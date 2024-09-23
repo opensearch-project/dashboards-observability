@@ -4,6 +4,7 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
+import datemath from '@elastic/datemath';
 import {
   EuiAccordion,
   EuiFlexGroup,
@@ -56,6 +57,8 @@ export function TracesContent(props: TracesProps) {
     jaegerIndicesExist,
     attributesFilterFields,
     setCurrentSelectedService,
+    tracesTableMode,
+    setTracesTableMode,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [columns, setColumns] = useState([]);
@@ -109,6 +112,7 @@ export function TracesContent(props: TracesProps) {
     jaegerIndicesExist,
     dataPrepperIndicesExist,
     includeMetrics,
+    tracesTableMode,
   ]);
 
   const onToggle = (isOpen: boolean) => {
@@ -151,6 +155,7 @@ export function TracesContent(props: TracesProps) {
       processTimeStamp(endTime, mode),
       page
     );
+    const isUnderOneHour = datemath.parse(endTime)?.diff(datemath.parse(startTime), 'hours')! < 1;
 
     if (mode === 'custom_data_prepper') {
       // service map should not be filtered by service name
@@ -159,16 +164,32 @@ export function TracesContent(props: TracesProps) {
         (must: any) => must?.term?.serviceName == null
       );
 
-      await handleCustomIndicesTracesRequest(
-        http,
-        DSL,
-        tableItems,
-        setTableItems,
-        setColumns,
-        mode,
-        props.dataSourceMDSId[0].id,
-        sort
-      );
+      if (tracesTableMode !== 'traces')
+        await handleCustomIndicesTracesRequest(
+          http,
+          DSL,
+          tableItems,
+          setTableItems,
+          setColumns,
+          mode,
+          props.dataSourceMDSId[0].id,
+          sort,
+          tracesTableMode,
+          isUnderOneHour
+        );
+      else {
+        await handleTracesRequest(
+          http,
+          DSL,
+          timeFilterDSL,
+          tableItems,
+          setTableItems,
+          mode,
+          props.dataSourceMDSId[0].id,
+          sort,
+          isUnderOneHour
+        );
+      }
       await handleServiceMapRequest(
         http,
         serviceMapDSL,
@@ -187,7 +208,8 @@ export function TracesContent(props: TracesProps) {
         setTableItems,
         mode,
         props.dataSourceMDSId[0].id,
-        sort
+        sort,
+        isUnderOneHour
       );
     }
 
@@ -237,6 +259,8 @@ export function TracesContent(props: TracesProps) {
             attributesFilterFields={attributesFilterFields}
           />
           <EuiSpacer size="s" />
+
+          {/* Switch between custom data prepper and regular table */}
           {mode === 'custom_data_prepper' ? (
             <TracesCustomIndicesTable
               columnItems={columns}
@@ -248,6 +272,8 @@ export function TracesContent(props: TracesProps) {
               openTraceFlyout={openTraceFlyout}
               jaegerIndicesExist={jaegerIndicesExist}
               dataPrepperIndicesExist={dataPrepperIndicesExist}
+              tracesTableMode={tracesTableMode}
+              setTracesTableMode={setTracesTableMode}
             />
           ) : (
             <TracesTable
@@ -262,6 +288,7 @@ export function TracesContent(props: TracesProps) {
             />
           )}
 
+          {/* Show services list and graph when mode is custom data prepper */}
           {mode === 'custom_data_prepper' && (
             <>
               <EuiSpacer size="m" />

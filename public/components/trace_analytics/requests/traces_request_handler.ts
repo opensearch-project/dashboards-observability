@@ -13,7 +13,7 @@ import { v1 as uuid } from 'uuid';
 import { HttpSetup } from '../../../../../../src/core/public';
 import { BarOrientation } from '../../../../common/constants/shared';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../common/constants/trace_analytics';
-import { TraceAnalyticsMode } from '../../../../common/types/trace_analytics';
+import { TraceAnalyticsMode, TraceQueryMode } from '../../../../common/types/trace_analytics';
 import { microToMilliSec, nanoToMilliSec } from '../components/common/helper_functions';
 import { SpanSearchParams } from '../components/traces/span_detail_table';
 import {
@@ -36,12 +36,14 @@ export const handleCustomIndicesTracesRequest = async (
   setColumns: (items: any) => void,
   mode: TraceAnalyticsMode,
   dataSourceMDSId?: string,
-  sort?: PropertySort
+  sort?: PropertySort,
+  queryMode?: TraceQueryMode,
+  isUnderOneHour?: boolean
 ) => {
   const responsePromise = handleDslRequest(
     http,
     DSL,
-    getCustomIndicesTracesQuery(mode, undefined, sort),
+    getCustomIndicesTracesQuery(mode, undefined, sort, queryMode, isUnderOneHour),
     mode,
     dataSourceMDSId
   );
@@ -89,7 +91,8 @@ export const handleTracesRequest = async (
   setItems: (items: any) => void,
   mode: TraceAnalyticsMode,
   dataSourceMDSId?: string,
-  sort?: PropertySort
+  sort?: PropertySort,
+  isUnderOneHour?: boolean
 ) => {
   const binarySearch = (arr: number[], target: number) => {
     if (!arr) return Number.NaN;
@@ -107,7 +110,7 @@ export const handleTracesRequest = async (
   const responsePromise = handleDslRequest(
     http,
     DSL,
-    getTracesQuery(mode, undefined, sort),
+    getTracesQuery(mode, undefined, sort, isUnderOneHour),
     mode,
     dataSourceMDSId
   );
