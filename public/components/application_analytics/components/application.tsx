@@ -326,6 +326,9 @@ export function Application(props: AppDetailProps) {
           setStartTime={setStartTimeForApp}
           setEndTime={setEndTimeForApp}
           dataSourceMDSId={[{ id: '', label: '' }]}
+          setCurrentSelectedService={() => {}}
+          tracesTableMode="traces"
+          setTracesTableMode={() => {}}
         />
         <EuiPanel>
           <PanelTitle title="Spans" totalItems={totalSpans} />
