@@ -5,7 +5,7 @@
 
 import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
-import React, { ReactChild, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { HashRouter, Redirect, Route, RouteComponentProps } from 'react-router-dom';
 import {
   ChromeBreadcrumb,
@@ -20,7 +20,8 @@ import {
   DataSourceSelectableConfig,
   DataSourceViewConfig,
 } from '../../../../../src/plugins/data_source_management/public';
-import { TraceAnalyticsMode } from '../../../common/types/trace_analytics';
+import { TRACE_TABLE_TYPE_KEY } from '../../../common/constants/trace_analytics';
+import { TraceAnalyticsMode, TraceQueryMode } from '../../../common/types/trace_analytics';
 import { dataSourceFilterFn } from '../../../common/utils/shared';
 import { coreRefs } from '../../framework/core_refs';
 import { FilterType } from './components/common/filters/filters';
@@ -114,10 +115,10 @@ export const Home = (props: HomeProps) => {
   };
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const _setToast = (title: string, color = 'success', text?: ReactChild, _side?: string) => {
-    if (!text) text = '';
-    setToasts([...toasts, { id: new Date().toISOString(), title, text, color } as Toast]);
-  };
+  const [tracesTableMode, setTracesTableMode] = useState<TraceQueryMode>(
+    (sessionStorage.getItem(TRACE_TABLE_TYPE_KEY) as TraceQueryMode) || 'all_spans'
+  );
+
   const [dataSourceMDSId, setDataSourceMDSId] = useState([{ id: '', label: '' }]);
   const [currentSelectedService, setCurrentSelectedService] = useState('');
   const [dataSourceMenuSelectable, setDataSourceMenuSelectable] = useState<boolean>(true);
@@ -257,7 +258,11 @@ export const Home = (props: HomeProps) => {
     },
   ];
 
-  const traceColumnAction = () => location.assign('#/traces');
+  const traceColumnAction = () => {
+    location.assign('#/traces');
+    setTracesTableMode('traces');
+    sessionStorage.setItem(TRACE_TABLE_TYPE_KEY, 'traces');
+  };
 
   const getTraceViewUri = (traceId: string) => `#/traces/${encodeURIComponent(traceId)}`;
 
@@ -358,6 +363,8 @@ export const Home = (props: HomeProps) => {
                   setCurrentSelectedService={setCurrentSelectedService}
                   toasts={toasts}
                   dataSourceMDSId={dataSourceMDSId}
+                  tracesTableMode={tracesTableMode}
+                  setTracesTableMode={setTracesTableMode}
                   {...commonProps}
                 />
               </TraceSideBar>
@@ -370,6 +377,8 @@ export const Home = (props: HomeProps) => {
                   setCurrentSelectedService={setCurrentSelectedService}
                   toasts={toasts}
                   dataSourceMDSId={dataSourceMDSId}
+                  tracesTableMode={tracesTableMode}
+                  setTracesTableMode={setTracesTableMode}
                   {...commonProps}
                 />
               </>

@@ -24,3 +24,28 @@ export const TRACE_ANALYTICS_DSL_ROUTE = '/api/observability/trace_analytics/que
 
 export const TRACE_CUSTOM_SPAN_INDEX_SETTING = 'observability:traceAnalyticsSpanIndices';
 export const TRACE_CUSTOM_SERVICE_INDEX_SETTING = 'observability:traceAnalyticsServiceIndices';
+
+export enum TRACE_TABLE_TITLES {
+  all_spans = 'All Spans',
+  root_spans = 'Root Spans',
+  entry_spans = 'Service Entry Spans',
+  traces = 'Traces',
+}
+
+const getDescription = (key: keyof typeof TRACE_TABLE_TITLES): string => {
+  const descriptions: Record<keyof typeof TRACE_TABLE_TITLES, string> = {
+    all_spans: 'Spans representing all activities in all traces across the system',
+    root_spans: 'Spans marking the root or starting point of each trace',
+    entry_spans: 'Spans that indicate the entry point of service-side processing',
+    traces: 'Spans grouped by traceId to show a complete trace lifecycle',
+  };
+  return descriptions[key];
+};
+
+export const TRACE_TABLE_OPTIONS = Object.entries(TRACE_TABLE_TITLES).map(([key, label]) => ({
+  label,
+  key,
+  'aria-describedby': getDescription(key as keyof typeof TRACE_TABLE_TITLES),
+}));
+
+export const TRACE_TABLE_TYPE_KEY = 'TraceAnalyticsTraceTableType';
