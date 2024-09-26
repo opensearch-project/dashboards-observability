@@ -39,6 +39,7 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
       id: observabilityApplicationsID,
       category: DEFAULT_APP_CATEGORIES.investigate,
       order: 400,
+      showInAllNavGroup: true,
     },
   ]);
 
