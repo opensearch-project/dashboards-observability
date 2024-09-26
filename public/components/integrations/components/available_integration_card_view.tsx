@@ -4,23 +4,19 @@
  */
 
 import {
-  EuiPanel,
+  EuiButtonGroup,
   EuiCard,
+  EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiSpacer,
-  EuiFieldSearch,
-  EuiButtonGroup,
 } from '@elastic/eui';
-import _ from 'lodash';
 import React, { useState } from 'react';
-import {
-  AvailableIntegrationsCardViewProps,
-  AvailableIntegrationType,
-} from './available_integration_overview_page';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
-import { badges } from './integration_category_badge_group';
 import { basePathLink } from '../../../../common/utils/shared';
+import { AvailableIntegrationsCardViewProps } from './available_integration_overview_page';
+import { badges } from './integration_category_badge_group';
 
 export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardViewProps) {
   const [toggleIconIdSelected, setToggleIconIdSelected] = useState('1');
@@ -28,9 +24,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
   const getImage = (url?: string) => {
     let optionalImg;
     if (url) {
-      optionalImg = (
-        <img style={{ height: 100, width: 100 }} alt="" className="synopsisIcon" src={url} />
-      );
+      optionalImg = <img alt="" className="synopsisIcon" src={url} />;
     }
     return optionalImg;
   };
@@ -57,7 +51,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
     }
   };
 
-  const renderRows = (integrations: AvailableIntegrationType[]) => {
+  const renderRows = (integrations: IntegrationConfig[]) => {
     if (!integrations || !integrations.length) return null;
     return (
       <>
@@ -68,11 +62,11 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
                 <EuiCard
                   icon={getImage(
                     basePathLink(
-                      `${INTEGRATIONS_BASE}/repository/${i.name}/static/${i.statics.logo.path}`
+                      `${INTEGRATIONS_BASE}/repository/${i.name}/static/${i.statics?.logo?.path}`
                     )
                   )}
                   title={i.displayName ? i.displayName : i.name}
-                  description={i.description}
+                  description={i.description ?? ''}
                   data-test-subj={`integration_card_${i.name.toLowerCase()}`}
                   titleElement="span"
                   href={basePathLink(`/app/integrations#/available/${i.name}`)}
@@ -91,7 +85,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
     <EuiPanel>
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiFieldSearch
+          <EuiCompressedFieldSearch
             fullWidth
             isClearable={false}
             placeholder="Search..."

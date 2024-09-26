@@ -2,7 +2,7 @@
 
 exports[`Create acceleration button component renders create acceleration button component with mv state 1`] = `
 <button
-  className="euiButton euiButton--primary euiButton--fill"
+  className="euiButton euiButton--primary euiButton--small euiButton--fill"
   disabled={false}
   onClick={[Function]}
   style={

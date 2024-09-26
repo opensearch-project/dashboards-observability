@@ -3,12 +3,12 @@
 exports[`Traces table component renders empty traces table message 1`] = `
 <TracesTable
   dataPrepperIndicesExist={false}
+  getTraceViewUri={[Function]}
   items={Array []}
   jaegerIndicesExist={false}
   loading={false}
   mode="data_prepper"
   refresh={[MockFunction]}
-  traceIdColumnAction={[Function]}
 >
   <EuiPanel>
     <div
@@ -73,17 +73,19 @@ exports[`Traces table component renders empty traces table message 1`] = `
       >
         <EuiEmptyPrompt
           actions={
-            <EuiButton
+            <EuiSmallButtonEmpty
               color="primary"
               iconSide="right"
               iconType="popout"
               onClick={[Function]}
             >
               Learn more
-            </EuiButton>
+            </EuiSmallButtonEmpty>
           }
           body={
-            <EuiText>
+            <EuiText
+              size="s"
+            >
               The indices required for trace analytics (otel-v1-apm-span-* and otel-v1-apm-service-map*) do not exist or you do not have permission to access them.
             </EuiText>
           }
@@ -122,9 +124,11 @@ exports[`Traces table component renders empty traces table message 1`] = `
                   <div
                     className="euiText euiText--medium"
                   >
-                    <EuiText>
+                    <EuiText
+                      size="s"
+                    >
                       <div
-                        className="euiText euiText--medium"
+                        className="euiText euiText--small"
                       >
                         The indices required for trace analytics (otel-v1-apm-span-* and otel-v1-apm-service-map*) do not exist or you do not have permission to access them.
                       </div>
@@ -140,46 +144,39 @@ exports[`Traces table component renders empty traces table message 1`] = `
                 className="euiSpacer euiSpacer--l"
               />
             </EuiSpacer>
-            <EuiButton
+            <EuiSmallButtonEmpty
               color="primary"
               iconSide="right"
               iconType="popout"
               onClick={[Function]}
             >
-              <EuiButtonDisplay
-                baseClassName="euiButton"
+              <EuiButtonEmpty
                 color="primary"
-                disabled={false}
-                element="button"
                 iconSide="right"
                 iconType="popout"
-                isDisabled={false}
                 onClick={[Function]}
-                type="button"
+                size="s"
               >
                 <button
-                  className="euiButton euiButton--primary"
+                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
                   disabled={false}
                   onClick={[Function]}
-                  style={
-                    Object {
-                      "minWidth": undefined,
-                    }
-                  }
                   type="button"
                 >
                   <EuiButtonContent
-                    className="euiButton__content"
+                    className="euiButtonEmpty__content"
+                    iconGap="m"
                     iconSide="right"
+                    iconSize="m"
                     iconType="popout"
                     textProps={
                       Object {
-                        "className": "euiButton__text",
+                        "className": "euiButtonEmpty__text",
                       }
                     }
                   >
                     <span
-                      className="euiButtonContent euiButtonContent--iconRight euiButton__content"
+                      className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                     >
                       <EuiIcon
                         className="euiButtonContent__icon"
@@ -212,15 +209,15 @@ exports[`Traces table component renders empty traces table message 1`] = `
                         </EuiIconBeaker>
                       </EuiIcon>
                       <span
-                        className="euiButton__text"
+                        className="euiButtonEmpty__text"
                       >
                         Learn more
                       </span>
                     </span>
                   </EuiButtonContent>
                 </button>
-              </EuiButtonDisplay>
-            </EuiButton>
+              </EuiButtonEmpty>
+            </EuiSmallButtonEmpty>
           </div>
         </EuiEmptyPrompt>
       </MissingConfigurationMessage>
@@ -232,12 +229,12 @@ exports[`Traces table component renders empty traces table message 1`] = `
 exports[`Traces table component renders empty traces table message 2`] = `
 <TracesTable
   dataPrepperIndicesExist={true}
+  getTraceViewUri={[Function]}
   items={Array []}
   jaegerIndicesExist={false}
   loading={false}
   mode="data_prepper"
   refresh={[MockFunction]}
-  traceIdColumnAction={[Function]}
 >
   <EuiPanel>
     <div
@@ -309,7 +306,9 @@ exports[`Traces table component renders empty traces table message 2`] = `
         </EuiSpacer>
         <EuiEmptyPrompt
           body={
-            <EuiText>
+            <EuiText
+              size="s"
+            >
               No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
             </EuiText>
           }
@@ -348,9 +347,11 @@ exports[`Traces table component renders empty traces table message 2`] = `
                   <div
                     className="euiText euiText--medium"
                   >
-                    <EuiText>
+                    <EuiText
+                      size="s"
+                    >
                       <div
-                        className="euiText euiText--medium"
+                        className="euiText euiText--small"
                       >
                         No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
                       </div>
@@ -377,6 +378,7 @@ exports[`Traces table component renders empty traces table message 2`] = `
 exports[`Traces table component renders jaeger traces table 1`] = `
 <TracesTable
   dataPrepperIndicesExist={false}
+  getTraceViewUri={[Function]}
   items={
     Array [
       Object {
@@ -393,7 +395,6 @@ exports[`Traces table component renders jaeger traces table 1`] = `
   loading={false}
   mode="jaeger"
   refresh={[MockFunction]}
-  traceIdColumnAction={[Function]}
 >
   <EuiPanel>
     <div
@@ -454,6 +455,7 @@ exports[`Traces table component renders jaeger traces table 1`] = `
         />
       </EuiHorizontalRule>
       <EuiInMemoryTable
+        allowNeutralSort={false}
         columns={
           Array [
             Object {
@@ -587,7 +589,7 @@ exports[`Traces table component renders jaeger traces table 1`] = `
           responsive={true}
           sorting={
             Object {
-              "allowNeutralSort": true,
+              "allowNeutralSort": false,
               "sort": Object {
                 "direction": "asc",
                 "field": "Trace ID",
@@ -706,6 +708,7 @@ exports[`Traces table component renders jaeger traces table 1`] = `
                                       >
                                         <EuiButtonContent
                                           className="euiButtonEmpty__content"
+                                          iconGap="m"
                                           iconSide="right"
                                           iconSize="s"
                                           iconType="arrowDown"
@@ -1111,25 +1114,32 @@ exports[`Traces table component renders jaeger traces table 1`] = `
                                     className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                                   >
                                     <EuiFlexItem
-                                      grow={10}
+                                      grow={false}
                                     >
                                       <div
-                                        className="euiFlexItem euiFlexItem--flexGrow10"
+                                        className="euiFlexItem euiFlexItem--flexGrowZero"
                                       >
                                         <EuiLink
-                                          onClick={[Function]}
+                                          data-test-subj="trace-link"
                                         >
                                           <button
                                             className="euiLink euiLink--primary"
+                                            data-test-subj="trace-link"
                                             disabled={false}
-                                            onClick={[Function]}
                                             type="button"
                                           >
-                                            <div
+                                            <EuiText
+                                              className="traces-table traces-table-trace-id"
+                                              size="s"
                                               title="00079a615e31e61766fcb20b557051c1"
                                             >
-                                              00079a615e31e61766fcb...
-                                            </div>
+                                              <div
+                                                className="euiText euiText--small traces-table traces-table-trace-id"
+                                                title="00079a615e31e61766fcb20b557051c1"
+                                              >
+                                                00079a615e31e61766fcb20b557051c1
+                                              </div>
+                                            </EuiText>
                                           </button>
                                         </EuiLink>
                                       </div>
@@ -1155,58 +1165,67 @@ exports[`Traces table component renders jaeger traces table 1`] = `
                                               onMouseOut={[Function]}
                                               onMouseOver={[Function]}
                                             >
-                                              <EuiButtonIcon
+                                              <EuiSmallButtonIcon
                                                 aria-label="Copy trace id"
                                                 iconType="copyClipboard"
                                                 onBlur={[Function]}
                                                 onClick={[Function]}
                                                 onFocus={[Function]}
                                               >
-                                                <button
+                                                <EuiButtonIcon
                                                   aria-label="Copy trace id"
-                                                  className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                                                  disabled={false}
+                                                  iconType="copyClipboard"
                                                   onBlur={[Function]}
                                                   onClick={[Function]}
                                                   onFocus={[Function]}
-                                                  type="button"
+                                                  size="s"
                                                 >
-                                                  <EuiIcon
-                                                    aria-hidden="true"
-                                                    className="euiButtonIcon__icon"
-                                                    color="inherit"
-                                                    size="m"
-                                                    type="copyClipboard"
+                                                  <button
+                                                    aria-label="Copy trace id"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small"
+                                                    disabled={false}
+                                                    onBlur={[Function]}
+                                                    onClick={[Function]}
+                                                    onFocus={[Function]}
+                                                    type="button"
                                                   >
-                                                    <EuiIconCopyClipboard
-                                                      aria-hidden={true}
-                                                      className="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
-                                                      focusable="false"
-                                                      role="img"
-                                                      style={null}
+                                                    <EuiIcon
+                                                      aria-hidden="true"
+                                                      className="euiButtonIcon__icon"
+                                                      color="inherit"
+                                                      size="m"
+                                                      type="copyClipboard"
                                                     >
-                                                      <svg
+                                                      <EuiIconCopyClipboard
                                                         aria-hidden={true}
                                                         className="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
                                                         focusable="false"
-                                                        height={16}
                                                         role="img"
                                                         style={null}
-                                                        viewBox="0 0 16 16"
-                                                        width={16}
-                                                        xmlns="http://www.w3.org/2000/svg"
                                                       >
-                                                        <path
-                                                          d="M0 2.729V2a1 1 0 0 1 1-1h2v1H1v12h4v1H1a1 1 0 0 1-1-1V2.729zM12 5V2a1 1 0 0 0-1-1H9v1h2v3h1zm-1 1h2v9H6V6h5V5H6a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2v1z"
-                                                        />
-                                                        <path
-                                                          d="M7 10h5V9H7zM7 8h5V7H7zM7 12h5v-1H7zM7 14h5v-1H7zM9 2V1a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v1h1V1h4v1h1ZM3 3h6V2H3z"
-                                                        />
-                                                      </svg>
-                                                    </EuiIconCopyClipboard>
-                                                  </EuiIcon>
-                                                </button>
-                                              </EuiButtonIcon>
+                                                        <svg
+                                                          aria-hidden={true}
+                                                          className="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
+                                                          focusable="false"
+                                                          height={16}
+                                                          role="img"
+                                                          style={null}
+                                                          viewBox="0 0 16 16"
+                                                          width={16}
+                                                          xmlns="http://www.w3.org/2000/svg"
+                                                        >
+                                                          <path
+                                                            d="M0 2.729V2a1 1 0 0 1 1-1h2v1H1v12h4v1H1a1 1 0 0 1-1-1V2.729zM12 5V2a1 1 0 0 0-1-1H9v1h2v3h1zm-1 1h2v9H6V6h5V5H6a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2v1z"
+                                                          />
+                                                          <path
+                                                            d="M7 10h5V9H7zM7 8h5V7H7zM7 12h5v-1H7zM7 14h5v-1H7zM9 2V1a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v1h1V1h4v1h1ZM3 3h6V2H3z"
+                                                          />
+                                                        </svg>
+                                                      </EuiIconCopyClipboard>
+                                                    </EuiIcon>
+                                                  </button>
+                                                </EuiButtonIcon>
+                                              </EuiSmallButtonIcon>
                                             </span>
                                           </EuiToolTip>
                                         </EuiCopy>
@@ -1436,6 +1455,7 @@ exports[`Traces table component renders jaeger traces table 1`] = `
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="right"
                                       iconSize="s"
                                       iconType="arrowDown"
@@ -1641,6 +1661,7 @@ exports[`Traces table component renders jaeger traces table 1`] = `
                                             >
                                               <EuiButtonContent
                                                 className="euiButtonEmpty__content"
+                                                iconGap="m"
                                                 iconSide="left"
                                                 iconSize="m"
                                                 textProps={
@@ -1752,6 +1773,7 @@ exports[`Traces table component renders jaeger traces table 1`] = `
 exports[`Traces table component renders traces table 1`] = `
 <TracesTable
   dataPrepperIndicesExist={true}
+  getTraceViewUri={[Function]}
   items={
     Array [
       Object {
@@ -1769,7 +1791,6 @@ exports[`Traces table component renders traces table 1`] = `
   loading={false}
   mode="data_prepper"
   refresh={[MockFunction]}
-  traceIdColumnAction={[Function]}
 >
   <EuiPanel>
     <div
@@ -1830,6 +1851,7 @@ exports[`Traces table component renders traces table 1`] = `
         />
       </EuiHorizontalRule>
       <EuiInMemoryTable
+        allowNeutralSort={false}
         columns={
           Array [
             Object {
@@ -1838,7 +1860,7 @@ exports[`Traces table component renders traces table 1`] = `
               "name": "Trace ID",
               "render": [Function],
               "sortable": true,
-              "truncateText": true,
+              "truncateText": false,
             },
             Object {
               "align": "left",
@@ -1858,11 +1880,9 @@ exports[`Traces table component renders traces table 1`] = `
             Object {
               "align": "right",
               "field": "percentile_in_trace_group",
-              "name": <React.Fragment>
-                <div>
-                  Percentile in trace group
-                </div>
-              </React.Fragment>,
+              "name": <div>
+                Percentile in trace group
+              </div>,
               "render": [Function],
               "sortable": true,
             },
@@ -1927,7 +1947,7 @@ exports[`Traces table component renders traces table 1`] = `
                 "name": "Trace ID",
                 "render": [Function],
                 "sortable": true,
-                "truncateText": true,
+                "truncateText": false,
               },
               Object {
                 "align": "left",
@@ -1947,11 +1967,9 @@ exports[`Traces table component renders traces table 1`] = `
               Object {
                 "align": "right",
                 "field": "percentile_in_trace_group",
-                "name": <React.Fragment>
-                  <div>
-                    Percentile in trace group
-                  </div>
-                </React.Fragment>,
+                "name": <div>
+                  Percentile in trace group
+                </div>,
                 "render": [Function],
                 "sortable": true,
               },
@@ -2003,7 +2021,7 @@ exports[`Traces table component renders traces table 1`] = `
           responsive={true}
           sorting={
             Object {
-              "allowNeutralSort": true,
+              "allowNeutralSort": false,
               "sort": Object {
                 "direction": "asc",
                 "field": "Trace ID",
@@ -2069,11 +2087,9 @@ exports[`Traces table component renders traces table 1`] = `
                                   "isSortAscending": undefined,
                                   "isSorted": false,
                                   "key": "_data_s_percentile_in_trace_group_3",
-                                  "name": <React.Fragment>
-                                    <div>
-                                      Percentile in trace group
-                                    </div>
-                                  </React.Fragment>,
+                                  "name": <div>
+                                    Percentile in trace group
+                                  </div>,
                                   "onSort": [Function],
                                 },
                                 Object {
@@ -2140,6 +2156,7 @@ exports[`Traces table component renders traces table 1`] = `
                                       >
                                         <EuiButtonContent
                                           className="euiButtonEmpty__content"
+                                          iconGap="m"
                                           iconSide="right"
                                           iconSize="s"
                                           iconType="arrowDown"
@@ -2634,7 +2651,7 @@ exports[`Traces table component renders traces table 1`] = `
                             }
                             setScopeRow={false}
                             textOnly={false}
-                            truncateText={true}
+                            truncateText={false}
                           >
                             <td
                               className="euiTableRowCell"
@@ -2650,7 +2667,7 @@ exports[`Traces table component renders traces table 1`] = `
                                 Trace ID
                               </div>
                               <div
-                                className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                                className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiFlexGroup
                                   alignItems="center"
@@ -2662,27 +2679,32 @@ exports[`Traces table component renders traces table 1`] = `
                                     className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                                   >
                                     <EuiFlexItem
-                                      grow={10}
+                                      grow={false}
                                     >
                                       <div
-                                        className="euiFlexItem euiFlexItem--flexGrow10"
+                                        className="euiFlexItem euiFlexItem--flexGrowZero"
                                       >
                                         <EuiLink
                                           data-test-subj="trace-link"
-                                          onClick={[Function]}
                                         >
                                           <button
                                             className="euiLink euiLink--primary"
                                             data-test-subj="trace-link"
                                             disabled={false}
-                                            onClick={[Function]}
                                             type="button"
                                           >
-                                            <div
+                                            <EuiText
+                                              className="traces-table traces-table-trace-id"
+                                              size="s"
                                               title="00079a615e31e61766fcb20b557051c1"
                                             >
-                                              00079a615e31e61766fcb...
-                                            </div>
+                                              <div
+                                                className="euiText euiText--small traces-table traces-table-trace-id"
+                                                title="00079a615e31e61766fcb20b557051c1"
+                                              >
+                                                00079a615e31e61766fcb20b557051c1
+                                              </div>
+                                            </EuiText>
                                           </button>
                                         </EuiLink>
                                       </div>
@@ -2708,66 +2730,68 @@ exports[`Traces table component renders traces table 1`] = `
                                               onMouseOut={[Function]}
                                               onMouseOver={[Function]}
                                             >
-                                              <EuiButtonIcon
+                                              <EuiSmallButtonIcon
                                                 aria-label="Copy trace id"
                                                 iconType="copyClipboard"
                                                 onBlur={[Function]}
                                                 onClick={[Function]}
                                                 onFocus={[Function]}
                                               >
-                                                <button
+                                                <EuiButtonIcon
                                                   aria-label="Copy trace id"
-                                                  className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                                                  disabled={false}
+                                                  iconType="copyClipboard"
                                                   onBlur={[Function]}
                                                   onClick={[Function]}
                                                   onFocus={[Function]}
-                                                  type="button"
+                                                  size="s"
                                                 >
-                                                  <EuiIcon
-                                                    aria-hidden="true"
-                                                    className="euiButtonIcon__icon"
-                                                    color="inherit"
-                                                    size="m"
-                                                    type="copyClipboard"
+                                                  <button
+                                                    aria-label="Copy trace id"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small"
+                                                    disabled={false}
+                                                    onBlur={[Function]}
+                                                    onClick={[Function]}
+                                                    onFocus={[Function]}
+                                                    type="button"
                                                   >
-                                                    <EuiIconBeaker
-                                                      aria-hidden={true}
-                                                      className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                                                      focusable="false"
-                                                      role="img"
-                                                      style={null}
+                                                    <EuiIcon
+                                                      aria-hidden="true"
+                                                      className="euiButtonIcon__icon"
+                                                      color="inherit"
+                                                      size="m"
+                                                      type="copyClipboard"
                                                     >
-                                                      <svg
+                                                      <EuiIconBeaker
                                                         aria-hidden={true}
                                                         className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
                                                         focusable="false"
-                                                        height={16}
                                                         role="img"
                                                         style={null}
-                                                        viewBox="0 0 16 16"
-                                                        width={16}
-                                                        xmlns="http://www.w3.org/2000/svg"
                                                       >
-                                                        <path
-                                                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                        />
-                                                      </svg>
-                                                    </EuiIconBeaker>
-                                                  </EuiIcon>
-                                                </button>
-                                              </EuiButtonIcon>
+                                                        <svg
+                                                          aria-hidden={true}
+                                                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                                          focusable="false"
+                                                          height={16}
+                                                          role="img"
+                                                          style={null}
+                                                          viewBox="0 0 16 16"
+                                                          width={16}
+                                                          xmlns="http://www.w3.org/2000/svg"
+                                                        >
+                                                          <path
+                                                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                          />
+                                                        </svg>
+                                                      </EuiIconBeaker>
+                                                    </EuiIcon>
+                                                  </button>
+                                                </EuiButtonIcon>
+                                              </EuiSmallButtonIcon>
                                             </span>
                                           </EuiToolTip>
                                         </EuiCopy>
                                       </div>
-                                    </EuiFlexItem>
-                                    <EuiFlexItem
-                                      grow={3}
-                                    >
-                                      <div
-                                        className="euiFlexItem euiFlexItem--flexGrow3"
-                                      />
                                     </EuiFlexItem>
                                   </div>
                                 </EuiFlexGroup>
@@ -2859,11 +2883,9 @@ exports[`Traces table component renders traces table 1`] = `
                             key="_data_column_percentile_in_trace_group_0_3"
                             mobileOptions={
                               Object {
-                                "header": <React.Fragment>
-                                  <div>
-                                    Percentile in trace group
-                                  </div>
-                                </React.Fragment>,
+                                "header": <div>
+                                  Percentile in trace group
+                                </div>,
                                 "render": undefined,
                               }
                             }
@@ -3077,6 +3099,7 @@ exports[`Traces table component renders traces table 1`] = `
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="right"
                                       iconSize="s"
                                       iconType="arrowDown"
@@ -3280,6 +3303,7 @@ exports[`Traces table component renders traces table 1`] = `
                                             >
                                               <EuiButtonContent
                                                 className="euiButtonEmpty__content"
+                                                iconGap="m"
                                                 iconSide="left"
                                                 iconSize="m"
                                                 textProps={

@@ -5,6 +5,7 @@
 
 import {
   EuiBadge,
+  EuiSmallButtonIcon,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -220,7 +221,7 @@ export const Field = (props: IFieldProps) => {
         >
           <>
             {isFieldToggleButtonDisabled ? (
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 color={selected ? 'danger' : 'primary'}
                 iconType={selected ? 'cross' : 'plusInCircleFilled'}
                 isDisabled
@@ -229,7 +230,7 @@ export const Field = (props: IFieldProps) => {
                 className="dscSidebarField__actionButton"
               />
             ) : (
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 color={selected ? 'danger' : 'primary'}
                 iconType={selected ? 'cross' : 'plusInCircleFilled'}
                 onClick={(e: React.MouseEvent<HTMLButtonElement>) => {

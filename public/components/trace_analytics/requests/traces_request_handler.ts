@@ -3,16 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from 'lodash';
+import { PropertySort } from '@elastic/eui';
+import { isArray, isObject } from 'lodash';
+import get from 'lodash/get';
+import omitBy from 'lodash/omitBy';
+import round from 'lodash/round';
 import moment from 'moment';
 import { v1 as uuid } from 'uuid';
 import { HttpSetup } from '../../../../../../src/core/public';
 import { BarOrientation } from '../../../../common/constants/shared';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../common/constants/trace_analytics';
+import { TraceAnalyticsMode, TraceQueryMode } from '../../../../common/types/trace_analytics';
 import { microToMilliSec, nanoToMilliSec } from '../components/common/helper_functions';
 import { SpanSearchParams } from '../components/traces/span_detail_table';
-import { TraceAnalyticsMode } from '../home';
 import {
+  getCustomIndicesTracesQuery,
   getPayloadQuery,
   getServiceBreakdownQuery,
   getSpanDetailQuery,
@@ -20,13 +25,61 @@ import {
   getSpansQuery,
   getTraceGroupPercentilesQuery,
   getTracesQuery,
-  getValidTraceIdsQuery,
 } from './queries/traces_queries';
 import { handleDslRequest } from './request_handler';
 
-export const handleValidTraceIds = (http: HttpSetup, DSL: any, mode: TraceAnalyticsMode) => {
-  return handleDslRequest(http, {}, getValidTraceIdsQuery(DSL), mode)
-    .then((response) => response.aggregations.traces.buckets.map((bucket: any) => bucket.key))
+export const handleCustomIndicesTracesRequest = async (
+  http: HttpSetup,
+  DSL: any,
+  items: any,
+  setItems: (items: any) => void,
+  setColumns: (items: any) => void,
+  mode: TraceAnalyticsMode,
+  dataSourceMDSId?: string,
+  sort?: PropertySort,
+  queryMode?: TraceQueryMode,
+  isUnderOneHour?: boolean
+) => {
+  const responsePromise = handleDslRequest(
+    http,
+    DSL,
+    getCustomIndicesTracesQuery(mode, undefined, sort, queryMode, isUnderOneHour),
+    mode,
+    dataSourceMDSId
+  );
+
+  return Promise.allSettled([responsePromise])
+    .then(([responseResult]) => {
+      if (responseResult.status === 'rejected') return Promise.reject(responseResult.reason);
+
+      if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
+        const keys = new Set();
+        const response = responseResult.value.hits.hits.map((val) => {
+          const source = omitBy(val._source, isArray || isObject);
+          Object.keys(source).forEach((key) => keys.add(key));
+          return { ...source };
+        });
+
+        return [keys, response];
+      } else {
+        return [
+          [undefined],
+          responseResult.value.aggregations.traces.buckets.map((bucket: any) => {
+            return {
+              trace_id: bucket.key,
+              latency: bucket.latency.value,
+              last_updated: moment(bucket.last_updated.value).format(TRACE_ANALYTICS_DATE_FORMAT),
+              error_count: bucket.error_count.doc_count,
+              actions: '#',
+            };
+          }),
+        ];
+      }
+    })
+    .then((newItems) => {
+      setColumns([...newItems[0]]);
+      setItems(newItems[1]);
+    })
     .catch((error) => console.error(error));
 };
 
@@ -38,7 +91,8 @@ export const handleTracesRequest = async (
   setItems: (items: any) => void,
   mode: TraceAnalyticsMode,
   dataSourceMDSId?: string,
-  sort?: any
+  sort?: PropertySort,
+  isUnderOneHour?: boolean
 ) => {
   const binarySearch = (arr: number[], target: number) => {
     if (!arr) return Number.NaN;
@@ -53,50 +107,63 @@ export const handleTracesRequest = async (
     return Math.max(0, Math.min(100, low));
   };
 
-  // percentile should only be affected by timefilter
-  const percentileRanges = await handleDslRequest(
+  const responsePromise = handleDslRequest(
     http,
-    timeFilterDSL,
-    getTraceGroupPercentilesQuery(),
+    DSL,
+    getTracesQuery(mode, undefined, sort, isUnderOneHour),
     mode,
     dataSourceMDSId
-  ).then((response) => {
-    const map: any = {};
-    response.aggregations.trace_group_name.buckets.forEach((traceGroup: any) => {
-      map[traceGroup.key] = Object.values(traceGroup.percentiles.values).map((value: any) =>
-        nanoToMilliSec(value)
-      );
-    });
-    return map;
-  });
+  );
 
-  return handleDslRequest(http, DSL, getTracesQuery(mode, undefined, sort), mode, dataSourceMDSId)
-    .then((response) => {
-      return Promise.all(
-        response.aggregations.traces.buckets.map((bucket: any) => {
-          if (mode === 'data_prepper') {
-            return {
-              trace_id: bucket.key,
-              trace_group: bucket.trace_group.buckets[0]?.key,
-              latency: bucket.latency.value,
-              last_updated: moment(bucket.last_updated.value).format(TRACE_ANALYTICS_DATE_FORMAT),
-              error_count: bucket.error_count.doc_count,
-              percentile_in_trace_group: binarySearch(
-                percentileRanges[bucket.trace_group.buckets[0]?.key],
-                bucket.latency.value
-              ),
-              actions: '#',
-            };
-          }
+  // percentile should only be affected by timefilter
+  const percentileRangesPromise =
+    mode === 'data_prepper' || mode === 'custom_data_prepper'
+      ? handleDslRequest(
+          http,
+          timeFilterDSL,
+          getTraceGroupPercentilesQuery(),
+          mode,
+          dataSourceMDSId
+        ).then((response) => {
+          const map: Record<string, number[]> = {};
+          response.aggregations.trace_group_name.buckets.forEach((traceGroup: any) => {
+            map[traceGroup.key] = Object.values(traceGroup.percentiles.values).map((value: any) =>
+              nanoToMilliSec(value)
+            );
+          });
+          return map;
+        })
+      : Promise.reject('Only data_prepper mode supports percentile');
+
+  return Promise.allSettled([responsePromise, percentileRangesPromise])
+    .then(([responseResult, percentileRangesResult]) => {
+      if (responseResult.status === 'rejected') return Promise.reject(responseResult.reason);
+      const percentileRanges =
+        percentileRangesResult.status === 'fulfilled' ? percentileRangesResult.value : {};
+      const response = responseResult.value;
+      return response.aggregations.traces.buckets.map((bucket: any) => {
+        if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
           return {
             trace_id: bucket.key,
+            trace_group: bucket.trace_group.buckets[0]?.key,
             latency: bucket.latency.value,
             last_updated: moment(bucket.last_updated.value).format(TRACE_ANALYTICS_DATE_FORMAT),
             error_count: bucket.error_count.doc_count,
+            percentile_in_trace_group: binarySearch(
+              percentileRanges[bucket.trace_group.buckets[0]?.key],
+              bucket.latency.value
+            ),
             actions: '#',
           };
-        })
-      );
+        }
+        return {
+          trace_id: bucket.key,
+          latency: bucket.latency.value,
+          last_updated: moment(bucket.last_updated.value).format(TRACE_ANALYTICS_DATE_FORMAT),
+          error_count: bucket.error_count.doc_count,
+          actions: '#',
+        };
+      });
     })
     .then((newItems) => {
       setItems(newItems);
@@ -247,14 +314,13 @@ const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyti
         : nanoToMilliSec(hit.sort[0]) - minStartTime;
     const duration =
       mode === 'jaeger'
-        ? _.round(microToMilliSec(hit._source.duration), 2)
-        : _.round(nanoToMilliSec(hit._source.durationInNanos), 2);
+        ? round(microToMilliSec(hit._source.duration), 2)
+        : round(nanoToMilliSec(hit._source.durationInNanos), 2);
     const serviceName =
       mode === 'jaeger'
-        ? _.get(hit, ['_source', 'process']).serviceName
-        : _.get(hit, ['_source', 'serviceName']);
-    const name =
-      mode === 'jaeger' ? _.get(hit, '_source.operationName') : _.get(hit, '_source.name');
+        ? get(hit, ['_source', 'process']).serviceName
+        : get(hit, ['_source', 'serviceName']);
+    const name = mode === 'jaeger' ? get(hit, '_source.operationName') : get(hit, '_source.name');
     const error =
       mode === 'jaeger'
         ? hit._source.tag?.['error'] === true

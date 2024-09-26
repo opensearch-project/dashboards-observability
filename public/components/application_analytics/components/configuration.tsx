@@ -5,7 +5,7 @@
 
 import {
   EuiBreadcrumb,
-  EuiButton,
+  EuiSmallButton,
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,7 +17,7 @@ import {
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiSelectOption,
   EuiSpacer,
   EuiText,
@@ -37,14 +37,7 @@ interface ConfigProps {
 }
 
 export const Configuration = (props: ConfigProps) => {
-  const {
-    appId,
-    application,
-    parentBreadcrumbs,
-    visWithAvailability,
-    updateApp,
-    switchToAvailability,
-  } = props;
+  const { appId, application, visWithAvailability, updateApp, switchToAvailability } = props;
   const [availabilityVisId, setAvailabilityVisId] = useState(
     application.availability.availabilityVisId || ''
   );
@@ -58,17 +51,17 @@ export const Configuration = (props: ConfigProps) => {
     <div>
       <EuiPage>
         <EuiPageBody component="div">
-          <EuiPageContent>
+          <EuiPageContent paddingSize="m">
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
-                <EuiTitle>
-                  <h3 style={{ paddingTop: '10px' }}>Configuration details</h3>
+                <EuiTitle size="s">
+                  <h2>Configuration details</h2>
                 </EuiTitle>
               </EuiPageContentHeaderSection>
               <EuiPageContentHeaderSection>
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem>
-                    <EuiButton
+                    <EuiSmallButton
                       fill
                       data-test-subj="editApplicationButton"
                       onClick={() => {
@@ -76,7 +69,7 @@ export const Configuration = (props: ConfigProps) => {
                       }}
                     >
                       Edit
-                    </EuiButton>
+                    </EuiSmallButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPageContentHeaderSection>
@@ -125,7 +118,7 @@ export const Configuration = (props: ConfigProps) => {
                   </EuiText>
                   <EuiSpacer size="m" />
                   {visWithAvailability.length > 0 ? (
-                    <EuiSelect
+                    <EuiCompressedSelect
                       options={visWithAvailability}
                       value={availabilityVisId}
                       onChange={onAvailabilityVisChange}

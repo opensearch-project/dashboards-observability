@@ -3,21 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
 import {
+  EuiBadge,
+  EuiCard,
   EuiFieldSearch,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFilterSelectItem,
-  EuiPopover,
-  EuiPopoverTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCard,
-  EuiText,
-  EuiBadge,
+  EuiPopover,
+  EuiPopoverTitle,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import { observabilityIntegrationsID } from '../../../../common/constants/shared';
 import { coreRefs } from '../../../../public/framework/core_refs';
 
 export const IntegrationCards = () => {
@@ -135,20 +136,23 @@ export const IntegrationCards = () => {
               icon={
                 integration.statics && integration.statics.logo && integration.statics.logo.path ? (
                   <img
-                    style={{ height: 100, width: 100 }}
                     alt=""
                     className="synopsisIcon"
                     src={`/api/integrations/repository/${integration.name}/static/${integration.statics.logo.path}`}
                   />
                 ) : (
-                  <div style={{ height: 100, width: 100, backgroundColor: '#ccc' }} />
+                  <div className="synopsisIcon" style={{ backgroundColor: '#ccc' }} />
                 )
               }
               title={integration.displayName || integration.name}
               description={integration.description}
               data-test-subj={`integration_card_${integration.name.toLowerCase()}`}
               titleElement="span"
-              href={`/app/integrations#/available/${integration.name}`}
+              onClick={() =>
+                coreRefs?.application?.navigateToApp(observabilityIntegrationsID, {
+                  path: `#/available/${integration.name}`,
+                })
+              }
               footer={
                 <div>
                   {integration.labels &&

@@ -1,0 +1,1584 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Select dashboard flyout should render 1`] = `
+<SelectDashboardFlyout
+  closeFlyout={[MockFunction]}
+  dashboardsSavedObjects={Object {}}
+  reloadPage={[MockFunction]}
+>
+  <EuiFlyout
+    onClose={[MockFunction]}
+    size="s"
+  >
+    <OuiWindowEvent
+      event="keydown"
+      handler={[Function]}
+    />
+    <EuiOverlayMask
+      headerZindexLocation="below"
+      onClick={[MockFunction]}
+    >
+      <Portal
+        containerInfo={
+          <div
+            class="euiOverlayMask euiOverlayMask--belowHeader"
+          >
+            <div
+              aria-hidden="true"
+              data-aria-hidden="true"
+              data-focus-guard="true"
+              style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+              tabindex="0"
+            />
+            <div
+              data-focus-lock-disabled="false"
+            >
+              <div
+                class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
+                role="dialog"
+                tabindex="-1"
+              >
+                <button
+                  aria-label="Close this dialog"
+                  class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
+                  data-test-subj="euiFlyoutCloseButton"
+                  type="button"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                    focusable="false"
+                    height="16"
+                    role="img"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                    />
+                  </svg>
+                </button>
+                <div
+                  class="euiFlyoutHeader"
+                >
+                  <div
+                    class="euiText euiText--small"
+                  >
+                    <h2>
+                      Select Dashboard
+                    </h2>
+                  </div>
+                </div>
+                <div
+                  class="euiFlyoutBody selectable-flyout-body"
+                >
+                  <div
+                    class="euiFlyoutBody__overflow"
+                    tabindex="0"
+                  >
+                    <div
+                      class="euiFlyoutBody__overflowContent"
+                    >
+                      <div
+                        class="euiSelectable euiSelectable-fullHeight"
+                      >
+                        <div
+                          class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+                        >
+                          <div
+                            class="euiFormControlLayout__childrenWrapper"
+                          >
+                            <input
+                              aria-activedescendant=""
+                              aria-haspopup="listbox"
+                              aria-label="Filter options"
+                              autocomplete="off"
+                              class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
+                              placeholder="Search for a dashboard..."
+                              type="search"
+                              value=""
+                            />
+                            <div
+                              class="euiFormControlLayoutIcons"
+                            >
+                              <span
+                                class="euiFormControlLayoutCustomIcon"
+                              >
+                                <svg
+                                  aria-hidden="true"
+                                  class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                  focusable="false"
+                                  height="16"
+                                  role="img"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                  />
+                                </svg>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="euiText euiText--extraSmall euiSelectableMessage"
+                          id="random_html_id"
+                        >
+                          <div
+                            class="euiTextColor euiTextColor--subdued"
+                          >
+                            <p>
+                              No options available
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlyoutFooter"
+                >
+                  <div
+                    class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <div
+                      class="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <button
+                        class="euiButtonEmpty euiButtonEmpty--danger euiButtonEmpty--small"
+                        type="button"
+                      >
+                        <span
+                          class="euiButtonContent euiButtonEmpty__content"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                            />
+                          </svg>
+                          <span
+                            class="euiButtonEmpty__text"
+                          >
+                            Cancel
+                          </span>
+                        </span>
+                      </button>
+                    </div>
+                    <div
+                      class="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <button
+                        class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
+                        disabled=""
+                        type="button"
+                      >
+                        <span
+                          class="euiButtonContent euiButton__content"
+                        >
+                          <span
+                            class="euiButton__text"
+                          >
+                            Select
+                          </span>
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              aria-hidden="true"
+              data-aria-hidden="true"
+              data-focus-guard="true"
+              style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+              tabindex="0"
+            />
+          </div>
+        }
+      >
+        <EuiFocusTrap
+          clickOutsideDisables={false}
+          disabled={false}
+          noIsolation={true}
+          returnFocus={true}
+          scrollLock={false}
+        >
+          <ForwardRef
+            enabled={true}
+            noIsolation={true}
+            onClickOutside={[Function]}
+            returnFocus={true}
+            scrollLock={false}
+          >
+            <ForwardRef
+              enabled={true}
+              noIsolation={true}
+              onClickOutside={[Function]}
+              returnFocus={true}
+              scrollLock={false}
+              sideCar={[Function]}
+            >
+              <ForwardRef(FocusLockUI)
+                as={
+                  Object {
+                    "$$typeof": Symbol(react.forward_ref),
+                    "classNames": Object {
+                      "fullWidth": "width-before-scroll-bar",
+                      "zeroRight": "right-scroll-bar-position",
+                    },
+                    "defaultProps": Object {
+                      "enabled": true,
+                      "inert": false,
+                      "removeScrollBar": true,
+                    },
+                    "render": [Function],
+                  }
+                }
+                autoFocus={true}
+                crossFrame={true}
+                disabled={false}
+                lockProps={
+                  Object {
+                    "allowPinchZoom": undefined,
+                    "as": undefined,
+                    "enabled": false,
+                    "inert": undefined,
+                    "onMouseDown": [Function],
+                    "onTouchStart": [Function],
+                    "shards": undefined,
+                    "sideCar": [Function],
+                    "style": undefined,
+                  }
+                }
+                noFocusGuards={false}
+                onActivation={[Function]}
+                onDeactivation={[Function]}
+                persistentFocus={false}
+                returnFocus={true}
+                sideCar={[Function]}
+              >
+                <div
+                  data-focus-guard={true}
+                  key="guard-first"
+                  style={
+                    Object {
+                      "height": "0px",
+                      "left": "1px",
+                      "overflow": "hidden",
+                      "padding": 0,
+                      "position": "fixed",
+                      "top": "1px",
+                      "width": "1px",
+                    }
+                  }
+                  tabIndex={0}
+                />
+                <RequireSideCar
+                  autoFocus={true}
+                  crossFrame={true}
+                  disabled={false}
+                  id={Object {}}
+                  observed={
+                    <div
+                      data-focus-lock-disabled="false"
+                    >
+                      <div
+                        class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
+                        role="dialog"
+                        tabindex="-1"
+                      >
+                        <button
+                          aria-label="Close this dialog"
+                          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
+                          data-test-subj="euiFlyoutCloseButton"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                            />
+                          </svg>
+                        </button>
+                        <div
+                          class="euiFlyoutHeader"
+                        >
+                          <div
+                            class="euiText euiText--small"
+                          >
+                            <h2>
+                              Select Dashboard
+                            </h2>
+                          </div>
+                        </div>
+                        <div
+                          class="euiFlyoutBody selectable-flyout-body"
+                        >
+                          <div
+                            class="euiFlyoutBody__overflow"
+                            tabindex="0"
+                          >
+                            <div
+                              class="euiFlyoutBody__overflowContent"
+                            >
+                              <div
+                                class="euiSelectable euiSelectable-fullHeight"
+                              >
+                                <div
+                                  class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+                                >
+                                  <div
+                                    class="euiFormControlLayout__childrenWrapper"
+                                  >
+                                    <input
+                                      aria-activedescendant=""
+                                      aria-haspopup="listbox"
+                                      aria-label="Filter options"
+                                      autocomplete="off"
+                                      class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
+                                      placeholder="Search for a dashboard..."
+                                      type="search"
+                                      value=""
+                                    />
+                                    <div
+                                      class="euiFormControlLayoutIcons"
+                                    >
+                                      <span
+                                        class="euiFormControlLayoutCustomIcon"
+                                      >
+                                        <svg
+                                          aria-hidden="true"
+                                          class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                          focusable="false"
+                                          height="16"
+                                          role="img"
+                                          viewBox="0 0 16 16"
+                                          width="16"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                          />
+                                        </svg>
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div
+                                  class="euiText euiText--extraSmall euiSelectableMessage"
+                                  id="random_html_id"
+                                >
+                                  <div
+                                    class="euiTextColor euiTextColor--subdued"
+                                  >
+                                    <p>
+                                      No options available
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="euiFlyoutFooter"
+                        >
+                          <div
+                            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          >
+                            <div
+                              class="euiFlexItem euiFlexItem--flexGrowZero"
+                            >
+                              <button
+                                class="euiButtonEmpty euiButtonEmpty--danger euiButtonEmpty--small"
+                                type="button"
+                              >
+                                <span
+                                  class="euiButtonContent euiButtonEmpty__content"
+                                >
+                                  <svg
+                                    aria-hidden="true"
+                                    class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                    focusable="false"
+                                    height="16"
+                                    role="img"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                    />
+                                  </svg>
+                                  <span
+                                    class="euiButtonEmpty__text"
+                                  >
+                                    Cancel
+                                  </span>
+                                </span>
+                              </button>
+                            </div>
+                            <div
+                              class="euiFlexItem euiFlexItem--flexGrowZero"
+                            >
+                              <button
+                                class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
+                                disabled=""
+                                type="button"
+                              >
+                                <span
+                                  class="euiButtonContent euiButton__content"
+                                >
+                                  <span
+                                    class="euiButton__text"
+                                  >
+                                    Select
+                                  </span>
+                                </span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                  onActivation={[Function]}
+                  onDeactivation={[Function]}
+                  persistentFocus={false}
+                  returnFocus={[Function]}
+                  shards={Array []}
+                  sideCar={
+                    Object {
+                      "assignMedium": [Function],
+                      "assignSyncMedium": [Function],
+                      "options": Object {
+                        "async": true,
+                        "ssr": false,
+                      },
+                      "read": [Function],
+                      "useMedium": [Function],
+                    }
+                  }
+                >
+                  <SideCar
+                    autoFocus={true}
+                    crossFrame={true}
+                    disabled={false}
+                    id={Object {}}
+                    observed={
+                      <div
+                        data-focus-lock-disabled="false"
+                      >
+                        <div
+                          class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
+                          role="dialog"
+                          tabindex="-1"
+                        >
+                          <button
+                            aria-label="Close this dialog"
+                            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
+                            data-test-subj="euiFlyoutCloseButton"
+                            type="button"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                              focusable="false"
+                              height="16"
+                              role="img"
+                              viewBox="0 0 16 16"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                              />
+                            </svg>
+                          </button>
+                          <div
+                            class="euiFlyoutHeader"
+                          >
+                            <div
+                              class="euiText euiText--small"
+                            >
+                              <h2>
+                                Select Dashboard
+                              </h2>
+                            </div>
+                          </div>
+                          <div
+                            class="euiFlyoutBody selectable-flyout-body"
+                          >
+                            <div
+                              class="euiFlyoutBody__overflow"
+                              tabindex="0"
+                            >
+                              <div
+                                class="euiFlyoutBody__overflowContent"
+                              >
+                                <div
+                                  class="euiSelectable euiSelectable-fullHeight"
+                                >
+                                  <div
+                                    class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+                                  >
+                                    <div
+                                      class="euiFormControlLayout__childrenWrapper"
+                                    >
+                                      <input
+                                        aria-activedescendant=""
+                                        aria-haspopup="listbox"
+                                        aria-label="Filter options"
+                                        autocomplete="off"
+                                        class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
+                                        placeholder="Search for a dashboard..."
+                                        type="search"
+                                        value=""
+                                      />
+                                      <div
+                                        class="euiFormControlLayoutIcons"
+                                      >
+                                        <span
+                                          class="euiFormControlLayoutCustomIcon"
+                                        >
+                                          <svg
+                                            aria-hidden="true"
+                                            class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                            focusable="false"
+                                            height="16"
+                                            role="img"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                          >
+                                            <path
+                                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                            />
+                                          </svg>
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div
+                                    class="euiText euiText--extraSmall euiSelectableMessage"
+                                    id="random_html_id"
+                                  >
+                                    <div
+                                      class="euiTextColor euiTextColor--subdued"
+                                    >
+                                      <p>
+                                        No options available
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            class="euiFlyoutFooter"
+                          >
+                            <div
+                              class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                            >
+                              <div
+                                class="euiFlexItem euiFlexItem--flexGrowZero"
+                              >
+                                <button
+                                  class="euiButtonEmpty euiButtonEmpty--danger euiButtonEmpty--small"
+                                  type="button"
+                                >
+                                  <span
+                                    class="euiButtonContent euiButtonEmpty__content"
+                                  >
+                                    <svg
+                                      aria-hidden="true"
+                                      class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                      focusable="false"
+                                      height="16"
+                                      role="img"
+                                      viewBox="0 0 16 16"
+                                      width="16"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                      />
+                                    </svg>
+                                    <span
+                                      class="euiButtonEmpty__text"
+                                    >
+                                      Cancel
+                                    </span>
+                                  </span>
+                                </button>
+                              </div>
+                              <div
+                                class="euiFlexItem euiFlexItem--flexGrowZero"
+                              >
+                                <button
+                                  class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
+                                  disabled=""
+                                  type="button"
+                                >
+                                  <span
+                                    class="euiButtonContent euiButton__content"
+                                  >
+                                    <span
+                                      class="euiButton__text"
+                                    >
+                                      Select
+                                    </span>
+                                  </span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                    onActivation={[Function]}
+                    onDeactivation={[Function]}
+                    persistentFocus={false}
+                    returnFocus={[Function]}
+                    shards={Array []}
+                    sideCar={
+                      Object {
+                        "assignMedium": [Function],
+                        "assignSyncMedium": [Function],
+                        "options": Object {
+                          "async": true,
+                          "ssr": false,
+                        },
+                        "read": [Function],
+                        "useMedium": [Function],
+                      }
+                    }
+                  >
+                    <SideEffect(FocusWatcher)
+                      autoFocus={true}
+                      crossFrame={true}
+                      disabled={false}
+                      id={Object {}}
+                      observed={
+                        <div
+                          data-focus-lock-disabled="false"
+                        >
+                          <div
+                            class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
+                            role="dialog"
+                            tabindex="-1"
+                          >
+                            <button
+                              aria-label="Close this dialog"
+                              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
+                              data-test-subj="euiFlyoutCloseButton"
+                              type="button"
+                            >
+                              <svg
+                                aria-hidden="true"
+                                class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                focusable="false"
+                                height="16"
+                                role="img"
+                                viewBox="0 0 16 16"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                />
+                              </svg>
+                            </button>
+                            <div
+                              class="euiFlyoutHeader"
+                            >
+                              <div
+                                class="euiText euiText--small"
+                              >
+                                <h2>
+                                  Select Dashboard
+                                </h2>
+                              </div>
+                            </div>
+                            <div
+                              class="euiFlyoutBody selectable-flyout-body"
+                            >
+                              <div
+                                class="euiFlyoutBody__overflow"
+                                tabindex="0"
+                              >
+                                <div
+                                  class="euiFlyoutBody__overflowContent"
+                                >
+                                  <div
+                                    class="euiSelectable euiSelectable-fullHeight"
+                                  >
+                                    <div
+                                      class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+                                    >
+                                      <div
+                                        class="euiFormControlLayout__childrenWrapper"
+                                      >
+                                        <input
+                                          aria-activedescendant=""
+                                          aria-haspopup="listbox"
+                                          aria-label="Filter options"
+                                          autocomplete="off"
+                                          class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
+                                          placeholder="Search for a dashboard..."
+                                          type="search"
+                                          value=""
+                                        />
+                                        <div
+                                          class="euiFormControlLayoutIcons"
+                                        >
+                                          <span
+                                            class="euiFormControlLayoutCustomIcon"
+                                          >
+                                            <svg
+                                              aria-hidden="true"
+                                              class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                              focusable="false"
+                                              height="16"
+                                              role="img"
+                                              viewBox="0 0 16 16"
+                                              width="16"
+                                              xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                              <path
+                                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                              />
+                                            </svg>
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div
+                                      class="euiText euiText--extraSmall euiSelectableMessage"
+                                      id="random_html_id"
+                                    >
+                                      <div
+                                        class="euiTextColor euiTextColor--subdued"
+                                      >
+                                        <p>
+                                          No options available
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="euiFlyoutFooter"
+                            >
+                              <div
+                                class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                              >
+                                <div
+                                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                                >
+                                  <button
+                                    class="euiButtonEmpty euiButtonEmpty--danger euiButtonEmpty--small"
+                                    type="button"
+                                  >
+                                    <span
+                                      class="euiButtonContent euiButtonEmpty__content"
+                                    >
+                                      <svg
+                                        aria-hidden="true"
+                                        class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                        focusable="false"
+                                        height="16"
+                                        role="img"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                        />
+                                      </svg>
+                                      <span
+                                        class="euiButtonEmpty__text"
+                                      >
+                                        Cancel
+                                      </span>
+                                    </span>
+                                  </button>
+                                </div>
+                                <div
+                                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                                >
+                                  <button
+                                    class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
+                                    disabled=""
+                                    type="button"
+                                  >
+                                    <span
+                                      class="euiButtonContent euiButton__content"
+                                    >
+                                      <span
+                                        class="euiButton__text"
+                                      >
+                                        Select
+                                      </span>
+                                    </span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      }
+                      onActivation={[Function]}
+                      onDeactivation={[Function]}
+                      persistentFocus={false}
+                      returnFocus={[Function]}
+                      shards={Array []}
+                    >
+                      <FocusWatcher
+                        autoFocus={true}
+                        crossFrame={true}
+                        disabled={false}
+                        id={Object {}}
+                        observed={
+                          <div
+                            data-focus-lock-disabled="false"
+                          >
+                            <div
+                              class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
+                              role="dialog"
+                              tabindex="-1"
+                            >
+                              <button
+                                aria-label="Close this dialog"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
+                                data-test-subj="euiFlyoutCloseButton"
+                                type="button"
+                              >
+                                <svg
+                                  aria-hidden="true"
+                                  class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                  focusable="false"
+                                  height="16"
+                                  role="img"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                  />
+                                </svg>
+                              </button>
+                              <div
+                                class="euiFlyoutHeader"
+                              >
+                                <div
+                                  class="euiText euiText--small"
+                                >
+                                  <h2>
+                                    Select Dashboard
+                                  </h2>
+                                </div>
+                              </div>
+                              <div
+                                class="euiFlyoutBody selectable-flyout-body"
+                              >
+                                <div
+                                  class="euiFlyoutBody__overflow"
+                                  tabindex="0"
+                                >
+                                  <div
+                                    class="euiFlyoutBody__overflowContent"
+                                  >
+                                    <div
+                                      class="euiSelectable euiSelectable-fullHeight"
+                                    >
+                                      <div
+                                        class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+                                      >
+                                        <div
+                                          class="euiFormControlLayout__childrenWrapper"
+                                        >
+                                          <input
+                                            aria-activedescendant=""
+                                            aria-haspopup="listbox"
+                                            aria-label="Filter options"
+                                            autocomplete="off"
+                                            class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
+                                            placeholder="Search for a dashboard..."
+                                            type="search"
+                                            value=""
+                                          />
+                                          <div
+                                            class="euiFormControlLayoutIcons"
+                                          >
+                                            <span
+                                              class="euiFormControlLayoutCustomIcon"
+                                            >
+                                              <svg
+                                                aria-hidden="true"
+                                                class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                                focusable="false"
+                                                height="16"
+                                                role="img"
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                              >
+                                                <path
+                                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                />
+                                              </svg>
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div
+                                        class="euiText euiText--extraSmall euiSelectableMessage"
+                                        id="random_html_id"
+                                      >
+                                        <div
+                                          class="euiTextColor euiTextColor--subdued"
+                                        >
+                                          <p>
+                                            No options available
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div
+                                class="euiFlyoutFooter"
+                              >
+                                <div
+                                  class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                >
+                                  <div
+                                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                                  >
+                                    <button
+                                      class="euiButtonEmpty euiButtonEmpty--danger euiButtonEmpty--small"
+                                      type="button"
+                                    >
+                                      <span
+                                        class="euiButtonContent euiButtonEmpty__content"
+                                      >
+                                        <svg
+                                          aria-hidden="true"
+                                          class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                          focusable="false"
+                                          height="16"
+                                          role="img"
+                                          viewBox="0 0 16 16"
+                                          width="16"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                          />
+                                        </svg>
+                                        <span
+                                          class="euiButtonEmpty__text"
+                                        >
+                                          Cancel
+                                        </span>
+                                      </span>
+                                    </button>
+                                  </div>
+                                  <div
+                                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                                  >
+                                    <button
+                                      class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
+                                      disabled=""
+                                      type="button"
+                                    >
+                                      <span
+                                        class="euiButtonContent euiButton__content"
+                                      >
+                                        <span
+                                          class="euiButton__text"
+                                        >
+                                          Select
+                                        </span>
+                                      </span>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        }
+                        onActivation={[Function]}
+                        onDeactivation={[Function]}
+                        persistentFocus={false}
+                        returnFocus={[Function]}
+                        shards={Array []}
+                      />
+                    </SideEffect(FocusWatcher)>
+                  </SideCar>
+                </RequireSideCar>
+                <ForwardRef
+                  data-focus-lock-disabled={false}
+                  enabled={false}
+                  inert={false}
+                  onBlur={[Function]}
+                  onFocus={[Function]}
+                  onMouseDown={[Function]}
+                  onTouchStart={[Function]}
+                  removeScrollBar={true}
+                  sideCar={[Function]}
+                >
+                  <div
+                    data-focus-lock-disabled={false}
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                    onMouseDown={[Function]}
+                    onScrollCapture={[Function]}
+                    onTouchMoveCapture={[Function]}
+                    onTouchStart={[Function]}
+                    onWheelCapture={[Function]}
+                  >
+                    <EuiOutsideClickDetector
+                      isDisabled={true}
+                      onOutsideClick={[Function]}
+                    >
+                      <div
+                        className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
+                        onMouseDown={[Function]}
+                        onMouseUp={[Function]}
+                        onTouchEnd={[Function]}
+                        onTouchStart={[Function]}
+                        role="dialog"
+                        tabIndex={-1}
+                      >
+                        <EuiI18n
+                          default="Close this dialog"
+                          token="euiFlyout.closeAriaLabel"
+                        >
+                          <EuiButtonIcon
+                            aria-label="Close this dialog"
+                            className="euiFlyout__closeButton euiFlyout__closeButton--inside"
+                            color="text"
+                            data-test-subj="euiFlyoutCloseButton"
+                            display="empty"
+                            iconType="cross"
+                            onClick={[Function]}
+                          >
+                            <button
+                              aria-label="Close this dialog"
+                              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
+                              data-test-subj="euiFlyoutCloseButton"
+                              disabled={false}
+                              onClick={[Function]}
+                              type="button"
+                            >
+                              <EuiIcon
+                                aria-hidden="true"
+                                className="euiButtonIcon__icon"
+                                color="inherit"
+                                size="m"
+                                type="cross"
+                              >
+                                <EuiIconBeaker
+                                  aria-hidden={true}
+                                  className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                  focusable="false"
+                                  role="img"
+                                  style={null}
+                                >
+                                  <svg
+                                    aria-hidden={true}
+                                    className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                    focusable="false"
+                                    height={16}
+                                    role="img"
+                                    style={null}
+                                    viewBox="0 0 16 16"
+                                    width={16}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                    />
+                                  </svg>
+                                </EuiIconBeaker>
+                              </EuiIcon>
+                            </button>
+                          </EuiButtonIcon>
+                        </EuiI18n>
+                        <EuiFlyoutHeader>
+                          <div
+                            className="euiFlyoutHeader"
+                          >
+                            <EuiText
+                              size="s"
+                            >
+                              <div
+                                className="euiText euiText--small"
+                              >
+                                <h2>
+                                  Select Dashboard
+                                </h2>
+                              </div>
+                            </EuiText>
+                          </div>
+                        </EuiFlyoutHeader>
+                        <EuiFlyoutBody
+                          className="selectable-flyout-body"
+                        >
+                          <div
+                            className="euiFlyoutBody selectable-flyout-body"
+                          >
+                            <div
+                              className="euiFlyoutBody__overflow"
+                              tabIndex={0}
+                            >
+                              <div
+                                className="euiFlyoutBody__overflowContent"
+                              >
+                                <EuiSelectable
+                                  height="full"
+                                  isPreFiltered={false}
+                                  listProps={
+                                    Object {
+                                      "bordered": false,
+                                    }
+                                  }
+                                  onChange={[Function]}
+                                  options={Array []}
+                                  searchProps={
+                                    Object {
+                                      "compressed": true,
+                                      "placeholder": "Search for a dashboard...",
+                                    }
+                                  }
+                                  searchable={true}
+                                  singleSelection="always"
+                                >
+                                  <div
+                                    className="euiSelectable euiSelectable-fullHeight"
+                                    onBlur={[Function]}
+                                    onFocus={[Function]}
+                                    onKeyDown={[Function]}
+                                  >
+                                    <EuiI18n
+                                      default="Filter options"
+                                      token="euiSelectable.placeholderName"
+                                    >
+                                      <EuiSelectableSearch
+                                        aria-activedescendant=""
+                                        aria-label="Filter options"
+                                        compressed={true}
+                                        defaultValue=""
+                                        isPreFiltered={false}
+                                        key="listSearch"
+                                        onChange={[Function]}
+                                        options={Array []}
+                                        placeholder="Search for a dashboard..."
+                                      >
+                                        <EuiFieldSearch
+                                          aria-activedescendant=""
+                                          aria-haspopup="listbox"
+                                          aria-label="Filter options"
+                                          autoComplete="off"
+                                          className="euiSelectableSearch"
+                                          compressed={true}
+                                          defaultValue=""
+                                          fullWidth={true}
+                                          incremental={true}
+                                          isClearable={true}
+                                          isLoading={false}
+                                          onSearch={[Function]}
+                                          placeholder="Search for a dashboard..."
+                                        >
+                                          <EuiFormControlLayout
+                                            compressed={true}
+                                            fullWidth={true}
+                                            icon="search"
+                                            isLoading={false}
+                                          >
+                                            <div
+                                              className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+                                            >
+                                              <div
+                                                className="euiFormControlLayout__childrenWrapper"
+                                              >
+                                                <EuiValidatableControl>
+                                                  <input
+                                                    aria-activedescendant=""
+                                                    aria-haspopup="listbox"
+                                                    aria-label="Filter options"
+                                                    autoComplete="off"
+                                                    className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
+                                                    defaultValue=""
+                                                    onKeyUp={[Function]}
+                                                    placeholder="Search for a dashboard..."
+                                                    type="search"
+                                                  />
+                                                </EuiValidatableControl>
+                                                <EuiFormControlLayoutIcons
+                                                  compressed={true}
+                                                  icon="search"
+                                                  isLoading={false}
+                                                >
+                                                  <div
+                                                    className="euiFormControlLayoutIcons"
+                                                  >
+                                                    <EuiFormControlLayoutCustomIcon
+                                                      size="s"
+                                                      type="search"
+                                                    >
+                                                      <span
+                                                        className="euiFormControlLayoutCustomIcon"
+                                                      >
+                                                        <EuiIcon
+                                                          aria-hidden="true"
+                                                          className="euiFormControlLayoutCustomIcon__icon"
+                                                          size="s"
+                                                          type="search"
+                                                        >
+                                                          <EuiIconBeaker
+                                                            aria-hidden={true}
+                                                            className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                                            focusable="false"
+                                                            role="img"
+                                                            style={null}
+                                                          >
+                                                            <svg
+                                                              aria-hidden={true}
+                                                              className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                                              focusable="false"
+                                                              height={16}
+                                                              role="img"
+                                                              style={null}
+                                                              viewBox="0 0 16 16"
+                                                              width={16}
+                                                              xmlns="http://www.w3.org/2000/svg"
+                                                            >
+                                                              <path
+                                                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                              />
+                                                            </svg>
+                                                          </EuiIconBeaker>
+                                                        </EuiIcon>
+                                                      </span>
+                                                    </EuiFormControlLayoutCustomIcon>
+                                                  </div>
+                                                </EuiFormControlLayoutIcons>
+                                              </div>
+                                            </div>
+                                          </EuiFormControlLayout>
+                                        </EuiFieldSearch>
+                                      </EuiSelectableSearch>
+                                    </EuiI18n>
+                                    <EuiSelectableMessage
+                                      bordered={false}
+                                      id="random_html_id"
+                                    >
+                                      <EuiText
+                                        className="euiSelectableMessage"
+                                        color="subdued"
+                                        id="random_html_id"
+                                        size="xs"
+                                      >
+                                        <div
+                                          className="euiText euiText--extraSmall euiSelectableMessage"
+                                          id="random_html_id"
+                                        >
+                                          <EuiTextColor
+                                            color="subdued"
+                                            component="div"
+                                          >
+                                            <div
+                                              className="euiTextColor euiTextColor--subdued"
+                                            >
+                                              <p>
+                                                <EuiI18n
+                                                  default="No options available"
+                                                  token="euiSelectable.noAvailableOptions"
+                                                >
+                                                  No options available
+                                                </EuiI18n>
+                                              </p>
+                                            </div>
+                                          </EuiTextColor>
+                                        </div>
+                                      </EuiText>
+                                    </EuiSelectableMessage>
+                                  </div>
+                                </EuiSelectable>
+                              </div>
+                            </div>
+                          </div>
+                        </EuiFlyoutBody>
+                        <EuiFlyoutFooter>
+                          <div
+                            className="euiFlyoutFooter"
+                          >
+                            <EuiFlexGroup
+                              gutterSize="m"
+                              justifyContent="spaceBetween"
+                            >
+                              <div
+                                className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                              >
+                                <EuiFlexItem
+                                  grow={false}
+                                >
+                                  <div
+                                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                                  >
+                                    <EuiSmallButtonEmpty
+                                      color="danger"
+                                      iconType="cross"
+                                      onClick={[MockFunction]}
+                                    >
+                                      <EuiButtonEmpty
+                                        color="danger"
+                                        iconType="cross"
+                                        onClick={[MockFunction]}
+                                        size="s"
+                                      >
+                                        <button
+                                          className="euiButtonEmpty euiButtonEmpty--danger euiButtonEmpty--small"
+                                          disabled={false}
+                                          onClick={[MockFunction]}
+                                          type="button"
+                                        >
+                                          <EuiButtonContent
+                                            className="euiButtonEmpty__content"
+                                            iconGap="m"
+                                            iconSide="left"
+                                            iconSize="m"
+                                            iconType="cross"
+                                            textProps={
+                                              Object {
+                                                "className": "euiButtonEmpty__text",
+                                              }
+                                            }
+                                          >
+                                            <span
+                                              className="euiButtonContent euiButtonEmpty__content"
+                                            >
+                                              <EuiIcon
+                                                className="euiButtonContent__icon"
+                                                color="inherit"
+                                                size="m"
+                                                type="cross"
+                                              >
+                                                <EuiIconBeaker
+                                                  aria-hidden={true}
+                                                  className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                                  focusable="false"
+                                                  role="img"
+                                                  style={null}
+                                                >
+                                                  <svg
+                                                    aria-hidden={true}
+                                                    className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                                    focusable="false"
+                                                    height={16}
+                                                    role="img"
+                                                    style={null}
+                                                    viewBox="0 0 16 16"
+                                                    width={16}
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                  >
+                                                    <path
+                                                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                    />
+                                                  </svg>
+                                                </EuiIconBeaker>
+                                              </EuiIcon>
+                                              <span
+                                                className="euiButtonEmpty__text"
+                                              >
+                                                Cancel
+                                              </span>
+                                            </span>
+                                          </EuiButtonContent>
+                                        </button>
+                                      </EuiButtonEmpty>
+                                    </EuiSmallButtonEmpty>
+                                  </div>
+                                </EuiFlexItem>
+                                <EuiFlexItem
+                                  grow={false}
+                                >
+                                  <div
+                                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                                  >
+                                    <EuiSmallButton
+                                      disabled={true}
+                                      fill={true}
+                                      isLoading={false}
+                                      onClick={[Function]}
+                                    >
+                                      <EuiButton
+                                        disabled={true}
+                                        fill={true}
+                                        isLoading={false}
+                                        onClick={[Function]}
+                                        size="s"
+                                      >
+                                        <EuiButtonDisplay
+                                          baseClassName="euiButton"
+                                          disabled={true}
+                                          element="button"
+                                          fill={true}
+                                          isDisabled={true}
+                                          isLoading={false}
+                                          onClick={[Function]}
+                                          size="s"
+                                          type="button"
+                                        >
+                                          <button
+                                            className="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
+                                            disabled={true}
+                                            onClick={[Function]}
+                                            style={
+                                              Object {
+                                                "minWidth": undefined,
+                                              }
+                                            }
+                                            type="button"
+                                          >
+                                            <EuiButtonContent
+                                              className="euiButton__content"
+                                              iconGap="m"
+                                              iconSide="left"
+                                              isLoading={false}
+                                              textProps={
+                                                Object {
+                                                  "className": "euiButton__text",
+                                                }
+                                              }
+                                            >
+                                              <span
+                                                className="euiButtonContent euiButton__content"
+                                              >
+                                                <span
+                                                  className="euiButton__text"
+                                                >
+                                                  Select
+                                                </span>
+                                              </span>
+                                            </EuiButtonContent>
+                                          </button>
+                                        </EuiButtonDisplay>
+                                      </EuiButton>
+                                    </EuiSmallButton>
+                                  </div>
+                                </EuiFlexItem>
+                              </div>
+                            </EuiFlexGroup>
+                          </div>
+                        </EuiFlyoutFooter>
+                      </div>
+                    </EuiOutsideClickDetector>
+                  </div>
+                </ForwardRef>
+                <div
+                  data-focus-guard={true}
+                  style={
+                    Object {
+                      "height": "0px",
+                      "left": "1px",
+                      "overflow": "hidden",
+                      "padding": 0,
+                      "position": "fixed",
+                      "top": "1px",
+                      "width": "1px",
+                    }
+                  }
+                  tabIndex={0}
+                />
+              </ForwardRef(FocusLockUI)>
+              <RequireSideCar
+                noIsolation={true}
+                onClickOutside={[Function]}
+                setLockProps={[Function]}
+                sideCar={
+                  Object {
+                    "assignMedium": [Function],
+                    "assignSyncMedium": [Function],
+                    "options": Object {
+                      "async": true,
+                      "ssr": false,
+                    },
+                    "read": [Function],
+                    "useMedium": [Function],
+                  }
+                }
+              >
+                <SideCar
+                  noIsolation={true}
+                  onClickOutside={[Function]}
+                  setLockProps={[Function]}
+                  sideCar={
+                    Object {
+                      "assignMedium": [Function],
+                      "assignSyncMedium": [Function],
+                      "options": Object {
+                        "async": true,
+                        "ssr": false,
+                      },
+                      "read": [Function],
+                      "useMedium": [Function],
+                    }
+                  }
+                >
+                  <Effect
+                    noIsolation={true}
+                    onClickOutside={[Function]}
+                    setLockProps={[Function]}
+                  >
+                    <Component>
+                      <Sheet
+                        styles="
+ [data-focus-on-hidden] {
+   pointer-events: none !important;
+ }
+"
+                      />
+                    </Component>
+                  </Effect>
+                </SideCar>
+              </RequireSideCar>
+            </ForwardRef>
+          </ForwardRef>
+        </EuiFocusTrap>
+      </Portal>
+    </EuiOverlayMask>
+  </EuiFlyout>
+</SelectDashboardFlyout>
+`;

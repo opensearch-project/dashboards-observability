@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiPage, EuiPageBody, EuiResizableContainer } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiResizableContainer, EuiSpacer } from '@elastic/eui';
 import debounce from 'lodash/debounce';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -115,11 +115,17 @@ export const Home = ({
                 <EuiPage>
                   <EuiPageBody component="div">
                     <TopMenu />
+                    <EuiSpacer size="m" />
                     <div className="metricsContainer">
                       <EuiResizableContainer>
                         {(EuiResizablePanel, EuiResizableButton) => (
                           <>
-                            <EuiResizablePanel mode="collapsible" initialSize={20} minSize="10%">
+                            <EuiResizablePanel
+                              mode="collapsible"
+                              initialSize={20}
+                              minSize="10%"
+                              paddingSize="none"
+                            >
                               <Sidebar
                                 additionalSelectedMetricId={routerProps.match.params.id}
                                 selectedDataSource={selectedDataSource}

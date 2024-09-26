@@ -17,10 +17,10 @@ export function IntegrationScreenshots(props: any) {
 
   return (
     <EuiPanel data-test-subj={`${config.name}-screenshots`}>
-      <EuiTitle>
-        <h2>Screenshots</h2>
+      <EuiTitle size="s">
+        <h3>Screenshots</h3>
       </EuiTitle>
-      <EuiSpacer />
+      <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="l" alignItems="flexStart">
         {screenshots?.map((screenshot: { path: string; annotation?: string }) => {
           return (

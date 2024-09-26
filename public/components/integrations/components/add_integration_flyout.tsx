@@ -5,8 +5,8 @@
 
 import _ from 'lodash';
 import {
-  EuiButton,
-  EuiFieldText,
+  EuiSmallButton,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -16,8 +16,7 @@ import {
   EuiForm,
   EuiText,
   EuiLink,
-  EuiFormRow,
-  EuiTitle,
+  EuiCompressedFormRow,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { HttpStart } from '../../../../../../src/core/public';
@@ -33,7 +32,7 @@ interface IntegrationFlyoutProps {
 }
 
 export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
-  const { onClose, onCreate, integrationName, integrationType, http } = props;
+  const { onClose, onCreate, integrationName, integrationType } = props;
 
   const [isDataSourceValid, setDataSourceValid] = useState<null | false | true>(null);
 
@@ -55,7 +54,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
   const formContent = () => {
     return (
       <div>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label="Index name or wildcard pattern"
           helpText="Input an index name or wildcard pattern that your integration will query."
           isInvalid={isDataSourceValid === false}
@@ -72,14 +71,14 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
             </EuiText>
           }
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             data-test-subj="data-source-name"
             name="first"
             onChange={(e) => onDatasourceChange(e)}
             value={dataSource}
             isInvalid={isDataSourceValid === false}
             append={
-              <EuiButton
+              <EuiSmallButton
                 data-test-subj="validateIndex"
                 onClick={async () => {
                   const validationResult = await doExistingDataSourceValidation(
@@ -96,18 +95,21 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
                 disabled={dataSource.length === 0}
               >
                 Validate
-              </EuiButton>
+              </EuiSmallButton>
             }
           />
-        </EuiFormRow>
-        <EuiFormRow label="Name" helpText="This will be used to label the newly added integration.">
-          <EuiFieldText
+        </EuiCompressedFormRow>
+        <EuiCompressedFormRow
+          label="Name"
+          helpText="This will be used to label the newly added integration."
+        >
+          <EuiCompressedFieldText
             data-test-subj="new-instance-name"
             name="first"
             onChange={(e) => onNameChange(e)}
             value={name}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </div>
     );
   };
@@ -123,20 +125,20 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
   return (
     <EuiFlyout data-test-subj="addIntegrationFlyout" onClose={onClose} size="s">
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle data-test-subj="addIntegrationFlyoutTitle">
+        <EuiText data-test-subj="addIntegrationFlyoutTitle" size="s">
           <h2>Add Integration</h2>
-        </EuiTitle>
+        </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{renderContent()}</EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiButton onClick={() => onClose()} color="danger">
+            <EuiSmallButton onClick={() => onClose()} color="danger">
               Cancel
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiButton
+            <EuiSmallButton
               onClick={() => {
                 onCreate(name, dataSource);
                 onClose();
@@ -153,7 +155,7 @@ export function AddIntegrationFlyout(props: IntegrationFlyoutProps) {
               data-click-metric-element="integrations.create_from_setup"
             >
               Add Integration
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

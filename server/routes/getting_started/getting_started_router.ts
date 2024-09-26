@@ -3,20 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/*
- * Copyright OpenSearch Contributors
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import { schema } from '@osd/config-schema';
 import { Readable } from 'stream';
 import {
   IOpenSearchDashboardsResponse,
   IRouter,
   ResponseError,
+  SavedObject,
 } from '../../../../../src/core/server';
 import { createSavedObjectsStreamFromNdJson } from '../../../../../src/core/server/saved_objects/routes/utils';
 import { loadAssetsFromFile } from './helper';
+import { getWorkspaceState } from '../../../../../src/core/server/utils';
 
 export function registerGettingStartedRoutes(router: IRouter) {
   // Fetch the tutorial assets
@@ -130,6 +127,86 @@ export function registerGettingStartedRoutes(router: IRouter) {
         return response.custom({
           statusCode: error.statusCode || 500,
           body: 'Issue in fetching index-patterns for tutorialId: ' + request.params.tutorialId,
+        });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: `/api/observability/gettingStarted/createAssets`,
+      validate: {
+        body: schema.object({
+          mdsId: schema.string(),
+          mdsLabel: schema.string(),
+          tutorialId: schema.string(),
+        }),
+      },
+    },
+    async (
+      context,
+      request,
+      response
+    ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
+      try {
+        const { mdsId, mdsLabel, tutorialId } = request.body;
+        const { requestWorkspaceId } = getWorkspaceState(request);
+        const fileData = await loadAssetsFromFile(tutorialId);
+
+        const objects = await createSavedObjectsStreamFromNdJson(Readable.from(fileData));
+        const loadedObjects = await objects.toArray();
+
+        const updatedObjects = loadedObjects.map((obj) => {
+          let newId = obj.id;
+          let references: SavedObject['references'] | undefined = obj.references;
+
+          if (requestWorkspaceId) {
+            newId = `workspaceId-${requestWorkspaceId}-${newId}`;
+            references = references?.map((ref) => {
+              return {
+                ...ref,
+                id: `workspaceId-${requestWorkspaceId}-${ref.id}`,
+              };
+            });
+          }
+
+          if (mdsId) {
+            newId = `mds-${mdsId}-objectId-${obj.id}`;
+            references = references?.map((ref) => {
+              return {
+                ...ref,
+                id: `mds-${mdsId}-objectId-${ref.id}`,
+              };
+            });
+
+            if (obj.type === 'index-pattern' && references) {
+              references.push({
+                id: mdsId,
+                type: 'data-source',
+                name: mdsLabel,
+              });
+            }
+          }
+
+          return {
+            ...obj,
+            id: newId,
+            ...(references && { references }),
+          };
+        });
+
+        await context.core.savedObjects.client.bulkCreate(updatedObjects);
+
+        return response.ok({
+          body: {
+            message: 'Objects loaded successfully',
+          },
+        });
+      } catch (error) {
+        console.error(error);
+        return response.custom({
+          statusCode: error.statusCode || 500,
+          body: 'Issue in loading objects for mdsId:',
         });
       }
     }

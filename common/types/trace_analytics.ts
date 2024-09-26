@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { TRACE_TABLE_TITLES } from '../constants/trace_analytics';
+
 export type SpanField =
   | 'SPAN_ID'
   | 'PARENT_SPAN_ID'
@@ -52,3 +54,6 @@ export interface GraphVisEdge {
   to: number;
   color: string;
 }
+
+export type TraceAnalyticsMode = 'jaeger' | 'data_prepper' | 'custom_data_prepper';
+export type TraceQueryMode = keyof typeof TRACE_TABLE_TITLES;

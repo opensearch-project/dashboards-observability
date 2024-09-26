@@ -7,14 +7,14 @@ import React, { Fragment, useCallback } from 'react';
 import {
   EuiButton,
   EuiAccordion,
-  EuiFormRow,
-  EuiFieldNumber,
+  EuiCompressedFormRow,
+  EuiCompressedFieldNumber,
   EuiColorPicker,
   EuiSpacer,
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
+  EuiCompressedFieldText,
   htmlIdGenerator,
   EuiToolTip,
 } from '@elastic/eui';
@@ -111,31 +111,31 @@ export const ConfigThresholds = ({
         vizState.map((thr: ThresholdUnitType) => {
           return (
             <Fragment key={thr.thid}>
-              <EuiFormRow fullWidth label="">
+              <EuiCompressedFormRow fullWidth label="">
                 <EuiFlexGroup alignItems="center" gutterSize="xs">
                   <EuiFlexItem grow={3}>
-                    <EuiFormRow helpText="color">
+                    <EuiCompressedFormRow helpText="color">
                       <EuiColorPicker
                         fullWidth
                         onChange={handleThresholdChange(thr.thid, 'color')}
                         color={thr.color}
                       />
-                    </EuiFormRow>
+                    </EuiCompressedFormRow>
                   </EuiFlexItem>
                   <EuiFlexItem grow={5}>
-                    <EuiFormRow helpText="name">
-                      <EuiFieldText
+                    <EuiCompressedFormRow helpText="name">
+                      <EuiCompressedFieldText
                         onChange={handleThresholdChange(thr.thid, 'name')}
                         value={thr.name || ''}
                         arial-label="Input threshold name"
                         data-test-subj="nameFieldText"
                         readOnly={thr.isReadOnly}
                       />
-                    </EuiFormRow>
+                    </EuiCompressedFormRow>
                   </EuiFlexItem>
                   <EuiFlexItem grow={5}>
-                    <EuiFormRow helpText="value">
-                      <EuiFieldNumber
+                    <EuiCompressedFormRow helpText="value">
+                      <EuiCompressedFieldNumber
                         fullWidth
                         placeholder="threshold value"
                         value={thr.value || 0}
@@ -144,17 +144,17 @@ export const ConfigThresholds = ({
                         data-test-subj="valueFieldNumber"
                         readOnly={thr.isReadOnly}
                       />
-                    </EuiFormRow>
+                    </EuiCompressedFormRow>
                   </EuiFlexItem>
                   {!thr.isReadOnly && (
                     <EuiFlexItem grow={1}>
-                      <EuiFormRow>
+                      <EuiCompressedFormRow>
                         <EuiIcon type="trash" onClick={handleThresholdDelete(thr.thid)} />
-                      </EuiFormRow>
+                      </EuiCompressedFormRow>
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
-              </EuiFormRow>
+              </EuiCompressedFormRow>
             </Fragment>
           );
         })}

@@ -15,12 +15,12 @@ exports[`Integration Header Test Renders integration header as expected 1`] = `
               data-test-subj="integrations-header"
               size="l"
             >
-              <h1
+              <h3
                 className="euiTitle euiTitle--large"
                 data-test-subj="integrations-header"
               >
                 Integrations
-              </h1>
+              </h3>
             </EuiTitle>
           </div>
         </EuiPageHeaderSection>
@@ -28,129 +28,137 @@ exports[`Integration Header Test Renders integration header as expected 1`] = `
           <div
             className="euiPageHeaderSection"
           >
-            <IntegrationHeaderActions
+            <IntegrationHeaderActionsOldNav
               onShowUpload={[Function]}
             >
-              <EuiPopover
-                anchorPosition="downLeft"
-                button={
-                  <EuiButton
-                    fill={true}
-                    iconType="arrowDown"
-                    onClick={[Function]}
-                  >
-                    Catalog
-                  </EuiButton>
-                }
-                closePopover={[Function]}
-                display="inlineBlock"
-                hasArrow={true}
-                id="integHeaderActionsPanel"
-                isOpen={false}
-                ownFocus={true}
-                panelPaddingSize="none"
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
               >
                 <div
-                  className="euiPopover euiPopover--anchorDownLeft"
-                  id="integHeaderActionsPanel"
+                  className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
-                  <div
-                    className="euiPopover__anchor"
+                  <EuiFlexItem
+                    grow={false}
                   >
-                    <EuiButton
-                      fill={true}
-                      iconType="arrowDown"
-                      onClick={[Function]}
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
                     >
-                      <EuiButtonDisplay
-                        baseClassName="euiButton"
-                        disabled={false}
-                        element="button"
-                        fill={true}
-                        iconType="arrowDown"
-                        isDisabled={false}
-                        onClick={[Function]}
-                        type="button"
+                      <EuiLink
+                        external={true}
+                        href="https://github.com/opensearch-project/opensearch-catalog/releases"
                       >
-                        <button
-                          className="euiButton euiButton--primary euiButton--fill"
-                          disabled={false}
-                          onClick={[Function]}
-                          style={
-                            Object {
-                              "minWidth": undefined,
-                            }
-                          }
-                          type="button"
+                        <a
+                          className="euiLink euiLink--primary"
+                          href="https://github.com/opensearch-project/opensearch-catalog/releases"
+                          rel="noreferrer"
                         >
-                          <EuiButtonContent
-                            className="euiButton__content"
-                            iconSide="left"
-                            iconType="arrowDown"
-                            textProps={
-                              Object {
-                                "className": "euiButton__text",
-                              }
-                            }
+                          View Catalog
+                          <EuiIcon
+                            aria-label="External link"
+                            className="euiLink__externalIcon"
+                            size="s"
+                            type="popout"
                           >
-                            <span
-                              className="euiButtonContent euiButton__content"
+                            <EuiIconBeaker
+                              aria-hidden={true}
+                              aria-label="External link"
+                              className="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                              focusable="false"
+                              role="img"
+                              style={null}
                             >
-                              <EuiIcon
-                                className="euiButtonContent__icon"
-                                color="inherit"
-                                size="m"
-                                type="arrowDown"
+                              <svg
+                                aria-hidden={true}
+                                aria-label="External link"
+                                className="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                                focusable="false"
+                                height={16}
+                                role="img"
+                                style={null}
+                                viewBox="0 0 16 16"
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
                               >
-                                <EuiIconBeaker
-                                  aria-hidden={true}
-                                  className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                  focusable="false"
-                                  role="img"
-                                  style={null}
+                                <path
+                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                />
+                              </svg>
+                            </EuiIconBeaker>
+                          </EuiIcon>
+                        </a>
+                      </EuiLink>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem
+                    grow={false}
+                  >
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <EuiSmallButton
+                        fill={true}
+                        onClick={[Function]}
+                      >
+                        <EuiButton
+                          fill={true}
+                          onClick={[Function]}
+                          size="s"
+                        >
+                          <EuiButtonDisplay
+                            baseClassName="euiButton"
+                            disabled={false}
+                            element="button"
+                            fill={true}
+                            isDisabled={false}
+                            onClick={[Function]}
+                            size="s"
+                            type="button"
+                          >
+                            <button
+                              className="euiButton euiButton--primary euiButton--small euiButton--fill"
+                              disabled={false}
+                              onClick={[Function]}
+                              style={
+                                Object {
+                                  "minWidth": undefined,
+                                }
+                              }
+                              type="button"
+                            >
+                              <EuiButtonContent
+                                className="euiButton__content"
+                                iconGap="m"
+                                iconSide="left"
+                                textProps={
+                                  Object {
+                                    "className": "euiButton__text",
+                                  }
+                                }
+                              >
+                                <span
+                                  className="euiButtonContent euiButton__content"
                                 >
-                                  <svg
-                                    aria-hidden={true}
-                                    className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                    focusable="false"
-                                    height={16}
-                                    role="img"
-                                    style={null}
-                                    viewBox="0 0 16 16"
-                                    width={16}
-                                    xmlns="http://www.w3.org/2000/svg"
+                                  <span
+                                    className="euiButton__text"
                                   >
-                                    <path
-                                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                    />
-                                  </svg>
-                                </EuiIconBeaker>
-                              </EuiIcon>
-                              <span
-                                className="euiButton__text"
-                              >
-                                Catalog
-                              </span>
-                            </span>
-                          </EuiButtonContent>
-                        </button>
-                      </EuiButtonDisplay>
-                    </EuiButton>
-                  </div>
+                                    Upload Integration
+                                  </span>
+                                </span>
+                              </EuiButtonContent>
+                            </button>
+                          </EuiButtonDisplay>
+                        </EuiButton>
+                      </EuiSmallButton>
+                    </div>
+                  </EuiFlexItem>
                 </div>
-              </EuiPopover>
-            </IntegrationHeaderActions>
+              </EuiFlexGroup>
+            </IntegrationHeaderActionsOldNav>
           </div>
         </EuiPageHeaderSection>
       </header>
     </EuiPageHeader>
-    <EuiSpacer
-      size="s"
-    >
-      <div
-        className="euiSpacer euiSpacer--s"
-      />
-    </EuiSpacer>
     <EuiText
       color="subdued"
       size="s"
@@ -218,17 +226,18 @@ exports[`Integration Header Test Renders integration header as expected 1`] = `
       </div>
     </EuiText>
     <EuiSpacer
-      size="l"
+      size="s"
     >
       <div
-        className="euiSpacer euiSpacer--l"
+        className="euiSpacer euiSpacer--s"
       />
     </EuiSpacer>
     <EuiTabs
-      display="condensed"
+      display="default"
+      size="s"
     >
       <div
-        className="euiTabs euiTabs--condensed"
+        className="euiTabs euiTabs--small"
         role="tablist"
       >
         <EuiTab

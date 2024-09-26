@@ -4,13 +4,13 @@
  */
 
 import {
-  EuiFieldNumber,
-  EuiFieldText,
-  EuiFormRow,
+  EuiCompressedFieldNumber,
+  EuiCompressedFieldText,
+  EuiCompressedFormRow,
   EuiLink,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiSpacer,
-  EuiSuperSelect,
+  EuiCompressedSuperSelect,
   EuiText,
 } from '@elastic/eui';
 import producer from 'immer';
@@ -164,26 +164,26 @@ export const IndexSettingOptions = ({
           setAccelerationFormData={setAccelerationFormData}
         />
       )}
-      <EuiFormRow
+      <EuiCompressedFormRow
         label="Refresh type"
         helpText="Specify how often the index should refresh, which publishes the most recent changes and make them available for search."
       >
-        <EuiSuperSelect
+        <EuiCompressedSuperSelect
           options={refreshOptions}
           valueOfSelected={refreshTypeSelected}
           onChange={onChangeRefreshType}
           itemLayoutAlign="top"
           hasDividers
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
       {refreshTypeSelected === 'autoInterval' && (
-        <EuiFormRow
+        <EuiCompressedFormRow
           label="Refresh increments"
           helpText="Specify how frequent the index gets updated when performing the refresh job."
           isInvalid={hasError(accelerationFormData.formErrors, 'refreshIntervalError')}
           error={accelerationFormData.formErrors.refreshIntervalError}
         >
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             placeholder="Refresh increments"
             value={refreshWindow}
             onChange={onChangeRefreshWindow}
@@ -202,7 +202,7 @@ export const IndexSettingOptions = ({
               );
             }}
             append={
-              <EuiSelect
+              <EuiCompressedSelect
                 value={refreshInterval}
                 onChange={onChangeRefreshInterval}
                 options={ACCELERATION_REFRESH_TIME_INTERVAL}
@@ -220,10 +220,10 @@ export const IndexSettingOptions = ({
               />
             }
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       )}
       {refreshTypeSelected !== 'manual' && (
-        <EuiFormRow
+        <EuiCompressedFormRow
           label="Checkpoint location"
           helpText="The HDFS compatible file system location path for incremental refresh job checkpoint."
           isInvalid={hasError(accelerationFormData.formErrors, 'checkpointLocationError')}
@@ -236,7 +236,7 @@ export const IndexSettingOptions = ({
             </EuiText>
           }
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             placeholder="s3://checkpoint/location"
             value={checkpoint}
             onChange={onChangeCheckpoint}
@@ -253,16 +253,16 @@ export const IndexSettingOptions = ({
               );
             }}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       )}
       {accelerationFormData.accelerationIndexType === 'materialized' && (
-        <EuiFormRow
+        <EuiCompressedFormRow
           label="Watermark Delay"
           helpText="Data arrival delay for incremental refresh on a materialized view with aggregations"
           isInvalid={hasError(accelerationFormData.formErrors, 'watermarkDelayError')}
           error={accelerationFormData.formErrors.watermarkDelayError}
         >
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             placeholder="Watermark delay interval"
             value={delayWindow}
             onChange={onChangeDelayWindow}
@@ -280,14 +280,14 @@ export const IndexSettingOptions = ({
               );
             }}
             append={
-              <EuiSelect
+              <EuiCompressedSelect
                 value={delayInterval}
                 onChange={onChangeDelayInterval}
                 options={ACCELERATION_TIME_INTERVAL}
               />
             }
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       )}
     </>
   );

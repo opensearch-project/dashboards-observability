@@ -21,6 +21,7 @@ export function IntegrationFields(props: any) {
   const search = {
     box: {
       incremental: true,
+      compressed: true,
     },
   };
 
@@ -93,10 +94,10 @@ export function IntegrationFields(props: any) {
 
   return (
     <EuiPanel data-test-subj={`${config.name}-fields`}>
-      <EuiTitle>
-        <h2>Fields</h2>
+      <EuiTitle size="s">
+        <h3>Fields</h3>
       </EuiTitle>
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
       <EuiInMemoryTable
         itemId="id"
         loading={false}

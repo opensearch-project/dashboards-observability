@@ -6,26 +6,30 @@
 import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { HomeProps } from 'public/components/getting_started/home';
-import { GettingStartedConnectionsHeader } from './getting_started_header';
 import { CollectAndShipData } from './getting_started_collectData';
 import { QueryAndAnalyze } from './getting_started_queryAndAnalyze';
+import { observabilityGettingStartedTitle } from '../../../../common/constants/shared';
 
-export const NewGettingStarted = (props: HomeProps) => {
-  const { chrome } = props;
+interface ExtendedHomeProps extends HomeProps {
+  selectedDataSourceId: string;
+  selectedDataSourceLabel: string;
+}
+
+export const NewGettingStarted = (props: ExtendedHomeProps) => {
+  const { chrome, selectedDataSourceId, selectedDataSourceLabel } = props;
   const [selectedSource, setSelectedSource] = useState('');
   const [isPickYourSourceOpen, setIsPickYourSourceOpen] = useState(true);
   const [isQueryDataOpen, setIsQueryDataOpen] = useState(false);
-  const [indexPatterns, setIndexPatterns] = useState<string[]>([]);
-  const [isSampleDataset, setIsSampleDataset] = useState(false); // New state
+  const [isSampleDataset, setIsSampleDataset] = useState(false);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
       {
-        text: 'Getting Started',
+        text: observabilityGettingStartedTitle,
         href: '#/',
       },
     ]);
-  }, []);
+  }, [chrome]);
 
   const handleSelectSource = (source: string) => {
     setSelectedSource(source);
@@ -42,10 +46,9 @@ export const NewGettingStarted = (props: HomeProps) => {
     setIsQueryDataOpen(isOpen);
   };
 
-  const setQueryDataOpen = (patterns: string[]) => {
+  const setQueryDataOpen = () => {
     setIsPickYourSourceOpen(false);
     setIsQueryDataOpen(true);
-    setIndexPatterns(patterns);
   };
 
   const handleCardSelectionChange = (isSample: boolean) => {
@@ -55,8 +58,6 @@ export const NewGettingStarted = (props: HomeProps) => {
   return (
     <EuiPage>
       <EuiPageBody component="div">
-        <GettingStartedConnectionsHeader />
-        <EuiSpacer size="l" />
         <CollectAndShipData
           isOpen={isPickYourSourceOpen}
           onToggle={togglePickYourSource}
@@ -64,14 +65,17 @@ export const NewGettingStarted = (props: HomeProps) => {
           onMoveToQueryData={setQueryDataOpen}
           onSelectSource={handleSelectSource}
           onCardSelectionChange={handleCardSelectionChange}
+          selectedDataSourceId={selectedDataSourceId}
+          selectedDataSourceLabel={selectedDataSourceLabel}
         />
-        <EuiSpacer size="l" />
+        <EuiSpacer size="m" />
         {!isSampleDataset && (
           <QueryAndAnalyze
             isOpen={isQueryDataOpen}
             onToggle={toggleQueryData}
             selectedTechnology={selectedSource}
-            indexPatterns={indexPatterns}
+            selectedDataSourceId={selectedDataSourceId}
+            selectedDataSourceLabel={selectedDataSourceLabel}
           />
         )}
       </EuiPageBody>

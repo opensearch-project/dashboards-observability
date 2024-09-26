@@ -4,7 +4,7 @@
  */
 
 import '@testing-library/jest-dom';
-import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
@@ -59,17 +59,14 @@ describe('<NoteTable /> spec', () => {
       dateCreated: '2023-01-01 12:00:00',
       dateModified: '2023-01-02 12:00:00',
     }));
-    const utils = renderNoteTable({ notebooks });
+    const { getByTestId, getAllByText, ...utils } = renderNoteTable({ notebooks });
     expect(utils.container.firstChild).toMatchSnapshot();
-
-    fireEvent.click(utils.getByText('Actions'));
-    fireEvent.click(utils.getByText('Add samples'));
+    fireEvent.click(utils.getByText('Add sample notebooks'));
     fireEvent.click(utils.getAllByLabelText('Select this row')[0]);
-    fireEvent.click(utils.getByText('Actions'));
-    fireEvent.click(utils.getByText('Delete'));
+    fireEvent.click(getByTestId('deleteSelectedNotebooks'));
+    expect(getAllByText('Delete 1 notebook')).toHaveLength(2);
     fireEvent.click(utils.getByText('Cancel'));
     fireEvent.click(utils.getAllByLabelText('Select this row')[0]);
-    fireEvent.click(utils.getByText('Actions'));
   });
 
   it('create notebook modal', async () => {
@@ -131,17 +128,16 @@ describe('<NoteTable /> spec', () => {
         dateModified: 'date-modified',
       },
     ];
-    const { getByText, getByLabelText, getAllByText, getByTestId } = renderNoteTable({ notebooks });
+    const { getByLabelText, getAllByText, getByTestId } = renderNoteTable({ notebooks });
 
     // Select a notebook
     fireEvent.click(getByLabelText('Select this row'));
 
-    // Open Actions dropdown and click Delete
-    fireEvent.click(getByText('Actions'));
-    fireEvent.click(getByText('Delete'));
+    // Click the delete button
+    fireEvent.click(getByTestId('deleteSelectedNotebooks'));
 
     // Ensure the modal is open (you may need to adjust based on your modal implementation)
-    expect(getAllByText('Delete 1 notebook')).toHaveLength(1);
+    expect(getAllByText('Delete 1 notebook')).toHaveLength(2);
 
     // Mock user confirmation and submit
     fireEvent.input(getByTestId('delete-notebook-modal-input'), {
@@ -155,38 +151,19 @@ describe('<NoteTable /> spec', () => {
   });
 
   it('adds sample notebooks', async () => {
-    const { getByText, getAllByText, getByTestId } = renderNoteTable({ notebooks: [] });
+    const { getAllByText, getByTestId } = renderNoteTable({ notebooks: [] });
 
-    // Open Actions dropdown and click Add samples
-    fireEvent.click(getByText('Actions'));
-    fireEvent.click(getAllByText('Add samples')[0]);
+    // Add samples
+    fireEvent.click(getAllByText('Add sample notebooks')[0]);
 
     // Ensure the modal is open (you may need to adjust based on your modal implementation)
-    expect(getAllByText('Add sample notebooks')).toHaveLength(1);
+    expect(getAllByText('Add sample notebooks')).toHaveLength(3);
 
     // Mock user confirmation and submit
     fireEvent.click(getByTestId('confirmModalConfirmButton'));
 
     // Assert that the addSampleNotebooks function is called
     expect(props.addSampleNotebooks).toHaveBeenCalledTimes(1);
-  });
-
-  it('closes the action panel', async () => {
-    const { getByText, queryByTestId } = renderNoteTable({ notebooks: [] });
-    expect(queryByTestId('renameNotebookBtn')).not.toBeInTheDocument();
-
-    // Open Actions dropdown
-    fireEvent.click(getByText('Actions'));
-
-    // Ensure the action panel is open
-    expect(queryByTestId('deleteNotebookBtn')).toBeInTheDocument();
-
-    await act(async () => {
-      fireEvent.click(getByText('Actions'));
-    });
-
-    // Ensure the action panel is closed
-    expect(queryByTestId('deleteNotebookBtn')).not.toBeInTheDocument();
   });
 
   it('closes the delete modal', () => {
@@ -198,22 +175,21 @@ describe('<NoteTable /> spec', () => {
         dateModified: 'date-modified',
       },
     ];
-    const { getByText, getByLabelText, queryByText } = renderNoteTable({ notebooks });
+    const { getByText, getByLabelText, getAllByText, getByTestId } = renderNoteTable({ notebooks });
 
     // Select a notebook
     fireEvent.click(getByLabelText('Select this row'));
 
-    // Open Actions dropdown and click Delete
-    fireEvent.click(getByText('Actions'));
-    fireEvent.click(getByText('Delete'));
+    // Click the delete button
+    fireEvent.click(getByTestId('deleteSelectedNotebooks'));
 
     // Ensure the modal is open
-    expect(getByText('Delete 1 notebook')).toBeInTheDocument();
+    expect(getAllByText('Delete 1 notebook')).toHaveLength(2);
 
     // Close the delete modal
     fireEvent.click(getByText('Cancel'));
 
     // Ensure the delete modal is closed
-    expect(queryByText('Delete 1 notebook')).toBeNull();
+    expect(getAllByText('Delete 1 notebook')).toHaveLength(1);
   });
 });

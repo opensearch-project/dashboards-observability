@@ -4,14 +4,16 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
 import { SavedObjectsClientContract } from '../../../../../src/core/server';
 import { IntegrationReader } from './repository/integration_reader';
-import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
 import { deepCheck } from './repository/utils';
 
 interface BuilderOptions {
   name: string;
   indexPattern: string;
+  dataSourceMDSId?: string;
+  dataSourceMDSLabel?: string;
   workflows?: string[];
   dataSource?: string;
   tableName?: string;
@@ -44,7 +46,13 @@ export class IntegrationInstanceBuilder {
       return Promise.reject(assets.error);
     }
     const remapped = this.remapIDs(this.getSavedObjectBundles(assets.value, options.workflows));
-    const withDataSource = this.remapDataSource(remapped, options.indexPattern);
+    const assets1 = this.addMDSReference(
+      remapped,
+      options.dataSource,
+      options.dataSourceMDSId,
+      options.dataSourceMDSLabel
+    );
+    const withDataSource = this.remapDataSource(assets1, options.indexPattern);
     const withSubstitutedQueries = this.substituteQueries(
       withDataSource,
       options.dataSource,
@@ -53,6 +61,44 @@ export class IntegrationInstanceBuilder {
     const refs = await this.postAssets(withSubstitutedQueries as SavedObjectsBulkCreateObject[]);
     const builtInstance = await this.buildInstance(integration, refs, options);
     return builtInstance;
+  }
+
+  substituteSavedSearch(
+    assets: SavedObject[],
+    dataSource?: string,
+    tableName?: string
+  ): SavedObject[] {
+    if (!dataSource || !tableName) {
+      return assets;
+    }
+
+    assets = assets.map((asset) => {
+      if (asset.type === 'search') {
+        const searchSourceMeta = asset.attributes.kibanaSavedObjectMeta.searchSourceJSON;
+        let searchSource;
+
+        try {
+          searchSource = JSON.parse(searchSourceMeta);
+        } catch (error) {
+          console.error('Invalid JSON in searchSourceJSON:', error);
+          return asset;
+        }
+
+        if (searchSource.query?.query && searchSource.query.language === 'SQL') {
+          searchSource.query.query = searchSource.query.query.replaceAll('{table_name}', tableName);
+        }
+
+        if (searchSourceMeta.dataset.type === 's3glue') {
+          asset.attributes.title = `${dataSource}.default.${tableName}`;
+        }
+
+        asset.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
+      }
+
+      return asset;
+    });
+
+    return assets;
   }
 
   // If we have a data source or table specified, hunt for saved queries and update them with the
@@ -155,6 +201,62 @@ export class IntegrationInstanceBuilder {
     });
   }
 
+  addMDSReference(
+    assets: SavedObject[],
+    dataSource?: string,
+    dataSourceMDSId?: string,
+    dataSourceMDSLabel?: string
+  ): SavedObject[] {
+    if (!dataSource) {
+      return assets;
+    }
+    return assets.map((asset) => {
+      // Check if the asset type is 'index-pattern' or if the title contains 'Timeline' visualization
+      if (
+        asset?.type &&
+        (asset.type === 'index-pattern' ||
+          (asset.type === 'visualization' && asset.attributes.visState.type === 'timelion'))
+      ) {
+        const dataSourceIndex = asset.references.findIndex((ref) => ref.type === 'data-source');
+
+        if (dataSourceIndex !== -1) {
+          // If a data-source reference exists, update it
+          asset.references[dataSourceIndex] = {
+            id: dataSourceMDSId ?? '',
+            name: dataSourceMDSLabel ?? 'Local cluster',
+            type: 'data-source',
+          };
+        } else {
+          // If no data-source reference exists, add a new one
+          asset.references.push({
+            id: dataSourceMDSId ?? '',
+            name: dataSourceMDSLabel ?? 'Local cluster',
+            type: 'data-source',
+          });
+        }
+      }
+
+      if (asset.type === 'search') {
+        if (asset?.attributes?.kibanaSavedObjectMeta?.searchSourceJSON) {
+          const searchSourceJSON = JSON.parse(
+            asset.attributes.kibanaSavedObjectMeta.searchSourceJSON
+          );
+
+          if (searchSourceJSON?.query?.dataset?.dataSource) {
+            searchSourceJSON.query.dataset.dataSource.id = dataSourceMDSId ?? '';
+            searchSourceJSON.query.dataset.dataSource.name = dataSourceMDSLabel ?? 'Local cluster';
+            searchSourceJSON.query.dataset.dataSource.type = 'data-source';
+          }
+
+          asset.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
+            searchSourceJSON
+          );
+        }
+      }
+
+      return asset;
+    });
+  }
   async postAssets(assets: SavedObjectsBulkCreateObject[]): Promise<AssetReference[]> {
     try {
       const response = await this.client.bulkCreate(assets);
@@ -186,15 +288,23 @@ export class IntegrationInstanceBuilder {
         new Error('Attempted to create instance with invalid template', config.error)
       );
     }
-    return Promise.resolve({
+    const instance: IntegrationInstance = {
       name: options.name,
       templateName: config.value.name,
-      // Before data sources existed we called the index pattern a data source. Now we need the old
-      // name for BWC but still use the new data sources in building, so we map the variable only
-      // for returned output here
       dataSource: options.indexPattern,
       creationDate: new Date().toISOString(),
       assets: refs,
-    });
+    };
+    if (options.dataSourceMDSId) {
+      instance.references = [
+        {
+          id: options.dataSourceMDSId || '',
+          name: options.dataSourceMDSLabel || 'Local cluster',
+          type: 'data-source',
+        },
+      ];
+    }
+
+    return Promise.resolve(instance);
   }
 }

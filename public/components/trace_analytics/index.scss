@@ -71,3 +71,54 @@ th[data-test-subj^='tableHeaderCell_dashboard_latency_variance'] {
   right: 20;
   z-index: 1000;
 }
+
+.traces-table {
+  &.traces-table-trace-id {
+    width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.popOverContainer {
+  width: 10vw;
+  min-width: 200px;
+}
+
+.traces-scrollable-table {
+  > div:first-of-type {
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+  }
+}
+
+.attributes-column-header,
+.attributes-column {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 8px;
+}
+
+.trace-group-column {
+  min-width: 200px;
+}
+
+.span-group-column {
+  min-width: 150px;
+}
+
+.attributes-column-header {
+  display: table-cell;
+}
+
+.tableModePopover {
+  width: 300px;
+}
+
+.popOverSelectableItem {
+  white-space: initial !important;
+}

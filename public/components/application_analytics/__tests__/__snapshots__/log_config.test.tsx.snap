@@ -13,8 +13,10 @@ exports[`Log Config component renders empty log config 1`] = `
       "getApplicationClasses$": [MockFunction],
       "getBadge$": [MockFunction],
       "getBreadcrumbs$": [MockFunction],
+      "getBreadcrumbsEnricher$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
       "getHeaderComponent": [MockFunction],
+      "getHeaderVariant$": [MockFunction],
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
@@ -116,7 +118,9 @@ exports[`Log Config component renders empty log config 1`] = `
       "setAppTitle": [MockFunction],
       "setBadge": [MockFunction],
       "setBreadcrumbs": [MockFunction],
+      "setBreadcrumbsEnricher": [MockFunction],
       "setCustomNavLink": [MockFunction],
+      "setHeaderVariant": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
       "setIsVisible": [MockFunction],
@@ -323,6 +327,7 @@ exports[`Log Config component renders empty log config 1`] = `
                 >
                   <EuiButtonContent
                     className="euiButton__content"
+                    iconGap="m"
                     iconSide="left"
                     textProps={
                       Object {
@@ -406,9 +411,9 @@ exports[`Log Config component renders empty log config 1`] = `
                       <div
                         className="euiFlexItem"
                       >
-                        <EuiFormRow
+                        <EuiCompressedFormRow
                           describedByIds={Array []}
-                          display="row"
+                          display="rowCompressed"
                           fullWidth={false}
                           hasChildLabel={true}
                           hasEmptyLabelSpace={false}
@@ -417,7 +422,7 @@ exports[`Log Config component renders empty log config 1`] = `
                           labelType="label"
                         >
                           <div
-                            className="euiFormRow"
+                            className="euiFormRow euiFormRow--compressed"
                             id="random_html_id-row"
                           >
                             <div
@@ -509,7 +514,7 @@ exports[`Log Config component renders empty log config 1`] = `
                                       id="autocomplete-root"
                                       role="combobox"
                                     >
-                                      <EuiTextArea
+                                      <EuiCompressedTextArea
                                         aria-autocomplete="both"
                                         aria-labelledby="autocomplete-0-label"
                                         autoCapitalize="off"
@@ -538,40 +543,71 @@ exports[`Log Config component renders empty log config 1`] = `
                                         type="search"
                                         value=""
                                       >
-                                        <EuiValidatableControl>
-                                          <textarea
-                                            aria-autocomplete="both"
-                                            aria-labelledby="autocomplete-0-label"
-                                            autoCapitalize="off"
-                                            autoComplete="off"
-                                            autoCorrect="off"
-                                            autoFocus={false}
-                                            className="euiTextArea euiTextArea--resizeVertical"
-                                            data-test-subj="searchAutocompleteTextArea"
-                                            disabled={false}
-                                            enterKeyHint="search"
-                                            id="autocomplete-textarea"
-                                            maxLength={16384}
-                                            onBlur={[Function]}
-                                            onChange={[Function]}
-                                            onClick={[Function]}
-                                            onFocus={[Function]}
-                                            onKeyDown={[Function]}
-                                            placeholder="Enter query"
-                                            rows={6}
-                                            spellCheck="false"
-                                            style={
-                                              Object {
-                                                "height": "18px",
-                                                "marginTop": "0px",
-                                                "padding": "8px",
-                                              }
+                                        <EuiTextArea
+                                          aria-autocomplete="both"
+                                          aria-labelledby="autocomplete-0-label"
+                                          autoCapitalize="off"
+                                          autoComplete="off"
+                                          autoCorrect="off"
+                                          autoFocus={false}
+                                          compressed={true}
+                                          data-test-subj="searchAutocompleteTextArea"
+                                          disabled={false}
+                                          enterKeyHint="search"
+                                          id="autocomplete-textarea"
+                                          maxLength={16384}
+                                          onBlur={[Function]}
+                                          onChange={[Function]}
+                                          onClick={[Function]}
+                                          onFocus={[Function]}
+                                          onKeyDown={[Function]}
+                                          placeholder="Enter query"
+                                          spellCheck="false"
+                                          style={
+                                            Object {
+                                              "height": "18px",
+                                              "marginTop": "0px",
+                                              "padding": "8px",
                                             }
-                                            type="search"
-                                            value=""
-                                          />
-                                        </EuiValidatableControl>
-                                      </EuiTextArea>
+                                          }
+                                          type="search"
+                                          value=""
+                                        >
+                                          <EuiValidatableControl>
+                                            <textarea
+                                              aria-autocomplete="both"
+                                              aria-labelledby="autocomplete-0-label"
+                                              autoCapitalize="off"
+                                              autoComplete="off"
+                                              autoCorrect="off"
+                                              autoFocus={false}
+                                              className="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
+                                              data-test-subj="searchAutocompleteTextArea"
+                                              disabled={false}
+                                              enterKeyHint="search"
+                                              id="autocomplete-textarea"
+                                              maxLength={16384}
+                                              onBlur={[Function]}
+                                              onChange={[Function]}
+                                              onClick={[Function]}
+                                              onFocus={[Function]}
+                                              onKeyDown={[Function]}
+                                              placeholder="Enter query"
+                                              rows={3}
+                                              spellCheck="false"
+                                              style={
+                                                Object {
+                                                  "height": "18px",
+                                                  "marginTop": "0px",
+                                                  "padding": "8px",
+                                                }
+                                              }
+                                              type="search"
+                                              value=""
+                                            />
+                                          </EuiValidatableControl>
+                                        </EuiTextArea>
+                                      </EuiCompressedTextArea>
                                     </div>
                                   </Autocomplete>
                                   <EuiBadge
@@ -616,7 +652,7 @@ exports[`Log Config component renders empty log config 1`] = `
                               </EuiFormHelpText>
                             </div>
                           </div>
-                        </EuiFormRow>
+                        </EuiCompressedFormRow>
                       </div>
                     </EuiFlexItem>
                   </div>
@@ -644,8 +680,10 @@ exports[`Log Config component renders with query 1`] = `
       "getApplicationClasses$": [MockFunction],
       "getBadge$": [MockFunction],
       "getBreadcrumbs$": [MockFunction],
+      "getBreadcrumbsEnricher$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
       "getHeaderComponent": [MockFunction],
+      "getHeaderVariant$": [MockFunction],
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
@@ -747,7 +785,9 @@ exports[`Log Config component renders with query 1`] = `
       "setAppTitle": [MockFunction],
       "setBadge": [MockFunction],
       "setBreadcrumbs": [MockFunction],
+      "setBreadcrumbsEnricher": [MockFunction],
       "setCustomNavLink": [MockFunction],
+      "setHeaderVariant": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
       "setIsVisible": [MockFunction],
@@ -955,6 +995,7 @@ exports[`Log Config component renders with query 1`] = `
                 >
                   <EuiButtonContent
                     className="euiButton__content"
+                    iconGap="m"
                     iconSide="left"
                     textProps={
                       Object {
@@ -1038,9 +1079,9 @@ exports[`Log Config component renders with query 1`] = `
                       <div
                         className="euiFlexItem"
                       >
-                        <EuiFormRow
+                        <EuiCompressedFormRow
                           describedByIds={Array []}
-                          display="row"
+                          display="rowCompressed"
                           fullWidth={false}
                           hasChildLabel={true}
                           hasEmptyLabelSpace={false}
@@ -1049,7 +1090,7 @@ exports[`Log Config component renders with query 1`] = `
                           labelType="label"
                         >
                           <div
-                            className="euiFormRow"
+                            className="euiFormRow euiFormRow--compressed"
                             id="random_html_id-row"
                           >
                             <div
@@ -1141,7 +1182,7 @@ exports[`Log Config component renders with query 1`] = `
                                       id="autocomplete-root"
                                       role="combobox"
                                     >
-                                      <EuiTextArea
+                                      <EuiCompressedTextArea
                                         aria-autocomplete="both"
                                         aria-labelledby="autocomplete-1-label"
                                         autoCapitalize="off"
@@ -1170,40 +1211,71 @@ exports[`Log Config component renders with query 1`] = `
                                         type="search"
                                         value="source = openserach_dashboard_sample_logs"
                                       >
-                                        <EuiValidatableControl>
-                                          <textarea
-                                            aria-autocomplete="both"
-                                            aria-labelledby="autocomplete-1-label"
-                                            autoCapitalize="off"
-                                            autoComplete="off"
-                                            autoCorrect="off"
-                                            autoFocus={false}
-                                            className="euiTextArea euiTextArea--resizeVertical"
-                                            data-test-subj="searchAutocompleteTextArea"
-                                            disabled={false}
-                                            enterKeyHint="search"
-                                            id="autocomplete-textarea"
-                                            maxLength={16384}
-                                            onBlur={[Function]}
-                                            onChange={[Function]}
-                                            onClick={[Function]}
-                                            onFocus={[Function]}
-                                            onKeyDown={[Function]}
-                                            placeholder="Enter query"
-                                            rows={6}
-                                            spellCheck="false"
-                                            style={
-                                              Object {
-                                                "height": "18px",
-                                                "marginTop": "0px",
-                                                "padding": "8px",
-                                              }
+                                        <EuiTextArea
+                                          aria-autocomplete="both"
+                                          aria-labelledby="autocomplete-1-label"
+                                          autoCapitalize="off"
+                                          autoComplete="off"
+                                          autoCorrect="off"
+                                          autoFocus={false}
+                                          compressed={true}
+                                          data-test-subj="searchAutocompleteTextArea"
+                                          disabled={false}
+                                          enterKeyHint="search"
+                                          id="autocomplete-textarea"
+                                          maxLength={16384}
+                                          onBlur={[Function]}
+                                          onChange={[Function]}
+                                          onClick={[Function]}
+                                          onFocus={[Function]}
+                                          onKeyDown={[Function]}
+                                          placeholder="Enter query"
+                                          spellCheck="false"
+                                          style={
+                                            Object {
+                                              "height": "18px",
+                                              "marginTop": "0px",
+                                              "padding": "8px",
                                             }
-                                            type="search"
-                                            value="source = openserach_dashboard_sample_logs"
-                                          />
-                                        </EuiValidatableControl>
-                                      </EuiTextArea>
+                                          }
+                                          type="search"
+                                          value="source = openserach_dashboard_sample_logs"
+                                        >
+                                          <EuiValidatableControl>
+                                            <textarea
+                                              aria-autocomplete="both"
+                                              aria-labelledby="autocomplete-1-label"
+                                              autoCapitalize="off"
+                                              autoComplete="off"
+                                              autoCorrect="off"
+                                              autoFocus={false}
+                                              className="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
+                                              data-test-subj="searchAutocompleteTextArea"
+                                              disabled={false}
+                                              enterKeyHint="search"
+                                              id="autocomplete-textarea"
+                                              maxLength={16384}
+                                              onBlur={[Function]}
+                                              onChange={[Function]}
+                                              onClick={[Function]}
+                                              onFocus={[Function]}
+                                              onKeyDown={[Function]}
+                                              placeholder="Enter query"
+                                              rows={3}
+                                              spellCheck="false"
+                                              style={
+                                                Object {
+                                                  "height": "18px",
+                                                  "marginTop": "0px",
+                                                  "padding": "8px",
+                                                }
+                                              }
+                                              type="search"
+                                              value="source = openserach_dashboard_sample_logs"
+                                            />
+                                          </EuiValidatableControl>
+                                        </EuiTextArea>
+                                      </EuiCompressedTextArea>
                                     </div>
                                   </Autocomplete>
                                   <EuiBadge
@@ -1248,7 +1320,7 @@ exports[`Log Config component renders with query 1`] = `
                               </EuiFormHelpText>
                             </div>
                           </div>
-                        </EuiFormRow>
+                        </EuiCompressedFormRow>
                       </div>
                     </EuiFlexItem>
                   </div>

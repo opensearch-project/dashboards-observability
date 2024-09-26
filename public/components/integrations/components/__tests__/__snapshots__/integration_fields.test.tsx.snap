@@ -8,18 +8,20 @@ exports[`Available Integration Table View Test Renders nginx integration table v
     className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
     data-test-subj="nginx-fields"
   >
-    <EuiTitle>
-      <h2
-        className="euiTitle euiTitle--medium"
+    <EuiTitle
+      size="s"
+    >
+      <h3
+        className="euiTitle euiTitle--small"
       >
         Fields
-      </h2>
+      </h3>
     </EuiTitle>
     <EuiSpacer
-      size="l"
+      size="s"
     >
       <div
-        className="euiSpacer euiSpacer--l"
+        className="euiSpacer euiSpacer--s"
       />
     </EuiSpacer>
     <EuiInMemoryTable
@@ -65,6 +67,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
       search={
         Object {
           "box": Object {
+            "compressed": true,
             "incremental": true,
           },
         }
@@ -75,6 +78,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
         <EuiSearchBar
           box={
             Object {
+              "compressed": true,
               "incremental": true,
             }
           }
@@ -96,6 +100,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                   className="euiFlexItem euiSearchBar__searchHolder"
                 >
                   <EuiSearchBox
+                    compressed={true}
                     incremental={true}
                     isInvalid={false}
                     onSearch={[Function]}
@@ -104,7 +109,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                   >
                     <EuiFieldSearch
                       aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
-                      compressed={false}
+                      compressed={true}
                       defaultValue=""
                       fullWidth={true}
                       incremental={true}
@@ -116,13 +121,13 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                       placeholder="Search..."
                     >
                       <EuiFormControlLayout
-                        compressed={false}
+                        compressed={true}
                         fullWidth={true}
                         icon="search"
                         isLoading={false}
                       >
                         <div
-                          className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                          className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
                         >
                           <div
                             className="euiFormControlLayout__childrenWrapper"
@@ -132,7 +137,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                             >
                               <input
                                 aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
-                                className="euiFieldSearch euiFieldSearch--fullWidth"
+                                className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
                                 defaultValue=""
                                 onKeyUp={[Function]}
                                 placeholder="Search..."
@@ -140,7 +145,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                               />
                             </EuiValidatableControl>
                             <EuiFormControlLayoutIcons
-                              compressed={false}
+                              compressed={true}
                               icon="search"
                               isLoading={false}
                             >
@@ -148,7 +153,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                 className="euiFormControlLayoutIcons"
                               >
                                 <EuiFormControlLayoutCustomIcon
-                                  size="m"
+                                  size="s"
                                   type="search"
                                 >
                                   <span
@@ -157,19 +162,19 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                     <EuiIcon
                                       aria-hidden="true"
                                       className="euiFormControlLayoutCustomIcon__icon"
-                                      size="m"
+                                      size="s"
                                       type="search"
                                     >
                                       <EuiIconBeaker
                                         aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                        className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         role="img"
                                         style={null}
                                       >
                                         <svg
                                           aria-hidden={true}
-                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                          className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                           focusable="false"
                                           height={16}
                                           role="img"

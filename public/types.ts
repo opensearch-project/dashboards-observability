@@ -24,6 +24,10 @@ import {
 } from '../common/types/data_connections';
 import { CatalogCacheManager } from './framework/catalog_cache/cache_manager';
 import { AssistantSetup } from './types';
+import {
+  ContentManagementPluginSetup,
+  ContentManagementPluginStart,
+} from '../../../src/plugins/content_management/public/types';
 
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
@@ -33,6 +37,7 @@ export interface AppPluginStartDependencies {
   data: DataPublicPluginStart;
   securityDashboards?: {};
   dataSource: DataSourcePluginStart;
+  contentManagement?: ContentManagementPluginStart;
 }
 
 export interface SetupDependencies {
@@ -44,6 +49,7 @@ export interface SetupDependencies {
   assistantDashboards?: AssistantSetup;
   dataSource: DataSourcePluginSetup;
   dataSourceManagement: DataSourceManagementPluginSetup;
+  contentManagement?: ContentManagementPluginSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

@@ -330,7 +330,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
               class="euiModalFooter"
             >
               <button
-                class="euiButton euiButton--primary"
+                class="euiButton euiButton--primary euiButton--small"
                 type="button"
               >
                 <span
@@ -344,7 +344,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                 </span>
               </button>
               <button
-                class="euiButton euiButton--danger euiButton--fill"
+                class="euiButton euiButton--danger euiButton--small euiButton--fill"
                 type="button"
               >
                 <span
@@ -755,7 +755,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
               className="euiModalFooter"
             >
               <button
-                className="euiButton euiButton--primary"
+                className="euiButton euiButton--primary euiButton--small"
                 disabled={false}
                 onClick={[Function]}
                 style={
@@ -776,7 +776,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                 </span>
               </button>
               <button
-                className="euiButton euiButton--danger euiButton--fill"
+                className="euiButton euiButton--danger euiButton--small euiButton--fill"
                 disabled={false}
                 onClick={[Function]}
                 style={
@@ -1426,7 +1426,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
               class="euiModalFooter"
             >
               <button
-                class="euiButton euiButton--primary"
+                class="euiButton euiButton--primary euiButton--small"
                 type="button"
               >
                 <span
@@ -1440,7 +1440,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                 </span>
               </button>
               <button
-                class="euiButton euiButton--danger euiButton--fill"
+                class="euiButton euiButton--danger euiButton--small euiButton--fill"
                 type="button"
               >
                 <span
@@ -2167,7 +2167,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
               className="euiModalFooter"
             >
               <button
-                className="euiButton euiButton--primary"
+                className="euiButton euiButton--primary euiButton--small"
                 disabled={false}
                 onClick={[Function]}
                 style={
@@ -2188,7 +2188,7 @@ exports[`Delete fields modal in skipping index renders delete fields modal in sk
                 </span>
               </button>
               <button
-                className="euiButton euiButton--danger euiButton--fill"
+                className="euiButton euiButton--danger euiButton--small euiButton--fill"
                 disabled={false}
                 onClick={[Function]}
                 style={

@@ -7,7 +7,7 @@
   "type": "logs",
   "labels": ["Observability", "Logs", "Python"],
   "author": "OpenSearch",
-  "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/nginx/info",
+  "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/python_client",
   "workflows": [
     {
       "name": "dashboards",
@@ -70,8 +70,8 @@
                 "type": "host-name"
               }
             ],
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/python_client/getting-started/.env"],
-            "content": "wget https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/python_client/getting-started/.env",
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/getting-started/.env"],
+            "content": "wget https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/.env",
             "description": "Setup docker-compose env variables "
           },
           {
@@ -79,10 +79,10 @@
             "label": "Environment Parameters",
             "phase": "docker",
             "type": "file-url",
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/python_client/getting-started/fluent-bit/fluent-bit.conf",
-              "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/python_client/getting-started/fluent-bit/parsers.conf"
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/getting-started/fluent-bit/fluent-bit.conf",
+              "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/getting-started/fluent-bit/parsers.conf"
             ],
-            "content": "wget https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/fluent-bit/fluent-bit.conf \\\n   https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/fluent-bit/parsers.conf\n",
+            "content": "mkdir -p fluent-bit\nwget -P fluent-bit https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/fluent-bit/fluent-bit.conf \\\n   https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/fluent-bit/parsers.conf\n",
             "description": "Setup docker-compose fluent-bit's service configuration "
           },
           {
@@ -90,10 +90,10 @@
             "label": "Environment Parameters",
             "phase": "docker",
             "type": "file-url",
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/python_client/getting-started/python-app/Dockerfile",
-              "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/python_client/getting-started/python-app/app.py"
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/getting-started/python-app/Dockerfile",
+              "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/getting-started/python-app/app.py"
             ],
-            "content": "wget https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/python_client/getting-started/python-app/Dockerfile \\\n  https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/python_client/getting-started/python-app/app.py \n",
+            "content": "mkdir -p python-app\nwget -P python-app https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/python-app/Dockerfile \\\n  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/python-app/app.py \n",
             "description": "Setup docker-compose golan-app service configuration "
           },
           {
@@ -101,9 +101,9 @@
             "label": "live container",
             "type": "file-url",
             "phase": "docker",
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/python_client/getting-started/docker-compose.yml"],
+            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/getting-started/docker-compose.yml"],
             "description": "Run docker-compose for the python-client live example and see the generated index",
-            "content": "wget -O docker-compose.yml https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/docker-compose.yml && docker-compose up --build \n"
+            "content": "wget -O docker-compose.yml https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/docker-compose.yml && docker-compose up --build  -d python-app fluent-bit \n"
           }
         ]
       },
@@ -187,7 +187,7 @@
         ],
         "content": "PUT _index_template/application_logs_template",
         "description": "Setup applicative logs index template in the dev console",
-        "index-template": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/python_client/schemas/applicative-logs-1.0.0.mapping.json",
+        "index-template": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/schemas/applicative-logs-1.0.0.mapping.json",
         "index-pattern-name": "applicative_logs-*"
       }
     ],
@@ -199,7 +199,7 @@
         "https://opensearch.org/docs/latest/dashboards/management/index-patterns/"
       ],
       "description": "Import index patterns `.ndjson` file to the saved objects",
-      "index-pattern": "https://github.com/opensearch-project/opensearch-catalog/tree/main/integrations/observability/python_client/assets/tutorial-1.0.0.ndjson",
+      "index-pattern": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/assets/tutorial-1.0.0.ndjson",
       "index-patterns-name": [
         "applicative_logs-*"
       ]

@@ -61,7 +61,7 @@ exports[`Advanced Index settings acceleration components renders acceleration in
       >
         Array [
           <div
-            className="euiFormRow"
+            className="euiFormRow euiFormRow--compressed"
             id="random_html_id-row"
           >
             <div
@@ -92,7 +92,7 @@ exports[`Advanced Index settings acceleration components renders acceleration in
               className="euiFormRow__fieldWrapper"
             >
               <div
-                className="euiFormControlLayout euiFormControlLayout--group"
+                className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
               >
                 <label
                   className="euiFormLabel euiFormControlLayout__prepend"
@@ -132,7 +132,7 @@ exports[`Advanced Index settings acceleration components renders acceleration in
                   <input
                     aria-describedby="random_html_id-help-0"
                     aria-label="Enter Index Name"
-                    className="euiFieldText euiFieldText--inGroup"
+                    className="euiFieldText euiFieldText--compressed euiFieldText--inGroup"
                     disabled={true}
                     id="random_html_id"
                     onBlur={[Function]}
@@ -161,7 +161,7 @@ exports[`Advanced Index settings acceleration components renders acceleration in
           "",
         ]
         <div
-          className="euiFormRow"
+          className="euiFormRow euiFormRow--compressed"
           id="random_html_id-row"
         >
           <div
@@ -179,7 +179,7 @@ exports[`Advanced Index settings acceleration components renders acceleration in
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiFormControlLayout"
+              className="euiFormControlLayout euiFormControlLayout--compressed"
             >
               <div
                 className="euiFormControlLayout__childrenWrapper"
@@ -187,7 +187,7 @@ exports[`Advanced Index settings acceleration components renders acceleration in
                 <input
                   aria-describedby="random_html_id-help-0"
                   aria-label="Number of primary shards"
-                  className="euiFieldNumber"
+                  className="euiFieldNumber euiFieldNumber--compressed"
                   id="random_html_id"
                   max={100}
                   min={1}
@@ -212,7 +212,7 @@ exports[`Advanced Index settings acceleration components renders acceleration in
           className="euiSpacer euiSpacer--l"
         />
         <div
-          className="euiFormRow"
+          className="euiFormRow euiFormRow--compressed"
           id="random_html_id-row"
         >
           <div
@@ -230,7 +230,7 @@ exports[`Advanced Index settings acceleration components renders acceleration in
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiFormControlLayout"
+              className="euiFormControlLayout euiFormControlLayout--compressed"
             >
               <div
                 className="euiFormControlLayout__childrenWrapper"
@@ -238,7 +238,7 @@ exports[`Advanced Index settings acceleration components renders acceleration in
                 <input
                   aria-describedby="random_html_id-help-0"
                   aria-label="Number of replicas"
-                  className="euiFieldNumber"
+                  className="euiFieldNumber euiFieldNumber--compressed"
                   id="random_html_id"
                   max={100}
                   min={0}
@@ -326,7 +326,7 @@ exports[`Advanced Index settings acceleration components renders acceleration in
         className="euiAccordion__padding--l"
       >
         <div
-          className="euiFormRow"
+          className="euiFormRow euiFormRow--compressed"
           id="random_html_id-row"
         >
           <div
@@ -344,7 +344,7 @@ exports[`Advanced Index settings acceleration components renders acceleration in
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiFormControlLayout"
+              className="euiFormControlLayout euiFormControlLayout--compressed"
             >
               <div
                 className="euiFormControlLayout__childrenWrapper"
@@ -352,7 +352,7 @@ exports[`Advanced Index settings acceleration components renders acceleration in
                 <input
                   aria-describedby="random_html_id-help-0"
                   aria-label="Number of primary shards"
-                  className="euiFieldNumber"
+                  className="euiFieldNumber euiFieldNumber--compressed"
                   id="random_html_id"
                   max={100}
                   min={1}
@@ -377,7 +377,7 @@ exports[`Advanced Index settings acceleration components renders acceleration in
           className="euiSpacer euiSpacer--l"
         />
         <div
-          className="euiFormRow"
+          className="euiFormRow euiFormRow--compressed"
           id="random_html_id-row"
         >
           <div
@@ -395,7 +395,7 @@ exports[`Advanced Index settings acceleration components renders acceleration in
             className="euiFormRow__fieldWrapper"
           >
             <div
-              className="euiFormControlLayout"
+              className="euiFormControlLayout euiFormControlLayout--compressed"
             >
               <div
                 className="euiFormControlLayout__childrenWrapper"
@@ -403,7 +403,7 @@ exports[`Advanced Index settings acceleration components renders acceleration in
                 <input
                   aria-describedby="random_html_id-help-0"
                   aria-label="Number of replicas"
-                  className="euiFieldNumber"
+                  className="euiFieldNumber euiFieldNumber--compressed"
                   id="random_html_id"
                   max={100}
                   min={0}

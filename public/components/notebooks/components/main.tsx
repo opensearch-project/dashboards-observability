@@ -95,6 +95,18 @@ export class Main extends React.Component<MainProps, MainState> {
 
   // Fetches path and id for all stored notebooks
   fetchNotebooks = () => {
+    if (this.props.dataSourceEnabled) {
+      // If `MDS` is enabled, only fetch from the first endpoint.
+      return this.props.http
+        .get(`${NOTEBOOKS_API_PREFIX}/savedNotebook/`)
+        .then((savedNotebooksResponse) => {
+          this.setState({ data: savedNotebooksResponse.data });
+        })
+        .catch((err) => {
+          console.error('Issue in fetching the notebooks', err.body.message);
+        });
+    }
+    // If `MDS` is not enabled /savedNotebook/ API returns notebooks stored as saved objects, and the other one returns notebooks stored as observability objects.
     return Promise.all([
       this.props.http.get(`${NOTEBOOKS_API_PREFIX}/savedNotebook/`),
       this.props.http.get(`${NOTEBOOKS_API_PREFIX}/`),
@@ -285,7 +297,7 @@ export class Main extends React.Component<MainProps, MainState> {
         console.error(err.body.message);
       });
   };
-  addSampleNotebooks = async () => {
+  addSampleNotebooks = async (dataSourceMDSId?: string, dataSourceMDSLabel?: string) => {
     try {
       this.setState({ loading: true });
       const flights = await this.props.http
@@ -296,7 +308,17 @@ export class Main extends React.Component<MainProps, MainState> {
             search: 'opensearch_dashboards_sample_data_flights',
           },
         })
-        .then((resp) => resp.total === 0);
+        .then((resp) => {
+          if (resp.total === 0) {
+            return true;
+          }
+          const hasDataSourceMDSId = resp.saved_objects.some((obj) =>
+            obj.references.some((ref) => ref.type === 'data-source' && ref.id === dataSourceMDSId)
+          );
+
+          // Return true if dataSourceMDSId is not found in any references
+          return !hasDataSourceMDSId;
+        });
       const logs = await this.props.http
         .get('../api/saved_objects/_find', {
           query: {
@@ -305,40 +327,99 @@ export class Main extends React.Component<MainProps, MainState> {
             search: 'opensearch_dashboards_sample_data_logs',
           },
         })
-        .then((resp) => resp.total === 0);
-      if (flights || logs) this.setToast('Adding sample data. This can take some time.');
-      await Promise.all([
-        flights ? this.props.http.post('../api/sample_data/flights') : Promise.resolve(),
-        logs ? this.props.http.post('../api/sample_data/logs') : Promise.resolve(),
-      ]);
+        .then((resp) => {
+          if (resp.total === 0) {
+            return true;
+          }
+          const hasDataSourceMDSId = resp.saved_objects.some((obj) =>
+            obj.references.some((ref) => ref.type === 'data-source' && ref.id === dataSourceMDSId)
+          );
+
+          // Return true if dataSourceMDSId is not found in any references
+          return !hasDataSourceMDSId;
+        });
+      if (flights) {
+        this.setToast('Adding sample data for flights. This can take some time.');
+        await this.props.http.post('../api/sample_data/flights', {
+          query: { data_source_id: dataSourceMDSId },
+        });
+      }
+      if (logs) {
+        this.setToast('Adding sample data for logs. This can take some time.');
+        await this.props.http.post('../api/sample_data/logs', {
+          query: { data_source_id: dataSourceMDSId },
+        });
+      }
       const visIds: string[] = [];
       await this.props.http
         .get('../api/saved_objects/_find', {
           query: {
             type: 'visualization',
             search_fields: 'title',
-            search: '[Logs] Response Codes Over Time + Annotations',
+            search:
+              `[Logs] Response Codes Over Time + Annotations` +
+              (dataSourceMDSLabel ? `_${dataSourceMDSLabel}` : ''),
           },
         })
-        .then((resp) => visIds.push(resp.saved_objects[0].id));
+        .then((resp) => {
+          if (this.props.dataSourceEnabled) {
+            const searchTitle = `[Logs] Response Codes Over Time + Annotations_${dataSourceMDSLabel}`;
+            const savedObjects = resp.saved_objects;
+
+            const foundObject = savedObjects.find((obj) => obj.attributes.title === searchTitle);
+            if (foundObject) {
+              visIds.push(foundObject.id);
+            }
+          } else {
+            visIds.push(resp.saved_objects[0].id);
+          }
+        });
       await this.props.http
         .get('../api/saved_objects/_find', {
           query: {
             type: 'visualization',
             search_fields: 'title',
-            search: '[Logs] Unique Visitors vs. Average Bytes',
+            search:
+              `[Logs] Unique Visitors vs. Average Bytes` +
+              (dataSourceMDSLabel ? `_${dataSourceMDSLabel}` : ''),
           },
         })
-        .then((resp) => visIds.push(resp.saved_objects[0].id));
+        .then((resp) => {
+          if (this.props.dataSourceEnabled) {
+            const searchTitle = `[Logs] Unique Visitors vs. Average Bytes_${dataSourceMDSLabel}`;
+            const savedObjects = resp.saved_objects;
+
+            const foundObject = savedObjects.find((obj) => obj.attributes.title === searchTitle);
+            if (foundObject) {
+              visIds.push(foundObject.id);
+            }
+          } else {
+            visIds.push(resp.saved_objects[0].id);
+          }
+        });
       await this.props.http
         .get('../api/saved_objects/_find', {
           query: {
             type: 'visualization',
             search_fields: 'title',
-            search: '[Flights] Flight Count and Average Ticket Price',
+            search:
+              `[Flights] Flight Count and Average Ticket Price` +
+              (dataSourceMDSLabel ? `_${dataSourceMDSLabel}` : ''),
           },
         })
-        .then((resp) => visIds.push(resp.saved_objects[0].id));
+        .then((resp) => {
+          if (this.props.dataSourceEnabled) {
+            const searchTitle = `[Flights] Flight Count and Average Ticket Price_${dataSourceMDSLabel}`;
+            const savedObjects = resp.saved_objects;
+
+            const foundObject = savedObjects.find((obj) => obj.attributes.title === searchTitle);
+            if (foundObject) {
+              visIds.push(foundObject.id);
+            }
+          } else {
+            visIds.push(resp.saved_objects[0].id);
+          }
+        });
       await this.props.http
         .post(`${NOTEBOOKS_API_PREFIX}/note/savedNotebook/addSampleNotebooks`, {
           body: JSON.stringify({ visIds }),
@@ -393,6 +474,10 @@ export class Main extends React.Component<MainProps, MainState> {
                   parentBreadcrumb={this.props.parentBreadcrumb}
                   setBreadcrumbs={this.props.setBreadcrumbs}
                   setToast={this.setToast}
+                  dataSourceManagement={this.props.dataSourceManagement}
+                  notifications={this.props.notifications}
+                  dataSourceEnabled={this.props.dataSourceEnabled}
+                  savedObjectsMDSClient={this.props.savedObjectsMDSClient}
                 />
               )}
             />

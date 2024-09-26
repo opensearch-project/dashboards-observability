@@ -5,7 +5,8 @@
 
 import {
   EuiButton,
-  EuiButtonIcon,
+  EuiSmallButton,
+  EuiSmallButtonIcon,
   EuiCodeBlock,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -132,12 +133,16 @@ export const VisualizationContainer = ({
         <EuiModal onClose={closeModal}>
           <EuiModalHeader>
             <EuiModalHeaderTitle>
-              <h1>{visualizationMetaData.name}</h1>
+              <EuiText size="s">
+                <h2>{visualizationMetaData.name}</h2>
+              </EuiText>
             </EuiModalHeaderTitle>
           </EuiModalHeader>
 
           <EuiModalBody>
-            This PPL Query is generated in runtime from selected data source
+            <EuiText size="s">
+              This PPL Query is generated in runtime from selected data source
+            </EuiText>
             <EuiSpacer />
             <EuiCodeBlock language="html" isCopyable>
               {visualizationMetaData.query}
@@ -145,9 +150,9 @@ export const VisualizationContainer = ({
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButton onClick={closeModal} fill>
+            <EuiSmallButton onClick={closeModal} fill>
               Close
-            </EuiButton>
+            </EuiSmallButton>
           </EuiModalFooter>
         </EuiModal>
       );
@@ -156,12 +161,14 @@ export const VisualizationContainer = ({
         <EuiModal onClose={closeModal}>
           <EuiModalHeader>
             <EuiModalHeaderTitle>
-              <h1>{isError.errorMessage}</h1>
+              <EuiText size="s">
+                <h2>{isError.errorMessage}</h2>
+              </EuiText>
             </EuiModalHeaderTitle>
           </EuiModalHeader>
 
           <EuiModalBody>
-            Error Details
+            <EuiText size="s">Error Details</EuiText>
             <EuiSpacer />
             <EuiCodeBlock language="html" isCopyable>
               {isError.errorDetails}
@@ -169,9 +176,9 @@ export const VisualizationContainer = ({
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButton onClick={closeModal} fill>
+            <EuiSmallButton onClick={closeModal} fill>
               Close
-            </EuiButton>
+            </EuiSmallButton>
           </EuiModalFooter>
         </EuiModal>
       );
@@ -379,7 +386,7 @@ export const VisualizationContainer = ({
               ) : (
                 <EuiPopover
                   button={
-                    <EuiButtonIcon
+                    <EuiSmallButtonIcon
                       aria-label="actionMenuButton"
                       iconType="boxesHorizontal"
                       onClick={onActionsMenuClick}
@@ -388,10 +395,12 @@ export const VisualizationContainer = ({
                   isOpen={isPopoverOpen}
                   closePopover={closeActionsMenu}
                   anchorPosition="downLeft"
+                  panelPaddingSize="none"
                 >
                   <EuiContextMenuPanel
                     items={popoverPanel}
                     data-test-subj="panelViz__popoverPanel"
+                    size="s"
                   />
                 </EuiPopover>
               )}

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiSmallButton } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { SANITIZE_QUERY_REGEX } from '../../../../../../../../common/constants/data_sources';
 import { CreateAccelerationForm } from '../../../../../../../../common/types/data_connections';
@@ -66,9 +66,9 @@ export const CreateAccelerationButton = ({
   }, [directqueryLoadStatus]);
 
   const createAccelerationBtn = (
-    <EuiButton onClick={createAcceleration} fill isLoading={isLoading}>
+    <EuiSmallButton onClick={createAcceleration} fill isLoading={isLoading}>
       {isLoading ? 'Creating acceleration' : 'Create acceleration'}
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   return createAccelerationBtn;

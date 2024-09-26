@@ -9,15 +9,15 @@ exports[`Trace view component renders trace view 1`] = `
         gutterSize="s"
       >
         <EuiFlexItem>
-          <EuiTitle
-            size="l"
+          <EuiText
+            size="s"
           >
-            <h2
+            <h1
               className="overview-content"
             >
               test
-            </h2>
-          </EuiTitle>
+            </h1>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer

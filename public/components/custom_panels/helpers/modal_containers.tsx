@@ -3,23 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
-import {
-  EuiOverlayMask,
-  EuiConfirmModal,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiText,
-  EuiSpacer,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
 import { CustomInputModal } from './custom_input_modal';
 
 /* The file contains helper functions for modal layouts

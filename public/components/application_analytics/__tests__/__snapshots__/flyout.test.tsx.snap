@@ -874,6 +874,7 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                           >
                             <EuiButtonContent
                               className="euiButton__content"
+                              iconGap="m"
                               iconSide="left"
                               textProps={
                                 Object {
@@ -954,6 +955,7 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                           >
                             <EuiButtonContent
                               className="euiButton__content"
+                              iconGap="m"
                               iconSide="left"
                               textProps={
                                 Object {

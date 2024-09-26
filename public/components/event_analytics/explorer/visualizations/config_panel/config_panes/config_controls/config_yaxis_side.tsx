@@ -7,13 +7,13 @@ import React, { Fragment, useCallback } from 'react';
 import {
   EuiButton,
   EuiAccordion,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiSpacer,
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   htmlIdGenerator,
-  EuiComboBox,
+  EuiCompressedComboBox,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import {
@@ -94,11 +94,11 @@ export const ConfigYAxisSide = ({
         vizState.map((ct) => {
           return (
             <Fragment key={ct.ctid}>
-              <EuiFormRow fullWidth label="">
+              <EuiCompressedFormRow fullWidth label="">
                 <EuiFlexGroup alignItems="center" gutterSize="xs">
                   <EuiFlexItem grow={4}>
-                    <EuiFormRow helpText="Field">
-                      <EuiComboBox
+                    <EuiCompressedFormRow helpText="Field">
+                      <EuiCompressedComboBox
                         id={ct.ctid}
                         placeholder="Select a field"
                         options={getUpdatedOptions()}
@@ -107,11 +107,11 @@ export const ConfigYAxisSide = ({
                         onChange={handleColorThemeChange(ct.ctid, 'label')}
                         aria-label="series-dropdown"
                       />
-                    </EuiFormRow>
+                    </EuiCompressedFormRow>
                   </EuiFlexItem>
                   <EuiFlexItem grow={3}>
-                    <EuiFormRow helpText="Position">
-                      <EuiComboBox
+                    <EuiCompressedFormRow helpText="Position">
+                      <EuiCompressedComboBox
                         id={ct.ctid}
                         placeholder="Select position"
                         options={SERIES_POSITION_OPTIONS}
@@ -126,15 +126,15 @@ export const ConfigYAxisSide = ({
                         onChange={handleColorThemeChange(ct.ctid, 'side')}
                         aria-label="series-position-dropdown"
                       />
-                    </EuiFormRow>
+                    </EuiCompressedFormRow>
                   </EuiFlexItem>
                   <EuiFlexItem grow={1}>
-                    <EuiFormRow>
+                    <EuiCompressedFormRow>
                       <EuiIcon type="trash" onClick={handleDeletePosition(ct.ctid)} />
-                    </EuiFormRow>
+                    </EuiCompressedFormRow>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </EuiFormRow>
+              </EuiCompressedFormRow>
             </Fragment>
           );
         })}

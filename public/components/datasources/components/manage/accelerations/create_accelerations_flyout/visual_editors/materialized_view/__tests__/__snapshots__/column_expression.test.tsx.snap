@@ -63,7 +63,7 @@ exports[`Column expression components in materialized view renders column expres
     >
       <button
         aria-label="delete-column-expression"
-        className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
+        className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--small"
         disabled={false}
         onClick={[Function]}
         type="button"
@@ -152,7 +152,7 @@ exports[`Column expression components in materialized view renders column expres
     >
       <button
         aria-label="delete-column-expression"
-        className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
+        className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--small"
         disabled={false}
         onClick={[Function]}
         type="button"

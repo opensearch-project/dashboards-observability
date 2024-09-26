@@ -3,15 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect } from 'react';
 import {
-  EuiComboBox,
-  EuiFieldText,
+  EuiCompressedComboBox,
+  EuiCompressedFieldText,
+  EuiCompressedFormRow,
   EuiFlexGroup,
-  EuiFormRow,
   EuiFlexItem,
   EuiForm,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { MetricType } from '../../../../common/types/metrics';
 import { fetchPanels } from '../../../../public/components/custom_panels/redux/panel_slice';
@@ -53,44 +57,34 @@ export const MetricsExportPanel = ({
 
   return (
     <div style={{ minWidth: '15vw' }}>
-      <EuiFormRow
-        label="Custom operational dashboards/application"
-        helpText="Search existing dashboards or applications by name"
-      >
-        <EuiComboBox
-          placeholder="Select dashboards/applications"
-          onChange={(newOptions) => {
-            setSelectedPanelOptions(newOptions);
-          }}
-          selectedOptions={selectedPanelOptions}
-          options={
-            availableDashboards?.map((option: any) => {
-              return {
-                panel: option,
-                label: option.title,
-              };
-            }) ?? []
-          }
-          isClearable={true}
-          data-test-subj="eventExplorer__querySaveComboBox"
-        />
-      </EuiFormRow>
+      <EuiTitle size="xs">
+        <h3>SAVE THE VIEW AS VISUALIZATION</h3>
+      </EuiTitle>
+      <EuiHorizontalRule margin="s" />
 
       {metricsToExport.length > 0 && (
-        <div style={{ maxHeight: '30vh', overflowY: 'scroll', width: 'auto', overflowX: 'hidden' }}>
+        <div
+          style={{
+            maxHeight: '30vh',
+            overflowY: 'scroll',
+            width: 'auto',
+            overflowX: 'hidden',
+            marginBottom: '16px',
+          }}
+        >
           {metricsToExport.map((metaData: any, index: number) => {
             return (
               <EuiForm component="form" key={`save-panel-id-${index}`}>
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <EuiFormRow label={'Metric Name #' + (index + 1)}>
-                      <EuiFieldText
+                    <EuiCompressedFormRow label={'Metric ' + (index + 1)}>
+                      <EuiCompressedFieldText
                         key={`metric-name-input-id-${index}`}
                         value={metaData.name}
                         onChange={(e) => onNameChange(index, e.target.value)}
                         data-test-subj="metrics__querySaveName"
                       />
-                    </EuiFormRow>
+                    </EuiCompressedFormRow>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiForm>
@@ -98,6 +92,50 @@ export const MetricsExportPanel = ({
           })}
         </div>
       )}
+
+      <EuiFlexGroup direction="column" gutterSize="none">
+        {!(metricsToExport.length > 0) && (
+          <EuiFlexItem style={{ maxWidth: '400px' }}>
+            <EuiText size="s" color="subdued">
+              <p>
+                Save the view as visualization. You can add it to custom operational dashboards or
+                applications.
+              </p>
+            </EuiText>
+            <EuiSpacer size="m" />
+          </EuiFlexItem>
+        )}
+
+        {metricsToExport.length > 0 && (
+          <EuiFlexItem>
+            <EuiText size="s">
+              <p>
+                <strong>Add to custom operational dashboards or applications.</strong>
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        )}
+
+        <EuiFlexItem style={{ maxWidth: '400px' }}>
+          <EuiCompressedFormRow label="Dashboards and applications - optional">
+            <EuiCompressedComboBox
+              placeholder="Select dashboards/applications"
+              onChange={(newOptions) => {
+                setSelectedPanelOptions(newOptions);
+              }}
+              selectedOptions={selectedPanelOptions}
+              options={
+                availableDashboards?.map((option: any) => ({
+                  panel: option,
+                  label: option.title,
+                })) ?? []
+              }
+              isClearable={true}
+              data-test-subj="eventExplorer__querySaveComboBox"
+            />
+          </EuiCompressedFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 };

@@ -314,10 +314,6 @@ describe('<Notebook /> spec', () => {
     });
 
     act(() => {
-      fireEvent.click(utils.getByText('Paragraph actions'));
-    });
-
-    act(() => {
       fireEvent.click(utils.getByText('Clear all outputs'));
     });
 
@@ -335,10 +331,6 @@ describe('<Notebook /> spec', () => {
 
     await waitFor(() => {
       expect(utils.queryByText('hello')).toBeNull();
-    });
-
-    act(() => {
-      fireEvent.click(utils.getByText('Paragraph actions'));
     });
 
     act(() => {
@@ -399,11 +391,7 @@ describe('<Notebook /> spec', () => {
     });
 
     act(() => {
-      fireEvent.click(utils.getByText('Notebook actions'));
-    });
-
-    act(() => {
-      fireEvent.click(utils.getByText('Rename notebook'));
+      fireEvent.click(utils.getByTestId('notebook-edit-icon'));
     });
 
     await waitFor(() => {
@@ -459,11 +447,7 @@ describe('<Notebook /> spec', () => {
     });
 
     act(() => {
-      fireEvent.click(utils.getByText('Notebook actions'));
-    });
-
-    act(() => {
-      fireEvent.click(utils.getByText('Duplicate notebook'));
+      fireEvent.click(utils.getByTestId('notebook-duplicate-icon'));
     });
 
     await waitFor(() => {
@@ -514,11 +498,7 @@ describe('<Notebook /> spec', () => {
     });
 
     act(() => {
-      fireEvent.click(utils.getByText('Notebook actions'));
-    });
-
-    act(() => {
-      fireEvent.click(utils.getByText('Delete notebook'));
+      fireEvent.click(utils.getByTestId('notebook-delete-icon'));
     });
 
     await waitFor(() => {
@@ -623,7 +603,7 @@ describe('<Notebook /> spec', () => {
     });
 
     act(() => {
-      fireEvent.click(utils.getByText('Upgrade Notebook'));
+      fireEvent.click(utils.getByTestId('upgrade-notebook'));
     });
 
     act(() => {
@@ -670,7 +650,7 @@ describe('<Notebook /> spec', () => {
     });
 
     act(() => {
-      fireEvent.click(utils.getByText('Delete this notebook'));
+      fireEvent.click(utils.getByTestId('notebook-delete-icon'));
     });
 
     await waitFor(() => {

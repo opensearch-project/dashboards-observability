@@ -11,7 +11,7 @@ import {
   EuiText,
   EuiCodeBlock,
   EuiFlyoutFooter,
-  EuiButton,
+  EuiSmallButton,
 } from '@elastic/eui';
 import React from 'react';
 
@@ -55,7 +55,7 @@ export function AvailabilityInfoFlyout(props: AvailabilityInfoFlyoutProps) {
         </EuiText>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButton onClick={closeFlyout}>Close</EuiButton>
+        <EuiSmallButton onClick={closeFlyout}>Close</EuiSmallButton>
       </EuiFlyoutFooter>
     </EuiFlyout>
   );

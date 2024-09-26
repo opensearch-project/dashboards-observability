@@ -5,7 +5,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
-  EuiButtonIcon,
   EuiCodeBlock,
   EuiCopy,
   EuiFlexGroup,
@@ -14,9 +13,9 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPanel,
+  EuiSmallButtonIcon,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
@@ -26,9 +25,11 @@ import {
   DataSourceViewConfig,
 } from '../../../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
+import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
 import { dataSourceFilterFn } from '../../../../../common/utils/shared';
-import { TraceAnalyticsCoreDeps, TraceAnalyticsMode } from '../../home';
+import { coreRefs } from '../../../../framework/core_refs';
+import { TraceAnalyticsCoreDeps } from '../../home';
 import { handleServiceMapRequest } from '../../requests/services_request_handler';
 import {
   handlePayloadRequest,
@@ -39,6 +40,8 @@ import { PanelTitle, filtersToDsl, processTimeStamp } from '../common/helper_fun
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { ServiceBreakdownPanel } from './service_breakdown_panel';
 import { SpanDetailPanel } from './span_detail_panel';
+
+const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
 interface TraceViewProps extends TraceAnalyticsCoreDeps {
   traceId: string;
@@ -54,11 +57,13 @@ export function TraceView(props: TraceViewProps) {
   const renderTitle = (traceId: string) => {
     return (
       <>
-        <EuiFlexItem>
-          <EuiTitle size="l">
-            <h2 className="overview-content">{traceId}</h2>
-          </EuiTitle>
-        </EuiFlexItem>
+        {!newNavigation && (
+          <EuiFlexItem>
+            <EuiText size="s">
+              <h1 className="overview-content">{traceId}</h1>
+            </EuiText>
+          </EuiFlexItem>
+        )}
       </>
     );
   };
@@ -84,20 +89,20 @@ export function TraceView(props: TraceViewProps) {
                     <EuiFlexItem grow={false}>
                       <EuiCopy textToCopy={fields.trace_id}>
                         {(copy) => (
-                          <EuiButtonIcon
+                          <EuiSmallButtonIcon
                             aria-label="Copy trace id"
                             iconType="copyClipboard"
                             onClick={copy}
                           >
                             Click to copy
-                          </EuiButtonIcon>
+                          </EuiSmallButtonIcon>
                         )}
                       </EuiCopy>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 )}
               </EuiFlexItem>
-              {mode === 'data_prepper' ? (
+              {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
                 <EuiFlexItem grow={false}>
                   <EuiText className="overview-title">Trace group name</EuiText>
                   <EuiText size="s" className="overview-content">
@@ -233,12 +238,14 @@ export function TraceView(props: TraceViewProps) {
 
   useEffect(() => {
     setNavBreadCrumbs(
-      [props.parentBreadcrumb],
       [
+        props.parentBreadcrumb,
         {
           text: 'Trace analytics',
-          href: '#/',
+          href: '#/traces',
         },
+      ],
+      [
         {
           text: 'Traces',
           href: '#/traces',
@@ -305,7 +312,7 @@ export function TraceView(props: TraceViewProps) {
             ) : null}
           </EuiPanel>
           <EuiSpacer />
-          {mode === 'data_prepper' ? (
+          {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
             <ServiceMap
               addFilter={undefined}
               serviceMap={traceFilteredServiceMap}

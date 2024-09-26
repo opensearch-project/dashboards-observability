@@ -4,7 +4,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiSpacer, EuiFormRow, EuiSwitch, htmlIdGenerator } from '@elastic/eui';
+import { EuiSpacer, EuiCompressedFormRow, EuiSwitch, htmlIdGenerator } from '@elastic/eui';
 
 interface EUISwitch {
   label: string;
@@ -14,7 +14,7 @@ interface EUISwitch {
 }
 export const ConfigSwitch: React.FC<EUISwitch> = ({ label, disabled, checked, handleChange }) => (
   <Fragment key={`config-switch-${label}`}>
-    <EuiFormRow label={label}>
+    <EuiCompressedFormRow label={label}>
       <EuiSwitch
         id={htmlIdGenerator('switch-button')()}
         showLabel={false}
@@ -24,7 +24,7 @@ export const ConfigSwitch: React.FC<EUISwitch> = ({ label, disabled, checked, ha
         onChange={(e) => handleChange(e.target.checked)}
         compressed
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
     <EuiSpacer size="s" />
   </Fragment>
 );

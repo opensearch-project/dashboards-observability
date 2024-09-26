@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -146,14 +146,14 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
 
   const DiscoverIcon = () => {
     return (
-      <EuiButtonEmpty
+      <EuiSmallButtonEmpty
         onClick={() => {
           onDiscoverIconClick(acceleration, dataSourceName);
           resetFlyout();
         }}
       >
         <EuiIcon type={'discoverApp'} size="m" />
-      </EuiButtonEmpty>
+      </EuiSmallButtonEmpty>
     );
   };
 
@@ -162,25 +162,25 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
       return null;
     }
     return (
-      <EuiButtonEmpty onClick={onSyncIconClickHandler}>
+      <EuiSmallButtonEmpty onClick={onSyncIconClickHandler}>
         <EuiIcon type="inputOutput" size="m" />
-      </EuiButtonEmpty>
+      </EuiSmallButtonEmpty>
     );
   };
 
   const DeleteIcon = () => {
     return (
-      <EuiButtonEmpty onClick={onDeleteIconClickHandler}>
+      <EuiSmallButtonEmpty onClick={onDeleteIconClickHandler}>
         <EuiIcon type="trash" size="m" />
-      </EuiButtonEmpty>
+      </EuiSmallButtonEmpty>
     );
   };
 
   const VacuumIcon = () => {
     return (
-      <EuiButtonEmpty onClick={onVacuumIconClickHandler}>
+      <EuiSmallButtonEmpty onClick={onVacuumIconClickHandler}>
         <EuiIcon type="broom" size="m" />
-      </EuiButtonEmpty>
+      </EuiSmallButtonEmpty>
     );
   };
 

@@ -32,6 +32,9 @@ import {
   observabilityApplicationsID,
   observabilityApplicationsPluginOrder,
   observabilityApplicationsTitle,
+  observabilityGettingStartedID,
+  observabilityGettingStartedPluginOrder,
+  observabilityGettingStartedTitle,
   observabilityIntegrationsID,
   observabilityIntegrationsPluginOrder,
   observabilityIntegrationsTitle,
@@ -44,21 +47,20 @@ import {
   observabilityNotebookID,
   observabilityNotebookPluginOrder,
   observabilityNotebookTitle,
+  observabilityOverviewID,
+  observabilityOverviewPluginOrder,
+  observabilityOverviewTitle,
   observabilityPanelsID,
   observabilityPanelsPluginOrder,
   observabilityPanelsTitle,
   observabilityPluginOrder,
+  observabilityServicesNewNavID,
   observabilityServicesPluginOrder,
   observabilityServicesTitle,
   observabilityTracesID,
+  observabilityTracesNewNavID,
   observabilityTracesPluginOrder,
   observabilityTracesTitle,
-  observabilityGettingStartedID,
-  observabilityGettingStartedTitle,
-  observabilityGettingStartedPluginOrder,
-  observabilityOverviewID,
-  observabilityOverviewTitle,
-  observabilityOverviewPluginOrder,
 } from '../common/constants/shared';
 import { QueryManager } from '../common/query_manager';
 import {
@@ -101,6 +103,8 @@ import { coreRefs } from './framework/core_refs';
 import { DataSourcePluggable } from './framework/datasource_pluggables/datasource_pluggable';
 import { S3DataSource } from './framework/datasources/s3_datasource';
 import './index.scss';
+import { registerAllPluginNavGroups } from './plugin_helpers/plugin_nav';
+import { setupOverviewPage } from './plugin_helpers/plugin_overview';
 import DSLService from './services/requests/dsl';
 import PPLService from './services/requests/ppl';
 import SavedObjects from './services/saved_objects/event_analytics/saved_objects';
@@ -111,7 +115,6 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
-import { registerAllPluginNavGroups } from './plugin_nav';
 
 interface PublicConfig {
   query_assist: {
@@ -166,6 +169,7 @@ export class ObservabilityPlugin
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<PublicConfig>();
   }
+  private mdsFlagStatus: boolean = false;
 
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
@@ -179,6 +183,9 @@ export class ObservabilityPlugin
     core.getStartServices().then(([coreStart]) => {
       setOSDSavedObjectsClient(coreStart.savedObjects.client);
     });
+
+    setupOverviewPage(setupDeps.contentManagement!);
+    this.mdsFlagStatus = !!setupDeps.dataSource;
 
     // redirect legacy notebooks URL to current URL under observability
     if (window.location.pathname.includes('notebooks-dashboards')) {
@@ -297,13 +304,15 @@ export class ObservabilityPlugin
       mount: appMountWithStartPage('metrics'),
     });
 
-    core.application.register({
-      id: observabilityApplicationsID,
-      title: observabilityApplicationsTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityApplicationsPluginOrder,
-      mount: appMountWithStartPage('applications'),
-    });
+    if (!setupDeps.dataSource) {
+      core.application.register({
+        id: observabilityApplicationsID,
+        title: observabilityApplicationsTitle,
+        category: OBSERVABILITY_APP_CATEGORIES.observability,
+        order: observabilityApplicationsPluginOrder,
+        mount: appMountWithStartPage('applications'),
+      });
+    }
 
     core.application.register({
       id: observabilityIntegrationsID,
@@ -331,7 +340,7 @@ export class ObservabilityPlugin
       });
 
       core.application.register({
-        id: 'observability-traces-nav',
+        id: observabilityTracesNewNavID,
         title: observabilityTracesTitle,
         order: observabilityTracesPluginOrder,
         category: DEFAULT_APP_CATEGORIES.investigate,
@@ -339,7 +348,7 @@ export class ObservabilityPlugin
       });
 
       core.application.register({
-        id: 'observability-services-nav',
+        id: observabilityServicesNewNavID,
         title: observabilityServicesTitle,
         order: observabilityServicesPluginOrder,
         category: DEFAULT_APP_CATEGORIES.investigate,
@@ -353,21 +362,23 @@ export class ObservabilityPlugin
         order: observabilityTracesPluginOrder,
         mount: appMountWithStartPage('traces'),
       });
-      // deprecated in new Nav Groups.
-      core.application.register({
-        id: observabilityPanelsID,
-        title: observabilityPanelsTitle,
-        category: OBSERVABILITY_APP_CATEGORIES.observability,
-        order: observabilityPanelsPluginOrder,
-        mount: appMountWithStartPage('dashboards'),
-      });
-      core.application.register({
-        id: observabilityLogsID,
-        title: observabilityLogsTitle,
-        category: OBSERVABILITY_APP_CATEGORIES.observability,
-        order: observabilityLogsPluginOrder,
-        mount: appMountWithStartPage('logs'),
-      });
+      // deprecated in new Nav Groups and when MDS is enabled.
+      if (!setupDeps.dataSource) {
+        core.application.register({
+          id: observabilityPanelsID,
+          title: observabilityPanelsTitle,
+          category: OBSERVABILITY_APP_CATEGORIES.observability,
+          order: observabilityPanelsPluginOrder,
+          mount: appMountWithStartPage('dashboards'),
+        });
+        core.application.register({
+          id: observabilityLogsID,
+          title: observabilityLogsTitle,
+          category: OBSERVABILITY_APP_CATEGORIES.observability,
+          order: observabilityLogsPluginOrder,
+          mount: appMountWithStartPage('logs'),
+        });
+      }
     }
 
     core.application.register({
@@ -438,6 +449,8 @@ export class ObservabilityPlugin
     coreRefs.summarizeEnabled = this.config.summarize.enabled;
     coreRefs.overlays = core.overlays;
     coreRefs.dataSource = startDeps.dataSource;
+    coreRefs.navigation = startDeps.navigation;
+    coreRefs.contentManagement = startDeps.contentManagement;
 
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
     dataSourceFactory.registerDataSourceType(S3_DATA_SOURCE_TYPE, S3DataSource);
@@ -448,7 +461,8 @@ export class ObservabilityPlugin
       return `${type.charAt(0).toUpperCase()}${type.slice(1)}`;
     };
 
-    // register all s3 datasources
+    // register all s3 datasources only if mds feature flag is disabled
+    if (!this.mdsFlagStatus) {
     const registerDataSources = () => {
       try {
         core.http.get(`${DATACONNECTIONS_BASE}`).then((s3DataSources) => {
@@ -498,6 +512,7 @@ export class ObservabilityPlugin
     } else {
       registerDataSources();
     }
+  }
 
     core.http.intercept({
       request: catalogRequestIntercept(),

@@ -3,25 +3,40 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButtonEmpty, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPopover,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
+  EuiSelectable,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import React, { useState } from 'react';
-import { TraceAnalyticsMode } from '../../home';
+import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
+import { CustomIndexFlyout } from '../common/custom_index_flyout';
 
 const labels = new Map([
   ['jaeger', 'Jaeger'],
   ['data_prepper', 'Data Prepper'],
+  ['custom_data_prepper', 'Custom source'],
 ]);
 
 export function DataSourcePicker(props: {
-  modes: {
+  modes: Array<{
     id: string;
     title: string;
-  }[];
+  }>;
   selectedMode: TraceAnalyticsMode;
   setMode: (mode: TraceAnalyticsMode) => void;
 }) {
-  const { modes, selectedMode, setMode } = props;
+  const { modes = [], selectedMode, setMode } = props;
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   const trigger = {
     label: labels.get(selectedMode),
@@ -33,7 +48,7 @@ export function DataSourcePicker(props: {
   const createTrigger = () => {
     const { label, title, ...rest } = trigger;
     return (
-      <EuiButtonEmpty
+      <EuiSmallButtonEmpty
         flush="left"
         color="text"
         iconSide="right"
@@ -43,7 +58,7 @@ export function DataSourcePicker(props: {
         {...rest}
       >
         {label}
-      </EuiButtonEmpty>
+      </EuiSmallButtonEmpty>
     );
   };
 
@@ -60,7 +75,7 @@ export function DataSourcePicker(props: {
         ownFocus
       >
         <div className="popOverContainer">
-          <EuiPopoverTitle>{'Choose data type'}</EuiPopoverTitle>
+          <EuiPopoverTitle>{'Choose data schema'}</EuiPopoverTitle>
           <EuiSelectable
             data-test-subj="indexPattern-switcher"
             searchable
@@ -70,10 +85,10 @@ export function DataSourcePicker(props: {
               key: x.id,
               value: x.id,
               checked: x.id === selectedMode ? 'on' : undefined,
-              "data-test-subj": x.id + '-mode',
+              'data-test-subj': x.id + '-mode',
             }))}
             onChange={(choices) => {
-              const choice = choices.find(({ checked }) => checked) as unknown as {
+              const choice = (choices.find(({ checked }) => checked) as unknown) as {
                 value: string;
                 label: string;
                 key: TraceAnalyticsMode;
@@ -93,8 +108,33 @@ export function DataSourcePicker(props: {
               </>
             )}
           </EuiSelectable>
+          <EuiPopoverFooter>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiSmallButton
+                  onClick={() => {
+                    setIsFlyoutVisible(true);
+                    setPopoverIsOpen(false);
+                  }}
+                >
+                  Manage custom source
+                </EuiSmallButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText>
+                  <EuiToolTip content="Custom trace and service indices is an experimental feature">
+                    <EuiIcon type="iInCircle" />
+                  </EuiToolTip>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPopoverFooter>
         </div>
       </EuiPopover>
+      <CustomIndexFlyout
+        isFlyoutVisible={isFlyoutVisible}
+        setIsFlyoutVisible={setIsFlyoutVisible}
+      />
     </>
   );
 }

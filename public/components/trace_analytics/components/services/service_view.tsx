@@ -6,7 +6,6 @@
 
 import {
   EuiBadge,
-  EuiButton,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
   EuiFlexGroup,
@@ -21,9 +20,9 @@ import {
   EuiPageBody,
   EuiPanel,
   EuiPopover,
+  EuiSmallButton,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -40,6 +39,7 @@ import { observabilityLogsID } from '../../../../../common/constants/shared';
 import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
 import { dataSourceFilterFn } from '../../../../../common/utils/shared';
 import { coreRefs } from '../../../../framework/core_refs';
+import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/plugin_headerControl';
 import { TraceAnalyticsComponentDeps } from '../../home';
 import {
   handleServiceMapRequest,
@@ -89,7 +89,7 @@ export function ServiceView(props: ServiceViewProps) {
       mode,
       props.dataSourceMDSId[0].id
     );
-    if (mode === 'data_prepper') {
+    if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
       handleServiceMapRequest(
         props.http,
         DSL,
@@ -104,12 +104,14 @@ export function ServiceView(props: ServiceViewProps) {
   useEffect(() => {
     if (page !== 'serviceFlyout')
       setNavBreadCrumbs(
-        [props.parentBreadcrumb],
         [
+          props.parentBreadcrumb,
           {
             text: 'Trace analytics',
-            href: '#/',
+            href: '#/traces',
           },
+        ],
+        [
           {
             text: 'Services',
             href: '#/services',
@@ -136,7 +138,10 @@ export function ServiceView(props: ServiceViewProps) {
   const redirectToServiceTraces = () => {
     if (setCurrentSelectedService) setCurrentSelectedService('');
     setRedirect(true);
-    const filterField = mode === 'data_prepper' ? 'serviceName' : 'process.serviceName';
+    const filterField =
+      mode === 'data_prepper' || mode === 'custom_data_prepper'
+        ? 'serviceName'
+        : 'process.serviceName';
     props.addFilter({
       field: filterField,
       operator: 'is',
@@ -152,21 +157,21 @@ export function ServiceView(props: ServiceViewProps) {
   }, [props.startTime, props.endTime, props.serviceName, props.mode]);
 
   const actionsButton = (
-    <EuiButton
+    <EuiSmallButton
       data-test-subj="ActionContextMenu"
       iconType="arrowDown"
       iconSide="right"
       onClick={() => setActionsMenuPopover(true)}
     >
       Actions
-    </EuiButton>
+    </EuiSmallButton>
   );
 
   const actionsMenu: EuiContextMenuPanelDescriptor[] = [
     {
       id: 0,
       items: [
-        ...(mode === 'data_prepper'
+        ...(mode === 'data_prepper' || mode === 'custom_data_prepper'
           ? [
               {
                 name: 'View logs',
@@ -203,6 +208,12 @@ export function ServiceView(props: ServiceViewProps) {
     },
   ];
 
+  const serviceHeader = (
+    <EuiText size="s">
+      <h1 className="overview-content">{props.serviceName}</h1>
+    </EuiText>
+  );
+
   const renderTitle = (
     serviceName: string,
     startTime: SearchBarProps['startTime'],
@@ -217,11 +228,7 @@ export function ServiceView(props: ServiceViewProps) {
         {_page === 'serviceFlyout' ? (
           <EuiFlyoutHeader hasBorder>
             <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem>
-                <EuiTitle size="l">
-                  <h2 className="overview-content">{serviceName}</h2>
-                </EuiTitle>
-              </EuiFlexItem>
+              <EuiFlexItem>{serviceHeader}</EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   panelPaddingSize="none"
@@ -229,19 +236,19 @@ export function ServiceView(props: ServiceViewProps) {
                   isOpen={actionsMenuPopover}
                   closePopover={() => setActionsMenuPopover(false)}
                 >
-                  <EuiContextMenu initialPanelId={0} panels={actionsMenu} />
+                  <EuiContextMenu initialPanelId={0} panels={actionsMenu} size="s" />
                 </EuiPopover>
               </EuiFlexItem>
             </EuiFlexGroup>
             {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}
           </EuiFlyoutHeader>
+        ) : coreRefs?.chrome?.navGroup.getNavGroupEnabled() ? (
+          <HeaderControlledComponentsWrapper
+            components={[renderDatePicker(startTime, setStartTime, endTime, setEndTime)]}
+          />
         ) : (
           <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem>
-              <EuiTitle size="l">
-                <h2 className="overview-content">{serviceName}</h2>
-              </EuiTitle>
-            </EuiFlexItem>
+            <EuiFlexItem>{serviceHeader}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}
             </EuiFlexItem>
@@ -277,7 +284,7 @@ export function ServiceView(props: ServiceViewProps) {
                     {props.serviceName || '-'}
                   </EuiText>
                 </EuiFlexItem>
-                {mode === 'data_prepper' ? (
+                {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
                   <EuiFlexItem grow={false}>
                     <EuiText className="overview-title">Number of connected services</EuiText>
                     <EuiText size="s" className="overview-content">
@@ -289,7 +296,7 @@ export function ServiceView(props: ServiceViewProps) {
                 ) : (
                   <EuiFlexItem />
                 )}
-                {mode === 'data_prepper' ? (
+                {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
                   <EuiFlexItem grow={false}>
                     <EuiText className="overview-title">Connected services</EuiText>
                     <EuiText size="s" className="overview-content">
@@ -402,14 +409,14 @@ export function ServiceView(props: ServiceViewProps) {
       processTimeStamp(props.startTime, mode),
       processTimeStamp(props.endTime, mode)
     );
-    if (mode === 'data_prepper') {
-      spanDSL.query.bool.must.push({
+    if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
+      spanDSL.query.bool.filter.push({
         term: {
           serviceName: props.serviceName,
         },
       });
     } else if (mode === 'jaeger') {
-      spanDSL.query.bool.must.push({
+      spanDSL.query.bool.filter.push({
         term: {
           'process.serviceName': props.serviceName,
         },
@@ -417,7 +424,7 @@ export function ServiceView(props: ServiceViewProps) {
     }
     spanFilters.map(({ field, value }) => {
       if (value != null) {
-        spanDSL.query.bool.must.push({
+        spanDSL.query.bool.filter.push({
           term: {
             [field]: value,
           },
@@ -485,10 +492,10 @@ export function ServiceView(props: ServiceViewProps) {
           results are filtered by {activeFilters.map((filter) => filter.field).join(', ')}
         </EuiText>
       )}
-      <EuiSpacer size="xl" />
+      <EuiSpacer size="m" />
       {overview}
 
-      {mode === 'data_prepper' ? (
+      {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
         <>
           <EuiSpacer />
           <ServiceMetrics

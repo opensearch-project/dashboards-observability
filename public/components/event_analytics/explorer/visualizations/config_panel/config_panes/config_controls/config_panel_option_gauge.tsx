@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiCompressedFieldNumber } from '@elastic/eui';
 import { find } from 'lodash';
 import {
   DEFAULT_GAUGE_CHART_PARAMETERS,
@@ -43,8 +43,8 @@ export const ConfigPanelOptionGauge = ({
   }, [vizState?.numberOfGauges]);
 
   return (
-    <EuiFormRow fullWidth label="Number of gauges" helpText={helpText}>
-      <EuiFieldNumber
+    <EuiCompressedFormRow fullWidth label="Number of gauges" helpText={helpText}>
+      <EuiCompressedFieldNumber
         name="numberOfGauges"
         onChange={(e) => {
           setNumberOfGauges(Number(e.target.value));
@@ -61,6 +61,6 @@ export const ConfigPanelOptionGauge = ({
         placeholder={'Number of gauges'}
         readOnly={dimensions.length === 0}
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 };

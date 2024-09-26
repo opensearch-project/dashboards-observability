@@ -10,10 +10,10 @@ import {
   observabilityMetricsID,
   observabilityNotebookID,
   observabilityOverviewID,
-} from '../common/constants/shared';
-import { CoreSetup } from '../../../src/core/public';
-import { AppPluginStartDependencies } from './types';
-import { DEFAULT_NAV_GROUPS, DEFAULT_APP_CATEGORIES } from '../../../src/core/public';
+} from '../../common/constants/shared';
+import { CoreSetup } from '../../../../src/core/public';
+import { AppPluginStartDependencies } from '../types';
+import { DEFAULT_NAV_GROUPS, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 
 export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDependencies>) {
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
@@ -53,7 +53,7 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
       id: observabilityMetricsID,
       category: DEFAULT_APP_CATEGORIES.investigate,
       showInAllNavGroup: true,
-      order: 100,
+      order: 200,
     },
   ]);
 
@@ -71,26 +71,19 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
       order: 400,
     },
   ]);
-  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.analytics, [
-    {
-      id: observabilityNotebookID,
-      category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
-      order: 400,
-    },
-  ]);
 
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
     {
       id: 'observability-traces-nav',
       category: DEFAULT_APP_CATEGORIES.investigate,
       showInAllNavGroup: true,
-      order: 200,
+      order: 300,
     },
     {
       id: 'observability-services-nav',
       category: DEFAULT_APP_CATEGORIES.investigate,
       showInAllNavGroup: true,
-      order: 300,
+      order: 100,
     },
   ]);
 }
