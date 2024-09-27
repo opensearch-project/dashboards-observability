@@ -395,6 +395,7 @@ export const Home = (props: HomeProps) => {
               notifications={props.notifications}
               dataSourceEnabled={props.dataSourceEnabled}
               savedObjectsMDSClient={props.savedObjectsMDSClient}
+              setDataSourceMenuSelectable={setDataSourceMenuSelectable}
             />
           )}
         />

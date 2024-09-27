@@ -20,14 +20,10 @@ import {
 import round from 'lodash/round';
 import React, { useEffect, useState } from 'react';
 import { MountPoint } from '../../../../../../../src/core/public';
-import {
-  DataSourceManagementPluginSetup,
-  DataSourceViewConfig,
-} from '../../../../../../../src/plugins/data_source_management/public';
+import { DataSourceManagementPluginSetup } from '../../../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
-import { dataSourceFilterFn } from '../../../../../common/utils/shared';
 import { coreRefs } from '../../../../framework/core_refs';
 import { TraceAnalyticsCoreDeps } from '../../home';
 import { handleServiceMapRequest } from '../../requests/services_request_handler';
@@ -49,6 +45,7 @@ interface TraceViewProps extends TraceAnalyticsCoreDeps {
   dataSourceMDSId: DataSourceOption[];
   dataSourceManagement: DataSourceManagementPluginSetup;
   setActionMenu: (menuMount: MountPoint | undefined) => void;
+  setDataSourceMenuSelectable?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export function TraceView(props: TraceViewProps) {
@@ -67,7 +64,6 @@ export function TraceView(props: TraceViewProps) {
       </>
     );
   };
-  const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
 
   const renderOverview = (fields: any) => {
     return (
@@ -256,22 +252,13 @@ export function TraceView(props: TraceViewProps) {
         },
       ]
     );
+    props.setDataSourceMenuSelectable?.(false);
     refresh();
-  }, [props.mode]);
+  }, [props.mode, props.setDataSourceMenuSelectable]);
+
   return (
     <>
       <EuiPage>
-        {props.dataSourceEnabled && (
-          <DataSourceMenu
-            setMenuMountPoint={props.setActionMenu}
-            componentType={'DataSourceView'}
-            componentConfig={{
-              activeOption: props.dataSourceMDSId,
-              fullWidth: true,
-              dataSourceFilter: dataSourceFilterFn,
-            }}
-          />
-        )}
         <EuiPageBody>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             {renderTitle(props.traceId)}
