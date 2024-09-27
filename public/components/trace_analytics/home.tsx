@@ -150,34 +150,29 @@ export const Home = (props: HomeProps) => {
   };
 
   const dataSourceMenuComponent = useMemo(() => {
-    if (!dataSourceMenuSelectable) {
-      return (
-        <DataSourceMenuView
-          setMenuMountPoint={props.setActionMenu}
-          componentType={'DataSourceView'}
-          componentConfig={{
-            activeOption: dataSourceMDSId,
-            fullWidth: true,
-            dataSourceFilter: dataSourceFilterFn,
-          }}
-        />
-      );
-    } else {
-      return (
-        <DataSourceMenu
-          setMenuMountPoint={props.setActionMenu}
-          componentType={'DataSourceSelectable'}
-          componentConfig={{
-            savedObjects: props.savedObjectsMDSClient.client,
-            notifications: props.notifications,
-            fullWidth: true,
-            onSelectedDataSources: onSelectedDataSource,
-            dataSourceFilter: dataSourceFilterFn,
-            activeOption: dataSourceMDSId,
-          }}
-        />
-      );
-    }
+    const sharedProps = {
+      setMenuMountPoint: props.setActionMenu,
+      componentConfig: {
+        activeOption: dataSourceMDSId,
+        fullWidth: true,
+        dataSourceFilter: dataSourceFilterFn,
+      },
+    };
+
+    return dataSourceMenuSelectable ? (
+      <DataSourceMenu
+        {...sharedProps}
+        componentType={'DataSourceSelectable'}
+        componentConfig={{
+          ...sharedProps.componentConfig,
+          savedObjects: props.savedObjectsMDSClient.client,
+          notifications: props.notifications,
+          onSelectedDataSources: onSelectedDataSource,
+        }}
+      />
+    ) : (
+      <DataSourceMenuView {...sharedProps} componentType={'DataSourceView'} />
+    );
   }, [
     dataSourceMenuSelectable,
     props.setActionMenu,
