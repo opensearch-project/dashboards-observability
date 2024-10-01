@@ -134,18 +134,6 @@ jobs:
           cd OpenSearch-Dashboards
           node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers=10 --verbose
 
-      - name: Save target caches
-        id: cache-target-folders-save
-        shell: bash
-        run: |
-          echo "Saving target folder caches..."
-          target_folders=("./OpenSearch-Dashboards/packages/*/target" "./OpenSearch-Dashboards/src/plugins/*/target" "./OpenSearch-Dashboards/src/core/target" "./plugins/dashboards-observability/target")
-          for target_folder in "${target_folders[@]}"; do
-            target_name = $(echo "$target_folder" | sed 's/\/target//g')
-            cache_key="${{ runner.OS }}-$target_name-${{ hashFiles("$target_folder/**/*", "!$target_folder/target/**") }}
-            actions/cache/save@v4 -p "$target_folder/target" -k "$cache_key" -r "${{ runner.OS }}-$target_name-"
-          done
-
       - name: Run OpenSearch Dashboards server
         run: |
           cd OpenSearch-Dashboards
