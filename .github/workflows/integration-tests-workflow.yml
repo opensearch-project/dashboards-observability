@@ -140,7 +140,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: OpenSearch-Dashboards/**/node_modules
-          key: ${{ runner.OS }}-node-${{ hashFiles('OpenSearch-Dashboards/**/package-lock.json') }}
+          key: ${{ runner.OS }}-node-${{ hashFiles('OpenSearch-Dashboards/**/yarn.lock') }}
           restore-keys: |
             ${{ runner.OS }}-node-
 
