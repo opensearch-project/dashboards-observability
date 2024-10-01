@@ -114,10 +114,15 @@ jobs:
           echo "Installing yarn ${{ steps.versions_step.outputs.yarn_version }}"
           npm i -g yarn@${{ steps.versions_step.outputs.yarn_version }}
 
-      - name: Bootstrap the plugin
+      - name: Bootstrap OpenSearch Dashboards
         run: |
-          cd OpenSearch-Dashboards/plugins/dashboards-observability
+          cd OpenSearch-Dashboards
           yarn osd bootstrap --single-version=loose
+
+      - name: Compile OpenSearch Dashboards
+        run: |
+          cd OpenSearch-Dashboards
+          node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers=10
 
       - name: Run OpenSearch Dashboards server
         run: |
@@ -128,10 +133,10 @@ jobs:
         if: ${{ runner.os == 'Linux' }}
         run: |
           cd ./OpenSearch-Dashboards
-          if timeout 600 grep -q "bundles compiled successfully after" <(tail -n0 -f dashboard.log); then
-            echo "OpenSearch Dashboards compiled successfully."
+          if timeout 60 grep -q "[OpenSearchDashboards][http] http server running at" <(tail -n0 -f dashboard.log); then
+            echo "OpenSearch Dashboards started successfully."
           else
-            echo "Timeout for 600 seconds reached. OpenSearch Dashboards did not finish compiling."
+            echo "Timeout of 60 seconds reached. OpenSearch Dashboards did not start successfully."
             exit 1
           fi
 
