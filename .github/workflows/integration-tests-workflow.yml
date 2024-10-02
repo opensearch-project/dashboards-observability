@@ -141,7 +141,9 @@ jobs:
       - name: Yarn Cache
         uses: actions/cache@v4
         with:
-          path: ${{ steps.setup-yarn.outputs.yarn-cache-dir }}
+          path: |
+            OpenSearch-Dashboards/**/node_modules
+            OpenSearch-Dashboards/**/target
           key: ${{ runner.OS }}-yarn-${{ hashFiles('OpenSearch-Dashboards/**/yarn.lock') }}
           restore-keys: |
             ${{ runner.OS }}-yarn-
