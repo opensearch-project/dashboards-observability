@@ -455,17 +455,7 @@ export class ObservabilityPlugin
     coreRefs.navigation = startDeps.navigation;
     coreRefs.contentManagement = startDeps.contentManagement;
 
-    // redirect trace URL to current URL under observability
-    // if (window.location.hash.includes('#/traces/')) {
-    //   window.location.assign(convertTraceUrl(window.location));
-    // }
-
-    // // redirect service analytics URL to current URL under observability
-    // if (window.location.hash.includes('#/services/')) {
-    //   window.location.assign(convertServiceUrl(window.location));
-    // }
-
-    // redirect legacy trace analytics URL to current URL under observability
+    // redirect trace URL based on new navigation
     if (window.location.pathname.includes(observabilityTracesID)) {
       convertTraceAnalyticsNewNavUrl(window.location);
     }
