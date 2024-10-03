@@ -114,7 +114,16 @@ export function ServiceView(props: ServiceViewProps) {
           },
           {
             text: props.serviceName,
-            href: `#/services/${encodeURIComponent(props.serviceName)}`,
+            href: (() => {
+              const dataSourceId = props.dataSourceMDSId[0].id;
+              if (dataSourceId && dataSourceId !== '') {
+                return `#/services?datasourceId=${encodeURIComponent(
+                  dataSourceId
+                )}&serviceId=${encodeURIComponent(props.serviceName)}`;
+              } else {
+                return `#/services?serviceId=${encodeURIComponent(props.serviceName)}`;
+              }
+            })(),
           },
         ]
       );
@@ -122,7 +131,14 @@ export function ServiceView(props: ServiceViewProps) {
   }, [props.serviceName, props.setDataSourceMenuSelectable]);
 
   const redirectToServicePage = (service: string) => {
-    window.location.href = `#/services/${service}`;
+    const dataSourceId = props.dataSourceMDSId[0].id;
+    if (dataSourceId && dataSourceId !== '') {
+      window.location.href = `#/services?datasourceId=${encodeURIComponent(
+        dataSourceId
+      )}&serviceId=${encodeURIComponent(service)}`;
+    } else {
+      window.location.href = `#/services?datasourceId=&serviceId=${encodeURIComponent(service)}`;
+    }
   };
 
   const onClickConnectedService = (service: string) => {
