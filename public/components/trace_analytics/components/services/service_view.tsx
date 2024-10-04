@@ -42,7 +42,12 @@ import {
   handleServiceViewRequest,
 } from '../../requests/services_request_handler';
 import { FilterType } from '../common/filters/filters';
-import { PanelTitle, filtersToDsl, processTimeStamp } from '../common/helper_functions';
+import {
+  PanelTitle,
+  filtersToDsl,
+  generateServiceUrl,
+  processTimeStamp,
+} from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBarProps, renderDatePicker } from '../common/search_bar';
 import { SpanDetailFlyout } from '../traces/span_detail_flyout';
@@ -114,16 +119,7 @@ export function ServiceView(props: ServiceViewProps) {
           },
           {
             text: props.serviceName,
-            href: (() => {
-              const dataSourceId = props.dataSourceMDSId[0].id;
-              if (dataSourceId && dataSourceId !== '') {
-                return `#/services?datasourceId=${encodeURIComponent(
-                  dataSourceId
-                )}&serviceId=${encodeURIComponent(props.serviceName)}`;
-              } else {
-                return `#/services?serviceId=${encodeURIComponent(props.serviceName)}`;
-              }
-            })(),
+            href: generateServiceUrl(props.serviceName, props.dataSourceMDSId[0].id),
           },
         ]
       );
@@ -131,14 +127,7 @@ export function ServiceView(props: ServiceViewProps) {
   }, [props.serviceName, props.setDataSourceMenuSelectable]);
 
   const redirectToServicePage = (service: string) => {
-    const dataSourceId = props.dataSourceMDSId[0].id;
-    if (dataSourceId && dataSourceId !== '') {
-      window.location.href = `#/services?datasourceId=${encodeURIComponent(
-        dataSourceId
-      )}&serviceId=${encodeURIComponent(service)}`;
-    } else {
-      window.location.href = `#/services?datasourceId=&serviceId=${encodeURIComponent(service)}`;
-    }
+    window.location.href = generateServiceUrl(service, props.dataSourceMDSId[0].id);
   };
 
   const onClickConnectedService = (service: string) => {

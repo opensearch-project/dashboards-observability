@@ -61,7 +61,10 @@ export function DashboardControls() {
           <EuiFlexItem grow={false}>
             <EuiToolTip
               content={
-                <FormattedMessage id="dashboard.popout.tooltip" defaultMessage="Go to dashboard" />
+                <FormattedMessage
+                  id="observability.dashboard.popout.tooltip"
+                  defaultMessage="Go to dashboard"
+                />
               }
             >
               <EuiLink

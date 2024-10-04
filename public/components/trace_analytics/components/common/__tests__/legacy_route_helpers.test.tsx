@@ -15,6 +15,24 @@ import {
 import { coreRefs } from '../../../../../framework/core_refs';
 
 describe('ConvertLegacyTraceAnalyticsUrl', () => {
+  let originalLocation: Location;
+
+  beforeEach(() => {
+    originalLocation = window.location;
+
+    Object.defineProperty(window, 'location', {
+      value: {
+        ...originalLocation,
+        assign: jest.fn(),
+      },
+      writable: true,
+    });
+  });
+
+  afterEach(() => {
+    window.location = originalLocation;
+  });
+
   it('should convert legacy URL correctly', () => {
     const location = {
       pathname: '/app/trace-analytics-dashboards',
@@ -35,6 +53,78 @@ describe('ConvertLegacyTraceAnalyticsUrl', () => {
 
     const result = convertLegacyTraceAnalyticsUrl(location);
     expect(result).toBe(`/app/${observabilityTracesID}#/traces?existing=param&param1=value1`);
+  });
+
+  it('should convert legacy trace URL with ID and redirect to the new nav traces URL', () => {
+    const location = {
+      pathname: '/app/trace-analytics-dashboards',
+      hash: '#/traces/02feb3a4f611abd81f2a53244d1278ae',
+      search: '',
+    } as Location;
+
+    coreRefs.chrome = { navGroup: { getNavGroupEnabled: jest.fn().mockReturnValue(true) } };
+
+    const result = convertLegacyTraceAnalyticsUrl(location);
+    expect(result).toBe(`/app/${observabilityTracesID}#/traces/02feb3a4f611abd81f2a53244d1278ae`);
+
+    convertTraceAnalyticsNewNavUrl(location);
+    expect(window.location.assign).toHaveBeenCalledWith(
+      `/app/${observabilityTracesNewNavID}#/traces?datasourceId=&traceId=02feb3a4f611abd81f2a53244d1278ae`
+    );
+  });
+
+  it('should convert legacy service URL with ID and redirect to the new nav services URL', () => {
+    const location = {
+      pathname: '/app/trace-analytics-dashboards',
+      hash: '#/services/analytics-service',
+      search: '',
+    } as Location;
+
+    coreRefs.chrome = { navGroup: { getNavGroupEnabled: jest.fn().mockReturnValue(true) } };
+
+    const result = convertLegacyTraceAnalyticsUrl(location);
+    expect(result).toBe(`/app/${observabilityTracesID}#/services/analytics-service`);
+
+    convertTraceAnalyticsNewNavUrl(location);
+    expect(window.location.assign).toHaveBeenCalledWith(
+      `/app/${observabilityServicesNewNavID}#/services?datasourceId=&serviceId=analytics-service`
+    );
+  });
+
+  it('should convert legacy trace URL with ID and redirect to the old nav traces URL', () => {
+    const location = {
+      pathname: '/app/trace-analytics-dashboards',
+      hash: '#/traces/02feb3a4f611abd81f2a53244d1278ae',
+      search: '',
+    } as Location;
+
+    coreRefs.chrome = { navGroup: { getNavGroupEnabled: jest.fn().mockReturnValue(false) } };
+
+    const result = convertLegacyTraceAnalyticsUrl(location);
+    expect(result).toBe(`/app/${observabilityTracesID}#/traces/02feb3a4f611abd81f2a53244d1278ae`);
+
+    convertTraceAnalyticsNewNavUrl(location);
+    expect(window.location.assign).toHaveBeenCalledWith(
+      `/app/${observabilityTracesID}#/traces?datasourceId=&traceId=02feb3a4f611abd81f2a53244d1278ae`
+    );
+  });
+
+  it('should convert legacy service URL with ID and redirect to the old nav services URL', () => {
+    const location = {
+      pathname: '/app/trace-analytics-dashboards',
+      hash: '#/services/analytics-service',
+      search: '',
+    } as Location;
+
+    coreRefs.chrome = { navGroup: { getNavGroupEnabled: jest.fn().mockReturnValue(false) } };
+
+    const result = convertLegacyTraceAnalyticsUrl(location);
+    expect(result).toBe(`/app/${observabilityTracesID}#/services/analytics-service`);
+
+    convertTraceAnalyticsNewNavUrl(location);
+    expect(window.location.assign).toHaveBeenCalledWith(
+      `/app/${observabilityTracesID}#/services?datasourceId=&serviceId=analytics-service`
+    );
   });
 });
 
