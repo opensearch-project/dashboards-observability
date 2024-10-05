@@ -21,7 +21,7 @@ exports[`Trace view component renders trace view 1`] = `
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer
-        size="xl"
+        size="s"
       />
       <EuiPanel>
         <PanelTitle

@@ -7,6 +7,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLink,
   EuiSuperDatePicker,
   EuiText,
@@ -15,6 +16,7 @@ import {
 import { OnTimeChangeProps } from '@opensearch-project/oui/src/eui_components/date_picker/super_date_picker/super_date_picker';
 import React from 'react';
 import { useObservable } from 'react-use';
+import { FormattedMessage } from '@osd/i18n/react';
 import { coreRefs } from '../../../framework/core_refs';
 import { HOME_CONTENT_AREAS } from '../../../plugin_helpers/plugin_overview';
 import { redirectToDashboards } from '../../getting_started/components/utils';
@@ -48,15 +50,32 @@ export function DashboardControls() {
   };
 
   return isDashboardSelected ? (
-    <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-      <EuiFlexItem grow={true}>
-        <EuiText size="s" className="obsOverviewDashboardHeader">
-          <p>
-            <EuiLink onClick={() => redirectToDashboards('/view/' + dashboardState?.dashboardId)}>
-              {dashboardState?.dashboardTitle}
-            </EuiLink>
-          </p>
-        </EuiText>
+    <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiText size="m" className="obsOverviewDashboardHeader">
+              <h4>{dashboardState?.dashboardTitle}</h4>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={
+                <FormattedMessage
+                  id="observability.dashboard.popout.tooltip"
+                  defaultMessage="Go to dashboard"
+                />
+              }
+            >
+              <EuiLink
+                onClick={() => redirectToDashboards('/view/' + dashboardState?.dashboardId)}
+                external={true}
+              >
+                <EuiIcon type="popout" />
+              </EuiLink>
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">

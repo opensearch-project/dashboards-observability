@@ -612,3 +612,13 @@ export const getServiceIndices = (mode: TraceAnalyticsMode) => {
       return JAEGER_SERVICE_INDEX_NAME;
   }
 };
+
+export const generateServiceUrl = (service: string, dataSourceId: string) => {
+  const url = `#/services?serviceId=${encodeURIComponent(service)}`;
+
+  if (dataSourceId && dataSourceId !== '') {
+    return `${url}&datasourceId=${encodeURIComponent(dataSourceId)}`;
+  }
+
+  return `${url}&datasourceId=`;
+};

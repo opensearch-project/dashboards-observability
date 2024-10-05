@@ -61,13 +61,13 @@ export const observabilityMetricsTitle = 'Metrics';
 export const observabilityMetricsPluginOrder = 5092;
 
 export const observabilityTracesNewNavID = 'observability-traces-nav';
-export const observabilityTracesNewNavURL = observabilityTracesNewNavID + '#/traces';
+export const observabilityTracesNewNavURL = observabilityTracesNewNavID;
 export const observabilityTracesID = 'observability-traces';
 export const observabilityTracesTitle = 'Traces';
 export const observabilityTracesPluginOrder = 5093;
 
 export const observabilityServicesNewNavID = 'observability-services-nav';
-export const observabilityServicesNewNavURL = observabilityServicesNewNavID + '#/services';
+export const observabilityServicesNewNavURL = observabilityServicesNewNavID;
 export const observabilityServicesID = 'observability-services';
 export const observabilityServicesTitle = 'Services';
 export const observabilityServicesPluginOrder = 5092;

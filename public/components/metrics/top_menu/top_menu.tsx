@@ -4,6 +4,7 @@
  */
 
 import {
+  EuiButtonIcon,
   EuiCompressedFieldText,
   EuiCompressedSelect,
   EuiCompressedSuperDatePicker,
@@ -52,13 +53,25 @@ export const TopMenu = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false} className="metrics-search-bar-datepicker">
+              <EuiFlexItem grow={false}>
                 <EuiCompressedSuperDatePicker
                   dateFormat={uiSettingsService.get('dateFormat')}
                   start={dateSpanFilter.start}
                   end={dateSpanFilter.end}
                   onTimeChange={(dateSpan) => dispatch(setDateSpan(dateSpan))}
                   recentlyUsedRanges={dateSpanFilter.recentlyUsedRanges}
+                  showUpdateButton={false}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="refresh"
+                  aria-label="Refresh"
+                  display="base"
+                  onClick={() => dispatch(setDateSpan(dateSpanFilter))}
+                  size="s"
+                  data-test-subj="superDatePickerApplyTimeButton"
+                  data-click-metric-element="metrics.refresh_button"
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
