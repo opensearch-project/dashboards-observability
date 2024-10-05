@@ -81,7 +81,10 @@ import { AccelerationDetailsFlyout } from './components/datasources/components/m
 import { CreateAcceleration } from './components/datasources/components/manage/accelerations/create_accelerations_flyout';
 import { AssociatedObjectsDetailsFlyout } from './components/datasources/components/manage/associated_objects/associated_objects_details_flyout';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
-import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
+import {
+  convertLegacyTraceAnalyticsUrl,
+  convertTraceAnalyticsNewNavUrl,
+} from './components/trace_analytics/components/common/legacy_route_helpers';
 import { registerAsssitantDependencies } from './dependencies/register_assistant';
 import {
   OBSERVABILITY_EMBEDDABLE,
@@ -451,6 +454,11 @@ export class ObservabilityPlugin
     coreRefs.dataSource = startDeps.dataSource;
     coreRefs.navigation = startDeps.navigation;
     coreRefs.contentManagement = startDeps.contentManagement;
+
+    // redirect trace URL based on new navigation
+    if (window.location.pathname.includes(observabilityTracesID)) {
+      convertTraceAnalyticsNewNavUrl(window.location);
+    }
 
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
     dataSourceFactory.registerDataSourceType(S3_DATA_SOURCE_TYPE, S3DataSource);
