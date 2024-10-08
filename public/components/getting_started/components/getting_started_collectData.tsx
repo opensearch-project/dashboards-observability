@@ -359,7 +359,19 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
     const baseUrl = `${window.location.origin}/app`;
 
     const cardData = {
-      otel: {
+      otelLogs: {
+        title: 'Otel Dashboard',
+        description: 'Analyze logs with pre-packaged dashboards',
+        icon: <img src={otelIcon} alt="Otel Icon" className="synopsisIcon" />,
+        url: `${baseUrl}/integrations#/available/otel-services`,
+      },
+      otelMetrics: {
+        title: 'Otel Dashboard',
+        description: 'Analyze logs with pre-packaged dashboards',
+        icon: <img src={otelIcon} alt="Otel Icon" className="synopsisIcon" />,
+        url: `${baseUrl}/integrations#/available/otel-services`,
+      },
+      otelTraces: {
         title: 'Otel Dashboard',
         description: 'Analyze logs with pre-packaged dashboards',
         icon: <img src={otelIcon} alt="Otel Icon" className="synopsisIcon" />,
