@@ -73,7 +73,8 @@ export function ServicesContent(props: ServicesProps) {
       })),
     ]);
     setRedirect(false);
-  }, [mode]);
+    props.setDataSourceMenuSelectable?.(true);
+  }, [mode, props.setDataSourceMenuSelectable, props.currentSelectedService]);
 
   useEffect(() => {
     let newFilteredService = '';

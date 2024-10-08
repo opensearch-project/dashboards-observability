@@ -6,6 +6,12 @@
 import React, { ReactNode, useEffect, useState } from 'react';
 import { HashRouter, Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@osd/i18n/react';
+import { useObservable } from 'react-use';
+import { EMPTY } from 'rxjs';
+import {
+  observabilityOverviewTitle,
+  observabilityOverviewTitleWithUseCase,
+} from '../../../common/constants/shared';
 import { alertsPluginID, anomalyPluginID } from '../../../common/constants/overview';
 import { DashboardSavedObjectsType } from '../../../common/types/overview';
 import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
@@ -17,6 +23,7 @@ import { ObsDashboardStateManager } from './components/obs_dashboard_state_manag
 import { SelectDashboardFlyout } from './components/select_dashboard_flyout';
 import { getObservabilityDashboardsId, setObservabilityDashboardsId } from './components/utils';
 import './index.scss';
+import { OBSERVABILITY_USE_CASE_ID } from '../../../../../src/core/public';
 
 export const Home = () => {
   const [homePage, setHomePage] = useState<ReactNode>(<></>);
@@ -68,6 +75,8 @@ export const Home = () => {
             description: card.description,
             title: card.title,
             cardProps: {
+              titleSize: 's',
+              titleElement: 'h4',
               selectable: {
                 children: (
                   <FormattedMessage
@@ -178,18 +187,23 @@ export const Home = () => {
     loadHomePage();
   }, [dashboardsSavedObjects]);
 
+  const currentNavGroup = useObservable(coreRefs?.chrome?.navGroup.getCurrentNavGroup$() || EMPTY);
+  const isObservabilityUseCase = currentNavGroup?.id === OBSERVABILITY_USE_CASE_ID;
+
   useEffect(() => {
     setNavBreadCrumbs(
       [],
       [
         {
-          text: 'Observability overview',
+          text: isObservabilityUseCase
+            ? observabilityOverviewTitle
+            : observabilityOverviewTitleWithUseCase,
           href: '#/',
         },
       ]
     );
     loadDashboardsState();
-  }, []);
+  }, [isObservabilityUseCase]);
 
   return (
     <div>
