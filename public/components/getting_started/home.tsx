@@ -19,6 +19,7 @@ import {
 } from '../../../../../src/plugins/data_source_management/public';
 import { NewGettingStarted } from './components/getting_started';
 import { dataSourceFilterFn } from '../../../common/utils/shared';
+import { HeaderControlledComponentsWrapper } from '../../plugin_helpers/plugin_headerControl';
 
 export interface HomeProps extends RouteComponentProps {
   pplService: any;
@@ -98,6 +99,9 @@ export const Home = (props: HomeProps) => {
   return (
     <div>
       {dataSourceMenuComponent}
+      <HeaderControlledComponentsWrapper
+        description={'Get started with collecting and monitoring logs, metrics, and traces.'}
+      />
       <HashRouter>
         <Switch>
           <Route

@@ -4,8 +4,6 @@
  */
 
 import {
-  EuiAccordion,
-  EuiButton,
   EuiCheckableCard,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -14,36 +12,43 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiPanel,
-  EuiSelectable,
   EuiSpacer,
   EuiSteps,
   EuiText,
   EuiTitle,
   EuiTabbedContent,
+  EuiCompressedComboBox,
+  EuiButton,
+  EuiIcon,
+  EuiCard,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 
-import csvFileJson from '../getting_started_artifacts/csv_file/csv_file-1.0.0.json';
 import golangClientJson from '../getting_started_artifacts/golang_client/golang_client-1.0.0.json';
-import otelJson from '../getting_started_artifacts/otel-services/otel-services-1.0.0.json';
+import golangIcon from '../getting_started_artifacts/golang_client/static/logo.svg';
+import otelJsonLogs from '../getting_started_artifacts/otel-services/otel-services-1.0.0-logs.json';
+import otelJsonMetrics from '../getting_started_artifacts/otel-services/otel-services-1.0.0-metrics.json';
+import otelJsonTraces from '../getting_started_artifacts/otel-services/otel-services-1.0.0-traces.json';
+import otelIcon from '../getting_started_artifacts/otel-services/static/logo.svg';
 import pythonJson from '../getting_started_artifacts/python_client/python_client-1.0.0.json';
+import pythonIcon from '../getting_started_artifacts/python_client/static/logo.png';
 import nginxJson from '../getting_started_artifacts/nginx/nginx-1.0.0.json';
+import nginxIcon from '../getting_started_artifacts/nginx/static/logo.svg';
 import javaJson from '../getting_started_artifacts/java_client/java_client-1.0.0.json';
+import javaIcon from '../getting_started_artifacts/java_client/static/logo.svg';
 
-import { IntegrationCards } from './getting_started_integrationCards';
-import { UploadAssets } from './utils';
+import { coreRefs } from '../../../../public/framework/core_refs';
+import { UploadAssets, fetchIndexPatternIds, redirectToDashboards } from './utils';
+import { getWorkspaceIdFromUrl } from '../../../../../../src/core/public/utils';
 
-const cardOne = 'Collector';
-const cardTwo = 'File Upload';
-const cardThree = 'Configure use-case based content';
+const cardOne = 'Logs';
+const cardTwo = 'Metrics';
+const cardThree = 'Traces';
 
 interface CollectAndShipDataProps {
   isOpen: boolean;
   onToggle: (isOpen: boolean) => void;
-  selectedTechnology: string;
-  onMoveToQueryData: (indexPatterns: string[]) => void;
   onSelectSource: (source: string) => void;
-  onCardSelectionChange: (isSampleDataset: boolean) => void;
   selectedDataSourceId: string;
   selectedDataSourceLabel: string;
 }
@@ -54,11 +59,7 @@ interface CollectorOption {
 }
 
 export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
-  isOpen,
-  onToggle,
-  onMoveToQueryData,
   onSelectSource,
-  onCardSelectionChange,
   selectedDataSourceId,
   selectedDataSourceLabel,
 }) => {
@@ -68,12 +69,13 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
   const [selectedTabId, setSelectedTabId] = useState('workflow_0');
   const [_selectedWorkflow, setSelectedWorkflow] = useState('');
   const [workflows, setWorkflows] = useState<any[]>([]);
-  const [selectedCard, setSelectedCard] = useState('');
   const [collectorOptions, setCollectorOptions] = useState<CollectorOption[]>([]);
+  const [patternsContent, setPatternsContent] = useState<any[]>([]);
 
   const technologyJsonMap: Record<string, any> = {
-    otel: otelJson,
-    csv: csvFileJson,
+    otelLogs: otelJsonLogs,
+    otelMetrics: otelJsonMetrics,
+    otelTraces: otelJsonTraces,
     golang: golangClientJson,
     python: pythonJson,
     nginx: nginxJson,
@@ -81,7 +83,23 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
   };
 
   useEffect(() => {
-    if (specificMethod) {
+    let isMounted = true;
+
+    const fetchPatterns = async () => {
+      try {
+        const content = await fetchIndexPatternIds(specificMethod);
+        if (isMounted) {
+          setPatternsContent(content.data.length !== 0 ? content.data : []);
+        }
+      } catch (error) {
+        console.error('Error fetching index patterns:', error);
+        if (isMounted) setPatternsContent([]);
+      }
+    };
+
+    if (specificMethod && isMounted) {
+      fetchPatterns();
+
       const json = technologyJsonMap[specificMethod];
       if (json && json['getting-started']) {
         const fetchedWorkflows = json['getting-started'].workflows || [];
@@ -95,11 +113,33 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
         setGettingStarted(null);
         setWorkflows([]);
       }
-    } else {
-      setGettingStarted(null);
-      setWorkflows([]);
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [specificMethod]);
+
+  const handleSpecificMethodChange = (newOption: any) => {
+    const selectedOptionValue = newOption[0]?.value;
+
+    if (selectedOptionValue === specificMethod) {
+      return;
+    }
+
+    setSpecificMethod(selectedOptionValue);
+    onSelectSource(selectedOptionValue);
+    setSelectedWorkflow('');
+    setGettingStarted(null);
+    setWorkflows([]);
+  };
+
+  // Auto-select first collector if nothing is selected and a collection method is set
+  useEffect(() => {
+    if (collectorOptions.length > 0 && !specificMethod && collectionMethod) {
+      handleSpecificMethodChange([{ value: collectorOptions[0].value }]);
+    }
+  }, [collectorOptions, specificMethod, collectionMethod]);
 
   const handleCollectionMethodChange = (value: string) => {
     setCollectionMethod(value);
@@ -107,65 +147,270 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
     setSelectedWorkflow('');
     setGettingStarted(null);
     setWorkflows([]);
-    onCardSelectionChange(value === cardThree);
 
     if (value === cardOne) {
       setCollectorOptions([
-        { label: 'Open Telemetry (structured)', value: 'otel' },
-        { label: 'Nginx (structured)', value: 'nginx' },
-        { label: 'Java (unstructured)', value: 'java' },
-        { label: 'Python (unstructured)', value: 'python' },
-        { label: 'Golang (unstructured)', value: 'golang' },
+        { label: 'Open Telemetry', value: 'otelLogs' },
+        { label: 'Nginx', value: 'nginx' },
+        { label: 'Java', value: 'java' },
+        { label: 'Python', value: 'python' },
+        { label: 'Golang', value: 'golang' },
       ]);
     } else if (value === cardTwo) {
-      setCollectorOptions([{ label: 'Fluent Bit', value: 'csv' }]);
+      setCollectorOptions([{ label: 'Open Telemetry', value: 'otelMetrics' }]);
+    } else if (value === cardThree) {
+      setCollectorOptions([{ label: 'Open Telemetry', value: 'otelTraces' }]);
     }
-  };
-
-  const handleSpecificMethodChange = (selectedOption: any) => {
-    if (!selectedOption) {
-      return;
-    }
-    const updatedOptions = collectorOptions.map((option) =>
-      option.value === selectedOption.value
-        ? { ...option, checked: 'on' }
-        : { ...option, checked: undefined }
-    );
-    setCollectorOptions(updatedOptions);
-    setSpecificMethod(selectedOption.value);
-    onSelectSource(selectedOption.value);
-    setSelectedWorkflow('');
-    setGettingStarted(null);
-    setWorkflows([]);
-  };
-
-  const onTabClick = (tab: any) => {
-    const workflowIndex = parseInt(tab.id.split('_')[1], 10);
-    setSelectedTabId(tab.id);
-    setSelectedWorkflow(workflows[workflowIndex].name);
-    setGettingStarted(workflows[workflowIndex]);
   };
 
   const renderSpecificMethodDropdown = () => {
     if (!collectionMethod) return null;
 
+    const iconMap: Record<string, string> = {
+      golang: golangIcon,
+      otel: otelIcon,
+      python: pythonIcon,
+      nginx: nginxIcon,
+      java: javaIcon,
+    };
+
+    const optionsWithIcons = collectorOptions.map((option) => ({
+      label: option.label,
+      value: option.value,
+      prepend: (
+        <img
+          src={iconMap[option.value]}
+          alt={`${option.label} icon`}
+          className="synopsisIconSmall"
+        />
+      ),
+    }));
+
+    const selectedOption = optionsWithIcons.find((option) => option.value === specificMethod);
+
     return (
       <>
         <EuiText>
-          <h3>Select a collector</h3>
+          <h3>{collectionMethod}</h3>
         </EuiText>
         <EuiSpacer size="s" />
-        <EuiSelectable
-          options={collectorOptions}
-          singleSelection
-          onChange={(newOptions) =>
-            handleSpecificMethodChange(newOptions.find((option) => option.checked))
-          }
-          listProps={{ bordered: true }}
-        >
-          {(list) => list}
-        </EuiSelectable>
+        <EuiText size="s">Select collector</EuiText>
+        <div style={{ maxWidth: '400px' }}>
+          <EuiCompressedComboBox
+            singleSelection={{ asPlainText: true }}
+            options={optionsWithIcons}
+            selectedOptions={selectedOption ? [selectedOption] : []}
+            onChange={(newOptions) => handleSpecificMethodChange(newOptions)}
+            renderOption={(option) => (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                {option.prepend}
+                {option.label}
+              </div>
+            )}
+          />
+        </div>
       </>
+    );
+  };
+
+  const renderIndexPatternStep = (
+    patternsContentRender: any[],
+    selectedDataSourceIdRender: string
+  ) => {
+    if (!patternsContentRender || patternsContentRender.length === 0) return null;
+
+    const handleIndexPatternClick = (patternId: string) => {
+      const finalPatternId = selectedDataSourceIdRender
+        ? `mds-${selectedDataSourceIdRender}-objectId-${patternId}`
+        : patternId;
+
+      const currentUrl = window.location.href;
+      const workspaceId = getWorkspaceIdFromUrl(currentUrl, coreRefs?.http!.basePath.getBasePath());
+
+      const workspacePatternId = workspaceId
+        ? `workspaceId-${workspaceId}-${finalPatternId}`
+        : finalPatternId;
+
+      coreRefs?.application!.navigateToApp('data-explorer', {
+        path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'${workspacePatternId}',view:discover))&_q=(filters:!(),query:(language:kuery,query:''))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))`,
+      });
+    };
+
+    const handleDiscoverNavigation = () => {
+      coreRefs.application?.navigateToApp('data-explorer', { path: '/discover' });
+    };
+
+    return (
+      <>
+        <EuiText>
+          <p>
+            Query your data in <EuiLink onClick={handleDiscoverNavigation}>Discover</EuiLink> to
+            uncover insights
+          </p>
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiListGroup flush>
+          {patternsContentRender.map((pattern) => (
+            <EuiListGroupItem
+              key={pattern.id}
+              label={
+                <EuiLink
+                  onClick={() => handleIndexPatternClick(pattern.id)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                >
+                  {pattern.title}
+                  <EuiIcon type="popout" aria-label="Open in Discover" />
+                </EuiLink>
+              }
+            />
+          ))}
+        </EuiListGroup>
+      </>
+    );
+  };
+
+  const renderSchema = (schemas: any[]) =>
+    schemas.map((schema, idx) => (
+      <div key={idx}>
+        <EuiTitle size="s">
+          <h3>{schema.type} Schema</h3>
+        </EuiTitle>
+        <EuiText>
+          {schema.description}
+          <br />
+          {schema.alias && (
+            <>
+              <strong>Alias:</strong> {schema.alias}
+              <br />
+            </>
+          )}
+          <strong>Index Pattern Name:</strong> {schema['index-pattern-name']}
+          <br />
+          {Array.isArray(schema.info) &&
+            schema.info.map((link: any, linkIdx: number) =>
+              link && typeof link.url === 'string' ? (
+                <EuiLink key={linkIdx} href={link.url} target="_blank">
+                  {typeof link.title === 'string' && link.title.trim() !== ''
+                    ? link.title
+                    : 'More Info'}
+                </EuiLink>
+              ) : (
+                <EuiText color="danger" key={linkIdx}>
+                  Invalid URL
+                </EuiText>
+              )
+            )}
+        </EuiText>
+        {schema.content && (
+          <EuiCodeBlock language="bash" fontSize="m" paddingSize="s" isCopyable>
+            {schema.content}
+          </EuiCodeBlock>
+        )}
+        {schema['index-template'] && (
+          <EuiLink href={schema['index-template']} target="_blank">
+            Index Template
+          </EuiLink>
+        )}
+        <EuiSpacer size="m" />
+      </div>
+    ));
+
+  const renderIndex = (indexPatterns: any) => (
+    <>
+      <EuiText>
+        {indexPatterns?.description}
+        <br />
+        {Array.isArray(indexPatterns?.info) &&
+          indexPatterns.info.map((link: any, linkIdx: number) =>
+            link && typeof link.url === 'string' ? (
+              <EuiLink key={linkIdx} href={link.url} target="_blank">
+                {typeof link.title === 'string' && link.title.trim() !== ''
+                  ? link.title
+                  : 'More Info'}
+              </EuiLink>
+            ) : (
+              <EuiText color="danger" key={linkIdx}>
+                Invalid URL
+              </EuiText>
+            )
+          )}
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiTitle size="s">
+        <h3>Index Patterns</h3>
+      </EuiTitle>
+      <EuiListGroup>
+        {indexPatterns?.['index-patterns-name']?.map((pattern: string, idx: number) => (
+          <EuiListGroupItem key={idx} label={pattern} />
+        ))}
+      </EuiListGroup>
+      <EuiButton
+        onClick={async () => {
+          await UploadAssets(specificMethod, selectedDataSourceId, selectedDataSourceLabel);
+        }}
+        fill
+      >
+        Create assets
+      </EuiButton>
+    </>
+  );
+
+  const renderTechnologyDashboardCards = (specificMethodRender: string) => {
+    const baseUrl = `${window.location.origin}/app`;
+
+    const cardData = {
+      otel: {
+        title: 'Otel Dashboard',
+        description: 'Analyze logs with pre-packaged dashboards',
+        icon: <img src={otelIcon} alt="Otel Icon" className="synopsisIcon" />,
+        url: `${baseUrl}/integrations#/available/otel-services`,
+      },
+      nginx: {
+        title: 'Nginx Dashboard',
+        description: 'Analyze logs with pre-packaged dashboards',
+        icon: <img src={nginxIcon} alt="Nginx Icon" className="synopsisIcon" />,
+        url: `${baseUrl}/integrations#/available/nginx`,
+      },
+    };
+
+    const selectedCard = cardData[specificMethodRender];
+
+    if (!selectedCard) return null;
+
+    return (
+      <EuiFlexItem style={{ maxWidth: '300px' }}>
+        <EuiCard
+          icon={selectedCard.icon}
+          title={selectedCard.title}
+          description={selectedCard.description}
+          footer={
+            <EuiButton iconType="popout" onClick={() => window.open(selectedCard.url, '_blank')}>
+              Install from Catalog
+            </EuiButton>
+          }
+        />
+      </EuiFlexItem>
+    );
+  };
+
+  const renderVisualizeDataStep = () => {
+    return (
+      <EuiFlexGroup>
+        {renderTechnologyDashboardCards(specificMethod)}
+
+        <EuiFlexItem style={{ maxWidth: '300px' }}>
+          <EuiCard
+            icon={<EuiIcon type="dashboardApp" size="xxl" />}
+            title="Create a new dashboard"
+            description="Create a new dashboard to visualize your data"
+            footer={
+              <EuiButton iconType="plusInCircle" onClick={() => redirectToDashboards('dashboards')}>
+                Create a dashboard
+              </EuiButton>
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   };
 
@@ -174,11 +419,6 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
       title: step.name,
       children: (
         <div>
-          {step.label && (
-            <EuiText color="secondary">
-              <p>{step.label}</p>
-            </EuiText>
-          )}
           <EuiText>{step.description}</EuiText>
           {step['input-params'] && step['input-params'].length > 0 && (
             <div>
@@ -192,12 +432,26 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
               ))}
             </div>
           )}
-          {step.info &&
-            step.info.map((link: string, linkIndex: number) => (
-              <EuiLink key={linkIndex} href={link} target="_blank">
-                More Info
-              </EuiLink>
-            ))}
+
+          {Array.isArray(step.info) &&
+            step.info.map((link: any, linkIndex: number) => {
+              if (link && typeof link.url === 'string') {
+                return (
+                  <EuiLink key={linkIndex} href={link.url} target="_blank">
+                    {typeof link.title === 'string' && link.title.trim() !== ''
+                      ? link.title
+                      : 'More Info'}
+                  </EuiLink>
+                );
+              } else {
+                return (
+                  <EuiText color="danger" key={linkIndex}>
+                    Invalid URL
+                  </EuiText>
+                );
+              }
+            })}
+
           {step.content && (
             <EuiCodeBlock language="bash" fontSize="m" paddingSize="s" isCopyable>
               {step.content}
@@ -226,72 +480,18 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
       ),
     });
 
+    steps.push({
+      title: 'Explore your data',
+      children: renderIndexPatternStep(patternsContent, selectedDataSourceId),
+    });
+
+    steps.push({
+      title: 'Visualize your data',
+      children: renderVisualizeDataStep(),
+    });
+
     return <EuiSteps steps={steps} />;
   };
-
-  const renderSchema = (schemas: any[]) =>
-    schemas.map((schema, idx) => (
-      <div key={idx}>
-        <EuiTitle size="s">
-          <h3>{schema.type} Schema</h3>
-        </EuiTitle>
-        <EuiText>
-          {schema.description}
-          <br />
-          <strong>Alias:</strong> {schema.alias}
-          <br />
-          <strong>Index Pattern Name:</strong> {schema['index-pattern-name']}
-          <br />
-          {schema.info.map((infoLink: string, linkIdx: number) => (
-            <EuiLink key={linkIdx} href={infoLink} target="_blank">
-              More Info
-            </EuiLink>
-          ))}
-        </EuiText>
-        <EuiCodeBlock language="bash" fontSize="m" paddingSize="s" isCopyable>
-          {schema.content}
-        </EuiCodeBlock>
-        <EuiLink href={schema['index-template']} target="_blank">
-          Index Template
-        </EuiLink>
-        <EuiSpacer size="m" />
-      </div>
-    ));
-
-  const renderIndex = (indexPatterns: any) => (
-    <>
-      <EuiText>
-        {indexPatterns?.description}
-        <br />
-        {indexPatterns?.info?.map((infoLink: string, linkIdx: number) => (
-          <EuiLink key={linkIdx} href={infoLink} target="_blank">
-            More Info
-          </EuiLink>
-        ))}
-      </EuiText>
-      <EuiSpacer size="m" />
-      <EuiTitle size="s">
-        <h3>Index Patterns</h3>
-      </EuiTitle>
-      <EuiListGroup>
-        {indexPatterns?.['index-patterns-name']?.map((pattern: string, idx: number) => (
-          <EuiListGroupItem key={idx} label={pattern} />
-        ))}
-      </EuiListGroup>
-      <EuiButton
-        onClick={async () => {
-          await UploadAssets(specificMethod, selectedDataSourceId, selectedDataSourceLabel);
-        }}
-        fill
-      >
-        Create assets
-      </EuiButton>
-      <EuiSpacer size="m" />
-      <EuiButton onClick={() => onMoveToQueryData(indexPatterns?.['index-patterns-name'] || [])}>
-        Move to query and analyze data
-      </EuiButton>
-    </>
-  );
 
   const tabs = workflows.map((workflow, index) => ({
     id: `workflow_${index}`,
@@ -306,83 +506,68 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
 
   return (
     <EuiPanel paddingSize="m">
-      <EuiAccordion
-        id="collect-and-ingest-data"
-        buttonContent="Collect and ingest data"
-        paddingSize="m"
-        forceState={isOpen ? 'open' : 'closed'}
-        onToggle={onToggle}
-      >
-        <EuiText>
-          <h2>Collection method</h2>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiCheckableCard
-              id="configure_collectors"
-              label={cardOne}
-              checkableType="radio"
-              checked={selectedCard === cardOne}
-              onChange={() => {
-                handleCollectionMethodChange(cardOne);
-                setSelectedCard(cardOne);
-              }}
-            >
-              <EuiText size="s">Configure agents and ingestion pipeline</EuiText>
-            </EuiCheckableCard>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiCheckableCard
-              id="upload_file"
-              label={cardTwo}
-              checkableType="radio"
-              checked={selectedCard === cardTwo}
-              onChange={() => {
-                handleCollectionMethodChange(cardTwo);
-                setSelectedCard(cardTwo);
-              }}
-            >
-              <EuiText size="s">Upload your data</EuiText>
-            </EuiCheckableCard>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiCheckableCard
-              id="use_sample_dataset"
-              label={cardThree}
-              checkableType="radio"
-              checked={selectedCard === cardThree}
-              onChange={() => {
-                handleCollectionMethodChange(cardThree);
-                setSelectedCard(cardThree);
-              }}
-            >
-              <EuiText size="s">Explore with a log dataset</EuiText>
-            </EuiCheckableCard>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        {collectionMethod === cardThree ? (
-          <IntegrationCards />
-        ) : (
-          <>
-            {renderSpecificMethodDropdown()}
-            <EuiSpacer size="s" />
-            {specificMethod && (
-              <>
-                <EuiSpacer size="s" />
-                {tabs.length > 0 && (
-                  <EuiTabbedContent
-                    tabs={tabs}
-                    selectedTab={tabs.find((tab) => tab.id === selectedTabId)}
-                    onTabClick={onTabClick}
-                  />
-                )}
-              </>
-            )}
-          </>
-        )}
-      </EuiAccordion>
+      <EuiTitle size="s">
+        <h3>Ingest data by signal type</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiCheckableCard
+            id="getting_started_logs"
+            label={cardOne}
+            checkableType="radio"
+            checked={collectionMethod === cardOne}
+            onChange={() => {
+              handleCollectionMethodChange(cardOne);
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCheckableCard
+            id="getting_started_metrics"
+            label={cardTwo}
+            checkableType="radio"
+            checked={collectionMethod === cardTwo}
+            onChange={() => {
+              handleCollectionMethodChange(cardTwo);
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCheckableCard
+            id="getting_started_traces"
+            label={cardThree}
+            checkableType="radio"
+            checked={collectionMethod === cardThree}
+            onChange={() => {
+              handleCollectionMethodChange(cardThree);
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      {renderSpecificMethodDropdown()}
+      <EuiSpacer size="s" />
+      {specificMethod && (
+        <>
+          <EuiSpacer size="s" />
+          {tabs.length > 0 && (
+            <>
+              <EuiTitle size="m">
+                <h3>
+                  How to ingest {specificMethod.charAt(0).toUpperCase() + specificMethod.slice(1)}{' '}
+                  {collectionMethod.toLowerCase()}
+                </h3>
+              </EuiTitle>
+              <EuiTabbedContent
+                tabs={tabs}
+                selectedTab={tabs.find((tab) => tab.id === selectedTabId)}
+                onTabClick={(tab) => setSelectedTabId(tab.id)}
+              />
+            </>
+          )}
+        </>
+      )}
     </EuiPanel>
   );
 };
