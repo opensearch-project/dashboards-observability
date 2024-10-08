@@ -18,10 +18,10 @@ import {
 import {
   DataSourceManagementPluginSetup,
   DataSourceSelectableConfig,
+  DataSourceViewConfig,
 } from '../../../../../src/plugins/data_source_management/public';
 import { TRACE_TABLE_TYPE_KEY } from '../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode, TraceQueryMode } from '../../../common/types/trace_analytics';
-import { dataSourceFilterFn } from '../../../common/utils/shared';
 import { coreRefs } from '../../framework/core_refs';
 import { FilterType } from './components/common/filters/filters';
 import { getAttributes, getSpanIndices } from './components/common/helper_functions';
@@ -73,6 +73,8 @@ export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, Sea
     spanMode: TraceAnalyticsMode;
     spanDataSourceMDSId: string;
   }) => void;
+  setDataSourceMenuSelectable?: React.Dispatch<React.SetStateAction<boolean>>;
+  currentSelectedService?: string;
 }
 
 export const Home = (props: HomeProps) => {
@@ -115,8 +117,16 @@ export const Home = (props: HomeProps) => {
   const [tracesTableMode, setTracesTableMode] = useState<TraceQueryMode>(
     (sessionStorage.getItem(TRACE_TABLE_TYPE_KEY) as TraceQueryMode) || 'all_spans'
   );
-  const [dataSourceMDSId, setDataSourceMDSId] = useState([{ id: '', label: '' }]);
+
+  // Get existing query params
+  const queryParamsOnLoad = new URLSearchParams(window.location.href.split('?')[1]);
+  const dsFromURL = queryParamsOnLoad.get('datasourceId');
+
+  const [dataSourceMDSId, setDataSourceMDSId] = useState([
+    { id: dsFromURL ?? undefined, label: undefined },
+  ]);
   const [currentSelectedService, setCurrentSelectedService] = useState('');
+  const [dataSourceMenuSelectable, setDataSourceMenuSelectable] = useState<boolean>(true);
 
   // Navigate a valid routes when suffixed with '/traces' and '/services'
   // Route defaults to traces page
@@ -133,28 +143,56 @@ export const Home = (props: HomeProps) => {
     DataSourceSelectableConfig
   >();
 
+  const DataSourceMenuView = props.dataSourceManagement?.ui?.getDataSourceMenu<
+    DataSourceViewConfig
+  >();
+
   const onSelectedDataSource = (e) => {
     const dataConnectionId = e[0] ? e[0].id : undefined;
     const dataConnectionLabel = e[0] ? e[0].label : undefined;
 
-    setDataSourceMDSId([{ id: dataConnectionId, label: dataConnectionLabel }]);
+    if (dataConnectionId !== dataSourceMDSId[0].id) {
+      setDataSourceMDSId([{ id: dataConnectionId, label: dataConnectionLabel }]);
+
+      const currentUrl = window.location.href.split('?')[0];
+      const queryParams = new URLSearchParams(window.location.search);
+
+      queryParams.set('datasourceId', dataConnectionId);
+
+      window.history.replaceState(null, '', `${currentUrl}?${queryParams.toString()}`);
+    }
   };
 
   const dataSourceMenuComponent = useMemo(() => {
-    return (
+    const sharedProps = {
+      setMenuMountPoint: props.setActionMenu,
+      componentConfig: {
+        activeOption: dataSourceMDSId[0].id === undefined ? undefined : dataSourceMDSId,
+        savedObjects: props.savedObjectsMDSClient.client,
+        notifications: props.notifications,
+        fullWidth: true,
+      },
+    };
+
+    return dataSourceMenuSelectable ? (
       <DataSourceMenu
-        setMenuMountPoint={props.setActionMenu}
+        {...sharedProps}
         componentType={'DataSourceSelectable'}
         componentConfig={{
-          savedObjects: props.savedObjectsMDSClient.client,
-          notifications: props.notifications,
-          fullWidth: true,
+          ...sharedProps.componentConfig,
           onSelectedDataSources: onSelectedDataSource,
-          dataSourceFilter: dataSourceFilterFn,
         }}
       />
+    ) : (
+      <DataSourceMenuView {...sharedProps} componentType={'DataSourceView'} />
     );
-  }, [props.setActionMenu, props.savedObjectsMDSClient.client, props.notifications]);
+  }, [
+    dataSourceMDSId,
+    dataSourceMenuSelectable,
+    props.setActionMenu,
+    props.savedObjectsMDSClient.client,
+    props.notifications,
+  ]);
 
   useEffect(() => {
     handleDataPrepperIndicesExistRequest(
@@ -235,7 +273,18 @@ export const Home = (props: HomeProps) => {
     sessionStorage.setItem(TRACE_TABLE_TYPE_KEY, 'traces');
   };
 
-  const getTraceViewUri = (traceId: string) => `#/traces/${encodeURIComponent(traceId)}`;
+  const getTraceViewUri = (traceId: string) => {
+    const dataSourceId = dataSourceMDSId[0].id;
+    if (dataSourceId && dataSourceId !== '') {
+      // If a datasourceId is selected, include it in the URL
+      return `#/traces?datasourceId=${encodeURIComponent(
+        dataSourceId
+      )}&traceId=${encodeURIComponent(traceId)}`;
+    } else {
+      // If no datasourceId is selected leave it as empty
+      return `#/traces?datasourceId=&traceId=${encodeURIComponent(traceId)}`;
+    }
+  };
 
   const [spanFlyoutComponent, setSpanFlyoutComponent] = useState(<></>);
 
@@ -293,6 +342,8 @@ export const Home = (props: HomeProps) => {
     savedObjectsMDSClient: props.savedObjectsMDSClient,
     attributesFilterFields,
     setSpanFlyout,
+    setDataSourceMenuSelectable,
+    currentSelectedService,
   };
 
   let flyout;
@@ -317,118 +368,95 @@ export const Home = (props: HomeProps) => {
         }}
         toastLifeTimeMs={6000}
       />
+      {props.dataSourceEnabled && dataSourceMenuComponent}
       <HashRouter>
         <Route
-          exact
           path="/traces"
-          render={(_routerProps) =>
-            !isNavGroupEnabled ? (
-              <TraceSideBar>
-                {props.dataSourceEnabled && dataSourceMenuComponent}
-                <Traces
-                  page="traces"
-                  childBreadcrumbs={traceBreadcrumbs}
-                  getTraceViewUri={getTraceViewUri}
-                  setCurrentSelectedService={setCurrentSelectedService}
-                  toasts={toasts}
-                  dataSourceMDSId={dataSourceMDSId}
-                  tracesTableMode={tracesTableMode}
-                  setTracesTableMode={setTracesTableMode}
-                  {...commonProps}
-                />
-              </TraceSideBar>
-            ) : (
-              <>
-                {props.dataSourceEnabled && dataSourceMenuComponent}
+          render={(_routerProps) => {
+            const queryParams = new URLSearchParams(window.location.href.split('?')[1]);
+            const traceId = queryParams.get('traceId');
 
-                <Traces
-                  page="traces"
-                  childBreadcrumbs={traceBreadcrumbs}
-                  getTraceViewUri={getTraceViewUri}
-                  setCurrentSelectedService={setCurrentSelectedService}
-                  toasts={toasts}
+            const SideBarComponent = !isNavGroupEnabled ? TraceSideBar : React.Fragment;
+            if (!traceId) {
+              return (
+                <SideBarComponent>
+                  <Traces
+                    page="traces"
+                    childBreadcrumbs={traceBreadcrumbs}
+                    getTraceViewUri={getTraceViewUri}
+                    setCurrentSelectedService={setCurrentSelectedService}
+                    toasts={toasts}
+                    dataSourceMDSId={dataSourceMDSId}
+                    tracesTableMode={tracesTableMode}
+                    setTracesTableMode={setTracesTableMode}
+                    {...commonProps}
+                  />
+                </SideBarComponent>
+              );
+            } else {
+              return (
+                <TraceView
+                  parentBreadcrumb={props.parentBreadcrumb}
+                  chrome={props.chrome}
+                  http={props.http}
+                  traceId={decodeURIComponent(traceId)}
+                  mode={mode}
                   dataSourceMDSId={dataSourceMDSId}
-                  tracesTableMode={tracesTableMode}
-                  setTracesTableMode={setTracesTableMode}
-                  {...commonProps}
+                  dataSourceManagement={props.dataSourceManagement}
+                  setActionMenu={props.setActionMenu}
+                  notifications={props.notifications}
+                  dataSourceEnabled={props.dataSourceEnabled}
+                  savedObjectsMDSClient={props.savedObjectsMDSClient}
+                  setDataSourceMenuSelectable={setDataSourceMenuSelectable}
                 />
-              </>
-            )
-          }
+              );
+            }
+          }}
         />
         <Route
-          path="/traces/:id+"
-          render={(routerProps) => (
-            <TraceView
-              parentBreadcrumb={props.parentBreadcrumb}
-              chrome={props.chrome}
-              http={props.http}
-              traceId={decodeURIComponent(routerProps.match.params.id)}
-              mode={mode}
-              dataSourceMDSId={dataSourceMDSId}
-              dataSourceManagement={props.dataSourceManagement}
-              setActionMenu={props.setActionMenu}
-              notifications={props.notifications}
-              dataSourceEnabled={props.dataSourceEnabled}
-              savedObjectsMDSClient={props.savedObjectsMDSClient}
-            />
-          )}
-        />
-        <Route
-          exact
-          path={['/services']}
-          render={(_routerProps) =>
-            !isNavGroupEnabled ? (
-              <TraceSideBar>
-                {props.dataSourceEnabled && dataSourceMenuComponent}
-                <Services
-                  page="services"
-                  childBreadcrumbs={serviceBreadcrumbs}
-                  traceColumnAction={traceColumnAction}
-                  setCurrentSelectedService={setCurrentSelectedService}
-                  toasts={toasts}
-                  dataSourceMDSId={dataSourceMDSId}
+          path="/services"
+          render={(_routerProps) => {
+            const queryParams = new URLSearchParams(window.location.href.split('?')[1]);
+            const serviceId = queryParams.get('serviceId');
+
+            const SideBarComponent = !isNavGroupEnabled ? TraceSideBar : React.Fragment;
+            if (!serviceId) {
+              return (
+                <SideBarComponent>
+                  <Services
+                    page="services"
+                    childBreadcrumbs={serviceBreadcrumbs}
+                    traceColumnAction={traceColumnAction}
+                    setCurrentSelectedService={setCurrentSelectedService}
+                    toasts={toasts}
+                    dataSourceMDSId={dataSourceMDSId}
+                    {...commonProps}
+                  />
+                </SideBarComponent>
+              );
+            } else {
+              return (
+                <ServiceView
+                  serviceName={decodeURIComponent(serviceId)}
                   {...commonProps}
-                />
-              </TraceSideBar>
-            ) : (
-              <>
-                {props.dataSourceEnabled && dataSourceMenuComponent}
-                <Services
-                  page="services"
-                  childBreadcrumbs={serviceBreadcrumbs}
-                  traceColumnAction={traceColumnAction}
-                  setCurrentSelectedService={setCurrentSelectedService}
-                  toasts={toasts}
+                  addFilter={(filter: FilterType) => {
+                    for (const addedFilter of filters) {
+                      if (
+                        addedFilter.field === filter.field &&
+                        addedFilter.operator === filter.operator &&
+                        addedFilter.value === filter.value
+                      ) {
+                        return;
+                      }
+                    }
+                    const newFilters = [...filters, filter];
+                    setFiltersWithStorage(newFilters);
+                  }}
                   dataSourceMDSId={dataSourceMDSId}
-                  {...commonProps}
                 />
-              </>
-            )
-          }
-        />
-        <Route
-          path="/services/:id+"
-          render={(routerProps) => (
-            <ServiceView
-              serviceName={decodeURIComponent(routerProps.match.params.id)}
-              {...commonProps}
-              addFilter={(filter: FilterType) => {
-                for (const addedFilter of filters) {
-                  if (
-                    addedFilter.field === filter.field &&
-                    addedFilter.operator === filter.operator &&
-                    addedFilter.value === filter.value
-                  ) {
-                    return;
-                  }
-                }
-                const newFilters = [...filters, filter];
-                setFiltersWithStorage(newFilters);
-              }}
-              dataSourceMDSId={dataSourceMDSId}
-            />
-          )}
+              );
+            }
+          }}
         />
         <Route path="/" render={() => <Redirect to={defaultRoute} />} />
       </HashRouter>

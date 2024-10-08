@@ -7,8 +7,8 @@ import { i18n } from '@osd/i18n';
 import {
   observabilityGettingStartedID,
   observabilityMetricsID,
-  observabilityTracesNewNavURL,
-  observabilityServicesNewNavURL,
+  observabilityTracesNewNavID,
+  observabilityServicesNewNavID,
   alertingPluginID,
   anomalyDetectionPluginID,
   tutorialSampleDataPluginId,
@@ -82,7 +82,7 @@ const TRACES_CONFIG: GettingStartedConfig = {
   }),
   description: 'Analyze performance bottlenecks using event flow visualizations.',
   footer: 'Traces',
-  url: observabilityTracesNewNavURL,
+  url: observabilityTracesNewNavID,
   path: '#/',
 };
 
@@ -94,7 +94,7 @@ const SERVICES_CONFIG: GettingStartedConfig = {
   }),
   description: 'Identify service performance issues with comprehensive monitoring and analysis.',
   footer: 'Services',
-  url: observabilityServicesNewNavURL,
+  url: observabilityServicesNewNavID,
   path: '#/',
 };
 
