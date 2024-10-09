@@ -907,10 +907,10 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                     </EuiFlexGroup>
                   </EuiSearchBar>
                   <EuiSpacer
-                    size="m"
+                    size="l"
                   >
                     <div
-                      className="euiSpacer euiSpacer--m"
+                      className="euiSpacer euiSpacer--l"
                     />
                   </EuiSpacer>
                   <EuiBasicTable
