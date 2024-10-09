@@ -531,7 +531,7 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                   >
                     <EuiFlexGroup
                       alignItems="center"
-                      gutterSize="m"
+                      gutterSize="s"
                       wrap={true}
                     >
                       <div
@@ -907,10 +907,10 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                     </EuiFlexGroup>
                   </EuiSearchBar>
                   <EuiSpacer
-                    size="l"
+                    size="m"
                   >
                     <div
-                      className="euiSpacer euiSpacer--l"
+                      className="euiSpacer euiSpacer--m"
                     />
                   </EuiSpacer>
                   <EuiBasicTable
