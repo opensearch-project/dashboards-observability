@@ -36,23 +36,6 @@ jobs:
         with:
           path: OpenSearch-Dashboards/plugins/dashboards-observability
 
-      - name: Get yarn cache dir
-        id: setup-yarn
-        shell: bash
-        run: |
-          cd ./OpenSearch-Dashboards
-          source $NVM_DIR/nvm.sh
-          nvm use
-          echo "yarn-cache-dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-
-      - name: Yarn Cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.setup-yarn.outputs.yarn-cache-dir }}
-          key: ${{ runner.OS }}-yarn-${{ hashFiles('OpenSearch-Dashboards/**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.OS }}-yarn-
-
       - name: Plugin Bootstrap
         uses: nick-fields/retry@v2
         with:
@@ -128,20 +111,6 @@ jobs:
 
       - run: node -v
       - run: yarn -v
-
-      - name: Get yarn cache dir
-        id: setup-yarn
-        shell: bash
-        run: |
-          echo "yarn-cache-dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-
-      - name: Yarn Cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.setup-yarn.outputs.yarn-cache-dir }}
-          key: ${{ runner.OS }}-yarn-${{ hashFiles('OpenSearch-Dashboards/**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.OS }}-yarn-
 
       - name: Checkout Dashboards Observability
         uses: actions/checkout@v2
