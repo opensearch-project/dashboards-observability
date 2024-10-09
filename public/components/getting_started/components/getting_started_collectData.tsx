@@ -168,7 +168,9 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
 
     const iconMap: Record<string, string> = {
       golang: golangIcon,
-      otel: otelIcon,
+      otelLogs: otelIcon,
+      otelMetrics: otelIcon,
+      otelTraces: otelIcon,
       python: pythonIcon,
       nginx: nginxIcon,
       java: javaIcon,
@@ -567,7 +569,10 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
             <>
               <EuiTitle size="m">
                 <h3>
-                  How to ingest {specificMethod.charAt(0).toUpperCase() + specificMethod.slice(1)}{' '}
+                  How to ingest{' '}
+                  {specificMethod.startsWith('otel')
+                    ? 'OpenTelemetry'
+                    : specificMethod.charAt(0).toUpperCase() + specificMethod.slice(1)}{' '}
                   {collectionMethod.toLowerCase()}
                 </h3>
               </EuiTitle>
