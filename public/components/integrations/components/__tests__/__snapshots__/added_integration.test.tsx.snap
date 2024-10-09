@@ -535,7 +535,7 @@ exports[`Added Integration View Test Renders added integration view using dummy 
                       wrap={true}
                     >
                       <div
-                        className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+                        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
                       >
                         <EuiFlexItem
                           className="euiSearchBar__searchHolder"
