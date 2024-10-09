@@ -401,32 +401,33 @@ export class ObservabilityPlugin
     }));
     setupDeps.embeddable.registerEmbeddableFactory(OBSERVABILITY_EMBEDDABLE, embeddableFactory);
 
-    setupDeps.visualizations.registerAlias({
-      name: OBSERVABILITY_EMBEDDABLE_ID,
-      title: OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME,
-      description: OBSERVABILITY_EMBEDDABLE_DESCRIPTION,
-      icon: OBSERVABILITY_EMBEDDABLE_ICON,
-      aliasApp: observabilityLogsID,
-      aliasPath: `#/explorer/?${CREATE_TAB_PARAM_KEY}=${CREATE_TAB_PARAM[TAB_CHART_ID]}`,
-      stage: 'production',
-      appExtensions: {
-        visualizations: {
-          docTypes: [VISUALIZATION_SAVED_OBJECT],
-          toListItem: ({ id, attributes, updated_at: updatedAt }) => ({
-            description: attributes?.description,
-            editApp: observabilityLogsID,
-            editUrl: `#/explorer/${VISUALIZATION_SAVED_OBJECT}:${id}`,
-            icon: OBSERVABILITY_EMBEDDABLE_ICON,
-            id,
-            savedObjectType: VISUALIZATION_SAVED_OBJECT,
-            title: attributes?.title,
-            typeTitle: OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME,
-            stage: 'production',
-            updated_at: updatedAt,
-          }),
+    if (!setupDeps.dataSource)
+      setupDeps.visualizations.registerAlias({
+        name: OBSERVABILITY_EMBEDDABLE_ID,
+        title: OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME,
+        description: OBSERVABILITY_EMBEDDABLE_DESCRIPTION,
+        icon: OBSERVABILITY_EMBEDDABLE_ICON,
+        aliasApp: observabilityLogsID,
+        aliasPath: `#/explorer/?${CREATE_TAB_PARAM_KEY}=${CREATE_TAB_PARAM[TAB_CHART_ID]}`,
+        stage: 'production',
+        appExtensions: {
+          visualizations: {
+            docTypes: [VISUALIZATION_SAVED_OBJECT],
+            toListItem: ({ id, attributes, updated_at: updatedAt }) => ({
+              description: attributes?.description,
+              editApp: observabilityLogsID,
+              editUrl: `#/explorer/${VISUALIZATION_SAVED_OBJECT}:${id}`,
+              icon: OBSERVABILITY_EMBEDDABLE_ICON,
+              id,
+              savedObjectType: VISUALIZATION_SAVED_OBJECT,
+              title: attributes?.title,
+              typeTitle: OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME,
+              stage: 'production',
+              updated_at: updatedAt,
+            }),
+          },
         },
-      },
-    });
+      });
 
     registerAsssitantDependencies(setupDeps.assistantDashboards);
 

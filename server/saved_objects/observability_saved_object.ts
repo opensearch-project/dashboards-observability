@@ -11,7 +11,7 @@ import {
   VISUALIZATION_SAVED_OBJECT,
 } from '../../common/types/observability_saved_object_attributes';
 
-export const visualizationSavedObject: SavedObjectsType = {
+export const getVisualizationSavedObject = (dataSourceEnabled: boolean): SavedObjectsType => ({
   name: VISUALIZATION_SAVED_OBJECT,
   hidden: false,
   namespaceType: 'single',
@@ -26,7 +26,7 @@ export const visualizationSavedObject: SavedObjectsType = {
       const editPath = `#/explorer/${VISUALIZATION_SAVED_OBJECT}:${obj.id}`;
       const editUrl = `/app/${observabilityLogsID}${editPath}`;
       return {
-        path: editUrl,
+        path: dataSourceEnabled ? '' : editUrl,
         uiCapabilitiesPath: 'observability.show',
       };
     },
@@ -44,9 +44,9 @@ export const visualizationSavedObject: SavedObjectsType = {
     },
   },
   migrations: {},
-};
+});
 
-export const searchSavedObject: SavedObjectsType = {
+export const getSearchSavedObject = (dataSourceEnabled: boolean): SavedObjectsType => ({
   name: SEARCH_SAVED_OBJECT,
   icon: 'editorCodeBlock',
   hidden: false,
@@ -61,7 +61,7 @@ export const searchSavedObject: SavedObjectsType = {
       const editPath = `#/explorer/${SEARCH_SAVED_OBJECT}:${obj.id}`;
       const editUrl = `/app/${observabilityLogsID}${editPath}`;
       return {
-        path: editUrl,
+        path: dataSourceEnabled ? '' : editUrl,
         uiCapabilitiesPath: 'observability.show',
       };
     },
@@ -79,7 +79,7 @@ export const searchSavedObject: SavedObjectsType = {
     },
   },
   migrations: {},
-};
+});
 
 export const notebookSavedObject: SavedObjectsType = {
   name: NOTEBOOK_SAVED_OBJECT,
