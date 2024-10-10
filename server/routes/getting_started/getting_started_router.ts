@@ -48,48 +48,6 @@ export function registerGettingStartedRoutes(router: IRouter) {
     }
   );
 
-  // Fetch the tutorial dashboards
-  router.get(
-    {
-      path: `/api/observability/gettingStarted/dashboards/{tutorialId}`,
-      validate: {
-        params: schema.object({
-          tutorialId: schema.string(),
-        }),
-      },
-    },
-    async (
-      context,
-      request,
-      response
-    ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      try {
-        const fileData = await loadAssetsFromFile(request.params.tutorialId);
-
-        const objects = await createSavedObjectsStreamFromNdJson(Readable.from(fileData));
-        const loadedObjects = await objects.toArray();
-        const loadDashboardIds = loadedObjects
-          .filter((savedObject) => savedObject.type === 'dashboard')
-          .map((dashboard) => ({
-            id: dashboard.id,
-            title: dashboard.attributes.title,
-          }));
-
-        return response.ok({
-          body: {
-            data: loadDashboardIds,
-          },
-        });
-      } catch (error) {
-        console.error(error);
-        return response.custom({
-          statusCode: error.statusCode || 500,
-          body: 'Issue in fetching dashboards for tutorialId: ' + request.params.tutorialId,
-        });
-      }
-    }
-  );
-
   // Fetch the tutorial saved searches
   router.get(
     {

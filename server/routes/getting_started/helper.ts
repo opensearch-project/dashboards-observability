@@ -8,8 +8,12 @@ import path from 'path';
 
 export const assetMapper = (tutorialId: string) => {
   switch (tutorialId) {
-    case 'otel':
-      return 'otel-index-patterns-1.0.0.ndjson';
+    case 'otelLogs':
+      return 'otel-index-patterns-1.0.0-Logs.ndjson';
+    case 'otelMetrics':
+      return 'otel-index-patterns-1.0.0-Metrics.ndjson';
+    case 'otelTraces':
+      return 'otel-index-patterns-1.0.0-Traces.ndjson';
     case 'nginx':
       return 'nginx-1.0.0.ndjson';
     case 'java':
@@ -18,10 +22,6 @@ export const assetMapper = (tutorialId: string) => {
       return 'python-tutorial-1.0.0.ndjson';
     case 'golang':
       return 'golang-tutorial-1.0.0.ndjson';
-    case 'csv':
-      return 'fluent-bit-csv-upload-1.0.0.ndjson';
-    case 'data-prepper':
-      return 'dummy.ndjson';
     default:
       return '';
   }
