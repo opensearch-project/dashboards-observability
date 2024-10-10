@@ -239,17 +239,10 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
       });
     };
 
-    const handleDiscoverNavigation = () => {
-      coreRefs.application?.navigateToApp('data-explorer', { path: '/discover' });
-    };
-
     return (
       <>
         <EuiText>
-          <p>
-            Query your data in <EuiLink onClick={handleDiscoverNavigation}>Discover</EuiLink> to
-            uncover insights
-          </p>
+          <p>Query your data in Discover to uncover insights</p>
         </EuiText>
         <EuiSpacer size="s" />
         <EuiListGroup flush>
