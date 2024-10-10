@@ -13,6 +13,7 @@ import {
   PluginInitializerContext,
   SavedObject,
   SavedObjectsType,
+  UiSettingScope,
 } from '../../../src/core/server';
 import { DataSourcePluginSetup } from '../../../src/plugins/data_source/server/types';
 import { DataSourceManagementPlugin } from '../../../src/plugins/data_source_management/public/plugin';
@@ -237,6 +238,9 @@ export class ObservabilityPlugin
         value: '',
         description: 'The default dashboard to display in Observability overview page',
         schema: schema.string(),
+        scope: core.workspace.isWorkspaceEnabled()
+          ? UiSettingScope.WORKSPACE
+          : UiSettingScope.GLOBAL,
       },
     });
 
