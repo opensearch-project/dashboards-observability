@@ -56,7 +56,7 @@
     "live-sample": "true",
     "workflows": [
       {
-        "name": "Go-client Setup",
+        "name": "Self managed",
         "description": "This is a Go-based getting started instructions tutorial",
         "steps": [
           {

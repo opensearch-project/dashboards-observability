@@ -42,7 +42,7 @@
     "live-sample": "true",
     "workflows": [
       {
-        "name": "Python-client",
+        "name": "Self managed",
         "description": "This is a fluent-bit based getting started instructions tutorial",
         "steps": [
           {

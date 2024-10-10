@@ -119,7 +119,7 @@
     "live-sample": "true",
     "workflows": [
       {
-        "name": "Connect to Nginx",
+        "name": "Self managed",
         "description": "This is a fluent-bit based getting started instructions tutorial",
         "steps": [
           {
