@@ -130,14 +130,8 @@
             "label": "Logs Exporter",
             "type": "console-cmd",
             "phase": "pipeline",
-            "info": [
-              {
-                "url": "https://raw.githubusercontent.com/opensearch-project/opentelemetry-demo/main/src/dataprepper/pipelines.yaml",
-                "title": "Logs Pipeline Configuration"
-              }
-            ],
             "description": "Configure Data-prepper logs pipeline and export into opensearch index",
-            "content": "otel-logs-pipeline:\n  workers: 5\n  delay: 10\n  source:\n    otel_logs_source:\n      ssl: false\n  buffer:\n    bounded_blocking:\n  sink:\n    - opensearch:\n        hosts: [\"https://opensearch-node1:9200\"]\n        username: \"admin\"\n        password: \"my_%New%_passW0rd!@#\"\n        insecure: true\n        index_type: custom\n        index: otel-events-%{yyyy.MM.dd}\n        bulk_size: 4\n"
+            "content": "otel-logs-pipeline:\n  workers: 5\n  delay: 10\n  source:\n    otel_logs_source:\n      ssl: false\n  buffer:\n    bounded_blocking:\n  sink:\n    - opensearch:\n        hosts: [\"<<https://opensearch-domain.com>>\"]\n        username: \"<<username>>\"\n        password: \"<<password>>\"\n        insecure: true\n        index_type: custom\n        index: otel-events-%{yyyy.MM.dd}\n        bulk_size: 4\n"
           },
           {
             "name": "Configure Data-Prepper inside Otel Collector",
@@ -165,25 +159,32 @@
         },
         "steps": [
           {
-            "name": "PLACEHOLDER",
+            "name": "Configure AWS OpenSearch ingestion services logs pipeline",
             "label": "Logs Exporter",
             "type": "console-cmd",
             "phase": "pipeline",
             "info": [
               {
-                "url": "https://raw.githubusercontent.com/opensearch-project/opentelemetry-demo/main/src/dataprepper/pipelines.yaml",
-                "title": "Logs Pipeline Configuration"
+                "url": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/pipeline-blueprint.html",
+                "title": "Ingestion service documentation"
               }
             ],
             "description": "Configure Data-prepper logs pipeline and export into opensearch index",
-            "content": "otel-logs-pipeline:\n  workers: 5\n  delay: 10\n  source:\n    otel_logs_source:\n      ssl: false\n  buffer:\n    bounded_blocking:\n  sink:\n    - opensearch:\n        hosts: [\"https://opensearch-node1:9200\"]\n        username: \"admin\"\n        password: \"my_%New%_passW0rd!@#\"\n        insecure: true\n        index_type: custom\n        index: otel-events-%{yyyy.MM.dd}\n        bulk_size: 4\n"
+            "content": "version: \"2\"\notel-logs-pipeline:\n  source:\n    otel_logs_source:\n      # Provide the path for ingestion. ${pipelineName} will be replaced with sub-pipeline name, i.e. otel-logs-pipeline, configured for this pipeline.\n      # In this case it would be \"/otel-logs-pipeline/v1/logs\".\n      path: \"/${pipelineName}/v1/logs\"\n  sink:\n    - opensearch:\n        # Provide an AWS OpenSearch Service domain endpoint\n        hosts: [ \"<<https://search-mydomain-1a2a3a4a5a6a7a8a9a0a9a8a7a.us-east-1.es.amazonaws.com>>\" ]\n        aws:\n          # Provide a Role ARN with access to the domain. This role should have a trust relationship with osis-pipelines.amazonaws.com\n          sts_role_arn: \"<<arn:aws:iam::123456789012:role/Example-Role>>\"\n          # Provide the region of the domain.\n          region: \"<<us-east-1>>\"\n          # Enable the 'serverless' flag if the sink is an Amazon OpenSearch Serverless collection\n          serverless: false\n          # serverless_options:\n            # Specify a name here to create or update network policy for the serverless collection\n            # network_policy_name: \"network-policy-name\"\n        index: \"logs\"\n        # Enable the 'distribution_version' setting if the AWS OpenSearch Service domain is of version Elasticsearch 6.x\n        # distribution_version: \"es6\"\n        # Enable and switch the 'enable_request_compression' flag if the default compression setting is changed in the domain. See https://docs.aws.amazon.com/opensearch-service/latest/developerguide/gzip.html\n        # enable_request_compression: true/false\n        # Optional: Enable the S3 DLQ to capture any failed requests in an S3 bucket. Delete this entire block if you don't want a DLQ.\n        dlq:\n          s3:\n            # Provide an S3 bucket\n            bucket: \"<<your-dlq-bucket-name>>\"\n            # Provide a key path prefix for the failed requests\n            # key_path_prefix: \"apache-log-pipeline/logs/dlq\"\n            # Provide the region of the bucket.\n            region: \"<<us-east-1>>\"\n            # Provide a Role ARN with access to the bucket. This role should have a trust relationship with osis-pipelines.amazonaws.com\n            sts_role_arn: \"<<arn:aws:iam::123456789012:role/Example-Role>>\""
+          },
+          {
+            "name": "Configure OSIS pipeline inside OTEL collector",
+            "label": "OSIS collector",
+            "type": "console-cmd",
+            "phase": "Collector",
+            "content": "extensions:\n  sigv4auth:\n    region: \"__AWS_REGION__\"\n    service: \"osis\"\n\nreceivers:\n  otlp:\n \nexporters:\n  otlphttp/logs:\n    logs_endpoint: \"https://__REPLACE_WITH_OtelLogs_ENDPOINT__/v1/logs\"\n    auth:\n      authenticator: sigv4auth\n    compression: none\n\nservice:\n  extensions: [sigv4auth]\n  pipelines:\n    logs:\n      receivers: [otlp]\n      exporters: [otlphttp/logs]"
           }
         ]
       }
     ],
     "schema": [
       {
-        "type": "logs",
+        "type": "Logs",
         "info": [
           {
             "url": "https://opensearch.org/docs/latest/im-plugin/index-templates",

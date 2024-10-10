@@ -83,6 +83,10 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
   };
 
   useEffect(() => {
+    handleCollectionMethodChange(cardOne);
+  }, []);
+
+  useEffect(() => {
     let isMounted = true;
 
     const fetchPatterns = async () => {
@@ -192,11 +196,8 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
 
     return (
       <>
-        <EuiText>
-          <h3>{collectionMethod}</h3>
-        </EuiText>
         <EuiSpacer size="s" />
-        <EuiText size="s">Select collector</EuiText>
+        <EuiText size="s">Select telemetry source</EuiText>
         <div style={{ maxWidth: '400px' }}>
           <EuiCompressedComboBox
             singleSelection={{ asPlainText: true }}
@@ -272,50 +273,58 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
   };
 
   const renderSchema = (schemas: any[]) =>
-    schemas.map((schema, idx) => (
-      <div key={idx}>
-        <EuiTitle size="s">
-          <h3>{schema.type} Schema</h3>
-        </EuiTitle>
-        <EuiText>
-          {schema.description}
-          <br />
-          {schema.alias && (
-            <>
-              <strong>Alias:</strong> {schema.alias}
-              <br />
-            </>
-          )}
-          <strong>Index Pattern Name:</strong> {schema['index-pattern-name']}
-          <br />
-          {Array.isArray(schema.info) &&
-            schema.info.map((link: any, linkIdx: number) =>
-              link && typeof link.url === 'string' ? (
-                <EuiLink key={linkIdx} href={link.url} target="_blank">
-                  {typeof link.title === 'string' && link.title.trim() !== ''
-                    ? link.title
-                    : 'More Info'}
-                </EuiLink>
-              ) : (
-                <EuiText color="danger" key={linkIdx}>
-                  Invalid URL
-                </EuiText>
-              )
+    schemas.map((schema, idx) => {
+      const indexPatternName = schema['index-pattern-name'] || '';
+
+      return (
+        <div key={idx}>
+          <EuiTitle size="s">
+            <h3>{schema.type} Schema</h3>
+          </EuiTitle>
+          <EuiText>
+            {schema.description}
+            <br />
+            {schema.alias && (
+              <>
+                <strong>Alias:</strong> {schema.alias}
+                <br />
+              </>
             )}
-        </EuiText>
-        {schema.content && (
-          <EuiCodeBlock language="bash" fontSize="m" paddingSize="s" isCopyable>
-            {schema.content}
-          </EuiCodeBlock>
-        )}
-        {schema['index-template'] && (
-          <EuiLink href={schema['index-template']} target="_blank">
-            Index Template
-          </EuiLink>
-        )}
-        <EuiSpacer size="m" />
-      </div>
-    ));
+            {indexPatternName && (
+              <>
+                <strong>Index Pattern Name:</strong> {indexPatternName}
+                <br />
+              </>
+            )}
+            {Array.isArray(schema.info) &&
+              schema.info.map((link: any, linkIdx: number) =>
+                link && typeof link.url === 'string' ? (
+                  <EuiLink key={linkIdx} href={link.url} target="_blank">
+                    {typeof link.title === 'string' && link.title.trim() !== ''
+                      ? link.title
+                      : 'More Info'}
+                  </EuiLink>
+                ) : (
+                  <EuiText color="danger" key={linkIdx}>
+                    Invalid URL
+                  </EuiText>
+                )
+              )}
+          </EuiText>
+          {schema.content && (
+            <EuiCodeBlock language="bash" fontSize="m" paddingSize="s" isCopyable>
+              {schema.content}
+            </EuiCodeBlock>
+          )}
+          {schema['index-template'] && (
+            <EuiLink href={schema['index-template']} target="_blank">
+              {`${indexPatternName} Index Template`}
+            </EuiLink>
+          )}
+          <EuiSpacer size="m" />
+        </div>
+      );
+    });
 
   const renderIndex = (indexPatterns: any) => (
     <>
@@ -361,29 +370,11 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
     const baseUrl = `${window.location.origin}/app`;
 
     const cardData = {
-      otelLogs: {
-        title: 'Otel Dashboard',
-        description: 'Analyze logs with pre-packaged dashboards',
-        icon: <img src={otelIcon} alt="Otel Icon" className="synopsisIcon" />,
-        url: `${baseUrl}/integrations#/available/otel-services`,
-      },
-      otelMetrics: {
-        title: 'Otel Dashboard',
-        description: 'Analyze logs with pre-packaged dashboards',
-        icon: <img src={otelIcon} alt="Otel Icon" className="synopsisIcon" />,
-        url: `${baseUrl}/integrations#/available/otel-services`,
-      },
-      otelTraces: {
-        title: 'Otel Dashboard',
-        description: 'Analyze logs with pre-packaged dashboards',
-        icon: <img src={otelIcon} alt="Otel Icon" className="synopsisIcon" />,
-        url: `${baseUrl}/integrations#/available/otel-services`,
-      },
       nginx: {
         title: 'Nginx Dashboard',
         description: 'Analyze logs with pre-packaged dashboards',
         icon: <img src={nginxIcon} alt="Nginx Icon" className="synopsisIcon" />,
-        url: `${baseUrl}/integrations#/available/nginx`,
+        url: `${baseUrl}/integrations#/available/nginx/setup`,
       },
     };
 
@@ -429,70 +420,73 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
   };
 
   const renderSteps = (workflow: any) => {
-    const steps = workflow.steps.map((step: any) => ({
-      title: step.name,
-      children: (
-        <div>
-          <EuiText>{step.description}</EuiText>
-          {step['input-params'] && step['input-params'].length > 0 && (
-            <div>
-              <EuiTitle size="xs">
-                <h4>Input Parameters:</h4>
-              </EuiTitle>
-              {step['input-params'].map((param: any, idx: number) => (
-                <EuiText key={idx}>
-                  <strong>{param.name}:</strong> {param.description} ({param.type})
-                </EuiText>
-              ))}
-            </div>
-          )}
+    const steps = [
+      {
+        title: 'Schema',
+        children: renderSchema(
+          technologyJsonMap[specificMethod]?.['getting-started']?.schema ||
+            technologyJsonMap[specificMethod]?.schema ||
+            []
+        ),
+      },
+      {
+        title: 'Index Patterns',
+        children: renderIndex(
+          technologyJsonMap[specificMethod]?.['getting-started']?.['index-patterns'] ||
+            technologyJsonMap[specificMethod]?.['index-patterns'] ||
+            {}
+        ),
+      },
+    ];
 
-          {Array.isArray(step.info) &&
-            step.info.map((link: any, linkIndex: number) => {
-              if (link && typeof link.url === 'string') {
-                return (
-                  <EuiLink key={linkIndex} href={link.url} target="_blank">
-                    {typeof link.title === 'string' && link.title.trim() !== ''
-                      ? link.title
-                      : 'More Info'}
-                  </EuiLink>
-                );
-              } else {
-                return (
-                  <EuiText color="danger" key={linkIndex}>
-                    Invalid URL
+    steps.push(
+      ...workflow.steps.map((step: any) => ({
+        title: step.name,
+        children: (
+          <div>
+            <EuiText>{step.description}</EuiText>
+            {step['input-params'] && step['input-params'].length > 0 && (
+              <div>
+                <EuiTitle size="xs">
+                  <h4>Input Parameters:</h4>
+                </EuiTitle>
+                {step['input-params'].map((param: any, idx: number) => (
+                  <EuiText key={idx}>
+                    <strong>{param.name}:</strong> {param.description}
                   </EuiText>
-                );
-              }
-            })}
+                ))}
+              </div>
+            )}
 
-          {step.content && (
-            <EuiCodeBlock language="bash" fontSize="m" paddingSize="s" isCopyable>
-              {step.content}
-            </EuiCodeBlock>
-          )}
-          <EuiSpacer size="m" />
-        </div>
-      ),
-    }));
+            {Array.isArray(step.info) &&
+              step.info.map((link: any, linkIndex: number) => {
+                if (link && typeof link.url === 'string') {
+                  return (
+                    <EuiLink key={linkIndex} href={link.url} target="_blank">
+                      {typeof link.title === 'string' && link.title.trim() !== ''
+                        ? link.title
+                        : 'More Info'}
+                    </EuiLink>
+                  );
+                } else {
+                  return (
+                    <EuiText color="danger" key={linkIndex}>
+                      Invalid URL
+                    </EuiText>
+                  );
+                }
+              })}
 
-    steps.push({
-      title: 'Schema',
-      children: renderSchema(
-        technologyJsonMap[specificMethod]?.['getting-started']?.schema ||
-          technologyJsonMap[specificMethod]?.schema ||
-          []
-      ),
-    });
-
-    steps.push({
-      title: 'Index Patterns',
-      children: renderIndex(
-        technologyJsonMap[specificMethod]?.['getting-started']?.['index-patterns'] ||
-          technologyJsonMap[specificMethod]?.['index-patterns'] ||
-          {}
-      ),
-    });
+            {step.content && (
+              <EuiCodeBlock language="bash" fontSize="m" paddingSize="s" isCopyable>
+                {step.content}
+              </EuiCodeBlock>
+            )}
+            <EuiSpacer size="m" />
+          </div>
+        ),
+      }))
+    );
 
     steps.push({
       title: 'Explore your data',
@@ -520,9 +514,6 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
 
   return (
     <EuiPanel paddingSize="m">
-      <EuiTitle size="s">
-        <h3>Ingest data by signal type</h3>
-      </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -567,9 +558,9 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
           <EuiSpacer size="s" />
           {tabs.length > 0 && (
             <>
-              <EuiTitle size="m">
+              <EuiTitle size="s">
                 <h3>
-                  How to ingest{' '}
+                  Steps to integrate{' '}
                   {specificMethod.startsWith('otel')
                     ? 'OpenTelemetry'
                     : specificMethod.charAt(0).toUpperCase() + specificMethod.slice(1)}{' '}

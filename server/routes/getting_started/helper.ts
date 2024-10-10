@@ -9,11 +9,11 @@ import path from 'path';
 export const assetMapper = (tutorialId: string) => {
   switch (tutorialId) {
     case 'otelLogs':
-      return 'otel-index-patterns-1.0.0.ndjson';
+      return 'otel-index-patterns-1.0.0-Logs.ndjson';
     case 'otelMetrics':
-      return 'otel-index-patterns-1.0.0.ndjson';
+      return 'otel-index-patterns-1.0.0-Metrics.ndjson';
     case 'otelTraces':
-      return 'otel-index-patterns-1.0.0.ndjson';
+      return 'otel-index-patterns-1.0.0-Traces.ndjson';
     case 'nginx':
       return 'nginx-1.0.0.ndjson';
     case 'java':

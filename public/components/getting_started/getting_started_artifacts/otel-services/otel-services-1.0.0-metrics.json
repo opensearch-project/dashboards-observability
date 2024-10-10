@@ -137,7 +137,7 @@
               }
             ],
             "description": "Configure Data-prepper Metrics pipeline and export into opensearch index",
-            "content": "otel-metrics-pipeline:\n  workers: 8\n  delay: 3000\n  source:\n    otel_metrics_source:\n      health_check_service: true\n      ssl: false\n  buffer:\n    bounded_blocking:\n      buffer_size: 1024 # max number of records the buffer accepts\n      batch_size: 1024 # max number of records the buffer drains after each read\n  processor:\n    - otel_metrics:\n        calculate_histogram_buckets: true\n        calculate_exponential_histogram_buckets: true\n        exponential_histogram_max_allowed_scale: 10\n        flatten_attributes: false\n  sink:\n    - opensearch:\n        hosts: [\"https://opensearch-node1:9200\"]\n        username: \"admin\"\n        password: \"my_%New%_passW0rd!@#\"\n        insecure: true\n        index_type: custom\n        index: ss4o_metrics-otel-%{yyyy.MM.dd}\n        bulk_size: 4\n        template_type: index-template"
+            "content": "otel-metrics-pipeline:\n  workers: 8\n  delay: 3000\n  source:\n    otel_metrics_source:\n      health_check_service: true\n      ssl: false\n  buffer:\n    bounded_blocking:\n      buffer_size: 1024 # max number of records the buffer accepts\n      batch_size: 1024 # max number of records the buffer drains after each read\n  processor:\n    - otel_metrics:\n        calculate_histogram_buckets: true\n        calculate_exponential_histogram_buckets: true\n        exponential_histogram_max_allowed_scale: 10\n        flatten_attributes: false\n  sink:\n    - opensearch:\n        hosts: [\"<<https://opensearch-domain.com>>\"]\n        username: \"<<username>>\"\n        password: \"<<password>>\"\n        insecure: true\n        index_type: custom\n        index: ss4o_metrics-otel-%{yyyy.MM.dd}\n        bulk_size: 4\n        template_type: index-template"
           },
           {
             "name": "Configure Data-Prepper inside Otel Collector",
@@ -165,25 +165,33 @@
         },
         "steps": [
           {
-            "name": "PLACEHOLDER",
-            "label": "Logs Exporter",
+            "name": "Configure AWS OpenSearch ingestion services metrics pipeline",
+            "label": "Metrics Exporter",
             "type": "console-cmd",
             "phase": "pipeline",
             "info": [
               {
-                "url": "https://raw.githubusercontent.com/opensearch-project/opentelemetry-demo/main/src/dataprepper/pipelines.yaml",
-                "title": "Logs Pipeline Configuration"
+                "url": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/pipeline-blueprint.html",
+                "title": "Ingestion service documentation"
               }
             ],
-            "description": "Configure Data-prepper logs pipeline and export into opensearch index",
-            "content": "otel-logs-pipeline:\n  workers: 5\n  delay: 10\n  source:\n    otel_logs_source:\n      ssl: false\n  buffer:\n    bounded_blocking:\n  sink:\n    - opensearch:\n        hosts: [\"https://opensearch-node1:9200\"]\n        username: \"admin\"\n        password: \"my_%New%_passW0rd!@#\"\n        insecure: true\n        index_type: custom\n        index: otel-events-%{yyyy.MM.dd}\n        bulk_size: 4\n"
+            "description": "Configure Data-prepper metrics pipeline and export into opensearch index",
+            "content": "version: \"2\"\notel-metrics-pipeline:\n  source:\n    otel_metrics_source:\n      # Provide the path for ingestion. ${pipelineName} will be replaced with sub-pipeline name, i.e. otel-metrics-pipeline, configured for this pipeline.\n      # In this case it would be \"/otel-metrics-pipeline/v1/metrics\". The value of the \"metrics_endpoint\" for the OpenTelemetry exporter should be\n      # https://<ingestion-endpoint-url>/otel-metrics-pipeline/v1/metrics\n      path: \"/${pipelineName}/v1/metrics\"\n  processor:\n    # For more configuration parameters, see https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/otel-metrics/\n    - otel_metrics:\n  sink:\n    - opensearch:\n        # Provide an AWS OpenSearch Service domain endpoint\n        hosts: [ \"<<https://search-mydomain-1a2a3a4a5a6a7a8a9a0a9a8a7a.us-east-1.es.amazonaws.com>>\" ]\n        aws:\n          # Provide a Role ARN with access to the domain. This role should have a trust relationship with osis-pipelines.amazonaws.com\n          sts_role_arn: \"<<arn:aws:iam::123456789012:role/Example-Role>>\"\n          # Provide the region of the domain.\n          region: \"<<us-east-1>>\"\n          # Enable the 'serverless' flag if the sink is an Amazon OpenSearch Serverless collection\n          serverless: false\n        # serverless_options:\n          # Specify a name here to create or update network policy for the serverless collection\n          # network_policy_name: \"network-policy-name\"\n        index: \"metrics\"\n        # Enable the 'distribution_version' setting if the AWS OpenSearch Service domain is of version Elasticsearch 6.x\n        # distribution_version: \"es6\"\n        # Enable and switch the 'enable_request_compression' flag if the default compression setting is changed in the domain. See https://docs.aws.amazon.com/opensearch-service/latest/developerguide/gzip.html\n        # enable_request_compression: true/false\n        # Optional: Enable the S3 DLQ to capture any failed requests in an S3 bucket. Delete this entire block if you don't want a DLQ.\n        dlq:\n          s3:\n            # Provide an S3 bucket\n            bucket: \"<<your-dlq-bucket-name>>\"\n            # Provide a key path prefix for the failed requests\n            # key_path_prefix: \"apache-log-pipeline/logs/dlq\"\n            # Provide the region of the bucket.\n            region: \"<<us-east-1>>\"\n            # Provide a Role ARN with access to the bucket. This role should have a trust relationship with osis-pipelines.amazonaws.com\n            sts_role_arn: \"<<arn:aws:iam::123456789012:role/Example-Role>>\""
+
+          },
+          {
+            "name": "Configure OSIS pipeline inside OTEL collector",
+            "label": "OSIS collector",
+            "type": "console-cmd",
+            "phase": "Collector",
+            "content": "extensions:\n  sigv4auth:\n    region: \"__AWS_REGION__\"\n    service: \"osis\"\n\nreceivers:\n  otlp:\n\nexporters:\n  otlphttp/metrics:\n    metrics_endpoint: \"https://__REPLACE_WITH_OtelMetrics_ENDPOINT__/v1/metrics\"\n    auth:\n      authenticator: sigv4auth\n    compression: none\n\nservice:\n  extensions: [sigv4auth]\n  pipelines:\n    metrics:\n      receivers: [otlp]\n      exporters: [otlphttp/metrics]"
           }
         ]
       }
     ],
     "schema": [
       {
-        "type": "metrics",
+        "type": "Metrics",
         "info": [
           {
             "url": "https://opensearch.org/docs/latest/im-plugin/index-templates",

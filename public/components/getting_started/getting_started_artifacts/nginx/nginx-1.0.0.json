@@ -134,7 +134,7 @@
               }
             ],
             "description": "Setup Fluent-Bit parser config file parsing Nginx access log fields",
-            "content": "[PARSER]\n    Name   apache\n    Format regex\n    Regex  ^(?<host>[^ ]*) [^ ]* (?<user>[^ ]*) \\[(?<time>[^\\]]*)\\] \"(?<method>\\S+)(?: +(?<path>[^\\\"]*?)(?: +\\S*)?)?\" (?<code>[^ ]*) (?<size>[^ ]*)(?: \"(?<referer>[^\\\"]*)\" \"(?<agent>[^\\\"]*)\")?$\n    Time_Key time\n    Time_Format %d/%b/%Y:%H:%M:%S %z\n\n[PARSER]\n    Name   nginx\n    Format regex\n    Regex ^(?<remote>[^ ]*) (?<host>[^ ]*) (?<user>[^ ]*) \\[(?<time>[^\\]]*)\\] \"(?<method>\\S+)(?: +(?<path>[^\\\"]*?)(?: +\\S*)?)?\" (?<code>[^ ]*) (?<size>[^ ]*)(?: \"(?<referer>[^\\\"]*)\" \"(?<agent>[^\\\"]*)\")\n    Time_Key time\n    Time_Format %d/%b/%Y:%H:%M:%S %z\n"
+            "content": "[PARSER]\n    Name   nginx\n    Format regex\n    Regex ^(?<remote>[^ ]*) (?<host>[^ ]*) (?<user>[^ ]*) \\[(?<time>[^\\]]*)\\] \"(?<method>\\S+)(?: +(?<path>[^\\\"]*?)(?: +\\S*)?)?\" (?<code>[^ ]*) (?<size>[^ ]*)(?: \"(?<referer>[^\\\"]*)\" \"(?<agent>[^\\\"]*)\")\n    Time_Key time\n    Time_Format %d/%b/%Y:%H:%M:%S %z\n"
           },
           {
             "name": "Fluent-Bit Log Converter",
@@ -164,8 +164,8 @@
             "description": "Setup Fluent-Bit conf file including logs parsing and OpenSearch access",
             "input-params": [
               {
-                "name": "opensearch-node1",
-                "description": "Opensearch host",
+                "name": "opensearch-endpoint",
+                "description": "Opensearch host url",
                 "type": "host-name"
               },
               {
@@ -174,7 +174,7 @@
                 "type": "index-name"
               }
             ],
-            "content": "[SERVICE]\n    Parsers_File parsers.conf\n\n[INPUT]\n    Name forward\n    Port 24224\n\n[FILTER]\n    Name parser\n    Match nginx.access\n    Key_Name log\n    Parser nginx\n\n[FILTER]\n    Name parser\n    Match apache.access\n    Key_Name log\n    Parser apache\n\n[Filter]\n    Name    lua\n    Match   *\n    Script  otel-converter.lua\n    call    convert_to_otel\n\n[OUTPUT]\n    Name  opensearch\n    Match nginx.access\n    Host  ${opensearch-node1}\n    Port  9200\n    Index ${ss4o_logs-nginx-prod}\n    Suppress_Type_Name On\n    tls             On\n    tls.verify      Off\n    HTTP_User       admin\n    HTTP_Passwd     my_%New%_passW0rd!@#\n\n[OUTPUT]\n    Name  opensearch\n    Match apache.access\n    Host  ${opensearch-node1}\n    Port  9200\n    Index ${ss4o_logs-nginx-prod}\n    Suppress_Type_Name On\n    tls             On\n    tls.verify      Off\n    HTTP_User       admin\n    HTTP_Passwd     my_%New%_passW0rd!@#\n\n[OUTPUT]\n    Name stdout\n    Match nginx.access"
+            "content": "[SERVICE]\n    Parsers_File parsers.conf\n\n[INPUT]\n    Name forward\n    Port 24224\n\n[FILTER]\n    Name parser\n    Match nginx.access\n    Key_Name log\n    Parser nginx\n\n[FILTER]\n    Name parser\n    Match apache.access\n    Key_Name log\n    Parser apache\n\n[Filter]\n    Name    lua\n    Match   *\n    Script  otel-converter.lua\n    call    convert_to_otel\n\n[OUTPUT]\n    Name  opensearch\n    Match nginx.access\n    Host  ${opensearch-endpoint}\n    Port  9200\n    Index ${ss4o_logs-nginx-prod}\n    Suppress_Type_Name On\n    tls             On\n    tls.verify      Off\n    HTTP_User       admin\n    HTTP_Passwd     my_%New%_passW0rd!@#\n\n[OUTPUT]\n    Name  opensearch\n    Match apache.access\n    Host  ${opensearch-endpoint}\n    Port  9200\n    Index ${ss4o_logs-nginx-prod}\n    Suppress_Type_Name On\n    tls             On\n    tls.verify      Off\n    HTTP_User       admin\n    HTTP_Passwd     my_%New%_passW0rd!@#\n\n[OUTPUT]\n    Name stdout\n    Match nginx.access"
           }
         ]
       }
@@ -182,32 +182,12 @@
     "schema": [
       {
         "type": "http",
-        "info": [
-          {
-            "url": "https://opensearch.org/docs/latest/im-plugin/index-templates",
-            "title": "Index Template Documentation"
-          },
-          {
-            "url": "https://github.com/opensearch-project/opensearch-catalog/blob/main/docs/schema/observability/Naming-convention.md",
-            "title": "Naming Convention"
-          }
-        ],
         "content": "PUT _component_template/http",
         "description": "Setup simple schema http component template in the dev console",
         "index-template": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/nginx/schemas/http-1.0.0.mapping.json"
       },
       {
         "type": "communication",
-        "info": [
-          {
-            "url": "https://opensearch.org/docs/latest/im-plugin/index-templates",
-            "title": "Index Template Documentation"
-          },
-          {
-            "url": "https://github.com/opensearch-project/opensearch-catalog/blob/main/docs/schema/observability/Naming-convention.md",
-            "title": "Naming Convention"
-          }
-        ],
         "content": "PUT _component_template/communication",
         "description": "Setup simple schema communication component template in the dev console",
         "index-template": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/nginx/schemas/communication-1.0.0.mapping.json"

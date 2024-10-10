@@ -100,7 +100,7 @@ export const Home = (props: HomeProps) => {
     <div>
       {dataSourceMenuComponent}
       <HeaderControlledComponentsWrapper
-        description={'Get started with collecting and monitoring logs, metrics, and traces.'}
+        description={'Get started with collecting and monitoring your observability data.'}
       />
       <HashRouter>
         <Switch>
