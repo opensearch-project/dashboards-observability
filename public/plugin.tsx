@@ -81,7 +81,10 @@ import { AccelerationDetailsFlyout } from './components/datasources/components/m
 import { CreateAcceleration } from './components/datasources/components/manage/accelerations/create_accelerations_flyout';
 import { AssociatedObjectsDetailsFlyout } from './components/datasources/components/manage/associated_objects/associated_objects_details_flyout';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
-import { convertLegacyTraceAnalyticsUrl } from './components/trace_analytics/components/common/legacy_route_helpers';
+import {
+  convertLegacyTraceAnalyticsUrl,
+  convertTraceAnalyticsNewNavUrl,
+} from './components/trace_analytics/components/common/legacy_route_helpers';
 import { registerAsssitantDependencies } from './dependencies/register_assistant';
 import {
   OBSERVABILITY_EMBEDDABLE,
@@ -197,17 +200,47 @@ export class ObservabilityPlugin
       window.location.assign(convertLegacyTraceAnalyticsUrl(window.location));
     }
 
-    const BASE_URL = core.http.basePath.prepend('/app/observability-dashboards#');
-    setupDeps.dashboard.registerDashboardProvider({
-      appId: 'observability-panel',
-      savedObjectsType: 'observability-panel',
-      savedObjectsName: 'Observability',
-      editUrlPathFn: (obj: SavedObject) => `${BASE_URL}/${obj.id}/edit`,
-      viewUrlPathFn: (obj: SavedObject) => `${BASE_URL}/${obj.id}`,
-      createLinkText: 'Observability Dashboard',
-      createSortText: 'Observability Dashboard',
-      createUrl: `${BASE_URL}/create`,
-    });
+    // if MDS is not enabled register observability dashboards & PPL visualizations in core
+    if (!setupDeps.dataSource) {
+      const BASE_URL = core.http.basePath.prepend('/app/observability-dashboards#');
+      setupDeps.dashboard.registerDashboardProvider({
+        appId: 'observability-panel',
+        savedObjectsType: 'observability-panel',
+        savedObjectsName: 'Observability',
+        editUrlPathFn: (obj: SavedObject) => `${BASE_URL}/${obj.id}/edit`,
+        viewUrlPathFn: (obj: SavedObject) => `${BASE_URL}/${obj.id}`,
+        createLinkText: 'Observability Dashboard',
+        createSortText: 'Observability Dashboard',
+        createUrl: `${BASE_URL}/create`,
+      });
+
+      setupDeps.visualizations.registerAlias({
+        name: OBSERVABILITY_EMBEDDABLE_ID,
+        title: OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME,
+        description: OBSERVABILITY_EMBEDDABLE_DESCRIPTION,
+        icon: OBSERVABILITY_EMBEDDABLE_ICON,
+        aliasApp: observabilityLogsID,
+        aliasPath: `#/explorer/?${CREATE_TAB_PARAM_KEY}=${CREATE_TAB_PARAM[TAB_CHART_ID]}`,
+        stage: 'production',
+        appExtensions: {
+          visualizations: {
+            docTypes: [VISUALIZATION_SAVED_OBJECT],
+            toListItem: ({ id, attributes, updated_at: updatedAt }) => ({
+              description: attributes?.description,
+              editApp: observabilityLogsID,
+              editUrl: `#/explorer/${VISUALIZATION_SAVED_OBJECT}:${id}`,
+              icon: OBSERVABILITY_EMBEDDABLE_ICON,
+              id,
+              savedObjectType: VISUALIZATION_SAVED_OBJECT,
+              title: attributes?.title,
+              typeTitle: OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME,
+              stage: 'production',
+              updated_at: updatedAt,
+            }),
+          },
+        },
+      });
+    }
 
     const OBSERVABILITY_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze({
       observability: {
@@ -398,33 +431,6 @@ export class ObservabilityPlugin
     }));
     setupDeps.embeddable.registerEmbeddableFactory(OBSERVABILITY_EMBEDDABLE, embeddableFactory);
 
-    setupDeps.visualizations.registerAlias({
-      name: OBSERVABILITY_EMBEDDABLE_ID,
-      title: OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME,
-      description: OBSERVABILITY_EMBEDDABLE_DESCRIPTION,
-      icon: OBSERVABILITY_EMBEDDABLE_ICON,
-      aliasApp: observabilityLogsID,
-      aliasPath: `#/explorer/?${CREATE_TAB_PARAM_KEY}=${CREATE_TAB_PARAM[TAB_CHART_ID]}`,
-      stage: 'production',
-      appExtensions: {
-        visualizations: {
-          docTypes: [VISUALIZATION_SAVED_OBJECT],
-          toListItem: ({ id, attributes, updated_at: updatedAt }) => ({
-            description: attributes?.description,
-            editApp: observabilityLogsID,
-            editUrl: `#/explorer/${VISUALIZATION_SAVED_OBJECT}:${id}`,
-            icon: OBSERVABILITY_EMBEDDABLE_ICON,
-            id,
-            savedObjectType: VISUALIZATION_SAVED_OBJECT,
-            title: attributes?.title,
-            typeTitle: OBSERVABILITY_EMBEDDABLE_DISPLAY_NAME,
-            stage: 'production',
-            updated_at: updatedAt,
-          }),
-        },
-      },
-    });
-
     registerAsssitantDependencies(setupDeps.assistantDashboards);
 
     // Return methods that should be available to other plugins
@@ -451,6 +457,11 @@ export class ObservabilityPlugin
     coreRefs.dataSource = startDeps.dataSource;
     coreRefs.navigation = startDeps.navigation;
     coreRefs.contentManagement = startDeps.contentManagement;
+
+    // redirect trace URL based on new navigation
+    if (window.location.pathname.includes(observabilityTracesID)) {
+      convertTraceAnalyticsNewNavUrl(window.location);
+    }
 
     const { dataSourceService, dataSourceFactory } = startDeps.data.dataSources;
     dataSourceFactory.registerDataSourceType(S3_DATA_SOURCE_TYPE, S3DataSource);

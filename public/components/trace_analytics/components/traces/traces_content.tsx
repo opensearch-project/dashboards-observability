@@ -103,7 +103,8 @@ export function TracesContent(props: TracesProps) {
         (mode === 'data_prepper' && dataPrepperIndicesExist) ||
         (mode === 'jaeger' && jaegerIndicesExist))
     )
-      refresh();
+      props.setDataSourceMenuSelectable?.(true);
+    refresh();
   }, [
     filters,
     appConfigs,
@@ -113,6 +114,7 @@ export function TracesContent(props: TracesProps) {
     dataPrepperIndicesExist,
     includeMetrics,
     tracesTableMode,
+    props.setDataSourceMenuSelectable,
   ]);
 
   const onToggle = (isOpen: boolean) => {

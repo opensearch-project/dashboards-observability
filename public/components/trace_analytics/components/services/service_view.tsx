@@ -26,10 +26,7 @@ import {
 } from '@elastic/eui';
 import round from 'lodash/round';
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  DataSourceManagementPluginSetup,
-  DataSourceViewConfig,
-} from '../../../../../../../src/plugins/data_source_management/public';
+import { DataSourceManagementPluginSetup } from '../../../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
 import {
   DEFAULT_DATA_SOURCE_NAME,
@@ -37,7 +34,6 @@ import {
 } from '../../../../../common/constants/data_sources';
 import { observabilityLogsID } from '../../../../../common/constants/shared';
 import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
-import { dataSourceFilterFn } from '../../../../../common/utils/shared';
 import { coreRefs } from '../../../../framework/core_refs';
 import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/plugin_headerControl';
 import { TraceAnalyticsComponentDeps } from '../../home';
@@ -46,7 +42,12 @@ import {
   handleServiceViewRequest,
 } from '../../requests/services_request_handler';
 import { FilterType } from '../common/filters/filters';
-import { PanelTitle, filtersToDsl, processTimeStamp } from '../common/helper_functions';
+import {
+  PanelTitle,
+  filtersToDsl,
+  generateServiceUrl,
+  processTimeStamp,
+} from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBarProps, renderDatePicker } from '../common/search_bar';
 import { SpanDetailFlyout } from '../traces/span_detail_flyout';
@@ -118,16 +119,15 @@ export function ServiceView(props: ServiceViewProps) {
           },
           {
             text: props.serviceName,
-            href: `#/services/${encodeURIComponent(props.serviceName)}`,
+            href: generateServiceUrl(props.serviceName, props.dataSourceMDSId[0].id),
           },
         ]
       );
-  }, [props.serviceName]);
-
-  const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
+    props.setDataSourceMenuSelectable?.(false);
+  }, [props.serviceName, props.setDataSourceMenuSelectable]);
 
   const redirectToServicePage = (service: string) => {
-    window.location.href = `#/services/${service}`;
+    window.location.href = generateServiceUrl(service, props.dataSourceMDSId[0].id);
   };
 
   const onClickConnectedService = (service: string) => {
@@ -261,17 +261,6 @@ export function ServiceView(props: ServiceViewProps) {
   const renderOverview = () => {
     return (
       <>
-        {props.dataSourceEnabled && (
-          <DataSourceMenu
-            setMenuMountPoint={props.setActionMenu}
-            componentType={'DataSourceView'}
-            componentConfig={{
-              activeOption: props.dataSourceMDSId,
-              fullWidth: true,
-              dataSourceFilter: dataSourceFilterFn,
-            }}
-          />
-        )}
         <EuiPanel>
           <PanelTitle title="Overview" />
           <EuiHorizontalRule margin="m" />
