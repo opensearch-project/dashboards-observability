@@ -16,7 +16,6 @@ interface ExtendedHomeProps extends HomeProps {
 
 export const NewGettingStarted = (props: ExtendedHomeProps) => {
   const { chrome, selectedDataSourceId, selectedDataSourceLabel } = props;
-  const [_selectedSource, setSelectedSource] = useState('');
   const [isPickYourSourceOpen, setIsPickYourSourceOpen] = useState(true);
 
   useEffect(() => {
@@ -28,10 +27,6 @@ export const NewGettingStarted = (props: ExtendedHomeProps) => {
     ]);
   }, [chrome]);
 
-  const handleSelectSource = (source: string) => {
-    setSelectedSource(source);
-  };
-
   const togglePickYourSource = (isOpen: boolean) => {
     setIsPickYourSourceOpen(isOpen);
   };
@@ -42,7 +37,6 @@ export const NewGettingStarted = (props: ExtendedHomeProps) => {
         <CollectAndShipData
           isOpen={isPickYourSourceOpen}
           onToggle={togglePickYourSource}
-          onSelectSource={handleSelectSource}
           selectedDataSourceId={selectedDataSourceId}
           selectedDataSourceLabel={selectedDataSourceLabel}
         />

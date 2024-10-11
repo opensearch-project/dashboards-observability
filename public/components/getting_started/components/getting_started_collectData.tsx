@@ -48,7 +48,6 @@ const cardThree = 'Traces';
 interface CollectAndShipDataProps {
   isOpen: boolean;
   onToggle: (isOpen: boolean) => void;
-  onSelectSource: (source: string) => void;
   selectedDataSourceId: string;
   selectedDataSourceLabel: string;
 }
@@ -59,7 +58,6 @@ interface CollectorOption {
 }
 
 export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
-  onSelectSource,
   selectedDataSourceId,
   selectedDataSourceLabel,
 }) => {
@@ -132,7 +130,6 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
     }
 
     setSpecificMethod(selectedOptionValue);
-    onSelectSource(selectedOptionValue);
     setSelectedWorkflow('');
     setGettingStarted(null);
     setWorkflows([]);

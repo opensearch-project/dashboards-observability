@@ -5,6 +5,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { i18n } from '@osd/i18n';
 import {
   ChromeBreadcrumb,
   ChromeStart,
@@ -100,7 +101,9 @@ export const Home = (props: HomeProps) => {
     <div>
       {dataSourceMenuComponent}
       <HeaderControlledComponentsWrapper
-        description={'Get started with collecting and monitoring your observability data.'}
+        description={i18n.translate('observabilityGetStarted.description', {
+          defaultMessage: 'Get started with collecting and monitoring your observability data.',
+        })}
       />
       <HashRouter>
         <Switch>

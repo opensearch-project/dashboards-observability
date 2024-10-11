@@ -14,6 +14,7 @@ import {
 import { createSavedObjectsStreamFromNdJson } from '../../../../../src/core/server/saved_objects/routes/utils';
 import { loadAssetsFromFile } from './helper';
 import { getWorkspaceState } from '../../../../../src/core/server/utils';
+import { TutorialId } from '../../../common/constants/getting_started_routes';
 
 export function registerGettingStartedRoutes(router: IRouter) {
   // Fetch the tutorial assets
@@ -32,7 +33,7 @@ export function registerGettingStartedRoutes(router: IRouter) {
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
-        const fileData = await loadAssetsFromFile(request.params.tutorialId);
+        const fileData = await loadAssetsFromFile(request.params.tutorialId as TutorialId);
         return response.ok({
           body: {
             data: fileData,
@@ -64,7 +65,7 @@ export function registerGettingStartedRoutes(router: IRouter) {
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
-        const fileData = await loadAssetsFromFile(request.params.tutorialId);
+        const fileData = await loadAssetsFromFile(request.params.tutorialId as TutorialId);
 
         const objects = await createSavedObjectsStreamFromNdJson(Readable.from(fileData));
         const loadedObjects = await objects.toArray();
@@ -109,7 +110,7 @@ export function registerGettingStartedRoutes(router: IRouter) {
       try {
         const { mdsId, mdsLabel, tutorialId } = request.body;
         const { requestWorkspaceId } = getWorkspaceState(request);
-        const fileData = await loadAssetsFromFile(tutorialId);
+        const fileData = await loadAssetsFromFile(tutorialId as TutorialId);
 
         const objects = await createSavedObjectsStreamFromNdJson(Readable.from(fileData));
         const loadedObjects = await objects.toArray();
