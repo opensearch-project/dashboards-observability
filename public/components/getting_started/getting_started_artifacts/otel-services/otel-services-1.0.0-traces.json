@@ -1,0 +1,263 @@
+{
+  "name": "otel-services",
+  "version": "1.0.0",
+  "displayName": "Otel Services Demo Flow",
+  "description": "Otel Services Demo Use Case with OpenSearch Observability",
+  "license": "Apache-2.0",
+  "type": "traces",
+  "labels": [
+    "log",
+    "traces",
+    "metrics"
+  ],
+  "author": "OpenSearch",
+  "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/otel-services/info",
+  "workflows": [
+    {
+      "name": "dashboards",
+      "label": "Dashboards & Visualizations",
+      "description": "Dashboards and indices that enable you to easily visualize important metrics.",
+      "enabled_by_default": false
+    }
+  ],
+  "statics": {
+    "logo": {
+      "annotation": "OpenTelemetry Logo",
+      "path": "logo.png"
+    },
+    "gallery": [
+      {
+        "annotation": "Services Step",
+        "path": "observability-services-step.png",
+        "tags": ["dashboard","services"],
+        "savedObject-id": "otel-services-dashboard-1_0_0_ID"
+      },
+      {
+        "annotation": "Ingestion Rate Step",
+        "path": "rate-ingestion-step.png",
+        "tags": ["dashboard","ingestion"],
+        "savedObject-id": "data-ingestion-rate-dashboard-1_0_0_ID"
+      },
+      {
+        "annotation": "Single service monitoring",
+        "path": "single-service-step.png",
+        "tags": ["dashboard","services"],
+        "savedObject-id": "single-service-correlated-dashboard-1_0_0_ID"
+      },
+      {
+        "annotation": "Network Metrics Monitoring",
+        "path": "apm-network-metrics-step.png",
+        "tags": ["dashboard","metrics"],
+        "savedObject-id": "apm-network-metrics-dashboard-1_0_0_ID"
+      },
+      {
+        "annotation": "System Metrics Monitoring",
+        "path": "apm-system-metrics-step.png",
+        "tags": ["dashboard","metrics"],
+        "savedObject-id": "apm-system-metrics-dashboard-1_0_0_ID"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "logs",
+      "version": "1.0.0"
+    },
+    {
+      "name": "metrics",
+      "version": "1.0.0"
+    },
+    {
+      "name": "services",
+      "version": "1.0.0"
+    },
+    {
+      "name": "traces",
+      "version": "1.0.0"
+    }
+  ],
+  "assets": [
+    {
+      "name": "getting-started-demo",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": [
+        "dashboards"
+      ]
+    },
+    {
+      "name": "demo-langing-page",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": [
+        "dashboards"
+      ]
+    },
+    {
+      "name": "otel-architecture",
+      "version": "1.0.0",
+      "extension": "ndjson",
+      "type": "savedObjectBundle",
+      "workflows": [
+        "dashboards"
+      ]
+    }
+  ],
+  "getting-started": {
+    "ingestion": ["otel-collector","data-prepper"],
+    "structured": "true",
+    "technology": "OpenTelemetry",
+    "protocol": ["otel"],
+    "info": {
+      "url": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/otel-services/info/Tutorial.md",
+      "title": "Otel Services Tutorial"
+    },
+    "live-sample": "true",
+    "workflows": [
+      {
+        "name": "Self managed",
+        "description": "This is a workflow for connecting into an existing Otel Collector",
+        "types": ["logs","traces","metrics"],
+        "info": {
+          "url": "https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/otel-services/getting-started/GettingStarted.md",
+          "title": "Getting Started Guide"
+        },
+        "steps": [
+          {
+            "name": "Configure Data-Prepper Traces exporter",
+            "label": "Traces Exporter",
+            "type": "console-cmd",
+            "phase": "pipeline",
+            "info": [
+              {
+                "url": "https://raw.githubusercontent.com/opensearch-project/opentelemetry-demo/main/src/dataprepper/pipelines.yaml",
+                "title": "Traces Pipeline Configuration"
+              }
+            ],
+            "description": "Configure Data-prepper Traces pipeline and export into opensearch index ",
+            "content": "entry-pipeline:\n  delay: \"100\"\n  source:\n    otel_trace_source:\n      ssl: false\n  sink:\n    - pipeline:\n        name: \"raw-pipeline\"\n    - pipeline:\n        name: \"service-map-pipeline\"\nraw-pipeline:\n  source:\n    pipeline:\n      name: \"entry-pipeline\"\n  processor:\n    - otel_trace_raw:\n  sink:\n    - opensearch:\n        hosts: [ \"<<https://opensearch-domain.com>>\" ]\n        insecure: true\n        username: \"<<username>>\"\n        password: \"<<password>>\"\n        index_type: trace-analytics-raw"
+
+          },
+          {
+            "name": "Configure Data-Prepper Services exporter",
+            "label": "Services Exporter",
+            "type": "console-cmd",
+            "phase": "pipeline",
+            "info": [
+              {
+                "url": "https://raw.githubusercontent.com/opensearch-project/opentelemetry-demo/main/src/dataprepper/pipelines.yaml",
+                "title": "Services Pipeline Configuration"
+              }
+            ],
+            "description": "Configure Data-prepper Services Processor to build the service network map pipeline and export into opensearch index ",
+            "content": "service-map-pipeline:\n  delay: \"100\"\n  source:\n    pipeline:\n      name: \"entry-pipeline\"\n  processor:\n    - service_map_stateful:\n  sink:\n    - opensearch:\n        hosts: [\"https://opensearch-node1:9200\"]\n        insecure: true\n        username: \"admin\"\n        password: \"my_%New%_passW0rd!@#\"\n        index_type: trace-analytics-service-map"
+          },
+          {
+            "name": "Configure Data-Prepper inside Otel Collector",
+            "label": "OTEL Collector Traces services",
+            "type": "console-cmd",
+            "phase": "Collector",
+            "info": [
+              {
+                "url": "https://raw.githubusercontent.com/opensearch-project/opentelemetry-demo/main/src/otelcollector/otelcol-config.yml",
+                "title": "OTEL Collector Traces Pipeline"
+              }
+            ],
+            "description": "Configure Data-prepper Pipelines within the Otel Processor Traces pipeline",
+            "content": "  otlp/traces:\n    endpoint: \"data-prepper:21890\"\n    tls:\n      insecure: true\n      insecure_skip_verify: true \n  service:\n  pipelines:\n    traces:\n      receivers: [otlp]\n      processors: [batch]\n      exporters: [otlp, debug, spanmetrics, otlp/traces]"
+          }
+        ]
+      },
+      {
+        "name": "AWS",
+        "description": "This is a workflow for connecting into an existing Otel Collector",
+        "types": ["logs","traces","metrics"],
+        "info": {
+          "url": "https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/otel-services/getting-started/GettingStarted.md",
+          "title": "Getting Started Guide"
+        },
+        "steps": [
+          {
+            "name": "Configure AWS OpenSearch ingestion services traces pipeline",
+            "label": "Traces Exporter",
+            "type": "console-cmd",
+            "phase": "pipeline",
+            "info": [
+              {
+                "url": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/pipeline-blueprint.html",
+                "title": "Ingestion service documentation"
+              }
+            ],
+            "description": "Configure Data-prepper traces pipeline and export into opensearch index",
+            "content": "version: \"2\"\nentry-pipeline:\n  source:\n    otel_trace_source:\n      # Provide the path for ingestion. ${pipelineName} will be replaced with sub-pipeline name, i.e. entry-pipeline, configured for this pipeline.\n      # In this case it would be \"/entry-pipeline/v1/traces\". This will be endpoint URI path in OpenTelemetry Exporter configuration.\n      path: \"/${pipelineName}/v1/traces\"\n  processor:\n    - trace_peer_forwarder:\n  sink:\n    - pipeline:\n        name: \"span-pipeline\"\n    - pipeline:\n        name: \"service-map-pipeline\"\nspan-pipeline:\n  source:\n    pipeline:\n      name: \"entry-pipeline\"\n  processor:\n    - otel_traces:\n      # For reference please visit: https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/otel-trace-raw/\n  sink:\n    - opensearch:\n        # Provide an AWS OpenSearch Service domain endpoint\n        hosts: [ \"<<https://search-mydomain-1a2a3a4a5a6a7a8a9a0a9a8a7a.us-east-1.es.amazonaws.com>>\" ]\n        aws:\n          # Provide a Role ARN with access to the domain. This role should have a trust relationship with osis-pipelines.amazonaws.com\n          sts_role_arn: \"<<arn:aws:iam::123456789012:role/Example-Role>>\"\n          # Provide the region of the domain.\n          region: \"<<us-east-1>>\"\n          # Enable the 'serverless' flag if the sink is an Amazon OpenSearch Serverless collection\n          serverless: false\n        # serverless_options:\n          # Specify a name here to create or update network policy for the serverless collection\n          # network_policy_name: \"network-policy-name\"\n        index_type: \"trace-analytics-raw\"\n        # Optional: Enable the S3 DLQ to capture any failed requests in an S3 bucket. Delete this entire block if you don't want a DLQ.\n        dlq:\n          s3:\n            # Provide an S3 bucket\n            bucket: \"<<your-dlq-bucket-name>>\"\n            # Provide a key path prefix for the failed requests\n            # key_path_prefix: \"span-pipeline/trace-analytics/dlq/\"\n            # Provide the region of the bucket.\n            region: \"<<us-east-1>>\"\n            # Provide a Role ARN with access to the bucket. This role should have a trust relationship with osis-pipelines.amazonaws.com\n            sts_role_arn: \"<<arn:aws:iam::123456789012:role/Example-Role>>\"\nservice-map-pipeline:\n  source:\n    pipeline:\n      name: \"entry-pipeline\"\n  processor:\n    - service_map:\n      # For reference please visit: https://opensearch.org/docs/latest/data-prepper/pipelines/configuration/processors/service-map-stateful/\n  sink:\n    - opensearch:\n        # Provide an AWS OpenSearch Service domain endpoint\n        hosts: [ \"<<https://search-mydomain-1a2a3a4a5a6a7a8a9a0a9a8a7a.us-east-1.es.amazonaws.com>>\" ]\n        aws:\n          # Provide a Role ARN with access to the domain. This role should have a trust relationship with osis-pipelines.amazonaws.com\n          sts_role_arn: \"<<arn:aws:iam::123456789012:role/Example-Role>>\"\n          # Provide the region of the domain.\n          region: \"<<us-east-1>>\"\n          # Enable the 'serverless' flag if the sink is an Amazon OpenSearch Serverless collection\n          serverless: false\n        # serverless_options:\n          # Specify a name here to create or update network policy for the serverless collection\n          # network_policy_name: \"network-policy-name\"\n        index_type: \"trace-analytics-service-map\"\n        # Optional: Enable the S3 DLQ to capture any failed requests in an S3 bucket. Delete this entire block if you don't want a DLQ.\n        dlq:\n          s3:\n            # Provide an S3 bucket\n            bucket: \"<<your-dlq-bucket-name>>\"\n            # Provide a key path prefix for the failed requests\n            # key_path_prefix: \"service-map-pipeline/trace-analytics-service-map/dlq\"\n            # Provide the region of the bucket.\n            region: \"<<us-east-1>>\"\n            # Provide a Role ARN with access to the bucket. This role should have a trust relationship with osis-pipelines.amazonaws.com\n            sts_role_arn: \"<<arn:aws:iam::123456789012:role/Example-Role>>\""
+          },
+          {
+            "name": "Configure OSIS pipeline inside OTEL collector",
+            "label": "OSIS collector",
+            "type": "console-cmd",
+            "phase": "Collector",
+            "content": "extensions:\n  sigv4auth:\n    region: \"__AWS_REGION__\"\n    service: \"osis\"\n\nreceivers:\n  otlp:\n\nexporters:\n  otlphttp/traces:\n    traces_endpoint: \"https://__REPLACE_WITH_OtelTraces_ENDPOINT__/v1/traces\"\n    auth:\n      authenticator: sigv4auth\n    compression: none\n \n\nservice:\n  extensions: [sigv4auth]\n  pipelines:\n    traces:\n      receivers: [otlp]\n      exporters: [otlphttp/traces]\n"
+          }
+        ]
+      }
+    ],
+    "schema": [
+      {
+        "type": "Traces",
+        "info": [
+          {
+            "url": "https://opensearch.org/docs/latest/im-plugin/index-templates",
+            "title": "Index Template Documentation"
+          },
+          {
+            "url": "https://github.com/opensearch-project/opensearch-catalog/blob/main/docs/schema/observability/Naming-convention.md",
+            "title": "Naming Convention"
+          }
+        ],
+        "content": "PUT _index_template/ss4o_traces_template",
+        "description": "Setup simple schema traces index template in the dev console, and than upload the index pattern corresponding to that template",
+        "index-template": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/otel-services/schemas/traces-1.0.0.mapping.json",
+        "alias": "otel-v1-apm-span",
+        "index-pattern-name": "ss4o_traces-*-*"
+      },
+      {
+        "type": "services",
+        "info": [
+          {
+            "url": "https://opensearch.org/docs/latest/im-plugin/index-templates",
+            "title": "Index Template Documentation"
+          },
+          {
+            "url": "https://github.com/opensearch-project/opensearch-catalog/blob/main/docs/schema/observability/Naming-convention.md",
+            "title": "Naming Convention"
+          }
+        ],
+        "content": "PUT _index_template/ss4o_services_template",
+        "description": "Setup simple schema services index template in the dev console, and than upload the index pattern corresponding to that template",
+        "index-template": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/otel-services/schemas/services-1.0.0.mapping.json",
+        "alias": "otel-v1-apm-service-map",
+        "index-pattern-name": "ss4o_services-*-*"
+      }
+    ],
+    "index-patterns": {
+      "type": ["services","traces"],
+      "info": [
+        {
+          "url": "https://opensearch.org/docs/latest/dashboards/management/index-patterns/",
+          "title": "Index Pattern Management Guide"
+        }
+      ],
+      "description": "Import index patterns `.ndjson` file to the saved objects",
+      "index-pattern": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/otel-services/assets/getting-started-demo-1.0.0.ndjson",
+      "index-patterns-name": [
+        "otel-v1-apm-span*",
+        "otel-v1-apm-service-map"
+      ]
+    }
+  },
+  "sampleData": {
+    "path": "traces-samples.json"
+  }
+}
