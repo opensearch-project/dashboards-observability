@@ -5,6 +5,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { i18n } from '@osd/i18n';
 import {
   ChromeBreadcrumb,
   ChromeStart,
@@ -19,6 +20,7 @@ import {
 } from '../../../../../src/plugins/data_source_management/public';
 import { NewGettingStarted } from './components/getting_started';
 import { dataSourceFilterFn } from '../../../common/utils/shared';
+import { HeaderControlledComponentsWrapper } from '../../plugin_helpers/plugin_headerControl';
 
 export interface HomeProps extends RouteComponentProps {
   pplService: any;
@@ -98,6 +100,11 @@ export const Home = (props: HomeProps) => {
   return (
     <div>
       {dataSourceMenuComponent}
+      <HeaderControlledComponentsWrapper
+        description={i18n.translate('observabilityGetStarted.description', {
+          defaultMessage: 'Get started with collecting and monitoring your observability data.',
+        })}
+      />
       <HashRouter>
         <Switch>
           <Route
