@@ -12,7 +12,7 @@ import {
   SavedObject,
 } from '../../../../../src/core/server';
 import { createSavedObjectsStreamFromNdJson } from '../../../../../src/core/server/saved_objects/routes/utils';
-import { loadAssetsFromFile } from './helper';
+import { loadAssetsFromFile, createAllTemplatesSettled } from './helper';
 import { getWorkspaceState } from '../../../../../src/core/server/utils';
 import { TutorialId } from '../../../common/constants/getting_started_routes';
 
@@ -99,6 +99,14 @@ export function registerGettingStartedRoutes(router: IRouter) {
           mdsId: schema.string(),
           mdsLabel: schema.string(),
           tutorialId: schema.string(),
+          indexTemplates: schema.arrayOf(
+            schema.object({
+              name: schema.string(),
+              templatePath: schema.string(),
+              template: schema.recordOf(schema.string(), schema.any()),
+            }),
+            { defaultValue: [] }
+          ),
         }),
       },
     },
@@ -108,9 +116,14 @@ export function registerGettingStartedRoutes(router: IRouter) {
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
-        const { mdsId, mdsLabel, tutorialId } = request.body;
+        const { mdsId, mdsLabel, tutorialId, indexTemplates } = request.body;
         const { requestWorkspaceId } = getWorkspaceState(request);
         const fileData = await loadAssetsFromFile(tutorialId as TutorialId);
+
+        // create related index templates
+        if (indexTemplates.length > 0) {
+          await createAllTemplatesSettled(context, indexTemplates, mdsId);
+        }
 
         const objects = await createSavedObjectsStreamFromNdJson(Readable.from(fileData));
         const loadedObjects = await objects.toArray();

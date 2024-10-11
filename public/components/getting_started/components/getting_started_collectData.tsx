@@ -52,7 +52,7 @@ interface CollectAndShipDataProps {
   selectedDataSourceLabel: string;
 }
 
-interface CollectorOption {
+export interface CollectorOption {
   label: string;
   value: string;
 }
@@ -347,7 +347,15 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
       </EuiListGroup>
       <EuiButton
         onClick={async () => {
-          await UploadAssets(specificMethod, selectedDataSourceId, selectedDataSourceLabel);
+          await UploadAssets(
+            specificMethod,
+            selectedDataSourceId,
+            selectedDataSourceLabel,
+            technologyJsonMap[specificMethod]?.['getting-started']?.schema ||
+              technologyJsonMap[specificMethod]?.schema ||
+              [],
+            collectorOptions
+          );
         }}
         fill
       >

@@ -3,8 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { MappingTypeMapping } from '@opensearch-project/opensearch/api/types';
+import { EuiSelectableOption } from '@elastic/eui';
 import { coreRefs } from '../../../framework/core_refs';
 import { useToast } from '../../../../public/components/common/toast';
+import { CollectorOption } from './getting_started_collectData';
+
+export interface ICollectorIndexTemplate {
+  name: string;
+  templatePath: string;
+  template: MappingTypeMapping;
+}
+
+export interface ICollectorSchema {
+  alias: string;
+  content: string;
+  description: string;
+  'index-pattern-name': string;
+  type: string;
+  'index-template': string;
+  info: string[];
+}
 
 const fetchAssets = async (tutorialId: string, assetFilter?: 'dashboards' | 'indexPatterns') => {
   const assetFilterParam = assetFilter ? `${assetFilter}/` : '';
@@ -20,16 +39,55 @@ const fetchAssets = async (tutorialId: string, assetFilter?: 'dashboards' | 'ind
   return responeData;
 };
 
-export const UploadAssets = async (tutorialId: string, mdsId: string, mdsLabel: string) => {
+export const UploadAssets = async (
+  tutorialId: string,
+  mdsId: string,
+  mdsLabel: string,
+  schema: ICollectorSchema[],
+  collectorOptions: Array<EuiSelectableOption<CollectorOption>>
+) => {
   const { setToast } = useToast();
   const http = coreRefs.http;
 
+  let selectedIntegration: string | undefined;
+  const checkedCollector = collectorOptions.find((collector) => {
+    return !!collector.checked;
+  });
+
+  if (checkedCollector !== undefined) {
+    if (checkedCollector.value === 'otel') {
+      selectedIntegration = 'otel-services';
+    } else if (checkedCollector.value === 'nginx') {
+      selectedIntegration = checkedCollector.value;
+    }
+  }
+
   try {
+    // Auto-generate index templates based on the selected integration
+    let templates: ICollectorIndexTemplate[] = [];
+    if (selectedIntegration !== undefined) {
+      const indexTemplateMappings = await http!.get(
+        `/api/integrations/repository/${selectedIntegration}/schema`
+      );
+      templates = schema.reduce((acc: ICollectorIndexTemplate[], sh) => {
+        const templateMapping = indexTemplateMappings?.data?.mappings?.[sh.type];
+        if (!!templateMapping) {
+          acc.push({
+            name: sh.content.match(/[^/]+$/)?.[0] || '',
+            templatePath: sh.content.match(/PUT\s+(.+)/)?.[1] || '',
+            template: templateMapping,
+          });
+        }
+        return acc;
+      }, []);
+    }
+
     const response = await http!.post(`/api/observability/gettingStarted/createAssets`, {
       body: JSON.stringify({
         mdsId,
         mdsLabel,
         tutorialId,
+        indexTemplates: templates,
       }),
     });
 
