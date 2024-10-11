@@ -175,9 +175,9 @@ export function ServiceView(props: ServiceViewProps) {
                   coreRefs?.application!.navigateToApp('data-explorer', {
                     path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
                       props.startTime
-                    },to:${props.endTime}))&_q=(filters:!(),query:(dataset:(dataSource:(id:${
+                    },to:${props.endTime}))&_q=(filters:!(),query:(dataset:(dataSource:(id:'${
                       props.dataSourceMDSId[0].id ?? ''
-                    },title:'',type:DATA_SOURCE),id:'${
+                    }',title:'',type:DATA_SOURCE),id:'${
                       props.dataSourceMDSId[0].id
                     }::ss4o_logs-*',timeFieldName:'%40timestamp',title:'ss4o_logs-*',type:INDEXES),language:PPL,query:'source%20%3D%20ss4o_logs-*%20%7C%20where%20serviceName%20%3D%20${
                       props.serviceName
