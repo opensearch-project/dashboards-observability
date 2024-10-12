@@ -42,74 +42,7 @@
     "live-sample": "true",
     "workflows": [
       {
-        "name": "Quick Start",
-        "description": "This is a java-client fluent-bit based docker quick starting instructions tutorial with a live example",
-        "steps": [
-          {
-            "name": "Create docker-network",
-            "label": "Environment setting",
-            "phase": "docker",
-            "type": "console-cmd",
-            "content": "docker network create opensearch-net",
-            "description": "Before running any docker-compose files, create the opensearch-net network"
-          },
-          {
-            "name": "Setup docker .env file",
-            "label": "Environment Parameters",
-            "phase": "docker",
-            "type": "file-url",
-            "input-params": [
-              {
-                "name": "OPENSEARCH_HOST",
-                "description": "Opensearch host",
-                "type": "host-name"
-              },
-              {
-                "name": "OPENSEARCH_DASHBOARD_HOST",
-                "description": "Opensearch Dashboard host",
-                "type": "host-name"
-              }
-            ],
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/.env"],
-            "content": "wget https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/.env",
-            "description": "Setup docker-compose env variables "
-          },
-          {
-            "name": "Setup fluent-bit folder",
-            "label": "Environment Parameters",
-            "phase": "docker",
-            "type": "file-url",
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/fluent-bit/fluent-bit.conf",
-              "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/fluent-bit/parsers.conf"
-            ],
-            "content": "mkdir -p fluent-bit\nwget -P fluent-bit https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/fluent-bit/fluent-bit.conf \\\n  https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/fluent-bit/parsers.conf \n",
-            "description": "Setup docker-compose fluent-bit's service configuration "
-          },
-          {
-            "name": "Setup java app folder",
-            "label": "Environment Parameters",
-            "phase": "docker",
-            "type": "file-url",
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/java-app/Dockerfile",
-              "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/java-app/src/main/java/App.java",
-              "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/java-app/pom.xml"
-            ],
-            "content": "mkdir -p java-app/src/main/java\n\nwget -P java-app \\\n  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/java-app/Dockerfile\n\nwget -P java-app \\\n  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/java-app/pom.xml\n\nwget -P java-app/src/main/java \\\n  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/java-app/src/main/java/App.java\n",
-            "description": "Setup docker-compose java-app service configuration "
-          },
-          {
-            "name": "Run docker-compose",
-            "label": "live container",
-            "type": "file-url",
-            "phase": "docker",
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/getting-started/docker-compose.yml"],
-            "description": "Run docker-compose for the java-client live example and see the generated index",
-            "content": "wget -O docker-compose.yml https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/java_client/getting-started/docker-compose.yml && docker-compose up --build -d java-app fluent-bit \n"
-          }
-        ]
-      },
-      {
-        "name": "java-client",
+        "name": "Self managed",
         "description": "This is a fluent-bit based getting started instructions tutorial",
         "steps": [
           {
@@ -175,7 +108,10 @@
                 "type": "source"
               }
             ],
-            "content": "String index = \"sample-index\";\nCreateIndexRequest createIndexRequest = new CreateIndexRequest.Builder().index(index).build();\nclient.indices().create(createIndexRequest);\n\nIndexSettings indexSettings = new IndexSettings.Builder().autoExpandReplicas(\"0-all\").build();\nPutIndicesSettingsRequest putIndicesSettingsRequest = new PutIndicesSettingsRequest.Builder().index(index).value(indexSettings).build();\nclient.indices().putSettings(putIndicesSettingsRequest);"
+            "content": "String index = \"sample-index\";\nCreateIndexRequest createIndexRequest = new CreateIndexRequest.Builder().index(index).build();\nclient.indices().create(createIndexRequest);\n\nIndexSettings indexSettings = new IndexSettings.Builder().autoExpandReplicas(\"0-all\").build();\nPutIndicesSettingsRequest putIndicesSettingsRequest = new PutIndicesSettingsRequest.Builder().index(index).value(indexSettings).build();\nclient.indices().putSettings(putIndicesSettingsRequest);",
+            "info": [
+              { "url": "https://opensearch.org/docs/latest/logging/indexing", "title": "Log Indexing Documentation" }
+            ]
           }
         ]
       }
@@ -183,9 +119,6 @@
     "schema": [
       {
         "type": "logs",
-        "info": [
-          "https://opensearch.org/docs/latest/im-plugin/index-templates"
-        ],
         "content": "PUT _index_template/application_logs_template",
         "description": "Setup applicative logs index template in the dev console",
         "index-template": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/schemas/applicative-logs-1.0.0.mapping.json",
@@ -197,7 +130,7 @@
         "logs"
       ],
       "info": [
-        "https://opensearch.org/docs/latest/dashboards/management/index-patterns/"
+        { "url": "https://opensearch.org/docs/latest/dashboards/management/index-patterns/", "title": "Index Pattern Management Guide" }
       ],
       "description": "Import index patterns `.ndjson` file to the saved objects",
       "index-pattern": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/java_client/assets/tutorial-1.0.0.ndjson",
