@@ -21,6 +21,7 @@ import {
   EuiButton,
   EuiIcon,
   EuiCard,
+  EuiSelectableOption,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 
@@ -44,6 +45,7 @@ import { getWorkspaceIdFromUrl } from '../../../../../../src/core/public/utils';
 const cardOne = 'Logs';
 const cardTwo = 'Metrics';
 const cardThree = 'Traces';
+const OTEL_LOGS_OPTION = { label: 'Open Telemetry', value: 'otelLogs' };
 
 interface CollectAndShipDataProps {
   isOpen: boolean;
@@ -69,6 +71,9 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
   const [workflows, setWorkflows] = useState<any[]>([]);
   const [collectorOptions, setCollectorOptions] = useState<CollectorOption[]>([]);
   const [patternsContent, setPatternsContent] = useState<any[]>([]);
+  const [selectedIntegration, setSelectedIntegration] = useState<
+    Array<EuiSelectableOption<CollectorOption>>
+  >([OTEL_LOGS_OPTION]);
 
   const technologyJsonMap: Record<string, any> = {
     otelLogs: otelJsonLogs,
@@ -129,6 +134,7 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
       return;
     }
 
+    setSelectedIntegration(newOption);
     setSpecificMethod(selectedOptionValue);
     setSelectedWorkflow('');
     setGettingStarted(null);
@@ -138,7 +144,7 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
   // Auto-select first collector if nothing is selected and a collection method is set
   useEffect(() => {
     if (collectorOptions.length > 0 && !specificMethod && collectionMethod) {
-      handleSpecificMethodChange([{ value: collectorOptions[0].value }]);
+      handleSpecificMethodChange([{ ...OTEL_LOGS_OPTION }]);
     }
   }, [collectorOptions, specificMethod, collectionMethod]);
 
@@ -151,7 +157,7 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
 
     if (value === cardOne) {
       setCollectorOptions([
-        { label: 'Open Telemetry', value: 'otelLogs' },
+        { ...OTEL_LOGS_OPTION },
         { label: 'Nginx', value: 'nginx' },
         { label: 'Java', value: 'java' },
         { label: 'Python', value: 'python' },
@@ -354,7 +360,7 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
             technologyJsonMap[specificMethod]?.['getting-started']?.schema ||
               technologyJsonMap[specificMethod]?.schema ||
               [],
-            collectorOptions
+            selectedIntegration
           );
         }}
         fill

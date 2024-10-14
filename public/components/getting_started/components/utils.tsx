@@ -44,33 +44,29 @@ export const UploadAssets = async (
   mdsId: string,
   mdsLabel: string,
   schema: ICollectorSchema[],
-  collectorOptions: Array<EuiSelectableOption<CollectorOption>>
+  selectedIntegration: Array<EuiSelectableOption<CollectorOption>>
 ) => {
   const { setToast } = useToast();
   const http = coreRefs.http;
 
-  let selectedIntegration: string | undefined;
-  const checkedCollector = collectorOptions.find((collector) => {
-    return !!collector.checked;
-  });
-
-  if (checkedCollector !== undefined) {
-    if (checkedCollector.value === 'otel') {
-      selectedIntegration = 'otel-services';
-    } else if (checkedCollector.value === 'nginx') {
-      selectedIntegration = checkedCollector.value;
+  let curIntegration: string | undefined;
+  if (selectedIntegration !== undefined) {
+    if (/^otel[A-Za-z]+$/i.test(selectedIntegration[0].value)) {
+      curIntegration = 'otel-services';
+    } else if (selectedIntegration[0].value === 'nginx') {
+      curIntegration = selectedIntegration[0].value;
     }
   }
 
   try {
     // Auto-generate index templates based on the selected integration
     let templates: ICollectorIndexTemplate[] = [];
-    if (selectedIntegration !== undefined) {
+    if (curIntegration !== undefined) {
       const indexTemplateMappings = await http!.get(
-        `/api/integrations/repository/${selectedIntegration}/schema`
+        `/api/integrations/repository/${curIntegration}/schema`
       );
       templates = schema.reduce((acc: ICollectorIndexTemplate[], sh) => {
-        const templateMapping = indexTemplateMappings?.data?.mappings?.[sh.type];
+        const templateMapping = indexTemplateMappings?.data?.mappings?.[sh.type.toLowerCase()];
         if (!!templateMapping) {
           acc.push({
             name: sh.content.match(/[^/]+$/)?.[0] || '',
