@@ -127,7 +127,7 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
     };
   }, [specificMethod]);
 
-  const handleSpecificMethodChange = (newOption: any) => {
+  const handleSpecificMethodChange = (newOption: Array<EuiSelectableOption<CollectorOption>>) => {
     const selectedOptionValue = newOption[0]?.value;
 
     if (selectedOptionValue === specificMethod) {
@@ -206,7 +206,9 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
             singleSelection={{ asPlainText: true }}
             options={optionsWithIcons}
             selectedOptions={selectedOption ? [selectedOption] : []}
-            onChange={(newOptions) => handleSpecificMethodChange(newOptions)}
+            onChange={(newOptions) =>
+              handleSpecificMethodChange(newOptions as Array<EuiSelectableOption<CollectorOption>>)
+            }
             renderOption={(option) => (
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 {option.prepend}
