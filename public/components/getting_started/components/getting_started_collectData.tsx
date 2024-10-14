@@ -45,7 +45,6 @@ import { getWorkspaceIdFromUrl } from '../../../../../../src/core/public/utils';
 const cardOne = 'Logs';
 const cardTwo = 'Metrics';
 const cardThree = 'Traces';
-const OTEL_LOGS_OPTION = { label: 'Open Telemetry', value: 'otelLogs' };
 
 interface CollectAndShipDataProps {
   isOpen: boolean;
@@ -71,9 +70,21 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
   const [workflows, setWorkflows] = useState<any[]>([]);
   const [collectorOptions, setCollectorOptions] = useState<CollectorOption[]>([]);
   const [patternsContent, setPatternsContent] = useState<any[]>([]);
+
+  const getTelemetryOption = (collectionMethodOtel: string) => {
+    switch (collectionMethodOtel) {
+      case cardTwo:
+        return { label: 'Open Telemetry', value: 'otelMetrics' };
+      case cardThree:
+        return { label: 'Open Telemetry', value: 'otelTraces' };
+      default:
+        return { label: 'Open Telemetry', value: 'otelLogs' };
+    }
+  };
+
   const [selectedIntegration, setSelectedIntegration] = useState<
     Array<EuiSelectableOption<CollectorOption>>
-  >([OTEL_LOGS_OPTION]);
+  >([getTelemetryOption(cardOne)]);
 
   const technologyJsonMap: Record<string, any> = {
     otelLogs: otelJsonLogs,
@@ -144,7 +155,8 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
   // Auto-select first collector if nothing is selected and a collection method is set
   useEffect(() => {
     if (collectorOptions.length > 0 && !specificMethod && collectionMethod) {
-      handleSpecificMethodChange([{ ...OTEL_LOGS_OPTION }]);
+      const telemetryOption = getTelemetryOption(collectionMethod);
+      handleSpecificMethodChange([{ ...telemetryOption }]);
     }
   }, [collectorOptions, specificMethod, collectionMethod]);
 
@@ -157,17 +169,19 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
 
     if (value === cardOne) {
       setCollectorOptions([
-        { ...OTEL_LOGS_OPTION },
+        getTelemetryOption(cardOne),
         { label: 'Nginx', value: 'nginx' },
         { label: 'Java', value: 'java' },
         { label: 'Python', value: 'python' },
         { label: 'Golang', value: 'golang' },
       ]);
     } else if (value === cardTwo) {
-      setCollectorOptions([{ label: 'Open Telemetry', value: 'otelMetrics' }]);
+      setCollectorOptions([getTelemetryOption(cardTwo)]);
     } else if (value === cardThree) {
-      setCollectorOptions([{ label: 'Open Telemetry', value: 'otelTraces' }]);
+      setCollectorOptions([getTelemetryOption(cardThree)]);
     }
+
+    setSelectedIntegration([getTelemetryOption(value)]);
   };
 
   const renderSpecificMethodDropdown = () => {
