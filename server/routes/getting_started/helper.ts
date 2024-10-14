@@ -5,13 +5,13 @@
 
 import fs from 'fs';
 import path from 'path';
+import { MappingTypeMapping } from '@opensearch-project/opensearch/api/types';
 import {
   COMPONENT_MAP,
   VERSION_MAP,
   SIGNAL_MAP,
   TutorialId,
 } from '../../../common/constants/getting_started_routes';
-import { MappingTypeMapping } from '@opensearch-project/opensearch/api/types';
 import { RequestHandlerContext } from '../../../../../src/core/server';
 
 export const assetMapper = (tutorialId: TutorialId): string => {
