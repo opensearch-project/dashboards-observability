@@ -33,6 +33,9 @@ exports[`Traces component renders empty traces page 1`] = `
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
+      "globalSearch": Object {
+        "getAllSearchCommands": [MockFunction],
+      },
       "logos": Object {
         "AnimatedMark": Object {
           "dark": Object {
@@ -270,6 +273,9 @@ exports[`Traces component renders empty traces page 1`] = `
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
         "getIsVisible$": [MockFunction],
+        "globalSearch": Object {
+          "getAllSearchCommands": [MockFunction],
+        },
         "logos": Object {
           "AnimatedMark": Object {
             "dark": Object {
@@ -2513,6 +2519,9 @@ exports[`Traces component renders jaeger traces page 1`] = `
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
+      "globalSearch": Object {
+        "getAllSearchCommands": [MockFunction],
+      },
       "logos": Object {
         "AnimatedMark": Object {
           "dark": Object {
@@ -2750,6 +2759,9 @@ exports[`Traces component renders jaeger traces page 1`] = `
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
         "getIsVisible$": [MockFunction],
+        "globalSearch": Object {
+          "getAllSearchCommands": [MockFunction],
+        },
         "logos": Object {
           "AnimatedMark": Object {
             "dark": Object {
@@ -4832,6 +4844,9 @@ exports[`Traces component renders traces page 1`] = `
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
+      "globalSearch": Object {
+        "getAllSearchCommands": [MockFunction],
+      },
       "logos": Object {
         "AnimatedMark": Object {
           "dark": Object {
@@ -5068,6 +5083,9 @@ exports[`Traces component renders traces page 1`] = `
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
         "getIsVisible$": [MockFunction],
+        "globalSearch": Object {
+          "getAllSearchCommands": [MockFunction],
+        },
         "logos": Object {
           "AnimatedMark": Object {
             "dark": Object {

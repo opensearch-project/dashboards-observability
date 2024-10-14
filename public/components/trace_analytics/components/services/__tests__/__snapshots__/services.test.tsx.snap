@@ -33,6 +33,9 @@ exports[`Services component renders empty services page 1`] = `
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
+      "globalSearch": Object {
+        "getAllSearchCommands": [MockFunction],
+      },
       "logos": Object {
         "AnimatedMark": Object {
           "dark": Object {
@@ -261,6 +264,9 @@ exports[`Services component renders empty services page 1`] = `
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
         "getIsVisible$": [MockFunction],
+        "globalSearch": Object {
+          "getAllSearchCommands": [MockFunction],
+        },
         "logos": Object {
           "AnimatedMark": Object {
             "dark": Object {
@@ -2326,6 +2332,9 @@ exports[`Services component renders jaeger services page 1`] = `
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
+      "globalSearch": Object {
+        "getAllSearchCommands": [MockFunction],
+      },
       "logos": Object {
         "AnimatedMark": Object {
           "dark": Object {
@@ -2554,6 +2563,9 @@ exports[`Services component renders jaeger services page 1`] = `
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
         "getIsVisible$": [MockFunction],
+        "globalSearch": Object {
+          "getAllSearchCommands": [MockFunction],
+        },
         "logos": Object {
           "AnimatedMark": Object {
             "dark": Object {
@@ -4048,6 +4060,9 @@ exports[`Services component renders services page 1`] = `
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
+      "globalSearch": Object {
+        "getAllSearchCommands": [MockFunction],
+      },
       "logos": Object {
         "AnimatedMark": Object {
           "dark": Object {
@@ -4275,6 +4290,9 @@ exports[`Services component renders services page 1`] = `
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
         "getIsVisible$": [MockFunction],
+        "globalSearch": Object {
+          "getAllSearchCommands": [MockFunction],
+        },
         "logos": Object {
           "AnimatedMark": Object {
             "dark": Object {
