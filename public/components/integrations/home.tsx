@@ -18,6 +18,7 @@ import { AddedIntegrationOverviewPage } from './components/added_integration_ove
 import { AvailableIntegrationOverviewPage } from './components/available_integration_overview_page';
 import { Integration } from './components/integration';
 import { SetupIntegrationPage } from './components/setup_integration';
+import { integrationsBreadcrumb } from '../../../common/constants/integrations';
 
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
@@ -104,7 +105,7 @@ export const Home = (props: HomeProps) => {
 
               props.chrome.setBreadcrumbs([
                 {
-                  text: 'Integrations',
+                  text: integrationsBreadcrumb,
                   href: '#/available',
                 },
                 {
