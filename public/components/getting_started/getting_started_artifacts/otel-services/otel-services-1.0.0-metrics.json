@@ -126,7 +126,7 @@
         },
         "steps": [
           {
-            "name": "Configure Data Prepper Metrics exporter",
+            "name": "Configure Data Prepper metrics exporter",
             "label": "Metrics Exporter",
             "type": "console-cmd",
             "phase": "pipeline",

@@ -150,7 +150,7 @@
         },
         "steps": [
           {
-            "name": "Configure Data Prepper Traces exporter",
+            "name": "Configure Data Prepper traces exporter",
             "label": "Traces Exporter",
             "type": "console-cmd",
             "phase": "pipeline",
@@ -164,7 +164,7 @@
             "content": "entry-pipeline:\n  delay: \"100\"\n  source:\n    otel_trace_source:\n      ssl: false\n  sink:\n    - pipeline:\n        name: \"raw-pipeline\"\n    - pipeline:\n        name: \"service-map-pipeline\"\nraw-pipeline:\n  source:\n    pipeline:\n      name: \"entry-pipeline\"\n  processor:\n    - otel_trace_raw:\n  sink:\n    - opensearch:\n        hosts: [ \"<<https://opensearch-domain.com>>\" ]\n        insecure: true\n        username: \"<<username>>\"\n        password: \"<<password>>\"\n        index_type: trace-analytics-raw"
           },
           {
-            "name": "Configure Data Prepper Services exporter",
+            "name": "Configure Data Prepper services exporter",
             "label": "Services Exporter",
             "type": "console-cmd",
             "phase": "pipeline",
