@@ -340,7 +340,15 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
       <EuiSpacer size="s" />
       <EuiButton
         onClick={async () => {
-          await UploadAssets(specificMethod, selectedDataSourceId, selectedDataSourceLabel);
+          await UploadAssets(
+            specificMethod,
+            selectedDataSourceId,
+            selectedDataSourceLabel,
+            technologyJsonMap[specificMethod]?.['getting-started']?.schema ||
+              technologyJsonMap[specificMethod]?.schema ||
+              [],
+            selectedIntegration
+          );
         }}
         fill
       >
@@ -363,31 +371,6 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
             )
           )}
       </EuiText>
-      <EuiSpacer size="m" />
-      <EuiTitle size="s">
-        <h3>Index Patterns</h3>
-      </EuiTitle>
-      <EuiListGroup>
-        {indexPatterns?.['index-patterns-name']?.map((pattern: string, idx: number) => (
-          <EuiListGroupItem key={idx} label={pattern} />
-        ))}
-      </EuiListGroup>
-      <EuiButton
-        onClick={async () => {
-          await UploadAssets(
-            specificMethod,
-            selectedDataSourceId,
-            selectedDataSourceLabel,
-            technologyJsonMap[specificMethod]?.['getting-started']?.schema ||
-              technologyJsonMap[specificMethod]?.schema ||
-              [],
-            selectedIntegration
-          );
-        }}
-        fill
-      >
-        Create assets
-      </EuiButton>
     </>
   );
 
@@ -458,7 +441,15 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
         <EuiSpacer size="s" />
         <EuiButton
           onClick={async () => {
-            await UploadAssets(specificMethod, selectedDataSourceId, selectedDataSourceLabel);
+            await UploadAssets(
+              specificMethod,
+              selectedDataSourceId,
+              selectedDataSourceLabel,
+              technologyJsonMap[specificMethod]?.['getting-started']?.schema ||
+                technologyJsonMap[specificMethod]?.schema ||
+                [],
+              selectedIntegration
+            );
           }}
           fill
         >
