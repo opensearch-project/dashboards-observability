@@ -18,6 +18,7 @@ import { AddedIntegrationOverviewPage } from './components/added_integration_ove
 import { AvailableIntegrationOverviewPage } from './components/available_integration_overview_page';
 import { Integration } from './components/integration';
 import { SetupIntegrationPage } from './components/setup_integration';
+import { integrationsBreadcrumb } from '../../../common/constants/integrations';
 
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
@@ -97,15 +98,32 @@ export const Home = (props: HomeProps) => {
           <Route
             exact
             path={'/available/:id/setup'}
-            render={(routerProps) => (
-              <SetupIntegrationPage
-                integration={decodeURIComponent(routerProps.match.params.id)}
-                dataSourceManagement={dataSourceManagement}
-                notifications={notifications}
-                dataSourceEnabled={dataSourceEnabled}
-                savedObjectsMDSClient={savedObjectsMDSClient}
-              />
-            )}
+            render={(routerProps) => {
+              const integrationId = decodeURIComponent(routerProps.match.params.id);
+              const capitalizedIntegrationId =
+                integrationId.charAt(0).toUpperCase() + integrationId.slice(1);
+
+              props.chrome.setBreadcrumbs([
+                {
+                  text: integrationsBreadcrumb,
+                  href: '#/available',
+                },
+                {
+                  text: capitalizedIntegrationId,
+                  href: `#/available/${integrationId}`,
+                },
+              ]);
+
+              return (
+                <SetupIntegrationPage
+                  integration={integrationId}
+                  dataSourceManagement={props.dataSourceManagement}
+                  notifications={props.notifications}
+                  dataSourceEnabled={props.dataSourceEnabled}
+                  savedObjectsMDSClient={props.savedObjectsMDSClient}
+                />
+              );
+            }}
           />
         </Switch>
       </HashRouter>

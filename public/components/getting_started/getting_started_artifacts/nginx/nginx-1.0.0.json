@@ -119,7 +119,7 @@
     "live-sample": "true",
     "workflows": [
       {
-        "name": "Self managed",
+        "name": "Self-managed",
         "description": "This is a fluent-bit based getting started instructions tutorial",
         "steps": [
           {
@@ -197,11 +197,11 @@
         "info": [
           {
             "url": "https://opensearch.org/docs/latest/im-plugin/index-templates",
-            "title": "Index Template Documentation"
+            "title": "Index template documentation"
           },
           {
             "url": "https://github.com/opensearch-project/opensearch-catalog/blob/main/docs/schema/observability/Naming-convention.md",
-            "title": "Naming Convention"
+            "title": "Naming convention"
           }
         ],
         "content": "PUT _index_template/ss4o_logs_template",
@@ -215,12 +215,51 @@
       "info": [
         {
           "url": "https://opensearch.org/docs/latest/dashboards/management/index-patterns/",
-          "title": "Index Pattern Management Guide"
+          "title": "Index pattern documentation"
         }
       ],
       "description": "Import index patterns `.ndjson` file to the saved objects",
       "index-pattern": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/nginx/assets/getting-started-tutorial-1.0.0.ndjson",
       "index-patterns-name": ["ss4o_logs-*-*"]
+    },
+    "schema_and_index_pattern": {
+      "schema": [
+        {
+          "type": "Http",
+          "content": "PUT _component_template/http",
+          "description": "Setup simple schema http component template in the dev console",
+          "index-template": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/nginx/schemas/http-1.0.0.mapping.json"
+        },
+        {
+          "type": "Communication",
+          "content": "PUT _component_template/communication",
+          "description": "Setup simple schema communication component template in the dev console",
+          "index-template": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/nginx/schemas/communication-1.0.0.mapping.json"
+        },
+        {
+          "type": "Logs",
+          "content": "PUT _index_template/ss4o_logs_template",
+          "description": "Setup simple schema logs index template in the dev console",
+          "index-template": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/nginx/schemas/logs-1.0.0.mapping.json",
+          "index-pattern-name": "ss4o_logs-*-*"
+        }
+      ],
+      "index-patterns": {
+        "type": ["logs"],
+        "info": [
+          {
+            "url": "https://opensearch.org/docs/latest/dashboards/management/index-patterns/",
+            "title": "Index pattern documentation"
+          },
+          {
+            "url": "https://github.com/opensearch-project/opensearch-catalog/blob/main/docs/schema/observability/Naming-convention.md",
+            "title": "Naming convention"
+          }
+        ],
+        "description": "Import index patterns `.ndjson` file to the saved objects",
+        "index-pattern": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/nginx/assets/getting-started-tutorial-1.0.0.ndjson",
+        "index-patterns-name": ["ss4o_logs-*-*"]
+      }
     }
   },
   "sampleData": {

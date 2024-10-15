@@ -17,3 +17,5 @@ export const OPENSEARCH_CATALOG_URL =
 
 // Upstream doesn't export this, so we need to redeclare it for our use.
 export type Color = 'success' | 'primary' | 'warning' | 'danger' | undefined;
+
+export const integrationsBreadcrumb = 'Integrations';
