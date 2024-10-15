@@ -97,15 +97,32 @@ export const Home = (props: HomeProps) => {
           <Route
             exact
             path={'/available/:id/setup'}
-            render={(routerProps) => (
-              <SetupIntegrationPage
-                integration={decodeURIComponent(routerProps.match.params.id)}
-                dataSourceManagement={dataSourceManagement}
-                notifications={notifications}
-                dataSourceEnabled={dataSourceEnabled}
-                savedObjectsMDSClient={savedObjectsMDSClient}
-              />
-            )}
+            render={(routerProps) => {
+              const integrationId = decodeURIComponent(routerProps.match.params.id);
+              const capitalizedIntegrationId =
+                integrationId.charAt(0).toUpperCase() + integrationId.slice(1);
+
+              props.chrome.setBreadcrumbs([
+                {
+                  text: 'Integrations',
+                  href: '#/available',
+                },
+                {
+                  text: capitalizedIntegrationId,
+                  href: `#/available/${integrationId}`,
+                },
+              ]);
+
+              return (
+                <SetupIntegrationPage
+                  integration={integrationId}
+                  dataSourceManagement={props.dataSourceManagement}
+                  notifications={props.notifications}
+                  dataSourceEnabled={props.dataSourceEnabled}
+                  savedObjectsMDSClient={props.savedObjectsMDSClient}
+                />
+              );
+            }}
           />
         </Switch>
       </HashRouter>
