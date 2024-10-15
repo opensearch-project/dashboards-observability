@@ -42,7 +42,7 @@
     "live-sample": "true",
     "workflows": [
       {
-        "name": "Self managed",
+        "name": "Self-managed",
         "description": "This is a fluent-bit based getting started instructions tutorial",
         "steps": [
           {
@@ -115,8 +115,8 @@
     ],
     "schema": [
       {
-        "type": "logs",
-        "content": "PUT _index_template/application_logs_template",
+        "type": "Logs",
+        "content": "PUT _index_template/application_logs_template\n{\n  \"index_patterns\": [\"applicative_logs-*\"],\n  \"template\": {\n    \"settings\": {\n      \"number_of_shards\": 1\n    },\n    \"mappings\": {\n      \"properties\": {\n        \"timestamp\": {\n          \"type\": \"date\"\n        },\n        \"level\": {\n          \"type\": \"keyword\"\n        },\n        \"message\": {\n          \"type\": \"text\"\n        },\n        \"source\": {\n          \"type\": \"keyword\"\n        },\n        \"module\": {\n          \"type\": \"keyword\"\n        },\n        \"function\": {\n          \"type\": \"keyword\"\n        },\n        \"error_code\": {\n          \"type\": \"keyword\"\n        },\n        \"user_id\": {\n          \"type\": \"keyword\"\n        }\n      }\n    }\n  }\n}",
         "description": "Setup applicative logs index template in the dev console",
         "index-template": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/schemas/applicative-logs-1.0.0.mapping.json",
         "index-pattern-name": "applicative_logs-*"
@@ -127,7 +127,7 @@
         "logs"
       ],
       "info": [
-        { "url": "https://opensearch.org/docs/latest/dashboards/management/index-patterns/", "title": "Index Pattern Management Guide" }
+        { "url": "https://opensearch.org/docs/latest/dashboards/management/index-patterns/", "title": "Index pattern documentation" }
       ],
       "description": "Import index patterns `.ndjson` file to the saved objects",
       "index-pattern": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/assets/tutorial-1.0.0.ndjson",
