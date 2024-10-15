@@ -20,6 +20,9 @@ exports[`Log Config component renders empty log config 1`] = `
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
+      "globalSearch": Object {
+        "getAllSearchCommands": [MockFunction],
+      },
       "logos": Object {
         "AnimatedMark": Object {
           "dark": Object {
@@ -687,6 +690,9 @@ exports[`Log Config component renders with query 1`] = `
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
+      "globalSearch": Object {
+        "getAllSearchCommands": [MockFunction],
+      },
       "logos": Object {
         "AnimatedMark": Object {
           "dark": Object {

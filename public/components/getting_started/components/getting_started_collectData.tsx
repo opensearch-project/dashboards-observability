@@ -21,6 +21,7 @@ import {
   EuiButton,
   EuiIcon,
   EuiCard,
+  EuiSelectableOption,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 
@@ -52,7 +53,7 @@ interface CollectAndShipDataProps {
   selectedDataSourceLabel: string;
 }
 
-interface CollectorOption {
+export interface CollectorOption {
   label: string;
   value: string;
 }
@@ -69,6 +70,21 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
   const [workflows, setWorkflows] = useState<any[]>([]);
   const [collectorOptions, setCollectorOptions] = useState<CollectorOption[]>([]);
   const [patternsContent, setPatternsContent] = useState<any[]>([]);
+
+  const getTelemetryOption = (collectionMethodOtel: string) => {
+    switch (collectionMethodOtel) {
+      case cardTwo:
+        return { label: 'Open Telemetry', value: 'otelMetrics' };
+      case cardThree:
+        return { label: 'Open Telemetry', value: 'otelTraces' };
+      default:
+        return { label: 'Open Telemetry', value: 'otelLogs' };
+    }
+  };
+
+  const [selectedIntegration, setSelectedIntegration] = useState<
+    Array<EuiSelectableOption<CollectorOption>>
+  >([getTelemetryOption(cardOne)]);
 
   const technologyJsonMap: Record<string, any> = {
     otelLogs: otelJsonLogs,
@@ -122,13 +138,14 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
     };
   }, [specificMethod]);
 
-  const handleSpecificMethodChange = (newOption: any) => {
+  const handleSpecificMethodChange = (newOption: Array<EuiSelectableOption<CollectorOption>>) => {
     const selectedOptionValue = newOption[0]?.value;
 
     if (selectedOptionValue === specificMethod) {
       return;
     }
 
+    setSelectedIntegration(newOption);
     setSpecificMethod(selectedOptionValue);
     setSelectedWorkflow('');
     setGettingStarted(null);
@@ -138,7 +155,8 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
   // Auto-select first collector if nothing is selected and a collection method is set
   useEffect(() => {
     if (collectorOptions.length > 0 && !specificMethod && collectionMethod) {
-      handleSpecificMethodChange([{ value: collectorOptions[0].value }]);
+      const telemetryOption = getTelemetryOption(collectionMethod);
+      handleSpecificMethodChange([{ ...telemetryOption }]);
     }
   }, [collectorOptions, specificMethod, collectionMethod]);
 
@@ -151,17 +169,19 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
 
     if (value === cardOne) {
       setCollectorOptions([
-        { label: 'Open Telemetry', value: 'otelLogs' },
+        getTelemetryOption(cardOne),
         { label: 'Nginx', value: 'nginx' },
         { label: 'Java', value: 'java' },
         { label: 'Python', value: 'python' },
         { label: 'Golang', value: 'golang' },
       ]);
     } else if (value === cardTwo) {
-      setCollectorOptions([{ label: 'Open Telemetry', value: 'otelMetrics' }]);
+      setCollectorOptions([getTelemetryOption(cardTwo)]);
     } else if (value === cardThree) {
-      setCollectorOptions([{ label: 'Open Telemetry', value: 'otelTraces' }]);
+      setCollectorOptions([getTelemetryOption(cardThree)]);
     }
+
+    setSelectedIntegration([getTelemetryOption(value)]);
   };
 
   const renderSpecificMethodDropdown = () => {
@@ -200,7 +220,9 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
             singleSelection={{ asPlainText: true }}
             options={optionsWithIcons}
             selectedOptions={selectedOption ? [selectedOption] : []}
-            onChange={(newOptions) => handleSpecificMethodChange(newOptions)}
+            onChange={(newOptions) =>
+              handleSpecificMethodChange(newOptions as Array<EuiSelectableOption<CollectorOption>>)
+            }
             renderOption={(option) => (
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 {option.prepend}
@@ -347,7 +369,15 @@ export const CollectAndShipData: React.FC<CollectAndShipDataProps> = ({
       </EuiListGroup>
       <EuiButton
         onClick={async () => {
-          await UploadAssets(specificMethod, selectedDataSourceId, selectedDataSourceLabel);
+          await UploadAssets(
+            specificMethod,
+            selectedDataSourceId,
+            selectedDataSourceLabel,
+            technologyJsonMap[specificMethod]?.['getting-started']?.schema ||
+              technologyJsonMap[specificMethod]?.schema ||
+              [],
+            selectedIntegration
+          );
         }}
         fill
       >
