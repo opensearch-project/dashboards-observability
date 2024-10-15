@@ -20,6 +20,7 @@ import { AvailableIntegrationsTable } from './available_integration_table';
 import { AvailableIntegrationsCardView } from './available_integration_card_view';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { AvailableIntegrationOverviewPageProps } from './integration_types';
+import { integrationsBreadcrumb } from '../../../../common/constants/integrations';
 
 type CategoryItems = Array<{ name: string; checked: boolean }>;
 
@@ -125,7 +126,7 @@ export function AvailableIntegrationOverviewPage(props: AvailableIntegrationOver
   useEffect(() => {
     chrome.setBreadcrumbs([
       {
-        text: 'Integrations',
+        text: integrationsBreadcrumb,
         href: '#/',
       },
     ]);
