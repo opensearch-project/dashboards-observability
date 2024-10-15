@@ -28,7 +28,10 @@ import truncate from 'lodash/truncate';
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { DataSourceViewConfig } from '../../../../../../src/plugins/data_source_management/public';
-import { ASSET_FILTER_OPTIONS } from '../../../../common/constants/integrations';
+import {
+  ASSET_FILTER_OPTIONS,
+  integrationsBreadcrumb,
+} from '../../../../common/constants/integrations';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { dataSourceFilterFn } from '../../../../common/utils/shared';
 import { useToast } from '../../../../public/components/common/toast';
@@ -71,7 +74,7 @@ export function AddedIntegration(props: AddedIntegrationProps) {
   useEffect(() => {
     chrome.setBreadcrumbs([
       {
-        text: 'Integrations',
+        text: integrationsBreadcrumb,
         href: '#/',
       },
       {

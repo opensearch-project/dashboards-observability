@@ -11,6 +11,7 @@ import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
 import { AddedIntegrationsTable } from './added_integration_table';
 import { IntegrationHeader } from './integration_header';
 import { AddedIntegrationOverviewPageProps } from './integration_types';
+import { integrationsBreadcrumb } from '../../../../common/constants/integrations';
 
 export interface AddedIntegrationsTableProps {
   loading: boolean;
@@ -44,7 +45,7 @@ export function AddedIntegrationOverviewPage(props: AddedIntegrationOverviewPage
   useEffect(() => {
     chrome.setBreadcrumbs([
       {
-        text: 'Integrations',
+        text: integrationsBreadcrumb,
         href: '#/',
       },
     ]);
