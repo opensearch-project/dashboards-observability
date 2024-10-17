@@ -251,6 +251,9 @@ export class ObservabilityPlugin
         value: true,
         description: 'Show the Observability overview page cards',
         schema: schema.boolean(),
+        scope: core.workspace.isWorkspaceEnabled()
+          ? UiSettingScope.WORKSPACE
+          : UiSettingScope.GLOBAL,
       },
     });
 
