@@ -3,6 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import {
+  EuiButtonIcon,
+  EuiPopover,
+  EuiContextMenu,
+  EuiIcon,
+  EuiButtonEmpty,
+  EuiToolTip,
+} from '@elastic/eui';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { HashRouter, Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -12,18 +20,29 @@ import {
   observabilityOverviewTitle,
   observabilityOverviewTitleWithUseCase,
 } from '../../../common/constants/shared';
-import { alertsPluginID, anomalyPluginID } from '../../../common/constants/overview';
 import { DashboardSavedObjectsType } from '../../../common/types/overview';
 import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
 import { coreRefs } from '../../framework/core_refs';
-import { HOME_CONTENT_AREAS, HOME_PAGE_ID } from '../../plugin_helpers/plugin_overview';
+import {
+  GET_STARTED_SECTION,
+  HOME_CONTENT_AREAS,
+  HOME_PAGE_ID,
+  SECTIONS,
+} from '../../plugin_helpers/plugin_overview';
 import { cardConfigs, GettingStartedConfig } from './components/card_configs';
 import { DashboardControls } from './components/dashboard_controls';
 import { ObsDashboardStateManager } from './components/obs_dashboard_state_manager';
 import { SelectDashboardFlyout } from './components/select_dashboard_flyout';
-import { getObservabilityDashboardsId, setObservabilityDashboardsId } from './components/utils';
+import {
+  getObservabilityDashboardsId,
+  setObservabilityDashboardsId,
+  getObservabilityDashboardsShowCards,
+  setObservabilityDashboardsShowCards,
+} from './components/utils';
 import './index.scss';
 import { OBSERVABILITY_USE_CASE_ID } from '../../../../../src/core/public';
+import { HeaderControlledComponentsWrapper } from '../../../public/plugin_helpers/plugin_headerControl';
+import { getOverviewPage } from '../../../common/utils';
 
 export const Home = () => {
   const [homePage, setHomePage] = useState<ReactNode>(<></>);
@@ -31,41 +50,187 @@ export const Home = () => {
     {}
   );
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [showGetStarted, setShowGetStarted] = useState<boolean | null>(null); // Initial null state
+
   ObsDashboardStateManager.showFlyout$.next(() => () => setIsFlyoutVisible(true));
 
   const loadHomePage = () => {
     setHomePage(coreRefs.contentManagement?.renderPage(HOME_PAGE_ID));
   };
 
-  const registerCards = async () => {
-    let alertsPluginExists = false;
-    let anomalyPluginExists = false;
-    try {
-      const res = await coreRefs.http?.get('/api/status');
-      if (res) {
-        for (const status of res.status.statuses) {
-          if (status.id.includes(alertsPluginID)) {
-            alertsPluginExists = true;
-          }
-          if (status.id.includes(anomalyPluginID)) {
-            anomalyPluginExists = true;
-          }
+  const togglePopover = () => setIsPopoverOpen(!isPopoverOpen);
+  const closePopover = () => setIsPopoverOpen(false);
+
+  const loadDashboardState = () => {
+    coreRefs.savedObjectsClient
+      ?.find({
+        type: 'dashboard',
+      })
+      .then((response) => {
+        const savedDashboards = response.savedObjects.reduce((acc, savedDashboard) => {
+          const dashboardAttributes = savedDashboard.attributes as {
+            title: string;
+            timeFrom: string;
+            timeTo: string;
+          };
+          const id = savedDashboard.id.toString();
+          acc[id] = {
+            value: id,
+            label: dashboardAttributes.title,
+            startDate: dashboardAttributes.timeFrom,
+            endDate: dashboardAttributes.timeTo,
+          };
+          return acc;
+        }, {} as DashboardSavedObjectsType);
+
+        setDashboardsSavedObjects(savedDashboards);
+        const defaultDashboard = getObservabilityDashboardsId();
+
+        if (defaultDashboard in savedDashboards) {
+          ObsDashboardStateManager.dashboardState$.next({
+            dashboardTitle: savedDashboards[defaultDashboard].label,
+            dashboardId: defaultDashboard,
+            startDate: savedDashboards[defaultDashboard].startDate ?? 'now-7d',
+            endDate: savedDashboards[defaultDashboard].endDate ?? 'now',
+          });
+          ObsDashboardStateManager.isDashboardSelected$.next(true);
+        } else {
+          setObservabilityDashboardsId(null);
+          ObsDashboardStateManager.dashboardState$.next({
+            startDate: '',
+            endDate: '',
+            dashboardTitle: '',
+            dashboardId: '',
+          });
+          ObsDashboardStateManager.isDashboardSelected$.next(false);
         }
+      })
+      .catch((error) => {
+        console.error('Error fetching dashboards:', error);
+      });
+  };
+
+  const flyout = isFlyoutVisible && (
+    <SelectDashboardFlyout
+      closeFlyout={() => setIsFlyoutVisible(false)}
+      dashboardsSavedObjects={dashboardsSavedObjects}
+      reloadPage={loadDashboardState}
+    />
+  );
+
+  useEffect(() => {
+    const fetchShowCards = async () => {
+      const showCards = await getObservabilityDashboardsShowCards();
+      setShowGetStarted(showCards);
+
+      if (showCards) {
+        getOverviewPage().createSection(GET_STARTED_SECTION);
+      } else {
+        getOverviewPage().removeSection(SECTIONS.GET_STARTED);
       }
-    } catch (error) {
-      console.error('Error checking plugin installation status:', error);
+    };
+
+    fetchShowCards();
+    loadDashboardState();
+  }, []);
+
+  const renderHeaderButton = () => {
+    if (showGetStarted === null) {
+      return (
+        <EuiButtonIcon
+          iconType="gear"
+          aria-label="Loading..."
+          color="primary"
+          display="base"
+          size="s"
+          isDisabled={true}
+        />
+      );
     }
 
-    cardConfigs
-      .filter((card) => {
-        if (card.id === 'alerts') {
-          return alertsPluginExists;
-        } else if (card.id === 'anomaly') {
-          return anomalyPluginExists;
-        }
-        return true;
-      })
-      .forEach((card: GettingStartedConfig) => {
+    const contextMenuItems = [
+      {
+        name: showGetStarted
+          ? 'Hide Get started with Observability'
+          : 'Show Get started with Observability',
+        icon: <EuiIcon type={showGetStarted ? 'eyeClosed' : 'eye'} />,
+        onClick: async () => {
+          const updatedShowCards = !showGetStarted;
+          await setObservabilityDashboardsShowCards(updatedShowCards);
+          setShowGetStarted(updatedShowCards);
+          closePopover();
+
+          if (updatedShowCards) {
+            console.log('Called createSection');
+            getOverviewPage().createSection(GET_STARTED_SECTION);
+          } else {
+            getOverviewPage().removeSection(SECTIONS.GET_STARTED);
+          }
+        },
+      },
+      {
+        name: 'Select a dashboard',
+        icon: <EuiIcon type="dashboardApp" />,
+        onClick: () => {
+          setIsFlyoutVisible(true);
+          closePopover();
+        },
+      },
+    ];
+
+    return (
+      <>
+        {showGetStarted && (
+          <EuiButtonEmpty
+            size="s"
+            color="primary"
+            iconSide="right"
+            iconType="cross"
+            onClick={() => {
+              setShowGetStarted(false);
+              setObservabilityDashboardsShowCards(false);
+              getOverviewPage().removeSection(SECTIONS.GET_STARTED);
+            }}
+          >
+            Dismiss Get started
+          </EuiButtonEmpty>
+        )}
+        <EuiToolTip content="Page settings">
+          <EuiPopover
+            button={
+              <EuiButtonIcon
+                iconType="gear"
+                aria-label="Page settings"
+                color="primary"
+                onClick={togglePopover}
+                display="base"
+                size="s"
+              />
+            }
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            panelPaddingSize="none"
+          >
+            <EuiContextMenu
+              size="s"
+              initialPanelId={0}
+              panels={[
+                {
+                  id: 0,
+                  items: contextMenuItems,
+                },
+              ]}
+            />
+          </EuiPopover>
+        </EuiToolTip>
+      </>
+    );
+  };
+
+  const registerCards = async () => {
+    try {
+      cardConfigs.forEach((card: GettingStartedConfig) => {
         coreRefs.contentManagement?.registerContentProvider({
           id: card.id,
           getContent: () => ({
@@ -92,6 +257,9 @@ export const Home = () => {
           getTargetArea: () => HOME_CONTENT_AREAS.GET_STARTED,
         });
       });
+    } catch (error) {
+      console.error('Error registering cards:', error);
+    }
   };
 
   const registerDashboard = () => {
@@ -172,14 +340,6 @@ export const Home = () => {
       });
   };
 
-  const flyout = isFlyoutVisible && (
-    <SelectDashboardFlyout
-      closeFlyout={() => setIsFlyoutVisible(false)}
-      dashboardsSavedObjects={dashboardsSavedObjects}
-      reloadPage={loadDashboardsState}
-    />
-  );
-
   useEffect(() => {
     registerCards();
     registerDashboard();
@@ -207,6 +367,10 @@ export const Home = () => {
 
   return (
     <div>
+      <HeaderControlledComponentsWrapper
+        components={[renderHeaderButton()]}
+        description={showGetStarted ? 'Get started with Observability' : undefined}
+      />
       <HashRouter>
         <Switch>
           <Route exact path="/">

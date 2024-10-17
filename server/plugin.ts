@@ -245,6 +245,18 @@ export class ObservabilityPlugin
       },
     });
 
+    core.uiSettings.register({
+      'observability:overviewCardsDisplay': {
+        name: 'Observability overview cards',
+        value: true,
+        description: 'Show the Observability overview page cards',
+        schema: schema.boolean(),
+        scope: core.workspace.isWorkspaceEnabled()
+          ? UiSettingScope.WORKSPACE
+          : UiSettingScope.GLOBAL,
+      },
+    });
+
     return {};
   }
 

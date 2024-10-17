@@ -72,6 +72,7 @@ import { VISUALIZATION_SAVED_OBJECT } from '../common/types/observability_saved_
 import {
   setOSDHttp,
   setOSDSavedObjectsClient,
+  setOverviewPage,
   setPPLService,
   uiSettingsService,
 } from '../common/utils';
@@ -187,7 +188,8 @@ export class ObservabilityPlugin
       setOSDSavedObjectsClient(coreStart.savedObjects.client);
     });
 
-    setupOverviewPage(setupDeps.contentManagement!);
+    const page = setupOverviewPage(setupDeps.contentManagement!);
+    setOverviewPage(page);
     this.mdsFlagStatus = !!setupDeps.dataSource;
 
     // redirect legacy notebooks URL to current URL under observability
