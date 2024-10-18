@@ -40,4 +40,4 @@ export const [getOSDSavedObjectsClient, setOSDSavedObjectsClient] = createGetter
   SavedObjectsClientContract
 >('SavedObjectsClient');
 export const [getQueryManager, setQueryManager] = createGetterSetter<QueryManager>('QueryManager');
-export const [getOverviewPage, setOverviewPage] = createGetterSetter<Page>('page');
+export const [getOverviewPage, setOverviewPage] = createGetterSetter<Page>('Page');
