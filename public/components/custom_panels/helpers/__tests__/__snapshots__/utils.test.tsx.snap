@@ -320,7 +320,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                       },
                       Object {
                         "component": [Function],
-                        "defaultState": 0,
+                        "defaultState": -45,
                         "eleType": "slider",
                         "mapTo": "rotateBarLabels",
                         "name": "Rotate bar labels",
@@ -419,7 +419,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
           "icontype": "visBarVerticalStacked",
           "id": "bar",
           "label": "Vertical bar",
-          "labelangle": 0,
+          "labelangle": -45,
           "legendposition": "v",
           "linewidth": 0,
           "mode": "group",
@@ -775,7 +775,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                         },
                         Object {
                           "component": [Function],
-                          "defaultState": 0,
+                          "defaultState": -45,
                           "eleType": "slider",
                           "mapTo": "rotateBarLabels",
                           "name": "Rotate bar labels",
@@ -874,7 +874,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
             "icontype": "visBarVerticalStacked",
             "id": "bar",
             "label": "Vertical bar",
-            "labelangle": 0,
+            "labelangle": -45,
             "legendposition": "v",
             "linewidth": 0,
             "mode": "group",
@@ -1253,7 +1253,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 0,
+                            "defaultState": -45,
                             "eleType": "slider",
                             "mapTo": "rotateBarLabels",
                             "name": "Rotate bar labels",
@@ -1352,7 +1352,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
               "icontype": "visBarVerticalStacked",
               "id": "bar",
               "label": "Vertical bar",
-              "labelangle": 0,
+              "labelangle": -45,
               "legendposition": "v",
               "linewidth": 0,
               "mode": "group",
@@ -1467,7 +1467,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
               "title": "",
               "xaxis": Object {
                 "automargin": true,
-                "tickangle": 0,
+                "tickangle": -45,
                 "tickfont": Object {
                   "size": 12,
                 },
@@ -1570,7 +1570,7 @@ exports[`Utils helper functions renders displayVisualization function 1`] = `
                 "title": "",
                 "xaxis": Object {
                   "automargin": true,
-                  "tickangle": 0,
+                  "tickangle": -45,
                   "tickfont": Object {
                     "size": 12,
                   },
@@ -2008,7 +2008,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                       },
                       Object {
                         "component": [Function],
-                        "defaultState": 0,
+                        "defaultState": -45,
                         "eleType": "slider",
                         "mapTo": "rotateLabels",
                         "name": "Rotate labels",
@@ -2524,7 +2524,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                         },
                         Object {
                           "component": [Function],
-                          "defaultState": 0,
+                          "defaultState": -45,
                           "eleType": "slider",
                           "mapTo": "rotateLabels",
                           "name": "Rotate labels",
@@ -3094,7 +3094,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 0,
+                            "defaultState": -45,
                             "eleType": "slider",
                             "mapTo": "rotateLabels",
                             "name": "Rotate labels",
@@ -3304,7 +3304,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
               "title": "",
               "xaxis": Object {
                 "automargin": true,
-                "tickangle": 0,
+                "tickangle": -45,
                 "tickfont": Object {},
               },
               "yaxis": Object {
@@ -3419,7 +3419,7 @@ exports[`Utils helper functions renders displayVisualization function 2`] = `
                 "title": "",
                 "xaxis": Object {
                   "automargin": true,
-                  "tickangle": 0,
+                  "tickangle": -45,
                   "tickfont": Object {},
                 },
                 "yaxis": Object {
@@ -3773,7 +3773,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                       },
                       Object {
                         "component": [Function],
-                        "defaultState": 0,
+                        "defaultState": -45,
                         "eleType": "slider",
                         "mapTo": "rotateBarLabels",
                         "name": "Rotate bar labels",
@@ -3872,7 +3872,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
           "icontype": "visBarHorizontalStacked",
           "id": "horizontal_bar",
           "label": "Horizontal bar",
-          "labelangle": 0,
+          "labelangle": -45,
           "legendposition": "v",
           "linewidth": 0,
           "mode": "group",
@@ -4228,7 +4228,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                         },
                         Object {
                           "component": [Function],
-                          "defaultState": 0,
+                          "defaultState": -45,
                           "eleType": "slider",
                           "mapTo": "rotateBarLabels",
                           "name": "Rotate bar labels",
@@ -4327,7 +4327,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
             "icontype": "visBarHorizontalStacked",
             "id": "horizontal_bar",
             "label": "Horizontal bar",
-            "labelangle": 0,
+            "labelangle": -45,
             "legendposition": "v",
             "linewidth": 0,
             "mode": "group",
@@ -4706,7 +4706,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 0,
+                            "defaultState": -45,
                             "eleType": "slider",
                             "mapTo": "rotateBarLabels",
                             "name": "Rotate bar labels",
@@ -4805,7 +4805,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
               "icontype": "visBarHorizontalStacked",
               "id": "horizontal_bar",
               "label": "Horizontal bar",
-              "labelangle": 0,
+              "labelangle": -45,
               "legendposition": "v",
               "linewidth": 0,
               "mode": "group",
@@ -4926,7 +4926,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
               },
               "yaxis": Object {
                 "automargin": true,
-                "tickangle": 0,
+                "tickangle": -45,
                 "tickfont": Object {
                   "size": 12,
                 },
@@ -5029,7 +5029,7 @@ exports[`Utils helper functions renders displayVisualization function 3`] = `
                 },
                 "yaxis": Object {
                   "automargin": true,
-                  "tickangle": 0,
+                  "tickangle": -45,
                   "tickfont": Object {
                     "size": 12,
                   },

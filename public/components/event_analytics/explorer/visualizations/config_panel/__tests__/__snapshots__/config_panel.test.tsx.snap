@@ -528,7 +528,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                     },
                     Object {
                       "component": [Function],
-                      "defaultState": 0,
+                      "defaultState": -45,
                       "eleType": "slider",
                       "mapTo": "rotateBarLabels",
                       "name": "Rotate bar labels",
@@ -627,7 +627,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
         "icontype": "visBarVerticalStacked",
         "id": "bar",
         "label": "Vertical bar",
-        "labelangle": 0,
+        "labelangle": -45,
         "legendposition": "v",
         "linewidth": 0,
         "mode": "group",
@@ -850,7 +850,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 0,
+                            "defaultState": -45,
                             "eleType": "slider",
                             "mapTo": "rotateBarLabels",
                             "name": "Rotate bar labels",
@@ -950,7 +950,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
               "icontype": "visBarVerticalStacked",
               "id": "bar",
               "label": "Vertical bar",
-              "labelangle": 0,
+              "labelangle": -45,
               "legendposition": "v",
               "linewidth": 0,
               "mode": "group",
@@ -1155,7 +1155,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 0,
+                            "defaultState": -45,
                             "eleType": "slider",
                             "mapTo": "rotateBarLabels",
                             "name": "Rotate bar labels",
@@ -1254,7 +1254,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
               "icontype": "visBarHorizontalStacked",
               "id": "horizontal_bar",
               "label": "Horizontal bar",
-              "labelangle": 0,
+              "labelangle": -45,
               "legendposition": "v",
               "linewidth": 0,
               "mode": "group",
@@ -1525,7 +1525,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 0,
+                            "defaultState": -45,
                             "eleType": "slider",
                             "mapTo": "rotateLabels",
                             "name": "Rotate labels",
@@ -2547,7 +2547,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 0,
+                            "defaultState": -45,
                             "eleType": "slider",
                             "mapTo": "rotateBarLabels",
                             "name": "Rotate bar labels",
@@ -2647,7 +2647,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
               "icontype": "visBarVerticalStacked",
               "id": "bar",
               "label": "Vertical bar",
-              "labelangle": 0,
+              "labelangle": -45,
               "legendposition": "v",
               "linewidth": 0,
               "mode": "group",
@@ -2884,7 +2884,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                               },
                               Object {
                                 "component": [Function],
-                                "defaultState": 0,
+                                "defaultState": -45,
                                 "eleType": "slider",
                                 "mapTo": "rotateBarLabels",
                                 "name": "Rotate bar labels",
@@ -2984,7 +2984,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                   "icontype": "visBarVerticalStacked",
                   "id": "bar",
                   "label": "Vertical bar",
-                  "labelangle": 0,
+                  "labelangle": -45,
                   "legendposition": "v",
                   "linewidth": 0,
                   "mode": "group",
@@ -3226,7 +3226,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                     },
                                     Object {
                                       "component": [Function],
-                                      "defaultState": 0,
+                                      "defaultState": -45,
                                       "eleType": "slider",
                                       "mapTo": "rotateBarLabels",
                                       "name": "Rotate bar labels",
@@ -3327,7 +3327,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       icontype="visBarVerticalStacked"
                       id="bar"
                       key="vertical bar"
-                      labelangle={0}
+                      labelangle={-45}
                       legendposition="v"
                       linewidth={0}
                       mode="group"
@@ -3503,7 +3503,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                       },
                                       Object {
                                         "component": [Function],
-                                        "defaultState": 0,
+                                        "defaultState": -45,
                                         "eleType": "slider",
                                         "mapTo": "rotateBarLabels",
                                         "name": "Rotate bar labels",
@@ -3603,7 +3603,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           "icontype": "visBarVerticalStacked",
                           "id": "bar",
                           "label": "Vertical bar",
-                          "labelangle": 0,
+                          "labelangle": -45,
                           "legendposition": "v",
                           "linewidth": 0,
                           "mode": "group",
@@ -3846,7 +3846,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                       },
                                       Object {
                                         "component": [Function],
-                                        "defaultState": 0,
+                                        "defaultState": -45,
                                         "eleType": "slider",
                                         "mapTo": "rotateBarLabels",
                                         "name": "Rotate bar labels",
@@ -3946,7 +3946,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         iconType="visBarVerticalStacked"
                         icontype="visBarVerticalStacked"
                         id="bar"
-                        labelangle={0}
+                        labelangle={-45}
                         legendposition="v"
                         linewidth={0}
                         mode="group"
@@ -4159,7 +4159,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                           },
                                           Object {
                                             "component": [Function],
-                                            "defaultState": 0,
+                                            "defaultState": -45,
                                             "eleType": "slider",
                                             "mapTo": "rotateBarLabels",
                                             "name": "Rotate bar labels",
@@ -4258,7 +4258,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                             groupwidth={0.7}
                             icontype="visBarVerticalStacked"
                             id="bar"
-                            labelangle={0}
+                            labelangle={-45}
                             legendposition="v"
                             linewidth={0}
                             mode="group"
@@ -4648,7 +4648,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         },
                         Object {
                           "component": [Function],
-                          "defaultState": 0,
+                          "defaultState": -45,
                           "eleType": "slider",
                           "mapTo": "rotateBarLabels",
                           "name": "Rotate bar labels",
@@ -5258,7 +5258,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 },
                                 Object {
                                   "component": [Function],
-                                  "defaultState": 0,
+                                  "defaultState": -45,
                                   "eleType": "slider",
                                   "mapTo": "rotateBarLabels",
                                   "name": "Rotate bar labels",
@@ -5357,7 +5357,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                     "icontype": "visBarVerticalStacked",
                     "id": "bar",
                     "label": "Vertical bar",
-                    "labelangle": 0,
+                    "labelangle": -45,
                     "legendposition": "v",
                     "linewidth": 0,
                     "mode": "group",
@@ -5590,7 +5590,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                           },
                           Object {
                             "component": [Function],
-                            "defaultState": 0,
+                            "defaultState": -45,
                             "eleType": "slider",
                             "mapTo": "rotateBarLabels",
                             "name": "Rotate bar labels",
@@ -6200,7 +6200,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   },
                                   Object {
                                     "component": [Function],
-                                    "defaultState": 0,
+                                    "defaultState": -45,
                                     "eleType": "slider",
                                     "mapTo": "rotateBarLabels",
                                     "name": "Rotate bar labels",
@@ -6299,7 +6299,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                       "icontype": "visBarVerticalStacked",
                       "id": "bar",
                       "label": "Vertical bar",
-                      "labelangle": 0,
+                      "labelangle": -45,
                       "legendposition": "v",
                       "linewidth": 0,
                       "mode": "group",
@@ -6573,7 +6573,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                         },
                         Object {
                           "component": [Function],
-                          "defaultState": 0,
+                          "defaultState": -45,
                           "eleType": "slider",
                           "mapTo": "rotateBarLabels",
                           "name": "Rotate bar labels",
@@ -7183,7 +7183,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 },
                                 Object {
                                   "component": [Function],
-                                  "defaultState": 0,
+                                  "defaultState": -45,
                                   "eleType": "slider",
                                   "mapTo": "rotateBarLabels",
                                   "name": "Rotate bar labels",
@@ -7282,7 +7282,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                     "icontype": "visBarVerticalStacked",
                     "id": "bar",
                     "label": "Vertical bar",
-                    "labelangle": 0,
+                    "labelangle": -45,
                     "legendposition": "v",
                     "linewidth": 0,
                     "mode": "group",
@@ -7894,7 +7894,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               },
                                               Object {
                                                 "component": [Function],
-                                                "defaultState": 0,
+                                                "defaultState": -45,
                                                 "eleType": "slider",
                                                 "mapTo": "rotateBarLabels",
                                                 "name": "Rotate bar labels",
@@ -7993,7 +7993,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "icontype": "visBarVerticalStacked",
                                   "id": "bar",
                                   "label": "Vertical bar",
-                                  "labelangle": 0,
+                                  "labelangle": -45,
                                   "legendposition": "v",
                                   "linewidth": 0,
                                   "mode": "group",
@@ -8904,7 +8904,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               },
                                               Object {
                                                 "component": [Function],
-                                                "defaultState": 0,
+                                                "defaultState": -45,
                                                 "eleType": "slider",
                                                 "mapTo": "rotateBarLabels",
                                                 "name": "Rotate bar labels",
@@ -9003,7 +9003,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "icontype": "visBarVerticalStacked",
                                   "id": "bar",
                                   "label": "Vertical bar",
-                                  "labelangle": 0,
+                                  "labelangle": -45,
                                   "legendposition": "v",
                                   "linewidth": 0,
                                   "mode": "group",
@@ -10391,7 +10391,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               },
                                               Object {
                                                 "component": [Function],
-                                                "defaultState": 0,
+                                                "defaultState": -45,
                                                 "eleType": "slider",
                                                 "mapTo": "rotateBarLabels",
                                                 "name": "Rotate bar labels",
@@ -10490,7 +10490,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "icontype": "visBarVerticalStacked",
                                   "id": "bar",
                                   "label": "Vertical bar",
-                                  "labelangle": 0,
+                                  "labelangle": -45,
                                   "legendposition": "v",
                                   "linewidth": 0,
                                   "mode": "group",
@@ -11307,7 +11307,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 },
                                 Object {
                                   "component": [Function],
-                                  "defaultState": 0,
+                                  "defaultState": -45,
                                   "eleType": "slider",
                                   "mapTo": "rotateBarLabels",
                                   "name": "Rotate bar labels",
@@ -11909,7 +11909,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               },
                                               Object {
                                                 "component": [Function],
-                                                "defaultState": 0,
+                                                "defaultState": -45,
                                                 "eleType": "slider",
                                                 "mapTo": "rotateBarLabels",
                                                 "name": "Rotate bar labels",
@@ -12008,7 +12008,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "icontype": "visBarVerticalStacked",
                                   "id": "bar",
                                   "label": "Vertical bar",
-                                  "labelangle": 0,
+                                  "labelangle": -45,
                                   "legendposition": "v",
                                   "linewidth": 0,
                                   "mode": "group",
@@ -12483,7 +12483,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                           />
                                         </EuiSpacer>
                                         <SliderConfig
-                                          currentRange={0}
+                                          currentRange={-45}
                                           handleSliderChange={[Function]}
                                           max={90}
                                           maxRange={90}
@@ -12633,7 +12633,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                 },
                                               ]
                                             }
-                                            value={0}
+                                            value={-45}
                                           >
                                             <EuiRangeWrapper
                                               className="euiRange euiRange--hasInput"
@@ -12676,7 +12676,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                       },
                                                     ]
                                                   }
-                                                  value={0}
+                                                  value={-45}
                                                 >
                                                   <div
                                                     aria-hidden={true}
@@ -12721,7 +12721,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                           },
                                                         ]
                                                       }
-                                                      value={0}
+                                                      value={-45}
                                                     >
                                                       <div
                                                         className="euiRangeTicks euiRangeTicks--compressed euiRangeTicks--isCustom"
@@ -12788,7 +12788,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                                   -90°
                                                                 </button>
                                                                 <button
-                                                                  class="euiRangeTick euiRangeTick--isCustom"
+                                                                  class="euiRangeTick euiRangeTick--selected euiRangeTick--isCustom"
                                                                   style="left: calc(-Infinity% + 8px);"
                                                                   tabindex="-1"
                                                                   title="-45°"
@@ -12798,7 +12798,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                                   -45°
                                                                 </button>
                                                                 <button
-                                                                  class="euiRangeTick euiRangeTick--selected euiRangeTick--isCustom"
+                                                                  class="euiRangeTick euiRangeTick--isCustom"
                                                                   style="left: calc(-Infinity% + 8px);"
                                                                   tabindex="-1"
                                                                   title="0°"
@@ -12830,7 +12830,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                               </div>,
                                                             }
                                                           }
-                                                          value={0}
+                                                          value={-45}
                                                         >
                                                           <button
                                                             className="euiRangeTick euiRangeTick--isCustom euiRangeTick--isMin euiRangeTick--hasTickMark"
@@ -12921,7 +12921,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                                   -90°
                                                                 </button>
                                                                 <button
-                                                                  class="euiRangeTick euiRangeTick--isCustom"
+                                                                  class="euiRangeTick euiRangeTick--selected euiRangeTick--isCustom"
                                                                   style="left: calc(-Infinity% + 8px);"
                                                                   tabindex="-1"
                                                                   title="-45°"
@@ -12931,7 +12931,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                                   -45°
                                                                 </button>
                                                                 <button
-                                                                  class="euiRangeTick euiRangeTick--selected euiRangeTick--isCustom"
+                                                                  class="euiRangeTick euiRangeTick--isCustom"
                                                                   style="left: calc(-Infinity% + 8px);"
                                                                   tabindex="-1"
                                                                   title="0°"
@@ -12963,10 +12963,10 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                               </div>,
                                                             }
                                                           }
-                                                          value={0}
+                                                          value={-45}
                                                         >
                                                           <button
-                                                            className="euiRangeTick euiRangeTick--isCustom"
+                                                            className="euiRangeTick euiRangeTick--selected euiRangeTick--isCustom"
                                                             onClick={[Function]}
                                                             style={
                                                               Object {
@@ -13044,7 +13044,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                                   -90°
                                                                 </button>
                                                                 <button
-                                                                  class="euiRangeTick euiRangeTick--isCustom"
+                                                                  class="euiRangeTick euiRangeTick--selected euiRangeTick--isCustom"
                                                                   style="left: calc(-Infinity% + 8px);"
                                                                   tabindex="-1"
                                                                   title="-45°"
@@ -13054,7 +13054,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                                   -45°
                                                                 </button>
                                                                 <button
-                                                                  class="euiRangeTick euiRangeTick--selected euiRangeTick--isCustom"
+                                                                  class="euiRangeTick euiRangeTick--isCustom"
                                                                   style="left: calc(-Infinity% + 8px);"
                                                                   tabindex="-1"
                                                                   title="0°"
@@ -13086,10 +13086,10 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                               </div>,
                                                             }
                                                           }
-                                                          value={0}
+                                                          value={-45}
                                                         >
                                                           <button
-                                                            className="euiRangeTick euiRangeTick--selected euiRangeTick--isCustom"
+                                                            className="euiRangeTick euiRangeTick--isCustom"
                                                             onClick={[Function]}
                                                             style={
                                                               Object {
@@ -13167,7 +13167,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                                   -90°
                                                                 </button>
                                                                 <button
-                                                                  class="euiRangeTick euiRangeTick--isCustom"
+                                                                  class="euiRangeTick euiRangeTick--selected euiRangeTick--isCustom"
                                                                   style="left: calc(-Infinity% + 8px);"
                                                                   tabindex="-1"
                                                                   title="-45°"
@@ -13177,7 +13177,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                                   -45°
                                                                 </button>
                                                                 <button
-                                                                  class="euiRangeTick euiRangeTick--selected euiRangeTick--isCustom"
+                                                                  class="euiRangeTick euiRangeTick--isCustom"
                                                                   style="left: calc(-Infinity% + 8px);"
                                                                   tabindex="-1"
                                                                   title="0°"
@@ -13209,7 +13209,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                               </div>,
                                                             }
                                                           }
-                                                          value={0}
+                                                          value={-45}
                                                         >
                                                           <button
                                                             className="euiRangeTick euiRangeTick--isCustom"
@@ -13290,7 +13290,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                                   -90°
                                                                 </button>
                                                                 <button
-                                                                  class="euiRangeTick euiRangeTick--isCustom"
+                                                                  class="euiRangeTick euiRangeTick--selected euiRangeTick--isCustom"
                                                                   style="left: calc(-Infinity% + 8px);"
                                                                   tabindex="-1"
                                                                   title="-45°"
@@ -13300,7 +13300,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                                   -45°
                                                                 </button>
                                                                 <button
-                                                                  class="euiRangeTick euiRangeTick--selected euiRangeTick--isCustom"
+                                                                  class="euiRangeTick euiRangeTick--isCustom"
                                                                   style="left: calc(-Infinity% + 8px);"
                                                                   tabindex="-1"
                                                                   title="0°"
@@ -13332,7 +13332,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                               </div>,
                                                             }
                                                           }
-                                                          value={0}
+                                                          value={-45}
                                                         >
                                                           <button
                                                             className="euiRangeTick euiRangeTick--isCustom"
@@ -13365,7 +13365,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                       showTicks={true}
                                                       step={1}
                                                       tabIndex={-1}
-                                                      value={0}
+                                                      value={-45}
                                                     >
                                                       <input
                                                         aria-hidden={true}
@@ -13378,7 +13378,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                         step={1}
                                                         tabIndex={-1}
                                                         type="range"
-                                                        value={0}
+                                                        value={-45}
                                                       />
                                                     </EuiRangeSlider>
                                                   </div>
@@ -13399,7 +13399,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                   name="Rotate bar labels"
                                                   onChange={[Function]}
                                                   step={1}
-                                                  value={0}
+                                                  value={-45}
                                                 >
                                                   <EuiFieldNumber
                                                     aria-label="change lineWidth slider"
@@ -13418,7 +13418,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                         "width": "4.4em",
                                                       }
                                                     }
-                                                    value={0}
+                                                    value={-45}
                                                   >
                                                     <EuiFormControlLayout
                                                       compressed={true}
@@ -13448,7 +13448,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                                                 }
                                                               }
                                                               type="number"
-                                                              value={0}
+                                                              value={-45}
                                                             />
                                                           </EuiValidatableControl>
                                                           <EuiFormControlLayoutIcons
@@ -15010,7 +15010,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                               },
                                               Object {
                                                 "component": [Function],
-                                                "defaultState": 0,
+                                                "defaultState": -45,
                                                 "eleType": "slider",
                                                 "mapTo": "rotateBarLabels",
                                                 "name": "Rotate bar labels",
@@ -15109,7 +15109,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   "icontype": "visBarVerticalStacked",
                                   "id": "bar",
                                   "label": "Vertical bar",
-                                  "labelangle": 0,
+                                  "labelangle": -45,
                                   "legendposition": "v",
                                   "linewidth": 0,
                                   "mode": "group",
