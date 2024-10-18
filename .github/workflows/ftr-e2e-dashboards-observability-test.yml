@@ -127,15 +127,16 @@ jobs:
           npm uninstall -g yarn
           echo "Installing yarn ${{ steps.versions_step.outputs.yarn_version }}"
           npm i -g yarn@${{ steps.versions_step.outputs.yarn_version }}
-          echo "yarn-cache-dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
 
       - name: Yarn Cache
         uses: actions/cache@v4
         with:
-          path: ${{ steps.setup-yarn.outputs.yarn-cache-dir }}
-          key: ${{ runner.OS }}-yarn-${{ hashFiles('OpenSearch-Dashboards/**/yarn.lock') }}
+          path: |
+            OpenSearch-Dashboards/**/target
+            OpenSearch-Dashboards/**/node_modules
+          key: ${{ runner.OS }}-build-${{ hashFiles('OpenSearch-Dashboards/**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.OS }}-yarn-
+            ${{ runner.OS }}-build-
 
       - name: Bootstrap OpenSearch Dashboards
         run: |
