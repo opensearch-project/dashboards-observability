@@ -526,7 +526,7 @@ exports[`Text component Renders text component 1`] = `
                     },
                     Object {
                       "component": [Function],
-                      "defaultState": 0,
+                      "defaultState": -45,
                       "eleType": "slider",
                       "mapTo": "rotateBarLabels",
                       "name": "Rotate bar labels",
@@ -625,7 +625,7 @@ exports[`Text component Renders text component 1`] = `
         "icontype": "visBarVerticalStacked",
         "id": "bar",
         "label": "Vertical bar",
-        "labelangle": 0,
+        "labelangle": -45,
         "legendposition": "v",
         "linewidth": 0,
         "mode": "group",
