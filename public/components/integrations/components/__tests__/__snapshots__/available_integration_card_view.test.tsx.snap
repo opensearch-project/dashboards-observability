@@ -463,9 +463,11 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
           </EuiFlexItem>
         </div>
       </EuiFlexGroup>
-      <EuiSpacer>
+      <EuiSpacer
+        size="m"
+      >
         <div
-          className="euiSpacer euiSpacer--l"
+          className="euiSpacer euiSpacer--m"
         />
       </EuiSpacer>
       <EuiFlexGroup
@@ -591,11 +593,6 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
           </EuiFlexItem>
         </div>
       </EuiFlexGroup>
-      <EuiSpacer>
-        <div
-          className="euiSpacer euiSpacer--l"
-        />
-      </EuiSpacer>
     </div>
   </EuiPanel>
 </AvailableIntegrationsCardView>

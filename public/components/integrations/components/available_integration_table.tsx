@@ -122,14 +122,15 @@ export function AvailableIntegrationsTable(props: AvailableIntegrationsTableProp
     toolsRight: renderToggle(),
     box: {
       incremental: true,
+      compressed: true,
     },
   };
 
   return (
-    <EuiPageContent id="availableIntegrationsArea">
-      <EuiSpacer />
+    <EuiPageContent id="availableIntegrationsArea" paddingSize="m">
       {integrations.length > 0 ? (
         <EuiInMemoryTable
+          compressed
           loading={props.loading}
           items={integrations}
           itemId="id"
