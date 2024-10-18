@@ -4,6 +4,8 @@
  */
 
 import { i18n } from '@osd/i18n';
+import { EuiI18n, EuiIcon, EuiTextColor } from '@elastic/eui';
+import React from 'react';
 import {
   observabilityGettingStartedID,
   tutorialSampleDataPluginId,
@@ -14,64 +16,92 @@ export interface GettingStartedConfig {
   order: number;
   title: string;
   description: string;
-  footer: string;
+  footer: React.ReactElement;
   url: string;
   path: string;
+  icon: React.ReactElement<EuiIcon>;
 }
 
 const SAMPLEDATA_CONFIG: GettingStartedConfig = {
   id: 'sample_data',
-  order: 1,
+  order: 10,
+  icon: <EuiIcon type="functionAdd" size="l" color="primary" />,
+  title: '',
   description: i18n.translate('home.sampleData.card.description', {
-    defaultMessage: 'You can install sample data to experiment with OpenSearch Dashboards.',
+    defaultMessage: 'Install sample data to experiment with OpenSearch.',
   }),
-  title: i18n.translate('home.sampleData.card.title', {
-    defaultMessage: 'Try OpenSearch',
-  }),
+  footer: (
+    <EuiTextColor color="subdued">
+      <EuiI18n
+        token="workspace.observability_overview.sample_data.card.footer"
+        default="Sample datasets"
+      />
+    </EuiTextColor>
+  ),
   url: tutorialSampleDataPluginId,
-  footer: 'Sample datasets',
   path: '#/',
 };
 
 const GETTING_STARTED_CONFIG: GettingStartedConfig = {
   id: 'getting_started',
-  order: 2,
-  title: i18n.translate('observability.overview.card.gettingStarted.title', {
-    defaultMessage: 'Set up your Observability workspace',
+  order: 20,
+  icon: <EuiIcon type="rocket" size="l" color="primary" />,
+  title: '',
+  description: i18n.translate('workspace.observability_overview.getting_started.card.description', {
+    defaultMessage: 'Get started collecting and analyzing data.',
   }),
-  description: 'Get started by collecting and analyzing your metrics, logs, and traces.',
-  footer: 'Getting started guide',
+  footer: (
+    <EuiTextColor color="subdued">
+      <EuiI18n
+        token="workspace.observability_overview.getting_started.card.footer"
+        default="Get started guide"
+      />
+    </EuiTextColor>
+  ),
   url: observabilityGettingStartedID,
   path: '#/',
 };
 
 const DISCOVER_CONFIG: GettingStartedConfig = {
   id: 'discover',
-  order: 3,
-  title: i18n.translate('observability.overview.card.discover.title', {
-    defaultMessage: 'Discover insights',
+  order: 30,
+  icon: <EuiIcon type="compass" size="l" color="primary" />,
+  title: '',
+  description: i18n.translate('workspace.observability_overview.discover.card.description', {
+    defaultMessage: 'Explore data to uncover and discover insights.',
   }),
-  description: 'Uncover logs with raw data exploration.',
-  footer: 'Discover',
+  footer: (
+    <EuiTextColor color="subdued">
+      <EuiI18n token="workspace.observability_overview.discover.card.footer" default="Discover" />
+    </EuiTextColor>
+  ),
   url: 'data-explorer',
   path: '/discover',
 };
 
-const DASHBOARD_CONFIG: GettingStartedConfig = {
-  id: 'dashboard',
-  order: 3,
-  title: i18n.translate('observability.overview.card.dashboard.title', {
-    defaultMessage: 'Dashboards',
+const DASHBOARDS_CONFIG: GettingStartedConfig = {
+  id: 'dashboards',
+  order: 40,
+  icon: <EuiIcon type="dashboard" size="l" color="primary" />,
+  title: '',
+  description: i18n.translate('workspace.observability_overview.dashboards.card.description', {
+    defaultMessage: 'Monitor and explore your data using dynamic data visualization tools.',
   }),
-  description: 'Monitor and explore your data using dynamic data visualization tools.',
-  footer: 'Dashboards',
+  footer: (
+    <EuiTextColor color="subdued">
+      <EuiI18n
+        token="workspace.observability_overview.dashboards.card.footer"
+        default="Dashboards"
+      />
+    </EuiTextColor>
+  ),
   url: 'dashboards',
-  path: '#/',
+  path: '/',
 };
 
 export const cardConfigs = [
   SAMPLEDATA_CONFIG,
   GETTING_STARTED_CONFIG,
   DISCOVER_CONFIG,
-  DASHBOARD_CONFIG,
+  DASHBOARDS_CONFIG,
 ];

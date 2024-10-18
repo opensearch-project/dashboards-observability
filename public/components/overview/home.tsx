@@ -13,7 +13,6 @@ import {
 } from '@elastic/eui';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { HashRouter, Route, Switch } from 'react-router-dom';
-import { FormattedMessage } from '@osd/i18n/react';
 import { useObservable } from 'react-use';
 import { EMPTY } from 'rxjs';
 import {
@@ -239,19 +238,11 @@ export const Home = () => {
             order: card.order,
             description: card.description,
             title: card.title,
+            onClick: () => coreRefs.application?.navigateToApp(card.url, { path: card.path }),
+            getFooter: () => card.footer,
+            getIcon: () => card.icon,
             cardProps: {
-              titleSize: 's',
-              titleElement: 'h4',
-              selectable: {
-                children: (
-                  <FormattedMessage
-                    id="home.sampleData.card.footer"
-                    defaultMessage={card.footer || 'Documentation'}
-                  />
-                ),
-                onClick: () => coreRefs.application?.navigateToApp(card.url, { path: card.path }),
-                isSelected: false,
-              },
+              className: 'usecaseOverviewGettingStartedCard',
             },
           }),
           getTargetArea: () => HOME_CONTENT_AREAS.GET_STARTED,
