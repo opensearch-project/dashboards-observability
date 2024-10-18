@@ -20,9 +20,6 @@ exports[`Service Config component renders empty service config 1`] = `
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
-      "globalSearch": Object {
-        "getAllSearchCommands": [MockFunction],
-      },
       "logos": Object {
         "AnimatedMark": Object {
           "dark": Object {
@@ -1233,9 +1230,6 @@ exports[`Service Config component renders with one service selected 1`] = `
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
-      "globalSearch": Object {
-        "getAllSearchCommands": [MockFunction],
-      },
       "logos": Object {
         "AnimatedMark": Object {
           "dark": Object {

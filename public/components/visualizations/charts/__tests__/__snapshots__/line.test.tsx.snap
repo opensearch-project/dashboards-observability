@@ -543,7 +543,7 @@ exports[`Line component Renders line component 1`] = `
                     },
                     Object {
                       "component": [Function],
-                      "defaultState": 0,
+                      "defaultState": -45,
                       "eleType": "slider",
                       "mapTo": "rotateBarLabels",
                       "name": "Rotate bar labels",
@@ -642,7 +642,7 @@ exports[`Line component Renders line component 1`] = `
         "icontype": "visBarVerticalStacked",
         "id": "bar",
         "label": "Vertical bar",
-        "labelangle": 0,
+        "labelangle": -45,
         "legendposition": "v",
         "linewidth": 0,
         "mode": "group",
@@ -715,7 +715,7 @@ exports[`Line component Renders line component 1`] = `
         "title": "",
         "xaxis": Object {
           "automargin": true,
-          "tickangle": 0,
+          "tickangle": -45,
           "tickfont": Object {},
         },
         "yaxis": Object {
@@ -776,7 +776,7 @@ exports[`Line component Renders line component 1`] = `
           "title": "",
           "xaxis": Object {
             "automargin": true,
-            "tickangle": 0,
+            "tickangle": -45,
             "tickfont": Object {},
           },
           "yaxis": Object {

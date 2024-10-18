@@ -33,9 +33,6 @@ exports[`Dashboard component renders dashboard 1`] = `
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
-      "globalSearch": Object {
-        "getAllSearchCommands": [MockFunction],
-      },
       "logos": Object {
         "AnimatedMark": Object {
           "dark": Object {
@@ -426,9 +423,6 @@ exports[`Dashboard component renders dashboard 1`] = `
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
         "getIsVisible$": [MockFunction],
-        "globalSearch": Object {
-          "getAllSearchCommands": [MockFunction],
-        },
         "logos": Object {
           "AnimatedMark": Object {
             "dark": Object {
@@ -1291,9 +1285,6 @@ exports[`Dashboard component renders empty dashboard 1`] = `
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
-      "globalSearch": Object {
-        "getAllSearchCommands": [MockFunction],
-      },
       "logos": Object {
         "AnimatedMark": Object {
           "dark": Object {
@@ -1683,9 +1674,6 @@ exports[`Dashboard component renders empty dashboard 1`] = `
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
         "getIsVisible$": [MockFunction],
-        "globalSearch": Object {
-          "getAllSearchCommands": [MockFunction],
-        },
         "logos": Object {
           "AnimatedMark": Object {
             "dark": Object {
@@ -2548,9 +2536,6 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
-      "globalSearch": Object {
-        "getAllSearchCommands": [MockFunction],
-      },
       "logos": Object {
         "AnimatedMark": Object {
           "dark": Object {
@@ -2942,9 +2927,6 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
         "getIsVisible$": [MockFunction],
-        "globalSearch": Object {
-          "getAllSearchCommands": [MockFunction],
-        },
         "logos": Object {
           "AnimatedMark": Object {
             "dark": Object {
