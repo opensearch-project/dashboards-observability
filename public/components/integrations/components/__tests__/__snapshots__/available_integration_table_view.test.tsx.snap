@@ -62,23 +62,19 @@ exports[`Available Integration Table View Test Renders nginx integration table v
 >
   <EuiPageContent
     id="availableIntegrationsArea"
+    paddingSize="m"
   >
     <EuiPanel
       className="euiPageContent"
       id="availableIntegrationsArea"
-      paddingSize="l"
+      paddingSize="m"
       role="main"
     >
       <div
-        className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
+        className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
         id="availableIntegrationsArea"
         role="main"
       >
-        <EuiSpacer>
-          <div
-            className="euiSpacer euiSpacer--l"
-          />
-        </EuiSpacer>
         <EuiInMemoryTable
           allowNeutralSort={false}
           columns={
@@ -106,6 +102,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
               },
             ]
           }
+          compressed={true}
           isSelectable={true}
           itemId="id"
           items={
@@ -175,6 +172,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
           search={
             Object {
               "box": Object {
+                "compressed": true,
                 "incremental": true,
               },
               "toolsRight": <EuiFlexGroup>
@@ -210,6 +208,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
             <EuiSearchBar
               box={
                 Object {
+                  "compressed": true,
                   "incremental": true,
                 }
               }
@@ -258,6 +257,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                       className="euiFlexItem euiSearchBar__searchHolder"
                     >
                       <EuiSearchBox
+                        compressed={true}
                         incremental={true}
                         isInvalid={false}
                         onSearch={[Function]}
@@ -266,7 +266,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                       >
                         <EuiFieldSearch
                           aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
-                          compressed={false}
+                          compressed={true}
                           defaultValue=""
                           fullWidth={true}
                           incremental={true}
@@ -278,13 +278,13 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                           placeholder="Search..."
                         >
                           <EuiFormControlLayout
-                            compressed={false}
+                            compressed={true}
                             fullWidth={true}
                             icon="search"
                             isLoading={false}
                           >
                             <div
-                              className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                              className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
                             >
                               <div
                                 className="euiFormControlLayout__childrenWrapper"
@@ -294,7 +294,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                 >
                                   <input
                                     aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
-                                    className="euiFieldSearch euiFieldSearch--fullWidth"
+                                    className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
                                     defaultValue=""
                                     onKeyUp={[Function]}
                                     placeholder="Search..."
@@ -302,7 +302,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                   />
                                 </EuiValidatableControl>
                                 <EuiFormControlLayoutIcons
-                                  compressed={false}
+                                  compressed={true}
                                   icon="search"
                                   isLoading={false}
                                 >
@@ -310,7 +310,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                     className="euiFormControlLayoutIcons"
                                   >
                                     <EuiFormControlLayoutCustomIcon
-                                      size="m"
+                                      size="s"
                                       type="search"
                                     >
                                       <span
@@ -319,19 +319,19 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                                         <EuiIcon
                                           aria-hidden="true"
                                           className="euiFormControlLayoutCustomIcon__icon"
-                                          size="m"
+                                          size="s"
                                           type="search"
                                         >
                                           <EuiIconBeaker
                                             aria-hidden={true}
-                                            className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                            className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                             focusable="false"
                                             role="img"
                                             style={null}
                                           >
                                             <svg
                                               aria-hidden={true}
-                                              className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                              className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                               focusable="false"
                                               height={16}
                                               role="img"
@@ -701,6 +701,7 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                   },
                 ]
               }
+              compressed={true}
               isSelectable={true}
               itemId="id"
               items={
@@ -809,12 +810,13 @@ exports[`Available Integration Table View Test Renders nginx integration table v
                     </div>
                   </EuiTableHeaderMobile>
                   <EuiTable
+                    compressed={true}
                     id="random_html_id"
                     responsive={true}
                     tableLayout="auto"
                   >
                     <table
-                      className="euiTable euiTable--responsive euiTable--auto"
+                      className="euiTable euiTable--compressed euiTable--responsive euiTable--auto"
                       id="random_html_id"
                       tabIndex={-1}
                     >
