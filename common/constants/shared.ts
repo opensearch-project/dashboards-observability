@@ -245,7 +245,7 @@ export const DEFAULT_CHART_STYLES: DefaultChartStylesProps = {
   MarkerSize: 5,
   ShowLegend: 'show',
   LegendPosition: 'v',
-  LabelAngle: 0,
+  LabelAngle: -45,
   DefaultSortSectors: 'largest_to_smallest',
   DefaultModeScatter: 'markers',
 };
