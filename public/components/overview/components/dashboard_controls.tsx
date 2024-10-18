@@ -4,7 +4,6 @@
  */
 
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -26,7 +25,6 @@ import { ObsDashboardStateManager } from './obs_dashboard_state_manager';
 export function DashboardControls() {
   const isDashboardSelected = useObservable(ObsDashboardStateManager.isDashboardSelected$);
   const dashboardState = useObservable(ObsDashboardStateManager.dashboardState$);
-  const showFlyout = useObservable(ObsDashboardStateManager.showFlyout$);
 
   const onTimeChange = (onTimeChangeProps: OnTimeChangeProps) => {
     ObsDashboardStateManager.dashboardState$.next({
@@ -86,18 +84,6 @@ export function DashboardControls() {
               onTimeChange={onTimeChange}
               compressed
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content="Replace dashboard">
-              <EuiButtonIcon
-                iconType="gear"
-                aria-label="Dashboard"
-                color="primary"
-                onClick={showFlyout}
-                display="base"
-                size="s"
-              />
-            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

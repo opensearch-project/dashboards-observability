@@ -76,7 +76,6 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
             );
           })}
         </EuiFlexGroup>
-        <EuiSpacer />
       </>
     );
   };
@@ -106,7 +105,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
+      <EuiSpacer size="m" />
       {renderRows(props.data.hits.filter((x) => x.name.includes(props.query)))}
     </EuiPanel>
   );
