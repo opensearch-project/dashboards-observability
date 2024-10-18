@@ -14,11 +14,12 @@ export class MetricsAnalyticsAdaptor {
           body: query,
           index,
         });
+      } else {
+        response = await client.callAsCurrentUser('search', {
+          body: query,
+          index,
+        });
       }
-      response = await client.callAsCurrentUser('search', {
-        body: query,
-        index,
-      });
       return response;
     } catch (error) {
       throw new Error('Fetch Otel Metrics Error:' + error);
