@@ -4,13 +4,10 @@
  */
 
 import { i18n } from '@osd/i18n';
+import { EuiI18n, EuiIcon, EuiTextColor } from '@elastic/eui';
+import React from 'react';
 import {
   observabilityGettingStartedID,
-  observabilityMetricsID,
-  observabilityTracesNewNavID,
-  observabilityServicesNewNavID,
-  alertingPluginID,
-  anomalyDetectionPluginID,
   tutorialSampleDataPluginId,
 } from '../../../../common/constants/shared';
 
@@ -19,116 +16,92 @@ export interface GettingStartedConfig {
   order: number;
   title: string;
   description: string;
-  footer: string;
+  footer: React.ReactElement;
   url: string;
   path: string;
+  icon: React.ReactElement<EuiIcon>;
 }
-
-const GETTING_STARTED_CONFIG: GettingStartedConfig = {
-  id: 'getting_started',
-  order: 1,
-  title: i18n.translate('observability.overview.card.gettingStarted.title', {
-    defaultMessage: 'Set up your Observability workspace',
-  }),
-  description: 'Get started by collecting and analyzing your metrics, logs, and traces.',
-  footer: 'Getting started guide',
-  url: observabilityGettingStartedID,
-  path: '#/',
-};
 
 const SAMPLEDATA_CONFIG: GettingStartedConfig = {
   id: 'sample_data',
-  order: 2,
+  order: 10,
+  icon: <EuiIcon type="functionAdd" size="l" color="primary" />,
+  title: '',
   description: i18n.translate('home.sampleData.card.description', {
-    defaultMessage: 'You can install sample data to experiment with OpenSearch Dashboards.',
+    defaultMessage: 'Install sample data to experiment with OpenSearch.',
   }),
-  title: i18n.translate('home.sampleData.card.title', {
-    defaultMessage: 'Try OpenSearch',
-  }),
+  footer: (
+    <EuiTextColor color="subdued">
+      <EuiI18n
+        token="workspace.observability_overview.sample_data.card.footer"
+        default="Sample datasets"
+      />
+    </EuiTextColor>
+  ),
   url: tutorialSampleDataPluginId,
-  footer: 'Sample datasets',
+  path: '#/',
+};
+
+const GETTING_STARTED_CONFIG: GettingStartedConfig = {
+  id: 'getting_started',
+  order: 20,
+  icon: <EuiIcon type="rocket" size="l" color="primary" />,
+  title: '',
+  description: i18n.translate('workspace.observability_overview.getting_started.card.description', {
+    defaultMessage: 'Get started collecting and analyzing data.',
+  }),
+  footer: (
+    <EuiTextColor color="subdued">
+      <EuiI18n
+        token="workspace.observability_overview.getting_started.card.footer"
+        default="Get started guide"
+      />
+    </EuiTextColor>
+  ),
+  url: observabilityGettingStartedID,
   path: '#/',
 };
 
 const DISCOVER_CONFIG: GettingStartedConfig = {
   id: 'discover',
-  order: 3,
-  title: i18n.translate('observability.overview.card.discover.title', {
-    defaultMessage: 'Discover insights',
+  order: 30,
+  icon: <EuiIcon type="compass" size="l" color="primary" />,
+  title: '',
+  description: i18n.translate('workspace.observability_overview.discover.card.description', {
+    defaultMessage: 'Explore data to uncover and discover insights.',
   }),
-  description: 'Uncover logs with raw data exploration.',
-  footer: 'Discover',
+  footer: (
+    <EuiTextColor color="subdued">
+      <EuiI18n token="workspace.observability_overview.discover.card.footer" default="Discover" />
+    </EuiTextColor>
+  ),
   url: 'data-explorer',
   path: '/discover',
 };
 
-const METRICS_CONFIG: GettingStartedConfig = {
-  id: 'metrics',
-  order: 4,
-  title: i18n.translate('observability.overview.card.metrics.title', {
-    defaultMessage: 'Monitor system performance',
+const DASHBOARDS_CONFIG: GettingStartedConfig = {
+  id: 'dashboards',
+  order: 40,
+  icon: <EuiIcon type="dashboard" size="l" color="primary" />,
+  title: '',
+  description: i18n.translate('workspace.observability_overview.dashboards.card.description', {
+    defaultMessage: 'Monitor and explore your data using dynamic data visualization tools.',
   }),
-  description: 'Transform logs into actionable visualizations by extracting metrics.',
-  footer: 'Metrics',
-  url: observabilityMetricsID,
-  path: '#/',
-};
-
-const TRACES_CONFIG: GettingStartedConfig = {
-  id: 'traces',
-  order: 5,
-  title: i18n.translate('observability.overview.card.traces.title', {
-    defaultMessage: 'Identify performance issues',
-  }),
-  description: 'Analyze performance bottlenecks using event flow visualizations.',
-  footer: 'Traces',
-  url: observabilityTracesNewNavID,
-  path: '#/',
-};
-
-const SERVICES_CONFIG: GettingStartedConfig = {
-  id: 'services',
-  order: 6,
-  title: i18n.translate('observability.overview.card.services.title', {
-    defaultMessage: 'Monitor service health',
-  }),
-  description: 'Identify service performance issues with comprehensive monitoring and analysis.',
-  footer: 'Services',
-  url: observabilityServicesNewNavID,
-  path: '#/',
-};
-
-const ALERTS_CONFIG: GettingStartedConfig = {
-  id: 'alerts',
-  order: 7,
-  title: i18n.translate('observability.overview.card.alerts.title', {
-    defaultMessage: 'Get notified',
-  }),
-  description: 'Receive timely notifications by configuring alert triggers.',
-  footer: 'Alerting',
-  url: alertingPluginID,
-  path: '#/',
-};
-
-const ANOMALY_CONFIG: GettingStartedConfig = {
-  id: 'anomaly',
-  order: 8,
-  title: i18n.translate('observability.overview.card.anomaly.title', {
-    defaultMessage: 'Detect anomalies in your data',
-  }),
-  description: 'Gain near real-time anomaly detection using the Random Cut Forest (RCF) algorithm.',
-  footer: 'Anomaly Detection',
-  url: anomalyDetectionPluginID,
-  path: '#/',
+  footer: (
+    <EuiTextColor color="subdued">
+      <EuiI18n
+        token="workspace.observability_overview.dashboards.card.footer"
+        default="Dashboards"
+      />
+    </EuiTextColor>
+  ),
+  url: 'dashboards',
+  path: '/',
 };
 
 export const cardConfigs = [
-  GETTING_STARTED_CONFIG,
   SAMPLEDATA_CONFIG,
+  GETTING_STARTED_CONFIG,
   DISCOVER_CONFIG,
-  METRICS_CONFIG,
-  TRACES_CONFIG,
-  SERVICES_CONFIG,
-  ALERTS_CONFIG,
-  ANOMALY_CONFIG,
+  DASHBOARDS_CONFIG,
 ];
