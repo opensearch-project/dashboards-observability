@@ -30,6 +30,7 @@ export function SpanDetailPanel(props: {
   colorMap: any;
   mode: TraceAnalyticsMode;
   dataSourceMDSId: string;
+  dataSourceMDSLabel: string | undefined;
   page?: string;
   openSpanFlyout?: any;
   data?: { gantt: any[]; table: any[]; ganttMaxX: number };
@@ -307,8 +308,8 @@ export function SpanDetailPanel(props: {
           closeFlyout={() => setCurrentSpan('')}
           addSpanFilter={addSpanFilter}
           mode={mode}
-          dataSourceMDSId={props.dataSourceMDSId}
-        />
+          dataSourceMDSId={props.dataSourceMDSId} 
+          dataSourceMDSLabel={props.dataSourceMDSLabel}        />
       )}
     </>
   );

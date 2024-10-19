@@ -79,6 +79,7 @@ export function SpanDetailFlyout(props: {
   addSpanFilter: (field: string, value: any) => void;
   mode: TraceAnalyticsMode;
   dataSourceMDSId: string;
+  dataSourceMDSLabel: string | undefined;
   serviceName?: string;
   setCurrentSelectedService?: React.Dispatch<React.SetStateAction<string>> | undefined;
   startTime?: string;
@@ -309,7 +310,7 @@ export function SpanDetailFlyout(props: {
         props.dataSourceMDSId ?? ''
       }',title:'',type:DATA_SOURCE),id:'${
         props.dataSourceMDSId
-      }::ss4o_logs-*',timeFieldName:'%40timestamp',title:'ss4o_logs-*',type:INDEXES),language:PPL,query:'source%20%3D%20ss4o_logs-*%20%7C%20where%20${spanField}%20%3D%20!'${spanId}!''))`,
+      }::ss4o_logs-*',timeFieldName:'time',title:'ss4o_logs-*',type:INDEXES),language:PPL,query:'source%20%3D%20ss4o_logs-*%20%7C%20where%20${spanField}%20%3D%20!'${spanId}!''))`,
     });
   };
 
