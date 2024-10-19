@@ -121,7 +121,7 @@ export const Home = (props: HomeProps) => {
   // Get existing query params
   const queryParamsOnLoad = new URLSearchParams(window.location.href.split('?')[1]);
   const dsFromURL = queryParamsOnLoad.get('datasourceId');
-  
+
   const [dataSourceMDSId, setDataSourceMDSId] = useState([
     { id: dsFromURL ?? undefined, label: undefined },
   ]);

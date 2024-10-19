@@ -308,8 +308,9 @@ export function SpanDetailPanel(props: {
           closeFlyout={() => setCurrentSpan('')}
           addSpanFilter={addSpanFilter}
           mode={mode}
-          dataSourceMDSId={props.dataSourceMDSId} 
-          dataSourceMDSLabel={props.dataSourceMDSLabel}        />
+          dataSourceMDSId={props.dataSourceMDSId}
+          dataSourceMDSLabel={props.dataSourceMDSLabel}
+        />
       )}
     </>
   );

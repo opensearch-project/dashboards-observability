@@ -178,8 +178,8 @@ export function ServiceView(props: ServiceViewProps) {
                 name: 'View logs',
                 'data-test-subj': 'viewLogsButton',
                 onClick: () => {
-                  isNewNavEnabled
-                  ? coreRefs?.application!.navigateToApp('data-explorer', {
+                  if (isNewNavEnabled) {
+                    coreRefs?.application!.navigateToApp('data-explorer', {
                       path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
                         props.startTime
                       },to:${props.endTime}))&_q=(filters:!(),query:(dataset:(dataSource:(id:'${
@@ -189,8 +189,9 @@ export function ServiceView(props: ServiceViewProps) {
                       }::ss4o_logs-*',timeFieldName:'time',title:'ss4o_logs-*',type:INDEXES),language:PPL,query:'source%20%3D%20ss4o_logs-%2A%20%7C%20where%20serviceName%20%3D%20%22${
                         props.serviceName
                       }%22'))`,
-                    })
-                  : coreRefs?.application!.navigateToApp(observabilityLogsID, {
+                    });
+                  } else {
+                    coreRefs?.application!.navigateToApp(observabilityLogsID, {
                       path: `#/explorer`,
                       state: {
                         DEFAULT_DATA_SOURCE_NAME,
@@ -200,6 +201,7 @@ export function ServiceView(props: ServiceViewProps) {
                         endTimeRange: props.endTime,
                       },
                     });
+                  }
                 },
               },
             ]
