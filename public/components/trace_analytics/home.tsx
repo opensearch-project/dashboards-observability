@@ -310,6 +310,7 @@ export const Home = (props: HomeProps) => {
         addSpanFilter={addSpanFilter}
         mode={spanMode}
         dataSourceMDSId={spanDataSourceMDSId}
+        dataSourceMDSLabel={dataSourceMDSId[0].label}
       />
     );
   };
