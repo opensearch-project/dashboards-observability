@@ -937,13 +937,10 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                   </svg>
                 </button>
                 <div
-                  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
+                  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
                   id="availableIntegrationsArea"
                   role="main"
                 >
-                  <div
-                    class="euiSpacer euiSpacer--l"
-                  />
                   <div
                     class="euiSpacer euiSpacer--xxl"
                   />
@@ -1087,13 +1084,10 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                           </svg>
                         </button>
                         <div
-                          class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
+                          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
                           id="availableIntegrationsArea"
                           role="main"
                         >
-                          <div
-                            class="euiSpacer euiSpacer--l"
-                          />
                           <div
                             class="euiSpacer euiSpacer--xxl"
                           />
@@ -1169,13 +1163,10 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                             </svg>
                           </button>
                           <div
-                            class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
+                            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
                             id="availableIntegrationsArea"
                             role="main"
                           >
-                            <div
-                              class="euiSpacer euiSpacer--l"
-                            />
                             <div
                               class="euiSpacer euiSpacer--xxl"
                             />
@@ -1251,13 +1242,10 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                               </svg>
                             </button>
                             <div
-                              class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
+                              class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
                               id="availableIntegrationsArea"
                               role="main"
                             >
-                              <div
-                                class="euiSpacer euiSpacer--l"
-                              />
                               <div
                                 class="euiSpacer euiSpacer--xxl"
                               />
@@ -1321,13 +1309,10 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                                 </svg>
                               </button>
                               <div
-                                class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
+                                class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
                                 id="availableIntegrationsArea"
                                 role="main"
                               >
-                                <div
-                                  class="euiSpacer euiSpacer--l"
-                                />
                                 <div
                                   class="euiSpacer euiSpacer--xxl"
                                 />
@@ -1459,23 +1444,19 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                         >
                           <EuiPageContent
                             id="availableIntegrationsArea"
+                            paddingSize="m"
                           >
                             <EuiPanel
                               className="euiPageContent"
                               id="availableIntegrationsArea"
-                              paddingSize="l"
+                              paddingSize="m"
                               role="main"
                             >
                               <div
-                                className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
+                                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
                                 id="availableIntegrationsArea"
                                 role="main"
                               >
-                                <EuiSpacer>
-                                  <div
-                                    className="euiSpacer euiSpacer--l"
-                                  />
-                                </EuiSpacer>
                                 <EuiSpacer
                                   size="xxl"
                                 >
