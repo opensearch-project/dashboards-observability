@@ -35,12 +35,9 @@ export function setupRoutes({
   client: ILegacyClusterClient;
   dataSourceEnabled: boolean;
 }) {
-  PanelsRouter(router);
   VisualizationsRouter(router);
   registerPplRoute({ router, facet: new PPLFacet(client) });
   registerDslRoute({ router, facet: new DSLFacet(client) }, dataSourceEnabled);
-  registerEventAnalyticsRouter({ router, savedObjectFacet: new SavedObjectFacet(client) });
-  registerAppAnalyticsRouter(router);
 
   // TODO remove trace analytics route when DSL route for autocomplete is added
   registerTraceAnalyticsDslRouter(router, dataSourceEnabled);
@@ -60,6 +57,9 @@ export function setupRoutes({
   // query assist is part of log explorer, which will be disabled if datasource is enabled
   if (!dataSourceEnabled) {
     registerQueryAssistRoutes(router);
+    PanelsRouter(router);
+    registerEventAnalyticsRouter({ router, savedObjectFacet: new SavedObjectFacet(client) });
+    registerAppAnalyticsRouter(router);
   }
 
   registerGettingStartedRoutes(router);

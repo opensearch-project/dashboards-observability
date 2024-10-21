@@ -51,7 +51,7 @@ export function registerTraceAnalyticsDslRouter(router: IRouter, dataSourceEnabl
       } catch (error) {
         console.error(error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode || 400,
           body: error.message,
         });
       }
@@ -90,7 +90,7 @@ export function registerTraceAnalyticsDslRouter(router: IRouter, dataSourceEnabl
       } catch (error) {
         console.error(error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode || 400,
           body: error.message,
         });
       }

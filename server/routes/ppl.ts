@@ -33,7 +33,7 @@ export function registerPplRoute({ router, facet }: { router: IRouter; facet: PP
         return res.ok(result);
       }
       return res.custom({
-        statusCode: queryRes.data.statusCode || queryRes.data.status || 500,
+        statusCode: queryRes.data.statusCode || queryRes.data.status || 400,
         body: queryRes.data.body || queryRes.data.message || '',
       });
     }
