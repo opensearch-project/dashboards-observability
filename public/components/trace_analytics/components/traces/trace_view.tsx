@@ -280,6 +280,7 @@ export function TraceView(props: TraceViewProps) {
                 data={ganttData}
                 setData={setGanttData}
                 dataSourceMDSId={props.dataSourceMDSId[0].id}
+                dataSourceMDSLabel={props.dataSourceMDSId[0].label}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
