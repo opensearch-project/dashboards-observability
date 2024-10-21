@@ -35,12 +35,15 @@ export function setupRoutes({
   client: ILegacyClusterClient;
   dataSourceEnabled: boolean;
 }) {
-  PanelsRouter(router);
+  PanelsRouter(router, dataSourceEnabled);
   VisualizationsRouter(router);
   registerPplRoute({ router, facet: new PPLFacet(client) });
   registerDslRoute({ router, facet: new DSLFacet(client) }, dataSourceEnabled);
-  registerEventAnalyticsRouter({ router, savedObjectFacet: new SavedObjectFacet(client) });
-  registerAppAnalyticsRouter(router);
+  registerEventAnalyticsRouter(
+    { router, savedObjectFacet: new SavedObjectFacet(client) },
+    dataSourceEnabled
+  );
+  registerAppAnalyticsRouter(router, dataSourceEnabled);
 
   // TODO remove trace analytics route when DSL route for autocomplete is added
   registerTraceAnalyticsDslRouter(router, dataSourceEnabled);
