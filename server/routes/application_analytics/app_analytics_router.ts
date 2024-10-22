@@ -42,7 +42,7 @@ export function registerAppAnalyticsRouter(router: IRouter) {
       } catch (err: any) {
         console.error('Error occurred while fetching applications', err);
         return response.custom({
-          statusCode: err.statusCode || 500,
+          statusCode: err.statusCode || 400,
           body: err.message,
         });
       }
@@ -78,7 +78,7 @@ export function registerAppAnalyticsRouter(router: IRouter) {
       } catch (err: any) {
         console.error('Error occurred while fetching application', err);
         return response.custom({
-          statusCode: err.statusCode || 500,
+          statusCode: err.statusCode || 400,
           body: err.message,
         });
       }
@@ -120,7 +120,7 @@ export function registerAppAnalyticsRouter(router: IRouter) {
       } catch (err: any) {
         console.error('Error occurred while creating a new application', err);
         return response.custom({
-          statusCode: err.statusCode || 500,
+          statusCode: err.statusCode || 400,
           body: err.message,
         });
       }
@@ -161,7 +161,7 @@ export function registerAppAnalyticsRouter(router: IRouter) {
       } catch (err: any) {
         console.error('Error occurred while renaming an existing application', err);
         return response.custom({
-          statusCode: err.statusCode || 500,
+          statusCode: err.statusCode || 400,
           body: err.message,
         });
       }
@@ -210,7 +210,7 @@ export function registerAppAnalyticsRouter(router: IRouter) {
       } catch (err: any) {
         console.error('Error occurred while updating an existing application', err);
         return response.custom({
-          statusCode: err.statusCode || 500,
+          statusCode: err.statusCode || 400,
           body: err.message,
         });
       }
@@ -245,7 +245,7 @@ export function registerAppAnalyticsRouter(router: IRouter) {
         });
       } catch (err: any) {
         return response.custom({
-          statusCode: err.statusCode || 500,
+          statusCode: err.statusCode || 400,
           body: err.message,
         });
       }
