@@ -4,6 +4,7 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
+import dateMath from '@elastic/datemath';
 import {
   EuiBadge,
   EuiContextMenu,
@@ -28,6 +29,12 @@ import round from 'lodash/round';
 import React, { useEffect, useMemo, useState } from 'react';
 import { DataSourceManagementPluginSetup } from '../../../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
+import {
+  DEFAULT_DATA_SOURCE_NAME,
+  DEFAULT_DATA_SOURCE_TYPE,
+} from '../../../../../common/constants/data_sources';
+import { observabilityLogsID } from '../../../../../common/constants/shared';
+import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
 import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
 import { coreRefs } from '../../../../framework/core_refs';
 import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/plugin_headerControl';
@@ -48,11 +55,6 @@ import { SearchBarProps, renderDatePicker } from '../common/search_bar';
 import { SpanDetailFlyout } from '../traces/span_detail_flyout';
 import { SpanDetailTable } from '../traces/span_detail_table';
 import { ServiceMetrics } from './service_metrics';
-import {
-  DEFAULT_DATA_SOURCE_NAME,
-  DEFAULT_DATA_SOURCE_TYPE,
-} from '../../../../../common/constants/data_sources';
-import { observabilityLogsID } from '../../../../../common/constants/shared';
 
 interface ServiceViewProps extends TraceAnalyticsComponentDeps {
   serviceName: string;
@@ -74,7 +76,6 @@ export function ServiceView(props: ServiceViewProps) {
   const [redirect, setRedirect] = useState(false);
   const [actionsMenuPopover, setActionsMenuPopover] = useState(false);
 
-  const isNewNavEnabled = coreRefs?.chrome?.navGroup?.getNavGroupEnabled();
   const refresh = () => {
     const DSL = filtersToDsl(
       mode,
@@ -178,11 +179,19 @@ export function ServiceView(props: ServiceViewProps) {
                 name: 'View logs',
                 'data-test-subj': 'viewLogsButton',
                 onClick: () => {
-                  if (isNewNavEnabled) {
+                  const startTime =
+                    dateMath
+                      .parse(props.startTime)!
+                      .subtract(3, 'days')
+                      .format(TRACE_ANALYTICS_DATE_FORMAT) ?? 'now-1y';
+                  const endTime =
+                    dateMath
+                      .parse(props.startTime, { roundUp: true })!
+                      .add(3, 'days')
+                      .format(TRACE_ANALYTICS_DATE_FORMAT) ?? 'now';
+                  if (coreRefs?.dataSource?.dataSourceEnabled) {
                     coreRefs?.application!.navigateToApp('data-explorer', {
-                      path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
-                        props.startTime
-                      },to:${props.endTime}))&_q=(filters:!(),query:(dataset:(dataSource:(id:'${
+                      path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'${startTime}',to:'${endTime}'))&_q=(filters:!(),query:(dataset:(dataSource:(id:'${
                         props.dataSourceMDSId[0].id ?? ''
                       }',title:'${props.dataSourceMDSId[0].label}',type:DATA_SOURCE),id:'${
                         props.dataSourceMDSId[0].id ?? ''
