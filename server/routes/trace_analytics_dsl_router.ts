@@ -157,7 +157,7 @@ export function registerTraceAnalyticsDslRouter(router: IRouter, dataSourceEnabl
         addRequestToMetric('trace_analytics', 'get', error);
         if (error.statusCode !== 404) console.error(error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode || 400,
           body: error.message,
         });
       }
