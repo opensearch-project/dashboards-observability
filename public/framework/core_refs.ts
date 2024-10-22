@@ -12,6 +12,7 @@ import {
   IToasts,
   OverlayStart,
   SavedObjectsClientContract,
+  WorkspacesStart,
 } from '../../../../src/core/public';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 import { DataSourceStart } from '../../../../src/plugins/data/public/data_sources/datasource_services/types';
@@ -40,6 +41,7 @@ class CoreRefs {
   public dataSources?: DataSourceStart;
   public navigation?: NavigationPublicPluginStart;
   public contentManagement?: ContentManagementPluginStart;
+  public workspaces?: WorkspacesStart;
   private constructor() {
     // ...
   }
