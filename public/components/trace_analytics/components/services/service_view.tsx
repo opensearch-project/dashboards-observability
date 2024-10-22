@@ -187,7 +187,7 @@ export function ServiceView(props: ServiceViewProps) {
                       .format(TRACE_ANALYTICS_DATE_FORMAT) ?? 'now-1y';
                   const endTime =
                     dateMath
-                      .parse(props.startTime, { roundUp: true })!
+                      .parse(props.endTime, { roundUp: true })!
                       .add(3, 'days')
                       .format(TRACE_ANALYTICS_DATE_FORMAT) ?? 'now';
                   if (coreRefs?.dataSource?.dataSourceEnabled) {
