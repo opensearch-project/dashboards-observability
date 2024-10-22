@@ -22,6 +22,11 @@ import round from 'lodash/round';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
+import {
+  DEFAULT_DATA_SOURCE_NAME,
+  DEFAULT_DATA_SOURCE_TYPE,
+} from '../../../../../common/constants/data_sources';
+import { observabilityLogsID } from '../../../../../common/constants/shared';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
 import { SpanField, TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { coreRefs } from '../../../../framework/core_refs';
@@ -300,17 +305,34 @@ export function SpanDetailFlyout(props: {
   };
 
   const redirectToExplorer = () => {
+    // NOTE: Discover has issue with PPL Time filter, hence adding +3/-3 days to actual timestamp
+    const startTime =
+      moment(span.startTime).subtract(3, 'days').format(TRACE_ANALYTICS_DATE_FORMAT) ?? 'now-3y';
+    const endTime =
+      moment(span.endTime).add(3, 'days').format(TRACE_ANALYTICS_DATE_FORMAT) ?? 'now';
     const spanId = getSpanValue(span, mode, 'SPAN_ID');
     const spanField = getSpanFieldKey(mode, 'SPAN_ID');
-    coreRefs?.application!.navigateToApp('data-explorer', {
-      path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
-        props.startTime
-      },to:${props.endTime}))&_q=(filters:!(),query:(dataset:(dataSource:(id:'${
-        props.dataSourceMDSId ?? ''
-      }',title:${props.dataSourceMDSLabel},type:DATA_SOURCE),id:'${
-        props.dataSourceMDSId
-      }::ss4o_logs-*',timeFieldName:time,title:'ss4o_logs-*',type:INDEXES),language:PPL,query:'source%20%3D%20ss4o_logs-*%20%7C%20where%20${spanField}%20%3D%20!'${spanId}!''))`,
-    });
+
+    if (coreRefs?.dataSource?.dataSourceEnabled) {
+      coreRefs?.application!.navigateToApp('data-explorer', {
+        path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'${startTime}',to:'${endTime}'))&_q=(filters:!(),query:(dataset:(dataSource:(id:'${
+          props.dataSourceMDSId ?? ''
+        }',title:${props.dataSourceMDSLabel},type:DATA_SOURCE),id:'${
+          props.dataSourceMDSId ?? ''
+        }::ss4o_logs-*',timeFieldName:'time',title:'ss4o_logs-*',type:INDEXES),language:PPL,query:'source%20%3D%20ss4o_logs-*%20%7C%20where%20${spanField}%20%3D%20!'${spanId}!''))`,
+      });
+    } else {
+      coreRefs?.application!.navigateToApp(observabilityLogsID, {
+        path: `#/explorer`,
+        state: {
+          DEFAULT_DATA_SOURCE_NAME,
+          DEFAULT_DATA_SOURCE_TYPE,
+          queryToRun: `source = ss4o_logs-* | where ${spanField}='${spanId}'`,
+          startTimeRange: startTime,
+          endTimeRange: endTime,
+        },
+      });
+    }
   };
 
   return (

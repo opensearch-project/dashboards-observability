@@ -17,9 +17,11 @@ import {
 } from '../../../../../src/core/public';
 import {
   DataSourceManagementPluginSetup,
+  DataSourceOption,
   DataSourceSelectableConfig,
   DataSourceViewConfig,
 } from '../../../../../src/plugins/data_source_management/public';
+import { DataSourceAttributes } from '../../../../../src/plugins/data_source_management/public/types';
 import { TRACE_TABLE_TYPE_KEY } from '../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode, TraceQueryMode } from '../../../common/types/trace_analytics';
 import { coreRefs } from '../../framework/core_refs';
@@ -122,7 +124,7 @@ export const Home = (props: HomeProps) => {
   const queryParamsOnLoad = new URLSearchParams(window.location.href.split('?')[1]);
   const dsFromURL = queryParamsOnLoad.get('datasourceId');
 
-  const [dataSourceMDSId, setDataSourceMDSId] = useState([
+  const [dataSourceMDSId, setDataSourceMDSId] = useState<DataSourceOption>([
     { id: dsFromURL ?? undefined, label: undefined },
   ]);
   const [currentSelectedService, setCurrentSelectedService] = useState('');
@@ -194,6 +196,17 @@ export const Home = (props: HomeProps) => {
     props.notifications,
   ]);
 
+  // This function sets mds label given the id is set in state:dataSourceMDSId
+  const getDatasourceAttributes = async () => {
+    const dataSourceAttributes = await coreRefs?.savedObjectsClient?.get<DataSourceAttributes>(
+      'data-source',
+      dataSourceMDSId[0].id
+    );
+    setDataSourceMDSId([
+      { id: dataSourceMDSId[0].id, label: dataSourceAttributes?.attributes.title },
+    ]);
+  };
+
   useEffect(() => {
     handleDataPrepperIndicesExistRequest(
       props.http,
@@ -201,6 +214,10 @@ export const Home = (props: HomeProps) => {
       dataSourceMDSId[0].id
     );
     handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist, dataSourceMDSId[0].id);
+    // When datasource is loaded form the URL, the label is set to undefined
+    if (dataSourceMDSId[0].id && dataSourceMDSId[0].label === undefined) {
+      getDatasourceAttributes();
+    }
   }, [dataSourceMDSId]);
 
   const modes = [
