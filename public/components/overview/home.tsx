@@ -11,7 +11,7 @@ import {
   EuiButtonEmpty,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { HashRouter, Route, Switch } from 'react-router-dom';
 import { useObservable } from 'react-use';
 import { EMPTY } from 'rxjs';
@@ -51,6 +51,18 @@ export const Home = () => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [showGetStarted, setShowGetStarted] = useState<boolean | null>(null); // Initial null state
+
+  const canUpdateUiSetting = useMemo(() => {
+    const capabilities = coreRefs.application?.capabilities;
+
+    // When workspace enabled, only workspace owner/OSD admin can update observability:defaultDashboard.
+    if (capabilities?.workspaces?.enabled) {
+      const isCurrentWorkspaceOwner = coreRefs.workspaces?.currentWorkspace$.getValue()?.owner;
+      const isDashboardAdmin = capabilities?.dashboards?.isDashboardAdmin !== false;
+      return isCurrentWorkspaceOwner || isDashboardAdmin;
+    }
+    return true;
+  }, [coreRefs.workspaces?.currentWorkspace$, coreRefs.application?.capabilities]);
 
   ObsDashboardStateManager.showFlyout$.next(() => () => setIsFlyoutVisible(true));
 
@@ -95,14 +107,16 @@ export const Home = () => {
           });
           ObsDashboardStateManager.isDashboardSelected$.next(true);
         } else {
-          setObservabilityDashboardsId(null);
-          ObsDashboardStateManager.dashboardState$.next({
-            startDate: '',
-            endDate: '',
-            dashboardTitle: '',
-            dashboardId: '',
-          });
-          ObsDashboardStateManager.isDashboardSelected$.next(false);
+          if (canUpdateUiSetting) {
+            setObservabilityDashboardsId(null);
+            ObsDashboardStateManager.dashboardState$.next({
+              startDate: '',
+              endDate: '',
+              dashboardTitle: '',
+              dashboardId: '',
+            });
+            ObsDashboardStateManager.isDashboardSelected$.next(false);
+          }
         }
       })
       .catch((error) => {
@@ -316,14 +330,16 @@ export const Home = () => {
           });
           ObsDashboardStateManager.isDashboardSelected$.next(true);
         } else {
-          setObservabilityDashboardsId(null);
-          ObsDashboardStateManager.dashboardState$.next({
-            startDate: '',
-            endDate: '',
-            dashboardTitle: '',
-            dashboardId: '',
-          });
-          ObsDashboardStateManager.isDashboardSelected$.next(false);
+          if (canUpdateUiSetting) {
+            setObservabilityDashboardsId(null);
+            ObsDashboardStateManager.dashboardState$.next({
+              startDate: '',
+              endDate: '',
+              dashboardTitle: '',
+              dashboardId: '',
+            });
+            ObsDashboardStateManager.isDashboardSelected$.next(false);
+          }
         }
       })
       .catch((error) => {
