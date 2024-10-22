@@ -52,12 +52,16 @@ export const Home = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [showGetStarted, setShowGetStarted] = useState<boolean | null>(null); // Initial null state
 
-  // When workspace enabled, only workspace owner can update observability:defaultDashboard.
-  const isWorkspaceOwner = useMemo(() => {
-    const isCurrentWorkspaceOwner = coreRefs.workspaces?.currentWorkspace$.getValue()?.owner;
-    const isDashboardAdmin =
-      coreRefs.application?.capabilities?.dashboards?.isDashboardAdmin !== false;
-    return isCurrentWorkspaceOwner || isDashboardAdmin;
+  // When workspace enabled, only workspace owner/OSD admin can update observability:defaultDashboard.
+  const canUpdateUiSetting = useMemo(() => {
+    if (coreRefs.application?.capabilities?.workspaces?.enabled) {
+      const isCurrentWorkspaceOwner = coreRefs.workspaces?.currentWorkspace$.getValue()?.owner;
+      const isDashboardAdmin =
+        coreRefs.application?.capabilities?.dashboards?.isDashboardAdmin !== false;
+      return isCurrentWorkspaceOwner || isDashboardAdmin;
+    } else {
+      return true;
+    }
   }, [coreRefs.workspaces, coreRefs.application?.capabilities]);
 
   ObsDashboardStateManager.showFlyout$.next(() => () => setIsFlyoutVisible(true));
@@ -103,7 +107,7 @@ export const Home = () => {
           });
           ObsDashboardStateManager.isDashboardSelected$.next(true);
         } else {
-          if (isWorkspaceOwner) {
+          if (canUpdateUiSetting) {
             setObservabilityDashboardsId(null);
             ObsDashboardStateManager.dashboardState$.next({
               startDate: '',
@@ -326,7 +330,7 @@ export const Home = () => {
           });
           ObsDashboardStateManager.isDashboardSelected$.next(true);
         } else {
-          if (isWorkspaceOwner) {
+          if (canUpdateUiSetting) {
             setObservabilityDashboardsId(null);
             ObsDashboardStateManager.dashboardState$.next({
               startDate: '',
