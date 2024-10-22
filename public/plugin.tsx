@@ -459,6 +459,7 @@ export class ObservabilityPlugin
     coreRefs.dataSource = startDeps.dataSource;
     coreRefs.navigation = startDeps.navigation;
     coreRefs.contentManagement = startDeps.contentManagement;
+    coreRefs.workspaces = core.workspaces;
 
     // redirect trace URL based on new navigation
     if (window.location.pathname.includes(observabilityTracesID)) {
