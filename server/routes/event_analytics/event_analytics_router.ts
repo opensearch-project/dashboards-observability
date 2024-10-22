@@ -40,7 +40,7 @@ export const registerEventAnalyticsRouter = ({
 
       if (savedRes.success || savedRes?.data?.statusCode === 404) return res.ok(result);
 
-      result.statusCode = savedRes?.data?.statusCode || 500;
+      result.statusCode = savedRes?.data?.statusCode || 400;
       result.message = savedRes?.data || '';
       return res.custom(result);
     }
@@ -65,7 +65,7 @@ export const registerEventAnalyticsRouter = ({
 
       if (savedRes.success || savedRes?.data?.statusCode === 404) return res.ok(result);
 
-      result.statusCode = savedRes?.data?.statusCode || 500;
+      result.statusCode = savedRes?.data?.statusCode || 400;
       result.message = savedRes?.data || '';
       return res.custom(result);
     }
@@ -107,7 +107,7 @@ export const registerEventAnalyticsRouter = ({
 
       if (savedRes.success) return res.ok(result);
 
-      result.statusCode = savedRes?.data?.statusCode || 500;
+      result.statusCode = savedRes?.data?.statusCode || 400;
       result.message = savedRes?.data || '';
       return res.custom(result);
     }
@@ -160,7 +160,7 @@ export const registerEventAnalyticsRouter = ({
 
       if (savedRes.success) return res.ok(result);
 
-      result.statusCode = savedRes?.data?.statusCode || 500;
+      result.statusCode = savedRes?.data?.statusCode || 400;
       result.message = savedRes?.data || '';
       return res.custom(result);
     }
@@ -201,7 +201,7 @@ export const registerEventAnalyticsRouter = ({
         },
       };
       if (savedRes.success) return res.ok(result);
-      result.statusCode = savedRes?.data?.statusCode || 500;
+      result.statusCode = savedRes?.data?.statusCode || 400;
       result.message = savedRes?.data || '';
       return res.custom(result);
     }
@@ -253,7 +253,7 @@ export const registerEventAnalyticsRouter = ({
         },
       };
       if (updateRes.success) return res.ok(result);
-      result.statusCode = updateRes?.data?.statusCode || 500;
+      result.statusCode = updateRes?.data?.statusCode || 400;
       result.message = updateRes?.data || '';
       return res.custom(result);
     }
@@ -281,7 +281,7 @@ export const registerEventAnalyticsRouter = ({
 
       if (savedRes.success) return res.ok(result);
 
-      result.statusCode = savedRes?.data?.statusCode || 500;
+      result.statusCode = savedRes?.data?.statusCode || 400;
       result.message = savedRes?.data || '';
       return res.custom(result);
     }
@@ -312,7 +312,7 @@ export const registerEventAnalyticsRouter = ({
 
       if (savedRes.success) return res.ok(result);
 
-      result.statusCode = savedRes?.data?.statusCode || 500;
+      result.statusCode = savedRes?.data?.statusCode || 400;
       result.message = savedRes?.data || '';
       return res.custom(result);
     }
@@ -335,7 +335,7 @@ export const registerEventAnalyticsRouter = ({
         },
       };
       if (deleteResponse.success) return res.ok(result);
-      result.statusCode = deleteResponse?.data?.statusCode || 500;
+      result.statusCode = deleteResponse?.data?.statusCode || 400;
       result.message = deleteResponse?.data || '';
       return res.custom(result);
     }
@@ -360,7 +360,7 @@ export const registerEventAnalyticsRouter = ({
 
       if (savedRes.success) return res.ok(result);
 
-      result.statusCode = savedRes?.data?.statusCode || 500;
+      result.statusCode = savedRes?.data?.statusCode || 400;
       result.message = savedRes?.data || '';
       return res.custom(result);
     }
