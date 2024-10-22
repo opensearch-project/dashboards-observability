@@ -179,6 +179,7 @@ export function ServiceView(props: ServiceViewProps) {
                 name: 'View logs',
                 'data-test-subj': 'viewLogsButton',
                 onClick: () => {
+                  // NOTE: Discover has issue with PPL Time filter, hence adding +3/-3 days to actual timestamp
                   const startTime =
                     dateMath
                       .parse(props.startTime)!

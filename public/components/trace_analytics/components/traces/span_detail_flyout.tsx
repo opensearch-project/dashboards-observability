@@ -306,6 +306,7 @@ export function SpanDetailFlyout(props: {
   };
 
   const redirectToExplorer = () => {
+    // NOTE: Discover has issue with PPL Time filter, hence adding +3/-3 days to actual timestamp
     const startTime =
       moment(span.startTime).subtract(3, 'days').format(TRACE_ANALYTICS_DATE_FORMAT) ?? 'now-1y';
     const endTime =
