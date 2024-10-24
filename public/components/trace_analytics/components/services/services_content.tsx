@@ -205,6 +205,7 @@ export function ServicesContent(props: ServicesProps) {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+          {props.filters.length > 0 && <EuiSpacer size="s" />}
           <Filters
             page={page}
             filters={filters}
