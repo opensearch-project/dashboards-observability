@@ -37,6 +37,9 @@ import {
   handleJaegerIndicesExistRequest,
 } from './requests/request_handler';
 import { TraceSideBar } from './trace_side_nav';
+import { observabilityTracesNewNavID } from '../../../common/constants/shared';
+
+const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
 export interface TraceAnalyticsCoreDeps {
   parentBreadcrumb: ChromeBreadcrumb;
@@ -244,8 +247,10 @@ export const Home = (props: HomeProps) => {
     if (!sessionStorage.getItem('TraceAnalyticsMode')) {
       if (dataPrepperIndicesExist) {
         setMode('data_prepper');
+        sessionStorage.setItem('TraceAnalyticsMode', 'data_prepper');
       } else if (jaegerIndicesExist) {
         setMode('jaeger');
+        sessionStorage.setItem('TraceAnalyticsMode', 'jaeger');
       }
     }
   }, [jaegerIndicesExist, dataPrepperIndicesExist]);
@@ -285,7 +290,15 @@ export const Home = (props: HomeProps) => {
   ];
 
   const traceColumnAction = () => {
-    location.assign('#/traces');
+    const tracesPath = '#/traces';
+    if (newNavigation) {
+      coreRefs.application?.navigateToApp(observabilityTracesNewNavID, {
+        path: tracesPath + '?datasourceId=' + dataSourceMDSId[0].id,
+      });
+    } else {
+      location.assign(tracesPath);
+    }
+
     setTracesTableMode('traces');
     sessionStorage.setItem(TRACE_TABLE_TYPE_KEY, 'traces');
   };

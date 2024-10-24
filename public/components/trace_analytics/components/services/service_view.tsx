@@ -163,7 +163,7 @@ export function ServiceView(props: ServiceViewProps) {
       data-test-subj="ActionContextMenu"
       iconType="arrowDown"
       iconSide="right"
-      onClick={() => setActionsMenuPopover(true)}
+      onClick={() => setActionsMenuPopover(!actionsMenuPopover)}
     >
       Actions
     </EuiSmallButton>
@@ -254,6 +254,11 @@ export function ServiceView(props: ServiceViewProps) {
           <EuiFlyoutHeader hasBorder>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem>{serviceHeader}</EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={true}>
+                {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   panelPaddingSize="none"
@@ -265,7 +270,6 @@ export function ServiceView(props: ServiceViewProps) {
                 </EuiPopover>
               </EuiFlexItem>
             </EuiFlexGroup>
-            {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}
           </EuiFlyoutHeader>
         ) : coreRefs?.chrome?.navGroup.getNavGroupEnabled() ? (
           <HeaderControlledComponentsWrapper
