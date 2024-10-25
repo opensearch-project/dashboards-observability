@@ -179,13 +179,8 @@ export function ServiceMap({
   };
 
   const setZoomLimits = (networkInstance) => {
-    let lastZoomLevel = 0.5;
+    let lastZoomLevel = 1.0;
     const initialPosition = networkInstance.getViewPosition();
-
-    networkInstance.moveTo({
-      scale: lastZoomLevel,
-      position: initialPosition,
-    });
 
     networkInstance.on('zoom', (params) => {
       const zoomLevel = params.scale;
