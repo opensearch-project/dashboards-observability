@@ -5,7 +5,6 @@
 
 import {
   EuiButtonGroup,
-  EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -13,6 +12,10 @@ import {
   EuiSpacer,
   EuiSuperSelect,
   EuiSuperSelectOption,
+  EuiSelectable,
+  EuiSelectableOption,
+  EuiPopover,
+  EuiFieldSearch,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 // @ts-ignore
@@ -79,6 +82,8 @@ export function ServiceMap({
   const [ticks, setTicks] = useState<number[]>([]);
   const [items, setItems] = useState<any>({});
   const [query, setQuery] = useState('');
+  const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]);
+
   const toggleButtons = [
     {
       id: 'latency',
@@ -97,6 +102,7 @@ export function ServiceMap({
   const [selectedNodeDetails, setSelectedNodeDetails] = useState<ServiceNodeDetails | null>(null);
 
   const [selectableValue, setSelectableValue] = useState<Array<EuiSuperSelectOption<any>>>([]);
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
 
   const onChangeSelectable = (value: React.SetStateAction<Array<EuiSuperSelectOption<any>>>) => {
     // if the change is changing for the first time then callback servicemap with metrics
@@ -124,9 +130,16 @@ export function ServiceMap({
     },
   ];
 
+  useEffect(() => {
+    const options = Object.keys(serviceMap).map((key) => ({
+      label: serviceMap[key].serviceName,
+      value: serviceMap[key].serviceName,
+    }));
+    setSelectableOptions(options);
+  }, [serviceMap]);
+
   const options = {
     layout: {
-      // hierarchical: true,
       hierarchical: {
         enabled: true,
         direction: 'UD', // UD, DU, LR, RL
@@ -154,6 +167,8 @@ export function ServiceMap({
       hover: true,
       tooltipDelay: 30,
       selectable: true,
+      zoomView: true,
+      zoomSpeed: 0.5,
     },
     manipulation: {
       enabled: false,
@@ -161,6 +176,28 @@ export function ServiceMap({
     height: '434px',
     width: '100%',
     autoResize: true,
+  };
+
+  const setZoomLimits = (networkInstance) => {
+    let lastZoomLevel = 0.5;
+    const initialPosition = networkInstance.getViewPosition();
+
+    networkInstance.moveTo({
+      scale: lastZoomLevel,
+      position: initialPosition,
+    });
+
+    networkInstance.on('zoom', (params) => {
+      const zoomLevel = params.scale;
+
+      if (zoomLevel < 0.25 && zoomLevel < lastZoomLevel) {
+        networkInstance.moveTo({ scale: 0.25, position: initialPosition });
+      } else if (zoomLevel > 1.75) {
+        networkInstance.moveTo({ scale: 1.75 });
+      }
+
+      lastZoomLevel = zoomLevel;
+    });
   };
 
   const addServiceFilter = (selectedServiceName: string) => {
@@ -273,14 +310,63 @@ export function ServiceMap({
         )}
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={7}>
-            <EuiCompressedFieldSearch
-              prepend="Focus on"
-              placeholder="Service name"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onSearch={(service) => onFocus(service)}
-              isInvalid={query.length > 0 && invalid}
-            />
+            <EuiPopover
+              button={
+                <EuiFieldSearch
+                  compressed
+                  prepend="Focus on"
+                  placeholder="Service name"
+                  value={query}
+                  onClick={() => setPopoverOpen(!isPopoverOpen)}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    if (!isPopoverOpen) {
+                      setPopoverOpen(true);
+                    }
+                  }}
+                  isInvalid={query.length > 0 && invalid}
+                  aria-controls="service-select-dropdown"
+                />
+              }
+              isOpen={isPopoverOpen}
+              closePopover={() => setPopoverOpen(false)}
+              panelPaddingSize="none"
+              anchorPosition="downLeft"
+              repositionOnScroll
+              id="service-select-dropdown"
+              ownFocus={false}
+            >
+              <EuiSelectable
+                searchable
+                searchProps={{
+                  value: query,
+                  onInput: (e) => setQuery(e.target.value),
+                  isClearable: true,
+                  autoFocus: true,
+                }}
+                options={selectableOptions.filter((option) =>
+                  option.label.toLowerCase().includes(query.toLowerCase())
+                )}
+                singleSelection={true}
+                onChange={(newOptions) => {
+                  const selectedOption = newOptions.find((option) => option.checked === 'on');
+                  if (selectedOption) {
+                    setQuery(selectedOption.label);
+                    onFocus(selectedOption.label as string);
+                    setPopoverOpen(false);
+                    setSelectableOptions(
+                      selectableOptions.map((option) => ({
+                        ...option,
+                        checked: undefined,
+                      }))
+                    );
+                  }
+                }}
+                listProps={{ bordered: true, style: { width: '300px' } }}
+              >
+                {(list) => <div>{list}</div>}
+              </EuiSelectable>
+            </EuiPopover>
           </EuiFlexItem>
           {page === 'traces' && (
             <EuiFlexItem grow={3}>
@@ -307,6 +393,7 @@ export function ServiceMap({
                     events={events}
                     getNetwork={(networkInstance: any) => {
                       setNetwork(networkInstance);
+                      setZoomLimits(networkInstance);
                       if (currService) onFocus(currService, networkInstance);
                     }}
                   />
