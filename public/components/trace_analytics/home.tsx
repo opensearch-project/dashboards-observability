@@ -296,7 +296,7 @@ export const Home = (props: HomeProps) => {
         path: tracesPath + '?datasourceId=' + dataSourceMDSId[0].id,
       });
     } else {
-      location.assign(tracesPath);
+      location.assign(tracesPath + '?datasourceId=' + dataSourceMDSId[0].id);
     }
 
     setTracesTableMode('traces');

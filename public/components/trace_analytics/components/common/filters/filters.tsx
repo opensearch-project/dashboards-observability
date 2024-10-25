@@ -13,6 +13,7 @@ import {
   EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
+  EuiSpacer,
   EuiTextColor,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
@@ -225,12 +226,15 @@ export function Filters(props: FiltersOwnProps) {
   const filterComponents = useMemo(() => renderFilters(), [props.filters]);
 
   return props.filters.length > 0 ? (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      {filterComponents}
-      <EuiFlexItem grow={false}>
-        <AddFilterButton />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        {filterComponents}
+        <EuiFlexItem grow={false}>
+          <AddFilterButton />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   ) : null;
 }
 
