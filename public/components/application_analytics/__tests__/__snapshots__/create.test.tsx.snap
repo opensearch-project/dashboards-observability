@@ -646,37 +646,66 @@ Object {
                           class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                         />
                         <div
-                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <div
                             class="euiFlexItem euiFlexItem--flexGrow7"
                           >
                             <div
-                              class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                              class="euiPopover euiPopover--anchorDownLeft"
+                              id="service-select-dropdown"
                             >
-                              <label
-                                class="euiFormLabel euiFormControlLayout__prepend"
-                              >
-                                Focus on
-                              </label>
                               <div
-                                class="euiFormControlLayout__childrenWrapper"
+                                class="euiPopover__anchor"
                               >
-                                <input
-                                  class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
-                                  placeholder="Service name"
-                                  type="search"
-                                  value=""
-                                />
                                 <div
-                                  class="euiFormControlLayoutIcons"
+                                  class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                                 >
-                                  <span
-                                    class="euiFormControlLayoutCustomIcon"
+                                  <label
+                                    class="euiFormLabel euiFormControlLayout__prepend"
+                                  >
+                                    Focus on
+                                  </label>
+                                  <div
+                                    class="euiFormControlLayout__childrenWrapper"
+                                  >
+                                    <input
+                                      aria-controls="service-select-dropdown"
+                                      class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
+                                      placeholder="Service name"
+                                      type="search"
+                                      value=""
+                                    />
+                                    <div
+                                      class="euiFormControlLayoutIcons"
+                                    >
+                                      <span
+                                        class="euiFormControlLayoutCustomIcon"
+                                      >
+                                        <svg
+                                          aria-hidden="true"
+                                          class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                          focusable="false"
+                                          height="16"
+                                          role="img"
+                                          viewBox="0 0 16 16"
+                                          width="16"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                          />
+                                        </svg>
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <button
+                                    class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
+                                    type="button"
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -685,10 +714,10 @@ Object {
                                       xmlns="http://www.w3.org/2000/svg"
                                     >
                                       <path
-                                        d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                        d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
                                       />
                                     </svg>
-                                  </span>
+                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -1895,37 +1924,66 @@ Object {
                         class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                       />
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <div
                           class="euiFlexItem euiFlexItem--flexGrow7"
                         >
                           <div
-                            class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                            class="euiPopover euiPopover--anchorDownLeft"
+                            id="service-select-dropdown"
                           >
-                            <label
-                              class="euiFormLabel euiFormControlLayout__prepend"
-                            >
-                              Focus on
-                            </label>
                             <div
-                              class="euiFormControlLayout__childrenWrapper"
+                              class="euiPopover__anchor"
                             >
-                              <input
-                                class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
-                                placeholder="Service name"
-                                type="search"
-                                value=""
-                              />
                               <div
-                                class="euiFormControlLayoutIcons"
+                                class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                               >
-                                <span
-                                  class="euiFormControlLayoutCustomIcon"
+                                <label
+                                  class="euiFormLabel euiFormControlLayout__prepend"
+                                >
+                                  Focus on
+                                </label>
+                                <div
+                                  class="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <input
+                                    aria-controls="service-select-dropdown"
+                                    class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
+                                    placeholder="Service name"
+                                    type="search"
+                                    value=""
+                                  />
+                                  <div
+                                    class="euiFormControlLayoutIcons"
+                                  >
+                                    <span
+                                      class="euiFormControlLayoutCustomIcon"
+                                    >
+                                      <svg
+                                        aria-hidden="true"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                        focusable="false"
+                                        height="16"
+                                        role="img"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                        />
+                                      </svg>
+                                    </span>
+                                  </div>
+                                </div>
+                                <button
+                                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
+                                  type="button"
                                 >
                                   <svg
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                    class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
                                     focusable="false"
                                     height="16"
                                     role="img"
@@ -1934,10 +1992,10 @@ Object {
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
-                                      d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                      d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
                                     />
                                   </svg>
-                                </span>
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -3083,37 +3141,66 @@ Object {
                           class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                         />
                         <div
-                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <div
                             class="euiFlexItem euiFlexItem--flexGrow7"
                           >
                             <div
-                              class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                              class="euiPopover euiPopover--anchorDownLeft"
+                              id="service-select-dropdown"
                             >
-                              <label
-                                class="euiFormLabel euiFormControlLayout__prepend"
-                              >
-                                Focus on
-                              </label>
                               <div
-                                class="euiFormControlLayout__childrenWrapper"
+                                class="euiPopover__anchor"
                               >
-                                <input
-                                  class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
-                                  placeholder="Service name"
-                                  type="search"
-                                  value=""
-                                />
                                 <div
-                                  class="euiFormControlLayoutIcons"
+                                  class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                                 >
-                                  <span
-                                    class="euiFormControlLayoutCustomIcon"
+                                  <label
+                                    class="euiFormLabel euiFormControlLayout__prepend"
+                                  >
+                                    Focus on
+                                  </label>
+                                  <div
+                                    class="euiFormControlLayout__childrenWrapper"
+                                  >
+                                    <input
+                                      aria-controls="service-select-dropdown"
+                                      class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
+                                      placeholder="Service name"
+                                      type="search"
+                                      value=""
+                                    />
+                                    <div
+                                      class="euiFormControlLayoutIcons"
+                                    >
+                                      <span
+                                        class="euiFormControlLayoutCustomIcon"
+                                      >
+                                        <svg
+                                          aria-hidden="true"
+                                          class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                          focusable="false"
+                                          height="16"
+                                          role="img"
+                                          viewBox="0 0 16 16"
+                                          width="16"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                          />
+                                        </svg>
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <button
+                                    class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
+                                    type="button"
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -3122,10 +3209,10 @@ Object {
                                       xmlns="http://www.w3.org/2000/svg"
                                     >
                                       <path
-                                        d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                        d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
                                       />
                                     </svg>
-                                  </span>
+                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -4246,37 +4333,66 @@ Object {
                         class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                       />
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <div
                           class="euiFlexItem euiFlexItem--flexGrow7"
                         >
                           <div
-                            class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                            class="euiPopover euiPopover--anchorDownLeft"
+                            id="service-select-dropdown"
                           >
-                            <label
-                              class="euiFormLabel euiFormControlLayout__prepend"
-                            >
-                              Focus on
-                            </label>
                             <div
-                              class="euiFormControlLayout__childrenWrapper"
+                              class="euiPopover__anchor"
                             >
-                              <input
-                                class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
-                                placeholder="Service name"
-                                type="search"
-                                value=""
-                              />
                               <div
-                                class="euiFormControlLayoutIcons"
+                                class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                               >
-                                <span
-                                  class="euiFormControlLayoutCustomIcon"
+                                <label
+                                  class="euiFormLabel euiFormControlLayout__prepend"
+                                >
+                                  Focus on
+                                </label>
+                                <div
+                                  class="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <input
+                                    aria-controls="service-select-dropdown"
+                                    class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
+                                    placeholder="Service name"
+                                    type="search"
+                                    value=""
+                                  />
+                                  <div
+                                    class="euiFormControlLayoutIcons"
+                                  >
+                                    <span
+                                      class="euiFormControlLayoutCustomIcon"
+                                    >
+                                      <svg
+                                        aria-hidden="true"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                        focusable="false"
+                                        height="16"
+                                        role="img"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                        />
+                                      </svg>
+                                    </span>
+                                  </div>
+                                </div>
+                                <button
+                                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
+                                  type="button"
                                 >
                                   <svg
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                    class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
                                     focusable="false"
                                     height="16"
                                     role="img"
@@ -4285,10 +4401,10 @@ Object {
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
-                                      d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                      d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
                                     />
                                   </svg>
-                                </span>
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -5502,37 +5618,66 @@ Object {
                           class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                         />
                         <div
-                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <div
                             class="euiFlexItem euiFlexItem--flexGrow7"
                           >
                             <div
-                              class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                              class="euiPopover euiPopover--anchorDownLeft"
+                              id="service-select-dropdown"
                             >
-                              <label
-                                class="euiFormLabel euiFormControlLayout__prepend"
-                              >
-                                Focus on
-                              </label>
                               <div
-                                class="euiFormControlLayout__childrenWrapper"
+                                class="euiPopover__anchor"
                               >
-                                <input
-                                  class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
-                                  placeholder="Service name"
-                                  type="search"
-                                  value=""
-                                />
                                 <div
-                                  class="euiFormControlLayoutIcons"
+                                  class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                                 >
-                                  <span
-                                    class="euiFormControlLayoutCustomIcon"
+                                  <label
+                                    class="euiFormLabel euiFormControlLayout__prepend"
+                                  >
+                                    Focus on
+                                  </label>
+                                  <div
+                                    class="euiFormControlLayout__childrenWrapper"
+                                  >
+                                    <input
+                                      aria-controls="service-select-dropdown"
+                                      class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
+                                      placeholder="Service name"
+                                      type="search"
+                                      value=""
+                                    />
+                                    <div
+                                      class="euiFormControlLayoutIcons"
+                                    >
+                                      <span
+                                        class="euiFormControlLayoutCustomIcon"
+                                      >
+                                        <svg
+                                          aria-hidden="true"
+                                          class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                          focusable="false"
+                                          height="16"
+                                          role="img"
+                                          viewBox="0 0 16 16"
+                                          width="16"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                          />
+                                        </svg>
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <button
+                                    class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
+                                    type="button"
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -5541,10 +5686,10 @@ Object {
                                       xmlns="http://www.w3.org/2000/svg"
                                     >
                                       <path
-                                        d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                        d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
                                       />
                                     </svg>
-                                  </span>
+                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -6665,37 +6810,66 @@ Object {
                         class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                       />
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <div
                           class="euiFlexItem euiFlexItem--flexGrow7"
                         >
                           <div
-                            class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                            class="euiPopover euiPopover--anchorDownLeft"
+                            id="service-select-dropdown"
                           >
-                            <label
-                              class="euiFormLabel euiFormControlLayout__prepend"
-                            >
-                              Focus on
-                            </label>
                             <div
-                              class="euiFormControlLayout__childrenWrapper"
+                              class="euiPopover__anchor"
                             >
-                              <input
-                                class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
-                                placeholder="Service name"
-                                type="search"
-                                value=""
-                              />
                               <div
-                                class="euiFormControlLayoutIcons"
+                                class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                               >
-                                <span
-                                  class="euiFormControlLayoutCustomIcon"
+                                <label
+                                  class="euiFormLabel euiFormControlLayout__prepend"
+                                >
+                                  Focus on
+                                </label>
+                                <div
+                                  class="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <input
+                                    aria-controls="service-select-dropdown"
+                                    class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
+                                    placeholder="Service name"
+                                    type="search"
+                                    value=""
+                                  />
+                                  <div
+                                    class="euiFormControlLayoutIcons"
+                                  >
+                                    <span
+                                      class="euiFormControlLayoutCustomIcon"
+                                    >
+                                      <svg
+                                        aria-hidden="true"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                        focusable="false"
+                                        height="16"
+                                        role="img"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                        />
+                                      </svg>
+                                    </span>
+                                  </div>
+                                </div>
+                                <button
+                                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
+                                  type="button"
                                 >
                                   <svg
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                    class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
                                     focusable="false"
                                     height="16"
                                     role="img"
@@ -6704,10 +6878,10 @@ Object {
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
-                                      d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                      d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
                                     />
                                   </svg>
-                                </span>
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -7848,37 +8022,66 @@ Object {
                           class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                         />
                         <div
-                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <div
                             class="euiFlexItem euiFlexItem--flexGrow7"
                           >
                             <div
-                              class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                              class="euiPopover euiPopover--anchorDownLeft"
+                              id="service-select-dropdown"
                             >
-                              <label
-                                class="euiFormLabel euiFormControlLayout__prepend"
-                              >
-                                Focus on
-                              </label>
                               <div
-                                class="euiFormControlLayout__childrenWrapper"
+                                class="euiPopover__anchor"
                               >
-                                <input
-                                  class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
-                                  placeholder="Service name"
-                                  type="search"
-                                  value=""
-                                />
                                 <div
-                                  class="euiFormControlLayoutIcons"
+                                  class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                                 >
-                                  <span
-                                    class="euiFormControlLayoutCustomIcon"
+                                  <label
+                                    class="euiFormLabel euiFormControlLayout__prepend"
+                                  >
+                                    Focus on
+                                  </label>
+                                  <div
+                                    class="euiFormControlLayout__childrenWrapper"
+                                  >
+                                    <input
+                                      aria-controls="service-select-dropdown"
+                                      class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
+                                      placeholder="Service name"
+                                      type="search"
+                                      value=""
+                                    />
+                                    <div
+                                      class="euiFormControlLayoutIcons"
+                                    >
+                                      <span
+                                        class="euiFormControlLayoutCustomIcon"
+                                      >
+                                        <svg
+                                          aria-hidden="true"
+                                          class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                          focusable="false"
+                                          height="16"
+                                          role="img"
+                                          viewBox="0 0 16 16"
+                                          width="16"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                          />
+                                        </svg>
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <button
+                                    class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
+                                    type="button"
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -7890,7 +8093,7 @@ Object {
                                         d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
                                       />
                                     </svg>
-                                  </span>
+                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -8972,37 +9175,66 @@ Object {
                         class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                       />
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <div
                           class="euiFlexItem euiFlexItem--flexGrow7"
                         >
                           <div
-                            class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                            class="euiPopover euiPopover--anchorDownLeft"
+                            id="service-select-dropdown"
                           >
-                            <label
-                              class="euiFormLabel euiFormControlLayout__prepend"
-                            >
-                              Focus on
-                            </label>
                             <div
-                              class="euiFormControlLayout__childrenWrapper"
+                              class="euiPopover__anchor"
                             >
-                              <input
-                                class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
-                                placeholder="Service name"
-                                type="search"
-                                value=""
-                              />
                               <div
-                                class="euiFormControlLayoutIcons"
+                                class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                               >
-                                <span
-                                  class="euiFormControlLayoutCustomIcon"
+                                <label
+                                  class="euiFormLabel euiFormControlLayout__prepend"
+                                >
+                                  Focus on
+                                </label>
+                                <div
+                                  class="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <input
+                                    aria-controls="service-select-dropdown"
+                                    class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
+                                    placeholder="Service name"
+                                    type="search"
+                                    value=""
+                                  />
+                                  <div
+                                    class="euiFormControlLayoutIcons"
+                                  >
+                                    <span
+                                      class="euiFormControlLayoutCustomIcon"
+                                    >
+                                      <svg
+                                        aria-hidden="true"
+                                        class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                        focusable="false"
+                                        height="16"
+                                        role="img"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                        />
+                                      </svg>
+                                    </span>
+                                  </div>
+                                </div>
+                                <button
+                                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
+                                  type="button"
                                 >
                                   <svg
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                    class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
                                     focusable="false"
                                     height="16"
                                     role="img"
@@ -9014,7 +9246,7 @@ Object {
                                       d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
                                     />
                                   </svg>
-                                </span>
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -10158,37 +10390,66 @@ Object {
                           class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                         />
                         <div
-                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <div
                             class="euiFlexItem euiFlexItem--flexGrow7"
                           >
                             <div
-                              class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                              class="euiPopover euiPopover--anchorDownLeft"
+                              id="service-select-dropdown"
                             >
-                              <label
-                                class="euiFormLabel euiFormControlLayout__prepend"
-                              >
-                                Focus on
-                              </label>
                               <div
-                                class="euiFormControlLayout__childrenWrapper"
+                                class="euiPopover__anchor"
                               >
-                                <input
-                                  class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
-                                  placeholder="Service name"
-                                  type="search"
-                                  value=""
-                                />
                                 <div
-                                  class="euiFormControlLayoutIcons"
+                                  class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                                 >
-                                  <span
-                                    class="euiFormControlLayoutCustomIcon"
+                                  <label
+                                    class="euiFormLabel euiFormControlLayout__prepend"
+                                  >
+                                    Focus on
+                                  </label>
+                                  <div
+                                    class="euiFormControlLayout__childrenWrapper"
+                                  >
+                                    <input
+                                      aria-controls="service-select-dropdown"
+                                      class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
+                                      placeholder="Service name"
+                                      type="search"
+                                      value=""
+                                    />
+                                    <div
+                                      class="euiFormControlLayoutIcons"
+                                    >
+                                      <span
+                                        class="euiFormControlLayoutCustomIcon"
+                                      >
+                                        <svg
+                                          aria-hidden="true"
+                                          class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                          focusable="false"
+                                          height="16"
+                                          role="img"
+                                          viewBox="0 0 16 16"
+                                          width="16"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                          />
+                                        </svg>
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <button
+                                    class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
+                                    type="button"
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -10197,10 +10458,10 @@ Object {
                                       xmlns="http://www.w3.org/2000/svg"
                                     >
                                       <path
-                                        d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                        d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
                                       />
                                     </svg>
-                                  </span>
+                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -11287,37 +11548,66 @@ Object {
                         class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                       />
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <div
                           class="euiFlexItem euiFlexItem--flexGrow7"
                         >
                           <div
-                            class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                            class="euiPopover euiPopover--anchorDownLeft"
+                            id="service-select-dropdown"
                           >
-                            <label
-                              class="euiFormLabel euiFormControlLayout__prepend"
-                            >
-                              Focus on
-                            </label>
                             <div
-                              class="euiFormControlLayout__childrenWrapper"
+                              class="euiPopover__anchor"
                             >
-                              <input
-                                class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
-                                placeholder="Service name"
-                                type="search"
-                                value=""
-                              />
                               <div
-                                class="euiFormControlLayoutIcons"
+                                class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                               >
-                                <span
-                                  class="euiFormControlLayoutCustomIcon"
+                                <label
+                                  class="euiFormLabel euiFormControlLayout__prepend"
+                                >
+                                  Focus on
+                                </label>
+                                <div
+                                  class="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <input
+                                    aria-controls="service-select-dropdown"
+                                    class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
+                                    placeholder="Service name"
+                                    type="search"
+                                    value=""
+                                  />
+                                  <div
+                                    class="euiFormControlLayoutIcons"
+                                  >
+                                    <span
+                                      class="euiFormControlLayoutCustomIcon"
+                                    >
+                                      <svg
+                                        aria-hidden="true"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                        focusable="false"
+                                        height="16"
+                                        role="img"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                        />
+                                      </svg>
+                                    </span>
+                                  </div>
+                                </div>
+                                <button
+                                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
+                                  type="button"
                                 >
                                   <svg
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                    class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
                                     focusable="false"
                                     height="16"
                                     role="img"
@@ -11326,10 +11616,10 @@ Object {
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
-                                      d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                      d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
                                     />
                                   </svg>
-                                </span>
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -12507,37 +12797,66 @@ Object {
                           class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                         />
                         <div
-                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <div
                             class="euiFlexItem euiFlexItem--flexGrow7"
                           >
                             <div
-                              class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                              class="euiPopover euiPopover--anchorDownLeft"
+                              id="service-select-dropdown"
                             >
-                              <label
-                                class="euiFormLabel euiFormControlLayout__prepend"
-                              >
-                                Focus on
-                              </label>
                               <div
-                                class="euiFormControlLayout__childrenWrapper"
+                                class="euiPopover__anchor"
                               >
-                                <input
-                                  class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
-                                  placeholder="Service name"
-                                  type="search"
-                                  value=""
-                                />
                                 <div
-                                  class="euiFormControlLayoutIcons"
+                                  class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                                 >
-                                  <span
-                                    class="euiFormControlLayoutCustomIcon"
+                                  <label
+                                    class="euiFormLabel euiFormControlLayout__prepend"
+                                  >
+                                    Focus on
+                                  </label>
+                                  <div
+                                    class="euiFormControlLayout__childrenWrapper"
+                                  >
+                                    <input
+                                      aria-controls="service-select-dropdown"
+                                      class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
+                                      placeholder="Service name"
+                                      type="search"
+                                      value=""
+                                    />
+                                    <div
+                                      class="euiFormControlLayoutIcons"
+                                    >
+                                      <span
+                                        class="euiFormControlLayoutCustomIcon"
+                                      >
+                                        <svg
+                                          aria-hidden="true"
+                                          class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                          focusable="false"
+                                          height="16"
+                                          role="img"
+                                          viewBox="0 0 16 16"
+                                          width="16"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                          />
+                                        </svg>
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <button
+                                    class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
+                                    type="button"
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -12546,10 +12865,10 @@ Object {
                                       xmlns="http://www.w3.org/2000/svg"
                                     >
                                       <path
-                                        d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                        d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
                                       />
                                     </svg>
-                                  </span>
+                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -13670,37 +13989,66 @@ Object {
                         class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                       />
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <div
                           class="euiFlexItem euiFlexItem--flexGrow7"
                         >
                           <div
-                            class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                            class="euiPopover euiPopover--anchorDownLeft"
+                            id="service-select-dropdown"
                           >
-                            <label
-                              class="euiFormLabel euiFormControlLayout__prepend"
-                            >
-                              Focus on
-                            </label>
                             <div
-                              class="euiFormControlLayout__childrenWrapper"
+                              class="euiPopover__anchor"
                             >
-                              <input
-                                class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
-                                placeholder="Service name"
-                                type="search"
-                                value=""
-                              />
                               <div
-                                class="euiFormControlLayoutIcons"
+                                class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                               >
-                                <span
-                                  class="euiFormControlLayoutCustomIcon"
+                                <label
+                                  class="euiFormLabel euiFormControlLayout__prepend"
+                                >
+                                  Focus on
+                                </label>
+                                <div
+                                  class="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <input
+                                    aria-controls="service-select-dropdown"
+                                    class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
+                                    placeholder="Service name"
+                                    type="search"
+                                    value=""
+                                  />
+                                  <div
+                                    class="euiFormControlLayoutIcons"
+                                  >
+                                    <span
+                                      class="euiFormControlLayoutCustomIcon"
+                                    >
+                                      <svg
+                                        aria-hidden="true"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                        focusable="false"
+                                        height="16"
+                                        role="img"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                        />
+                                      </svg>
+                                    </span>
+                                  </div>
+                                </div>
+                                <button
+                                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
+                                  type="button"
                                 >
                                   <svg
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                    class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
                                     focusable="false"
                                     height="16"
                                     role="img"
@@ -13709,10 +14057,10 @@ Object {
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
-                                      d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                      d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
                                     />
                                   </svg>
-                                </span>
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -14858,37 +15206,66 @@ Object {
                           class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                         />
                         <div
-                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <div
                             class="euiFlexItem euiFlexItem--flexGrow7"
                           >
                             <div
-                              class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                              class="euiPopover euiPopover--anchorDownLeft"
+                              id="service-select-dropdown"
                             >
-                              <label
-                                class="euiFormLabel euiFormControlLayout__prepend"
-                              >
-                                Focus on
-                              </label>
                               <div
-                                class="euiFormControlLayout__childrenWrapper"
+                                class="euiPopover__anchor"
                               >
-                                <input
-                                  class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
-                                  placeholder="Service name"
-                                  type="search"
-                                  value=""
-                                />
                                 <div
-                                  class="euiFormControlLayoutIcons"
+                                  class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                                 >
-                                  <span
-                                    class="euiFormControlLayoutCustomIcon"
+                                  <label
+                                    class="euiFormLabel euiFormControlLayout__prepend"
+                                  >
+                                    Focus on
+                                  </label>
+                                  <div
+                                    class="euiFormControlLayout__childrenWrapper"
+                                  >
+                                    <input
+                                      aria-controls="service-select-dropdown"
+                                      class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
+                                      placeholder="Service name"
+                                      type="search"
+                                      value=""
+                                    />
+                                    <div
+                                      class="euiFormControlLayoutIcons"
+                                    >
+                                      <span
+                                        class="euiFormControlLayoutCustomIcon"
+                                      >
+                                        <svg
+                                          aria-hidden="true"
+                                          class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                          focusable="false"
+                                          height="16"
+                                          role="img"
+                                          viewBox="0 0 16 16"
+                                          width="16"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                          />
+                                        </svg>
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <button
+                                    class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
+                                    type="button"
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -14897,10 +15274,10 @@ Object {
                                       xmlns="http://www.w3.org/2000/svg"
                                     >
                                       <path
-                                        d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                        d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
                                       />
                                     </svg>
-                                  </span>
+                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -16021,37 +16398,66 @@ Object {
                         class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                       />
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <div
                           class="euiFlexItem euiFlexItem--flexGrow7"
                         >
                           <div
-                            class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                            class="euiPopover euiPopover--anchorDownLeft"
+                            id="service-select-dropdown"
                           >
-                            <label
-                              class="euiFormLabel euiFormControlLayout__prepend"
-                            >
-                              Focus on
-                            </label>
                             <div
-                              class="euiFormControlLayout__childrenWrapper"
+                              class="euiPopover__anchor"
                             >
-                              <input
-                                class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
-                                placeholder="Service name"
-                                type="search"
-                                value=""
-                              />
                               <div
-                                class="euiFormControlLayoutIcons"
+                                class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                               >
-                                <span
-                                  class="euiFormControlLayoutCustomIcon"
+                                <label
+                                  class="euiFormLabel euiFormControlLayout__prepend"
+                                >
+                                  Focus on
+                                </label>
+                                <div
+                                  class="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <input
+                                    aria-controls="service-select-dropdown"
+                                    class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
+                                    placeholder="Service name"
+                                    type="search"
+                                    value=""
+                                  />
+                                  <div
+                                    class="euiFormControlLayoutIcons"
+                                  >
+                                    <span
+                                      class="euiFormControlLayoutCustomIcon"
+                                    >
+                                      <svg
+                                        aria-hidden="true"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                        focusable="false"
+                                        height="16"
+                                        role="img"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                        />
+                                      </svg>
+                                    </span>
+                                  </div>
+                                </div>
+                                <button
+                                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
+                                  type="button"
                                 >
                                   <svg
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                    class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
                                     focusable="false"
                                     height="16"
                                     role="img"
@@ -16060,10 +16466,10 @@ Object {
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
-                                      d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                      d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
                                     />
                                   </svg>
-                                </span>
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -17247,37 +17653,66 @@ Object {
                           class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                         />
                         <div
-                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <div
                             class="euiFlexItem euiFlexItem--flexGrow7"
                           >
                             <div
-                              class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                              class="euiPopover euiPopover--anchorDownLeft"
+                              id="service-select-dropdown"
                             >
-                              <label
-                                class="euiFormLabel euiFormControlLayout__prepend"
-                              >
-                                Focus on
-                              </label>
                               <div
-                                class="euiFormControlLayout__childrenWrapper"
+                                class="euiPopover__anchor"
                               >
-                                <input
-                                  class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
-                                  placeholder="Service name"
-                                  type="search"
-                                  value=""
-                                />
                                 <div
-                                  class="euiFormControlLayoutIcons"
+                                  class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                                 >
-                                  <span
-                                    class="euiFormControlLayoutCustomIcon"
+                                  <label
+                                    class="euiFormLabel euiFormControlLayout__prepend"
+                                  >
+                                    Focus on
+                                  </label>
+                                  <div
+                                    class="euiFormControlLayout__childrenWrapper"
+                                  >
+                                    <input
+                                      aria-controls="service-select-dropdown"
+                                      class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
+                                      placeholder="Service name"
+                                      type="search"
+                                      value=""
+                                    />
+                                    <div
+                                      class="euiFormControlLayoutIcons"
+                                    >
+                                      <span
+                                        class="euiFormControlLayoutCustomIcon"
+                                      >
+                                        <svg
+                                          aria-hidden="true"
+                                          class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                          focusable="false"
+                                          height="16"
+                                          role="img"
+                                          viewBox="0 0 16 16"
+                                          width="16"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                          />
+                                        </svg>
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <button
+                                    class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
+                                    type="button"
                                   >
                                     <svg
                                       aria-hidden="true"
-                                      class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                      class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
                                       focusable="false"
                                       height="16"
                                       role="img"
@@ -17286,10 +17721,10 @@ Object {
                                       xmlns="http://www.w3.org/2000/svg"
                                     >
                                       <path
-                                        d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                        d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
                                       />
                                     </svg>
-                                  </span>
+                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -18496,37 +18931,66 @@ Object {
                         class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                       />
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <div
                           class="euiFlexItem euiFlexItem--flexGrow7"
                         >
                           <div
-                            class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                            class="euiPopover euiPopover--anchorDownLeft"
+                            id="service-select-dropdown"
                           >
-                            <label
-                              class="euiFormLabel euiFormControlLayout__prepend"
-                            >
-                              Focus on
-                            </label>
                             <div
-                              class="euiFormControlLayout__childrenWrapper"
+                              class="euiPopover__anchor"
                             >
-                              <input
-                                class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
-                                placeholder="Service name"
-                                type="search"
-                                value=""
-                              />
                               <div
-                                class="euiFormControlLayoutIcons"
+                                class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                               >
-                                <span
-                                  class="euiFormControlLayoutCustomIcon"
+                                <label
+                                  class="euiFormLabel euiFormControlLayout__prepend"
+                                >
+                                  Focus on
+                                </label>
+                                <div
+                                  class="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <input
+                                    aria-controls="service-select-dropdown"
+                                    class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
+                                    placeholder="Service name"
+                                    type="search"
+                                    value=""
+                                  />
+                                  <div
+                                    class="euiFormControlLayoutIcons"
+                                  >
+                                    <span
+                                      class="euiFormControlLayoutCustomIcon"
+                                    >
+                                      <svg
+                                        aria-hidden="true"
+                                        class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                        focusable="false"
+                                        height="16"
+                                        role="img"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                        />
+                                      </svg>
+                                    </span>
+                                  </div>
+                                </div>
+                                <button
+                                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
+                                  type="button"
                                 >
                                   <svg
                                     aria-hidden="true"
-                                    class="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                    class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
                                     focusable="false"
                                     height="16"
                                     role="img"
@@ -18535,10 +18999,10 @@ Object {
                                     xmlns="http://www.w3.org/2000/svg"
                                   >
                                     <path
-                                      d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                      d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
                                     />
                                   </svg>
-                                </span>
+                                </button>
                               </div>
                             </div>
                           </div>

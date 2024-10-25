@@ -5,6 +5,7 @@
 
 import {
   EuiButtonGroup,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -77,6 +78,7 @@ export function ServiceMap({
   filterByCurrService?: boolean;
   includeMetricsCallback?: () => void;
 }) {
+  const [graphKey, setGraphKey] = useState(0); // adding key to allow for re-renders
   const [invalid, setInvalid] = useState(false);
   const [network, setNetwork] = useState(null);
   const [ticks, setTicks] = useState<number[]>([]);
@@ -236,9 +238,27 @@ export function ServiceMap({
 
   const onFocus = (service: string, networkInstance?: any) => {
     if (service.length === 0) {
+      // Reset all nodes to the default size when no service is selected
+      const resetNodes = items.graph.nodes.map((node) => ({ ...node, size: 15 }));
+      setItems({
+        ...items,
+        graph: { ...items.graph, nodes: resetNodes },
+      });
+      if (networkInstance) networkInstance.fit(); // Adjust the view if needed
       setInvalid(false);
     } else if (serviceMap[service]) {
       if (!networkInstance) networkInstance = network;
+
+      // Enlarge the focused node and reset others
+      const updatedNodes = items.graph.nodes.map((node) =>
+        node.label === service ? { ...node, size: 30 } : { ...node, size: 15 }
+      );
+
+      setItems({
+        ...items,
+        graph: { ...items.graph, nodes: updatedNodes },
+      });
+
       networkInstance.focus(serviceMap[service].id, { animation: true });
       setInvalid(false);
     } else {
@@ -303,7 +323,7 @@ export function ServiceMap({
             <EuiHorizontalRule margin="m" />
           </>
         )}
-        <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexGroup>
           <EuiFlexItem grow={7}>
             <EuiPopover
               button={
@@ -314,12 +334,24 @@ export function ServiceMap({
                   value={query}
                   onClick={() => setPopoverOpen(!isPopoverOpen)}
                   onChange={(e) => {
-                    setQuery(e.target.value);
-                    if (!isPopoverOpen) {
-                      setPopoverOpen(true);
+                    const newValue = e.target.value;
+                    setQuery(newValue);
+                    if (newValue === '') {
+                      onFocus(''); // Clear node focus when input is cleared
                     }
                   }}
                   isInvalid={query.length > 0 && invalid}
+                  append={
+                    <EuiButtonIcon
+                      iconType="refresh"
+                      size="s"
+                      onClick={() => {
+                        setGraphKey((prevKey) => prevKey + 1);
+                        setQuery('');
+                        onFocus('');
+                      }}
+                    />
+                  }
                   aria-controls="service-select-dropdown"
                 />
               }
@@ -383,6 +415,7 @@ export function ServiceMap({
               <div style={{ position: 'relative' }}>
                 {items?.graph && (
                   <Graph
+                    key={graphKey}
                     graph={items.graph}
                     options={options}
                     events={events}

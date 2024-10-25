@@ -34,25 +34,70 @@ exports[`Service map component renders service map 1`] = `
     <EuiHorizontalRule
       margin="m"
     />
-    <EuiFlexGroup
-      justifyContent="spaceBetween"
-    >
+    <EuiFlexGroup>
       <EuiFlexItem
         grow={7}
       >
-        <EuiCompressedFieldSearch
-          compressed={true}
-          fullWidth={false}
-          incremental={false}
-          isClearable={true}
-          isInvalid={false}
-          isLoading={false}
-          onChange={[Function]}
-          onSearch={[Function]}
-          placeholder="Service name"
-          prepend="Focus on"
-          value=""
-        />
+        <EuiPopover
+          anchorPosition="downLeft"
+          button={
+            <EuiFieldSearch
+              append={
+                <EuiButtonIcon
+                  iconType="refresh"
+                  onClick={[Function]}
+                  size="s"
+                />
+              }
+              aria-controls="service-select-dropdown"
+              compressed={true}
+              fullWidth={false}
+              incremental={false}
+              isClearable={true}
+              isInvalid={false}
+              isLoading={false}
+              onChange={[Function]}
+              onClick={[Function]}
+              placeholder="Service name"
+              prepend="Focus on"
+              value=""
+            />
+          }
+          closePopover={[Function]}
+          display="inlineBlock"
+          hasArrow={true}
+          id="service-select-dropdown"
+          isOpen={false}
+          ownFocus={false}
+          panelPaddingSize="none"
+          repositionOnScroll={true}
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            listProps={
+              Object {
+                "bordered": true,
+                "style": Object {
+                  "width": "300px",
+                },
+              }
+            }
+            onChange={[Function]}
+            options={Array []}
+            searchProps={
+              Object {
+                "autoFocus": true,
+                "isClearable": true,
+                "onInput": [Function],
+                "value": "",
+              }
+            }
+            searchable={true}
+            singleSelection={true}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiSpacer />
