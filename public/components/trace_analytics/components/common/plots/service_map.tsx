@@ -133,12 +133,17 @@ export function ServiceMap({
   ];
 
   useEffect(() => {
-    const options = Object.keys(serviceMap).map((key) => ({
-      label: serviceMap[key].serviceName,
-      value: serviceMap[key].serviceName,
-    }));
-    setSelectableOptions(options);
-  }, [serviceMap]);
+    if (items?.graph?.nodes) {
+      const visibleNodes = items.graph.nodes.map((node) => node.label);
+      const options = Object.keys(serviceMap)
+        .filter((key) => visibleNodes.includes(serviceMap[key].serviceName))
+        .map((key) => ({
+          label: serviceMap[key].serviceName,
+          value: serviceMap[key].serviceName,
+        }));
+      setSelectableOptions(options);
+    }
+  }, [items.graph, serviceMap]);
 
   const options = {
     layout: {
