@@ -1,6 +1,6 @@
-## Version 2.17.0 Release Notes
+## Version 2.18.0 Release Notes
 
-Compatible with OpenSearch and OpenSearch Dashboards version 2.17.0
+Compatible with OpenSearch and OpenSearch Dashboards version 2.18.0
 
 ### Features
 * [Feature] Auto trigger schema setup in assets creation flow of get started page ([#2200](https://github.com/opensearch-project/dashboards-observability/pull/2200))
@@ -15,8 +15,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 2.17.0
 * fit&finish ([#2186](https://github.com/opensearch-project/dashboards-observability/pull/2186))
 * [navigation]feat: update category to flatten menus in analytics(all) use case ([#2182](https://github.com/opensearch-project/dashboards-observability/pull/2182))
 * Update custom traces table with filters (#2178) ([#2178](https://github.com/opensearch-project/dashboards-observability/pull/2178))
-
-
+* HeaderControl update style, UI Adjustments Integrations ([#2171](https://github.com/opensearch-project/dashboards-observability/pull/2171))
 
 ### Bug Fixes
 * Fix getting started cards re-direction to integrations  ([#2146](https://github.com/opensearch-project/dashboards-observability/pull/2146))
