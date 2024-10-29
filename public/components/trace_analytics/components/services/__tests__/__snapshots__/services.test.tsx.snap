@@ -686,7 +686,10 @@ exports[`Services component renders empty services page 1`] = `
                                 placeholder="Trace ID, trace group name, service name"
                                 prepend={
                                   <GlobalFilterButton
+                                    attributesFilterFields={Array []}
                                     filters={Array []}
+                                    mode="data_prepper"
+                                    page="services"
                                     setFilters={
                                       [MockFunction] {
                                         "calls": Array [
@@ -713,7 +716,10 @@ exports[`Services component renders empty services page 1`] = `
                                   isLoading={false}
                                   prepend={
                                     <GlobalFilterButton
+                                      attributesFilterFields={Array []}
                                       filters={Array []}
+                                      mode="data_prepper"
+                                      page="services"
                                       setFilters={
                                         [MockFunction] {
                                           "calls": Array [
@@ -736,9 +742,12 @@ exports[`Services component renders empty services page 1`] = `
                                     className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed euiFormControlLayout--group"
                                   >
                                     <GlobalFilterButton
+                                      attributesFilterFields={Array []}
                                       className="euiFormControlLayout__prepend"
                                       filters={Array []}
                                       key="0/.0"
+                                      mode="data_prepper"
+                                      page="services"
                                       setFilters={
                                         [MockFunction] {
                                           "calls": Array [
@@ -756,14 +765,17 @@ exports[`Services component renders empty services page 1`] = `
                                       }
                                     >
                                       <EuiPopover
-                                        anchorPosition="rightUp"
+                                        anchorPosition="downLeft"
                                         button={
-                                          <EuiSmallButtonIcon
-                                            aria-label="Change all filters"
+                                          <EuiButtonEmpty
                                             iconType="filter"
                                             onClick={[Function]}
-                                            title="Change all filters"
-                                          />
+                                            size="s"
+                                          >
+                                            <EuiIcon
+                                              type="arrowDown"
+                                            />
+                                          </EuiButtonEmpty>
                                         }
                                         closePopover={[Function]}
                                         data-test-subj="global-filter-button"
@@ -774,67 +786,103 @@ exports[`Services component renders empty services page 1`] = `
                                         panelPaddingSize="none"
                                       >
                                         <div
-                                          className="euiPopover euiPopover--anchorRightUp"
+                                          className="euiPopover euiPopover--anchorDownLeft"
                                           data-test-subj="global-filter-button"
                                         >
                                           <div
                                             className="euiPopover__anchor"
                                           >
-                                            <EuiSmallButtonIcon
-                                              aria-label="Change all filters"
+                                            <EuiButtonEmpty
                                               iconType="filter"
                                               onClick={[Function]}
-                                              title="Change all filters"
+                                              size="s"
                                             >
-                                              <EuiButtonIcon
-                                                aria-label="Change all filters"
-                                                iconType="filter"
+                                              <button
+                                                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+                                                disabled={false}
                                                 onClick={[Function]}
-                                                size="s"
-                                                title="Change all filters"
+                                                type="button"
                                               >
-                                                <button
-                                                  aria-label="Change all filters"
-                                                  className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small"
-                                                  disabled={false}
-                                                  onClick={[Function]}
-                                                  title="Change all filters"
-                                                  type="button"
+                                                <EuiButtonContent
+                                                  className="euiButtonEmpty__content"
+                                                  iconGap="m"
+                                                  iconSide="left"
+                                                  iconSize="m"
+                                                  iconType="filter"
+                                                  textProps={
+                                                    Object {
+                                                      "className": "euiButtonEmpty__text",
+                                                    }
+                                                  }
                                                 >
-                                                  <EuiIcon
-                                                    aria-hidden="true"
-                                                    className="euiButtonIcon__icon"
-                                                    color="inherit"
-                                                    size="m"
-                                                    type="filter"
+                                                  <span
+                                                    className="euiButtonContent euiButtonEmpty__content"
                                                   >
-                                                    <EuiIconBeaker
-                                                      aria-hidden={true}
-                                                      className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                                                      focusable="false"
-                                                      role="img"
-                                                      style={null}
+                                                    <EuiIcon
+                                                      className="euiButtonContent__icon"
+                                                      color="inherit"
+                                                      size="m"
+                                                      type="filter"
                                                     >
-                                                      <svg
+                                                      <EuiIconBeaker
                                                         aria-hidden={true}
-                                                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                                                         focusable="false"
-                                                        height={16}
                                                         role="img"
                                                         style={null}
-                                                        viewBox="0 0 16 16"
-                                                        width={16}
-                                                        xmlns="http://www.w3.org/2000/svg"
                                                       >
-                                                        <path
-                                                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                        />
-                                                      </svg>
-                                                    </EuiIconBeaker>
-                                                  </EuiIcon>
-                                                </button>
-                                              </EuiButtonIcon>
-                                            </EuiSmallButtonIcon>
+                                                        <svg
+                                                          aria-hidden={true}
+                                                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                                          focusable="false"
+                                                          height={16}
+                                                          role="img"
+                                                          style={null}
+                                                          viewBox="0 0 16 16"
+                                                          width={16}
+                                                          xmlns="http://www.w3.org/2000/svg"
+                                                        >
+                                                          <path
+                                                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                          />
+                                                        </svg>
+                                                      </EuiIconBeaker>
+                                                    </EuiIcon>
+                                                    <span
+                                                      className="euiButtonEmpty__text"
+                                                    >
+                                                      <EuiIcon
+                                                        type="arrowDown"
+                                                      >
+                                                        <EuiIconBeaker
+                                                          aria-hidden={true}
+                                                          className="euiIcon euiIcon--medium euiIcon-isLoading"
+                                                          focusable="false"
+                                                          role="img"
+                                                          style={null}
+                                                        >
+                                                          <svg
+                                                            aria-hidden={true}
+                                                            className="euiIcon euiIcon--medium euiIcon-isLoading"
+                                                            focusable="false"
+                                                            height={16}
+                                                            role="img"
+                                                            style={null}
+                                                            viewBox="0 0 16 16"
+                                                            width={16}
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                          >
+                                                            <path
+                                                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                            />
+                                                          </svg>
+                                                        </EuiIconBeaker>
+                                                      </EuiIcon>
+                                                    </span>
+                                                  </span>
+                                                </EuiButtonContent>
+                                              </button>
+                                            </EuiButtonEmpty>
                                           </div>
                                         </div>
                                       </EuiPopover>
@@ -1393,91 +1441,7 @@ exports[`Services component renders empty services page 1`] = `
                   ],
                 }
               }
-            >
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="xs"
-                responsive={false}
-              >
-                <div
-                  className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
-                >
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    <div
-                      className="euiFlexItem euiFlexItem--flexGrowZero"
-                    >
-                      <AddFilterButton>
-                        <EuiPopover
-                          anchorPosition="downLeft"
-                          button={
-                            <EuiButtonEmpty
-                              flush="left"
-                              onClick={[Function]}
-                              size="xs"
-                            >
-                              + Add filter
-                            </EuiButtonEmpty>
-                          }
-                          closePopover={[Function]}
-                          data-test-subj="addfilter"
-                          display="inlineBlock"
-                          hasArrow={true}
-                          isOpen={false}
-                          ownFocus={true}
-                          panelPaddingSize="m"
-                        >
-                          <div
-                            className="euiPopover euiPopover--anchorDownLeft"
-                            data-test-subj="addfilter"
-                          >
-                            <div
-                              className="euiPopover__anchor"
-                            >
-                              <EuiButtonEmpty
-                                flush="left"
-                                onClick={[Function]}
-                                size="xs"
-                              >
-                                <button
-                                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
-                                  disabled={false}
-                                  onClick={[Function]}
-                                  type="button"
-                                >
-                                  <EuiButtonContent
-                                    className="euiButtonEmpty__content"
-                                    iconGap="m"
-                                    iconSide="left"
-                                    iconSize="s"
-                                    textProps={
-                                      Object {
-                                        "className": "euiButtonEmpty__text",
-                                      }
-                                    }
-                                  >
-                                    <span
-                                      className="euiButtonContent euiButtonEmpty__content"
-                                    >
-                                      <span
-                                        className="euiButtonEmpty__text"
-                                      >
-                                        + Add filter
-                                      </span>
-                                    </span>
-                                  </EuiButtonContent>
-                                </button>
-                              </EuiButtonEmpty>
-                            </div>
-                          </div>
-                        </EuiPopover>
-                      </AddFilterButton>
-                    </div>
-                  </EuiFlexItem>
-                </div>
-              </EuiFlexGroup>
-            </Filters>
+            />
             <EuiSpacer
               size="s"
             >
@@ -2986,7 +2950,10 @@ exports[`Services component renders jaeger services page 1`] = `
                                 placeholder="Trace ID, trace group name, service name"
                                 prepend={
                                   <GlobalFilterButton
+                                    attributesFilterFields={Array []}
                                     filters={Array []}
+                                    mode="jaeger"
+                                    page="services"
                                     setFilters={
                                       [MockFunction] {
                                         "calls": Array [
@@ -3013,7 +2980,10 @@ exports[`Services component renders jaeger services page 1`] = `
                                   isLoading={false}
                                   prepend={
                                     <GlobalFilterButton
+                                      attributesFilterFields={Array []}
                                       filters={Array []}
+                                      mode="jaeger"
+                                      page="services"
                                       setFilters={
                                         [MockFunction] {
                                           "calls": Array [
@@ -3036,9 +3006,12 @@ exports[`Services component renders jaeger services page 1`] = `
                                     className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed euiFormControlLayout--group"
                                   >
                                     <GlobalFilterButton
+                                      attributesFilterFields={Array []}
                                       className="euiFormControlLayout__prepend"
                                       filters={Array []}
                                       key="0/.0"
+                                      mode="jaeger"
+                                      page="services"
                                       setFilters={
                                         [MockFunction] {
                                           "calls": Array [
@@ -3056,14 +3029,17 @@ exports[`Services component renders jaeger services page 1`] = `
                                       }
                                     >
                                       <EuiPopover
-                                        anchorPosition="rightUp"
+                                        anchorPosition="downLeft"
                                         button={
-                                          <EuiSmallButtonIcon
-                                            aria-label="Change all filters"
+                                          <EuiButtonEmpty
                                             iconType="filter"
                                             onClick={[Function]}
-                                            title="Change all filters"
-                                          />
+                                            size="s"
+                                          >
+                                            <EuiIcon
+                                              type="arrowDown"
+                                            />
+                                          </EuiButtonEmpty>
                                         }
                                         closePopover={[Function]}
                                         data-test-subj="global-filter-button"
@@ -3074,68 +3050,105 @@ exports[`Services component renders jaeger services page 1`] = `
                                         panelPaddingSize="none"
                                       >
                                         <div
-                                          className="euiPopover euiPopover--anchorRightUp"
+                                          className="euiPopover euiPopover--anchorDownLeft"
                                           data-test-subj="global-filter-button"
                                         >
                                           <div
                                             className="euiPopover__anchor"
                                           >
-                                            <EuiSmallButtonIcon
-                                              aria-label="Change all filters"
+                                            <EuiButtonEmpty
                                               iconType="filter"
                                               onClick={[Function]}
-                                              title="Change all filters"
+                                              size="s"
                                             >
-                                              <EuiButtonIcon
-                                                aria-label="Change all filters"
-                                                iconType="filter"
+                                              <button
+                                                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+                                                disabled={false}
                                                 onClick={[Function]}
-                                                size="s"
-                                                title="Change all filters"
+                                                type="button"
                                               >
-                                                <button
-                                                  aria-label="Change all filters"
-                                                  className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small"
-                                                  disabled={false}
-                                                  onClick={[Function]}
-                                                  title="Change all filters"
-                                                  type="button"
+                                                <EuiButtonContent
+                                                  className="euiButtonEmpty__content"
+                                                  iconGap="m"
+                                                  iconSide="left"
+                                                  iconSize="m"
+                                                  iconType="filter"
+                                                  textProps={
+                                                    Object {
+                                                      "className": "euiButtonEmpty__text",
+                                                    }
+                                                  }
                                                 >
-                                                  <EuiIcon
-                                                    aria-hidden="true"
-                                                    className="euiButtonIcon__icon"
-                                                    color="inherit"
-                                                    size="m"
-                                                    type="filter"
+                                                  <span
+                                                    className="euiButtonContent euiButtonEmpty__content"
                                                   >
-                                                    <EuiIconFilter
-                                                      aria-hidden={true}
-                                                      className="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
-                                                      focusable="false"
-                                                      role="img"
-                                                      style={null}
+                                                    <EuiIcon
+                                                      className="euiButtonContent__icon"
+                                                      color="inherit"
+                                                      size="m"
+                                                      type="filter"
                                                     >
-                                                      <svg
+                                                      <EuiIconFilter
                                                         aria-hidden={true}
-                                                        className="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
+                                                        className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
                                                         focusable="false"
-                                                        height={16}
                                                         role="img"
                                                         style={null}
-                                                        viewBox="0 0 16 16"
-                                                        width={16}
-                                                        xmlns="http://www.w3.org/2000/svg"
                                                       >
-                                                        <path
-                                                          d="m9.759 12.652-1.8 2.25-.78-.625 1.8-2.25A.1.1 0 0 0 9 11.965V8.362a1 1 0 0 1 .232-.64l4.631-5.558A.1.1 0 0 0 13.787 2H2.213a.1.1 0 0 0-.077.164l4.631 5.558a1 1 0 0 1 .232.64v5.853a.1.1 0 0 0 .178.062l.781.625c-.65.812-1.959.353-1.959-.687V8.362L1.368 2.804C.771 2.088 1.281 1 2.214 1h11.573c.932 0 1.442 1.088.845 1.804L10 8.362v3.603a1.1 1.1 0 0 1-.241.687Z"
-                                                          fillRule="evenodd"
-                                                        />
-                                                      </svg>
-                                                    </EuiIconFilter>
-                                                  </EuiIcon>
-                                                </button>
-                                              </EuiButtonIcon>
-                                            </EuiSmallButtonIcon>
+                                                        <svg
+                                                          aria-hidden={true}
+                                                          className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                                                          focusable="false"
+                                                          height={16}
+                                                          role="img"
+                                                          style={null}
+                                                          viewBox="0 0 16 16"
+                                                          width={16}
+                                                          xmlns="http://www.w3.org/2000/svg"
+                                                        >
+                                                          <path
+                                                            d="m9.759 12.652-1.8 2.25-.78-.625 1.8-2.25A.1.1 0 0 0 9 11.965V8.362a1 1 0 0 1 .232-.64l4.631-5.558A.1.1 0 0 0 13.787 2H2.213a.1.1 0 0 0-.077.164l4.631 5.558a1 1 0 0 1 .232.64v5.853a.1.1 0 0 0 .178.062l.781.625c-.65.812-1.959.353-1.959-.687V8.362L1.368 2.804C.771 2.088 1.281 1 2.214 1h11.573c.932 0 1.442 1.088.845 1.804L10 8.362v3.603a1.1 1.1 0 0 1-.241.687Z"
+                                                            fillRule="evenodd"
+                                                          />
+                                                        </svg>
+                                                      </EuiIconFilter>
+                                                    </EuiIcon>
+                                                    <span
+                                                      className="euiButtonEmpty__text"
+                                                    >
+                                                      <EuiIcon
+                                                        type="arrowDown"
+                                                      >
+                                                        <EuiIconArrowDown
+                                                          aria-hidden={true}
+                                                          className="euiIcon euiIcon--medium"
+                                                          focusable="false"
+                                                          role="img"
+                                                          style={null}
+                                                        >
+                                                          <svg
+                                                            aria-hidden={true}
+                                                            className="euiIcon euiIcon--medium"
+                                                            focusable="false"
+                                                            height={16}
+                                                            role="img"
+                                                            style={null}
+                                                            viewBox="0 0 16 16"
+                                                            width={16}
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                          >
+                                                            <path
+                                                              d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
+                                                              fillRule="non-zero"
+                                                            />
+                                                          </svg>
+                                                        </EuiIconArrowDown>
+                                                      </EuiIcon>
+                                                    </span>
+                                                  </span>
+                                                </EuiButtonContent>
+                                              </button>
+                                            </EuiButtonEmpty>
                                           </div>
                                         </div>
                                       </EuiPopover>
@@ -3696,91 +3709,7 @@ exports[`Services component renders jaeger services page 1`] = `
                   ],
                 }
               }
-            >
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="xs"
-                responsive={false}
-              >
-                <div
-                  className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
-                >
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    <div
-                      className="euiFlexItem euiFlexItem--flexGrowZero"
-                    >
-                      <AddFilterButton>
-                        <EuiPopover
-                          anchorPosition="downLeft"
-                          button={
-                            <EuiButtonEmpty
-                              flush="left"
-                              onClick={[Function]}
-                              size="xs"
-                            >
-                              + Add filter
-                            </EuiButtonEmpty>
-                          }
-                          closePopover={[Function]}
-                          data-test-subj="addfilter"
-                          display="inlineBlock"
-                          hasArrow={true}
-                          isOpen={false}
-                          ownFocus={true}
-                          panelPaddingSize="m"
-                        >
-                          <div
-                            className="euiPopover euiPopover--anchorDownLeft"
-                            data-test-subj="addfilter"
-                          >
-                            <div
-                              className="euiPopover__anchor"
-                            >
-                              <EuiButtonEmpty
-                                flush="left"
-                                onClick={[Function]}
-                                size="xs"
-                              >
-                                <button
-                                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
-                                  disabled={false}
-                                  onClick={[Function]}
-                                  type="button"
-                                >
-                                  <EuiButtonContent
-                                    className="euiButtonEmpty__content"
-                                    iconGap="m"
-                                    iconSide="left"
-                                    iconSize="s"
-                                    textProps={
-                                      Object {
-                                        "className": "euiButtonEmpty__text",
-                                      }
-                                    }
-                                  >
-                                    <span
-                                      className="euiButtonContent euiButtonEmpty__content"
-                                    >
-                                      <span
-                                        className="euiButtonEmpty__text"
-                                      >
-                                        + Add filter
-                                      </span>
-                                    </span>
-                                  </EuiButtonContent>
-                                </button>
-                              </EuiButtonEmpty>
-                            </div>
-                          </div>
-                        </EuiPopover>
-                      </AddFilterButton>
-                    </div>
-                  </EuiFlexItem>
-                </div>
-              </EuiFlexGroup>
-            </Filters>
+            />
             <EuiSpacer
               size="s"
             >
@@ -4712,7 +4641,10 @@ exports[`Services component renders services page 1`] = `
                                 placeholder="Trace ID, trace group name, service name"
                                 prepend={
                                   <GlobalFilterButton
+                                    attributesFilterFields={Array []}
                                     filters={Array []}
+                                    mode="data_prepper"
+                                    page="services"
                                     setFilters={
                                       [MockFunction] {
                                         "calls": Array [
@@ -4739,7 +4671,10 @@ exports[`Services component renders services page 1`] = `
                                   isLoading={false}
                                   prepend={
                                     <GlobalFilterButton
+                                      attributesFilterFields={Array []}
                                       filters={Array []}
+                                      mode="data_prepper"
+                                      page="services"
                                       setFilters={
                                         [MockFunction] {
                                           "calls": Array [
@@ -4762,9 +4697,12 @@ exports[`Services component renders services page 1`] = `
                                     className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed euiFormControlLayout--group"
                                   >
                                     <GlobalFilterButton
+                                      attributesFilterFields={Array []}
                                       className="euiFormControlLayout__prepend"
                                       filters={Array []}
                                       key="0/.0"
+                                      mode="data_prepper"
+                                      page="services"
                                       setFilters={
                                         [MockFunction] {
                                           "calls": Array [
@@ -4782,14 +4720,17 @@ exports[`Services component renders services page 1`] = `
                                       }
                                     >
                                       <EuiPopover
-                                        anchorPosition="rightUp"
+                                        anchorPosition="downLeft"
                                         button={
-                                          <EuiSmallButtonIcon
-                                            aria-label="Change all filters"
+                                          <EuiButtonEmpty
                                             iconType="filter"
                                             onClick={[Function]}
-                                            title="Change all filters"
-                                          />
+                                            size="s"
+                                          >
+                                            <EuiIcon
+                                              type="arrowDown"
+                                            />
+                                          </EuiButtonEmpty>
                                         }
                                         closePopover={[Function]}
                                         data-test-subj="global-filter-button"
@@ -4800,68 +4741,105 @@ exports[`Services component renders services page 1`] = `
                                         panelPaddingSize="none"
                                       >
                                         <div
-                                          className="euiPopover euiPopover--anchorRightUp"
+                                          className="euiPopover euiPopover--anchorDownLeft"
                                           data-test-subj="global-filter-button"
                                         >
                                           <div
                                             className="euiPopover__anchor"
                                           >
-                                            <EuiSmallButtonIcon
-                                              aria-label="Change all filters"
+                                            <EuiButtonEmpty
                                               iconType="filter"
                                               onClick={[Function]}
-                                              title="Change all filters"
+                                              size="s"
                                             >
-                                              <EuiButtonIcon
-                                                aria-label="Change all filters"
-                                                iconType="filter"
+                                              <button
+                                                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+                                                disabled={false}
                                                 onClick={[Function]}
-                                                size="s"
-                                                title="Change all filters"
+                                                type="button"
                                               >
-                                                <button
-                                                  aria-label="Change all filters"
-                                                  className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small"
-                                                  disabled={false}
-                                                  onClick={[Function]}
-                                                  title="Change all filters"
-                                                  type="button"
+                                                <EuiButtonContent
+                                                  className="euiButtonEmpty__content"
+                                                  iconGap="m"
+                                                  iconSide="left"
+                                                  iconSize="m"
+                                                  iconType="filter"
+                                                  textProps={
+                                                    Object {
+                                                      "className": "euiButtonEmpty__text",
+                                                    }
+                                                  }
                                                 >
-                                                  <EuiIcon
-                                                    aria-hidden="true"
-                                                    className="euiButtonIcon__icon"
-                                                    color="inherit"
-                                                    size="m"
-                                                    type="filter"
+                                                  <span
+                                                    className="euiButtonContent euiButtonEmpty__content"
                                                   >
-                                                    <EuiIconFilter
-                                                      aria-hidden={true}
-                                                      className="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
-                                                      focusable="false"
-                                                      role="img"
-                                                      style={null}
+                                                    <EuiIcon
+                                                      className="euiButtonContent__icon"
+                                                      color="inherit"
+                                                      size="m"
+                                                      type="filter"
                                                     >
-                                                      <svg
+                                                      <EuiIconFilter
                                                         aria-hidden={true}
-                                                        className="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
+                                                        className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
                                                         focusable="false"
-                                                        height={16}
                                                         role="img"
                                                         style={null}
-                                                        viewBox="0 0 16 16"
-                                                        width={16}
-                                                        xmlns="http://www.w3.org/2000/svg"
                                                       >
-                                                        <path
-                                                          d="m9.759 12.652-1.8 2.25-.78-.625 1.8-2.25A.1.1 0 0 0 9 11.965V8.362a1 1 0 0 1 .232-.64l4.631-5.558A.1.1 0 0 0 13.787 2H2.213a.1.1 0 0 0-.077.164l4.631 5.558a1 1 0 0 1 .232.64v5.853a.1.1 0 0 0 .178.062l.781.625c-.65.812-1.959.353-1.959-.687V8.362L1.368 2.804C.771 2.088 1.281 1 2.214 1h11.573c.932 0 1.442 1.088.845 1.804L10 8.362v3.603a1.1 1.1 0 0 1-.241.687Z"
-                                                          fillRule="evenodd"
-                                                        />
-                                                      </svg>
-                                                    </EuiIconFilter>
-                                                  </EuiIcon>
-                                                </button>
-                                              </EuiButtonIcon>
-                                            </EuiSmallButtonIcon>
+                                                        <svg
+                                                          aria-hidden={true}
+                                                          className="euiIcon euiIcon--medium euiIcon--inherit euiButtonContent__icon"
+                                                          focusable="false"
+                                                          height={16}
+                                                          role="img"
+                                                          style={null}
+                                                          viewBox="0 0 16 16"
+                                                          width={16}
+                                                          xmlns="http://www.w3.org/2000/svg"
+                                                        >
+                                                          <path
+                                                            d="m9.759 12.652-1.8 2.25-.78-.625 1.8-2.25A.1.1 0 0 0 9 11.965V8.362a1 1 0 0 1 .232-.64l4.631-5.558A.1.1 0 0 0 13.787 2H2.213a.1.1 0 0 0-.077.164l4.631 5.558a1 1 0 0 1 .232.64v5.853a.1.1 0 0 0 .178.062l.781.625c-.65.812-1.959.353-1.959-.687V8.362L1.368 2.804C.771 2.088 1.281 1 2.214 1h11.573c.932 0 1.442 1.088.845 1.804L10 8.362v3.603a1.1 1.1 0 0 1-.241.687Z"
+                                                            fillRule="evenodd"
+                                                          />
+                                                        </svg>
+                                                      </EuiIconFilter>
+                                                    </EuiIcon>
+                                                    <span
+                                                      className="euiButtonEmpty__text"
+                                                    >
+                                                      <EuiIcon
+                                                        type="arrowDown"
+                                                      >
+                                                        <EuiIconArrowDown
+                                                          aria-hidden={true}
+                                                          className="euiIcon euiIcon--medium"
+                                                          focusable="false"
+                                                          role="img"
+                                                          style={null}
+                                                        >
+                                                          <svg
+                                                            aria-hidden={true}
+                                                            className="euiIcon euiIcon--medium"
+                                                            focusable="false"
+                                                            height={16}
+                                                            role="img"
+                                                            style={null}
+                                                            viewBox="0 0 16 16"
+                                                            width={16}
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                          >
+                                                            <path
+                                                              d="M13.069 5.157 8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0Z"
+                                                              fillRule="non-zero"
+                                                            />
+                                                          </svg>
+                                                        </EuiIconArrowDown>
+                                                      </EuiIcon>
+                                                    </span>
+                                                  </span>
+                                                </EuiButtonContent>
+                                              </button>
+                                            </EuiButtonEmpty>
                                           </div>
                                         </div>
                                       </EuiPopover>
@@ -5422,91 +5400,7 @@ exports[`Services component renders services page 1`] = `
                   ],
                 }
               }
-            >
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="xs"
-                responsive={false}
-              >
-                <div
-                  className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
-                >
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    <div
-                      className="euiFlexItem euiFlexItem--flexGrowZero"
-                    >
-                      <AddFilterButton>
-                        <EuiPopover
-                          anchorPosition="downLeft"
-                          button={
-                            <EuiButtonEmpty
-                              flush="left"
-                              onClick={[Function]}
-                              size="xs"
-                            >
-                              + Add filter
-                            </EuiButtonEmpty>
-                          }
-                          closePopover={[Function]}
-                          data-test-subj="addfilter"
-                          display="inlineBlock"
-                          hasArrow={true}
-                          isOpen={false}
-                          ownFocus={true}
-                          panelPaddingSize="m"
-                        >
-                          <div
-                            className="euiPopover euiPopover--anchorDownLeft"
-                            data-test-subj="addfilter"
-                          >
-                            <div
-                              className="euiPopover__anchor"
-                            >
-                              <EuiButtonEmpty
-                                flush="left"
-                                onClick={[Function]}
-                                size="xs"
-                              >
-                                <button
-                                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
-                                  disabled={false}
-                                  onClick={[Function]}
-                                  type="button"
-                                >
-                                  <EuiButtonContent
-                                    className="euiButtonEmpty__content"
-                                    iconGap="m"
-                                    iconSide="left"
-                                    iconSize="s"
-                                    textProps={
-                                      Object {
-                                        "className": "euiButtonEmpty__text",
-                                      }
-                                    }
-                                  >
-                                    <span
-                                      className="euiButtonContent euiButtonEmpty__content"
-                                    >
-                                      <span
-                                        className="euiButtonEmpty__text"
-                                      >
-                                        + Add filter
-                                      </span>
-                                    </span>
-                                  </EuiButtonContent>
-                                </button>
-                              </EuiButtonEmpty>
-                            </div>
-                          </div>
-                        </EuiPopover>
-                      </AddFilterButton>
-                    </div>
-                  </EuiFlexItem>
-                </div>
-              </EuiFlexGroup>
-            </Filters>
+            />
             <EuiSpacer
               size="s"
             >
