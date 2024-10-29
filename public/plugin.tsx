@@ -424,6 +424,14 @@ export class ObservabilityPlugin
       mount: appMountWithStartPage('notebooks'),
     });
 
+    core.application.register({
+      id: 'observability-kubernetes',
+      title: 'Kubernetes',
+      category: OBSERVABILITY_APP_CATEGORIES.observability,
+      order: 5095,
+      mount: appMountWithStartPage('kubernetes'),
+    });
+
     registerAllPluginNavGroups(core);
 
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
