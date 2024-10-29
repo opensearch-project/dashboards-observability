@@ -74,7 +74,15 @@ export const SearchBar = forwardRef((props: SearchBarOwnProps, ref) => {
         {!props.datepickerOnly && (
           <EuiFlexItem>
             <EuiCompressedFieldSearch
-              prepend={<GlobalFilterButton filters={props.filters} setFilters={props.setFilters} />}
+              prepend={
+                <GlobalFilterButton
+                  filters={props.filters}
+                  setFilters={props.setFilters}
+                  attributesFilterFields={props.attributesFilterFields}
+                  mode={props.mode}
+                  page={props.page}
+                />
+              }
               compressed
               fullWidth
               isClearable={false}
