@@ -142,6 +142,8 @@ export function ServiceMap({
           value: serviceMap[key].serviceName,
         }));
       setSelectableOptions(options);
+    } else {
+      setSelectableOptions([]); // Ensure options are empty if items.graph.nodes doesn't exist
     }
   }, [items.graph, serviceMap]);
 
@@ -287,7 +289,10 @@ export function ServiceMap({
   }, [items]);
 
   useEffect(() => {
-    if (Object.keys(serviceMap).length === 0) return;
+    if (!serviceMap || Object.keys(serviceMap).length === 0) {
+      setItems({});
+      return;
+    }
     const values = Object.keys(serviceMap)
       .filter((service) => serviceMap[service][idSelected])
       .map((service) => serviceMap[service][idSelected]!);
