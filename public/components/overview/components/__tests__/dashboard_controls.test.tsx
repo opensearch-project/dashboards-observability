@@ -23,6 +23,11 @@ jest.mock('../../../../framework/core_refs', () => ({
     contentManagement: {
       updatePageSection: jest.fn(),
     },
+    http: {
+      basePath: {
+        getBasePath: jest.fn(() => '/basePath'),
+      },
+    },
   },
 }));
 
