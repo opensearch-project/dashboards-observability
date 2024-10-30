@@ -24,6 +24,7 @@ import { AddDataSourceCallout } from './add_datasource_callout';
 import { ObsDashboardStateManager } from './obs_dashboard_state_manager';
 import { SavedObjectsClientCommonFindArgs } from '../../../../../../src/plugins/data/common';
 import { getWorkspaceIdFromUrl } from '../../../../../../src/core/public/utils';
+import { setObservabilityDashboardsId } from './utils';
 
 const getDatasourceAttributes = async () => {
   const findOptions: SavedObjectsClientCommonFindArgs = {
@@ -37,21 +38,27 @@ const getDatasourceAttributes = async () => {
 
 export function DashboardControls() {
   const [isDataSourceEmpty, setIsDataSourceEmpty] = useState<boolean | null>(null);
+  const [isInWorkspace, setIsInWorkspace] = useState<boolean>(false); // Track if user is in a workspace
   const isDashboardSelected = useObservable(ObsDashboardStateManager.isDashboardSelected$);
   const dashboardState = useObservable(ObsDashboardStateManager.dashboardState$);
 
   useEffect(() => {
     const checkDataSource = async () => {
       const currentUrl = window.location.href;
-      const workspaceId = getWorkspaceIdFromUrl(currentUrl, coreRefs?.http!.basePath.getBasePath());
+      const workspaceId = getWorkspaceIdFromUrl(currentUrl, coreRefs?.http?.basePath.getBasePath());
 
-      // If in a workspace, perform the data source check
       if (workspaceId) {
+        setIsInWorkspace(true);
         const savedObjectsArray = await getDatasourceAttributes();
         setIsDataSourceEmpty(savedObjectsArray.length === 0);
+
+        // Set to null if there are no data sources associated [Handle if dashboard was set, then datasource deleted]
+        if (savedObjectsArray.length === 0) {
+          await setObservabilityDashboardsId(null);
+        }
       } else {
-        // If not in a workspace, set to false to always show AddDashboardCallout
-        setIsDataSourceEmpty(false);
+        setIsInWorkspace(false);
+        setIsDataSourceEmpty(false); // Not in workspace
       }
     };
     checkDataSource();
@@ -77,6 +84,11 @@ export function DashboardControls() {
       return section;
     });
   };
+
+  // Directly show AddDataSourceCallout if in workspace and no data source is associated
+  if (isInWorkspace && isDataSourceEmpty) {
+    return <AddDataSourceCallout />;
+  }
 
   return isDashboardSelected ? (
     <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
@@ -119,8 +131,6 @@ export function DashboardControls() {
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
-  ) : isDataSourceEmpty ? (
-    <AddDataSourceCallout />
   ) : (
     <AddDashboardCallout />
   );
