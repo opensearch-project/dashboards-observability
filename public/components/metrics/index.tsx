@@ -55,7 +55,7 @@ export const Home = ({
   // Side bar constants
   const [selectedDataSource, setSelectedDataSource] = useState<OptionType[]>([]);
   const [selectedOTIndex, setSelectedOTIndex] = useState([]);
-  const [dataSourceMDSId, setDataSourceMDSId] = useState<string>('');
+  const [dataSourceMDSId, setDataSourceMDSId] = useState<string | null>(null);
   const [reloadSidebar, setReloadSidebar] = useState<boolean>(false);
 
   useEffect(() => {
@@ -77,7 +77,7 @@ export const Home = ({
   const dispatch = useDispatch();
 
   const onSelectedDataSource = async (dataSources: DataSourceOption[]) => {
-    const id = dataSources[0] ? dataSources[0].id : '';
+    const id = dataSources[0] ? dataSources[0].id : null;
     setDataSourceMDSId(id);
     debounce(() => {
       dispatch(setSelectedDataSourceMDSId(id));
@@ -111,7 +111,7 @@ export const Home = ({
           path={['/:id', '/']}
           render={(routerProps) => (
             <div>
-              {reloadSidebar && (
+              {(dataSourceEnabled ? dataSourceMDSId !== null : true) && reloadSidebar && (
                 <EuiPage>
                   <EuiPageBody component="div">
                     <TopMenu />
