@@ -129,6 +129,95 @@ describe('IntegrationInstanceBuilder', () => {
       expect(instance).toEqual(expectedInstance);
     });
 
+    it('should build an integration instance with MDS reference', async () => {
+      const options = {
+        indexPattern: 'instance-datasource',
+        name: 'instance-name',
+        dataSourceMDSId: 'sampleMDSId',
+        dataSourceMDSLabel: 'sample MDS',
+      };
+
+      const remappedAssets = [
+        {
+          id: 'remapped-asset1',
+          references: [{ id: 'remapped-ref1' }],
+        },
+        {
+          id: 'remapped-asset2',
+          references: [{ id: 'remapped-ref2' }],
+        },
+      ];
+      const postAssetsResponse = {
+        saved_objects: [
+          { id: 'created-asset1', type: 'dashboard', attributes: { title: 'Dashboard 1' } },
+          { id: 'created-asset2', type: 'visualization', attributes: { title: 'Visualization 1' } },
+        ],
+      };
+      const expectedInstance = {
+        name: 'instance-name',
+        templateName: 'sample',
+        dataSource: 'instance-datasource',
+        creationDate: expect.any(String),
+        assets: [
+          {
+            assetType: 'dashboard',
+            assetId: 'created-asset1',
+            status: 'available',
+            isDefaultAsset: true,
+            description: 'Dashboard 1',
+          },
+          {
+            assetType: 'visualization',
+            assetId: 'created-asset2',
+            status: 'available',
+            isDefaultAsset: false,
+            description: 'Visualization 1',
+          },
+        ],
+        references: [
+          {
+            id: 'sampleMDSId',
+            name: 'sample MDS',
+            type: 'data-source',
+          },
+        ],
+      };
+
+      const mockTemplate: Partial<IntegrationConfig> = TEST_INTEGRATION_CONFIG;
+
+      jest
+        .spyOn(mockUtils, 'deepCheck')
+        .mockResolvedValue({ ok: true, value: mockTemplate as IntegrationConfig });
+
+      // Mock the implementation of the methods in the Integration class
+      // sampleIntegration.deepCheck = jest.fn().mockResolvedValue({ ok: true, value: mockTemplate });
+      sampleIntegration.getAssets = jest.fn().mockResolvedValue({
+        ok: true,
+        value: [{ type: 'savedObjectBundle', data: remappedAssets }],
+      });
+      sampleIntegration.getConfig = jest.fn().mockResolvedValue({ ok: true, value: mockTemplate });
+
+      // Mock builder sub-methods
+      const remapIDsSpy = jest.spyOn(builder, 'remapIDs');
+      const addMDSReferenceSpy = jest.spyOn(builder, 'addMDSReference');
+      const postAssetsSpy = jest.spyOn(builder, 'postAssets');
+
+      (mockSavedObjectsClient.bulkCreate as jest.Mock).mockResolvedValue(postAssetsResponse);
+
+      const instance = await builder.build(sampleIntegration, options);
+
+      expect(sampleIntegration.getAssets).toHaveBeenCalled();
+      expect(remapIDsSpy).toHaveBeenCalledWith(remappedAssets);
+      expect(addMDSReferenceSpy).toHaveBeenCalledWith(
+        remappedAssets,
+        undefined,
+        'sampleMDSId',
+        'sample MDS'
+      );
+      expect(postAssetsSpy).toHaveBeenCalledWith(remappedAssets);
+      expect(instance).toEqual(expectedInstance);
+    });
+
     it('should reject with an error if integration is not valid', async () => {
       const options = {
         indexPattern: 'instance-datasource',
