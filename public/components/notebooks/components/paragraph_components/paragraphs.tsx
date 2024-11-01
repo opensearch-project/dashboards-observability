@@ -4,19 +4,19 @@
  */
 
 import {
-  EuiSmallButton,
-  EuiSmallButtonIcon,
   EuiComboBoxOptionOption,
+  EuiCompressedFormRow,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCompressedFormRow,
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
   EuiPanel,
   EuiPopover,
+  EuiSmallButton,
+  EuiSmallButtonIcon,
   EuiSpacer,
   EuiText,
   htmlIdGenerator,
@@ -24,7 +24,12 @@ import {
 import filter from 'lodash/filter';
 import moment from 'moment';
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
-import { CoreStart, MountPoint, SavedObjectsStart } from '../../../../../../../src/core/public';
+import {
+  CoreStart,
+  MountPoint,
+  SavedObjectsFindOptions,
+  SavedObjectsStart,
+} from '../../../../../../../src/core/public';
 import {
   DashboardContainerInput,
   DashboardStart,
@@ -40,6 +45,7 @@ import {
 import { ParaType } from '../../../../../common/types/notebooks';
 import { uiSettingsService } from '../../../../../common/utils';
 import { dataSourceFilterFn } from '../../../../../common/utils/shared';
+import { coreRefs } from '../../../../framework/core_refs';
 import PPLService from '../../../../services/requests/ppl';
 import { SavedObjectsActions } from '../../../../services/saved_objects/saved_object_client/saved_objects_actions';
 import { ObservabilitySavedVisualization } from '../../../../services/saved_objects/saved_object_client/types';
@@ -160,45 +166,78 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
   }));
 
   const fetchVisualizations = async () => {
-    let opt1: EuiComboBoxOptionOption[] = [];
-    let opt2: EuiComboBoxOptionOption[] = [];
-    await http
-      .get(`${NOTEBOOKS_API_PREFIX}/visualizations/${dataSourceMDSId ?? ''}`)
-      .then((res) => {
-        opt1 = res.savedVisualizations.map((vizObject) => ({
-          label: vizObject.label,
-          key: vizObject.key,
-          className: 'VISUALIZATION',
-        }));
-      })
-      .catch((err) => console.error('Fetching dashboard visualization issue', err.body.message));
-
-    await SavedObjectsActions.getBulk<ObservabilitySavedVisualization>({
-      objectType: ['savedVisualization'],
-    })
-      .then((res) => {
-        opt2 = res.observabilityObjectList
-          .filter((visualization) => !visualization.savedVisualization.application_id)
-          .map((visualization) => ({
-            label: visualization.savedVisualization.name,
-            key: visualization.objectId,
-            className: 'OBSERVABILITY_VISUALIZATION',
+    if (dataSourceEnabled) {
+      let opts: EuiComboBoxOptionOption[] = [];
+      const vizOptions: SavedObjectsFindOptions = {
+        type: 'visualization',
+        ...(coreRefs.application?.capabilities?.workspaces?.enabled
+          ? { workspaces: coreRefs.workspaces?.currentWorkspace$.getValue()?.name }
+          : {}),
+      };
+      await coreRefs.savedObjectsClient
+        ?.find(vizOptions)
+        .then((res) => {
+          opts = res.savedObjects.map((vizObject) => ({
+            label: vizObject.attributes.title,
+            key: vizObject.id,
+            className: 'VISUALIZATION',
           }));
+        })
+        .catch((error) => {
+          console.error('Issue is fetching visualizations', error);
+        });
+
+      const allVisualizations = [{ label: 'Dashboards Visualizations', options: opts }];
+      setVisOptions(allVisualizations);
+
+      const selectedObject = filter([...opts], {
+        key: para.visSavedObjId,
+      });
+      if (selectedObject.length > 0) {
+        setVisType(selectedObject.className);
+        setSelectedVisOption(selectedObject);
+      }
+    } else {
+      let opt1: EuiComboBoxOptionOption[] = [];
+      let opt2: EuiComboBoxOptionOption[] = [];
+      await http
+        .get(`${NOTEBOOKS_API_PREFIX}/visualizations/${dataSourceMDSId ?? ''}`)
+        .then((res) => {
+          opt1 = res.savedVisualizations.map((vizObject) => ({
+            label: vizObject.label,
+            key: vizObject.key,
+            className: 'VISUALIZATION',
+          }));
+        })
+        .catch((err) => console.error('Fetching dashboard visualization issue', err.body.message));
+
+      await SavedObjectsActions.getBulk<ObservabilitySavedVisualization>({
+        objectType: ['savedVisualization'],
       })
-      .catch((err) => console.error('Fetching observability visualization issue', err));
+        .then((res) => {
+          opt2 = res.observabilityObjectList
+            .filter((visualization) => !visualization.savedVisualization.application_id)
+            .map((visualization) => ({
+              label: visualization.savedVisualization.name,
+              key: visualization.objectId,
+              className: 'OBSERVABILITY_VISUALIZATION',
+            }));
+        })
+        .catch((err) => console.error('Fetching observability visualization issue', err));
 
-    const allVisualizations = [
-      { label: 'Dashboards Visualizations', options: opt1 },
-      { label: 'Observability Visualizations', options: opt2 },
-    ];
-    setVisOptions(allVisualizations);
+      const allVisualizations = [
+        { label: 'Dashboards Visualizations', options: opt1 },
+        { label: 'Observability Visualizations', options: opt2 },
+      ];
+      setVisOptions(allVisualizations);
 
-    const selectedObject = filter([...opt1, ...opt2], {
-      key: para.visSavedObjId,
-    });
-    if (selectedObject.length > 0) {
-      setVisType(selectedObject.className);
-      setSelectedVisOption(selectedObject);
+      const selectedObject = filter([...opt1, ...opt2], {
+        key: para.visSavedObjId,
+      });
+      if (selectedObject.length > 0) {
+        setVisType(selectedObject.className);
+        setSelectedVisOption(selectedObject);
+      }
     }
   };
 
