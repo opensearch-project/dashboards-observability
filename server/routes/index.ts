@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ILegacyClusterClient, IRouter } from '../../../../src/core/server';
+import { ILegacyClusterClient, IRouter, Logger } from '../../../../src/core/server';
 import { DSLFacet } from '../services/facets/dsl_facet';
 import { PPLFacet } from '../services/facets/ppl_facet';
 import SavedObjectFacet from '../services/facets/saved_objects';
@@ -30,10 +30,12 @@ export function setupRoutes({
   router,
   client,
   dataSourceEnabled,
+  logger,
 }: {
   router: IRouter;
   client: ILegacyClusterClient;
   dataSourceEnabled: boolean;
+  logger: Logger;
 }) {
   PanelsRouter(router);
   VisualizationsRouter(router);
@@ -49,7 +51,7 @@ export function setupRoutes({
   registerParaRoute(router);
   registerNoteRoute(router);
   registerVizRoute(router, dataSourceEnabled);
-  const queryService = new QueryService(client);
+  const queryService = new QueryService(client, logger);
   registerSqlRoute(router, queryService, dataSourceEnabled);
 
   registerMetricsRoute(router, dataSourceEnabled);
