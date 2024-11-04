@@ -42,7 +42,7 @@ export function registerDslRoute(
       } catch (error) {
         if (error.statusCode !== 404) console.error(error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode === 500 ? 503 : error.statusCode || 503,
           body: error.message,
         });
       }
@@ -71,7 +71,7 @@ export function registerDslRoute(
       } catch (error) {
         if (error.statusCode !== 404) console.error(error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode === 500 ? 503 : error.statusCode || 503,
           body: error.message,
         });
       }
@@ -95,7 +95,7 @@ export function registerDslRoute(
       } catch (error) {
         if (error.statusCode !== 404) console.error(error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode === 500 ? 503 : error.statusCode || 503,
           body: error.message,
         });
       }
@@ -119,7 +119,7 @@ export function registerDslRoute(
       } catch (error) {
         if (error.statusCode !== 404) console.error(error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode === 500 ? 503 : error.statusCode || 503,
           body: error.message,
         });
       }
@@ -158,7 +158,7 @@ export function registerDslRoute(
       } catch (error) {
         if (error.statusCode !== 404) console.error(error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode === 500 ? 503 : error.statusCode || 503,
           body: error.message,
         });
       }
@@ -194,7 +194,7 @@ export function registerDslRoute(
       } catch (error) {
         if (error.statusCode !== 404) console.error(error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode === 500 ? 503 : error.statusCode || 503,
           body: error.message,
         });
       }
@@ -230,7 +230,7 @@ export function registerDslRoute(
       } catch (error) {
         if (error.statusCode !== 404) console.error(error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode === 500 ? 503 : error.statusCode || 503,
           body: error.message,
         });
       }
@@ -263,7 +263,7 @@ export function registerDslRoute(
       } catch (error) {
         if (error.statusCode !== 404) console.error(error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode === 500 ? 503 : error.statusCode || 503,
           body: error.message,
         });
       }
@@ -298,7 +298,7 @@ export function registerDslRoute(
       } catch (error) {
         if (error.statusCode !== 404) console.error(error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode === 500 ? 503 : error.statusCode || 503,
           body: error.message,
         });
       }

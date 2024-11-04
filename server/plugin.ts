@@ -219,7 +219,12 @@ export class ObservabilityPlugin
     core.savedObjects.registerType(integrationTemplateType);
 
     // Register server side APIs
-    setupRoutes({ router, client: openSearchObservabilityClient, dataSourceEnabled });
+    setupRoutes({
+      router,
+      client: openSearchObservabilityClient,
+      dataSourceEnabled,
+      logger: this.logger,
+    });
 
     core.savedObjects.registerType(getVisualizationSavedObject(dataSourceEnabled));
     core.savedObjects.registerType(getSearchSavedObject(dataSourceEnabled));
