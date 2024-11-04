@@ -305,7 +305,7 @@ export async function addIntegrationRequest({
   indexPattern,
   workflows,
   skipRedirect,
-  dataSourceInfo,
+  dataSourceInfo, // s3 datasource
   dataSourceMDSId,
   dataSourceMDSLabel,
 }: AddIntegrationRequestParams): Promise<boolean> {
@@ -378,6 +378,7 @@ export async function addIntegrationRequest({
       query: {
         path: `${indexPattern}/_bulk?refresh=wait_for`,
         method: 'POST',
+        dataSourceId: dataSourceMDSId,
       },
     })
     .then((_) => {
