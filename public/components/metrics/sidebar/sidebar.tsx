@@ -40,7 +40,8 @@ interface SideBarMenuProps {
   selectedOTIndex: React.SetStateAction<Array<{}>>;
   setSelectedOTIndex: React.Dispatch<React.SetStateAction<unknown>>;
   additionalSelectedMetricId?: string;
-  dataSourceMDSId: string;
+  dataSourceMDSId: string | null;
+  dataSourceEnabled: boolean;
 }
 export const Sidebar = ({
   selectedDataSource,
@@ -49,6 +50,7 @@ export const Sidebar = ({
   setSelectedOTIndex,
   additionalSelectedMetricId,
   dataSourceMDSId,
+  dataSourceEnabled,
 }: SideBarMenuProps) => {
   const dispatch = useDispatch();
   const [availableOTDocuments, setAvailableOTDocuments] = useState([]);
@@ -95,6 +97,11 @@ export const Sidebar = ({
   }, [selectedMetrics, selectedMetricsIds, dataSourceMDSId]);
 
   useEffect(() => {
+    // If data source is enabled but is still null prevent the invalid call
+    if (dataSourceEnabled && dataSourceMDSId === null) {
+      return;
+    }
+
     if (selectedOTIndex.length > 0 && selectedDataSource[0]?.label === 'OpenTelemetry') {
       const fetchOtelDocuments = async () => {
         try {

@@ -133,6 +133,7 @@ export const Home = ({
                                 selectedOTIndex={selectedOTIndex}
                                 setSelectedOTIndex={setSelectedOTIndex}
                                 dataSourceMDSId={dataSourceMDSId}
+                                dataSourceEnabled={dataSourceEnabled}
                               />
                             </EuiResizablePanel>
 
