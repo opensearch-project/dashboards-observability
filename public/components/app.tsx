@@ -23,6 +23,7 @@ import { Main as NotebooksHome } from './notebooks/components/main';
 import { Home as TraceAnalyticsHome } from './trace_analytics/home';
 import { Home as GettingStartedHome } from './getting_started/home';
 import { Home as OverviewHome } from './overview/home';
+import { Home as KubernetesHome } from './kubernetes/home';
 
 interface ObservabilityAppDeps {
   CoreStartProp: CoreStart;
@@ -56,6 +57,7 @@ const pages = {
   dataconnections: DataConnectionsHome,
   gettingStarted: GettingStartedHome,
   overview: OverviewHome,
+  kubernetes: KubernetesHome,
 };
 
 export const App = ({
