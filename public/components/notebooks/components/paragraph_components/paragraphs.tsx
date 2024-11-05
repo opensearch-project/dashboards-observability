@@ -184,7 +184,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
           }));
         })
         .catch((error) => {
-          console.error('Issue is fetching visualizations', error);
+          console.error('Failed to fetch visualizations', error);
         });
 
       const allVisualizations = [{ label: 'Dashboards Visualizations', options: opts }];
@@ -194,7 +194,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
         key: para.visSavedObjId,
       });
       if (selectedObject.length > 0) {
-        setVisType(selectedObject.className);
+        setVisType(selectedObject[0].className ?? 'VISUALIZATION');
         setSelectedVisOption(selectedObject);
       }
     } else {
@@ -235,7 +235,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
         key: para.visSavedObjId,
       });
       if (selectedObject.length > 0) {
-        setVisType(selectedObject.className);
+        setVisType(selectedObject[0].className ?? 'VISUALIZATION');
         setSelectedVisOption(selectedObject);
       }
     }
