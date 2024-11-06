@@ -235,7 +235,7 @@ export const Home = (props: HomeProps) => {
 
   const fetchAttributesFields = () => {
     coreRefs.dslService
-      ?.fetchFieldCaps(getSpanIndices(mode), '*attributes*', dataSourceMDSId)
+      ?.fetchFieldCaps(getSpanIndices(mode), '*attributes*', dataSourceMDSId[0].id)
       .then((res) => {
         const attributes = getAttributeFieldNames(res);
         setAttributesFilterFields(attributes);
