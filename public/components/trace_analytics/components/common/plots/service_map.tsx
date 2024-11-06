@@ -327,7 +327,7 @@ export function ServiceMap({
     if (filterChange) {
       setIsFilterChange(false);
     }
-  }, [mode, filterChange]);
+  }, [mode, filterChange, currService]);
 
   useEffect(() => {
     if (selectedNodeDetails && items?.graph?.nodes) {
