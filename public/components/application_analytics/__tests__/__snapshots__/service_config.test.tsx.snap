@@ -705,6 +705,7 @@ exports[`Service Config component renders empty service config 1`] = `
                         buttonSize="s"
                         color="text"
                         idSelected="latency"
+                        legend="Select metric for service map display"
                         onChange={[Function]}
                         options={
                           Array [
@@ -730,7 +731,9 @@ exports[`Service Config component renders empty service config 1`] = `
                           <EuiScreenReaderOnly>
                             <legend
                               className="euiScreenReaderOnly"
-                            />
+                            >
+                              Select metric for service map display
+                            </legend>
                           </EuiScreenReaderOnly>
                           <div
                             className="euiButtonGroup__buttons"
@@ -2048,6 +2051,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                         buttonSize="s"
                         color="text"
                         idSelected="latency"
+                        legend="Select metric for service map display"
                         onChange={[Function]}
                         options={
                           Array [
@@ -2073,7 +2077,9 @@ exports[`Service Config component renders with one service selected 1`] = `
                           <EuiScreenReaderOnly>
                             <legend
                               className="euiScreenReaderOnly"
-                            />
+                            >
+                              Select metric for service map display
+                            </legend>
                           </EuiScreenReaderOnly>
                           <div
                             className="euiButtonGroup__buttons"

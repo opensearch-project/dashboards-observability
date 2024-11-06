@@ -563,7 +563,9 @@ Object {
                         >
                           <legend
                             class="euiScreenReaderOnly"
-                          />
+                          >
+                            Select metric for service map display
+                          </legend>
                           <div
                             class="euiButtonGroup__buttons"
                           >
@@ -1841,7 +1843,9 @@ Object {
                       >
                         <legend
                           class="euiScreenReaderOnly"
-                        />
+                        >
+                          Select metric for service map display
+                        </legend>
                         <div
                           class="euiButtonGroup__buttons"
                         >
@@ -3058,7 +3062,9 @@ Object {
                         >
                           <legend
                             class="euiScreenReaderOnly"
-                          />
+                          >
+                            Select metric for service map display
+                          </legend>
                           <div
                             class="euiButtonGroup__buttons"
                           >
@@ -4250,7 +4256,9 @@ Object {
                       >
                         <legend
                           class="euiScreenReaderOnly"
-                        />
+                        >
+                          Select metric for service map display
+                        </legend>
                         <div
                           class="euiButtonGroup__buttons"
                         >
@@ -5535,7 +5543,9 @@ Object {
                         >
                           <legend
                             class="euiScreenReaderOnly"
-                          />
+                          >
+                            Select metric for service map display
+                          </legend>
                           <div
                             class="euiButtonGroup__buttons"
                           >
@@ -6727,7 +6737,9 @@ Object {
                       >
                         <legend
                           class="euiScreenReaderOnly"
-                        />
+                        >
+                          Select metric for service map display
+                        </legend>
                         <div
                           class="euiButtonGroup__buttons"
                         >
@@ -7939,7 +7951,9 @@ Object {
                         >
                           <legend
                             class="euiScreenReaderOnly"
-                          />
+                          >
+                            Select metric for service map display
+                          </legend>
                           <div
                             class="euiButtonGroup__buttons"
                           >
@@ -9092,7 +9106,9 @@ Object {
                       >
                         <legend
                           class="euiScreenReaderOnly"
-                        />
+                        >
+                          Select metric for service map display
+                        </legend>
                         <div
                           class="euiButtonGroup__buttons"
                         >
@@ -10307,7 +10323,9 @@ Object {
                         >
                           <legend
                             class="euiScreenReaderOnly"
-                          />
+                          >
+                            Select metric for service map display
+                          </legend>
                           <div
                             class="euiButtonGroup__buttons"
                           >
@@ -11465,7 +11483,9 @@ Object {
                       >
                         <legend
                           class="euiScreenReaderOnly"
-                        />
+                        >
+                          Select metric for service map display
+                        </legend>
                         <div
                           class="euiButtonGroup__buttons"
                         >
@@ -12714,7 +12734,9 @@ Object {
                         >
                           <legend
                             class="euiScreenReaderOnly"
-                          />
+                          >
+                            Select metric for service map display
+                          </legend>
                           <div
                             class="euiButtonGroup__buttons"
                           >
@@ -13906,7 +13928,9 @@ Object {
                       >
                         <legend
                           class="euiScreenReaderOnly"
-                        />
+                        >
+                          Select metric for service map display
+                        </legend>
                         <div
                           class="euiButtonGroup__buttons"
                         >
@@ -15123,7 +15147,9 @@ Object {
                         >
                           <legend
                             class="euiScreenReaderOnly"
-                          />
+                          >
+                            Select metric for service map display
+                          </legend>
                           <div
                             class="euiButtonGroup__buttons"
                           >
@@ -16315,7 +16341,9 @@ Object {
                       >
                         <legend
                           class="euiScreenReaderOnly"
-                        />
+                        >
+                          Select metric for service map display
+                        </legend>
                         <div
                           class="euiButtonGroup__buttons"
                         >
@@ -17570,7 +17598,9 @@ Object {
                         >
                           <legend
                             class="euiScreenReaderOnly"
-                          />
+                          >
+                            Select metric for service map display
+                          </legend>
                           <div
                             class="euiButtonGroup__buttons"
                           >
@@ -18848,7 +18878,9 @@ Object {
                       >
                         <legend
                           class="euiScreenReaderOnly"
-                        />
+                        >
+                          Select metric for service map display
+                        </legend>
                         <div
                           class="euiButtonGroup__buttons"
                         >

@@ -183,8 +183,12 @@ export function getServiceMapGraph(
       const percent = (value - ticks[0]) / (ticks[ticks.length - 1] - ticks[0]);
       const color = getServiceMapScaleColor(percent, idSelected);
       styleOptions = {
-        borderWidth: 0,
-        color: relatedServices!.indexOf(service) >= 0 ? `rgba(${color}, 1)` : `rgba(${color}, 0.2)`,
+        borderWidth: 3,
+        color: {
+          border: '#4A4A4A',
+          background:
+            relatedServices!.indexOf(service) >= 0 ? `rgba(${color}, 1)` : `rgba(${color}, 0.2)`,
+        },
         font: {
           color:
             relatedServices!.indexOf(service) >= 0
@@ -194,10 +198,10 @@ export function getServiceMapGraph(
       };
     } else {
       styleOptions = {
-        borderWidth: 1.0,
+        borderWidth: 3,
         chosen: false,
         color: {
-          border: '#DADADC',
+          border: '#4A4A4A',
           background: '#FFFFFF',
         },
       };
@@ -540,9 +544,14 @@ interface JsonMapping {
 }
 
 export const extractAttributes = (
-  mapping: AttributeMapping['properties'],
+  mapping: AttributeMapping['properties'] | undefined,
   prefix: string
 ): string[] => {
+  if (!mapping) {
+    console.warn('Mapping is missing or undefined.');
+    return [];
+  }
+
   let attributes: string[] = [];
 
   for (const [key, value] of Object.entries(mapping)) {

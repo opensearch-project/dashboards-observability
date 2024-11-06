@@ -1721,6 +1721,7 @@ exports[`Services component renders empty services page 1`] = `
               addFilter={[Function]}
               currService=""
               idSelected="latency"
+              mode="data_prepper"
               page="services"
               serviceMap={Object {}}
               setIdSelected={[Function]}
@@ -1757,6 +1758,7 @@ exports[`Services component renders empty services page 1`] = `
                     buttonSize="s"
                     color="text"
                     idSelected="latency"
+                    legend="Select metric for service map display"
                     onChange={[Function]}
                     options={
                       Array [
@@ -1782,7 +1784,9 @@ exports[`Services component renders empty services page 1`] = `
                       <EuiScreenReaderOnly>
                         <legend
                           className="euiScreenReaderOnly"
-                        />
+                        >
+                          Select metric for service map display
+                        </legend>
                       </EuiScreenReaderOnly>
                       <div
                         className="euiButtonGroup__buttons"
@@ -5794,6 +5798,7 @@ exports[`Services component renders services page 1`] = `
               addFilter={[Function]}
               currService=""
               idSelected="latency"
+              mode="data_prepper"
               page="services"
               serviceMap={Object {}}
               setIdSelected={[Function]}
@@ -5830,6 +5835,7 @@ exports[`Services component renders services page 1`] = `
                     buttonSize="s"
                     color="text"
                     idSelected="latency"
+                    legend="Select metric for service map display"
                     onChange={[Function]}
                     options={
                       Array [
@@ -5855,7 +5861,9 @@ exports[`Services component renders services page 1`] = `
                       <EuiScreenReaderOnly>
                         <legend
                           className="euiScreenReaderOnly"
-                        />
+                        >
+                          Select metric for service map display
+                        </legend>
                       </EuiScreenReaderOnly>
                       <div
                         className="euiButtonGroup__buttons"

@@ -17,6 +17,7 @@ import {
   EuiSelectableOption,
   EuiPopover,
   EuiFieldSearch,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 // @ts-ignore
@@ -59,6 +60,7 @@ export function ServiceMap({
   setCurrentSelectedService,
   filterByCurrService,
   includeMetricsCallback,
+  mode,
 }: {
   serviceMap: ServiceObject;
   idSelected: 'latency' | 'error_rate' | 'throughput';
@@ -77,6 +79,7 @@ export function ServiceMap({
   setCurrentSelectedService?: (value: React.SetStateAction<string>) => void;
   filterByCurrService?: boolean;
   includeMetricsCallback?: () => void;
+  mode?: string;
 }) {
   const [graphKey, setGraphKey] = useState(0); // adding key to allow for re-renders
   const [invalid, setInvalid] = useState(false);
@@ -85,6 +88,8 @@ export function ServiceMap({
   const [items, setItems] = useState<any>({});
   const [query, setQuery] = useState('');
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [filterChange, setIsFilterChange] = useState(false);
 
   const toggleButtons = [
     {
@@ -149,11 +154,26 @@ export function ServiceMap({
 
   const options = {
     layout: {
+      randomSeed: 10,
+      improvedLayout: false,
+      clusterThreshold: 150,
       hierarchical: {
+        enabled: false,
+      },
+    },
+    physics: {
+      enabled: true,
+      stabilization: {
         enabled: true,
-        direction: 'UD', // UD, DU, LR, RL
-        sortMethod: 'directed', // hubsize, directed
-        shakeTowards: 'leaves', // roots, leaves
+        iterations: 1000, // Increase iterations for better layout stability
+        updateInterval: 25,
+      },
+      solver: 'forceAtlas2Based',
+      forceAtlas2Based: {
+        gravitationalConstant: -100, // Adjust this for node repulsion
+        centralGravity: 0.005,
+        springLength: 200, // Increase to make nodes further apart
+        springConstant: 0.08,
       },
     },
     edges: {
@@ -162,7 +182,7 @@ export function ServiceMap({
           enabled: true,
         },
       },
-      physics: false,
+      physics: true,
     },
     nodes: {
       shape: 'dot',
@@ -194,8 +214,8 @@ export function ServiceMap({
     networkInstance.on('zoom', (params) => {
       const zoomLevel = params.scale;
 
-      if (zoomLevel < 0.25 && zoomLevel < lastZoomLevel) {
-        networkInstance.moveTo({ scale: 0.25, position: initialPosition });
+      if (zoomLevel < 0.1 && zoomLevel < lastZoomLevel) {
+        networkInstance.moveTo({ scale: 0.1, position: initialPosition });
       } else if (zoomLevel > 1.75) {
         networkInstance.moveTo({ scale: 1.75 });
       }
@@ -206,6 +226,8 @@ export function ServiceMap({
 
   const addServiceFilter = (selectedServiceName: string) => {
     if (!addFilter) return;
+    setGraphKey((prevKey) => prevKey + 1);
+
     addFilter({
       field: 'serviceName',
       operator: 'is',
@@ -213,12 +235,24 @@ export function ServiceMap({
       inverted: false,
       disabled: false,
     });
+    setIsFilterChange(true);
+
     if (!['appCreate', 'detailFlyout'].includes(page)) {
       window.scrollTo({ left: 0, top: 0, behavior: 'smooth' });
     }
   };
 
   const events = {
+    stabilizationProgress: () => {
+      setIsLoading(true);
+    },
+    // Disable physics after rendering the tree
+    stabilizationIterationsDone: () => {
+      if (network) {
+        network.setOptions({ physics: { enabled: false } });
+      }
+      setIsLoading(false);
+    },
     select: (event) => {
       const { nodes } = event;
       if (!addFilter || !nodes) return;
@@ -226,18 +260,17 @@ export function ServiceMap({
       if (selectedNode) {
         const details = {
           label: selectedNode.label,
-          average_latency: selectedNode.average_latency,
-          error_rate: selectedNode.error_rate,
-          throughput: selectedNode.throughput,
+          average_latency: selectedNode.average_latency || '-',
+          error_rate: selectedNode.error_rate || '-',
+          throughput: selectedNode.throughput || '-',
         };
 
-        // On traces page with custom sources
-        // When user clicks on empty graph, load metrics
-        if (selectableValue.length === 0) {
-          onChangeSelectable('latency');
+        if (serviceMap[selectedNode.label]) {
+          setSelectedNodeDetails(details);
+        } else {
+          console.warn('Selected node details are missing in the new data source.');
+          setSelectedNodeDetails(null);
         }
-        // Update the state to display node details
-        setSelectedNodeDetails(details);
       }
     },
     hoverNode: (_event) => {},
@@ -245,28 +278,41 @@ export function ServiceMap({
 
   const onFocus = (service: string, networkInstance?: any) => {
     if (service.length === 0) {
-      // Reset all nodes to the default size when no service is selected
-      const resetNodes = items.graph.nodes.map((node) => ({ ...node, size: 15 }));
-      setItems({
-        ...items,
-        graph: { ...items.graph, nodes: resetNodes },
-      });
-      if (networkInstance) networkInstance.fit(); // Adjust the view if needed
+      // Reset all nodes to the default size and show the entire graph when no service is selected
+      const resetGraph = getServiceMapGraph(
+        serviceMap,
+        idSelected,
+        ticks,
+        undefined,
+        serviceMap[currService!]?.relatedServices,
+        false // Do not filter by the current service to show the entire graph
+      );
+      setItems(resetGraph);
+
+      if (networkInstance) networkInstance.fit();
       setInvalid(false);
     } else if (serviceMap[service]) {
       if (!networkInstance) networkInstance = network;
 
-      // Enlarge the focused node and reset others
-      const updatedNodes = items.graph.nodes.map((node) =>
-        node.label === service ? { ...node, size: 30 } : { ...node, size: 15 }
+      // Get a filtered graph showing only nodes connected to the focused service
+      const filteredGraph = getServiceMapGraph(
+        serviceMap,
+        idSelected,
+        ticks,
+        service,
+        serviceMap[service]?.relatedServices,
+        true // Enable filtering by the current service to show only connected nodes
       );
 
-      setItems({
-        ...items,
-        graph: { ...items.graph, nodes: updatedNodes },
-      });
+      setItems(filteredGraph);
 
-      networkInstance.focus(serviceMap[service].id, { animation: true });
+      networkInstance.focus(serviceMap[service].id, {
+        scale: 0.75, // Higher scale for closer zoom
+        animation: {
+          duration: 1000, // Duration of the zoom-in animation in milliseconds
+          easingFunction: 'easeInOutQuad',
+        },
+      });
       setInvalid(false);
     } else {
       setInvalid(true);
@@ -274,17 +320,30 @@ export function ServiceMap({
   };
 
   useEffect(() => {
-    if (selectedNodeDetails) {
-      const selectedNode = items?.graph.nodes.find(
+    setSelectedNodeDetails(null);
+    setQuery('');
+    setItems({});
+
+    if (filterChange) {
+      setIsFilterChange(false);
+    }
+  }, [mode, filterChange]);
+
+  useEffect(() => {
+    if (selectedNodeDetails && items?.graph?.nodes) {
+      const selectedNode = items.graph.nodes.find(
         (node) => node.label === selectedNodeDetails.label
       );
-      const details = {
-        label: selectedNode.label,
-        average_latency: selectedNode.average_latency,
-        error_rate: selectedNode.error_rate,
-        throughput: selectedNode.throughput,
-      };
-      setSelectedNodeDetails(details);
+
+      if (selectedNode) {
+        const details = {
+          label: selectedNode.label,
+          average_latency: selectedNode.average_latency || '-',
+          error_rate: selectedNode.error_rate || '-',
+          throughput: selectedNode.throughput || '-',
+        };
+        setSelectedNodeDetails(details);
+      }
     }
   }, [items]);
 
@@ -329,6 +388,7 @@ export function ServiceMap({
               onChange={(id) => setIdSelected(id as 'latency' | 'error_rate' | 'throughput')}
               buttonSize="s"
               color="text"
+              legend="Select metric for service map display"
             />
             <EuiHorizontalRule margin="m" />
           </>
@@ -347,7 +407,9 @@ export function ServiceMap({
                     const newValue = e.target.value;
                     setQuery(newValue);
                     if (newValue === '') {
-                      onFocus(''); // Clear node focus when input is cleared
+                      setGraphKey((prevKey) => prevKey + 1);
+                      setQuery('');
+                      onFocus('');
                     }
                   }}
                   isInvalid={query.length > 0 && invalid}
@@ -435,6 +497,24 @@ export function ServiceMap({
                       if (currService) onFocus(currService, networkInstance);
                     }}
                   />
+                )}
+                {isLoading && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                      zIndex: 1000,
+                    }}
+                  >
+                    <EuiLoadingSpinner size="xl" />
+                  </div>
                 )}
                 {selectedNodeDetails && (
                   <div
