@@ -22,11 +22,12 @@ import {
   DataSourceViewConfig,
 } from '../../../../../src/plugins/data_source_management/public';
 import { DataSourceAttributes } from '../../../../../src/plugins/data_source_management/public/types';
+import { observabilityTracesNewNavID } from '../../../common/constants/shared';
 import { TRACE_TABLE_TYPE_KEY } from '../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode, TraceQueryMode } from '../../../common/types/trace_analytics';
 import { coreRefs } from '../../framework/core_refs';
 import { FilterType } from './components/common/filters/filters';
-import { getAttributes, getSpanIndices } from './components/common/helper_functions';
+import { getAttributeFieldNames, getSpanIndices } from './components/common/helper_functions';
 import { SearchBarProps } from './components/common/search_bar';
 import { ServiceView, Services } from './components/services';
 import { ServiceFlyout } from './components/services/service_flyout';
@@ -37,7 +38,6 @@ import {
   handleJaegerIndicesExistRequest,
 } from './requests/request_handler';
 import { TraceSideBar } from './trace_side_nav';
-import { observabilityTracesNewNavID } from '../../../common/constants/shared';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
@@ -235,12 +235,12 @@ export const Home = (props: HomeProps) => {
 
   const fetchAttributesFields = () => {
     coreRefs.dslService
-      ?.fetchFields(getSpanIndices(mode))
+      ?.fetchFieldCaps(getSpanIndices(mode), '*attributes*', dataSourceMDSId)
       .then((res) => {
-        const attributes = getAttributes(res);
+        const attributes = getAttributeFieldNames(res);
         setAttributesFilterFields(attributes);
       })
-      .catch((error) => console.error('fetching attributes field failed', error));
+      .catch((error) => console.error('Failed to fetch attribute fields', error));
   };
 
   useEffect(() => {
@@ -257,7 +257,7 @@ export const Home = (props: HomeProps) => {
 
   useEffect(() => {
     if (mode === 'data_prepper' || mode === 'custom_data_prepper') fetchAttributesFields();
-  }, [mode]);
+  }, [mode, dataSourceMDSId]);
 
   const serviceBreadcrumbs = [
     ...(!isNavGroupEnabled
