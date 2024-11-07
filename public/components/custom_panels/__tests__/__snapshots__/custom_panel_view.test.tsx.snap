@@ -1306,6 +1306,7 @@ exports[`Panels View Component renders panel view container with visualizations 
     dslService={
       DSLService {
         "fetch": [Function],
+        "fetchFieldCaps": [Function],
         "fetchFields": [Function],
         "fetchIndices": [Function],
         "fetchSettings": [Function],
@@ -1809,6 +1810,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                             dslService={
                               DSLService {
                                 "fetch": [Function],
+                                "fetchFieldCaps": [Function],
                                 "fetchFields": [Function],
                                 "fetchIndices": [Function],
                                 "fetchSettings": [Function],
@@ -3672,6 +3674,7 @@ exports[`Panels View Component renders panel view container without visualizatio
     dslService={
       DSLService {
         "fetch": [Function],
+        "fetchFieldCaps": [Function],
         "fetchFields": [Function],
         "fetchIndices": [Function],
         "fetchSettings": [Function],
@@ -4173,6 +4176,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                             dslService={
                               DSLService {
                                 "fetch": [Function],
+                                "fetchFieldCaps": [Function],
                                 "fetchFields": [Function],
                                 "fetchIndices": [Function],
                                 "fetchSettings": [Function],
