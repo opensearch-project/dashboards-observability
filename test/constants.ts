@@ -701,3 +701,71 @@ export const mockSavedObjectActions = ({ get = [], getBulk = [] }) => {
     getBulk: jest.fn().mockResolvedValue({ observabilityObjectList: getBulk }),
   };
 };
+
+export const fieldCapQueryResponse1 = {
+  indices: ['dest1:otel-v1-apm-span-000001', 'dest2:otel-v1-apm-span-000001'],
+  fields: {
+    'span.attributes.http@url': {
+      text: {
+        type: 'text',
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'span.attributes.net@peer@ip': {
+      text: {
+        type: 'text',
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'span.attributes.http@user_agent.keyword': {
+      keyword: {
+        type: 'keyword',
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    'resource.attributes.telemetry@sdk@version.keyword': {
+      keyword: {
+        type: 'keyword',
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    'resource.attributes.host@hostname.keyword': {
+      keyword: {
+        type: 'keyword',
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    'unrelated.field.name': {
+      text: {
+        type: 'text',
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+  },
+};
+
+export const fieldCapQueryResponse2 = {
+  indices: ['dest1:otel-v1-apm-span-000001', 'dest2:otel-v1-apm-span-000001'],
+  fields: {
+    'unrelated.field1': {
+      text: {
+        type: 'text',
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'another.unrelated.field': {
+      keyword: {
+        type: 'keyword',
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+  },
+};

@@ -24,6 +24,7 @@ import {
   TraceAnalyticsMode,
 } from '../../../../../common/types/trace_analytics';
 import { uiSettingsService } from '../../../../../common/utils';
+import { FieldCapResponse } from '../../../common/types';
 import { serviceMapColorPalette } from './color_palette';
 import { FilterType } from './filters/filters';
 import { ServiceObject } from './plots/service_map';
@@ -526,60 +527,10 @@ export const filtersToDsl = (
   return DSL;
 };
 
-interface AttributeMapping {
-  properties: {
-    [key: string]: {
-      type?: string;
-      properties?: AttributeMapping['properties'];
-    };
-  };
-}
-
-interface JsonMapping {
-  [key: string]: {
-    mappings: {
-      properties: AttributeMapping['properties'];
-    };
-  };
-}
-
-export const extractAttributes = (
-  mapping: AttributeMapping['properties'] | undefined,
-  prefix: string
-): string[] => {
-  if (!mapping) {
-    console.warn('Mapping is missing or undefined.');
-    return [];
-  }
-
-  let attributes: string[] = [];
-
-  for (const [key, value] of Object.entries(mapping)) {
-    if (value.properties) {
-      attributes = attributes.concat(extractAttributes(value.properties, `${prefix}.${key}`));
-    } else {
-      attributes.push(`${prefix}.${key}`);
-    }
-  }
-
-  return attributes;
-};
-
-export const getAttributes = (jsonMapping: JsonMapping): string[] => {
-  if (Object.keys(jsonMapping)[0] !== undefined) {
-    const spanMapping =
-      jsonMapping[Object.keys(jsonMapping)[0]]?.mappings?.properties?.span?.properties?.attributes
-        ?.properties;
-    const resourceMapping =
-      jsonMapping[Object.keys(jsonMapping)[0]]?.mappings?.properties?.resource?.properties
-        ?.attributes?.properties;
-
-    const spanAttributes = extractAttributes(spanMapping!, 'span.attributes');
-    const resourceAttributes = extractAttributes(resourceMapping!, 'resource.attributes');
-
-    return [...spanAttributes, ...resourceAttributes];
-  }
-  return [];
+export const getAttributeFieldNames = (response: FieldCapResponse): string[] => {
+  return Object.keys(response.fields).filter(
+    (field) => field.startsWith('resource.attributes') || field.startsWith('span.attributes')
+  );
 };
 
 export const getTraceCustomSpanIndex = () => {
