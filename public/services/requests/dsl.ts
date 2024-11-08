@@ -6,11 +6,13 @@
 import { CoreStart } from '../../../../../src/core/public';
 import {
   DSL_BASE,
-  DSL_SEARCH,
   DSL_CAT,
+  DSL_FIELD_CAPS,
   DSL_MAPPING,
+  DSL_SEARCH,
   DSL_SETTINGS,
 } from '../../../common/constants/shared';
+import { FieldCapResponse } from '../../components/common/types';
 
 /* eslint-disable import/no-default-export */
 export default class DSLService {
@@ -49,6 +51,20 @@ export default class DSLService {
     return this.http.get(`${DSL_BASE}${DSL_SETTINGS}`, {
       query: {
         index,
+      },
+    });
+  };
+
+  fetchFieldCaps = async (
+    index: string,
+    fields: string,
+    dataSourceMDSId: string
+  ): Promise<FieldCapResponse> => {
+    return this.http.get(`${DSL_BASE}${DSL_FIELD_CAPS}`, {
+      query: {
+        index,
+        fields,
+        dataSourceMDSId,
       },
     });
   };

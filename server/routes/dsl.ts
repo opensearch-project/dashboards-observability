@@ -9,6 +9,7 @@ import { IRouter } from '../../../../src/core/server';
 import {
   DSL_BASE,
   DSL_CAT,
+  DSL_FIELD_CAPS,
   DSL_MAPPING,
   DSL_SEARCH,
   DSL_SETTINGS,
@@ -222,6 +223,47 @@ export function registerDslRoute(
           resp = await context.core.opensearch.legacy.client.callAsCurrentUser(
             'indices.getSettings',
             { index: request.query.index }
+          );
+        }
+        return response.ok({
+          body: resp,
+        });
+      } catch (error) {
+        if (error.statusCode !== 404) console.error(error);
+        return response.custom({
+          statusCode: error.statusCode === 500 ? 503 : error.statusCode || 503,
+          body: error.message,
+        });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: `${DSL_BASE}${DSL_FIELD_CAPS}`,
+      validate: {
+        query: schema.object({
+          index: schema.string(),
+          fields: schema.string(),
+          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const dataSourceMDSId = request.query.dataSourceMDSId;
+      try {
+        const requestBody = {
+          index: request.query.index,
+          fields: request.query.fields,
+        };
+        let resp;
+        if (dataSourceEnabled && dataSourceMDSId) {
+          const client = await context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
+          resp = await client.callAPI('fieldCaps', requestBody);
+        } else {
+          resp = await context.core.opensearch.legacy.client.callAsCurrentUser(
+            'fieldCaps',
+            requestBody
           );
         }
         return response.ok({
