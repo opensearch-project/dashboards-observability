@@ -222,6 +222,7 @@ describe('Testing traces Spans table verify table headers functionality', () => 
   });
 
   it('Render Spans table and change data table Density', () => {
+    cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
     cy.get('*[data-test-subj^="service-flyout-action-btntrace_service"]').eq(1).click();
     cy.get('[data-test-subj="ActionContextMenu"]').click();
     cy.get('[data-test-subj="viewServiceButton"]').click();
@@ -284,7 +285,7 @@ describe('Testing traces Spans table and verify columns functionality', () => {
     cy.get('.euiBadge__content .euiBadge__text').contains('spanId: 277a5934acf55dcf').should('exist');
     count_table_row(1);
     cy.get('[aria-label="remove current filter"]').click();
-    cy.get('[aria-label="remove current filter"]').should('not.exist');
+    cy.get('.panel-title-count').contains('8').should('exist');
     count_table_row(8);
   });
 

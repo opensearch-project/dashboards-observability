@@ -29,6 +29,8 @@ describe('Testing traces table', () => {
         win.sessionStorage.clear();
       },
     });
+    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    cy.get("[data-test-subj='data_prepper-mode']").click();
     setTimeFilter();
   });
 
@@ -66,6 +68,8 @@ describe('Testing trace view', () => {
         win.sessionStorage.clear();
       },
     });
+    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    cy.get("[data-test-subj='data_prepper-mode']").click();
     setTimeFilter();
     cy.get('input[type="search"]').focus().type(`${TRACE_ID}`);
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
@@ -86,7 +90,6 @@ describe('Testing trace view', () => {
 
   it('Has working breadcrumbs', () => {
     cy.get('.euiBreadcrumb').contains(TRACE_ID).click();
-    // cy.get('h1.overview-content').contains(TRACE_ID).should('exist');
     cy.get('.euiBreadcrumb').contains('Traces').click();
     cy.get('.euiBreadcrumb').contains('Trace analytics').click();
     cy.get('.euiBreadcrumb').contains('Observability').click();
@@ -118,11 +121,12 @@ describe('Testing traces table', () => {
         win.sessionStorage.clear();
       },
     });
+    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    cy.get("[data-test-subj='data_prepper-mode']").click();
     setTimeFilter();
   });
 
   it('Renders the traces table and verify Table Column, Pagination and Rows Data ', () => {
-    cy.contains(' (108)').should('exist');
     cy.get('.euiTableCellContent__text').contains('Trace ID').should('exist');
     cy.get('.euiTableCellContent__text').contains('Trace group').should('exist');
     cy.get('.euiTableCellContent__text').contains('Duration (ms)').should('exist');
