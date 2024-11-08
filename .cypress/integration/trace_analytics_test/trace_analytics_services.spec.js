@@ -125,8 +125,7 @@ describe('Testing service view', () => {
   });
 
   it('Renders spans data grid, flyout, filters', () => {
-    // cy.get("[data-test-subj='spanId-link']").contains(SERVICE_SPAN_ID).trigger('mouseover', { force: true });
-    cy.get("[data-test-subj='spanId-link']").contains("e275ac9d21929e9b").trigger('mouseover', { force: true });
+    cy.get("[data-test-subj='spanId-link']").contains(SERVICE_SPAN_ID).trigger('mouseover', { force: true });
     cy.get('button[data-datagrid-interactable="true"]').eq(0).click({ force: true });
     cy.contains('Span detail').should('exist');
     cy.contains('Span attributes').should('exist');
@@ -223,7 +222,6 @@ describe('Testing traces Spans table verify table headers functionality', () => 
   });
 
   it('Render Spans table and change data table Density', () => {
-    // cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist').click();
     cy.get('*[data-test-subj^="service-flyout-action-btntrace_service"]').eq(1).click();
     cy.get('[data-test-subj="ActionContextMenu"]').click();
     cy.get('[data-test-subj="viewServiceButton"]').click();
@@ -269,7 +267,6 @@ describe('Testing traces Spans table and verify columns functionality', () => {
   });
 
   it('Renders the spans table and click on first span to verify details', () => {
-    // cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist').click();
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
     cy.get('*[data-test-subj^="service-flyout-action-btntrace_service"]').eq(1).click();
     cy.get('[data-test-subj="ActionContextMenu"]').click();
@@ -287,6 +284,7 @@ describe('Testing traces Spans table and verify columns functionality', () => {
     cy.get('.euiBadge__content .euiBadge__text').contains('spanId: 277a5934acf55dcf').should('exist');
     count_table_row(1);
     cy.get('[aria-label="remove current filter"]').click();
+    cy.get('[aria-label="remove current filter"]').should('not.exist');
     count_table_row(8);
   });
 

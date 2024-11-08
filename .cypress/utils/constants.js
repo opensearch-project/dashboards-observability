@@ -18,7 +18,7 @@ export const DATASOURCES_PATH = {
 export const TRACE_ID = '8832ed6abbb2a83516461960c89af49d';
 export const SPAN_ID = 'a673bc074b438374';
 export const SERVICE_NAME = 'frontend-client';
-export const SERVICE_SPAN_ID = '7df5609a6d104736';
+export const SERVICE_SPAN_ID = 'e275ac9d21929e9b';
 export const AUTH_SERVICE_SPAN_ID = '277a5934acf55dcf';
 
 export const testDataSet = [
