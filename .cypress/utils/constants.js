@@ -68,23 +68,18 @@ export const setTimeFilter = (setEndTime = false, refresh = true) => {
   cy.get('button.euiButtonEmpty[aria-label="Date quick select"]').click();
   cy.get('.euiQuickSelect__applyButton').click();
   cy.get('.euiSuperDatePicker__prettyFormatLink').click();
-  cy.get(
-    'button.euiDatePopoverButton--start[data-test-subj="superDatePickerstartDatePopoverButton"]'
-  ).click();
   cy.get('.euiTab__content').contains('Absolute').click();
   cy.get('input[data-test-subj="superDatePickerAbsoluteDateInput"]')
     .focus()
     .type('{selectall}' + startTime, { force: true });
   if (setEndTime) {
-    cy.get(
-      'button.euiDatePopoverButton--end[data-test-subj="superDatePickerendDatePopoverButton"]'
-    ).click();
+    cy.get('button.euiDatePopoverButton--end[data-test-subj="superDatePickerendDatePopoverButton"]').click();
     cy.get('.euiTab__content').contains('Absolute').click();
     cy.get('input[data-test-subj="superDatePickerAbsoluteDateInput"]')
       .focus()
       .type('{selectall}' + endTime, { force: true });
   }
-  if (refresh) cy.get('.euiButton__text').contains('Refresh').click();
+  if (refresh) cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
   cy.get('.euiTableRow').should('have.length.greaterThan', 3); //Replaces Wait
 };
 

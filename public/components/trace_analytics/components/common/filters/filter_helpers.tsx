@@ -109,34 +109,42 @@ export const getOperatorOptions = (field: string) => {
     long: [
       {
         label: 'is between',
+        'data-test-subj': 'is-between-operator',
       },
       {
         label: 'is not between',
+        'data-test-subj': 'is-not-between-operator',
       },
     ],
     date_nanos: [
       {
         label: 'is between',
+        'data-test-subj': 'is-between-operator',
       },
       {
         label: 'is not between',
+        'data-test-subj': 'is-not-between-operator',
       },
     ],
     keyword: [],
     default_first: [
       {
         label: 'is',
+        'data-test-subj': 'is-operator',
       },
       {
         label: 'is not',
+        'data-test-subj': 'is-not-operator',
       },
     ],
     default_last: [
       {
         label: 'exists',
+        'data-test-subj': 'exists-operator',
       },
       {
         label: 'does not exist',
+        'data-test-subj': 'does-not-exist-operator',
       },
     ],
   };

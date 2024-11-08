@@ -45,6 +45,7 @@ export function FilterEditPopover(props: {
           <EuiCompressedFormRow label={'Field'}>
             <EuiCompressedComboBox
               placeholder="Select a field first"
+              data-test-subj="field-selector-filter-panel"
               isClearable={false}
               options={props.filterFieldOptions}
               selectedOptions={selectedFieldOptions}
@@ -61,6 +62,7 @@ export function FilterEditPopover(props: {
           <EuiCompressedFormRow label={'Operator'}>
             <EuiCompressedComboBox
               placeholder={selectedFieldOptions.length === 0 ? 'Waiting' : 'Select'}
+              data-test-subj="operator-selector-filter-panel"
               isClearable={false}
               isDisabled={selectedFieldOptions.length === 0}
               options={
