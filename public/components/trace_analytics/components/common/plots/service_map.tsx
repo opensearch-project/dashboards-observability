@@ -91,6 +91,7 @@ export function ServiceMap({
   const [isLoading, setIsLoading] = useState(true);
   const [filterChange, setIsFilterChange] = useState(false);
   const [focusedService, setFocusedService] = useState<string | null>(null);
+  const [clearFilterRequest, setClearFilterRequest] = useState(false);
 
   const toggleButtons = [
     {
@@ -137,6 +138,44 @@ export function ServiceMap({
       inputDisplay: 'Request Rate',
     },
   ];
+
+  const clearFilter = () => {
+    setFocusedService(null);
+    setClearFilterRequest(true);
+  };
+
+  useEffect(() => {
+    if (clearFilterRequest && focusedService === null) {
+      setClearFilterRequest(false);
+
+      setQuery('');
+      currService = '';
+
+      if (addFilter) {
+        addFilter({
+          field: 'serviceName',
+          operator: 'is',
+          value: '',
+          inverted: false,
+          disabled: true, // Disable the filter to effectively clear it
+        });
+      }
+
+      // Reset the graph to show the full view
+      setItems(
+        getServiceMapGraph(
+          serviceMap,
+          idSelected,
+          ticks,
+          undefined,
+          serviceMap[currService!]?.relatedServices,
+          false // Do not filter by the current service to show the entire graph
+        )
+      );
+
+      setInvalid(false);
+    }
+  }, [focusedService, clearFilterRequest]);
 
   useEffect(() => {
     if (items?.graph?.nodes) {
@@ -288,27 +327,7 @@ export function ServiceMap({
 
   const onFocus = (service: string) => {
     if (service.length === 0) {
-      setFocusedService(null);
-      if (addFilter) {
-        addFilter({
-          field: 'serviceName',
-          operator: 'is',
-          value: '',
-          inverted: false,
-          disabled: true, // Disable the filter to effectively clear it
-        });
-      }
-      setItems(
-        getServiceMapGraph(
-          serviceMap,
-          idSelected,
-          ticks,
-          undefined,
-          serviceMap[currService!]?.relatedServices,
-          false // Do not filter by the current service to show the entire graph
-        )
-      );
-      setInvalid(false);
+      clearFilter();
     } else if (serviceMap[service]) {
       // Focus on the specified service and add a filter
       setFocusedService(service);
