@@ -532,6 +532,7 @@ export function ServiceView(props: ServiceViewProps) {
             currService={props.serviceName}
             page="serviceView"
             filterByCurrService={true}
+            mode={mode}
           />
         </>
       ) : (

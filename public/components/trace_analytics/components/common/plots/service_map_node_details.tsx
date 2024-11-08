@@ -18,7 +18,7 @@ import { ServiceNodeDetails } from '../../../../../../common/types/trace_analyti
 interface ServiceMapNodeDetailsProps {
   selectedNodeDetails: ServiceNodeDetails | null;
   setSelectedNodeDetails: React.Dispatch<React.SetStateAction<ServiceNodeDetails | null>>;
-  addServiceFilter: (selectedServiceName: string) => void;
+  addServiceFilter: (selectedServiceName: string | null) => void;
   setCurrentSelectedService?: (value: React.SetStateAction<string>) => void;
 }
 

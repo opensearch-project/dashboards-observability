@@ -90,6 +90,7 @@ export function ServiceMap({
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filterChange, setIsFilterChange] = useState(false);
+  const [focusedService, setFocusedService] = useState<string | null>(null);
 
   const toggleButtons = [
     {
@@ -214,8 +215,8 @@ export function ServiceMap({
     networkInstance.on('zoom', (params) => {
       const zoomLevel = params.scale;
 
-      if (zoomLevel < 0.1 && zoomLevel < lastZoomLevel) {
-        networkInstance.moveTo({ scale: 0.1, position: initialPosition });
+      if (zoomLevel < 0.05 && zoomLevel < lastZoomLevel) {
+        networkInstance.moveTo({ scale: 0.05, position: initialPosition });
       } else if (zoomLevel > 1.75) {
         networkInstance.moveTo({ scale: 1.75 });
       }
@@ -224,21 +225,30 @@ export function ServiceMap({
     });
   };
 
-  const addServiceFilter = (selectedServiceName: string) => {
+  const addServiceFilter = (selectedServiceName) => {
+    if (selectedServiceName === focusedService) return;
+
     if (!addFilter) return;
-    setGraphKey((prevKey) => prevKey + 1);
 
-    addFilter({
-      field: 'serviceName',
-      operator: 'is',
-      value: selectedServiceName,
-      inverted: false,
-      disabled: false,
-    });
-    setIsFilterChange(true);
-
-    if (!['appCreate', 'detailFlyout'].includes(page)) {
-      window.scrollTo({ left: 0, top: 0, behavior: 'smooth' });
+    if (selectedServiceName) {
+      setFocusedService(selectedServiceName);
+      addFilter({
+        field: 'serviceName',
+        operator: 'is',
+        value: selectedServiceName,
+        inverted: false,
+        disabled: false,
+      });
+    } else {
+      // Clear the filter by adding a disabled filter or an empty filter object
+      setFocusedService(null);
+      addFilter({
+        field: 'serviceName',
+        operator: 'is',
+        value: '',
+        inverted: false,
+        disabled: true,
+      });
     }
   };
 
@@ -276,25 +286,42 @@ export function ServiceMap({
     hoverNode: (_event) => {},
   };
 
-  const onFocus = (service: string, networkInstance?: any) => {
+  const onFocus = (service: string) => {
     if (service.length === 0) {
-      // Reset all nodes to the default size and show the entire graph when no service is selected
-      const resetGraph = getServiceMapGraph(
-        serviceMap,
-        idSelected,
-        ticks,
-        undefined,
-        serviceMap[currService!]?.relatedServices,
-        false // Do not filter by the current service to show the entire graph
+      setFocusedService(null);
+      if (addFilter) {
+        addFilter({
+          field: 'serviceName',
+          operator: 'is',
+          value: '',
+          inverted: false,
+          disabled: true, // Disable the filter to effectively clear it
+        });
+      }
+      setItems(
+        getServiceMapGraph(
+          serviceMap,
+          idSelected,
+          ticks,
+          undefined,
+          serviceMap[currService!]?.relatedServices,
+          false // Do not filter by the current service to show the entire graph
+        )
       );
-      setItems(resetGraph);
-
-      if (networkInstance) networkInstance.fit();
       setInvalid(false);
     } else if (serviceMap[service]) {
-      if (!networkInstance) networkInstance = network;
+      // Focus on the specified service and add a filter
+      setFocusedService(service);
+      if (addFilter) {
+        addFilter({
+          field: 'serviceName',
+          operator: 'is',
+          value: service,
+          inverted: false,
+          disabled: false,
+        });
+      }
 
-      // Get a filtered graph showing only nodes connected to the focused service
       const filteredGraph = getServiceMapGraph(
         serviceMap,
         idSelected,
@@ -303,16 +330,7 @@ export function ServiceMap({
         serviceMap[service]?.relatedServices,
         true // Enable filtering by the current service to show only connected nodes
       );
-
       setItems(filteredGraph);
-
-      networkInstance.focus(serviceMap[service].id, {
-        scale: 0.75, // Higher scale for closer zoom
-        animation: {
-          duration: 1000, // Duration of the zoom-in animation in milliseconds
-          easingFunction: 'easeInOutQuad',
-        },
-      });
       setInvalid(false);
     } else {
       setInvalid(true);
@@ -323,6 +341,7 @@ export function ServiceMap({
     setSelectedNodeDetails(null);
     setQuery('');
     setItems({});
+    setFocusedService(null);
 
     if (filterChange) {
       setIsFilterChange(false);
@@ -348,10 +367,15 @@ export function ServiceMap({
   }, [items]);
 
   useEffect(() => {
+    if (currService === focusedService) {
+      return;
+    }
+
     if (!serviceMap || Object.keys(serviceMap).length === 0) {
       setItems({});
       return;
     }
+
     const values = Object.keys(serviceMap)
       .filter((service) => serviceMap[service][idSelected])
       .map((service) => serviceMap[service][idSelected]!);
@@ -401,7 +425,7 @@ export function ServiceMap({
                   compressed
                   prepend="Focus on"
                   placeholder="Service name"
-                  value={query}
+                  value={focusedService || query}
                   onClick={() => setPopoverOpen(!isPopoverOpen)}
                   onChange={(e) => {
                     const newValue = e.target.value;
@@ -450,15 +474,13 @@ export function ServiceMap({
                 onChange={(newOptions) => {
                   const selectedOption = newOptions.find((option) => option.checked === 'on');
                   if (selectedOption) {
+                    if (selectedOption.label === focusedService) {
+                      setPopoverOpen(false);
+                      return;
+                    }
                     setQuery(selectedOption.label);
-                    onFocus(selectedOption.label as string);
+                    onFocus(selectedOption.label);
                     setPopoverOpen(false);
-                    setSelectableOptions(
-                      selectableOptions.map((option) => ({
-                        ...option,
-                        checked: undefined,
-                      }))
-                    );
                   }
                 }}
                 listProps={{ bordered: true, style: { width: '300px' } }}
