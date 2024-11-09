@@ -11,6 +11,7 @@ import {
   EuiCompressedSuperDatePicker,
   EuiSpacer,
   EuiPageHeader,
+  EuiText,
 } from '@elastic/eui';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { PlotlyHTMLElement } from 'plotly.js';
@@ -20,6 +21,7 @@ import PPLService from '../../../services/requests/ppl';
 import { coreRefs } from '../../../framework/core_refs';
 import { uiSettingsService } from '../../../../common/utils';
 import { Plt } from '../../../components/visualizations/plotly/plot';
+import { PLOTLY_COLOR } from '../../../../common/constants/shared';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -52,19 +54,19 @@ const layouts = {
   lg: [
     // Top row with global usage and counts
     { i: 'clusterCPUUsage', x: 0, y: 0, w: 5, h: 2 },
-    { i: 'clusterMemoryUsage', x: 2, y: 0, w: 2, h: 2 },
-    { i: 'nodesCount', x: 4, y: 0, w: 1, h: 1 },
-    { i: 'namespacesCount', x: 5, y: 0, w: 1, h: 2 },
-    { i: 'runningPodsCount', x: 6, y: 0, w: 2, h: 2 },
+    { i: 'clusterMemoryUsage', x: 0, y: 3, w: 5, h: 2 },
+    { i: 'nodesCount', x: 5, y: 0, w: 1, h: 1 },
+    { i: 'namespacesCount', x: 5, y: 1, w: 1, h: 1 },
+    { i: 'runningPodsCount', x: 5, y: 2, w: 1, h: 1 },
 
     // Middle row with CPU and RAM utilization
-    // { i: 'cpuUsage', x: 0, y: 2, w: 2, h: 1 },
-    // { i: 'ramUsage', x: 2, y: 2, w: 2, h: 1 },
+    // { i: 'ramUsage', x: 5, y: 4, w: 2, h: 1 },
     // { i: 'clusterCPUUtilization', x: 4, y: 2, w: 2, h: 1 },
     // { i: 'clusterMemoryUtilization', x: 6, y: 2, w: 2, h: 1 },
 
     // Additional information panels
-    { i: 'runningPodsCategory', x: 0, y: 3, w: 3, h: 2 },
+    { i: 'runningPodsCategory', x: 7, y: 0, w: 2, h: 2 },
+    { i: 'cpuCoreCount', x: 5, y: 3, w: 1, h: 1 },
     { i: 'totalNetworkTraffic', x: 3, y: 3, w: 5, h: 2 },
 
     // Visualization row with detailed charts
@@ -85,7 +87,7 @@ const layouts = {
     { i: 'nodesCount', x: 4, y: 0, w: 1, h: 2 },
     { i: 'namespacesCount', x: 5, y: 0, w: 1, h: 2 },
     { i: 'runningPodsCount', x: 6, y: 0, w: 2, h: 2 },
-    { i: 'cpuUsage', x: 0, y: 2, w: 2, h: 1 },
+    { i: 'cpuCoreCount', x: 0, y: 2, w: 2, h: 1 },
     { i: 'ramUsage', x: 2, y: 2, w: 2, h: 1 },
     { i: 'clusterCPUUtilization', x: 4, y: 2, w: 2, h: 1 },
     { i: 'clusterMemoryUtilization', x: 6, y: 2, w: 2, h: 1 },
@@ -104,7 +106,7 @@ const layouts = {
     { i: 'nodesCount', x: 0, y: 2, w: 2, h: 2 },
     { i: 'namespacesCount', x: 2, y: 2, w: 2, h: 2 },
     { i: 'runningPodsCount', x: 0, y: 4, w: 2, h: 2 },
-    { i: 'cpuUsage', x: 2, y: 4, w: 2, h: 1 },
+    { i: 'cpuCoreCount', x: 2, y: 4, w: 2, h: 1 },
     { i: 'ramUsage', x: 0, y: 5, w: 2, h: 1 },
     { i: 'clusterCPUUtilization', x: 2, y: 5, w: 2, h: 1 },
     { i: 'clusterMemoryUtilization', x: 0, y: 6, w: 2, h: 1 },
@@ -149,10 +151,22 @@ export const GroupDashboards = ({
     gKeys: string[],
     traceConfig: {}
   ) => {
-    console.log('data: ', data);
-    console.log('xKeys[0]: ', xKeys[0]);
-    console.log('yKeys[0]: ', yKeys[0]);
-    if (gKeys.length === 0) {
+    if (traceConfig.type === 'pie') {
+      return [
+        {
+          labels: data.data[xKeys[0]],
+          values: data.data[yKeys[0]],
+          ...traceConfig,
+        },
+      ];
+    } else if (traceConfig.type === 'indicator') {
+      return [
+        {
+          value: data?.data[yKeys[0]][0] || 0,
+          ...traceConfig,
+        },
+      ];
+    } else if (gKeys.length === 0) {
       return [
         {
           x: data.data[xKeys[0]],
@@ -187,14 +201,13 @@ export const GroupDashboards = ({
   const renderPanel = (metrics: IMetrics[]) => {
     console.log('metrics', metrics);
     return metrics.map((metric, index) => {
-      if (!metric) {
-        return null;
-      }
+      // if (!metric) {
+      //   return [];
+      // }
 
       const visXaxisKeys = prometheusQueries[index].vis.xKeys;
       const visYaxisKeys = prometheusQueries[index].vis.yKeys;
       const visGroupingKeys = prometheusQueries[index].vis.gKeys;
-      console.log('metric: ', metric);
       const visualizationData = getProcessedMetricsVizData(
         metric,
         visXaxisKeys,
@@ -202,7 +215,6 @@ export const GroupDashboards = ({
         visGroupingKeys,
         prometheusQueries[index].vis.config
       );
-      console.log('visualizationData: ', visualizationData);
 
       // metric
       // jdbc
@@ -214,6 +226,9 @@ export const GroupDashboards = ({
       return (
         <div key={prometheusQueries[index].title + index} data-grid={layouts.lg[index]}>
           <EuiPanel paddingSize="m">
+            <EuiText>
+              <h4>{prometheusQueries[index].title}</h4>
+            </EuiText>
             <Plt
               // data={[
               //   {
@@ -224,6 +239,10 @@ export const GroupDashboards = ({
               // ]}
               data={visualizationData}
               layout={{
+                // width: 200, // Set custom width
+                // height: 150, // Set custom height
+                margin: { t: 0, b: 0, l: 0, r: 0 }, // Minimal margins
+                padding: { t: 0, b: 0, l: 0, r: 0 }, // Minimal padding
                 showlegend: true,
                 ...(prometheusQueries[index].vis.layout || {}),
                 xaxis: {
@@ -243,10 +262,10 @@ export const GroupDashboards = ({
                   zeroline: false,
                   rangemode: 'normal',
                 },
+                colorway: PLOTLY_COLOR
               }}
               // config={prometheusQueries[index].vis.component.config}
             />
-            <EuiSpacer size="m" />
             {/* <Visualization
             visualizations={{
               data: {
@@ -269,6 +288,7 @@ export const GroupDashboards = ({
             }}
           /> */}
           </EuiPanel>
+          <EuiSpacer size="m" />
         </div>
       );
     });

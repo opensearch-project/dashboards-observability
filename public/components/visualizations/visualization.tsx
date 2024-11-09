@@ -55,6 +55,7 @@ export const Visualization = ({
   };
 
   const [isValid, erroInfo] = isVisDataValid(visualizations);
+  console.log('isValid', isValid);
   return (
     <>
       {isValid ? (
