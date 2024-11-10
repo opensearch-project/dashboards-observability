@@ -4,7 +4,6 @@
  */
 
 import React from 'react';
-// import { useNavigate } from 'react-router-dom';
 import {
   EuiPage,
   EuiPageBody,
@@ -27,12 +26,10 @@ import {
 } from '@elastic/eui';
 
 export const ClusterOverview = (props) => {
-  console.log('clusterOverviewHome props: ', props);
-  // const navigate = useNavigate();
   const fakeData = [
     {
       clusterName: 'eks-cluster-with-vpc',
-      provider: 'digitalocean',
+      provider: 'amp',
       nodes: 2,
       cpuUsage: { avg: '0.607 cores', max: '1.45 cores' },
       memoryUsage: { avg: '4.66 GiB', max: '5.01 GiB' },
@@ -51,7 +48,7 @@ export const ClusterOverview = (props) => {
         <EuiPageHeader>
           <EuiPageHeaderSection>
             <EuiTitle size="l">
-              <h1>Clusters</h1>
+              <h3>Clusters</h3>
             </EuiTitle>
           </EuiPageHeaderSection>
         </EuiPageHeader>

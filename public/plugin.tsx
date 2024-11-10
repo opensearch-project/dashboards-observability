@@ -486,6 +486,14 @@ export class ObservabilityPlugin
     });
 
     core.application.register({
+      id: 'kubernetes-configurations',
+      title: 'Configurations',
+      category: OBSERVABILITY_APP_CATEGORIES.kubernetes,
+      order: 5096,
+      mount: appMountWithStartPage('kubernetesConfigurations'),
+    });
+
+    core.application.register({
       id: 'kubernetes-overview',
       title: 'Overview',
       category: OBSERVABILITY_APP_CATEGORIES.kubernetes,
@@ -518,6 +526,10 @@ export class ObservabilityPlugin
     });
 
     const navLinks = [
+      {
+        id: 'kubernetes-configurations',
+        parentNavLinkId: OBSERVABILITY_APP_CATEGORIES.kubernetes.id,
+      },
       {
         id: 'kubernetes-overview',
         parentNavLinkId: OBSERVABILITY_APP_CATEGORIES.kubernetes.id,

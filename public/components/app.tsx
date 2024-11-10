@@ -29,6 +29,8 @@ import { clusterOverviewHome } from './kubernetes/cluster';
 import { NodeOverview } from './kubernetes/node/overview';
 import { NamespacesOverviewHome } from './kubernetes/namespaces';
 import { KubernetesOverview } from './kubernetes/overview';
+import { NodeOverviewHome } from './kubernetes/node';
+import { KubernetesConfiguration } from './kubernetes/configurations/configurations';
 
 interface ObservabilityAppDeps {
   CoreStartProp: CoreStart;
@@ -64,8 +66,9 @@ const pages = {
   overview: OverviewHome,
   kubernetesOverview: KubernetesOverview,
   kubernetesCluster: clusterOverviewHome,
-  kubernetesNode: NodeOverview,
+  kubernetesNode: NodeOverviewHome,
   kubernetesNamespaces: NamespacesOverviewHome,
+  kubernetesConfigurations: KubernetesConfiguration,
 };
 
 export const App = ({

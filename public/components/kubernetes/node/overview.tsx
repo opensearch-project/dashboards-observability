@@ -102,7 +102,7 @@ export const NodeOverview = () => {
               {fakeData.map((node, index) => (
                 <EuiTableRow key={index}>
                   <EuiTableRowCell>
-                    <EuiLink href={`kubernetes-node/${node.clusterName}`}>
+                    <EuiLink href={`kubernetes-node/${node.nodeName}`}>
                       {node.nodeName}
                     </EuiLink>
                   </EuiTableRowCell>

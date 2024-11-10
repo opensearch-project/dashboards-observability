@@ -18,12 +18,30 @@ import {
   EuiStat,
   EuiPanel,
   EuiSpacer,
-  EuiHorizontalRule,
-  EuiProgress,
+  EuiTable,
+  EuiTableHeader,
+  EuiTableHeaderCell,
+  EuiTableBody,
+  EuiTableRow,
+  EuiTableRowCell,
+  EuiBadge,
 } from '@elastic/eui';
-import { Plt } from '../visualizations/plotly/plot'; // Assuming Plt component is in the same directory
+import { Plt } from '../visualizations/plotly/plot';
 
 export const KubernetesOverview = () => {
+
+  const fakeData = [
+    {
+      clusterName: 'eks-cluster-with-vpc',
+      provider: 'amp',
+      nodes: 2,
+      cpuUsage: { avg: '0.607 cores', max: '1.45 cores' },
+      memoryUsage: { avg: '4.66 GiB', max: '5.01 GiB' },
+      // alerts: 2,
+      resourceUsage: 'low',
+    },
+  ];
+
   const statsData = [
     { label: 'Clusters', value: 1 },
     { label: 'Nodes', value: 2 },
@@ -76,7 +94,9 @@ export const KubernetesOverview = () => {
             </EuiTitle>
             <EuiText color="subdued">
               For tips on using this overview, visit the{' '}
-              <EuiLink href="#" color="primary">documentation</EuiLink>
+              <EuiLink href="#" color="primary">
+                documentation
+              </EuiLink>
             </EuiText>
           </EuiPageHeaderSection>
         </EuiPageHeader>
@@ -139,7 +159,11 @@ export const KubernetesOverview = () => {
                 <h2>CPU Usage by Cluster</h2>
               </EuiTitle>
               <EuiSpacer size="s" />
-              <Plt data={cpuUsageData} layout={{ yaxis: { title: 'Percentage (%)' }, xaxis: { title: 'Time' } }} height="250px" />
+              <Plt
+                data={cpuUsageData}
+                layout={{ yaxis: { title: 'Percentage (%)' }, xaxis: { title: 'Time' } }}
+                height="250px"
+              />
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -148,7 +172,11 @@ export const KubernetesOverview = () => {
                 <h2>Memory Usage by Cluster</h2>
               </EuiTitle>
               <EuiSpacer size="s" />
-              <Plt data={memoryUsageData} layout={{ yaxis: { title: 'Percentage (%)' }, xaxis: { title: 'Time' } }} height="250px" />
+              <Plt
+                data={memoryUsageData}
+                layout={{ yaxis: { title: 'Percentage (%)' }, xaxis: { title: 'Time' } }}
+                height="250px"
+              />
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -156,7 +184,7 @@ export const KubernetesOverview = () => {
         <EuiSpacer size="l" />
 
         {/* Deployed Container Images */}
-        <EuiPanel paddingSize="m" style={{ borderRadius: '8px' }}>
+        {/* <EuiPanel paddingSize="m" style={{ borderRadius: '8px' }}>
           <EuiTitle size="xs">
             <h2>Deployed Container Images</h2>
           </EuiTitle>
@@ -174,6 +202,85 @@ export const KubernetesOverview = () => {
               <EuiText size="xs" style={{ flex: '0.3', textAlign: 'right' }}>{image.count}</EuiText>
             </div>
           ))}
+        </EuiPanel> */}
+        <EuiPageHeader>
+          <EuiPageHeaderSection>
+            <EuiTitle size="m">
+              <h3>Clusters</h3>
+            </EuiTitle>
+          </EuiPageHeaderSection>
+        </EuiPageHeader>
+
+        <EuiPanel>
+          {/* <EuiFlexGroup gutterSize="m">
+            <EuiFlexItem>
+              <EuiCard
+                title="Usage"
+                description=""
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiCard
+                title="Cost"
+                description=""
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiCard
+                title="Explore Clusters"
+                description=""
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer size="m" /> */}
+
+          <EuiTable>
+            <EuiTableHeader>
+              <EuiTableHeaderCell>Cluster</EuiTableHeaderCell>
+              <EuiTableHeaderCell>Provider</EuiTableHeaderCell>
+              <EuiTableHeaderCell>Nodes</EuiTableHeaderCell>
+              <EuiTableHeaderCell>CPU Usage (Average)</EuiTableHeaderCell>
+              <EuiTableHeaderCell>CPU Usage (Max)</EuiTableHeaderCell>
+              <EuiTableHeaderCell>Memory Usage (Average)</EuiTableHeaderCell>
+              <EuiTableHeaderCell>Memory Usage (Max)</EuiTableHeaderCell>
+              {/* <EuiTableHeaderCell>Alerts</EuiTableHeaderCell> */}
+              <EuiTableHeaderCell>Resource Usage</EuiTableHeaderCell>
+            </EuiTableHeader>
+
+            <EuiTableBody>
+              {fakeData.map((cluster, index) => (
+                <EuiTableRow key={index}>
+                  <EuiTableRowCell>
+                    {/* <Link
+                      to={`/${cluster.clusterName}`}
+                      style={{ textDecoration: 'none', color: 'blue' }}
+                    >
+                      {cluster.clusterName}
+                    </Link> */}
+                    <EuiLink href={`kubernetes-cluster/${cluster.clusterName}`}>
+                      {/* <EuiLink onClick={() => handleClusterClick(cluster.clusterName)}> */}
+                      {cluster.clusterName}
+                    </EuiLink>
+                  </EuiTableRowCell>
+                  <EuiTableRowCell>{cluster.provider}</EuiTableRowCell>
+                  <EuiTableRowCell>{cluster.nodes}</EuiTableRowCell>
+                  <EuiTableRowCell>{cluster.cpuUsage.avg}</EuiTableRowCell>
+                  <EuiTableRowCell>{cluster.cpuUsage.max}</EuiTableRowCell>
+                  <EuiTableRowCell>{cluster.memoryUsage.avg}</EuiTableRowCell>
+                  <EuiTableRowCell>{cluster.memoryUsage.max}</EuiTableRowCell>
+                  {/* <EuiTableRowCell>
+                    <EuiBadge color="warning">{cluster.alerts}</EuiBadge>
+                  </EuiTableRowCell> */}
+                  <EuiTableRowCell>
+                    <EuiBadge color={cluster.resourceUsage === 'low' ? 'success' : 'danger'}>
+                      {cluster.resourceUsage}
+                    </EuiBadge>
+                  </EuiTableRowCell>
+                </EuiTableRow>
+              ))}
+            </EuiTableBody>
+          </EuiTable>
         </EuiPanel>
       </EuiPageBody>
     </EuiPage>
