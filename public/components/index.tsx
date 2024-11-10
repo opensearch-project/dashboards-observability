@@ -28,6 +28,7 @@ export const Observability = (
 ) => {
   const { setHeaderActionMenu } = AppMountParametersProp;
   const { dataSource } = DepsStart;
+  console.log('activated?');
   ReactDOM.render(
     <App
       CoreStartProp={CoreStartProp}
@@ -44,6 +45,7 @@ export const Observability = (
       dataSourceEnabled={!!dataSource}
       savedObjectsMDSClient={savedObjectsMDSClient}
       defaultRoute={defaultRoute}
+      AppMountParametersProp={AppMountParametersProp}
     />,
     AppMountParametersProp.element
   );

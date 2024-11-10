@@ -120,7 +120,7 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
-import cluster from 'cluster';
+const KUBERNETES_ID = 'kubernetes-cluster'
 
 interface PublicConfig {
   query_assist: {
@@ -276,9 +276,9 @@ export class ObservabilityPlugin
         order: 5097,
       },
       pod: {
-        id: 'observability-kubernetes-pod',
+        id: 'observability-kubernetes-node',
         label: i18n.translate('core.ui.observabilityNavList.label', {
-          defaultMessage: 'Pod',
+          defaultMessage: 'node',
         }),
         order: 5098,
       }
@@ -338,6 +338,7 @@ export class ObservabilityPlugin
     const appMountWithStartPage = (startPage: string, defaultRoute?: string) => async (
       params: AppMountParameters
     ) => {
+      console.log('AppMountParameters: ', params);
       const { Observability } = await import('./components/index');
       const [coreStart, depsStart] = await core.getStartServices();
       const dslService = new DSLService(coreStart.http);
@@ -361,23 +362,6 @@ export class ObservabilityPlugin
       );
     };
 
-    // core.application.register({
-    //   id: 'observability-kubernetes',
-    //   title: 'Kubernetes',
-    //   description: 'OpenSearch Dashboards Kubernetes Plugin',
-    //   category: {
-    //     id: 'opensearch',
-    //     label: 'OpenSearch Plugins',
-    //     order: 2000,
-    //   },
-    //   order: 4000,
-    //   mount: async (params) => {
-    //     const { renderApp } = await import('./components/kubernetes/home');
-    //     const [coreStart] = await core.getStartServices();
-    //     return renderApp(coreStart, params);
-    //   },
-    // });
-
     core.chrome.navGroup.addNavLinksToGroup(OBSERVABILITY_APP_CATEGORIES.kubernetes, [
       {
         id: 'observability-kubernetes',
@@ -385,14 +369,6 @@ export class ObservabilityPlugin
         parentNavLinkId: DEFAULT_APP_CATEGORIES.observability.id,
       },
     ]);
-
-    // core.chrome.navGroup.addNavLinksToGroup(OBSERVABILITY_APP_CATEGORIES.cluster, [
-    //   {
-    //     id: 'observability-kubernetes-cluster',
-    //     category: DEFAULT_APP_CATEGORIES.observability,
-    //     parentNavLinkId: DEFAULT_APP_CATEGORIES.observability.id,
-    //   },
-    // ]);
 
     core.application.register({
       id: observabilityMetricsID,
@@ -514,31 +490,31 @@ export class ObservabilityPlugin
       title: 'Overview',
       category: OBSERVABILITY_APP_CATEGORIES.kubernetes,
       order: 5096,
-      mount: appMountWithStartPage('kubernetes-overview'),
+      mount: appMountWithStartPage('kubernetesOverview'),
     });
 
     core.application.register({
       id: 'kubernetes-cluster',
-      title: 'Cluster',
+      title: 'Clusters',
       category: OBSERVABILITY_APP_CATEGORIES.kubernetes,
       order: 5096,
-      mount: appMountWithStartPage('kubernetes-cluster'),
+      mount: appMountWithStartPage('kubernetesCluster'),
     });
 
     core.application.register({
       id: 'kubernetes-namespaces',
-      title: 'Namespace',
+      title: 'Namespaces',
       category: OBSERVABILITY_APP_CATEGORIES.kubernetes,
       order: 5096,
-      mount: appMountWithStartPage('kubernetes-namespaces'),
+      mount: appMountWithStartPage('kubernetesNamespaces'),
     });
 
     core.application.register({
-      id: 'kubernetes-pod',
-      title: 'Pod',
+      id: 'kubernetes-node',
+      title: 'Nodes',
       category: OBSERVABILITY_APP_CATEGORIES.kubernetes,
       order: 5096,
-      mount: appMountWithStartPage('kubernetes-pod'),
+      mount: appMountWithStartPage('kubernetesNode'),
     });
 
     const navLinks = [
@@ -555,7 +531,7 @@ export class ObservabilityPlugin
         parentNavLinkId: OBSERVABILITY_APP_CATEGORIES.kubernetes.id,
       },
       {
-        id: 'kubernetes-pod',
+        id: 'kubernetes-node',
         parentNavLinkId: OBSERVABILITY_APP_CATEGORIES.kubernetes.id,
       },
     ];

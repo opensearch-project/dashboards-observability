@@ -24,6 +24,11 @@ import { Home as TraceAnalyticsHome } from './trace_analytics/home';
 import { Home as GettingStartedHome } from './getting_started/home';
 import { Home as OverviewHome } from './overview/home';
 import { Home as KubernetesHome } from './kubernetes/home';
+import { ClusterOverview } from './kubernetes/cluster/overview';
+import { clusterOverviewHome } from './kubernetes/cluster';
+import { NodeOverview } from './kubernetes/node/overview';
+import { NamespacesOverviewHome } from './kubernetes/namespaces';
+import { KubernetesOverview } from './kubernetes/overview';
 
 interface ObservabilityAppDeps {
   CoreStartProp: CoreStart;
@@ -57,7 +62,10 @@ const pages = {
   dataconnections: DataConnectionsHome,
   gettingStarted: GettingStartedHome,
   overview: OverviewHome,
-  kubernetes: KubernetesHome,
+  kubernetesOverview: KubernetesOverview,
+  kubernetesCluster: clusterOverviewHome,
+  kubernetesNode: NodeOverview,
+  kubernetesNamespaces: NamespacesOverviewHome,
 };
 
 export const App = ({
@@ -75,6 +83,7 @@ export const App = ({
   dataSourceEnabled,
   savedObjectsMDSClient,
   defaultRoute,
+  AppMountParametersProp,
 }: ObservabilityAppDeps) => {
   const { chrome, http, notifications, savedObjects: _coreSavedObjects } = CoreStartProp;
   const parentBreadcrumb = {
@@ -111,6 +120,7 @@ export const App = ({
             setActionMenu={setActionMenu}
             savedObjectsMDSClient={savedObjectsMDSClient}
             defaultRoute={defaultRoute}
+            AppMountParametersProp={AppMountParametersProp}
           />
         </MetricsListener>
       </I18nProvider>
