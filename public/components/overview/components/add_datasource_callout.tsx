@@ -14,7 +14,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { coreRefs } from '../../../framework/core_refs';
-import { dataSourcesId } from '../../../../common/constants/shared';
+import { dataSourceManagementPluginId } from '../../../../common/constants/shared';
 
 export function AddDataSourceCallout() {
   return (
@@ -40,7 +40,9 @@ export function AddDataSourceCallout() {
           <EuiButton
             fill
             color="primary"
-            onClick={() => coreRefs.application?.navigateToApp(dataSourcesId, { path: '#/' })}
+            onClick={() =>
+              coreRefs.application?.navigateToApp(dataSourceManagementPluginId, { path: '#/' })
+            }
           >
             Manage data sources
           </EuiButton>

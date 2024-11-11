@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Dashboard controls should render 1`] = `
+exports[`Dashboard controls - checkDataSource useEffect simplified should render 1`] = `
 <DashboardControls>
   <AddDashboardCallout>
     <EuiPanel

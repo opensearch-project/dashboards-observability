@@ -35,7 +35,7 @@ export const JOBS_ENDPOINT_BASE = '/_plugins/_async_query';
 export const JOB_RESULT_ENDPOINT = '/result';
 
 export const tutorialSampleDataPluginId = 'import_sample_data';
-export const dataSourcesId = 'dataSources';
+export const dataSourceManagementPluginId = 'dataSources';
 
 export const observabilityID = 'observability-logs';
 export const observabilityTitle = 'Observability';

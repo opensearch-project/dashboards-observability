@@ -10,6 +10,9 @@ import {
   EuiIcon,
   EuiButtonEmpty,
   EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { HashRouter, Route, Switch } from 'react-router-dom';
@@ -51,6 +54,7 @@ export const Home = () => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [showGetStarted, setShowGetStarted] = useState<boolean | null>(null); // Initial null state
+  const [isDashboardLoaded, setIsDashboardLoaded] = useState(false);
 
   const canUpdateUiSetting = useMemo(() => {
     const capabilities = coreRefs.application?.capabilities;
@@ -74,6 +78,7 @@ export const Home = () => {
   const closePopover = () => setIsPopoverOpen(false);
 
   const loadDashboardState = () => {
+    setIsDashboardLoaded(false);
     coreRefs.savedObjectsClient
       ?.find({
         type: 'dashboard',
@@ -92,6 +97,7 @@ export const Home = () => {
             startDate: dashboardAttributes.timeFrom,
             endDate: dashboardAttributes.timeTo,
           };
+          setIsDashboardLoaded(true);
           return acc;
         }, {} as DashboardSavedObjectsType);
 
@@ -121,6 +127,7 @@ export const Home = () => {
       })
       .catch((error) => {
         console.error('Error fetching dashboards:', error);
+        setIsDashboardLoaded(true);
       });
   };
 
@@ -382,8 +389,22 @@ export const Home = () => {
         <Switch>
           <Route exact path="/">
             <div>
-              {homePage}
-              {flyout}
+              {isDashboardLoaded ? (
+                <>
+                  {homePage}
+                  {flyout}
+                </>
+              ) : (
+                <EuiFlexGroup
+                  justifyContent="center"
+                  alignItems="center"
+                  style={{ height: '100vh' }}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="xl" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
             </div>
           </Route>
         </Switch>

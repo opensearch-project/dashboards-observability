@@ -17,7 +17,7 @@ import { OnTimeChangeProps } from '@opensearch-project/oui/src/eui_components/da
 import { useObservable } from 'react-use';
 import { FormattedMessage } from '@osd/i18n/react';
 import { coreRefs } from '../../../framework/core_refs';
-import { HOME_CONTENT_AREAS } from '../../../plugin_helpers/plugin_overview';
+import { HOME_CONTENT_AREAS, SECTIONS } from '../../../plugin_helpers/plugin_overview';
 import { redirectToDashboards } from '../../getting_started/components/utils';
 import { AddDashboardCallout } from './add_dashboard_callout';
 import { AddDataSourceCallout } from './add_datasource_callout';
@@ -25,6 +25,7 @@ import { ObsDashboardStateManager } from './obs_dashboard_state_manager';
 import { SavedObjectsClientCommonFindArgs } from '../../../../../../src/plugins/data/common';
 import { getWorkspaceIdFromUrl } from '../../../../../../src/core/public/utils';
 import { setObservabilityDashboardsId } from './utils';
+import { getOverviewPage } from '../../../../common/utils';
 
 const getDatasourceAttributes = async () => {
   const findOptions: SavedObjectsClientCommonFindArgs = {
@@ -55,6 +56,7 @@ export function DashboardControls() {
         // Set to null if there are no data sources associated [Handle if dashboard was set, then datasource deleted]
         if (savedObjectsArray.length === 0) {
           await setObservabilityDashboardsId(null);
+          getOverviewPage().removeSection(SECTIONS.DASHBOARD); // Clear the present dashboard
         }
       } else {
         setIsInWorkspace(false);
