@@ -60,7 +60,6 @@ describe('Testing traces table', () => {
   });
 });
 
-//here
 describe('Testing trace view', () => {
   beforeEach(() => {
     cy.visit(`app/observability-traces#/traces`, {
