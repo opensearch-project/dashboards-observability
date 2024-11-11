@@ -5,7 +5,7 @@
 
 /// <reference types="cypress" />
 
-import { delay, SERVICE_NAME, SERVICE_SPAN_ID, setTimeFilter, verify_traces_spans_data_grid_cols_exists, count_table_row, AUTH_SERVICE_SPAN_ID } from '../../utils/constants';
+import { expandServiceView, SERVICE_NAME, SERVICE_SPAN_ID, setTimeFilter, verify_traces_spans_data_grid_cols_exists, count_table_row, AUTH_SERVICE_SPAN_ID } from '../../utils/constants';
 import { suppressResizeObserverIssue } from '../../utils/constants';
 
 suppressResizeObserverIssue();//needs to be in file once
@@ -103,9 +103,7 @@ describe('Testing service view', () => {
     cy.get('input[type="search"]').first().focus().type(`${SERVICE_NAME}`);
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
     cy.get('.euiTableRow').should('have.length.lessThan', 3);//Replaces wait
-    cy.get('*[data-test-subj^="service-flyout-action-btntrace_service"]').click();
-    cy.get('[data-test-subj="ActionContextMenu"]').click();
-    cy.get('[data-test-subj="viewServiceButton"]').click();
+    expandServiceView(0);
   });
 
   it('Renders service view', () => {
@@ -178,9 +176,7 @@ describe('Testing traces Spans table verify table headers functionality', () => 
     cy.contains(' (8)').should('exist');
     cy.contains('analytics-service, frontend-client, recommendation').should('exist');
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
-    cy.get('*[data-test-subj^="service-flyout-action-btntrace_service"]').eq(1).click();
-    cy.get('[data-test-subj="ActionContextMenu"]').click();
-    cy.get('[data-test-subj="viewServiceButton"]').click();
+    expandServiceView(1);
     cy.get('.panel-title').contains('Spans').should('exist');
     cy.get('.panel-title-count').contains('8').should('exist');
     verify_traces_spans_data_grid_cols_exists();
@@ -188,9 +184,7 @@ describe('Testing traces Spans table verify table headers functionality', () => 
 
   it('Toggle columns and verify the columns hidden text verify rows', () => {
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
-    cy.get('*[data-test-subj^="service-flyout-action-btntrace_service"]').eq(1).click();
-    cy.get('[data-test-subj="ActionContextMenu"]').click();
-    cy.get('[data-test-subj="viewServiceButton"]').click();
+    expandServiceView(1);
     cy.get('[data-test-subj = "dataGridColumnSelectorButton"]').click({ force: true });
     cy.get('.panel-title-count').contains('8').should('exist');
     cy.get('.euiSwitch.euiSwitch--compressed.euiSwitch--mini .euiSwitch__button').eq(3).click();
@@ -200,9 +194,7 @@ describe('Testing traces Spans table verify table headers functionality', () => 
 
   it('Show all button Spans table', () => {
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
-    cy.get('*[data-test-subj^="service-flyout-action-btntrace_service"]').eq(1).click();
-    cy.get('[data-test-subj="ActionContextMenu"]').click();
-    cy.get('[data-test-subj="viewServiceButton"]').click();
+    expandServiceView(1);
     cy.get('[data-test-subj = "dataGridColumnSelectorButton"]').click();
     cy.get('.euiPopoverFooter .euiFlexItem.euiFlexItem--flexGrowZero').eq(0).should('have.text', 'Show all').click();
     cy.get('.euiDataGrid__focusWrap').click().should('exist');
@@ -211,9 +203,7 @@ describe('Testing traces Spans table verify table headers functionality', () => 
 
   it('Hide all button Spans table', () => {
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
-    cy.get('*[data-test-subj^="service-flyout-action-btntrace_service"]').eq(1).click();
-    cy.get('[data-test-subj="ActionContextMenu"]').click();
-    cy.get('[data-test-subj="viewServiceButton"]').click();
+    expandServiceView(1);
     cy.get('.euiTableRow').should('have.length.lessThan', 2);//Replace wait
     cy.get('[data-test-subj = "dataGridColumnSelectorButton"]').click();
     cy.get('.euiPopoverFooter .euiFlexItem.euiFlexItem--flexGrowZero').eq(1).should('have.text', 'Hide all').click();
@@ -223,9 +213,7 @@ describe('Testing traces Spans table verify table headers functionality', () => 
 
   it('Render Spans table and change data table Density', () => {
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
-    cy.get('*[data-test-subj^="service-flyout-action-btntrace_service"]').eq(1).click();
-    cy.get('[data-test-subj="ActionContextMenu"]').click();
-    cy.get('[data-test-subj="viewServiceButton"]').click();
+    expandServiceView(1);
     verify_traces_spans_data_grid_cols_exists();
     cy.get('.euiButtonEmpty__text').contains('Density').click();
     cy.get('.euiButtonContent__icon').eq(5).click();
@@ -235,9 +223,7 @@ describe('Testing traces Spans table verify table headers functionality', () => 
 
   it('Render Spans table and and click on sort', () => {
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
-    cy.get('*[data-test-subj^="service-flyout-action-btntrace_service"]').eq(1).click();
-    cy.get('[data-test-subj="ActionContextMenu"]').click();
-    cy.get('[data-test-subj="viewServiceButton"]').click();
+    expandServiceView(1);
     verify_traces_spans_data_grid_cols_exists();
     cy.get('[data-test-subj="dataGridColumnSortingButton"]').contains('Sort fields').should('exist').click();
     cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection"]').click();
@@ -269,9 +255,7 @@ describe('Testing traces Spans table and verify columns functionality', () => {
 
   it('Renders the spans table and click on first span to verify details', () => {
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
-    cy.get('*[data-test-subj^="service-flyout-action-btntrace_service"]').eq(1).click();
-    cy.get('[data-test-subj="ActionContextMenu"]').click();
-    cy.get('[data-test-subj="viewServiceButton"]').click();
+    expandServiceView(1);
     verify_traces_spans_data_grid_cols_exists();
     cy.contains(AUTH_SERVICE_SPAN_ID).click();
     cy.get('[data-test-subj="spanDetailFlyout"]').contains('Span detail').should('exist');
@@ -291,9 +275,7 @@ describe('Testing traces Spans table and verify columns functionality', () => {
 
   it('Render Spans table and verify Column functionality', () => {
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
-    cy.get('*[data-test-subj^="service-flyout-action-btntrace_service"]').eq(1).click();
-    cy.get('[data-test-subj="ActionContextMenu"]').click();
-    cy.get('[data-test-subj="viewServiceButton"]').click();
+    expandServiceView(1);
     verify_traces_spans_data_grid_cols_exists();
     cy.get('.euiDataGridHeaderCell__content').contains('Span ID').click();
     cy.get('.euiListGroupItem__label').contains('Hide column').click();

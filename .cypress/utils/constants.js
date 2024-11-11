@@ -83,6 +83,12 @@ export const setTimeFilter = (setEndTime = false, refresh = true) => {
   cy.get('.euiTableRow').should('have.length.greaterThan', 3); //Replaces Wait
 };
 
+export const expandServiceView = (rowIndex = 0) => {
+  cy.get('*[data-test-subj^="service-flyout-action-btntrace_service"]').eq(rowIndex).click();
+  cy.get('[data-test-subj="ActionContextMenu"]').click();
+  cy.get('[data-test-subj="viewServiceButton"]').click();
+};
+
 // notebooks
 export const TEST_NOTEBOOK = 'Test Notebook';
 export const TEST_INTEGRATION_INSTANCE = 'nginx-test';
@@ -124,6 +130,7 @@ select * from opensearch_dashboards_sample_data_flights limit 20 {enter}
 export const PPL_QUERY_TEXT = `%ppl
 source=opensearch_dashboards_sample_data_flights {enter}
 `;
+
 
 export const suppressResizeObserverIssue = () => {
   // exception is thrown on loading EuiDataGrid in cypress only, ignore for now
