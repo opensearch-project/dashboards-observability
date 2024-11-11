@@ -61,6 +61,7 @@ export function ServiceMap({
   filterByCurrService,
   includeMetricsCallback,
   mode,
+  hideSearchBar = false,
 }: {
   serviceMap: ServiceObject;
   idSelected: 'latency' | 'error_rate' | 'throughput';
@@ -80,6 +81,7 @@ export function ServiceMap({
   filterByCurrService?: boolean;
   includeMetricsCallback?: () => void;
   mode?: string;
+  hideSearchBar?: boolean;
 }) {
   const [graphKey, setGraphKey] = useState(0); // adding key to allow for re-renders
   const [invalid, setInvalid] = useState(false);
@@ -436,90 +438,92 @@ export function ServiceMap({
             <EuiHorizontalRule margin="m" />
           </>
         )}
-        <EuiFlexGroup>
-          <EuiFlexItem grow={7}>
-            <EuiPopover
-              button={
-                <EuiFieldSearch
-                  compressed
-                  prepend="Focus on"
-                  placeholder="Service name"
-                  value={focusedService || query}
-                  onClick={() => setPopoverOpen(!isPopoverOpen)}
-                  onChange={(e) => {
-                    const newValue = e.target.value;
-                    setQuery(newValue);
-                    if (newValue === '') {
-                      setGraphKey((prevKey) => prevKey + 1);
-                      setQuery('');
-                      onFocus('');
-                    }
-                  }}
-                  isInvalid={query.length > 0 && invalid}
-                  append={
-                    <EuiButtonIcon
-                      iconType="refresh"
-                      size="s"
-                      onClick={() => {
+        {!hideSearchBar && (
+          <EuiFlexGroup>
+            <EuiFlexItem grow={7}>
+              <EuiPopover
+                button={
+                  <EuiFieldSearch
+                    compressed
+                    prepend="Focus on"
+                    placeholder="Service name"
+                    value={focusedService || query}
+                    onClick={() => setPopoverOpen(!isPopoverOpen)}
+                    onChange={(e) => {
+                      const newValue = e.target.value;
+                      setQuery(newValue);
+                      if (newValue === '') {
                         setGraphKey((prevKey) => prevKey + 1);
                         setQuery('');
                         onFocus('');
-                      }}
-                    />
-                  }
-                  aria-controls="service-select-dropdown"
-                />
-              }
-              isOpen={isPopoverOpen}
-              closePopover={() => setPopoverOpen(false)}
-              panelPaddingSize="none"
-              anchorPosition="downLeft"
-              repositionOnScroll
-              id="service-select-dropdown"
-              ownFocus={false}
-            >
-              <EuiSelectable
-                searchable
-                searchProps={{
-                  value: query,
-                  onInput: (e) => setQuery(e.target.value),
-                  isClearable: true,
-                  autoFocus: true,
-                }}
-                options={selectableOptions.filter((option) =>
-                  option.label.toLowerCase().includes(query.toLowerCase())
-                )}
-                singleSelection={true}
-                onChange={(newOptions) => {
-                  const selectedOption = newOptions.find((option) => option.checked === 'on');
-                  if (selectedOption) {
-                    if (selectedOption.label === focusedService) {
-                      setPopoverOpen(false);
-                      return;
+                      }
+                    }}
+                    isInvalid={query.length > 0 && invalid}
+                    append={
+                      <EuiButtonIcon
+                        iconType="refresh"
+                        size="s"
+                        onClick={() => {
+                          setGraphKey((prevKey) => prevKey + 1);
+                          setQuery('');
+                          onFocus('');
+                        }}
+                      />
                     }
-                    setQuery(selectedOption.label);
-                    onFocus(selectedOption.label);
-                    setPopoverOpen(false);
-                  }
-                }}
-                listProps={{ bordered: true, style: { width: '300px' } }}
+                    aria-controls="service-select-dropdown"
+                  />
+                }
+                isOpen={isPopoverOpen}
+                closePopover={() => setPopoverOpen(false)}
+                panelPaddingSize="none"
+                anchorPosition="downLeft"
+                repositionOnScroll
+                id="service-select-dropdown"
+                ownFocus={false}
               >
-                {(list) => <div>{list}</div>}
-              </EuiSelectable>
-            </EuiPopover>
-          </EuiFlexItem>
-          {page === 'traces' && (
-            <EuiFlexItem grow={3}>
-              <EuiSuperSelect
-                prepend="Select metrics"
-                compressed
-                options={metricOptions}
-                valueOfSelected={selectableValue}
-                onChange={(value) => onChangeSelectable(value)}
-              />
+                <EuiSelectable
+                  searchable
+                  searchProps={{
+                    value: query,
+                    onInput: (e) => setQuery(e.target.value),
+                    isClearable: true,
+                    autoFocus: true,
+                  }}
+                  options={selectableOptions.filter((option) =>
+                    option.label.toLowerCase().includes(query.toLowerCase())
+                  )}
+                  singleSelection={true}
+                  onChange={(newOptions) => {
+                    const selectedOption = newOptions.find((option) => option.checked === 'on');
+                    if (selectedOption) {
+                      if (selectedOption.label === focusedService) {
+                        setPopoverOpen(false);
+                        return;
+                      }
+                      setQuery(selectedOption.label);
+                      onFocus(selectedOption.label);
+                      setPopoverOpen(false);
+                    }
+                  }}
+                  listProps={{ bordered: true, style: { width: '300px' } }}
+                >
+                  {(list) => <div>{list}</div>}
+                </EuiSelectable>
+              </EuiPopover>
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+            {page === 'traces' && (
+              <EuiFlexItem grow={3}>
+                <EuiSuperSelect
+                  prepend="Select metrics"
+                  compressed
+                  options={metricOptions}
+                  valueOfSelected={selectableValue}
+                  onChange={(value) => onChangeSelectable(value)}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        )}
         <EuiSpacer />
 
         {Object.keys(serviceMap).length > 0 ? (

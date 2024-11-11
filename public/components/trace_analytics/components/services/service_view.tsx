@@ -533,6 +533,7 @@ export function ServiceView(props: ServiceViewProps) {
             page="serviceView"
             filterByCurrService={true}
             mode={mode}
+            hideSearchBar={page === 'serviceFlyout'}
           />
         </>
       ) : (
