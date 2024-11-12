@@ -5,7 +5,7 @@
 
 /// <reference types="cypress" />
 
-import { testDataSet, delay, setTimeFilter, jaegerTestDataSet } from '../../utils/constants';
+import { testDataSet, setTimeFilter, jaegerTestDataSet } from '../../utils/constants';
 import { suppressResizeObserverIssue } from '../../utils/constants';
 
 suppressResizeObserverIssue();//needs to be in file once
@@ -102,15 +102,15 @@ describe('Testing dashboard table', () => {
   });
 
   it('Adds the percentile filters', () => {
-    cy.contains(' >= 95 percentile').click({ force: true });
-    cy.contains(' >= 95 percentile').click({ force: true });
+    
+    cy.get('[data-test-subj="dashboardTable"]').should('be.visible');
+    cy.get('[data-test-subj="dashboard-table-percentile-button-2"]').click();
 
     cy.contains('Latency percentile within trace group: >= 95th').should('exist');
     cy.contains(' (7)').should('exist');
     cy.contains('318.69').should('exist');
 
-    cy.contains(' < 95 percentile').click({ force: true });
-    cy.contains(' < 95 percentile').click({ force: true });
+    cy.get('[data-test-subj="dashboard-table-percentile-button-1"]').click();
 
     cy.contains('Latency percentile within trace group: < 95th').should('exist');
     cy.contains(' (8)').should('exist');
@@ -148,6 +148,7 @@ describe('Testing plots', () => {
 
   it('Renders service map', () => {
     // plotly scale texts are in attribute "data-unformatted"
+    cy.get('.euiSideNavItemButton__label').contains('Services').click();
     cy.get('text.ytitle[data-unformatted="Average duration (ms)"]').should('exist');
     cy.get('text[data-unformatted="200"]').should('exist');
     cy.get('.vis-network').should('exist');
@@ -218,7 +219,6 @@ describe('Latency by trace group table', () =>{
   it('Verify Search engine on Trace dashboard', () => {
     cy.get('.euiFieldSearch.euiFieldSearch--fullWidth').click().type('client_pay_order');
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
-    cy.wait(delay);//Fails without
     cy.get('.euiTableCellContent.euiTableCellContent--alignRight.euiTableCellContent--overflowingContent').contains('211.04').should('exist');
     cy.get('button[data-test-subj="dashboard-table-trace-group-name-button"]').eq(0).click();
     cy.get('.euiBadge.euiBadge--hollow.euiBadge--iconRight.globalFilterItem').click();
@@ -250,25 +250,22 @@ describe('Testing filters on trace analytics page', { scrollBehavior: false }, (
   });
 
   it('Verify Change all filters', () =>{
-    cy.wait(delay);//Needed after removing waits from setTimeFilter()
     cy.get('[data-test-subj="global-filter-button"]').click();
     cy.get('.euiContextMenuPanelTitle').contains('Change all filters').should('exist');
-    cy.get('.euiContextMenuItem__text').eq(0).contains('Enable all');
-    cy.get('.euiContextMenuItem__text').eq(1).contains('Disable all');
-    cy.get('.euiContextMenuItem__text').eq(2).contains('Invert inclusion');
-    cy.get('.euiContextMenuItem__text').eq(3).contains('Invert enabled/disabled');
-    cy.get('.euiContextMenuItem__text').eq(4).contains('Remove all');
+    cy.get('.euiContextMenuItem__text').eq(1).contains('Enable all');
+    cy.get('.euiContextMenuItem__text').eq(2).contains('Disable all');
+    cy.get('.euiContextMenuItem__text').eq(3).contains('Invert inclusion');
+    cy.get('.euiContextMenuItem__text').eq(4).contains('Invert enabled/disabled');
+    cy.get('.euiContextMenuItem__text').eq(5).contains('Remove all');
   })
 
   it('Verify Add filter section', () => {
-    cy.wait(delay);//Needed after removing waits from setTimeFilter()
-    cy.get('[data-test-subj="addfilter"]').contains('+ Add filter').click();
-    cy.get('.euiPopoverTitle').contains('Add filter').should('exist');
-    cy.wait(delay);//drop down won't open without
-    cy.get('.euiComboBox__inputWrap.euiComboBox__inputWrap--noWrap').eq(0).trigger('mouseover').click();
-    cy.get('.euiComboBoxOption__content').eq(1).click();
-    cy.get('.euiComboBox__inputWrap.euiComboBox__inputWrap--noWrap').eq(1).trigger('mouseover').click();
-    cy.get('.euiComboBoxOption__content').eq(2).click();
+    cy.get('[data-test-subj="global-filter-button"]').click();
+    cy.get('.euiContextMenuItem__text').contains('Add filter').click();
+    cy.get('[data-test-subj="field-selector-filter-panel"]').click();
+    cy.get('[data-test-subj="field-selector-filter-panel"]').type('traceId{enter}');
+    cy.get('[data-test-subj="operator-selector-filter-panel"]').click();
+    cy.get('[data-test-subj="operator-selector-filter-panel"]').type('exists{enter}');
     cy.get('.euiButton.euiButton--primary.euiButton--fill').contains('Save').click();
     cy.get('.euiBadge__content').should('exist').click();
     cy.get('.euiIcon.euiIcon--medium.euiContextMenu__arrow').click();

@@ -18,7 +18,7 @@ export const DATASOURCES_PATH = {
 export const TRACE_ID = '8832ed6abbb2a83516461960c89af49d';
 export const SPAN_ID = 'a673bc074b438374';
 export const SERVICE_NAME = 'frontend-client';
-export const SERVICE_SPAN_ID = '7df5609a6d104736';
+export const SERVICE_SPAN_ID = 'e275ac9d21929e9b';
 export const AUTH_SERVICE_SPAN_ID = '277a5934acf55dcf';
 
 export const testDataSet = [
@@ -68,24 +68,25 @@ export const setTimeFilter = (setEndTime = false, refresh = true) => {
   cy.get('button.euiButtonEmpty[aria-label="Date quick select"]').click();
   cy.get('.euiQuickSelect__applyButton').click();
   cy.get('.euiSuperDatePicker__prettyFormatLink').click();
-  cy.get(
-    'button.euiDatePopoverButton--start[data-test-subj="superDatePickerstartDatePopoverButton"]'
-  ).click();
   cy.get('.euiTab__content').contains('Absolute').click();
   cy.get('input[data-test-subj="superDatePickerAbsoluteDateInput"]')
     .focus()
     .type('{selectall}' + startTime, { force: true });
   if (setEndTime) {
-    cy.get(
-      'button.euiDatePopoverButton--end[data-test-subj="superDatePickerendDatePopoverButton"]'
-    ).click();
+    cy.get('button.euiDatePopoverButton--end[data-test-subj="superDatePickerendDatePopoverButton"]').click();
     cy.get('.euiTab__content').contains('Absolute').click();
     cy.get('input[data-test-subj="superDatePickerAbsoluteDateInput"]')
       .focus()
       .type('{selectall}' + endTime, { force: true });
   }
-  if (refresh) cy.get('.euiButton__text').contains('Refresh').click();
+  if (refresh) cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
   cy.get('.euiTableRow').should('have.length.greaterThan', 3); //Replaces Wait
+};
+
+export const expandServiceView = (rowIndex = 0) => {
+  cy.get('*[data-test-subj^="service-flyout-action-btntrace_service"]').eq(rowIndex).click();
+  cy.get('[data-test-subj="ActionContextMenu"]').click();
+  cy.get('[data-test-subj="viewServiceButton"]').click();
 };
 
 // notebooks
@@ -129,6 +130,7 @@ select * from opensearch_dashboards_sample_data_flights limit 20 {enter}
 export const PPL_QUERY_TEXT = `%ppl
 source=opensearch_dashboards_sample_data_flights {enter}
 `;
+
 
 export const suppressResizeObserverIssue = () => {
   // exception is thrown on loading EuiDataGrid in cypress only, ignore for now
