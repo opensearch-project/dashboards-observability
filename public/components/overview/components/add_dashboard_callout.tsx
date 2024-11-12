@@ -26,7 +26,7 @@ import SampleDataLightPNG from './assets/SampleDataLight.png';
 
 export function AddDashboardCallout() {
   const showFlyout = useObservable(ObsDashboardStateManager.showFlyout$);
-  const isDarkMode = uiSettingsService.get('theme:darkMode');
+  const isDarkMode = uiSettingsService?.get('theme:darkMode') ?? false;
 
   return (
     <EuiPanel paddingSize="m" hasShadow={true}>
