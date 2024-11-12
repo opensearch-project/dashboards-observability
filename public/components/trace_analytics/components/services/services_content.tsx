@@ -242,6 +242,7 @@ export function ServicesContent(props: ServicesProps) {
               currService={filteredService}
               page={page}
               setCurrentSelectedService={setCurrentSelectedService}
+              mode={mode}
             />
           ) : (
             <div />
