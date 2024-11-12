@@ -232,7 +232,9 @@ exports[`Service view component renders service view 1`] = `
       <ServiceMap
         currService="order"
         filterByCurrService={true}
+        hideSearchBar={false}
         idSelected="latency"
+        mode="data_prepper"
         page="serviceView"
         serviceMap={Object {}}
         setIdSelected={[Function]}
