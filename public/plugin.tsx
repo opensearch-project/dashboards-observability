@@ -429,18 +429,13 @@ export class ObservabilityPlugin
         mount: appMountWithStartPage('traces', '/services'),
       });
 
-      // core.application.register({
-      //   id: 'observability-kubernetes',
-      //   title: 'Kubernetes',
-      //   category: DEFAULT_APP_CATEGORIES.observability,
-      //   // category: {
-      //   //   id: 'observability',
-      //   //   label: 'Observability',
-      //   //   order: 3000,
-      //   // },
-      //   order: 5095,
-      //   mount: appMountWithStartPage('kubernetes'),
-      // });
+      core.application.register({
+        id: 'observability-kubernetes',
+        title: 'Kubernetes',
+        category: DEFAULT_APP_CATEGORIES.investigate,
+        order: 5095,
+        mount: appMountWithStartPage('kubernetes'),
+      });
 
     } else {
       core.application.register({
@@ -449,6 +444,14 @@ export class ObservabilityPlugin
         category: OBSERVABILITY_APP_CATEGORIES.observability,
         order: observabilityTracesPluginOrder,
         mount: appMountWithStartPage('traces'),
+      });
+
+      core.application.register({
+        id: 'observability-kubernetes',
+        title: 'Kubernetes',
+        category: DEFAULT_APP_CATEGORIES.observability,
+        order: 5095,
+        mount: appMountWithStartPage('kubernetes'),
       });
       // deprecated in new Nav Groups and when MDS is enabled.
       if (!setupDeps.dataSource) {
@@ -475,14 +478,6 @@ export class ObservabilityPlugin
       category: OBSERVABILITY_APP_CATEGORIES.observability,
       order: observabilityNotebookPluginOrder,
       mount: appMountWithStartPage('notebooks'),
-    });
-
-    core.application.register({
-      id: 'observability-kubernetes',
-      title: 'Kubernetes',
-      category: DEFAULT_APP_CATEGORIES.observability,
-      order: 5095,
-      mount: appMountWithStartPage('kubernetes'),
     });
 
     core.application.register({
