@@ -261,27 +261,6 @@ export class ObservabilityPlugin
         }),
         order: 5095,
       },
-      cluster: {
-        id: 'observability-kubernetes-cluster',
-        label: i18n.translate('core.ui.observabilityNavList.label', {
-          defaultMessage: 'Cluster',
-        }),
-        order: 5096,
-      },
-      namespaces: {
-        id: 'observability-kubernetes-namespaces',
-        label: i18n.translate('core.ui.observabilityNavList.label', {
-          defaultMessage: 'Namespaces',
-        }),
-        order: 5097,
-      },
-      pod: {
-        id: 'observability-kubernetes-node',
-        label: i18n.translate('core.ui.observabilityNavList.label', {
-          defaultMessage: 'node',
-        }),
-        order: 5098,
-      }
     });
 
     // Adding a variation entails associating a key-value pair, where a change in the key results in
@@ -362,14 +341,6 @@ export class ObservabilityPlugin
       );
     };
 
-    core.chrome.navGroup.addNavLinksToGroup(OBSERVABILITY_APP_CATEGORIES.kubernetes, [
-      {
-        id: 'observability-kubernetes',
-        category: DEFAULT_APP_CATEGORIES.observability,
-        parentNavLinkId: DEFAULT_APP_CATEGORIES.observability.id,
-      },
-    ]);
-
     core.application.register({
       id: observabilityMetricsID,
       title: observabilityMetricsTitle,
@@ -397,6 +368,15 @@ export class ObservabilityPlugin
     });
     console.log('core.chrome.navGroup.getNavGroupEnabled(): ', core.chrome.navGroup.getNavGroupEnabled());
     if (core.chrome.navGroup.getNavGroupEnabled()) {
+
+      core.chrome.navGroup.addNavLinksToGroup(
+        DEFAULT_NAV_GROUPS.observability,
+        [{
+          id: 'observability-kubernetes',
+          parentNavLinkId: DEFAULT_APP_CATEGORIES.investigate.id,
+        },]
+      );
+
       core.application.register({
         id: observabilityOverviewID,
         title: observabilityOverviewTitle,
@@ -432,12 +412,21 @@ export class ObservabilityPlugin
       core.application.register({
         id: 'observability-kubernetes',
         title: 'Kubernetes',
-        category: DEFAULT_APP_CATEGORIES.investigate,
+        category: OBSERVABILITY_APP_CATEGORIES.observability,
         order: 5095,
         mount: appMountWithStartPage('kubernetes'),
       });
 
     } else {
+
+      core.chrome.navGroup.addNavLinksToGroup(OBSERVABILITY_APP_CATEGORIES.kubernetes, [
+        {
+          id: 'observability-kubernetes',
+          category: DEFAULT_APP_CATEGORIES.observability,
+          parentNavLinkId: DEFAULT_APP_CATEGORIES.observability.id,
+        },
+      ]);
+
       core.application.register({
         id: observabilityTracesID,
         title: observabilityTracesTitle,
@@ -523,7 +512,7 @@ export class ObservabilityPlugin
     const navLinks = [
       {
         id: 'kubernetes-configurations',
-        parentNavLinkId: OBSERVABILITY_APP_CATEGORIES.kubernetes.id,
+        parentNavLinkId: 'observability-kubernetes',
       },
       {
         id: 'kubernetes-overview',
@@ -543,8 +532,13 @@ export class ObservabilityPlugin
       },
     ];
 
+    // core.chrome.navGroup.addNavLinksToGroup(
+    //   OBSERVABILITY_APP_CATEGORIES.kubernetes,
+    //   navLinks
+    // );
+
     core.chrome.navGroup.addNavLinksToGroup(
-      OBSERVABILITY_APP_CATEGORIES.kubernetes,
+      DEFAULT_NAV_GROUPS.observability,
       navLinks
     );
 
