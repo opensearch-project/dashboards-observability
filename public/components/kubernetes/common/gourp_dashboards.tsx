@@ -67,11 +67,12 @@ const layouts = {
     // Additional information panels
     { i: 'runningPodsCategory', x: 7, y: 0, w: 2, h: 2 },
     { i: 'cpuCoreCount', x: 5, y: 3, w: 1, h: 1 },
+    { i: 'diskIO', x: 7, y: 2, w: 2, h: 2 },
     { i: 'totalNetworkTraffic', x: 3, y: 3, w: 5, h: 2 },
 
     // Visualization row with detailed charts
     // { i: 'networkTraffic', x: 0, y: 5, w: 4, h: 3 },
-    // { i: 'diskIO', x: 4, y: 5, w: 4, h: 3 },
+    // { i: 'diskIO', x: 7, y: 2, w: 2, h: 2 },
 
     // Namespace-based CPU and memory usage panels
     { i: 'cpuUsageByNamespace', x: 0, y: 8, w: 4, h: 3 },
@@ -94,7 +95,7 @@ const layouts = {
     { i: 'runningPodsCategory', x: 0, y: 3, w: 3, h: 2 },
     { i: 'totalNetworkTraffic', x: 3, y: 3, w: 5, h: 2 },
     { i: 'networkTraffic', x: 0, y: 5, w: 4, h: 3 },
-    { i: 'diskIO', x: 4, y: 5, w: 4, h: 3 },
+    { i: 'diskIO', x: 7, y: 2, w: 2, h: 2 },
     { i: 'cpuUsageByNamespace', x: 0, y: 8, w: 4, h: 3 },
     { i: 'memoryUsageByNamespace', x: 4, y: 8, w: 4, h: 3 },
     { i: 'podNetworkUtilization', x: 0, y: 11, w: 4, h: 3 },
@@ -113,7 +114,7 @@ const layouts = {
     { i: 'runningPodsCategory', x: 2, y: 6, w: 2, h: 2 },
     { i: 'totalNetworkTraffic', x: 0, y: 7, w: 4, h: 3 },
     { i: 'networkTraffic', x: 0, y: 10, w: 4, h: 3 },
-    { i: 'diskIO', x: 0, y: 13, w: 4, h: 3 },
+    { i: 'diskIO', x: 7, y: 2, w: 2, h: 2 },
     { i: 'cpuUsageByNamespace', x: 0, y: 16, w: 4, h: 3 },
     { i: 'memoryUsageByNamespace', x: 0, y: 19, w: 4, h: 3 },
     { i: 'podNetworkUtilization', x: 0, y: 22, w: 4, h: 3 },
@@ -130,7 +131,6 @@ export const GroupDashboards = ({
   const [metricsData, setMetricsData] = React.useState<any[]>([]);
 
   useEffect(() => {
-    console.log('reredner on date change.....');
     const metrics = prometheusQueries.map((query) => {
       return pplService.fetch({ query: query.query, format: 'viz' });
     });
@@ -149,28 +149,31 @@ export const GroupDashboards = ({
     xKeys: string[],
     yKeys: string[],
     gKeys: string[],
-    traceConfig: {}
+    vis: {}
   ) => {
+    const traceConfig = vis.config;
     if (traceConfig.type === 'pie') {
       return [
         {
-          labels: data.data[xKeys[0]],
-          values: data.data[yKeys[0]],
+          // labels: data,
+          // values: data.data[yKeys[0]],
+          labels: vis.labels,
+          values: vis.values,
           ...traceConfig,
         },
       ];
     } else if (traceConfig.type === 'indicator') {
       return [
         {
-          value: data?.data[yKeys[0]][0] || 0,
+          value: vis.value ? vis.value : data?.data[yKeys[0]][0],
           ...traceConfig,
         },
       ];
     } else if (gKeys.length === 0) {
       return [
         {
-          x: data.data[xKeys[0]],
-          y: data.data[yKeys[0]],
+          x: vis.x ? vis.x : data.data[xKeys[0]],
+          y: vis.y ? vis.y : data.data[yKeys[0]],
           ...traceConfig,
         },
       ];
@@ -213,16 +216,9 @@ export const GroupDashboards = ({
         visXaxisKeys,
         visYaxisKeys,
         visGroupingKeys,
-        prometheusQueries[index].vis.config
+        prometheusQueries[index].vis
       );
 
-      // metric
-      // jdbc
-      // metric.datarows.forEach((row) => {
-      //   xaxisData.push(row[0]);
-      //   yaxisData.push(row[1]);
-      //   // row[0] = new Date(row[0]).toISOString();
-      // });
       return (
         <div key={prometheusQueries[index].title + index} data-grid={layouts.lg[index]}>
           <EuiPanel paddingSize="m">
@@ -230,13 +226,6 @@ export const GroupDashboards = ({
               <h4>{prometheusQueries[index].title}</h4>
             </EuiText>
             <Plt
-              // data={[
-              //   {
-              //     x: xaxisData,
-              //     y: yaxisData,
-              //     type: prometheusQueries[index].vis?.type || 'scatter',
-              //   },
-              // ]}
               data={visualizationData}
               layout={{
                 // width: 200, // Set custom width
@@ -246,9 +235,6 @@ export const GroupDashboards = ({
                 showlegend: true,
                 ...(prometheusQueries[index].vis.layout || {}),
                 xaxis: {
-                  // title: {
-                  //   text: prometheusQueries[index].vis.x || metric.schema[0]?.name || '',
-                  // },
                   showgrid: true,
                   zeroline: false,
                   rangemode: 'normal',
@@ -262,31 +248,9 @@ export const GroupDashboards = ({
                   zeroline: false,
                   rangemode: 'normal',
                 },
-                colorway: PLOTLY_COLOR
+                colorway: PLOTLY_COLOR,
               }}
-              // config={prometheusQueries[index].vis.component.config}
             />
-            {/* <Visualization
-            visualizations={{
-              data: {
-                userConfigs: {
-                  dataConfig: {
-                    span: {},
-                    [GROUPBY]: metric.schema[1]?.name,
-                    [AGGREGATIONS]: metric.schema[0]?.name,
-                    queryMetaData: {},
-                    metricType: '',
-                  },
-                },
-                explorer: {
-                  explorerData: { schema: metric.schema, jsonData: metric.jsonData },
-                },
-              },
-              vis: {
-                component: prometheusQueries[index].vis.component,
-              },
-            }}
-          /> */}
           </EuiPanel>
           <EuiSpacer size="m" />
         </div>

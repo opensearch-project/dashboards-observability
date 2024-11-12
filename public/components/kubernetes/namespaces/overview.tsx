@@ -25,6 +25,7 @@ import {
   EuiSelect,
   EuiFieldSearch,
   EuiIcon,
+  EuiLink,
 } from '@elastic/eui';
 
 export const NamespaceOverview = () => {
@@ -113,7 +114,10 @@ export const NamespaceOverview = () => {
               {fakeData.map((namespace, index) => (
                 <EuiTableRow key={index}>
                   <EuiTableRowCell>
-                    <EuiIcon type="arrowRight" /> {namespace.namespace}
+                    <EuiLink href={`kubernetes-namespaces/${namespace.namespace}`}>
+                      {namespace.namespace}
+                    </EuiLink>
+                    {/* <EuiIcon type="arrowRight" /> {namespace.namespace} */}
                   </EuiTableRowCell>
                   <EuiTableRowCell>
                     <EuiBadge color="hollow">{namespace.cluster}</EuiBadge>

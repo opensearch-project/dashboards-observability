@@ -35,6 +35,26 @@ export const KubernetesConfiguration = () => {
   const [osUsername, setOsUsername] = useState('');
   const [osPassword, setOsPassword] = useState('');
   const [toasts, setToasts] = useState([]);
+  const [selectedDatasource, setSelectedDatasource] = useState(''); // For tracking the selected datasource
+
+  // Sample list of available OpenSearch datasources
+  const availableDatasources = [
+    { value: '', text: 'Select an OpenSearch Datasource' },
+    { value: 'localcluster', text: 'localcluster' },
+  ];
+
+  const handleDatasourceChange = (e) => {
+    const value = e.target.value;
+    setSelectedDatasource(value);
+
+    // If "Custom URI" is selected, clear the osUri input field
+    if (value === 'custom') {
+      setOsUri('');
+    } else {
+      // Set osUri to the selected datasource's value
+      setOsUri(value);
+    }
+  };
 
   const addToast = () => {
     const newToast = {
@@ -77,10 +97,12 @@ export const KubernetesConfiguration = () => {
           <EuiText>
             <ul>
               <li>
-                Ensure that you have access to a <strong>Prometheus</strong> instance and a <strong>Kubernetes cluster</strong> for providing Access Key and Secret Key.
+                Ensure that you have access to a <strong>Prometheus</strong> instance and a{' '}
+                <strong>Kubernetes cluster</strong> for providing Access Key and Secret Key.
               </li>
               <li>
-                Have an <strong>OpenSearch compatible domain</strong> as a datasource, or enable a local OpenSearch cluster to create the Prometheus datasource in OpenSearch.
+                Have an <strong>OpenSearch compatible domain</strong> as a datasource, or enable a
+                local OpenSearch cluster to create the Prometheus datasource in OpenSearch.
               </li>
             </ul>
           </EuiText>
@@ -91,7 +113,7 @@ export const KubernetesConfiguration = () => {
         {/* Datasource Selector Section */}
         <EuiPanel paddingSize="m">
           <EuiTitle size="s">
-            <h2>Datasource Selector</h2>
+            <h2>Datasource Configurations</h2>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiForm component="form">
@@ -100,11 +122,21 @@ export const KubernetesConfiguration = () => {
               buttonContent="OpenSearch Datasource Configuration"
               paddingSize="m"
             >
-              <EuiFormRow label="OpenSearch URI" helpText="Enter the URI for your OpenSearch instance.">
+              {/* <EuiFormRow label="OpenSearch URI" helpText="Enter the URI for your OpenSearch instance.">
                 <EuiFieldText
                   placeholder="https://localhost:9200"
                   value={osUri}
                   onChange={(e) => setOsUri(e.target.value)}
+                />
+              </EuiFormRow> */}
+              <EuiFormRow
+                label="OpenSearch Datasource"
+                helpText="Select or enter the URI for your OpenSearch instance."
+              >
+                <EuiSelect
+                  options={availableDatasources}
+                  value={selectedDatasource}
+                  onChange={handleDatasourceChange}
                 />
               </EuiFormRow>
               <EuiFormRow label="OpenSearch Username">
@@ -138,7 +170,10 @@ export const KubernetesConfiguration = () => {
                   onChange={(e) => setDatasourceName(e.target.value)}
                 />
               </EuiFormRow>
-              <EuiFormRow label="Prometheus URI" helpText="Enter the URI for your Prometheus instance.">
+              <EuiFormRow
+                label="Prometheus URI"
+                helpText="Enter the URI for your Prometheus instance."
+              >
                 <EuiFieldText
                   placeholder="https://prometheus.example.com"
                   value={prometheusUri}
@@ -173,17 +208,17 @@ export const KubernetesConfiguration = () => {
 
         <EuiSpacer size="l" />
 
-        {/* Create Datasource Button */}
-        <EuiButton fill color="primary" onClick={handleCreateDatasource}>
-          Create Prometheus Datasource
-        </EuiButton>
+        {/* Create Datasource Button in Flex Item */}
+        <EuiFlexGroup justifyContent="flexStart">
+          <EuiFlexItem grow={false}>
+            <EuiButton fill color="primary" onClick={handleCreateDatasource}>
+              Create Prometheus Datasource
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
         {/* Toast Notifications */}
-        <EuiGlobalToastList
-          toasts={toasts}
-          dismissToast={removeToast}
-          toastLifeTimeMs={6000}
-        />
+        <EuiGlobalToastList toasts={toasts} dismissToast={removeToast} toastLifeTimeMs={6000} />
       </EuiPageBody>
     </EuiPage>
   );

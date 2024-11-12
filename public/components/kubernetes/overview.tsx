@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiPage,
   EuiPageBody,
@@ -25,10 +25,24 @@ import {
   EuiTableRow,
   EuiTableRowCell,
   EuiBadge,
+  EuiStatProps,
 } from '@elastic/eui';
 import { Plt } from '../visualizations/plotly/plot';
+import { coreRefs } from '../../framework/core_refs';
+const initialStatsData = [
+  { label: 'Clusters', value: 0 },
+  { label: 'Nodes', value: 2 },
+  { label: 'Namespaces', value: 11 },
+  { label: 'Workloads', value: 48 },
+  { label: 'Pods', value: 68 },
+  { label: 'Containers', value: 96 },
+];
 
 export const KubernetesOverview = () => {
+  const [statsData, setStatsData] = useState<{ label: string; value: number }[]>([
+    ...initialStatsData,
+  ]);
+  const [isStatsLoading, setIsStatsLoading] = useState(false);
 
   const fakeData = [
     {
@@ -42,14 +56,46 @@ export const KubernetesOverview = () => {
     },
   ];
 
-  const statsData = [
-    { label: 'Clusters', value: 1 },
-    { label: 'Nodes', value: 2 },
-    { label: 'Namespaces', value: 11 },
-    { label: 'Workloads', value: 48 },
-    { label: 'Pods', value: 68 },
-    { label: 'Containers', value: 96 },
-  ];
+  useEffect(() => {
+    // Fetch stats data
+    setIsStatsLoading(true);
+    const stats = [
+      coreRefs!.pplService!.fetch({
+        query:
+          'source = prometheus_k8s_cluster.`count:up1` | fields cluster | dedup cluster | stats count()',
+        format: 'jdbc',
+      }),
+      coreRefs!.pplService!.fetch({
+        query:
+          'source = prometheus_k8s_cluster.kube_node_info | fields node | dedup node | stats count()',
+        format: 'jdbc',
+      }),
+      coreRefs!.pplService!.fetch({
+        query:
+          'source = prometheus_k8s_cluster.kube_namespace_created | fields namespace | dedup namespace | stats count()',
+        format: 'jdbc',
+      }),
+      
+    ];
+    const nextState = [...initialStatsData];
+    Promise.allSettled(stats)
+      .then((data) => {
+        data
+          .map((d, index) => (d.status === 'fulfilled' ? d.value : null))
+          .forEach((r, index) => {
+            if (r) {
+              nextState[index].value = r.datarows[0][0];
+            }
+          });
+        setStatsData(nextState);
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+      .finally(() => {
+        setIsStatsLoading(false);
+      });
+  }, []);
 
   const imageData = [
     { name: 'ghcr.io/grafana/quick...', count: 6 },
@@ -143,6 +189,7 @@ export const KubernetesOverview = () => {
                   description={stat.label}
                   titleSize="l"
                   titleColor="primary"
+                  isLoading={isStatsLoading}
                 />
               </EuiPanel>
             </EuiFlexItem>

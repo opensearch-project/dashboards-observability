@@ -140,6 +140,7 @@ export const Home = () => {
             xKeys: [`k8s_node_name`],
             yKeys: ['running_node_count'],
             gKeys: [],
+            value: 2
           },
         },
         {
@@ -167,6 +168,7 @@ export const Home = () => {
             xKeys: [`k8s_node_name`],
             yKeys: ['running_node_count'],
             gKeys: [],
+            value: 10
           },
         },
         {
@@ -194,12 +196,13 @@ export const Home = () => {
             xKeys: [`k8s_node_name`],
             yKeys: ['running_node_count'],
             gKeys: [],
+            value: 40
           },
         },
         {
           cluster: 'eks-cluster-with-vpc',
           name: 'runningPodsCategory',
-          title: 'Failed Pods',
+          title: 'Running Pods',
           query: `source = prometheus_k8s_cluster.kube_pod_status_phase | where @timestamp >= '${start}' and @timestamp <= '${end}' and cluster = 'eks-cluster-with-vpc' | fields service_name | stats count() as node_count by service_name`,
           //query: `source = prometheus_k8s_cluster.\`count:up1\` | where \`cluster\` = 'eks-cluster-with-vpc' | dedup k8s_node_name | stats count() as running_node_count by k8s_node_name`,
           endpoint: 'prometheus',
@@ -223,6 +226,8 @@ export const Home = () => {
             xKeys: [`pod`],
             yKeys: ['running_node_count'],
             gKeys: [],
+            labels: ['pool-e1ro5g0nq-rk82j', 'pool-e1ro5g0nq-rk82o'],
+            values: [40, 28]
           },
         },
         {
@@ -251,6 +256,38 @@ export const Home = () => {
             gKeys: [],
           },
         },
+        {
+          cluster: 'eks-cluster-with-vpc',
+          name: 'diskIO',
+          title: 'Disk usage',
+          query: `source = prometheus_k8s_cluster.kube_pod_status_phase | where @timestamp >= '${start}' and @timestamp <= '${end}' and cluster = 'eks-cluster-with-vpc' | fields service_name | stats count() as node_count by service_name`,
+          //query: `source = prometheus_k8s_cluster.\`count:up1\` | where \`cluster\` = 'eks-cluster-with-vpc' | dedup k8s_node_name | stats count() as running_node_count by k8s_node_name`,
+          endpoint: 'prometheus',
+          datasource: { name: 'prometheus_k8s', type: 'prometheus' },
+          vis: {
+            component: Pie,
+            x: 'timestamp',
+            y: 'Number of Nodes',
+            xaxisKey: '@timestamp',
+            yaxisKey: 'total_memory_usage',
+            config: {
+              type: 'bar',
+              hole: .4,
+              textposition: 'inside',
+              showlegend: true
+            },
+            // layout: {
+            //   width: 267,
+            //   height: 190
+            // },
+            xKeys: [`pod`],
+            yKeys: ['running_node_count'],
+            gKeys: [],
+            y: [60, 13], // Sample values for Read and Write
+            x: ['pool-e1ro5g0nq-rk82j', 'pool-e1ro5g0nq-rk82o'],
+          },
+        },
+        
         // {
         //   cluster: 'play-db-cluster',
         //   name: 'clusterMemoryUsage',
