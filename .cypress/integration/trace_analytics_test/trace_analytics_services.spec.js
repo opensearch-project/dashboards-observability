@@ -5,7 +5,7 @@
 
 /// <reference types="cypress" />
 
-import { delay, SERVICE_NAME, SERVICE_SPAN_ID, setTimeFilter, verify_traces_spans_data_grid_cols_exists, count_table_row, AUTH_SERVICE_SPAN_ID } from '../../utils/constants';
+import { expandServiceView, SERVICE_NAME, SERVICE_SPAN_ID, setTimeFilter, verify_traces_spans_data_grid_cols_exists, count_table_row, AUTH_SERVICE_SPAN_ID } from '../../utils/constants';
 import { suppressResizeObserverIssue } from '../../utils/constants';
 
 suppressResizeObserverIssue();//needs to be in file once
@@ -32,6 +32,8 @@ describe('Testing services table', () => {
         win.sessionStorage.clear();
       },
     });
+    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    cy.get("[data-test-subj='data_prepper-mode']").click();
     setTimeFilter();
   });
 
@@ -44,13 +46,13 @@ describe('Testing services table', () => {
 
   it('Searches correctly', () => {
     cy.get('input[type="search"]').first().focus().type(`${SERVICE_NAME}{enter}`);
-    cy.get('.euiButton__text').contains('Refresh').click();
+    cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
     cy.contains(' (1)').should('exist');
     cy.contains('3.57%').should('exist');
   });
 
   it('Verify columns in Services table', () => {
-    cy.get('.euiFlexItem.euiFlexItem--flexGrow10 .panel-title').contains('Services').should('exist');
+    cy.get('.euiFlexItem.euiFlexItem--flexGrowZero .panel-title').contains('Services').should('exist');
     cy.get('.euiTableCellContent__text[title="Name"]').should('exist');
     cy.get('.euiTableCellContent__text[title="Average duration (ms)"]').should('exist');
     cy.get('.euiTableCellContent__text[title="Error rate"]').should('exist');
@@ -95,15 +97,17 @@ describe('Testing service view', () => {
         win.sessionStorage.clear();
       },
     });
+    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    cy.get("[data-test-subj='data_prepper-mode']").click();
     setTimeFilter();
     cy.get('input[type="search"]').first().focus().type(`${SERVICE_NAME}`);
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
     cy.get('.euiTableRow').should('have.length.lessThan', 3);//Replaces wait
-    cy.get('[data-test-subj="service-link"]').eq(0).click();
+    expandServiceView(0);
   });
 
   it('Renders service view', () => {
-    cy.get('h2.euiTitle').contains(SERVICE_NAME).should('exist');
+    cy.get('h1.overview-content').contains(SERVICE_NAME).should('exist');
     cy.contains('178.6').should('exist');
     cy.contains('3.57%').should('exist');
     cy.get('div.vis-network').should('exist');
@@ -111,7 +115,7 @@ describe('Testing service view', () => {
 
   it('Has working breadcrumbs', () => {
     cy.get('.euiBreadcrumb').contains(SERVICE_NAME).click();
-    cy.get('h2.euiTitle').contains(SERVICE_NAME).should('exist');
+    cy.get('h1.overview-content').contains(SERVICE_NAME).should('exist');
     cy.get('.euiBreadcrumb').contains('Services').click();
     cy.get('.euiBreadcrumb').contains('Trace analytics').click();
     cy.get('.euiBreadcrumb').contains('Observability').click();
@@ -138,6 +142,8 @@ describe('Testing Service map', () => {
         win.sessionStorage.clear();
       },
     });
+    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    cy.get("[data-test-subj='data_prepper-mode']").click();
     setTimeFilter();
   });
 
@@ -149,7 +155,7 @@ describe('Testing Service map', () => {
     cy.contains('60%');
     cy.get('[data-text = "Duration"]').click();
     cy.contains('100');
-    cy.get('.euiText.euiText--medium').contains('Focus on').should('exist');
+    cy.get('.euiFormLabel.euiFormControlLayout__prepend').contains('Focus on').should('exist');
     cy.get('[placeholder="Service name"]').focus().type('database{enter}');
   })
 });
@@ -161,28 +167,34 @@ describe('Testing traces Spans table verify table headers functionality', () => 
         win.sessionStorage.clear();
       },
     });
+    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    cy.get("[data-test-subj='data_prepper-mode']").click();
     setTimeFilter();
   });
 
   it('Renders the spans table and verify columns headers', () => {
     cy.contains(' (8)').should('exist');
     cy.contains('analytics-service, frontend-client, recommendation').should('exist');
-    cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist').click();
+    cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
+    expandServiceView(1);
     cy.get('.panel-title').contains('Spans').should('exist');
     cy.get('.panel-title-count').contains('8').should('exist');
     verify_traces_spans_data_grid_cols_exists();
   });
 
   it('Toggle columns and verify the columns hidden text verify rows', () => {
-    cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist').click();
-    cy.get('[data-test-subj = "dataGridColumnSelectorButton"]').click();
+    cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
+    expandServiceView(1);
+    cy.get('[data-test-subj = "dataGridColumnSelectorButton"]').click({ force: true });
+    cy.get('.panel-title-count').contains('8').should('exist');
     cy.get('.euiSwitch.euiSwitch--compressed.euiSwitch--mini .euiSwitch__button').eq(3).click();
     cy.get('[data-test-subj = "dataGridColumnSelectorButton"]').click().should('have.text', '2 columns hidden');
     count_table_row(8);
   });
 
   it('Show all button Spans table', () => {
-    cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist').click();
+    cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
+    expandServiceView(1);
     cy.get('[data-test-subj = "dataGridColumnSelectorButton"]').click();
     cy.get('.euiPopoverFooter .euiFlexItem.euiFlexItem--flexGrowZero').eq(0).should('have.text', 'Show all').click();
     cy.get('.euiDataGrid__focusWrap').click().should('exist');
@@ -190,7 +202,8 @@ describe('Testing traces Spans table verify table headers functionality', () => 
   });
 
   it('Hide all button Spans table', () => {
-    cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist').click();
+    cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
+    expandServiceView(1);
     cy.get('.euiTableRow').should('have.length.lessThan', 2);//Replace wait
     cy.get('[data-test-subj = "dataGridColumnSelectorButton"]').click();
     cy.get('.euiPopoverFooter .euiFlexItem.euiFlexItem--flexGrowZero').eq(1).should('have.text', 'Hide all').click();
@@ -199,7 +212,8 @@ describe('Testing traces Spans table verify table headers functionality', () => 
   });
 
   it('Render Spans table and change data table Density', () => {
-    cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist').click();
+    cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
+    expandServiceView(1);
     verify_traces_spans_data_grid_cols_exists();
     cy.get('.euiButtonEmpty__text').contains('Density').click();
     cy.get('.euiButtonContent__icon').eq(5).click();
@@ -208,7 +222,8 @@ describe('Testing traces Spans table verify table headers functionality', () => 
   });
 
   it('Render Spans table and and click on sort', () => {
-    cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist').click();
+    cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
+    expandServiceView(1);
     verify_traces_spans_data_grid_cols_exists();
     cy.get('[data-test-subj="dataGridColumnSortingButton"]').contains('Sort fields').should('exist').click();
     cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection"]').click();
@@ -233,14 +248,17 @@ describe('Testing traces Spans table and verify columns functionality', () => {
         win.sessionStorage.clear();
       },
     });
+    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    cy.get("[data-test-subj='data_prepper-mode']").click();
     setTimeFilter();
   });
 
   it('Renders the spans table and click on first span to verify details', () => {
-    cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist').click();
+    cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
+    expandServiceView(1);
     verify_traces_spans_data_grid_cols_exists();
     cy.contains(AUTH_SERVICE_SPAN_ID).click();
-    cy.get('[data-test-subj="spanDetailFlyout"] .euiTitle.euiTitle--medium').contains('Span detail').should('exist');
+    cy.get('[data-test-subj="spanDetailFlyout"]').contains('Span detail').should('exist');
     cy.get('.euiFlyoutBody .panel-title').contains('Overview').should('exist');
     cy.get('.euiTextColor.euiTextColor--subdued').contains('Span ID').should('exist');
     cy.get('[data-test-subj="parentSpanId"]').contains('d03fecfa0f55b77c').should('exist');
@@ -251,11 +269,13 @@ describe('Testing traces Spans table and verify columns functionality', () => {
     cy.get('.euiBadge__content .euiBadge__text').contains('spanId: 277a5934acf55dcf').should('exist');
     count_table_row(1);
     cy.get('[aria-label="remove current filter"]').click();
+    cy.get('.panel-title-count').contains('8').should('exist');
     count_table_row(8);
   });
 
   it('Render Spans table and verify Column functionality', () => {
-    cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist').click();
+    cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
+    expandServiceView(1);
     verify_traces_spans_data_grid_cols_exists();
     cy.get('.euiDataGridHeaderCell__content').contains('Span ID').click();
     cy.get('.euiListGroupItem__label').contains('Hide column').click();

@@ -257,6 +257,7 @@ export const GlobalFilterButton = ({
     () =>
       getFilterFields(mode, page, attributesFilterFields).map((field) => ({
         label: field,
+        'data-test-subj': `filterFieldOptions-${field}`,
       })),
     [mode, page, attributesFilterFields]
   );
