@@ -97,7 +97,6 @@ export const Home = () => {
             startDate: dashboardAttributes.timeFrom,
             endDate: dashboardAttributes.timeTo,
           };
-          setIsDashboardLoaded(true);
           return acc;
         }, {} as DashboardSavedObjectsType);
 
@@ -127,6 +126,8 @@ export const Home = () => {
       })
       .catch((error) => {
         console.error('Error fetching dashboards:', error);
+      })
+      .finally(() => {
         setIsDashboardLoaded(true);
       });
   };
@@ -182,7 +183,6 @@ export const Home = () => {
           closePopover();
 
           if (updatedShowCards) {
-            console.log('Called createSection');
             getOverviewPage().createSection(GET_STARTED_SECTION);
           } else {
             getOverviewPage().removeSection(SECTIONS.GET_STARTED);

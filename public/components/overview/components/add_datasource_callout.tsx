@@ -13,6 +13,7 @@ import {
   EuiText,
   EuiButton,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { coreRefs } from '../../../framework/core_refs';
 import { dataSourceManagementPluginId } from '../../../../common/constants/shared';
 
@@ -31,8 +32,10 @@ export function AddDataSourceCallout() {
         <EuiFlexItem grow={false} style={{ maxWidth: '40%' }}>
           <EuiText textAlign="center">
             <p style={{ margin: 0 }}>
-              There are no data sources associated to the workspace. Associate data sources or
-              request your administrator to associate data sources for you to get started.
+              {i18n.translate('traceAnalytics.noDataSourcesMessage', {
+                defaultMessage:
+                  'There are no data sources associated to the workspace. Associate data sources or request your administrator to associate data sources for you to get started.',
+              })}
             </p>
           </EuiText>
         </EuiFlexItem>

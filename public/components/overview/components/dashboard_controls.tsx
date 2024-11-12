@@ -43,26 +43,27 @@ export function DashboardControls() {
   const isDashboardSelected = useObservable(ObsDashboardStateManager.isDashboardSelected$);
   const dashboardState = useObservable(ObsDashboardStateManager.dashboardState$);
 
-  useEffect(() => {
-    const checkDataSource = async () => {
-      const currentUrl = window.location.href;
-      const workspaceId = getWorkspaceIdFromUrl(currentUrl, coreRefs?.http?.basePath.getBasePath());
+  const checkDataSource = async () => {
+    const currentUrl = window.location.href;
+    const workspaceId = getWorkspaceIdFromUrl(currentUrl, coreRefs?.http?.basePath.getBasePath());
 
-      if (workspaceId) {
-        setIsInWorkspace(true);
-        const savedObjectsArray = await getDatasourceAttributes();
-        setIsDataSourceEmpty(savedObjectsArray.length === 0);
+    if (workspaceId) {
+      setIsInWorkspace(true);
+      const savedObjectsArray = await getDatasourceAttributes();
+      setIsDataSourceEmpty(savedObjectsArray.length === 0);
 
-        // Set to null if there are no data sources associated [Handle if dashboard was set, then datasource deleted]
-        if (savedObjectsArray.length === 0) {
-          await setObservabilityDashboardsId(null);
-          getOverviewPage().removeSection(SECTIONS.DASHBOARD); // Clear the present dashboard
-        }
-      } else {
-        setIsInWorkspace(false);
-        setIsDataSourceEmpty(false); // Not in workspace
+      // Set to null if there are no data sources associated [Handle if dashboard was set, then datasource deleted]
+      if (savedObjectsArray.length === 0) {
+        await setObservabilityDashboardsId(null);
+        getOverviewPage().removeSection(SECTIONS.DASHBOARD); // Clear the present dashboard
       }
-    };
+    } else {
+      setIsInWorkspace(false);
+      setIsDataSourceEmpty(false); // Not in workspace
+    }
+  };
+
+  useEffect(() => {
     checkDataSource();
   }, []);
 
