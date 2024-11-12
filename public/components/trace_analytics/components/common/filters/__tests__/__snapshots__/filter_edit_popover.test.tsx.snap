@@ -91,6 +91,7 @@ exports[`Filter popover component renders filter popover 1`] = `
                   <EuiCompressedComboBox
                     async={false}
                     compressed={true}
+                    data-test-subj="field-selector-filter-panel"
                     fullWidth={false}
                     id="random_html_id"
                     isClearable={false}
@@ -129,6 +130,7 @@ exports[`Filter popover component renders filter popover 1`] = `
                       aria-expanded={false}
                       aria-haspopup="listbox"
                       className="euiComboBox euiComboBox--compressed"
+                      data-test-subj="field-selector-filter-panel"
                       onKeyDown={[Function]}
                       role="combobox"
                     >
@@ -371,6 +373,7 @@ exports[`Filter popover component renders filter popover 1`] = `
                   <EuiCompressedComboBox
                     async={false}
                     compressed={true}
+                    data-test-subj="operator-selector-filter-panel"
                     fullWidth={false}
                     id="random_html_id"
                     isClearable={false}
@@ -392,6 +395,7 @@ exports[`Filter popover component renders filter popover 1`] = `
                       aria-expanded={false}
                       aria-haspopup="listbox"
                       className="euiComboBox euiComboBox--compressed euiComboBox-isDisabled"
+                      data-test-subj="operator-selector-filter-panel"
                       onKeyDown={[Function]}
                       role="combobox"
                     >
