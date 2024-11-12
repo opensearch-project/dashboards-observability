@@ -26,6 +26,8 @@ import { ObsDashboardStateManager } from './obs_dashboard_state_manager';
 import { getObservabilityDashboardsId, setObservabilityDashboardsId } from './utils';
 import { coreRefs } from '../../../framework/core_refs';
 import { tutorialSampleDataPluginId } from '../../../../common/constants/shared';
+import { getOverviewPage } from '../../../../common/utils';
+import { DASHBOARD_SECTION } from '../../../../public/plugin_helpers/plugin_overview';
 
 export interface Props {
   closeFlyout: () => void;
@@ -61,6 +63,7 @@ export function SelectDashboardFlyout({ closeFlyout, dashboardsSavedObjects, rel
   const onClickAdd = async () => {
     const selectedOption = options.find((option) => option.checked === 'on');
     if (selectedOption && selectedOption.key) {
+      getOverviewPage().createSection(DASHBOARD_SECTION);
       setIsLoading(true);
       ObsDashboardStateManager.isDashboardSelected$.next(true);
       await setObservabilityDashboardsId(selectedOption.key);
