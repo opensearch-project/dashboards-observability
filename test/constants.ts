@@ -209,8 +209,11 @@ export const TEST_SERVICE_MAP_GRAPH = {
         label: 'order',
         size: 15,
         title: 'order\n\n Average duration: 90.1ms \n Error rate: 4.17% \n Request rate: 48',
-        borderWidth: 0,
-        color: 'rgba(158, 134, 192, 1)',
+        borderWidth: 3,
+        color: {
+          background: 'rgba(158, 134, 192, 1)',
+          border: '#4A4A4A',
+        },
         font: {
           color: 'rgba(72, 122, 180, 1)',
         },
@@ -224,8 +227,11 @@ export const TEST_SERVICE_MAP_GRAPH = {
         size: 15,
         title:
           'analytics-service\n\n Average duration: 12.99ms \n Error rate: 0% \n Request rate: 37',
-        borderWidth: 0,
-        color: 'rgba(210, 202, 224, 1)',
+        borderWidth: 3,
+        color: {
+          background: 'rgba(210, 202, 224, 1)',
+          border: '#4A4A4A',
+        },
         font: {
           color: 'rgba(72, 122, 180, 1)',
         },
@@ -238,8 +244,11 @@ export const TEST_SERVICE_MAP_GRAPH = {
         label: 'database',
         size: 15,
         title: 'database\n\n Average duration: 49.54ms \n Error rate: 3.77% \n Request rate: 53',
-        borderWidth: 0,
-        color: 'rgba(187, 171, 212, 1)',
+        borderWidth: 3,
+        color: {
+          background: 'rgba(187, 171, 212, 1)',
+          border: '#4A4A4A',
+        },
         font: {
           color: 'rgba(72, 122, 180, 1)',
         },
@@ -253,8 +262,11 @@ export const TEST_SERVICE_MAP_GRAPH = {
         size: 15,
         title:
           'frontend-client\n\n Average duration: 207.71ms \n Error rate: 7.41% \n Request rate: 27',
-        borderWidth: 0,
-        color: 'rgba(78, 42, 122, 1)',
+        borderWidth: 3,
+        color: {
+          background: 'rgba(78, 42, 122, 1)',
+          border: '#4A4A4A',
+        },
         font: {
           color: 'rgba(72, 122, 180, 1)',
         },
@@ -267,8 +279,11 @@ export const TEST_SERVICE_MAP_GRAPH = {
         label: 'inventory',
         size: 15,
         title: 'inventory\n\n Average duration: 183.52ms \n Error rate: 3.23% \n Request rate: 31',
-        borderWidth: 0,
-        color: 'rgba(95, 61, 138, 1)',
+        borderWidth: 3,
+        color: {
+          background: 'rgba(95, 61, 138, 1)',
+          border: '#4A4A4A',
+        },
         font: {
           color: 'rgba(72, 122, 180, 1)',
         },
@@ -282,8 +297,11 @@ export const TEST_SERVICE_MAP_GRAPH = {
         size: 15,
         title:
           'authentication\n\n Average duration: 139.09ms \n Error rate: 8.33% \n Request rate: 12',
-        borderWidth: 0,
-        color: 'rgba(125, 95, 166, 1)',
+        borderWidth: 3,
+        color: {
+          background: 'rgba(125, 95, 166, 1)',
+          border: '#4A4A4A',
+        },
         font: {
           color: 'rgba(72, 122, 180, 1)',
         },
@@ -296,8 +314,11 @@ export const TEST_SERVICE_MAP_GRAPH = {
         label: 'payment',
         size: 15,
         title: 'payment\n\n Average duration: 134.36ms \n Error rate: 9.09% \n Request rate: 11',
-        borderWidth: 0,
-        color: 'rgba(129, 99, 169, 1)',
+        borderWidth: 3,
+        color: {
+          background: 'rgba(129, 99, 169, 1)',
+          border: '#4A4A4A',
+        },
         font: {
           color: 'rgba(72, 122, 180, 1)',
         },
@@ -311,8 +332,11 @@ export const TEST_SERVICE_MAP_GRAPH = {
         size: 15,
         title:
           'recommendation\n\n Average duration: 176.97ms \n Error rate: 6.25% \n Request rate: 16',
-        borderWidth: 0,
-        color: 'rgba(100, 66, 143, 1)',
+        borderWidth: 3,
+        color: {
+          background: 'rgba(100, 66, 143, 1)',
+          border: '#4A4A4A',
+        },
         font: {
           color: 'rgba(72, 122, 180, 1)',
         },
@@ -390,6 +414,7 @@ export const TEST_SERVICE_MAP_GRAPH = {
     ],
   },
 };
+
 export const TEST_SERVICE_MAP = {
   order: {
     serviceName: 'order',
@@ -675,4 +700,72 @@ export const mockSavedObjectActions = ({ get = [], getBulk = [] }) => {
     get: jest.fn().mockResolvedValue({ observabilityObjectList: get }),
     getBulk: jest.fn().mockResolvedValue({ observabilityObjectList: getBulk }),
   };
+};
+
+export const fieldCapQueryResponse1 = {
+  indices: ['dest1:otel-v1-apm-span-000001', 'dest2:otel-v1-apm-span-000001'],
+  fields: {
+    'span.attributes.http@url': {
+      text: {
+        type: 'text',
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'span.attributes.net@peer@ip': {
+      text: {
+        type: 'text',
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'span.attributes.http@user_agent.keyword': {
+      keyword: {
+        type: 'keyword',
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    'resource.attributes.telemetry@sdk@version.keyword': {
+      keyword: {
+        type: 'keyword',
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    'resource.attributes.host@hostname.keyword': {
+      keyword: {
+        type: 'keyword',
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    'unrelated.field.name': {
+      text: {
+        type: 'text',
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+  },
+};
+
+export const fieldCapQueryResponse2 = {
+  indices: ['dest1:otel-v1-apm-span-000001', 'dest2:otel-v1-apm-span-000001'],
+  fields: {
+    'unrelated.field1': {
+      text: {
+        type: 'text',
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'another.unrelated.field': {
+      keyword: {
+        type: 'keyword',
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+  },
 };

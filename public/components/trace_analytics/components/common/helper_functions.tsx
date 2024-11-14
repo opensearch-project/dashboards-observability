@@ -24,6 +24,7 @@ import {
   TraceAnalyticsMode,
 } from '../../../../../common/types/trace_analytics';
 import { uiSettingsService } from '../../../../../common/utils';
+import { FieldCapResponse } from '../../../common/types';
 import { serviceMapColorPalette } from './color_palette';
 import { FilterType } from './filters/filters';
 import { ServiceObject } from './plots/service_map';
@@ -183,8 +184,12 @@ export function getServiceMapGraph(
       const percent = (value - ticks[0]) / (ticks[ticks.length - 1] - ticks[0]);
       const color = getServiceMapScaleColor(percent, idSelected);
       styleOptions = {
-        borderWidth: 0,
-        color: relatedServices!.indexOf(service) >= 0 ? `rgba(${color}, 1)` : `rgba(${color}, 0.2)`,
+        borderWidth: 3,
+        color: {
+          border: '#4A4A4A',
+          background:
+            relatedServices!.indexOf(service) >= 0 ? `rgba(${color}, 1)` : `rgba(${color}, 0.2)`,
+        },
         font: {
           color:
             relatedServices!.indexOf(service) >= 0
@@ -194,10 +199,10 @@ export function getServiceMapGraph(
       };
     } else {
       styleOptions = {
-        borderWidth: 1.0,
+        borderWidth: 3,
         chosen: false,
         color: {
-          border: '#DADADC',
+          border: '#4A4A4A',
           background: '#FFFFFF',
         },
       };
@@ -522,55 +527,10 @@ export const filtersToDsl = (
   return DSL;
 };
 
-interface AttributeMapping {
-  properties: {
-    [key: string]: {
-      type?: string;
-      properties?: AttributeMapping['properties'];
-    };
-  };
-}
-
-interface JsonMapping {
-  [key: string]: {
-    mappings: {
-      properties: AttributeMapping['properties'];
-    };
-  };
-}
-
-export const extractAttributes = (
-  mapping: AttributeMapping['properties'],
-  prefix: string
-): string[] => {
-  let attributes: string[] = [];
-
-  for (const [key, value] of Object.entries(mapping)) {
-    if (value.properties) {
-      attributes = attributes.concat(extractAttributes(value.properties, `${prefix}.${key}`));
-    } else {
-      attributes.push(`${prefix}.${key}`);
-    }
-  }
-
-  return attributes;
-};
-
-export const getAttributes = (jsonMapping: JsonMapping): string[] => {
-  if (Object.keys(jsonMapping)[0] !== undefined) {
-    const spanMapping =
-      jsonMapping[Object.keys(jsonMapping)[0]]?.mappings?.properties?.span?.properties?.attributes
-        ?.properties;
-    const resourceMapping =
-      jsonMapping[Object.keys(jsonMapping)[0]]?.mappings?.properties?.resource?.properties
-        ?.attributes?.properties;
-
-    const spanAttributes = extractAttributes(spanMapping!, 'span.attributes');
-    const resourceAttributes = extractAttributes(resourceMapping!, 'resource.attributes');
-
-    return [...spanAttributes, ...resourceAttributes];
-  }
-  return [];
+export const getAttributeFieldNames = (response: FieldCapResponse): string[] => {
+  return Object.keys(response.fields).filter(
+    (field) => field.startsWith('resource.attributes') || field.startsWith('span.attributes')
+  );
 };
 
 export const getTraceCustomSpanIndex = () => {

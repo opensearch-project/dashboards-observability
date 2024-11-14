@@ -6,12 +6,18 @@
 import { configure, mount, shallow } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
-import { TEST_SERVICE_MAP, TEST_SERVICE_MAP_GRAPH } from '../../../../../../test/constants';
+import {
+  fieldCapQueryResponse1,
+  fieldCapQueryResponse2,
+  TEST_SERVICE_MAP,
+  TEST_SERVICE_MAP_GRAPH,
+} from '../../../../../../test/constants';
 import {
   calculateTicks,
   filtersToDsl,
   fixedIntervalToMilli,
   fixedIntervalToTickFormat,
+  getAttributeFieldNames,
   getPercentileFilter,
   getServiceMapGraph,
   getServiceMapScaleColor,
@@ -169,5 +175,24 @@ describe('Helper functions', () => {
     expect(JSON.stringify(customDSL)).toEqual(
       '{"query":{"bool":{"must":[],"filter":[{"range":{"startTime":{"gte":"now-5m","lte":"now"}}},{"query_string":{"query":"order"}}],"should":["test"],"must_not":[],"minimum_should_match":1}},"custom":{"timeFilter":[{"range":{"startTime":{"gte":"now-5m","lte":"now"}}}],"serviceNames":[],"serviceNamesExclude":[],"traceGroup":[],"traceGroupExclude":[],"percentiles":{"query":{"bool":{"should":["test"],"minimum_should_match":1}}}}}'
     );
+  });
+
+  describe('getAttributeFieldNames', () => {
+    it("should return only field names starting with 'resource.attributes' or 'span.attributes'", () => {
+      const expectedFields = [
+        'span.attributes.http@url',
+        'span.attributes.net@peer@ip',
+        'span.attributes.http@user_agent.keyword',
+        'resource.attributes.telemetry@sdk@version.keyword',
+        'resource.attributes.host@hostname.keyword',
+      ];
+      const result = getAttributeFieldNames(fieldCapQueryResponse1);
+      expect(result).toEqual(expectedFields);
+    });
+
+    it('should return an empty array if no fields match the specified prefixes', () => {
+      const result = getAttributeFieldNames(fieldCapQueryResponse2);
+      expect(result).toEqual([]);
+    });
   });
 });

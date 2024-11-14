@@ -11,6 +11,7 @@ export const DSL_SEARCH = '/search';
 export const DSL_CAT = '/cat.indices';
 export const DSL_MAPPING = '/indices.getFieldMapping';
 export const DSL_SETTINGS = '/indices.getFieldSettings';
+export const DSL_FIELD_CAPS = '/fieldCaps';
 export const OBSERVABILITY_BASE = '/api/observability';
 export const INTEGRATIONS_BASE = '/api/integrations';
 export const JOBS_BASE = '/query/jobs';
@@ -34,6 +35,7 @@ export const JOBS_ENDPOINT_BASE = '/_plugins/_async_query';
 export const JOB_RESULT_ENDPOINT = '/result';
 
 export const tutorialSampleDataPluginId = 'import_sample_data';
+export const dataSourceManagementPluginId = 'dataSources';
 
 export const observabilityID = 'observability-logs';
 export const observabilityTitle = 'Observability';

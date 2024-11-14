@@ -32,23 +32,24 @@ export const GET_STARTED_SECTION: Section = {
   columns: 5,
 };
 
+export const SELECTOR_SECTION: Section = {
+  id: SECTIONS.SELECTOR,
+  order: 2000,
+  title: 'Dashboards controls',
+  kind: 'custom',
+  render: (contents) => <div key={contents[0].id}>{contents[0].render()}</div>,
+};
+
+export const DASHBOARD_SECTION: Section = {
+  id: SECTIONS.DASHBOARD,
+  order: 3000,
+  kind: 'dashboard',
+};
+
 export const setupOverviewPage = (contentManagement: ContentManagementPluginSetup) => {
   return contentManagement.registerPage({
     id: HOME_PAGE_ID,
     title: 'Home',
-    sections: [
-      {
-        id: SECTIONS.SELECTOR,
-        order: 2000,
-        title: 'Dashboards controls',
-        kind: 'custom',
-        render: (contents) => <div key={contents[0].id}>{contents[0].render()}</div>,
-      },
-      {
-        id: SECTIONS.DASHBOARD,
-        order: 3000,
-        kind: 'dashboard',
-      },
-    ],
+    sections: [SELECTOR_SECTION, DASHBOARD_SECTION],
   });
 };
