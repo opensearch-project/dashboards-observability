@@ -54,8 +54,7 @@ describe('Adding sample data and visualization', () => {
 
   it('Add sample observability data', () => {
     moveToEventsHome();
-    cy.get('button[data-test-subj="eventHomeAction"]').trigger('mouseover').click();
-    cy.get('button[data-test-subj="eventHomeAction__addSamples"]').trigger('mouseover').click();
+    cy.get('button[data-test-subj="actionAddSamples"]').trigger('mouseover').click();
     cy.get('.euiModalHeader__title[data-test-subj="confirmModalTitleText"]')
       .contains('Add samples')
       .should('exist');
@@ -116,8 +115,7 @@ describe('Testing notebooks table', () => {
 
   it('Deletes all notebooks', () => {
     cy.get('input[data-test-subj="checkboxSelectAll"]').click();
-    cy.get('button[data-test-subj="notebookTableActionBtn"]').click();
-    cy.get('button[data-test-subj="deleteNotebookBtn"]').click();
+    cy.get('button[data-test-subj="deleteSelectedNotebooks"]').click();
     cy.get('button[data-test-subj="delete-notebook-modal-delete-button"]').should('be.disabled');
     cy.get('input[data-test-subj="delete-notebook-modal-input"]').focus().type('delete');
     cy.get('button[data-test-subj="delete-notebook-modal-delete-button"]').should(
@@ -135,7 +133,7 @@ describe('Testing paragraphs', () => {
     cy.get('a[data-test-subj="createNotebookPrimaryBtn"]').click();
     cy.get('input[data-test-subj="custom-input-modal-input"]').focus().type(TEST_NOTEBOOK);
     cy.get('button[data-test-subj="custom-input-modal-confirm-button"]').click();
-    cy.get('h3[data-test-subj="notebookTableTitle"]').contains(TEST_NOTEBOOK).should('exist');
+    cy.get('h3[data-test-subj="notebookTitle"]').contains(TEST_NOTEBOOK).should('exist');
   });
 
   beforeEach(() => {
@@ -166,7 +164,7 @@ describe('Testing paragraphs', () => {
 
   it('Has working breadcrumbs', () => {
     cy.get('a[data-test-subj="breadcrumb last"]').contains(TEST_NOTEBOOK).click();
-    cy.get('h3[data-test-subj="notebookTableTitle"]').contains(TEST_NOTEBOOK).should('exist');
+    cy.get('h3[data-test-subj="notebookTitle"]').contains(TEST_NOTEBOOK).should('exist');
     cy.get('a[data-test-subj="breadcrumb"]').contains('Notebooks').click();
     cy.get('h3[data-test-subj="notebookTableTitle"]').should('exist');
     cy.get('a[data-test-subj="breadcrumb first"]').contains('Observability').click();
@@ -298,6 +296,7 @@ describe('Testing paragraphs', () => {
   });
 
   it('Adds an observability visualization paragraph', () => {
+    cy.get('h3[data-test-subj="notebookTitle"]').contains(TEST_NOTEBOOK).should('exist');
     cy.get('button[data-test-subj="notebook-paragraph-actions-button"]').click();
     cy.get('span.euiContextMenuItem__text').contains('To top').click();
     cy.get('button.euiContextMenuItem').contains('Visualization').click();
@@ -309,9 +308,8 @@ describe('Testing paragraphs', () => {
     cy.get('div[data-test-subj="comboBoxInput"]').click();
     cy.get('input[data-test-subj="comboBoxSearchInput"]')
       .focus()
-      .type('[Logs] Count total requests by tags');
-
-    cy.get('.euiComboBoxOption__content').contains('[Logs] Count total requests by tags').click();
+      .type('[Logs] Count total requests by t');
+    cy.get('.euiComboBoxOption__content').contains('[Logs] Count total requests by tags').click({ force: true });
     cy.get('button[data-test-subj="runRefreshBtn-0"]').click();
     cy.get('h5').contains('[Logs] Count total requests by tags').should('exist');
   });
@@ -335,9 +333,7 @@ describe('Testing paragraphs', () => {
 
   it('Clears outputs', () => {
     cy.get('h3[data-test-subj="notebookTitle"]').contains(TEST_NOTEBOOK).should('exist');
-    cy.get('[data-test-subj="notebook-paragraph-actions-button"]').should('exist');
-    cy.get('[data-test-subj="notebook-paragraph-actions-button"]').click();
-    cy.get('.euiContextMenuItem__text').contains('Clear all outputs').click();
+    cy.get('.euiButton__text').contains('Clear all outputs').click();
     cy.get('button[data-test-subj="confirmModalConfirmButton"]').click();
 
     cy.get(`a[href="${SAMPLE_URL}"]`).should('not.exist');
@@ -345,8 +341,7 @@ describe('Testing paragraphs', () => {
 
   it('Runs all paragraphs', () => {
     cy.get('h3[data-test-subj="notebookTitle"]').contains(TEST_NOTEBOOK).should('exist');
-    cy.get('[data-test-subj="notebook-paragraph-actions-button"]').click();
-    cy.get('.euiContextMenuItem__text').contains('Run all paragraphs').click();
+    cy.get('.euiButton__text').contains('Run all paragraphs').click();
 
     cy.get(`a[href="${SAMPLE_URL}"]`).should('exist');
   });
@@ -365,11 +360,11 @@ describe('Testing paragraphs', () => {
     cy.get('h3[data-test-subj="notebookTitle"]').contains(TEST_NOTEBOOK).should('exist');
 
     cy.get('button[data-test-subj="notebook-paragraph-actions-button"]').click();
-    cy.get('span.euiContextMenuItem__text').contains('To To bottom').click();
+    cy.get('span.euiContextMenuItem__text').contains('To bottom').click();
     cy.get('button.euiContextMenuItem').contains('Code block').click();
 
-    cy.get('.euiText').contains('[4] Visualization').should('exist');
-    cy.get('.euiText').contains('[5] Code block').should('exist');
+    cy.get('.euiText').contains('[6] Visualization').should('exist');
+    cy.get('.euiText').contains('[7] Code block').should('exist');
   });
 
   it('Moves paragraphs', () => {
@@ -378,22 +373,20 @@ describe('Testing paragraphs', () => {
     cy.get('.euiContextMenuItem-isDisabled').should('have.length.gte', 2);
     cy.get('.euiContextMenuItem__text').contains('Move to bottom').click();
 
-    cy.get('.euiText').contains('[3] Visualization').should('exist');
+    cy.get('.euiText').contains('[5] Visualization').should('exist');
   });
 
   it('Duplicates and renames the notebook', () => {
     cy.get('h3[data-test-subj="notebookTitle"]').contains(TEST_NOTEBOOK).should('exist');
-    cy.get('[data-test-subj="notebook-notebook-actions-button"]').click();
-    cy.get('.euiContextMenuItem__text').contains('Duplicate notebook').click();
+    cy.get('[data-test-subj="notebook-duplicate-icon"]').click();
     cy.get('.euiButton__text').contains('Duplicate').click();
 
-    cy.get('[data-test-subj="notebook-notebook-actions-button"]').click();
-    cy.get('.euiContextMenuItem__text').contains('Rename notebook').click();
+    cy.get('[data-test-subj="notebook-edit-icon"]').click();
     cy.get('input.euiFieldText[data-autofocus="true"]').focus().type(' (rename)');
     cy.get('.euiButton__text').last().contains('Rename').click();
     cy.reload();
 
-    cy.get('.euiText')
+    cy.get('h3[data-test-subj="notebookTitle"]')
       .contains(TEST_NOTEBOOK + ' (rename)')
       .should('exist');
     cy.get(`a[href="${SAMPLE_URL}"]`).should('have.length.gte', 2);
@@ -401,16 +394,14 @@ describe('Testing paragraphs', () => {
 
   it('Deletes paragraphs', () => {
     cy.get('h3[data-test-subj="notebookTitle"]').contains(TEST_NOTEBOOK).should('exist');
-    cy.get('[data-test-subj="notebook-paragraph-actions-button"]').click();
-    cy.get('.euiContextMenuItem__text').contains('Delete all paragraphs').click();
+    cy.get('.euiButton__text').contains('Delete all paragraphs').click();
     cy.get('button[data-test-subj="confirmModalConfirmButton"]').click();
 
     cy.get('button[data-test-subj="emptyNotebookAddCodeBlockBtn"]').should('exist');
   });
 
   it('Deletes notebook', () => {
-    cy.get('[data-test-subj="notebook-notebook-actions-button"]').click();
-    cy.get('.euiContextMenuItem__text').contains('Delete notebook').click();
+    cy.get('[data-test-subj="notebook-delete-icon"]').click();
     cy.get('button[data-test-subj="delete-notebook-modal-delete-button"]').should('be.disabled');
 
     cy.get('input[data-test-subj="delete-notebook-modal-input"]').focus().type('delete');
@@ -426,8 +417,7 @@ describe('clean up all test data', () => {
   it('Cleans up test notebooks', () => {
     moveToNotebookHome();
     cy.get('input[data-test-subj="checkboxSelectAll"]').click();
-    cy.get('button[data-test-subj="notebookTableActionBtn"]').click();
-    cy.get('button[data-test-subj="deleteNotebookBtn"]').click();
+    cy.get('button[data-test-subj="deleteSelectedNotebooks"]').click();
     cy.get('button[data-test-subj="delete-notebook-modal-delete-button"]').should('be.disabled');
     cy.get('input[data-test-subj="delete-notebook-modal-input"]').focus().type('delete');
     cy.get('button[data-test-subj="delete-notebook-modal-delete-button"]').should(
