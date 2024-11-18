@@ -185,6 +185,7 @@ describe('Testing traces Spans table verify table headers functionality', () => 
   it('Toggle columns and verify the columns hidden text verify rows', () => {
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
     expandServiceView(1);
+    cy.scrollTo('bottom');
     cy.get('[data-test-subj = "dataGridColumnSelectorButton"]').click({ force: true });
     cy.get('.panel-title-count').contains('8').should('exist');
     cy.get('.euiSwitch.euiSwitch--compressed.euiSwitch--mini .euiSwitch__button').eq(3).click();
