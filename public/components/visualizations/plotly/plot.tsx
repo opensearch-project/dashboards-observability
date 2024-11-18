@@ -15,6 +15,7 @@ interface PltProps {
   onHoverHandler?: (event: Readonly<Plotly.PlotMouseEvent>) => void;
   onUnhoverHandler?: (event: Readonly<Plotly.PlotMouseEvent>) => void;
   onClickHandler?: (event: Readonly<Plotly.PlotMouseEvent>) => void;
+  onSelectedHandler?: (event: Readonly<Plotly.PlotSelectionEvent>) => void;
   height?: string;
   dispatch?: (props: any) => void;
 }
@@ -79,6 +80,7 @@ export function Plt(props: PltProps) {
       onHover={props.onHoverHandler}
       onUnhover={props.onUnhoverHandler}
       onClick={props.onClickHandler}
+      onSelected={props.onSelectedHandler}
       useResizeHandler
       config={finalConfig}
       layout={finalLayout}

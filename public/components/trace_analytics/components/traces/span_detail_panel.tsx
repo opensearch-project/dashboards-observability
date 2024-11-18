@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
+  EuiSmallButton,
   EuiSpacer,
 } from '@elastic/eui';
 import debounce from 'lodash/debounce';
@@ -55,6 +56,14 @@ export function SpanDetailPanel(props: {
   } else {
     [data, setData] = [localData, localSetData];
   }
+
+  const fullRange = [0, data.ganttMaxX * 1.2];
+  const [selectedRange, setSelectedRange] = useState(fullRange);
+
+  // Update selectedRange whenever data.ganttMaxX changes to ensure it starts fully zoomed out
+  useEffect(() => {
+    setSelectedRange(fullRange);
+  }, [data.ganttMaxX]);
 
   const setSpanFiltersWithStorage = (newFilters: Array<{ field: string; value: any }>) => {
     setSpanFilters(newFilters);
@@ -147,7 +156,10 @@ export function SpanDetailPanel(props: {
     refresh();
   }, [props.colorMap, spanFilters]);
 
-  const getSpanDetailLayout = (plotTraces: Plotly.Data[], maxX: number): Partial<Plotly.Layout> => {
+  const getSpanDetailLayout = (
+    plotTraces: Plotly.Data[],
+    _maxX: number
+  ): Partial<Plotly.Layout> => {
     // get unique labels from traces
     const yLabels = plotTraces
       .map((d) => d.y[0])
@@ -171,12 +183,13 @@ export function SpanDetailPanel(props: {
         side: 'top',
         color: '#91989c',
         showline: true,
-        range: [0, maxX * 1.2],
+        range: selectedRange, // Apply selected range to main chart
       },
       yaxis: {
         showgrid: false,
         tickvals: yLabels,
         ticktext: yTexts,
+        fixedrange: true, // Prevent panning/scrolling in main chart
       },
     };
   };
@@ -184,7 +197,16 @@ export function SpanDetailPanel(props: {
   const layout = useMemo(() => getSpanDetailLayout(data.gantt, data.ganttMaxX), [
     data.gantt,
     data.ganttMaxX,
+    selectedRange,
   ]);
+
+  const miniMapLayout = {
+    ...layout,
+    height: 100,
+    dragmode: 'select',
+    xaxis: { ...layout.xaxis, range: fullRange },
+    yaxis: { visible: false, fixedrange: true },
+  };
 
   const [currentSpan, setCurrentSpan] = useState('');
 
@@ -261,7 +283,16 @@ export function SpanDetailPanel(props: {
   const ganttChart = useMemo(
     () => (
       <Plt
-        data={data.gantt}
+        data={data.gantt.map((trace) => {
+          const duration = trace.x[0] ? trace.x[0].toFixed(2) : '0.00'; // Format duration to 2 decimal places
+
+          return {
+            ...trace,
+            text: `${duration} ms`,
+            textposition: 'outside',
+            hoverinfo: 'none',
+          };
+        })}
         layout={layout}
         onClickHandler={onClick}
         onHoverHandler={onHover}
@@ -271,34 +302,68 @@ export function SpanDetailPanel(props: {
     [data.gantt, layout, onClick, onHover, onUnhover]
   );
 
+  const miniMap = useMemo(
+    () => (
+      <Plt
+        data={data.gantt.map((trace) => ({
+          ...trace,
+        }))}
+        layout={miniMapLayout}
+        onSelectedHandler={(event) => {
+          if (event && event.range) {
+            const { x } = event.range;
+            setSelectedRange(x); // Update selected range state to adjust main chart
+          }
+        }}
+      />
+    ),
+    [data.gantt, miniMapLayout]
+  );
+
   return (
     <>
       <EuiPanel data-test-subj="span-gantt-chart-panel">
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <PanelTitle title="Spans" totalItems={data.gantt.length / 2} />
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            {miniMap}
+            <EuiFlexGroup justifyContent="center" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <EuiSmallButton onClick={() => setSelectedRange(fullRange)}>
+                  Reset Zoom
+                </EuiSmallButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonGroup
-              legend="Select view of spans"
-              options={toggleOptions}
-              idSelected={toggleIdSelected}
-              onChange={(id) => setToggleIdSelected(id)}
-            />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <PanelTitle title="Spans" totalItems={data.gantt.length / 2} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonGroup
+                  legend="Select view of spans"
+                  options={toggleOptions}
+                  idSelected={toggleIdSelected}
+                  onChange={(id) => setToggleIdSelected(id)}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          {spanFilters.length > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup gutterSize="s" wrap>
+                {renderFilters}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+
+          <EuiHorizontalRule margin="m" />
+
+          <EuiFlexItem style={{ overflowY: 'auto', maxHeight: 500 }}>
+            {toggleIdSelected === 'timeline' ? ganttChart : spanDetailTable}
           </EuiFlexItem>
         </EuiFlexGroup>
-        {spanFilters.length > 0 && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="s" wrap>
-              {renderFilters}
-            </EuiFlexGroup>
-          </>
-        )}
-        <EuiHorizontalRule margin="m" />
-        <div style={{ overflowY: 'auto', maxHeight: 500 }}>
-          {toggleIdSelected === 'timeline' ? ganttChart : spanDetailTable}
-        </div>
       </EuiPanel>
       {!!currentSpan && (
         <SpanDetailFlyout

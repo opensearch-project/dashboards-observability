@@ -74,6 +74,10 @@ export function TracesContent(props: TracesProps) {
   const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
 
   useEffect(() => {
+    refresh();
+  }, [startTime, endTime, props.dataSourceMDSId]);
+
+  useEffect(() => {
     chrome.setBreadcrumbs([
       ...(isNavGroupEnabled ? [] : [props.parentBreadcrumb]),
       ...childBreadcrumbs,

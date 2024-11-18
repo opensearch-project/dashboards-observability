@@ -300,6 +300,7 @@ const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyti
     ganttMaxX: 0,
   };
   if (hits.length === 0) return data;
+  // console.log("hit._source:", hits);//ADAM looking for parent ID
 
   const minStartTime =
     mode === 'jaeger'
@@ -335,6 +336,7 @@ const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyti
     data.table.push({
       service_name: serviceName,
       span_id: hit._source.spanID,
+      parent_id: hit._source.parentSpanId,
       latency: duration,
       vs_benchmark: 0,
       error,
@@ -354,6 +356,7 @@ const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyti
         hoverinfo: 'none',
         showlegend: false,
         spanId: mode === 'jaeger' ? hit._source.spanID : hit._source.spanId,
+        parentId: hit._source.parentSpanId,
       },
       {
         x: [duration],
@@ -369,9 +372,16 @@ const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyti
         orientation: BarOrientation.horizontal,
         hovertemplate: '%{x}<extra></extra>',
         spanId: mode === 'jaeger' ? hit._source.spanID : hit._source.spanId,
+        parentId: hit._source.parentSpanId,
       }
     );
   });
+
+  // Logging to verify parent_id values //ADAM
+  // console.log("Span Detail Data with Parent ID:");
+  // data.table.forEach((span) => {
+  //   console.log(`Span ID: ${span.span_id}, Parent ID: ${span.parent_id}, Service: ${span.service_name}`);
+  // });
 
   data.ganttMaxX = maxEndTime;
   return data;
