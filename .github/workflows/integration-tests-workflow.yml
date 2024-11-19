@@ -199,12 +199,12 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: cypress-screenshots-${{ matrix.os }}
+          name: cypress-screenshots-${{ matrix.os }}-${{ matrix.testgroups }}
           path: OpenSearch-Dashboards/plugins/dashboards-observability/.cypress/screenshots
 
       - name: Capture test video
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: cypress-videos-${{ matrix.os }}
+          name: cypress-videos-${{ matrix.os }}-${{ matrix.testgroups }}
           path: OpenSearch-Dashboards/plugins/dashboards-observability/.cypress/videos
