@@ -10,13 +10,11 @@ import {
   EuiLink,
   EuiText,
   EuiIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSmallButton,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import round from 'lodash/round';
 import moment from 'moment';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
@@ -41,23 +39,252 @@ export interface SpanSearchParams {
   }>;
 }
 
-const gatherAllSpanIds = (spans) => {
-  const allSpanIds = new Set();
-  spans.forEach((span) => {
-    allSpanIds.add(span.spanId);
-    if (span.children && span.children.length > 0) {
-      const childSpanIds = gatherAllSpanIds(span.children);
-      childSpanIds.forEach((id) => allSpanIds.add(id));
-    }
-  });
-  return allSpanIds;
+const getColumns = (mode: TraceAnalyticsMode): EuiDataGridColumn[] => [
+  {
+    id: mode === 'jaeger' ? 'spanID' : 'spanId',
+    display: 'Span ID',
+    initialWidth: 250,
+  },
+  {
+    id: mode === 'jaeger' ? 'references' : 'parentSpanId',
+    display: 'Parent span ID',
+    initialWidth: 150,
+  },
+  {
+    id: mode === 'jaeger' ? 'traceID' : 'traceId',
+    display: 'Trace ID',
+    initialWidth: 200,
+  },
+  ...(mode !== 'jaeger'
+    ? [
+        {
+          id: 'traceGroup',
+          display: 'Trace group',
+          initialWidth: 200,
+        },
+      ]
+    : []),
+  {
+    id: mode === 'jaeger' ? 'process' : 'serviceName',
+    display: 'Service',
+    initialWidth: 200,
+  },
+  {
+    id: mode === 'jaeger' ? 'operationName' : 'name',
+    display: 'Operation',
+    initialWidth: 250,
+  },
+  {
+    id: mode === 'jaeger' ? 'duration' : 'durationInNanos',
+    display: 'Duration',
+    initialWidth: 100,
+  },
+  {
+    id: mode === 'jaeger' ? 'tag' : 'status.code',
+    display: 'Errors',
+    initialWidth: 100,
+  },
+  {
+    id: 'startTime',
+    display: 'Start time',
+    initialWidth: 200,
+  },
+  {
+    id: mode === 'jaeger' ? 'jaegerEndTime' : 'endTime',
+    display: 'End time',
+    initialWidth: 200,
+  },
+];
+
+const renderCommonCellValue = ({
+  rowIndex,
+  columnId,
+  items,
+  tableParams,
+  expandedRows,
+  toggleRowExpansion,
+  props,
+  flattenedItems,
+  indentationFactor = 0,
+}: {
+  rowIndex: number;
+  columnId: string;
+  items: any;
+  tableParams: any;
+  expandedRows?: Set<string>;
+  toggleRowExpansion?: (spanId: string) => void;
+  props: SpanDetailTableProps;
+  flattenedItems?: any[];
+  indentationFactor?: number;
+}) => {
+  const adjustedRowIndex = flattenedItems
+    ? rowIndex
+    : rowIndex - tableParams.page * tableParams.size;
+  const item = flattenedItems ? flattenedItems[rowIndex] : items[adjustedRowIndex];
+
+  if (!item) return '-';
+
+  const value = item[columnId];
+  const indentation = `${(item.level || 0) * indentationFactor}px`;
+  const isRowExpanded = expandedRows?.has(item.spanId);
+
+  if ((value == null || value === '') && columnId !== 'jaegerEndTime') return '-';
+
+  switch (columnId) {
+    case 'tag':
+      return value?.error === true ? (
+        <EuiText color="danger" size="s">
+          Yes
+        </EuiText>
+      ) : (
+        'No'
+      );
+    case 'references':
+      return value.length > 0 ? value[0].spanID : '';
+    case 'process':
+      return value?.serviceName;
+    case 'spanId':
+    case 'spanID':
+      return (
+        <div style={{ paddingLeft: indentation, display: 'flex', alignItems: 'center' }}>
+          {toggleRowExpansion && item.children?.length > 0 ? (
+            <EuiIcon
+              type={isRowExpanded ? 'arrowDown' : 'arrowRight'}
+              onClick={() => toggleRowExpansion(item.spanId)}
+              style={{ cursor: 'pointer', marginRight: 5 }}
+            />
+          ) : (
+            <EuiIcon type="empty" style={{ visibility: 'hidden', marginRight: 5 }} />
+          )}
+          <EuiLink data-test-subj="spanId-link" onClick={() => props.openFlyout(value)}>
+            {value}
+          </EuiLink>
+        </div>
+      );
+    case 'durationInNanos':
+      return `${round(nanoToMilliSec(Math.max(0, value)), 2)} ms`;
+    case 'duration':
+      return `${round(microToMilliSec(Math.max(0, value)), 2)} ms`;
+    case 'startTime':
+      return props.mode === 'jaeger'
+        ? moment(round(microToMilliSec(Math.max(0, value)), 2)).format(TRACE_ANALYTICS_DATE_FORMAT)
+        : moment(value).format(TRACE_ANALYTICS_DATE_FORMAT);
+    case 'jaegerEndTime':
+      return moment(round(microToMilliSec(Math.max(0, item.startTime + item.duration)), 2)).format(
+        TRACE_ANALYTICS_DATE_FORMAT
+      );
+    case 'endTime':
+      return moment(value).format(TRACE_ANALYTICS_DATE_FORMAT);
+    case 'status.code':
+      return value === 2 ? (
+        <EuiText color="danger" size="s">
+          Yes
+        </EuiText>
+      ) : (
+        'No'
+      );
+
+    default:
+      return value || '-';
+  }
 };
 
 export function SpanDetailTable(props: SpanDetailTableProps) {
+  const [tableParams, setTableParams] = useState({
+    size: 10,
+    page: 0,
+    sortingColumns: [] as Array<{
+      id: string;
+      direction: 'asc' | 'desc';
+    }>,
+  });
+  const [items, setItems] = useState<any>([]);
+  const [total, setTotal] = useState(0);
+  const { mode } = props;
+
+  useEffect(() => {
+    const spanSearchParams: SpanSearchParams = {
+      from: tableParams.page * tableParams.size,
+      size: tableParams.size,
+      sortingColumns: tableParams.sortingColumns.map(({ id, direction }) => ({
+        [id]: direction,
+      })),
+    };
+    handleSpansRequest(
+      props.http,
+      setItems,
+      setTotal,
+      spanSearchParams,
+      props.DSL,
+      mode,
+      props.dataSourceMDSId
+    );
+  }, [tableParams, props.DSL]);
+
+  useEffect(() => {
+    if (props.setTotal) props.setTotal(total);
+  }, [total]);
+
+  const columns = useMemo(() => getColumns(mode), [mode]);
+
+  const [visibleColumns, setVisibleColumns] = useState(() =>
+    columns
+      .filter(({ id }) => props.hiddenColumns.findIndex((column) => column === id) === -1)
+      .map(({ id }) => id)
+  );
+
+  const renderCellValue = useCallback(
+    (params) => renderCommonCellValue({ ...params, items, tableParams, props }),
+    [items, tableParams, props]
+  );
+
+  const onSort = useCallback(
+    (sortingColumns) => {
+      setTableParams({
+        ...tableParams,
+        sortingColumns,
+      });
+    },
+    [tableParams]
+  );
+
+  const onChangeItemsPerPage = useCallback((size) => setTableParams({ ...tableParams, size }), [
+    tableParams,
+  ]);
+  const onChangePage = useCallback((page) => setTableParams({ ...tableParams, page }), [
+    tableParams,
+  ]);
+
+  return (
+    <>
+      <EuiDataGrid
+        aria-labelledby="span-detail-data-grid"
+        columns={columns}
+        columnVisibility={{ visibleColumns, setVisibleColumns }}
+        rowCount={total}
+        renderCellValue={renderCellValue}
+        sorting={mode === 'jaeger' ? undefined : { columns: tableParams.sortingColumns, onSort }}
+        toolbarVisibility={mode === 'jaeger' ? false : true}
+        pagination={{
+          pageIndex: tableParams.page,
+          pageSize: tableParams.size,
+          pageSizeOptions: [10, 50, 100],
+          onChangeItemsPerPage,
+          onChangePage,
+        }}
+      />
+      {total === 0 && <NoMatchMessage size="xl" />}
+    </>
+  );
+}
+
+export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
   const { mode } = props;
   const [items, setItems] = useState<any>([]);
   const [total, setTotal] = useState(0);
-  const [expandedRows, setExpandedRows] = useState(new Set());
+  const [expandedRows, setExpandedRows] = useState(new Set<string>());
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
+  const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
 
   useEffect(() => {
     const spanSearchParams = {
@@ -70,10 +297,6 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
       (data) => {
         const hierarchy = buildHierarchy(data);
         setItems(hierarchy);
-
-        // Expand all rows by default
-        const allExpandedIds = gatherAllSpanIds(hierarchy);
-        setExpandedRows(allExpandedIds);
       },
       setTotal,
       spanSearchParams,
@@ -83,15 +306,27 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
     );
   }, [props.DSL]);
 
-  const buildHierarchy = (spans) => {
-    const spanMap = {};
+  interface Span {
+    spanId: string;
+    parentSpanId?: string;
+    children: Span[];
+    [key: string]: any;
+  }
+
+  type SpanMap = Record<string, Span>;
+
+  const buildHierarchy = (spans: Span[]): Span[] => {
+    const spanMap: SpanMap = {};
+
     spans.forEach((span) => {
       spanMap[span.spanId] = { ...span, children: [] };
     });
-    const rootSpans = [];
+
+    const rootSpans: Span[] = [];
 
     spans.forEach((span) => {
       if (span.parentSpanId && spanMap[span.parentSpanId]) {
+        // If the parent span exists, add this span to its children array
         spanMap[span.parentSpanId].children.push(spanMap[span.spanId]);
       } else {
         rootSpans.push(spanMap[span.spanId]);
@@ -101,156 +336,82 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
     return rootSpans;
   };
 
-  const flattenHierarchy = (spans, level = 0, isParentExpanded = true) => {
-    return spans.flatMap((span) => {
-      const isExpanded = expandedRows.has(span.spanId);
-      const shouldShow = level === 0 || isParentExpanded;
-      const row = shouldShow ? [{ ...span, level }] : [];
-      const children = flattenHierarchy(span.children, level + 1, isExpanded && shouldShow);
-      return [...row, ...children];
-    });
-  };
+  const flattenedItems = useMemo(() => {
+    const flattenHierarchy = (spans: Span[], level = 0, isParentExpanded = true): Span[] => {
+      return spans.flatMap((span) => {
+        const isExpanded = expandedRows.has(span.spanId);
+        const shouldShow = level === 0 || isParentExpanded;
+        const row = shouldShow ? [{ ...span, level }] : [];
+        const children = flattenHierarchy(span.children || [], level + 1, isExpanded && shouldShow);
+        return [...row, ...children];
+      });
+    };
 
-  const flattenedItems = useMemo(() => flattenHierarchy(items), [items, expandedRows]);
+    return flattenHierarchy(items);
+  }, [items, expandedRows]);
 
-  const columns: EuiDataGridColumn[] = [
-    {
-      id: mode === 'jaeger' ? 'spanID' : 'spanId',
-      display: 'Span ID',
-      initialWidth: 250,
-    },
-    {
-      id: mode === 'jaeger' ? 'references' : 'parentSpanId',
-      display: 'Parent span ID',
-    },
-    {
-      id: mode === 'jaeger' ? 'traceID' : 'traceId',
-      display: 'Trace ID',
-    },
-    ...(mode !== 'jaeger'
-      ? [
-          {
-            id: 'traceGroup',
-            display: 'Trace group',
-          },
-        ]
-      : []),
-    {
-      id: mode === 'jaeger' ? 'process' : 'serviceName',
-      display: 'Service',
-    },
-    {
-      id: mode === 'jaeger' ? 'operationName' : 'name',
-      display: 'Operation',
-    },
-    {
-      id: mode === 'jaeger' ? 'duration' : 'durationInNanos',
-      display: 'Duration',
-    },
-    {
-      id: 'startTime',
-      display: 'Start time',
-    },
-    {
-      id: mode === 'jaeger' ? 'jaegerEndTime' : 'endTime',
-      display: 'End time',
-    },
-    {
-      id: mode === 'jaeger' ? 'tag' : 'status.code',
-      display: 'Errors',
-    },
-  ];
+  const columns = useMemo(() => getColumns(mode), [mode]);
 
-  const [visibleColumns, setVisibleColumns] = useState(() =>
-    columns
-      .filter(({ id }) => props.hiddenColumns.findIndex((column) => column === id) === -1)
-      .map(({ id }) => id)
+  useEffect(() => {
+    setVisibleColumns(
+      columns
+        .filter(({ id }) => props.hiddenColumns.findIndex((column) => column === id) === -1)
+        .map(({ id }) => id)
+    );
+  }, [columns, props.hiddenColumns]);
+
+  const renderCellValue = useCallback(
+    (params) =>
+      renderCommonCellValue({
+        ...params,
+        items,
+        props,
+        expandedRows,
+        toggleRowExpansion: (id) => {
+          setExpandedRows((prev) => {
+            const newSet = new Set(prev);
+            if (newSet.has(id)) {
+              newSet.delete(id);
+            } else {
+              newSet.add(id);
+            }
+            return newSet;
+          });
+        },
+        flattenedItems,
+        indentationFactor: 20,
+      }),
+    [items, expandedRows, props, flattenedItems]
   );
 
-  const toggleRowExpansion = (spanId) => {
-    setExpandedRows((prevExpandedRows) => {
-      const newExpandedRows = new Set(prevExpandedRows);
-      if (newExpandedRows.has(spanId)) {
-        newExpandedRows.delete(spanId);
-      } else {
-        newExpandedRows.add(spanId);
+  const onColumnResize = useCallback(({ columnId, width }) => {
+    setColumnWidths((prevWidths) => ({
+      ...prevWidths,
+      [columnId]: width,
+    }));
+  }, []);
+
+  const adjustedColumns = useMemo(() => {
+    return columns.map((column) => ({
+      ...column,
+      initialWidth: columnWidths[column.id] || column.initialWidth,
+    }));
+  }, [columns, columnWidths]);
+
+  const gatherAllSpanIds = (spans: Span[]): Set<string> => {
+    const allSpanIds = new Set<string>();
+
+    spans.forEach((span) => {
+      allSpanIds.add(span.spanId);
+
+      if (span.children && span.children.length > 0) {
+        const childSpanIds = gatherAllSpanIds(span.children);
+        childSpanIds.forEach((id) => allSpanIds.add(id));
       }
-      return newExpandedRows;
     });
+
+    return allSpanIds;
   };
-
-  const renderCellValue = useMemo(() => {
-    return ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-      const span = flattenedItems[rowIndex];
-      if (!span) return '-';
-
-      const value = span[columnId];
-      const indentation = `${span.level * 20}px`; // Indent based on the level of hierarchy
-      const isRowExpanded = expandedRows.has(span.spanId);
-
-      if ((value == null || value === '') && columnId !== 'jaegerEndTime') return '-';
-
-      switch (columnId) {
-        case 'tag':
-          return value?.error === true ? (
-            <EuiText color="danger" size="s">
-              Yes
-            </EuiText>
-          ) : (
-            'No'
-          );
-        case 'references':
-          return value.length > 0 ? value[0].spanID : '';
-        case 'process':
-          return value?.serviceName;
-        case 'spanId':
-        case 'spanID':
-          return (
-            <div style={{ paddingLeft: indentation, display: 'flex', alignItems: 'center' }}>
-              {span.children.length > 0 ? (
-                <EuiIcon
-                  type={isRowExpanded ? 'arrowDown' : 'arrowRight'}
-                  onClick={() => toggleRowExpansion(span.spanId)}
-                  style={{ cursor: 'pointer', marginRight: 5 }}
-                />
-              ) : (
-                <EuiIcon type="empty" style={{ visibility: 'hidden', marginRight: 5 }} />
-              )}
-              <EuiLink data-test-subj="spanId-link" onClick={() => props.openFlyout(value)}>
-                {value}
-              </EuiLink>
-            </div>
-          );
-        case 'durationInNanos':
-          return `${round(nanoToMilliSec(Math.max(0, value)), 2)} ms`;
-        case 'duration':
-          return `${round(microToMilliSec(Math.max(0, value)), 2)} ms`;
-        case 'startTime':
-          return mode === 'jaeger'
-            ? moment(round(microToMilliSec(Math.max(0, value)), 2)).format(
-                TRACE_ANALYTICS_DATE_FORMAT
-              )
-            : moment(value).format(TRACE_ANALYTICS_DATE_FORMAT);
-        case 'jaegerEndTime':
-          return moment(
-            round(microToMilliSec(Math.max(0, span.startTime + span.duration)), 2)
-          ).format(TRACE_ANALYTICS_DATE_FORMAT);
-        case 'endTime':
-          return moment(value).format(TRACE_ANALYTICS_DATE_FORMAT);
-        case 'status.code':
-          return value === 2 ? (
-            <EuiText color="danger" size="s">
-              Yes
-            </EuiText>
-          ) : (
-            'No'
-          );
-
-        default:
-          return value || '-';
-      }
-    };
-  }, [flattenedItems, expandedRows]);
 
   const expandAllRows = () => {
     const allExpandedIds = gatherAllSpanIds(items);
@@ -261,22 +422,32 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
     setExpandedRows(new Set());
   };
 
-  const toolbarButtons = (
-    <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiSmallButton onClick={expandAllRows}>Expand All</EuiSmallButton>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiSmallButton onClick={collapseAllRows}>Collapse All</EuiSmallButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  const toolbarButtons = [
+    <EuiButtonEmpty
+      size="xs"
+      onClick={expandAllRows}
+      key="expandAll"
+      color="text"
+      iconType="expand"
+    >
+      Expand all
+    </EuiButtonEmpty>,
+    <EuiButtonEmpty
+      size="xs"
+      onClick={collapseAllRows}
+      key="collapseAll"
+      color="text"
+      iconType="minimize"
+    >
+      Collapse all
+    </EuiButtonEmpty>,
+  ];
 
   return (
     <div style={{ height: '700px', overflowY: 'auto' }}>
       <EuiDataGrid
         aria-labelledby="span-detail-data-grid"
-        columns={columns}
+        columns={adjustedColumns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         rowCount={flattenedItems.length}
         renderCellValue={renderCellValue}
@@ -290,6 +461,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
                 additionalControls: toolbarButtons,
               }
         }
+        onColumnResize={onColumnResize}
       />
       {total === 0 && <NoMatchMessage size="xl" />}
     </div>

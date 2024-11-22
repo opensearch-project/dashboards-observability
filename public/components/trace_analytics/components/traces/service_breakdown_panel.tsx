@@ -29,8 +29,8 @@ export function ServiceBreakdownPanel(props: { data: Plotly.Data[] }) {
         margin: {
           l: 5,
           r: 5,
-          b: 5,
-          t: 5,
+          b: 15,
+          t: 15,
         },
       } as Partial<Plotly.Layout>),
     [props.data]
@@ -72,12 +72,11 @@ export function ServiceBreakdownPanel(props: { data: Plotly.Data[] }) {
       <EuiPanel>
         <PanelTitle title="Time spent by service" data-test-subj="time-spent-by-service-panel" />
         <EuiHorizontalRule margin="m" />
-        <EuiFlexGroup direction="column" alignItems="center">
-          <EuiFlexItem>
+        <EuiFlexGroup alignItems="center" gutterSize="l">
+          <EuiFlexItem grow={false}>
             {props.data?.length > 0 ? <Plt data={props.data} layout={layout} /> : null}
           </EuiFlexItem>
-          <EuiSpacer />
-          <EuiFlexItem>{stats}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{stats}</EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
       </EuiPanel>

@@ -11,23 +11,29 @@ import ReactDOM from 'react-dom';
 import { act } from 'react-dom/test-utils';
 import { HttpResponse } from '../../../../../../../../src/core/public';
 import { TEST_JAEGER_SPAN_RESPONSE, TEST_SPAN_RESPONSE } from '../../../../../../test/constants';
-import httpClientMock from '../../../../../../test/__mocks__/httpClientMock';
-import { SpanDetailTable } from '../span_detail_table';
+import { SpanDetailTable, SpanDetailTableHierarchy } from '../span_detail_table';
+
+jest.mock('../../../../../../test/__mocks__/httpClientMock', () => ({
+  post: jest.fn(),
+}));
+
+const httpClientMock = jest.requireMock('../../../../../../test/__mocks__/httpClientMock');
 
 describe('<SpanDetailTable /> spec', () => {
   configure({ adapter: new Adapter() });
 
   it('renders the empty component', async () => {
-    httpClientMock.post = jest.fn(() =>
-      Promise.resolve(({ hits: { hits: [], total: { value: 0 } } } as unknown) as HttpResponse)
-    );
+    httpClientMock.post.mockResolvedValue(({
+      hits: { hits: [], total: { value: 0 } },
+    } as unknown) as HttpResponse);
     const utils = await mount(
       <SpanDetailTable
         http={httpClientMock}
         hiddenColumns={['traceId', 'traceGroup']}
         DSL={{}}
         openFlyout={() => {}}
-        mode='data_prepper'
+        mode="data_prepper"
+        dataSourceMDSId="testDataSource"
       />
     );
     utils.update();
@@ -38,10 +44,8 @@ describe('<SpanDetailTable /> spec', () => {
 
   it('renders the component with data', async () => {
     const setCurrentSpan = jest.fn();
-    httpClientMock.post = jest.fn(() =>
-      Promise.resolve((TEST_SPAN_RESPONSE as unknown) as HttpResponse)
-    );
-    let container = document.createElement('div');
+    httpClientMock.post.mockResolvedValue((TEST_SPAN_RESPONSE as unknown) as HttpResponse);
+    const container = document.createElement('div');
     await act(() => {
       ReactDOM.render(
         <SpanDetailTable
@@ -49,7 +53,8 @@ describe('<SpanDetailTable /> spec', () => {
           hiddenColumns={['traceId', 'traceGroup']}
           DSL={{}}
           openFlyout={(spanId: string) => setCurrentSpan(spanId)}
-          mode='data_prepper'
+          mode="data_prepper"
+          dataSourceMDSId="testDataSource"
         />,
         container
       );
@@ -59,10 +64,8 @@ describe('<SpanDetailTable /> spec', () => {
 
   it('renders the jaeger component with data', async () => {
     const setCurrentSpan = jest.fn();
-    httpClientMock.post = jest.fn(() =>
-      Promise.resolve((TEST_JAEGER_SPAN_RESPONSE as unknown) as HttpResponse)
-    );
-    let container = document.createElement('div');
+    httpClientMock.post.mockResolvedValue((TEST_JAEGER_SPAN_RESPONSE as unknown) as HttpResponse);
+    const container = document.createElement('div');
     await act(() => {
       ReactDOM.render(
         <SpanDetailTable
@@ -70,7 +73,72 @@ describe('<SpanDetailTable /> spec', () => {
           hiddenColumns={['traceID', 'traceGroup']}
           DSL={{}}
           openFlyout={(spanId: string) => setCurrentSpan(spanId)}
-          mode='jaeger'
+          mode="jaeger"
+          dataSourceMDSId="testDataSource"
+        />,
+        container
+      );
+    });
+    expect(container).toMatchSnapshot();
+  });
+});
+
+describe('<SpanDetailTableHierarchy /> spec', () => {
+  configure({ adapter: new Adapter() });
+
+  it('renders the empty component', async () => {
+    httpClientMock.post.mockResolvedValue(({
+      hits: { hits: [], total: { value: 0 } },
+    } as unknown) as HttpResponse);
+    const utils = await mount(
+      <SpanDetailTableHierarchy
+        http={httpClientMock}
+        hiddenColumns={['traceId', 'traceGroup']}
+        DSL={{}}
+        openFlyout={() => {}}
+        mode="data_prepper"
+        dataSourceMDSId="testDataSource"
+      />
+    );
+    utils.update();
+    await waitFor(() => {
+      expect(utils).toMatchSnapshot();
+    });
+  });
+
+  it('renders the component with data', async () => {
+    const setCurrentSpan = jest.fn();
+    httpClientMock.post.mockResolvedValue((TEST_SPAN_RESPONSE as unknown) as HttpResponse);
+    const container = document.createElement('div');
+    await act(() => {
+      ReactDOM.render(
+        <SpanDetailTableHierarchy
+          http={httpClientMock}
+          hiddenColumns={['traceId', 'traceGroup']}
+          DSL={{}}
+          openFlyout={(spanId: string) => setCurrentSpan(spanId)}
+          mode="data_prepper"
+          dataSourceMDSId="testDataSource"
+        />,
+        container
+      );
+    });
+    expect(container).toMatchSnapshot();
+  });
+
+  it('renders the jaeger component with data', async () => {
+    const setCurrentSpan = jest.fn();
+    httpClientMock.post.mockResolvedValue((TEST_JAEGER_SPAN_RESPONSE as unknown) as HttpResponse);
+    const container = document.createElement('div');
+    await act(() => {
+      ReactDOM.render(
+        <SpanDetailTableHierarchy
+          http={httpClientMock}
+          hiddenColumns={['traceID', 'traceGroup']}
+          DSL={{}}
+          openFlyout={(spanId: string) => setCurrentSpan(spanId)}
+          mode="jaeger"
+          dataSourceMDSId="testDataSource"
         />,
         container
       );

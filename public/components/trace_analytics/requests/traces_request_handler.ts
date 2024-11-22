@@ -300,7 +300,6 @@ const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyti
     ganttMaxX: 0,
   };
   if (hits.length === 0) return data;
-  // console.log("hit._source:", hits);//ADAM looking for parent ID
 
   const minStartTime =
     mode === 'jaeger'
@@ -376,12 +375,6 @@ const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyti
       }
     );
   });
-
-  // Logging to verify parent_id values //ADAM
-  // console.log("Span Detail Data with Parent ID:");
-  // data.table.forEach((span) => {
-  //   console.log(`Span ID: ${span.span_id}, Parent ID: ${span.parent_id}, Service: ${span.service_name}`);
-  // });
 
   data.ganttMaxX = maxEndTime;
   return data;

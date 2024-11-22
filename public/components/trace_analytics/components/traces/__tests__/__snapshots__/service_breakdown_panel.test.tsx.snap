@@ -35,24 +35,23 @@ exports[`Service breakdown panel component renders empty service breakdown panel
       </EuiHorizontalRule>
       <EuiFlexGroup
         alignItems="center"
-        direction="column"
+        gutterSize="l"
       >
         <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
-          <EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
             <div
-              className="euiFlexItem"
+              className="euiFlexItem euiFlexItem--flexGrowZero"
             />
           </EuiFlexItem>
-          <EuiSpacer>
+          <EuiFlexItem
+            grow={false}
+          >
             <div
-              className="euiSpacer euiSpacer--l"
-            />
-          </EuiSpacer>
-          <EuiFlexItem>
-            <div
-              className="euiFlexItem"
+              className="euiFlexItem euiFlexItem--flexGrowZero"
             />
           </EuiFlexItem>
         </div>
@@ -121,14 +120,16 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
       </EuiHorizontalRule>
       <EuiFlexGroup
         alignItems="center"
-        direction="column"
+        gutterSize="l"
       >
         <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
-          <EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
             <div
-              className="euiFlexItem"
+              className="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <Plt
                 data={
@@ -155,10 +156,10 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
                   Object {
                     "height": 200,
                     "margin": Object {
-                      "b": 5,
+                      "b": 15,
                       "l": 5,
                       "r": 5,
-                      "t": 5,
+                      "t": 15,
                     },
                     "paper_bgcolor": "rgba(0, 0, 0, 0)",
                     "plot_bgcolor": "rgba(0, 0, 0, 0)",
@@ -214,10 +215,10 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
                         "traceorder": "normal",
                       },
                       "margin": Object {
-                        "b": 5,
+                        "b": 15,
                         "l": 5,
                         "r": 5,
-                        "t": 5,
+                        "t": 15,
                       },
                       "paper_bgcolor": "rgba(0, 0, 0, 0)",
                       "plot_bgcolor": "rgba(0, 0, 0, 0)",
@@ -260,14 +261,11 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
               </Plt>
             </div>
           </EuiFlexItem>
-          <EuiSpacer>
+          <EuiFlexItem
+            grow={false}
+          >
             <div
-              className="euiSpacer euiSpacer--l"
-            />
-          </EuiSpacer>
-          <EuiFlexItem>
-            <div
-              className="euiFlexItem"
+              className="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <EuiFlexGroup
                 responsive={false}
