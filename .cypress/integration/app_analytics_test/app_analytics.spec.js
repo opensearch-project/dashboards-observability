@@ -571,6 +571,7 @@ describe('Application Analytics home page', () => {
     cy.get('[data-test-subj="deleteApplication"]').eq(0).click();
     cy.get('[data-test-subj="popoverModal__deleteTextInput"]').type('delete');
     cy.get('[data-test-subj="popoverModal__deleteButton"').click();
+    cy.reload();
     cy.get(`[data-test-subj="${newName}ApplicationLink"]`).should('not.exist');
   });
 });
