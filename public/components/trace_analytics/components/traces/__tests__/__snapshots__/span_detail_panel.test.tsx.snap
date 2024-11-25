@@ -137,24 +137,26 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
                               <EuiSmallButton
+                                isDisabled={true}
                                 onClick={[Function]}
                               >
                                 <EuiButton
+                                  isDisabled={true}
                                   onClick={[Function]}
                                   size="s"
                                 >
                                   <EuiButtonDisplay
                                     baseClassName="euiButton"
-                                    disabled={false}
+                                    disabled={true}
                                     element="button"
-                                    isDisabled={false}
+                                    isDisabled={true}
                                     onClick={[Function]}
                                     size="s"
                                     type="button"
                                   >
                                     <button
-                                      className="euiButton euiButton--primary euiButton--small"
-                                      disabled={false}
+                                      className="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
+                                      disabled={true}
                                       onClick={[Function]}
                                       style={
                                         Object {
@@ -179,7 +181,7 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
                                           <span
                                             className="euiButton__text"
                                           >
-                                            Reset Zoom
+                                            Reset zoom
                                           </span>
                                         </span>
                                       </EuiButtonContent>
@@ -211,7 +213,7 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
                                     },
                                     Object {
                                       "id": "hierarchy_span_list",
-                                      "label": "Span connections",
+                                      "label": "Tree view",
                                     },
                                   ]
                                 }
@@ -400,7 +402,7 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
                                       isIconOnly={false}
                                       isSelected={false}
                                       key="2"
-                                      label="Span connections"
+                                      label="Tree view"
                                       name="random_html_id"
                                       onChange={[Function]}
                                       size="s"
@@ -418,9 +420,9 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
                                         textProps={
                                           Object {
                                             "className": "euiButtonGroupButton__textShift",
-                                            "data-text": "Span connections",
+                                            "data-text": "Tree view",
                                             "ref": [Function],
-                                            "title": "Span connections",
+                                            "title": "Tree view",
                                           }
                                         }
                                       >
@@ -442,9 +444,9 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
                                             textProps={
                                               Object {
                                                 "className": "euiButton__text euiButtonGroupButton__textShift",
-                                                "data-text": "Span connections",
+                                                "data-text": "Tree view",
                                                 "ref": [Function],
-                                                "title": "Span connections",
+                                                "title": "Tree view",
                                               }
                                             }
                                           >
@@ -453,8 +455,8 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
                                             >
                                               <span
                                                 className="euiButton__text euiButtonGroupButton__textShift"
-                                                data-text="Span connections"
-                                                title="Span connections"
+                                                data-text="Tree view"
+                                                title="Tree view"
                                               >
                                                 <input
                                                   checked={false}
@@ -466,7 +468,7 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
                                                   onChange={[Function]}
                                                   type="radio"
                                                 />
-                                                Span connections
+                                                Tree view
                                               </span>
                                             </span>
                                           </EuiButtonContent>

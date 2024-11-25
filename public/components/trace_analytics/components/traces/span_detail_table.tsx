@@ -43,36 +43,30 @@ const getColumns = (mode: TraceAnalyticsMode): EuiDataGridColumn[] => [
   {
     id: mode === 'jaeger' ? 'spanID' : 'spanId',
     display: 'Span ID',
-    initialWidth: 250,
   },
   {
     id: mode === 'jaeger' ? 'references' : 'parentSpanId',
     display: 'Parent span ID',
-    initialWidth: 150,
   },
   {
     id: mode === 'jaeger' ? 'traceID' : 'traceId',
     display: 'Trace ID',
-    initialWidth: 200,
   },
   ...(mode !== 'jaeger'
     ? [
         {
           id: 'traceGroup',
           display: 'Trace group',
-          initialWidth: 200,
         },
       ]
     : []),
   {
     id: mode === 'jaeger' ? 'process' : 'serviceName',
     display: 'Service',
-    initialWidth: 200,
   },
   {
     id: mode === 'jaeger' ? 'operationName' : 'name',
     display: 'Operation',
-    initialWidth: 250,
   },
   {
     id: mode === 'jaeger' ? 'duration' : 'durationInNanos',
@@ -87,12 +81,10 @@ const getColumns = (mode: TraceAnalyticsMode): EuiDataGridColumn[] => [
   {
     id: 'startTime',
     display: 'Start time',
-    initialWidth: 200,
   },
   {
     id: mode === 'jaeger' ? 'jaegerEndTime' : 'endTime',
     display: 'End time',
-    initialWidth: 200,
   },
 ];
 
@@ -283,7 +275,6 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
   const [items, setItems] = useState<any>([]);
   const [total, setTotal] = useState(0);
   const [expandedRows, setExpandedRows] = useState(new Set<string>());
-  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
 
   useEffect(() => {
@@ -384,20 +375,6 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
     [items, expandedRows, props, flattenedItems]
   );
 
-  const onColumnResize = useCallback(({ columnId, width }) => {
-    setColumnWidths((prevWidths) => ({
-      ...prevWidths,
-      [columnId]: width,
-    }));
-  }, []);
-
-  const adjustedColumns = useMemo(() => {
-    return columns.map((column) => ({
-      ...column,
-      initialWidth: columnWidths[column.id] || column.initialWidth,
-    }));
-  }, [columns, columnWidths]);
-
   const gatherAllSpanIds = (spans: Span[]): Set<string> => {
     const allSpanIds = new Set<string>();
 
@@ -444,10 +421,10 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
   ];
 
   return (
-    <div style={{ height: '700px', overflowY: 'auto' }}>
+    <div style={{ height: '500px', overflowY: 'auto' }}>
       <EuiDataGrid
         aria-labelledby="span-detail-data-grid"
-        columns={adjustedColumns}
+        columns={columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         rowCount={flattenedItems.length}
         renderCellValue={renderCellValue}
@@ -461,7 +438,6 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
                 additionalControls: toolbarButtons,
               }
         }
-        onColumnResize={onColumnResize}
       />
       {total === 0 && <NoMatchMessage size="xl" />}
     </div>

@@ -335,7 +335,6 @@ const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyti
     data.table.push({
       service_name: serviceName,
       span_id: hit._source.spanID,
-      parent_id: hit._source.parentSpanId,
       latency: duration,
       vs_benchmark: 0,
       error,
@@ -355,7 +354,6 @@ const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyti
         hoverinfo: 'none',
         showlegend: false,
         spanId: mode === 'jaeger' ? hit._source.spanID : hit._source.spanId,
-        parentId: hit._source.parentSpanId,
       },
       {
         x: [duration],
@@ -371,7 +369,6 @@ const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyti
         orientation: BarOrientation.horizontal,
         hovertemplate: '%{x}<extra></extra>',
         spanId: mode === 'jaeger' ? hit._source.spanID : hit._source.spanId,
-        parentId: hit._source.parentSpanId,
       }
     );
   });

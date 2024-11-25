@@ -112,32 +112,26 @@ exports[`<SpanDetailTable /> spec renders the empty component 1`] = `
         Object {
           "display": "Span ID",
           "id": "spanId",
-          "initialWidth": 250,
         },
         Object {
           "display": "Parent span ID",
           "id": "parentSpanId",
-          "initialWidth": 150,
         },
         Object {
           "display": "Trace ID",
           "id": "traceId",
-          "initialWidth": 200,
         },
         Object {
           "display": "Trace group",
           "id": "traceGroup",
-          "initialWidth": 200,
         },
         Object {
           "display": "Service",
           "id": "serviceName",
-          "initialWidth": 200,
         },
         Object {
           "display": "Operation",
           "id": "name",
-          "initialWidth": 250,
         },
         Object {
           "display": "Duration",
@@ -152,12 +146,10 @@ exports[`<SpanDetailTable /> spec renders the empty component 1`] = `
         Object {
           "display": "Start time",
           "id": "startTime",
-          "initialWidth": 200,
         },
         Object {
           "display": "End time",
           "id": "endTime",
-          "initialWidth": 200,
         },
       ]
     }
@@ -448,7 +440,7 @@ exports[`<SpanDetailTable /> spec renders the jaeger component with data 1`] = `
 exports[`<SpanDetailTableHierarchy /> spec renders the component with data 1`] = `
 <div>
   <div
-    style="height: 700px; overflow-y: auto;"
+    style="height: 500px; overflow-y: auto;"
   >
     <div
       data-focus-guard="true"
@@ -542,7 +534,7 @@ exports[`<SpanDetailTableHierarchy /> spec renders the empty component 1`] = `
   <div
     style={
       Object {
-        "height": "700px",
+        "height": "500px",
         "overflowY": "auto",
       }
     }
@@ -569,32 +561,26 @@ exports[`<SpanDetailTableHierarchy /> spec renders the empty component 1`] = `
           Object {
             "display": "Span ID",
             "id": "spanId",
-            "initialWidth": 250,
           },
           Object {
             "display": "Parent span ID",
             "id": "parentSpanId",
-            "initialWidth": 150,
           },
           Object {
             "display": "Trace ID",
             "id": "traceId",
-            "initialWidth": 200,
           },
           Object {
             "display": "Trace group",
             "id": "traceGroup",
-            "initialWidth": 200,
           },
           Object {
             "display": "Service",
             "id": "serviceName",
-            "initialWidth": 200,
           },
           Object {
             "display": "Operation",
             "id": "name",
-            "initialWidth": 250,
           },
           Object {
             "display": "Duration",
@@ -609,16 +595,13 @@ exports[`<SpanDetailTableHierarchy /> spec renders the empty component 1`] = `
           Object {
             "display": "Start time",
             "id": "startTime",
-            "initialWidth": 200,
           },
           Object {
             "display": "End time",
             "id": "endTime",
-            "initialWidth": 200,
           },
         ]
       }
-      onColumnResize={[Function]}
       renderCellValue={[Function]}
       rowCount={0}
       toolbarVisibility={
@@ -858,7 +841,7 @@ exports[`<SpanDetailTableHierarchy /> spec renders the empty component 1`] = `
 exports[`<SpanDetailTableHierarchy /> spec renders the jaeger component with data 1`] = `
 <div>
   <div
-    style="height: 700px; overflow-y: auto;"
+    style="height: 500px; overflow-y: auto;"
   >
     <div
       data-focus-guard="true"
