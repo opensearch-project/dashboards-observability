@@ -519,10 +519,12 @@ describe('Editing application', () => {
     cy.get('[data-test-subj="logSourceAccordion"]').trigger('mouseover').click();
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').should('be.disabled');
     cy.get('[data-test-subj="servicesEntitiesAccordion"]').trigger('mouseover').click();
+    cy.get('[data-test-subj="servicesEntitiesCountBadge"]').should('contain', '1');
     cy.get('[data-test-subj="servicesEntitiesComboBox"]').click();
     cy.get('.euiFilterSelectItem').contains(service_two).click();
     cy.get('[data-test-subj="servicesEntitiesCountBadge"]').should('contain', '2');
     cy.get('[data-test-subj="traceGroupsAccordion"]').trigger('mouseover').click();
+    cy.get('[data-test-subj="traceGroupsCountBadge"]').should('contain', '2');
     cy.get('[data-test-subj="comboBoxToggleListButton"]').eq(1).click();
     cy.get('.euiFilterSelectItem').contains(trace_three).trigger('click');
     cy.get('[data-test-subj="traceGroupsCountBadge"]').should('contain', '3');
