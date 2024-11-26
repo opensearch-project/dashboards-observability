@@ -5,10 +5,18 @@
 
 /// <reference types="cypress" />
 
-import { expandServiceView, SERVICE_NAME, SERVICE_SPAN_ID, setTimeFilter, verify_traces_spans_data_grid_cols_exists, count_table_row, AUTH_SERVICE_SPAN_ID } from '../../utils/constants';
+import {
+  expandServiceView,
+  SERVICE_NAME,
+  SERVICE_SPAN_ID,
+  setTimeFilter,
+  verify_traces_spans_data_grid_cols_exists,
+  count_table_row,
+  AUTH_SERVICE_SPAN_ID,
+} from '../../utils/constants';
 import { suppressResizeObserverIssue } from '../../utils/constants';
 
-suppressResizeObserverIssue();//needs to be in file once
+suppressResizeObserverIssue(); //needs to be in file once
 
 describe('Testing services table empty state', () => {
   beforeEach(() => {
@@ -52,7 +60,9 @@ describe('Testing services table', () => {
   });
 
   it('Verify columns in Services table', () => {
-    cy.get('.euiFlexItem.euiFlexItem--flexGrowZero .panel-title').contains('Services').should('exist');
+    cy.get('.euiFlexItem.euiFlexItem--flexGrowZero .panel-title')
+      .contains('Services')
+      .should('exist');
     cy.get('.euiTableCellContent__text[title="Name"]').should('exist');
     cy.get('.euiTableCellContent__text[title="Average duration (ms)"]').should('exist');
     cy.get('.euiTableCellContent__text[title="Error rate"]').should('exist');
@@ -61,17 +71,20 @@ describe('Testing services table', () => {
     cy.get('.euiTableCellContent__text[title="Connected services"]').should('exist');
     cy.get('.euiTableCellContent__text[title="Traces"]').should('exist');
     cy.get('[data-test-subj="tablePaginationPopoverButton"]').click();
-    cy.get('.euiIcon.euiIcon--medium.euiIcon--inherit.euiContextMenu__icon').eq(0).should('exist').click();
+    cy.get('.euiIcon.euiIcon--medium.euiIcon--inherit.euiContextMenu__icon')
+      .eq(0)
+      .should('exist')
+      .click();
     cy.get('[data-test-subj="pagination-button-next"]').should('exist').click();
     cy.get('.euiLink.euiLink--primary').contains('order').should('exist');
-  })
+  });
 
   it('Navigate from Services to Traces', () => {
     cy.get('.euiTableCellContent__text[title="Traces"]').should('exist');
     cy.contains('74').should('exist').click();
     cy.get('.euiText.euiText--medium .panel-title').should('exist');
     cy.get('.euiBadge__childButton[data-test-subj="filterBadge"]').should('exist');
-  })
+  });
 });
 
 describe('Testing service view empty state', () => {
@@ -102,7 +115,7 @@ describe('Testing service view', () => {
     setTimeFilter();
     cy.get('input[type="search"]').first().focus().type(`${SERVICE_NAME}`);
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
-    cy.get('.euiTableRow').should('have.length.lessThan', 3);//Replaces wait
+    cy.get('.euiTableRow').should('have.length.lessThan', 3); //Replaces wait
     expandServiceView(0);
   });
 
@@ -123,7 +136,9 @@ describe('Testing service view', () => {
   });
 
   it('Renders spans data grid, flyout, filters', () => {
-    cy.get("[data-test-subj='spanId-link']").contains(SERVICE_SPAN_ID).trigger('mouseover', { force: true });
+    cy.get("[data-test-subj='spanId-link']")
+      .contains(SERVICE_SPAN_ID)
+      .trigger('mouseover', { force: true });
     cy.get('button[data-datagrid-interactable="true"]').eq(0).click({ force: true });
     cy.contains('Span detail').should('exist');
     cy.contains('Span attributes').should('exist');
@@ -157,7 +172,7 @@ describe('Testing Service map', () => {
     cy.contains('100');
     cy.get('.euiFormLabel.euiFormControlLayout__prepend').contains('Focus on').should('exist');
     cy.get('[placeholder="Service name"]').focus().type('database{enter}');
-  })
+  });
 });
 
 describe('Testing traces Spans table verify table headers functionality', () => {
@@ -188,7 +203,9 @@ describe('Testing traces Spans table verify table headers functionality', () => 
     cy.get('[data-test-subj = "dataGridColumnSelectorButton"]').click({ force: true });
     cy.get('.panel-title-count').contains('8').should('exist');
     cy.get('.euiSwitch.euiSwitch--compressed.euiSwitch--mini .euiSwitch__button').eq(3).click();
-    cy.get('[data-test-subj = "dataGridColumnSelectorButton"]').click().should('have.text', '2 columns hidden');
+    cy.get('[data-test-subj = "dataGridColumnSelectorButton"]')
+      .click()
+      .should('have.text', '2 columns hidden');
     count_table_row(8);
   });
 
@@ -196,7 +213,10 @@ describe('Testing traces Spans table verify table headers functionality', () => 
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
     expandServiceView(1);
     cy.get('[data-test-subj = "dataGridColumnSelectorButton"]').click();
-    cy.get('.euiPopoverFooter .euiFlexItem.euiFlexItem--flexGrowZero').eq(0).should('have.text', 'Show all').click();
+    cy.get('.euiPopoverFooter .euiFlexItem.euiFlexItem--flexGrowZero')
+      .eq(0)
+      .should('have.text', 'Show all')
+      .click();
     cy.get('.euiDataGrid__focusWrap').click().should('exist');
     verify_traces_spans_data_grid_cols_exists();
   });
@@ -204,11 +224,17 @@ describe('Testing traces Spans table verify table headers functionality', () => 
   it('Hide all button Spans table', () => {
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
     expandServiceView(1);
-    cy.get('.euiTableRow').should('have.length.lessThan', 2);//Replace wait
+    cy.get('.euiTableRow').should('have.length.lessThan', 2); //Replace wait
     cy.get('[data-test-subj = "dataGridColumnSelectorButton"]').click();
-    cy.get('.euiPopoverFooter .euiFlexItem.euiFlexItem--flexGrowZero').eq(1).should('have.text', 'Hide all').click();
+    cy.get('.euiPopoverFooter .euiFlexItem.euiFlexItem--flexGrowZero')
+      .eq(1)
+      .should('have.text', 'Hide all')
+      .click();
     cy.get('.euiDataGrid__focusWrap').click().should('exist');
-    cy.get('[data-test-subj="dataGridColumnSelectorPopover"]').should('have.text', '10 columns hidden');
+    cy.get('[data-test-subj="dataGridColumnSelectorPopover"]').should(
+      'have.text',
+      '10 columns hidden'
+    );
   });
 
   it('Render Spans table and change data table Density', () => {
@@ -225,13 +251,18 @@ describe('Testing traces Spans table verify table headers functionality', () => 
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
     expandServiceView(1);
     verify_traces_spans_data_grid_cols_exists();
-    cy.get('[data-test-subj="dataGridColumnSortingButton"]').contains('Sort fields').should('exist').click();
+    cy.get('[data-test-subj="dataGridColumnSortingButton"]')
+      .contains('Sort fields')
+      .should('exist')
+      .click();
     cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection"]').click();
     cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-spanId').click();
     cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-parentSpanId"]').click();
     cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-traceId"]').click();
     cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-traceGroup').click();
-    cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-durationInNanos"]').click();
+    cy.get(
+      '[data-test-subj="dataGridColumnSortingPopoverColumnSelection-durationInNanos"]'
+    ).click();
     cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-startTime"]').click();
     cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-endTime').click();
     cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-status.code"]').click();
@@ -262,11 +293,15 @@ describe('Testing traces Spans table and verify columns functionality', () => {
     cy.get('.euiFlyoutBody .panel-title').contains('Overview').should('exist');
     cy.get('.euiTextColor.euiTextColor--subdued').contains('Span ID').should('exist');
     cy.get('[data-test-subj="parentSpanId"]').contains('d03fecfa0f55b77c').should('exist');
-    cy.get('.euiFlyoutBody__overflowContent .panel-title').contains('Span attributes').should('exist');
+    cy.get('.euiFlyoutBody__overflowContent .panel-title')
+      .contains('Span attributes')
+      .should('exist');
     cy.get('.euiDescriptionList__description .euiFlexItem').eq(0).trigger('mouseover').click();
     cy.get('[aria-label="span-flyout-filter-icon"]').click();
     cy.get('.euiFlyout__closeButton.euiFlyout__closeButton--inside').click();
-    cy.get('.euiBadge__content .euiBadge__text').contains('spanId: 277a5934acf55dcf').should('exist');
+    cy.get('.euiBadge__content .euiBadge__text')
+      .contains('spanId: 277a5934acf55dcf')
+      .should('exist');
     count_table_row(1);
     cy.get('[aria-label="remove current filter"]').click();
     cy.get('.panel-title-count').contains('8').should('exist');
@@ -277,6 +312,8 @@ describe('Testing traces Spans table and verify columns functionality', () => {
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
     expandServiceView(1);
     verify_traces_spans_data_grid_cols_exists();
+    cy.get('[data-test-subj="service-dep-title"]').should('exist');
+    cy.get('[data-test-subj="parentSpanId"]').contains('d03fecfa0f55b77c').should('exist');
     cy.get('.euiDataGridHeaderCell__content').contains('Span ID').click();
     cy.get('.euiListGroupItem__label').contains('Hide column').click();
     cy.get('.euiDataGridHeaderCell__content').contains('Trace ID').click();
@@ -285,7 +322,6 @@ describe('Testing traces Spans table and verify columns functionality', () => {
     cy.get('.euiListGroupItem__label').contains('Move left').click();
   });
 });
-
 
 describe('Testing switch mode to jaeger', () => {
   beforeEach(() => {
@@ -312,9 +348,9 @@ describe('Testing switch mode to jaeger', () => {
   });
 
   it('Verifies traces links to traces page with filter applied', () => {
-    cy.get('.euiTableRow').should('have.length.lessThan', 7);//Replaces Wait
+    cy.get('.euiTableRow').should('have.length.lessThan', 7); //Replaces Wait
     cy.get('.euiLink').contains('7').click();
     cy.contains(' (7)').should('exist');
-    cy.get("[data-test-subj='filterBadge']").eq(0).contains('process.serviceName: customer')
-  })
+    cy.get("[data-test-subj='filterBadge']").eq(0).contains('process.serviceName: customer');
+  });
 });
