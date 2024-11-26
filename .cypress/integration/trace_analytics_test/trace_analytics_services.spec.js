@@ -241,6 +241,7 @@ describe('Testing traces Spans table verify table headers functionality', () => 
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
     expandServiceView(1);
     verify_traces_spans_data_grid_cols_exists();
+    cy.get('[data-test-subj="service-dep-table"]').should('exist');
     cy.get('.euiButtonEmpty__text').contains('Density').click();
     cy.get('.euiButtonContent__icon').eq(5).click();
     cy.get('.euiButtonContent__icon').eq(6).click();
@@ -251,6 +252,7 @@ describe('Testing traces Spans table verify table headers functionality', () => 
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
     expandServiceView(1);
     verify_traces_spans_data_grid_cols_exists();
+    cy.get('[data-test-subj="service-dep-table"]').should('exist');
     cy.get('[data-test-subj="dataGridColumnSortingButton"]')
       .contains('Sort fields')
       .should('exist')
