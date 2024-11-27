@@ -243,9 +243,9 @@ describe('Testing traces Spans table verify table headers functionality', () => 
     verify_traces_spans_data_grid_cols_exists();
     cy.get('[data-test-subj="service-dep-table"]').should('exist');
     cy.get('.euiButtonEmpty__text').contains('Density').click();
-    cy.get('.euiButtonContent__icon').eq(5).click();
-    cy.get('.euiButtonContent__icon').eq(6).click();
-    cy.get('.euiButtonContent__icon').eq(7).click();
+    cy.contains('.euiButtonContent', 'Compact density').find('.euiButtonContent__icon').click();
+    cy.contains('.euiButtonContent', 'Normal density').find('.euiButtonContent__icon').click();
+    cy.contains('.euiButtonContent', 'Expanded density').find('.euiButtonContent__icon').click();
   });
 
   it('Render Spans table and and click on sort', () => {
