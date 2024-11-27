@@ -86,7 +86,7 @@ export function AppTable(props: AppTableProps) {
     );
     clear();
     fetchApplications();
-  }, [applications.length]);
+  }, []);
 
   const clear = () => {
     setFilters([]);
@@ -226,6 +226,8 @@ export function AppTable(props: AppTableProps) {
   const filteredApplications = applications.filter((app) =>
     app.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  console.log('Applications', applications);
 
   return (
     <>

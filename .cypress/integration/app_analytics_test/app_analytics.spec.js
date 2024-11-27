@@ -438,7 +438,6 @@ describe('Viewing application', () => {
     cy.wait('@selectUpdate');
 
     moveToHomePage();
-    cy.reload()
     cy.wait('@loadingPanels');
     cy.get('[data-test-subj="AvailableAvailabilityBadge"][style="background-color: rgb(84, 179, 153); color: rgb(0, 0, 0);"]').should('contain', 'Available');
     moveToApplication(nameOne);
@@ -571,7 +570,6 @@ describe('Application Analytics home page', () => {
     cy.get('[data-test-subj="deleteApplication"]').eq(0).click();
     cy.get('[data-test-subj="popoverModal__deleteTextInput"]').type('delete');
     cy.get('[data-test-subj="popoverModal__deleteButton"').click();
-    cy.reload();
     cy.get(`[data-test-subj="${newName}ApplicationLink"]`).should('not.exist');
   });
 });
