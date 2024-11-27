@@ -1453,6 +1453,14 @@ exports[`Services component renders empty services page 1`] = `
               addFilter={[Function]}
               addServicesGroupFilter={[Function]}
               dataPrepperIndicesExist={true}
+              dataSourceMDSId={
+                Array [
+                  Object {
+                    "id": "",
+                    "label": "",
+                  },
+                ]
+              }
               isServiceTrendEnabled={false}
               items={Array []}
               loading={true}
@@ -3839,6 +3847,14 @@ exports[`Services component renders jaeger services page 1`] = `
               addFilter={[Function]}
               addServicesGroupFilter={[Function]}
               dataPrepperIndicesExist={false}
+              dataSourceMDSId={
+                Array [
+                  Object {
+                    "id": "",
+                    "label": "",
+                  },
+                ]
+              }
               isServiceTrendEnabled={false}
               items={Array []}
               jaegerIndicesExist={true}
@@ -5530,6 +5546,14 @@ exports[`Services component renders services page 1`] = `
               addFilter={[Function]}
               addServicesGroupFilter={[Function]}
               dataPrepperIndicesExist={true}
+              dataSourceMDSId={
+                Array [
+                  Object {
+                    "id": "",
+                    "label": "",
+                  },
+                ]
+              }
               isServiceTrendEnabled={false}
               items={Array []}
               loading={true}

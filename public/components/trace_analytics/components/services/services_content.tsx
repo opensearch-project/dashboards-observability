@@ -230,6 +230,7 @@ export function ServicesContent(props: ServicesProps) {
             isServiceTrendEnabled={isServiceTrendEnabled}
             setIsServiceTrendEnabled={setIsServiceTrendEnabled}
             serviceTrends={serviceTrends}
+            dataSourceMDSId={props.dataSourceMDSId}
           />
           <EuiSpacer size="s" />
           {mode === 'custom_data_prepper' ||

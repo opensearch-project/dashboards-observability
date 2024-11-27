@@ -24,11 +24,13 @@ import React, { useMemo } from 'react';
 import { ServiceTrends, TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { FilterType } from '../common/filters/filters';
 import {
+  generateServiceUrl,
   MissingConfigurationMessage,
   NoMatchMessage,
   PanelTitle,
 } from '../common/helper_functions';
 import { ServiceTrendsPlots } from './service_trends_plots';
+import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public';
 
 interface ServicesTableProps {
   items: any[];
@@ -46,6 +48,7 @@ interface ServicesTableProps {
   isServiceTrendEnabled: boolean;
   setIsServiceTrendEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   serviceTrends: ServiceTrends;
+  dataSourceMDSId: DataSourceOption[];
 }
 
 export function ServicesTable(props: ServicesTableProps) {
@@ -65,6 +68,7 @@ export function ServicesTable(props: ServicesTableProps) {
     isServiceTrendEnabled,
     setIsServiceTrendEnabled,
     serviceTrends,
+    dataSourceMDSId,
   } = props;
 
   const selectionValue = {
@@ -72,13 +76,7 @@ export function ServicesTable(props: ServicesTableProps) {
   };
 
   const nameColumnAction = (serviceName: string) => {
-    addFilter({
-      field: mode === 'jaeger' ? 'process.serviceName' : 'serviceName',
-      operator: 'is',
-      value: serviceName,
-      inverted: false,
-      disabled: false,
-    });
+    window.location.href = generateServiceUrl(serviceName, dataSourceMDSId[0].id);
   };
 
   const renderTitleBar = (totalItems?: number) => {
