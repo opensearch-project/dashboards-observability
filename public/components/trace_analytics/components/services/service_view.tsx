@@ -488,20 +488,22 @@ export function ServiceView(props: ServiceViewProps) {
   }, [spanFilters]);
 
   const [total, setTotal] = useState(0);
-  const spanDetailTable = useMemo(
-    () => (
-      <SpanDetailTable
-        http={props.http}
-        hiddenColumns={['serviceName']}
-        DSL={DSL}
-        openFlyout={(spanId: string) => setCurrentSpan(spanId)}
-        setTotal={setTotal}
-        mode={mode}
-        dataSourceMDSId={props.dataSourceMDSId[0].id}
-      />
-    ),
-    [DSL, setCurrentSpan, spanFilters]
-  );
+  const spanDetailTable = useMemo(() => {
+    // only render when time and service state updates in DSL
+    if (Object.keys(DSL).length > 0)
+      return (
+        <SpanDetailTable
+          http={props.http}
+          hiddenColumns={['serviceName']}
+          DSL={DSL}
+          openFlyout={(spanId: string) => setCurrentSpan(spanId)}
+          setTotal={setTotal}
+          mode={mode}
+          dataSourceMDSId={props.dataSourceMDSId[0].id}
+        />
+      );
+    return <></>;
+  }, [DSL, setCurrentSpan, spanFilters]);
 
   const pageToRender = (
     <>
