@@ -237,6 +237,8 @@ export function ServicesContent(props: ServicesProps) {
           (mode === 'data_prepper' && dataPrepperIndicesExist) ? (
             <ServiceMap
               addFilter={addFilter}
+              filters={filters}
+              setFilters={setFilters}
               serviceMap={serviceMap}
               idSelected={serviceMapIdSelected}
               setIdSelected={setServiceMapIdSelected}

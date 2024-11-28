@@ -61,6 +61,8 @@ export function ServiceMap({
   filterByCurrService,
   includeMetricsCallback,
   mode,
+  filters,
+  setFilters,
   hideSearchBar = false,
 }: {
   serviceMap: ServiceObject;
@@ -81,6 +83,10 @@ export function ServiceMap({
   filterByCurrService?: boolean;
   includeMetricsCallback?: () => void;
   mode?: string;
+  filters: FilterType[];
+  setFilters:
+    | React.Dispatch<React.SetStateAction<FilterType[]>>
+    | ((filters: FilterType[]) => void);
   hideSearchBar?: boolean;
 }) {
   const [graphKey, setGraphKey] = useState(0); // adding key to allow for re-renders
@@ -93,7 +99,6 @@ export function ServiceMap({
   const [isLoading, setIsLoading] = useState(true);
   const [filterChange, setIsFilterChange] = useState(false);
   const [focusedService, setFocusedService] = useState<string | null>(null);
-  const [clearFilterRequest, setClearFilterRequest] = useState(false);
 
   const toggleButtons = [
     {
@@ -141,43 +146,13 @@ export function ServiceMap({
     },
   ];
 
-  const clearFilter = () => {
-    setFocusedService(null);
-    setClearFilterRequest(true);
+  const removeFilter = (field: string, value: string) => {
+    if (!setFilters) return;
+    const updatedFilters = filters.filter(
+      (filter) => !(filter.field === field && filter.value === value)
+    );
+    setFilters(updatedFilters);
   };
-
-  useEffect(() => {
-    if (clearFilterRequest && focusedService === null) {
-      setClearFilterRequest(false);
-
-      setQuery('');
-      currService = '';
-
-      if (addFilter) {
-        addFilter({
-          field: 'serviceName',
-          operator: 'is',
-          value: '',
-          inverted: false,
-          disabled: true, // Disable the filter to effectively clear it
-        });
-      }
-
-      // Reset the graph to show the full view
-      setItems(
-        getServiceMapGraph(
-          serviceMap,
-          idSelected,
-          ticks,
-          undefined,
-          serviceMap[currService!]?.relatedServices,
-          false // Do not filter by the current service to show the entire graph
-        )
-      );
-
-      setInvalid(false);
-    }
-  }, [focusedService, clearFilterRequest]);
 
   useEffect(() => {
     if (items?.graph?.nodes) {
@@ -267,8 +242,6 @@ export function ServiceMap({
   };
 
   const addServiceFilter = (selectedServiceName) => {
-    if (selectedServiceName === focusedService) return;
-
     if (!addFilter) return;
 
     if (selectedServiceName) {
@@ -328,31 +301,39 @@ export function ServiceMap({
   };
 
   const onFocus = (service: string) => {
-    if (service.length === 0) {
-      clearFilter();
-    } else if (serviceMap[service]) {
-      // Focus on the specified service and add a filter
-      setFocusedService(service);
-      if (addFilter) {
-        addFilter({
-          field: 'serviceName',
-          operator: 'is',
-          value: service,
-          inverted: false,
-          disabled: false,
-        });
+    if (!service) {
+      // Clear focus if no service is provided
+      if (focusedService !== null) {
+        removeFilter('serviceName', focusedService);
+        setItems(
+          getServiceMapGraph(
+            serviceMap,
+            idSelected,
+            ticks,
+            undefined,
+            undefined,
+            false // Show the entire graph without filtering
+          )
+        );
+        setFocusedService(null);
+        setInvalid(false);
       }
-
-      const filteredGraph = getServiceMapGraph(
-        serviceMap,
-        idSelected,
-        ticks,
-        service,
-        serviceMap[service]?.relatedServices,
-        true // Enable filtering by the current service to show only connected nodes
-      );
-      setItems(filteredGraph);
-      setInvalid(false);
+    } else if (serviceMap[service]) {
+      if (focusedService !== service) {
+        const filteredGraph = getServiceMapGraph(
+          serviceMap,
+          idSelected,
+          ticks,
+          service,
+          serviceMap[service]?.relatedServices,
+          true // Enable filtering to focus on connected nodes
+        );
+        setSelectedNodeDetails(null);
+        setItems(filteredGraph);
+        setFocusedService(service);
+        setInvalid(false);
+        setGraphKey((prevKey) => prevKey + 1);
+      }
     } else {
       setInvalid(true);
     }
@@ -388,10 +369,6 @@ export function ServiceMap({
   }, [items]);
 
   useEffect(() => {
-    if (currService === focusedService) {
-      return;
-    }
-
     if (!serviceMap || Object.keys(serviceMap).length === 0) {
       setItems({});
       return;
@@ -404,14 +381,16 @@ export function ServiceMap({
     const max = Math.max(...values);
     const calculatedTicks = calculateTicks(min, max);
     setTicks(calculatedTicks);
+    // Adjust graph rendering logic to ensure related services are visible
+    const showRelatedServices = focusedService ? true : filterByCurrService;
     setItems(
       getServiceMapGraph(
         serviceMap,
         idSelected,
         calculatedTicks,
-        currService,
+        focusedService ?? currService,
         serviceMap[currService!]?.relatedServices,
-        filterByCurrService
+        showRelatedServices
       )
     );
   }, [serviceMap, idSelected]);
@@ -539,7 +518,7 @@ export function ServiceMap({
                     getNetwork={(networkInstance: any) => {
                       setNetwork(networkInstance);
                       setZoomLimits(networkInstance);
-                      if (currService) onFocus(currService, networkInstance);
+                      if (currService) onFocus(currService);
                     }}
                   />
                 )}

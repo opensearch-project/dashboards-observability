@@ -1728,10 +1728,26 @@ exports[`Services component renders empty services page 1`] = `
             <ServiceMap
               addFilter={[Function]}
               currService=""
+              filters={Array []}
               idSelected="latency"
               mode="data_prepper"
               page="services"
               serviceMap={Object {}}
+              setFilters={
+                [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      Array [],
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": undefined,
+                    },
+                  ],
+                }
+              }
               setIdSelected={[Function]}
             >
               <EuiPanel>
@@ -5821,10 +5837,26 @@ exports[`Services component renders services page 1`] = `
             <ServiceMap
               addFilter={[Function]}
               currService=""
+              filters={Array []}
               idSelected="latency"
               mode="data_prepper"
               page="services"
               serviceMap={Object {}}
+              setFilters={
+                [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      Array [],
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": undefined,
+                    },
+                  ],
+                }
+              }
               setIdSelected={[Function]}
             >
               <EuiPanel>
