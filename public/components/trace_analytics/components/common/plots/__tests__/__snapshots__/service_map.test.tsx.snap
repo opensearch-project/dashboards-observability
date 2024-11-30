@@ -1,434 +1,1981 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Service map component renders service map 1`] = `
-<Fragment>
+exports[`ServiceMap Component renders service map component 1`] = `
+<ServiceMap
+  addFilter={[MockFunction]}
+  currService=""
+  filters={Array []}
+  idSelected="latency"
+  isLoading={false}
+  mode="jaeger"
+  page="dashboard"
+  removeFilter={[MockFunction]}
+  serviceMap={
+    Object {
+      "analytics-service": Object {
+        "average_latency": 150,
+        "destServices": Array [
+          "order",
+          "inventory",
+          "authentication",
+          "payment",
+          "recommendation",
+        ],
+        "error_rate": 0,
+        "id": 2,
+        "latency": 12.99,
+        "relatedServices": Array [
+          "order",
+          "inventory",
+          "authentication",
+          "payment",
+          "recommendation",
+        ],
+        "serviceName": "analytics-service",
+        "targetServices": Array [],
+        "throughput": 37,
+        "traceGroups": Array [
+          Object {
+            "targetResource": Array [
+              "/logs",
+            ],
+            "traceGroup": "client_cancel_order",
+          },
+          Object {
+            "targetResource": Array [
+              "/logs",
+            ],
+            "traceGroup": "client_checkout",
+          },
+          Object {
+            "targetResource": Array [
+              "/logs",
+            ],
+            "traceGroup": "client_create_order",
+          },
+          Object {
+            "targetResource": Array [
+              "/logs",
+            ],
+            "traceGroup": "client_delivery_status",
+          },
+          Object {
+            "targetResource": Array [
+              "/logs",
+            ],
+            "traceGroup": "client_pay_order",
+          },
+          Object {
+            "targetResource": Array [
+              "/logs",
+            ],
+            "traceGroup": "load_main_screen",
+          },
+        ],
+      },
+      "authentication": Object {
+        "average_latency": 350,
+        "destServices": Array [
+          "frontend-client",
+        ],
+        "error_rate": 8.33,
+        "id": 6,
+        "latency": 139.09,
+        "relatedServices": Array [
+          "analytics-service",
+          "recommendation",
+          "frontend-client",
+        ],
+        "serviceName": "authentication",
+        "targetServices": Array [
+          "analytics-service",
+          "recommendation",
+        ],
+        "throughput": 12,
+        "traceGroups": Array [
+          Object {
+            "targetResource": Array [
+              "server_request_login",
+            ],
+            "traceGroup": "load_main_screen",
+          },
+        ],
+      },
+      "database": Object {
+        "average_latency": 200,
+        "destServices": Array [
+          "order",
+          "inventory",
+        ],
+        "error_rate": 3.77,
+        "id": 3,
+        "latency": 49.54,
+        "relatedServices": Array [
+          "order",
+          "inventory",
+        ],
+        "serviceName": "database",
+        "targetServices": Array [],
+        "throughput": 53,
+        "traceGroups": Array [
+          Object {
+            "targetResource": Array [
+              "cartEmpty",
+            ],
+            "traceGroup": "client_cancel_order",
+          },
+          Object {
+            "targetResource": Array [
+              "updateItem",
+            ],
+            "traceGroup": "client_checkout",
+          },
+          Object {
+            "targetResource": Array [
+              "addItemToCart",
+            ],
+            "traceGroup": "client_create_order",
+          },
+          Object {
+            "targetResource": Array [
+              "getCart",
+            ],
+            "traceGroup": "client_delivery_status",
+          },
+          Object {
+            "targetResource": Array [
+              "cartSold",
+            ],
+            "traceGroup": "client_pay_order",
+          },
+          Object {
+            "targetResource": Array [
+              "getInventory",
+            ],
+            "traceGroup": "load_main_screen",
+          },
+        ],
+      },
+      "frontend-client": Object {
+        "average_latency": 250,
+        "destServices": Array [],
+        "error_rate": 7.41,
+        "id": 4,
+        "latency": 207.71,
+        "relatedServices": Array [
+          "order",
+          "payment",
+          "authentication",
+        ],
+        "serviceName": "frontend-client",
+        "targetServices": Array [
+          "order",
+          "payment",
+          "authentication",
+        ],
+        "throughput": 27,
+        "traceGroups": Array [
+          Object {
+            "targetResource": Array [],
+            "traceGroup": "client_cancel_order",
+          },
+          Object {
+            "targetResource": Array [],
+            "traceGroup": "client_checkout",
+          },
+          Object {
+            "targetResource": Array [],
+            "traceGroup": "client_create_order",
+          },
+          Object {
+            "targetResource": Array [],
+            "traceGroup": "client_delivery_status",
+          },
+          Object {
+            "targetResource": Array [],
+            "traceGroup": "client_pay_order",
+          },
+          Object {
+            "targetResource": Array [],
+            "traceGroup": "load_main_screen",
+          },
+        ],
+      },
+      "inventory": Object {
+        "average_latency": 300,
+        "destServices": Array [
+          "payment",
+          "recommendation",
+        ],
+        "error_rate": 3.23,
+        "id": 5,
+        "latency": 183.52,
+        "relatedServices": Array [
+          "analytics-service",
+          "database",
+          "payment",
+          "recommendation",
+        ],
+        "serviceName": "inventory",
+        "targetServices": Array [
+          "analytics-service",
+          "database",
+        ],
+        "throughput": 31,
+        "traceGroups": Array [
+          Object {
+            "targetResource": Array [
+              "update_inventory",
+            ],
+            "traceGroup": "client_checkout",
+          },
+          Object {
+            "targetResource": Array [
+              "read_inventory",
+            ],
+            "traceGroup": "load_main_screen",
+          },
+        ],
+      },
+      "order": Object {
+        "average_latency": 100,
+        "destServices": Array [
+          "frontend-client",
+        ],
+        "error_rate": 4.17,
+        "id": 1,
+        "latency": 90.1,
+        "relatedServices": Array [
+          "analytics-service",
+          "database",
+          "frontend-client",
+        ],
+        "serviceName": "order",
+        "targetServices": Array [
+          "analytics-service",
+          "database",
+        ],
+        "throughput": 48,
+        "traceGroups": Array [
+          Object {
+            "targetResource": Array [
+              "clear_order",
+            ],
+            "traceGroup": "client_cancel_order",
+          },
+          Object {
+            "targetResource": Array [
+              "update_order",
+            ],
+            "traceGroup": "client_create_order",
+          },
+          Object {
+            "targetResource": Array [
+              "get_order",
+            ],
+            "traceGroup": "client_delivery_status",
+          },
+          Object {
+            "targetResource": Array [
+              "pay_order",
+            ],
+            "traceGroup": "client_pay_order",
+          },
+        ],
+      },
+      "payment": Object {
+        "average_latency": 400,
+        "destServices": Array [
+          "frontend-client",
+        ],
+        "error_rate": 9.09,
+        "id": 7,
+        "latency": 134.36,
+        "relatedServices": Array [
+          "analytics-service",
+          "inventory",
+          "frontend-client",
+        ],
+        "serviceName": "payment",
+        "targetServices": Array [
+          "analytics-service",
+          "inventory",
+        ],
+        "throughput": 11,
+        "traceGroups": Array [
+          Object {
+            "targetResource": Array [
+              "payment",
+            ],
+            "traceGroup": "client_checkout",
+          },
+        ],
+      },
+      "recommendation": Object {
+        "average_latency": 450,
+        "destServices": Array [
+          "authentication",
+        ],
+        "error_rate": 6.25,
+        "id": 8,
+        "latency": 176.97,
+        "relatedServices": Array [
+          "analytics-service",
+          "inventory",
+          "authentication",
+        ],
+        "serviceName": "recommendation",
+        "targetServices": Array [
+          "analytics-service",
+          "inventory",
+        ],
+        "throughput": 16,
+        "traceGroups": Array [
+          Object {
+            "targetResource": Array [
+              "recommend",
+            ],
+            "traceGroup": "load_main_screen",
+          },
+        ],
+      },
+    }
+  }
+  setFilters={[MockFunction]}
+  setIdSelected={[MockFunction]}
+>
   <EuiPanel>
-    <PanelTitle
-      title="Service map"
-    />
-    <EuiSpacer
-      size="m"
-    />
-    <EuiButtonGroup
-      buttonSize="s"
-      color="text"
-      idSelected="latency"
-      legend="Select metric for service map display"
-      onChange={[Function]}
-      options={
-        Array [
-          Object {
-            "id": "latency",
-            "label": "Duration",
-          },
-          Object {
-            "id": "error_rate",
-            "label": "Errors",
-          },
-          Object {
-            "id": "throughput",
-            "label": "Request Rate",
-          },
-        ]
-      }
-    />
-    <EuiHorizontalRule
-      margin="m"
-    />
-    <EuiFlexGroup>
-      <EuiFlexItem
-        grow={7}
-      >
-        <EuiPopover
-          anchorPosition="downLeft"
-          button={
-            <EuiFieldSearch
-              append={
-                <EuiButtonIcon
-                  iconType="refresh"
-                  onClick={[Function]}
-                  size="s"
-                />
-              }
-              aria-controls="service-select-dropdown"
-              compressed={true}
-              fullWidth={false}
-              incremental={false}
-              isClearable={true}
-              isInvalid={false}
-              isLoading={false}
-              onChange={[Function]}
-              onClick={[Function]}
-              placeholder="Service name"
-              prepend="Focus on"
-              value=""
-            />
-          }
-          closePopover={[Function]}
-          display="inlineBlock"
-          hasArrow={true}
-          id="service-select-dropdown"
-          isOpen={false}
-          ownFocus={false}
-          panelPaddingSize="none"
-          repositionOnScroll={true}
-        >
-          <EuiSelectable
-            isPreFiltered={false}
-            listProps={
-              Object {
-                "bordered": true,
-                "style": Object {
-                  "width": "300px",
-                },
-              }
-            }
-            onChange={[Function]}
-            options={Array []}
-            searchProps={
-              Object {
-                "autoFocus": true,
-                "isClearable": true,
-                "onInput": [Function],
-                "value": "",
-              }
-            }
-            searchable={true}
-            singleSelection={true}
-          >
-            <Component />
-          </EuiSelectable>
-        </EuiPopover>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer />
-    <EuiFlexGroup
-      gutterSize="none"
-      responsive={false}
+    <div
+      className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
     >
-      <EuiFlexItem>
-        <div
-          style={
-            Object {
-              "position": "relative",
-            }
-          }
+      <PanelTitle
+        title="Service map"
+      >
+        <EuiText
+          size="m"
         >
           <div
-            style={
-              Object {
-                "alignItems": "center",
-                "backgroundColor": "rgba(255, 255, 255, 0.8)",
-                "bottom": 0,
-                "display": "flex",
-                "justifyContent": "center",
-                "left": 0,
-                "position": "absolute",
-                "right": 0,
-                "top": 0,
-                "zIndex": 1000,
-              }
-            }
+            className="euiText euiText--medium"
           >
-            <EuiLoadingSpinner
-              size="xl"
-            />
+            <span
+              className="panel-title"
+            >
+              Service map
+            </span>
           </div>
-        </div>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
+        </EuiText>
+      </PanelTitle>
+      <EuiSpacer
+        size="m"
       >
-        <ServiceMapScale
-          idSelected="latency"
-          serviceMap={
-            Object {
-              "analytics-service": Object {
-                "destServices": Array [
-                  "order",
-                  "inventory",
-                  "authentication",
-                  "payment",
-                  "recommendation",
-                ],
-                "error_rate": 0,
-                "id": 2,
-                "latency": 12.99,
-                "serviceName": "analytics-service",
-                "targetServices": Array [],
-                "throughput": 37,
-                "traceGroups": Array [
-                  Object {
-                    "targetResource": Array [
-                      "/logs",
-                    ],
-                    "traceGroup": "client_cancel_order",
-                  },
-                  Object {
-                    "targetResource": Array [
-                      "/logs",
-                    ],
-                    "traceGroup": "client_checkout",
-                  },
-                  Object {
-                    "targetResource": Array [
-                      "/logs",
-                    ],
-                    "traceGroup": "client_create_order",
-                  },
-                  Object {
-                    "targetResource": Array [
-                      "/logs",
-                    ],
-                    "traceGroup": "client_delivery_status",
-                  },
-                  Object {
-                    "targetResource": Array [
-                      "/logs",
-                    ],
-                    "traceGroup": "client_pay_order",
-                  },
-                  Object {
-                    "targetResource": Array [
-                      "/logs",
-                    ],
-                    "traceGroup": "load_main_screen",
-                  },
-                ],
-              },
-              "authentication": Object {
-                "destServices": Array [
-                  "frontend-client",
-                ],
-                "error_rate": 8.33,
-                "id": 6,
-                "latency": 139.09,
-                "serviceName": "authentication",
-                "targetServices": Array [
-                  "analytics-service",
-                  "recommendation",
-                ],
-                "throughput": 12,
-                "traceGroups": Array [
-                  Object {
-                    "targetResource": Array [
-                      "server_request_login",
-                    ],
-                    "traceGroup": "load_main_screen",
-                  },
-                ],
-              },
-              "database": Object {
-                "destServices": Array [
-                  "order",
-                  "inventory",
-                ],
-                "error_rate": 3.77,
-                "id": 3,
-                "latency": 49.54,
-                "serviceName": "database",
-                "targetServices": Array [],
-                "throughput": 53,
-                "traceGroups": Array [
-                  Object {
-                    "targetResource": Array [
-                      "cartEmpty",
-                    ],
-                    "traceGroup": "client_cancel_order",
-                  },
-                  Object {
-                    "targetResource": Array [
-                      "updateItem",
-                    ],
-                    "traceGroup": "client_checkout",
-                  },
-                  Object {
-                    "targetResource": Array [
-                      "addItemToCart",
-                    ],
-                    "traceGroup": "client_create_order",
-                  },
-                  Object {
-                    "targetResource": Array [
-                      "getCart",
-                    ],
-                    "traceGroup": "client_delivery_status",
-                  },
-                  Object {
-                    "targetResource": Array [
-                      "cartSold",
-                    ],
-                    "traceGroup": "client_pay_order",
-                  },
-                  Object {
-                    "targetResource": Array [
-                      "getIntentory",
-                    ],
-                    "traceGroup": "load_main_screen",
-                  },
-                ],
-              },
-              "frontend-client": Object {
-                "destServices": Array [],
-                "error_rate": 7.41,
-                "id": 4,
-                "latency": 207.71,
-                "serviceName": "frontend-client",
-                "targetServices": Array [
-                  "order",
-                  "payment",
-                  "authentication",
-                ],
-                "throughput": 27,
-                "traceGroups": Array [
-                  Object {
-                    "targetResource": Array [],
-                    "traceGroup": "client_cancel_order",
-                  },
-                  Object {
-                    "targetResource": Array [],
-                    "traceGroup": "client_checkout",
-                  },
-                  Object {
-                    "targetResource": Array [],
-                    "traceGroup": "client_create_order",
-                  },
-                  Object {
-                    "targetResource": Array [],
-                    "traceGroup": "client_delivery_status",
-                  },
-                  Object {
-                    "targetResource": Array [],
-                    "traceGroup": "client_pay_order",
-                  },
-                  Object {
-                    "targetResource": Array [],
-                    "traceGroup": "load_main_screen",
-                  },
-                ],
-              },
-              "inventory": Object {
-                "destServices": Array [
-                  "payment",
-                  "recommendation",
-                ],
-                "error_rate": 3.23,
-                "id": 5,
-                "latency": 183.52,
-                "serviceName": "inventory",
-                "targetServices": Array [
-                  "analytics-service",
-                  "database",
-                ],
-                "throughput": 31,
-                "traceGroups": Array [
-                  Object {
-                    "targetResource": Array [
-                      "update_inventory",
-                    ],
-                    "traceGroup": "client_checkout",
-                  },
-                  Object {
-                    "targetResource": Array [
-                      "read_inventory",
-                    ],
-                    "traceGroup": "load_main_screen",
-                  },
-                ],
-              },
-              "order": Object {
-                "destServices": Array [
-                  "frontend-client",
-                ],
-                "error_rate": 4.17,
-                "id": 1,
-                "latency": 90.1,
-                "serviceName": "order",
-                "targetServices": Array [
-                  "analytics-service",
-                  "database",
-                ],
-                "throughput": 48,
-                "traceGroups": Array [
-                  Object {
-                    "targetResource": Array [
-                      "clear_order",
-                    ],
-                    "traceGroup": "client_cancel_order",
-                  },
-                  Object {
-                    "targetResource": Array [
-                      "update_order",
-                    ],
-                    "traceGroup": "client_create_order",
-                  },
-                  Object {
-                    "targetResource": Array [
-                      "get_order",
-                    ],
-                    "traceGroup": "client_delivery_status",
-                  },
-                  Object {
-                    "targetResource": Array [
-                      "pay_order",
-                    ],
-                    "traceGroup": "client_pay_order",
-                  },
-                ],
-              },
-              "payment": Object {
-                "destServices": Array [
-                  "frontend-client",
-                ],
-                "error_rate": 9.09,
-                "id": 7,
-                "latency": 134.36,
-                "serviceName": "payment",
-                "targetServices": Array [
-                  "analytics-service",
-                  "inventory",
-                ],
-                "throughput": 11,
-                "traceGroups": Array [
-                  Object {
-                    "targetResource": Array [
-                      "payment",
-                    ],
-                    "traceGroup": "client_checkout",
-                  },
-                ],
-              },
-              "recommendation": Object {
-                "destServices": Array [
-                  "authentication",
-                ],
-                "error_rate": 6.25,
-                "id": 8,
-                "latency": 176.97,
-                "serviceName": "recommendation",
-                "targetServices": Array [
-                  "analytics-service",
-                  "inventory",
-                ],
-                "throughput": 16,
-                "traceGroups": Array [
-                  Object {
-                    "targetResource": Array [
-                      "recommend",
-                    ],
-                    "traceGroup": "load_main_screen",
-                  },
-                ],
-              },
-            }
-          }
-          ticks={Array []}
+        <div
+          className="euiSpacer euiSpacer--m"
         />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </EuiSpacer>
+      <EuiButtonGroup
+        buttonSize="s"
+        color="text"
+        idSelected="latency"
+        legend="Select metric for service map display"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "id": "latency",
+              "label": "Duration",
+            },
+            Object {
+              "id": "error_rate",
+              "label": "Errors",
+            },
+            Object {
+              "id": "throughput",
+              "label": "Request Rate",
+            },
+          ]
+        }
+      >
+        <fieldset
+          className="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
+          disabled={false}
+        >
+          <EuiScreenReaderOnly>
+            <legend
+              className="euiScreenReaderOnly"
+            >
+              Select metric for service map display
+            </legend>
+          </EuiScreenReaderOnly>
+          <div
+            className="euiButtonGroup__buttons"
+          >
+            <EuiButtonGroupButton
+              color="text"
+              element="label"
+              id="latency"
+              isDisabled={false}
+              isIconOnly={false}
+              isSelected={true}
+              key="0"
+              label="Duration"
+              name="random_html_id"
+              onChange={[Function]}
+              size="s"
+            >
+              <EuiButtonDisplay
+                baseClassName="euiButtonGroupButton"
+                className="euiButtonGroupButton-isSelected"
+                color="text"
+                element="label"
+                fill={true}
+                htmlFor="random_html_id"
+                isDisabled={false}
+                onClick={[Function]}
+                size="s"
+                textProps={
+                  Object {
+                    "className": "euiButtonGroupButton__textShift",
+                    "data-text": "Duration",
+                    "ref": [Function],
+                    "title": "Duration",
+                  }
+                }
+              >
+                <label
+                  className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
+                  disabled={false}
+                  htmlFor="random_html_id"
+                  onClick={[Function]}
+                  style={
+                    Object {
+                      "minWidth": undefined,
+                    }
+                  }
+                >
+                  <EuiButtonContent
+                    className="euiButton__content"
+                    iconGap="m"
+                    iconSide="left"
+                    textProps={
+                      Object {
+                        "className": "euiButton__text euiButtonGroupButton__textShift",
+                        "data-text": "Duration",
+                        "ref": [Function],
+                        "title": "Duration",
+                      }
+                    }
+                  >
+                    <span
+                      className="euiButtonContent euiButton__content"
+                    >
+                      <span
+                        className="euiButton__text euiButtonGroupButton__textShift"
+                        data-text="Duration"
+                        title="Duration"
+                      >
+                        <input
+                          checked={true}
+                          className="euiScreenReaderOnly"
+                          data-test-subj="latency"
+                          disabled={false}
+                          id="random_html_id"
+                          name="random_html_id"
+                          onChange={[Function]}
+                          type="radio"
+                        />
+                        Duration
+                      </span>
+                    </span>
+                  </EuiButtonContent>
+                </label>
+              </EuiButtonDisplay>
+            </EuiButtonGroupButton>
+            <EuiButtonGroupButton
+              color="text"
+              element="label"
+              id="error_rate"
+              isDisabled={false}
+              isIconOnly={false}
+              isSelected={false}
+              key="1"
+              label="Errors"
+              name="random_html_id"
+              onChange={[Function]}
+              size="s"
+            >
+              <EuiButtonDisplay
+                baseClassName="euiButtonGroupButton"
+                className=""
+                color="text"
+                element="label"
+                fill={false}
+                htmlFor="random_html_id"
+                isDisabled={false}
+                onClick={[Function]}
+                size="s"
+                textProps={
+                  Object {
+                    "className": "euiButtonGroupButton__textShift",
+                    "data-text": "Errors",
+                    "ref": [Function],
+                    "title": "Errors",
+                  }
+                }
+              >
+                <label
+                  className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                  disabled={false}
+                  htmlFor="random_html_id"
+                  onClick={[Function]}
+                  style={
+                    Object {
+                      "minWidth": undefined,
+                    }
+                  }
+                >
+                  <EuiButtonContent
+                    className="euiButton__content"
+                    iconGap="m"
+                    iconSide="left"
+                    textProps={
+                      Object {
+                        "className": "euiButton__text euiButtonGroupButton__textShift",
+                        "data-text": "Errors",
+                        "ref": [Function],
+                        "title": "Errors",
+                      }
+                    }
+                  >
+                    <span
+                      className="euiButtonContent euiButton__content"
+                    >
+                      <span
+                        className="euiButton__text euiButtonGroupButton__textShift"
+                        data-text="Errors"
+                        title="Errors"
+                      >
+                        <input
+                          checked={false}
+                          className="euiScreenReaderOnly"
+                          data-test-subj="error_rate"
+                          disabled={false}
+                          id="random_html_id"
+                          name="random_html_id"
+                          onChange={[Function]}
+                          type="radio"
+                        />
+                        Errors
+                      </span>
+                    </span>
+                  </EuiButtonContent>
+                </label>
+              </EuiButtonDisplay>
+            </EuiButtonGroupButton>
+            <EuiButtonGroupButton
+              color="text"
+              element="label"
+              id="throughput"
+              isDisabled={false}
+              isIconOnly={false}
+              isSelected={false}
+              key="2"
+              label="Request Rate"
+              name="random_html_id"
+              onChange={[Function]}
+              size="s"
+            >
+              <EuiButtonDisplay
+                baseClassName="euiButtonGroupButton"
+                className=""
+                color="text"
+                element="label"
+                fill={false}
+                htmlFor="random_html_id"
+                isDisabled={false}
+                onClick={[Function]}
+                size="s"
+                textProps={
+                  Object {
+                    "className": "euiButtonGroupButton__textShift",
+                    "data-text": "Request Rate",
+                    "ref": [Function],
+                    "title": "Request Rate",
+                  }
+                }
+              >
+                <label
+                  className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                  disabled={false}
+                  htmlFor="random_html_id"
+                  onClick={[Function]}
+                  style={
+                    Object {
+                      "minWidth": undefined,
+                    }
+                  }
+                >
+                  <EuiButtonContent
+                    className="euiButton__content"
+                    iconGap="m"
+                    iconSide="left"
+                    textProps={
+                      Object {
+                        "className": "euiButton__text euiButtonGroupButton__textShift",
+                        "data-text": "Request Rate",
+                        "ref": [Function],
+                        "title": "Request Rate",
+                      }
+                    }
+                  >
+                    <span
+                      className="euiButtonContent euiButton__content"
+                    >
+                      <span
+                        className="euiButton__text euiButtonGroupButton__textShift"
+                        data-text="Request Rate"
+                        title="Request Rate"
+                      >
+                        <input
+                          checked={false}
+                          className="euiScreenReaderOnly"
+                          data-test-subj="throughput"
+                          disabled={false}
+                          id="random_html_id"
+                          name="random_html_id"
+                          onChange={[Function]}
+                          type="radio"
+                        />
+                        Request Rate
+                      </span>
+                    </span>
+                  </EuiButtonContent>
+                </label>
+              </EuiButtonDisplay>
+            </EuiButtonGroupButton>
+          </div>
+        </fieldset>
+      </EuiButtonGroup>
+      <EuiHorizontalRule
+        margin="m"
+      >
+        <hr
+          className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+        />
+      </EuiHorizontalRule>
+      <EuiFlexGroup>
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <EuiFlexItem
+            grow={7}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrow7"
+            >
+              <EuiPopover
+                anchorPosition="downLeft"
+                button={
+                  <EuiToolTip
+                    delay="regular"
+                    position="top"
+                  >
+                    <EuiFieldSearch
+                      append={
+                        <EuiButtonIcon
+                          aria-label="Clear focus and refresh the service map"
+                          data-test-subj="serviceMapRefreshButton"
+                          iconType="refresh"
+                          onClick={[Function]}
+                          size="s"
+                        />
+                      }
+                      aria-controls="service-select-dropdown"
+                      compressed={true}
+                      disabled={false}
+                      fullWidth={false}
+                      incremental={false}
+                      isClearable={true}
+                      isInvalid={false}
+                      isLoading={false}
+                      onChange={[Function]}
+                      onClick={[Function]}
+                      placeholder="Service name"
+                      prepend="Focus on"
+                      value=""
+                    />
+                  </EuiToolTip>
+                }
+                closePopover={[Function]}
+                display="inlineBlock"
+                hasArrow={true}
+                id="service-select-dropdown"
+                isOpen={false}
+                ownFocus={false}
+                panelPaddingSize="none"
+                repositionOnScroll={true}
+              >
+                <EuiOutsideClickDetector
+                  onOutsideClick={[Function]}
+                >
+                  <div
+                    className="euiPopover euiPopover--anchorDownLeft"
+                    id="service-select-dropdown"
+                    onKeyDown={[Function]}
+                    onMouseDown={[Function]}
+                    onMouseUp={[Function]}
+                    onTouchEnd={[Function]}
+                    onTouchStart={[Function]}
+                  >
+                    <div
+                      className="euiPopover__anchor"
+                    >
+                      <EuiToolTip
+                        delay="regular"
+                        position="top"
+                      >
+                        <span
+                          className="euiToolTipAnchor"
+                          onKeyUp={[Function]}
+                          onMouseOut={[Function]}
+                          onMouseOver={[Function]}
+                        >
+                          <EuiFieldSearch
+                            append={
+                              <EuiButtonIcon
+                                aria-label="Clear focus and refresh the service map"
+                                data-test-subj="serviceMapRefreshButton"
+                                iconType="refresh"
+                                onClick={[Function]}
+                                size="s"
+                              />
+                            }
+                            aria-controls="service-select-dropdown"
+                            compressed={true}
+                            disabled={false}
+                            fullWidth={false}
+                            incremental={false}
+                            isClearable={true}
+                            isInvalid={false}
+                            isLoading={false}
+                            onBlur={[Function]}
+                            onChange={[Function]}
+                            onClick={[Function]}
+                            onFocus={[Function]}
+                            placeholder="Service name"
+                            prepend="Focus on"
+                            value=""
+                          >
+                            <EuiFormControlLayout
+                              append={
+                                <EuiButtonIcon
+                                  aria-label="Clear focus and refresh the service map"
+                                  data-test-subj="serviceMapRefreshButton"
+                                  iconType="refresh"
+                                  onClick={[Function]}
+                                  size="s"
+                                />
+                              }
+                              compressed={true}
+                              fullWidth={false}
+                              icon="search"
+                              isLoading={false}
+                              prepend="Focus on"
+                            >
+                              <div
+                                className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                              >
+                                <EuiFormLabel
+                                  className="euiFormControlLayout__prepend"
+                                >
+                                  <label
+                                    className="euiFormLabel euiFormControlLayout__prepend"
+                                  >
+                                    Focus on
+                                  </label>
+                                </EuiFormLabel>
+                                <div
+                                  className="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <EuiValidatableControl
+                                    isInvalid={false}
+                                  >
+                                    <input
+                                      aria-controls="service-select-dropdown"
+                                      className="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
+                                      disabled={false}
+                                      onBlur={[Function]}
+                                      onChange={[Function]}
+                                      onClick={[Function]}
+                                      onFocus={[Function]}
+                                      onKeyUp={[Function]}
+                                      placeholder="Service name"
+                                      type="search"
+                                      value=""
+                                    />
+                                  </EuiValidatableControl>
+                                  <EuiFormControlLayoutIcons
+                                    compressed={true}
+                                    icon="search"
+                                    isLoading={false}
+                                  >
+                                    <div
+                                      className="euiFormControlLayoutIcons"
+                                    >
+                                      <EuiFormControlLayoutCustomIcon
+                                        size="s"
+                                        type="search"
+                                      >
+                                        <span
+                                          className="euiFormControlLayoutCustomIcon"
+                                        >
+                                          <EuiIcon
+                                            aria-hidden="true"
+                                            className="euiFormControlLayoutCustomIcon__icon"
+                                            size="s"
+                                            type="search"
+                                          >
+                                            <EuiIconBeaker
+                                              aria-hidden={true}
+                                              className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                              focusable="false"
+                                              role="img"
+                                              style={null}
+                                            >
+                                              <svg
+                                                aria-hidden={true}
+                                                className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                                focusable="false"
+                                                height={16}
+                                                role="img"
+                                                style={null}
+                                                viewBox="0 0 16 16"
+                                                width={16}
+                                                xmlns="http://www.w3.org/2000/svg"
+                                              >
+                                                <path
+                                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                />
+                                              </svg>
+                                            </EuiIconBeaker>
+                                          </EuiIcon>
+                                        </span>
+                                      </EuiFormControlLayoutCustomIcon>
+                                    </div>
+                                  </EuiFormControlLayoutIcons>
+                                </div>
+                                <EuiButtonIcon
+                                  aria-label="Clear focus and refresh the service map"
+                                  className="euiFormControlLayout__append"
+                                  data-test-subj="serviceMapRefreshButton"
+                                  iconType="refresh"
+                                  key="0/.0"
+                                  onClick={[Function]}
+                                  size="s"
+                                >
+                                  <button
+                                    aria-label="Clear focus and refresh the service map"
+                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
+                                    data-test-subj="serviceMapRefreshButton"
+                                    disabled={false}
+                                    onClick={[Function]}
+                                    type="button"
+                                  >
+                                    <EuiIcon
+                                      aria-hidden="true"
+                                      className="euiButtonIcon__icon"
+                                      color="inherit"
+                                      size="m"
+                                      type="refresh"
+                                    >
+                                      <EuiIconBeaker
+                                        aria-hidden={true}
+                                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                        focusable="false"
+                                        role="img"
+                                        style={null}
+                                      >
+                                        <svg
+                                          aria-hidden={true}
+                                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                          focusable="false"
+                                          height={16}
+                                          role="img"
+                                          style={null}
+                                          viewBox="0 0 16 16"
+                                          width={16}
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                          />
+                                        </svg>
+                                      </EuiIconBeaker>
+                                    </EuiIcon>
+                                  </button>
+                                </EuiButtonIcon>
+                              </div>
+                            </EuiFormControlLayout>
+                          </EuiFieldSearch>
+                        </span>
+                      </EuiToolTip>
+                    </div>
+                  </div>
+                </EuiOutsideClickDetector>
+              </EuiPopover>
+            </div>
+          </EuiFlexItem>
+        </div>
+      </EuiFlexGroup>
+      <EuiSpacer>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+      </EuiSpacer>
+      <EuiFlexGroup
+        gutterSize="none"
+        responsive={false}
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--directionRow"
+        >
+          <EuiFlexItem>
+            <div
+              className="euiFlexItem"
+            >
+              <div
+                style={
+                  Object {
+                    "position": "relative",
+                  }
+                }
+              >
+                <GraphMock
+                  events={
+                    Object {
+                      "hoverNode": [Function],
+                      "select": [Function],
+                      "stabilizationIterationsDone": [Function],
+                      "stabilizationProgress": [Function],
+                    }
+                  }
+                  getNetwork={[Function]}
+                  graph={
+                    Object {
+                      "edges": Array [
+                        Object {
+                          "color": "rgba(0, 0, 0, 1)",
+                          "from": 1,
+                          "to": 2,
+                        },
+                        Object {
+                          "color": "rgba(0, 0, 0, 1)",
+                          "from": 1,
+                          "to": 3,
+                        },
+                        Object {
+                          "color": "rgba(0, 0, 0, 1)",
+                          "from": 4,
+                          "to": 1,
+                        },
+                        Object {
+                          "color": "rgba(0, 0, 0, 1)",
+                          "from": 4,
+                          "to": 7,
+                        },
+                        Object {
+                          "color": "rgba(0, 0, 0, 1)",
+                          "from": 4,
+                          "to": 6,
+                        },
+                        Object {
+                          "color": "rgba(0, 0, 0, 1)",
+                          "from": 5,
+                          "to": 2,
+                        },
+                        Object {
+                          "color": "rgba(0, 0, 0, 1)",
+                          "from": 5,
+                          "to": 3,
+                        },
+                        Object {
+                          "color": "rgba(0, 0, 0, 1)",
+                          "from": 6,
+                          "to": 2,
+                        },
+                        Object {
+                          "color": "rgba(0, 0, 0, 1)",
+                          "from": 6,
+                          "to": 8,
+                        },
+                        Object {
+                          "color": "rgba(0, 0, 0, 1)",
+                          "from": 7,
+                          "to": 2,
+                        },
+                        Object {
+                          "color": "rgba(0, 0, 0, 1)",
+                          "from": 7,
+                          "to": 5,
+                        },
+                        Object {
+                          "color": "rgba(0, 0, 0, 1)",
+                          "from": 8,
+                          "to": 2,
+                        },
+                        Object {
+                          "color": "rgba(0, 0, 0, 1)",
+                          "from": 8,
+                          "to": 5,
+                        },
+                      ],
+                      "nodes": Array [
+                        Object {
+                          "average_latency": "Average duration: 90.1ms",
+                          "borderWidth": 3,
+                          "color": Object {
+                            "background": "rgba(158, 134, 192, 1)",
+                            "border": "#4A4A4A",
+                          },
+                          "error_rate": "Error rate: 4.17%",
+                          "font": Object {
+                            "color": "rgba(72, 122, 180, 1)",
+                          },
+                          "id": 1,
+                          "label": "order",
+                          "size": 15,
+                          "throughput": "Request rate: 48",
+                          "title": "order
+
+ Average duration: 90.1ms 
+ Error rate: 4.17% 
+ Request rate: 48",
+                        },
+                        Object {
+                          "average_latency": "Average duration: 12.99ms",
+                          "borderWidth": 3,
+                          "color": Object {
+                            "background": "rgba(210, 202, 224, 1)",
+                            "border": "#4A4A4A",
+                          },
+                          "error_rate": "Error rate: 0%",
+                          "font": Object {
+                            "color": "rgba(72, 122, 180, 1)",
+                          },
+                          "id": 2,
+                          "label": "analytics-service",
+                          "size": 15,
+                          "throughput": "Request rate: 37",
+                          "title": "analytics-service
+
+ Average duration: 12.99ms 
+ Error rate: 0% 
+ Request rate: 37",
+                        },
+                        Object {
+                          "average_latency": "Average duration: 49.54ms",
+                          "borderWidth": 3,
+                          "color": Object {
+                            "background": "rgba(187, 171, 212, 1)",
+                            "border": "#4A4A4A",
+                          },
+                          "error_rate": "Error rate: 3.77%",
+                          "font": Object {
+                            "color": "rgba(72, 122, 180, 1)",
+                          },
+                          "id": 3,
+                          "label": "database",
+                          "size": 15,
+                          "throughput": "Request rate: 53",
+                          "title": "database
+
+ Average duration: 49.54ms 
+ Error rate: 3.77% 
+ Request rate: 53",
+                        },
+                        Object {
+                          "average_latency": "Average duration: 207.71ms",
+                          "borderWidth": 3,
+                          "color": Object {
+                            "background": "rgba(78, 42, 122, 1)",
+                            "border": "#4A4A4A",
+                          },
+                          "error_rate": "Error rate: 7.41%",
+                          "font": Object {
+                            "color": "rgba(72, 122, 180, 1)",
+                          },
+                          "id": 4,
+                          "label": "frontend-client",
+                          "size": 15,
+                          "throughput": "Request rate: 27",
+                          "title": "frontend-client
+
+ Average duration: 207.71ms 
+ Error rate: 7.41% 
+ Request rate: 27",
+                        },
+                        Object {
+                          "average_latency": "Average duration: 183.52ms",
+                          "borderWidth": 3,
+                          "color": Object {
+                            "background": "rgba(95, 61, 138, 1)",
+                            "border": "#4A4A4A",
+                          },
+                          "error_rate": "Error rate: 3.23%",
+                          "font": Object {
+                            "color": "rgba(72, 122, 180, 1)",
+                          },
+                          "id": 5,
+                          "label": "inventory",
+                          "size": 15,
+                          "throughput": "Request rate: 31",
+                          "title": "inventory
+
+ Average duration: 183.52ms 
+ Error rate: 3.23% 
+ Request rate: 31",
+                        },
+                        Object {
+                          "average_latency": "Average duration: 139.09ms",
+                          "borderWidth": 3,
+                          "color": Object {
+                            "background": "rgba(125, 95, 166, 1)",
+                            "border": "#4A4A4A",
+                          },
+                          "error_rate": "Error rate: 8.33%",
+                          "font": Object {
+                            "color": "rgba(72, 122, 180, 1)",
+                          },
+                          "id": 6,
+                          "label": "authentication",
+                          "size": 15,
+                          "throughput": "Request rate: 12",
+                          "title": "authentication
+
+ Average duration: 139.09ms 
+ Error rate: 8.33% 
+ Request rate: 12",
+                        },
+                        Object {
+                          "average_latency": "Average duration: 134.36ms",
+                          "borderWidth": 3,
+                          "color": Object {
+                            "background": "rgba(129, 99, 169, 1)",
+                            "border": "#4A4A4A",
+                          },
+                          "error_rate": "Error rate: 9.09%",
+                          "font": Object {
+                            "color": "rgba(72, 122, 180, 1)",
+                          },
+                          "id": 7,
+                          "label": "payment",
+                          "size": 15,
+                          "throughput": "Request rate: 11",
+                          "title": "payment
+
+ Average duration: 134.36ms 
+ Error rate: 9.09% 
+ Request rate: 11",
+                        },
+                        Object {
+                          "average_latency": "Average duration: 176.97ms",
+                          "borderWidth": 3,
+                          "color": Object {
+                            "background": "rgba(100, 66, 143, 1)",
+                            "border": "#4A4A4A",
+                          },
+                          "error_rate": "Error rate: 6.25%",
+                          "font": Object {
+                            "color": "rgba(72, 122, 180, 1)",
+                          },
+                          "id": 8,
+                          "label": "recommendation",
+                          "size": 15,
+                          "throughput": "Request rate: 16",
+                          "title": "recommendation
+
+ Average duration: 176.97ms 
+ Error rate: 6.25% 
+ Request rate: 16",
+                        },
+                      ],
+                    }
+                  }
+                  key="0"
+                  options={
+                    Object {
+                      "autoResize": true,
+                      "edges": Object {
+                        "arrows": Object {
+                          "to": Object {
+                            "enabled": true,
+                          },
+                        },
+                        "physics": true,
+                      },
+                      "height": "434px",
+                      "interaction": Object {
+                        "hover": true,
+                        "selectable": true,
+                        "tooltipDelay": 30,
+                        "zoomSpeed": 0.5,
+                        "zoomView": true,
+                      },
+                      "layout": Object {
+                        "clusterThreshold": 150,
+                        "hierarchical": Object {
+                          "enabled": false,
+                        },
+                        "improvedLayout": false,
+                        "randomSeed": 10,
+                      },
+                      "manipulation": Object {
+                        "enabled": false,
+                      },
+                      "nodes": Object {
+                        "color": "#adadad",
+                        "font": Object {
+                          "color": "#387ab9",
+                          "size": 17,
+                        },
+                        "shape": "dot",
+                      },
+                      "physics": Object {
+                        "enabled": true,
+                        "forceAtlas2Based": Object {
+                          "centralGravity": 0.005,
+                          "gravitationalConstant": -100,
+                          "springConstant": 0.08,
+                          "springLength": 200,
+                        },
+                        "solver": "forceAtlas2Based",
+                        "stabilization": Object {
+                          "enabled": true,
+                          "iterations": 1000,
+                          "updateInterval": 25,
+                        },
+                      },
+                      "width": "100%",
+                    }
+                  }
+                >
+                  <div
+                    data-testid="mock-graph"
+                  >
+                    Mock Graph
+                  </div>
+                </GraphMock>
+                <div
+                  style={
+                    Object {
+                      "alignItems": "center",
+                      "backgroundColor": "rgba(255, 255, 255, 0.8)",
+                      "bottom": 0,
+                      "display": "flex",
+                      "justifyContent": "center",
+                      "left": 0,
+                      "position": "absolute",
+                      "right": 0,
+                      "top": 0,
+                      "zIndex": 1000,
+                    }
+                  }
+                >
+                  <EuiLoadingSpinner
+                    aria-label="Service map is loading"
+                    size="xl"
+                  >
+                    <span
+                      aria-label="Service map is loading"
+                      className="euiLoadingSpinner euiLoadingSpinner--xLarge"
+                    />
+                  </EuiLoadingSpinner>
+                </div>
+              </div>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <ServiceMapScale
+                idSelected="latency"
+                serviceMap={
+                  Object {
+                    "analytics-service": Object {
+                      "average_latency": 150,
+                      "destServices": Array [
+                        "order",
+                        "inventory",
+                        "authentication",
+                        "payment",
+                        "recommendation",
+                      ],
+                      "error_rate": 0,
+                      "id": 2,
+                      "latency": 12.99,
+                      "relatedServices": Array [
+                        "order",
+                        "inventory",
+                        "authentication",
+                        "payment",
+                        "recommendation",
+                      ],
+                      "serviceName": "analytics-service",
+                      "targetServices": Array [],
+                      "throughput": 37,
+                      "traceGroups": Array [
+                        Object {
+                          "targetResource": Array [
+                            "/logs",
+                          ],
+                          "traceGroup": "client_cancel_order",
+                        },
+                        Object {
+                          "targetResource": Array [
+                            "/logs",
+                          ],
+                          "traceGroup": "client_checkout",
+                        },
+                        Object {
+                          "targetResource": Array [
+                            "/logs",
+                          ],
+                          "traceGroup": "client_create_order",
+                        },
+                        Object {
+                          "targetResource": Array [
+                            "/logs",
+                          ],
+                          "traceGroup": "client_delivery_status",
+                        },
+                        Object {
+                          "targetResource": Array [
+                            "/logs",
+                          ],
+                          "traceGroup": "client_pay_order",
+                        },
+                        Object {
+                          "targetResource": Array [
+                            "/logs",
+                          ],
+                          "traceGroup": "load_main_screen",
+                        },
+                      ],
+                    },
+                    "authentication": Object {
+                      "average_latency": 350,
+                      "destServices": Array [
+                        "frontend-client",
+                      ],
+                      "error_rate": 8.33,
+                      "id": 6,
+                      "latency": 139.09,
+                      "relatedServices": Array [
+                        "analytics-service",
+                        "recommendation",
+                        "frontend-client",
+                      ],
+                      "serviceName": "authentication",
+                      "targetServices": Array [
+                        "analytics-service",
+                        "recommendation",
+                      ],
+                      "throughput": 12,
+                      "traceGroups": Array [
+                        Object {
+                          "targetResource": Array [
+                            "server_request_login",
+                          ],
+                          "traceGroup": "load_main_screen",
+                        },
+                      ],
+                    },
+                    "database": Object {
+                      "average_latency": 200,
+                      "destServices": Array [
+                        "order",
+                        "inventory",
+                      ],
+                      "error_rate": 3.77,
+                      "id": 3,
+                      "latency": 49.54,
+                      "relatedServices": Array [
+                        "order",
+                        "inventory",
+                      ],
+                      "serviceName": "database",
+                      "targetServices": Array [],
+                      "throughput": 53,
+                      "traceGroups": Array [
+                        Object {
+                          "targetResource": Array [
+                            "cartEmpty",
+                          ],
+                          "traceGroup": "client_cancel_order",
+                        },
+                        Object {
+                          "targetResource": Array [
+                            "updateItem",
+                          ],
+                          "traceGroup": "client_checkout",
+                        },
+                        Object {
+                          "targetResource": Array [
+                            "addItemToCart",
+                          ],
+                          "traceGroup": "client_create_order",
+                        },
+                        Object {
+                          "targetResource": Array [
+                            "getCart",
+                          ],
+                          "traceGroup": "client_delivery_status",
+                        },
+                        Object {
+                          "targetResource": Array [
+                            "cartSold",
+                          ],
+                          "traceGroup": "client_pay_order",
+                        },
+                        Object {
+                          "targetResource": Array [
+                            "getInventory",
+                          ],
+                          "traceGroup": "load_main_screen",
+                        },
+                      ],
+                    },
+                    "frontend-client": Object {
+                      "average_latency": 250,
+                      "destServices": Array [],
+                      "error_rate": 7.41,
+                      "id": 4,
+                      "latency": 207.71,
+                      "relatedServices": Array [
+                        "order",
+                        "payment",
+                        "authentication",
+                      ],
+                      "serviceName": "frontend-client",
+                      "targetServices": Array [
+                        "order",
+                        "payment",
+                        "authentication",
+                      ],
+                      "throughput": 27,
+                      "traceGroups": Array [
+                        Object {
+                          "targetResource": Array [],
+                          "traceGroup": "client_cancel_order",
+                        },
+                        Object {
+                          "targetResource": Array [],
+                          "traceGroup": "client_checkout",
+                        },
+                        Object {
+                          "targetResource": Array [],
+                          "traceGroup": "client_create_order",
+                        },
+                        Object {
+                          "targetResource": Array [],
+                          "traceGroup": "client_delivery_status",
+                        },
+                        Object {
+                          "targetResource": Array [],
+                          "traceGroup": "client_pay_order",
+                        },
+                        Object {
+                          "targetResource": Array [],
+                          "traceGroup": "load_main_screen",
+                        },
+                      ],
+                    },
+                    "inventory": Object {
+                      "average_latency": 300,
+                      "destServices": Array [
+                        "payment",
+                        "recommendation",
+                      ],
+                      "error_rate": 3.23,
+                      "id": 5,
+                      "latency": 183.52,
+                      "relatedServices": Array [
+                        "analytics-service",
+                        "database",
+                        "payment",
+                        "recommendation",
+                      ],
+                      "serviceName": "inventory",
+                      "targetServices": Array [
+                        "analytics-service",
+                        "database",
+                      ],
+                      "throughput": 31,
+                      "traceGroups": Array [
+                        Object {
+                          "targetResource": Array [
+                            "update_inventory",
+                          ],
+                          "traceGroup": "client_checkout",
+                        },
+                        Object {
+                          "targetResource": Array [
+                            "read_inventory",
+                          ],
+                          "traceGroup": "load_main_screen",
+                        },
+                      ],
+                    },
+                    "order": Object {
+                      "average_latency": 100,
+                      "destServices": Array [
+                        "frontend-client",
+                      ],
+                      "error_rate": 4.17,
+                      "id": 1,
+                      "latency": 90.1,
+                      "relatedServices": Array [
+                        "analytics-service",
+                        "database",
+                        "frontend-client",
+                      ],
+                      "serviceName": "order",
+                      "targetServices": Array [
+                        "analytics-service",
+                        "database",
+                      ],
+                      "throughput": 48,
+                      "traceGroups": Array [
+                        Object {
+                          "targetResource": Array [
+                            "clear_order",
+                          ],
+                          "traceGroup": "client_cancel_order",
+                        },
+                        Object {
+                          "targetResource": Array [
+                            "update_order",
+                          ],
+                          "traceGroup": "client_create_order",
+                        },
+                        Object {
+                          "targetResource": Array [
+                            "get_order",
+                          ],
+                          "traceGroup": "client_delivery_status",
+                        },
+                        Object {
+                          "targetResource": Array [
+                            "pay_order",
+                          ],
+                          "traceGroup": "client_pay_order",
+                        },
+                      ],
+                    },
+                    "payment": Object {
+                      "average_latency": 400,
+                      "destServices": Array [
+                        "frontend-client",
+                      ],
+                      "error_rate": 9.09,
+                      "id": 7,
+                      "latency": 134.36,
+                      "relatedServices": Array [
+                        "analytics-service",
+                        "inventory",
+                        "frontend-client",
+                      ],
+                      "serviceName": "payment",
+                      "targetServices": Array [
+                        "analytics-service",
+                        "inventory",
+                      ],
+                      "throughput": 11,
+                      "traceGroups": Array [
+                        Object {
+                          "targetResource": Array [
+                            "payment",
+                          ],
+                          "traceGroup": "client_checkout",
+                        },
+                      ],
+                    },
+                    "recommendation": Object {
+                      "average_latency": 450,
+                      "destServices": Array [
+                        "authentication",
+                      ],
+                      "error_rate": 6.25,
+                      "id": 8,
+                      "latency": 176.97,
+                      "relatedServices": Array [
+                        "analytics-service",
+                        "inventory",
+                        "authentication",
+                      ],
+                      "serviceName": "recommendation",
+                      "targetServices": Array [
+                        "analytics-service",
+                        "inventory",
+                      ],
+                      "throughput": 16,
+                      "traceGroups": Array [
+                        Object {
+                          "targetResource": Array [
+                            "recommend",
+                          ],
+                          "traceGroup": "load_main_screen",
+                        },
+                      ],
+                    },
+                  }
+                }
+                ticks={
+                  Array [
+                    0,
+                    50,
+                    100,
+                    150,
+                    200,
+                    250,
+                  ]
+                }
+              >
+                <div
+                  style={
+                    Object {
+                      "minHeight": 400,
+                      "minWidth": 65,
+                    }
+                  }
+                >
+                  <Plt
+                    data={
+                      Array [
+                        Object {
+                          "hoverinfo": "none",
+                          "marker": Object {
+                            "color": Array [
+                              "rgb(218, 214, 227)",
+                              "rgb(185, 169, 211)",
+                              "rgb(151, 126, 187)",
+                              "rgb(117, 86, 158)",
+                              "rgb(83, 47, 127)",
+                            ],
+                          },
+                          "orientation": "v",
+                          "showlegend": false,
+                          "type": "bar",
+                          "width": 0.4,
+                          "x": Array [
+                            0,
+                            0,
+                            0,
+                            0,
+                            0,
+                            0,
+                          ],
+                          "y": Array [
+                            50,
+                            50,
+                            50,
+                            50,
+                            50,
+                            50,
+                          ],
+                        },
+                      ]
+                    }
+                    height="270px"
+                    layout={
+                      Object {
+                        "height": 270,
+                        "margin": Object {
+                          "b": 10,
+                          "l": 0,
+                          "pad": 0,
+                          "r": 60,
+                          "t": 10,
+                        },
+                        "paper_bgcolor": "rgba(0, 0, 0, 0)",
+                        "plot_bgcolor": "rgba(0, 0, 0, 0)",
+                        "width": 77,
+                        "xaxis": Object {
+                          "fixedrange": true,
+                          "range": Array [
+                            -0.35,
+                            0.35,
+                          ],
+                          "showgrid": false,
+                          "showline": false,
+                          "showticklabels": false,
+                          "zeroline": false,
+                        },
+                        "yaxis": Object {
+                          "color": "0,0,0",
+                          "fixedrange": true,
+                          "range": Array [
+                            0,
+                            250,
+                          ],
+                          "showgrid": false,
+                          "showline": false,
+                          "showticklabels": true,
+                          "side": "right",
+                          "ticksuffix": "",
+                          "ticktexts": Array [
+                            0,
+                            50,
+                            100,
+                            150,
+                            200,
+                            250,
+                          ],
+                          "tickvals": Array [
+                            0,
+                            50,
+                            100,
+                            150,
+                            200,
+                            250,
+                          ],
+                          "title": Object {
+                            "standoff": 15,
+                            "text": "Average duration (ms)",
+                          },
+                          "zeroline": false,
+                        },
+                      }
+                    }
+                  >
+                    <PlotlyComponent
+                      config={
+                        Object {
+                          "displayModeBar": false,
+                        }
+                      }
+                      data={
+                        Array [
+                          Object {
+                            "hoverinfo": "none",
+                            "marker": Object {
+                              "color": Array [
+                                "rgb(218, 214, 227)",
+                                "rgb(185, 169, 211)",
+                                "rgb(151, 126, 187)",
+                                "rgb(117, 86, 158)",
+                                "rgb(83, 47, 127)",
+                              ],
+                            },
+                            "orientation": "v",
+                            "showlegend": false,
+                            "type": "bar",
+                            "width": 0.4,
+                            "x": Array [
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                            ],
+                            "y": Array [
+                              50,
+                              50,
+                              50,
+                              50,
+                              50,
+                              50,
+                            ],
+                          },
+                        ]
+                      }
+                      debug={false}
+                      divId="explorerPlotComponent"
+                      layout={
+                        Object {
+                          "autosize": true,
+                          "barmode": "stack",
+                          "height": 270,
+                          "hovermode": "closest",
+                          "layout": Object {
+                            "annotations": Array [
+                              Object {
+                                "showarrow": true,
+                                "xanchor": "right",
+                              },
+                            ],
+                          },
+                          "legend": Object {
+                            "orientation": "h",
+                            "traceorder": "normal",
+                          },
+                          "margin": Object {
+                            "b": 10,
+                            "l": 0,
+                            "pad": 0,
+                            "r": 60,
+                            "t": 10,
+                          },
+                          "paper_bgcolor": "rgba(0, 0, 0, 0)",
+                          "plot_bgcolor": "rgba(0, 0, 0, 0)",
+                          "showlegend": false,
+                          "width": 77,
+                          "xaxis": Object {
+                            "fixedrange": true,
+                            "range": Array [
+                              -0.35,
+                              0.35,
+                            ],
+                            "showgrid": false,
+                            "showline": false,
+                            "showticklabels": false,
+                            "zeroline": false,
+                          },
+                          "yaxis": Object {
+                            "color": "0,0,0",
+                            "fixedrange": true,
+                            "range": Array [
+                              0,
+                              250,
+                            ],
+                            "showgrid": false,
+                            "showline": false,
+                            "showticklabels": true,
+                            "side": "right",
+                            "ticksuffix": "",
+                            "ticktexts": Array [
+                              0,
+                              50,
+                              100,
+                              150,
+                              200,
+                              250,
+                            ],
+                            "tickvals": Array [
+                              0,
+                              50,
+                              100,
+                              150,
+                              200,
+                              250,
+                            ],
+                            "title": Object {
+                              "standoff": 15,
+                              "text": "Average duration (ms)",
+                            },
+                            "zeroline": false,
+                          },
+                        }
+                      }
+                      style={
+                        Object {
+                          "height": "270px",
+                          "width": "100%",
+                        }
+                      }
+                      useResizeHandler={true}
+                    >
+                      <div
+                        id="explorerPlotComponent"
+                        style={
+                          Object {
+                            "height": "270px",
+                            "width": "100%",
+                          }
+                        }
+                      />
+                    </PlotlyComponent>
+                  </Plt>
+                  <EuiSpacer>
+                    <div
+                      className="euiSpacer euiSpacer--l"
+                    />
+                  </EuiSpacer>
+                  <EuiFlexGroup
+                    gutterSize="none"
+                  >
+                    <div
+                      className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    >
+                      <EuiFlexItem
+                        grow={false}
+                      >
+                        <div
+                          className="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <img
+                            alt="unmatched-node-legend"
+                            src="file-stub"
+                            style={
+                              Object {
+                                "height": 40,
+                                "width": 40,
+                              }
+                            }
+                          />
+                        </div>
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        grow={false}
+                        style={
+                          Object {
+                            "marginLeft": -10,
+                            "marginRight": -30,
+                          }
+                        }
+                      >
+                        <div
+                          className="euiFlexItem euiFlexItem--flexGrowZero"
+                          style={
+                            Object {
+                              "marginLeft": -10,
+                              "marginRight": -30,
+                            }
+                          }
+                        >
+                          <EuiText
+                            style={
+                              Object {
+                                "color": "#808080",
+                                "fontSize": "14px",
+                                "transform": "rotate(-90deg)",
+                              }
+                            }
+                          >
+                            <div
+                              className="euiText euiText--medium"
+                              style={
+                                Object {
+                                  "color": "#808080",
+                                  "fontSize": "14px",
+                                  "transform": "rotate(-90deg)",
+                                }
+                              }
+                            >
+                              No match
+                            </div>
+                          </EuiText>
+                        </div>
+                      </EuiFlexItem>
+                    </div>
+                  </EuiFlexGroup>
+                </div>
+              </ServiceMapScale>
+            </div>
+          </EuiFlexItem>
+        </div>
+      </EuiFlexGroup>
+    </div>
   </EuiPanel>
   <EuiSpacer
     size="m"
-  />
-</Fragment>
+  >
+    <div
+      className="euiSpacer euiSpacer--m"
+    />
+  </EuiSpacer>
+</ServiceMap>
 `;

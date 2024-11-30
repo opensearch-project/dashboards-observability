@@ -14,12 +14,12 @@ import {
   EuiSuperSelect,
   EuiSuperSelectOption,
   EuiSelectable,
-  EuiSelectableOption,
   EuiPopover,
   EuiFieldSearch,
   EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 // @ts-ignore
 import Graph from 'react-graph-vis';
 import { ServiceNodeDetails } from '../../../../../../common/types/trace_analytics';
@@ -61,7 +61,7 @@ export function ServiceMap({
   filterByCurrService,
   includeMetricsCallback,
   mode,
-  filters,
+  filters = [],
   setFilters,
   hideSearchBar = false,
 }: {
@@ -95,7 +95,6 @@ export function ServiceMap({
   const [ticks, setTicks] = useState<number[]>([]);
   const [items, setItems] = useState<any>({});
   const [query, setQuery] = useState('');
-  const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filterChange, setIsFilterChange] = useState(false);
   const [focusedService, setFocusedService] = useState<string | null>(null);
@@ -116,9 +115,15 @@ export function ServiceMap({
   ];
 
   const [selectedNodeDetails, setSelectedNodeDetails] = useState<ServiceNodeDetails | null>(null);
-
   const [selectableValue, setSelectableValue] = useState<Array<EuiSuperSelectOption<any>>>([]);
   const [isPopoverOpen, setPopoverOpen] = useState(false);
+
+  // Memoize a boolean to determine if the focus bar should be disabled
+  const isFocusBarDisabled = useMemo(() => {
+    return filters.some(
+      (filter) => filter.field === 'serviceName' && focusedService === filter.value
+    );
+  }, [filters, focusedService]);
 
   const onChangeSelectable = (value: React.SetStateAction<Array<EuiSuperSelectOption<any>>>) => {
     // if the change is changing for the first time then callback servicemap with metrics
@@ -153,21 +158,6 @@ export function ServiceMap({
     );
     setFilters(updatedFilters);
   };
-
-  useEffect(() => {
-    if (items?.graph?.nodes) {
-      const visibleNodes = items.graph.nodes.map((node) => node.label);
-      const options = Object.keys(serviceMap)
-        .filter((key) => visibleNodes.includes(serviceMap[key].serviceName))
-        .map((key) => ({
-          label: serviceMap[key].serviceName,
-          value: serviceMap[key].serviceName,
-        }));
-      setSelectableOptions(options);
-    } else {
-      setSelectableOptions([]); // Ensure options are empty if items.graph.nodes doesn't exist
-    }
-  }, [items.graph, serviceMap]);
 
   const options = {
     layout: {
@@ -328,14 +318,9 @@ export function ServiceMap({
           serviceMap[service]?.relatedServices,
           true // Enable filtering to focus on connected nodes
         );
-        setSelectedNodeDetails(null);
         setItems(filteredGraph);
         setFocusedService(service);
-        setInvalid(false);
-        setGraphKey((prevKey) => prevKey + 1);
       }
-    } else {
-      setInvalid(true);
     }
   };
 
@@ -422,35 +407,57 @@ export function ServiceMap({
             <EuiFlexItem grow={7}>
               <EuiPopover
                 button={
-                  <EuiFieldSearch
-                    compressed
-                    prepend="Focus on"
-                    placeholder="Service name"
-                    value={focusedService || query}
-                    onClick={() => setPopoverOpen(!isPopoverOpen)}
-                    onChange={(e) => {
-                      const newValue = e.target.value;
-                      setQuery(newValue);
-                      if (newValue === '') {
-                        setGraphKey((prevKey) => prevKey + 1);
-                        setQuery('');
-                        onFocus('');
-                      }
-                    }}
-                    isInvalid={query.length > 0 && invalid}
-                    append={
-                      <EuiButtonIcon
-                        iconType="refresh"
-                        size="s"
-                        onClick={() => {
-                          setGraphKey((prevKey) => prevKey + 1);
-                          setQuery('');
-                          onFocus('');
-                        }}
-                      />
+                  <EuiToolTip
+                    position="top"
+                    content={
+                      isFocusBarDisabled
+                        ? 'To use the focus field, clear the service filter manually or click the refresh icon.'
+                        : undefined
                     }
-                    aria-controls="service-select-dropdown"
-                  />
+                  >
+                    <EuiFieldSearch
+                      compressed
+                      prepend="Focus on"
+                      placeholder={focusedService || 'Service name'}
+                      value={query}
+                      onClick={() => {
+                        if (!isFocusBarDisabled) setPopoverOpen(!isPopoverOpen);
+                      }}
+                      onChange={(e) => {
+                        if (!isFocusBarDisabled) {
+                          const newValue = e.target.value;
+                          setQuery(newValue);
+                          if (newValue === '') {
+                            if (focusedService) {
+                              setGraphKey((prevKey) => prevKey + 1);
+                              setQuery('');
+                              onFocus(focusedService);
+                            } else {
+                              setGraphKey((prevKey) => prevKey + 1);
+                              setQuery('');
+                              onFocus('');
+                            }
+                          }
+                        }
+                      }}
+                      isInvalid={query.length > 0 && invalid}
+                      append={
+                        <EuiButtonIcon
+                          iconType="refresh"
+                          data-test-subj="serviceMapRefreshButton"
+                          aria-label="Clear focus and refresh the service map"
+                          size="s"
+                          onClick={() => {
+                            setGraphKey((prevKey) => prevKey + 1);
+                            setQuery('');
+                            onFocus('');
+                          }}
+                        />
+                      }
+                      aria-controls="service-select-dropdown"
+                      disabled={isFocusBarDisabled}
+                    />
+                  </EuiToolTip>
                 }
                 isOpen={isPopoverOpen}
                 closePopover={() => setPopoverOpen(false)}
@@ -468,9 +475,12 @@ export function ServiceMap({
                     isClearable: true,
                     autoFocus: true,
                   }}
-                  options={selectableOptions.filter((option) =>
-                    option.label.toLowerCase().includes(query.toLowerCase())
-                  )}
+                  options={
+                    items?.graph?.nodes?.map((node) => ({
+                      label: node.label,
+                      checked: focusedService === node.label ? 'on' : undefined,
+                    })) || []
+                  }
                   singleSelection={true}
                   onChange={(newOptions) => {
                     const selectedOption = newOptions.find((option) => option.checked === 'on');
@@ -479,9 +489,10 @@ export function ServiceMap({
                         setPopoverOpen(false);
                         return;
                       }
-                      setQuery(selectedOption.label);
+                      setQuery('');
                       onFocus(selectedOption.label);
                       setPopoverOpen(false);
+                      setGraphKey((prevKey) => prevKey + 1);
                     }
                   }}
                   listProps={{ bordered: true, style: { width: '300px' } }}
@@ -537,7 +548,7 @@ export function ServiceMap({
                       zIndex: 1000,
                     }}
                   >
-                    <EuiLoadingSpinner size="xl" />
+                    <EuiLoadingSpinner size="xl" aria-label="Service map is loading" />
                   </div>
                 )}
                 {selectedNodeDetails && (
