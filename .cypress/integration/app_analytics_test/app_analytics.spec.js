@@ -436,6 +436,7 @@ describe('Viewing application', () => {
     cy.get('[data-test-subj="app-analytics-configTab"]').click();
     cy.get('select').select(visOneName);
     cy.wait('@selectUpdate');
+    cy.get('select').find('option:selected').should('have.text', visOneName);
 
     moveToHomePage();
     cy.wait('@loadingPanels');
@@ -563,13 +564,15 @@ describe('Application Analytics home page', () => {
     cy.get('[data-test-subj="deleteApplication"]').eq(0).click();
     cy.get('[data-test-subj="popoverModal__deleteTextInput"]').type('delete');
     cy.get('[data-test-subj="popoverModal__deleteButton"').click();
-    cy.get('.euiToast').contains(`Applications successfully deleted!`);
+    cy.get('[data-test-subj="applicationHomePageTitle"]').contains(`(2)`);
     cy.get('[data-test-subj="deleteApplication"]').eq(0).click();
     cy.get('[data-test-subj="popoverModal__deleteTextInput"]').type('delete');
     cy.get('[data-test-subj="popoverModal__deleteButton"').click();
+    cy.get('[data-test-subj="applicationHomePageTitle"]').contains(`(1)`);
     cy.get('[data-test-subj="deleteApplication"]').eq(0).click();
     cy.get('[data-test-subj="popoverModal__deleteTextInput"]').type('delete');
     cy.get('[data-test-subj="popoverModal__deleteButton"').click();
+    cy.get('[data-test-subj="applicationHomePageTitle"]').contains(`(0)`);
     cy.get(`[data-test-subj="${newName}ApplicationLink"]`).should('not.exist');
   });
 });

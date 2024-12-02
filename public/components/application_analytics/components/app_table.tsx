@@ -227,8 +227,6 @@ export function AppTable(props: AppTableProps) {
     app.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  console.log('Applications', applications);
-
   return (
     <>
       <EuiPage>
