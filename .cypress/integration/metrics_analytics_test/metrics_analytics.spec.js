@@ -32,7 +32,7 @@ describe('Metrics Analytics', () => {
       moveToEventsHome();
       cy.get('[data-test-subj="eventHome__savedQueryTableName"]')
         .first()
-        .contains(PPL_METRICS_NAMES[metricIndex]);
+        .contains(PPL_METRICS_NAMES[0]);
     });
   });
 
@@ -41,6 +41,8 @@ describe('Metrics Analytics', () => {
       createSavedObjectMetric({ testMetricIndex: 1 });
 
       moveToMetricsHome();
+      cy.get('[data-test-subj="comboBoxToggleListButton"]').click();
+      cy.get('[data-test-subj="prometheusOption"]').click();
       cy.get('[data-test-subj="metricsListItems_availableMetrics"]')
         .contains(PPL_METRICS_NAMES[1])
         .should('exist');
@@ -57,11 +59,11 @@ describe('Metrics Analytics', () => {
 
     describe('Check data source picker', () => {
       it('Index picker should be only available under Otel metric datasource', () => {
-        cy.get('[data-test-subj="metricsDataSourcePicker"]').click();
+        cy.get('[data-test-subj="comboBoxToggleListButton"]').click();
         cy.get('[data-test-subj="prometheusOption"]').click();
         cy.get('[data-test-subj="metricsIndexPicker"]').should('not.exist');
 
-        cy.get('[data-test-subj="metricsDataSourcePicker"]').click();
+        cy.get('[data-test-subj="comboBoxToggleListButton"]').click();
         cy.get('[data-test-subj="openTelemetryOption"]').click();
         cy.get('[data-test-subj="metricsIndexPicker"]').should('exist');
       });
@@ -137,21 +139,18 @@ describe('Metrics Analytics', () => {
           .click();
       });
 
-      it('Drag and drop a Metric visualization in edit mode', () => {
+      it('Drag and drop a Metric visualization', () => {
         cy.get('[data-test-subj="metricsListItems_availableMetrics"]')
           .contains(PPL_METRICS_NAMES[1])
           .trigger('mouseover')
           .click();
-        cy.get('h5')
-          .contains(PPL_METRICS_NAMES[0])
-          .trigger('mousedown', { which: 1, force: true })
-          .trigger('mousemove', { clientX: 415, clientY: 500 })
-          .trigger('mouseup', { force: true });
-        cy.wait(delay * 3);
-        cy.get('div.react-grid-layout>div')
-          .eq(1)
-          .invoke('attr', 'style')
-          .should('match', new RegExp('(.*)transform: translate((.*)10px)(.*)'));
+        cy.get('h5').eq(2).contains(PPL_METRICS_NAMES[1]).should('exist');;
+        cy.get('[data-test-subj="draggable"]').eq(0)
+        .focus()
+        .type(' ')
+        .type('{downarrow}')
+        .type(' ');
+          cy.get('h5').eq(2).contains(PPL_METRICS_NAMES[0]).should('exist');
       });
 
       it('Change date filter of the Metrics home page', () => {
@@ -175,7 +174,7 @@ describe('Metrics Analytics', () => {
         cy.wait(delay * 3);
         moveToMetricsHome();
         cy.get('[data-test-subj="metrics__saveManagementPopover"]').trigger('mouseover').click();
-        cy.get('[data-test-subj="comboBoxSearchInput"]')
+        cy.get('[data-test-subj="comboBoxSearchInput"]').eq(1)
           .focus()
           .type(TESTING_PANEL, { force: true });
         cy.get('[data-test-subj="metrics__SaveConfirm"]').click({ force: true });
@@ -211,19 +210,19 @@ const moveToEventsHome = () => {
 };
 
 const createCustomMetric = ({ testMetricIndex }) => {
-  cy.get('[id^=autocomplete-textarea]').focus().type(PPL_METRICS[metricIndex], {
+  cy.get('[id^=autocomplete-textarea]').focus().type(PPL_METRICS[testMetricIndex], {
     delay: 50,
   });
-  cy.get('.euiButton__text').contains('Refresh').trigger('mouseover').click();
+  cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').trigger('mouseover').click();
   suppressResizeObserverIssue();
   cy.get('button[id="main-content-vis"]').contains('Visualizations').trigger('mouseover').click();
   cy.wait(delay * 2);
-  cy.get('[data-test-subj="comboBoxToggleListButton"]').click();
-  cy.get('[data-test-subj="comboBoxSearchInput"]').focus().type(VIS_TYPE_LINE, { force: true });
+  cy.get('[data-test-subj="comboBoxToggleListButton"]').eq(1).click();
+  cy.get('[data-test-subj="comboBoxSearchInput"]').eq(1).focus().type(VIS_TYPE_LINE, { force: true });
   cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click({ force: true });
   cy.get('[data-test-subj="eventExplorer__querySaveName"]')
     .focus()
-    .type(PPL_METRICS_NAMES[metricIndex], { force: true });
+    .type(PPL_METRICS_NAMES[testMetricIndex], { force: true });
   cy.get('[data-test-subj="eventExplorer__metricSaveName"]').click({ force: true });
   cy.wait(delay * 10);
   cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]', {
