@@ -476,10 +476,12 @@ export function ServiceMap({
                     autoFocus: true,
                   }}
                   options={
-                    items?.graph?.nodes?.map((node) => ({
-                      label: node.label,
-                      checked: focusedService === node.label ? 'on' : undefined,
-                    })) || []
+                    items?.graph?.nodes
+                      ?.filter((node) => node.label.toLowerCase().includes(query.toLowerCase()))
+                      .map((node) => ({
+                        label: node.label,
+                        checked: focusedService === node.label ? 'on' : undefined,
+                      })) || []
                   }
                   singleSelection={true}
                   onChange={(newOptions) => {
