@@ -488,7 +488,7 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
             showFullScreenSelector: false,
             additionalControls: toolbarButtons,
           }}
-          style={{ height: fullScreenMode ? '100%' : 'auto', overflowY: 'auto' }}
+          style={{ height: fullScreenMode ? '100%' : '500px', overflowY: 'auto' }}
         />
       </FullScreenWrapper>
       {!fullScreenMode && total === 0 && <NoMatchMessage size="xl" />}

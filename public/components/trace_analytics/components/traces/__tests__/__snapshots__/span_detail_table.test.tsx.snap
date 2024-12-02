@@ -447,7 +447,7 @@ exports[`SpanDetailTableHierarchy renders the component with data 1`] = `
   >
     <div
       class="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stickyFooter"
-      style="height: auto; overflow-y: auto;"
+      style="height: 500px; overflow-y: auto;"
     />
   </div>
   <div
@@ -596,7 +596,7 @@ exports[`SpanDetailTableHierarchy renders the empty component 1`] = `
       rowCount={0}
       style={
         Object {
-          "height": "auto",
+          "height": "500px",
           "overflowY": "auto",
         }
       }
@@ -736,7 +736,7 @@ exports[`SpanDetailTableHierarchy renders the empty component 1`] = `
                     onKeyDown={[Function]}
                     style={
                       Object {
-                        "height": "auto",
+                        "height": "500px",
                         "overflowY": "auto",
                       }
                     }
@@ -856,7 +856,7 @@ exports[`SpanDetailTableHierarchy renders the jaeger component with data 1`] = `
   >
     <div
       class="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stickyFooter"
-      style="height: auto; overflow-y: auto;"
+      style="height: 500px; overflow-y: auto;"
     />
   </div>
   <div

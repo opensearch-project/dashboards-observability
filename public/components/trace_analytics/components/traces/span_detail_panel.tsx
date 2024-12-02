@@ -212,7 +212,8 @@ export function SpanDetailPanel(props: {
     const maxLabelLength = Math.max(...yTexts.map((text) => text.length));
 
     // Dynamically set left margin based on the longest label
-    const dynamicLeftMargin = Math.max(150, maxLabelLength * 5);
+    let dynamicLeftMargin = Math.max(150, maxLabelLength * 5);
+    dynamicLeftMargin = Math.min(dynamicLeftMargin, 500);
 
     return {
       plot_bgcolor: 'rgba(0, 0, 0, 0)',
