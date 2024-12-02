@@ -19,7 +19,12 @@ import { HttpSetup } from '../../../../../../../src/core/public';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { handleSpansRequest } from '../../requests/traces_request_handler';
-import { NoMatchMessage, microToMilliSec, nanoToMilliSec } from '../common/helper_functions';
+import {
+  NoMatchMessage,
+  microToMilliSec,
+  nanoToMilliSec,
+  FullScreenWrapper,
+} from '../common/helper_functions';
 
 interface SpanDetailTableProps {
   http: HttpSetup;
@@ -98,6 +103,7 @@ const renderCommonCellValue = ({
   props,
   flattenedItems,
   indentationFactor = 0,
+  fullScreenMode = false,
 }: {
   rowIndex: number;
   columnId: string;
@@ -108,6 +114,7 @@ const renderCommonCellValue = ({
   props: SpanDetailTableProps;
   flattenedItems?: any[];
   indentationFactor?: number;
+  fullScreenMode?: boolean;
 }) => {
   const adjustedRowIndex = flattenedItems
     ? rowIndex
@@ -148,9 +155,13 @@ const renderCommonCellValue = ({
           ) : (
             <EuiIcon type="empty" style={{ visibility: 'hidden', marginRight: 5 }} />
           )}
-          <EuiLink data-test-subj="spanId-link" onClick={() => props.openFlyout(value)}>
-            {value}
-          </EuiLink>
+          {!fullScreenMode ? (
+            <EuiLink data-test-subj="spanId-link" onClick={() => props.openFlyout(value)}>
+              {value}
+            </EuiLink>
+          ) : (
+            <span>{value}</span>
+          )}
         </div>
       );
     case 'durationInNanos':
@@ -225,9 +236,13 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
       .map(({ id }) => id)
   );
 
+  const [fullScreenMode, setFullScreenMode] = useState(false);
+  const openFullScreenModal = () => setFullScreenMode(true);
+  const closeFullScreenModal = () => setFullScreenMode(false);
+
   const renderCellValue = useCallback(
-    (params) => renderCommonCellValue({ ...params, items, tableParams, props }),
-    [items, tableParams, props]
+    (params) => renderCommonCellValue({ ...params, items, tableParams, props, fullScreenMode }),
+    [items, tableParams, props, fullScreenMode]
   );
 
   const onSort = useCallback(
@@ -247,24 +262,47 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
     tableParams,
   ]);
 
+  const toolbarButtons = [
+    <EuiButtonEmpty
+      size="xs"
+      onClick={fullScreenMode ? closeFullScreenModal : openFullScreenModal}
+      key="fullScreen"
+      color="text"
+      iconType={fullScreenMode ? 'cross' : 'fullScreen'}
+      data-test-subj="fullScreenButton"
+    >
+      {fullScreenMode ? 'Exit Full Screen' : 'Full Screen'}
+    </EuiButtonEmpty>,
+  ];
+
   return (
     <>
-      <EuiDataGrid
-        aria-labelledby="span-detail-data-grid"
-        columns={columns}
-        columnVisibility={{ visibleColumns, setVisibleColumns }}
-        rowCount={total}
-        renderCellValue={renderCellValue}
-        sorting={mode === 'jaeger' ? undefined : { columns: tableParams.sortingColumns, onSort }}
-        toolbarVisibility={mode === 'jaeger' ? false : true}
-        pagination={{
-          pageIndex: tableParams.page,
-          pageSize: tableParams.size,
-          pageSizeOptions: [10, 50, 100],
-          onChangeItemsPerPage,
-          onChangePage,
-        }}
-      />
+      <FullScreenWrapper isFullScreen={fullScreenMode} onClose={closeFullScreenModal}>
+        <EuiDataGrid
+          aria-labelledby="span-detail-data-grid"
+          columns={columns}
+          columnVisibility={{ visibleColumns, setVisibleColumns }}
+          rowCount={total}
+          renderCellValue={renderCellValue}
+          sorting={mode === 'jaeger' ? undefined : { columns: tableParams.sortingColumns, onSort }}
+          toolbarVisibility={{
+            showColumnSelector: true,
+            showSortSelector: true,
+            showFullScreenSelector: false,
+            additionalControls: toolbarButtons,
+          }}
+          pagination={{
+            pageIndex: tableParams.page,
+            pageSize: tableParams.size,
+            pageSizeOptions: [10, 50, 100],
+            onChangeItemsPerPage,
+            onChangePage,
+          }}
+          style={{
+            height: fullScreenMode ? '100%' : 'auto',
+          }}
+        />
+      </FullScreenWrapper>
       {total === 0 && <NoMatchMessage size="xl" />}
     </>
   );
@@ -351,6 +389,10 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
     );
   }, [columns, props.hiddenColumns]);
 
+  const [fullScreenMode, setFullScreenMode] = useState(false);
+  const openFullScreenModal = () => setFullScreenMode(true);
+  const closeFullScreenModal = () => setFullScreenMode(false);
+
   const renderCellValue = useCallback(
     (params) =>
       renderCommonCellValue({
@@ -371,8 +413,9 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
         },
         flattenedItems,
         indentationFactor: 20,
+        fullScreenMode,
       }),
-    [items, expandedRows, props, flattenedItems]
+    [items, expandedRows, props, flattenedItems, fullScreenMode]
   );
 
   const gatherAllSpanIds = (spans: Span[]): Set<string> => {
@@ -402,6 +445,16 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
   const toolbarButtons = [
     <EuiButtonEmpty
       size="xs"
+      onClick={fullScreenMode ? closeFullScreenModal : openFullScreenModal}
+      key="fullScreen"
+      color="text"
+      iconType={fullScreenMode ? 'cross' : 'fullScreen'}
+      data-test-subj="fullScreenButton"
+    >
+      {fullScreenMode ? 'Exit Full Screen' : 'Full Screen'}
+    </EuiButtonEmpty>,
+    <EuiButtonEmpty
+      size="xs"
       onClick={expandAllRows}
       key="expandAll"
       color="text"
@@ -421,25 +474,24 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
   ];
 
   return (
-    <div style={{ height: '500px', overflowY: 'auto' }}>
-      <EuiDataGrid
-        aria-labelledby="span-detail-data-grid"
-        columns={columns}
-        columnVisibility={{ visibleColumns, setVisibleColumns }}
-        rowCount={flattenedItems.length}
-        renderCellValue={renderCellValue}
-        toolbarVisibility={
-          mode === 'jaeger'
-            ? false
-            : {
-                showColumnSelector: true,
-                showSortSelector: true,
-                showFullScreenSelector: true,
-                additionalControls: toolbarButtons,
-              }
-        }
-      />
-      {total === 0 && <NoMatchMessage size="xl" />}
-    </div>
+    <>
+      <FullScreenWrapper isFullScreen={fullScreenMode} onClose={closeFullScreenModal}>
+        <EuiDataGrid
+          aria-labelledby="span-detail-data-grid"
+          columns={columns}
+          columnVisibility={{ visibleColumns, setVisibleColumns }}
+          rowCount={flattenedItems.length}
+          renderCellValue={renderCellValue}
+          toolbarVisibility={{
+            showColumnSelector: true,
+            showSortSelector: true,
+            showFullScreenSelector: false,
+            additionalControls: toolbarButtons,
+          }}
+          style={{ height: fullScreenMode ? '100%' : 'auto', overflowY: 'auto' }}
+        />
+      </FullScreenWrapper>
+      {!fullScreenMode && total === 0 && <NoMatchMessage size="xl" />}
+    </>
   );
 }

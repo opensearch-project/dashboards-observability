@@ -5,7 +5,14 @@
 /* eslint-disable radix */
 
 import dateMath from '@elastic/datemath';
-import { EuiEmptyPrompt, EuiSmallButtonEmpty, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiEmptyPrompt,
+  EuiOverlayMask,
+  EuiSmallButtonEmpty,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { SpacerSize } from '@elastic/eui/src/components/spacer/spacer';
 import { isEmpty, round } from 'lodash';
 import React from 'react';
@@ -581,4 +588,57 @@ export const generateServiceUrl = (service: string, dataSourceId: string) => {
   }
 
   return `${url}&datasourceId=`;
+};
+
+interface FullScreenWrapperProps {
+  children: React.ReactNode;
+  onClose: () => void;
+  isFullScreen: boolean;
+}
+
+export const FullScreenWrapper: React.FC<FullScreenWrapperProps> = ({
+  children,
+  onClose,
+  isFullScreen,
+}) => {
+  if (!isFullScreen) return <>{children}</>;
+
+  return (
+    <EuiOverlayMask>
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          backgroundColor: '#fff',
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <EuiButtonIcon
+          iconType="cross"
+          aria-label="Close full screen"
+          onClick={onClose}
+          display="empty"
+          style={{
+            position: 'absolute',
+            top: '4px',
+            right: '4px',
+            zIndex: 10000,
+          }}
+        />
+        <div
+          style={{
+            flex: '1 1 auto',
+            overflow: 'auto',
+          }}
+        >
+          {children}
+        </div>
+      </div>
+    </EuiOverlayMask>
+  );
 };
