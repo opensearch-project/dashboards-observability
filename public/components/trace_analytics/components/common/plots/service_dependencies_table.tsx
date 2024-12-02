@@ -99,7 +99,7 @@ export const ServiceDependenciesTable = ({ serviceMap, graph }: ServiceDependenc
   );
 
   return (
-    <EuiPanel>
+    <EuiPanel data-test-subj="service-dep-table">
       <PanelTitle title="Service Dependencies" />
       <EuiHorizontalRule margin="m" />
       <EuiInMemoryTable

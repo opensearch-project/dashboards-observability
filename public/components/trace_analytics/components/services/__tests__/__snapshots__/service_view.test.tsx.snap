@@ -248,21 +248,7 @@ exports[`Service view component renders service view 1`] = `
         <EuiHorizontalRule
           margin="m"
         />
-        <div>
-          <SpanDetailTable
-            DSL={Object {}}
-            dataSourceMDSId=""
-            hiddenColumns={
-              Array [
-                "serviceName",
-              ]
-            }
-            http={[MockFunction]}
-            mode="data_prepper"
-            openFlyout={[Function]}
-            setTotal={[Function]}
-          />
-        </div>
+        <div />
       </EuiPanel>
     </EuiPageBody>
   </EuiPage>
