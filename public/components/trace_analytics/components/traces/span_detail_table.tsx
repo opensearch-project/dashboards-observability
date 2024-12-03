@@ -271,7 +271,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
       iconType={fullScreenMode ? 'cross' : 'fullScreen'}
       data-test-subj="fullScreenButton"
     >
-      {fullScreenMode ? 'Exit Full Screen' : 'Full Screen'}
+      {fullScreenMode ? 'Exit full screen' : 'Full screen'}
     </EuiButtonEmpty>,
   ];
 
@@ -451,7 +451,7 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
       iconType={fullScreenMode ? 'cross' : 'fullScreen'}
       data-test-subj="fullScreenButton"
     >
-      {fullScreenMode ? 'Exit Full Screen' : 'Full Screen'}
+      {fullScreenMode ? 'Exit full screen' : 'Full screen'}
     </EuiButtonEmpty>,
     <EuiButtonEmpty
       size="xs"

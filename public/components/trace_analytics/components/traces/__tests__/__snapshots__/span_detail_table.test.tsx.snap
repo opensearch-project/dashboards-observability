@@ -163,7 +163,7 @@ exports[`SpanDetailTable renders the empty component 1`] = `
               onClick={[Function]}
               size="xs"
             >
-              Full Screen
+              Full screen
             </EuiButtonEmpty>,
           ],
           "showColumnSelector": true,
@@ -610,7 +610,7 @@ exports[`SpanDetailTableHierarchy renders the empty component 1`] = `
               onClick={[Function]}
               size="xs"
             >
-              Full Screen
+              Full screen
             </EuiButtonEmpty>,
             <EuiButtonEmpty
               color="text"
