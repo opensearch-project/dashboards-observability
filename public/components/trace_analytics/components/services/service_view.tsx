@@ -76,18 +76,16 @@ export function ServiceView(props: ServiceViewProps) {
   >('latency');
   const [redirect, setRedirect] = useState(false);
   const [actionsMenuPopover, setActionsMenuPopover] = useState(false);
-  const [serviceId, setServiceId] = useState<string | null>(null);
-  const location = useLocation();
 
-  useEffect(() => {
-    try {
-      const params = new URLSearchParams(location.search);
-      const id = params.get('serviceId');
-      setServiceId(id);
-    } catch (error) {
-      setServiceId(null);
-    }
-  }, [location]);
+  let serviceId: string | null = null;
+
+  try {
+    const location = useLocation();
+    const params = new URLSearchParams(location?.search || '');
+    serviceId = params.get('serviceId');
+  } catch (error) {
+    serviceId = null;
+  }
 
   const hideSearchBarCheck = page === 'serviceFlyout' || serviceId !== '';
 
