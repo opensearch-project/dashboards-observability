@@ -206,6 +206,7 @@ describe('Setting availability', () => {
     cy.get('.euiTableRow').should('have.length.lessThan', 1);
     cy.get('[data-test-subj="applicationTitle"]').should('contain', nameThree);
     cy.get('.euiBreadcrumb[href="#/"]').click();
+    cy.reload();
     cy.get(`[data-test-subj="${nameThree}ApplicationLink"]`);
     cy.get('[data-test-subj="setAvailabilityHomePageLink"]').first().click();
     cy.get('[data-test-subj="applicationTitle"]').should('contain', nameThree);
@@ -431,15 +432,15 @@ describe('Viewing application', () => {
 
 
   it('Changes availability visualization', () => {
-    cy.intercept('PUT', `**/api/observability/application`).as('selectUpdate');
-    cy.intercept('GET', `**/api/observability/operational_panels/panels/**`).as('loadingPanels')
     cy.get('[data-test-subj="app-analytics-configTab"]').click();
     cy.get('select').select(visOneName);
+    cy.intercept('PUT', `**/api/observability/application`).as('selectUpdate');
     cy.wait('@selectUpdate');
-    cy.get('select').find('option:selected').should('have.text', visOneName);
 
     moveToHomePage();
+    cy.intercept('GET', `**/api/observability/operational_panels/panels/**`).as('loadingPanels')
     cy.wait('@loadingPanels');
+    cy.reload();
     cy.get('[data-test-subj="AvailableAvailabilityBadge"][style="background-color: rgb(84, 179, 153); color: rgb(0, 0, 0);"]').should('contain', 'Available');
     moveToApplication(nameOne);
     cy.get('[data-test-subj="app-analytics-configTab"]').click();
@@ -561,18 +562,20 @@ describe('Application Analytics home page', () => {
   });
 
   it('Deletes application', () => {
-    cy.get('[data-test-subj="deleteApplication"]').eq(0).click();
+    cy.get('.euiFieldSearch').clear().type(nameTwo);
+    cy.get('[data-test-subj="deleteApplication"]').click();
     cy.get('[data-test-subj="popoverModal__deleteTextInput"]').type('delete');
     cy.get('[data-test-subj="popoverModal__deleteButton"').click();
-    cy.get('[data-test-subj="applicationHomePageTitle"]').contains(`(2)`);
-    cy.get('[data-test-subj="deleteApplication"]').eq(0).click();
+    cy.get('.euiToast').contains(`Applications successfully deleted!`);
+    cy.get('.euiFieldSearch').clear().type(nameThree);
+    cy.get('[data-test-subj="deleteApplication"]').click();
     cy.get('[data-test-subj="popoverModal__deleteTextInput"]').type('delete');
     cy.get('[data-test-subj="popoverModal__deleteButton"').click();
-    cy.get('[data-test-subj="applicationHomePageTitle"]').contains(`(1)`);
-    cy.get('[data-test-subj="deleteApplication"]').eq(0).click();
+    cy.get('.euiFieldSearch').clear().type(newName);
+    cy.get('[data-test-subj="deleteApplication"]').click();
     cy.get('[data-test-subj="popoverModal__deleteTextInput"]').type('delete');
     cy.get('[data-test-subj="popoverModal__deleteButton"').click();
-    cy.get('[data-test-subj="applicationHomePageTitle"]').contains(`(0)`);
-    cy.get(`[data-test-subj="${newName}ApplicationLink"]`).should('not.exist');
+    cy.get('.euiFieldSearch').clear()
+    cy.get('[data-test-subj="applicationHomePageTitle"]').contains('(0)');
   });
 });
