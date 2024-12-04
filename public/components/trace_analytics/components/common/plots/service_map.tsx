@@ -84,9 +84,7 @@ export function ServiceMap({
   includeMetricsCallback?: () => void;
   mode?: string;
   filters: FilterType[];
-  setFilters:
-    | React.Dispatch<React.SetStateAction<FilterType[]>>
-    | ((filters: FilterType[]) => void);
+  setFilters: (filters: FilterType[]) => void;
   hideSearchBar?: boolean;
 }) {
   const [graphKey, setGraphKey] = useState(0); // adding key to allow for re-renders
