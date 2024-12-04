@@ -596,6 +596,7 @@ interface FullScreenWrapperProps {
   isFullScreen: boolean;
 }
 
+// EUI Data grid full screen button is currently broken, this is a workaround
 export const FullScreenWrapper: React.FC<FullScreenWrapperProps> = ({
   children,
   onClose,
@@ -605,39 +606,15 @@ export const FullScreenWrapper: React.FC<FullScreenWrapperProps> = ({
 
   return (
     <EuiOverlayMask>
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          backgroundColor: '#fff',
-          zIndex: 9999,
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
+      <div className="full-screen-wrapper">
         <EuiButtonIcon
           iconType="cross"
           aria-label="Close full screen"
           onClick={onClose}
           display="empty"
-          style={{
-            position: 'absolute',
-            top: '4px',
-            right: '4px',
-            zIndex: 10000,
-          }}
+          className="full-screen-close-icon"
         />
-        <div
-          style={{
-            flex: '1 1 auto',
-            overflow: 'auto',
-          }}
-        >
-          {children}
-        </div>
+        <div className="full-screen-content">{children}</div>
       </div>
     </EuiOverlayMask>
   );

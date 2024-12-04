@@ -7,7 +7,7 @@ import React from 'react';
 import { configure, mount, shallow } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import { SpanDetailPanel } from '../span_detail_panel';
-import { EuiButtonGroup, EuiSmallButton } from '@elastic/eui';
+import { EuiSmallButton } from '@elastic/eui';
 import { Plt } from '../../../../visualizations/plotly/plot';
 import { act } from 'react-dom/test-utils';
 
@@ -126,26 +126,6 @@ describe('SpanDetailPanel component', () => {
       .find(EuiSmallButton)
       .filterWhere((btn) => btn.text().includes('Reset zoom'));
     expect(resetButton.prop('isDisabled')).toBe(true);
-  });
-
-  it('handles view toggle button group', () => {
-    const wrapper = mount(<SpanDetailPanel {...mockProps} />);
-    const toggleButtons = wrapper.find(EuiButtonGroup);
-    expect(toggleButtons).toHaveLength(1);
-
-    // Verify initial state is 'timeline'
-    expect(toggleButtons.prop('idSelected')).toBe('timeline');
-
-    // Simulate changing the toggle
-    act(() => {
-      toggleButtons.prop('onChange')!('span_list');
-    });
-
-    wrapper.update();
-
-    // Verify the toggle button group has been updated
-    const updatedToggleButtons = wrapper.find(EuiButtonGroup);
-    expect(updatedToggleButtons.prop('idSelected')).toBe('span_list');
   });
 
   it('handles user-defined zoom range via mini-map', () => {

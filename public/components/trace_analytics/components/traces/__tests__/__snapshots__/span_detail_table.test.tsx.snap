@@ -614,6 +614,7 @@ exports[`SpanDetailTableHierarchy renders the empty component 1`] = `
             </EuiButtonEmpty>,
             <EuiButtonEmpty
               color="text"
+              data-test-subj="treeExpandAll"
               iconType="expand"
               onClick={[Function]}
               size="xs"
@@ -622,6 +623,7 @@ exports[`SpanDetailTableHierarchy renders the empty component 1`] = `
             </EuiButtonEmpty>,
             <EuiButtonEmpty
               color="text"
+              data-test-subj="treeCollapseAll"
               iconType="minimize"
               onClick={[Function]}
               size="xs"

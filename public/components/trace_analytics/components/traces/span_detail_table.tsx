@@ -459,6 +459,7 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
       key="expandAll"
       color="text"
       iconType="expand"
+      data-test-subj="treeExpandAll"
     >
       Expand all
     </EuiButtonEmpty>,
@@ -468,6 +469,7 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
       key="collapseAll"
       color="text"
       iconType="minimize"
+      data-test-subj="treeCollapseAll"
     >
       Collapse all
     </EuiButtonEmpty>,

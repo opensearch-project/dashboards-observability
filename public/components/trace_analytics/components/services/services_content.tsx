@@ -62,10 +62,6 @@ export function ServicesContent(props: ServicesProps) {
   const searchBarRef = useRef<{ updateQuery: (newQuery: string) => void }>(null);
 
   useEffect(() => {
-    refresh();
-  }, [startTime, endTime, props.dataSourceMDSId]);
-
-  useEffect(() => {
     const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
     chrome.setBreadcrumbs([...(isNavGroupEnabled ? [] : [parentBreadcrumb]), ...childBreadcrumbs]);
     const validFilters = getValidFilterFields(mode, 'services', attributesFilterFields);
@@ -104,6 +100,9 @@ export function ServicesContent(props: ServicesProps) {
     jaegerIndicesExist,
     dataPrepperIndicesExist,
     isServiceTrendEnabled,
+    startTime,
+    endTime,
+    props.dataSourceMDSId,
   ]);
 
   const refresh = async (currService?: string, overrideQuery?: string) => {

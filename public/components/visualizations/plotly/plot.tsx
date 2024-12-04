@@ -16,7 +16,7 @@ interface PltProps {
   onUnhoverHandler?: (event: Readonly<Plotly.PlotMouseEvent>) => void;
   onClickHandler?: (event: Readonly<Plotly.PlotMouseEvent>) => void;
   onSelectedHandler?: (event: Readonly<Plotly.PlotSelectionEvent>) => void;
-  onRelayout?: (event: any) => void;
+  onRelayout?: (event: Readonly<Plotly.PlotSelectionEvent>) => void;
   height?: string;
   dispatch?: (props: any) => void;
 }

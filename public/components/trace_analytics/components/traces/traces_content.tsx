@@ -74,10 +74,6 @@ export function TracesContent(props: TracesProps) {
   const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
 
   useEffect(() => {
-    refresh();
-  }, [startTime, endTime, props.dataSourceMDSId]);
-
-  useEffect(() => {
     chrome.setBreadcrumbs([
       ...(isNavGroupEnabled ? [] : [props.parentBreadcrumb]),
       ...childBreadcrumbs,
@@ -119,6 +115,9 @@ export function TracesContent(props: TracesProps) {
     includeMetrics,
     tracesTableMode,
     props.setDataSourceMenuSelectable,
+    startTime,
+    endTime,
+    props.dataSourceMDSId,
   ]);
 
   const onToggle = (isOpen: boolean) => {
