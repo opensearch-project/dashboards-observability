@@ -364,7 +364,7 @@ export function SpanDetailPanel(props: {
 
   const spanDetailTable = useMemo(
     () => (
-      <div style={{ width: dynamicLayoutAdjustment }}>
+      <div style={{ width: 'auto' }}>
         <SpanDetailTable
           http={props.http}
           hiddenColumns={mode === 'jaeger' ? ['traceID', 'traceGroup'] : ['traceId', 'traceGroup']}
@@ -386,7 +386,7 @@ export function SpanDetailPanel(props: {
 
   const spanDetailTableHierarchy = useMemo(
     () => (
-      <div style={{ width: dynamicLayoutAdjustment }}>
+      <div style={{ width: 'auto' }}>
         <SpanDetailTableHierarchy
           http={props.http}
           hiddenColumns={mode === 'jaeger' ? ['traceID', 'traceGroup'] : ['traceId', 'traceGroup']}
