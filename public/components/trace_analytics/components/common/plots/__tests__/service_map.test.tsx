@@ -10,7 +10,7 @@ import React from 'react';
 import { act } from '@testing-library/react';
 import { ServiceMap } from '../service_map';
 import { EuiFieldSearch, EuiSelectable } from '@elastic/eui';
-import { TEST_SERVICE_MAP } from '../../../../../../../test/constants';
+import { TEST_SERVICE_MAP, MOCK_CANVAS_CONTEXT } from '../../../../../../../test/constants';
 import Graph from 'react-graph-vis';
 
 configure({ adapter: new Adapter() });
@@ -32,62 +32,11 @@ const crypto = {
 };
 Object.defineProperty(global, 'crypto', { value: crypto });
 
-const mockContext = ({
-  canvas: document.createElement('canvas'),
-  fillRect: jest.fn(),
-  clearRect: jest.fn(),
-  getImageData: jest.fn(() => ({ data: new Uint8ClampedArray() })),
-  putImageData: jest.fn(),
-  createImageData: jest.fn(),
-  setTransform: jest.fn(),
-  drawImage: jest.fn(),
-  save: jest.fn(),
-  fillText: jest.fn(),
-  restore: jest.fn(),
-  beginPath: jest.fn(),
-  moveTo: jest.fn(),
-  lineTo: jest.fn(),
-  closePath: jest.fn(),
-  stroke: jest.fn(),
-  translate: jest.fn(),
-  scale: jest.fn(),
-  rotate: jest.fn(),
-  arc: jest.fn(),
-  fill: jest.fn(),
-  measureText: jest.fn(() => ({ width: 0 })),
-  transform: jest.fn(),
-  rect: jest.fn(),
-  globalAlpha: 1,
-  globalCompositeOperation: 'source-over',
-  filter: 'none',
-  imageSmoothingEnabled: true,
-  imageSmoothingQuality: 'low',
-  strokeStyle: '#000',
-  fillStyle: '#000',
-  shadowOffsetX: 0,
-  shadowOffsetY: 0,
-  shadowBlur: 0,
-  shadowColor: 'rgba(0,0,0,0)',
-  lineWidth: 1,
-  lineCap: 'butt',
-  lineJoin: 'miter',
-  miterLimit: 10,
-  lineDashOffset: 0,
-  font: '10px sans-serif',
-  textAlign: 'start',
-  textBaseline: 'alphabetic',
-  direction: 'ltr',
-  getContextAttributes: jest.fn(() => ({
-    alpha: true,
-    desynchronized: false,
-    colorSpace: 'srgb',
-    willReadFrequently: false,
-  })),
-} as unknown) as CanvasRenderingContext2D;
-
 jest
   .spyOn(HTMLCanvasElement.prototype, 'getContext')
-  .mockImplementation((contextId) => (contextId === '2d' ? mockContext : null));
+  .mockImplementation((contextId) =>
+    contextId === '2d' ? ((MOCK_CANVAS_CONTEXT as unknown) as CanvasRenderingContext2D) : null
+  );
 
 jest.mock('react-graph-vis', () => {
   const GraphMock = () => <div data-testid="mock-graph">Mock Graph</div>;

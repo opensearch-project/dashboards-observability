@@ -1221,7 +1221,7 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                           "yref": "paper",
                         },
                       ],
-                      "width": undefined,
+                      "width": 412,
                       "xaxis": Object {
                         "color": "#91989c",
                         "range": Array [
@@ -1295,7 +1295,7 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                           },
                         ],
                         "showlegend": false,
-                        "width": undefined,
+                        "width": 412,
                         "xaxis": Object {
                           "color": "#91989c",
                           "range": Array [
@@ -1365,7 +1365,7 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                       },
                       "paper_bgcolor": "rgba(0, 0, 0, 0)",
                       "plot_bgcolor": "rgba(0, 0, 0, 0)",
-                      "width": undefined,
+                      "width": 412,
                       "xaxis": Object {
                         "color": "#91989c",
                         "range": Array [
@@ -1425,7 +1425,7 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                         "paper_bgcolor": "rgba(0, 0, 0, 0)",
                         "plot_bgcolor": "rgba(0, 0, 0, 0)",
                         "showlegend": false,
-                        "width": undefined,
+                        "width": 412,
                         "xaxis": Object {
                           "color": "#91989c",
                           "range": Array [

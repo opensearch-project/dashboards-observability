@@ -426,15 +426,9 @@ export function ServiceMap({
                           const newValue = e.target.value;
                           setQuery(newValue);
                           if (newValue === '') {
-                            if (focusedService) {
-                              setGraphKey((prevKey) => prevKey + 1);
-                              setQuery('');
-                              onFocus(focusedService);
-                            } else {
-                              setGraphKey((prevKey) => prevKey + 1);
-                              setQuery('');
-                              onFocus('');
-                            }
+                            setGraphKey((prevKey) => prevKey + 1);
+                            setQuery('');
+                            onFocus(focusedService || '');
                           }
                         }
                       }}

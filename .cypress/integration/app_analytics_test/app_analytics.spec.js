@@ -274,7 +274,7 @@ describe('Viewing application', () => {
 
   it('Opens service detail flyout when Service Name is clicked', () => {
     cy.get('[data-test-subj="app-analytics-serviceTab"]').click();
-    cy.get('*[data-test-subj^="service-flyout-action-btntrace"]').eq(0).click();
+    cy.get('*[data-test-subj^="service-link"]').eq(0).click();
     cy.get('[data-test-subj="serviceDetailFlyoutTitle"]').should('be.visible');
     cy.get('[data-test-subj="Number of connected servicesDescriptionList"]').should('contain', '3');
     cy.get('[data-text="Errors"]').eq(1).click(); // Selecting errors tab within flyout
