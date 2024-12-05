@@ -5,8 +5,10 @@
 
 import {
   EuiSmallButton,
+  EuiSmallButtonIcon,
   EuiCodeBlock,
   EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -17,6 +19,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiPanel,
+  EuiPopover,
   EuiSpacer,
   EuiText,
   EuiToolTip,
@@ -100,6 +103,7 @@ export const VisualizationContainer = ({
   onEditClick,
   cloneVisualization,
   showFlyout,
+  removeVisualization,
   catalogVisualization,
   inlineEditor,
   actionMenuType,
@@ -112,6 +116,7 @@ export const VisualizationContainer = ({
   const [visualizationData, setVisualizationData] = useState<Plotly.Data[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState({} as VizContainerError);
+  const onActionsMenuClick = () => setIsPopoverOpen((currPopoverOpen) => !currPopoverOpen);
   const closeActionsMenu = () => setIsPopoverOpen(false);
   const { http, pplService } = coreRefs;
   const { setToast } = useToast();
@@ -233,10 +238,7 @@ export const VisualizationContainer = ({
     </EuiContextMenuItem>,
   ];
 
-  if (
-    visualizationMetaData?.metricType === PROMQL_METRIC_SUBTYPE &&
-    actionMenuType === 'metricsGrid'
-  ) {
+  if (actionMenuType === 'metricsGrid') {
     popoverPanel = [showPPLQueryPanel];
   } else if (usedInNotebooks) {
     popoverPanel = [popoverPanel[0]];
@@ -367,6 +369,37 @@ export const VisualizationContainer = ({
                   <h5 data-test-subj="visualizationHeader">{visualizationTitle}</h5>
                 </EuiToolTip>
               </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} className="visualization-action-button">
+              {editMode ? (
+                <EuiIcon
+                  data-test-subj="removeVisualizationButton"
+                  type="crossInACircleFilled"
+                  onClick={() => {
+                    removeVisualization(visualizationId);
+                  }}
+                />
+              ) : (
+                <EuiPopover
+                  button={
+                    <EuiSmallButtonIcon
+                      aria-label="actionMenuButton"
+                      iconType="boxesHorizontal"
+                      onClick={onActionsMenuClick}
+                    />
+                  }
+                  isOpen={isPopoverOpen}
+                  closePopover={closeActionsMenu}
+                  anchorPosition="downLeft"
+                  panelPaddingSize="none"
+                >
+                  <EuiContextMenuPanel
+                    items={popoverPanel}
+                    data-test-subj="panelViz__popoverPanel"
+                    size="s"
+                  />
+                </EuiPopover>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
           {inlineEditor}
