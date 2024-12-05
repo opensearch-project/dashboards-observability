@@ -456,6 +456,7 @@ describe('Visualizing data', () => {
   it('Visualize pie chart', () => {
     cy.get('[data-test-subj="comboBoxInput"]').eq(1).click();
     cy.get('[data-test-subj="comboBoxOptionsList "] span').contains(VIS_TYPE_PIE).click();
+    cy.get('[data-test-subj="comboBoxInput"]').eq(1).should('contain', VIS_TYPE_PIE);
     cy.get('[data-test-subj="vizConfigSection-series"]')
       .find('[data-test-subj="viz-config-add-btn"]')
       .click();
