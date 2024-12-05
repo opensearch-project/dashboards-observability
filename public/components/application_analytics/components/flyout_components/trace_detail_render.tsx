@@ -30,7 +30,6 @@ export const TraceDetailRender = ({
   openSpanFlyout,
   mode,
   dataSourceMDSId,
-
 }: TraceDetailRenderProps) => {
   const [fields, setFields] = useState<any>({});
   const [serviceBreakdownData, setServiceBreakdownData] = useState([]);
@@ -78,6 +77,7 @@ export const TraceDetailRender = ({
           openSpanFlyout={openSpanFlyout}
           mode={mode}
           dataSourceMDSId={dataSourceMDSId}
+          isApplicationFlyout={true}
         />
         <EuiSpacer size="xs" />
         <EuiHorizontalRule margin="s" />
