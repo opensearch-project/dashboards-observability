@@ -260,18 +260,16 @@ export function TraceView(props: TraceViewProps) {
     <>
       <EuiPage>
         <EuiPageBody>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            {renderTitle(props.traceId)}
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          {renderOverview(fields)}
-
-          <EuiSpacer />
-          <EuiFlexGroup>
+          {renderTitle(props.traceId)}
+          <EuiFlexGroup alignItems="stretch" gutterSize="s">
+            <EuiFlexItem grow={5}>{renderOverview(fields)}</EuiFlexItem>
             <EuiFlexItem grow={3}>
               <ServiceBreakdownPanel data={serviceBreakdownData} />
             </EuiFlexItem>
-            <EuiFlexItem grow={7}>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
               <SpanDetailPanel
                 traceId={props.traceId}
                 http={props.http}
