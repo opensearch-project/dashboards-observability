@@ -39,9 +39,13 @@ import {
 describe('Adding sample data and visualization', () => {
   it('Adds sample flights and logs data for event analytics', () => {
     cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`);
-    cy.get('[data-test-subj="launchSampleDataSetflights"]').click();
+    cy.get('div[data-test-subj="sampleDataSetCardflights"]')
+      .contains(/(Add|View) data/)
+      .click();
     cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`);
-    cy.get('[data-test-subj="launchSampleDataSetlogs"]').click();
+    cy.get('div[data-test-subj="sampleDataSetCardlogs"]')
+      .contains(/(Add|View) data/)
+      .click();
   });
 });
 
