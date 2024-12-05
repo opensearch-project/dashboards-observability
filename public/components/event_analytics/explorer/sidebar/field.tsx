@@ -194,6 +194,7 @@ export const Field = (props: IFieldProps) => {
                 aria-label={'inspect'}
                 className="dscSidebarField__actionButton"
                 isDisabled={!(isDefaultDataSourceType || appLogEvents)}
+                data-test-subj={`field-${field.name}-showDetails`}
               />
             }
           >
