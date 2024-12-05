@@ -123,6 +123,7 @@ exports[`<Notebook /> spec Renders the empty component 1`] = `
                   >
                     <button
                       class="euiButton euiButton--primary euiButton--small"
+                      data-test-subj="reporting-actions-button"
                       id="reportingActionsButton"
                       type="button"
                     >
