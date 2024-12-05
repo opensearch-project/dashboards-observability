@@ -151,6 +151,7 @@ const renderCommonCellValue = ({
               type={isRowExpanded ? 'arrowDown' : 'arrowRight'}
               onClick={() => toggleRowExpansion(item.spanId)}
               style={{ cursor: 'pointer', marginRight: 5 }}
+              data-test-subj="treeViewExpandArrow"
             />
           ) : (
             <EuiIcon type="empty" style={{ visibility: 'hidden', marginRight: 5 }} />

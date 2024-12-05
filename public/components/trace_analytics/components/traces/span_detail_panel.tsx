@@ -27,6 +27,8 @@ import { SpanDetailFlyout } from './span_detail_flyout';
 import { SpanDetailTable, SpanDetailTableHierarchy } from './span_detail_table';
 import { coreRefs } from '../../../../framework/core_refs';
 
+const newNavigation = coreRefs?.chrome?.navGroup.getNavGroupEnabled?.();
+
 export function SpanDetailPanel(props: {
   http: HttpSetup;
   traceId: string;
@@ -97,7 +99,8 @@ export function SpanDetailPanel(props: {
   }, []);
 
   const dynamicLayoutAdjustment = useMemo(() => {
-    return isLocked ? availableWidth - 350 : availableWidth - 150;
+    const adjustment = newNavigation ? 350 : 400;
+    return isLocked ? availableWidth - adjustment : availableWidth - 150;
   }, [isLocked, availableWidth]);
 
   // Update selectedRange whenever data.ganttMaxX changes to ensure it starts fully zoomed out
@@ -200,7 +203,11 @@ export function SpanDetailPanel(props: {
     plotTraces: Plotly.Data[],
     _maxX: number
   ): Partial<Plotly.Layout> => {
-    const dynamicWidthAdjustment = isLocked ? 410 : 200;
+    const dynamicWidthAdjustment = !isLocked
+      ? 200
+      : newNavigation
+      ? 390 // If locked and new navigation
+      : 410; // If locked and new navigation is disabled
     // get unique labels from traces
     const yLabels = plotTraces
       .map((d) => d.y[0])
