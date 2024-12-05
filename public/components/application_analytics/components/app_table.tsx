@@ -86,7 +86,7 @@ export function AppTable(props: AppTableProps) {
     );
     clear();
     fetchApplications();
-  }, [applications.length]);
+  }, []);
 
   const clear = () => {
     setFilters([]);
@@ -138,6 +138,7 @@ export function AppTable(props: AppTableProps) {
       description: 'Rename this application',
       icon: 'pencil',
       type: 'icon',
+      'data-test-subj': 'renameApplication',
       onClick: (app: ApplicationType) => renameApp(app),
     },
     {
@@ -146,6 +147,7 @@ export function AppTable(props: AppTableProps) {
       icon: 'trash',
       type: 'icon',
       color: 'danger',
+      'data-test-subj': 'deleteApplication',
       onClick: (app: ApplicationType) => deleteApp(app),
     },
   ];
@@ -231,7 +233,7 @@ export function AppTable(props: AppTableProps) {
         <EuiPageBody component="div">
           <EuiPageHeader>
             {!newNavigation && (
-              <EuiTitle size="l">
+              <EuiTitle data-test-subj="applicationHomePageTitle" size="l">
                 <h3>Applications {` (${applications.length})`}</h3>
               </EuiTitle>
             )}
