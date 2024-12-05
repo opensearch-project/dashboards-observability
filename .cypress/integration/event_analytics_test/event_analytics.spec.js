@@ -453,7 +453,7 @@ describe('Visualizing data', () => {
     querySearch(TEST_QUERIES[2].query, YEAR_TO_DATE_DOM_ID);
   });
 
-  it.only('Visualize pie chart', () => {
+  it('Visualize pie chart', () => {
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('[data-test-subj="comboBoxInput"]').eq(1).click();
     cy.get('[data-test-subj="comboBoxOptionsList "] span').contains(VIS_TYPE_PIE).click();
