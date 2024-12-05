@@ -200,7 +200,7 @@ export function SpanDetailPanel(props: {
     plotTraces: Plotly.Data[],
     _maxX: number
   ): Partial<Plotly.Layout> => {
-    const dynamicWidthAdjustment = isLocked ? 400 : 200;
+    const dynamicWidthAdjustment = isLocked ? 410 : 200;
     // get unique labels from traces
     const yLabels = plotTraces
       .map((d) => d.y[0])

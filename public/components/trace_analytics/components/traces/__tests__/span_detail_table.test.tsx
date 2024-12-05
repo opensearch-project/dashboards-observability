@@ -26,6 +26,33 @@ const httpClientMock = jest.requireMock('../../../../../../test/__mocks__/httpCl
 
 configure({ adapter: new Adapter() });
 
+describe.only('SpanDetailTable with Mocked Data', () => {
+  it('renders the table with mocked data', async () => {
+    // Mock the HTTP response
+    httpClientMock.post.mockResolvedValue((TEST_SPAN_RESPONSE as unknown) as HttpResponse);
+
+    const wrapper = mount(
+      <SpanDetailTable
+        http={httpClientMock}
+        hiddenColumns={['traceId', 'traceGroup']}
+        DSL={{}}
+        openFlyout={() => {}}
+        mode="data_prepper"
+        dataSourceMDSId="testDataSource"
+      />
+    );
+
+    // Wait for the table to render
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('EuiDataGrid')).toHaveLength(1); // Ensure the table is rendered
+    });
+      // Check that the table has rows
+    const tableRows = wrapper.find('[data-test-subj="dataGridRowCell"]').hostNodes();
+    expect(tableRows).toHaveLength(3); // Replace 10 with the expected number of rows
+  });
+});
+
 describe('SpanDetailTable', () => {
   it('renders the empty component', async () => {
     httpClientMock.post.mockResolvedValue(({
@@ -308,5 +335,103 @@ describe('SpanDetailTableHierarchy', () => {
       );
     });
     expect(container).toMatchSnapshot();
+  });
+
+  it.only('should expand all rows when "Expand All" is clicked', async () => {
+    // Mock HTTP response with data
+    httpClientMock.post.mockResolvedValue((TEST_SPAN_RESPONSE as unknown) as HttpResponse);
+
+    const wrapper = mount(
+      <SpanDetailTableHierarchy
+        http={httpClientMock}
+        hiddenColumns={[]}
+        openFlyout={jest.fn()}
+        mode="data_prepper"
+        dataSourceMDSId="testDataSource"
+      />
+    );
+
+    // Wait for the component to render
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('EuiDataGrid')).toHaveLength(1);
+    });
+
+    const densitybuttonz = wrapper.find('[data-test-subj="dataGridStyleSelectorPopover"]').hostNodes();
+    console.log("Density button", densitybuttonz.length);
+    const expandAllButton1 = wrapper.find('[data-test-subj="treeExpandAll"]').hostNodes();
+    const collapseAllButton1 = wrapper.find('[data-test-subj="treeCollapseAll"]').hostNodes();
+    wrapper.update();
+    await waitFor(() => {
+      
+      expect(wrapper.find('EuiDataGrid')).toHaveLength(1); // Ensure the table is rendered
+    });
+    
+    // Simulate clicking the "Expand All" button
+    const expandAllButton = wrapper
+      .find('[data-test-subj="treeExpandAll"]')
+      .hostNodes();
+    expect(expandAllButton).toHaveLength(1);
+
+    act(() => {
+      expandAllButton.simulate('click');
+    });
+
+    wrapper.update();
+
+    // Check that all rows are expanded
+    const expandedRows = wrapper.find('EuiIcon[type="arrowDown"]').length;
+    expect(expandedRows).toBeGreaterThan(0);
+  });
+
+  it.only('should collapse all rows when "Collapse All" is clicked', async () => {
+    // Mock HTTP response with data
+    httpClientMock.post.mockResolvedValue((TEST_SPAN_RESPONSE as unknown) as HttpResponse);
+
+    const wrapper = mount(
+      <SpanDetailTableHierarchy
+        http={httpClientMock}
+        hiddenColumns={[]}
+        openFlyout={jest.fn()}
+        mode="data_prepper"
+        dataSourceMDSId="testDataSource"
+      />
+    );
+
+    // Wait for the component to render
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('EuiDataGrid')).toHaveLength(1);
+    });
+
+  // Check that the table has rows
+  const tableRows = wrapper.find('[data-test-subj="dataGridRowCell"]').hostNodes();
+  expect(tableRows).toHaveLength(10); // Replace 10 with the expected number of rows
+
+    // Simulate clicking the "Expand All" button first to expand all rows
+    const expandAllButton = wrapper
+      .find('[data-test-subj="treeExpandAll"]')
+      .hostNodes();
+    act(() => {
+      expandAllButton.simulate('click');
+    });
+
+    wrapper.update();
+
+    // Simulate clicking the "Collapse All" button
+    const collapseAllButton = wrapper
+      .find('[data-test-subj="treeCollapseAll"]')
+      .hostNodes();
+    expect(collapseAllButton).toHaveLength(1);
+
+    act(() => {
+      collapseAllButton.simulate('click');
+    });
+
+    wrapper.update();
+
+    // Check that all rows are collapsed
+    const expandedRows = wrapper.find('EuiIcon[type="arrowDown"]').length;
+    expect(expandedRows).toBe(0);
   });
 });
