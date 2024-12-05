@@ -37,11 +37,11 @@ import {
 } from '../../utils/event_analytics/helpers';
 
 describe('Adding sample data and visualization', () => {
-  it('Adds sample flights data for event analytics', () => {
+  it('Adds sample flights and logs data for event analytics', () => {
     cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`);
-    cy.get('div[data-test-subj="sampleDataSetCardflights"]')
-      .contains(/(Add|View) data/)
-      .click();
+    cy.get('[data-test-subj="launchSampleDataSetflights"]').click();
+    cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`);
+    cy.get('[data-test-subj="launchSampleDataSetlogs"]').click();
   });
 });
 
