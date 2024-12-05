@@ -17,7 +17,15 @@ import React, { useMemo } from 'react';
 import { Plt } from '../../../visualizations/plotly/plot';
 import { PanelTitle } from '../common/helper_functions';
 
-export function ServiceBreakdownPanel(props: { data: Plotly.Data[] }) {
+interface ServiceBreakdownData {
+  labels: string[];
+  values: number[];
+  marker: {
+    colors: string[];
+  };
+}
+
+export function ServiceBreakdownPanel(props: { data: ServiceBreakdownData[] }) {
   const layout = useMemo(
     () =>
       ({
@@ -29,58 +37,58 @@ export function ServiceBreakdownPanel(props: { data: Plotly.Data[] }) {
         margin: {
           l: 5,
           r: 5,
-          b: 5,
-          t: 5,
+          b: 15,
+          t: 15,
         },
       } as Partial<Plotly.Layout>),
     [props.data]
   );
 
   const renderStats = () => {
-    return props.data.length > 0 ? (
-      <EuiFlexGroup responsive={false} style={{ maxHeight: 260, overflowY: 'auto' }}>
-        <EuiFlexItem>
-          <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="m" responsive={false}>
-            {props.data[0].marker.colors.map((color, i) => (
-              <EuiFlexItem key={`label-${i}`}>
-                <EuiHealth color={color}>
-                  <div style={{ whiteSpace: 'nowrap' }}>{props.data[0].labels[i]}</div>
-                </EuiHealth>
-              </EuiFlexItem>
-            ))}
+    if (props.data.length === 0) return null;
+
+    const { labels, values, marker } = props.data[0];
+
+    return (
+      <EuiFlexGroup
+        direction="column"
+        style={{ maxHeight: 260, overflowY: 'auto', paddingRight: '20px' }}
+        gutterSize="s"
+        responsive={false}
+      >
+        {labels.map((label: string, index: number) => (
+          <EuiFlexGroup
+            key={index}
+            alignItems="center"
+            justifyContent="spaceBetween"
+            gutterSize="m"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiHealth color={marker.colors[index]}>{label}</EuiHealth>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">{round(values[index], 2)}%</EuiText>
+            </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem />
-        <EuiFlexItem />
-        <EuiFlexItem>
-          <EuiFlexGroup direction="column" alignItems="flexEnd" gutterSize="m" responsive={false}>
-            {props.data[0].values.map((value, i) => (
-              <EuiFlexItem key={`value-${i}`}>
-                <EuiText size="s">{round(value, 2)}%</EuiText>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        ))}
       </EuiFlexGroup>
-    ) : null;
+    );
   };
 
   const stats = useMemo(() => renderStats(), [props.data]);
 
   return (
-    <>
-      <EuiPanel>
-        <PanelTitle title="Time spent by service" data-test-subj="time-spent-by-service-panel" />
-        <EuiHorizontalRule margin="m" />
-        <EuiFlexGroup direction="column" alignItems="center">
-          <EuiFlexItem>
-            {props.data?.length > 0 ? <Plt data={props.data} layout={layout} /> : null}
-          </EuiFlexItem>
-          <EuiSpacer />
-          <EuiFlexItem>{stats}</EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-      </EuiPanel>
-    </>
+    <EuiPanel>
+      <PanelTitle title="Time spent by service" data-test-subj="time-spent-by-service-panel" />
+      <EuiHorizontalRule margin="m" />
+      <EuiFlexGroup alignItems="center" gutterSize="m">
+        <EuiFlexItem grow={3}>
+          {props.data?.length > 0 ? <Plt data={props.data} layout={layout} /> : null}
+        </EuiFlexItem>
+        <EuiFlexItem grow={3}>{stats}</EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+    </EuiPanel>
   );
 }

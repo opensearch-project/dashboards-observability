@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<SpanDetailTable /> spec renders the component with data 1`] = `
+exports[`SpanDetailTable renders the component with data 1`] = `
 <div>
   <div
     data-focus-guard="true"
@@ -13,6 +13,7 @@ exports[`<SpanDetailTable /> spec renders the component with data 1`] = `
   >
     <div
       class="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stickyFooter"
+      style="height: auto;"
     />
   </div>
   <div
@@ -23,116 +24,159 @@ exports[`<SpanDetailTable /> spec renders the component with data 1`] = `
 </div>
 `;
 
-exports[`<SpanDetailTable /> spec renders the empty component 1`] = `
+exports[`SpanDetailTable renders the empty component 1`] = `
 <SpanDetailTable
   DSL={Object {}}
+  dataSourceMDSId="testDataSource"
   hiddenColumns={
     Array [
       "traceId",
       "traceGroup",
     ]
   }
-  http={[MockFunction]}
+  http={
+    Object {
+      "post": [MockFunction] {
+        "calls": Array [
+          Array [
+            "/api/observability/trace_analytics/query",
+            Object {
+              "body": "{\\"size\\":10,\\"from\\":0,\\"query\\":{\\"bool\\":{\\"must\\":[],\\"filter\\":[],\\"should\\":[],\\"must_not\\":[]}},\\"sort\\":[],\\"index\\":\\"otel-v1-apm-span-*\\"}",
+              "query": Object {
+                "dataSourceMDSId": "testDataSource",
+              },
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      },
+    }
+  }
   mode="data_prepper"
   openFlyout={[Function]}
 >
-  <EuiDataGrid
-    aria-labelledby="span-detail-data-grid"
-    columnVisibility={
-      Object {
-        "setVisibleColumns": [Function],
-        "visibleColumns": Array [
-          "spanId",
-          "parentSpanId",
-          "serviceName",
-          "name",
-          "durationInNanos",
-          "startTime",
-          "endTime",
-          "status.code",
-        ],
-      }
-    }
-    columns={
-      Array [
-        Object {
-          "display": "Span ID",
-          "id": "spanId",
-        },
-        Object {
-          "display": "Parent span ID",
-          "id": "parentSpanId",
-        },
-        Object {
-          "display": "Trace ID",
-          "id": "traceId",
-        },
-        Object {
-          "display": "Trace group",
-          "id": "traceGroup",
-        },
-        Object {
-          "display": "Service",
-          "id": "serviceName",
-        },
-        Object {
-          "display": "Operation",
-          "id": "name",
-        },
-        Object {
-          "display": "Duration",
-          "id": "durationInNanos",
-        },
-        Object {
-          "display": "Start time",
-          "id": "startTime",
-        },
-        Object {
-          "display": "End time",
-          "id": "endTime",
-        },
-        Object {
-          "display": "Errors",
-          "id": "status.code",
-        },
-      ]
-    }
-    pagination={
-      Object {
-        "onChangeItemsPerPage": [Function],
-        "onChangePage": [Function],
-        "pageIndex": 0,
-        "pageSize": 10,
-        "pageSizeOptions": Array [
-          10,
-          50,
-          100,
-        ],
-      }
-    }
-    renderCellValue={[Function]}
-    rowCount={0}
-    sorting={
-      Object {
-        "columns": Array [],
-        "onSort": [Function],
-      }
-    }
-    toolbarVisibility={true}
+  <FullScreenWrapper
+    isFullScreen={false}
+    onClose={[Function]}
   >
-    <EuiFocusTrap
-      className="euiDataGrid__focusWrap"
-      clickOutsideDisables={false}
-      disabled={true}
-      noIsolation={true}
-      returnFocus={true}
-      scrollLock={false}
+    <EuiDataGrid
+      aria-labelledby="span-detail-data-grid"
+      columnVisibility={
+        Object {
+          "setVisibleColumns": [Function],
+          "visibleColumns": Array [
+            "spanId",
+            "parentSpanId",
+            "serviceName",
+            "name",
+            "durationInNanos",
+            "status.code",
+            "startTime",
+            "endTime",
+          ],
+        }
+      }
+      columns={
+        Array [
+          Object {
+            "display": "Span ID",
+            "id": "spanId",
+          },
+          Object {
+            "display": "Parent span ID",
+            "id": "parentSpanId",
+          },
+          Object {
+            "display": "Trace ID",
+            "id": "traceId",
+          },
+          Object {
+            "display": "Trace group",
+            "id": "traceGroup",
+          },
+          Object {
+            "display": "Service",
+            "id": "serviceName",
+          },
+          Object {
+            "display": "Operation",
+            "id": "name",
+          },
+          Object {
+            "display": "Duration",
+            "id": "durationInNanos",
+            "initialWidth": 100,
+          },
+          Object {
+            "display": "Errors",
+            "id": "status.code",
+            "initialWidth": 100,
+          },
+          Object {
+            "display": "Start time",
+            "id": "startTime",
+          },
+          Object {
+            "display": "End time",
+            "id": "endTime",
+          },
+        ]
+      }
+      pagination={
+        Object {
+          "onChangeItemsPerPage": [Function],
+          "onChangePage": [Function],
+          "pageIndex": 0,
+          "pageSize": 10,
+          "pageSizeOptions": Array [
+            10,
+            50,
+            100,
+          ],
+        }
+      }
+      renderCellValue={[Function]}
+      rowCount={0}
+      sorting={
+        Object {
+          "columns": Array [],
+          "onSort": [Function],
+        }
+      }
+      style={
+        Object {
+          "height": "auto",
+        }
+      }
+      toolbarVisibility={
+        Object {
+          "additionalControls": Array [
+            <EuiButtonEmpty
+              color="text"
+              data-test-subj="fullScreenButton"
+              iconType="fullScreen"
+              onClick={[Function]}
+              size="xs"
+            >
+              Full screen
+            </EuiButtonEmpty>,
+          ],
+          "showColumnSelector": true,
+          "showFullScreenSelector": false,
+          "showSortSelector": true,
+        }
+      }
     >
-      <ForwardRef
+      <EuiFocusTrap
         className="euiDataGrid__focusWrap"
-        enabled={false}
+        clickOutsideDisables={false}
+        disabled={true}
         noIsolation={true}
-        onClickOutside={[Function]}
         returnFocus={true}
         scrollLock={false}
       >
@@ -143,111 +187,119 @@ exports[`<SpanDetailTable /> spec renders the empty component 1`] = `
           onClickOutside={[Function]}
           returnFocus={true}
           scrollLock={false}
-          sideCar={[Function]}
         >
-          <ForwardRef(FocusLockUI)
-            as={
-              Object {
-                "$$typeof": Symbol(react.forward_ref),
-                "classNames": Object {
-                  "fullWidth": "width-before-scroll-bar",
-                  "zeroRight": "right-scroll-bar-position",
-                },
-                "defaultProps": Object {
-                  "enabled": true,
-                  "inert": false,
-                  "removeScrollBar": true,
-                },
-                "render": [Function],
-              }
-            }
-            autoFocus={true}
+          <ForwardRef
             className="euiDataGrid__focusWrap"
-            crossFrame={true}
-            disabled={true}
-            lockProps={
-              Object {
-                "allowPinchZoom": undefined,
-                "as": undefined,
-                "enabled": false,
-                "inert": undefined,
-                "shards": undefined,
-                "sideCar": [Function],
-                "style": undefined,
-              }
-            }
-            noFocusGuards={false}
-            persistentFocus={false}
+            enabled={false}
+            noIsolation={true}
+            onClickOutside={[Function]}
             returnFocus={true}
+            scrollLock={false}
             sideCar={[Function]}
           >
-            <div
-              data-focus-guard={true}
-              key="guard-first"
-              style={
+            <ForwardRef(FocusLockUI)
+              as={
                 Object {
-                  "height": "0px",
-                  "left": "1px",
-                  "overflow": "hidden",
-                  "padding": 0,
-                  "position": "fixed",
-                  "top": "1px",
-                  "width": "1px",
+                  "$$typeof": Symbol(react.forward_ref),
+                  "classNames": Object {
+                    "fullWidth": "width-before-scroll-bar",
+                    "zeroRight": "right-scroll-bar-position",
+                  },
+                  "defaultProps": Object {
+                    "enabled": true,
+                    "inert": false,
+                    "removeScrollBar": true,
+                  },
+                  "render": [Function],
                 }
               }
-              tabIndex={-1}
-            />
-            <ForwardRef
+              autoFocus={true}
               className="euiDataGrid__focusWrap"
-              data-focus-lock-disabled="disabled"
-              enabled={false}
-              inert={false}
-              onBlur={[Function]}
-              onFocus={[Function]}
-              removeScrollBar={true}
+              crossFrame={true}
+              disabled={true}
+              lockProps={
+                Object {
+                  "allowPinchZoom": undefined,
+                  "as": undefined,
+                  "enabled": false,
+                  "inert": undefined,
+                  "shards": undefined,
+                  "sideCar": [Function],
+                  "style": undefined,
+                }
+              }
+              noFocusGuards={false}
+              persistentFocus={false}
+              returnFocus={true}
               sideCar={[Function]}
             >
               <div
+                data-focus-guard={true}
+                key="guard-first"
+                style={
+                  Object {
+                    "height": "0px",
+                    "left": "1px",
+                    "overflow": "hidden",
+                    "padding": 0,
+                    "position": "fixed",
+                    "top": "1px",
+                    "width": "1px",
+                  }
+                }
+                tabIndex={-1}
+              />
+              <ForwardRef
                 className="euiDataGrid__focusWrap"
                 data-focus-lock-disabled="disabled"
+                enabled={false}
+                inert={false}
                 onBlur={[Function]}
                 onFocus={[Function]}
-                onScrollCapture={[Function]}
-                onTouchMoveCapture={[Function]}
-                onWheelCapture={[Function]}
+                removeScrollBar={true}
+                sideCar={[Function]}
               >
                 <div
-                  className="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stickyFooter"
-                  onKeyDown={[Function]}
-                  style={
-                    Object {
-                      "height": undefined,
-                      "width": undefined,
+                  className="euiDataGrid__focusWrap"
+                  data-focus-lock-disabled="disabled"
+                  onBlur={[Function]}
+                  onFocus={[Function]}
+                  onScrollCapture={[Function]}
+                  onTouchMoveCapture={[Function]}
+                  onWheelCapture={[Function]}
+                >
+                  <div
+                    className="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stickyFooter"
+                    onKeyDown={[Function]}
+                    style={
+                      Object {
+                        "height": "auto",
+                      }
                     }
+                  />
+                </div>
+              </ForwardRef>
+              <div
+                data-focus-guard={true}
+                style={
+                  Object {
+                    "height": "0px",
+                    "left": "1px",
+                    "overflow": "hidden",
+                    "padding": 0,
+                    "position": "fixed",
+                    "top": "1px",
+                    "width": "1px",
                   }
-                />
-              </div>
-            </ForwardRef>
-            <div
-              data-focus-guard={true}
-              style={
-                Object {
-                  "height": "0px",
-                  "left": "1px",
-                  "overflow": "hidden",
-                  "padding": 0,
-                  "position": "fixed",
-                  "top": "1px",
-                  "width": "1px",
                 }
-              }
-              tabIndex={-1}
-            />
-          </ForwardRef(FocusLockUI)>
+                tabIndex={-1}
+              />
+            </ForwardRef(FocusLockUI)>
+          </ForwardRef>
         </ForwardRef>
-      </ForwardRef>
-    </EuiFocusTrap>
-  </EuiDataGrid>
+      </EuiFocusTrap>
+    </EuiDataGrid>
+  </FullScreenWrapper>
   <NoMatchMessage
     size="xl"
   >
@@ -327,7 +379,7 @@ exports[`<SpanDetailTable /> spec renders the empty component 1`] = `
 </SpanDetailTable>
 `;
 
-exports[`<SpanDetailTable /> spec renders the jaeger component with data 1`] = `
+exports[`SpanDetailTable renders the jaeger component with data 1`] = `
 <div>
   <div
     data-focus-guard="true"
@@ -339,13 +391,511 @@ exports[`<SpanDetailTable /> spec renders the jaeger component with data 1`] = `
     data-focus-lock-disabled="disabled"
   >
     <div
-      class="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stickyFooter euiDataGrid--noControls"
+      class="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stickyFooter"
+      style="height: auto;"
     />
   </div>
   <div
     data-focus-guard="true"
     style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
     tabindex="-1"
+  />
+  <div
+    class="euiSpacer euiSpacer--xl"
+  />
+  <div
+    class="euiEmptyPrompt"
+  >
+    <h2
+      class="euiTitle euiTitle--medium"
+    >
+      No matches
+    </h2>
+    <span
+      class="euiTextColor euiTextColor--subdued"
+    >
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
+      <div
+        class="euiText euiText--medium"
+      >
+        <div
+          class="euiText euiText--small"
+        >
+          No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+        </div>
+      </div>
+    </span>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--xl"
+  />
+</div>
+`;
+
+exports[`SpanDetailTableHierarchy renders the component with data 1`] = `
+<div>
+  <div
+    data-focus-guard="true"
+    style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+    tabindex="-1"
+  />
+  <div
+    class="euiDataGrid__focusWrap"
+    data-focus-lock-disabled="disabled"
+  >
+    <div
+      class="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stickyFooter"
+      style="height: 500px; overflow-y: auto;"
+    />
+  </div>
+  <div
+    data-focus-guard="true"
+    style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+    tabindex="-1"
+  />
+  <div
+    class="euiSpacer euiSpacer--xl"
+  />
+  <div
+    class="euiEmptyPrompt"
+  >
+    <h2
+      class="euiTitle euiTitle--medium"
+    >
+      No matches
+    </h2>
+    <span
+      class="euiTextColor euiTextColor--subdued"
+    >
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
+      <div
+        class="euiText euiText--medium"
+      >
+        <div
+          class="euiText euiText--small"
+        >
+          No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+        </div>
+      </div>
+    </span>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--xl"
+  />
+</div>
+`;
+
+exports[`SpanDetailTableHierarchy renders the empty component 1`] = `
+<SpanDetailTableHierarchy
+  DSL={Object {}}
+  dataSourceMDSId="testDataSource"
+  hiddenColumns={
+    Array [
+      "traceId",
+      "traceGroup",
+    ]
+  }
+  http={
+    Object {
+      "post": [MockFunction] {
+        "calls": Array [
+          Array [
+            "/api/observability/trace_analytics/query",
+            Object {
+              "body": "{\\"size\\":10000,\\"from\\":0,\\"query\\":{\\"bool\\":{\\"must\\":[],\\"filter\\":[],\\"should\\":[],\\"must_not\\":[]}},\\"sort\\":[],\\"index\\":\\"otel-v1-apm-span-*\\"}",
+              "query": Object {
+                "dataSourceMDSId": "testDataSource",
+              },
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      },
+    }
+  }
+  mode="data_prepper"
+  openFlyout={[Function]}
+>
+  <FullScreenWrapper
+    isFullScreen={false}
+    onClose={[Function]}
+  >
+    <EuiDataGrid
+      aria-labelledby="span-detail-data-grid"
+      columnVisibility={
+        Object {
+          "setVisibleColumns": [Function],
+          "visibleColumns": Array [
+            "spanId",
+            "parentSpanId",
+            "serviceName",
+            "name",
+            "durationInNanos",
+            "status.code",
+            "startTime",
+            "endTime",
+          ],
+        }
+      }
+      columns={
+        Array [
+          Object {
+            "display": "Span ID",
+            "id": "spanId",
+          },
+          Object {
+            "display": "Parent span ID",
+            "id": "parentSpanId",
+          },
+          Object {
+            "display": "Trace ID",
+            "id": "traceId",
+          },
+          Object {
+            "display": "Trace group",
+            "id": "traceGroup",
+          },
+          Object {
+            "display": "Service",
+            "id": "serviceName",
+          },
+          Object {
+            "display": "Operation",
+            "id": "name",
+          },
+          Object {
+            "display": "Duration",
+            "id": "durationInNanos",
+            "initialWidth": 100,
+          },
+          Object {
+            "display": "Errors",
+            "id": "status.code",
+            "initialWidth": 100,
+          },
+          Object {
+            "display": "Start time",
+            "id": "startTime",
+          },
+          Object {
+            "display": "End time",
+            "id": "endTime",
+          },
+        ]
+      }
+      renderCellValue={[Function]}
+      rowCount={0}
+      style={
+        Object {
+          "height": "500px",
+          "overflowY": "auto",
+        }
+      }
+      toolbarVisibility={
+        Object {
+          "additionalControls": Array [
+            <EuiButtonEmpty
+              color="text"
+              data-test-subj="fullScreenButton"
+              iconType="fullScreen"
+              onClick={[Function]}
+              size="xs"
+            >
+              Full screen
+            </EuiButtonEmpty>,
+            <EuiButtonEmpty
+              color="text"
+              data-test-subj="treeExpandAll"
+              iconType="expand"
+              onClick={[Function]}
+              size="xs"
+            >
+              Expand all
+            </EuiButtonEmpty>,
+            <EuiButtonEmpty
+              color="text"
+              data-test-subj="treeCollapseAll"
+              iconType="minimize"
+              onClick={[Function]}
+              size="xs"
+            >
+              Collapse all
+            </EuiButtonEmpty>,
+          ],
+          "showColumnSelector": true,
+          "showFullScreenSelector": false,
+          "showSortSelector": true,
+        }
+      }
+    >
+      <EuiFocusTrap
+        className="euiDataGrid__focusWrap"
+        clickOutsideDisables={false}
+        disabled={true}
+        noIsolation={true}
+        returnFocus={true}
+        scrollLock={false}
+      >
+        <ForwardRef
+          className="euiDataGrid__focusWrap"
+          enabled={false}
+          noIsolation={true}
+          onClickOutside={[Function]}
+          returnFocus={true}
+          scrollLock={false}
+        >
+          <ForwardRef
+            className="euiDataGrid__focusWrap"
+            enabled={false}
+            noIsolation={true}
+            onClickOutside={[Function]}
+            returnFocus={true}
+            scrollLock={false}
+            sideCar={[Function]}
+          >
+            <ForwardRef(FocusLockUI)
+              as={
+                Object {
+                  "$$typeof": Symbol(react.forward_ref),
+                  "classNames": Object {
+                    "fullWidth": "width-before-scroll-bar",
+                    "zeroRight": "right-scroll-bar-position",
+                  },
+                  "defaultProps": Object {
+                    "enabled": true,
+                    "inert": false,
+                    "removeScrollBar": true,
+                  },
+                  "render": [Function],
+                }
+              }
+              autoFocus={true}
+              className="euiDataGrid__focusWrap"
+              crossFrame={true}
+              disabled={true}
+              lockProps={
+                Object {
+                  "allowPinchZoom": undefined,
+                  "as": undefined,
+                  "enabled": false,
+                  "inert": undefined,
+                  "shards": undefined,
+                  "sideCar": [Function],
+                  "style": undefined,
+                }
+              }
+              noFocusGuards={false}
+              persistentFocus={false}
+              returnFocus={true}
+              sideCar={[Function]}
+            >
+              <div
+                data-focus-guard={true}
+                key="guard-first"
+                style={
+                  Object {
+                    "height": "0px",
+                    "left": "1px",
+                    "overflow": "hidden",
+                    "padding": 0,
+                    "position": "fixed",
+                    "top": "1px",
+                    "width": "1px",
+                  }
+                }
+                tabIndex={-1}
+              />
+              <ForwardRef
+                className="euiDataGrid__focusWrap"
+                data-focus-lock-disabled="disabled"
+                enabled={false}
+                inert={false}
+                onBlur={[Function]}
+                onFocus={[Function]}
+                removeScrollBar={true}
+                sideCar={[Function]}
+              >
+                <div
+                  className="euiDataGrid__focusWrap"
+                  data-focus-lock-disabled="disabled"
+                  onBlur={[Function]}
+                  onFocus={[Function]}
+                  onScrollCapture={[Function]}
+                  onTouchMoveCapture={[Function]}
+                  onWheelCapture={[Function]}
+                >
+                  <div
+                    className="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stickyFooter"
+                    onKeyDown={[Function]}
+                    style={
+                      Object {
+                        "height": "500px",
+                        "overflowY": "auto",
+                      }
+                    }
+                  />
+                </div>
+              </ForwardRef>
+              <div
+                data-focus-guard={true}
+                style={
+                  Object {
+                    "height": "0px",
+                    "left": "1px",
+                    "overflow": "hidden",
+                    "padding": 0,
+                    "position": "fixed",
+                    "top": "1px",
+                    "width": "1px",
+                  }
+                }
+                tabIndex={-1}
+              />
+            </ForwardRef(FocusLockUI)>
+          </ForwardRef>
+        </ForwardRef>
+      </EuiFocusTrap>
+    </EuiDataGrid>
+  </FullScreenWrapper>
+  <NoMatchMessage
+    size="xl"
+  >
+    <EuiSpacer
+      size="xl"
+    >
+      <div
+        className="euiSpacer euiSpacer--xl"
+      />
+    </EuiSpacer>
+    <EuiEmptyPrompt
+      body={
+        <EuiText
+          size="s"
+        >
+          No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+        </EuiText>
+      }
+      title={
+        <h2>
+          No matches
+        </h2>
+      }
+    >
+      <div
+        className="euiEmptyPrompt"
+      >
+        <EuiTitle
+          size="m"
+        >
+          <h2
+            className="euiTitle euiTitle--medium"
+          >
+            No matches
+          </h2>
+        </EuiTitle>
+        <EuiTextColor
+          color="subdued"
+        >
+          <span
+            className="euiTextColor euiTextColor--subdued"
+          >
+            <EuiSpacer
+              size="m"
+            >
+              <div
+                className="euiSpacer euiSpacer--m"
+              />
+            </EuiSpacer>
+            <EuiText>
+              <div
+                className="euiText euiText--medium"
+              >
+                <EuiText
+                  size="s"
+                >
+                  <div
+                    className="euiText euiText--small"
+                  >
+                    No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                  </div>
+                </EuiText>
+              </div>
+            </EuiText>
+          </span>
+        </EuiTextColor>
+      </div>
+    </EuiEmptyPrompt>
+    <EuiSpacer
+      size="xl"
+    >
+      <div
+        className="euiSpacer euiSpacer--xl"
+      />
+    </EuiSpacer>
+  </NoMatchMessage>
+</SpanDetailTableHierarchy>
+`;
+
+exports[`SpanDetailTableHierarchy renders the jaeger component with data 1`] = `
+<div>
+  <div
+    data-focus-guard="true"
+    style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+    tabindex="-1"
+  />
+  <div
+    class="euiDataGrid__focusWrap"
+    data-focus-lock-disabled="disabled"
+  >
+    <div
+      class="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stickyFooter"
+      style="height: 500px; overflow-y: auto;"
+    />
+  </div>
+  <div
+    data-focus-guard="true"
+    style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+    tabindex="-1"
+  />
+  <div
+    class="euiSpacer euiSpacer--xl"
+  />
+  <div
+    class="euiEmptyPrompt"
+  >
+    <h2
+      class="euiTitle euiTitle--medium"
+    >
+      No matches
+    </h2>
+    <span
+      class="euiTextColor euiTextColor--subdued"
+    >
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
+      <div
+        class="euiText euiText--medium"
+      >
+        <div
+          class="euiText euiText--small"
+        >
+          No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+        </div>
+      </div>
+    </span>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--xl"
   />
 </div>
 `;

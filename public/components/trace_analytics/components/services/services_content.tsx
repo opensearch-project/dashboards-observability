@@ -100,6 +100,9 @@ export function ServicesContent(props: ServicesProps) {
     jaegerIndicesExist,
     dataPrepperIndicesExist,
     isServiceTrendEnabled,
+    startTime,
+    endTime,
+    props.dataSourceMDSId,
   ]);
 
   const refresh = async (currService?: string, overrideQuery?: string) => {
