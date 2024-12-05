@@ -329,3 +329,421 @@ exports[`<Paragraphs /> spec renders the component 1`] = `
   </div>
 </div>
 `;
+
+exports[`<Paragraphs /> spec use SavedObject find to fetch visualizations when dataSourceEnabled 1`] = `
+<div
+  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+>
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem"
+    >
+      <div
+        class="euiText euiText--medium"
+        style="font-size: 17px;"
+      >
+        [1] Visualization 
+        <button
+          aria-label="Toggle show input"
+          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small"
+          data-test-subj="paragraphToggleInputBtn"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
+            focusable="false"
+            height="16"
+            role="img"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m2.931 10.843 4.685-4.611a.546.546 0 0 1 .768 0l4.685 4.61c.213.21.558.21.771 0a.53.53 0 0 0 0-.759l-4.684-4.61a1.65 1.65 0 0 0-2.312 0l-4.684 4.61a.53.53 0 0 0 0 .76c.213.21.558.21.771 0Z"
+              fill-rule="nonzero"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        class="euiPopover euiPopover--anchorDownCenter"
+      >
+        <div
+          class="euiPopover__anchor"
+        >
+          <button
+            aria-label="Open paragraph menu"
+            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
+              focusable="false"
+              height="16"
+              role="img"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0 6h4v4H0V6Zm1 1v2h2V7H1Zm5-1h4v4H6V6Zm1 1v2h2V7H7Zm5-1h4v4h-4V6Zm1 3h2V7h-2v2Z"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s"
+  />
+  <div
+    class="euiSpacer euiSpacer--s"
+  />
+  <div
+    class="notebooks-paragraph notebooks-paragraph-light"
+  >
+    <div
+      class="euiSpacer euiSpacer--s"
+    />
+    <div
+      class="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+      id="random_html_id-row"
+    >
+      <div
+        class="euiFormRow__fieldWrapper"
+      >
+        <div
+          class="sc-gLDzan gebGCr"
+        >
+          <div
+            class="sc-beqWaB CSaoA"
+          />
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+              style="min-width: 500px;"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <div
+                  class="euiFlexItem"
+                >
+                  <div
+                    class="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+                    id="random_html_id-row"
+                  >
+                    <div
+                      class="euiFormRow__labelWrapper"
+                    >
+                      <label
+                        class="euiFormLabel euiFormRow__label"
+                        for="random_html_id"
+                      >
+                        Title
+                      </label>
+                    </div>
+                    <div
+                      class="euiFormRow__fieldWrapper"
+                    >
+                      <div
+                        aria-expanded="false"
+                        aria-haspopup="listbox"
+                        class="euiComboBox euiComboBox--compressed"
+                        role="combobox"
+                      >
+                        <div
+                          class="euiFormControlLayout euiFormControlLayout--compressed"
+                        >
+                          <div
+                            class="euiFormControlLayout__childrenWrapper"
+                          >
+                            <div
+                              class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable"
+                              data-test-subj="comboBoxInput"
+                              tabindex="-1"
+                            >
+                              <p
+                                class="euiComboBoxPlaceholder"
+                              >
+                                Find visualization
+                              </p>
+                              <div
+                                class="euiComboBox__input"
+                                style="font-size: 14px; display: inline-block;"
+                              >
+                                <input
+                                  aria-controls=""
+                                  data-test-subj="comboBoxSearchInput"
+                                  id="random_html_id"
+                                  role="textbox"
+                                  style="box-sizing: content-box; width: 2px;"
+                                  value=""
+                                />
+                                <div
+                                  style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                                />
+                              </div>
+                            </div>
+                            <div
+                              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                            >
+                              <button
+                                aria-label="Open list of options"
+                                class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                                data-test-subj="comboBoxToggleListButton"
+                                type="button"
+                              >
+                                <svg
+                                  aria-hidden="true"
+                                  class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                  focusable="false"
+                                  height="16"
+                                  role="img"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <button
+                    class="euiButton euiButton--primary euiButton--small"
+                    data-test-subj="para-input-visualization-browse-button"
+                    type="button"
+                  >
+                    <span
+                      class="euiButtonContent euiButton__content"
+                    >
+                      <span
+                        class="euiButton__text"
+                      >
+                        Browse
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem"
+            />
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <div
+                class="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+                id="random_html_id-row"
+              >
+                <div
+                  class="euiFormRow__labelWrapper"
+                >
+                  <label
+                    class="euiFormLabel euiFormRow__label"
+                    for="random_html_id"
+                  >
+                    Date range
+                  </label>
+                </div>
+                <div
+                  class="euiFormRow__fieldWrapper"
+                >
+                  <div
+                    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiSuperDatePicker__flexWrapper euiSuperDatePicker__flexWrapper--noUpdateButton"
+                  >
+                    <div
+                      class="euiFlexItem"
+                    >
+                      <div
+                        class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group euiSuperDatePicker"
+                      >
+                        <div
+                          class="euiPopover euiPopover--anchorDownLeft"
+                        >
+                          <div
+                            class="euiPopover__anchor euiQuickSelectPopover__anchor"
+                          >
+                            <button
+                              aria-label="Date quick select"
+                              class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
+                              data-test-subj="superDatePickerToggleQuickMenuButton"
+                              type="button"
+                            >
+                              <span
+                                class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                              >
+                                <svg
+                                  aria-hidden="true"
+                                  class="euiIcon euiIcon--small euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                                  focusable="false"
+                                  height="16"
+                                  role="img"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                  />
+                                </svg>
+                                <span
+                                  class="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
+                                >
+                                  <svg
+                                    aria-hidden="true"
+                                    class="euiIcon euiIcon--medium euiIcon-isLoading"
+                                    focusable="false"
+                                    height="16"
+                                    role="img"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                    />
+                                  </svg>
+                                </span>
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                        <div
+                          class="euiFormControlLayout__childrenWrapper"
+                        >
+                          <div
+                            class="euiDatePickerRange euiDatePickerRange--inGroup"
+                          >
+                            <button
+                              class="euiSuperDatePicker__prettyFormat euiSuperDatePicker__prettyFormat--compressed"
+                              data-test-subj="superDatePickerShowDatesButton"
+                            >
+                              Last 15 minutes
+                              <span
+                                class="euiSuperDatePicker__prettyFormatLink"
+                              >
+                                Show dates
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--m"
+    />
+    <div
+      class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <button
+          class="euiButton euiButton--primary euiButton--small"
+          data-test-subj="runRefreshBtn-0"
+          type="button"
+        >
+          <span
+            class="euiButtonContent euiButton__content"
+          >
+            <span
+              class="euiButton__text"
+            >
+              Refresh
+            </span>
+          </span>
+        </button>
+      </div>
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
+      />
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <svg
+          aria-hidden="true"
+          class="euiIcon euiIcon--medium euiIcon--secondary"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
+            fill-rule="evenodd"
+          />
+        </svg>
+      </div>
+      <div
+        class="euiFlexItem"
+      >
+        <div
+          class="euiText euiText--small"
+          data-test-subj="lastRunText"
+        >
+          <div
+            class="euiTextColor euiTextColor--subdued"
+          >
+            Last successful run 11/01/2023 01:02 AM.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--m"
+    />
+    <hr
+      class="euiHorizontalRule euiHorizontalRule--full"
+    />
+    <div
+      style="opacity: 1; padding: 15px;"
+    >
+      <div
+        class="euiText euiText--small wrapAll markdown-output-text"
+        data-test-subj="markdownOutputText"
+      >
+        <div
+          class="markdown-body "
+        >
+          <h1>
+            Type your input here
+          </h1>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
