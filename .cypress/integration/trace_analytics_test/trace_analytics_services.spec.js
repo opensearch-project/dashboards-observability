@@ -171,7 +171,35 @@ describe('Testing Service map', () => {
     cy.get('[data-text = "Duration"]').click();
     cy.contains('100');
     cy.get('.euiFormLabel.euiFormControlLayout__prepend').contains('Focus on').should('exist');
-    cy.get('[placeholder="Service name"]').focus().type('database{enter}');
+  });
+
+  it('Tests focus functionality in Service map', () => {
+    cy.get('.euiText.euiText--medium .panel-title').contains('Service map');
+    cy.get('[data-test-subj="latency"]').should('exist');
+    cy.get('.ytitle').contains('Average duration (ms)');
+
+    // Test metric selection functionality
+    cy.get('[data-text="Errors"]').click();
+    cy.contains('60%');
+    cy.get('[data-text="Duration"]').click();
+    cy.contains('100');
+
+    // Focus on "order" by selecting the first option
+    cy.get('.euiFormLabel.euiFormControlLayout__prepend').contains('Focus on').should('exist');
+    cy.get('[placeholder="Service name"]').click();
+    cy.get('.euiSelectableList__list li').eq(0).click();
+
+    // Verify the service map updates and focus is applied
+    cy.get('.euiFormLabel.euiFormControlLayout__prepend').contains('Focus on').should('exist');
+    cy.get('[placeholder="order"]').click();
+    cy.get('.euiSelectableList__list li').should('have.length', 4); // Focused view with 4 options
+
+    // Refresh to reset the focus
+    cy.get('[data-test-subj="serviceMapRefreshButton"]').click();
+
+    // Verify the service map is reset to the original state
+    cy.get('[placeholder="Service name"]').should('have.value', '');
+    cy.get('.euiSelectableList__list li').should('have.length', 8); // Original 8 options
   });
 });
 
