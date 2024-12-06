@@ -12,6 +12,7 @@ import { ServiceMap } from '../service_map';
 import { EuiFieldSearch, EuiSelectable } from '@elastic/eui';
 import { TEST_SERVICE_MAP, MOCK_CANVAS_CONTEXT } from '../../../../../../../test/constants';
 import Graph from 'react-graph-vis';
+import toJson from 'enzyme-to-json';
 
 configure({ adapter: new Adapter() });
 
@@ -98,9 +99,18 @@ describe('ServiceMap Component', () => {
     jest.clearAllMocks();
   });
 
-  it('renders service map component', () => {
+  it('renders service map component', async () => {
     const wrapper = mount(<ServiceMap {...defaultProps} />);
-    expect(wrapper).toMatchSnapshot();
+    wrapper.update();
+
+    await act(async () => {
+      expect(
+        toJson(wrapper, {
+          noKey: false,
+          mode: 'deep',
+        })
+      ).toMatchSnapshot();
+    });
   });
 
   it('renders application composition map title when page is app', () => {
