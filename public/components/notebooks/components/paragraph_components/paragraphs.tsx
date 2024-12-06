@@ -170,9 +170,6 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
       let opts: EuiComboBoxOptionOption[] = [];
       const vizOptions: SavedObjectsFindOptions = {
         type: 'visualization',
-        ...(coreRefs.application?.capabilities?.workspaces?.enabled
-          ? { workspaces: coreRefs.workspaces?.currentWorkspace$.getValue()?.name }
-          : {}),
       };
       await coreRefs.savedObjectsClient
         ?.find(vizOptions)
