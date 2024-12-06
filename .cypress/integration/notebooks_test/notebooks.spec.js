@@ -13,6 +13,8 @@ import {
   PPL_QUERY_TEXT,
   NOTEBOOK_TEXT,
   OPENSEARCH_URL,
+  PPL_INCORRECT_QUERY_TEXT,
+  SQL_INCORRECT_QUERY_TEXT,
 } from '../../utils/constants';
 
 import { v4 as uuid4 } from 'uuid';
@@ -74,7 +76,9 @@ describe('Testing notebooks table', () => {
     cy.get('h3[data-test-subj="notebookTableTitle"]').contains('Notebooks (0)').should('exist');
     cy.get('div[data-test-subj="notebookEmptyTableText"]').contains('No notebooks');
     cy.get('a[data-test-subj="notebookEmptyTableCreateBtn"]').contains('Create notebook');
-    cy.get('button[data-test-subj="notebookEmptyTableAddSamplesBtn"]').contains('Add sample notebooks');
+    cy.get('button[data-test-subj="notebookEmptyTableAddSamplesBtn"]').contains(
+      'Add sample notebooks'
+    );
   });
 
   it('Displays error toast for invalid notebook name', () => {
@@ -96,13 +100,9 @@ describe('Testing notebooks table', () => {
     cy.get('input.euiFieldSearch').focus().type('this notebook should not exist');
     cy.get('.euiTableCellContent__text').contains('No items found').should('exist');
     cy.get('.euiFormControlLayoutClearButton').click();
-    cy.get('input.euiFieldSearch')
-      .focus()
-      .type(TEST_NOTEBOOK);
+    cy.get('input.euiFieldSearch').focus().type(TEST_NOTEBOOK);
 
-    cy.get('a.euiLink')
-      .contains(TEST_NOTEBOOK)
-      .should('exist');
+    cy.get('a.euiLink').contains(TEST_NOTEBOOK).should('exist');
   });
 
   it('Notebooks table columns headers and pagination', () => {
@@ -295,6 +295,24 @@ describe('Testing paragraphs', () => {
       });
   });
 
+  it('Adds an incorrect SQL query paragraph', () => {
+    cy.get('button[data-test-subj="AddParagraphButton"]').click();
+    cy.get('button[data-test-subj="AddCodeBlockBtn"]').click();
+
+    cy.get('textarea[data-test-subj="editorArea-6"]').clear();
+    cy.get('textarea[data-test-subj="editorArea-6"]').focus();
+    cy.get('textarea[data-test-subj="editorArea-6"]').type(SQL_INCORRECT_QUERY_TEXT);
+    cy.get('button[data-test-subj="runRefreshBtn-6"]').click();
+
+    cy.get('textarea[data-test-subj="editorArea-6"]').should('exist');
+    cy.get('div[id$="-error-0"]')
+      .should('exist')
+      .and('have.class', 'euiFormErrorText')
+      .and('contain.text', 'Invalid SQL query');
+
+    cy.get('.euiDataGrid__overflow').should('exist');
+  });
+
   it('Adds an observability visualization paragraph', () => {
     cy.get('h3[data-test-subj="notebookTitle"]').contains(TEST_NOTEBOOK).should('exist');
     cy.get('button[data-test-subj="notebook-paragraph-actions-button"]').click();
@@ -309,7 +327,9 @@ describe('Testing paragraphs', () => {
     cy.get('input[data-test-subj="comboBoxSearchInput"]')
       .focus()
       .type('[Logs] Count total requests by t');
-    cy.get('.euiComboBoxOption__content').contains('[Logs] Count total requests by tags').click({ force: true });
+    cy.get('.euiComboBoxOption__content')
+      .contains('[Logs] Count total requests by tags')
+      .click({ force: true });
     cy.get('button[data-test-subj="runRefreshBtn-0"]').click();
     cy.get('h5').contains('[Logs] Count total requests by tags').should('exist');
   });
@@ -318,15 +338,33 @@ describe('Testing paragraphs', () => {
     cy.get('button[data-test-subj="AddParagraphButton"]').click();
     cy.get('button[data-test-subj="AddCodeBlockBtn"]').click();
 
-    cy.get('textarea[data-test-subj="editorArea-7"]').clear();
-    cy.get('textarea[data-test-subj="editorArea-7"]').focus();
-    cy.get('textarea[data-test-subj="editorArea-7"]').type(PPL_QUERY_TEXT);
-    cy.get('button[data-test-subj="runRefreshBtn-7"]').click();
+    cy.get('textarea[data-test-subj="editorArea-8"]').clear();
+    cy.get('textarea[data-test-subj="editorArea-8"]').focus();
+    cy.get('textarea[data-test-subj="editorArea-8"]').type(PPL_QUERY_TEXT);
+    cy.get('button[data-test-subj="runRefreshBtn-8"]').click();
 
-    cy.get('textarea[data-test-subj="editorArea-7"]').should('not.exist');
+    cy.get('textarea[data-test-subj="editorArea-8"]').should('not.exist');
     cy.get('div[data-test-subj="queryOutputText"]')
       .contains('source=opensearch_dashboards_sample_data_flights')
       .should('exist');
+
+    cy.get('.euiDataGrid__overflow').should('exist');
+  });
+
+  it('Adds an incorrect PPL query paragraph', () => {
+    cy.get('button[data-test-subj="AddParagraphButton"]').click();
+    cy.get('button[data-test-subj="AddCodeBlockBtn"]').click();
+
+    cy.get('textarea[data-test-subj="editorArea-9"]').clear();
+    cy.get('textarea[data-test-subj="editorArea-9"]').focus();
+    cy.get('textarea[data-test-subj="editorArea-9"]').type(PPL_INCORRECT_QUERY_TEXT);
+    cy.get('button[data-test-subj="runRefreshBtn-9"]').click();
+
+    cy.get('textarea[data-test-subj="editorArea-9"]').should('exist');
+    cy.get('div[id$="-error-0"]')
+      .should('exist')
+      .and('have.class', 'euiFormErrorText')
+      .and('contain.text', 'Error occurred in OpenSearch engine: no such index');
 
     cy.get('.euiDataGrid__overflow').should('exist');
   });
