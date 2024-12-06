@@ -12,7 +12,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import _ from 'lodash';
+import round from 'lodash/round';
 import React, { useMemo } from 'react';
 import { Plt } from '../../../visualizations/plotly/plot';
 import { PanelTitle } from '../common/helper_functions';
