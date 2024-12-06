@@ -380,11 +380,11 @@ describe('Testing paragraphs', () => {
     cy.get('h3[data-test-subj="notebookTitle"]').contains(TEST_NOTEBOOK).should('exist');
     cy.get('[data-test-subj="notebook-duplicate-icon"]').click();
     cy.get('.euiButton__text').contains('Duplicate').click();
+    cy.get('h3[data-test-subj="notebookTitle"]').contains(TEST_NOTEBOOK + ' (copy)').should('exist');
 
     cy.get('[data-test-subj="notebook-edit-icon"]').click();
-    cy.get('input.euiFieldText[data-autofocus="true"]').focus().type(' (rename)');
+    cy.get('input.euiFieldText[data-autofocus="true"]').clear().type(TEST_NOTEBOOK + ' (rename)');
     cy.get('.euiButton__text').last().contains('Rename').click();
-    cy.reload();
 
     cy.get('h3[data-test-subj="notebookTitle"]')
       .contains(TEST_NOTEBOOK + ' (rename)')
