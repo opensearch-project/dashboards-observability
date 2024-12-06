@@ -35,24 +35,23 @@ exports[`Service breakdown panel component renders empty service breakdown panel
       </EuiHorizontalRule>
       <EuiFlexGroup
         alignItems="center"
-        direction="column"
+        gutterSize="m"
       >
         <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+          className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
-          <EuiFlexItem>
+          <EuiFlexItem
+            grow={3}
+          >
             <div
-              className="euiFlexItem"
+              className="euiFlexItem euiFlexItem--flexGrow3"
             />
           </EuiFlexItem>
-          <EuiSpacer>
+          <EuiFlexItem
+            grow={3}
+          >
             <div
-              className="euiSpacer euiSpacer--l"
-            />
-          </EuiSpacer>
-          <EuiFlexItem>
-            <div
-              className="euiFlexItem"
+              className="euiFlexItem euiFlexItem--flexGrow3"
             />
           </EuiFlexItem>
         </div>
@@ -121,14 +120,16 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
       </EuiHorizontalRule>
       <EuiFlexGroup
         alignItems="center"
-        direction="column"
+        gutterSize="m"
       >
         <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+          className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
-          <EuiFlexItem>
+          <EuiFlexItem
+            grow={3}
+          >
             <div
-              className="euiFlexItem"
+              className="euiFlexItem euiFlexItem--flexGrow3"
             >
               <Plt
                 data={
@@ -155,10 +156,10 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
                   Object {
                     "height": 200,
                     "margin": Object {
-                      "b": 5,
+                      "b": 15,
                       "l": 5,
                       "r": 5,
-                      "t": 5,
+                      "t": 15,
                     },
                     "paper_bgcolor": "rgba(0, 0, 0, 0)",
                     "plot_bgcolor": "rgba(0, 0, 0, 0)",
@@ -206,10 +207,10 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
                         "traceorder": "normal",
                       },
                       "margin": Object {
-                        "b": 5,
+                        "b": 15,
                         "l": 5,
                         "r": 5,
-                        "t": 5,
+                        "t": 15,
                       },
                       "paper_bgcolor": "rgba(0, 0, 0, 0)",
                       "plot_bgcolor": "rgba(0, 0, 0, 0)",
@@ -252,182 +253,143 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
               </Plt>
             </div>
           </EuiFlexItem>
-          <EuiSpacer>
+          <EuiFlexItem
+            grow={3}
+          >
             <div
-              className="euiSpacer euiSpacer--l"
-            />
-          </EuiSpacer>
-          <EuiFlexItem>
-            <div
-              className="euiFlexItem"
+              className="euiFlexItem euiFlexItem--flexGrow3"
             >
               <EuiFlexGroup
+                direction="column"
+                gutterSize="s"
                 responsive={false}
                 style={
                   Object {
                     "maxHeight": 260,
                     "overflowY": "auto",
+                    "paddingRight": "20px",
                   }
                 }
               >
                 <div
-                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                  className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionColumn"
                   style={
                     Object {
                       "maxHeight": 260,
                       "overflowY": "auto",
+                      "paddingRight": "20px",
                     }
                   }
                 >
-                  <EuiFlexItem>
+                  <EuiFlexGroup
+                    alignItems="center"
+                    gutterSize="m"
+                    justifyContent="spaceBetween"
+                    key="0"
+                    responsive={false}
+                  >
                     <div
-                      className="euiFlexItem"
+                      className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
                     >
-                      <EuiFlexGroup
-                        alignItems="flexStart"
-                        direction="column"
-                        gutterSize="m"
-                        responsive={false}
+                      <EuiFlexItem
+                        grow={false}
                       >
                         <div
-                          className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn"
+                          className="euiFlexItem euiFlexItem--flexGrowZero"
                         >
-                          <EuiFlexItem
-                            key="label-0"
+                          <EuiHealth
+                            color="#7492e7"
                           >
                             <div
-                              className="euiFlexItem"
+                              className="euiHealth euiHealth--textSizeS"
                             >
-                              <EuiHealth
-                                color="#7492e7"
+                              <EuiFlexGroup
+                                alignItems="center"
+                                gutterSize="xs"
+                                responsive={false}
                               >
                                 <div
-                                  className="euiHealth euiHealth--textSizeS"
+                                  className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                                 >
-                                  <EuiFlexGroup
-                                    alignItems="center"
-                                    gutterSize="xs"
-                                    responsive={false}
+                                  <EuiFlexItem
+                                    grow={false}
                                   >
                                     <div
-                                      className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                                      className="euiFlexItem euiFlexItem--flexGrowZero"
                                     >
-                                      <EuiFlexItem
-                                        grow={false}
+                                      <EuiIcon
+                                        color="#7492e7"
+                                        type="dot"
                                       >
-                                        <div
-                                          className="euiFlexItem euiFlexItem--flexGrowZero"
+                                        <EuiIconBeaker
+                                          aria-hidden={true}
+                                          className="euiIcon euiIcon--medium euiIcon--customColor euiIcon-isLoading"
+                                          focusable="false"
+                                          role="img"
+                                          style={
+                                            Object {
+                                              "color": "#7492e7",
+                                            }
+                                          }
                                         >
-                                          <EuiIcon
-                                            color="#7492e7"
-                                            type="dot"
-                                          >
-                                            <EuiIconBeaker
-                                              aria-hidden={true}
-                                              className="euiIcon euiIcon--medium euiIcon--customColor euiIcon-isLoading"
-                                              focusable="false"
-                                              role="img"
-                                              style={
-                                                Object {
-                                                  "color": "#7492e7",
-                                                }
-                                              }
-                                            >
-                                              <svg
-                                                aria-hidden={true}
-                                                className="euiIcon euiIcon--medium euiIcon--customColor euiIcon-isLoading"
-                                                focusable="false"
-                                                height={16}
-                                                role="img"
-                                                style={
-                                                  Object {
-                                                    "color": "#7492e7",
-                                                  }
-                                                }
-                                                viewBox="0 0 16 16"
-                                                width={16}
-                                                xmlns="http://www.w3.org/2000/svg"
-                                              >
-                                                <path
-                                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                />
-                                              </svg>
-                                            </EuiIconBeaker>
-                                          </EuiIcon>
-                                        </div>
-                                      </EuiFlexItem>
-                                      <EuiFlexItem
-                                        grow={false}
-                                      >
-                                        <div
-                                          className="euiFlexItem euiFlexItem--flexGrowZero"
-                                        >
-                                          <div
+                                          <svg
+                                            aria-hidden={true}
+                                            className="euiIcon euiIcon--medium euiIcon--customColor euiIcon-isLoading"
+                                            focusable="false"
+                                            height={16}
+                                            role="img"
                                             style={
                                               Object {
-                                                "whiteSpace": "nowrap",
+                                                "color": "#7492e7",
                                               }
                                             }
+                                            viewBox="0 0 16 16"
+                                            width={16}
+                                            xmlns="http://www.w3.org/2000/svg"
                                           >
-                                            inventory
-                                          </div>
-                                        </div>
-                                      </EuiFlexItem>
+                                            <path
+                                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                            />
+                                          </svg>
+                                        </EuiIconBeaker>
+                                      </EuiIcon>
                                     </div>
-                                  </EuiFlexGroup>
+                                  </EuiFlexItem>
+                                  <EuiFlexItem
+                                    grow={false}
+                                  >
+                                    <div
+                                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                                    >
+                                      inventory
+                                    </div>
+                                  </EuiFlexItem>
                                 </div>
-                              </EuiHealth>
+                              </EuiFlexGroup>
                             </div>
-                          </EuiFlexItem>
+                          </EuiHealth>
                         </div>
-                      </EuiFlexGroup>
-                    </div>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <div
-                      className="euiFlexItem"
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <div
-                      className="euiFlexItem"
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <div
-                      className="euiFlexItem"
-                    >
-                      <EuiFlexGroup
-                        alignItems="flexEnd"
-                        direction="column"
-                        gutterSize="m"
-                        responsive={false}
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        grow={false}
                       >
                         <div
-                          className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsFlexEnd euiFlexGroup--directionColumn"
+                          className="euiFlexItem euiFlexItem--flexGrowZero"
                         >
-                          <EuiFlexItem
-                            key="value-0"
+                          <EuiText
+                            size="s"
                           >
                             <div
-                              className="euiFlexItem"
+                              className="euiText euiText--small"
                             >
-                              <EuiText
-                                size="s"
-                              >
-                                <div
-                                  className="euiText euiText--small"
-                                >
-                                  100
-                                  %
-                                </div>
-                              </EuiText>
+                              100
+                              %
                             </div>
-                          </EuiFlexItem>
+                          </EuiText>
                         </div>
-                      </EuiFlexGroup>
+                      </EuiFlexItem>
                     </div>
-                  </EuiFlexItem>
+                  </EuiFlexGroup>
                 </div>
               </EuiFlexGroup>
             </div>

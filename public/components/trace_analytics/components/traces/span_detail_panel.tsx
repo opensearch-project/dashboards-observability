@@ -11,18 +11,23 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
+  EuiSmallButton,
   EuiSpacer,
 } from '@elastic/eui';
 import debounce from 'lodash/debounce';
 import isEmpty from 'lodash/isEmpty';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { Plt } from '../../../visualizations/plotly/plot';
 import { handleSpansGanttRequest } from '../../requests/traces_request_handler';
 import { PanelTitle } from '../common/helper_functions';
 import { SpanDetailFlyout } from './span_detail_flyout';
-import { SpanDetailTable } from './span_detail_table';
+import { SpanDetailTable, SpanDetailTableHierarchy } from './span_detail_table';
+import { coreRefs } from '../../../../framework/core_refs';
+
+const newNavigation = coreRefs?.chrome?.navGroup.getNavGroupEnabled?.();
 
 export function SpanDetailPanel(props: {
   http: HttpSetup;
@@ -35,7 +40,9 @@ export function SpanDetailPanel(props: {
   openSpanFlyout?: any;
   data?: { gantt: any[]; table: any[]; ganttMaxX: number };
   setData?: (data: { gantt: any[]; table: any[]; ganttMaxX: number }) => void;
+  isApplicationFlyout?: boolean;
 }) {
+  const { chrome } = coreRefs;
   const { mode } = props;
   const storedFilters = sessionStorage.getItem('TraceAnalyticsSpanFilters');
   const fromApp = props.page === 'app';
@@ -43,17 +50,63 @@ export function SpanDetailPanel(props: {
     storedFilters ? JSON.parse(storedFilters) : []
   );
   const [DSL, setDSL] = useState<any>({});
-  let data: { gantt: any[]; table: any[]; ganttMaxX: number },
-    setData: (data: { gantt: any[]; table: any[]; ganttMaxX: number }) => void;
+  let data: { gantt: any[]; table: any[]; ganttMaxX: number };
+  let setData: (data: { gantt: any[]; table: any[]; ganttMaxX: number }) => void;
+  const [localData, localSetData] = useState<{ gantt: any[]; table: any[]; ganttMaxX: number }>({
+    gantt: [],
+    table: [],
+    ganttMaxX: 0,
+  });
   if (props.data && props.setData) {
     [data, setData] = [props.data, props.setData];
   } else {
-    [data, setData] = useState<{ gantt: any[]; table: any[]; ganttMaxX: number }>({
-      gantt: [],
-      table: [],
-      ganttMaxX: 0,
-    });
+    [data, setData] = [localData, localSetData];
   }
+  const fullRange = [0, data.ganttMaxX * 1.1];
+  const [selectedRange, setSelectedRange] = useState(fullRange);
+  const isLocked = useObservable(chrome!.getIsNavDrawerLocked$() ?? false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [availableWidth, setAvailableWidth] = useState<number>(window.innerWidth);
+
+  useEffect(() => {
+    const updateAvailableWidth = () => {
+      if (containerRef.current) {
+        setAvailableWidth(containerRef.current.getBoundingClientRect().width);
+      } else {
+        setAvailableWidth(window.innerWidth);
+      }
+    };
+
+    const handleFullScreenChange = () => {
+      const isFullscreenActive = !!document.fullscreenElement;
+      setIsFullScreen(isFullscreenActive);
+      updateAvailableWidth();
+    };
+
+    // Add event listeners for window resize and full-screen toggling
+    window.addEventListener('resize', updateAvailableWidth);
+    document.addEventListener('fullscreenchange', handleFullScreenChange);
+
+    // Initial update
+    updateAvailableWidth();
+
+    return () => {
+      // Clean up event listeners
+      window.removeEventListener('resize', updateAvailableWidth);
+      document.removeEventListener('fullscreenchange', handleFullScreenChange);
+    };
+  }, []);
+
+  const dynamicLayoutAdjustment = useMemo(() => {
+    const adjustment = newNavigation ? 350 : 400;
+    return isLocked ? availableWidth - adjustment : availableWidth - 150;
+  }, [isLocked, availableWidth]);
+
+  // Update selectedRange whenever data.ganttMaxX changes to ensure it starts fully zoomed out
+  useEffect(() => {
+    setSelectedRange(fullRange);
+  }, [data.ganttMaxX]);
 
   const setSpanFiltersWithStorage = (newFilters: Array<{ field: string; value: any }>) => {
     setSpanFilters(newFilters);
@@ -146,7 +199,15 @@ export function SpanDetailPanel(props: {
     refresh();
   }, [props.colorMap, spanFilters]);
 
-  const getSpanDetailLayout = (plotTraces: Plotly.Data[], maxX: number): Partial<Plotly.Layout> => {
+  const getSpanDetailLayout = (
+    plotTraces: Plotly.Data[],
+    _maxX: number
+  ): Partial<Plotly.Layout> => {
+    const dynamicWidthAdjustment = !isLocked
+      ? 200
+      : newNavigation
+      ? 390 // If locked and new navigation
+      : 410; // If locked and new navigation is disabled
     // get unique labels from traces
     const yLabels = plotTraces
       .map((d) => d.y[0])
@@ -154,13 +215,20 @@ export function SpanDetailPanel(props: {
     // remove uuid when displaying y-ticks
     const yTexts = yLabels.map((label) => label.substring(0, label.length - 36));
 
+    // Calculate the maximum label length dynamically
+    const maxLabelLength = Math.max(...yTexts.map((text) => text.length));
+
+    // Dynamically set left margin based on the longest label
+    let dynamicLeftMargin = Math.max(150, maxLabelLength * 5);
+    dynamicLeftMargin = Math.min(dynamicLeftMargin, 500);
+
     return {
       plot_bgcolor: 'rgba(0, 0, 0, 0)',
       paper_bgcolor: 'rgba(0, 0, 0, 0)',
       height: 25 * plotTraces.length + 60,
-      width: 800,
+      width: props.isApplicationFlyout ? undefined : availableWidth - dynamicWidthAdjustment, // Allow plotly to render the gantt chart full screen with padding
       margin: {
-        l: 260,
+        l: dynamicLeftMargin,
         r: 5,
         b: 30,
         t: 30,
@@ -170,12 +238,13 @@ export function SpanDetailPanel(props: {
         side: 'top',
         color: '#91989c',
         showline: true,
-        range: [0, maxX * 1.2],
+        range: selectedRange, // Apply selected range to main chart
       },
       yaxis: {
         showgrid: false,
         tickvals: yLabels,
         ticktext: yTexts,
+        fixedrange: true, // Prevent panning/scrolling in main chart
       },
     };
   };
@@ -183,7 +252,59 @@ export function SpanDetailPanel(props: {
   const layout = useMemo(() => getSpanDetailLayout(data.gantt, data.ganttMaxX), [
     data.gantt,
     data.ganttMaxX,
+    selectedRange,
+    availableWidth,
+    isLocked,
+    isFullScreen,
   ]);
+  const miniMapLayout = {
+    ...layout,
+    height: 100,
+    dragmode: 'select', // Allow users to define their zoom range
+    xaxis: { ...layout.xaxis, range: fullRange },
+    yaxis: { visible: false, fixedrange: true },
+    shapes: [
+      {
+        type: 'rect',
+        xref: 'x',
+        yref: 'paper',
+        x0: selectedRange[0],
+        x1: selectedRange[1],
+        y0: 0,
+        y1: 1,
+        fillcolor: 'rgba(128, 128, 128, 0.3)', // Highlight the selection area
+        line: {
+          width: 1,
+          color: 'rgba(255, 0, 0, 0.6)', // Border of the selection
+        },
+        editable: true,
+      },
+    ],
+  };
+
+  const miniMap = useMemo(
+    () => (
+      <Plt
+        data={data.gantt.map((trace) => ({
+          ...trace,
+        }))}
+        layout={miniMapLayout}
+        onSelectedHandler={(event) => {
+          if (event && event.range) {
+            const { x } = event.range;
+            setSelectedRange(x); // Update selected range to reflect user-defined zoom
+          }
+        }}
+        onRelayout={(event) => {
+          if (event && event['shapes[0].x0'] && event['shapes[0].x1']) {
+            // Update selected range when the shape (rectangle) is moved
+            setSelectedRange([event['shapes[0].x0'], event['shapes[0].x1']]);
+          }
+        }}
+      />
+    ),
+    [data.gantt, miniMapLayout, setSelectedRange]
+  );
 
   const [currentSpan, setCurrentSpan] = useState('');
 
@@ -234,70 +355,145 @@ export function SpanDetailPanel(props: {
       id: 'span_list',
       label: 'Span list',
     },
+    {
+      id: 'hierarchy_span_list',
+      label: 'Tree view',
+    },
   ];
   const [toggleIdSelected, setToggleIdSelected] = useState(toggleOptions[0].id);
 
   const spanDetailTable = useMemo(
     () => (
-      <SpanDetailTable
-        http={props.http}
-        hiddenColumns={mode === 'jaeger' ? ['traceID', 'traceGroup'] : ['traceId', 'traceGroup']}
-        DSL={DSL}
-        mode={mode}
-        openFlyout={(spanId: string) => {
-          if (fromApp) {
-            props.openSpanFlyout(spanId);
-          } else {
-            setCurrentSpan(spanId);
-          }
-        }}
-        dataSourceMDSId={props.dataSourceMDSId}
-      />
+      <div style={{ width: 'auto' }}>
+        <SpanDetailTable
+          http={props.http}
+          hiddenColumns={mode === 'jaeger' ? ['traceID', 'traceGroup'] : ['traceId', 'traceGroup']}
+          DSL={DSL}
+          mode={mode}
+          openFlyout={(spanId: string) => {
+            if (fromApp) {
+              props.openSpanFlyout(spanId);
+            } else {
+              setCurrentSpan(spanId);
+            }
+          }}
+          dataSourceMDSId={props.dataSourceMDSId}
+        />
+      </div>
     ),
-    [DSL, setCurrentSpan]
+    [DSL, setCurrentSpan, dynamicLayoutAdjustment]
+  );
+
+  const spanDetailTableHierarchy = useMemo(
+    () => (
+      <div style={{ width: 'auto' }}>
+        <SpanDetailTableHierarchy
+          http={props.http}
+          hiddenColumns={mode === 'jaeger' ? ['traceID', 'traceGroup'] : ['traceId', 'traceGroup']}
+          DSL={DSL}
+          mode={mode}
+          openFlyout={(spanId: string) => {
+            if (fromApp) {
+              props.openSpanFlyout(spanId);
+            } else {
+              setCurrentSpan(spanId);
+            }
+          }}
+          dataSourceMDSId={props.dataSourceMDSId}
+        />
+      </div>
+    ),
+    [DSL, setCurrentSpan, dynamicLayoutAdjustment]
   );
 
   const ganttChart = useMemo(
     () => (
       <Plt
-        data={data.gantt}
+        data={data.gantt.map((trace) => {
+          const duration = trace.x[0] ? trace.x[0].toFixed(2) : '0.00'; // Format duration to 2 decimal places
+
+          return {
+            ...trace,
+            text: `${duration} ms`,
+            textposition: 'outside',
+            hoverinfo: 'none',
+          };
+        })}
         layout={layout}
         onClickHandler={onClick}
         onHoverHandler={onHover}
         onUnhoverHandler={onUnhover}
+        onRelayout={(event) => {
+          // Handle x-axis range update
+          if (event && event['xaxis.range[0]'] && event['xaxis.range[1]']) {
+            const newRange = [event['xaxis.range[0]'], event['xaxis.range[1]']];
+            setSelectedRange(newRange);
+          } else {
+            setSelectedRange(fullRange);
+          }
+        }}
       />
     ),
-    [data.gantt, layout, onClick, onHover, onUnhover]
+    [data.gantt, layout, onClick, onHover, onUnhover, setSelectedRange]
   );
 
   return (
     <>
       <EuiPanel data-test-subj="span-gantt-chart-panel">
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <PanelTitle title="Spans" totalItems={data.gantt.length / 2} />
-          </EuiFlexItem>
+        <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem grow={false}>
-            <EuiButtonGroup
-              legend="Select view of spans"
-              options={toggleOptions}
-              idSelected={toggleIdSelected}
-              onChange={(id) => setToggleIdSelected(id)}
-            />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <PanelTitle title="Spans" totalItems={data.gantt.length / 2} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
+                  {toggleIdSelected === 'timeline' && (
+                    <EuiFlexItem grow={false}>
+                      <EuiSmallButton
+                        onClick={() => setSelectedRange(fullRange)}
+                        isDisabled={
+                          selectedRange[0] === fullRange[0] && selectedRange[1] === fullRange[1]
+                        }
+                      >
+                        Reset zoom
+                      </EuiSmallButton>
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonGroup
+                      legend="Select view of spans"
+                      options={toggleOptions}
+                      idSelected={toggleIdSelected}
+                      onChange={(id) => setToggleIdSelected(id)}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+
+          {spanFilters.length > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup gutterSize="s" wrap>
+                {renderFilters}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+
+          <EuiHorizontalRule margin="m" />
+
+          {toggleIdSelected === 'timeline' && <EuiFlexItem grow={false}>{miniMap}</EuiFlexItem>}
+
+          <EuiFlexItem style={{ overflowY: 'auto', maxHeight: 500 }}>
+            {toggleIdSelected === 'timeline'
+              ? ganttChart
+              : toggleIdSelected === 'span_list'
+              ? spanDetailTable
+              : spanDetailTableHierarchy}
           </EuiFlexItem>
         </EuiFlexGroup>
-        {spanFilters.length > 0 && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="s" wrap>
-              {renderFilters}
-            </EuiFlexGroup>
-          </>
-        )}
-        <EuiHorizontalRule margin="m" />
-        <div style={{ overflowY: 'auto', maxHeight: 500 }}>
-          {toggleIdSelected === 'timeline' ? ganttChart : spanDetailTable}
-        </div>
       </EuiPanel>
       {!!currentSpan && (
         <SpanDetailFlyout

@@ -115,6 +115,9 @@ export function TracesContent(props: TracesProps) {
     includeMetrics,
     tracesTableMode,
     props.setDataSourceMenuSelectable,
+    startTime,
+    endTime,
+    props.dataSourceMDSId,
   ]);
 
   const onToggle = (isOpen: boolean) => {
