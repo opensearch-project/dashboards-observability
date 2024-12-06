@@ -266,7 +266,7 @@ export const Sidebar = (props: ISidebarProps) => {
                             data-attr-field={field.name}
                             paddingSize="s"
                             className="dscSidebar__item"
-                            data-test-subj={`fieldList-field`}
+                            data-test-subj={`field-${field.name}`}
                           >
                             <Field
                               query={query}
@@ -324,7 +324,7 @@ export const Sidebar = (props: ISidebarProps) => {
                               data-attr-field={field.name}
                               paddingSize="s"
                               className="dscSidebar__item"
-                              data-test-subj={`fieldList-field`}
+                              data-test-subj={`field-${field.name}`}
                             >
                               <Field
                                 query={query}
