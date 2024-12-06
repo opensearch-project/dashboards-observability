@@ -538,7 +538,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     const isValid = isValidUUID(this.props.openedNoteId);
     const route = isValid
       ? `${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/update/run`
-      : `${NOTEBOOKS_API_PREFIX}/paragraph/update/run`;
+      : `${NOTEBOOKS_API_PREFIX}/paragraph/update/run/`;
     return this.props.http
       .post(route, {
         body: JSON.stringify(paraUpdateObject),
