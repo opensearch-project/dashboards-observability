@@ -153,8 +153,6 @@ jobs:
             OpenSearch-Dashboards/**/target
             OpenSearch-Dashboards/**/node_modules
           key: ${{ runner.OS }}-build-${{ hashFiles('OpenSearch-Dashboards/**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.OS }}-build-
 
       - name: Bootstrap OpenSearch Dashboards
         run: |
