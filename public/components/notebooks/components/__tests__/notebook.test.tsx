@@ -518,6 +518,61 @@ describe('<Notebook /> spec', () => {
     expect(deleteNotebook).toHaveBeenCalledTimes(1);
   });
 
+  it('Checks notebook reporting action presence', async () => {
+    httpClient.get = jest.fn(() => Promise.resolve((emptyNotebook as unknown) as HttpResponse));
+
+    const utils = render(
+      <Notebook
+        pplService={pplService}
+        openedNoteId="458e1320-3f05-11ef-bd29-e58626f102c0"
+        DashboardContainerByValueRenderer={jest.fn()}
+        http={httpClient}
+        parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
+        setBreadcrumbs={setBreadcrumbs}
+        renameNotebook={jest.fn()}
+        cloneNotebook={jest.fn()}
+        deleteNotebook={deleteNotebook}
+        setToast={setToast}
+        location={location}
+        history={history}
+        dataSourceEnabled={false}
+      />
+    );
+    await waitFor(() => {
+      expect(utils.getByText('sample-notebook-1')).toBeInTheDocument();
+    });
+
+    const button = utils.queryByTestId('reporting-actions-button');
+    expect(button).toBeInTheDocument();
+  });
+
+  it('Checks notebook reporting action absence', async () => {
+    httpClient.get = jest.fn(() => Promise.resolve((emptyNotebook as unknown) as HttpResponse));
+
+    const utils = render(
+      <Notebook
+        pplService={pplService}
+        openedNoteId="458e1320-3f05-11ef-bd29-e58626f102c0"
+        DashboardContainerByValueRenderer={jest.fn()}
+        http={httpClient}
+        parentBreadcrumb={{ href: 'parent-href', text: 'parent-text' }}
+        setBreadcrumbs={setBreadcrumbs}
+        renameNotebook={jest.fn()}
+        cloneNotebook={jest.fn()}
+        deleteNotebook={deleteNotebook}
+        setToast={setToast}
+        location={location}
+        history={history}
+        dataSourceEnabled={true}
+      />
+    );
+    await waitFor(() => {
+      expect(utils.getByText('sample-notebook-1')).toBeInTheDocument();
+    });
+    const button = utils.queryByTestId('reporting-actions-button');
+    expect(button).not.toBeInTheDocument();
+  });
+
   it('Renders the visualization component', async () => {
     SavedObjectsActions.getBulk = jest.fn().mockResolvedValue({
       observabilityObjectList: [{ savedVisualization: sampleSavedVisualization }],
