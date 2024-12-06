@@ -4,7 +4,7 @@ on: [pull_request, push]
 
 env:
   PLUGIN_NAME: dashboards-observability
-  OPENSEARCH_DASHBOARDS_VERSION: "2.x"
+  OPENSEARCH_DASHBOARDS_VERSION: '2.x'
 
 jobs:
   tests:
@@ -40,8 +40,8 @@ jobs:
       - name: Set up Java 11
         uses: actions/setup-java@v3
         with:
-          distribution: "corretto"
-          java-version: "11"
+          distribution: 'corretto'
+          java-version: '11'
 
       - name: Checkout Branch
         uses: actions/checkout@v3
@@ -128,7 +128,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ steps.versions_step.outputs.node_version }}
-          registry-url: "https://registry.npmjs.org"
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Configure OpenSearch Dashboards
         run: |
@@ -152,9 +152,9 @@ jobs:
           path: |
             OpenSearch-Dashboards/**/target
             OpenSearch-Dashboards/**/node_modules
-          key: ${{ runner.OS }}-build-${{ hashFiles('OpenSearch-Dashboards/**/yarn.lock') }}
+          key: ${{ runner.os }}-build-${{ hashFiles('OpenSearch-Dashboards/**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.OS }}-build-
+            ${{ runner.os }}-build-
 
       - name: Bootstrap OpenSearch Dashboards
         run: |
@@ -175,10 +175,10 @@ jobs:
         if: ${{ runner.os == 'Linux' }}
         run: |
           cd ./OpenSearch-Dashboards
-          if timeout 60 grep -q "http server running" <(tail -n +1 -f dashboard.log); then
+          if timeout 600 grep -q "http server running" <(tail -n +1 -f dashboard.log); then
             echo "OpenSearch Dashboards started successfully."
           else
-            echo "Timeout of 60 seconds reached. OpenSearch Dashboards did not start successfully."
+            echo "Timeout of 600 seconds reached. OpenSearch Dashboards did not start successfully."
             exit 1
           fi&
 
@@ -198,6 +198,13 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
           npm config delete script-shell
+
+      - name: Upload OpenSearch Dashboards Logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dashboard-log
+          path: OpenSearch-Dashboards/dashboard.log
 
       - name: Run Cypress tests for test group of ${{ matrix.testgroups }}
         run: |
