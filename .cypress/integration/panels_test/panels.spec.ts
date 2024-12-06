@@ -96,7 +96,7 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
       it('Displays error toast for invalid panel name', () => {
         clickCreatePanelButton();
         confirmModal();
-        expectToastWith('Invalid Dashboard name');
+        expectToastWith('Invalid Dashboard Name');
       });
 
       it('Creates a panel and redirects to the panel', () => {
@@ -124,14 +124,21 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
         cy.get('.euiTableRow').should('have.length', 2);
         const duplicateName = TEST_PANEL + ' (copy)';
         cy.contains(duplicateName).should('exist');
-        const duplicate = cy.get('.euiLink').contains(duplicateName);
-        expectUuid(duplicate);
+        cy.get('.euiLink')
+          .contains(duplicateName)
+          .should('exist')
+          .then(($anchorElem) => {
+            expectUuid(cy.wrap($anchorElem));
+          });
       });
 
       it('Renames the panel', () => {
         cy.reload();
-        const cell = cy.get('.euiTableCellContent');
-        expectLegacyId(cell);
+        cy.get('.euiTableCellContent')
+          .should('exist')
+          .then(($anchorElem) => {
+            expectLegacyId(cy.wrap($anchorElem));
+          });
         cy.get('.euiCheckbox__input[title="Select this row"]').first().click();
         openActionsDropdown();
         cy.get('button[data-test-subj="renameContextMenuItem"]').click();
@@ -192,8 +199,12 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
         cy.get('[data-test-subj="breadcrumb"]').click({ force: true }); //reload page
         cy.get('.euiTableRow').should('have.length', 2);
         cy.contains(duplicateName).should('exist');
-        const duplicate = cy.get('.euiLink').contains(duplicateName);
-        expectUuid(duplicate);
+        cy.get('.euiLink')
+          .contains(duplicateName)
+          .should('exist')
+          .then(($anchorElem) => {
+            expectUuid(cy.wrap($anchorElem));
+          });
       });
 
       it('Renames a saved-objects panel', () => {
@@ -227,11 +238,10 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
       it('Redirects to observability dashboard from OSD dashboards with edit', () => {
         moveToOsdDashboards();
         cy.location('pathname').should('eq', '/app/dashboards');
-        cy.get('[data-test-subj="dashboardListingTitleLink-Test-Panel"]')
-          .closest('tr')
-          .get('span.euiToolTipAnchor > button.euiButtonIcon')
+        cy.get('[data-test-subj="dashboardEditBtn"]')
           .eq(0)
           .click();
+        cy.get('[data-test-subj="dashboardEditDashboard"]').click();
         cy.location('pathname').should('eq', '/app/observability-dashboards');
         cy.location('hash').should('include', '/edit');
       });
@@ -775,7 +785,7 @@ const createSavedObjectPanel = (newName = TEST_PANEL) => {
     .then((response) => response.body);
 };
 
-const addVisualizationsToPanel = (panel, additionalVisualizationIds: string[]) => {
+const addVisualizationsToPanel = (panel, additionalVisualizationIds) => {
   const additionalVisualizations = additionalVisualizationIds.map((id, idx) => {
     return {
       savedVisualizationId: `observability-visualization:${id}`,
@@ -849,7 +859,7 @@ const createVisualization = (newName, query, vizConfig) => {
 };
 
 const createLegacyPanel = (newName = TEST_PANEL) => {
-  const result = cy.request({
+  cy.request({
     method: 'POST',
     failOnStatusCode: false,
     url: 'api/observability/operational_panels/panels',
