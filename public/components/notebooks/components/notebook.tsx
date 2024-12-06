@@ -970,31 +970,33 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       },
     ];
 
-    const showReportingContextMenu = this.state.isReportingPluginInstalled ? (
-      <div>
-        <EuiPopover
-          panelPaddingSize="none"
-          button={
-            <EuiSmallButton
-              id="reportingActionsButton"
-              iconType="arrowDown"
-              iconSide="right"
-              onClick={() =>
-                this.setState({
-                  isReportingActionsPopoverOpen: !this.state.isReportingActionsPopoverOpen,
-                })
-              }
-            >
-              Reporting
-            </EuiSmallButton>
-          }
-          isOpen={this.state.isReportingActionsPopoverOpen}
-          closePopover={() => this.setState({ isReportingActionsPopoverOpen: false })}
-        >
-          <EuiContextMenu initialPanelId={0} panels={reportingActionPanels} size="s" />
-        </EuiPopover>
-      </div>
-    ) : null;
+    const showReportingContextMenu =
+      this.state.isReportingPluginInstalled && !this.state.dataSourceMDSEnabled ? (
+        <div>
+          <EuiPopover
+            panelPaddingSize="none"
+            button={
+              <EuiSmallButton
+                data-test-subj="reporting-actions-button"
+                id="reportingActionsButton"
+                iconType="arrowDown"
+                iconSide="right"
+                onClick={() =>
+                  this.setState({
+                    isReportingActionsPopoverOpen: !this.state.isReportingActionsPopoverOpen,
+                  })
+                }
+              >
+                Reporting
+              </EuiSmallButton>
+            }
+            isOpen={this.state.isReportingActionsPopoverOpen}
+            closePopover={() => this.setState({ isReportingActionsPopoverOpen: false })}
+          >
+            <EuiContextMenu initialPanelId={0} panels={reportingActionPanels} size="s" />
+          </EuiPopover>
+        </div>
+      ) : null;
 
     const showLoadingModal = this.state.isReportingLoadingModalOpen ? (
       <GenerateReportLoadingModal setShowLoading={this.toggleReportingLoadingModal} />
