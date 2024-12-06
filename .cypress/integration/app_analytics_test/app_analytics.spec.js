@@ -297,6 +297,7 @@ describe('Viewing application', () => {
     });
     cy.get('[data-test-subj="euiFlyoutCloseButton"]').click();
     cy.get('[data-test-subj="traceDetailFlyout"]').should('not.exist');
+    cy.get('[data-test-subj="superDatePickerShowDatesButton"]').click();//added to replace wait
     cy.get('[title="03f9c770db5ee2f1caac0afc36db49ba"]').click();
     cy.get('[data-text="Span list"]').click();
     cy.get('[data-test-subj="dataGridRowCell"]').contains('d67c5bb617ba9203').click();
