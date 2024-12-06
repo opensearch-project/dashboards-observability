@@ -284,7 +284,7 @@ export function registerParaRoute(router: IRouter) {
 
   router.post(
     {
-      path: `${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/`,
+      path: `${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph`,
       validate: {
         body: schema.object({
           noteId: schema.string(),
@@ -314,7 +314,7 @@ export function registerParaRoute(router: IRouter) {
   );
   router.put(
     {
-      path: `${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/clearall/`,
+      path: `${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/clearall`,
       validate: {
         body: schema.object({
           noteId: schema.string(),
@@ -377,7 +377,7 @@ export function registerParaRoute(router: IRouter) {
 
   router.post(
     {
-      path: `${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/update/run/`,
+      path: `${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/update/run`,
       validate: {
         body: schema.object({
           noteId: schema.string(),
@@ -413,7 +413,7 @@ export function registerParaRoute(router: IRouter) {
 
   router.put(
     {
-      path: `${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/`,
+      path: `${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph`,
       validate: {
         body: schema.object({
           noteId: schema.string(),
@@ -445,7 +445,7 @@ export function registerParaRoute(router: IRouter) {
   );
   router.post(
     {
-      path: `${NOTEBOOKS_API_PREFIX}/savedNotebook/set_paragraphs/`,
+      path: `${NOTEBOOKS_API_PREFIX}/savedNotebook/set_paragraphs`,
       validate: {
         body: schema.object({
           noteId: schema.string(),
