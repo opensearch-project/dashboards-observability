@@ -294,7 +294,7 @@ export function Application(props: AppDetailProps) {
         <ServicesContent
           {...props}
           page="app"
-          nameColumnAction={nameColumnAction}
+          setCurrentSelectedService={nameColumnAction}
           traceColumnAction={traceColumnAction}
           parentBreadcrumb={parentBreadcrumbs[0]}
           childBreadcrumbs={childBreadcrumbs}

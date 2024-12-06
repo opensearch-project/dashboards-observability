@@ -38,6 +38,7 @@ import {
   isNameValid,
   removeTabData,
 } from './helpers/utils';
+import { SavedObjectsActions } from '../../services/saved_objects/saved_object_client/saved_objects_actions';
 
 export type AppAnalyticsCoreDeps = TraceAnalyticsCoreDeps;
 
@@ -201,9 +202,8 @@ export const Home = (props: HomeProps) => {
   const deleteSavedVisualizationsForPanel = async (appPanelId: string) => {
     const savedVizIdsToDelete = await fetchPanelsVizIdList(http, appPanelId);
     if (!isEmpty(savedVizIdsToDelete)) {
-      savedObjects
-        .deleteSavedObjectsList({ objectIdList: savedVizIdsToDelete })
-        .then((res) => {
+      await SavedObjectsActions.deleteBulk({ objectIdList: savedVizIdsToDelete })
+        .then((_res) => {
           deletePanelForApp(appPanelId);
         })
         .catch((err) => {
@@ -350,14 +350,10 @@ export const Home = (props: HomeProps) => {
   };
 
   // Delete existing applications
-  const deleteApp = (appList: string[], panelList: string[], toastMessage?: string) => {
+  const deleteApp = async (appList: string[], panelList: string[], toastMessage?: string) => {
     return http
-      .delete(`${APP_ANALYTICS_API_PREFIX}/${appList.join(',')}`)
-      .then((res) => {
-        setApplicationList((prevApplicationList) => {
-          return prevApplicationList.filter((app) => !appList.includes(app.id));
-        });
-
+      .delete(`${APP_ANALYTICS_API_PREFIX}/${[...appList].join(',')}`)
+      .then(async (res) => {
         for (let i = 0; i < appList.length; i++) {
           removeTabData(dispatch, appList[i], '');
         }
@@ -366,6 +362,9 @@ export const Home = (props: HomeProps) => {
           deleteSavedVisualizationsForPanel(panelList[i]);
         }
 
+        setApplicationList((prevApplicationList) => {
+          return prevApplicationList.filter((app) => !appList.includes(app.id));
+        });
         const message =
           toastMessage || `Application${appList.length > 1 ? 's' : ''} successfully deleted!`;
         setToast(message);
