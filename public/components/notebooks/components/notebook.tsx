@@ -4,9 +4,9 @@
  */
 
 import {
-  EuiSmallButton,
   EuiButtonGroup,
   EuiButtonGroupOptionProps,
+  EuiButtonIcon,
   EuiCallOut,
   EuiCard,
   EuiContextMenu,
@@ -19,18 +19,18 @@ import {
   EuiPageBody,
   EuiPanel,
   EuiPopover,
+  EuiSmallButton,
   EuiSpacer,
   EuiText,
-  EuiButtonIcon,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { FormattedMessage } from '@osd/i18n/react';
 import CSS from 'csstype';
 import moment from 'moment';
 import queryString from 'query-string';
 import React, { Component } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { FormattedMessage } from '@osd/i18n/react';
 import {
   ChromeBreadcrumb,
   CoreStart,
@@ -43,6 +43,8 @@ import { CREATE_NOTE_MESSAGE, NOTEBOOKS_API_PREFIX } from '../../../../common/co
 import { UI_DATE_FORMAT } from '../../../../common/constants/shared';
 import { ParaType } from '../../../../common/types/notebooks';
 import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
+import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
+import { coreRefs } from '../../../framework/core_refs';
 import PPLService from '../../../services/requests/ppl';
 import { GenerateReportLoadingModal } from './helpers/custom_modals/reporting_loading_modal';
 import { defaultParagraphParser } from './helpers/default_parser';
@@ -54,8 +56,6 @@ import {
   generateInContextReport,
 } from './helpers/reporting_context_menu_helper';
 import { Paragraphs } from './paragraph_components/paragraphs';
-import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
-import { coreRefs } from '../../../framework/core_refs';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
@@ -416,7 +416,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     };
 
     return this.props.http
-      .post(`${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/`, {
+      .post(`${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph`, {
         body: JSON.stringify(addParaObj),
       })
       .then((res) => {
@@ -468,7 +468,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     };
 
     return this.props.http
-      .post(`${NOTEBOOKS_API_PREFIX}/savedNotebook/set_paragraphs/`, {
+      .post(`${NOTEBOOKS_API_PREFIX}/savedNotebook/set_paragraphs`, {
         body: JSON.stringify(moveParaObj),
       })
       .then((_res) => this.setState({ paragraphs, parsedPara }))
@@ -499,7 +499,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       noteId: this.props.openedNoteId,
     };
     this.props.http
-      .put(`${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/clearall/`, {
+      .put(`${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/clearall`, {
         body: JSON.stringify(clearParaObj),
       })
       .then((res) => {
@@ -537,7 +537,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     };
     const isValid = isValidUUID(this.props.openedNoteId);
     const route = isValid
-      ? `${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/update/run/`
+      ? `${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/update/run`
       : `${NOTEBOOKS_API_PREFIX}/paragraph/update/run/`;
     return this.props.http
       .post(route, {

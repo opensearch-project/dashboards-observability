@@ -98,7 +98,7 @@ export class Main extends React.Component<MainProps, MainState> {
     if (this.props.dataSourceEnabled) {
       // If `MDS` is enabled, only fetch from the first endpoint.
       return this.props.http
-        .get(`${NOTEBOOKS_API_PREFIX}/savedNotebook/`)
+        .get(`${NOTEBOOKS_API_PREFIX}/savedNotebook`)
         .then((savedNotebooksResponse) => {
           this.setState({ data: savedNotebooksResponse.data });
         })
@@ -106,9 +106,11 @@ export class Main extends React.Component<MainProps, MainState> {
           console.error('Issue in fetching the notebooks', err.body.message);
         });
     }
-    // If `MDS` is not enabled /savedNotebook/ API returns notebooks stored as saved objects, and the other one returns notebooks stored as observability objects.
+    // If `MDS` is not enabled /savedNotebook API returns notebooks stored as saved objects, and the other one returns notebooks stored as observability objects.
+    // ${NOTEBOOKS_API_PREFIX}/savedNotebook: this point to new notebooks saved in saved objects
+    // ${NOTEBOOKS_API_PREFIX}/: this point to old notebooks saved in observability index
     return Promise.all([
-      this.props.http.get(`${NOTEBOOKS_API_PREFIX}/savedNotebook/`),
+      this.props.http.get(`${NOTEBOOKS_API_PREFIX}/savedNotebook`),
       this.props.http.get(`${NOTEBOOKS_API_PREFIX}/`),
     ])
       .then(([savedNotebooksResponse, secondResponse]) => {
