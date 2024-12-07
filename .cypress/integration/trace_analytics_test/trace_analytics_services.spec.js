@@ -149,7 +149,7 @@ describe('Testing service view', () => {
     cy.contains('Spans (1)').should('exist');
   });
 });
-
+//adam
 describe('Testing Service map', () => {
   beforeEach(() => {
     cy.visit('app/observability-traces#/services', {
@@ -160,6 +160,7 @@ describe('Testing Service map', () => {
     cy.get("[data-test-subj='indexPattern-switch-link']").click();
     cy.get("[data-test-subj='data_prepper-mode']").click();
     setTimeFilter();
+    cy.get('.euiTableRow').should('have.length.greaterThan', 7); //Replaces wait
   });
 
   it('Render Service map', () => {
@@ -195,6 +196,12 @@ describe('Testing Service map', () => {
   it('Click on a node to see the details', () => {
     cy.get('.euiText.euiText--medium .panel-title').contains('Service map');
     cy.get('.vis-network canvas').should('exist');
+
+    // ensure rendering is complete before node click, replace wait
+    cy.get('[data-text="Errors"]').click();
+    cy.contains('60%');
+    cy.get('[data-text="Duration"]').click();
+    cy.contains('100');
 
     // clicks on payment node
     cy.get('.vis-network canvas').click(707, 388);
