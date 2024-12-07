@@ -150,7 +150,7 @@ describe('Testing service view', () => {
   });
 });
 
-describe('Testing Service map', () => {
+describe.only('Testing Service map', () => {
   beforeEach(() => {
     cy.visit('app/observability-traces#/services', {
       onBeforeLoad: (win) => {
@@ -171,6 +171,32 @@ describe('Testing Service map', () => {
     cy.get('[data-text = "Duration"]').click();
     cy.contains('100');
     cy.get('.euiFormLabel.euiFormControlLayout__prepend').contains('Focus on').should('exist');
+  });
+
+  it('Render the vis-network div and canvas', () => {
+    // Visit the page where your ServiceMap component is rendered
+    cy.get('.euiText.euiText--medium .panel-title').contains('Service map');
+    cy.get('.vis-network').should('exist');
+    cy.get('.vis-network canvas').should('exist');
+
+    cy.get('.vis-network canvas')
+      .should('have.attr', 'style')
+      .and('include', 'position: relative')
+      .and('include', 'touch-action: none')
+      .and('include', 'user-select: none')
+      .and('include', 'width: 100%')
+      .and('include', 'height: 100%');
+
+    cy.get('.vis-network canvas').should('have.attr', 'width').and('not.eq', '0');
+    cy.get('.vis-network canvas').should('have.attr', 'height').and('not.eq', '0');
+  });
+
+  it.only('Click on a node to see the details', () => {
+    cy.get('.euiText.euiText--medium .panel-title').contains('Service map');
+    cy.get('.vis-network canvas').should('exist');
+
+    cy.get('.vis-network canvas').click(707, 388); // clicks on payment node
+    cy.get('.euiText.euiText--small').contains('Average duration: 216.43ms').should('exist');
   });
 
   it('Tests focus functionality in Service map', () => {

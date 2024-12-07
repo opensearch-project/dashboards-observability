@@ -6,17 +6,17 @@
 import {
   EuiButtonGroup,
   EuiButtonIcon,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
   EuiPanel,
+  EuiPopover,
+  EuiSelectable,
   EuiSpacer,
   EuiSuperSelect,
   EuiSuperSelectOption,
-  EuiSelectable,
-  EuiPopover,
-  EuiFieldSearch,
-  EuiLoadingSpinner,
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -538,7 +538,7 @@ export function ServiceMap({
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                      backgroundColor: 'transparent', // supports both dark and light themes
                       zIndex: 1000,
                     }}
                   >
