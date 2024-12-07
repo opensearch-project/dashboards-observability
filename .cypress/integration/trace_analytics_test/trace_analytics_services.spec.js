@@ -174,11 +174,12 @@ describe.only('Testing Service map', () => {
   });
 
   it('Render the vis-network div and canvas', () => {
-    // Visit the page where your ServiceMap component is rendered
+    // Check the view where ServiceMap component is rendered
     cy.get('.euiText.euiText--medium .panel-title').contains('Service map');
     cy.get('.vis-network').should('exist');
     cy.get('.vis-network canvas').should('exist');
 
+    // Check the canvas is not empty
     cy.get('.vis-network canvas')
       .should('have.attr', 'style')
       .and('include', 'position: relative')
@@ -195,7 +196,9 @@ describe.only('Testing Service map', () => {
     cy.get('.euiText.euiText--medium .panel-title').contains('Service map');
     cy.get('.vis-network canvas').should('exist');
 
-    cy.get('.vis-network canvas').click(707, 388); // clicks on payment node
+    // clicks on payment node
+    cy.get('.vis-network canvas').click(707, 388);
+    // checks the duration in node details popover
     cy.get('.euiText.euiText--small').contains('Average duration: 216.43ms').should('exist');
   });
 
