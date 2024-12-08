@@ -149,7 +149,7 @@ describe('Testing service view', () => {
     cy.contains('Spans (1)').should('exist');
   });
 });
-//adam
+
 describe('Testing Service map', () => {
   beforeEach(() => {
     cy.visit('app/observability-traces#/services', {
@@ -193,7 +193,7 @@ describe('Testing Service map', () => {
     cy.get('.vis-network canvas').should('have.attr', 'height').and('not.eq', '0');
   });
 
-  it.only('Click on a node to see the details', () => {
+  it('Click on a node to see the details', () => {
     cy.get('.euiText.euiText--medium .panel-title').contains('Service map');
     cy.get('.vis-network canvas').should('exist');
 
