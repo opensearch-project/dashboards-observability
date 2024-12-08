@@ -490,9 +490,9 @@ export const Home = (props: HomeProps) => {
           }}
         />
         <Route path="/" render={() => <Redirect to={defaultRoute} />} />
+        {flyout}
+        {spanFlyoutComponent}
       </HashRouter>
-      {flyout}
-      {spanFlyoutComponent}
     </>
   );
 };

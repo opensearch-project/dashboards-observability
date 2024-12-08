@@ -27,6 +27,7 @@ import {
 } from '@elastic/eui';
 import round from 'lodash/round';
 import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { DataSourceManagementPluginSetup } from '../../../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
 import {
@@ -75,6 +76,20 @@ export function ServiceView(props: ServiceViewProps) {
   >('latency');
   const [redirect, setRedirect] = useState(false);
   const [actionsMenuPopover, setActionsMenuPopover] = useState(false);
+  const [serviceId, setServiceId] = useState<string | null>(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(location?.search || '');
+      const id = params.get('serviceId');
+      setServiceId(id);
+    } catch (error) {
+      setServiceId(null);
+    }
+  }, [location]);
+
+  const hideSearchBarCheck = page === 'serviceFlyout' || serviceId !== '';
 
   const refresh = () => {
     const DSL = filtersToDsl(
@@ -535,7 +550,7 @@ export function ServiceView(props: ServiceViewProps) {
             page="serviceView"
             filterByCurrService={true}
             mode={mode}
-            hideSearchBar={page === 'serviceFlyout'}
+            hideSearchBar={hideSearchBarCheck}
           />
         </>
       ) : (

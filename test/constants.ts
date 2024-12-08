@@ -419,6 +419,7 @@ export const TEST_SERVICE_MAP = {
   order: {
     serviceName: 'order',
     id: 1,
+    average_latency: 100,
     traceGroups: [
       {
         traceGroup: 'client_cancel_order',
@@ -442,10 +443,12 @@ export const TEST_SERVICE_MAP = {
     latency: 90.1,
     error_rate: 4.17,
     throughput: 48,
+    relatedServices: ['analytics-service', 'database', 'frontend-client'],
   },
   'analytics-service': {
     serviceName: 'analytics-service',
     id: 2,
+    average_latency: 150,
     traceGroups: [
       {
         traceGroup: 'client_cancel_order',
@@ -477,10 +480,12 @@ export const TEST_SERVICE_MAP = {
     latency: 12.99,
     error_rate: 0,
     throughput: 37,
+    relatedServices: ['order', 'inventory', 'authentication', 'payment', 'recommendation'],
   },
   database: {
     serviceName: 'database',
     id: 3,
+    average_latency: 200,
     traceGroups: [
       {
         traceGroup: 'client_cancel_order',
@@ -504,7 +509,7 @@ export const TEST_SERVICE_MAP = {
       },
       {
         traceGroup: 'load_main_screen',
-        targetResource: ['getIntentory'],
+        targetResource: ['getInventory'],
       },
     ],
     targetServices: [],
@@ -512,10 +517,12 @@ export const TEST_SERVICE_MAP = {
     latency: 49.54,
     error_rate: 3.77,
     throughput: 53,
+    relatedServices: ['order', 'inventory'],
   },
   'frontend-client': {
     serviceName: 'frontend-client',
     id: 4,
+    average_latency: 250,
     traceGroups: [
       {
         traceGroup: 'client_cancel_order',
@@ -547,10 +554,12 @@ export const TEST_SERVICE_MAP = {
     latency: 207.71,
     error_rate: 7.41,
     throughput: 27,
+    relatedServices: ['order', 'payment', 'authentication'],
   },
   inventory: {
     serviceName: 'inventory',
     id: 5,
+    average_latency: 300,
     traceGroups: [
       {
         traceGroup: 'client_checkout',
@@ -566,10 +575,12 @@ export const TEST_SERVICE_MAP = {
     latency: 183.52,
     error_rate: 3.23,
     throughput: 31,
+    relatedServices: ['analytics-service', 'database', 'payment', 'recommendation'],
   },
   authentication: {
     serviceName: 'authentication',
     id: 6,
+    average_latency: 350,
     traceGroups: [
       {
         traceGroup: 'load_main_screen',
@@ -581,10 +592,12 @@ export const TEST_SERVICE_MAP = {
     latency: 139.09,
     error_rate: 8.33,
     throughput: 12,
+    relatedServices: ['analytics-service', 'recommendation', 'frontend-client'],
   },
   payment: {
     serviceName: 'payment',
     id: 7,
+    average_latency: 400,
     traceGroups: [
       {
         traceGroup: 'client_checkout',
@@ -596,10 +609,12 @@ export const TEST_SERVICE_MAP = {
     latency: 134.36,
     error_rate: 9.09,
     throughput: 11,
+    relatedServices: ['analytics-service', 'inventory', 'frontend-client'],
   },
   recommendation: {
     serviceName: 'recommendation',
     id: 8,
+    average_latency: 450,
     traceGroups: [
       {
         traceGroup: 'load_main_screen',
@@ -611,6 +626,7 @@ export const TEST_SERVICE_MAP = {
     latency: 176.97,
     error_rate: 6.25,
     throughput: 16,
+    relatedServices: ['analytics-service', 'inventory', 'authentication'],
   },
 };
 
@@ -768,4 +784,57 @@ export const fieldCapQueryResponse2 = {
       },
     },
   },
+};
+
+export const MOCK_CANVAS_CONTEXT = {
+  canvas: document.createElement('canvas'),
+  fillRect: jest.fn(),
+  clearRect: jest.fn(),
+  getImageData: jest.fn(() => ({ data: new Uint8ClampedArray() })),
+  putImageData: jest.fn(),
+  createImageData: jest.fn(),
+  setTransform: jest.fn(),
+  drawImage: jest.fn(),
+  save: jest.fn(),
+  fillText: jest.fn(),
+  restore: jest.fn(),
+  beginPath: jest.fn(),
+  moveTo: jest.fn(),
+  lineTo: jest.fn(),
+  closePath: jest.fn(),
+  stroke: jest.fn(),
+  translate: jest.fn(),
+  scale: jest.fn(),
+  rotate: jest.fn(),
+  arc: jest.fn(),
+  fill: jest.fn(),
+  measureText: jest.fn(() => ({ width: 0 })),
+  transform: jest.fn(),
+  rect: jest.fn(),
+  globalAlpha: 1,
+  globalCompositeOperation: 'source-over',
+  filter: 'none',
+  imageSmoothingEnabled: true,
+  imageSmoothingQuality: 'low',
+  strokeStyle: '#000',
+  fillStyle: '#000',
+  shadowOffsetX: 0,
+  shadowOffsetY: 0,
+  shadowBlur: 0,
+  shadowColor: 'rgba(0,0,0,0)',
+  lineWidth: 1,
+  lineCap: 'butt',
+  lineJoin: 'miter',
+  miterLimit: 10,
+  lineDashOffset: 0,
+  font: '10px sans-serif',
+  textAlign: 'start',
+  textBaseline: 'alphabetic',
+  direction: 'ltr',
+  getContextAttributes: jest.fn(() => ({
+    alpha: true,
+    desynchronized: false,
+    colorSpace: 'srgb',
+    willReadFrequently: false,
+  })),
 };

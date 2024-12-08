@@ -670,6 +670,7 @@ exports[`Services table component renders jaeger services table 1`] = `
               "field": "actions",
               "name": "Actions",
               "render": [Function],
+              "sortable": false,
             },
           ]
         }
@@ -758,6 +759,7 @@ exports[`Services table component renders jaeger services table 1`] = `
                 "field": "actions",
                 "name": "Actions",
                 "render": [Function],
+                "sortable": false,
               },
             ]
           }
@@ -2672,6 +2674,7 @@ exports[`Services table component renders services table 1`] = `
               "field": "actions",
               "name": "Actions",
               "render": [Function],
+              "sortable": false,
             },
           ]
         }
@@ -2782,6 +2785,7 @@ exports[`Services table component renders services table 1`] = `
                 "field": "actions",
                 "name": "Actions",
                 "render": [Function],
+                "sortable": false,
               },
             ]
           }
