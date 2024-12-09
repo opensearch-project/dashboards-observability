@@ -74,7 +74,9 @@ export const setTimeFilter = (setEndTime = false, refresh = true) => {
     .focus()
     .type('{selectall}' + startTime, { force: true });
   if (setEndTime) {
-    cy.get('button.euiDatePopoverButton--end[data-test-subj="superDatePickerendDatePopoverButton"]').click();
+    cy.get(
+      'button.euiDatePopoverButton--end[data-test-subj="superDatePickerendDatePopoverButton"]'
+    ).click();
     cy.get('.euiTab__content').contains('Absolute').click();
     cy.get('input[data-test-subj="superDatePickerAbsoluteDateInput"]')
       .focus()
@@ -128,10 +130,17 @@ export const SQL_QUERY_TEXT = `%sql
 select * from opensearch_dashboards_sample_data_flights limit 20 {enter}
 `;
 
+export const SQL_INCORRECT_QUERY_TEXT = `%sql 
+selectaaaaa * from opensearch_dashboards_sample_data_flights limit 20 {enter}
+`;
+
 export const PPL_QUERY_TEXT = `%ppl
 source=opensearch_dashboards_sample_data_flights {enter}
 `;
 
+export const PPL_INCORRECT_QUERY_TEXT = `%ppl
+source=opensearch_dashboards_sample_data_flights__ {enter}
+`;
 
 export const suppressResizeObserverIssue = () => {
   // exception is thrown on loading EuiDataGrid in cypress only, ignore for now
