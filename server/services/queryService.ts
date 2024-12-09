@@ -51,7 +51,7 @@ export class QueryService {
       return {
         data: {
           ok: false,
-          resp: err.message,
+          resp: err.response,
           body: err.body,
         },
       };
