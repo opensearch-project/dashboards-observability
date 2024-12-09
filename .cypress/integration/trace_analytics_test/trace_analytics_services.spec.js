@@ -197,21 +197,16 @@ describe('Testing Service map', () => {
     cy.get('.euiText.euiText--medium .panel-title').contains('Service map');
     cy.get('.vis-network canvas').should('exist');
 
-    // Focus on "order" by selecting the first option
-    cy.get('.euiFormLabel.euiFormControlLayout__prepend').contains('Focus on').should('exist');
-    cy.get('[placeholder="Service name"]').click();
-    cy.get('.euiSelectableList__list li').eq(0).click();
-
     // ensure rendering is complete before node click, replace wait
     cy.get('[data-text="Errors"]').click();
     cy.contains('60%');
     cy.get('[data-text="Duration"]').click();
     cy.contains('100');
 
-    // clicks on database node
-    cy.get('.vis-network canvas').click(727, 388);
+    // clicks on payment node
+    cy.get('.vis-network canvas').click(707, 388);
     // checks the duration in node details popover
-    cy.get('.euiText.euiText--small').contains('Average duration: 45.84ms').should('exist');
+    cy.get('.euiText.euiText--small').contains('Average duration: 216.43ms').should('exist');
   });
 
   it('Tests focus functionality in Service map', () => {
