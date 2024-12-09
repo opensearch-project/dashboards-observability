@@ -233,12 +233,16 @@ export function ServicesContent(props: ServicesProps) {
             isServiceTrendEnabled={isServiceTrendEnabled}
             setIsServiceTrendEnabled={setIsServiceTrendEnabled}
             serviceTrends={serviceTrends}
+            dataSourceMDSId={props.dataSourceMDSId}
+            page={page}
           />
           <EuiSpacer size="s" />
           {mode === 'custom_data_prepper' ||
           (mode === 'data_prepper' && dataPrepperIndicesExist) ? (
             <ServiceMap
               addFilter={addFilter}
+              filters={filters}
+              setFilters={setFilters}
               serviceMap={serviceMap}
               idSelected={serviceMapIdSelected}
               setIdSelected={setServiceMapIdSelected}
