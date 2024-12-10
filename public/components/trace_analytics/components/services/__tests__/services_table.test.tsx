@@ -7,6 +7,7 @@ import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { ServicesTable } from '../services_table';
+import { generateServiceUrl } from '../../common/helper_functions';
 
 describe('Services table component', () => {
   configure({ adapter: new Adapter() });
@@ -113,5 +114,56 @@ describe('Services table component', () => {
     );
 
     expect(wrapper).toMatchSnapshot();
+  });
+
+  it('redirects to the correct URL when the service link is clicked', () => {
+    const mockDataSourceId = 'mock-data-source-id';
+    const tableItems = [
+      {
+        name: 'checkoutservice',
+        average_latency: 100,
+        error_rate: 0.5,
+        throughput: 200,
+        traces: 10,
+        itemId: '1',
+      },
+    ];
+
+    // Mock window.location before rendering
+    const originalLocation = window.location;
+    delete window.location;
+    window.location = { ...originalLocation };
+
+    const wrapper = mount(
+      <ServicesTable
+        items={tableItems}
+        selectedItems={[]}
+        setSelectedItems={jest.fn()}
+        addServicesGroupFilter={jest.fn()}
+        loading={false}
+        traceColumnAction={jest.fn()}
+        setCurrentSelectedService={jest.fn()}
+        addFilter={jest.fn()}
+        setRedirect={jest.fn()}
+        mode="data_prepper"
+        jaegerIndicesExist={false}
+        dataPrepperIndicesExist={true}
+        isServiceTrendEnabled={false}
+        setIsServiceTrendEnabled={jest.fn()}
+        serviceTrends={{}}
+        dataSourceMDSId={[{ id: mockDataSourceId, label: 'Mock Data Source' }]}
+      />
+    );
+
+    // Find and click the service link
+    const serviceLink = wrapper.find('[data-test-subj="service-link"]').first();
+    expect(serviceLink.exists()).toBeTruthy();
+
+    serviceLink.simulate('click');
+
+    const expectedUrl = generateServiceUrl('checkoutservice', mockDataSourceId);
+    expect(window.location.href).toBe(expectedUrl);
+
+    window.location = originalLocation;
   });
 });
