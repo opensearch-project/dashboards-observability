@@ -376,7 +376,7 @@ export function ServiceMap({
         showRelatedServices
       )
     );
-  }, [serviceMap, idSelected]);
+  }, [serviceMap, idSelected, focusedService, filterByCurrService]);
 
   return (
     <>
@@ -440,7 +440,9 @@ export function ServiceMap({
                           aria-label="Clear focus and refresh the service map"
                           size="s"
                           onClick={() => {
-                            setGraphKey((prevKey) => prevKey + 1);
+                            if (!isFocusBarDisabled) {
+                              setGraphKey((prevKey) => prevKey + 1);
+                            }
                             setQuery('');
                             onFocus('');
                           }}
