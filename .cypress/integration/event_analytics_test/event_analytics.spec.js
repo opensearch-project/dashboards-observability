@@ -479,6 +479,7 @@ describe('Visualizing data', () => {
   });
 
   it('Visualize vertical bar chart', () => {
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('[data-test-subj="comboBoxInput"]').eq(1).click();
     cy.get('[data-test-subj="comboBoxOptionsList "] span').contains(VIS_TYPE_VBAR).click();
     cy.get('[data-test-subj="vizConfigSection-series"]')

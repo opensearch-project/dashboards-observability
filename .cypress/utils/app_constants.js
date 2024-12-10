@@ -136,6 +136,7 @@ export const moveToEditPage = () => {
 
 export const changeTimeTo24 = (timeUnit) => {
   cy.get('[data-test-subj="superDatePickerToggleQuickMenuButton"]').trigger('mouseover').click({ force: true });
+  cy.get('[aria-label="Time value"]').type('{selectall}24');
   cy.get('[aria-label="Time unit"]').select(timeUnit);
   cy.get('.euiButton').contains('Apply').click();
   cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();

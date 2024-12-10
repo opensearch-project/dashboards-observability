@@ -433,13 +433,13 @@ describe('Viewing application', () => {
 
 
   it('Changes availability visualization', () => {
+    cy.intercept('PUT', `**/api/observability/application`).as('selectUpdate');
+    cy.intercept('GET', `**/api/observability/operational_panels/panels/**`).as('loadingPanels')
     cy.get('[data-test-subj="app-analytics-configTab"]').click();
     cy.get('select').select(visOneName);
-    cy.intercept('PUT', `**/api/observability/application`).as('selectUpdate');
     cy.wait('@selectUpdate');
 
     moveToHomePage();
-    cy.intercept('GET', `**/api/observability/operational_panels/panels/**`).as('loadingPanels')
     cy.wait('@loadingPanels');
     cy.reload();
     cy.get('[data-test-subj="AvailableAvailabilityBadge"][style="background-color: rgb(84, 179, 153); color: rgb(0, 0, 0);"]').should('contain', 'Available');
