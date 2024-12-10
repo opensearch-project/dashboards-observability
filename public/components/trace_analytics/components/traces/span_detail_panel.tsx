@@ -226,7 +226,9 @@ export function SpanDetailPanel(props: {
       plot_bgcolor: 'rgba(0, 0, 0, 0)',
       paper_bgcolor: 'rgba(0, 0, 0, 0)',
       height: 25 * plotTraces.length + 60,
-      width: props.isApplicationFlyout ? undefined : availableWidth - dynamicWidthAdjustment, // Allow plotly to render the gantt chart full screen with padding
+      width: props.isApplicationFlyout
+        ? availableWidth / 2 - 100 // Allow gantt chart to fit in flyout
+        : availableWidth - dynamicWidthAdjustment, // Allow gantt chart to render full screen
       margin: {
         l: dynamicLeftMargin,
         r: 5,
