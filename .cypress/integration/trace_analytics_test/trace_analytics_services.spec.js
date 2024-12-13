@@ -160,6 +160,7 @@ describe('Testing Service map', () => {
     cy.get("[data-test-subj='indexPattern-switch-link']").click();
     cy.get("[data-test-subj='data_prepper-mode']").click();
     setTimeFilter();
+    cy.get('.euiTableRow').should('have.length.greaterThan', 7); //Replaces wait
   });
 
   it('Render Service map', () => {
@@ -171,7 +172,70 @@ describe('Testing Service map', () => {
     cy.get('[data-text = "Duration"]').click();
     cy.contains('100');
     cy.get('.euiFormLabel.euiFormControlLayout__prepend').contains('Focus on').should('exist');
-    cy.get('[placeholder="Service name"]').focus().type('database{enter}');
+  });
+
+  it('Render the vis-network div and canvas', () => {
+    // Check the view where ServiceMap component is rendered
+    cy.get('.euiText.euiText--medium .panel-title').contains('Service map');
+    cy.get('.vis-network').should('exist');
+    cy.get('.vis-network canvas').should('exist');
+
+    // Check the canvas is not empty
+    cy.get('.vis-network canvas')
+      .should('have.attr', 'style')
+      .and('include', 'position: relative')
+      .and('include', 'touch-action: none')
+      .and('include', 'user-select: none')
+      .and('include', 'width: 100%')
+      .and('include', 'height: 100%');
+
+    cy.get('.vis-network canvas').should('have.attr', 'width').and('not.eq', '0');
+    cy.get('.vis-network canvas').should('have.attr', 'height').and('not.eq', '0');
+  });
+
+  it('Click on a node to see the details', () => {
+    cy.get('.euiText.euiText--medium .panel-title').contains('Service map');
+    cy.get('.vis-network canvas').should('exist');
+
+    // ensure rendering is complete before node click, replace wait
+    cy.get('[data-text="Errors"]').click();
+    cy.contains('60%');
+    cy.get('[data-text="Duration"]').click();
+    cy.contains('100');
+
+    // clicks on payment node
+    cy.get('.vis-network canvas').click(707, 388);
+    // checks the duration in node details popover
+    cy.get('.euiText.euiText--small').contains('Average duration: 216.43ms').should('exist');
+  });
+
+  it('Tests focus functionality in Service map', () => {
+    cy.get('.euiText.euiText--medium .panel-title').contains('Service map');
+    cy.get('[data-test-subj="latency"]').should('exist');
+    cy.get('.ytitle').contains('Average duration (ms)');
+
+    // Test metric selection functionality
+    cy.get('[data-text="Errors"]').click();
+    cy.contains('60%');
+    cy.get('[data-text="Duration"]').click();
+    cy.contains('100');
+
+    // Focus on "order" by selecting the first option
+    cy.get('.euiFormLabel.euiFormControlLayout__prepend').contains('Focus on').should('exist');
+    cy.get('[placeholder="Service name"]').click();
+    cy.get('.euiSelectableList__list li').eq(0).click();
+
+    // Verify the service map updates and focus is applied
+    cy.get('.euiFormLabel.euiFormControlLayout__prepend').contains('Focus on').should('exist');
+    cy.get('[placeholder="order"]').click();
+    cy.get('.euiSelectableList__list li').should('have.length', 4); // Focused view with 4 options
+
+    // Refresh to reset the focus
+    cy.get('[data-test-subj="serviceMapRefreshButton"]').click();
+
+    // Verify the service map is reset to the original state
+    cy.get('[placeholder="Service name"]').should('have.value', '');
+    cy.get('.euiSelectableList__list li').should('have.length', 8); // Original 8 options
   });
 });
 

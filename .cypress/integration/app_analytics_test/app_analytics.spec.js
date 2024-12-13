@@ -274,7 +274,7 @@ describe('Viewing application', () => {
 
   it('Opens service detail flyout when Service Name is clicked', () => {
     cy.get('[data-test-subj="app-analytics-serviceTab"]').click();
-    cy.get('*[data-test-subj^="service-flyout-action-btntrace"]').eq(0).click();
+    cy.get('*[data-test-subj^="service-link"]').eq(0).click();
     cy.get('[data-test-subj="serviceDetailFlyoutTitle"]').should('be.visible');
     cy.get('[data-test-subj="Number of connected servicesDescriptionList"]').should('contain', '3');
     cy.get('[data-text="Errors"]').eq(1).click(); // Selecting errors tab within flyout
@@ -297,6 +297,7 @@ describe('Viewing application', () => {
     });
     cy.get('[data-test-subj="euiFlyoutCloseButton"]').click();
     cy.get('[data-test-subj="traceDetailFlyout"]').should('not.exist');
+    cy.get('[data-test-subj="superDatePickerShowDatesButton"]').click();//added to replace wait
     cy.get('[title="03f9c770db5ee2f1caac0afc36db49ba"]').click();
     cy.get('[data-text="Span list"]').click();
     cy.get('[data-test-subj="dataGridRowCell"]').contains('d67c5bb617ba9203').click();
