@@ -164,6 +164,7 @@ describe('Testing traces tree view', () => {
     cy.get("[data-test-subj='indexPattern-switch-link']").click();
     cy.get("[data-test-subj='data_prepper-mode']").click();
     setTimeFilter();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.contains('02feb3a4f611abd81f2a53244d1278ae').click();
     cy.get('h1.overview-content').contains('02feb3a4f611abd81f2a53244d1278ae').should('exist');
   });
