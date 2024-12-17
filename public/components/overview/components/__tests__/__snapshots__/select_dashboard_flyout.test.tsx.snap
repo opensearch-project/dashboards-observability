@@ -81,33 +81,72 @@ exports[`Select dashboard flyout should render 1`] = `
                       class="euiFlyoutBody__overflowContent"
                     >
                       <div
-                        class="euiSelectable euiSelectable-fullHeight"
+                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
                       >
                         <div
-                          class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--xLarge euiIcon--app euiIcon-isLoading"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                            />
+                          </svg>
+                        </div>
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <h3
+                            class="euiTitle euiTitle--small"
+                          >
+                            No dashboards
+                          </h3>
+                        </div>
+                        <div
+                          class="euiSpacer euiSpacer--l"
+                        />
+                        <div
+                          class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <div
-                            class="euiFormControlLayout__childrenWrapper"
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
                           >
-                            <input
-                              aria-activedescendant=""
-                              aria-haspopup="listbox"
-                              aria-label="Filter options"
-                              autocomplete="off"
-                              class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
-                              placeholder="Search for a dashboard..."
-                              type="search"
-                              value=""
-                            />
-                            <div
-                              class="euiFormControlLayoutIcons"
+                            <button
+                              class="euiButton euiButton--primary euiButton--small"
+                              type="button"
                             >
                               <span
-                                class="euiFormControlLayoutCustomIcon"
+                                class="euiButtonContent euiButton__content"
+                              >
+                                <span
+                                  class="euiButton__text"
+                                >
+                                  Install Sample Data
+                                </span>
+                              </span>
+                            </button>
+                          </div>
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <button
+                              class="euiButton euiButton--primary euiButton--small euiButton--fill"
+                              type="button"
+                            >
+                              <span
+                                class="euiButtonContent euiButton__content"
                               >
                                 <svg
                                   aria-hidden="true"
-                                  class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                  class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                                   focusable="false"
                                   height="16"
                                   role="img"
@@ -119,20 +158,13 @@ exports[`Select dashboard flyout should render 1`] = `
                                     d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
                                   />
                                 </svg>
+                                <span
+                                  class="euiButton__text"
+                                >
+                                  Create Dashboard
+                                </span>
                               </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div
-                          class="euiText euiText--extraSmall euiSelectableMessage"
-                          id="random_html_id"
-                        >
-                          <div
-                            class="euiTextColor euiTextColor--subdued"
-                          >
-                            <p>
-                              No options available
-                            </p>
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -344,33 +376,72 @@ exports[`Select dashboard flyout should render 1`] = `
                               class="euiFlyoutBody__overflowContent"
                             >
                               <div
-                                class="euiSelectable euiSelectable-fullHeight"
+                                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
                               >
                                 <div
-                                  class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+                                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                                >
+                                  <svg
+                                    aria-hidden="true"
+                                    class="euiIcon euiIcon--xLarge euiIcon--app euiIcon-isLoading"
+                                    focusable="false"
+                                    height="16"
+                                    role="img"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                    />
+                                  </svg>
+                                </div>
+                                <div
+                                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                                >
+                                  <h3
+                                    class="euiTitle euiTitle--small"
+                                  >
+                                    No dashboards
+                                  </h3>
+                                </div>
+                                <div
+                                  class="euiSpacer euiSpacer--l"
+                                />
+                                <div
+                                  class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                                 >
                                   <div
-                                    class="euiFormControlLayout__childrenWrapper"
+                                    class="euiFlexItem euiFlexItem--flexGrowZero"
                                   >
-                                    <input
-                                      aria-activedescendant=""
-                                      aria-haspopup="listbox"
-                                      aria-label="Filter options"
-                                      autocomplete="off"
-                                      class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
-                                      placeholder="Search for a dashboard..."
-                                      type="search"
-                                      value=""
-                                    />
-                                    <div
-                                      class="euiFormControlLayoutIcons"
+                                    <button
+                                      class="euiButton euiButton--primary euiButton--small"
+                                      type="button"
                                     >
                                       <span
-                                        class="euiFormControlLayoutCustomIcon"
+                                        class="euiButtonContent euiButton__content"
+                                      >
+                                        <span
+                                          class="euiButton__text"
+                                        >
+                                          Install Sample Data
+                                        </span>
+                                      </span>
+                                    </button>
+                                  </div>
+                                  <div
+                                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                                  >
+                                    <button
+                                      class="euiButton euiButton--primary euiButton--small euiButton--fill"
+                                      type="button"
+                                    >
+                                      <span
+                                        class="euiButtonContent euiButton__content"
                                       >
                                         <svg
                                           aria-hidden="true"
-                                          class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                          class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                                           focusable="false"
                                           height="16"
                                           role="img"
@@ -382,20 +453,13 @@ exports[`Select dashboard flyout should render 1`] = `
                                             d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
                                           />
                                         </svg>
+                                        <span
+                                          class="euiButton__text"
+                                        >
+                                          Create Dashboard
+                                        </span>
                                       </span>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div
-                                  class="euiText euiText--extraSmall euiSelectableMessage"
-                                  id="random_html_id"
-                                >
-                                  <div
-                                    class="euiTextColor euiTextColor--subdued"
-                                  >
-                                    <p>
-                                      No options available
-                                    </p>
+                                    </button>
                                   </div>
                                 </div>
                               </div>
@@ -539,33 +603,72 @@ exports[`Select dashboard flyout should render 1`] = `
                                 class="euiFlyoutBody__overflowContent"
                               >
                                 <div
-                                  class="euiSelectable euiSelectable-fullHeight"
+                                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
                                 >
                                   <div
-                                    class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+                                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                                  >
+                                    <svg
+                                      aria-hidden="true"
+                                      class="euiIcon euiIcon--xLarge euiIcon--app euiIcon-isLoading"
+                                      focusable="false"
+                                      height="16"
+                                      role="img"
+                                      viewBox="0 0 16 16"
+                                      width="16"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                      />
+                                    </svg>
+                                  </div>
+                                  <div
+                                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                                  >
+                                    <h3
+                                      class="euiTitle euiTitle--small"
+                                    >
+                                      No dashboards
+                                    </h3>
+                                  </div>
+                                  <div
+                                    class="euiSpacer euiSpacer--l"
+                                  />
+                                  <div
+                                    class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                                   >
                                     <div
-                                      class="euiFormControlLayout__childrenWrapper"
+                                      class="euiFlexItem euiFlexItem--flexGrowZero"
                                     >
-                                      <input
-                                        aria-activedescendant=""
-                                        aria-haspopup="listbox"
-                                        aria-label="Filter options"
-                                        autocomplete="off"
-                                        class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
-                                        placeholder="Search for a dashboard..."
-                                        type="search"
-                                        value=""
-                                      />
-                                      <div
-                                        class="euiFormControlLayoutIcons"
+                                      <button
+                                        class="euiButton euiButton--primary euiButton--small"
+                                        type="button"
                                       >
                                         <span
-                                          class="euiFormControlLayoutCustomIcon"
+                                          class="euiButtonContent euiButton__content"
+                                        >
+                                          <span
+                                            class="euiButton__text"
+                                          >
+                                            Install Sample Data
+                                          </span>
+                                        </span>
+                                      </button>
+                                    </div>
+                                    <div
+                                      class="euiFlexItem euiFlexItem--flexGrowZero"
+                                    >
+                                      <button
+                                        class="euiButton euiButton--primary euiButton--small euiButton--fill"
+                                        type="button"
+                                      >
+                                        <span
+                                          class="euiButtonContent euiButton__content"
                                         >
                                           <svg
                                             aria-hidden="true"
-                                            class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                                             focusable="false"
                                             height="16"
                                             role="img"
@@ -577,20 +680,13 @@ exports[`Select dashboard flyout should render 1`] = `
                                               d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
                                             />
                                           </svg>
+                                          <span
+                                            class="euiButton__text"
+                                          >
+                                            Create Dashboard
+                                          </span>
                                         </span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div
-                                    class="euiText euiText--extraSmall euiSelectableMessage"
-                                    id="random_html_id"
-                                  >
-                                    <div
-                                      class="euiTextColor euiTextColor--subdued"
-                                    >
-                                      <p>
-                                        No options available
-                                      </p>
+                                      </button>
                                     </div>
                                   </div>
                                 </div>
@@ -734,33 +830,72 @@ exports[`Select dashboard flyout should render 1`] = `
                                   class="euiFlyoutBody__overflowContent"
                                 >
                                   <div
-                                    class="euiSelectable euiSelectable-fullHeight"
+                                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
                                   >
                                     <div
-                                      class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+                                      class="euiFlexItem euiFlexItem--flexGrowZero"
+                                    >
+                                      <svg
+                                        aria-hidden="true"
+                                        class="euiIcon euiIcon--xLarge euiIcon--app euiIcon-isLoading"
+                                        focusable="false"
+                                        height="16"
+                                        role="img"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                        />
+                                      </svg>
+                                    </div>
+                                    <div
+                                      class="euiFlexItem euiFlexItem--flexGrowZero"
+                                    >
+                                      <h3
+                                        class="euiTitle euiTitle--small"
+                                      >
+                                        No dashboards
+                                      </h3>
+                                    </div>
+                                    <div
+                                      class="euiSpacer euiSpacer--l"
+                                    />
+                                    <div
+                                      class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                                     >
                                       <div
-                                        class="euiFormControlLayout__childrenWrapper"
+                                        class="euiFlexItem euiFlexItem--flexGrowZero"
                                       >
-                                        <input
-                                          aria-activedescendant=""
-                                          aria-haspopup="listbox"
-                                          aria-label="Filter options"
-                                          autocomplete="off"
-                                          class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
-                                          placeholder="Search for a dashboard..."
-                                          type="search"
-                                          value=""
-                                        />
-                                        <div
-                                          class="euiFormControlLayoutIcons"
+                                        <button
+                                          class="euiButton euiButton--primary euiButton--small"
+                                          type="button"
                                         >
                                           <span
-                                            class="euiFormControlLayoutCustomIcon"
+                                            class="euiButtonContent euiButton__content"
+                                          >
+                                            <span
+                                              class="euiButton__text"
+                                            >
+                                              Install Sample Data
+                                            </span>
+                                          </span>
+                                        </button>
+                                      </div>
+                                      <div
+                                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                                      >
+                                        <button
+                                          class="euiButton euiButton--primary euiButton--small euiButton--fill"
+                                          type="button"
+                                        >
+                                          <span
+                                            class="euiButtonContent euiButton__content"
                                           >
                                             <svg
                                               aria-hidden="true"
-                                              class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                              class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                                               focusable="false"
                                               height="16"
                                               role="img"
@@ -772,20 +907,13 @@ exports[`Select dashboard flyout should render 1`] = `
                                                 d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
                                               />
                                             </svg>
+                                            <span
+                                              class="euiButton__text"
+                                            >
+                                              Create Dashboard
+                                            </span>
                                           </span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div
-                                      class="euiText euiText--extraSmall euiSelectableMessage"
-                                      id="random_html_id"
-                                    >
-                                      <div
-                                        class="euiTextColor euiTextColor--subdued"
-                                      >
-                                        <p>
-                                          No options available
-                                        </p>
+                                        </button>
                                       </div>
                                     </div>
                                   </div>
@@ -917,33 +1045,72 @@ exports[`Select dashboard flyout should render 1`] = `
                                     class="euiFlyoutBody__overflowContent"
                                   >
                                     <div
-                                      class="euiSelectable euiSelectable-fullHeight"
+                                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
                                     >
                                       <div
-                                        class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+                                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                                      >
+                                        <svg
+                                          aria-hidden="true"
+                                          class="euiIcon euiIcon--xLarge euiIcon--app euiIcon-isLoading"
+                                          focusable="false"
+                                          height="16"
+                                          role="img"
+                                          viewBox="0 0 16 16"
+                                          width="16"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <path
+                                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                          />
+                                        </svg>
+                                      </div>
+                                      <div
+                                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                                      >
+                                        <h3
+                                          class="euiTitle euiTitle--small"
+                                        >
+                                          No dashboards
+                                        </h3>
+                                      </div>
+                                      <div
+                                        class="euiSpacer euiSpacer--l"
+                                      />
+                                      <div
+                                        class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                                       >
                                         <div
-                                          class="euiFormControlLayout__childrenWrapper"
+                                          class="euiFlexItem euiFlexItem--flexGrowZero"
                                         >
-                                          <input
-                                            aria-activedescendant=""
-                                            aria-haspopup="listbox"
-                                            aria-label="Filter options"
-                                            autocomplete="off"
-                                            class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
-                                            placeholder="Search for a dashboard..."
-                                            type="search"
-                                            value=""
-                                          />
-                                          <div
-                                            class="euiFormControlLayoutIcons"
+                                          <button
+                                            class="euiButton euiButton--primary euiButton--small"
+                                            type="button"
                                           >
                                             <span
-                                              class="euiFormControlLayoutCustomIcon"
+                                              class="euiButtonContent euiButton__content"
+                                            >
+                                              <span
+                                                class="euiButton__text"
+                                              >
+                                                Install Sample Data
+                                              </span>
+                                            </span>
+                                          </button>
+                                        </div>
+                                        <div
+                                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                                        >
+                                          <button
+                                            class="euiButton euiButton--primary euiButton--small euiButton--fill"
+                                            type="button"
+                                          >
+                                            <span
+                                              class="euiButtonContent euiButton__content"
                                             >
                                               <svg
                                                 aria-hidden="true"
-                                                class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                                class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                                                 focusable="false"
                                                 height="16"
                                                 role="img"
@@ -955,20 +1122,13 @@ exports[`Select dashboard flyout should render 1`] = `
                                                   d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
                                                 />
                                               </svg>
+                                              <span
+                                                class="euiButton__text"
+                                              >
+                                                Create Dashboard
+                                              </span>
                                             </span>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div
-                                        class="euiText euiText--extraSmall euiSelectableMessage"
-                                        id="random_html_id"
-                                      >
-                                        <div
-                                          class="euiTextColor euiTextColor--subdued"
-                                        >
-                                          <p>
-                                            No options available
-                                          </p>
+                                          </button>
                                         </div>
                                       </div>
                                     </div>
@@ -1165,117 +1325,209 @@ exports[`Select dashboard flyout should render 1`] = `
                               <div
                                 className="euiFlyoutBody__overflowContent"
                               >
-                                <EuiSelectable
-                                  height="full"
-                                  isPreFiltered={false}
-                                  listProps={
-                                    Object {
-                                      "bordered": false,
-                                    }
-                                  }
-                                  onChange={[Function]}
-                                  options={Array []}
-                                  searchProps={
-                                    Object {
-                                      "compressed": true,
-                                      "placeholder": "Search for a dashboard...",
-                                    }
-                                  }
-                                  searchable={true}
-                                  singleSelection="always"
+                                <EuiFlexGroup
+                                  alignItems="center"
+                                  direction="column"
+                                  justifyContent="center"
                                 >
                                   <div
-                                    className="euiSelectable euiSelectable-fullHeight"
-                                    onBlur={[Function]}
-                                    onFocus={[Function]}
-                                    onKeyDown={[Function]}
+                                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
                                   >
-                                    <EuiI18n
-                                      default="Filter options"
-                                      token="euiSelectable.placeholderName"
+                                    <EuiFlexItem
+                                      grow={false}
                                     >
-                                      <EuiSelectableSearch
-                                        aria-activedescendant=""
-                                        aria-label="Filter options"
-                                        compressed={true}
-                                        defaultValue=""
-                                        isPreFiltered={false}
-                                        key="listSearch"
-                                        onChange={[Function]}
-                                        options={Array []}
-                                        placeholder="Search for a dashboard..."
+                                      <div
+                                        className="euiFlexItem euiFlexItem--flexGrowZero"
                                       >
-                                        <EuiFieldSearch
-                                          aria-activedescendant=""
-                                          aria-haspopup="listbox"
-                                          aria-label="Filter options"
-                                          autoComplete="off"
-                                          className="euiSelectableSearch"
-                                          compressed={true}
-                                          defaultValue=""
-                                          fullWidth={true}
-                                          incremental={true}
-                                          isClearable={true}
-                                          isLoading={false}
-                                          onSearch={[Function]}
-                                          placeholder="Search for a dashboard..."
+                                        <EuiIcon
+                                          size="xl"
+                                          type="dashboardApp"
                                         >
-                                          <EuiFormControlLayout
-                                            compressed={true}
-                                            fullWidth={true}
-                                            icon="search"
-                                            isLoading={false}
+                                          <EuiIconBeaker
+                                            aria-hidden={true}
+                                            className="euiIcon euiIcon--xLarge euiIcon--app euiIcon-isLoading"
+                                            focusable="false"
+                                            role="img"
+                                            style={null}
                                           >
-                                            <div
-                                              className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+                                            <svg
+                                              aria-hidden={true}
+                                              className="euiIcon euiIcon--xLarge euiIcon--app euiIcon-isLoading"
+                                              focusable="false"
+                                              height={16}
+                                              role="img"
+                                              style={null}
+                                              viewBox="0 0 16 16"
+                                              width={16}
+                                              xmlns="http://www.w3.org/2000/svg"
                                             >
-                                              <div
-                                                className="euiFormControlLayout__childrenWrapper"
+                                              <path
+                                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                              />
+                                            </svg>
+                                          </EuiIconBeaker>
+                                        </EuiIcon>
+                                      </div>
+                                    </EuiFlexItem>
+                                    <EuiFlexItem
+                                      grow={false}
+                                    >
+                                      <div
+                                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                                      >
+                                        <EuiTitle
+                                          size="s"
+                                        >
+                                          <h3
+                                            className="euiTitle euiTitle--small"
+                                          >
+                                            No dashboards
+                                          </h3>
+                                        </EuiTitle>
+                                      </div>
+                                    </EuiFlexItem>
+                                    <EuiSpacer
+                                      size="l"
+                                    >
+                                      <div
+                                        className="euiSpacer euiSpacer--l"
+                                      />
+                                    </EuiSpacer>
+                                    <EuiFlexGroup
+                                      gutterSize="m"
+                                      justifyContent="center"
+                                    >
+                                      <div
+                                        className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                      >
+                                        <EuiFlexItem
+                                          grow={false}
+                                        >
+                                          <div
+                                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                                          >
+                                            <EuiSmallButton
+                                              onClick={[Function]}
+                                            >
+                                              <EuiButton
+                                                onClick={[Function]}
+                                                size="s"
                                               >
-                                                <EuiValidatableControl>
-                                                  <input
-                                                    aria-activedescendant=""
-                                                    aria-haspopup="listbox"
-                                                    aria-label="Filter options"
-                                                    autoComplete="off"
-                                                    className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
-                                                    defaultValue=""
-                                                    onKeyUp={[Function]}
-                                                    placeholder="Search for a dashboard..."
-                                                    type="search"
-                                                  />
-                                                </EuiValidatableControl>
-                                                <EuiFormControlLayoutIcons
-                                                  compressed={true}
-                                                  icon="search"
-                                                  isLoading={false}
+                                                <EuiButtonDisplay
+                                                  baseClassName="euiButton"
+                                                  disabled={false}
+                                                  element="button"
+                                                  isDisabled={false}
+                                                  onClick={[Function]}
+                                                  size="s"
+                                                  type="button"
                                                 >
-                                                  <div
-                                                    className="euiFormControlLayoutIcons"
+                                                  <button
+                                                    className="euiButton euiButton--primary euiButton--small"
+                                                    disabled={false}
+                                                    onClick={[Function]}
+                                                    style={
+                                                      Object {
+                                                        "minWidth": undefined,
+                                                      }
+                                                    }
+                                                    type="button"
                                                   >
-                                                    <EuiFormControlLayoutCustomIcon
-                                                      size="s"
-                                                      type="search"
+                                                    <EuiButtonContent
+                                                      className="euiButton__content"
+                                                      iconGap="m"
+                                                      iconSide="left"
+                                                      textProps={
+                                                        Object {
+                                                          "className": "euiButton__text",
+                                                        }
+                                                      }
                                                     >
                                                       <span
-                                                        className="euiFormControlLayoutCustomIcon"
+                                                        className="euiButtonContent euiButton__content"
+                                                      >
+                                                        <span
+                                                          className="euiButton__text"
+                                                        >
+                                                          Install Sample Data
+                                                        </span>
+                                                      </span>
+                                                    </EuiButtonContent>
+                                                  </button>
+                                                </EuiButtonDisplay>
+                                              </EuiButton>
+                                            </EuiSmallButton>
+                                          </div>
+                                        </EuiFlexItem>
+                                        <EuiFlexItem
+                                          grow={false}
+                                        >
+                                          <div
+                                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                                          >
+                                            <EuiSmallButton
+                                              fill={true}
+                                              iconType="plusInCircle"
+                                              onClick={[Function]}
+                                            >
+                                              <EuiButton
+                                                fill={true}
+                                                iconType="plusInCircle"
+                                                onClick={[Function]}
+                                                size="s"
+                                              >
+                                                <EuiButtonDisplay
+                                                  baseClassName="euiButton"
+                                                  disabled={false}
+                                                  element="button"
+                                                  fill={true}
+                                                  iconType="plusInCircle"
+                                                  isDisabled={false}
+                                                  onClick={[Function]}
+                                                  size="s"
+                                                  type="button"
+                                                >
+                                                  <button
+                                                    className="euiButton euiButton--primary euiButton--small euiButton--fill"
+                                                    disabled={false}
+                                                    onClick={[Function]}
+                                                    style={
+                                                      Object {
+                                                        "minWidth": undefined,
+                                                      }
+                                                    }
+                                                    type="button"
+                                                  >
+                                                    <EuiButtonContent
+                                                      className="euiButton__content"
+                                                      iconGap="m"
+                                                      iconSide="left"
+                                                      iconType="plusInCircle"
+                                                      textProps={
+                                                        Object {
+                                                          "className": "euiButton__text",
+                                                        }
+                                                      }
+                                                    >
+                                                      <span
+                                                        className="euiButtonContent euiButton__content"
                                                       >
                                                         <EuiIcon
-                                                          aria-hidden="true"
-                                                          className="euiFormControlLayoutCustomIcon__icon"
-                                                          size="s"
-                                                          type="search"
+                                                          className="euiButtonContent__icon"
+                                                          color="inherit"
+                                                          size="m"
+                                                          type="plusInCircle"
                                                         >
                                                           <EuiIconBeaker
                                                             aria-hidden={true}
-                                                            className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                                                             focusable="false"
                                                             role="img"
                                                             style={null}
                                                           >
                                                             <svg
                                                               aria-hidden={true}
-                                                              className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                                              className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
                                                               focusable="false"
                                                               height={16}
                                                               role="img"
@@ -1290,52 +1542,23 @@ exports[`Select dashboard flyout should render 1`] = `
                                                             </svg>
                                                           </EuiIconBeaker>
                                                         </EuiIcon>
+                                                        <span
+                                                          className="euiButton__text"
+                                                        >
+                                                          Create Dashboard
+                                                        </span>
                                                       </span>
-                                                    </EuiFormControlLayoutCustomIcon>
-                                                  </div>
-                                                </EuiFormControlLayoutIcons>
-                                              </div>
-                                            </div>
-                                          </EuiFormControlLayout>
-                                        </EuiFieldSearch>
-                                      </EuiSelectableSearch>
-                                    </EuiI18n>
-                                    <EuiSelectableMessage
-                                      bordered={false}
-                                      id="random_html_id"
-                                    >
-                                      <EuiText
-                                        className="euiSelectableMessage"
-                                        color="subdued"
-                                        id="random_html_id"
-                                        size="xs"
-                                      >
-                                        <div
-                                          className="euiText euiText--extraSmall euiSelectableMessage"
-                                          id="random_html_id"
-                                        >
-                                          <EuiTextColor
-                                            color="subdued"
-                                            component="div"
-                                          >
-                                            <div
-                                              className="euiTextColor euiTextColor--subdued"
-                                            >
-                                              <p>
-                                                <EuiI18n
-                                                  default="No options available"
-                                                  token="euiSelectable.noAvailableOptions"
-                                                >
-                                                  No options available
-                                                </EuiI18n>
-                                              </p>
-                                            </div>
-                                          </EuiTextColor>
-                                        </div>
-                                      </EuiText>
-                                    </EuiSelectableMessage>
+                                                    </EuiButtonContent>
+                                                  </button>
+                                                </EuiButtonDisplay>
+                                              </EuiButton>
+                                            </EuiSmallButton>
+                                          </div>
+                                        </EuiFlexItem>
+                                      </div>
+                                    </EuiFlexGroup>
                                   </div>
-                                </EuiSelectable>
+                                </EuiFlexGroup>
                               </div>
                             </div>
                           </div>

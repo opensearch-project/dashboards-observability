@@ -24,9 +24,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
   const getImage = (url?: string) => {
     let optionalImg;
     if (url) {
-      optionalImg = (
-        <img style={{ height: 100, width: 100 }} alt="" className="synopsisIcon" src={url} />
-      );
+      optionalImg = <img alt="" className="synopsisIcon" src={url} />;
     }
     return optionalImg;
   };
@@ -78,7 +76,6 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
             );
           })}
         </EuiFlexGroup>
-        <EuiSpacer />
       </>
     );
   };
@@ -108,7 +105,7 @@ export function AvailableIntegrationsCardView(props: AvailableIntegrationsCardVi
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
+      <EuiSpacer size="m" />
       {renderRows(props.data.hits.filter((x) => x.name.includes(props.query)))}
     </EuiPanel>
   );

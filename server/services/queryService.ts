@@ -6,10 +6,11 @@
 import 'core-js/stable';
 import _ from 'lodash';
 import 'regenerator-runtime/runtime';
+import { Logger } from '../../../../src/core/server';
 
 export class QueryService {
   private client: any;
-  constructor(client: any) {
+  constructor(client: any, private readonly logger: Logger) {
     this.client = client;
   }
 
@@ -50,7 +51,7 @@ export class QueryService {
       return {
         data: {
           ok: false,
-          resp: err.message,
+          resp: err.response,
           body: err.body,
         },
       };

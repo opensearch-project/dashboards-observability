@@ -30,6 +30,9 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
         "getHelpExtension$": [MockFunction],
         "getIsNavDrawerLocked$": [MockFunction],
         "getIsVisible$": [MockFunction],
+        "globalSearch": Object {
+          "getAllSearchCommands": [MockFunction],
+        },
         "logos": Object {
           "AnimatedMark": Object {
             "dark": Object {
@@ -204,6 +207,9 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
           "getHelpExtension$": [MockFunction],
           "getIsNavDrawerLocked$": [MockFunction],
           "getIsVisible$": [MockFunction],
+          "globalSearch": Object {
+            "getAllSearchCommands": [MockFunction],
+          },
           "logos": Object {
             "AnimatedMark": Object {
               "dark": Object {

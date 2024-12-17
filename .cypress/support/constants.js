@@ -7,4 +7,3 @@ export const ADMIN_AUTH = {
   username: 'admin',
   password: 'admin',
 };
-

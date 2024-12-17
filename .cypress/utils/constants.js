@@ -17,8 +17,9 @@ export const DATASOURCES_PATH = {
 // trace analytics
 export const TRACE_ID = '8832ed6abbb2a83516461960c89af49d';
 export const SPAN_ID = 'a673bc074b438374';
+export const SPAN_ID_TREE_VIEW = 'fe4076542b41d40b';
 export const SERVICE_NAME = 'frontend-client';
-export const SERVICE_SPAN_ID = '7df5609a6d104736';
+export const SERVICE_SPAN_ID = 'e275ac9d21929e9b';
 export const AUTH_SERVICE_SPAN_ID = '277a5934acf55dcf';
 
 export const testDataSet = [
@@ -68,9 +69,6 @@ export const setTimeFilter = (setEndTime = false, refresh = true) => {
   cy.get('button.euiButtonEmpty[aria-label="Date quick select"]').click();
   cy.get('.euiQuickSelect__applyButton').click();
   cy.get('.euiSuperDatePicker__prettyFormatLink').click();
-  cy.get(
-    'button.euiDatePopoverButton--start[data-test-subj="superDatePickerstartDatePopoverButton"]'
-  ).click();
   cy.get('.euiTab__content').contains('Absolute').click();
   cy.get('input[data-test-subj="superDatePickerAbsoluteDateInput"]')
     .focus()
@@ -84,8 +82,14 @@ export const setTimeFilter = (setEndTime = false, refresh = true) => {
       .focus()
       .type('{selectall}' + endTime, { force: true });
   }
-  if (refresh) cy.get('.euiButton__text').contains('Refresh').click();
+  if (refresh) cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
   cy.get('.euiTableRow').should('have.length.greaterThan', 3); //Replaces Wait
+};
+
+export const expandServiceView = (rowIndex = 0) => {
+  cy.get('*[data-test-subj^="service-flyout-action-btntrace_service"]').eq(rowIndex).click();
+  cy.get('[data-test-subj="ActionContextMenu"]').click();
+  cy.get('[data-test-subj="viewServiceButton"]').click();
 };
 
 // notebooks
@@ -94,7 +98,7 @@ export const TEST_INTEGRATION_INSTANCE = 'nginx-test';
 export const TEST_SAMPLE_INSTANCE = 'nginx-sample';
 export const SAMPLE_URL = 'https://github.com/opensearch-project/sql/tree/main/sql-jdbc';
 export const NOTEBOOK_TEXT =
-  'Use Notebooks to interactively and collaboratively develop rich reports backed by live data. Common use cases for notebooks includes creating postmortem reports, designing run books, building live infrastructure reports, or even documentation.';
+  'Use Notebooks to interactively and collaboratively develop rich reports backed by live data. Common use cases for notebooks include creating postmortem reports, designing run books, building live infrastructure reports, or even documentation.';
 export const OPENSEARCH_URL = 'https://opensearch.org/docs/latest/observability-plugin/notebooks/';
 export const MARKDOWN_TEXT = `%md
 # Heading 1
@@ -126,8 +130,16 @@ export const SQL_QUERY_TEXT = `%sql
 select * from opensearch_dashboards_sample_data_flights limit 20 {enter}
 `;
 
+export const SQL_INCORRECT_QUERY_TEXT = `%sql 
+selectaaaaa * from opensearch_dashboards_sample_data_flights limit 20 {enter}
+`;
+
 export const PPL_QUERY_TEXT = `%ppl
 source=opensearch_dashboards_sample_data_flights {enter}
+`;
+
+export const PPL_INCORRECT_QUERY_TEXT = `%ppl
+source=opensearch_dashboards_sample_data_flights__ {enter}
 `;
 
 export const suppressResizeObserverIssue = () => {

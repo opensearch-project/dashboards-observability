@@ -4,9 +4,9 @@
  */
 
 import {
-  EuiSmallButton,
   EuiButtonGroup,
   EuiButtonGroupOptionProps,
+  EuiButtonIcon,
   EuiCallOut,
   EuiCard,
   EuiContextMenu,
@@ -19,11 +19,13 @@ import {
   EuiPageBody,
   EuiPanel,
   EuiPopover,
+  EuiSmallButton,
   EuiSpacer,
   EuiText,
-  EuiButtonIcon,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
+import { FormattedMessage } from '@osd/i18n/react';
 import CSS from 'csstype';
 import moment from 'moment';
 import queryString from 'query-string';
@@ -41,6 +43,8 @@ import { CREATE_NOTE_MESSAGE, NOTEBOOKS_API_PREFIX } from '../../../../common/co
 import { UI_DATE_FORMAT } from '../../../../common/constants/shared';
 import { ParaType } from '../../../../common/types/notebooks';
 import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs';
+import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
+import { coreRefs } from '../../../framework/core_refs';
 import PPLService from '../../../services/requests/ppl';
 import { GenerateReportLoadingModal } from './helpers/custom_modals/reporting_loading_modal';
 import { defaultParagraphParser } from './helpers/default_parser';
@@ -52,8 +56,6 @@ import {
   generateInContextReport,
 } from './helpers/reporting_context_menu_helper';
 import { Paragraphs } from './paragraph_components/paragraphs';
-import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
-import { coreRefs } from '../../../framework/core_refs';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
@@ -414,7 +416,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     };
 
     return this.props.http
-      .post(`${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/`, {
+      .post(`${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph`, {
         body: JSON.stringify(addParaObj),
       })
       .then((res) => {
@@ -466,7 +468,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     };
 
     return this.props.http
-      .post(`${NOTEBOOKS_API_PREFIX}/savedNotebook/set_paragraphs/`, {
+      .post(`${NOTEBOOKS_API_PREFIX}/savedNotebook/set_paragraphs`, {
         body: JSON.stringify(moveParaObj),
       })
       .then((_res) => this.setState({ paragraphs, parsedPara }))
@@ -497,7 +499,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       noteId: this.props.openedNoteId,
     };
     this.props.http
-      .put(`${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/clearall/`, {
+      .put(`${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/clearall`, {
         body: JSON.stringify(clearParaObj),
       })
       .then((res) => {
@@ -535,7 +537,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     };
     const isValid = isValidUUID(this.props.openedNoteId);
     const route = isValid
-      ? `${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/update/run/`
+      ? `${NOTEBOOKS_API_PREFIX}/savedNotebook/paragraph/update/run`
       : `${NOTEBOOKS_API_PREFIX}/paragraph/update/run/`;
     return this.props.http
       .post(route, {
@@ -968,31 +970,33 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       },
     ];
 
-    const showReportingContextMenu = this.state.isReportingPluginInstalled ? (
-      <div>
-        <EuiPopover
-          panelPaddingSize="none"
-          button={
-            <EuiSmallButton
-              id="reportingActionsButton"
-              iconType="arrowDown"
-              iconSide="right"
-              onClick={() =>
-                this.setState({
-                  isReportingActionsPopoverOpen: !this.state.isReportingActionsPopoverOpen,
-                })
-              }
-            >
-              Reporting
-            </EuiSmallButton>
-          }
-          isOpen={this.state.isReportingActionsPopoverOpen}
-          closePopover={() => this.setState({ isReportingActionsPopoverOpen: false })}
-        >
-          <EuiContextMenu initialPanelId={0} panels={reportingActionPanels} size="s" />
-        </EuiPopover>
-      </div>
-    ) : null;
+    const showReportingContextMenu =
+      this.state.isReportingPluginInstalled && !this.state.dataSourceMDSEnabled ? (
+        <div>
+          <EuiPopover
+            panelPaddingSize="none"
+            button={
+              <EuiSmallButton
+                data-test-subj="reporting-actions-button"
+                id="reportingActionsButton"
+                iconType="arrowDown"
+                iconSide="right"
+                onClick={() =>
+                  this.setState({
+                    isReportingActionsPopoverOpen: !this.state.isReportingActionsPopoverOpen,
+                  })
+                }
+              >
+                Reporting
+              </EuiSmallButton>
+            }
+            isOpen={this.state.isReportingActionsPopoverOpen}
+            closePopover={() => this.setState({ isReportingActionsPopoverOpen: false })}
+          >
+            <EuiContextMenu initialPanelId={0} panels={reportingActionPanels} size="s" />
+          </EuiPopover>
+        </div>
+      ) : null;
 
     const showLoadingModal = this.state.isReportingLoadingModalOpen ? (
       <GenerateReportLoadingModal setShowLoading={this.toggleReportingLoadingModal} />
@@ -1003,45 +1007,72 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         {this.state.savedObjectNotebook ? (
           <>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                color="danger"
-                display="base"
-                iconType="trash"
-                size="s"
-                onClick={this.showDeleteNotebookModal}
-                data-test-subj="notebook-delete-icon"
-              />
+              <EuiToolTip
+                content={
+                  <FormattedMessage id="notebook.deleteButton.tooltip" defaultMessage="Delete" />
+                }
+              >
+                <EuiButtonIcon
+                  color="danger"
+                  display="base"
+                  iconType="trash"
+                  size="s"
+                  onClick={this.showDeleteNotebookModal}
+                  data-test-subj="notebook-delete-icon"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                display="base"
-                iconType="pencil"
-                size="s"
-                onClick={this.showRenameModal}
-                data-test-subj="notebook-edit-icon"
-              />
+              <EuiToolTip
+                content={
+                  <FormattedMessage id="notebook.editButton.tooltip" defaultMessage="Edit name" />
+                }
+              >
+                <EuiButtonIcon
+                  display="base"
+                  iconType="pencil"
+                  size="s"
+                  onClick={this.showRenameModal}
+                  data-test-subj="notebook-edit-icon"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="copy"
-                display="base"
-                size="s"
-                onClick={this.showCloneModal}
-                data-test-subj="notebook-duplicate-icon"
-              />
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="notebook.duplicateButton.tooltip"
+                    defaultMessage="Duplicate"
+                  />
+                }
+              >
+                <EuiButtonIcon
+                  iconType="copy"
+                  display="base"
+                  size="s"
+                  onClick={this.showCloneModal}
+                  data-test-subj="notebook-duplicate-icon"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </>
         ) : (
           <>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                color="danger"
-                display="base"
-                iconType="trash"
-                size="s"
-                onClick={this.showDeleteNotebookModal}
-                data-test-subj="notebook-delete-icon"
-              />
+              <EuiToolTip
+                content={
+                  <FormattedMessage id="notebook.deleteButton.tooltip" defaultMessage="Delete" />
+                }
+              >
+                <EuiButtonIcon
+                  color="danger"
+                  display="base"
+                  iconType="trash"
+                  size="s"
+                  onClick={this.showDeleteNotebookModal}
+                  data-test-subj="notebook-delete-icon"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </>
         )}

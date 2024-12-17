@@ -13,7 +13,7 @@ import {
   EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
-  EuiSmallButtonIcon,
+  EuiSpacer,
   EuiTextColor,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
@@ -126,13 +126,14 @@ export function Filters(props: FiltersOwnProps) {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const button = (
       <EuiButtonEmpty
-        size="xs"
+        size="s"
         flush="left"
+        iconType="plusInCircle"
         onClick={() => {
           setIsPopoverOpen(true);
         }}
       >
-        + Add filter
+        Add filter
       </EuiButtonEmpty>
     );
 
@@ -224,21 +225,51 @@ export function Filters(props: FiltersOwnProps) {
 
   const filterComponents = useMemo(() => renderFilters(), [props.filters]);
 
-  return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      {filterComponents}
-      <EuiFlexItem grow={false}>
-        <AddFilterButton />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  return props.filters.length > 0 ? (
+    <>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        {filterComponents}
+        <EuiFlexItem grow={false}>
+          <AddFilterButton />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  ) : null;
 }
 
-export const GlobalFilterButton = ({ filters, setFilters }) => {
+export const GlobalFilterButton = ({
+  filters,
+  setFilters,
+  attributesFilterFields,
+  mode,
+  page,
+}: {
+  filters: FilterType[];
+  setFilters: (filters: FilterType[]) => void;
+  attributesFilterFields: string[];
+  mode: TraceAnalyticsMode;
+  page: 'dashboard' | 'traces' | 'services' | 'app';
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const filterFieldOptions = useMemo(
+    () =>
+      getFilterFields(mode, page, attributesFilterFields).map((field) => ({
+        label: field,
+        'data-test-subj': `filterFieldOptions-${field}`,
+      })),
+    [mode, page, attributesFilterFields]
+  );
 
   const togglePopover = () => {
     setIsPopoverOpen(!isPopoverOpen);
+  };
+
+  const handleAddFilter = (newFilter: FilterType) => {
+    const updatedFilters = [...filters, newFilter];
+    setFilters(updatedFilters);
+    togglePopover();
   };
 
   const globalPopoverPanels = [
@@ -246,6 +277,12 @@ export const GlobalFilterButton = ({ filters, setFilters }) => {
       id: 0,
       title: 'Change all filters',
       items: [
+        {
+          name: 'Add filter',
+          icon: <EuiIcon type="plusInCircle" size="m" />,
+          onClick: () => setIsPopoverOpen(true),
+          panel: 1,
+        },
         {
           name: 'Enable all',
           icon: <EuiIcon type="eye" size="m" />,
@@ -312,6 +349,21 @@ export const GlobalFilterButton = ({ filters, setFilters }) => {
         },
       ],
     },
+    {
+      id: 1,
+      title: 'Add filter',
+      width: 530,
+      content: (
+        <div style={{ margin: 15 }}>
+          <FilterEditPopover
+            filterFieldOptions={filterFieldOptions}
+            index={filters.length}
+            setFilter={handleAddFilter}
+            closePopover={() => setIsPopoverOpen(false)}
+          />
+        </div>
+      ),
+    },
   ];
 
   return (
@@ -319,14 +371,11 @@ export const GlobalFilterButton = ({ filters, setFilters }) => {
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       button={
-        <EuiSmallButtonIcon
-          onClick={togglePopover}
-          iconType="filter"
-          title="Change all filters"
-          aria-label="Change all filters"
-        />
+        <EuiButtonEmpty size="s" iconType="filter" onClick={togglePopover}>
+          <EuiIcon type="arrowDown" />
+        </EuiButtonEmpty>
       }
-      anchorPosition="rightUp"
+      anchorPosition="downLeft"
       panelPaddingSize="none"
       data-test-subj="global-filter-button"
     >

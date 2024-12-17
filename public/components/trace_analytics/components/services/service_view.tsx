@@ -4,6 +4,7 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
+import dateMath from '@elastic/datemath';
 import {
   EuiBadge,
   EuiContextMenu,
@@ -26,18 +27,16 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  DataSourceManagementPluginSetup,
-  DataSourceViewConfig,
-} from '../../../../../../../src/plugins/data_source_management/public';
+import { useLocation } from 'react-router-dom';
+import { DataSourceManagementPluginSetup } from '../../../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
 import {
   DEFAULT_DATA_SOURCE_NAME,
   DEFAULT_DATA_SOURCE_TYPE,
 } from '../../../../../common/constants/data_sources';
 import { observabilityLogsID } from '../../../../../common/constants/shared';
+import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
 import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
-import { dataSourceFilterFn } from '../../../../../common/utils/shared';
 import { coreRefs } from '../../../../framework/core_refs';
 import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/plugin_headerControl';
 import { TraceAnalyticsComponentDeps } from '../../home';
@@ -46,7 +45,12 @@ import {
   handleServiceViewRequest,
 } from '../../requests/services_request_handler';
 import { FilterType } from '../common/filters/filters';
-import { PanelTitle, filtersToDsl, processTimeStamp } from '../common/helper_functions';
+import {
+  PanelTitle,
+  filtersToDsl,
+  generateServiceUrl,
+  processTimeStamp,
+} from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBarProps, renderDatePicker } from '../common/search_bar';
 import { SpanDetailFlyout } from '../traces/span_detail_flyout';
@@ -72,6 +76,20 @@ export function ServiceView(props: ServiceViewProps) {
   >('latency');
   const [redirect, setRedirect] = useState(false);
   const [actionsMenuPopover, setActionsMenuPopover] = useState(false);
+  const [serviceId, setServiceId] = useState<string | null>(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(location?.search || '');
+      const id = params.get('serviceId');
+      setServiceId(id);
+    } catch (error) {
+      setServiceId(null);
+    }
+  }, [location]);
+
+  const hideSearchBarCheck = page === 'serviceFlyout' || serviceId !== '';
 
   const refresh = () => {
     const DSL = filtersToDsl(
@@ -118,16 +136,15 @@ export function ServiceView(props: ServiceViewProps) {
           },
           {
             text: props.serviceName,
-            href: `#/services/${encodeURIComponent(props.serviceName)}`,
+            href: generateServiceUrl(props.serviceName, props.dataSourceMDSId[0].id),
           },
         ]
       );
-  }, [props.serviceName]);
-
-  const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
+    props.setDataSourceMenuSelectable?.(false);
+  }, [props.serviceName, props.setDataSourceMenuSelectable]);
 
   const redirectToServicePage = (service: string) => {
-    window.location.href = `#/services/${service}`;
+    window.location.href = generateServiceUrl(service, props.dataSourceMDSId[0].id);
   };
 
   const onClickConnectedService = (service: string) => {
@@ -161,7 +178,7 @@ export function ServiceView(props: ServiceViewProps) {
       data-test-subj="ActionContextMenu"
       iconType="arrowDown"
       iconSide="right"
-      onClick={() => setActionsMenuPopover(true)}
+      onClick={() => setActionsMenuPopover(!actionsMenuPopover)}
     >
       Actions
     </EuiSmallButton>
@@ -177,16 +194,39 @@ export function ServiceView(props: ServiceViewProps) {
                 name: 'View logs',
                 'data-test-subj': 'viewLogsButton',
                 onClick: () => {
-                  coreRefs?.application!.navigateToApp(observabilityLogsID, {
-                    path: `#/explorer`,
-                    state: {
-                      DEFAULT_DATA_SOURCE_NAME,
-                      DEFAULT_DATA_SOURCE_TYPE,
-                      queryToRun: `source = ss4o_logs-* | where serviceName='${props.serviceName}'`,
-                      startTimeRange: props.startTime,
-                      endTimeRange: props.endTime,
-                    },
-                  });
+                  // NOTE: Discover has issue with PPL Time filter, hence adding +3/-3 days to actual timestamp
+                  const startTime =
+                    dateMath
+                      .parse(props.startTime)!
+                      .subtract(3, 'days')
+                      .format(TRACE_ANALYTICS_DATE_FORMAT) ?? 'now-3y';
+                  const endTime =
+                    dateMath
+                      .parse(props.endTime, { roundUp: true })!
+                      .add(3, 'days')
+                      .format(TRACE_ANALYTICS_DATE_FORMAT) ?? 'now';
+                  if (coreRefs?.dataSource?.dataSourceEnabled) {
+                    coreRefs?.application!.navigateToApp('data-explorer', {
+                      path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'${startTime}',to:'${endTime}'))&_q=(filters:!(),query:(dataset:(dataSource:(id:'${
+                        props.dataSourceMDSId[0].id ?? ''
+                      }',title:'${props.dataSourceMDSId[0].label}',type:DATA_SOURCE),id:'${
+                        props.dataSourceMDSId[0].id ?? ''
+                      }::ss4o_logs-*',timeFieldName:'time',title:'ss4o_logs-*',type:INDEXES),language:PPL,query:'source%20%3D%20ss4o_logs-%2A%20%7C%20where%20serviceName%20%3D%20%22${
+                        props.serviceName
+                      }%22'))`,
+                    });
+                  } else {
+                    coreRefs?.application!.navigateToApp(observabilityLogsID, {
+                      path: `#/explorer`,
+                      state: {
+                        DEFAULT_DATA_SOURCE_NAME,
+                        DEFAULT_DATA_SOURCE_TYPE,
+                        queryToRun: `source = ss4o_logs-* | where serviceName='${props.serviceName}'`,
+                        startTimeRange: props.startTime,
+                        endTimeRange: props.endTime,
+                      },
+                    });
+                  }
                 },
               },
             ]
@@ -229,6 +269,11 @@ export function ServiceView(props: ServiceViewProps) {
           <EuiFlyoutHeader hasBorder>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem>{serviceHeader}</EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={true}>
+                {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   panelPaddingSize="none"
@@ -240,7 +285,6 @@ export function ServiceView(props: ServiceViewProps) {
                 </EuiPopover>
               </EuiFlexItem>
             </EuiFlexGroup>
-            {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}
           </EuiFlyoutHeader>
         ) : coreRefs?.chrome?.navGroup.getNavGroupEnabled() ? (
           <HeaderControlledComponentsWrapper
@@ -261,17 +305,6 @@ export function ServiceView(props: ServiceViewProps) {
   const renderOverview = () => {
     return (
       <>
-        {props.dataSourceEnabled && (
-          <DataSourceMenu
-            setMenuMountPoint={props.setActionMenu}
-            componentType={'DataSourceView'}
-            componentConfig={{
-              activeOption: props.dataSourceMDSId,
-              fullWidth: true,
-              dataSourceFilter: dataSourceFilterFn,
-            }}
-          />
-        )}
         <EuiPanel>
           <PanelTitle title="Overview" />
           <EuiHorizontalRule margin="m" />
@@ -470,20 +503,22 @@ export function ServiceView(props: ServiceViewProps) {
   }, [spanFilters]);
 
   const [total, setTotal] = useState(0);
-  const spanDetailTable = useMemo(
-    () => (
-      <SpanDetailTable
-        http={props.http}
-        hiddenColumns={['serviceName']}
-        DSL={DSL}
-        openFlyout={(spanId: string) => setCurrentSpan(spanId)}
-        setTotal={setTotal}
-        mode={mode}
-        dataSourceMDSId={props.dataSourceMDSId[0].id}
-      />
-    ),
-    [DSL, setCurrentSpan, spanFilters]
-  );
+  const spanDetailTable = useMemo(() => {
+    // only render when time and service state updates in DSL
+    if (Object.keys(DSL).length > 0)
+      return (
+        <SpanDetailTable
+          http={props.http}
+          hiddenColumns={['serviceName']}
+          DSL={DSL}
+          openFlyout={(spanId: string) => setCurrentSpan(spanId)}
+          setTotal={setTotal}
+          mode={mode}
+          dataSourceMDSId={props.dataSourceMDSId[0].id}
+        />
+      );
+    return <></>;
+  }, [DSL, setCurrentSpan, spanFilters]);
 
   const pageToRender = (
     <>
@@ -514,6 +549,8 @@ export function ServiceView(props: ServiceViewProps) {
             currService={props.serviceName}
             page="serviceView"
             filterByCurrService={true}
+            mode={mode}
+            hideSearchBar={hideSearchBarCheck}
           />
         </>
       ) : (
@@ -552,6 +589,7 @@ export function ServiceView(props: ServiceViewProps) {
             mode={mode}
             serviceName={props.serviceName}
             dataSourceMDSId={props.dataSourceMDSId[0].id}
+            dataSourceMDSLabel={props.dataSourceMDSId[0].label}
             startTime={props.startTime}
             endTime={props.endTime}
             setCurrentSpan={setCurrentSpan}
@@ -580,6 +618,7 @@ export function ServiceView(props: ServiceViewProps) {
                 addSpanFilter={addSpanFilter}
                 mode={mode}
                 dataSourceMDSId={props.dataSourceMDSId[0].id}
+                dataSourceMDSLabel={props.dataSourceMDSId[0].label}
               />
             )}
           </EuiPageBody>

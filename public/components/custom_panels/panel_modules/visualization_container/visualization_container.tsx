@@ -239,10 +239,7 @@ export const VisualizationContainer = ({
     </EuiContextMenuItem>,
   ];
 
-  if (
-    visualizationMetaData?.metricType === PROMQL_METRIC_SUBTYPE &&
-    actionMenuType === 'metricsGrid'
-  ) {
+  if (actionMenuType === 'metricsGrid') {
     popoverPanel = [showPPLQueryPanel];
   } else if (usedInNotebooks) {
     popoverPanel = [popoverPanel[0]];

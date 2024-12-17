@@ -83,6 +83,7 @@ export function SpanDetailFlyout(props: {
   addSpanFilter: (field: string, value: any) => void;
   mode: TraceAnalyticsMode;
   dataSourceMDSId: string;
+  dataSourceMDSLabel: string | undefined;
   serviceName?: string;
   setCurrentSelectedService?: React.Dispatch<React.SetStateAction<string>> | undefined;
   startTime?: string;
@@ -304,18 +305,34 @@ export function SpanDetailFlyout(props: {
   };
 
   const redirectToExplorer = () => {
+    // NOTE: Discover has issue with PPL Time filter, hence adding +3/-3 days to actual timestamp
+    const startTime =
+      moment(span.startTime).subtract(3, 'days').format(TRACE_ANALYTICS_DATE_FORMAT) ?? 'now-3y';
+    const endTime =
+      moment(span.endTime).add(3, 'days').format(TRACE_ANALYTICS_DATE_FORMAT) ?? 'now';
     const spanId = getSpanValue(span, mode, 'SPAN_ID');
     const spanField = getSpanFieldKey(mode, 'SPAN_ID');
-    coreRefs?.application!.navigateToApp(observabilityLogsID, {
-      path: `#/explorer`,
-      state: {
-        DEFAULT_DATA_SOURCE_NAME,
-        DEFAULT_DATA_SOURCE_TYPE,
-        queryToRun: `source = ss4o_logs-* | where ${spanField}='${spanId}'`,
-        startTimeRange: props.startTime,
-        endTimeRange: props.endTime,
-      },
-    });
+
+    if (coreRefs?.dataSource?.dataSourceEnabled) {
+      coreRefs?.application!.navigateToApp('data-explorer', {
+        path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'${startTime}',to:'${endTime}'))&_q=(filters:!(),query:(dataset:(dataSource:(id:'${
+          props.dataSourceMDSId ?? ''
+        }',title:${props.dataSourceMDSLabel},type:DATA_SOURCE),id:'${
+          props.dataSourceMDSId ?? ''
+        }::ss4o_logs-*',timeFieldName:'time',title:'ss4o_logs-*',type:INDEXES),language:PPL,query:'source%20%3D%20ss4o_logs-*%20%7C%20where%20${spanField}%20%3D%20!'${spanId}!''))`,
+      });
+    } else {
+      coreRefs?.application!.navigateToApp(observabilityLogsID, {
+        path: `#/explorer`,
+        state: {
+          DEFAULT_DATA_SOURCE_NAME,
+          DEFAULT_DATA_SOURCE_TYPE,
+          queryToRun: `source = ss4o_logs-* | where ${spanField}='${spanId}'`,
+          startTimeRange: startTime,
+          endTimeRange: endTime,
+        },
+      });
+    }
   };
 
   return (

@@ -11,7 +11,6 @@ import {
   EuiPageHeaderSection,
   EuiPanel,
   EuiSelectOption,
-  EuiSpacer,
   EuiTabbedContent,
   EuiTabbedContentTab,
   EuiText,
@@ -292,11 +291,10 @@ export function Application(props: AppDetailProps) {
   const getService = () => {
     return (
       <>
-        <EuiSpacer size="m" />
         <ServicesContent
           {...props}
           page="app"
-          nameColumnAction={nameColumnAction}
+          setCurrentSelectedService={nameColumnAction}
           traceColumnAction={traceColumnAction}
           parentBreadcrumb={parentBreadcrumbs[0]}
           childBreadcrumbs={childBreadcrumbs}
@@ -317,7 +315,6 @@ export function Application(props: AppDetailProps) {
   const getTrace = () => {
     return (
       <>
-        <EuiSpacer size="m" />
         <TracesContent
           {...props}
           page="app"
@@ -329,8 +326,10 @@ export function Application(props: AppDetailProps) {
           setStartTime={setStartTimeForApp}
           setEndTime={setEndTimeForApp}
           dataSourceMDSId={[{ id: '', label: '' }]}
+          setCurrentSelectedService={() => {}}
+          tracesTableMode="traces"
+          setTracesTableMode={() => {}}
         />
-        <EuiSpacer size="m" />
         <EuiPanel>
           <PanelTitle title="Spans" totalItems={totalSpans} />
           <EuiHorizontalRule margin="m" />

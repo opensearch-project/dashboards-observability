@@ -40,7 +40,7 @@ export function PanelsRouter(router: IRouter) {
       } catch (error: any) {
         console.error('Issue in fetching panel list:', error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode || 400,
           body: error.message,
         });
       }
@@ -77,7 +77,7 @@ export function PanelsRouter(router: IRouter) {
       } catch (error: any) {
         console.error('Issue in fetching panel:', error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode || 400,
           body: error.message,
         });
       }
@@ -118,7 +118,7 @@ export function PanelsRouter(router: IRouter) {
       } catch (error: any) {
         console.error('Issue in creating new panel', error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode || 400,
           body: error.message,
         });
       }
@@ -146,7 +146,7 @@ export function PanelsRouter(router: IRouter) {
       );
 
       try {
-        const responseBody = await customPanelBackend.updatePanel(
+        const _responseBody = await customPanelBackend.updatePanel(
           opensearchNotebooksClient,
           request.body.panelId,
           request.body.panel
@@ -159,7 +159,7 @@ export function PanelsRouter(router: IRouter) {
       } catch (error: any) {
         console.error('Issue in updating panel', error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode || 400,
           body: error.message,
         });
       }
@@ -187,7 +187,7 @@ export function PanelsRouter(router: IRouter) {
       );
 
       try {
-        const responseBody = await customPanelBackend.renamePanel(
+        const _responseBody = await customPanelBackend.renamePanel(
           opensearchNotebooksClient,
           request.body.panelId,
           request.body.panelName
@@ -200,7 +200,7 @@ export function PanelsRouter(router: IRouter) {
       } catch (error: any) {
         console.error('Issue in renaming panel', error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode || 400,
           body: error.message,
         });
       }
@@ -245,7 +245,7 @@ export function PanelsRouter(router: IRouter) {
       } catch (error: any) {
         console.error('Issue in cloning panel', error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode || 400,
           body: error.message,
         });
       }
@@ -272,7 +272,7 @@ export function PanelsRouter(router: IRouter) {
       );
 
       try {
-        const deleteResponse = await customPanelBackend.deletePanel(
+        const _deleteResponse = await customPanelBackend.deletePanel(
           opensearchNotebooksClient,
           request.params.panelId
         );
@@ -284,7 +284,7 @@ export function PanelsRouter(router: IRouter) {
       } catch (error: any) {
         console.error('Issue in deleting panel', error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode || 400,
           body: error.message,
         });
       }
@@ -311,7 +311,7 @@ export function PanelsRouter(router: IRouter) {
       );
 
       try {
-        const deleteResponse = await customPanelBackend.deletePanelList(
+        const _deleteResponse = await customPanelBackend.deletePanelList(
           opensearchNotebooksClient,
           request.params.panelIdList
         );
@@ -323,7 +323,7 @@ export function PanelsRouter(router: IRouter) {
       } catch (error: any) {
         console.error('Issue in deleting panel', error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode || 400,
           body: error.message,
         });
       }
@@ -354,7 +354,7 @@ export function PanelsRouter(router: IRouter) {
       );
 
       try {
-        const panelFilterResponse = await customPanelBackend.addPanelFilter(
+        const _panelFilterResponse = await customPanelBackend.addPanelFilter(
           opensearchNotebooksClient,
           request.body.panelId,
           request.body.query,
@@ -370,7 +370,7 @@ export function PanelsRouter(router: IRouter) {
       } catch (error: any) {
         console.error('Issue in adding query filter', error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode || 400,
           body: error.message,
         });
       }
@@ -409,7 +409,7 @@ export function PanelsRouter(router: IRouter) {
       } catch (error: any) {
         console.error('Issue in fetching panel list:', error);
         return response.custom({
-          statusCode: error.statusCode || 500,
+          statusCode: error.statusCode || 400,
           body: error.message,
         });
       }

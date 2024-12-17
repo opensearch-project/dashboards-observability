@@ -20,6 +20,9 @@ exports[`Service Config component renders empty service config 1`] = `
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
+      "globalSearch": Object {
+        "getAllSearchCommands": [MockFunction],
+      },
       "logos": Object {
         "AnimatedMark": Object {
           "dark": Object {
@@ -702,6 +705,7 @@ exports[`Service Config component renders empty service config 1`] = `
                         buttonSize="s"
                         color="text"
                         idSelected="latency"
+                        legend="Select metric for service map display"
                         onChange={[Function]}
                         options={
                           Array [
@@ -727,7 +731,9 @@ exports[`Service Config component renders empty service config 1`] = `
                           <EuiScreenReaderOnly>
                             <legend
                               className="euiScreenReaderOnly"
-                            />
+                            >
+                              Select metric for service map display
+                            </legend>
                           </EuiScreenReaderOnly>
                           <div
                             className="euiButtonGroup__buttons"
@@ -985,11 +991,9 @@ exports[`Service Config component renders empty service config 1`] = `
                           className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                         />
                       </EuiHorizontalRule>
-                      <EuiFlexGroup
-                        justifyContent="spaceBetween"
-                      >
+                      <EuiFlexGroup>
                         <div
-                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <EuiFlexItem
                             grow={7}
@@ -997,106 +1001,256 @@ exports[`Service Config component renders empty service config 1`] = `
                             <div
                               className="euiFlexItem euiFlexItem--flexGrow7"
                             >
-                              <EuiCompressedFieldSearch
-                                compressed={true}
-                                fullWidth={false}
-                                incremental={false}
-                                isClearable={true}
-                                isInvalid={false}
-                                isLoading={false}
-                                onChange={[Function]}
-                                onSearch={[Function]}
-                                placeholder="Service name"
-                                prepend="Focus on"
-                                value=""
+                              <EuiPopover
+                                anchorPosition="downLeft"
+                                button={
+                                  <EuiToolTip
+                                    delay="regular"
+                                    position="top"
+                                  >
+                                    <EuiFieldSearch
+                                      append={
+                                        <EuiButtonIcon
+                                          aria-label="Clear focus and refresh the service map"
+                                          data-test-subj="serviceMapRefreshButton"
+                                          iconType="refresh"
+                                          onClick={[Function]}
+                                          size="s"
+                                        />
+                                      }
+                                      aria-controls="service-select-dropdown"
+                                      compressed={true}
+                                      disabled={false}
+                                      fullWidth={false}
+                                      incremental={false}
+                                      isClearable={true}
+                                      isInvalid={false}
+                                      isLoading={false}
+                                      onChange={[Function]}
+                                      onClick={[Function]}
+                                      placeholder="Service name"
+                                      prepend="Focus on"
+                                      value=""
+                                    />
+                                  </EuiToolTip>
+                                }
+                                closePopover={[Function]}
+                                display="inlineBlock"
+                                hasArrow={true}
+                                id="service-select-dropdown"
+                                isOpen={false}
+                                ownFocus={false}
+                                panelPaddingSize="none"
+                                repositionOnScroll={true}
                               >
-                                <EuiFormControlLayout
-                                  compressed={true}
-                                  fullWidth={false}
-                                  icon="search"
-                                  isLoading={false}
-                                  prepend="Focus on"
+                                <EuiOutsideClickDetector
+                                  onOutsideClick={[Function]}
                                 >
                                   <div
-                                    className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                                    className="euiPopover euiPopover--anchorDownLeft"
+                                    id="service-select-dropdown"
+                                    onKeyDown={[Function]}
+                                    onMouseDown={[Function]}
+                                    onMouseUp={[Function]}
+                                    onTouchEnd={[Function]}
+                                    onTouchStart={[Function]}
                                   >
-                                    <EuiFormLabel
-                                      className="euiFormControlLayout__prepend"
-                                    >
-                                      <label
-                                        className="euiFormLabel euiFormControlLayout__prepend"
-                                      >
-                                        Focus on
-                                      </label>
-                                    </EuiFormLabel>
                                     <div
-                                      className="euiFormControlLayout__childrenWrapper"
+                                      className="euiPopover__anchor"
                                     >
-                                      <EuiValidatableControl
-                                        isInvalid={false}
+                                      <EuiToolTip
+                                        delay="regular"
+                                        position="top"
                                       >
-                                        <input
-                                          className="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
-                                          onChange={[Function]}
+                                        <span
+                                          className="euiToolTipAnchor"
                                           onKeyUp={[Function]}
-                                          placeholder="Service name"
-                                          type="search"
-                                          value=""
-                                        />
-                                      </EuiValidatableControl>
-                                      <EuiFormControlLayoutIcons
-                                        compressed={true}
-                                        icon="search"
-                                        isLoading={false}
-                                      >
-                                        <div
-                                          className="euiFormControlLayoutIcons"
+                                          onMouseOut={[Function]}
+                                          onMouseOver={[Function]}
                                         >
-                                          <EuiFormControlLayoutCustomIcon
-                                            size="s"
-                                            type="search"
-                                          >
-                                            <span
-                                              className="euiFormControlLayoutCustomIcon"
-                                            >
-                                              <EuiIcon
-                                                aria-hidden="true"
-                                                className="euiFormControlLayoutCustomIcon__icon"
+                                          <EuiFieldSearch
+                                            append={
+                                              <EuiButtonIcon
+                                                aria-label="Clear focus and refresh the service map"
+                                                data-test-subj="serviceMapRefreshButton"
+                                                iconType="refresh"
+                                                onClick={[Function]}
                                                 size="s"
-                                                type="search"
+                                              />
+                                            }
+                                            aria-controls="service-select-dropdown"
+                                            compressed={true}
+                                            disabled={false}
+                                            fullWidth={false}
+                                            incremental={false}
+                                            isClearable={true}
+                                            isInvalid={false}
+                                            isLoading={false}
+                                            onBlur={[Function]}
+                                            onChange={[Function]}
+                                            onClick={[Function]}
+                                            onFocus={[Function]}
+                                            placeholder="Service name"
+                                            prepend="Focus on"
+                                            value=""
+                                          >
+                                            <EuiFormControlLayout
+                                              append={
+                                                <EuiButtonIcon
+                                                  aria-label="Clear focus and refresh the service map"
+                                                  data-test-subj="serviceMapRefreshButton"
+                                                  iconType="refresh"
+                                                  onClick={[Function]}
+                                                  size="s"
+                                                />
+                                              }
+                                              compressed={true}
+                                              fullWidth={false}
+                                              icon="search"
+                                              isLoading={false}
+                                              prepend="Focus on"
+                                            >
+                                              <div
+                                                className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                                               >
-                                                <EuiIconBeaker
-                                                  aria-hidden={true}
-                                                  className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                                  focusable="false"
-                                                  role="img"
-                                                  style={null}
+                                                <EuiFormLabel
+                                                  className="euiFormControlLayout__prepend"
                                                 >
-                                                  <svg
-                                                    aria-hidden={true}
-                                                    className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                                    focusable="false"
-                                                    height={16}
-                                                    role="img"
-                                                    style={null}
-                                                    viewBox="0 0 16 16"
-                                                    width={16}
-                                                    xmlns="http://www.w3.org/2000/svg"
+                                                  <label
+                                                    className="euiFormLabel euiFormControlLayout__prepend"
                                                   >
-                                                    <path
-                                                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                    Focus on
+                                                  </label>
+                                                </EuiFormLabel>
+                                                <div
+                                                  className="euiFormControlLayout__childrenWrapper"
+                                                >
+                                                  <EuiValidatableControl
+                                                    isInvalid={false}
+                                                  >
+                                                    <input
+                                                      aria-controls="service-select-dropdown"
+                                                      className="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
+                                                      disabled={false}
+                                                      onBlur={[Function]}
+                                                      onChange={[Function]}
+                                                      onClick={[Function]}
+                                                      onFocus={[Function]}
+                                                      onKeyUp={[Function]}
+                                                      placeholder="Service name"
+                                                      type="search"
+                                                      value=""
                                                     />
-                                                  </svg>
-                                                </EuiIconBeaker>
-                                              </EuiIcon>
-                                            </span>
-                                          </EuiFormControlLayoutCustomIcon>
-                                        </div>
-                                      </EuiFormControlLayoutIcons>
+                                                  </EuiValidatableControl>
+                                                  <EuiFormControlLayoutIcons
+                                                    compressed={true}
+                                                    icon="search"
+                                                    isLoading={false}
+                                                  >
+                                                    <div
+                                                      className="euiFormControlLayoutIcons"
+                                                    >
+                                                      <EuiFormControlLayoutCustomIcon
+                                                        size="s"
+                                                        type="search"
+                                                      >
+                                                        <span
+                                                          className="euiFormControlLayoutCustomIcon"
+                                                        >
+                                                          <EuiIcon
+                                                            aria-hidden="true"
+                                                            className="euiFormControlLayoutCustomIcon__icon"
+                                                            size="s"
+                                                            type="search"
+                                                          >
+                                                            <EuiIconBeaker
+                                                              aria-hidden={true}
+                                                              className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                                              focusable="false"
+                                                              role="img"
+                                                              style={null}
+                                                            >
+                                                              <svg
+                                                                aria-hidden={true}
+                                                                className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                                                                focusable="false"
+                                                                height={16}
+                                                                role="img"
+                                                                style={null}
+                                                                viewBox="0 0 16 16"
+                                                                width={16}
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                              >
+                                                                <path
+                                                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                                />
+                                                              </svg>
+                                                            </EuiIconBeaker>
+                                                          </EuiIcon>
+                                                        </span>
+                                                      </EuiFormControlLayoutCustomIcon>
+                                                    </div>
+                                                  </EuiFormControlLayoutIcons>
+                                                </div>
+                                                <EuiButtonIcon
+                                                  aria-label="Clear focus and refresh the service map"
+                                                  className="euiFormControlLayout__append"
+                                                  data-test-subj="serviceMapRefreshButton"
+                                                  iconType="refresh"
+                                                  key="0/.0"
+                                                  onClick={[Function]}
+                                                  size="s"
+                                                >
+                                                  <button
+                                                    aria-label="Clear focus and refresh the service map"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
+                                                    data-test-subj="serviceMapRefreshButton"
+                                                    disabled={false}
+                                                    onClick={[Function]}
+                                                    type="button"
+                                                  >
+                                                    <EuiIcon
+                                                      aria-hidden="true"
+                                                      className="euiButtonIcon__icon"
+                                                      color="inherit"
+                                                      size="m"
+                                                      type="refresh"
+                                                    >
+                                                      <EuiIconBeaker
+                                                        aria-hidden={true}
+                                                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                                        focusable="false"
+                                                        role="img"
+                                                        style={null}
+                                                      >
+                                                        <svg
+                                                          aria-hidden={true}
+                                                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                                                          focusable="false"
+                                                          height={16}
+                                                          role="img"
+                                                          style={null}
+                                                          viewBox="0 0 16 16"
+                                                          width={16}
+                                                          xmlns="http://www.w3.org/2000/svg"
+                                                        >
+                                                          <path
+                                                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                          />
+                                                        </svg>
+                                                      </EuiIconBeaker>
+                                                    </EuiIcon>
+                                                  </button>
+                                                </EuiButtonIcon>
+                                              </div>
+                                            </EuiFormControlLayout>
+                                          </EuiFieldSearch>
+                                        </span>
+                                      </EuiToolTip>
                                     </div>
                                   </div>
-                                </EuiFormControlLayout>
-                              </EuiCompressedFieldSearch>
+                                </EuiOutsideClickDetector>
+                              </EuiPopover>
                             </div>
                           </EuiFlexItem>
                         </div>
@@ -1230,6 +1384,9 @@ exports[`Service Config component renders with one service selected 1`] = `
       "getHelpExtension$": [MockFunction],
       "getIsNavDrawerLocked$": [MockFunction],
       "getIsVisible$": [MockFunction],
+      "globalSearch": Object {
+        "getAllSearchCommands": [MockFunction],
+      },
       "logos": Object {
         "AnimatedMark": Object {
           "dark": Object {
@@ -1928,6 +2085,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                         buttonSize="s"
                         color="text"
                         idSelected="latency"
+                        legend="Select metric for service map display"
                         onChange={[Function]}
                         options={
                           Array [
@@ -1953,7 +2111,9 @@ exports[`Service Config component renders with one service selected 1`] = `
                           <EuiScreenReaderOnly>
                             <legend
                               className="euiScreenReaderOnly"
-                            />
+                            >
+                              Select metric for service map display
+                            </legend>
                           </EuiScreenReaderOnly>
                           <div
                             className="euiButtonGroup__buttons"
@@ -2211,11 +2371,9 @@ exports[`Service Config component renders with one service selected 1`] = `
                           className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
                         />
                       </EuiHorizontalRule>
-                      <EuiFlexGroup
-                        justifyContent="spaceBetween"
-                      >
+                      <EuiFlexGroup>
                         <div
-                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <EuiFlexItem
                             grow={7}
@@ -2223,106 +2381,256 @@ exports[`Service Config component renders with one service selected 1`] = `
                             <div
                               className="euiFlexItem euiFlexItem--flexGrow7"
                             >
-                              <EuiCompressedFieldSearch
-                                compressed={true}
-                                fullWidth={false}
-                                incremental={false}
-                                isClearable={true}
-                                isInvalid={false}
-                                isLoading={false}
-                                onChange={[Function]}
-                                onSearch={[Function]}
-                                placeholder="Service name"
-                                prepend="Focus on"
-                                value=""
+                              <EuiPopover
+                                anchorPosition="downLeft"
+                                button={
+                                  <EuiToolTip
+                                    delay="regular"
+                                    position="top"
+                                  >
+                                    <EuiFieldSearch
+                                      append={
+                                        <EuiButtonIcon
+                                          aria-label="Clear focus and refresh the service map"
+                                          data-test-subj="serviceMapRefreshButton"
+                                          iconType="refresh"
+                                          onClick={[Function]}
+                                          size="s"
+                                        />
+                                      }
+                                      aria-controls="service-select-dropdown"
+                                      compressed={true}
+                                      disabled={false}
+                                      fullWidth={false}
+                                      incremental={false}
+                                      isClearable={true}
+                                      isInvalid={false}
+                                      isLoading={false}
+                                      onChange={[Function]}
+                                      onClick={[Function]}
+                                      placeholder="Service name"
+                                      prepend="Focus on"
+                                      value=""
+                                    />
+                                  </EuiToolTip>
+                                }
+                                closePopover={[Function]}
+                                display="inlineBlock"
+                                hasArrow={true}
+                                id="service-select-dropdown"
+                                isOpen={false}
+                                ownFocus={false}
+                                panelPaddingSize="none"
+                                repositionOnScroll={true}
                               >
-                                <EuiFormControlLayout
-                                  compressed={true}
-                                  fullWidth={false}
-                                  icon="search"
-                                  isLoading={false}
-                                  prepend="Focus on"
+                                <EuiOutsideClickDetector
+                                  onOutsideClick={[Function]}
                                 >
                                   <div
-                                    className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                                    className="euiPopover euiPopover--anchorDownLeft"
+                                    id="service-select-dropdown"
+                                    onKeyDown={[Function]}
+                                    onMouseDown={[Function]}
+                                    onMouseUp={[Function]}
+                                    onTouchEnd={[Function]}
+                                    onTouchStart={[Function]}
                                   >
-                                    <EuiFormLabel
-                                      className="euiFormControlLayout__prepend"
-                                    >
-                                      <label
-                                        className="euiFormLabel euiFormControlLayout__prepend"
-                                      >
-                                        Focus on
-                                      </label>
-                                    </EuiFormLabel>
                                     <div
-                                      className="euiFormControlLayout__childrenWrapper"
+                                      className="euiPopover__anchor"
                                     >
-                                      <EuiValidatableControl
-                                        isInvalid={false}
+                                      <EuiToolTip
+                                        delay="regular"
+                                        position="top"
                                       >
-                                        <input
-                                          className="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
-                                          onChange={[Function]}
+                                        <span
+                                          className="euiToolTipAnchor"
                                           onKeyUp={[Function]}
-                                          placeholder="Service name"
-                                          type="search"
-                                          value=""
-                                        />
-                                      </EuiValidatableControl>
-                                      <EuiFormControlLayoutIcons
-                                        compressed={true}
-                                        icon="search"
-                                        isLoading={false}
-                                      >
-                                        <div
-                                          className="euiFormControlLayoutIcons"
+                                          onMouseOut={[Function]}
+                                          onMouseOver={[Function]}
                                         >
-                                          <EuiFormControlLayoutCustomIcon
-                                            size="s"
-                                            type="search"
-                                          >
-                                            <span
-                                              className="euiFormControlLayoutCustomIcon"
-                                            >
-                                              <EuiIcon
-                                                aria-hidden="true"
-                                                className="euiFormControlLayoutCustomIcon__icon"
+                                          <EuiFieldSearch
+                                            append={
+                                              <EuiButtonIcon
+                                                aria-label="Clear focus and refresh the service map"
+                                                data-test-subj="serviceMapRefreshButton"
+                                                iconType="refresh"
+                                                onClick={[Function]}
                                                 size="s"
-                                                type="search"
+                                              />
+                                            }
+                                            aria-controls="service-select-dropdown"
+                                            compressed={true}
+                                            disabled={false}
+                                            fullWidth={false}
+                                            incremental={false}
+                                            isClearable={true}
+                                            isInvalid={false}
+                                            isLoading={false}
+                                            onBlur={[Function]}
+                                            onChange={[Function]}
+                                            onClick={[Function]}
+                                            onFocus={[Function]}
+                                            placeholder="Service name"
+                                            prepend="Focus on"
+                                            value=""
+                                          >
+                                            <EuiFormControlLayout
+                                              append={
+                                                <EuiButtonIcon
+                                                  aria-label="Clear focus and refresh the service map"
+                                                  data-test-subj="serviceMapRefreshButton"
+                                                  iconType="refresh"
+                                                  onClick={[Function]}
+                                                  size="s"
+                                                />
+                                              }
+                                              compressed={true}
+                                              fullWidth={false}
+                                              icon="search"
+                                              isLoading={false}
+                                              prepend="Focus on"
+                                            >
+                                              <div
+                                                className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                                               >
-                                                <EuiIconSearch
-                                                  aria-hidden={true}
-                                                  className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
-                                                  focusable="false"
-                                                  role="img"
-                                                  style={null}
+                                                <EuiFormLabel
+                                                  className="euiFormControlLayout__prepend"
                                                 >
-                                                  <svg
-                                                    aria-hidden={true}
-                                                    className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
-                                                    focusable="false"
-                                                    height={16}
-                                                    role="img"
-                                                    style={null}
-                                                    viewBox="0 0 16 16"
-                                                    width={16}
-                                                    xmlns="http://www.w3.org/2000/svg"
+                                                  <label
+                                                    className="euiFormLabel euiFormControlLayout__prepend"
                                                   >
-                                                    <path
-                                                      d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                                    Focus on
+                                                  </label>
+                                                </EuiFormLabel>
+                                                <div
+                                                  className="euiFormControlLayout__childrenWrapper"
+                                                >
+                                                  <EuiValidatableControl
+                                                    isInvalid={false}
+                                                  >
+                                                    <input
+                                                      aria-controls="service-select-dropdown"
+                                                      className="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
+                                                      disabled={false}
+                                                      onBlur={[Function]}
+                                                      onChange={[Function]}
+                                                      onClick={[Function]}
+                                                      onFocus={[Function]}
+                                                      onKeyUp={[Function]}
+                                                      placeholder="Service name"
+                                                      type="search"
+                                                      value=""
                                                     />
-                                                  </svg>
-                                                </EuiIconSearch>
-                                              </EuiIcon>
-                                            </span>
-                                          </EuiFormControlLayoutCustomIcon>
-                                        </div>
-                                      </EuiFormControlLayoutIcons>
+                                                  </EuiValidatableControl>
+                                                  <EuiFormControlLayoutIcons
+                                                    compressed={true}
+                                                    icon="search"
+                                                    isLoading={false}
+                                                  >
+                                                    <div
+                                                      className="euiFormControlLayoutIcons"
+                                                    >
+                                                      <EuiFormControlLayoutCustomIcon
+                                                        size="s"
+                                                        type="search"
+                                                      >
+                                                        <span
+                                                          className="euiFormControlLayoutCustomIcon"
+                                                        >
+                                                          <EuiIcon
+                                                            aria-hidden="true"
+                                                            className="euiFormControlLayoutCustomIcon__icon"
+                                                            size="s"
+                                                            type="search"
+                                                          >
+                                                            <EuiIconSearch
+                                                              aria-hidden={true}
+                                                              className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                                              focusable="false"
+                                                              role="img"
+                                                              style={null}
+                                                            >
+                                                              <svg
+                                                                aria-hidden={true}
+                                                                className="euiIcon euiIcon--small euiFormControlLayoutCustomIcon__icon"
+                                                                focusable="false"
+                                                                height={16}
+                                                                role="img"
+                                                                style={null}
+                                                                viewBox="0 0 16 16"
+                                                                width={16}
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                              >
+                                                                <path
+                                                                  d="m11.271 11.978 3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738Z"
+                                                                />
+                                                              </svg>
+                                                            </EuiIconSearch>
+                                                          </EuiIcon>
+                                                        </span>
+                                                      </EuiFormControlLayoutCustomIcon>
+                                                    </div>
+                                                  </EuiFormControlLayoutIcons>
+                                                </div>
+                                                <EuiButtonIcon
+                                                  aria-label="Clear focus and refresh the service map"
+                                                  className="euiFormControlLayout__append"
+                                                  data-test-subj="serviceMapRefreshButton"
+                                                  iconType="refresh"
+                                                  key="0/.0"
+                                                  onClick={[Function]}
+                                                  size="s"
+                                                >
+                                                  <button
+                                                    aria-label="Clear focus and refresh the service map"
+                                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
+                                                    data-test-subj="serviceMapRefreshButton"
+                                                    disabled={false}
+                                                    onClick={[Function]}
+                                                    type="button"
+                                                  >
+                                                    <EuiIcon
+                                                      aria-hidden="true"
+                                                      className="euiButtonIcon__icon"
+                                                      color="inherit"
+                                                      size="m"
+                                                      type="refresh"
+                                                    >
+                                                      <EuiIconRefresh
+                                                        aria-hidden={true}
+                                                        className="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
+                                                        focusable="false"
+                                                        role="img"
+                                                        style={null}
+                                                      >
+                                                        <svg
+                                                          aria-hidden={true}
+                                                          className="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
+                                                          focusable="false"
+                                                          height={16}
+                                                          role="img"
+                                                          style={null}
+                                                          viewBox="0 0 16 16"
+                                                          width={16}
+                                                          xmlns="http://www.w3.org/2000/svg"
+                                                        >
+                                                          <path
+                                                            d="M11.228 2.942a.5.5 0 1 1-.538.842A5 5 0 1 0 13 8a.5.5 0 1 1 1 0 6 6 0 1 1-2.772-5.058ZM14 1.5v3A1.5 1.5 0 0 1 12.5 6h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 1 1 1 0Z"
+                                                          />
+                                                        </svg>
+                                                      </EuiIconRefresh>
+                                                    </EuiIcon>
+                                                  </button>
+                                                </EuiButtonIcon>
+                                              </div>
+                                            </EuiFormControlLayout>
+                                          </EuiFieldSearch>
+                                        </span>
+                                      </EuiToolTip>
                                     </div>
                                   </div>
-                                </EuiFormControlLayout>
-                              </EuiCompressedFieldSearch>
+                                </EuiOutsideClickDetector>
+                              </EuiPopover>
                             </div>
                           </EuiFlexItem>
                         </div>

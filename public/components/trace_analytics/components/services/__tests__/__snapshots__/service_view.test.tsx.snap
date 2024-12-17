@@ -67,7 +67,7 @@ exports[`Service view component renders service view 1`] = `
                 },
               ]
             }
-            compressed={false}
+            compressed={true}
             dateFormat=""
             end="now"
             isAutoRefreshOnly={false}
@@ -232,7 +232,9 @@ exports[`Service view component renders service view 1`] = `
       <ServiceMap
         currService="order"
         filterByCurrService={true}
+        hideSearchBar={true}
         idSelected="latency"
+        mode="data_prepper"
         page="serviceView"
         serviceMap={Object {}}
         setIdSelected={[Function]}
@@ -246,21 +248,7 @@ exports[`Service view component renders service view 1`] = `
         <EuiHorizontalRule
           margin="m"
         />
-        <div>
-          <SpanDetailTable
-            DSL={Object {}}
-            dataSourceMDSId=""
-            hiddenColumns={
-              Array [
-                "serviceName",
-              ]
-            }
-            http={[MockFunction]}
-            mode="data_prepper"
-            openFlyout={[Function]}
-            setTotal={[Function]}
-          />
-        </div>
+        <div />
       </EuiPanel>
     </EuiPageBody>
   </EuiPage>

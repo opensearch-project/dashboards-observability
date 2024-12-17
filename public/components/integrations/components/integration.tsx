@@ -33,6 +33,7 @@ import { IntegrationFields } from './integration_fields_panel';
 import { IntegrationOverview } from './integration_overview_panel';
 import { IntegrationScreenshots } from './integration_screenshots_panel';
 import { AvailableIntegrationProps } from './integration_types';
+import { integrationsBreadcrumb } from '../../../../common/constants/integrations';
 
 export function Integration(props: AvailableIntegrationProps) {
   const http = coreRefs.http!;
@@ -60,7 +61,7 @@ export function Integration(props: AvailableIntegrationProps) {
   useEffect(() => {
     chrome.setBreadcrumbs([
       {
-        text: 'Integrations',
+        text: integrationsBreadcrumb,
         href: '#/',
       },
       {
@@ -256,7 +257,7 @@ export function Integration(props: AvailableIntegrationProps) {
         <EuiSpacer size="s" />
         {IntegrationScreenshots({ integration, http })}
         <EuiSpacer size="s" />
-        <EuiTabs display="condensed" size="s">
+        <EuiTabs display="default" size="s">
           {renderTabs()}
         </EuiTabs>
         <EuiSpacer size="s" />

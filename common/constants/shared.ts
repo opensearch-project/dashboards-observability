@@ -11,6 +11,7 @@ export const DSL_SEARCH = '/search';
 export const DSL_CAT = '/cat.indices';
 export const DSL_MAPPING = '/indices.getFieldMapping';
 export const DSL_SETTINGS = '/indices.getFieldSettings';
+export const DSL_FIELD_CAPS = '/fieldCaps';
 export const OBSERVABILITY_BASE = '/api/observability';
 export const INTEGRATIONS_BASE = '/api/integrations';
 export const JOBS_BASE = '/query/jobs';
@@ -34,13 +35,15 @@ export const JOBS_ENDPOINT_BASE = '/_plugins/_async_query';
 export const JOB_RESULT_ENDPOINT = '/result';
 
 export const tutorialSampleDataPluginId = 'import_sample_data';
+export const dataSourceManagementPluginId = 'dataSources';
 
 export const observabilityID = 'observability-logs';
 export const observabilityTitle = 'Observability';
 export const observabilityPluginOrder = 1500;
 
 export const observabilityOverviewID = 'observability-overview';
-export const observabilityOverviewTitle = 'Observability overview';
+export const observabilityOverviewTitle = 'Overview';
+export const observabilityOverviewTitleWithUseCase = 'Observability overview';
 export const observabilityOverviewPluginOrder = 5088;
 
 export const observabilityGettingStartedID = 'observability-gettingStarted';
@@ -60,13 +63,13 @@ export const observabilityMetricsTitle = 'Metrics';
 export const observabilityMetricsPluginOrder = 5092;
 
 export const observabilityTracesNewNavID = 'observability-traces-nav';
-export const observabilityTracesNewNavURL = observabilityTracesNewNavID + '#/traces';
+export const observabilityTracesNewNavURL = observabilityTracesNewNavID;
 export const observabilityTracesID = 'observability-traces';
 export const observabilityTracesTitle = 'Traces';
 export const observabilityTracesPluginOrder = 5093;
 
 export const observabilityServicesNewNavID = 'observability-services-nav';
-export const observabilityServicesNewNavURL = observabilityServicesNewNavID + '#/services';
+export const observabilityServicesNewNavURL = observabilityServicesNewNavID;
 export const observabilityServicesID = 'observability-services';
 export const observabilityServicesTitle = 'Services';
 export const observabilityServicesPluginOrder = 5092;
@@ -244,7 +247,7 @@ export const DEFAULT_CHART_STYLES: DefaultChartStylesProps = {
   MarkerSize: 25,
   ShowLegend: 'show',
   LegendPosition: 'v',
-  LabelAngle: 0,
+  LabelAngle: -45,
   DefaultSortSectors: 'largest_to_smallest',
   DefaultModeScatter: 'markers',
 };

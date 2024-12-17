@@ -21,6 +21,7 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
       id: observabilityOverviewID,
       category: undefined,
       order: 10,
+      showInAllNavGroup: true,
     },
   ]);
 
@@ -29,6 +30,7 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
       id: observabilityGettingStartedID,
       category: undefined,
       order: 20,
+      showInAllNavGroup: true,
     },
   ]);
 
@@ -37,10 +39,19 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
       id: observabilityApplicationsID,
       category: DEFAULT_APP_CATEGORIES.investigate,
       order: 400,
+      showInAllNavGroup: true,
     },
   ]);
 
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+    {
+      id: observabilityIntegrationsID,
+      category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
+      order: 500,
+    },
+  ]);
+
+  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
     {
       id: observabilityIntegrationsID,
       category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
@@ -53,7 +64,7 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
       id: observabilityMetricsID,
       category: DEFAULT_APP_CATEGORIES.investigate,
       showInAllNavGroup: true,
-      order: 100,
+      order: 200,
     },
   ]);
 
@@ -71,19 +82,26 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
       order: 400,
     },
   ]);
+  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+    {
+      id: observabilityNotebookID,
+      category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
+      order: 400,
+    },
+  ]);
 
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
     {
       id: 'observability-traces-nav',
       category: DEFAULT_APP_CATEGORIES.investigate,
       showInAllNavGroup: true,
-      order: 200,
+      order: 300,
     },
     {
       id: 'observability-services-nav',
       category: DEFAULT_APP_CATEGORIES.investigate,
       showInAllNavGroup: true,
-      order: 300,
+      order: 100,
     },
   ]);
 }

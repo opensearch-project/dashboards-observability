@@ -73,7 +73,8 @@ export function ServicesContent(props: ServicesProps) {
       })),
     ]);
     setRedirect(false);
-  }, [mode]);
+    props.setDataSourceMenuSelectable?.(true);
+  }, [mode, props.setDataSourceMenuSelectable, props.currentSelectedService]);
 
   useEffect(() => {
     let newFilteredService = '';
@@ -99,6 +100,9 @@ export function ServicesContent(props: ServicesProps) {
     jaegerIndicesExist,
     dataPrepperIndicesExist,
     isServiceTrendEnabled,
+    startTime,
+    endTime,
+    props.dataSourceMDSId,
   ]);
 
   const refresh = async (currService?: string, overrideQuery?: string) => {
@@ -229,18 +233,23 @@ export function ServicesContent(props: ServicesProps) {
             isServiceTrendEnabled={isServiceTrendEnabled}
             setIsServiceTrendEnabled={setIsServiceTrendEnabled}
             serviceTrends={serviceTrends}
+            dataSourceMDSId={props.dataSourceMDSId}
+            page={page}
           />
           <EuiSpacer size="s" />
           {mode === 'custom_data_prepper' ||
           (mode === 'data_prepper' && dataPrepperIndicesExist) ? (
             <ServiceMap
               addFilter={addFilter}
+              filters={filters}
+              setFilters={setFilters}
               serviceMap={serviceMap}
               idSelected={serviceMapIdSelected}
               setIdSelected={setServiceMapIdSelected}
               currService={filteredService}
               page={page}
               setCurrentSelectedService={setCurrentSelectedService}
+              mode={mode}
             />
           ) : (
             <div />

@@ -10,6 +10,7 @@ import {
   SavedObjectsClientContract,
   ToastInput,
 } from '../../../../src/core/public';
+import { Page } from '../../../../src/plugins/content_management/public';
 import { createGetterSetter } from '../../../../src/plugins/opensearch_dashboards_utils/common';
 import PPLService from '../../public/services/requests/ppl';
 import { QueryManager } from '../query_manager';
@@ -39,3 +40,4 @@ export const [getOSDSavedObjectsClient, setOSDSavedObjectsClient] = createGetter
   SavedObjectsClientContract
 >('SavedObjectsClient');
 export const [getQueryManager, setQueryManager] = createGetterSetter<QueryManager>('QueryManager');
+export const [getOverviewPage, setOverviewPage] = createGetterSetter<Page>('Page');

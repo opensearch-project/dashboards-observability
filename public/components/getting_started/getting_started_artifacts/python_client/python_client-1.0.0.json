@@ -42,73 +42,7 @@
     "live-sample": "true",
     "workflows": [
       {
-        "name": "Quick Start",
-        "description": "This is a python-client fluent-bit based docker quick starting instructions tutorial with a live example",
-        "steps": [
-          {
-            "name": "Create docker-network",
-            "label": "Environment setting",
-            "phase": "docker",
-            "type": "console-cmd",
-            "content": "docker network create opensearch-net",
-            "description": "Before running any docker-compose files, create the opensearch-net network"
-          },
-          {
-            "name": "Setup docker .env file",
-            "label": "Environment Parameters",
-            "phase": "docker",
-            "type": "file-url",
-            "input-params": [
-              {
-                "name": "OPENSEARCH_HOST",
-                "description": "Opensearch host",
-                "type": "host-name"
-              },
-              {
-                "name": "OPENSEARCH_DASHBOARD_HOST",
-                "description": "Opensearch Dashboard host",
-                "type": "host-name"
-              }
-            ],
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/getting-started/.env"],
-            "content": "wget https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/.env",
-            "description": "Setup docker-compose env variables "
-          },
-          {
-            "name": "Setup fluent-bit folder",
-            "label": "Environment Parameters",
-            "phase": "docker",
-            "type": "file-url",
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/getting-started/fluent-bit/fluent-bit.conf",
-              "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/getting-started/fluent-bit/parsers.conf"
-            ],
-            "content": "mkdir -p fluent-bit\nwget -P fluent-bit https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/fluent-bit/fluent-bit.conf \\\n   https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/fluent-bit/parsers.conf\n",
-            "description": "Setup docker-compose fluent-bit's service configuration "
-          },
-          {
-            "name": "Setup python app folder",
-            "label": "Environment Parameters",
-            "phase": "docker",
-            "type": "file-url",
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/getting-started/python-app/Dockerfile",
-              "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/getting-started/python-app/app.py"
-            ],
-            "content": "mkdir -p python-app\nwget -P python-app https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/python-app/Dockerfile \\\n  https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/python-app/app.py \n",
-            "description": "Setup docker-compose golan-app service configuration "
-          },
-          {
-            "name": "Run docker-compose",
-            "label": "live container",
-            "type": "file-url",
-            "phase": "docker",
-            "info": ["https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/getting-started/docker-compose.yml"],
-            "description": "Run docker-compose for the python-client live example and see the generated index",
-            "content": "wget -O docker-compose.yml https://raw.githubusercontent.com/opensearch-project/opensearch-catalog/main/integrations/observability/python_client/getting-started/docker-compose.yml && docker-compose up --build  -d python-app fluent-bit \n"
-          }
-        ]
-      },
-      {
-        "name": "Python-client",
+        "name": "Self-managed",
         "description": "This is a fluent-bit based getting started instructions tutorial",
         "steps": [
           {
@@ -181,11 +115,8 @@
     ],
     "schema": [
       {
-        "type": "logs",
-        "info": [
-          "https://opensearch.org/docs/latest/im-plugin/index-templates"
-        ],
-        "content": "PUT _index_template/application_logs_template",
+        "type": "Logs",
+        "content": "PUT _index_template/application_logs_template\n{\n  \"index_patterns\": [\"applicative_logs-*\"],\n  \"template\": {\n    \"settings\": {\n      \"number_of_shards\": 1\n    },\n    \"mappings\": {\n      \"properties\": {\n        \"timestamp\": {\n          \"type\": \"date\"\n        },\n        \"level\": {\n          \"type\": \"keyword\"\n        },\n        \"message\": {\n          \"type\": \"text\"\n        },\n        \"source\": {\n          \"type\": \"keyword\"\n        },\n        \"module\": {\n          \"type\": \"keyword\"\n        },\n        \"function\": {\n          \"type\": \"keyword\"\n        },\n        \"error_code\": {\n          \"type\": \"keyword\"\n        },\n        \"user_id\": {\n          \"type\": \"keyword\"\n        }\n      }\n    }\n  }\n}",
         "description": "Setup applicative logs index template in the dev console",
         "index-template": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/schemas/applicative-logs-1.0.0.mapping.json",
         "index-pattern-name": "applicative_logs-*"
@@ -196,7 +127,7 @@
         "logs"
       ],
       "info": [
-        "https://opensearch.org/docs/latest/dashboards/management/index-patterns/"
+        { "url": "https://opensearch.org/docs/latest/dashboards/management/index-patterns/", "title": "Index pattern documentation" }
       ],
       "description": "Import index patterns `.ndjson` file to the saved objects",
       "index-pattern": "https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/python_client/assets/tutorial-1.0.0.ndjson",

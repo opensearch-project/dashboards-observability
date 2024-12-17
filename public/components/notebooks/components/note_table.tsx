@@ -7,7 +7,6 @@ import {
   EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiInMemoryTable,
   EuiLink,
   EuiOverlayMask,
@@ -239,20 +238,15 @@ export function NoteTable({
               </EuiPageHeaderSection>
             </EuiPageHeader>
           )}
-          <EuiPageContent id="notebookArea">
+          <EuiPageContent id="notebookArea" paddingSize="m">
             {newNavigation ? (
               <HeaderControlledComponentsWrapper
-                description={
-                  <>
-                    Use Notebooks to interactively and collaboratively develop rich reports backed
-                    by live data. Common use cases for notebooks include creating postmortem
-                    reports, designing run books, building live infrastructure reports, or even
-                    documentation.{' '}
-                    <EuiLink external={true} href={NOTEBOOKS_DOCUMENTATION_URL} target="_blank">
-                      Learn more
-                    </EuiLink>
-                  </>
-                }
+                description={{
+                  text:
+                    'Use Notebooks to interactively and collaboratively develop rich reports backed by live data. Common use cases for notebooks include creating postmortem reports, designing run books, building live infrastructure reports, or even documentation.',
+                  url: NOTEBOOKS_DOCUMENTATION_URL,
+                  urlTitle: 'Learn more',
+                }}
                 components={[
                   <EuiFlexGroup gutterSize="s" key="controls">
                     <EuiFlexItem grow={false}>
@@ -348,7 +342,7 @@ export function NoteTable({
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <EuiHorizontalRule margin="m" />
+                <EuiSpacer size="m" />
                 <EuiInMemoryTable
                   loading={loading}
                   items={

@@ -5,7 +5,7 @@
 
 /// <reference types="cypress" />
 
-import { delay, setTimeFilter, SPAN_ID, TRACE_ID } from '../../utils/constants';
+import { setTimeFilter, SPAN_ID, TRACE_ID, SPAN_ID_TREE_VIEW } from '../../utils/constants';
 
 describe('Testing traces table empty state', () => {
   beforeEach(() => {
@@ -29,13 +29,15 @@ describe('Testing traces table', () => {
         win.sessionStorage.clear();
       },
     });
+    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    cy.get("[data-test-subj='data_prepper-mode']").click();
     setTimeFilter();
   });
 
   it('Renders the traces table', () => {
     cy.contains(' (108)').should('exist');
     cy.contains('03/25/2021 10:23:45').should('exist');
-    cy.contains('03f9c770db5ee2f1caac0...').should('exist');
+    cy.contains('03f9c770db5ee2f1caac0afc36db49ba').should('exist');
     cy.contains('224.99').should('exist');
 
     // test data contains output from data-prepper 0.8, which doesn't have fields denormalized
@@ -52,7 +54,7 @@ describe('Testing traces table', () => {
 
   it('Searches correctly', () => {
     cy.get('input[type="search"]').focus().type(`${TRACE_ID}{enter}`);
-    cy.get('.euiButton__text').contains('Refresh').click();
+    cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
     cy.contains(' (1)').should('exist');
     cy.contains('03/25/2021 10:21:22').should('exist');
   });
@@ -65,9 +67,11 @@ describe('Testing trace view', () => {
         win.sessionStorage.clear();
       },
     });
+    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    cy.get("[data-test-subj='data_prepper-mode']").click();
     setTimeFilter();
     cy.get('input[type="search"]').focus().type(`${TRACE_ID}`);
-    cy.get('.euiButton__text').contains('Refresh').click();
+    cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
     cy.get('.euiTableRow').should('have.length.lessThan', 3);//Replaces wait
     cy.get('[data-test-subj="trace-link"]').eq(0).click();
   });
@@ -84,11 +88,10 @@ describe('Testing trace view', () => {
   });
 
   it('Has working breadcrumbs', () => {
-    cy.get(`.euiBreadcrumb[href="#/traces/${TRACE_ID}"]`).click();
-    cy.get('h2.euiTitle').contains(TRACE_ID).should('exist');
-    cy.get('.euiBreadcrumb[href="#/traces"]').click();
-    cy.get('.euiBreadcrumb[href="#/"]').click();
-    cy.get('.euiBreadcrumb[href="observability-logs#/"]').click();
+    cy.get('.euiBreadcrumb').contains(TRACE_ID).click();
+    cy.get('.euiBreadcrumb').contains('Traces').click();
+    cy.get('.euiBreadcrumb').contains('Trace analytics').click();
+    cy.get('.euiBreadcrumb').contains('Observability').click();
     cy.get('.euiTitle').contains('Logs').should('exist');
   });
 
@@ -117,6 +120,8 @@ describe('Testing traces table', () => {
         win.sessionStorage.clear();
       },
     });
+    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    cy.get("[data-test-subj='data_prepper-mode']").click();
     setTimeFilter();
   });
 
@@ -132,8 +137,8 @@ describe('Testing traces table', () => {
     cy.get('[data-test-subj="pagination-button-previous"]').click();
     cy.contains('224.99').should('exist');
     cy.get('.euiButtonEmpty').contains('5').click();
-    cy.contains('690d3c7af1a78cf89c43e...').should('exist');
-    cy.contains('5be8370207cbb002a165d...').click();
+    cy.contains('690d3c7af1a78cf89c43e').should('exist');
+    cy.contains('5be8370207cbb002a165d').click();
     cy.contains('client_create_order').should('exist');
     cy.get('path[style*="rgb(116, 146, 231)"]').should('exist');
     cy.go('back');
@@ -146,6 +151,102 @@ describe('Testing traces table', () => {
       let total=row.length-1;
       expect(total).to.equal(expected_row_count);
     });
+  });
+});
+
+describe('Testing traces tree view', () => {
+  beforeEach(() => {
+    cy.visit('app/observability-traces#/traces', {
+      onBeforeLoad: (win) => {
+        win.sessionStorage.clear();
+      },
+    });
+    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    cy.get("[data-test-subj='data_prepper-mode']").click();
+    setTimeFilter();
+    cy.contains('02feb3a4f611abd81f2a53244d1278ae').click();
+    cy.get('h1.overview-content').contains('02feb3a4f611abd81f2a53244d1278ae').should('exist');
+  });
+
+  it('Verifies tree view and table toggle functionality with expand/collapse logic', () => {
+    cy.get('.euiButtonGroup').contains('Tree view').click();
+    cy.contains('Expand all').should('exist');
+    cy.contains("Collapse all").should('exist')
+    //Waiting time for render to complete
+    cy.get("[data-test-subj='treeExpandAll']").click();
+    cy.get("[data-test-subj='treeCollapseAll']").click();
+    
+    cy.get("[data-test-subj='spanId-link']").then((initialSpanIds) => {
+      const initialCount = initialSpanIds.length;
+      expect(initialCount).to.equal(6);
+  
+      cy.get("[data-test-subj='treeExpandAll']").click();
+  
+      cy.get("[data-test-subj='spanId-link']").then((expandedSpanIds) => {
+        const expandedCount = expandedSpanIds.length;
+        expect(expandedCount).to.equal(10);
+      });
+  
+      cy.get("[data-test-subj='treeCollapseAll']").click();
+  
+      cy.get("[data-test-subj='spanId-link']").then((collapsedSpanIds) => {
+        const collapsedCount = collapsedSpanIds.length;
+        expect(collapsedCount).to.equal(6); // Collapsed rows should match the initial count
+      });
+    });
+  });
+  
+  it('Verifies tree view expand arrow functionality', () => {
+    cy.get('.euiButtonGroup').contains('Tree view').click();
+    cy.contains('Expand all').should('exist');
+    cy.contains("Collapse all").should('exist')
+    // Waiting time for render to complete
+    cy.get("[data-test-subj='treeExpandAll']").click();
+    cy.get("[data-test-subj='treeCollapseAll']").click();
+
+    cy.get("[data-test-subj='spanId-link']").then((initialSpanIds) => {
+      const initialCount = initialSpanIds.length;
+      expect(initialCount).to.equal(6);
+  
+      // Find and click the first tree view expand arrow
+      cy.get("[data-test-subj='treeViewExpandArrow']").first().click();
+  
+      // Check the number of Span IDs after expanding the arrow (should be 7)
+      cy.get("[data-test-subj='spanId-link']").then((expandedSpanIds) => {
+        const expandedCount = expandedSpanIds.length;
+        expect(expandedCount).to.equal(7);
+      });
+    });
+  });
+  
+  it('Verifies span flyout', () => {
+    cy.get('.euiButtonGroup').contains('Tree view').click();
+    cy.contains('Expand all').should('exist');
+    cy.contains("Collapse all").should('exist')
+    // Waiting time for render to complete
+    cy.get("[data-test-subj='treeExpandAll']").click();
+    cy.get("[data-test-subj='treeCollapseAll']").click();
+    
+    // Open flyout for a span
+    cy.get("[data-test-subj='spanId-link']")
+        .contains(SPAN_ID_TREE_VIEW)
+        .click()
+    cy.contains('Span detail').should('exist');
+    cy.contains('Span attributes').should('exist');
+  });
+
+  it('Handles toggling between full screen and regular modes', () => {
+    cy.get('.euiButtonGroup').contains('Tree view').click();
+    cy.contains('Expand all').should('exist');
+    cy.contains("Collapse all").should('exist')
+    // Waiting time for render to complete
+    cy.get("[data-test-subj='treeExpandAll']").click();
+    cy.get("[data-test-subj='treeCollapseAll']").click();
+
+    cy.get('[data-test-subj="fullScreenButton"]').click();
+    cy.get('.euiButtonEmpty__text').should('contain.text', 'Exit full screen');
+    cy.get('[data-test-subj="fullScreenButton"]').click();
+    cy.get('.euiButtonEmpty__text').should('contain.text', 'Full screen');
   });
 });
 

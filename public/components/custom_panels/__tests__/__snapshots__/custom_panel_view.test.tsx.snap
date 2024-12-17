@@ -1167,6 +1167,9 @@ exports[`Panels View Component renders panel view container with visualizations 
           ],
         },
         "getIsVisible$": [MockFunction],
+        "globalSearch": Object {
+          "getAllSearchCommands": [MockFunction],
+        },
         "logos": Object {
           "AnimatedMark": Object {
             "dark": Object {
@@ -1303,6 +1306,7 @@ exports[`Panels View Component renders panel view container with visualizations 
     dslService={
       DSLService {
         "fetch": [Function],
+        "fetchFieldCaps": [Function],
         "fetchFields": [Function],
         "fetchIndices": [Function],
         "fetchSettings": [Function],
@@ -1806,6 +1810,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                             dslService={
                               DSLService {
                                 "fetch": [Function],
+                                "fetchFieldCaps": [Function],
                                 "fetchFields": [Function],
                                 "fetchIndices": [Function],
                                 "fetchSettings": [Function],
@@ -3069,6 +3074,9 @@ exports[`Panels View Component renders panel view container with visualizations 
                           ],
                         },
                         "getIsVisible$": [MockFunction],
+                        "globalSearch": Object {
+                          "getAllSearchCommands": [MockFunction],
+                        },
                         "logos": Object {
                           "AnimatedMark": Object {
                             "dark": Object {
@@ -3527,6 +3535,9 @@ exports[`Panels View Component renders panel view container without visualizatio
           ],
         },
         "getIsVisible$": [MockFunction],
+        "globalSearch": Object {
+          "getAllSearchCommands": [MockFunction],
+        },
         "logos": Object {
           "AnimatedMark": Object {
             "dark": Object {
@@ -3663,6 +3674,7 @@ exports[`Panels View Component renders panel view container without visualizatio
     dslService={
       DSLService {
         "fetch": [Function],
+        "fetchFieldCaps": [Function],
         "fetchFields": [Function],
         "fetchIndices": [Function],
         "fetchSettings": [Function],
@@ -4164,6 +4176,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                             dslService={
                               DSLService {
                                 "fetch": [Function],
+                                "fetchFieldCaps": [Function],
                                 "fetchFields": [Function],
                                 "fetchIndices": [Function],
                                 "fetchSettings": [Function],
@@ -5313,6 +5326,9 @@ exports[`Panels View Component renders panel view container without visualizatio
                           ],
                         },
                         "getIsVisible$": [MockFunction],
+                        "globalSearch": Object {
+                          "getAllSearchCommands": [MockFunction],
+                        },
                         "logos": Object {
                           "AnimatedMark": Object {
                             "dark": Object {

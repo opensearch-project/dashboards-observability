@@ -19,11 +19,13 @@ exports[`Datagrid Doc viewer row component Renders Doc viewer row component 1`] 
 >
   <EuiSmallButtonIcon
     aria-label="inspect document details"
+    data-test-subj="eventExplorer__flyout"
     iconType="inspect"
     onClick={[Function]}
   >
     <EuiButtonIcon
       aria-label="inspect document details"
+      data-test-subj="eventExplorer__flyout"
       iconType="inspect"
       onClick={[Function]}
       size="s"
@@ -31,6 +33,7 @@ exports[`Datagrid Doc viewer row component Renders Doc viewer row component 1`] 
       <button
         aria-label="inspect document details"
         className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small"
+        data-test-subj="eventExplorer__flyout"
         disabled={false}
         onClick={[Function]}
         type="button"

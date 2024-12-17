@@ -207,7 +207,7 @@ export class IntegrationInstanceBuilder {
     dataSourceMDSId?: string,
     dataSourceMDSLabel?: string
   ): SavedObject[] {
-    if (!dataSource) {
+    if (!dataSourceMDSId) {
       return assets;
     }
     return assets.map((asset) => {

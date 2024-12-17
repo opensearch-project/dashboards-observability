@@ -10,7 +10,6 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
@@ -41,6 +40,7 @@ import { setNavBreadCrumbs } from '../../../../common/utils/set_nav_bread_crumbs
 import { DeleteModal } from '../../common/helpers/delete_modal';
 import { HeaderControlledComponentsWrapper } from '../../../../public/plugin_helpers/plugin_headerControl';
 import { coreRefs } from '../../../framework/core_refs';
+import { TopNavControlButtonData } from '../../../../../../src/plugins/navigation/public';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
@@ -86,7 +86,7 @@ export function AppTable(props: AppTableProps) {
     );
     clear();
     fetchApplications();
-  }, [applications.length]);
+  }, []);
 
   const clear = () => {
     setFilters([]);
@@ -138,6 +138,7 @@ export function AppTable(props: AppTableProps) {
       description: 'Rename this application',
       icon: 'pencil',
       type: 'icon',
+      'data-test-subj': 'renameApplication',
       onClick: (app: ApplicationType) => renameApp(app),
     },
     {
@@ -146,6 +147,7 @@ export function AppTable(props: AppTableProps) {
       icon: 'trash',
       type: 'icon',
       color: 'danger',
+      'data-test-subj': 'deleteApplication',
       onClick: (app: ApplicationType) => deleteApp(app),
     },
   ];
@@ -231,12 +233,36 @@ export function AppTable(props: AppTableProps) {
         <EuiPageBody component="div">
           <EuiPageHeader>
             {!newNavigation && (
-              <EuiTitle size="l">
+              <EuiTitle data-test-subj="applicationHomePageTitle" size="l">
                 <h3>Applications {` (${applications.length})`}</h3>
               </EuiTitle>
             )}
+            <EuiFlexItem grow={false}>
+              <HeaderControlledComponentsWrapper
+                components={
+                  newNavigation
+                    ? [
+                        {
+                          label: createButtonText,
+                          run: () => {
+                            window.location.href = '#/create';
+                          },
+                          iconType: 'plus',
+                          iconSide: 'left',
+                          fill: true,
+                          controlType: 'button',
+                        } as TopNavControlButtonData,
+                      ]
+                    : [
+                        <EuiSmallButton fill href="#/create" iconType="plus" iconSide="left">
+                          {createButtonText}
+                        </EuiSmallButton>,
+                      ]
+                }
+              />
+            </EuiFlexItem>
           </EuiPageHeader>
-          <EuiPageContent id="applicationArea">
+          <EuiPageContent id="applicationArea" paddingSize="m">
             <EuiPageContentHeader>
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexItem>
@@ -250,18 +276,8 @@ export function AppTable(props: AppTableProps) {
                     aria-label="Search applications"
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <HeaderControlledComponentsWrapper
-                    components={[
-                      <EuiSmallButton fill href="#/create" iconType="plus" iconSide="left">
-                        {createButtonText}
-                      </EuiSmallButton>,
-                    ]}
-                  />
-                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPageContentHeader>
-            <EuiHorizontalRule />
             {filteredApplications.length > 0 ? (
               <EuiInMemoryTable
                 loading={props.loading}

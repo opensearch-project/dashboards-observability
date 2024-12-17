@@ -14,6 +14,9 @@ import {
   EuiSmallButton,
   EuiSmallButtonEmpty,
   EuiText,
+  EuiIcon,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useObservable } from 'react-use';
@@ -21,6 +24,10 @@ import { DashboardSavedObjectsType } from '../../../../common/types/overview';
 import { useToast } from '../../common/toast';
 import { ObsDashboardStateManager } from './obs_dashboard_state_manager';
 import { getObservabilityDashboardsId, setObservabilityDashboardsId } from './utils';
+import { coreRefs } from '../../../framework/core_refs';
+import { tutorialSampleDataPluginId } from '../../../../common/constants/shared';
+import { getOverviewPage } from '../../../../common/utils';
+import { DASHBOARD_SECTION } from '../../../../public/plugin_helpers/plugin_overview';
 
 export interface Props {
   closeFlyout: () => void;
@@ -56,6 +63,7 @@ export function SelectDashboardFlyout({ closeFlyout, dashboardsSavedObjects, rel
   const onClickAdd = async () => {
     const selectedOption = options.find((option) => option.checked === 'on');
     if (selectedOption && selectedOption.key) {
+      getOverviewPage().createSection(DASHBOARD_SECTION);
       setIsLoading(true);
       ObsDashboardStateManager.isDashboardSelected$.next(true);
       await setObservabilityDashboardsId(selectedOption.key);
@@ -86,25 +94,59 @@ export function SelectDashboardFlyout({ closeFlyout, dashboardsSavedObjects, rel
         </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody className="selectable-flyout-body">
-        <EuiSelectable
-          searchable
-          searchProps={{
-            placeholder: 'Search for a dashboard...',
-            compressed: true,
-          }}
-          singleSelection="always"
-          options={options}
-          onChange={onSelectionChange}
-          listProps={{ bordered: false }}
-          height="full"
-        >
-          {(list, search) => (
-            <>
-              {search}
-              {list}
-            </>
-          )}
-        </EuiSelectable>
+        {Object.keys(dashboardsSavedObjects).length === 0 ? (
+          <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="dashboardApp" size="xl" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="s">
+                <h3>No dashboards</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiSpacer size="l" />
+            <EuiFlexGroup justifyContent="center" gutterSize="m">
+              <EuiFlexItem grow={false}>
+                <EuiSmallButton
+                  onClick={() =>
+                    coreRefs.application?.navigateToApp(tutorialSampleDataPluginId, { path: '#' })
+                  }
+                >
+                  Install Sample Data
+                </EuiSmallButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSmallButton
+                  onClick={() => coreRefs.application?.navigateToApp('dashboards', { path: '#/' })}
+                  iconType="plusInCircle"
+                  fill
+                >
+                  Create Dashboard
+                </EuiSmallButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexGroup>
+        ) : (
+          <EuiSelectable
+            searchable
+            searchProps={{
+              placeholder: 'Search for a dashboard...',
+              compressed: true,
+            }}
+            singleSelection="always"
+            options={options}
+            onChange={onSelectionChange}
+            listProps={{ bordered: false }}
+            height="full"
+          >
+            {(list, search) => (
+              <>
+                {search}
+                {list}
+              </>
+            )}
+          </EuiSelectable>
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
@@ -117,7 +159,7 @@ export function SelectDashboardFlyout({ closeFlyout, dashboardsSavedObjects, rel
             <EuiSmallButton
               onClick={onClickAdd}
               fill
-              disabled={!buttonIsActive}
+              disabled={!buttonIsActive || Object.keys(dashboardsSavedObjects).length === 0}
               isLoading={isLoading}
             >
               {isDashboardSelected ? 'Replace' : 'Select'}

@@ -463,9 +463,11 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
           </EuiFlexItem>
         </div>
       </EuiFlexGroup>
-      <EuiSpacer>
+      <EuiSpacer
+        size="m"
+      >
         <div
-          className="euiSpacer euiSpacer--l"
+          className="euiSpacer euiSpacer--m"
         />
       </EuiSpacer>
       <EuiFlexGroup
@@ -512,12 +514,6 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
                     alt=""
                     className="synopsisIcon"
                     src="/api/integrations/repository/nginx/static/logo.svg"
-                    style={
-                      Object {
-                        "height": 100,
-                        "width": 100,
-                      }
-                    }
                   />
                 }
                 title="NginX Dashboard"
@@ -542,12 +538,6 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
                         alt=""
                         className="synopsisIcon euiCard__icon"
                         src="/api/integrations/repository/nginx/static/logo.svg"
-                        style={
-                          Object {
-                            "height": 100,
-                            "width": 100,
-                          }
-                        }
                       />
                     </div>
                     <div
@@ -603,11 +593,6 @@ exports[`Available Integration Card View Test Renders nginx integration card vie
           </EuiFlexItem>
         </div>
       </EuiFlexGroup>
-      <EuiSpacer>
-        <div
-          className="euiSpacer euiSpacer--l"
-        />
-      </EuiSpacer>
     </div>
   </EuiPanel>
 </AvailableIntegrationsCardView>

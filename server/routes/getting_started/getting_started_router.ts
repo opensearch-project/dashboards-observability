@@ -12,8 +12,9 @@ import {
   SavedObject,
 } from '../../../../../src/core/server';
 import { createSavedObjectsStreamFromNdJson } from '../../../../../src/core/server/saved_objects/routes/utils';
-import { loadAssetsFromFile } from './helper';
+import { loadAssetsFromFile, createAllTemplatesSettled } from './helper';
 import { getWorkspaceState } from '../../../../../src/core/server/utils';
+import { TutorialId } from '../../../common/constants/getting_started_routes';
 
 export function registerGettingStartedRoutes(router: IRouter) {
   // Fetch the tutorial assets
@@ -32,7 +33,7 @@ export function registerGettingStartedRoutes(router: IRouter) {
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
-        const fileData = await loadAssetsFromFile(request.params.tutorialId);
+        const fileData = await loadAssetsFromFile(request.params.tutorialId as TutorialId);
         return response.ok({
           body: {
             data: fileData,
@@ -43,48 +44,6 @@ export function registerGettingStartedRoutes(router: IRouter) {
         return response.custom({
           statusCode: error.statusCode || 500,
           body: 'Issue in fetching NDJSON file for tutorialId: ' + request.params.tutorialId,
-        });
-      }
-    }
-  );
-
-  // Fetch the tutorial dashboards
-  router.get(
-    {
-      path: `/api/observability/gettingStarted/dashboards/{tutorialId}`,
-      validate: {
-        params: schema.object({
-          tutorialId: schema.string(),
-        }),
-      },
-    },
-    async (
-      context,
-      request,
-      response
-    ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      try {
-        const fileData = await loadAssetsFromFile(request.params.tutorialId);
-
-        const objects = await createSavedObjectsStreamFromNdJson(Readable.from(fileData));
-        const loadedObjects = await objects.toArray();
-        const loadDashboardIds = loadedObjects
-          .filter((savedObject) => savedObject.type === 'dashboard')
-          .map((dashboard) => ({
-            id: dashboard.id,
-            title: dashboard.attributes.title,
-          }));
-
-        return response.ok({
-          body: {
-            data: loadDashboardIds,
-          },
-        });
-      } catch (error) {
-        console.error(error);
-        return response.custom({
-          statusCode: error.statusCode || 500,
-          body: 'Issue in fetching dashboards for tutorialId: ' + request.params.tutorialId,
         });
       }
     }
@@ -106,7 +65,7 @@ export function registerGettingStartedRoutes(router: IRouter) {
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
-        const fileData = await loadAssetsFromFile(request.params.tutorialId);
+        const fileData = await loadAssetsFromFile(request.params.tutorialId as TutorialId);
 
         const objects = await createSavedObjectsStreamFromNdJson(Readable.from(fileData));
         const loadedObjects = await objects.toArray();
@@ -140,6 +99,14 @@ export function registerGettingStartedRoutes(router: IRouter) {
           mdsId: schema.string(),
           mdsLabel: schema.string(),
           tutorialId: schema.string(),
+          indexTemplates: schema.arrayOf(
+            schema.object({
+              name: schema.string(),
+              templatePath: schema.string(),
+              template: schema.recordOf(schema.string(), schema.any()),
+            }),
+            { defaultValue: [] }
+          ),
         }),
       },
     },
@@ -149,9 +116,14 @@ export function registerGettingStartedRoutes(router: IRouter) {
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
-        const { mdsId, mdsLabel, tutorialId } = request.body;
+        const { mdsId, mdsLabel, tutorialId, indexTemplates } = request.body;
         const { requestWorkspaceId } = getWorkspaceState(request);
-        const fileData = await loadAssetsFromFile(tutorialId);
+        const fileData = await loadAssetsFromFile(tutorialId as TutorialId);
+
+        // create related index templates
+        if (indexTemplates.length > 0) {
+          await createAllTemplatesSettled(context, indexTemplates, mdsId);
+        }
 
         const objects = await createSavedObjectsStreamFromNdJson(Readable.from(fileData));
         const loadedObjects = await objects.toArray();
