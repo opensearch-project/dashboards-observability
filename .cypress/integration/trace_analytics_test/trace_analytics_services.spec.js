@@ -201,7 +201,8 @@ describe('Testing Service map', () => {
     cy.get('[data-text="Errors"]').click();
     cy.contains('60%');
     cy.get('[data-text="Duration"]').click();
-    cy.contains('100');
+    cy.contains('Average duration (ms)');
+    cy.get("[data-test-subj='tableHeaderCell_average_latency_1']").click();
 
     // clicks on payment node
     cy.get('.vis-network canvas').click(707, 388);
