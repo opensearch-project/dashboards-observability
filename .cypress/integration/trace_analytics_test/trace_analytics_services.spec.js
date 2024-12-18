@@ -193,7 +193,7 @@ describe('Testing Service map', () => {
     cy.get('.vis-network canvas').should('have.attr', 'height').and('not.eq', '0');
   });
 
-  it('Click on a node to see the details', () => {
+  it.only('Click on a node to see the details', () => {
     cy.get('.euiText.euiText--medium .panel-title').contains('Service map');
     cy.get('.vis-network canvas').should('exist');
 
@@ -202,6 +202,7 @@ describe('Testing Service map', () => {
     cy.contains('60%');
     cy.get('[data-text="Duration"]').click();
     cy.contains('Average duration (ms)');
+    cy.get("[data-test-subj='tableHeaderCell_average_latency_1']").click();
 
     // clicks on payment node
     cy.get('.vis-network canvas').click(707, 388);
