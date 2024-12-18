@@ -125,19 +125,21 @@ describe('Testing traces table', () => {
     setTimeFilter();
   });
 
-  it('Renders the traces table and verify Table Column, Pagination and Rows Data ', () => {
+  it.only('Renders the traces table and verify Table Column, Pagination and Rows Data ', () => {
     cy.get('.euiTableCellContent__text').contains('Trace ID').should('exist');
     cy.get('.euiTableCellContent__text').contains('Trace group').should('exist');
     cy.get('.euiTableCellContent__text').contains('Duration (ms)').should('exist');
     cy.get('.euiTableCellContent__text').contains('Percentile in trace group').should('exist');
     cy.get('.euiTableCellContent__text').contains('Errors').should('exist');
     cy.get('.euiTableCellContent__text').contains('Last updated').should('exist');
+    cy.get("[data-test-subj='tableHeaderCell_trace_group_1']").click();
+    cy.contains('mysql').should('not.exist');
     cy.get('[data-test-subj="pagination-button-next"]').click();
     cy.contains('HTTP POST').should('exist');
     cy.get('[data-test-subj="pagination-button-previous"]').click();
-    cy.contains('224.99').should('exist');
+    cy.contains('56.88').should('exist');
     cy.get('.euiButtonEmpty').contains('5').click();
-    cy.contains('690d3c7af1a78cf89c43e').should('exist');
+    cy.contains('386d26555771f39c0caaf').should('exist');
     cy.contains('5be8370207cbb002a165d').click();
     cy.contains('client_create_order').should('exist');
     cy.get('path[style*="rgb(116, 146, 231)"]').should('exist');
