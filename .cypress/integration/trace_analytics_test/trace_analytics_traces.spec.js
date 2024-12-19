@@ -125,7 +125,7 @@ describe('Testing traces table', () => {
     setTimeFilter();
   });
 
-  it.only('Renders the traces table and verify Table Column, Pagination and Rows Data ', () => {
+  it('Renders the traces table and verify Table Column, Pagination and Rows Data ', () => {
     cy.get('.euiTableCellContent__text').contains('Trace ID').should('exist');
     cy.get('.euiTableCellContent__text').contains('Trace group').should('exist');
     cy.get('.euiTableCellContent__text').contains('Duration (ms)').should('exist');
