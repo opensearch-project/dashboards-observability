@@ -132,25 +132,27 @@ describe('Testing traces table', () => {
     cy.get('.euiTableCellContent__text').contains('Percentile in trace group').should('exist');
     cy.get('.euiTableCellContent__text').contains('Errors').should('exist');
     cy.get('.euiTableCellContent__text').contains('Last updated').should('exist');
+    cy.get("[data-test-subj='tableHeaderCell_trace_group_1']").click();
+    cy.contains('mysql').should('not.exist');
     cy.get('[data-test-subj="pagination-button-next"]').click();
-    cy.contains('client_pay_order').should('exist');
+    cy.contains('HTTP POST').should('exist');
     cy.get('[data-test-subj="pagination-button-previous"]').click();
-    cy.contains('224.99').should('exist');
+    cy.contains('56.88').should('exist');
     cy.get('.euiButtonEmpty').contains('5').click();
-    cy.contains('690d3c7af1a78cf89c43e').should('exist');
+    cy.contains('386d26555771f39c0caaf').should('exist');
     cy.contains('5be8370207cbb002a165d').click();
     cy.contains('client_create_order').should('exist');
     cy.get('path[style*="rgb(116, 146, 231)"]').should('exist');
     cy.go('back');
     cy.get('.euiButtonEmpty__text').contains('Rows per page').click();
     cy.get('.euiContextMenuItem__text').contains('15 rows').click();
-    let expected_row_count=15;
+    let expected_row_count = 15;
     cy.get('.euiTable--auto')
-    .find("tr")
-    .then((row) => {
-      let total=row.length-1;
-      expect(total).to.equal(expected_row_count);
-    });
+      .find("tr")
+      .then((row) => {
+        let total = row.length - 1;
+        expect(total).to.equal(expected_row_count);
+      });
   });
 });
 
@@ -176,27 +178,29 @@ describe('Testing traces tree view', () => {
     //Waiting time for render to complete
     cy.get("[data-test-subj='treeExpandAll']").click();
     cy.get("[data-test-subj='treeCollapseAll']").click();
-    
-    cy.get("[data-test-subj='spanId-link']").then((initialSpanIds) => {
-      const initialCount = initialSpanIds.length;
-      expect(initialCount).to.equal(6);
-  
-      cy.get("[data-test-subj='treeExpandAll']").click();
-  
-      cy.get("[data-test-subj='spanId-link']").then((expandedSpanIds) => {
-        const expandedCount = expandedSpanIds.length;
-        expect(expandedCount).to.equal(10);
+
+    cy.get("[data-test-subj='spanId-link']")
+      .should('have.length', 6)
+      .then((initialSpanIds) => {
+        const initialCount = initialSpanIds.length;
+        expect(initialCount).to.equal(6);
+
+        cy.get("[data-test-subj='treeExpandAll']").click();
+
+        cy.get("[data-test-subj='spanId-link']").then((expandedSpanIds) => {
+          const expandedCount = expandedSpanIds.length;
+          expect(expandedCount).to.equal(10);
+        });
+
+        cy.get("[data-test-subj='treeCollapseAll']").click();
+
+        cy.get("[data-test-subj='spanId-link']").then((collapsedSpanIds) => {
+          const collapsedCount = collapsedSpanIds.length;
+          expect(collapsedCount).to.equal(6); // Collapsed rows should match the initial count
+        });
       });
-  
-      cy.get("[data-test-subj='treeCollapseAll']").click();
-  
-      cy.get("[data-test-subj='spanId-link']").then((collapsedSpanIds) => {
-        const collapsedCount = collapsedSpanIds.length;
-        expect(collapsedCount).to.equal(6); // Collapsed rows should match the initial count
-      });
-    });
   });
-  
+
   it('Verifies tree view expand arrow functionality', () => {
     cy.get('.euiButtonGroup').contains('Tree view').click();
     cy.contains('Expand all').should('exist');
@@ -208,10 +212,10 @@ describe('Testing traces tree view', () => {
     cy.get("[data-test-subj='spanId-link']").then((initialSpanIds) => {
       const initialCount = initialSpanIds.length;
       expect(initialCount).to.equal(6);
-  
+
       // Find and click the first tree view expand arrow
       cy.get("[data-test-subj='treeViewExpandArrow']").first().click();
-  
+
       // Check the number of Span IDs after expanding the arrow (should be 7)
       cy.get("[data-test-subj='spanId-link']").then((expandedSpanIds) => {
         const expandedCount = expandedSpanIds.length;
@@ -219,7 +223,7 @@ describe('Testing traces tree view', () => {
       });
     });
   });
-  
+
   it('Verifies span flyout', () => {
     cy.get('.euiButtonGroup').contains('Tree view').click();
     cy.contains('Expand all').should('exist');
@@ -227,11 +231,11 @@ describe('Testing traces tree view', () => {
     // Waiting time for render to complete
     cy.get("[data-test-subj='treeExpandAll']").click();
     cy.get("[data-test-subj='treeCollapseAll']").click();
-    
+
     // Open flyout for a span
     cy.get("[data-test-subj='spanId-link']")
-        .contains(SPAN_ID_TREE_VIEW)
-        .click()
+      .contains(SPAN_ID_TREE_VIEW)
+      .click()
     cy.contains('Span detail').should('exist');
     cy.contains('Span attributes').should('exist');
   });
