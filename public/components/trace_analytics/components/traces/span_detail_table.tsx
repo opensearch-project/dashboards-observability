@@ -34,6 +34,7 @@ interface SpanDetailTableProps {
   DSL?: any;
   setTotal?: (total: number) => void;
   dataSourceMDSId: string;
+  availableWidth?: number;
 }
 
 export interface SpanSearchParams {
@@ -300,6 +301,11 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
             onChangePage,
           }}
           style={{
+            width: fullScreenMode
+              ? '100%'
+              : props.availableWidth
+              ? `${props.availableWidth}px`
+              : '100%', // allow page to be resized
             height: fullScreenMode ? '100%' : 'auto',
           }}
         />
@@ -491,7 +497,15 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
             showFullScreenSelector: false,
             additionalControls: toolbarButtons,
           }}
-          style={{ height: fullScreenMode ? '100%' : '500px', overflowY: 'auto' }}
+          style={{
+            width: fullScreenMode
+              ? '100%'
+              : props.availableWidth
+              ? `${props.availableWidth}px`
+              : '100%', // allow page to be resized
+            height: fullScreenMode ? '100%' : '500px',
+            overflowY: 'auto',
+          }}
         />
       </FullScreenWrapper>
       {!fullScreenMode && total === 0 && <NoMatchMessage size="xl" />}
