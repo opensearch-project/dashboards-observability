@@ -355,6 +355,7 @@ describe('Viewing application', () => {
     cy.get('[data-test-subj="app-analytics-panelTab"]').click();
     cy.get('[aria-label="actionMenuButton"]').click();
     cy.get('[data-test-subj="editVizContextMenuItem"]').click();
+    changeTimeTo24('months');//Ensure time is set
     cy.get('[data-test-subj="superDatePickerShowDatesButton"]').should('contain', 'Last 24 months');
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
     cy.get('.euiTab[id="availability-panel"]').click();
