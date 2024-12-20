@@ -27,8 +27,6 @@ import { SpanDetailFlyout } from './span_detail_flyout';
 import { SpanDetailTable, SpanDetailTableHierarchy } from './span_detail_table';
 import { coreRefs } from '../../../../framework/core_refs';
 
-const newNavigation = coreRefs?.chrome?.navGroup.getNavGroupEnabled?.();
-
 export function SpanDetailPanel(props: {
   http: HttpSetup;
   traceId: string;
@@ -68,22 +66,23 @@ export function SpanDetailPanel(props: {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [availableWidth, setAvailableWidth] = useState<number>(window.innerWidth);
+  const newNavigation = coreRefs?.chrome?.navGroup.getNavGroupEnabled?.();
+
+  const updateAvailableWidth = () => {
+    if (containerRef.current) {
+      setAvailableWidth(containerRef.current.getBoundingClientRect().width);
+    } else {
+      setAvailableWidth(window.innerWidth);
+    }
+  };
+
+  const handleFullScreenChange = () => {
+    const isFullscreenActive = !!document.fullscreenElement;
+    setIsFullScreen(isFullscreenActive);
+    updateAvailableWidth();
+  };
 
   useEffect(() => {
-    const updateAvailableWidth = () => {
-      if (containerRef.current) {
-        setAvailableWidth(containerRef.current.getBoundingClientRect().width);
-      } else {
-        setAvailableWidth(window.innerWidth);
-      }
-    };
-
-    const handleFullScreenChange = () => {
-      const isFullscreenActive = !!document.fullscreenElement;
-      setIsFullScreen(isFullscreenActive);
-      updateAvailableWidth();
-    };
-
     // Add event listeners for window resize and full-screen toggling
     window.addEventListener('resize', updateAvailableWidth);
     document.addEventListener('fullscreenchange', handleFullScreenChange);
@@ -99,8 +98,9 @@ export function SpanDetailPanel(props: {
   }, []);
 
   const dynamicLayoutAdjustment = useMemo(() => {
-    const adjustment = newNavigation ? 350 : 400;
-    return isLocked ? availableWidth - adjustment : availableWidth - 150;
+    const adjustment = newNavigation ? 350 : 400; // allows resizing of the window
+    const leftNavAdjustment = newNavigation ? 125 : 75;
+    return isLocked ? availableWidth - adjustment : availableWidth - leftNavAdjustment;
   }, [isLocked, availableWidth]);
 
   // Update selectedRange whenever data.ganttMaxX changes to ensure it starts fully zoomed out
@@ -348,6 +348,19 @@ export function SpanDetailPanel(props: {
     dragLayer.style.cursor = '';
   }, []);
 
+  const onRelayoutHandler = useCallback(
+    (event) => {
+      // Handle x-axis range update
+      if (event && event['xaxis.range[0]'] && event['xaxis.range[1]']) {
+        const newRange = [event['xaxis.range[0]'], event['xaxis.range[1]']];
+        setSelectedRange(newRange);
+      } else {
+        setSelectedRange(fullRange);
+      }
+    },
+    [setSelectedRange, fullRange]
+  );
+
   const toggleOptions = [
     {
       id: 'timeline',
@@ -380,6 +393,7 @@ export function SpanDetailPanel(props: {
             }
           }}
           dataSourceMDSId={props.dataSourceMDSId}
+          availableWidth={dynamicLayoutAdjustment}
         />
       </div>
     ),
@@ -402,6 +416,7 @@ export function SpanDetailPanel(props: {
             }
           }}
           dataSourceMDSId={props.dataSourceMDSId}
+          availableWidth={dynamicLayoutAdjustment}
         />
       </div>
     ),
@@ -425,15 +440,7 @@ export function SpanDetailPanel(props: {
         onClickHandler={onClick}
         onHoverHandler={onHover}
         onUnhoverHandler={onUnhover}
-        onRelayout={(event) => {
-          // Handle x-axis range update
-          if (event && event['xaxis.range[0]'] && event['xaxis.range[1]']) {
-            const newRange = [event['xaxis.range[0]'], event['xaxis.range[1]']];
-            setSelectedRange(newRange);
-          } else {
-            setSelectedRange(fullRange);
-          }
-        }}
+        onRelayout={onRelayoutHandler}
       />
     ),
     [data.gantt, layout, onClick, onHover, onUnhover, setSelectedRange]
