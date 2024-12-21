@@ -13,7 +13,7 @@ exports[`SpanDetailTable renders the component with data 1`] = `
   >
     <div
       class="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stickyFooter"
-      style="height: auto;"
+      style="width: 100%; height: auto;"
     />
   </div>
   <div
@@ -151,6 +151,7 @@ exports[`SpanDetailTable renders the empty component 1`] = `
       style={
         Object {
           "height": "auto",
+          "width": "100%",
         }
       }
       toolbarVisibility={
@@ -274,6 +275,7 @@ exports[`SpanDetailTable renders the empty component 1`] = `
                     style={
                       Object {
                         "height": "auto",
+                        "width": "100%",
                       }
                     }
                   />
@@ -392,7 +394,7 @@ exports[`SpanDetailTable renders the jaeger component with data 1`] = `
   >
     <div
       class="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stickyFooter"
-      style="height: auto;"
+      style="width: 100%; height: auto;"
     />
   </div>
   <div
@@ -447,7 +449,7 @@ exports[`SpanDetailTableHierarchy renders the component with data 1`] = `
   >
     <div
       class="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stickyFooter"
-      style="height: 500px; overflow-y: auto;"
+      style="width: 100%; height: 500px; overflow-y: auto;"
     />
   </div>
   <div
@@ -598,6 +600,7 @@ exports[`SpanDetailTableHierarchy renders the empty component 1`] = `
         Object {
           "height": "500px",
           "overflowY": "auto",
+          "width": "100%",
         }
       }
       toolbarVisibility={
@@ -740,6 +743,7 @@ exports[`SpanDetailTableHierarchy renders the empty component 1`] = `
                       Object {
                         "height": "500px",
                         "overflowY": "auto",
+                        "width": "100%",
                       }
                     }
                   />
@@ -858,7 +862,7 @@ exports[`SpanDetailTableHierarchy renders the jaeger component with data 1`] = `
   >
     <div
       class="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stickyFooter"
-      style="height: 500px; overflow-y: auto;"
+      style="width: 100%; height: 500px; overflow-y: auto;"
     />
   </div>
   <div
