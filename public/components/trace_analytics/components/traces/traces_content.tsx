@@ -301,6 +301,8 @@ export function TracesContent(props: TracesProps) {
                 <EuiFlexItem grow={2}>
                   <ServicesList
                     addFilter={addFilter}
+                    filters={filters}
+                    setFilters={setFilters}
                     serviceMap={serviceMap}
                     filteredService={filteredService}
                     setFilteredService={setFilteredService}
@@ -310,6 +312,8 @@ export function TracesContent(props: TracesProps) {
                 <EuiFlexItem grow={8}>
                   <ServiceMap
                     addFilter={addFilter}
+                    filters={filters}
+                    setFilters={setFilters}
                     serviceMap={serviceMap}
                     idSelected={serviceMapIdSelected}
                     setIdSelected={setServiceMapIdSelected}
