@@ -14,7 +14,11 @@ import { HttpSetup } from '../../../../../../src/core/public';
 import { BarOrientation } from '../../../../common/constants/shared';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode, TraceQueryMode } from '../../../../common/types/trace_analytics';
-import { microToMilliSec, nanoToMilliSec } from '../components/common/helper_functions';
+import {
+  getTimestampPrecision,
+  microToMilliSec,
+  nanoToMilliSec,
+} from '../components/common/helper_functions';
 import { SpanSearchParams } from '../components/traces/span_detail_table';
 import {
   getCustomIndicesTracesQuery,
@@ -301,17 +305,35 @@ const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyti
   };
   if (hits.length === 0) return data;
 
-  const minStartTime =
-    mode === 'jaeger'
-      ? microToMilliSec(hits[hits.length - 1].sort[0])
-      : nanoToMilliSec(hits[hits.length - 1].sort[0]);
+  const timestampPrecision = getTimestampPrecision(hits[hits.length - 1].sort[0]);
+
+  const minStartTime = (() => {
+    switch (timestampPrecision) {
+      case 'micros':
+        return microToMilliSec(hits[hits.length - 1].sort[0]);
+      case 'nanos':
+        return nanoToMilliSec(hits[hits.length - 1].sort[0]);
+      default:
+        // 'millis'
+        return hits[hits.length - 1].sort[0];
+    }
+  })();
+
   let maxEndTime = 0;
 
   hits.forEach((hit: any) => {
-    const startTime =
-      mode === 'jaeger'
-        ? microToMilliSec(hit.sort[0]) - minStartTime
-        : nanoToMilliSec(hit.sort[0]) - minStartTime;
+    const startTime = (() => {
+      switch (timestampPrecision) {
+        case 'micros':
+          return microToMilliSec(hit.sort[0]) - minStartTime;
+        case 'nanos':
+          return nanoToMilliSec(hit.sort[0]) - minStartTime;
+        default:
+          // 'millis'
+          return hit.sort[0] - minStartTime;
+      }
+    })();
+
     const duration =
       mode === 'jaeger'
         ? round(microToMilliSec(hit._source.duration), 2)
