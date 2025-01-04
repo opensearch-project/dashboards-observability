@@ -122,7 +122,6 @@ export function nanoToMilliSec(nano: number) {
 export const getTimestampPrecision = (timestamp: number): 'millis' | 'micros' | 'nanos' => {
   if (!timestamp) return 'millis';
 
-  // Convert to string and get total length
   const digitCount = timestamp.toString().length;
 
   // For Unix timestamps:

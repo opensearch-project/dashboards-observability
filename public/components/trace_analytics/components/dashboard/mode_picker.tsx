@@ -62,6 +62,17 @@ export function DataSourcePicker(props: {
     );
   };
 
+  const updateUrlWithMode = (key: TraceAnalyticsMode) => {
+    const currentUrl = window.location.href.split('?')[0];
+    const queryParams = new URLSearchParams(window.location.search);
+
+    // Update the mode parameter in the query string
+    queryParams.set('mode', key);
+
+    // Update the URL without reloading the page
+    window.history.replaceState(null, '', `${currentUrl}?${queryParams.toString()}`);
+  };
+
   return (
     <>
       <EuiPopover
@@ -94,6 +105,7 @@ export function DataSourcePicker(props: {
                 key: TraceAnalyticsMode;
               };
               setMode(choice.key);
+              updateUrlWithMode(choice.key);
               setPopoverIsOpen(false);
               sessionStorage.setItem('TraceAnalyticsMode', choice.key);
             }}

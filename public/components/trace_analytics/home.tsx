@@ -406,6 +406,7 @@ export const Home = (props: HomeProps) => {
           render={(_routerProps) => {
             const queryParams = new URLSearchParams(window.location.href.split('?')[1]);
             const traceId = queryParams.get('traceId');
+            const traceMode = queryParams.get('mode');
 
             const SideBarComponent = !isNavGroupEnabled ? TraceSideBar : React.Fragment;
             if (!traceId) {
@@ -431,7 +432,7 @@ export const Home = (props: HomeProps) => {
                   chrome={props.chrome}
                   http={props.http}
                   traceId={decodeURIComponent(traceId)}
-                  mode={mode}
+                  mode={((traceMode as unknown) as TraceAnalyticsMode) || mode}
                   dataSourceMDSId={dataSourceMDSId}
                   dataSourceManagement={props.dataSourceManagement}
                   setActionMenu={props.setActionMenu}

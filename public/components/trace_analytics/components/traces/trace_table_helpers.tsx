@@ -73,28 +73,44 @@ export const getTableColumns = (
       '-'
     );
 
-  const renderTraceLinkField = (item: string) => (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiLink
-          data-test-subj="trace-link"
-          {...(getTraceViewUri && { href: getTraceViewUri(item) })}
-          {...(openTraceFlyout && { onClick: () => openTraceFlyout(item) })}
-        >
-          <EuiText size="s" className="traces-table traces-table-trace-id" title={item}>
-            {item}
-          </EuiText>
-        </EuiLink>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiCopy textToCopy={item}>
-          {(copy) => (
-            <EuiButtonIcon aria-label="Copy trace id" iconType="copyClipboard" onClick={copy} />
-          )}
-        </EuiCopy>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  const renderTraceLinkField = (item: string) => {
+    // Extract the current mode from the URL or session storage
+    const queryParams = new URLSearchParams(window.location.search);
+    const traceMode = queryParams.get('mode') || sessionStorage.getItem('TraceAnalyticsMode');
+
+    // Update the href to include the mode if available
+    const updatedGetTraceViewUri = (traceId: string) => {
+      const baseUri = getTraceViewUri ? getTraceViewUri(traceId) : '';
+      if (traceMode) {
+        const separator = baseUri.includes('?') ? '&' : '?';
+        return `${baseUri}${separator}mode=${encodeURIComponent(traceMode)}`;
+      }
+      return baseUri;
+    };
+
+    return (
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiLink
+            data-test-subj="trace-link"
+            {...(getTraceViewUri && { href: updatedGetTraceViewUri(item) })}
+            {...(openTraceFlyout && { onClick: () => openTraceFlyout(item) })}
+          >
+            <EuiText size="s" className="traces-table traces-table-trace-id" title={item}>
+              {item}
+            </EuiText>
+          </EuiLink>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiCopy textToCopy={item}>
+            {(copy) => (
+              <EuiButtonIcon aria-label="Copy trace id" iconType="copyClipboard" onClick={copy} />
+            )}
+          </EuiCopy>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
 
   const renderErrorsField = (item: number) =>
     item == null ? (
