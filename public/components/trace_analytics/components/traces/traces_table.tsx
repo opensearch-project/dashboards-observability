@@ -54,6 +54,18 @@ export function TracesTable(props: TracesTableProps) {
   };
 
   const columns = useMemo(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const traceMode = queryParams.get('mode') || sessionStorage.getItem('TraceAnalyticsMode');
+
+    const updatedGetTraceViewUri = (traceId: string) => {
+      const baseUri = getTraceViewUri ? getTraceViewUri(traceId) : '';
+      if (traceMode) {
+        const separator = baseUri.includes('?') ? '&' : '?';
+        return `${baseUri}${separator}mode=${encodeURIComponent(traceMode)}`;
+      }
+      return baseUri;
+    };
+
     if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
       return [
         {
@@ -67,7 +79,7 @@ export function TracesTable(props: TracesTableProps) {
               <EuiFlexItem grow={false}>
                 <EuiLink
                   data-test-subj="trace-link"
-                  {...(getTraceViewUri && { href: getTraceViewUri(item) })}
+                  {...(getTraceViewUri && { href: updatedGetTraceViewUri(item) })}
                   {...(openTraceFlyout && { onClick: () => openTraceFlyout(item) })}
                 >
                   <EuiText size="s" className="traces-table traces-table-trace-id" title={item}>
@@ -158,7 +170,7 @@ export function TracesTable(props: TracesTableProps) {
               <EuiFlexItem grow={false}>
                 <EuiLink
                   data-test-subj="trace-link"
-                  {...(getTraceViewUri && { href: getTraceViewUri(item) })}
+                  {...(getTraceViewUri && { href: updatedGetTraceViewUri(item) })}
                   {...(openTraceFlyout && { onClick: () => openTraceFlyout(item) })}
                 >
                   <EuiText size="s" className="traces-table traces-table-trace-id" title={item}>

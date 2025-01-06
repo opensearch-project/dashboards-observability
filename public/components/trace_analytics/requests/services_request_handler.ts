@@ -107,11 +107,6 @@ export const handleServiceMapRequest = async (
     dataSourceMDSId
   )
     .then((response) => {
-      // Check if the mode hasn't been set first
-      if (mode === 'jaeger' && !response?.aggregations?.service_type?.buckets) {
-        console.warn('No service nodes found in response.');
-        return false;
-      }
       response.aggregations.service_name.buckets.map(
         (bucket: any) =>
           (map[bucket.key] = {

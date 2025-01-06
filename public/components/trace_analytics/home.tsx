@@ -87,7 +87,7 @@ export const Home = (props: HomeProps) => {
   const [jaegerIndicesExist, setJaegerIndicesExist] = useState(false);
   const [attributesFilterFields, setAttributesFilterFields] = useState<string[]>([]);
   const [mode, setMode] = useState<TraceAnalyticsMode>(
-    (sessionStorage.getItem('TraceAnalyticsMode') as TraceAnalyticsMode) || 'jaeger'
+    (sessionStorage.getItem('TraceAnalyticsMode') as TraceAnalyticsMode) || 'data_prepper'
   );
   const storedFilters = sessionStorage.getItem('TraceAnalyticsFilters');
   const [query, setQuery] = useState<string>(sessionStorage.getItem('TraceAnalyticsQuery') || '');
