@@ -67,7 +67,7 @@ export function DataSourcePicker(props: {
     const hash = window.location.hash;
 
     if (hash) {
-      const [hashPath, hashQueryString] = hash.split('?');
+      const [hashPath, hashQueryString] = hash.substring(1).split('?');
       const queryParams = new URLSearchParams(hashQueryString || '');
       queryParams.set('mode', key);
 

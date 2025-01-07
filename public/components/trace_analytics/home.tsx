@@ -422,6 +422,7 @@ export const Home = (props: HomeProps) => {
                     tracesTableMode={tracesTableMode}
                     setTracesTableMode={setTracesTableMode}
                     {...commonProps}
+                    mode={((traceMode as unknown) as TraceAnalyticsMode) || mode}
                   />
                 </SideBarComponent>
               );
@@ -450,6 +451,7 @@ export const Home = (props: HomeProps) => {
           render={(_routerProps) => {
             const queryParams = new URLSearchParams(window.location.href.split('?')[1]);
             const serviceId = queryParams.get('serviceId');
+            const serviceMode = queryParams.get('mode');
 
             const SideBarComponent = !isNavGroupEnabled ? TraceSideBar : React.Fragment;
             if (!serviceId) {
@@ -463,6 +465,7 @@ export const Home = (props: HomeProps) => {
                     toasts={toasts}
                     dataSourceMDSId={dataSourceMDSId}
                     {...commonProps}
+                    mode={((serviceMode as unknown) as TraceAnalyticsMode) || mode}
                   />
                 </SideBarComponent>
               );
@@ -471,6 +474,7 @@ export const Home = (props: HomeProps) => {
                 <ServiceView
                   serviceName={decodeURIComponent(serviceId)}
                   {...commonProps}
+                  mode={((serviceMode as unknown) as TraceAnalyticsMode) || mode}
                   addFilter={(filter: FilterType) => {
                     for (const addedFilter of filters) {
                       if (
