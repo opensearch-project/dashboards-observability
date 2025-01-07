@@ -140,6 +140,27 @@ export const getTimestampPrecision = (timestamp: number): 'millis' | 'micros' | 
   }
 };
 
+export const appendModeToTraceViewUri = (
+  traceId: string,
+  getTraceViewUri?: (traceId: string) => string,
+  traceMode?: string | null
+): string => {
+  const baseUri = getTraceViewUri ? getTraceViewUri(traceId) : '';
+  const isHashRouter = baseUri.includes('#');
+  const separator = isHashRouter
+    ? baseUri.includes('?')
+      ? '&'
+      : '?'
+    : baseUri.includes('?')
+    ? '&'
+    : '?';
+
+  if (traceMode) {
+    return `${baseUri}${separator}mode=${encodeURIComponent(traceMode)}`;
+  }
+  return baseUri;
+};
+
 export function microToMilliSec(micro: number) {
   if (typeof micro !== 'number') return 0;
   return micro / 1000;

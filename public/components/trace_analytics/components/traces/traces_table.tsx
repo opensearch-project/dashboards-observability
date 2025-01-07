@@ -25,6 +25,7 @@ import React, { useMemo, useState } from 'react';
 import { TRACES_MAX_NUM } from '../../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import {
+  appendModeToTraceViewUri,
   MissingConfigurationMessage,
   NoMatchMessage,
   PanelTitle,
@@ -54,17 +55,11 @@ export function TracesTable(props: TracesTableProps) {
   };
 
   const columns = useMemo(() => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const traceMode = queryParams.get('mode') || sessionStorage.getItem('TraceAnalyticsMode');
-
-    const updatedGetTraceViewUri = (traceId: string) => {
-      const baseUri = getTraceViewUri ? getTraceViewUri(traceId) : '';
-      if (traceMode) {
-        const separator = baseUri.includes('?') ? '&' : '?';
-        return `${baseUri}${separator}mode=${encodeURIComponent(traceMode)}`;
-      }
-      return baseUri;
-    };
+    // Extract the current mode from the URL or session storage
+    const currentUrl = window.location.href;
+    const traceMode =
+      new URLSearchParams(currentUrl.split('?')[1]).get('mode') ||
+      sessionStorage.getItem('TraceAnalyticsMode');
 
     if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
       return [
@@ -79,7 +74,7 @@ export function TracesTable(props: TracesTableProps) {
               <EuiFlexItem grow={false}>
                 <EuiLink
                   data-test-subj="trace-link"
-                  {...(getTraceViewUri && { href: updatedGetTraceViewUri(item) })}
+                  href={appendModeToTraceViewUri(item, getTraceViewUri, traceMode)}
                   {...(openTraceFlyout && { onClick: () => openTraceFlyout(item) })}
                 >
                   <EuiText size="s" className="traces-table traces-table-trace-id" title={item}>
@@ -170,7 +165,7 @@ export function TracesTable(props: TracesTableProps) {
               <EuiFlexItem grow={false}>
                 <EuiLink
                   data-test-subj="trace-link"
-                  {...(getTraceViewUri && { href: updatedGetTraceViewUri(item) })}
+                  href={appendModeToTraceViewUri(item, getTraceViewUri, traceMode)}
                   {...(openTraceFlyout && { onClick: () => openTraceFlyout(item) })}
                 >
                   <EuiText size="s" className="traces-table traces-table-trace-id" title={item}>

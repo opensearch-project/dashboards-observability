@@ -149,7 +149,7 @@ export function ServiceMap({
         includeMetricsCallback();
       }
     }
-  }, [selectableValue, setIdSelected]);
+  }, []);
 
   const removeFilter = (field: string, value: string) => {
     if (!setFilters) return;

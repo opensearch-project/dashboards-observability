@@ -153,12 +153,6 @@ export const handleTracesRequest = async (
         percentileRangesResult.status === 'fulfilled' ? percentileRangesResult.value : {};
       const response = responseResult.value;
 
-      // Check if the mode hasn't been set first
-      // if (mode === 'jaeger' && !response?.aggregations?.service_type?.buckets) {
-      //   console.warn('No traces or aggregations found.');
-      //   return [];
-      // }
-
       return response.aggregations.traces.buckets.map((bucket: any) => {
         if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
           return {

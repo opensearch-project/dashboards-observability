@@ -63,14 +63,25 @@ export function DataSourcePicker(props: {
   };
 
   const updateUrlWithMode = (key: TraceAnalyticsMode) => {
-    const currentUrl = window.location.href.split('?')[0];
-    const queryParams = new URLSearchParams(window.location.search);
+    const currentUrl = window.location.href.split('#')[0];
+    const hash = window.location.hash;
 
-    // Update the mode parameter in the query string
-    queryParams.set('mode', key);
+    if (hash) {
+      const [hashPath, hashQueryString] = hash.split('?');
+      const queryParams = new URLSearchParams(hashQueryString || '');
+      queryParams.set('mode', key);
 
-    // Update the URL without reloading the page
-    window.history.replaceState(null, '', `${currentUrl}?${queryParams.toString()}`);
+      const newHash = `${hashPath}?${queryParams.toString()}`;
+      const newUrl = `${currentUrl}#${newHash}`;
+      window.history.replaceState(null, '', newUrl);
+    } else {
+      // Non-hash-based URL
+      const queryParams = new URLSearchParams(window.location.search);
+      queryParams.set('mode', key);
+
+      const newUrl = `${currentUrl}?${queryParams.toString()}`;
+      window.history.replaceState(null, '', newUrl);
+    }
   };
 
   return (

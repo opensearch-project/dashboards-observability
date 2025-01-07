@@ -18,7 +18,7 @@ import moment from 'moment';
 import React from 'react';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode, TraceQueryMode } from '../../../../../common/types/trace_analytics';
-import { nanoToMilliSec } from '../common/helper_functions';
+import { appendModeToTraceViewUri, nanoToMilliSec } from '../common/helper_functions';
 
 export const fetchDynamicColumns = (columnItems: string[]) => {
   return columnItems
@@ -75,25 +75,17 @@ export const getTableColumns = (
 
   const renderTraceLinkField = (item: string) => {
     // Extract the current mode from the URL or session storage
-    const queryParams = new URLSearchParams(window.location.search);
-    const traceMode = queryParams.get('mode') || sessionStorage.getItem('TraceAnalyticsMode');
-
-    // Update the href to include the mode if available
-    const updatedGetTraceViewUri = (traceId: string) => {
-      const baseUri = getTraceViewUri ? getTraceViewUri(traceId) : '';
-      if (traceMode) {
-        const separator = baseUri.includes('?') ? '&' : '?';
-        return `${baseUri}${separator}mode=${encodeURIComponent(traceMode)}`;
-      }
-      return baseUri;
-    };
+    const currentUrl = window.location.href;
+    const traceMode =
+      new URLSearchParams(currentUrl.split('?')[1]).get('mode') ||
+      sessionStorage.getItem('TraceAnalyticsMode');
 
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiLink
             data-test-subj="trace-link"
-            {...(getTraceViewUri && { href: updatedGetTraceViewUri(item) })}
+            href={appendModeToTraceViewUri(item, getTraceViewUri, traceMode)}
             {...(openTraceFlyout && { onClick: () => openTraceFlyout(item) })}
           >
             <EuiText size="s" className="traces-table traces-table-trace-id" title={item}>
