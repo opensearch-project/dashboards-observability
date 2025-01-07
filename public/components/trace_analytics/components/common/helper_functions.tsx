@@ -146,14 +146,7 @@ export const appendModeToTraceViewUri = (
   traceMode?: string | null
 ): string => {
   const baseUri = getTraceViewUri ? getTraceViewUri(traceId) : '';
-  const isHashRouter = baseUri.includes('#');
-  const separator = isHashRouter
-    ? baseUri.includes('?')
-      ? '&'
-      : '?'
-    : baseUri.includes('?')
-    ? '&'
-    : '?';
+  const separator = baseUri.includes('?') ? '&' : '?';
 
   if (traceMode) {
     return `${baseUri}${separator}mode=${encodeURIComponent(traceMode)}`;
