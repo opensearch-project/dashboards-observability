@@ -13,6 +13,7 @@ import {
   TEST_SERVICE_MAP_GRAPH,
 } from '../../../../../../test/constants';
 import {
+  appendModeToTraceViewUri,
   calculateTicks,
   filtersToDsl,
   fixedIntervalToMilli,
@@ -22,6 +23,7 @@ import {
   getServiceMapGraph,
   getServiceMapScaleColor,
   getServiceMapTargetResources,
+  getTimestampPrecision,
   milliToNanoSec,
   minFixedInterval,
   MissingConfigurationMessage,
@@ -193,6 +195,58 @@ describe('Helper functions', () => {
     it('should return an empty array if no fields match the specified prefixes', () => {
       const result = getAttributeFieldNames(fieldCapQueryResponse2);
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('getTimestampPrecision', () => {
+    it('returns "millis" for 13-digit timestamps', () => {
+      expect(getTimestampPrecision(1703599200000)).toEqual('millis');
+    });
+
+    it('returns "micros" for 16-digit timestamps', () => {
+      expect(getTimestampPrecision(1703599200000000)).toEqual('micros');
+    });
+
+    it('returns "nanos" for 19-digit timestamps', () => {
+      expect(getTimestampPrecision(1703599200000000000)).toEqual('nanos');
+    });
+
+    it('returns "millis" for invalid or missing timestamps', () => {
+      expect(getTimestampPrecision((undefined as unknown) as number)).toEqual('millis');
+      expect(getTimestampPrecision(123)).toEqual('millis');
+    });
+  });
+
+  describe('appendModeToTraceViewUri', () => {
+    const mockGetTraceViewUri = (traceId: string) => `#/traces/${traceId}`;
+
+    it('appends mode to the URI when mode is provided', () => {
+      const result = appendModeToTraceViewUri('123', mockGetTraceViewUri, 'data_prepper');
+      expect(result).toEqual('#/traces/123?mode=data_prepper');
+    });
+
+    it('appends mode correctly for hash router URIs with existing query params', () => {
+      const result = appendModeToTraceViewUri('123', (id) => `#/traces/${id}?foo=bar`, 'jaeger');
+      expect(result).toEqual('#/traces/123?foo=bar&mode=jaeger');
+    });
+
+    it('does not append mode if not provided', () => {
+      const result = appendModeToTraceViewUri('123', mockGetTraceViewUri, null);
+      expect(result).toEqual('#/traces/123');
+    });
+
+    it('handles URIs without a hash router', () => {
+      const result = appendModeToTraceViewUri(
+        '123',
+        (id) => `/traces/${id}`,
+        'custom_data_prepper'
+      );
+      expect(result).toEqual('/traces/123?mode=custom_data_prepper');
+    });
+
+    it('handles URIs without a hash router and existing query params', () => {
+      const result = appendModeToTraceViewUri('123', (id) => `/traces/${id}?foo=bar`, 'jaeger');
+      expect(result).toEqual('/traces/123?foo=bar&mode=jaeger');
     });
   });
 });

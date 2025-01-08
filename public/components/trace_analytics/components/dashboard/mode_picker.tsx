@@ -62,6 +62,28 @@ export function DataSourcePicker(props: {
     );
   };
 
+  const updateUrlWithMode = (key: TraceAnalyticsMode) => {
+    const currentUrl = window.location.href.split('#')[0];
+    const hash = window.location.hash;
+
+    if (hash) {
+      const [hashPath, hashQueryString] = hash.substring(1).split('?');
+      const queryParams = new URLSearchParams(hashQueryString || '');
+      queryParams.set('mode', key);
+
+      const newHash = `${hashPath}?${queryParams.toString()}`;
+      const newUrl = `${currentUrl}#${newHash}`;
+      window.history.replaceState(null, '', newUrl);
+    } else {
+      // Non-hash-based URL
+      const queryParams = new URLSearchParams(window.location.search);
+      queryParams.set('mode', key);
+
+      const newUrl = `${currentUrl}?${queryParams.toString()}`;
+      window.history.replaceState(null, '', newUrl);
+    }
+  };
+
   return (
     <>
       <EuiPopover
@@ -94,6 +116,7 @@ export function DataSourcePicker(props: {
                 key: TraceAnalyticsMode;
               };
               setMode(choice.key);
+              updateUrlWithMode(choice.key);
               setPopoverIsOpen(false);
               sessionStorage.setItem('TraceAnalyticsMode', choice.key);
             }}
