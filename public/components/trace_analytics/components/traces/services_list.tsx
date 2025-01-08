@@ -21,6 +21,8 @@ interface ServicesListProps {
   addFilter?: (filter: FilterType) => void;
   filteredService: string;
   setFilteredService: React.Dispatch<React.SetStateAction<string>>;
+  filters: FilterType[];
+  setFilters: (filters: FilterType[]) => void;
 }
 
 export const ServicesList = ({
@@ -28,11 +30,31 @@ export const ServicesList = ({
   addFilter,
   filteredService,
   setFilteredService,
+  filters = [],
+  setFilters,
 }: ServicesListProps) => {
-  const [options, setOptions] = useState<Array<{ label: string }>>([]);
+  const [options, setOptions] = useState<Array<{ label: string; checked?: 'on' | undefined }>>([]);
+
+  const removeFilter = (field: string, value: string) => {
+    if (!setFilters) return;
+    const updatedFilters = filters.filter(
+      (filter) => !(filter.field === field && filter.value === value)
+    );
+    setFilters(updatedFilters);
+  };
 
   const nameColumnAction = (serviceName: string) => {
     if (!addFilter) return;
+
+    // Check if the service is already selected
+    if (filteredService === serviceName) {
+      // Remove the filter if the service is deselected
+      removeFilter('serviceName', filteredService);
+      setFilteredService(''); // Reset the selected service
+      return;
+    }
+
+    // Add the filter if a new service is selected
     addFilter({
       field: 'serviceName',
       operator: 'is',
@@ -58,14 +80,14 @@ export const ServicesList = ({
   );
 
   useEffect(() => {
+    // Update selectable options based on the current filtered service
     setOptions(
-      Object.keys(serviceMap).map((key) => {
-        return filteredService === key
-          ? { label: key, checked: 'on', bordered: false }
-          : { label: key, bordered: false };
-      })
+      Object.keys(serviceMap).map((key) => ({
+        label: key,
+        checked: filteredService === key ? 'on' : undefined,
+      }))
     );
-  }, [serviceMap]);
+  }, [serviceMap, filteredService]);
 
   return (
     <EuiPanel>
@@ -74,14 +96,26 @@ export const ServicesList = ({
       <EuiHorizontalRule margin="none" />
       <div style={{ height: '90%' }}>
         <EuiSelectable
-          aria-label="Basic example"
+          aria-label="Services List"
           height="full"
           searchable
           options={options}
           listProps={{ bordered: true }}
           onChange={(newOptions) => {
-            setOptions(newOptions);
-            nameColumnAction(newOptions.filter((option) => option.checked === 'on')[0].label);
+            const selectedOption = newOptions.find((option) => option.checked === 'on');
+
+            // Handle deselection
+            if (!selectedOption) {
+              nameColumnAction(filteredService);
+              setOptions(newOptions);
+              return;
+            }
+
+            // Handle selection
+            if (selectedOption) {
+              nameColumnAction(selectedOption.label);
+              setOptions(newOptions);
+            }
           }}
           singleSelection={true}
         >

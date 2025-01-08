@@ -123,17 +123,6 @@ export function ServiceMap({
     );
   }, [filters, focusedService]);
 
-  const onChangeSelectable = (value: React.SetStateAction<Array<EuiSuperSelectOption<any>>>) => {
-    // if the change is changing for the first time then callback servicemap with metrics
-    if (selectableValue.length === 0 && value.length !== 0) {
-      if (includeMetricsCallback) {
-        includeMetricsCallback();
-      }
-    }
-    setIdSelected(value);
-    setSelectableValue(value);
-  };
-
   const metricOptions: Array<EuiSuperSelectOption<any>> = [
     {
       value: 'latency',
@@ -148,6 +137,19 @@ export function ServiceMap({
       inputDisplay: 'Request Rate',
     },
   ];
+
+  // For the traces custom page
+  useEffect(() => {
+    if (!selectableValue || selectableValue.length === 0) {
+      // Set to the first option ("latency") and trigger the onChange function
+      const defaultValue = metricOptions[0].value;
+      setSelectableValue(defaultValue); // Update the state
+      setIdSelected(defaultValue); // Propagate the default to parent
+      if (includeMetricsCallback) {
+        includeMetricsCallback();
+      }
+    }
+  }, []);
 
   const removeFilter = (field: string, value: string) => {
     if (!setFilters) return;
@@ -504,7 +506,10 @@ export function ServiceMap({
                   compressed
                   options={metricOptions}
                   valueOfSelected={selectableValue}
-                  onChange={(value) => onChangeSelectable(value)}
+                  onChange={(value) => {
+                    setSelectableValue(value);
+                    setIdSelected(value);
+                  }}
                 />
               </EuiFlexItem>
             )}
