@@ -210,6 +210,10 @@ export const Home = (props: HomeProps) => {
     ]);
   };
 
+  const isValidTraceAnalyticsMode = (urlMode: string | null): urlMode is TraceAnalyticsMode => {
+    return ['jaeger', 'data_prepper', 'custom_data_prepper'].includes(urlMode || '');
+  };
+
   useEffect(() => {
     handleDataPrepperIndicesExistRequest(
       props.http,
@@ -406,7 +410,8 @@ export const Home = (props: HomeProps) => {
           render={(_routerProps) => {
             const queryParams = new URLSearchParams(window.location.href.split('?')[1]);
             const traceId = queryParams.get('traceId');
-            const traceMode = queryParams.get('mode');
+            const traceModeFromURL = queryParams.get('mode');
+            const traceMode = isValidTraceAnalyticsMode(traceModeFromURL) ? traceModeFromURL : mode;
 
             const SideBarComponent = !isNavGroupEnabled ? TraceSideBar : React.Fragment;
             if (!traceId) {
@@ -451,7 +456,10 @@ export const Home = (props: HomeProps) => {
           render={(_routerProps) => {
             const queryParams = new URLSearchParams(window.location.href.split('?')[1]);
             const serviceId = queryParams.get('serviceId');
-            const serviceMode = queryParams.get('mode');
+            const serviceModeFromURL = queryParams.get('mode');
+            const serviceMode = isValidTraceAnalyticsMode(serviceModeFromURL)
+              ? serviceModeFromURL
+              : mode;
 
             const SideBarComponent = !isNavGroupEnabled ? TraceSideBar : React.Fragment;
             if (!serviceId) {
