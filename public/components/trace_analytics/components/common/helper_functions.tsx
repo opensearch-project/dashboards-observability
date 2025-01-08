@@ -119,6 +119,41 @@ export function nanoToMilliSec(nano: number) {
   return nano / 1000000;
 }
 
+export const getTimestampPrecision = (timestamp: number): 'millis' | 'micros' | 'nanos' => {
+  if (!timestamp) return 'millis';
+
+  const digitCount = timestamp.toString().length;
+
+  // For Unix timestamps:
+  // 13 digits = milliseconds (e.g., 1703599200000)
+  // 16 digits = microseconds (e.g., 1703599200000000)
+  // 19 digits = nanoseconds  (e.g., 1703599200000000000)
+  switch (digitCount) {
+    case 13:
+      return 'millis';
+    case 16:
+      return 'micros';
+    case 19:
+      return 'nanos';
+    default:
+      return 'millis';
+  }
+};
+
+export const appendModeToTraceViewUri = (
+  traceId: string,
+  getTraceViewUri?: (traceId: string) => string,
+  traceMode?: string | null
+): string => {
+  const baseUri = getTraceViewUri ? getTraceViewUri(traceId) : '';
+  const separator = baseUri.includes('?') ? '&' : '?';
+
+  if (traceMode) {
+    return `${baseUri}${separator}mode=${encodeURIComponent(traceMode)}`;
+  }
+  return baseUri;
+};
+
 export function microToMilliSec(micro: number) {
   if (typeof micro !== 'number') return 0;
   return micro / 1000;

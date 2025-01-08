@@ -13,8 +13,7 @@ describe('Traces table component', () => {
 
   it('renders empty traces table message', () => {
     const refresh = jest.fn();
-    const getTraceViewUri = (item: any) =>
-      location.assign(`#/trace_analytics/traces/${encodeURIComponent(item)}`);
+    const getTraceViewUri = (item: any) => `#/trace_analytics/traces/${encodeURIComponent(item)}`;
     const noIndicesTable = mount(
       <TracesTable
         items={[]}
@@ -55,8 +54,7 @@ describe('Traces table component', () => {
         actions: '#',
       },
     ];
-    const getTraceViewUri = (item: any) =>
-      location.assign(`#/trace_analytics/traces/${encodeURIComponent(item)}`);
+    const getTraceViewUri = (item: any) => `#/trace_analytics/traces/${encodeURIComponent(item)}`;
     const refresh = jest.fn();
     const wrapper = mount(
       <TracesTable
@@ -86,8 +84,7 @@ describe('Traces table component', () => {
         actions: '#',
       },
     ];
-    const getTraceViewUri = (item: any) =>
-      location.assign(`#/trace_analytics/traces/${encodeURIComponent(item)}`);
+    const getTraceViewUri = (item: any) => `#/trace_analytics/traces/${encodeURIComponent(item)}`;
     const refresh = jest.fn();
     const wrapper = mount(
       <TracesTable

@@ -22,6 +22,7 @@ import {
   getServiceTrendsQuery,
 } from './queries/services_queries';
 import { handleDslRequest } from './request_handler';
+import { coreRefs } from '../../../../public/framework/core_refs';
 
 export const handleServicesRequest = async (
   http: HttpSetup,
@@ -71,7 +72,13 @@ export const handleServicesRequest = async (
     .then((newItems) => {
       setItems(newItems);
     })
-    .catch((error) => console.error(error));
+    .catch((error) => {
+      console.error('Error in handleServicesRequest:', error);
+      coreRefs.core?.notifications.toasts.addError(error, {
+        title: 'Failed to retrieve services',
+        toastLifeTimeMs: 10000,
+      });
+    });
 };
 
 export const handleServiceMapRequest = async (
@@ -92,8 +99,14 @@ export const handleServiceMapRequest = async (
   }
   const map: ServiceObject = {};
   let id = 1;
-  await handleDslRequest(http, null, getServiceNodesQuery(mode), mode, dataSourceMDSId)
-    .then((response) =>
+  const serviceNodesResponse = await handleDslRequest(
+    http,
+    null,
+    getServiceNodesQuery(mode),
+    mode,
+    dataSourceMDSId
+  )
+    .then((response) => {
       response.aggregations.service_name.buckets.map(
         (bucket: any) =>
           (map[bucket.key] = {
@@ -106,9 +119,22 @@ export const handleServiceMapRequest = async (
             targetServices: [],
             destServices: [],
           })
-      )
-    )
-    .catch((error) => console.error(error));
+      );
+      return true;
+    })
+    .catch((error) => {
+      console.error('Error retrieving service nodes:', error);
+      coreRefs.core?.notifications.toasts.addError(error, {
+        title: 'Failed to retrieve service nodes',
+        toastLifeTimeMs: 10000,
+      });
+      return false;
+    });
+
+  // Early return if service node not found
+  if (!serviceNodesResponse) {
+    return map;
+  }
 
   const targets = {};
   await handleDslRequest(http, null, getServiceEdgesQuery('target', mode), mode, dataSourceMDSId)
@@ -121,7 +147,14 @@ export const handleServiceMapRequest = async (
         });
       })
     )
-    .catch((error) => console.error(error));
+    .catch((error) => {
+      console.error('Error retrieving target edges:', error);
+      coreRefs.core?.notifications.toasts.addError(error, {
+        title: 'Failed to retrieve target edges',
+        toastLifeTimeMs: 10000,
+      });
+    });
+
   await handleDslRequest(
     http,
     null,
@@ -146,24 +179,37 @@ export const handleServiceMapRequest = async (
         })
       )
     )
-    .catch((error) => console.error(error));
+    .catch((error) => {
+      console.error('Error retrieving destination edges:', error);
+      coreRefs.core?.notifications.toasts.addError(error, {
+        title: 'Failed to retrieve destination edges',
+        toastLifeTimeMs: 10000,
+      });
+    });
 
   if (includeMetrics) {
-    // service map handles DSL differently
-    const latencies = await handleDslRequest(
-      http,
-      DSL,
-      getServiceMetricsQuery(DSL, Object.keys(map), map, mode),
-      mode,
-      dataSourceMDSId
-    );
-    latencies.aggregations.service_name.buckets.map((bucket: any) => {
-      map[bucket.key].latency = bucket.average_latency.value;
-      map[bucket.key].error_rate = round(bucket.error_rate.value, 2) || 0;
-      map[bucket.key].throughput = bucket.doc_count;
-      if (minutesInDateRange != null)
-        map[bucket.key].throughputPerMinute = round(bucket.doc_count / minutesInDateRange, 2);
-    });
+    try {
+      const latencies = await handleDslRequest(
+        http,
+        DSL,
+        getServiceMetricsQuery(DSL, Object.keys(map), map, mode),
+        mode,
+        dataSourceMDSId
+      );
+      latencies.aggregations.service_name.buckets.map((bucket: any) => {
+        map[bucket.key].latency = bucket.average_latency.value;
+        map[bucket.key].error_rate = round(bucket.error_rate.value, 2) || 0;
+        map[bucket.key].throughput = bucket.doc_count;
+        if (minutesInDateRange != null)
+          map[bucket.key].throughputPerMinute = round(bucket.doc_count / minutesInDateRange, 2);
+      });
+    } catch (error) {
+      console.error('Error retrieving service metrics:', error);
+      coreRefs.core?.notifications.toasts.addError(error, {
+        title: 'Failed to retrieve service metrics',
+        toastLifeTimeMs: 10000,
+      });
+    }
   }
 
   if (currService) {
@@ -180,7 +226,13 @@ export const handleServiceMapRequest = async (
         }
         map[currService].relatedServices = [...relatedServices];
       })
-      .catch((error) => console.error(error));
+      .catch((error) => {
+        console.error('Error retrieving related services:', error);
+        coreRefs.core?.notifications.toasts.addError(error, {
+          title: 'Failed to retrieve related services',
+          toastLifeTimeMs: 10000,
+        });
+      });
   }
 
   if (setItems) setItems(map);
@@ -222,7 +274,13 @@ export const handleServiceViewRequest = (
     .then((newFields) => {
       setFields(newFields);
     })
-    .catch((error) => console.error(error));
+    .catch((error) => {
+      console.error('Error in handleServiceViewRequest:', error);
+      coreRefs.core?.notifications.toasts.addError(error, {
+        title: 'Failed to retrieve service view data',
+        toastLifeTimeMs: 10000,
+      });
+    });
 };
 
 export const handleServiceTrendsRequest = (
@@ -324,5 +382,11 @@ export const handleServiceTrendsRequest = (
       });
       setItems(parsedResult);
     })
-    .catch((error) => console.error(error));
+    .catch((error) => {
+      console.error('Error in handleServiceTrendsRequest:', error);
+      coreRefs.core?.notifications.toasts.addError(error, {
+        title: 'Failed to retrieve service trends',
+        toastLifeTimeMs: 10000,
+      });
+    });
 };
