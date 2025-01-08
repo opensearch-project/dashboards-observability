@@ -87,7 +87,7 @@ export const Home = (props: HomeProps) => {
   const [jaegerIndicesExist, setJaegerIndicesExist] = useState(false);
   const [attributesFilterFields, setAttributesFilterFields] = useState<string[]>([]);
   const [mode, setMode] = useState<TraceAnalyticsMode>(
-    (sessionStorage.getItem('TraceAnalyticsMode') as TraceAnalyticsMode) || 'jaeger'
+    (sessionStorage.getItem('TraceAnalyticsMode') as TraceAnalyticsMode) || 'data_prepper'
   );
   const storedFilters = sessionStorage.getItem('TraceAnalyticsFilters');
   const [query, setQuery] = useState<string>(sessionStorage.getItem('TraceAnalyticsQuery') || '');
@@ -208,6 +208,10 @@ export const Home = (props: HomeProps) => {
     setDataSourceMDSId([
       { id: dataSourceMDSId[0].id, label: dataSourceAttributes?.attributes.title },
     ]);
+  };
+
+  const isValidTraceAnalyticsMode = (urlMode: string | null): urlMode is TraceAnalyticsMode => {
+    return ['jaeger', 'data_prepper', 'custom_data_prepper'].includes(urlMode || '');
   };
 
   useEffect(() => {
@@ -406,6 +410,8 @@ export const Home = (props: HomeProps) => {
           render={(_routerProps) => {
             const queryParams = new URLSearchParams(window.location.href.split('?')[1]);
             const traceId = queryParams.get('traceId');
+            const traceModeFromURL = queryParams.get('mode');
+            const traceMode = isValidTraceAnalyticsMode(traceModeFromURL) ? traceModeFromURL : mode;
 
             const SideBarComponent = !isNavGroupEnabled ? TraceSideBar : React.Fragment;
             if (!traceId) {
@@ -421,6 +427,7 @@ export const Home = (props: HomeProps) => {
                     tracesTableMode={tracesTableMode}
                     setTracesTableMode={setTracesTableMode}
                     {...commonProps}
+                    mode={((traceMode as unknown) as TraceAnalyticsMode) || mode}
                   />
                 </SideBarComponent>
               );
@@ -431,7 +438,7 @@ export const Home = (props: HomeProps) => {
                   chrome={props.chrome}
                   http={props.http}
                   traceId={decodeURIComponent(traceId)}
-                  mode={mode}
+                  mode={((traceMode as unknown) as TraceAnalyticsMode) || mode}
                   dataSourceMDSId={dataSourceMDSId}
                   dataSourceManagement={props.dataSourceManagement}
                   setActionMenu={props.setActionMenu}
@@ -449,6 +456,10 @@ export const Home = (props: HomeProps) => {
           render={(_routerProps) => {
             const queryParams = new URLSearchParams(window.location.href.split('?')[1]);
             const serviceId = queryParams.get('serviceId');
+            const serviceModeFromURL = queryParams.get('mode');
+            const serviceMode = isValidTraceAnalyticsMode(serviceModeFromURL)
+              ? serviceModeFromURL
+              : mode;
 
             const SideBarComponent = !isNavGroupEnabled ? TraceSideBar : React.Fragment;
             if (!serviceId) {
@@ -462,6 +473,7 @@ export const Home = (props: HomeProps) => {
                     toasts={toasts}
                     dataSourceMDSId={dataSourceMDSId}
                     {...commonProps}
+                    mode={((serviceMode as unknown) as TraceAnalyticsMode) || mode}
                   />
                 </SideBarComponent>
               );
@@ -470,6 +482,7 @@ export const Home = (props: HomeProps) => {
                 <ServiceView
                   serviceName={decodeURIComponent(serviceId)}
                   {...commonProps}
+                  mode={((serviceMode as unknown) as TraceAnalyticsMode) || mode}
                   addFilter={(filter: FilterType) => {
                     for (const addedFilter of filters) {
                       if (
