@@ -1474,6 +1474,7 @@ exports[`Traces component renders empty traces page 1`] = `
               items={Array []}
               loading={true}
               mode="data_prepper"
+              page="traces"
               refresh={[Function]}
             >
               <EuiPanel>
@@ -3930,6 +3931,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
               jaegerIndicesExist={true}
               loading={true}
               mode="jaeger"
+              page="traces"
               refresh={[Function]}
             >
               <EuiPanel>
@@ -6217,6 +6219,7 @@ exports[`Traces component renders traces page 1`] = `
               items={Array []}
               loading={true}
               mode="data_prepper"
+              page="traces"
               refresh={[Function]}
             >
               <EuiPanel>

@@ -40,6 +40,7 @@ interface TracesTableProps {
   openTraceFlyout?: (traceId: string) => void;
   jaegerIndicesExist: boolean;
   dataPrepperIndicesExist: boolean;
+  page?: 'traces' | 'app';
 }
 
 export function TracesTable(props: TracesTableProps) {
@@ -74,7 +75,9 @@ export function TracesTable(props: TracesTableProps) {
               <EuiFlexItem grow={false}>
                 <EuiLink
                   data-test-subj="trace-link"
-                  href={appendModeToTraceViewUri(item, getTraceViewUri, traceMode)}
+                  {...(props.page !== 'app' && {
+                    href: appendModeToTraceViewUri(item, getTraceViewUri, traceMode),
+                  })}
                   {...(openTraceFlyout && { onClick: () => openTraceFlyout(item) })}
                 >
                   <EuiText size="s" className="traces-table traces-table-trace-id" title={item}>

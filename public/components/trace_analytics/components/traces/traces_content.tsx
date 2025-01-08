@@ -290,6 +290,7 @@ export function TracesContent(props: TracesProps) {
               openTraceFlyout={openTraceFlyout}
               jaegerIndicesExist={jaegerIndicesExist}
               dataPrepperIndicesExist={dataPrepperIndicesExist}
+              page={page}
             />
           )}
 
