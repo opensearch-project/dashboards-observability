@@ -355,6 +355,7 @@ describe('Viewing application', () => {
     cy.get('[data-test-subj="app-analytics-panelTab"]').click();
     cy.get('[aria-label="actionMenuButton"]').click();
     cy.get('[data-test-subj="editVizContextMenuItem"]').click();
+    changeTimeTo24('months');//Ensure time is set
     cy.get('[data-test-subj="superDatePickerShowDatesButton"]').should('contain', 'Last 24 months');
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
     cy.get('.euiTab[id="availability-panel"]').click();
@@ -433,13 +434,13 @@ describe('Viewing application', () => {
 
 
   it('Changes availability visualization', () => {
+    cy.intercept('PUT', `**/api/observability/application`).as('selectUpdate');
+    cy.intercept('GET', `**/api/observability/operational_panels/panels/**`).as('loadingPanels')
     cy.get('[data-test-subj="app-analytics-configTab"]').click();
     cy.get('select').select(visOneName);
-    cy.intercept('PUT', `**/api/observability/application`).as('selectUpdate');
     cy.wait('@selectUpdate');
 
     moveToHomePage();
-    cy.intercept('GET', `**/api/observability/operational_panels/panels/**`).as('loadingPanels')
     cy.wait('@loadingPanels');
     cy.reload();
     cy.get('[data-test-subj="AvailableAvailabilityBadge"][style="background-color: rgb(84, 179, 153); color: rgb(0, 0, 0);"]').should('contain', 'Available');

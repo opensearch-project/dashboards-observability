@@ -25,6 +25,7 @@ import React, { useMemo, useState } from 'react';
 import { TRACES_MAX_NUM } from '../../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import {
+  appendModeToTraceViewUri,
   MissingConfigurationMessage,
   NoMatchMessage,
   PanelTitle,
@@ -39,6 +40,7 @@ interface TracesTableProps {
   openTraceFlyout?: (traceId: string) => void;
   jaegerIndicesExist: boolean;
   dataPrepperIndicesExist: boolean;
+  page?: 'traces' | 'app';
 }
 
 export function TracesTable(props: TracesTableProps) {
@@ -54,6 +56,12 @@ export function TracesTable(props: TracesTableProps) {
   };
 
   const columns = useMemo(() => {
+    // Extract the current mode from the URL or session storage
+    const currentUrl = window.location.href;
+    const traceMode =
+      new URLSearchParams(currentUrl.split('?')[1]).get('mode') ||
+      sessionStorage.getItem('TraceAnalyticsMode');
+
     if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
       return [
         {
@@ -67,7 +75,9 @@ export function TracesTable(props: TracesTableProps) {
               <EuiFlexItem grow={false}>
                 <EuiLink
                   data-test-subj="trace-link"
-                  {...(getTraceViewUri && { href: getTraceViewUri(item) })}
+                  {...(props.page !== 'app' && {
+                    href: appendModeToTraceViewUri(item, getTraceViewUri, traceMode),
+                  })}
                   {...(openTraceFlyout && { onClick: () => openTraceFlyout(item) })}
                 >
                   <EuiText size="s" className="traces-table traces-table-trace-id" title={item}>
@@ -158,7 +168,7 @@ export function TracesTable(props: TracesTableProps) {
               <EuiFlexItem grow={false}>
                 <EuiLink
                   data-test-subj="trace-link"
-                  {...(getTraceViewUri && { href: getTraceViewUri(item) })}
+                  href={appendModeToTraceViewUri(item, getTraceViewUri, traceMode)}
                   {...(openTraceFlyout && { onClick: () => openTraceFlyout(item) })}
                 >
                   <EuiText size="s" className="traces-table traces-table-trace-id" title={item}>

@@ -14,7 +14,11 @@ import { HttpSetup } from '../../../../../../src/core/public';
 import { BarOrientation } from '../../../../common/constants/shared';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode, TraceQueryMode } from '../../../../common/types/trace_analytics';
-import { microToMilliSec, nanoToMilliSec } from '../components/common/helper_functions';
+import {
+  getTimestampPrecision,
+  microToMilliSec,
+  nanoToMilliSec,
+} from '../components/common/helper_functions';
 import { SpanSearchParams } from '../components/traces/span_detail_table';
 import {
   getCustomIndicesTracesQuery,
@@ -27,6 +31,7 @@ import {
   getTracesQuery,
 } from './queries/traces_queries';
 import { handleDslRequest } from './request_handler';
+import { coreRefs } from '../../../../public/framework/core_refs';
 
 export const handleCustomIndicesTracesRequest = async (
   http: HttpSetup,
@@ -80,7 +85,13 @@ export const handleCustomIndicesTracesRequest = async (
       setColumns([...newItems[0]]);
       setItems(newItems[1]);
     })
-    .catch((error) => console.error(error));
+    .catch((error) => {
+      console.error('Error in handleCustomIndicesTracesRequest:', error);
+      coreRefs.core?.notifications.toasts.addError(error, {
+        title: 'Failed to retrieve custom indices traces',
+        toastLifeTimeMs: 10000,
+      });
+    });
 };
 
 export const handleTracesRequest = async (
@@ -141,6 +152,7 @@ export const handleTracesRequest = async (
       const percentileRanges =
         percentileRangesResult.status === 'fulfilled' ? percentileRangesResult.value : {};
       const response = responseResult.value;
+
       return response.aggregations.traces.buckets.map((bucket: any) => {
         if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
           return {
@@ -168,7 +180,13 @@ export const handleTracesRequest = async (
     .then((newItems) => {
       setItems(newItems);
     })
-    .catch((error) => console.error(error));
+    .catch((error) => {
+      console.error('Error in handleTracesRequest:', error);
+      coreRefs.core?.notifications.toasts.addError(error, {
+        title: 'Failed to retrieve traces',
+        toastLifeTimeMs: 10000,
+      });
+    });
 };
 
 export const handleTraceViewRequest = (
@@ -181,6 +199,11 @@ export const handleTraceViewRequest = (
 ) => {
   handleDslRequest(http, null, getTracesQuery(mode, traceId), mode, dataSourceMDSId)
     .then(async (response) => {
+      // Check if the mode hasn't been set first
+      if (mode === 'jaeger' && !response?.aggregations?.service_type?.buckets) {
+        console.warn('No traces or aggregations found.');
+        return [];
+      }
       const bucket = response.aggregations.traces.buckets[0];
       return {
         trace_id: bucket.key,
@@ -197,7 +220,13 @@ export const handleTraceViewRequest = (
     .then((newFields) => {
       setFields(newFields);
     })
-    .catch((error) => console.error(error));
+    .catch((error) => {
+      console.error('Error in handleTraceViewRequest:', error);
+      coreRefs.core?.notifications.toasts.addError(error, {
+        title: `Failed to retrieve trace view for trace ID: ${traceId}`,
+        toastLifeTimeMs: 10000,
+      });
+    });
 };
 
 // setColorMap sets serviceName to color mappings
@@ -226,8 +255,14 @@ export const handleServicesPieChartRequest = async (
   const colorMap: any = {};
   let index = 0;
   await handleDslRequest(http, null, getServiceBreakdownQuery(traceId, mode), mode, dataSourceMDSId)
-    .then((response) =>
-      Promise.all(
+    .then((response) => {
+      // Check if the mode hasn't been set first
+      if (mode === 'jaeger' && !response?.aggregations?.service_type?.buckets) {
+        console.warn(`No service breakdown found for trace ID: ${traceId}`);
+        return [];
+      }
+
+      return Promise.all(
         response.aggregations.service_type.buckets.map((bucket: any) => {
           colorMap[bucket.key] = colors[index++ % colors.length];
           return {
@@ -237,9 +272,10 @@ export const handleServicesPieChartRequest = async (
             benchmark: 0,
           };
         })
-      )
-    )
+      );
+    })
     .then((newItems) => {
+      if (!newItems.length) return; // No data to process
       const latencySum = newItems.map((item) => item.value).reduce((a, b) => a + b, 0);
       return [
         {
@@ -258,10 +294,18 @@ export const handleServicesPieChartRequest = async (
       ];
     })
     .then((newItems) => {
-      setServiceBreakdownData(newItems);
-      setColorMap(colorMap);
+      if (newItems) {
+        setServiceBreakdownData(newItems);
+        setColorMap(colorMap);
+      }
     })
-    .catch((error) => console.error(error));
+    .catch((error) => {
+      console.error('Error in handleServicesPieChartRequest:', error);
+      coreRefs.core?.notifications.toasts.addError(error, {
+        title: `Failed to retrieve service breakdown for trace ID: ${traceId}`,
+        toastLifeTimeMs: 10000,
+      });
+    });
 };
 
 export const handleSpansGanttRequest = (
@@ -276,7 +320,13 @@ export const handleSpansGanttRequest = (
   handleDslRequest(http, spanFiltersDSL, getSpanDetailQuery(mode, traceId), mode, dataSourceMDSId)
     .then((response) => hitsToSpanDetailData(response.hits.hits, colorMap, mode))
     .then((newItems) => setSpanDetailData(newItems))
-    .catch((error) => console.error(error));
+    .catch((error) => {
+      console.error('Error in handleSpansGanttRequest:', error);
+      coreRefs.core?.notifications.toasts.addError(error, {
+        title: `Failed to retrieve spans Gantt chart for trace ID: ${traceId}`,
+        toastLifeTimeMs: 10000,
+      });
+    });
 };
 
 export const handleSpansFlyoutRequest = (
@@ -290,7 +340,13 @@ export const handleSpansFlyoutRequest = (
     .then((response) => {
       setItems(response?.hits.hits?.[0]?._source);
     })
-    .catch((error) => console.error(error));
+    .catch((error) => {
+      console.error('Error in handleSpansFlyoutRequest:', error);
+      coreRefs.core?.notifications.toasts.addError(error, {
+        title: `Failed to retrieve span details for span ID: ${spanId}`,
+        toastLifeTimeMs: 10000,
+      });
+    });
 };
 
 const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyticsMode) => {
@@ -301,17 +357,35 @@ const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyti
   };
   if (hits.length === 0) return data;
 
-  const minStartTime =
-    mode === 'jaeger'
-      ? microToMilliSec(hits[hits.length - 1].sort[0])
-      : nanoToMilliSec(hits[hits.length - 1].sort[0]);
+  const timestampPrecision = getTimestampPrecision(hits[hits.length - 1].sort[0]);
+
+  const minStartTime = (() => {
+    switch (timestampPrecision) {
+      case 'micros':
+        return microToMilliSec(hits[hits.length - 1].sort[0]);
+      case 'nanos':
+        return nanoToMilliSec(hits[hits.length - 1].sort[0]);
+      default:
+        // 'millis'
+        return hits[hits.length - 1].sort[0];
+    }
+  })();
+
   let maxEndTime = 0;
 
   hits.forEach((hit: any) => {
-    const startTime =
-      mode === 'jaeger'
-        ? microToMilliSec(hit.sort[0]) - minStartTime
-        : nanoToMilliSec(hit.sort[0]) - minStartTime;
+    const startTime = (() => {
+      switch (timestampPrecision) {
+        case 'micros':
+          return microToMilliSec(hit.sort[0]) - minStartTime;
+        case 'nanos':
+          return nanoToMilliSec(hit.sort[0]) - minStartTime;
+        default:
+          // 'millis'
+          return hit.sort[0] - minStartTime;
+      }
+    })();
+
     const duration =
       mode === 'jaeger'
         ? round(microToMilliSec(hit._source.duration), 2)
@@ -387,7 +461,13 @@ export const handlePayloadRequest = (
 ) => {
   handleDslRequest(http, null, getPayloadQuery(mode, traceId), mode, dataSourceMDSId)
     .then((response) => setPayloadData(JSON.stringify(response.hits.hits, null, 2)))
-    .catch((error) => console.error(error));
+    .catch((error) => {
+      console.error('Error in handlePayloadRequest:', error);
+      coreRefs.core?.notifications.toasts.addError(error, {
+        title: `Failed to retrieve payload for trace ID: ${traceId}`,
+        toastLifeTimeMs: 10000,
+      });
+    });
 };
 
 export const handleSpansRequest = (
@@ -404,5 +484,11 @@ export const handleSpansRequest = (
       setItems(response.hits.hits.map((hit: any) => hit._source));
       setTotal(response.hits.total?.value || 0);
     })
-    .catch((error) => console.error(error));
+    .catch((error) => {
+      console.error('Error in handleSpansRequest:', error);
+      coreRefs.core?.notifications.toasts.addError(error, {
+        title: 'Failed to retrieve spans',
+        toastLifeTimeMs: 10000,
+      });
+    });
 };
