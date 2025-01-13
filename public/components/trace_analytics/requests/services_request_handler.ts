@@ -112,10 +112,7 @@ export const handleServiceMapRequest = async (
           (map[bucket.key] = {
             serviceName: bucket.key,
             id: id++,
-            traceGroups: bucket.trace_group.buckets.map((traceGroup: any) => ({
-              traceGroup: traceGroup.key,
-              targetResource: traceGroup.target_resource.buckets.map((res: any) => res.key),
-            })),
+            targetResources: bucket.target_resource.buckets.map((res: any) => res.key),
             targetServices: [],
             destServices: [],
           })
@@ -217,13 +214,18 @@ export const handleServiceMapRequest = async (
       .then((response) =>
         response.aggregations.traces.buckets.filter((bucket: any) => bucket.service.doc_count > 0)
       )
-      .then((traces) => {
+      .then((filteredBuckets) => {
         const maxNumServices = Object.keys(map).length;
         const relatedServices = new Set<string>();
-        for (let i = 0; i < traces.length; i++) {
-          traces[i].all_services.buckets.map((bucket: any) => relatedServices.add(bucket.key));
+
+        // Iterate through the filtered trace buckets
+        for (let i = 0; i < filteredBuckets.length; i++) {
+          // Add the current service name to the related services
+          relatedServices.add(filteredBuckets[i].key);
           if (relatedServices.size === maxNumServices) break;
         }
+
+        // Add the related services to the map for the current service
         map[currService].relatedServices = [...relatedServices];
       })
       .catch((error) => {

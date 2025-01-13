@@ -229,14 +229,10 @@ export function getServiceMapGraph(
         borderWidth: 3,
         color: {
           border: '#4A4A4A',
-          background:
-            relatedServices!.indexOf(service) >= 0 ? `rgba(${color}, 1)` : `rgba(${color}, 0.2)`,
+          background: `rgba(${color}, 1)`,
         },
         font: {
-          color:
-            relatedServices!.indexOf(service) >= 0
-              ? `rgba(72, 122, 180, 1)`
-              : `rgba(72, 122, 180, 0.2)`,
+          color: `rgba(72, 122, 180, 1)`,
         },
       };
     } else {
@@ -285,10 +281,7 @@ export function getServiceMapGraph(
         edges.push({
           from: map[service].id,
           to: map[target].id,
-          color:
-            relatedServices!.indexOf(service) >= 0 && relatedServices!.indexOf(target) >= 0
-              ? `rgba(${edgeColor}, 1)`
-              : `rgba(${edgeColor}, 0.2)`,
+          color: `rgba(${edgeColor}, 1)`,
         });
       });
   });

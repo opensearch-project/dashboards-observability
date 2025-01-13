@@ -22,7 +22,6 @@ import {
   getPercentileFilter,
   getServiceMapGraph,
   getServiceMapScaleColor,
-  getServiceMapTargetResources,
   getTimestampPrecision,
   milliToNanoSec,
   minFixedInterval,
@@ -94,8 +93,9 @@ describe('Helper functions', () => {
     expect(serviceMapGraph).toEqual(TEST_SERVICE_MAP_GRAPH);
   });
 
-  it('returns target resources by service name', () => {
-    const targetResources = getServiceMapTargetResources(TEST_SERVICE_MAP, 'order');
+  it('returns target resources for a service from the traceGroups', () => {
+    const traceGroups = TEST_SERVICE_MAP.order.traceGroups;
+    const targetResources = [].concat(...traceGroups.map((group) => group.targetResource));
     expect(targetResources).toEqual(['clear_order', 'update_order', 'get_order', 'pay_order']);
   });
 
