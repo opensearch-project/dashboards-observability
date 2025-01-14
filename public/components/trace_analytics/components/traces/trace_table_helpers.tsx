@@ -115,6 +115,17 @@ export const getTableColumns = (
       'No'
     );
 
+  const renderStatusCodeErrorsField = (item: number) =>
+    item === undefined || item === null ? (
+      '-'
+    ) : item === 2 ? ( // Error status code is 2
+      <EuiText color="danger" size="s">
+        Yes
+      </EuiText>
+    ) : (
+      'No'
+    );
+
   const renderDurationField = (item: number) =>
     item ? <EuiText size="s">{round(nanoToMilliSec(Math.max(0, item)), 2)}</EuiText> : '-';
 
@@ -166,7 +177,7 @@ export const getTableColumns = (
         name: 'Errors',
         align: 'right',
         sortable: true,
-        render: renderErrorsField,
+        render: renderStatusCodeErrorsField,
       },
       {
         field: 'endTime',
