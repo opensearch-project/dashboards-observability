@@ -6,6 +6,7 @@
 import { schema } from '@osd/config-schema';
 import { UiSettingsServiceSetup } from '../../../../src/core/server/ui_settings';
 import {
+  TRACE_CUSTOM_MODE_DEFAULT_SETTING,
   TRACE_CUSTOM_SERVICE_INDEX_SETTING,
   TRACE_CUSTOM_SPAN_INDEX_SETTING,
 } from '../../common/constants/trace_analytics';
@@ -30,6 +31,17 @@ export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSet
       description:
         '<strong>Experimental feature:</strong> Configure custom service indices that adhere to data prepper schema, to be used by the trace analytics plugin',
       schema: schema.string(),
+    },
+  });
+
+  uiSettings.register({
+    [TRACE_CUSTOM_MODE_DEFAULT_SETTING]: {
+      name: 'Trace analytics custom mode default',
+      value: false,
+      category: ['Observability'],
+      description:
+        '<strong>Experimental feature:</strong> Enable this to default to "custom_data_prepper" mode in the trace analytics plugin',
+      schema: schema.boolean(),
     },
   });
 };

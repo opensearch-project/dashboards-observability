@@ -23,7 +23,10 @@ import {
 } from '../../../../../src/plugins/data_source_management/public';
 import { DataSourceAttributes } from '../../../../../src/plugins/data_source_management/public/types';
 import { observabilityTracesNewNavID } from '../../../common/constants/shared';
-import { TRACE_TABLE_TYPE_KEY } from '../../../common/constants/trace_analytics';
+import {
+  TRACE_CUSTOM_MODE_DEFAULT_SETTING,
+  TRACE_TABLE_TYPE_KEY,
+} from '../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode, TraceQueryMode } from '../../../common/types/trace_analytics';
 import { coreRefs } from '../../framework/core_refs';
 import { FilterType } from './components/common/filters/filters';
@@ -38,6 +41,7 @@ import {
   handleJaegerIndicesExistRequest,
 } from './requests/request_handler';
 import { TraceSideBar } from './trace_side_nav';
+import { uiSettingsService } from '../../../common/utils';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
@@ -258,6 +262,32 @@ export const Home = (props: HomeProps) => {
       }
     }
   }, [jaegerIndicesExist, dataPrepperIndicesExist]);
+
+  useEffect(() => {
+    const urlParts = window.location.href.split('?');
+    const queryParams =
+      urlParts.length > 1 ? new URLSearchParams(urlParts[1].split('#')[0]) : new URLSearchParams();
+
+    const urlMode = queryParams.get('mode');
+    const isCustomModeEnabled = uiSettingsService.get(TRACE_CUSTOM_MODE_DEFAULT_SETTING) || false;
+
+    if (!urlMode && isCustomModeEnabled) {
+      // Add `mode=custom_data_prepper` to the URL
+      queryParams.set('mode', 'custom_data_prepper');
+      const newUrl = `${urlParts[0]}?${queryParams.toString()}${
+        urlParts[1]?.includes('#') ? `#${urlParts[1].split('#')[1]}` : ''
+      }`;
+      window.history.replaceState(null, '', newUrl);
+
+      // Set the mode to `custom_data_prepper` in state and session storage
+      setMode('custom_data_prepper');
+      sessionStorage.setItem('TraceAnalyticsMode', 'custom_data_prepper');
+    } else if (isValidTraceAnalyticsMode(urlMode)) {
+      // Use the existing mode if valid
+      setMode(urlMode as TraceAnalyticsMode);
+      sessionStorage.setItem('TraceAnalyticsMode', urlMode!);
+    }
+  }, []);
 
   useEffect(() => {
     if (mode === 'data_prepper' || mode === 'custom_data_prepper') fetchAttributesFields();
