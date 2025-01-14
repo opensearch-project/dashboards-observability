@@ -146,10 +146,6 @@ export const handleServiceMapRequest = async (
     )
     .catch((error) => {
       console.error('Error retrieving target edges:', error);
-      coreRefs.core?.notifications.toasts.addError(error, {
-        title: 'Failed to retrieve target edges',
-        toastLifeTimeMs: 10000,
-      });
     });
 
   await handleDslRequest(
@@ -178,10 +174,6 @@ export const handleServiceMapRequest = async (
     )
     .catch((error) => {
       console.error('Error retrieving destination edges:', error);
-      coreRefs.core?.notifications.toasts.addError(error, {
-        title: 'Failed to retrieve destination edges',
-        toastLifeTimeMs: 10000,
-      });
     });
 
   if (includeMetrics) {
@@ -202,10 +194,6 @@ export const handleServiceMapRequest = async (
       });
     } catch (error) {
       console.error('Error retrieving service metrics:', error);
-      coreRefs.core?.notifications.toasts.addError(error, {
-        title: 'Failed to retrieve service metrics',
-        toastLifeTimeMs: 10000,
-      });
     }
   }
 
@@ -230,10 +218,6 @@ export const handleServiceMapRequest = async (
       })
       .catch((error) => {
         console.error('Error retrieving related services:', error);
-        coreRefs.core?.notifications.toasts.addError(error, {
-          title: 'Failed to retrieve related services',
-          toastLifeTimeMs: 10000,
-        });
       });
   }
 
