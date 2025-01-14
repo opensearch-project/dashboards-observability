@@ -292,14 +292,6 @@ export function getServiceMapGraph(
   return { graph: { nodes, edges } };
 }
 
-// returns flattened targetResource as an array for all traceGroups
-export function getServiceMapTargetResources(map: ServiceObject, serviceName: string) {
-  return ([] as string[]).concat.apply(
-    [],
-    [...map[serviceName].traceGroups.map((traceGroup) => [...traceGroup.targetResource])]
-  );
-}
-
 export function calculateTicks(min: number, max: number, numTicks = 5): number[] {
   if (min >= max) return calculateTicks(0, Math.max(1, max), numTicks);
   min = Math.floor(min);
@@ -608,14 +600,25 @@ export const getServiceIndices = (mode: TraceAnalyticsMode) => {
   }
 };
 
-export const generateServiceUrl = (service: string, dataSourceId: string) => {
-  const url = `#/services?serviceId=${encodeURIComponent(service)}`;
+export const generateServiceUrl = (
+  service: string,
+  dataSourceId: string,
+  mode?: TraceAnalyticsMode
+): string => {
+  // Construct the base URL with the serviceId
+  let url = `#/services?serviceId=${encodeURIComponent(service)}`;
 
+  // Append the datasourceId if provided
   if (dataSourceId && dataSourceId !== '') {
-    return `${url}&datasourceId=${encodeURIComponent(dataSourceId)}`;
+    url += `&datasourceId=${encodeURIComponent(dataSourceId)}`;
   }
 
-  return `${url}&datasourceId=`;
+  // Append the mode parameter
+  if (mode) {
+    url += `&mode=${encodeURIComponent(mode)}`;
+  }
+
+  return url;
 };
 
 interface FullScreenWrapperProps {

@@ -118,6 +118,7 @@ describe('Services table component', () => {
 
   it('redirects to the correct URL when the service link is clicked', () => {
     const mockDataSourceId = 'mock-data-source-id';
+    const mockMode = 'data_prepper';
     const tableItems = [
       {
         name: 'checkoutservice',
@@ -161,7 +162,7 @@ describe('Services table component', () => {
 
     serviceLink.simulate('click');
 
-    const expectedUrl = generateServiceUrl('checkoutservice', mockDataSourceId);
+    const expectedUrl = generateServiceUrl('checkoutservice', mockDataSourceId, mockMode);
     expect(window.location.href).toBe(expectedUrl);
 
     window.location = originalLocation;
