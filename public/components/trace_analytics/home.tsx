@@ -325,12 +325,14 @@ export const Home = (props: HomeProps) => {
 
   const traceColumnAction = () => {
     const tracesPath = '#/traces';
+    const dataSourceId = dataSourceMDSId[0]?.id || ''; // Default to empty string if undefined
+
     if (newNavigation) {
       coreRefs.application?.navigateToApp(observabilityTracesNewNavID, {
-        path: tracesPath + '?datasourceId=' + dataSourceMDSId[0].id,
+        path: `${tracesPath}?datasourceId=${encodeURIComponent(dataSourceId)}`,
       });
     } else {
-      location.assign(tracesPath + '?datasourceId=' + dataSourceMDSId[0].id);
+      location.assign(`${tracesPath}?datasourceId=${encodeURIComponent(dataSourceId)}`);
     }
 
     setTracesTableMode('traces');
