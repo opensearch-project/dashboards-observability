@@ -326,13 +326,20 @@ export const Home = (props: HomeProps) => {
   const traceColumnAction = () => {
     const tracesPath = '#/traces';
     const dataSourceId = dataSourceMDSId[0]?.id || ''; // Default to empty string if undefined
+    const urlParts = window.location.href.split('?');
+    const queryParams =
+      urlParts.length > 1 ? new URLSearchParams(urlParts[1]) : new URLSearchParams();
+
+    // Retain existing `mode` parameter if it exists
+    const modeParam = queryParams.get('mode') || '';
+    const modeQuery = modeParam ? `&mode=${encodeURIComponent(modeParam)}` : '';
 
     if (newNavigation) {
       coreRefs.application?.navigateToApp(observabilityTracesNewNavID, {
-        path: `${tracesPath}?datasourceId=${encodeURIComponent(dataSourceId)}`,
+        path: `${tracesPath}?datasourceId=${encodeURIComponent(dataSourceId)}${modeQuery}`,
       });
     } else {
-      location.assign(`${tracesPath}?datasourceId=${encodeURIComponent(dataSourceId)}`);
+      location.assign(`${tracesPath}?datasourceId=${encodeURIComponent(dataSourceId)}${modeQuery}`);
     }
 
     setTracesTableMode('traces');
