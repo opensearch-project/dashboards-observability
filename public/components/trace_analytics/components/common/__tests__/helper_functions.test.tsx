@@ -32,7 +32,7 @@ import {
   renderBenchmark,
 } from '../helper_functions';
 
-describe('Helper functions', () => {
+describe('Trace analytics helper functions', () => {
   configure({ adapter: new Adapter() });
 
   it('renders panel title', () => {
@@ -93,10 +93,15 @@ describe('Helper functions', () => {
     expect(serviceMapGraph).toEqual(TEST_SERVICE_MAP_GRAPH);
   });
 
-  it('returns target resources for a service from the traceGroups', () => {
+  it('extracts correct target resources for a given service from its traceGroups', () => {
     const traceGroups = TEST_SERVICE_MAP.order.traceGroups;
+
+    // Extract all target resources from the traceGroups
     const targetResources = [].concat(...traceGroups.map((group) => group.targetResource));
-    expect(targetResources).toEqual(['clear_order', 'update_order', 'get_order', 'pay_order']);
+
+    // Verify the extracted resources match the expected list
+    const expectedResources = ['clear_order', 'update_order', 'get_order', 'pay_order'];
+    expect(targetResources).toEqual(expectedResources);
   });
 
   it('calculates ticks', () => {

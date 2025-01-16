@@ -263,6 +263,15 @@ export const Home = (props: HomeProps) => {
     }
   }, [jaegerIndicesExist, dataPrepperIndicesExist]);
 
+  const updateUrlWithMode = (traceMode: string) => {
+    const urlParts = window.location.href.split('?');
+    const queryParams = new URLSearchParams(urlParts[1]?.split('#')[0] || '');
+    queryParams.set('mode', traceMode);
+    return `${urlParts[0]}?${queryParams.toString()}${
+      urlParts[1]?.includes('#') ? `#${urlParts[1].split('#')[1]}` : ''
+    }`;
+  };
+
   useEffect(() => {
     const urlParts = window.location.href.split('?');
     const queryParams =
@@ -272,20 +281,19 @@ export const Home = (props: HomeProps) => {
     const isCustomModeEnabled = uiSettingsService.get(TRACE_CUSTOM_MODE_DEFAULT_SETTING) || false;
 
     if (!urlMode && isCustomModeEnabled) {
-      // Add `mode=custom_data_prepper` to the URL
-      queryParams.set('mode', 'custom_data_prepper');
-      const newUrl = `${urlParts[0]}?${queryParams.toString()}${
-        urlParts[1]?.includes('#') ? `#${urlParts[1].split('#')[1]}` : ''
-      }`;
-      window.history.replaceState(null, '', newUrl);
+      const newUrl = updateUrlWithMode('custom_data_prepper');
+      if (window.location.href !== newUrl) {
+        window.history.replaceState(null, '', newUrl);
 
-      // Set the mode to `custom_data_prepper` in state and session storage
-      setMode('custom_data_prepper');
-      sessionStorage.setItem('TraceAnalyticsMode', 'custom_data_prepper');
+        setMode('custom_data_prepper');
+        sessionStorage.setItem('TraceAnalyticsMode', 'custom_data_prepper');
+      }
     } else if (isValidTraceAnalyticsMode(urlMode)) {
       // Use the existing mode if valid
-      setMode(urlMode as TraceAnalyticsMode);
-      sessionStorage.setItem('TraceAnalyticsMode', urlMode!);
+      if (sessionStorage.getItem('TraceAnalyticsMode') !== urlMode) {
+        setMode(urlMode as TraceAnalyticsMode);
+        sessionStorage.setItem('TraceAnalyticsMode', urlMode);
+      }
     }
   }, []);
 
@@ -325,12 +333,11 @@ export const Home = (props: HomeProps) => {
 
   const traceColumnAction = () => {
     const tracesPath = '#/traces';
-    const dataSourceId = dataSourceMDSId[0]?.id || ''; // Default to empty string if undefined
+    const dataSourceId = dataSourceMDSId[0]?.id || '';
     const urlParts = window.location.href.split('?');
     const queryParams =
       urlParts.length > 1 ? new URLSearchParams(urlParts[1]) : new URLSearchParams();
 
-    // Retain existing `mode` parameter if it exists
     const modeParam = queryParams.get('mode') || '';
     const modeQuery = modeParam ? `&mode=${encodeURIComponent(modeParam)}` : '';
 

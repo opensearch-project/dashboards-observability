@@ -605,15 +605,12 @@ export const generateServiceUrl = (
   dataSourceId: string,
   mode?: TraceAnalyticsMode
 ): string => {
-  // Construct the base URL with the serviceId
   let url = `#/services?serviceId=${encodeURIComponent(service)}`;
 
-  // Append the datasourceId if provided
   if (dataSourceId && dataSourceId !== '') {
     url += `&datasourceId=${encodeURIComponent(dataSourceId)}`;
   }
 
-  // Append the mode parameter
   if (mode) {
     url += `&mode=${encodeURIComponent(mode)}`;
   }

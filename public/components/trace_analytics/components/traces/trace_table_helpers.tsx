@@ -118,7 +118,7 @@ export const getTableColumns = (
   const renderStatusCodeErrorsField = (item: number) =>
     item === undefined || item === null ? (
       '-'
-    ) : item === 2 ? ( // Error status code is 2
+    ) : item === 2 ? (
       <EuiText color="danger" size="s">
         Yes
       </EuiText>
