@@ -24,6 +24,7 @@ export const TRACE_ANALYTICS_DSL_ROUTE = '/api/observability/trace_analytics/que
 
 export const TRACE_CUSTOM_SPAN_INDEX_SETTING = 'observability:traceAnalyticsSpanIndices';
 export const TRACE_CUSTOM_SERVICE_INDEX_SETTING = 'observability:traceAnalyticsServiceIndices';
+export const TRACE_CUSTOM_MODE_DEFAULT_SETTING = 'observability:traceAnalyticsCustomModeDefault';
 
 export enum TRACE_TABLE_TITLES {
   all_spans = 'All Spans',

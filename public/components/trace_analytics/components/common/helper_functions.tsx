@@ -208,17 +208,22 @@ function filterGraphBySelectedNode(
   return { graph: { nodes: connectedNodes, edges: connectedEdges } };
 }
 
-// construct vis-js graph from ServiceObject
-export function getServiceMapGraph(
-  map: ServiceObject,
-  idSelected: 'latency' | 'error_rate' | 'throughput',
-  ticks: number[],
-  currService?: string,
-  relatedServices?: string[],
-  filterByCurrService?: boolean
-) {
-  if (!relatedServices) relatedServices = Object.keys(map);
+interface ServiceMapParams {
+  map: ServiceObject;
+  idSelected: 'latency' | 'error_rate' | 'throughput';
+  ticks: number[];
+  currService?: string;
+  filterByCurrService?: boolean;
+}
 
+// construct vis-js graph from ServiceObject
+export function getServiceMapGraph({
+  map,
+  idSelected,
+  ticks,
+  currService,
+  filterByCurrService,
+}: ServiceMapParams) {
   const nodes = Object.keys(map).map((service) => {
     const value = map[service][idSelected];
     let styleOptions;
@@ -229,14 +234,10 @@ export function getServiceMapGraph(
         borderWidth: 3,
         color: {
           border: '#4A4A4A',
-          background:
-            relatedServices!.indexOf(service) >= 0 ? `rgba(${color}, 1)` : `rgba(${color}, 0.2)`,
+          background: `rgba(${color}, 1)`,
         },
         font: {
-          color:
-            relatedServices!.indexOf(service) >= 0
-              ? `rgba(72, 122, 180, 1)`
-              : `rgba(72, 122, 180, 0.2)`,
+          color: `rgba(72, 122, 180, 1)`,
         },
       };
     } else {
@@ -285,10 +286,7 @@ export function getServiceMapGraph(
         edges.push({
           from: map[service].id,
           to: map[target].id,
-          color:
-            relatedServices!.indexOf(service) >= 0 && relatedServices!.indexOf(target) >= 0
-              ? `rgba(${edgeColor}, 1)`
-              : `rgba(${edgeColor}, 0.2)`,
+          color: `rgba(${edgeColor}, 1)`,
         });
       });
   });
@@ -297,14 +295,6 @@ export function getServiceMapGraph(
     return filterGraphBySelectedNode(nodes, edges, currService);
   }
   return { graph: { nodes, edges } };
-}
-
-// returns flattened targetResource as an array for all traceGroups
-export function getServiceMapTargetResources(map: ServiceObject, serviceName: string) {
-  return ([] as string[]).concat.apply(
-    [],
-    [...map[serviceName].traceGroups.map((traceGroup) => [...traceGroup.targetResource])]
-  );
 }
 
 export function calculateTicks(min: number, max: number, numTicks = 5): number[] {
@@ -615,14 +605,22 @@ export const getServiceIndices = (mode: TraceAnalyticsMode) => {
   }
 };
 
-export const generateServiceUrl = (service: string, dataSourceId: string) => {
-  const url = `#/services?serviceId=${encodeURIComponent(service)}`;
+export const generateServiceUrl = (
+  service: string,
+  dataSourceId: string,
+  mode?: TraceAnalyticsMode
+): string => {
+  let url = `#/services?serviceId=${encodeURIComponent(service)}`;
 
   if (dataSourceId && dataSourceId !== '') {
-    return `${url}&datasourceId=${encodeURIComponent(dataSourceId)}`;
+    url += `&datasourceId=${encodeURIComponent(dataSourceId)}`;
   }
 
-  return `${url}&datasourceId=`;
+  if (mode) {
+    url += `&mode=${encodeURIComponent(mode)}`;
+  }
+
+  return url;
 };
 
 interface FullScreenWrapperProps {

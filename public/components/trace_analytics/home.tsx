@@ -23,7 +23,10 @@ import {
 } from '../../../../../src/plugins/data_source_management/public';
 import { DataSourceAttributes } from '../../../../../src/plugins/data_source_management/public/types';
 import { observabilityTracesNewNavID } from '../../../common/constants/shared';
-import { TRACE_TABLE_TYPE_KEY } from '../../../common/constants/trace_analytics';
+import {
+  TRACE_CUSTOM_MODE_DEFAULT_SETTING,
+  TRACE_TABLE_TYPE_KEY,
+} from '../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode, TraceQueryMode } from '../../../common/types/trace_analytics';
 import { coreRefs } from '../../framework/core_refs';
 import { FilterType } from './components/common/filters/filters';
@@ -38,6 +41,7 @@ import {
   handleJaegerIndicesExistRequest,
 } from './requests/request_handler';
 import { TraceSideBar } from './trace_side_nav';
+import { uiSettingsService } from '../../../common/utils';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
@@ -259,6 +263,40 @@ export const Home = (props: HomeProps) => {
     }
   }, [jaegerIndicesExist, dataPrepperIndicesExist]);
 
+  const updateUrlWithMode = (traceMode: string) => {
+    const urlParts = window.location.href.split('?');
+    const queryParams = new URLSearchParams(urlParts[1]?.split('#')[0] || '');
+    queryParams.set('mode', traceMode);
+    return `${urlParts[0]}?${queryParams.toString()}${
+      urlParts[1]?.includes('#') ? `#${urlParts[1].split('#')[1]}` : ''
+    }`;
+  };
+
+  useEffect(() => {
+    const urlParts = window.location.href.split('?');
+    const queryParams =
+      urlParts.length > 1 ? new URLSearchParams(urlParts[1].split('#')[0]) : new URLSearchParams();
+
+    const urlMode = queryParams.get('mode');
+    const isCustomModeEnabled = uiSettingsService.get(TRACE_CUSTOM_MODE_DEFAULT_SETTING) || false;
+
+    if (!urlMode && isCustomModeEnabled) {
+      const newUrl = updateUrlWithMode('custom_data_prepper');
+      if (window.location.href !== newUrl) {
+        window.history.replaceState(null, '', newUrl);
+
+        setMode('custom_data_prepper');
+        sessionStorage.setItem('TraceAnalyticsMode', 'custom_data_prepper');
+      }
+    } else if (isValidTraceAnalyticsMode(urlMode)) {
+      // Use the existing mode if valid
+      if (sessionStorage.getItem('TraceAnalyticsMode') !== urlMode) {
+        setMode(urlMode as TraceAnalyticsMode);
+        sessionStorage.setItem('TraceAnalyticsMode', urlMode);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     if (mode === 'data_prepper' || mode === 'custom_data_prepper') fetchAttributesFields();
   }, [mode, dataSourceMDSId]);
@@ -295,12 +333,20 @@ export const Home = (props: HomeProps) => {
 
   const traceColumnAction = () => {
     const tracesPath = '#/traces';
+    const dataSourceId = dataSourceMDSId[0]?.id || '';
+    const urlParts = window.location.href.split('?');
+    const queryParams =
+      urlParts.length > 1 ? new URLSearchParams(urlParts[1]) : new URLSearchParams();
+
+    const modeParam = queryParams.get('mode') || '';
+    const modeQuery = modeParam ? `&mode=${encodeURIComponent(modeParam)}` : '';
+
     if (newNavigation) {
       coreRefs.application?.navigateToApp(observabilityTracesNewNavID, {
-        path: tracesPath + '?datasourceId=' + dataSourceMDSId[0].id,
+        path: `${tracesPath}?datasourceId=${encodeURIComponent(dataSourceId)}${modeQuery}`,
       });
     } else {
-      location.assign(tracesPath + '?datasourceId=' + dataSourceMDSId[0].id);
+      location.assign(`${tracesPath}?datasourceId=${encodeURIComponent(dataSourceId)}${modeQuery}`);
     }
 
     setTracesTableMode('traces');

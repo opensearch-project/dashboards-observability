@@ -87,6 +87,7 @@ export const setTimeFilter = (setEndTime = false, refresh = true) => {
 };
 
 export const expandServiceView = (rowIndex = 0) => {
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');//Replaces wait
   cy.get('*[data-test-subj^="service-flyout-action-btntrace_service"]').eq(rowIndex).click();
   cy.get('[data-test-subj="ActionContextMenu"]').click();
   cy.get('[data-test-subj="viewServiceButton"]').click();

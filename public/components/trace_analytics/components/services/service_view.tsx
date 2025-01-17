@@ -144,7 +144,7 @@ export function ServiceView(props: ServiceViewProps) {
   }, [props.serviceName, props.setDataSourceMenuSelectable]);
 
   const redirectToServicePage = (service: string) => {
-    window.location.href = generateServiceUrl(service, props.dataSourceMDSId[0].id);
+    window.location.href = generateServiceUrl(service, props.dataSourceMDSId[0].id, mode);
   };
 
   const onClickConnectedService = (service: string) => {

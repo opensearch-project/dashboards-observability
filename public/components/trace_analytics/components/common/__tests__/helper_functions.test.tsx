@@ -22,7 +22,6 @@ import {
   getPercentileFilter,
   getServiceMapGraph,
   getServiceMapScaleColor,
-  getServiceMapTargetResources,
   getTimestampPrecision,
   milliToNanoSec,
   minFixedInterval,
@@ -33,7 +32,7 @@ import {
   renderBenchmark,
 } from '../helper_functions';
 
-describe('Helper functions', () => {
+describe('Trace analytics helper functions', () => {
   configure({ adapter: new Adapter() });
 
   it('renders panel title', () => {
@@ -83,20 +82,12 @@ describe('Helper functions', () => {
   });
 
   it('returns service map graph', () => {
-    const serviceMapGraph = getServiceMapGraph(TEST_SERVICE_MAP, 'latency', [
-      0,
-      50,
-      100,
-      150,
-      200,
-      250,
-    ]);
+    const serviceMapGraph = getServiceMapGraph({
+      map: TEST_SERVICE_MAP,
+      idSelected: 'latency',
+      ticks: [0, 50, 100, 150, 200, 250],
+    });
     expect(serviceMapGraph).toEqual(TEST_SERVICE_MAP_GRAPH);
-  });
-
-  it('returns target resources by service name', () => {
-    const targetResources = getServiceMapTargetResources(TEST_SERVICE_MAP, 'order');
-    expect(targetResources).toEqual(['clear_order', 'update_order', 'get_order', 'pay_order']);
   });
 
   it('calculates ticks', () => {
