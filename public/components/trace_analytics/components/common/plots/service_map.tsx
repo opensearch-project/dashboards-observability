@@ -296,28 +296,25 @@ export function ServiceMap({
       if (focusedService !== null) {
         removeFilter('serviceName', focusedService);
         setItems(
-          getServiceMapGraph(
-            serviceMap,
+          getServiceMapGraph({
+            map: serviceMap,
             idSelected,
             ticks,
-            undefined,
-            undefined,
-            false // Show the entire graph without filtering
-          )
+            filterByCurrService: false,
+          })
         );
         setFocusedService(null);
         setInvalid(false);
       }
     } else if (serviceMap[service]) {
       if (focusedService !== service) {
-        const filteredGraph = getServiceMapGraph(
-          serviceMap,
+        const filteredGraph = getServiceMapGraph({
+          map: serviceMap,
           idSelected,
           ticks,
-          service,
-          serviceMap[service]?.relatedServices,
-          true // Enable filtering to focus on connected nodes
-        );
+          currService: service,
+          filterByCurrService: true,
+        });
         setItems(filteredGraph);
         setFocusedService(service);
       }
@@ -369,14 +366,13 @@ export function ServiceMap({
     // Adjust graph rendering logic to ensure related services are visible
     const showRelatedServices = focusedService ? true : filterByCurrService;
     setItems(
-      getServiceMapGraph(
-        serviceMap,
+      getServiceMapGraph({
+        map: serviceMap,
         idSelected,
-        calculatedTicks,
-        focusedService ?? currService,
-        serviceMap[currService!]?.relatedServices,
-        showRelatedServices
-      )
+        ticks: calculatedTicks,
+        currService: focusedService ?? currService,
+        filterByCurrService: showRelatedServices,
+      })
     );
   }, [serviceMap, idSelected, focusedService, filterByCurrService]);
 

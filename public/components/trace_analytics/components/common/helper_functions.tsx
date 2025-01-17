@@ -208,17 +208,22 @@ function filterGraphBySelectedNode(
   return { graph: { nodes: connectedNodes, edges: connectedEdges } };
 }
 
-// construct vis-js graph from ServiceObject
-export function getServiceMapGraph(
-  map: ServiceObject,
-  idSelected: 'latency' | 'error_rate' | 'throughput',
-  ticks: number[],
-  currService?: string,
-  relatedServices?: string[],
-  filterByCurrService?: boolean
-) {
-  if (!relatedServices) relatedServices = Object.keys(map);
+interface ServiceMapParams {
+  map: ServiceObject;
+  idSelected: 'latency' | 'error_rate' | 'throughput';
+  ticks: number[];
+  currService?: string;
+  filterByCurrService?: boolean;
+}
 
+// construct vis-js graph from ServiceObject
+export function getServiceMapGraph({
+  map,
+  idSelected,
+  ticks,
+  currService,
+  filterByCurrService,
+}: ServiceMapParams) {
   const nodes = Object.keys(map).map((service) => {
     const value = map[service][idSelected];
     let styleOptions;
