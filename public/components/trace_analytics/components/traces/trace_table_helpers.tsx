@@ -119,6 +119,7 @@ export const getTableColumns = (
     item === undefined || item === null ? (
       '-'
     ) : item === 2 ? (
+      // 2 means Error, 1 means OK, 0 means Unset
       <EuiText color="danger" size="s">
         Yes
       </EuiText>

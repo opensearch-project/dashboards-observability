@@ -214,11 +214,8 @@ export function getServiceMapGraph(
   idSelected: 'latency' | 'error_rate' | 'throughput',
   ticks: number[],
   currService?: string,
-  relatedServices?: string[],
   filterByCurrService?: boolean
 ) {
-  if (!relatedServices) relatedServices = Object.keys(map);
-
   const nodes = Object.keys(map).map((service) => {
     const value = map[service][idSelected];
     let styleOptions;

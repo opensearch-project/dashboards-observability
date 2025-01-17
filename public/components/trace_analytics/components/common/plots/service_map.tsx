@@ -301,7 +301,6 @@ export function ServiceMap({
             idSelected,
             ticks,
             undefined,
-            undefined,
             false // Show the entire graph without filtering
           )
         );
@@ -315,7 +314,6 @@ export function ServiceMap({
           idSelected,
           ticks,
           service,
-          serviceMap[service]?.relatedServices,
           true // Enable filtering to focus on connected nodes
         );
         setItems(filteredGraph);

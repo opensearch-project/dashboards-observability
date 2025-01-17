@@ -93,17 +93,6 @@ describe('Trace analytics helper functions', () => {
     expect(serviceMapGraph).toEqual(TEST_SERVICE_MAP_GRAPH);
   });
 
-  it('extracts correct target resources for a given service from its traceGroups', () => {
-    const traceGroups = TEST_SERVICE_MAP.order.traceGroups;
-
-    // Extract all target resources from the traceGroups
-    const targetResources = [].concat(...traceGroups.map((group) => group.targetResource));
-
-    // Verify the extracted resources match the expected list
-    const expectedResources = ['clear_order', 'update_order', 'get_order', 'pay_order'];
-    expect(targetResources).toEqual(expectedResources);
-  });
-
   it('calculates ticks', () => {
     const ticks = calculateTicks(500, 200);
     const ticks2 = calculateTicks(0, 200, 10);
