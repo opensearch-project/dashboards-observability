@@ -82,14 +82,11 @@ describe('Trace analytics helper functions', () => {
   });
 
   it('returns service map graph', () => {
-    const serviceMapGraph = getServiceMapGraph(TEST_SERVICE_MAP, 'latency', [
-      0,
-      50,
-      100,
-      150,
-      200,
-      250,
-    ]);
+    const serviceMapGraph = getServiceMapGraph({
+      map: TEST_SERVICE_MAP,
+      idSelected: 'latency',
+      ticks: [0, 50, 100, 150, 200, 250],
+    });
     expect(serviceMapGraph).toEqual(TEST_SERVICE_MAP_GRAPH);
   });
 
