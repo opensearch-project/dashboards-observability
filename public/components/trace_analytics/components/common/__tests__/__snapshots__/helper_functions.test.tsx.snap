@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Helper functions renders benchmark 1`] = `
+exports[`Trace analytics helper functions renders benchmark 1`] = `
 <EuiText
   size="s"
   style={
@@ -22,7 +22,7 @@ exports[`Helper functions renders benchmark 1`] = `
 </EuiText>
 `;
 
-exports[`Helper functions renders benchmark 2`] = `
+exports[`Trace analytics helper functions renders benchmark 2`] = `
 <EuiText
   size="s"
   style={
@@ -44,7 +44,7 @@ exports[`Helper functions renders benchmark 2`] = `
 </EuiText>
 `;
 
-exports[`Helper functions renders benchmark 3`] = `
+exports[`Trace analytics helper functions renders benchmark 3`] = `
 <EuiText
   size="s"
   style={
@@ -66,7 +66,7 @@ exports[`Helper functions renders benchmark 3`] = `
 </EuiText>
 `;
 
-exports[`Helper functions renders no match and missing configuration messages 1`] = `
+exports[`Trace analytics helper functions renders no match and missing configuration messages 1`] = `
 <Fragment>
   <EuiSpacer
     size="s"
@@ -91,7 +91,7 @@ exports[`Helper functions renders no match and missing configuration messages 1`
 </Fragment>
 `;
 
-exports[`Helper functions renders no match and missing configuration messages 2`] = `
+exports[`Trace analytics helper functions renders no match and missing configuration messages 2`] = `
 <Fragment>
   <EuiEmptyPrompt
     actions={
@@ -120,7 +120,7 @@ exports[`Helper functions renders no match and missing configuration messages 2`
 </Fragment>
 `;
 
-exports[`Helper functions renders panel title 1`] = `
+exports[`Trace analytics helper functions renders panel title 1`] = `
 <EuiText
   size="m"
 >
@@ -137,7 +137,7 @@ exports[`Helper functions renders panel title 1`] = `
 </EuiText>
 `;
 
-exports[`Helper functions renders panel title 2`] = `
+exports[`Trace analytics helper functions renders panel title 2`] = `
 <EuiText
   size="m"
 >

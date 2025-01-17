@@ -5,6 +5,7 @@
 
 import {
   EuiCallOut,
+  EuiCheckbox,
   EuiCompressedFieldText,
   EuiDescribedFormGroup,
   EuiFlexGroup,
@@ -23,6 +24,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import {
   TRACE_CUSTOM_SERVICE_INDEX_SETTING,
   TRACE_CUSTOM_SPAN_INDEX_SETTING,
+  TRACE_CUSTOM_MODE_DEFAULT_SETTING,
 } from '../../../../../common/constants/trace_analytics';
 import { uiSettingsService } from '../../../../../common/utils';
 import { useToast } from '../../../common/toast';
@@ -39,6 +41,7 @@ export const CustomIndexFlyout = ({
   const { setToast } = useToast();
   const [spanIndices, setSpanIndices] = useState('');
   const [serviceIndices, setServiceIndices] = useState('');
+  const [customModeDefault, setCustomModeDefault] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const onChangeSpanIndices = (e: { target: { value: React.SetStateAction<string> } }) => {
@@ -49,21 +52,27 @@ export const CustomIndexFlyout = ({
     setServiceIndices(e.target.value);
   };
 
+  const onToggleCustomModeDefault = (e: { target: { checked: boolean } }) => {
+    setCustomModeDefault(e.target.checked);
+  };
+
   useEffect(() => {
     setSpanIndices(uiSettingsService.get(TRACE_CUSTOM_SPAN_INDEX_SETTING));
     setServiceIndices(uiSettingsService.get(TRACE_CUSTOM_SERVICE_INDEX_SETTING));
+    setCustomModeDefault(uiSettingsService.get(TRACE_CUSTOM_MODE_DEFAULT_SETTING) || false);
   }, [uiSettingsService]);
 
-  const onSaveIndices = async () => {
+  const onSaveSettings = async () => {
     try {
       setIsLoading(true);
       await uiSettingsService.set(TRACE_CUSTOM_SPAN_INDEX_SETTING, spanIndices);
       await uiSettingsService.set(TRACE_CUSTOM_SERVICE_INDEX_SETTING, serviceIndices);
+      await uiSettingsService.set(TRACE_CUSTOM_MODE_DEFAULT_SETTING, customModeDefault);
       setIsLoading(false);
-      setToast('Updated trace analytics sources successfully', 'success');
+      setToast('Updated trace analytics settings successfully', 'success');
     } catch (error) {
       console.error(error);
-      setToast('Failed to update trace analytics sources', 'danger');
+      setToast('Failed to update trace analytics settings', 'danger');
     }
     setIsLoading(false);
   };
@@ -134,6 +143,23 @@ export const CustomIndexFlyout = ({
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
+          <EuiDescribedFormGroup
+            title={<h3>Set default mode</h3>}
+            description={
+              <Fragment>
+                Enable this to set &quot;Custom source&quot; as the default mode for trace analytics
+              </Fragment>
+            }
+          >
+            <EuiFormRow>
+              <EuiCheckbox
+                id="customModeDefault"
+                label="Enable custom source as default mode"
+                checked={customModeDefault}
+                onChange={onToggleCustomModeDefault}
+              />
+            </EuiFormRow>
+          </EuiDescribedFormGroup>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
@@ -149,7 +175,7 @@ export const CustomIndexFlyout = ({
             <EuiFlexItem grow={false}>
               <EuiSmallButton
                 onClick={async () => {
-                  await onSaveIndices();
+                  await onSaveSettings();
                   setIsFlyoutVisible(false);
                 }}
                 fill

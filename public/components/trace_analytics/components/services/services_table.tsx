@@ -81,7 +81,7 @@ export function ServicesTable(props: ServicesTableProps) {
     if (page === 'app') {
       setCurrentSelectedService(serviceName);
     } else {
-      window.location.href = generateServiceUrl(serviceName, dataSourceMDSId[0].id);
+      window.location.href = generateServiceUrl(serviceName, dataSourceMDSId[0].id, props.mode);
     }
   };
 
