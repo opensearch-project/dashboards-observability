@@ -11,10 +11,10 @@ import DSLService from 'public/services/requests/dsl';
 import { HttpSetup, HttpStart } from '../../../../../../src/core/public';
 import { TRACE_ANALYTICS_PLOTS_DATE_FORMAT } from '../../../../common/constants/trace_analytics';
 import { ServiceTrends, TraceAnalyticsMode } from '../../../../common/types/trace_analytics';
+import { coreRefs } from '../../../../public/framework/core_refs';
 import { fixedIntervalToMilli } from '../components/common/helper_functions';
 import { ServiceObject } from '../components/common/plots/service_map';
 import {
-  getRelatedServicesQuery,
   getServiceEdgesQuery,
   getServiceMetricsQuery,
   getServiceNodesQuery,
@@ -22,7 +22,6 @@ import {
   getServiceTrendsQuery,
 } from './queries/services_queries';
 import { handleDslRequest } from './request_handler';
-import { coreRefs } from '../../../../public/framework/core_refs';
 
 export const handleServicesRequest = async (
   http: HttpSetup,
@@ -195,30 +194,6 @@ export const handleServiceMapRequest = async (
     } catch (error) {
       console.error('Error retrieving service metrics:', error);
     }
-  }
-
-  if (currService) {
-    await handleDslRequest(http, DSL, getRelatedServicesQuery(currService), mode, dataSourceMDSId)
-      .then((response) =>
-        response.aggregations.traces.buckets.filter((bucket: any) => bucket.service.doc_count > 0)
-      )
-      .then((filteredBuckets) => {
-        const maxNumServices = Object.keys(map).length;
-        const relatedServices = new Set<string>();
-
-        // Iterate through the filtered trace buckets
-        for (let i = 0; i < filteredBuckets.length; i++) {
-          // Add the current service name to the related services
-          relatedServices.add(filteredBuckets[i].key);
-          if (relatedServices.size === maxNumServices) break;
-        }
-
-        // Add the related services to the map for the current service
-        map[currService].relatedServices = [...relatedServices];
-      })
-      .catch((error) => {
-        console.error('Error retrieving related services:', error);
-      });
   }
 
   if (setItems) setItems(map);
