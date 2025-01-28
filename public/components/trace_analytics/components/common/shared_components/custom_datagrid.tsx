@@ -92,6 +92,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
         key="fullScreen"
         color="text"
         iconType={isFullScreen ? 'cross' : 'fullScreen'}
+        data-test-subj="fullScreenButton"
       >
         {isFullScreen ? 'Exit full screen' : 'Full screen'}
       </EuiButtonEmpty>,
