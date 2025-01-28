@@ -4,14 +4,7 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import {
-  EuiDataGrid,
-  EuiDataGridColumn,
-  EuiLink,
-  EuiText,
-  EuiIcon,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiDataGridColumn, EuiLink, EuiText, EuiIcon, EuiButtonEmpty } from '@elastic/eui';
 import round from 'lodash/round';
 import moment from 'moment';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
@@ -19,12 +12,8 @@ import { HttpSetup } from '../../../../../../../src/core/public';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { handleSpansRequest } from '../../requests/traces_request_handler';
-import {
-  NoMatchMessage,
-  microToMilliSec,
-  nanoToMilliSec,
-  FullScreenWrapper,
-} from '../common/helper_functions';
+import { microToMilliSec, nanoToMilliSec } from '../common/helper_functions';
+import { RenderCustomDataGrid } from '../common/shared_components/custom_datagrid';
 
 interface SpanDetailTableProps {
   http: HttpSetup;
@@ -99,37 +88,20 @@ const renderCommonCellValue = ({
   columnId,
   items,
   tableParams,
-  expandedRows,
-  toggleRowExpansion,
   props,
-  flattenedItems,
-  indentationFactor = 0,
-  fullScreenMode = false,
 }: {
   rowIndex: number;
   columnId: string;
-  items: any;
+  items: any[];
   tableParams: any;
-  expandedRows?: Set<string>;
-  toggleRowExpansion?: (spanId: string) => void;
   props: SpanDetailTableProps;
-  flattenedItems?: any[];
-  indentationFactor?: number;
-  fullScreenMode?: boolean;
 }) => {
-  const adjustedRowIndex = flattenedItems
-    ? rowIndex
-    : rowIndex - tableParams.page * tableParams.size;
-  const item = flattenedItems ? flattenedItems[rowIndex] : items[adjustedRowIndex];
+  const adjustedRowIndex = rowIndex - tableParams.page * tableParams.size;
+  const item = items[adjustedRowIndex];
 
   if (!item) return '-';
 
   const value = item[columnId];
-  const indentation = `${(item.level || 0) * indentationFactor}px`;
-  const isRowExpanded = expandedRows?.has(item.spanId);
-
-  if ((value == null || value === '') && columnId !== 'jaegerEndTime') return '-';
-
   switch (columnId) {
     case 'tag':
       return value?.error === true ? (
@@ -146,25 +118,9 @@ const renderCommonCellValue = ({
     case 'spanId':
     case 'spanID':
       return (
-        <div style={{ paddingLeft: indentation, display: 'flex', alignItems: 'center' }}>
-          {toggleRowExpansion && item.children?.length > 0 ? (
-            <EuiIcon
-              type={isRowExpanded ? 'arrowDown' : 'arrowRight'}
-              onClick={() => toggleRowExpansion(item.spanId)}
-              style={{ cursor: 'pointer', marginRight: 5 }}
-              data-test-subj="treeViewExpandArrow"
-            />
-          ) : (
-            <EuiIcon type="empty" style={{ visibility: 'hidden', marginRight: 5 }} />
-          )}
-          {!fullScreenMode ? (
-            <EuiLink data-test-subj="spanId-link" onClick={() => props.openFlyout(value)}>
-              {value}
-            </EuiLink>
-          ) : (
-            <span>{value}</span>
-          )}
-        </div>
+        <EuiLink data-test-subj="spanId-link" onClick={() => props.openFlyout(value)}>
+          {value}
+        </EuiLink>
       );
     case 'durationInNanos':
       return `${round(nanoToMilliSec(Math.max(0, value)), 2)} ms`;
@@ -203,124 +159,96 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
       direction: 'asc' | 'desc';
     }>,
   });
-  const [items, setItems] = useState<any>([]);
+  const [items, setItems] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
-  const { mode } = props;
 
-  useEffect(() => {
+  const fetchData = async () => {
     const spanSearchParams: SpanSearchParams = {
       from: tableParams.page * tableParams.size,
       size: tableParams.size,
-      sortingColumns: tableParams.sortingColumns.map(({ id, direction }) => ({
-        [id]: direction,
-      })),
+      sortingColumns: tableParams.sortingColumns.map(({ id, direction }) => ({ [id]: direction })),
     };
-    handleSpansRequest(
-      props.http,
-      setItems,
-      setTotal,
-      spanSearchParams,
-      props.DSL,
-      mode,
-      props.dataSourceMDSId
-    );
+
+    try {
+      await handleSpansRequest(
+        props.http,
+        setItems,
+        setTotal,
+        spanSearchParams,
+        props.DSL,
+        props.mode,
+        props.dataSourceMDSId
+      );
+    } catch (err) {
+      console.error('Error fetching spans:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
   }, [tableParams, props.DSL]);
 
   useEffect(() => {
     if (props.setTotal) props.setTotal(total);
   }, [total]);
-
-  const columns = useMemo(() => getColumns(mode), [mode]);
-
-  const [visibleColumns, setVisibleColumns] = useState(() =>
-    columns
-      .filter(({ id }) => props.hiddenColumns.findIndex((column) => column === id) === -1)
-      .map(({ id }) => id)
-  );
-
-  const [fullScreenMode, setFullScreenMode] = useState(false);
-  const openFullScreenModal = () => setFullScreenMode(true);
-  const closeFullScreenModal = () => setFullScreenMode(false);
-
+  const columns = useMemo(() => getColumns(props.mode), [props.mode]);
   const renderCellValue = useCallback(
-    (params) => renderCommonCellValue({ ...params, items, tableParams, props, fullScreenMode }),
-    [items, tableParams, props, fullScreenMode]
+    ({ rowIndex, columnId }) =>
+      renderCommonCellValue({
+        rowIndex,
+        columnId,
+        items,
+        tableParams,
+        props,
+      }),
+    [items, tableParams, props]
   );
 
-  const onSort = useCallback(
-    (sortingColumns) => {
-      setTableParams({
-        ...tableParams,
-        sortingColumns,
-      });
+  const onSort = (sortingColumns) => {
+    setTableParams((prev) => ({ ...prev, sortingColumns }));
+  };
+
+  const onChangePage = (page) => {
+    setTableParams((prev) => ({ ...prev, page }));
+  };
+
+  const onChangeItemsPerPage = (size) => {
+    setTableParams((prev) => ({ ...prev, size, page: 0 }));
+  };
+
+  const hiddenColumns = props.hiddenColumns ?? ['traceId', 'traceGroup'];
+
+  const visibleColumns = useMemo(
+    () =>
+      getColumns(props.mode)
+        .filter(({ id }) => !hiddenColumns.includes(id))
+        .map(({ id }) => id),
+    [props.mode, hiddenColumns]
+  );
+
+  return RenderCustomDataGrid({
+    columns,
+    renderCellValue,
+    rowCount: total,
+    sorting: props.mode === 'jaeger' ? undefined : { columns: tableParams.sortingColumns, onSort },
+    pagination: {
+      pageIndex: tableParams.page,
+      pageSize: tableParams.size,
+      pageSizeOptions: [10, 50, 100],
+      onChangePage,
+      onChangeItemsPerPage,
     },
-    [tableParams]
-  );
-
-  const onChangeItemsPerPage = useCallback((size) => setTableParams({ ...tableParams, size }), [
-    tableParams,
-  ]);
-  const onChangePage = useCallback((page) => setTableParams({ ...tableParams, page }), [
-    tableParams,
-  ]);
-
-  const toolbarButtons = [
-    <EuiButtonEmpty
-      size="xs"
-      onClick={fullScreenMode ? closeFullScreenModal : openFullScreenModal}
-      key="fullScreen"
-      color="text"
-      iconType={fullScreenMode ? 'cross' : 'fullScreen'}
-      data-test-subj="fullScreenButton"
-    >
-      {fullScreenMode ? 'Exit full screen' : 'Full screen'}
-    </EuiButtonEmpty>,
-  ];
-
-  return (
-    <>
-      <FullScreenWrapper isFullScreen={fullScreenMode} onClose={closeFullScreenModal}>
-        <EuiDataGrid
-          aria-labelledby="span-detail-data-grid"
-          columns={columns}
-          columnVisibility={{ visibleColumns, setVisibleColumns }}
-          rowCount={total}
-          renderCellValue={renderCellValue}
-          sorting={mode === 'jaeger' ? undefined : { columns: tableParams.sortingColumns, onSort }}
-          toolbarVisibility={{
-            showColumnSelector: true,
-            showSortSelector: true,
-            showFullScreenSelector: false,
-            additionalControls: toolbarButtons,
-          }}
-          pagination={{
-            pageIndex: tableParams.page,
-            pageSize: tableParams.size,
-            pageSizeOptions: [10, 50, 100],
-            onChangeItemsPerPage,
-            onChangePage,
-          }}
-          style={{
-            width: fullScreenMode
-              ? '100%'
-              : props.availableWidth
-              ? `${props.availableWidth}px`
-              : '100%', // allow page to be resized
-            height: fullScreenMode ? '100%' : 'auto',
-          }}
-        />
-      </FullScreenWrapper>
-      {total === 0 && <NoMatchMessage size="xl" />}
-    </>
-  );
+    noMatchMessageSize: 'xl',
+    visibleColumns,
+    availableWidth: props.availableWidth,
+  });
 }
 
 export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
-  const { mode } = props;
-  const [items, setItems] = useState<any>([]);
-  const [total, setTotal] = useState(0);
+  const { http, hiddenColumns, mode, DSL, dataSourceMDSId, availableWidth, openFlyout } = props;
+  const [items, setItems] = useState<Span[]>([]);
+  const [_total, setTotal] = useState(0);
   const [expandedRows, setExpandedRows] = useState(new Set<string>());
-  const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
 
   useEffect(() => {
     const spanSearchParams = {
@@ -329,18 +257,18 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
       sortingColumns: [],
     };
     handleSpansRequest(
-      props.http,
+      http,
       (data) => {
         const hierarchy = buildHierarchy(data);
         setItems(hierarchy);
       },
       setTotal,
       spanSearchParams,
-      props.DSL,
+      DSL,
       mode,
-      props.dataSourceMDSId
+      dataSourceMDSId
     );
-  }, [props.DSL]);
+  }, [DSL, http, mode, dataSourceMDSId]);
 
   interface Span {
     spanId: string;
@@ -372,97 +300,99 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
     return rootSpans;
   };
 
-  const flattenedItems = useMemo(() => {
-    const flattenHierarchy = (spans: Span[], level = 0, isParentExpanded = true): Span[] => {
-      return spans.flatMap((span) => {
-        const isExpanded = expandedRows.has(span.spanId);
-        const shouldShow = level === 0 || isParentExpanded;
-        const row = shouldShow ? [{ ...span, level }] : [];
-        const children = flattenHierarchy(span.children || [], level + 1, isExpanded && shouldShow);
-        return [...row, ...children];
-      });
-    };
+  const flattenHierarchy = (spans: Span[], level = 0, isParentExpanded = true): Span[] => {
+    return spans.flatMap((span) => {
+      const isExpanded = expandedRows.has(span.spanId);
+      const shouldShow = level === 0 || isParentExpanded;
+      const row = shouldShow ? [{ ...span, level }] : [];
+      const children = flattenHierarchy(span.children || [], level + 1, isExpanded && shouldShow);
+      return [...row, ...children];
+    });
+  };
 
-    return flattenHierarchy(items);
-  }, [items, expandedRows]);
+  const flattenedItems = useMemo(() => flattenHierarchy(items), [items, expandedRows]);
 
   const columns = useMemo(() => getColumns(mode), [mode]);
-
-  useEffect(() => {
-    setVisibleColumns(
-      columns
-        .filter(({ id }) => props.hiddenColumns.findIndex((column) => column === id) === -1)
-        .map(({ id }) => id)
-    );
-  }, [columns, props.hiddenColumns]);
-
-  const [fullScreenMode, setFullScreenMode] = useState(false);
-  const openFullScreenModal = () => setFullScreenMode(true);
-  const closeFullScreenModal = () => setFullScreenMode(false);
-
-  const renderCellValue = useCallback(
-    (params) =>
-      renderCommonCellValue({
-        ...params,
-        items,
-        props,
-        expandedRows,
-        toggleRowExpansion: (id) => {
-          setExpandedRows((prev) => {
-            const newSet = new Set(prev);
-            if (newSet.has(id)) {
-              newSet.delete(id);
-            } else {
-              newSet.add(id);
-            }
-            return newSet;
-          });
-        },
-        flattenedItems,
-        indentationFactor: 20,
-        fullScreenMode,
-      }),
-    [items, expandedRows, props, flattenedItems, fullScreenMode]
+  const visibleColumns = useMemo(
+    () => columns.filter(({ id }) => !hiddenColumns.includes(id)).map(({ id }) => id),
+    [columns, hiddenColumns]
   );
 
   const gatherAllSpanIds = (spans: Span[]): Set<string> => {
     const allSpanIds = new Set<string>();
-
-    spans.forEach((span) => {
-      allSpanIds.add(span.spanId);
-
-      if (span.children && span.children.length > 0) {
-        const childSpanIds = gatherAllSpanIds(span.children);
-        childSpanIds.forEach((id) => allSpanIds.add(id));
-      }
-    });
-
+    const gather = (spanList: Span[]) => {
+      spanList.forEach((span) => {
+        allSpanIds.add(span.spanId);
+        if (span.children.length > 0) {
+          gather(span.children);
+        }
+      });
+    };
+    gather(spans);
     return allSpanIds;
   };
 
-  const expandAllRows = () => {
-    const allExpandedIds = gatherAllSpanIds(items);
-    setExpandedRows(allExpandedIds);
-  };
+  const renderCellValue = useCallback(
+    ({ rowIndex, columnId }) => {
+      const item = flattenedItems[rowIndex];
+      const value = item[columnId];
 
-  const collapseAllRows = () => {
-    setExpandedRows(new Set());
-  };
+      if (columnId === 'spanId') {
+        const indentation = `${(item.level || 0) * 20}px`;
+        const isExpanded = expandedRows.has(item.spanId);
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', paddingLeft: indentation }}>
+            {item.children.length > 0 ? (
+              <EuiIcon
+                type={isExpanded ? 'arrowDown' : 'arrowRight'}
+                onClick={() => {
+                  setExpandedRows((prev) => {
+                    const newSet = new Set(prev);
+                    if (newSet.has(item.spanId)) {
+                      newSet.delete(item.spanId);
+                    } else {
+                      newSet.add(item.spanId);
+                    }
+                    return newSet;
+                  });
+                }}
+                style={{ cursor: 'pointer', marginRight: 5 }}
+                data-test-subj="treeViewExpandArrow"
+              />
+            ) : (
+              <EuiIcon type="empty" style={{ visibility: 'hidden', marginRight: 5 }} />
+            )}
+            <EuiButtonEmpty
+              size="xs"
+              onClick={() => openFlyout(value)}
+              color="primary"
+              data-test-subj="spanId-flyout-button"
+            >
+              {value}
+            </EuiButtonEmpty>
+          </div>
+        );
+      }
+
+      if (columnId === 'status.code' || columnId === 'tag' || columnId === 'Errors') {
+        return value === 1 ? (
+          <EuiText color="danger" size="s">
+            Yes
+          </EuiText>
+        ) : (
+          'No'
+        );
+      }
+
+      return value || '-';
+    },
+    [flattenedItems, expandedRows, openFlyout]
+  );
 
   const toolbarButtons = [
     <EuiButtonEmpty
       size="xs"
-      onClick={fullScreenMode ? closeFullScreenModal : openFullScreenModal}
-      key="fullScreen"
-      color="text"
-      iconType={fullScreenMode ? 'cross' : 'fullScreen'}
-      data-test-subj="fullScreenButton"
-    >
-      {fullScreenMode ? 'Exit full screen' : 'Full screen'}
-    </EuiButtonEmpty>,
-    <EuiButtonEmpty
-      size="xs"
-      onClick={expandAllRows}
+      onClick={() => setExpandedRows(gatherAllSpanIds(items))}
       key="expandAll"
       color="text"
       iconType="expand"
@@ -472,7 +402,7 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
     </EuiButtonEmpty>,
     <EuiButtonEmpty
       size="xs"
-      onClick={collapseAllRows}
+      onClick={() => setExpandedRows(new Set())}
       key="collapseAll"
       color="text"
       iconType="minimize"
@@ -482,33 +412,14 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
     </EuiButtonEmpty>,
   ];
 
-  return (
-    <>
-      <FullScreenWrapper isFullScreen={fullScreenMode} onClose={closeFullScreenModal}>
-        <EuiDataGrid
-          aria-labelledby="span-detail-data-grid"
-          columns={columns}
-          columnVisibility={{ visibleColumns, setVisibleColumns }}
-          rowCount={flattenedItems.length}
-          renderCellValue={renderCellValue}
-          toolbarVisibility={{
-            showColumnSelector: true,
-            showSortSelector: true,
-            showFullScreenSelector: false,
-            additionalControls: toolbarButtons,
-          }}
-          style={{
-            width: fullScreenMode
-              ? '100%'
-              : props.availableWidth
-              ? `${props.availableWidth}px`
-              : '100%', // allow page to be resized
-            height: fullScreenMode ? '100%' : '500px',
-            overflowY: 'auto',
-          }}
-        />
-      </FullScreenWrapper>
-      {!fullScreenMode && total === 0 && <NoMatchMessage size="xl" />}
-    </>
-  );
+  return RenderCustomDataGrid({
+    columns,
+    renderCellValue,
+    rowCount: flattenedItems.length,
+    toolbarButtons,
+    fullScreen: false,
+    availableWidth,
+    noMatchMessageSize: 'xl',
+    visibleColumns,
+  });
 }
