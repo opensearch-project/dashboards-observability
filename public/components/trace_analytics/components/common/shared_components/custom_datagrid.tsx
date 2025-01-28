@@ -102,7 +102,13 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
 
   const gridStyle = useMemo(
     () => ({
-      stripes: true,
+      border: 'horizontal',
+      stripes: false,
+      rowHover: 'highlight',
+      header: 'underline',
+      fontSize: 's',
+      cellPadding: 's',
+      footer: 'overline',
     }),
     []
   );
