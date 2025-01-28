@@ -15,7 +15,7 @@ exports[`SpanDetailTable renders the component with data 1`] = `
       data-focus-lock-disabled="disabled"
     >
       <div
-        class="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stripes euiDataGrid--stickyFooter"
+        class="euiDataGrid euiDataGrid--fontSizeSmall euiDataGrid--bordersHorizontal euiDataGrid--headerUnderline euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--paddingSmall euiDataGrid--stickyFooter"
         style="width: 100%; height: auto;"
       />
     </div>
@@ -142,7 +142,13 @@ exports[`SpanDetailTable renders the empty component 1`] = `
         }
         gridStyle={
           Object {
-            "stripes": true,
+            "border": "horizontal",
+            "cellPadding": "s",
+            "fontSize": "s",
+            "footer": "overline",
+            "header": "underline",
+            "rowHover": "highlight",
+            "stripes": false,
           }
         }
         pagination={
@@ -177,6 +183,7 @@ exports[`SpanDetailTable renders the empty component 1`] = `
             "additionalControls": Array [
               <EuiButtonEmpty
                 color="text"
+                data-test-subj="fullScreenButton"
                 iconType="fullScreen"
                 onClick={[Function]}
                 size="xs"
@@ -287,7 +294,7 @@ exports[`SpanDetailTable renders the empty component 1`] = `
                     onWheelCapture={[Function]}
                   >
                     <div
-                      className="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stripes euiDataGrid--stickyFooter"
+                      className="euiDataGrid euiDataGrid--fontSizeSmall euiDataGrid--bordersHorizontal euiDataGrid--headerUnderline euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--paddingSmall euiDataGrid--stickyFooter"
                       onKeyDown={[Function]}
                       style={
                         Object {
@@ -414,7 +421,7 @@ exports[`SpanDetailTable renders the jaeger component with data 1`] = `
       data-focus-lock-disabled="disabled"
     >
       <div
-        class="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stripes euiDataGrid--stickyFooter"
+        class="euiDataGrid euiDataGrid--fontSizeSmall euiDataGrid--bordersHorizontal euiDataGrid--headerUnderline euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--paddingSmall euiDataGrid--stickyFooter"
         style="width: 100%; height: auto;"
       />
     </div>
@@ -473,7 +480,7 @@ exports[`SpanDetailTableHierarchy renders the component with data 1`] = `
       data-focus-lock-disabled="disabled"
     >
       <div
-        class="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stripes euiDataGrid--stickyFooter"
+        class="euiDataGrid euiDataGrid--fontSizeSmall euiDataGrid--bordersHorizontal euiDataGrid--headerUnderline euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--paddingSmall euiDataGrid--stickyFooter"
         style="width: 100%; height: 500px;"
       />
     </div>
@@ -631,7 +638,13 @@ exports[`SpanDetailTableHierarchy renders the empty component 1`] = `
         }
         gridStyle={
           Object {
-            "stripes": true,
+            "border": "horizontal",
+            "cellPadding": "s",
+            "fontSize": "s",
+            "footer": "overline",
+            "header": "underline",
+            "rowHover": "highlight",
+            "stripes": false,
           }
         }
         renderCellValue={[Function]}
@@ -647,6 +660,7 @@ exports[`SpanDetailTableHierarchy renders the empty component 1`] = `
             "additionalControls": Array [
               <EuiButtonEmpty
                 color="text"
+                data-test-subj="fullScreenButton"
                 iconType="fullScreen"
                 onClick={[Function]}
                 size="xs"
@@ -775,7 +789,7 @@ exports[`SpanDetailTableHierarchy renders the empty component 1`] = `
                     onWheelCapture={[Function]}
                   >
                     <div
-                      className="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stripes euiDataGrid--stickyFooter"
+                      className="euiDataGrid euiDataGrid--fontSizeSmall euiDataGrid--bordersHorizontal euiDataGrid--headerUnderline euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--paddingSmall euiDataGrid--stickyFooter"
                       onKeyDown={[Function]}
                       style={
                         Object {
@@ -902,7 +916,7 @@ exports[`SpanDetailTableHierarchy renders the jaeger component with data 1`] = `
       data-focus-lock-disabled="disabled"
     >
       <div
-        class="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stripes euiDataGrid--stickyFooter"
+        class="euiDataGrid euiDataGrid--fontSizeSmall euiDataGrid--bordersHorizontal euiDataGrid--headerUnderline euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--paddingSmall euiDataGrid--stickyFooter"
         style="width: 100%; height: 500px;"
       />
     </div>
