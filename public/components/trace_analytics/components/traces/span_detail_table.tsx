@@ -216,14 +216,12 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
     setTableParams((prev) => ({ ...prev, size, page: 0 }));
   };
 
-  const hiddenColumns = props.hiddenColumns ?? ['traceId', 'traceGroup'];
-
   const visibleColumns = useMemo(
     () =>
       getColumns(props.mode)
-        .filter(({ id }) => !hiddenColumns.includes(id))
+        .filter(({ id }) => !props.hiddenColumns.includes(id))
         .map(({ id }) => id),
-    [props.mode, hiddenColumns]
+    [props.mode]
   );
 
   return RenderCustomDataGrid({
