@@ -84,6 +84,8 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   );
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
 
+  const disableInteractions = useMemo(() => isFullScreen, [isFullScreen]);
+
   const toolbarControls = useMemo(
     () => [
       <EuiButtonEmpty
@@ -132,7 +134,12 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
               setVisibleColumns: setLocalVisibleColumns,
             }}
             rowCount={rowCount}
-            renderCellValue={renderCellValue}
+            renderCellValue={(props) =>
+              renderCellValue({
+                ...props,
+                disableInteractions,
+              })
+            }
             sorting={sorting}
             toolbarVisibility={{
               showColumnSelector: true,

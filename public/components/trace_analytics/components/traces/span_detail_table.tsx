@@ -89,12 +89,14 @@ const renderCommonCellValue = ({
   items,
   tableParams,
   props,
+  disableInteractions,
 }: {
   rowIndex: number;
   columnId: string;
   items: any[];
   tableParams: any;
   props: SpanDetailTableProps;
+  disableInteractions: boolean;
 }) => {
   const adjustedRowIndex = rowIndex - tableParams.page * tableParams.size;
   const item = items[adjustedRowIndex];
@@ -117,7 +119,9 @@ const renderCommonCellValue = ({
       return value?.serviceName;
     case 'spanId':
     case 'spanID':
-      return (
+      return disableInteractions ? (
+        <span>{value}</span>
+      ) : (
         <EuiLink data-test-subj="spanId-link" onClick={() => props.openFlyout(value)}>
           {value}
         </EuiLink>
@@ -193,13 +197,14 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
   }, [total]);
   const columns = useMemo(() => getColumns(props.mode), [props.mode]);
   const renderCellValue = useCallback(
-    ({ rowIndex, columnId }) =>
+    ({ rowIndex, columnId, disableInteractions }) =>
       renderCommonCellValue({
         rowIndex,
         columnId,
         items,
         tableParams,
         props,
+        disableInteractions,
       }),
     [items, tableParams, props]
   );
@@ -331,7 +336,7 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
   };
 
   const renderCellValue = useCallback(
-    ({ rowIndex, columnId }) => {
+    ({ rowIndex, columnId, disableInteractions }) => {
       const item = flattenedItems[rowIndex];
       const value = item[columnId];
 
@@ -360,14 +365,17 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
             ) : (
               <EuiIcon type="empty" style={{ visibility: 'hidden', marginRight: 5 }} />
             )}
-            <EuiButtonEmpty
-              size="xs"
-              onClick={() => openFlyout(value)}
-              color="primary"
-              data-test-subj="spanId-flyout-button"
-            >
-              {value}
-            </EuiButtonEmpty>
+            {disableInteractions ? (
+              <span>{value}</span>
+            ) : (
+              <EuiLink
+                onClick={() => openFlyout(value)}
+                color="primary"
+                data-test-subj="spanId-flyout-button"
+              >
+                {value}
+              </EuiLink>
+            )}
           </div>
         );
       }
