@@ -154,3 +154,15 @@ th[data-test-subj^='tableHeaderCell_dashboard_latency_variance'] {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.full-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.normal-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+}

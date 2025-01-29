@@ -52,9 +52,15 @@ interface PaginationParams {
   onChangeItemsPerPage: (size: number) => void;
 }
 
+interface RenderCellValueProps {
+  rowIndex: number;
+  columnId: string;
+  disableInteractions: boolean;
+}
+
 interface RenderCustomDataGridParams {
   columns: EuiDataGridColumn[];
-  renderCellValue: (props: any) => React.ReactNode;
+  renderCellValue: (props: RenderCellValueProps) => React.ReactNode;
   rowCount: number;
   sorting?: EuiDataGridSorting;
   pagination?: PaginationParams;
@@ -119,13 +125,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   return (
     <>
       <FullScreenWrapper isFullScreen={isFullScreen} onClose={() => setIsFullScreen(false)}>
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: isFullScreen ? '100vh' : 'auto',
-          }}
-        >
+        <div className={isFullScreen ? 'full-wrapper' : 'normal-wrapper'}>
           <EuiDataGrid
             aria-labelledby="custom-data-grid"
             columns={columns}

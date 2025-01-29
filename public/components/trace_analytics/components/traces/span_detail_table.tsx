@@ -26,6 +26,13 @@ interface SpanDetailTableProps {
   availableWidth?: number;
 }
 
+interface Span {
+  spanId: string;
+  parentSpanId?: string;
+  children: Span[];
+  [key: string]: any;
+}
+
 export interface SpanSearchParams {
   from: number;
   size: number;
@@ -83,30 +90,37 @@ const getColumns = (mode: TraceAnalyticsMode): EuiDataGridColumn[] => [
   },
 ];
 
-const renderCommonCellValue = ({
+const renderSpanCellValue = ({
   rowIndex,
   columnId,
   items,
   tableParams,
-  props,
   disableInteractions,
+  props,
 }: {
   rowIndex: number;
   columnId: string;
-  items: any[];
-  tableParams: any;
-  props: SpanDetailTableProps;
+  items: Span[];
+  tableParams: { page: number; size: number };
   disableInteractions: boolean;
+  props: SpanDetailTableProps;
 }) => {
   const adjustedRowIndex = rowIndex - tableParams.page * tableParams.size;
   const item = items[adjustedRowIndex];
-
   if (!item) return '-';
 
   const value = item[columnId];
   switch (columnId) {
     case 'tag':
       return value?.error === true ? (
+        <EuiText color="danger" size="s">
+          Yes
+        </EuiText>
+      ) : (
+        'No'
+      );
+    case 'status.code':
+      return value === 2 ? (
         <EuiText color="danger" size="s">
           Yes
         </EuiText>
@@ -140,14 +154,6 @@ const renderCommonCellValue = ({
       );
     case 'endTime':
       return moment(value).format(TRACE_ANALYTICS_DATE_FORMAT);
-    case 'status.code':
-      return value === 2 ? (
-        <EuiText color="danger" size="s">
-          Yes
-        </EuiText>
-      ) : (
-        'No'
-      );
 
     default:
       return value || '-';
@@ -163,7 +169,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
       direction: 'asc' | 'desc';
     }>,
   });
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<Span[]>([]);
   const [total, setTotal] = useState(0);
 
   const fetchData = async () => {
@@ -198,15 +204,15 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
   const columns = useMemo(() => getColumns(props.mode), [props.mode]);
   const renderCellValue = useCallback(
     ({ rowIndex, columnId, disableInteractions }) =>
-      renderCommonCellValue({
+      renderSpanCellValue({
         rowIndex,
         columnId,
         items,
         tableParams,
-        props,
         disableInteractions,
+        props,
       }),
-    [items, tableParams, props]
+    [items]
   );
 
   const onSort = (sortingColumns) => {
@@ -272,13 +278,6 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
       dataSourceMDSId
     );
   }, [DSL, http, mode, dataSourceMDSId]);
-
-  interface Span {
-    spanId: string;
-    parentSpanId?: string;
-    children: Span[];
-    [key: string]: any;
-  }
 
   type SpanMap = Record<string, Span>;
 
@@ -380,17 +379,14 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
         );
       }
 
-      if (columnId === 'status.code' || columnId === 'tag' || columnId === 'Errors') {
-        return value === 1 ? (
-          <EuiText color="danger" size="s">
-            Yes
-          </EuiText>
-        ) : (
-          'No'
-        );
-      }
-
-      return value || '-';
+      return renderSpanCellValue({
+        rowIndex,
+        columnId,
+        items: flattenedItems,
+        tableParams: { page: 0, size: flattenedItems.length },
+        disableInteractions,
+        props,
+      });
     },
     [flattenedItems, expandedRows, openFlyout]
   );

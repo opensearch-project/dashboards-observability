@@ -3,7 +3,7 @@
 exports[`SpanDetailTable renders the component with data 1`] = `
 <div>
   <div
-    style="display: flex; flex-direction: column; height: auto;"
+    class="normal-wrapper"
   >
     <div
       data-focus-guard="true"
@@ -69,13 +69,7 @@ exports[`SpanDetailTable renders the empty component 1`] = `
     onClose={[Function]}
   >
     <div
-      style={
-        Object {
-          "display": "flex",
-          "flexDirection": "column",
-          "height": "auto",
-        }
-      }
+      className="normal-wrapper"
     >
       <EuiDataGrid
         aria-labelledby="custom-data-grid"
@@ -409,7 +403,7 @@ exports[`SpanDetailTable renders the empty component 1`] = `
 exports[`SpanDetailTable renders the jaeger component with data 1`] = `
 <div>
   <div
-    style="display: flex; flex-direction: column; height: auto;"
+    class="normal-wrapper"
   >
     <div
       data-focus-guard="true"
@@ -468,7 +462,7 @@ exports[`SpanDetailTable renders the jaeger component with data 1`] = `
 exports[`SpanDetailTableHierarchy renders the component with data 1`] = `
 <div>
   <div
-    style="display: flex; flex-direction: column; height: auto;"
+    class="normal-wrapper"
   >
     <div
       data-focus-guard="true"
@@ -565,13 +559,7 @@ exports[`SpanDetailTableHierarchy renders the empty component 1`] = `
     onClose={[Function]}
   >
     <div
-      style={
-        Object {
-          "display": "flex",
-          "flexDirection": "column",
-          "height": "auto",
-        }
-      }
+      className="normal-wrapper"
     >
       <EuiDataGrid
         aria-labelledby="custom-data-grid"
@@ -904,7 +892,7 @@ exports[`SpanDetailTableHierarchy renders the empty component 1`] = `
 exports[`SpanDetailTableHierarchy renders the jaeger component with data 1`] = `
 <div>
   <div
-    style="display: flex; flex-direction: column; height: auto;"
+    class="normal-wrapper"
   >
     <div
       data-focus-guard="true"
