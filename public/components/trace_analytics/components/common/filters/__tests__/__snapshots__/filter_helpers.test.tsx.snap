@@ -134,89 +134,99 @@ Array [
       className="euiSpacer euiSpacer--s"
     />
   </EuiSpacer>,
-  <EuiCompressedFormRow
-    describedByIds={Array []}
-    display="rowCompressed"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    label="Value"
-    labelType="label"
+  <EuiFlexItem
+    grow={true}
   >
     <div
-      className="euiFormRow euiFormRow--compressed"
-      id="random_html_id-row"
+      className="euiFlexItem"
     >
-      <div
-        className="euiFormRow__labelWrapper"
+      <EuiCompressedFormRow
+        describedByIds={Array []}
+        display="rowCompressed"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label="Value"
+        labelType="label"
       >
-        <EuiFormLabel
-          className="euiFormRow__label"
-          htmlFor="random_html_id"
-          isFocused={false}
-          type="label"
+        <div
+          className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+          id="random_html_id-row"
         >
-          <label
-            className="euiFormLabel euiFormRow__label"
-            htmlFor="random_html_id"
+          <div
+            className="euiFormRow__labelWrapper"
           >
-            Value
-          </label>
-        </EuiFormLabel>
-      </div>
-      <div
-        className="euiFormRow__fieldWrapper"
-      >
-        <EuiCompressedFieldText
-          id="random_html_id"
-          onBlur={[Function]}
-          onChange={[Function]}
-          onFocus={[Function]}
-          placeholder="Enter a value"
-          value={0}
-        >
-          <EuiFieldText
-            compressed={true}
-            id="random_html_id"
-            onBlur={[Function]}
-            onChange={[Function]}
-            onFocus={[Function]}
-            placeholder="Enter a value"
-            value={0}
-          >
-            <EuiFormControlLayout
-              compressed={true}
-              fullWidth={false}
-              inputId="random_html_id"
+            <EuiFormLabel
+              className="euiFormRow__label"
+              htmlFor="random_html_id"
+              isFocused={false}
+              type="label"
             >
-              <div
-                className="euiFormControlLayout euiFormControlLayout--compressed"
+              <label
+                className="euiFormLabel euiFormRow__label"
+                htmlFor="random_html_id"
               >
-                <div
-                  className="euiFormControlLayout__childrenWrapper"
+                Value
+              </label>
+            </EuiFormLabel>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <EuiCompressedFieldText
+              fullWidth={true}
+              id="random_html_id"
+              onBlur={[Function]}
+              onChange={[Function]}
+              onFocus={[Function]}
+              placeholder="Enter a value"
+              value={0}
+            >
+              <EuiFieldText
+                compressed={true}
+                fullWidth={true}
+                id="random_html_id"
+                onBlur={[Function]}
+                onChange={[Function]}
+                onFocus={[Function]}
+                placeholder="Enter a value"
+                value={0}
+              >
+                <EuiFormControlLayout
+                  compressed={true}
+                  fullWidth={true}
+                  inputId="random_html_id"
                 >
-                  <EuiValidatableControl>
-                    <input
-                      className="euiFieldText euiFieldText--compressed"
-                      id="random_html_id"
-                      onBlur={[Function]}
-                      onChange={[Function]}
-                      onFocus={[Function]}
-                      placeholder="Enter a value"
-                      type="text"
-                      value={0}
-                    />
-                  </EuiValidatableControl>
-                  <EuiFormControlLayoutIcons
-                    compressed={true}
-                  />
-                </div>
-              </div>
-            </EuiFormControlLayout>
-          </EuiFieldText>
-        </EuiCompressedFieldText>
-      </div>
+                  <div
+                    className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+                  >
+                    <div
+                      className="euiFormControlLayout__childrenWrapper"
+                    >
+                      <EuiValidatableControl>
+                        <input
+                          className="euiFieldText euiFieldText--fullWidth euiFieldText--compressed"
+                          id="random_html_id"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          placeholder="Enter a value"
+                          type="text"
+                          value={0}
+                        />
+                      </EuiValidatableControl>
+                      <EuiFormControlLayoutIcons
+                        compressed={true}
+                      />
+                    </div>
+                  </div>
+                </EuiFormControlLayout>
+              </EuiFieldText>
+            </EuiCompressedFieldText>
+          </div>
+        </div>
+      </EuiCompressedFormRow>
     </div>
-  </EuiCompressedFormRow>,
+  </EuiFlexItem>,
 ]
 `;

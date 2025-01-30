@@ -7,6 +7,7 @@ import {
   EuiCompressedComboBox,
   EuiCompressedFieldText,
   EuiCompressedFormRow,
+  EuiFlexItem,
   EuiFormControlLayoutDelimited,
   EuiSpacer,
 } from '@elastic/eui';
@@ -157,13 +158,16 @@ export const getValueComponent = (
   const textField = (
     <>
       <EuiSpacer size="s" />
-      <EuiCompressedFormRow label={'Value'}>
-        <EuiCompressedFieldText
-          placeholder="Enter a value"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-        />
-      </EuiCompressedFormRow>
+      <EuiFlexItem grow={true}>
+        <EuiCompressedFormRow label={'Value'} fullWidth>
+          <EuiCompressedFieldText
+            placeholder="Enter a value"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            fullWidth
+          />
+        </EuiCompressedFormRow>
+      </EuiFlexItem>
     </>
   );
 

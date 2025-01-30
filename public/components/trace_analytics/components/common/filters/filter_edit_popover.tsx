@@ -37,12 +37,12 @@ export function FilterEditPopover(props: {
   const [filterValue, setFilterValue] = useState(props.filter?.value || '');
 
   return (
-    <div style={{ width: 500 }}>
+    <div style={{ width: 600 }}>
       {/* invisible button workaround to prevent auto focus on context menu panel switch */}
       <button style={{ width: 0, height: 0, position: 'fixed', marginLeft: -1000, bottom: 0 }} />
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={6}>
-          <EuiCompressedFormRow label={'Field'}>
+      <EuiFlexGroup gutterSize="m" direction="column">
+        <EuiFlexItem grow={true}>
+          <EuiCompressedFormRow label={'Field'} fullWidth>
             <EuiCompressedComboBox
               placeholder="Select a field first"
               data-test-subj="field-selector-filter-panel"
@@ -55,11 +55,12 @@ export function FilterEditPopover(props: {
                 setFilterValue('');
               }}
               singleSelection={{ asPlainText: true }}
+              fullWidth
             />
           </EuiCompressedFormRow>
         </EuiFlexItem>
-        <EuiFlexItem grow={5}>
-          <EuiCompressedFormRow label={'Operator'}>
+        <EuiFlexItem grow={true}>
+          <EuiCompressedFormRow label={'Operator'} fullWidth>
             <EuiCompressedComboBox
               placeholder={selectedFieldOptions.length === 0 ? 'Waiting' : 'Select'}
               data-test-subj="operator-selector-filter-panel"
@@ -76,6 +77,7 @@ export function FilterEditPopover(props: {
                 setFilterValue('');
               }}
               singleSelection={{ asPlainText: true }}
+              fullWidth
             />
           </EuiCompressedFormRow>
         </EuiFlexItem>

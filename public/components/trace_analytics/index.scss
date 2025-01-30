@@ -148,8 +148,8 @@ th[data-test-subj^='tableHeaderCell_dashboard_latency_variance'] {
 }
 
 .ellipsis-left {
-  direction: rtl;
-  unicode-bidi: bidi-override;
+  direction: rtl; 
+  unicode-bidi: plaintext;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
