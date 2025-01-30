@@ -25,7 +25,7 @@ import {
   FIELD_HOST,
   FIELD_AGENT
 } from '../../utils/event_analytics/constants';
-import { COMMAND_TIMEOUT_LONG } from '../../utils/constants';
+import { suppressResizeObserverIssue, COMMAND_TIMEOUT_LONG } from '../../utils/constants';
 
 import {
   querySearch,
@@ -281,20 +281,8 @@ describe('Override timestamp for an index', () => {
     clearQuerySearchBoxText('searchAutocompleteTextArea');
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').type(TEST_QUERIES[2].query);
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
-    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('.tab-title').contains('Events').click();
-    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-
-    // handle redux state not setting default timestamp
-    cy.get('[data-test-subj="eventExplorer__overrideDefaultTimestamp"]').then(($buttons) => {
-      if ($buttons.length > 1) {
-        cy.wrap($buttons.first()).click({ force: true });
-      }
-    });
-
-    cy.get('[data-test-subj="eventExplorer__overrideDefaultTimestamp"]')
-      .should('have.length', 1)
-      .click({ force: true });
+    cy.get('[data-test-subj="eventExplorer__overrideDefaultTimestamp"]').click({ force: true });
 
     cy.get('[data-attr-field="utc_time"] [data-test-subj="eventFields__default-timestamp-mark"')
       .contains('Default Timestamp')
