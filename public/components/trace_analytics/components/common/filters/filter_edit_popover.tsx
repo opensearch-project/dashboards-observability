@@ -14,6 +14,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useState } from 'react';
+import { i18n } from '@osd/i18n';
 import { getInvertedOperator, getOperatorOptions, getValueComponent } from './filter_helpers';
 import { FilterType } from './filters';
 
@@ -37,14 +38,16 @@ export function FilterEditPopover(props: {
   const [filterValue, setFilterValue] = useState(props.filter?.value || '');
 
   return (
-    <div style={{ width: 500 }}>
+    <div style={{ width: 600 }}>
       {/* invisible button workaround to prevent auto focus on context menu panel switch */}
       <button style={{ width: 0, height: 0, position: 'fixed', marginLeft: -1000, bottom: 0 }} />
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={6}>
-          <EuiCompressedFormRow label={'Field'}>
+      <EuiFlexGroup gutterSize="m" direction="column">
+        <EuiFlexItem grow={true}>
+          <EuiCompressedFormRow label={'Field'} fullWidth>
             <EuiCompressedComboBox
-              placeholder="Select a field first"
+              placeholder={i18n.translate('addFilter.selectFieldPlaceholder', {
+                defaultMessage: 'Select a field first',
+              })}
               data-test-subj="field-selector-filter-panel"
               isClearable={false}
               options={props.filterFieldOptions}
@@ -55,13 +58,22 @@ export function FilterEditPopover(props: {
                 setFilterValue('');
               }}
               singleSelection={{ asPlainText: true }}
+              fullWidth
             />
           </EuiCompressedFormRow>
         </EuiFlexItem>
-        <EuiFlexItem grow={5}>
-          <EuiCompressedFormRow label={'Operator'}>
+        <EuiFlexItem grow={true}>
+          <EuiCompressedFormRow label={'Operator'} fullWidth>
             <EuiCompressedComboBox
-              placeholder={selectedFieldOptions.length === 0 ? 'Waiting' : 'Select'}
+              placeholder={
+                selectedFieldOptions.length === 0
+                  ? i18n.translate('addFilter.waitingPlaceholder', {
+                      defaultMessage: 'Waiting',
+                    })
+                  : i18n.translate('addFilter.selectPlaceholder', {
+                      defaultMessage: 'Select',
+                    })
+              }
               data-test-subj="operator-selector-filter-panel"
               isClearable={false}
               isDisabled={selectedFieldOptions.length === 0}
@@ -76,6 +88,7 @@ export function FilterEditPopover(props: {
                 setFilterValue('');
               }}
               singleSelection={{ asPlainText: true }}
+              fullWidth
             />
           </EuiCompressedFormRow>
         </EuiFlexItem>

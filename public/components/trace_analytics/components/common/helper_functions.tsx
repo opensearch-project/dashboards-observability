@@ -5,14 +5,7 @@
 /* eslint-disable radix */
 
 import dateMath from '@elastic/datemath';
-import {
-  EuiButtonIcon,
-  EuiEmptyPrompt,
-  EuiOverlayMask,
-  EuiSmallButtonEmpty,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiSmallButtonEmpty, EuiSpacer, EuiText } from '@elastic/eui';
 import { SpacerSize } from '@elastic/eui/src/components/spacer/spacer';
 import { isEmpty, round } from 'lodash';
 import React from 'react';
@@ -621,34 +614,4 @@ export const generateServiceUrl = (
   }
 
   return url;
-};
-
-interface FullScreenWrapperProps {
-  children: React.ReactNode;
-  onClose: () => void;
-  isFullScreen: boolean;
-}
-
-// EUI Data grid full screen button is currently broken, this is a workaround
-export const FullScreenWrapper: React.FC<FullScreenWrapperProps> = ({
-  children,
-  onClose,
-  isFullScreen,
-}) => {
-  if (!isFullScreen) return <>{children}</>;
-
-  return (
-    <EuiOverlayMask>
-      <div className="full-screen-wrapper">
-        <EuiButtonIcon
-          iconType="cross"
-          aria-label="Close full screen"
-          onClick={onClose}
-          display="empty"
-          className="full-screen-close-icon"
-        />
-        <div className="full-screen-content">{children}</div>
-      </div>
-    </EuiOverlayMask>
-  );
 };

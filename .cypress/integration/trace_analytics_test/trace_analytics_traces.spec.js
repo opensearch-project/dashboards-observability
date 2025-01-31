@@ -179,7 +179,7 @@ describe('Testing traces tree view', () => {
     cy.get("[data-test-subj='treeExpandAll']").click();
     cy.get("[data-test-subj='treeCollapseAll']").click();
 
-    cy.get("[data-test-subj='spanId-link']")
+    cy.get("[data-test-subj='spanId-flyout-button']")
       .should('have.length', 6)
       .then((initialSpanIds) => {
         const initialCount = initialSpanIds.length;
@@ -187,14 +187,14 @@ describe('Testing traces tree view', () => {
 
         cy.get("[data-test-subj='treeExpandAll']").click();
 
-        cy.get("[data-test-subj='spanId-link']").then((expandedSpanIds) => {
+        cy.get("[data-test-subj='spanId-flyout-button']").then((expandedSpanIds) => {
           const expandedCount = expandedSpanIds.length;
           expect(expandedCount).to.equal(10);
         });
 
         cy.get("[data-test-subj='treeCollapseAll']").click();
 
-        cy.get("[data-test-subj='spanId-link']").then((collapsedSpanIds) => {
+        cy.get("[data-test-subj='spanId-flyout-button']").then((collapsedSpanIds) => {
           const collapsedCount = collapsedSpanIds.length;
           expect(collapsedCount).to.equal(6); // Collapsed rows should match the initial count
         });
@@ -209,7 +209,7 @@ describe('Testing traces tree view', () => {
     cy.get("[data-test-subj='treeExpandAll']").click();
     cy.get("[data-test-subj='treeCollapseAll']").click();
 
-    cy.get("[data-test-subj='spanId-link']").then((initialSpanIds) => {
+    cy.get("[data-test-subj='spanId-flyout-button']").then((initialSpanIds) => {
       const initialCount = initialSpanIds.length;
       expect(initialCount).to.equal(6);
 
@@ -217,7 +217,7 @@ describe('Testing traces tree view', () => {
       cy.get("[data-test-subj='treeViewExpandArrow']").first().click();
 
       // Check the number of Span IDs after expanding the arrow (should be 7)
-      cy.get("[data-test-subj='spanId-link']").then((expandedSpanIds) => {
+      cy.get("[data-test-subj='spanId-flyout-button']").then((expandedSpanIds) => {
         const expandedCount = expandedSpanIds.length;
         expect(expandedCount).to.equal(7);
       });
@@ -233,7 +233,7 @@ describe('Testing traces tree view', () => {
     cy.get("[data-test-subj='treeCollapseAll']").click();
 
     // Open flyout for a span
-    cy.get("[data-test-subj='spanId-link']")
+    cy.get("[data-test-subj='spanId-flyout-button']")
       .contains(SPAN_ID_TREE_VIEW)
       .click()
     cy.contains('Span detail').should('exist');
