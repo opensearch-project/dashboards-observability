@@ -106,7 +106,7 @@ export function Filters(props: FiltersOwnProps) {
     },
     {
       id: 1,
-      width: 530,
+      width: 630,
       title: 'Edit filter',
       content: (
         <div style={{ margin: 15 }}>
@@ -228,7 +228,7 @@ export function Filters(props: FiltersOwnProps) {
   return props.filters.length > 0 ? (
     <>
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
         {filterComponents}
         <EuiFlexItem grow={false}>
           <AddFilterButton />
@@ -258,6 +258,7 @@ export const GlobalFilterButton = ({
       getFilterFields(mode, page, attributesFilterFields).map((field) => ({
         label: field,
         'data-test-subj': `filterFieldOptions-${field}`,
+        className: 'ellipsis-left',
       })),
     [mode, page, attributesFilterFields]
   );
@@ -352,7 +353,7 @@ export const GlobalFilterButton = ({
     {
       id: 1,
       title: 'Add filter',
-      width: 530,
+      width: 630,
       content: (
         <div style={{ margin: 15 }}>
           <FilterEditPopover
