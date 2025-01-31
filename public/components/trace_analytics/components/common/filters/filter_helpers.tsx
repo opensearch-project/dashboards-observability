@@ -13,6 +13,7 @@ import {
 } from '@elastic/eui';
 import get from 'lodash/get';
 import React from 'react';
+import { i18n } from '@osd/i18n';
 import { TraceAnalyticsMode } from '../../../../../../common/types/trace_analytics';
 
 const getFields = (
@@ -161,7 +162,9 @@ export const getValueComponent = (
       <EuiFlexItem grow={true}>
         <EuiCompressedFormRow label={'Value'} fullWidth>
           <EuiCompressedFieldText
-            placeholder="Enter a value"
+            placeholder={i18n.translate('filterValue.placeholderText', {
+              defaultMessage: 'Enter a value',
+            })}
             value={value}
             onChange={(e) => setValue(e.target.value)}
             fullWidth
@@ -198,7 +201,9 @@ export const getValueComponent = (
             startControl={
               <input
                 type="string"
-                placeholder="Start of range"
+                placeholder={i18n.translate('rangeField.startOfRangePlaceholder', {
+                  defaultMessage: 'Start of range',
+                })}
                 className="euiFieldText"
                 value={getFromValue()}
                 onChange={(e) => setFromValue(e.target.value)}
@@ -207,7 +212,9 @@ export const getValueComponent = (
             endControl={
               <input
                 type="string"
-                placeholder="End of range"
+                placeholder={i18n.translate('rangeField.endOfRangePlaceholder', {
+                  defaultMessage: 'End of range',
+                })}
                 className="euiFieldText"
                 value={getToValue()}
                 onChange={(e) => setToValue(e.target.value)}
@@ -225,7 +232,9 @@ export const getValueComponent = (
         <EuiSpacer size="s" />
         <EuiCompressedFormRow label={'Value'}>
           <EuiCompressedComboBox
-            placeholder="Select a value"
+            placeholder={i18n.translate('comboBox.selectValuePlaceholder', {
+              defaultMessage: 'Select a value',
+            })}
             options={[
               {
                 label: 'true',

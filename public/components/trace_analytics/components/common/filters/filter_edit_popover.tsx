@@ -14,6 +14,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useState } from 'react';
+import { i18n } from '@osd/i18n';
 import { getInvertedOperator, getOperatorOptions, getValueComponent } from './filter_helpers';
 import { FilterType } from './filters';
 
@@ -44,7 +45,9 @@ export function FilterEditPopover(props: {
         <EuiFlexItem grow={true}>
           <EuiCompressedFormRow label={'Field'} fullWidth>
             <EuiCompressedComboBox
-              placeholder="Select a field first"
+              placeholder={i18n.translate('addFilter.selectFieldPlaceholder', {
+                defaultMessage: 'Select a field first',
+              })}
               data-test-subj="field-selector-filter-panel"
               isClearable={false}
               options={props.filterFieldOptions}
@@ -62,7 +65,15 @@ export function FilterEditPopover(props: {
         <EuiFlexItem grow={true}>
           <EuiCompressedFormRow label={'Operator'} fullWidth>
             <EuiCompressedComboBox
-              placeholder={selectedFieldOptions.length === 0 ? 'Waiting' : 'Select'}
+              placeholder={
+                selectedFieldOptions.length === 0
+                  ? i18n.translate('addFilter.waitingPlaceholder', {
+                      defaultMessage: 'Waiting',
+                    })
+                  : i18n.translate('addFilter.selectPlaceholder', {
+                      defaultMessage: 'Select',
+                    })
+              }
               data-test-subj="operator-selector-filter-panel"
               isClearable={false}
               isDisabled={selectedFieldOptions.length === 0}

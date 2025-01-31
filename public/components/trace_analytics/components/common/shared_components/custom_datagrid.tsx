@@ -12,6 +12,7 @@ import {
   EuiOverlayMask,
   EuiButtonIcon,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { NoMatchMessage } from '../helper_functions';
 
 interface FullScreenWrapperProps {
@@ -102,7 +103,13 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
         iconType={isFullScreen ? 'cross' : 'fullScreen'}
         data-test-subj="fullScreenButton"
       >
-        {isFullScreen ? 'Exit full screen' : 'Full screen'}
+        {isFullScreen
+          ? i18n.translate('toolbarControls.exitFullScreen', {
+              defaultMessage: 'Exit full screen',
+            })
+          : i18n.translate('toolbarControls.fullScreen', {
+              defaultMessage: 'Full screen',
+            })}
       </EuiButtonEmpty>,
       ...toolbarButtons,
     ],

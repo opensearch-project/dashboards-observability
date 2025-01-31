@@ -4,6 +4,7 @@
  */
 
 @import '../../../node_modules/vis-network/dist/dist/vis-network.min.css';
+@import './components/common/shared_components/sharedComponents.scss';
 
 .overview-title {
   color: '#333333';
@@ -145,24 +146,4 @@ th[data-test-subj^='tableHeaderCell_dashboard_latency_variance'] {
 .full-screen-content {
   flex: 1 1 auto;
   overflow: auto;
-}
-
-.ellipsis-left {
-  direction: rtl; 
-  unicode-bidi: plaintext;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.full-wrapper {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
-.normal-wrapper {
-  display: flex;
-  flex-direction: column;
-  height: auto;
 }
