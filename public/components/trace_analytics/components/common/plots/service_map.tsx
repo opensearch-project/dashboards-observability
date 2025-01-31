@@ -378,10 +378,6 @@ export function ServiceMap({
     );
   }, [serviceMap, idSelected, focusedService, filterByCurrService]);
 
-  useEffect(() => {
-    console.log('items.graph: ', items);
-  }, [items]);
-
   return (
     <>
       <EuiPanel>

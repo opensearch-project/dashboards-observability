@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import { EuiSmallButton } from '@elastic/eui';
+import { waitFor } from '@testing-library/react';
 import { configure, mount, shallow } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import { SpanDetailPanel } from '../span_detail_panel';
-import { EuiSmallButton } from '@elastic/eui';
-import { Plt } from '../../../../visualizations/plotly/plot';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { Plt } from '../../../../visualizations/plotly/plot';
+import { SpanDetailPanel } from '../span_detail_panel';
 
 configure({ adapter: new Adapter() });
 
@@ -86,14 +87,29 @@ describe('SpanDetailPanel component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('renders gantt chart and mini-map correctly', () => {
+  it('displays loading chart initially', () => {
     const wrapper = mount(<SpanDetailPanel {...mockProps} />);
-    expect(wrapper.find(Plt)).toHaveLength(2); // Gantt chart and mini-map
+    expect(wrapper.find('EuiLoadingChart')).toHaveLength(1);
   });
 
-  it('handles zoom reset button correctly', () => {
+  it('renders gantt chart and mini-map correctly', async () => {
     const wrapper = mount(<SpanDetailPanel {...mockProps} />);
 
+    expect(wrapper.find('EuiLoadingChart')).toHaveLength(1); // Ensure loading state appears
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find(Plt)).toHaveLength(2); // Gantt chart and mini-map appear
+    });
+  });
+
+  it('handles zoom reset button correctly', async () => {
+    const wrapper = mount(<SpanDetailPanel {...mockProps} />);
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find(Plt)).toHaveLength(2); // Gantt chart and mini-map appear
+    });
     // Verify that the reset button is initially disabled
     let resetButton = wrapper
       .find(EuiSmallButton)
@@ -106,30 +122,35 @@ describe('SpanDetailPanel component', () => {
       miniMap.simulate('click');
     });
 
-    wrapper.update();
-
-    // Verify that the reset button is now enabled
-    resetButton = wrapper
-      .find(EuiSmallButton)
-      .filterWhere((btn) => btn.text().includes('Reset zoom'));
-    expect(resetButton.prop('isDisabled')).toBe(false); // Should now be enabled
+    await waitFor(() => {
+      wrapper.update();
+      resetButton = wrapper
+        .find(EuiSmallButton)
+        .filterWhere((btn) => btn.text().includes('Reset zoom'));
+      expect(resetButton.prop('isDisabled')).toBe(false); // Should now be enabled
+    });
 
     // Simulate clicking the reset button
     act(() => {
       resetButton.prop('onClick')!();
     });
 
-    wrapper.update();
-
-    // Verify that the reset button is disabled again after reset
-    resetButton = wrapper
-      .find(EuiSmallButton)
-      .filterWhere((btn) => btn.text().includes('Reset zoom'));
-    expect(resetButton.prop('isDisabled')).toBe(true);
+    await waitFor(() => {
+      wrapper.update();
+      resetButton = wrapper
+        .find(EuiSmallButton)
+        .filterWhere((btn) => btn.text().includes('Reset zoom'));
+      expect(resetButton.prop('isDisabled')).toBe(true); // Should reset
+    });
   });
 
-  it('handles user-defined zoom range via mini-map', () => {
+  it('handles user-defined zoom range via mini-map', async () => {
     const wrapper = mount(<SpanDetailPanel {...mockProps} />);
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find(Plt)).toHaveLength(2); // Gantt chart and mini-map appear
+    });
 
     // Find the mini-map and simulate click
     const miniMap = wrapper.find('[data-test-subj="mocked-plt"]').at(0);
@@ -137,12 +158,12 @@ describe('SpanDetailPanel component', () => {
       miniMap.simulate('click');
     });
 
-    wrapper.update();
-
-    // After zooming, the reset button should be enabled
-    const resetButton = wrapper
-      .find(EuiSmallButton)
-      .filterWhere((btn) => btn.text().includes('Reset zoom'));
-    expect(resetButton.prop('isDisabled')).toBe(false);
+    await waitFor(() => {
+      wrapper.update();
+      const resetButton = wrapper
+        .find(EuiSmallButton)
+        .filterWhere((btn) => btn.text().includes('Reset zoom'));
+      expect(resetButton.prop('isDisabled')).toBe(false);
+    });
   });
 });
