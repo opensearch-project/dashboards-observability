@@ -28,7 +28,7 @@ exports[`Filter popover component renders filter popover 1`] = `
   <div
     style={
       Object {
-        "width": 500,
+        "width": 600,
       }
     }
   >
@@ -44,28 +44,29 @@ exports[`Filter popover component renders filter popover 1`] = `
       }
     />
     <EuiFlexGroup
-      gutterSize="s"
+      direction="column"
+      gutterSize="m"
     >
       <div
-        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+        className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
       >
         <EuiFlexItem
-          grow={6}
+          grow={true}
         >
           <div
-            className="euiFlexItem euiFlexItem--flexGrow6"
+            className="euiFlexItem"
           >
             <EuiCompressedFormRow
               describedByIds={Array []}
               display="rowCompressed"
-              fullWidth={false}
+              fullWidth={true}
               hasChildLabel={true}
               hasEmptyLabelSpace={false}
               label="Field"
               labelType="label"
             >
               <div
-                className="euiFormRow euiFormRow--compressed"
+                className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
                 id="random_html_id-row"
               >
                 <div
@@ -92,7 +93,7 @@ exports[`Filter popover component renders filter popover 1`] = `
                     async={false}
                     compressed={true}
                     data-test-subj="field-selector-filter-panel"
-                    fullWidth={false}
+                    fullWidth={true}
                     id="random_html_id"
                     isClearable={false}
                     onBlur={[Function]}
@@ -129,7 +130,7 @@ exports[`Filter popover component renders filter popover 1`] = `
                     <div
                       aria-expanded={false}
                       aria-haspopup="listbox"
-                      className="euiComboBox euiComboBox--compressed"
+                      className="euiComboBox euiComboBox--compressed euiComboBox--fullWidth"
                       data-test-subj="field-selector-filter-panel"
                       onKeyDown={[Function]}
                       role="combobox"
@@ -137,7 +138,7 @@ exports[`Filter popover component renders filter popover 1`] = `
                       <EuiComboBoxInput
                         autoSizeInputRef={[Function]}
                         compressed={true}
-                        fullWidth={false}
+                        fullWidth={true}
                         hasSelectedOptions={false}
                         id="random_html_id"
                         inputRef={[Function]}
@@ -164,7 +165,7 @@ exports[`Filter popover component renders filter popover 1`] = `
                       >
                         <EuiFormControlLayout
                           compressed={true}
-                          fullWidth={false}
+                          fullWidth={true}
                           icon={
                             Object {
                               "aria-label": "Open list of options",
@@ -178,13 +179,13 @@ exports[`Filter popover component renders filter popover 1`] = `
                           }
                         >
                           <div
-                            className="euiFormControlLayout euiFormControlLayout--compressed"
+                            className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
                           >
                             <div
                               className="euiFormControlLayout__childrenWrapper"
                             >
                               <div
-                                className="euiComboBox__inputWrap euiComboBox__inputWrap--compressed euiComboBox__inputWrap--noWrap"
+                                className="euiComboBox__inputWrap euiComboBox__inputWrap--compressed euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
                                 data-test-subj="comboBoxInput"
                                 onClick={[Function]}
                                 tabIndex={-1}
@@ -332,22 +333,22 @@ exports[`Filter popover component renders filter popover 1`] = `
           </div>
         </EuiFlexItem>
         <EuiFlexItem
-          grow={5}
+          grow={true}
         >
           <div
-            className="euiFlexItem euiFlexItem--flexGrow5"
+            className="euiFlexItem"
           >
             <EuiCompressedFormRow
               describedByIds={Array []}
               display="rowCompressed"
-              fullWidth={false}
+              fullWidth={true}
               hasChildLabel={true}
               hasEmptyLabelSpace={false}
               label="Operator"
               labelType="label"
             >
               <div
-                className="euiFormRow euiFormRow--compressed"
+                className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
                 id="random_html_id-row"
               >
                 <div
@@ -374,7 +375,7 @@ exports[`Filter popover component renders filter popover 1`] = `
                     async={false}
                     compressed={true}
                     data-test-subj="operator-selector-filter-panel"
-                    fullWidth={false}
+                    fullWidth={true}
                     id="random_html_id"
                     isClearable={false}
                     isDisabled={true}
@@ -394,7 +395,7 @@ exports[`Filter popover component renders filter popover 1`] = `
                     <div
                       aria-expanded={false}
                       aria-haspopup="listbox"
-                      className="euiComboBox euiComboBox--compressed euiComboBox-isDisabled"
+                      className="euiComboBox euiComboBox--compressed euiComboBox--fullWidth euiComboBox-isDisabled"
                       data-test-subj="operator-selector-filter-panel"
                       onKeyDown={[Function]}
                       role="combobox"
@@ -402,7 +403,7 @@ exports[`Filter popover component renders filter popover 1`] = `
                       <EuiComboBoxInput
                         autoSizeInputRef={[Function]}
                         compressed={true}
-                        fullWidth={false}
+                        fullWidth={true}
                         hasSelectedOptions={false}
                         id="random_html_id"
                         inputRef={[Function]}
@@ -430,7 +431,7 @@ exports[`Filter popover component renders filter popover 1`] = `
                       >
                         <EuiFormControlLayout
                           compressed={true}
-                          fullWidth={false}
+                          fullWidth={true}
                           icon={
                             Object {
                               "aria-label": "Open list of options",
@@ -444,13 +445,13 @@ exports[`Filter popover component renders filter popover 1`] = `
                           }
                         >
                           <div
-                            className="euiFormControlLayout euiFormControlLayout--compressed"
+                            className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
                           >
                             <div
                               className="euiFormControlLayout__childrenWrapper"
                             >
                               <div
-                                className="euiComboBox__inputWrap euiComboBox__inputWrap--compressed euiComboBox__inputWrap--noWrap"
+                                className="euiComboBox__inputWrap euiComboBox__inputWrap--compressed euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
                                 data-test-subj="comboBoxInput"
                                 onClick={[Function]}
                                 tabIndex={-1}
