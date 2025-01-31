@@ -116,7 +116,7 @@ export function TraceView(props: TraceViewProps) {
                                 iconType="copyClipboard"
                                 onClick={copy}
                               >
-                                Click txo copy
+                                Click to copy
                               </EuiSmallButtonIcon>
                             )}
                           </EuiCopy>

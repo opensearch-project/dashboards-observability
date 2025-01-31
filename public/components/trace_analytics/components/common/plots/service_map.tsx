@@ -533,7 +533,6 @@ export function ServiceMap({
                   />
                 )}
 
-                {/* Loading spinner */}
                 {(isLoading || isServicesDataLoading) && (
                   <div
                     style={{
@@ -553,7 +552,6 @@ export function ServiceMap({
                   </div>
                 )}
 
-                {/* Node details */}
                 {selectedNodeDetails && (
                   <div
                     style={{
@@ -574,7 +572,6 @@ export function ServiceMap({
               </div>
             </EuiFlexItem>
 
-            {/* Scale */}
             {(page !== 'traces' || idSelected) && (
               <EuiFlexItem grow={false}>
                 <ServiceMapScale idSelected={idSelected} serviceMap={serviceMap} ticks={ticks} />
