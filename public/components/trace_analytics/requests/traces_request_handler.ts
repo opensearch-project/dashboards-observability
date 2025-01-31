@@ -197,7 +197,7 @@ export const handleTraceViewRequest = (
   mode: TraceAnalyticsMode,
   dataSourceMDSId?: string
 ) => {
-  handleDslRequest(http, null, getTracesQuery(mode, traceId), mode, dataSourceMDSId)
+  return handleDslRequest(http, null, getTracesQuery(mode, traceId), mode, dataSourceMDSId)
     .then(async (response) => {
       // Check if the mode hasn't been set first
       if (mode === 'jaeger' && !response?.aggregations?.service_type?.buckets) {
@@ -317,7 +317,13 @@ export const handleSpansGanttRequest = (
   mode: TraceAnalyticsMode,
   dataSourceMDSId?: string
 ) => {
-  handleDslRequest(http, spanFiltersDSL, getSpanDetailQuery(mode, traceId), mode, dataSourceMDSId)
+  return handleDslRequest(
+    http,
+    spanFiltersDSL,
+    getSpanDetailQuery(mode, traceId),
+    mode,
+    dataSourceMDSId
+  )
     .then((response) => hitsToSpanDetailData(response.hits.hits, colorMap, mode))
     .then((newItems) => setSpanDetailData(newItems))
     .catch((error) => {
@@ -459,7 +465,7 @@ export const handlePayloadRequest = (
   mode: TraceAnalyticsMode,
   dataSourceMDSId?: string
 ) => {
-  handleDslRequest(http, null, getPayloadQuery(mode, traceId), mode, dataSourceMDSId)
+  return handleDslRequest(http, null, getPayloadQuery(mode, traceId), mode, dataSourceMDSId)
     .then((response) => setPayloadData(JSON.stringify(response.hits.hits, null, 2)))
     .catch((error) => {
       console.error('Error in handlePayloadRequest:', error);
@@ -479,7 +485,7 @@ export const handleSpansRequest = (
   mode: TraceAnalyticsMode,
   dataSourceMDSId?: string
 ) => {
-  handleDslRequest(http, DSL, getSpansQuery(spanSearchParams), mode, dataSourceMDSId)
+  return handleDslRequest(http, DSL, getSpansQuery(spanSearchParams), mode, dataSourceMDSId)
     .then((response) => {
       setItems(response.hits.hits.map((hit: any) => hit._source));
       setTotal(response.hits.total?.value || 0);

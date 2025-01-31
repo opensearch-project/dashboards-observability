@@ -8,6 +8,7 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiHorizontalRule,
+  EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -25,7 +26,7 @@ interface ServiceBreakdownData {
   };
 }
 
-export function ServiceBreakdownPanel(props: { data: ServiceBreakdownData[] }) {
+export function ServiceBreakdownPanel(props: { data: ServiceBreakdownData[]; isLoading: boolean }) {
   const layout = useMemo(
     () =>
       ({
@@ -81,14 +82,22 @@ export function ServiceBreakdownPanel(props: { data: ServiceBreakdownData[] }) {
   return (
     <EuiPanel>
       <PanelTitle title="Time spent by service" data-test-subj="time-spent-by-service-panel" />
-      <EuiHorizontalRule margin="m" />
-      <EuiFlexGroup alignItems="center" gutterSize="m">
-        <EuiFlexItem grow={3}>
-          {props.data?.length > 0 ? <Plt data={props.data} layout={layout} /> : null}
-        </EuiFlexItem>
-        <EuiFlexItem grow={3}>{stats}</EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
+      {props.isLoading ? (
+        <div className="center-loading-div">
+          <EuiLoadingChart size="l" />
+        </div>
+      ) : (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <EuiFlexGroup alignItems="center" gutterSize="m">
+            <EuiFlexItem grow={3}>
+              {props.data?.length > 0 ? <Plt data={props.data} layout={layout} /> : null}
+            </EuiFlexItem>
+            <EuiFlexItem grow={3}>{stats}</EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+        </>
+      )}
     </EuiPanel>
   );
 }

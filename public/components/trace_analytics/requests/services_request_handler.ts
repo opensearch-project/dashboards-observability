@@ -206,7 +206,7 @@ export const handleServiceViewRequest = (
   mode: TraceAnalyticsMode,
   dataSourceMDSId?: string
 ) => {
-  handleDslRequest(http, DSL, getServicesQuery(mode, serviceName), mode, dataSourceMDSId)
+  return handleDslRequest(http, DSL, getServicesQuery(mode, serviceName), mode, dataSourceMDSId)
     .then(async (response) => {
       const bucket = response.aggregations.service.buckets[0];
       if (!bucket) return {};

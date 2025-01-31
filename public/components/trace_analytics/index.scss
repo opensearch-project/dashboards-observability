@@ -148,9 +148,10 @@ th[data-test-subj^='tableHeaderCell_dashboard_latency_variance'] {
   overflow: auto;
 }
 
-.center-parent-div {
+.center-loading-div {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100%;
+  min-height: 200px;
 }
