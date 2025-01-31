@@ -147,3 +147,10 @@ th[data-test-subj^='tableHeaderCell_dashboard_latency_variance'] {
   flex: 1 1 auto;
   overflow: auto;
 }
+
+.center-parent-div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}

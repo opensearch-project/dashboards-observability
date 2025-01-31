@@ -90,7 +90,7 @@ export function TraceView(props: TraceViewProps) {
                             iconType="copyClipboard"
                             onClick={copy}
                           >
-                            Click to copy
+                            Click txo copy
                           </EuiSmallButtonIcon>
                         )}
                       </EuiCopy>
@@ -163,6 +163,7 @@ export function TraceView(props: TraceViewProps) {
   const [serviceMapIdSelected, setServiceMapIdSelected] = useState<
     'latency' | 'error_rate' | 'throughput'
   >('latency');
+  const [isServicesDataLoading, setIsServicesDataLoading] = useState(false);
 
   const refresh = async () => {
     const DSL = filtersToDsl(
@@ -197,7 +198,14 @@ export function TraceView(props: TraceViewProps) {
       mode,
       props.dataSourceMDSId[0].id
     );
-    handleServiceMapRequest(props.http, DSL, mode, props.dataSourceMDSId[0].id, setServiceMap);
+    setIsServicesDataLoading(true);
+    handleServiceMapRequest(
+      props.http,
+      DSL,
+      mode,
+      props.dataSourceMDSId[0].id,
+      setServiceMap
+    ).finally(() => setIsServicesDataLoading(false));
   };
 
   useEffect(() => {
@@ -302,6 +310,7 @@ export function TraceView(props: TraceViewProps) {
             <ServiceMap
               addFilter={undefined}
               serviceMap={traceFilteredServiceMap}
+              isServicesDataLoading={isServicesDataLoading}
               idSelected={serviceMapIdSelected}
               setIdSelected={setServiceMapIdSelected}
               page={page}

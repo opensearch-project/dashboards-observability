@@ -56,6 +56,7 @@ export function ServiceDetailFlyout(props: ServiceFlyoutProps) {
   const [serviceMapIdSelected, setServiceMapIdSelected] = useState<
     'latency' | 'error_rate' | 'throughput'
   >('latency');
+  const [isServicesDataLoading, setIsServicesDataLoading] = useState(false);
 
   const renderContent = useMemo(() => {
     if (!serviceName) return '-';
@@ -96,6 +97,7 @@ export function ServiceDetailFlyout(props: ServiceFlyoutProps) {
         <EuiHorizontalRule margin="s" />
         <ServiceMap
           serviceMap={serviceMap}
+          isServicesDataLoading={isServicesDataLoading}
           idSelected={serviceMapIdSelected}
           setIdSelected={setServiceMapIdSelected}
           currService={serviceName}
@@ -130,8 +132,13 @@ export function ServiceDetailFlyout(props: ServiceFlyoutProps) {
       'app',
       appConfigs
     );
-    handleServiceViewRequest(serviceName, http, serviceDSL, setFields, mode);
-    handleServiceMapRequest(http, serviceDSL, mode, '', setServiceMap, serviceName);
+
+    setIsServicesDataLoading(true);
+    Promise.all([
+      handleServiceViewRequest(serviceName, http, serviceDSL, setFields, mode),
+      handleServiceMapRequest(http, serviceDSL, mode, '', setServiceMap),
+    ]).finally(() => setIsServicesDataLoading(false));
+
     const spanDSL = filtersToDsl(mode, filters, query, startTime, endTime, 'app', appConfigs);
     spanDSL.query.bool.filter.push({
       term: {

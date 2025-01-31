@@ -14,6 +14,7 @@ import { HttpSetup } from '../../../../../../src/core/public';
 import { BarOrientation } from '../../../../common/constants/shared';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode, TraceQueryMode } from '../../../../common/types/trace_analytics';
+import { coreRefs } from '../../../../public/framework/core_refs';
 import {
   getTimestampPrecision,
   microToMilliSec,
@@ -31,7 +32,6 @@ import {
   getTracesQuery,
 } from './queries/traces_queries';
 import { handleDslRequest } from './request_handler';
-import { coreRefs } from '../../../../public/framework/core_refs';
 
 export const handleCustomIndicesTracesRequest = async (
   http: HttpSetup,

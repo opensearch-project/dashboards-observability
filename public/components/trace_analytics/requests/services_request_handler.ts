@@ -86,7 +86,6 @@ export const handleServiceMapRequest = async (
   mode: TraceAnalyticsMode,
   dataSourceMDSId?: string,
   setItems?: any,
-  currService?: string,
   includeMetrics = true
 ) => {
   let minutesInDateRange: number;
@@ -195,7 +194,6 @@ export const handleServiceMapRequest = async (
       console.error('Error retrieving service metrics:', error);
     }
   }
-
   if (setItems) setItems(map);
   return map;
 };

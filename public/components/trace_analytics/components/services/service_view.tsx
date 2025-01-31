@@ -78,6 +78,7 @@ export function ServiceView(props: ServiceViewProps) {
   const [actionsMenuPopover, setActionsMenuPopover] = useState(false);
   const [serviceId, setServiceId] = useState<string | null>(null);
   const location = useLocation();
+  const [isServicesDataLoading, setIsServicesDataLoading] = useState(false);
 
   useEffect(() => {
     try {
@@ -99,24 +100,21 @@ export function ServiceView(props: ServiceViewProps) {
       processTimeStamp(props.startTime, mode),
       processTimeStamp(props.endTime, mode)
     );
-    handleServiceViewRequest(
-      props.serviceName,
-      props.http,
-      DSL,
-      setFields,
-      mode,
-      props.dataSourceMDSId[0].id
-    );
-    if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
-      handleServiceMapRequest(
+
+    setIsServicesDataLoading(true);
+    Promise.all([
+      handleServiceViewRequest(
+        props.serviceName,
         props.http,
         DSL,
+        setFields,
         mode,
-        props.dataSourceMDSId[0].id,
-        setServiceMap,
-        props.serviceName
-      );
-    }
+        props.dataSourceMDSId[0].id
+      ),
+      mode === 'data_prepper' || mode === 'custom_data_prepper'
+        ? handleServiceMapRequest(props.http, DSL, mode, props.dataSourceMDSId[0].id, setServiceMap)
+        : Promise.resolve(null),
+    ]).finally(() => setIsServicesDataLoading(false));
   };
 
   useEffect(() => {
@@ -544,6 +542,7 @@ export function ServiceView(props: ServiceViewProps) {
           <EuiSpacer />
           <ServiceMap
             serviceMap={serviceMap}
+            isServicesDataLoading={isServicesDataLoading}
             idSelected={serviceMapIdSelected}
             setIdSelected={setServiceMapIdSelected}
             currService={props.serviceName}

@@ -52,6 +52,7 @@ export interface ServiceObject {
 
 export function ServiceMap({
   serviceMap,
+  isServicesDataLoading,
   idSelected,
   setIdSelected,
   addFilter,
@@ -66,6 +67,7 @@ export function ServiceMap({
   hideSearchBar = false,
 }: {
   serviceMap: ServiceObject;
+  isServicesDataLoading: boolean;
   idSelected: 'latency' | 'error_rate' | 'throughput';
   setIdSelected: (newId: 'latency' | 'error_rate' | 'throughput') => void;
   addFilter?: (filter: FilterType) => void;
@@ -376,6 +378,10 @@ export function ServiceMap({
     );
   }, [serviceMap, idSelected, focusedService, filterByCurrService]);
 
+  useEffect(() => {
+    console.log('items.graph: ', items);
+  }, [items]);
+
   return (
     <>
       <EuiPanel>
@@ -513,7 +519,7 @@ export function ServiceMap({
         )}
         <EuiSpacer />
 
-        {Object.keys(serviceMap).length > 0 ? (
+        {Object.keys(serviceMap).length > 0 || isLoading || isServicesDataLoading ? (
           <EuiFlexGroup gutterSize="none" responsive={false}>
             <EuiFlexItem>
               <div style={{ position: 'relative' }}>
@@ -530,7 +536,9 @@ export function ServiceMap({
                     }}
                   />
                 )}
-                {isLoading && (
+
+                {/* Loading spinner */}
+                {(isLoading || isServicesDataLoading) && (
                   <div
                     style={{
                       position: 'absolute',
@@ -541,13 +549,15 @@ export function ServiceMap({
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      backgroundColor: 'transparent', // supports both dark and light themes
+                      backgroundColor: 'transparent',
                       zIndex: 1000,
                     }}
                   >
                     <EuiLoadingSpinner size="xl" aria-label="Service map is loading" />
                   </div>
                 )}
+
+                {/* Node details */}
                 {selectedNodeDetails && (
                   <div
                     style={{
@@ -567,6 +577,8 @@ export function ServiceMap({
                 )}
               </div>
             </EuiFlexItem>
+
+            {/* Scale */}
             {(page !== 'traces' || idSelected) && (
               <EuiFlexItem grow={false}>
                 <ServiceMapScale idSelected={idSelected} serviceMap={serviceMap} ticks={ticks} />

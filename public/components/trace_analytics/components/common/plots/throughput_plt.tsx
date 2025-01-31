@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButtonGroup, EuiFlexGroup, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiHorizontalRule,
+  EuiLoadingChart,
+  EuiPanel,
+} from '@elastic/eui';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { Plt } from '../../../../visualizations/plotly/plot';
@@ -102,6 +108,7 @@ export function ThroughputPlt(props: {
   setIdSelected: (mode: string) => void;
   idSelected: string;
   toggleButtons: any[];
+  isThroughputTrendLoading: boolean;
 }) {
   const onClick = (event) => {
     if (!event?.points) return;
@@ -116,18 +123,26 @@ export function ThroughputPlt(props: {
   return (
     <>
       <EuiPanel style={{ minWidth: 433, minHeight: 308, maxHeight: 560 }}>
-        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs">
-          <PanelTitle title={props.title ? props.title : 'Traces over time'} />
-          <EuiButtonGroup
-            options={props.toggleButtons}
-            idSelected={props.idSelected}
-            onChange={(id: string) => props.setIdSelected(id as 'error_rate' | 'throughput')}
-            buttonSize="s"
-            color="text"
-          />
-        </EuiFlexGroup>
-        <EuiHorizontalRule margin="m" />
-        <ThroughputTrendPlt items={props.items} onClick={onClick} isPanel={true} />
+        {props.isThroughputTrendLoading ? (
+          <div className="center-parent-div">
+            <EuiLoadingChart size="l" mono />
+          </div>
+        ) : (
+          <>
+            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs">
+              <PanelTitle title={props.title ? props.title : 'Traces over time'} />
+              <EuiButtonGroup
+                options={props.toggleButtons}
+                idSelected={props.idSelected}
+                onChange={(id: string) => props.setIdSelected(id as 'error_rate' | 'throughput')}
+                buttonSize="s"
+                color="text"
+              />
+            </EuiFlexGroup>
+            <EuiHorizontalRule margin="m" />
+            <ThroughputTrendPlt items={props.items} onClick={onClick} isPanel={true} />
+          </>
+        )}
       </EuiPanel>
     </>
   );
