@@ -342,7 +342,7 @@ export const handleSpansFlyoutRequest = (
   mode: TraceAnalyticsMode,
   dataSourceMDSId?: string
 ) => {
-  handleDslRequest(http, null, getSpanFlyoutQuery(mode, spanId), mode, dataSourceMDSId)
+  return handleDslRequest(http, null, getSpanFlyoutQuery(mode, spanId), mode, dataSourceMDSId)
     .then((response) => {
       setItems(response?.hits.hits?.[0]?._source);
     })

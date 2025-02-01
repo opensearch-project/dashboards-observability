@@ -120,7 +120,7 @@ export function ServiceDetailFlyout(props: ServiceFlyoutProps) {
         />
       </>
     );
-  }, [serviceName, fields, serviceMap, DSL, serviceMapIdSelected]);
+  }, [isServicesDataLoading, serviceName, fields, serviceMap, DSL, serviceMapIdSelected]);
 
   useEffect(() => {
     const serviceDSL = filtersToDsl(
