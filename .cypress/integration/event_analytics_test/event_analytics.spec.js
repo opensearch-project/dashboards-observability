@@ -281,8 +281,12 @@ describe('Override timestamp for an index', () => {
     clearQuerySearchBoxText('searchAutocompleteTextArea');
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').type(TEST_QUERIES[2].query);
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('.tab-title').contains('Events').click();
-    cy.get('[data-test-subj="eventExplorer__overrideDefaultTimestamp"]').click({ force: true });
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('[data-test-subj="eventExplorer__overrideDefaultTimestamp"]')
+    .first()
+    .click({ force: true });
 
     cy.get('[data-attr-field="utc_time"] [data-test-subj="eventFields__default-timestamp-mark"')
       .contains('Default Timestamp')
