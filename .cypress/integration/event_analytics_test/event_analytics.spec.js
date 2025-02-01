@@ -285,8 +285,11 @@ describe('Override timestamp for an index', () => {
     cy.get('.tab-title').contains('Events').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('[data-test-subj="eventExplorer__overrideDefaultTimestamp"]')
-    .first()
-    .click({ force: true });
+    .then(($elements) => {
+      // Handle redux state bug in main not setting default timestamp for cypress
+      const indexToClick = $elements.length > 1 ? 1 : 0;
+      cy.wrap($elements.eq(indexToClick)).click({ force: true });
+    });
 
     cy.get('[data-attr-field="utc_time"] [data-test-subj="eventFields__default-timestamp-mark"')
       .contains('Default Timestamp')
