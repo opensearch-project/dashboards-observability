@@ -121,6 +121,7 @@ exports[`Trace view component renders trace view 1`] = `
         >
           <ServiceBreakdownPanel
             data={Array []}
+            isLoading={false}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -163,6 +164,7 @@ exports[`Trace view component renders trace view 1`] = `
       <EuiSpacer />
       <ServiceMap
         idSelected="latency"
+        isServicesDataLoading={false}
         page="traceView"
         serviceMap={Object {}}
         setIdSelected={[Function]}

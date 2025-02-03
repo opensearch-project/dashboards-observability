@@ -42,6 +42,7 @@ exports[`SpanDetailPanel component renders correctly with default props 1`] = `
               >
                 <EuiButtonGroup
                   idSelected="timeline"
+                  isDisabled={false}
                   legend="Select view of spans"
                   onChange={[Function]}
                   options={

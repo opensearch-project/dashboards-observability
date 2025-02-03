@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiLoadingChart,
   EuiPanel,
   EuiSmallButton,
   EuiSpacer,
@@ -20,12 +21,12 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useObservable from 'react-use/lib/useObservable';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
+import { coreRefs } from '../../../../framework/core_refs';
 import { Plt } from '../../../visualizations/plotly/plot';
 import { handleSpansGanttRequest } from '../../requests/traces_request_handler';
 import { PanelTitle } from '../common/helper_functions';
 import { SpanDetailFlyout } from './span_detail_flyout';
 import { SpanDetailTable, SpanDetailTableHierarchy } from './span_detail_table';
-import { coreRefs } from '../../../../framework/core_refs';
 
 export function SpanDetailPanel(props: {
   http: HttpSetup;
@@ -67,6 +68,7 @@ export function SpanDetailPanel(props: {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [availableWidth, setAvailableWidth] = useState<number>(window.innerWidth);
   const newNavigation = coreRefs?.chrome?.navGroup.getNavGroupEnabled?.();
+  const [isGanttChartLoading, setIsGanttChartLoading] = useState(false);
 
   const updateAvailableWidth = () => {
     if (containerRef.current) {
@@ -145,7 +147,7 @@ export function SpanDetailPanel(props: {
       refreshDSL,
       mode,
       props.dataSourceMDSId
-    );
+    ).finally(() => setIsGanttChartLoading(false));
   }, 150);
 
   const spanFiltersToDSL = () => {
@@ -196,6 +198,7 @@ export function SpanDetailPanel(props: {
   };
 
   useEffect(() => {
+    setIsGanttChartLoading(true);
     refresh();
   }, [props.colorMap, spanFilters]);
 
@@ -471,6 +474,7 @@ export function SpanDetailPanel(props: {
                   )}
                   <EuiFlexItem grow={false}>
                     <EuiButtonGroup
+                      isDisabled={isGanttChartLoading}
                       legend="Select view of spans"
                       options={toggleOptions}
                       idSelected={toggleIdSelected}
@@ -481,27 +485,34 @@ export function SpanDetailPanel(props: {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
+          {isGanttChartLoading ? (
+            <div className="center-loading-div">
+              <EuiLoadingChart size="l" />
+            </div>
+          ) : (
+            <>
+              {spanFilters.length > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiSpacer size="s" />
+                  <EuiFlexGroup gutterSize="s" wrap>
+                    {renderFilters}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              )}
 
-          {spanFilters.length > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="s" />
-              <EuiFlexGroup gutterSize="s" wrap>
-                {renderFilters}
-              </EuiFlexGroup>
-            </EuiFlexItem>
+              <EuiHorizontalRule margin="m" />
+
+              {toggleIdSelected === 'timeline' && <EuiFlexItem grow={false}>{miniMap}</EuiFlexItem>}
+
+              <EuiFlexItem style={{ overflowY: 'auto', maxHeight: 500 }}>
+                {toggleIdSelected === 'timeline'
+                  ? ganttChart
+                  : toggleIdSelected === 'span_list'
+                  ? spanDetailTable
+                  : spanDetailTableHierarchy}
+              </EuiFlexItem>
+            </>
           )}
-
-          <EuiHorizontalRule margin="m" />
-
-          {toggleIdSelected === 'timeline' && <EuiFlexItem grow={false}>{miniMap}</EuiFlexItem>}
-
-          <EuiFlexItem style={{ overflowY: 'auto', maxHeight: 500 }}>
-            {toggleIdSelected === 'timeline'
-              ? ganttChart
-              : toggleIdSelected === 'span_list'
-              ? spanDetailTable
-              : spanDetailTableHierarchy}
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
       {!!currentSpan && (

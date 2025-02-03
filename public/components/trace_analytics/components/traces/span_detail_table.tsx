@@ -4,10 +4,10 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiDataGridColumn, EuiLink, EuiText, EuiIcon, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiDataGridColumn, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
 import round from 'lodash/round';
 import moment from 'moment';
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
@@ -171,27 +171,26 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
   });
   const [items, setItems] = useState<Span[]>([]);
   const [total, setTotal] = useState(0);
+  const [isSpansTableDataLoading, setIsSpansTableDataLoading] = useState(false);
+  const { mode } = props;
 
   const fetchData = async () => {
+    setIsSpansTableDataLoading(true);
     const spanSearchParams: SpanSearchParams = {
       from: tableParams.page * tableParams.size,
       size: tableParams.size,
       sortingColumns: tableParams.sortingColumns.map(({ id, direction }) => ({ [id]: direction })),
     };
 
-    try {
-      await handleSpansRequest(
-        props.http,
-        setItems,
-        setTotal,
-        spanSearchParams,
-        props.DSL,
-        props.mode,
-        props.dataSourceMDSId
-      );
-    } catch (err) {
-      console.error('Error fetching spans:', err);
-    }
+    handleSpansRequest(
+      props.http,
+      setItems,
+      setTotal,
+      spanSearchParams,
+      props.DSL,
+      props.mode,
+      props.dataSourceMDSId
+    ).finally(() => setIsSpansTableDataLoading(false));
   };
 
   useEffect(() => {
@@ -250,6 +249,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
     noMatchMessageSize: 'xl',
     visibleColumns,
     availableWidth: props.availableWidth,
+    isTableDataLoading: isSpansTableDataLoading,
   });
 }
 
@@ -258,8 +258,10 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
   const [items, setItems] = useState<Span[]>([]);
   const [_total, setTotal] = useState(0);
   const [expandedRows, setExpandedRows] = useState(new Set<string>());
+  const [isSpansTableDataLoading, setIsSpansTableDataLoading] = useState(false);
 
   useEffect(() => {
+    setIsSpansTableDataLoading(true);
     const spanSearchParams = {
       from: 0,
       size: 10000,
@@ -276,7 +278,7 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
       DSL,
       mode,
       dataSourceMDSId
-    );
+    ).finally(() => setIsSpansTableDataLoading(false));
   }, [DSL, http, mode, dataSourceMDSId]);
 
   type SpanMap = Record<string, Span>;
@@ -423,5 +425,6 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
     availableWidth,
     noMatchMessageSize: 'xl',
     visibleColumns,
+    isTableDataLoading: isSpansTableDataLoading,
   });
 }

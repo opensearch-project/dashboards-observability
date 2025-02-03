@@ -3,6 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import {
+  EuiDataGridColumnVisibility,
+  EuiDataGridPaginationProps,
+  EuiDataGridSorting,
+} from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
@@ -12,11 +17,6 @@ import { act } from 'react-dom/test-utils';
 import { HttpResponse } from '../../../../../../../../src/core/public';
 import { TEST_JAEGER_SPAN_RESPONSE, TEST_SPAN_RESPONSE } from '../../../../../../test/constants';
 import { SpanDetailTable, SpanDetailTableHierarchy } from '../span_detail_table';
-import {
-  EuiDataGridPaginationProps,
-  EuiDataGridSorting,
-  EuiDataGridColumnVisibility,
-} from '@elastic/eui';
 
 jest.mock('../../../../../../test/__mocks__/httpClientMock', () => ({
   post: jest.fn(),
@@ -106,20 +106,28 @@ describe('SpanDetailTable', () => {
         />
       );
 
-      const pagination = wrapper
-        .find('EuiDataGrid')
-        .prop('pagination') as EuiDataGridPaginationProps;
+      expect(wrapper.find('EuiLoadingContent')).toHaveLength(1); // Ensure loading state appears
 
       await act(async () => {
-        pagination.onChangeItemsPerPage!(50);
+        await waitFor(() => {
+          wrapper.update();
+          // Retrieve initial pagination state
+          const pagination = wrapper
+            .find('EuiDataGrid')
+            .prop('pagination') as EuiDataGridPaginationProps;
+
+          expect(pagination.pageSize).not.toBe(50); // Ensure it starts with a different page size
+          pagination.onChangeItemsPerPage!(50);
+        });
       });
 
-      wrapper.update();
-
-      const updatedPagination = wrapper
-        .find('EuiDataGrid')
-        .prop('pagination') as EuiDataGridPaginationProps;
-      expect(updatedPagination.pageSize).toBe(50);
+      await waitFor(() => {
+        wrapper.update();
+        const updatedPagination = wrapper
+          .find('EuiDataGrid')
+          .prop('pagination') as EuiDataGridPaginationProps;
+        expect(updatedPagination.pageSize).toBe(50);
+      });
     });
 
     it('should handle page changes', async () => {
@@ -135,25 +143,30 @@ describe('SpanDetailTable', () => {
         />
       );
 
-      const pagination = wrapper
-        .find('EuiDataGrid')
-        .prop('pagination') as EuiDataGridPaginationProps;
+      expect(wrapper.find('EuiLoadingContent')).toHaveLength(1); // Ensure loading state appears
 
       await act(async () => {
-        pagination.onChangePage!(1);
+        await waitFor(() => {
+          wrapper.update();
+          const pagination = wrapper
+            .find('EuiDataGrid')
+            .prop('pagination') as EuiDataGridPaginationProps;
+          pagination.onChangePage!(1);
+        });
       });
 
-      wrapper.update();
-
-      const updatedPagination = wrapper
-        .find('EuiDataGrid')
-        .prop('pagination') as EuiDataGridPaginationProps;
-      expect(updatedPagination.pageIndex).toBe(1);
+      await waitFor(() => {
+        wrapper.update();
+        const updatedPagination = wrapper
+          .find('EuiDataGrid')
+          .prop('pagination') as EuiDataGridPaginationProps;
+        expect(updatedPagination.pageIndex).toBe(1);
+      });
     });
   });
 
   describe('Column visibility', () => {
-    it('should hide columns specified in hiddenColumns prop', () => {
+    it('should hide columns specified in hiddenColumns prop', async () => {
       const wrapper = mount(
         <SpanDetailTable
           http={httpClientMock}
@@ -164,13 +177,14 @@ describe('SpanDetailTable', () => {
         />
       );
 
-      const columnVisibility = wrapper
-        .find('EuiDataGrid')
-        .prop('columnVisibility') as EuiDataGridColumnVisibility;
-      const visibleColumns = columnVisibility.visibleColumns;
-
-      expect(visibleColumns).not.toContain('spanId');
-      expect(visibleColumns).not.toContain('startTime');
+      await waitFor(() => {
+        wrapper.update();
+        const columnVisibility = wrapper
+          .find('EuiDataGrid')
+          .prop('columnVisibility') as EuiDataGridColumnVisibility;
+        expect(columnVisibility.visibleColumns).not.toContain('spanId');
+        expect(columnVisibility.visibleColumns).not.toContain('startTime');
+      });
     });
 
     it('should update visible columns when column visibility changes', async () => {
@@ -186,20 +200,23 @@ describe('SpanDetailTable', () => {
 
       const newVisibleColumns = ['spanId', 'serviceName'];
 
-      const columnVisibility = wrapper
-        .find('EuiDataGrid')
-        .prop('columnVisibility') as EuiDataGridColumnVisibility;
-
       await act(async () => {
-        columnVisibility.setVisibleColumns!(newVisibleColumns);
+        await waitFor(() => {
+          wrapper.update();
+          const columnVisibility = wrapper
+            .find('EuiDataGrid')
+            .prop('columnVisibility') as EuiDataGridColumnVisibility;
+          columnVisibility.setVisibleColumns!(newVisibleColumns);
+        });
       });
 
-      wrapper.update();
-
-      const updatedColumnVisibility = wrapper
-        .find('EuiDataGrid')
-        .prop('columnVisibility') as EuiDataGridColumnVisibility;
-      expect(updatedColumnVisibility.visibleColumns).toEqual(newVisibleColumns);
+      await waitFor(() => {
+        wrapper.update();
+        const updatedColumnVisibility = wrapper
+          .find('EuiDataGrid')
+          .prop('columnVisibility') as EuiDataGridColumnVisibility;
+        expect(updatedColumnVisibility.visibleColumns).toEqual(newVisibleColumns);
+      });
     });
   });
 
@@ -215,23 +232,23 @@ describe('SpanDetailTable', () => {
         />
       );
 
-      const newSorting: Array<{ id: string; direction: 'asc' | 'desc' }> = [
-        { id: 'startTime', direction: 'desc' },
-      ];
-
-      const sorting = wrapper.find('EuiDataGrid').prop('sorting') as EuiDataGridSorting;
-
+      const newSorting = [{ id: 'startTime', direction: 'desc' }];
       await act(async () => {
-        sorting.onSort!(newSorting);
+        await waitFor(() => {
+          wrapper.update();
+          const sorting = wrapper.find('EuiDataGrid').prop('sorting') as EuiDataGridSorting;
+          sorting.onSort!(newSorting);
+        });
       });
 
-      wrapper.update();
-
-      const updatedSorting = wrapper.find('EuiDataGrid').prop('sorting') as EuiDataGridSorting;
-      expect(updatedSorting.columns).toEqual(newSorting);
+      await waitFor(() => {
+        wrapper.update();
+        const updatedSorting = wrapper.find('EuiDataGrid').prop('sorting') as EuiDataGridSorting;
+        expect(updatedSorting.columns).toEqual(newSorting);
+      });
     });
 
-    it('should disable sorting in Jaeger mode', () => {
+    it('should disable sorting in Jaeger mode', async () => {
       const wrapper = mount(
         <SpanDetailTable
           http={httpClientMock}
@@ -242,7 +259,10 @@ describe('SpanDetailTable', () => {
         />
       );
 
-      expect(wrapper.find('EuiDataGrid').prop('sorting')).toBeUndefined();
+      await waitFor(() => {
+        wrapper.update();
+        expect(wrapper.find('EuiDataGrid').prop('sorting')).toBeUndefined();
+      });
     });
   });
 });

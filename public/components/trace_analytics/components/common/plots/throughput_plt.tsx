@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButtonGroup, EuiFlexGroup, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiHorizontalRule,
+  EuiLoadingChart,
+  EuiPanel,
+} from '@elastic/eui';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { Plt } from '../../../../visualizations/plotly/plot';
@@ -102,6 +108,7 @@ export function ThroughputPlt(props: {
   setIdSelected: (mode: string) => void;
   idSelected: string;
   toggleButtons: any[];
+  isThroughputTrendLoading: boolean;
 }) {
   const onClick = (event) => {
     if (!event?.points) return;
@@ -126,8 +133,16 @@ export function ThroughputPlt(props: {
             color="text"
           />
         </EuiFlexGroup>
-        <EuiHorizontalRule margin="m" />
-        <ThroughputTrendPlt items={props.items} onClick={onClick} isPanel={true} />
+        {props.isThroughputTrendLoading ? (
+          <div className="center-loading-div">
+            <EuiLoadingChart size="l" />
+          </div>
+        ) : (
+          <>
+            <EuiHorizontalRule margin="m" />
+            <ThroughputTrendPlt items={props.items} onClick={onClick} isPanel={true} />
+          </>
+        )}
       </EuiPanel>
     </>
   );

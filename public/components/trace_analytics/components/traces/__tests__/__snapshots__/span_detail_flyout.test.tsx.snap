@@ -116,7 +116,47 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                     <div
                       class="euiFlyoutBody__overflowContent"
                     >
-                      -
+                      <div>
+                        <span
+                          class="euiLoadingContent"
+                        >
+                          <span
+                            class="euiLoadingContent__singleLine"
+                          >
+                            <span
+                              class="euiLoadingContent__singleLineBackground"
+                            />
+                          </span>
+                          <span
+                            class="euiLoadingContent__singleLine"
+                          >
+                            <span
+                              class="euiLoadingContent__singleLineBackground"
+                            />
+                          </span>
+                          <span
+                            class="euiLoadingContent__singleLine"
+                          >
+                            <span
+                              class="euiLoadingContent__singleLineBackground"
+                            />
+                          </span>
+                          <span
+                            class="euiLoadingContent__singleLine"
+                          >
+                            <span
+                              class="euiLoadingContent__singleLineBackground"
+                            />
+                          </span>
+                          <span
+                            class="euiLoadingContent__singleLine"
+                          >
+                            <span
+                              class="euiLoadingContent__singleLineBackground"
+                            />
+                          </span>
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -295,7 +335,47 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                             <div
                               class="euiFlyoutBody__overflowContent"
                             >
-                              -
+                              <div>
+                                <span
+                                  class="euiLoadingContent"
+                                >
+                                  <span
+                                    class="euiLoadingContent__singleLine"
+                                  >
+                                    <span
+                                      class="euiLoadingContent__singleLineBackground"
+                                    />
+                                  </span>
+                                  <span
+                                    class="euiLoadingContent__singleLine"
+                                  >
+                                    <span
+                                      class="euiLoadingContent__singleLineBackground"
+                                    />
+                                  </span>
+                                  <span
+                                    class="euiLoadingContent__singleLine"
+                                  >
+                                    <span
+                                      class="euiLoadingContent__singleLineBackground"
+                                    />
+                                  </span>
+                                  <span
+                                    class="euiLoadingContent__singleLine"
+                                  >
+                                    <span
+                                      class="euiLoadingContent__singleLineBackground"
+                                    />
+                                  </span>
+                                  <span
+                                    class="euiLoadingContent__singleLine"
+                                  >
+                                    <span
+                                      class="euiLoadingContent__singleLineBackground"
+                                    />
+                                  </span>
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -406,7 +486,47 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                               <div
                                 class="euiFlyoutBody__overflowContent"
                               >
-                                -
+                                <div>
+                                  <span
+                                    class="euiLoadingContent"
+                                  >
+                                    <span
+                                      class="euiLoadingContent__singleLine"
+                                    >
+                                      <span
+                                        class="euiLoadingContent__singleLineBackground"
+                                      />
+                                    </span>
+                                    <span
+                                      class="euiLoadingContent__singleLine"
+                                    >
+                                      <span
+                                        class="euiLoadingContent__singleLineBackground"
+                                      />
+                                    </span>
+                                    <span
+                                      class="euiLoadingContent__singleLine"
+                                    >
+                                      <span
+                                        class="euiLoadingContent__singleLineBackground"
+                                      />
+                                    </span>
+                                    <span
+                                      class="euiLoadingContent__singleLine"
+                                    >
+                                      <span
+                                        class="euiLoadingContent__singleLineBackground"
+                                      />
+                                    </span>
+                                    <span
+                                      class="euiLoadingContent__singleLine"
+                                    >
+                                      <span
+                                        class="euiLoadingContent__singleLineBackground"
+                                      />
+                                    </span>
+                                  </span>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -517,7 +637,47 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                                 <div
                                   class="euiFlyoutBody__overflowContent"
                                 >
-                                  -
+                                  <div>
+                                    <span
+                                      class="euiLoadingContent"
+                                    >
+                                      <span
+                                        class="euiLoadingContent__singleLine"
+                                      >
+                                        <span
+                                          class="euiLoadingContent__singleLineBackground"
+                                        />
+                                      </span>
+                                      <span
+                                        class="euiLoadingContent__singleLine"
+                                      >
+                                        <span
+                                          class="euiLoadingContent__singleLineBackground"
+                                        />
+                                      </span>
+                                      <span
+                                        class="euiLoadingContent__singleLine"
+                                      >
+                                        <span
+                                          class="euiLoadingContent__singleLineBackground"
+                                        />
+                                      </span>
+                                      <span
+                                        class="euiLoadingContent__singleLine"
+                                      >
+                                        <span
+                                          class="euiLoadingContent__singleLineBackground"
+                                        />
+                                      </span>
+                                      <span
+                                        class="euiLoadingContent__singleLine"
+                                      >
+                                        <span
+                                          class="euiLoadingContent__singleLineBackground"
+                                        />
+                                      </span>
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -616,7 +776,47 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                                   <div
                                     class="euiFlyoutBody__overflowContent"
                                   >
-                                    -
+                                    <div>
+                                      <span
+                                        class="euiLoadingContent"
+                                      >
+                                        <span
+                                          class="euiLoadingContent__singleLine"
+                                        >
+                                          <span
+                                            class="euiLoadingContent__singleLineBackground"
+                                          />
+                                        </span>
+                                        <span
+                                          class="euiLoadingContent__singleLine"
+                                        >
+                                          <span
+                                            class="euiLoadingContent__singleLineBackground"
+                                          />
+                                        </span>
+                                        <span
+                                          class="euiLoadingContent__singleLine"
+                                        >
+                                          <span
+                                            class="euiLoadingContent__singleLineBackground"
+                                          />
+                                        </span>
+                                        <span
+                                          class="euiLoadingContent__singleLine"
+                                        >
+                                          <span
+                                            class="euiLoadingContent__singleLineBackground"
+                                          />
+                                        </span>
+                                        <span
+                                          class="euiLoadingContent__singleLine"
+                                        >
+                                          <span
+                                            class="euiLoadingContent__singleLineBackground"
+                                          />
+                                        </span>
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
@@ -813,7 +1013,56 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                               <div
                                 className="euiFlyoutBody__overflowContent"
                               >
-                                -
+                                <div>
+                                  <EuiLoadingContent
+                                    lines={5}
+                                  >
+                                    <span
+                                      className="euiLoadingContent"
+                                    >
+                                      <span
+                                        className="euiLoadingContent__singleLine"
+                                        key="0"
+                                      >
+                                        <span
+                                          className="euiLoadingContent__singleLineBackground"
+                                        />
+                                      </span>
+                                      <span
+                                        className="euiLoadingContent__singleLine"
+                                        key="1"
+                                      >
+                                        <span
+                                          className="euiLoadingContent__singleLineBackground"
+                                        />
+                                      </span>
+                                      <span
+                                        className="euiLoadingContent__singleLine"
+                                        key="2"
+                                      >
+                                        <span
+                                          className="euiLoadingContent__singleLineBackground"
+                                        />
+                                      </span>
+                                      <span
+                                        className="euiLoadingContent__singleLine"
+                                        key="3"
+                                      >
+                                        <span
+                                          className="euiLoadingContent__singleLineBackground"
+                                        />
+                                      </span>
+                                      <span
+                                        className="euiLoadingContent__singleLine"
+                                        key="4"
+                                      >
+                                        <span
+                                          className="euiLoadingContent__singleLineBackground"
+                                        />
+                                      </span>
+                                    </span>
+                                  </EuiLoadingContent>
+                                </div>
                               </div>
                             </div>
                           </div>
