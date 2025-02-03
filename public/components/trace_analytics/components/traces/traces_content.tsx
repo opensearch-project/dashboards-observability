@@ -63,7 +63,8 @@ export function TracesContent(props: TracesProps) {
   const [tableItems, setTableItems] = useState([]);
   const [columns, setColumns] = useState([]);
   const [redirect, setRedirect] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const [isTraceTableLoading, setIsTraceTableLoading] = useState(false);
+  const [isServicesDataLoading, setIsServicesDataLoading] = useState(false);
   const [trigger, setTrigger] = useState<'open' | 'closed'>('closed');
   const [serviceMap, setServiceMap] = useState<ServiceObject>({});
   const [filteredService, setFilteredService] = useState('');
@@ -142,7 +143,6 @@ export function TracesContent(props: TracesProps) {
 
   const refresh = async (sort?: PropertySort, overrideQuery?: string) => {
     const filterQuery = overrideQuery ?? query;
-    setLoading(true);
     const DSL = filtersToDsl(
       mode,
       filters,
@@ -162,50 +162,54 @@ export function TracesContent(props: TracesProps) {
     );
     const isUnderOneHour = datemath.parse(endTime)?.diff(datemath.parse(startTime), 'hours')! < 1;
 
+    setIsTraceTableLoading(true);
+
     if (mode === 'custom_data_prepper') {
-      // service map should not be filtered by service name
+      // Remove serviceName filter from service map query
       const serviceMapDSL = cloneDeep(DSL);
       serviceMapDSL.query.bool.must = serviceMapDSL.query.bool.must.filter(
-        (must: any) => must?.term?.serviceName == null
+        (must: any) => !must?.term?.serviceName
       );
 
-      if (tracesTableMode !== 'traces')
-        await handleCustomIndicesTracesRequest(
-          http,
-          DSL,
-          tableItems,
-          setTableItems,
-          setColumns,
-          mode,
-          props.dataSourceMDSId[0].id,
-          sort,
-          tracesTableMode,
-          isUnderOneHour
-        );
-      else {
-        await handleTracesRequest(
-          http,
-          DSL,
-          timeFilterDSL,
-          tableItems,
-          setTableItems,
-          mode,
-          props.dataSourceMDSId[0].id,
-          sort,
-          isUnderOneHour
-        );
-      }
-      await handleServiceMapRequest(
+      const tracesRequest =
+        tracesTableMode !== 'traces'
+          ? handleCustomIndicesTracesRequest(
+              http,
+              DSL,
+              tableItems,
+              setTableItems,
+              setColumns,
+              mode,
+              props.dataSourceMDSId[0].id,
+              sort,
+              tracesTableMode,
+              isUnderOneHour
+            )
+          : handleTracesRequest(
+              http,
+              DSL,
+              timeFilterDSL,
+              tableItems,
+              setTableItems,
+              mode,
+              props.dataSourceMDSId[0].id,
+              sort,
+              isUnderOneHour
+            );
+
+      tracesRequest.finally(() => setIsTraceTableLoading(false));
+
+      setIsServicesDataLoading(true);
+      handleServiceMapRequest(
         http,
         serviceMapDSL,
         mode,
         props.dataSourceMDSId[0].id,
         setServiceMap,
-        filteredService,
         includeMetrics
-      );
+      ).finally(() => setIsServicesDataLoading(false));
     } else {
-      await handleTracesRequest(
+      handleTracesRequest(
         http,
         DSL,
         timeFilterDSL,
@@ -215,10 +219,8 @@ export function TracesContent(props: TracesProps) {
         props.dataSourceMDSId[0].id,
         sort,
         isUnderOneHour
-      );
+      ).finally(() => setIsTraceTableLoading(false));
     }
-
-    setLoading(false);
   };
 
   const dashboardContent = () => {
@@ -272,7 +274,7 @@ export function TracesContent(props: TracesProps) {
               items={tableItems}
               refresh={refresh}
               mode={mode}
-              loading={loading}
+              loading={isTraceTableLoading}
               getTraceViewUri={getTraceViewUri}
               openTraceFlyout={openTraceFlyout}
               jaegerIndicesExist={jaegerIndicesExist}
@@ -285,7 +287,7 @@ export function TracesContent(props: TracesProps) {
               items={tableItems}
               refresh={refresh}
               mode={mode}
-              loading={loading}
+              loading={isTraceTableLoading}
               getTraceViewUri={getTraceViewUri}
               openTraceFlyout={openTraceFlyout}
               jaegerIndicesExist={jaegerIndicesExist}
@@ -305,6 +307,7 @@ export function TracesContent(props: TracesProps) {
                     filters={filters}
                     setFilters={setFilters}
                     serviceMap={serviceMap}
+                    isServicesDataLoading={isServicesDataLoading}
                     filteredService={filteredService}
                     setFilteredService={setFilteredService}
                   />
@@ -316,6 +319,7 @@ export function TracesContent(props: TracesProps) {
                     filters={filters}
                     setFilters={setFilters}
                     serviceMap={serviceMap}
+                    isServicesDataLoading={isServicesDataLoading}
                     idSelected={serviceMapIdSelected}
                     setIdSelected={setServiceMapIdSelected}
                     page={page}

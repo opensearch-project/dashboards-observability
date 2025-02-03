@@ -671,6 +671,7 @@ exports[`Service Config component renders empty service config 1`] = `
                 <ServiceMap
                   addFilter={[Function]}
                   idSelected="latency"
+                  isServicesDataLoading={true}
                   page="appCreate"
                   serviceMap={Object {}}
                   setIdSelected={[Function]}
@@ -1262,90 +1263,77 @@ exports[`Service Config component renders empty service config 1`] = `
                           className="euiSpacer euiSpacer--l"
                         />
                       </EuiSpacer>
-                      <div
-                        style={
-                          Object {
-                            "minHeight": 434,
-                          }
-                        }
+                      <EuiFlexGroup
+                        gutterSize="none"
+                        responsive={false}
                       >
-                        <NoMatchMessage
-                          size="s"
+                        <div
+                          className="euiFlexGroup euiFlexGroup--directionRow"
                         >
-                          <EuiSpacer
-                            size="s"
-                          >
+                          <EuiFlexItem>
                             <div
-                              className="euiSpacer euiSpacer--s"
-                            />
-                          </EuiSpacer>
-                          <EuiEmptyPrompt
-                            body={
-                              <EuiText
-                                size="s"
-                              >
-                                No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                              </EuiText>
-                            }
-                            title={
-                              <h2>
-                                No matches
-                              </h2>
-                            }
-                          >
-                            <div
-                              className="euiEmptyPrompt"
+                              className="euiFlexItem"
                             >
-                              <EuiTitle
-                                size="m"
+                              <div
+                                style={
+                                  Object {
+                                    "position": "relative",
+                                  }
+                                }
                               >
-                                <h2
-                                  className="euiTitle euiTitle--medium"
+                                <div
+                                  style={
+                                    Object {
+                                      "alignItems": "center",
+                                      "backgroundColor": "transparent",
+                                      "bottom": 0,
+                                      "display": "flex",
+                                      "justifyContent": "center",
+                                      "left": 0,
+                                      "position": "absolute",
+                                      "right": 0,
+                                      "top": 0,
+                                      "zIndex": 1000,
+                                    }
+                                  }
                                 >
-                                  No matches
-                                </h2>
-                              </EuiTitle>
-                              <EuiTextColor
-                                color="subdued"
-                              >
-                                <span
-                                  className="euiTextColor euiTextColor--subdued"
-                                >
-                                  <EuiSpacer
-                                    size="m"
+                                  <EuiLoadingSpinner
+                                    aria-label="Service map is loading"
+                                    size="xl"
                                   >
-                                    <div
-                                      className="euiSpacer euiSpacer--m"
+                                    <span
+                                      aria-label="Service map is loading"
+                                      className="euiLoadingSpinner euiLoadingSpinner--xLarge"
                                     />
-                                  </EuiSpacer>
-                                  <EuiText>
-                                    <div
-                                      className="euiText euiText--medium"
-                                    >
-                                      <EuiText
-                                        size="s"
-                                      >
-                                        <div
-                                          className="euiText euiText--small"
-                                        >
-                                          No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                                        </div>
-                                      </EuiText>
-                                    </div>
-                                  </EuiText>
-                                </span>
-                              </EuiTextColor>
+                                  </EuiLoadingSpinner>
+                                </div>
+                              </div>
                             </div>
-                          </EuiEmptyPrompt>
-                          <EuiSpacer
-                            size="s"
+                          </EuiFlexItem>
+                          <EuiFlexItem
+                            grow={false}
                           >
                             <div
-                              className="euiSpacer euiSpacer--s"
-                            />
-                          </EuiSpacer>
-                        </NoMatchMessage>
-                      </div>
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                            >
+                              <ServiceMapScale
+                                idSelected="latency"
+                                serviceMap={Object {}}
+                                ticks={Array []}
+                              >
+                                <div
+                                  style={
+                                    Object {
+                                      "minHeight": 400,
+                                      "minWidth": 65,
+                                    }
+                                  }
+                                />
+                              </ServiceMapScale>
+                            </div>
+                          </EuiFlexItem>
+                        </div>
+                      </EuiFlexGroup>
                     </div>
                   </EuiPanel>
                   <EuiSpacer
@@ -2053,6 +2041,7 @@ exports[`Service Config component renders with one service selected 1`] = `
                 <ServiceMap
                   addFilter={[Function]}
                   idSelected="latency"
+                  isServicesDataLoading={true}
                   page="appCreate"
                   serviceMap={Object {}}
                   setIdSelected={[Function]}
@@ -2644,90 +2633,77 @@ exports[`Service Config component renders with one service selected 1`] = `
                           className="euiSpacer euiSpacer--l"
                         />
                       </EuiSpacer>
-                      <div
-                        style={
-                          Object {
-                            "minHeight": 434,
-                          }
-                        }
+                      <EuiFlexGroup
+                        gutterSize="none"
+                        responsive={false}
                       >
-                        <NoMatchMessage
-                          size="s"
+                        <div
+                          className="euiFlexGroup euiFlexGroup--directionRow"
                         >
-                          <EuiSpacer
-                            size="s"
-                          >
+                          <EuiFlexItem>
                             <div
-                              className="euiSpacer euiSpacer--s"
-                            />
-                          </EuiSpacer>
-                          <EuiEmptyPrompt
-                            body={
-                              <EuiText
-                                size="s"
-                              >
-                                No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                              </EuiText>
-                            }
-                            title={
-                              <h2>
-                                No matches
-                              </h2>
-                            }
-                          >
-                            <div
-                              className="euiEmptyPrompt"
+                              className="euiFlexItem"
                             >
-                              <EuiTitle
-                                size="m"
+                              <div
+                                style={
+                                  Object {
+                                    "position": "relative",
+                                  }
+                                }
                               >
-                                <h2
-                                  className="euiTitle euiTitle--medium"
+                                <div
+                                  style={
+                                    Object {
+                                      "alignItems": "center",
+                                      "backgroundColor": "transparent",
+                                      "bottom": 0,
+                                      "display": "flex",
+                                      "justifyContent": "center",
+                                      "left": 0,
+                                      "position": "absolute",
+                                      "right": 0,
+                                      "top": 0,
+                                      "zIndex": 1000,
+                                    }
+                                  }
                                 >
-                                  No matches
-                                </h2>
-                              </EuiTitle>
-                              <EuiTextColor
-                                color="subdued"
-                              >
-                                <span
-                                  className="euiTextColor euiTextColor--subdued"
-                                >
-                                  <EuiSpacer
-                                    size="m"
+                                  <EuiLoadingSpinner
+                                    aria-label="Service map is loading"
+                                    size="xl"
                                   >
-                                    <div
-                                      className="euiSpacer euiSpacer--m"
+                                    <span
+                                      aria-label="Service map is loading"
+                                      className="euiLoadingSpinner euiLoadingSpinner--xLarge"
                                     />
-                                  </EuiSpacer>
-                                  <EuiText>
-                                    <div
-                                      className="euiText euiText--medium"
-                                    >
-                                      <EuiText
-                                        size="s"
-                                      >
-                                        <div
-                                          className="euiText euiText--small"
-                                        >
-                                          No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-                                        </div>
-                                      </EuiText>
-                                    </div>
-                                  </EuiText>
-                                </span>
-                              </EuiTextColor>
+                                  </EuiLoadingSpinner>
+                                </div>
+                              </div>
                             </div>
-                          </EuiEmptyPrompt>
-                          <EuiSpacer
-                            size="s"
+                          </EuiFlexItem>
+                          <EuiFlexItem
+                            grow={false}
                           >
                             <div
-                              className="euiSpacer euiSpacer--s"
-                            />
-                          </EuiSpacer>
-                        </NoMatchMessage>
-                      </div>
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                            >
+                              <ServiceMapScale
+                                idSelected="latency"
+                                serviceMap={Object {}}
+                                ticks={Array []}
+                              >
+                                <div
+                                  style={
+                                    Object {
+                                      "minHeight": 400,
+                                      "minWidth": 65,
+                                    }
+                                  }
+                                />
+                              </ServiceMapScale>
+                            </div>
+                          </EuiFlexItem>
+                        </div>
+                      </EuiFlexGroup>
                     </div>
                   </EuiPanel>
                   <EuiSpacer

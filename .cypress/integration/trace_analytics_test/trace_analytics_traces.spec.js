@@ -72,7 +72,7 @@ describe('Testing trace view', () => {
     setTimeFilter();
     cy.get('input[type="search"]').focus().type(`${TRACE_ID}`);
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
-    cy.get('.euiTableRow').should('have.length.lessThan', 3);//Replaces wait
+    cy.get('.euiTableRow').should('have.length.lessThan', 3); //Replaces wait
     cy.get('[data-test-subj="trace-link"]').eq(0).click();
   });
 
@@ -95,7 +95,8 @@ describe('Testing trace view', () => {
     cy.get('.euiTitle').contains('Logs').should('exist');
   });
 
-  it('Renders data grid, flyout and filters', () => {
+  it.only('Renders data grid, flyout and filters', () => {
+    cy.get('.panel-title-count').contains('(11)').should('exist');
     cy.get('.euiButton__text[title="Span list"]').click({ force: true });
     cy.contains('2 columns hidden').should('exist');
 
@@ -148,7 +149,7 @@ describe('Testing traces table', () => {
     cy.get('.euiContextMenuItem__text').contains('15 rows').click();
     let expected_row_count = 15;
     cy.get('.euiTable--auto')
-      .find("tr")
+      .find('tr')
       .then((row) => {
         let total = row.length - 1;
         expect(total).to.equal(expected_row_count);
@@ -174,7 +175,7 @@ describe('Testing traces tree view', () => {
   it('Verifies tree view and table toggle functionality with expand/collapse logic', () => {
     cy.get('.euiButtonGroup').contains('Tree view').click();
     cy.contains('Expand all').should('exist');
-    cy.contains("Collapse all").should('exist')
+    cy.contains('Collapse all').should('exist');
     //Waiting time for render to complete
     cy.get("[data-test-subj='treeExpandAll']").click();
     cy.get("[data-test-subj='treeCollapseAll']").click();
@@ -204,7 +205,7 @@ describe('Testing traces tree view', () => {
   it('Verifies tree view expand arrow functionality', () => {
     cy.get('.euiButtonGroup').contains('Tree view').click();
     cy.contains('Expand all').should('exist');
-    cy.contains("Collapse all").should('exist')
+    cy.contains('Collapse all').should('exist');
     // Waiting time for render to complete
     cy.get("[data-test-subj='treeExpandAll']").click();
     cy.get("[data-test-subj='treeCollapseAll']").click();
@@ -227,15 +228,13 @@ describe('Testing traces tree view', () => {
   it('Verifies span flyout', () => {
     cy.get('.euiButtonGroup').contains('Tree view').click();
     cy.contains('Expand all').should('exist');
-    cy.contains("Collapse all").should('exist')
+    cy.contains('Collapse all').should('exist');
     // Waiting time for render to complete
     cy.get("[data-test-subj='treeExpandAll']").click();
     cy.get("[data-test-subj='treeCollapseAll']").click();
 
     // Open flyout for a span
-    cy.get("[data-test-subj='spanId-flyout-button']")
-      .contains(SPAN_ID_TREE_VIEW)
-      .click()
+    cy.get("[data-test-subj='spanId-flyout-button']").contains(SPAN_ID_TREE_VIEW).click();
     cy.contains('Span detail').should('exist');
     cy.contains('Span attributes').should('exist');
   });
@@ -243,7 +242,7 @@ describe('Testing traces tree view', () => {
   it('Handles toggling between full screen and regular modes', () => {
     cy.get('.euiButtonGroup').contains('Tree view').click();
     cy.contains('Expand all').should('exist');
-    cy.contains("Collapse all").should('exist')
+    cy.contains('Collapse all').should('exist');
     // Waiting time for render to complete
     cy.get("[data-test-subj='treeExpandAll']").click();
     cy.get("[data-test-subj='treeCollapseAll']").click();
@@ -280,7 +279,7 @@ describe('Testing switch mode to jaeger', () => {
 
   it('Verifies Trace View', () => {
     cy.contains('08ee9fd9bf964384').click();
-    cy.contains("Time spent by service").should('exist');
+    cy.contains('Time spent by service').should('exist');
     cy.get("[data-test-subj='span-gantt-chart-panel']").should('exist');
-  })
+  });
 });
