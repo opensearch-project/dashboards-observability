@@ -172,7 +172,6 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
   const [items, setItems] = useState<Span[]>([]);
   const [total, setTotal] = useState(0);
   const [isSpansTableDataLoading, setIsSpansTableDataLoading] = useState(false);
-  const { mode } = props;
 
   const fetchData = async () => {
     setIsSpansTableDataLoading(true);

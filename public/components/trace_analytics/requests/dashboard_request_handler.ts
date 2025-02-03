@@ -62,17 +62,21 @@ export const handleDashboardRequest = async (
     latencyTrendDSL,
     getLatencyTrendQuery(),
     mode,
-    setShowTimeoutToast
+    setShowTimeoutToast,
+    dataSourceMDSId
   )
     .then((response) => {
       const map: any = {};
-      response.aggregations.trace_group_name.buckets.map((bucket) => {
-        const latencyTrend = bucket.group_by_hour.buckets
+      response.aggregations.trace_group_name.buckets.map((aggBucket) => {
+        const latencyTrend = aggBucket.group_by_hour.buckets
           .slice(-24)
-          .filter((bucket) => bucket.average_latency?.value || bucket.average_latency?.value === 0);
+          .filter(
+            (filterBucket) =>
+              filterBucket.average_latency?.value || filterBucket.average_latency?.value === 0
+          );
         const values = {
-          x: latencyTrend.map((bucket) => bucket.key),
-          y: latencyTrend.map((bucket) => bucket.average_latency?.value || 0),
+          x: latencyTrend.map((xBucket) => xBucket.key),
+          y: latencyTrend.map((yBucket) => yBucket.average_latency?.value || 0),
         };
         const latencyTrendData =
           values.x?.length > 0
@@ -115,7 +119,7 @@ export const handleDashboardRequest = async (
                 },
               }
             : {};
-        map[bucket.key] = latencyTrendData;
+        map[aggBucket.key] = latencyTrendData;
       });
       return map;
     })
@@ -152,8 +156,7 @@ export const handleJaegerDashboardRequest = async (
   setItems,
   mode,
   setShowTimeoutToast,
-  dataSourceMDSId?,
-  setPercentileMap?
+  dataSourceMDSId?
 ) => {
   const latencyTrends = await handleDslRequest(
     http,
@@ -165,13 +168,16 @@ export const handleJaegerDashboardRequest = async (
   )
     .then((response) => {
       const map: any = {};
-      response.aggregations.trace_group_name.buckets.map((bucket) => {
-        const latencyTrend = bucket.group_by_hour.buckets
+      response.aggregations.trace_group_name.buckets.map((aggBucket) => {
+        const latencyTrend = aggBucket.group_by_hour.buckets
           .slice(-24)
-          .filter((bucket) => bucket.average_latency?.value || bucket.average_latency?.value === 0);
+          .filter(
+            (filterBucket) =>
+              filterBucket.average_latency?.value || filterBucket.average_latency?.value === 0
+          );
         const values = {
-          x: latencyTrend.map((bucket) => bucket.key),
-          y: latencyTrend.map((bucket) => bucket.average_latency?.value || 0),
+          x: latencyTrend.map((xBucket) => xBucket.key),
+          y: latencyTrend.map((yBucket) => yBucket.average_latency?.value || 0),
         };
         const latencyTrendData =
           values.x?.length > 0
@@ -211,7 +217,7 @@ export const handleJaegerDashboardRequest = async (
                 },
               }
             : {};
-        map[bucket.key] = latencyTrendData;
+        map[aggBucket.key] = latencyTrendData;
       });
       return map;
     })
@@ -251,7 +257,7 @@ export const handleJaegerDashboardRequest = async (
           newItems.map((a) => a.dashboard_trace_group_name)
         ),
         mode,
-        true,
+        dataSourceMDSId,
         setShowTimeoutToast
       )
         .then((response) => {
@@ -281,8 +287,7 @@ export const handleJaegerErrorDashboardRequest = async (
   setItems,
   mode,
   setShowTimeoutToast,
-  dataSourceMDSId?,
-  setPercentileMap?
+  dataSourceMDSId?
 ) => {
   const errorTrends = await handleDslRequest(
     http,
@@ -294,13 +299,15 @@ export const handleJaegerErrorDashboardRequest = async (
   )
     .then((response) => {
       const map: any = {};
-      response.aggregations.trace_group_name.buckets.map((bucket) => {
-        const errorTrend = bucket.group_by_hour.buckets
+      response.aggregations.trace_group_name.buckets.map((aggBucket) => {
+        const errorTrend = aggBucket.group_by_hour.buckets
           .slice(-24)
-          .filter((bucket) => bucket.error_rate?.value || bucket.error_rate?.value === 0);
+          .filter(
+            (filterBucket) => filterBucket.error_rate?.value || filterBucket.error_rate?.value === 0
+          );
         const values = {
-          x: errorTrend.map((bucket) => bucket.key),
-          y: errorTrend.map((bucket) => bucket.error_rate?.value || 0),
+          x: errorTrend.map((xBucket) => xBucket.key),
+          y: errorTrend.map((yBucket) => yBucket.error_rate?.value || 0),
         };
         const errorTrendData =
           values.x?.length > 0
@@ -340,7 +347,7 @@ export const handleJaegerErrorDashboardRequest = async (
                 },
               }
             : {};
-        map[bucket.key] = errorTrendData;
+        map[aggBucket.key] = errorTrendData;
       });
       return map;
     })
