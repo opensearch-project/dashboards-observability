@@ -3,16 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
 import {
-  EuiDataGrid,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiDataGrid,
   EuiDataGridColumn,
   EuiDataGridSorting,
+  EuiLoadingContent,
   EuiOverlayMask,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import React, { useMemo, useState } from 'react';
 import { NoMatchMessage } from '../helper_functions';
 
 interface FullScreenWrapperProps {
@@ -71,6 +72,7 @@ interface RenderCustomDataGridParams {
   noMatchMessageSize?: string;
   defaultHeight?: string;
   visibleColumns?: string[];
+  isTableDataLoading?: boolean;
 }
 
 export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
@@ -85,6 +87,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   noMatchMessageSize = 'xl',
   defaultHeight = '500px',
   visibleColumns,
+  isTableDataLoading,
 }) => {
   const [localVisibleColumns, setLocalVisibleColumns] = useState(
     visibleColumns ?? columns.map((col) => col.id)
@@ -129,7 +132,11 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
     []
   );
 
-  return (
+  return isTableDataLoading ? (
+    <div>
+      <EuiLoadingContent lines={4} />
+    </div>
+  ) : (
     <>
       <FullScreenWrapper isFullScreen={isFullScreen} onClose={() => setIsFullScreen(false)}>
         <div className={isFullScreen ? 'full-wrapper' : 'normal-wrapper'}>

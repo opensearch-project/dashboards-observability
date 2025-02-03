@@ -8,6 +8,7 @@ import {
   EuiButtonGroupOptionProps,
   EuiFlexGroup,
   EuiHorizontalRule,
+  EuiLoadingChart,
   EuiPanel,
 } from '@elastic/eui';
 import moment from 'moment';
@@ -112,6 +113,7 @@ export function ErrorRatePlt(props: {
   setIdSelected: (mode: string) => void;
   idSelected: string;
   toggleButtons: EuiButtonGroupOptionProps[];
+  isErrorRateTrendLoading: boolean;
 }) {
   const onClick = (event: any) => {
     if (!event?.points) return;
@@ -136,8 +138,16 @@ export function ErrorRatePlt(props: {
             color="text"
           />
         </EuiFlexGroup>
-        <EuiHorizontalRule margin="m" />
-        <ErrorTrendPlt items={props.items} onClick={onClick} isPanel={true} />
+        {props.isErrorRateTrendLoading ? (
+          <div className="center-loading-div">
+            <EuiLoadingChart size="l" />
+          </div>
+        ) : (
+          <>
+            <EuiHorizontalRule margin="m" />
+            <ErrorTrendPlt items={props.items} onClick={onClick} isPanel={true} />
+          </>
+        )}
       </EuiPanel>
     </>
   );

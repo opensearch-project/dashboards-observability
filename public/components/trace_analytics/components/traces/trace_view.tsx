@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiLoadingContent,
   EuiPage,
   EuiPageBody,
   EuiPanel,
@@ -65,90 +66,6 @@ export function TraceView(props: TraceViewProps) {
     );
   };
 
-  const renderOverview = (fields: any) => {
-    return (
-      <EuiPanel>
-        <PanelTitle title="Overview" />
-        <EuiHorizontalRule margin="m" />
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Trace ID</EuiText>
-                {fields.trace_id && (
-                  <EuiFlexGroup gutterSize="s" alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s" className="overview-content">
-                        {fields.trace_id}
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiCopy textToCopy={fields.trace_id}>
-                        {(copy) => (
-                          <EuiSmallButtonIcon
-                            aria-label="Copy trace id"
-                            iconType="copyClipboard"
-                            onClick={copy}
-                          >
-                            Click to copy
-                          </EuiSmallButtonIcon>
-                        )}
-                      </EuiCopy>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                )}
-              </EuiFlexItem>
-              {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
-                <EuiFlexItem grow={false}>
-                  <EuiText className="overview-title">Trace group name</EuiText>
-                  <EuiText size="s" className="overview-content">
-                    {fields.trace_group || '-'}
-                  </EuiText>
-                </EuiFlexItem>
-              ) : (
-                <div />
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Latency</EuiText>
-                <EuiText size="s" className="overview-content">
-                  {fields.latency}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Last updated</EuiText>
-                <EuiText size="s" className="overview-content">
-                  {fields.last_updated}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Errors</EuiText>
-                <EuiText size="s" className="overview-content">
-                  {fields.error_count == null ? (
-                    '-'
-                  ) : fields.error_count > 0 ? (
-                    <EuiText color="danger" size="s" style={{ fontWeight: 430 }}>
-                      Yes
-                    </EuiText>
-                  ) : (
-                    'No'
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    );
-  };
-
   const [fields, setFields] = useState({});
   const [serviceBreakdownData, setServiceBreakdownData] = useState([]);
   const [payloadData, setPayloadData] = useState('');
@@ -163,6 +80,102 @@ export function TraceView(props: TraceViewProps) {
   const [serviceMapIdSelected, setServiceMapIdSelected] = useState<
     'latency' | 'error_rate' | 'throughput'
   >('latency');
+  const [isServicesDataLoading, setIsServicesDataLoading] = useState(false);
+  const [isTraceOverViewLoading, setIsTraceOverViewLoading] = useState(false);
+  const [isTracePayloadLoading, setTracePayloadLoading] = useState(false);
+  const [isServicesPieChartLoading, setIsServicesPieChartLoading] = useState(false);
+
+  const renderOverview = (overviewFields: any) => {
+    return (
+      <EuiPanel>
+        <PanelTitle title="Overview" />
+        {isTraceOverViewLoading ? (
+          <div>
+            <EuiLoadingContent lines={4} />
+          </div>
+        ) : (
+          <>
+            <EuiHorizontalRule margin="m" />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiFlexGroup direction="column">
+                  <EuiFlexItem grow={false}>
+                    <EuiText className="overview-title">Trace ID</EuiText>
+                    {overviewFields.trace_id && (
+                      <EuiFlexGroup gutterSize="s" alignItems="center">
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s" className="overview-content">
+                            {overviewFields.trace_id}
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiCopy textToCopy={overviewFields.trace_id}>
+                            {(copy) => (
+                              <EuiSmallButtonIcon
+                                aria-label="Copy trace id"
+                                iconType="copyClipboard"
+                                onClick={copy}
+                              >
+                                Click to copy
+                              </EuiSmallButtonIcon>
+                            )}
+                          </EuiCopy>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    )}
+                  </EuiFlexItem>
+                  {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiText className="overview-title">Trace group name</EuiText>
+                      <EuiText size="s" className="overview-content">
+                        {overviewFields.trace_group || '-'}
+                      </EuiText>
+                    </EuiFlexItem>
+                  ) : (
+                    <div />
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup direction="column">
+                  <EuiFlexItem grow={false}>
+                    <EuiText className="overview-title">Latency</EuiText>
+                    <EuiText size="s" className="overview-content">
+                      {overviewFields.latency}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText className="overview-title">Last updated</EuiText>
+                    <EuiText size="s" className="overview-content">
+                      {overviewFields.last_updated}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup direction="column">
+                  <EuiFlexItem grow={false}>
+                    <EuiText className="overview-title">Errors</EuiText>
+                    <EuiText size="s" className="overview-content">
+                      {overviewFields.error_count == null ? (
+                        '-'
+                      ) : fields.error_count > 0 ? (
+                        <EuiText color="danger" size="s" style={{ fontWeight: 430 }}>
+                          Yes
+                        </EuiText>
+                      ) : (
+                        'No'
+                      )}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
+      </EuiPanel>
+    );
+  };
 
   const refresh = async () => {
     const DSL = filtersToDsl(
@@ -173,6 +186,8 @@ export function TraceView(props: TraceViewProps) {
       processTimeStamp('now', mode),
       page
     );
+
+    setIsTraceOverViewLoading(true);
     handleTraceViewRequest(
       props.traceId,
       props.http,
@@ -180,7 +195,9 @@ export function TraceView(props: TraceViewProps) {
       setFields,
       mode,
       props.dataSourceMDSId[0].id
-    );
+    ).finally(() => setIsTraceOverViewLoading(false));
+
+    setTracePayloadLoading(true);
     handlePayloadRequest(
       props.traceId,
       props.http,
@@ -188,7 +205,9 @@ export function TraceView(props: TraceViewProps) {
       setPayloadData,
       mode,
       props.dataSourceMDSId[0].id
-    );
+    ).finally(() => setTracePayloadLoading(false));
+
+    setIsServicesPieChartLoading(true);
     handleServicesPieChartRequest(
       props.traceId,
       props.http,
@@ -196,8 +215,16 @@ export function TraceView(props: TraceViewProps) {
       setColorMap,
       mode,
       props.dataSourceMDSId[0].id
-    );
-    handleServiceMapRequest(props.http, DSL, mode, props.dataSourceMDSId[0].id, setServiceMap);
+    ).finally(() => setIsServicesPieChartLoading(false));
+
+    setIsServicesDataLoading(true);
+    handleServiceMapRequest(
+      props.http,
+      DSL,
+      mode,
+      props.dataSourceMDSId[0].id,
+      setServiceMap
+    ).finally(() => setIsServicesDataLoading(false));
   };
 
   useEffect(() => {
@@ -264,7 +291,10 @@ export function TraceView(props: TraceViewProps) {
           <EuiFlexGroup alignItems="stretch" gutterSize="s">
             <EuiFlexItem grow={5}>{renderOverview(fields)}</EuiFlexItem>
             <EuiFlexItem grow={3}>
-              <ServiceBreakdownPanel data={serviceBreakdownData} />
+              <ServiceBreakdownPanel
+                data={serviceBreakdownData}
+                isLoading={isServicesPieChartLoading}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
@@ -291,17 +321,24 @@ export function TraceView(props: TraceViewProps) {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
-            {payloadData.length > 0 ? (
-              <EuiCodeBlock language="json" paddingSize="s" isCopyable overflowHeight={500}>
-                {payloadData}
-              </EuiCodeBlock>
-            ) : null}
+            {isTracePayloadLoading ? (
+              <div>
+                <EuiLoadingContent lines={4} />
+              </div>
+            ) : (
+              payloadData.length > 0 && (
+                <EuiCodeBlock language="json" paddingSize="s" isCopyable overflowHeight={500}>
+                  {payloadData}
+                </EuiCodeBlock>
+              )
+            )}
           </EuiPanel>
           <EuiSpacer />
           {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
             <ServiceMap
               addFilter={undefined}
               serviceMap={traceFilteredServiceMap}
+              isServicesDataLoading={isServicesDataLoading}
               idSelected={serviceMapIdSelected}
               setIdSelected={setServiceMapIdSelected}
               page={page}

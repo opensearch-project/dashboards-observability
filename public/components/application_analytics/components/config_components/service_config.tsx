@@ -47,9 +47,13 @@ export const ServiceConfig = (props: ServiceConfigProps) => {
   >('latency');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
+  const [isServicesDataLoading, setIsServicesDataLoading] = useState(false);
 
   useEffect(() => {
-    handleServiceMapRequest(http, dslService, mode, '', setServiceMap);
+    setIsServicesDataLoading(true);
+    handleServiceMapRequest(http, dslService, mode, '', setServiceMap).finally(() =>
+      setIsServicesDataLoading(false)
+    );
   }, []);
 
   useEffect(() => {
@@ -181,6 +185,7 @@ export const ServiceConfig = (props: ServiceConfigProps) => {
         <EuiSpacer />
         <ServiceMap
           serviceMap={serviceMap}
+          isServicesDataLoading={isServicesDataLoading}
           idSelected={serviceMapIdSelected}
           setIdSelected={setServiceMapIdSelected}
           addFilter={addFilter}

@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { truncate } from 'lodash';
 import React, { useMemo } from 'react';
+import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public';
 import { ServiceTrends, TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { FilterType } from '../common/filters/filters';
 import {
@@ -30,7 +31,6 @@ import {
   PanelTitle,
 } from '../common/helper_functions';
 import { ServiceTrendsPlots } from './service_trends_plots';
-import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public';
 
 interface ServicesTableProps {
   items: any[];
@@ -281,7 +281,7 @@ export function ServicesTable(props: ServicesTableProps) {
           (mode === 'jaeger' && jaegerIndicesExist)
         ) ? (
           <MissingConfigurationMessage mode={mode} />
-        ) : items?.length > 0 ? (
+        ) : items?.length > 0 || loading ? (
           <EuiInMemoryTable
             tableLayout="auto"
             items={items}
