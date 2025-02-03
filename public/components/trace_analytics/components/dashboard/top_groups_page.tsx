@@ -25,17 +25,19 @@ export function TopGroupsPage(props: {
   jaegerTableItems: any[];
   setStartTime: (time: string) => void;
   setEndTime: (time: string) => void;
+  isErrorRateTrendLoading: boolean;
+  isThroughputTrendLoading: boolean;
 }) {
   const toggleButtons = [
     {
       id: 'error_rate',
       label: 'Errors',
-      'data-test-subj': 'errors-toggle'
+      'data-test-subj': 'errors-toggle',
     },
     {
       id: 'throughput',
       label: 'Request rate',
-      'data-test-subj': 'throughput-toggle'
+      'data-test-subj': 'throughput-toggle',
     },
   ];
   const [idSelected, setIdSelected] = useState('error_rate');
@@ -51,6 +53,7 @@ export function TopGroupsPage(props: {
             setIdSelected={(mode: string) => setIdSelected(mode)}
             idSelected={idSelected}
             toggleButtons={toggleButtons}
+            isErrorRateTrendLoading={props.isErrorRateTrendLoading}
           />
           <ErrorRatesTable
             title={'Top 5 Service and Operation Errors'}
@@ -67,6 +70,7 @@ export function TopGroupsPage(props: {
             setIdSelected={(mode: string) => setIdSelected(mode)}
             idSelected={idSelected}
             toggleButtons={toggleButtons}
+            isThrouputTrendLoading={props.isThroughputTrendLoading}
           />
           <LatencyTable
             title={'Top 5 Service and Operation Latency'}

@@ -13,6 +13,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
+  EuiLoadingContent,
   EuiSmallButtonIcon,
   EuiSpacer,
   EuiText,
@@ -93,9 +94,17 @@ export function SpanDetailFlyout(props: {
 }) {
   const { mode } = props;
   const [span, setSpan] = useState<any>({});
+  const [isSpanDataLoading, setIsSpanDataLoading] = useState(false);
 
   useEffect(() => {
-    handleSpansFlyoutRequest(props.http, props.spanId, setSpan, mode, props.dataSourceMDSId);
+    setIsSpanDataLoading(true);
+    handleSpansFlyoutRequest(
+      props.http,
+      props.spanId,
+      setSpan,
+      mode,
+      props.dataSourceMDSId
+    ).finally(() => setIsSpanDataLoading(false));
   }, [props.spanId]);
 
   const getListItem = (
@@ -124,6 +133,13 @@ export function SpanDetailFlyout(props: {
   };
 
   const renderContent = () => {
+    if (isSpanDataLoading) {
+      return (
+        <div>
+          <EuiLoadingContent lines={5} />
+        </div>
+      );
+    }
     if (!span || isEmpty(span)) return '-';
     const overviewList = [
       getListItem(
@@ -288,19 +304,21 @@ export function SpanDetailFlyout(props: {
         <EuiText size="m">
           <span className="panel-title">Overview</span>
         </EuiText>
-        <EuiSpacer size="s" />
-        {overviewList}
-        <EuiSpacer size="xs" />
-        <EuiHorizontalRule margin="s" />
-        {eventsComponent}
-        <EuiText size="m">
-          <span className="panel-title">Span attributes</span>
-          {attributesList.length === 0 || attributesList.length ? (
-            <span className="panel-title-count">{` (${attributesList.length})`}</span>
-          ) : null}
-        </EuiText>
-        <EuiSpacer size="s" />
-        {attributesList}
+        <>
+          <EuiSpacer size="s" />
+          {overviewList}
+          <EuiSpacer size="xs" />
+          <EuiHorizontalRule margin="s" />
+          {eventsComponent}
+          <EuiText size="m">
+            <span className="panel-title">Span attributes</span>
+            {attributesList.length === 0 || attributesList.length ? (
+              <span className="panel-title-count">{` (${attributesList.length})`}</span>
+            ) : null}
+          </EuiText>
+          <EuiSpacer size="s" />
+          {attributesList}
+        </>
       </>
     );
   };

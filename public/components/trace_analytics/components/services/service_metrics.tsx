@@ -34,6 +34,7 @@ export const ServiceMetrics = ({
   serviceName,
 }: ServiceMetricsProps) => {
   const [trends, setTrends] = useState<ServiceTrends>({});
+  const [isTrendsDataLoading, setIsTrendsDataLoading] = useState(false);
   const { http } = coreRefs;
 
   const serviceFilter = [
@@ -45,14 +46,15 @@ export const ServiceMetrics = ({
   ];
 
   const fetchMetrics = async () => {
-    await handleServiceTrendsRequest(
+    setIsTrendsDataLoading(true);
+    handleServiceTrendsRequest(
       http,
       '1h',
       setTrends,
       mode,
       serviceFilter,
       dataSourceMDSId[0].id
-    );
+    ).finally(() => setIsTrendsDataLoading(false));
   };
 
   useEffect(() => {
@@ -75,6 +77,7 @@ export const ServiceMetrics = ({
                 }}
                 setStartTime={setStartTime}
                 setEndTime={setEndTime}
+                isThroughputTrendLoading={isTrendsDataLoading}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -86,10 +89,15 @@ export const ServiceMetrics = ({
                 }}
                 setStartTime={setStartTime}
                 setEndTime={setEndTime}
+                isErrorRateTrendLoading={isTrendsDataLoading}
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <LatencyPltPanel data={trends[serviceName]?.latency_trend} isPanel={true} />
+              <LatencyPltPanel
+                data={trends[serviceName]?.latency_trend}
+                isPanel={true}
+                isLatencyTrendLoading={isTrendsDataLoading}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

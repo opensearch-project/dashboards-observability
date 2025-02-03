@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFlexGroup, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiHorizontalRule, EuiLoadingChart, EuiPanel } from '@elastic/eui';
 import round from 'lodash/round';
 import React, { useMemo } from 'react';
 import { Plt } from '../../../../visualizations/plotly/plot';
@@ -100,14 +100,30 @@ export function LatencyPlt(props: { data: Plotly.Data[]; isPanel?: boolean }) {
   );
 }
 
-export function LatencyPltPanel(props: { data: Plotly.Data[]; isPanel?: boolean }) {
+export function LatencyPltPanel(props: {
+  data: Plotly.Data[];
+  isLatencyTrendLoading: boolean;
+  isPanel?: boolean;
+}) {
   return (
     <EuiPanel style={{ minWidth: 433, minHeight: 308, maxHeight: 560 }}>
       <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs">
         <PanelTitle title="24hr latency trend" />
       </EuiFlexGroup>
-      <EuiHorizontalRule margin="m" />
-      {props.data ? <LatencyPlt data={[props.data]} isPanel={true} /> : <NoMatchMessage size="s" />}
+      {props.isLatencyTrendLoading ? (
+        <div className="center-loading-div">
+          <EuiLoadingChart size="l" />
+        </div>
+      ) : (
+        <>
+          <EuiHorizontalRule margin="m" />
+          {props.data ? (
+            <LatencyPlt data={[props.data]} isPanel={true} />
+          ) : (
+            <NoMatchMessage size="s" />
+          )}
+        </>
+      )}
     </EuiPanel>
   );
 }

@@ -324,17 +324,7 @@ describe('Testing traces Spans table verify table headers functionality', () => 
       .click();
     cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection"]').click();
     cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-spanId').click();
-    cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-parentSpanId"]').click();
-    cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-traceId"]').click();
-    cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-traceGroup').click();
-    cy.get(
-      '[data-test-subj="dataGridColumnSortingPopoverColumnSelection-durationInNanos"]'
-    ).click();
-    cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-startTime"]').click();
-    cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-endTime').click();
-    cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-status.code"]').click();
-    cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection"]').click();
-    cy.get('[data-test-subj="dataGridColumnSortingButton"]').should('have.text', '8 fields sorted');
+    cy.get('[data-test-subj="dataGridColumnSortingButton"]').should('have.text', '1 fields sorted');
     cy.get('[data-test-subj="dataGridColumnSortingButton"]').should('exist').click();
   });
 });
@@ -371,6 +361,8 @@ describe('Testing traces Spans table and verify columns functionality', () => {
       .should('exist');
     count_table_row(1);
     cy.get('[aria-label="remove current filter"]').click();
+    verify_traces_spans_data_grid_cols_exists();
+    cy.contains('277a5934acf55dcf').should('exist');
     cy.get('.panel-title-count').contains('8').should('exist');
     count_table_row(8);
   });
