@@ -23,7 +23,6 @@ import _ from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { FilterType } from '../common/filters/filters';
 import { NoMatchMessage, PanelTitle } from '../common/helper_functions';
-import { LatencyTrendCell } from './latency_trend_cell';
 
 export function ErrorRatesTable(props: {
   title?: string;
@@ -239,7 +238,7 @@ export function ErrorRatesTable(props: {
     },
   });
 
-  const onTableChange = async ({ page, sort }: CriteriaWithPagination<any>) => {
+  const onTableChange = async ({ _page, sort }: CriteriaWithPagination<any>) => {
     if (typeof sort?.field !== 'string') return;
     setSorting({ sort } as { sort: PropertySort });
   };
@@ -250,7 +249,7 @@ export function ErrorRatesTable(props: {
         {titleBar}
         <EuiSpacer size="m" />
         <EuiHorizontalRule margin="none" />
-        {props.items?.length > 0 ? (
+        {props.items?.length > 0 || props.loading ? (
           <EuiInMemoryTable
             data-test-subj="dashboardTable"
             tableLayout="auto"
