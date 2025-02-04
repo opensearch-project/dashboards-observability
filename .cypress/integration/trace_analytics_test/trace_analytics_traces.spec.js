@@ -95,7 +95,7 @@ describe('Testing trace view', () => {
     cy.get('.euiTitle').contains('Logs').should('exist');
   });
 
-  it.only('Renders data grid, flyout and filters', () => {
+  it('Renders data grid, flyout and filters', () => {
     cy.get('.panel-title-count').contains('(11)').should('exist');
     cy.get('.euiButton__text[title="Span list"]').click({ force: true });
     cy.contains('2 columns hidden').should('exist');
