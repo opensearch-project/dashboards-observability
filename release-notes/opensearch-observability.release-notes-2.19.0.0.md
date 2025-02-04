@@ -57,3 +57,4 @@ Compatible with OpenSearch and OpenSearch Dashboards version 2.19.0
 - Separate uploaded cypress artifacts for actions/upload-artifact@v4 ([#2259](https://github.com/opensearch-project/dashboards-observability/pull/2259))
 - Trace analytics updates ([#2251](https://github.com/opensearch-project/dashboards-observability/pull/2251))
 - Increment version to 2.19.0.0 ([#2271](https://github.com/opensearch-project/dashboards-observability/pull/2271))
+- Adding release notes for 2.19.0([#2343](https://github.com/opensearch-project/dashboards-observability/pull/2343))
