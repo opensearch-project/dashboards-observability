@@ -153,6 +153,17 @@ export const handleTracesRequest = async (
         percentileRangesResult.status === 'fulfilled' ? percentileRangesResult.value : {};
       const response = responseResult.value;
 
+      if (
+        !response ||
+        !response.aggregations ||
+        !response.aggregations.traces ||
+        !response.aggregations.traces.buckets ||
+        response.aggregations.traces.buckets.length === 0
+      ) {
+        setItems([]);
+        return [];
+      }
+
       return response.aggregations.traces.buckets.map((bucket: any) => {
         if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
           return {
