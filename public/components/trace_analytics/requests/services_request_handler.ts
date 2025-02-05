@@ -47,6 +47,12 @@ export const handleServicesRequest = async (
         dataSourceMDSId,
         setServiceMap
       );
+
+      if (!serviceObject || Object.keys(serviceObject).length === 0) {
+        setItems([]);
+        return [];
+      }
+
       return Promise.all(
         response.aggregations.service.buckets
           .filter((bucket: any) => serviceObject[bucket.key])
@@ -103,35 +109,39 @@ export const handleServiceMapRequest = async (
     getServiceNodesQuery(mode),
     mode,
     dataSourceMDSId
-  )
-    .then((response) => {
-      response.aggregations.service_name.buckets.map(
-        (bucket: any) =>
-          (map[bucket.key] = {
-            serviceName: bucket.key,
-            id: id++,
-            targetResources: bucket.target_resource.buckets.map((res: any) => res.key),
-            targetServices: [],
-            destServices: [],
-          })
-      );
-      return true;
-    })
-    .catch((error) => {
-      console.error('Error retrieving service nodes:', error);
-      coreRefs.core?.notifications.toasts.addError(error, {
-        title: 'Failed to retrieve service nodes',
-        toastLifeTimeMs: 10000,
-      });
-      return false;
+  ).catch((error) => {
+    console.error('Error retrieving service nodes:', error);
+    coreRefs.core?.notifications.toasts.addError(error, {
+      title: 'Failed to retrieve service nodes',
+      toastLifeTimeMs: 10000,
     });
+    return null;
+  });
 
-  // Early return if service node not found
-  if (!serviceNodesResponse) {
+  if (
+    !serviceNodesResponse ||
+    !serviceNodesResponse.aggregations ||
+    !serviceNodesResponse.aggregations.service_name ||
+    !serviceNodesResponse.aggregations.service_name.buckets ||
+    serviceNodesResponse.aggregations.service_name.buckets.length === 0
+  ) {
+    if (setItems) {
+      setItems(map);
+    }
     return map;
   }
 
-  const targets = {};
+  serviceNodesResponse.aggregations.service_name.buckets.forEach((bucket: any) => {
+    map[bucket.key] = {
+      serviceName: bucket.key,
+      id: id++,
+      targetResources: bucket.target_resource.buckets.map((res: any) => res.key),
+      targetServices: [],
+      destServices: [],
+    };
+  });
+
+  const targets: Record<string, string> = {};
   await handleDslRequest(http, null, getServiceEdgesQuery('target', mode), mode, dataSourceMDSId)
     .then((response) =>
       response.aggregations.service_name.buckets.map((bucket: any) => {
