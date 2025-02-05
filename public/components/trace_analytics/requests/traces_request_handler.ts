@@ -153,6 +153,10 @@ export const handleTracesRequest = async (
         percentileRangesResult.status === 'fulfilled' ? percentileRangesResult.value : {};
       const response = responseResult.value;
 
+      if ((response.statusCode && response.statusCode >= 400) || response.error) {
+        return Promise.reject(response);
+      }
+
       if (
         !response ||
         !response.aggregations ||
