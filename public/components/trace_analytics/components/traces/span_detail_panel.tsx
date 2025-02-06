@@ -15,18 +15,34 @@ import {
   EuiSmallButton,
   EuiSpacer,
 } from '@elastic/eui';
-import debounce from 'lodash/debounce';
-import isEmpty from 'lodash/isEmpty';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { coreRefs } from '../../../../framework/core_refs';
 import { Plt } from '../../../visualizations/plotly/plot';
-import { handleSpansGanttRequest } from '../../requests/traces_request_handler';
 import { PanelTitle } from '../common/helper_functions';
 import { SpanDetailFlyout } from './span_detail_flyout';
 import { SpanDetailTable, SpanDetailTableHierarchy } from './span_detail_table';
+import { hitsToSpanDetailData } from '../../requests/traces_request_handler';
+
+/*
+ * Parse an ISO timestamp with up to nanosecond precision.
+ * For example, "2025-01-28T03:12:37.293990144Z" will be converted
+ * to a number representing the total nanoseconds since the Unix epoch.
+ */
+export function parseIsoToNano(iso: string): number {
+  const match = iso.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d+))?Z$/);
+  if (!match) {
+    throw new Error(`Invalid ISO timestamp: ${iso}`);
+  }
+  // Parse the base part using Date.parse (which gives ms)
+  const baseMs = new Date(match[1] + 'Z').getTime();
+  // Get the fractional part (if any), pad to 9 digits for nanosecond precision
+  let fraction = match[2] || '0';
+  fraction = fraction.padEnd(9, '0'); // ensure it has 9 digits
+  return baseMs * 1e6 + Number(fraction);
+}
 
 export function SpanDetailPanel(props: {
   http: HttpSetup;
@@ -38,8 +54,11 @@ export function SpanDetailPanel(props: {
   page?: string;
   openSpanFlyout?: any;
   data?: { gantt: any[]; table: any[]; ganttMaxX: number };
-  setData?: (data: { gantt: any[]; table: any[]; ganttMaxX: number }) => void;
+  setGanttData?: (data: { gantt: any[]; table: any[]; ganttMaxX: number }) => void;
   isApplicationFlyout?: boolean;
+  payloadData: string;
+  isGanttChartLoading?: boolean;
+  setGanttChartLoading?: (loading: boolean) => void;
 }) {
   const { chrome } = coreRefs;
   const { mode } = props;
@@ -48,7 +67,7 @@ export function SpanDetailPanel(props: {
   const [spanFilters, setSpanFilters] = useState<Array<{ field: string; value: any }>>(
     storedFilters ? JSON.parse(storedFilters) : []
   );
-  const [DSL, setDSL] = useState<any>({});
+  const [DSL, _setDSL] = useState<any>({});
   let data: { gantt: any[]; table: any[]; ganttMaxX: number };
   let setData: (data: { gantt: any[]; table: any[]; ganttMaxX: number }) => void;
   const [localData, localSetData] = useState<{ gantt: any[]; table: any[]; ganttMaxX: number }>({
@@ -56,8 +75,8 @@ export function SpanDetailPanel(props: {
     table: [],
     ganttMaxX: 0,
   });
-  if (props.data && props.setData) {
-    [data, setData] = [props.data, props.setData];
+  if (props.data && props.setGanttData) {
+    [data, setData] = [props.data, props.setGanttData];
   } else {
     [data, setData] = [localData, localSetData];
   }
@@ -68,7 +87,6 @@ export function SpanDetailPanel(props: {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [availableWidth, setAvailableWidth] = useState<number>(window.innerWidth);
   const newNavigation = coreRefs?.chrome?.navGroup.getNavGroupEnabled?.();
-  const [isGanttChartLoading, setIsGanttChartLoading] = useState(false);
 
   const updateAvailableWidth = () => {
     if (containerRef.current) {
@@ -135,72 +153,83 @@ export function SpanDetailPanel(props: {
     }
   };
 
-  const refresh = debounce(() => {
-    if (isEmpty(props.colorMap)) return;
-    const refreshDSL = spanFiltersToDSL();
-    setDSL(refreshDSL);
-    handleSpansGanttRequest(
-      props.traceId,
-      props.http,
-      setData,
-      props.colorMap,
-      refreshDSL,
-      mode,
-      props.dataSourceMDSId
-    ).finally(() => setIsGanttChartLoading(false));
-  }, 150);
+  useEffect(() => {
+    if (!props.payloadData) {
+      console.warn('No payloadData provided to SpanDetailPanel');
+      return;
+    }
 
-  const spanFiltersToDSL = () => {
-    const spanDSL: any =
-      mode === 'jaeger'
-        ? {
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      traceID: props.traceId,
-                    },
-                  },
-                ],
-                filter: [],
-                should: [],
-                must_not: [],
-              },
-            },
+    try {
+      const parsed = JSON.parse(props.payloadData);
+      let hits: any[] = [];
+      if (parsed.hits && Array.isArray(parsed.hits.hits)) {
+        hits = parsed.hits.hits;
+      } else if (Array.isArray(parsed)) {
+        hits = parsed;
+      } else {
+        console.warn('Unexpected payload format:', parsed);
+        return;
+      }
+
+      hits = hits.map((hit) => {
+        if (mode === 'jaeger') {
+          if (!hit.sort || !hit.sort[0]) {
+            return {
+              ...hit,
+              sort: [Number(hit._source.startTime) * 1000], // Jaeger: startTime is in microseconds
+            };
           }
-        : {
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      traceId: props.traceId,
-                    },
-                  },
-                ],
-                filter: [],
-                should: [],
-                must_not: [],
-              },
-            },
-          };
-    spanFilters.map(({ field, value }) => {
-      if (value != null) {
-        spanDSL.query.bool.filter.push({
-          term: {
-            [field]: value,
-          },
+        } else {
+          if (!hit.sort || !hit.sort[0]) {
+            return {
+              ...hit,
+              sort: [parseIsoToNano(hit._source.startTime)],
+            };
+          }
+        }
+        return hit;
+      });
+
+      hits.sort((a, b) => b.sort[0] - a.sort[0]);
+
+      if (spanFilters.length > 0) {
+        hits = hits.filter((hit) => {
+          return spanFilters.every(({ field, value }) => {
+            let fieldVal;
+            if (mode === 'jaeger' && field.startsWith('process.')) {
+              fieldVal = hit._source?.process?.[field.split('.')[1]];
+            } else {
+              fieldVal = hit._source?.[field];
+            }
+            return fieldVal === value;
+          });
         });
       }
-    });
-    return spanDSL;
-  };
 
-  useEffect(() => {
-    setIsGanttChartLoading(true);
-    refresh();
-  }, [props.colorMap, spanFilters]);
+      hits = hits.filter((hit) => {
+        if (mode === 'jaeger') {
+          return Boolean(hit._source?.process?.serviceName);
+        } else {
+          return Boolean(hit._source?.serviceName);
+        }
+      });
+
+      hitsToSpanDetailData(hits, props.colorMap, mode)
+        .then((transformedData) => {
+          setData(transformedData);
+        })
+        .catch((error) => {
+          console.error('Error in hitsToSpanDetailData:', error);
+        })
+        .finally(() => {
+          if (props.setGanttChartLoading) {
+            props.setGanttChartLoading(false);
+          }
+        });
+    } catch (error) {
+      console.error('Error processing payloadData in SpanDetailPanel:', error);
+    }
+  }, [props.payloadData, props.colorMap, mode, spanFilters]);
 
   const getSpanDetailLayout = (
     plotTraces: Plotly.Data[],
@@ -397,10 +426,12 @@ export function SpanDetailPanel(props: {
           }}
           dataSourceMDSId={props.dataSourceMDSId}
           availableWidth={dynamicLayoutAdjustment}
+          payloadData={props.payloadData}
+          filters={spanFilters}
         />
       </div>
     ),
-    [DSL, setCurrentSpan, dynamicLayoutAdjustment]
+    [DSL, setCurrentSpan, dynamicLayoutAdjustment, props.payloadData, spanFilters]
   );
 
   const spanDetailTableHierarchy = useMemo(
@@ -420,10 +451,12 @@ export function SpanDetailPanel(props: {
           }}
           dataSourceMDSId={props.dataSourceMDSId}
           availableWidth={dynamicLayoutAdjustment}
+          payloadData={props.payloadData}
+          filters={spanFilters}
         />
       </div>
     ),
-    [DSL, setCurrentSpan, dynamicLayoutAdjustment]
+    [DSL, setCurrentSpan, dynamicLayoutAdjustment, props.payloadData, spanFilters]
   );
 
   const ganttChart = useMemo(
@@ -474,7 +507,7 @@ export function SpanDetailPanel(props: {
                   )}
                   <EuiFlexItem grow={false}>
                     <EuiButtonGroup
-                      isDisabled={isGanttChartLoading}
+                      isDisabled={props.isGanttChartLoading}
                       legend="Select view of spans"
                       options={toggleOptions}
                       idSelected={toggleIdSelected}
@@ -485,7 +518,7 @@ export function SpanDetailPanel(props: {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {isGanttChartLoading ? (
+          {props.isGanttChartLoading ? (
             <div className="center-loading-div">
               <EuiLoadingChart size="l" />
             </div>

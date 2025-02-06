@@ -28,15 +28,12 @@ import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_cru
 import { coreRefs } from '../../../../framework/core_refs';
 import { TraceAnalyticsCoreDeps } from '../../home';
 import { handleServiceMapRequest } from '../../requests/services_request_handler';
-import {
-  handlePayloadRequest,
-  handleServicesPieChartRequest,
-  handleTraceViewRequest,
-} from '../../requests/traces_request_handler';
+import { handlePayloadRequest } from '../../requests/traces_request_handler';
 import { PanelTitle, filtersToDsl, processTimeStamp } from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { ServiceBreakdownPanel } from './service_breakdown_panel';
 import { SpanDetailPanel } from './span_detail_panel';
+import { getOverviewFields, getServiceBreakdownData } from './trace_view_helpers';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
@@ -84,6 +81,7 @@ export function TraceView(props: TraceViewProps) {
   const [isTraceOverViewLoading, setIsTraceOverViewLoading] = useState(false);
   const [isTracePayloadLoading, setTracePayloadLoading] = useState(false);
   const [isServicesPieChartLoading, setIsServicesPieChartLoading] = useState(false);
+  const [isGanttChartLoading, setIsGanttChartLoading] = useState(false);
 
   const renderOverview = (overviewFields: any) => {
     return (
@@ -187,17 +185,10 @@ export function TraceView(props: TraceViewProps) {
       page
     );
 
-    setIsTraceOverViewLoading(true);
-    handleTraceViewRequest(
-      props.traceId,
-      props.http,
-      fields,
-      setFields,
-      mode,
-      props.dataSourceMDSId[0].id
-    ).finally(() => setIsTraceOverViewLoading(false));
-
     setTracePayloadLoading(true);
+    setIsTraceOverViewLoading(true);
+    setIsServicesPieChartLoading(true);
+    setIsGanttChartLoading(true);
     handlePayloadRequest(
       props.traceId,
       props.http,
@@ -206,16 +197,6 @@ export function TraceView(props: TraceViewProps) {
       mode,
       props.dataSourceMDSId[0].id
     ).finally(() => setTracePayloadLoading(false));
-
-    setIsServicesPieChartLoading(true);
-    handleServicesPieChartRequest(
-      props.traceId,
-      props.http,
-      setServiceBreakdownData,
-      setColorMap,
-      mode,
-      props.dataSourceMDSId[0].id
-    ).finally(() => setIsServicesPieChartLoading(false));
 
     setIsServicesDataLoading(true);
     handleServiceMapRequest(
@@ -226,6 +207,30 @@ export function TraceView(props: TraceViewProps) {
       setServiceMap
     ).finally(() => setIsServicesDataLoading(false));
   };
+
+  useEffect(() => {
+    if (!payloadData) return;
+
+    try {
+      const parsedPayload = JSON.parse(payloadData);
+      const overview = getOverviewFields(parsedPayload, mode);
+      if (overview) {
+        setFields(overview);
+      }
+
+      const {
+        serviceBreakdownData: queryServiceBreakdownData,
+        colorMap: queryColorMap,
+      } = getServiceBreakdownData(parsedPayload, mode);
+      setServiceBreakdownData(queryServiceBreakdownData);
+      setColorMap(queryColorMap);
+    } catch (error) {
+      console.error('Error processing payloadData:', error);
+    } finally {
+      setIsTraceOverViewLoading(false);
+      setIsServicesPieChartLoading(false);
+    }
+  }, [payloadData, mode]);
 
   useEffect(() => {
     if (!Object.keys(serviceMap).length || !ganttData.table.length) return;
@@ -306,9 +311,12 @@ export function TraceView(props: TraceViewProps) {
                 colorMap={colorMap}
                 mode={mode}
                 data={ganttData}
-                setData={setGanttData}
+                setGanttData={setGanttData}
                 dataSourceMDSId={props.dataSourceMDSId[0].id}
                 dataSourceMDSLabel={props.dataSourceMDSId[0].label}
+                payloadData={payloadData}
+                isGanttChartLoading={isGanttChartLoading}
+                setGanttChartLoading={setIsGanttChartLoading}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

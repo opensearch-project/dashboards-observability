@@ -11,9 +11,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
-import { handleSpansRequest } from '../../requests/traces_request_handler';
 import { microToMilliSec, nanoToMilliSec } from '../common/helper_functions';
 import { RenderCustomDataGrid } from '../common/shared_components/custom_datagrid';
+import { handleSpansRequest } from '../../requests/traces_request_handler';
 
 interface SpanDetailTableProps {
   http: HttpSetup;
@@ -24,6 +24,8 @@ interface SpanDetailTableProps {
   setTotal?: (total: number) => void;
   dataSourceMDSId: string;
   availableWidth?: number;
+  payloadData: string;
+  filters: Array<{ field: string; value: any }>;
 }
 
 interface Span {
@@ -173,6 +175,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
   const [total, setTotal] = useState(0);
   const [isSpansTableDataLoading, setIsSpansTableDataLoading] = useState(false);
 
+  // For application_analytics
   const fetchData = async () => {
     setIsSpansTableDataLoading(true);
     const spanSearchParams: SpanSearchParams = {
@@ -192,9 +195,52 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
     ).finally(() => setIsSpansTableDataLoading(false));
   };
 
+  // For application_analytics
   useEffect(() => {
-    fetchData();
+    if (!props.payloadData) {
+      fetchData();
+    }
   }, [tableParams, props.DSL]);
+
+  useEffect(() => {
+    if (!props.payloadData) {
+      console.warn('No payloadData provided in SpanDetailTable');
+      return;
+    }
+    try {
+      const parsed = JSON.parse(props.payloadData);
+
+      const hitsArray =
+        parsed.hits && Array.isArray(parsed.hits.hits)
+          ? parsed.hits.hits
+          : Array.isArray(parsed)
+          ? parsed
+          : [];
+
+      if (hitsArray.length === 0) {
+        console.warn('No hits found in payloadData');
+      }
+
+      // Map each hit to its _source
+      let spans = hitsArray.map((hit: any) => hit._source);
+
+      // Apply filters passed as a prop.
+      if (props.filters.length > 0) {
+        spans = spans.filter((span: any) => {
+          return props.filters.every(({ field, value }) => {
+            return span[field] === value;
+          });
+        });
+      }
+
+      setItems(spans);
+      setTotal(spans.length);
+    } catch (error) {
+      console.error('Error parsing payloadData in SpanDetailTable:', error);
+    } finally {
+      setIsSpansTableDataLoading(false);
+    }
+  }, [props.payloadData, props.DSL, props.filters]);
 
   useEffect(() => {
     if (props.setTotal) props.setTotal(total);
@@ -253,32 +299,42 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
 }
 
 export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
-  const { http, hiddenColumns, mode, DSL, dataSourceMDSId, availableWidth, openFlyout } = props;
+  const { hiddenColumns, mode, availableWidth, openFlyout } = props;
   const [items, setItems] = useState<Span[]>([]);
   const [_total, setTotal] = useState(0);
   const [expandedRows, setExpandedRows] = useState(new Set<string>());
   const [isSpansTableDataLoading, setIsSpansTableDataLoading] = useState(false);
 
   useEffect(() => {
-    setIsSpansTableDataLoading(true);
-    const spanSearchParams = {
-      from: 0,
-      size: 10000,
-      sortingColumns: [],
-    };
-    handleSpansRequest(
-      http,
-      (data) => {
-        const hierarchy = buildHierarchy(data);
-        setItems(hierarchy);
-      },
-      setTotal,
-      spanSearchParams,
-      DSL,
-      mode,
-      dataSourceMDSId
-    ).finally(() => setIsSpansTableDataLoading(false));
-  }, [DSL, http, mode, dataSourceMDSId]);
+    if (!props.payloadData) return;
+    try {
+      const parsed = JSON.parse(props.payloadData);
+      const hitsArray =
+        parsed.hits && Array.isArray(parsed.hits.hits)
+          ? parsed.hits.hits
+          : Array.isArray(parsed)
+          ? parsed
+          : [];
+
+      let spans = hitsArray.map((hit: any) => hit._source);
+
+      if (props.filters.length > 0) {
+        spans = spans.filter((span: any) => {
+          return props.filters.every(
+            ({ field, value }: { field: string; value: any }) => span[field] === value
+          );
+        });
+      }
+
+      const hierarchy = buildHierarchy(spans);
+      setItems(hierarchy);
+      setTotal(hierarchy.length);
+    } catch (error) {
+      console.error('Error parsing payloadData in SpanDetailTableHierarchy:', error);
+    } finally {
+      setIsSpansTableDataLoading(false);
+    }
+  }, [props.payloadData, props.DSL, props.mode, props.dataSourceMDSId, props.filters]);
 
   type SpanMap = Record<string, Span>;
 
