@@ -29,7 +29,7 @@ export function getOverviewFields(parsed: any, mode: string) {
     return {
       trace_id: firstSpan.traceID || '-',
       trace_group: firstSpan.operationName || '-',
-      last_updated: moment(lastUpdated).format('YYYY-MM-DD HH:mm:ss'),
+      last_updated: moment(lastUpdated).format('MM/DD/YYYY HH:mm:ss'),
       latency: firstSpan.duration ? `${(Number(firstSpan.duration) / 1000).toFixed(2)} ms` : 'N/A',
       error_count: firstSpan.tag && firstSpan.tag.error ? 1 : 0,
     };
@@ -62,7 +62,7 @@ export function getOverviewFields(parsed: any, mode: string) {
       trace_id: firstSpan.traceId || '-',
       trace_group: firstSpan.traceGroup || '-',
       last_updated: computedLastUpdated
-        ? moment(computedLastUpdated).format('YYYY-MM-DD HH:mm:ss')
+        ? moment(computedLastUpdated).format('MM/DD/YYYY HH:mm:ss')
         : 'N/A',
       latency: computedLatency != null ? `${computedLatency.toFixed(2)} ms` : 'N/A',
       error_count: errorCount,

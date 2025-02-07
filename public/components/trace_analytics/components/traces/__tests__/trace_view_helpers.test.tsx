@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import moment from 'moment';
 import {
   normalizePayload,
   getOverviewFields,
@@ -92,6 +93,9 @@ describe('overviewAndPieHelpers', () => {
       expect(overview).toBeTruthy();
       expect(overview?.trace_id).toBe('abc');
       expect(overview?.trace_group).toBe('opA');
+      // For jaeger we use startTime = 1000, duration = 2000 → lastUpdated = 1000 + (2000/1000) = 1002 ms
+      const expectedLastUpdated = moment(1002).format('MM/DD/YYYY HH:mm:ss');
+      expect(overview?.last_updated).toBe(expectedLastUpdated);
       expect(overview?.latency).toBe('2.00 ms');
       expect(overview?.error_count).toBe(0);
     });
@@ -101,6 +105,9 @@ describe('overviewAndPieHelpers', () => {
       expect(overview).toBeTruthy();
       expect(overview?.trace_id).toBe('def');
       expect(overview?.trace_group).toBe('TestGroup');
+      // For data prepper, we use traceGroupFields.endTime for last_updated.
+      const expectedLastUpdated = moment('2023-02-05T12:00:00Z').format('MM/DD/YYYY HH:mm:ss');
+      expect(overview?.last_updated).toBe(expectedLastUpdated);
       expect(overview?.latency).toBe('5.00 ms');
       expect(overview?.error_count).toBe(0);
     });
