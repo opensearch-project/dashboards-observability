@@ -3,28 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { get } from 'lodash';
 import moment from 'moment';
-
-export function normalizePayload(parsed: any): any[] {
-  if (Array.isArray(parsed)) {
-    return parsed;
-  }
-  if (parsed.hits && Array.isArray(parsed.hits.hits)) {
-    return parsed.hits.hits;
-  }
-  return [];
-}
+import { NANOS_TO_MS, pieChartColors } from '../common/constants';
 
 export function getOverviewFields(parsed: any, mode: string) {
-  const hits = normalizePayload(parsed);
-  if (hits.length === 0) return null;
-  const firstSpan = hits[0]._source;
+  if (parsed.length === 0) return null;
+  const firstSpan = parsed[0]._source;
   if (!firstSpan) return null;
 
+  let fallbackValueUsed = false;
+
   if (mode === 'jaeger') {
-    // In Jaeger mode, we assume fields:
-    //   startTime: a number in microseconds
-    //   duration: a number in microseconds
+    // In Jaeger mode, we assume fields: startTime and duration are numbers (in microseconds)
     const lastUpdated = Number(firstSpan.startTime) + Number(firstSpan.duration) / 1000;
     return {
       trace_id: firstSpan.traceID || '-',
@@ -32,31 +23,31 @@ export function getOverviewFields(parsed: any, mode: string) {
       last_updated: moment(lastUpdated).format('MM/DD/YYYY HH:mm:ss'),
       latency: firstSpan.duration ? `${(Number(firstSpan.duration) / 1000).toFixed(2)} ms` : 'N/A',
       error_count: firstSpan.tag && firstSpan.tag.error ? 1 : 0,
+      fallbackValueUsed: false,
     };
   } else {
-    // Data Prepper mode: try to use traceGroupFields, but if they're null, fall back to top-level values.
     let computedLatency: number | null = null;
+    const tgDuration = get(firstSpan, 'traceGroupFields.durationInNanos');
     if (firstSpan.traceGroupFields && firstSpan.traceGroupFields.durationInNanos != null) {
-      computedLatency = Number(firstSpan.traceGroupFields.durationInNanos) / 1e6;
+      computedLatency = Number(firstSpan.traceGroupFields.durationInNanos) / NANOS_TO_MS;
+    } else if (tgDuration != null) {
+      computedLatency = Number(tgDuration) / NANOS_TO_MS;
+    } else if (firstSpan.durationInNanos != null) {
+      computedLatency = Number(firstSpan.durationInNanos) / NANOS_TO_MS;
+      fallbackValueUsed = true;
     } else if (firstSpan.startTime && firstSpan.endTime) {
       computedLatency = moment(firstSpan.endTime).diff(
         moment(firstSpan.startTime),
         'milliseconds',
         true
       );
+      fallbackValueUsed = true;
     }
 
     const computedLastUpdated =
-      firstSpan.traceGroupFields && firstSpan.traceGroupFields.endTime
-        ? firstSpan.traceGroupFields.endTime
-        : firstSpan.endTime || null;
-
-    const errorCount =
-      firstSpan.traceGroupFields && firstSpan.traceGroupFields.statusCode != null
-        ? Number(firstSpan.traceGroupFields.statusCode) !== 0
-          ? 1
-          : 0
-        : 0;
+      get(firstSpan, 'traceGroupFields.endTime') || firstSpan.endTime || null;
+    const tgStatus = get(firstSpan, 'traceGroupFields.statusCode');
+    const errorCount = tgStatus != null ? (Number(tgStatus) !== 0 ? 1 : 0) : 0;
 
     return {
       trace_id: firstSpan.traceId || '-',
@@ -66,14 +57,16 @@ export function getOverviewFields(parsed: any, mode: string) {
         : 'N/A',
       latency: computedLatency != null ? `${computedLatency.toFixed(2)} ms` : 'N/A',
       error_count: errorCount,
+      fallbackValueUsed,
     };
   }
 }
 
 export function getServiceBreakdownData(parsed: any, mode: string) {
-  const hits = normalizePayload(parsed);
   const serviceLatencyMap = new Map<string, number>();
-  hits.forEach((hit) => {
+  let totalLatency = 0;
+
+  parsed.forEach((hit) => {
     const source = hit._source;
     const serviceName = mode === 'jaeger' ? source.process?.serviceName : source.serviceName;
     let latency = 0;
@@ -81,33 +74,21 @@ export function getServiceBreakdownData(parsed: any, mode: string) {
       latency = source.duration ? Number(source.duration) / 1000 : 0;
     } else {
       if (source.durationInNanos) {
-        latency = Number(source.durationInNanos) / 1e6;
+        latency = Number(source.durationInNanos) / NANOS_TO_MS;
       } else if (source.traceGroupFields?.durationInNanos) {
-        latency = Number(source.traceGroupFields.durationInNanos) / 1e6;
+        latency = Number(source.traceGroupFields.durationInNanos) / NANOS_TO_MS;
       }
     }
+
     if (serviceName) {
       const current = serviceLatencyMap.get(serviceName) || 0;
       serviceLatencyMap.set(serviceName, current + latency);
+      totalLatency += latency;
     }
   });
 
   const serviceBreakdownArray = [...serviceLatencyMap.entries()].sort((a, b) => b[1] - a[1]);
 
-  const colors = [
-    '#7492e7',
-    '#c33d69',
-    '#2ea597',
-    '#8456ce',
-    '#e07941',
-    '#3759ce',
-    '#ce567c',
-    '#9469d6',
-    '#4066df',
-    '#da7596',
-  ];
-
-  const totalLatency = serviceBreakdownArray.reduce((sum, [, value]) => sum + value, 0);
   const serviceBreakdownData = [
     {
       labels: serviceBreakdownArray.map(([name]) => name),
@@ -116,12 +97,15 @@ export function getServiceBreakdownData(parsed: any, mode: string) {
       ),
       type: 'pie',
       textinfo: 'none',
-      marker: { colors: colors.slice(0, serviceBreakdownArray.length) },
+      marker: { colors: pieChartColors.slice(0, serviceBreakdownArray.length) },
     },
   ];
 
   const colorMap = Object.fromEntries(
-    serviceBreakdownArray.map(([name], index) => [name, colors[index % colors.length]])
+    serviceBreakdownArray.map(([name], index) => [
+      name,
+      pieChartColors[index % pieChartColors.length],
+    ])
   );
 
   return { serviceBreakdownData, colorMap };

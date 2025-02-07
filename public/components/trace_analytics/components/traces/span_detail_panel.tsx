@@ -21,28 +21,10 @@ import { HttpSetup } from '../../../../../../../src/core/public';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { coreRefs } from '../../../../framework/core_refs';
 import { Plt } from '../../../visualizations/plotly/plot';
-import { PanelTitle } from '../common/helper_functions';
+import { PanelTitle, parseIsoToNano } from '../common/helper_functions';
 import { SpanDetailFlyout } from './span_detail_flyout';
 import { SpanDetailTable, SpanDetailTableHierarchy } from './span_detail_table';
 import { hitsToSpanDetailData } from '../../requests/traces_request_handler';
-
-/*
- * Parse an ISO timestamp with up to nanosecond precision.
- * For example, "2025-01-28T03:12:37.293990144Z" will be converted
- * to a number representing the total nanoseconds since the Unix epoch.
- */
-export function parseIsoToNano(iso: string): number {
-  const match = iso.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d+))?Z$/);
-  if (!match) {
-    throw new Error(`Invalid ISO timestamp: ${iso}`);
-  }
-  // Parse the base part using Date.parse (which gives ms)
-  const baseMs = new Date(match[1] + 'Z').getTime();
-  // Get the fractional part (if any), pad to 9 digits for nanosecond precision
-  let fraction = match[2] || '0';
-  fraction = fraction.padEnd(9, '0'); // ensure it has 9 digits
-  return baseMs * 1e6 + Number(fraction);
-}
 
 export function SpanDetailPanel(props: {
   http: HttpSetup;
@@ -153,14 +135,13 @@ export function SpanDetailPanel(props: {
     }
   };
 
-  useEffect(() => {
-    if (!props.payloadData) {
-      console.warn('No payloadData provided to SpanDetailPanel');
-      return;
-    }
-
+  const parseAndFilterHits = (
+    payloadData: string,
+    traceMode: string,
+    payloadSpanFilters: any[]
+  ) => {
     try {
-      const parsed = JSON.parse(props.payloadData);
+      const parsed = JSON.parse(payloadData);
       let hits: any[] = [];
       if (parsed.hits && Array.isArray(parsed.hits.hits)) {
         hits = parsed.hits.hits;
@@ -168,11 +149,11 @@ export function SpanDetailPanel(props: {
         hits = parsed;
       } else {
         console.warn('Unexpected payload format:', parsed);
-        return;
+        return [];
       }
 
       hits = hits.map((hit) => {
-        if (mode === 'jaeger') {
+        if (traceMode === 'jaeger') {
           if (!hit.sort || !hit.sort[0]) {
             return {
               ...hit,
@@ -192,11 +173,11 @@ export function SpanDetailPanel(props: {
 
       hits.sort((a, b) => b.sort[0] - a.sort[0]);
 
-      if (spanFilters.length > 0) {
+      if (payloadSpanFilters.length > 0) {
         hits = hits.filter((hit) => {
-          return spanFilters.every(({ field, value }) => {
+          return payloadSpanFilters.every(({ field, value }) => {
             let fieldVal;
-            if (mode === 'jaeger' && field.startsWith('process.')) {
+            if (traceMode === 'jaeger' && field.startsWith('process.')) {
               fieldVal = hit._source?.process?.[field.split('.')[1]];
             } else {
               fieldVal = hit._source?.[field];
@@ -207,28 +188,44 @@ export function SpanDetailPanel(props: {
       }
 
       hits = hits.filter((hit) => {
-        if (mode === 'jaeger') {
+        if (traceMode === 'jaeger') {
           return Boolean(hit._source?.process?.serviceName);
         } else {
           return Boolean(hit._source?.serviceName);
         }
       });
 
-      hitsToSpanDetailData(hits, props.colorMap, mode)
-        .then((transformedData) => {
-          setData(transformedData);
-        })
-        .catch((error) => {
-          console.error('Error in hitsToSpanDetailData:', error);
-        })
-        .finally(() => {
-          if (props.setGanttChartLoading) {
-            props.setGanttChartLoading(false);
-          }
-        });
+      return hits;
     } catch (error) {
-      console.error('Error processing payloadData in SpanDetailPanel:', error);
+      console.error('Error processing payloadData in parseAndFilterHits:', error);
+      return [];
     }
+  };
+
+  useEffect(() => {
+    if (!props.payloadData) {
+      console.warn('No payloadData provided to SpanDetailPanel');
+      return;
+    }
+
+    const hits = parseAndFilterHits(props.payloadData, mode, spanFilters);
+
+    if (hits.length === 0) {
+      return;
+    }
+
+    hitsToSpanDetailData(hits, props.colorMap, mode)
+      .then((transformedData) => {
+        setData(transformedData);
+      })
+      .catch((error) => {
+        console.error('Error in hitsToSpanDetailData:', error);
+      })
+      .finally(() => {
+        if (props.setGanttChartLoading) {
+          props.setGanttChartLoading(false);
+        }
+      });
   }, [props.payloadData, props.colorMap, mode, spanFilters]);
 
   const getSpanDetailLayout = (

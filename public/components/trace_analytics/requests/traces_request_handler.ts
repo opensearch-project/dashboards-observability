@@ -324,6 +324,16 @@ export const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: Trace
   return data;
 };
 
+export function normalizePayload(parsed: any): any[] {
+  if (Array.isArray(parsed)) {
+    return parsed;
+  }
+  if (parsed.hits && Array.isArray(parsed.hits.hits)) {
+    return parsed.hits.hits;
+  }
+  return [];
+}
+
 export const handlePayloadRequest = (
   traceId: string,
   http: HttpSetup,
@@ -333,7 +343,10 @@ export const handlePayloadRequest = (
   dataSourceMDSId?: string
 ) => {
   return handleDslRequest(http, null, getPayloadQuery(mode, traceId), mode, dataSourceMDSId)
-    .then((response) => setPayloadData(JSON.stringify(response.hits.hits, null, 2)))
+    .then((response) => {
+      const normalizedData = normalizePayload(response);
+      setPayloadData(JSON.stringify(normalizedData, null, 2));
+    })
     .catch((error) => {
       console.error('Error in handlePayloadRequest:', error);
       coreRefs.core?.notifications.toasts.addError(error, {

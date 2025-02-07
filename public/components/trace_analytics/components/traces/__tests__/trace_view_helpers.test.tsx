@@ -4,11 +4,8 @@
  */
 
 import moment from 'moment';
-import {
-  normalizePayload,
-  getOverviewFields,
-  getServiceBreakdownData,
-} from '../trace_view_helpers';
+import { getOverviewFields, getServiceBreakdownData } from '../trace_view_helpers';
+import { normalizePayload } from '../../../requests/traces_request_handler';
 
 const dataPrepperPayload = {
   hits: {
@@ -55,7 +52,6 @@ const jaegerPayload = {
           tag: { error: false },
           process: { serviceName: 'serviceX' },
         },
-        sort: [1000 * 1000],
       },
       {
         _source: {
@@ -66,7 +62,6 @@ const jaegerPayload = {
           tag: { error: true },
           process: { serviceName: 'serviceY' },
         },
-        sort: [1500 * 1000],
       },
     ],
   },
@@ -83,13 +78,14 @@ describe('overviewAndPieHelpers', () => {
       expect(normalizePayload(obj)).toEqual([4, 5, 6]);
     });
     it('should return an empty array for unexpected input', () => {
-      expect(normalizePayload({ foo: 'bar' })).toEqual([]);
+      const obj = { foo: 'bar' };
+      expect(normalizePayload(obj)).toEqual([]);
     });
   });
 
   describe('getOverviewFields', () => {
     it('should return correct overview fields for jaeger mode', () => {
-      const overview = getOverviewFields(jaegerPayload, 'jaeger');
+      const overview = getOverviewFields(jaegerPayload.hits.hits, 'jaeger');
       expect(overview).toBeTruthy();
       expect(overview?.trace_id).toBe('abc');
       expect(overview?.trace_group).toBe('opA');
@@ -101,7 +97,7 @@ describe('overviewAndPieHelpers', () => {
     });
 
     it('should return correct overview fields for data prepper mode', () => {
-      const overview = getOverviewFields(dataPrepperPayload, 'data_prepper');
+      const overview = getOverviewFields(dataPrepperPayload.hits.hits, 'data_prepper');
       expect(overview).toBeTruthy();
       expect(overview?.trace_id).toBe('def');
       expect(overview?.trace_group).toBe('TestGroup');
@@ -116,7 +112,7 @@ describe('overviewAndPieHelpers', () => {
   describe('getServiceBreakdownData', () => {
     it('should return correct service breakdown data for data prepper mode', () => {
       const { serviceBreakdownData, colorMap } = getServiceBreakdownData(
-        dataPrepperPayload,
+        dataPrepperPayload.hits.hits, // Pass hits.hits directly
         'data_prepper'
       );
       expect(serviceBreakdownData).toBeDefined();
@@ -128,7 +124,10 @@ describe('overviewAndPieHelpers', () => {
     });
 
     it('should return correct service breakdown data for jaeger mode', () => {
-      const { serviceBreakdownData, colorMap } = getServiceBreakdownData(jaegerPayload, 'jaeger');
+      const { serviceBreakdownData, colorMap } = getServiceBreakdownData(
+        jaegerPayload.hits.hits,
+        'jaeger'
+      );
       expect(serviceBreakdownData).toBeDefined();
       expect(Array.isArray(serviceBreakdownData)).toBe(true);
       expect(colorMap).toBeDefined();

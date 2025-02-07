@@ -217,10 +217,6 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
           ? parsed
           : [];
 
-      if (hitsArray.length === 0) {
-        console.warn('No hits found in payloadData');
-      }
-
       // Map each hit to its _source
       let spans = hitsArray.map((hit: any) => hit._source);
 

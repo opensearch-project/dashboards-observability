@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIconTip,
   EuiLoadingContent,
   EuiPage,
   EuiPageBody,
@@ -140,6 +141,15 @@ export function TraceView(props: TraceViewProps) {
                     <EuiText className="overview-title">Latency</EuiText>
                     <EuiText size="s" className="overview-content">
                       {overviewFields.latency}
+                      {overviewFields.fallbackValueUsed && (
+                        <EuiIconTip
+                          aria-label="Warning"
+                          size="m"
+                          type="alert"
+                          color="warning"
+                          content="Latency may not be accurate due to missing or unexpected duration data."
+                        />
+                      )}
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
@@ -157,7 +167,7 @@ export function TraceView(props: TraceViewProps) {
                     <EuiText size="s" className="overview-content">
                       {overviewFields.error_count == null ? (
                         '-'
-                      ) : fields.error_count > 0 ? (
+                      ) : overviewFields.error_count > 0 ? (
                         <EuiText color="danger" size="s" style={{ fontWeight: 430 }}>
                           Yes
                         </EuiText>
