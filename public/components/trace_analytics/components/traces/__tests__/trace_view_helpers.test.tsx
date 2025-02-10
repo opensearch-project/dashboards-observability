@@ -96,7 +96,7 @@ describe('overviewAndPieHelpers', () => {
       const latencyInMilliseconds = durationMillis.toFixed(2);
       expect(overview?.last_updated).toBe(expectedLastUpdated);
       expect(overview?.latency).toBe(`${latencyInMilliseconds} ms`);
-      expect(overview?.error_count).toBe(0);
+      expect(overview?.error_count).toBe(1);
     });
 
     it('should return correct overview fields for data prepper mode', () => {
