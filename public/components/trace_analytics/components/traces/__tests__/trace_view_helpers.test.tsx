@@ -47,8 +47,8 @@ const jaegerPayload = {
         _source: {
           traceID: 'abc',
           operationName: 'opA',
-          startTime: 1000,
-          duration: 2000,
+          startTime: 1000000,
+          duration: 2000000,
           tag: { error: false },
           process: { serviceName: 'serviceX' },
         },
@@ -57,8 +57,8 @@ const jaegerPayload = {
         _source: {
           traceID: 'abc',
           operationName: 'opB',
-          startTime: 1500,
-          duration: 3000,
+          startTime: 1500000,
+          duration: 3000000,
           tag: { error: true },
           process: { serviceName: 'serviceY' },
         },
@@ -89,10 +89,13 @@ describe('overviewAndPieHelpers', () => {
       expect(overview).toBeTruthy();
       expect(overview?.trace_id).toBe('abc');
       expect(overview?.trace_group).toBe('opA');
-      // For jaeger we use startTime = 1000, duration = 2000 → lastUpdated = 1000 + (2000/1000) = 1002 ms
-      const expectedLastUpdated = moment(1002).format('MM/DD/YYYY HH:mm:ss');
+      const startTimeMillis = 1000000 / 1000;
+      const durationMillis = 2000000 / 1000;
+      const lastUpdated = startTimeMillis + durationMillis;
+      const expectedLastUpdated = moment(lastUpdated).format('MM/DD/YYYY HH:mm:ss.SSS');
+      const latencyInMilliseconds = durationMillis.toFixed(2);
       expect(overview?.last_updated).toBe(expectedLastUpdated);
-      expect(overview?.latency).toBe('2.00 ms');
+      expect(overview?.latency).toBe(`${latencyInMilliseconds} ms`);
       expect(overview?.error_count).toBe(0);
     });
 
@@ -102,7 +105,7 @@ describe('overviewAndPieHelpers', () => {
       expect(overview?.trace_id).toBe('def');
       expect(overview?.trace_group).toBe('TestGroup');
       // For data prepper, we use traceGroupFields.endTime for last_updated.
-      const expectedLastUpdated = moment('2023-02-05T12:00:00Z').format('MM/DD/YYYY HH:mm:ss');
+      const expectedLastUpdated = moment('2023-02-05T12:00:00Z').format('MM/DD/YYYY HH:mm:ss.SSS');
       expect(overview?.last_updated).toBe(expectedLastUpdated);
       expect(overview?.latency).toBe('5.00 ms');
       expect(overview?.error_count).toBe(0);

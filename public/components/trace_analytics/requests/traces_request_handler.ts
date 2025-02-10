@@ -345,7 +345,15 @@ export const handlePayloadRequest = (
   return handleDslRequest(http, null, getPayloadQuery(mode, traceId), mode, dataSourceMDSId)
     .then((response) => {
       const normalizedData = normalizePayload(response);
-      setPayloadData(JSON.stringify(normalizedData, null, 2));
+
+      // Sort the data by start time (ascending)
+      const sortedData = normalizedData.sort((a, b) => {
+        const startTimeA = a._source.startTime;
+        const startTimeB = b._source.startTime;
+        return startTimeA - startTimeB;
+      });
+
+      setPayloadData(JSON.stringify(sortedData, null, 2));
     })
     .catch((error) => {
       console.error('Error in handlePayloadRequest:', error);

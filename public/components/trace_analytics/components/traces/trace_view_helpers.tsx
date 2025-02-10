@@ -5,7 +5,7 @@
 
 import { get } from 'lodash';
 import moment from 'moment';
-import { NANOS_TO_MS, pieChartColors } from '../common/constants';
+import { MILI_TO_SEC, NANOS_TO_MS, pieChartColors } from '../common/constants';
 
 export function getOverviewFields(parsed: any, mode: string) {
   if (parsed.length === 0) return null;
@@ -15,13 +15,15 @@ export function getOverviewFields(parsed: any, mode: string) {
   let fallbackValueUsed = false;
 
   if (mode === 'jaeger') {
-    // In Jaeger mode, we assume fields: startTime and duration are numbers (in microseconds)
-    const lastUpdated = Number(firstSpan.startTime) + Number(firstSpan.duration) / 1000;
+    const lastUpdated =
+      Number(firstSpan.startTime) / MILI_TO_SEC + Number(firstSpan.duration) / MILI_TO_SEC;
     return {
       trace_id: firstSpan.traceID || '-',
       trace_group: firstSpan.operationName || '-',
-      last_updated: moment(lastUpdated).format('MM/DD/YYYY HH:mm:ss'),
-      latency: firstSpan.duration ? `${(Number(firstSpan.duration) / 1000).toFixed(2)} ms` : 'N/A',
+      last_updated: moment(lastUpdated).format('MM/DD/YYYY HH:mm:ss.SSS'),
+      latency: firstSpan.duration
+        ? `${(Number(firstSpan.duration) / MILI_TO_SEC).toFixed(2)} ms`
+        : 'N/A',
       error_count: firstSpan.tag && firstSpan.tag.error ? 1 : 0,
       fallbackValueUsed: false,
     };
@@ -53,7 +55,7 @@ export function getOverviewFields(parsed: any, mode: string) {
       trace_id: firstSpan.traceId || '-',
       trace_group: firstSpan.traceGroup || '-',
       last_updated: computedLastUpdated
-        ? moment(computedLastUpdated).format('MM/DD/YYYY HH:mm:ss')
+        ? moment(computedLastUpdated).format('MM/DD/YYYY HH:mm:ss.SSS')
         : 'N/A',
       latency: computedLatency != null ? `${computedLatency.toFixed(2)} ms` : 'N/A',
       error_count: errorCount,

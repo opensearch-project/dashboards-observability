@@ -322,7 +322,7 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
         });
       }
 
-      const hierarchy = buildHierarchy(spans);
+      const hierarchy = buildHierarchy(spans, mode);
       setItems(hierarchy);
       setTotal(hierarchy.length);
     } catch (error) {
@@ -334,38 +334,84 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
 
   type SpanMap = Record<string, Span>;
 
-  const buildHierarchy = (spans: Span[]): Span[] => {
+  const buildHierarchy = (spans: Span[], modeTree: TraceAnalyticsMode): Span[] => {
     const spanMap: SpanMap = {};
 
     spans.forEach((span) => {
-      spanMap[span.spanId] = { ...span, children: [] };
+      const spanIdKey = modeTree === 'jaeger' ? 'spanID' : 'spanId';
+      spanMap[span[spanIdKey]] = { ...span, children: [] };
     });
 
     const rootSpans: Span[] = [];
+    const alreadyAddedRootSpans: Set<string> = new Set(); // Track added root spans
 
     spans.forEach((span) => {
-      if (span.parentSpanId && spanMap[span.parentSpanId]) {
-        // If the parent span exists, add this span to its children array
-        spanMap[span.parentSpanId].children.push(spanMap[span.spanId]);
+      const spanIdKey = modeTree === 'jaeger' ? 'spanID' : 'spanId';
+      const references = span.references || [];
+
+      // Handle Jaeger references (FOLLOWS_FROM and CHILD_OF)
+      if (modeTree === 'jaeger') {
+        references.forEach((ref: any) => {
+          if (ref.refType === 'CHILD_OF') {
+            const parentSpan = spanMap[ref.spanID];
+            if (parentSpan) {
+              parentSpan.children.push(spanMap[span[spanIdKey]]);
+            }
+          }
+          if (ref.refType === 'FOLLOWS_FROM') {
+            if (!alreadyAddedRootSpans.has(span[spanIdKey])) {
+              rootSpans.push(spanMap[span[spanIdKey]]);
+              alreadyAddedRootSpans.add(span[spanIdKey]);
+            }
+          }
+        });
+
+        // If no references or only FOLLOWS_FROM, treat as a root span
+        if (references.length === 0 || references.every((ref) => ref.refType === 'FOLLOWS_FROM')) {
+          if (!alreadyAddedRootSpans.has(span[spanIdKey])) {
+            rootSpans.push(spanMap[span[spanIdKey]]);
+            alreadyAddedRootSpans.add(span[spanIdKey]);
+          }
+        }
       } else {
-        rootSpans.push(spanMap[span.spanId]);
+        // Data Prepper
+        if (span.parentSpanId && spanMap[span.parentSpanId]) {
+          spanMap[span.parentSpanId].children.push(spanMap[span[spanIdKey]]);
+        } else {
+          // No parentSpanId or no matching parent span, treat as root span
+          if (!alreadyAddedRootSpans.has(span[spanIdKey])) {
+            rootSpans.push(spanMap[span[spanIdKey]]);
+            alreadyAddedRootSpans.add(span[spanIdKey]);
+          }
+        }
       }
     });
 
     return rootSpans;
   };
 
-  const flattenHierarchy = (spans: Span[], level = 0, isParentExpanded = true): Span[] => {
+  const flattenHierarchy = (
+    spans: Span[],
+    modeFlatten: TraceAnalyticsMode,
+    level = 0,
+    isParentExpanded = true
+  ): Span[] => {
     return spans.flatMap((span) => {
-      const isExpanded = expandedRows.has(span.spanId);
+      const isExpanded = expandedRows.has(span.spanId || span.spanID);
       const shouldShow = level === 0 || isParentExpanded;
+
       const row = shouldShow ? [{ ...span, level }] : [];
-      const children = flattenHierarchy(span.children || [], level + 1, isExpanded && shouldShow);
+      const children = flattenHierarchy(
+        span.children || [],
+        modeFlatten,
+        level + 1,
+        isExpanded && shouldShow
+      );
       return [...row, ...children];
     });
   };
 
-  const flattenedItems = useMemo(() => flattenHierarchy(items), [items, expandedRows]);
+  const flattenedItems = useMemo(() => flattenHierarchy(items, mode), [items, expandedRows, mode]);
 
   const columns = useMemo(() => getColumns(mode), [mode]);
   const visibleColumns = useMemo(
@@ -377,7 +423,7 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
     const allSpanIds = new Set<string>();
     const gather = (spanList: Span[]) => {
       spanList.forEach((span) => {
-        allSpanIds.add(span.spanId);
+        allSpanIds.add(span.spanId || span.spanID);
         if (span.children.length > 0) {
           gather(span.children);
         }
@@ -392,21 +438,23 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
       const item = flattenedItems[rowIndex];
       const value = item[columnId];
 
-      if (columnId === 'spanId') {
+      const spanIdKey = props.mode === 'jaeger' ? 'spanID' : 'spanId';
+
+      if (columnId === 'spanId' || columnId === 'spanID') {
         const indentation = `${(item.level || 0) * 20}px`;
-        const isExpanded = expandedRows.has(item.spanId);
+        const isExpanded = expandedRows.has(item[spanIdKey]);
         return (
           <div style={{ display: 'flex', alignItems: 'center', paddingLeft: indentation }}>
-            {item.children.length > 0 ? (
+            {item.children && item.children.length > 0 ? (
               <EuiIcon
                 type={isExpanded ? 'arrowDown' : 'arrowRight'}
                 onClick={() => {
                   setExpandedRows((prev) => {
                     const newSet = new Set(prev);
-                    if (newSet.has(item.spanId)) {
-                      newSet.delete(item.spanId);
+                    if (newSet.has(item[spanIdKey])) {
+                      newSet.delete(item[spanIdKey]);
                     } else {
-                      newSet.add(item.spanId);
+                      newSet.add(item[spanIdKey]);
                     }
                     return newSet;
                   });
@@ -421,7 +469,7 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
               <span>{value}</span>
             ) : (
               <EuiLink
-                onClick={() => openFlyout(value)}
+                onClick={() => openFlyout(item[spanIdKey])}
                 color="primary"
                 data-test-subj="spanId-flyout-button"
               >
@@ -441,7 +489,7 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
         props,
       });
     },
-    [flattenedItems, expandedRows, openFlyout]
+    [flattenedItems, expandedRows, openFlyout, props.mode]
   );
 
   const toolbarButtons = [
