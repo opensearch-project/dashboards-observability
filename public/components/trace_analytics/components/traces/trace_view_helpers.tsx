@@ -17,6 +17,16 @@ export function getOverviewFields(parsed: any, mode: string) {
   if (mode === 'jaeger') {
     const lastUpdated =
       Number(firstSpan.startTime) / MILI_TO_SEC + Number(firstSpan.duration) / MILI_TO_SEC;
+
+    let errorCount = 0;
+    parsed.some((span: any) => {
+      if (span._source.tag?.['error'] === true) {
+        errorCount++;
+        return true;
+      }
+      return false;
+    });
+
     return {
       trace_id: firstSpan.traceID || '-',
       trace_group: firstSpan.operationName || '-',
@@ -24,7 +34,7 @@ export function getOverviewFields(parsed: any, mode: string) {
       latency: firstSpan.duration
         ? `${(Number(firstSpan.duration) / MILI_TO_SEC).toFixed(2)} ms`
         : 'N/A',
-      error_count: firstSpan.tag && firstSpan.tag.error ? 1 : 0,
+      error_count: errorCount,
       fallbackValueUsed: false,
     };
   } else {
