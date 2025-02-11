@@ -44,16 +44,17 @@ export function getOverviewFields(parsed: any, mode: string) {
       computedLatency = Number(firstSpan.traceGroupFields.durationInNanos) / NANOS_TO_MS;
     } else if (tgDuration != null) {
       computedLatency = Number(tgDuration) / NANOS_TO_MS;
-    } else if (firstSpan.durationInNanos != null) {
-      computedLatency = Number(firstSpan.durationInNanos) / NANOS_TO_MS;
-      fallbackValueUsed = true;
-    } else if (firstSpan.startTime && firstSpan.endTime) {
-      computedLatency = moment(firstSpan.endTime).diff(
-        moment(firstSpan.startTime),
-        'milliseconds',
-        true
-      );
-      fallbackValueUsed = true;
+    } else {
+      const startTimes = parsed.map((span: any) => moment(span._source.startTime));
+      const endTimes = parsed.map((span: any) => moment(span._source.endTime));
+
+      const minStartTime = moment.min(startTimes);
+      const maxEndTime = moment.max(endTimes);
+
+      if (minStartTime && maxEndTime) {
+        computedLatency = maxEndTime.diff(minStartTime, 'milliseconds', true);
+        fallbackValueUsed = true;
+      }
     }
 
     const computedLastUpdated =
