@@ -289,7 +289,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
     columns,
     renderCellValue,
     rowCount: total,
-    sorting: props.mode === 'jaeger' ? undefined : { columns: tableParams.sortingColumns, onSort },
+    sorting: { columns: tableParams.sortingColumns, onSort },
     pagination: {
       pageIndex: tableParams.page,
       pageSize: tableParams.size,
