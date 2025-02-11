@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import round from 'lodash/round';
 import React, { useEffect, useState } from 'react';
+import { i18n } from '@osd/i18n';
 import { MountPoint } from '../../../../../../../src/core/public';
 import { DataSourceManagementPluginSetup } from '../../../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
@@ -143,11 +144,16 @@ export function TraceView(props: TraceViewProps) {
                       {overviewFields.latency}
                       {overviewFields.fallbackValueUsed && (
                         <EuiIconTip
-                          aria-label="Warning"
+                          aria-label={i18n.translate('tracesOverview.iconTip.ariaLabel', {
+                            defaultMessage: 'Warning',
+                          })}
                           size="m"
                           type="alert"
                           color="warning"
-                          content="Latency may not be accurate due to missing or unexpected duration data."
+                          content={i18n.translate('tracesOverview.iconTip.content', {
+                            defaultMessage:
+                              'Latency may not be accurate due to missing or unexpected duration data.',
+                          })}
                         />
                       )}
                     </EuiText>

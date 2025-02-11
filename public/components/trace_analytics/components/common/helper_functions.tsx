@@ -634,11 +634,49 @@ export function parseIsoToNano(iso: string): number {
   fraction = fraction.padEnd(9, '0'); // ensure it has 9 digits
   return baseMs * NANOS_TO_MS + Number(fraction);
 }
+interface Span {
+  traceId: string;
+  spanId: string;
+  traceState: string;
+  parentSpanId: string;
+  name: string;
+  kind: string;
+  startTime: string;
+  endTime: string;
+  durationInNanos: number;
+  serviceName: string;
+  events: any[];
+  links: any[];
+  droppedAttributesCount: number;
+  droppedEventsCount: number;
+  droppedLinksCount: number;
+  traceGroup: string;
+  traceGroupFields: {
+    endTime: string;
+    durationInNanos: number;
+    statusCode: number;
+  };
+  status: {
+    code: number;
+  };
+  instrumentationLibrary: {
+    name: string;
+    version: string;
+  };
+}
 
-export const parseHits = (payloadData: string) => {
+interface ParsedHit {
+  _index: string;
+  _id: string;
+  _score: number;
+  _source: Span;
+  sort?: any[];
+}
+
+export const parseHits = (payloadData: string): ParsedHit[] => {
   try {
     const parsed = JSON.parse(payloadData);
-    let hits: any[] = [];
+    let hits: ParsedHit[] = [];
 
     if (parsed.hits && Array.isArray(parsed.hits.hits)) {
       hits = parsed.hits.hits;

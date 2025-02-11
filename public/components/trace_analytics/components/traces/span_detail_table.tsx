@@ -208,7 +208,6 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
 
   useEffect(() => {
     if (!props.payloadData) {
-      console.warn('No payloadData provided in SpanDetailTable');
       return;
     }
     try {
@@ -226,7 +225,9 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
         });
       }
 
-      spans = applySorting(spans);
+      if (tableParams.sortingColumns.length > 0) {
+        spans = applySorting(spans);
+      }
 
       setItems(spans);
       setTotal(spans.length);
@@ -238,19 +239,16 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
   }, [props.payloadData, props.DSL, props.filters, tableParams]);
 
   const applySorting = (spans: Span[]) => {
-    if (tableParams.sortingColumns.length > 0) {
-      return spans.sort((a, b) => {
-        for (const { id, direction } of tableParams.sortingColumns) {
-          const aValue = a[id];
-          const bValue = b[id];
+    return spans.sort((a, b) => {
+      for (const { id, direction } of tableParams.sortingColumns) {
+        const aValue = a[id];
+        const bValue = b[id];
 
-          if (aValue < bValue) return direction === 'asc' ? -1 : 1;
-          if (aValue > bValue) return direction === 'asc' ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return spans;
+        if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
   };
 
   const onSort = (sortingColumns) => {
@@ -340,6 +338,23 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
 
   type SpanMap = Record<string, Span>;
 
+  interface SpanReference {
+    refType: 'CHILD_OF' | 'FOLLOWS_FROM';
+    spanID: string;
+  }
+
+  const addRootSpan = (
+    spanId: string,
+    spanMap: SpanMap,
+    rootSpans: Span[],
+    alreadyAddedRootSpans: Set<string>
+  ) => {
+    if (!alreadyAddedRootSpans.has(spanId)) {
+      rootSpans.push(spanMap[spanId]);
+      alreadyAddedRootSpans.add(spanId);
+    }
+  };
+
   const buildHierarchy = (spans: Span[]): Span[] => {
     const spanMap: SpanMap = {};
 
@@ -353,42 +368,31 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
 
     spans.forEach((span) => {
       const spanIdKey = props.mode === 'jaeger' ? 'spanID' : 'spanId';
-      const references = span.references || [];
+      const references: SpanReference[] = span.references || [];
 
-      // Handle Jaeger references (FOLLOWS_FROM and CHILD_OF)
       if (props.mode === 'jaeger') {
-        references.forEach((ref: any) => {
+        references.forEach((ref: SpanReference) => {
           if (ref.refType === 'CHILD_OF') {
             const parentSpan = spanMap[ref.spanID];
             if (parentSpan) {
               parentSpan.children.push(spanMap[span[spanIdKey]]);
             }
           }
-          if (ref.refType === 'FOLLOWS_FROM') {
-            if (!alreadyAddedRootSpans.has(span[spanIdKey])) {
-              rootSpans.push(spanMap[span[spanIdKey]]);
-              alreadyAddedRootSpans.add(span[spanIdKey]);
-            }
+
+          if (ref.refType === 'FOLLOWS_FROM' && !alreadyAddedRootSpans.has(span[spanIdKey])) {
+            addRootSpan(span[spanIdKey], spanMap, rootSpans, alreadyAddedRootSpans);
           }
         });
 
-        // If no references or only FOLLOWS_FROM, treat as a root span
         if (references.length === 0 || references.every((ref) => ref.refType === 'FOLLOWS_FROM')) {
-          if (!alreadyAddedRootSpans.has(span[spanIdKey])) {
-            rootSpans.push(spanMap[span[spanIdKey]]);
-            alreadyAddedRootSpans.add(span[spanIdKey]);
-          }
+          addRootSpan(span[spanIdKey], spanMap, rootSpans, alreadyAddedRootSpans);
         }
       } else {
         // Data Prepper
         if (span.parentSpanId && spanMap[span.parentSpanId]) {
           spanMap[span.parentSpanId].children.push(spanMap[span[spanIdKey]]);
         } else {
-          // No parentSpanId or no matching parent span, treat as root span
-          if (!alreadyAddedRootSpans.has(span[spanIdKey])) {
-            rootSpans.push(spanMap[span[spanIdKey]]);
-            alreadyAddedRootSpans.add(span[spanIdKey]);
-          }
+          addRootSpan(span[spanIdKey], spanMap, rootSpans, alreadyAddedRootSpans);
         }
       }
     });

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { get } from 'lodash';
 import moment from 'moment';
 import { MILI_TO_SEC, NANOS_TO_MS, pieChartColors } from '../common/constants';
 
@@ -39,11 +38,11 @@ export function getOverviewFields(parsed: any, mode: string) {
     };
   } else {
     let computedLatency: number | null = null;
-    const tgDuration = get(firstSpan, 'traceGroupFields.durationInNanos');
-    if (firstSpan.traceGroupFields && firstSpan.traceGroupFields.durationInNanos != null) {
-      computedLatency = Number(firstSpan.traceGroupFields.durationInNanos) / NANOS_TO_MS;
-    } else if (tgDuration != null) {
-      computedLatency = Number(tgDuration) / NANOS_TO_MS;
+    const traceGroupFields = firstSpan.traceGroupFields;
+    if (traceGroupFields && traceGroupFields.durationInNanos != null) {
+      computedLatency = Number(traceGroupFields.durationInNanos) / NANOS_TO_MS;
+    } else if (firstSpan.traceGroupFields?.durationInNanos != null) {
+      computedLatency = Number(firstSpan.traceGroupFields?.durationInNanos) / NANOS_TO_MS;
     } else {
       const startTimes = parsed.map((span: any) => moment(span._source.startTime));
       const endTimes = parsed.map((span: any) => moment(span._source.endTime));
@@ -57,9 +56,8 @@ export function getOverviewFields(parsed: any, mode: string) {
       }
     }
 
-    const computedLastUpdated =
-      get(firstSpan, 'traceGroupFields.endTime') || firstSpan.endTime || null;
-    const tgStatus = get(firstSpan, 'traceGroupFields.statusCode');
+    const computedLastUpdated = traceGroupFields?.endTime || firstSpan.endTime || null;
+    const tgStatus = traceGroupFields?.statusCode;
     const errorCount = tgStatus != null ? (Number(tgStatus) === 2 ? 1 : 0) : 0;
 
     return {
@@ -89,7 +87,7 @@ export function getServiceBreakdownData(parsed: any, mode: string) {
       if (source.durationInNanos) {
         latency = Number(source.durationInNanos) / NANOS_TO_MS;
       } else if (source.traceGroupFields?.durationInNanos) {
-        latency = Number(source.traceGroupFields.durationInNanos) / NANOS_TO_MS;
+        latency = Number(source.traceGroupFields?.durationInNanos) / NANOS_TO_MS;
       }
     }
 

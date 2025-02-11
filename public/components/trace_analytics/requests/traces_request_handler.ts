@@ -324,7 +324,22 @@ export const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: Trace
   return data;
 };
 
-export function normalizePayload(parsed: any): any[] {
+interface Hit {
+  _index: string;
+  _id: string;
+  _score: number;
+  _source: any;
+  sort?: any[];
+}
+
+interface ParsedResponse {
+  hits?: {
+    hits: Hit[];
+  };
+  [key: string]: any;
+}
+
+export function normalizePayload(parsed: ParsedResponse): Hit[] {
   if (Array.isArray(parsed)) {
     return parsed;
   }

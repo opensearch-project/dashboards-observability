@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import _ from 'lodash';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { coreRefs } from '../../../../framework/core_refs';
@@ -164,7 +163,8 @@ export function SpanDetailPanel(props: {
       if (payloadSpanFilters.length > 0) {
         hits = hits.filter((hit) => {
           return payloadSpanFilters.every(({ field, value }) => {
-            return _.get(hit._source, field) === value;
+            const fieldValue = field.split('.').reduce((acc, part) => acc?.[part], hit._source);
+            return fieldValue === value;
           });
         });
       }
