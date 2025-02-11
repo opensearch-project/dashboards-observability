@@ -282,4 +282,21 @@ describe('Testing switch mode to jaeger', () => {
     cy.contains('Time spent by service').should('exist');
     cy.get("[data-test-subj='span-gantt-chart-panel']").should('exist');
   });
+
+  it('Checks tree view for specific traceId in Jaeger mode', () => {
+    cy.contains('15b0b4004a651c4c').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+    cy.get('.euiButtonGroup').contains('Tree view').click();
+    cy.get("[data-test-subj='treeExpandAll']").should('exist');
+    cy.get("[data-test-subj='treeCollapseAll']").should('exist');
+
+    // Waiting time for render to complete
+    cy.get("[data-test-subj='treeExpandAll']").click();
+    cy.get("[data-test-subj='treeCollapseAll']").click();
+    
+    cy.get("[data-test-subj='treeViewExpandArrow']").should('have.length', 1);
+    cy.get("[data-test-subj='treeExpandAll']").click();
+    cy.get("[data-test-subj='treeViewExpandArrow']").should('have.length', 6);
+  });
 });
