@@ -222,6 +222,8 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
         });
       }
 
+      spans = applySorting(spans);
+
       setItems(spans);
       setTotal(spans.length);
     } catch (error) {
@@ -229,11 +231,36 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
     } finally {
       setIsSpansTableDataLoading(false);
     }
-  }, [props.payloadData, props.DSL, props.filters]);
+  }, [props.payloadData, props.DSL, props.filters, tableParams]);
 
-  useEffect(() => {
-    if (props.setTotal) props.setTotal(total);
-  }, [total]);
+  const applySorting = (spans: Span[]) => {
+    if (tableParams.sortingColumns.length > 0) {
+      return spans.sort((a, b) => {
+        for (const { id, direction } of tableParams.sortingColumns) {
+          const aValue = a[id];
+          const bValue = b[id];
+
+          if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+          if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return spans;
+  };
+
+  const onSort = (sortingColumns) => {
+    setTableParams((prev) => ({ ...prev, sortingColumns }));
+  };
+
+  const onChangePage = (page) => {
+    setTableParams((prev) => ({ ...prev, page }));
+  };
+
+  const onChangeItemsPerPage = (size) => {
+    setTableParams((prev) => ({ ...prev, size, page: 0 }));
+  };
+
   const columns = useMemo(() => getColumns(props.mode), [props.mode]);
   const renderCellValue = useCallback(
     ({ rowIndex, columnId, disableInteractions }) =>
@@ -247,18 +274,6 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
       }),
     [items]
   );
-
-  const onSort = (sortingColumns) => {
-    setTableParams((prev) => ({ ...prev, sortingColumns }));
-  };
-
-  const onChangePage = (page) => {
-    setTableParams((prev) => ({ ...prev, page }));
-  };
-
-  const onChangeItemsPerPage = (size) => {
-    setTableParams((prev) => ({ ...prev, size, page: 0 }));
-  };
 
   const visibleColumns = useMemo(
     () =>
