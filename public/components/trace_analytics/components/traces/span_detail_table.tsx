@@ -203,6 +203,10 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
   }, [tableParams, props.DSL]);
 
   useEffect(() => {
+    if (props.setTotal) props.setTotal(total);
+  }, [total]);
+
+  useEffect(() => {
     if (!props.payloadData) {
       console.warn('No payloadData provided in SpanDetailTable');
       return;
