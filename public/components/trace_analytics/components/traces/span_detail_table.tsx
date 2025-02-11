@@ -11,7 +11,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
-import { microToMilliSec, nanoToMilliSec } from '../common/helper_functions';
+import { microToMilliSec, nanoToMilliSec, parseHits } from '../common/helper_functions';
 import { RenderCustomDataGrid } from '../common/shared_components/custom_datagrid';
 import { handleSpansRequest } from '../../requests/traces_request_handler';
 
@@ -208,14 +208,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
       return;
     }
     try {
-      const parsed = JSON.parse(props.payloadData);
-
-      const hitsArray =
-        parsed.hits && Array.isArray(parsed.hits.hits)
-          ? parsed.hits.hits
-          : Array.isArray(parsed)
-          ? parsed
-          : [];
+      const hitsArray = parseHits(props.payloadData);
 
       // Map each hit to its _source
       let spans = hitsArray.map((hit: any) => hit._source);
@@ -304,13 +297,7 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
   useEffect(() => {
     if (!props.payloadData) return;
     try {
-      const parsed = JSON.parse(props.payloadData);
-      const hitsArray =
-        parsed.hits && Array.isArray(parsed.hits.hits)
-          ? parsed.hits.hits
-          : Array.isArray(parsed)
-          ? parsed
-          : [];
+      const hitsArray = parseHits(props.payloadData);
 
       let spans = hitsArray.map((hit: any) => hit._source);
 
@@ -322,7 +309,7 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
         });
       }
 
-      const hierarchy = buildHierarchy(spans, mode);
+      const hierarchy = buildHierarchy(spans);
       setItems(hierarchy);
       setTotal(hierarchy.length);
     } catch (error) {
@@ -334,11 +321,11 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
 
   type SpanMap = Record<string, Span>;
 
-  const buildHierarchy = (spans: Span[], modeTree: TraceAnalyticsMode): Span[] => {
+  const buildHierarchy = (spans: Span[]): Span[] => {
     const spanMap: SpanMap = {};
 
     spans.forEach((span) => {
-      const spanIdKey = modeTree === 'jaeger' ? 'spanID' : 'spanId';
+      const spanIdKey = props.mode === 'jaeger' ? 'spanID' : 'spanId';
       spanMap[span[spanIdKey]] = { ...span, children: [] };
     });
 
@@ -346,11 +333,11 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
     const alreadyAddedRootSpans: Set<string> = new Set(); // Track added root spans
 
     spans.forEach((span) => {
-      const spanIdKey = modeTree === 'jaeger' ? 'spanID' : 'spanId';
+      const spanIdKey = props.mode === 'jaeger' ? 'spanID' : 'spanId';
       const references = span.references || [];
 
       // Handle Jaeger references (FOLLOWS_FROM and CHILD_OF)
-      if (modeTree === 'jaeger') {
+      if (props.mode === 'jaeger') {
         references.forEach((ref: any) => {
           if (ref.refType === 'CHILD_OF') {
             const parentSpan = spanMap[ref.spanID];
@@ -390,28 +377,18 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
     return rootSpans;
   };
 
-  const flattenHierarchy = (
-    spans: Span[],
-    modeFlatten: TraceAnalyticsMode,
-    level = 0,
-    isParentExpanded = true
-  ): Span[] => {
+  const flattenHierarchy = (spans: Span[], level = 0, isParentExpanded = true): Span[] => {
     return spans.flatMap((span) => {
       const isExpanded = expandedRows.has(span.spanId || span.spanID);
       const shouldShow = level === 0 || isParentExpanded;
 
       const row = shouldShow ? [{ ...span, level }] : [];
-      const children = flattenHierarchy(
-        span.children || [],
-        modeFlatten,
-        level + 1,
-        isExpanded && shouldShow
-      );
+      const children = flattenHierarchy(span.children || [], level + 1, isExpanded && shouldShow);
       return [...row, ...children];
     });
   };
 
-  const flattenedItems = useMemo(() => flattenHierarchy(items, mode), [items, expandedRows, mode]);
+  const flattenedItems = useMemo(() => flattenHierarchy(items), [items, expandedRows, mode]);
 
   const columns = useMemo(() => getColumns(mode), [mode]);
   const visibleColumns = useMemo(

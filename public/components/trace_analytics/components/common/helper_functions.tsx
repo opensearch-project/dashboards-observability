@@ -634,3 +634,21 @@ export function parseIsoToNano(iso: string): number {
   fraction = fraction.padEnd(9, '0'); // ensure it has 9 digits
   return baseMs * NANOS_TO_MS + Number(fraction);
 }
+
+export const parseHits = (payloadData: string) => {
+  try {
+    const parsed = JSON.parse(payloadData);
+    let hits: any[] = [];
+
+    if (parsed.hits && Array.isArray(parsed.hits.hits)) {
+      hits = parsed.hits.hits;
+    } else if (Array.isArray(parsed)) {
+      hits = parsed;
+    }
+
+    return hits;
+  } catch (error) {
+    console.error('Error processing payloadData:', error);
+    return [];
+  }
+};

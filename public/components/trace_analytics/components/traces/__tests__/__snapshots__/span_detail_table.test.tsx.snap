@@ -30,7 +30,6 @@ exports[`SpanDetailTable renders the component with data 1`] = `
 
 exports[`SpanDetailTable renders the empty component 1`] = `
 <SpanDetailTable
-  DSL={Object {}}
   dataSourceMDSId="testDataSource"
   hiddenColumns={
     Array [
@@ -209,7 +208,6 @@ exports[`SpanDetailTableHierarchy renders the component with data 1`] = `
 
 exports[`SpanDetailTableHierarchy renders the empty component 1`] = `
 <SpanDetailTableHierarchy
-  DSL={Object {}}
   dataSourceMDSId="testDataSource"
   hiddenColumns={
     Array [

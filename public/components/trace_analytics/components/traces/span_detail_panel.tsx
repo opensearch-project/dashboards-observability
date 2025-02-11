@@ -17,14 +17,16 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import _ from 'lodash';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { coreRefs } from '../../../../framework/core_refs';
 import { Plt } from '../../../visualizations/plotly/plot';
-import { PanelTitle, parseIsoToNano } from '../common/helper_functions';
+import { PanelTitle, parseHits, parseIsoToNano } from '../common/helper_functions';
 import { SpanDetailFlyout } from './span_detail_flyout';
 import { SpanDetailTable, SpanDetailTableHierarchy } from './span_detail_table';
 import { hitsToSpanDetailData } from '../../requests/traces_request_handler';
+import { MILI_TO_SEC } from '../common/constants';
 
 export function SpanDetailPanel(props: {
   http: HttpSetup;
@@ -49,7 +51,6 @@ export function SpanDetailPanel(props: {
   const [spanFilters, setSpanFilters] = useState<Array<{ field: string; value: any }>>(
     storedFilters ? JSON.parse(storedFilters) : []
   );
-  const [DSL, _setDSL] = useState<any>({});
   let data: { gantt: any[]; table: any[]; ganttMaxX: number };
   let setData: (data: { gantt: any[]; table: any[]; ganttMaxX: number }) => void;
   const [localData, localSetData] = useState<{ gantt: any[]; table: any[]; ganttMaxX: number }>({
@@ -141,32 +142,19 @@ export function SpanDetailPanel(props: {
     payloadSpanFilters: any[]
   ) => {
     try {
-      const parsed = JSON.parse(payloadData);
-      let hits: any[] = [];
-      if (parsed.hits && Array.isArray(parsed.hits.hits)) {
-        hits = parsed.hits.hits;
-      } else if (Array.isArray(parsed)) {
-        hits = parsed;
-      } else {
-        console.warn('Unexpected payload format:', parsed);
-        return [];
-      }
+      let hits = parseHits(props.payloadData);
 
       hits = hits.map((hit) => {
-        if (traceMode === 'jaeger') {
-          if (!hit.sort || !hit.sort[0]) {
-            return {
-              ...hit,
-              sort: [Number(hit._source.startTime) * 1000], // Jaeger: startTime is in microseconds
-            };
-          }
-        } else {
-          if (!hit.sort || !hit.sort[0]) {
-            return {
-              ...hit,
-              sort: [parseIsoToNano(hit._source.startTime)],
-            };
-          }
+        if (!hit.sort || !hit.sort[0]) {
+          const time =
+            traceMode === 'jaeger'
+              ? Number(hit._source.startTime) * MILI_TO_SEC
+              : parseIsoToNano(hit._source.startTime);
+
+          return {
+            ...hit,
+            sort: [time],
+          };
         }
         return hit;
       });
@@ -176,13 +164,7 @@ export function SpanDetailPanel(props: {
       if (payloadSpanFilters.length > 0) {
         hits = hits.filter((hit) => {
           return payloadSpanFilters.every(({ field, value }) => {
-            let fieldVal;
-            if (traceMode === 'jaeger' && field.startsWith('process.')) {
-              fieldVal = hit._source?.process?.[field.split('.')[1]];
-            } else {
-              fieldVal = hit._source?.[field];
-            }
-            return fieldVal === value;
+            return _.get(hit._source, field) === value;
           });
         });
       }
@@ -412,7 +394,6 @@ export function SpanDetailPanel(props: {
         <SpanDetailTable
           http={props.http}
           hiddenColumns={mode === 'jaeger' ? ['traceID', 'traceGroup'] : ['traceId', 'traceGroup']}
-          DSL={DSL}
           mode={mode}
           openFlyout={(spanId: string) => {
             if (fromApp) {
@@ -428,7 +409,7 @@ export function SpanDetailPanel(props: {
         />
       </div>
     ),
-    [DSL, setCurrentSpan, dynamicLayoutAdjustment, props.payloadData, spanFilters]
+    [setCurrentSpan, dynamicLayoutAdjustment, props.payloadData, spanFilters]
   );
 
   const spanDetailTableHierarchy = useMemo(
@@ -437,7 +418,6 @@ export function SpanDetailPanel(props: {
         <SpanDetailTableHierarchy
           http={props.http}
           hiddenColumns={mode === 'jaeger' ? ['traceID', 'traceGroup'] : ['traceId', 'traceGroup']}
-          DSL={DSL}
           mode={mode}
           openFlyout={(spanId: string) => {
             if (fromApp) {
@@ -453,7 +433,7 @@ export function SpanDetailPanel(props: {
         />
       </div>
     ),
-    [DSL, setCurrentSpan, dynamicLayoutAdjustment, props.payloadData, spanFilters]
+    [setCurrentSpan, dynamicLayoutAdjustment, props.payloadData, spanFilters]
   );
 
   const ganttChart = useMemo(

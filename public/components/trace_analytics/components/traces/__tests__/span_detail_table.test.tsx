@@ -36,7 +36,6 @@ describe('SpanDetailTable', () => {
       <SpanDetailTable
         http={httpClientMock}
         hiddenColumns={['traceId', 'traceGroup']}
-        DSL={{}}
         openFlyout={() => {}}
         mode="data_prepper"
         dataSourceMDSId="testDataSource"
@@ -60,7 +59,6 @@ describe('SpanDetailTable', () => {
         <SpanDetailTable
           http={httpClientMock}
           hiddenColumns={['traceId', 'traceGroup']}
-          DSL={{}}
           openFlyout={(spanId: string) => setCurrentSpan(spanId)}
           mode="data_prepper"
           dataSourceMDSId="testDataSource"
@@ -81,7 +79,6 @@ describe('SpanDetailTable', () => {
         <SpanDetailTable
           http={httpClientMock}
           hiddenColumns={['traceID', 'traceGroup']}
-          DSL={{}}
           openFlyout={(spanId: string) => setCurrentSpan(spanId)}
           mode="jaeger"
           dataSourceMDSId="testDataSource"
@@ -278,7 +275,6 @@ describe('SpanDetailTableHierarchy', () => {
       <SpanDetailTableHierarchy
         http={httpClientMock}
         hiddenColumns={['traceId', 'traceGroup']}
-        DSL={{}}
         openFlyout={() => {}}
         mode="data_prepper"
         dataSourceMDSId="testDataSource"
@@ -299,7 +295,6 @@ describe('SpanDetailTableHierarchy', () => {
         <SpanDetailTableHierarchy
           http={httpClientMock}
           hiddenColumns={['traceId', 'traceGroup']}
-          DSL={{}}
           openFlyout={(spanId: string) => setCurrentSpan(spanId)}
           mode="data_prepper"
           dataSourceMDSId="testDataSource"
@@ -319,7 +314,6 @@ describe('SpanDetailTableHierarchy', () => {
         <SpanDetailTableHierarchy
           http={httpClientMock}
           hiddenColumns={['traceID', 'traceGroup']}
-          DSL={{}}
           openFlyout={(spanId: string) => setCurrentSpan(spanId)}
           mode="jaeger"
           dataSourceMDSId="testDataSource"
