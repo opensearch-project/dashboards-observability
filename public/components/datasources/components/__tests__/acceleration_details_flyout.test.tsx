@@ -76,12 +76,13 @@ describe('AccelerationDetailsFlyout Component Tests', () => {
         index="mockIndex"
         acceleration={mockAcceleration}
         dataSourceName="mockDataSource"
+        dataSourceMDSId=""
       />
     );
 
-    expect(coreRefsModule.coreRefs.dslService!.fetchFields).toHaveBeenCalledWith('testIndex');
-    expect(coreRefsModule.coreRefs.dslService!.fetchSettings).toHaveBeenCalledWith('testIndex');
-    expect(coreRefsModule.coreRefs.dslService!.fetchIndices).toHaveBeenCalledWith('testIndex');
+    expect(coreRefsModule.coreRefs.dslService!.fetchFields).toHaveBeenCalledWith('testIndex', '');
+    expect(coreRefsModule.coreRefs.dslService!.fetchSettings).toHaveBeenCalledWith('testIndex', '');
+    expect(coreRefsModule.coreRefs.dslService!.fetchIndices).toHaveBeenCalledWith('testIndex', '');
   });
 
   it('switches tabs correctly', async () => {

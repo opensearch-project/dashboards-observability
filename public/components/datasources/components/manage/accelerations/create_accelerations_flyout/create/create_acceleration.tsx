@@ -277,6 +277,7 @@ export const CreateAcceleration = ({
                 setAccelerationFormData={setAccelerationFormData}
                 resetFlyout={resetFlyout}
                 refreshHandler={refreshHandler}
+                dataSourceMDSId={dataSourceMDSId}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

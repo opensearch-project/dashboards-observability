@@ -28,9 +28,9 @@ export default class DSLService {
       .catch((error) => console.error(error));
   };
 
-  fetchIndices = async (index: string = '') => {
+  fetchIndices = async (index: string = '', dataSourceMDSId?: string) => {
     return this.http
-      .get(`${DSL_BASE}${DSL_CAT}`, {
+      .get(`${DSL_BASE}${DSL_CAT}/dataSourceMDSId=${dataSourceMDSId}`, {
         query: {
           format: 'json',
           index,
@@ -39,16 +39,16 @@ export default class DSLService {
       .catch((error) => console.error(error));
   };
 
-  fetchFields = async (index: string) => {
-    return this.http.get(`${DSL_BASE}${DSL_MAPPING}`, {
+  fetchFields = async (index: string, dataSourceMDSId?: string) => {
+    return this.http.get(`${DSL_BASE}${DSL_MAPPING}/dataSourceMDSId=${dataSourceMDSId}`, {
       query: {
         index,
       },
     });
   };
 
-  fetchSettings = async (index: string) => {
-    return this.http.get(`${DSL_BASE}${DSL_SETTINGS}`, {
+  fetchSettings = async (index: string, dataSourceMDSId?: string) => {
+    return this.http.get(`${DSL_BASE}${DSL_SETTINGS}/dataSourceMDSId=${dataSourceMDSId}`, {
       query: {
         index,
       },
