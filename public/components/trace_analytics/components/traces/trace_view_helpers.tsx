@@ -60,7 +60,7 @@ export function getOverviewFields(parsed: any, mode: string) {
     const computedLastUpdated =
       get(firstSpan, 'traceGroupFields.endTime') || firstSpan.endTime || null;
     const tgStatus = get(firstSpan, 'traceGroupFields.statusCode');
-    const errorCount = tgStatus != null ? (Number(tgStatus) !== 0 ? 1 : 0) : 0;
+    const errorCount = tgStatus != null ? (Number(tgStatus) === 2 ? 1 : 0) : 0;
 
     return {
       trace_id: firstSpan.traceId || '-',
