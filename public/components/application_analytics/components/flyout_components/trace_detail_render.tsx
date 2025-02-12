@@ -9,12 +9,12 @@ import { HttpStart } from '../../../../../../../src/core/public';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { ServiceBreakdownPanel } from '../../../trace_analytics/components/traces/service_breakdown_panel';
 import { SpanDetailPanel } from '../../../trace_analytics/components/traces/span_detail_panel';
-import {
-  handlePayloadRequest,
-  handleServicesPieChartRequest,
-  handleTraceViewRequest,
-} from '../../../trace_analytics/requests/traces_request_handler';
+import { handlePayloadRequest } from '../../../trace_analytics/requests/traces_request_handler';
 import { getListItem } from '../../helpers/utils';
+import {
+  getOverviewFields,
+  getServiceBreakdownData,
+} from '../../../trace_analytics/components/traces/trace_view_helpers';
 
 interface TraceDetailRenderProps {
   traceId: string;
@@ -78,6 +78,7 @@ export const TraceDetailRender = ({
           mode={mode}
           dataSourceMDSId={dataSourceMDSId}
           isApplicationFlyout={true}
+          payloadData={payloadData}
         />
         <EuiSpacer size="xs" />
         <EuiHorizontalRule margin="s" />
@@ -95,10 +96,29 @@ export const TraceDetailRender = ({
   }, [traceId, fields, serviceBreakdownData, colorMap, payloadData]);
 
   useEffect(() => {
-    handleTraceViewRequest(traceId, http, fields, setFields, mode);
-    handleServicesPieChartRequest(traceId, http, setServiceBreakdownData, setColorMap, mode);
     handlePayloadRequest(traceId, http, payloadData, setPayloadData, mode);
   }, [traceId]);
+
+  useEffect(() => {
+    if (!payloadData) return;
+
+    try {
+      const parsedPayload = JSON.parse(payloadData);
+      const overview = getOverviewFields(parsedPayload, mode);
+      if (overview) {
+        setFields(overview);
+      }
+
+      const {
+        serviceBreakdownData: queryServiceBreakdownData,
+        colorMap: queryColorMap,
+      } = getServiceBreakdownData(parsedPayload, mode);
+      setServiceBreakdownData(queryServiceBreakdownData);
+      setColorMap(queryColorMap);
+    } catch (error) {
+      console.error('Error processing payloadData:', error);
+    }
+  }, [payloadData, mode]);
 
   return renderContent;
 };
