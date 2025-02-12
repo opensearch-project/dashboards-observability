@@ -11,9 +11,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
-import { handleSpansRequest } from '../../requests/traces_request_handler';
-import { microToMilliSec, nanoToMilliSec } from '../common/helper_functions';
+import { microToMilliSec, nanoToMilliSec, parseHits } from '../common/helper_functions';
 import { RenderCustomDataGrid } from '../common/shared_components/custom_datagrid';
+import { handleSpansRequest } from '../../requests/traces_request_handler';
 
 interface SpanDetailTableProps {
   http: HttpSetup;
@@ -24,6 +24,8 @@ interface SpanDetailTableProps {
   setTotal?: (total: number) => void;
   dataSourceMDSId: string;
   availableWidth?: number;
+  payloadData: string;
+  filters: Array<{ field: string; value: any }>;
 }
 
 interface Span {
@@ -173,6 +175,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
   const [total, setTotal] = useState(0);
   const [isSpansTableDataLoading, setIsSpansTableDataLoading] = useState(false);
 
+  // For application_analytics
   const fetchData = async () => {
     setIsSpansTableDataLoading(true);
     const spanSearchParams: SpanSearchParams = {
@@ -192,13 +195,82 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
     ).finally(() => setIsSpansTableDataLoading(false));
   };
 
+  // For application_analytics
   useEffect(() => {
-    fetchData();
+    if (!props.payloadData) {
+      fetchData();
+    }
   }, [tableParams, props.DSL]);
 
   useEffect(() => {
     if (props.setTotal) props.setTotal(total);
   }, [total]);
+
+  useEffect(() => {
+    if (!props.payloadData) {
+      return;
+    }
+    try {
+      const hitsArray = parseHits(props.payloadData);
+
+      // Map each hit to its _source
+      let spans = hitsArray.map((hit: any) => hit._source);
+
+      // Apply filters passed as a prop.
+      if (props.filters.length > 0) {
+        spans = spans.filter((span: any) => {
+          return props.filters.every(({ field, value }) => {
+            return span[field] === value;
+          });
+        });
+      }
+
+      if (tableParams.sortingColumns.length > 0) {
+        spans = applySorting(spans);
+      }
+
+      setItems(spans);
+      setTotal(spans.length);
+    } catch (error) {
+      console.error('Error parsing payloadData in SpanDetailTable:', error);
+    } finally {
+      setIsSpansTableDataLoading(false);
+    }
+  }, [props.payloadData, props.DSL, props.filters, tableParams]);
+
+  const applySorting = (spans: Span[]) => {
+    return spans.sort((a, b) => {
+      for (const { id, direction } of tableParams.sortingColumns) {
+        let aValue = a[id];
+        let bValue = b[id];
+
+        // Handle sorting for "Errors" column in Jaeger mode
+        if (id === 'tag' && props.mode === 'jaeger') {
+          const aHasError = a.tag?.error === true ? 1 : 0;
+          const bHasError = b.tag?.error === true ? 1 : 0;
+          aValue = aHasError;
+          bValue = bHasError;
+        }
+
+        if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  };
+
+  const onSort = (sortingColumns) => {
+    setTableParams((prev) => ({ ...prev, sortingColumns }));
+  };
+
+  const onChangePage = (page) => {
+    setTableParams((prev) => ({ ...prev, page }));
+  };
+
+  const onChangeItemsPerPage = (size) => {
+    setTableParams((prev) => ({ ...prev, size, page: 0 }));
+  };
+
   const columns = useMemo(() => getColumns(props.mode), [props.mode]);
   const renderCellValue = useCallback(
     ({ rowIndex, columnId, disableInteractions }) =>
@@ -213,18 +285,6 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
     [items]
   );
 
-  const onSort = (sortingColumns) => {
-    setTableParams((prev) => ({ ...prev, sortingColumns }));
-  };
-
-  const onChangePage = (page) => {
-    setTableParams((prev) => ({ ...prev, page }));
-  };
-
-  const onChangeItemsPerPage = (size) => {
-    setTableParams((prev) => ({ ...prev, size, page: 0 }));
-  };
-
   const visibleColumns = useMemo(
     () =>
       getColumns(props.mode)
@@ -237,7 +297,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
     columns,
     renderCellValue,
     rowCount: total,
-    sorting: props.mode === 'jaeger' ? undefined : { columns: tableParams.sortingColumns, onSort },
+    sorting: { columns: tableParams.sortingColumns, onSort },
     pagination: {
       pageIndex: tableParams.page,
       pageSize: tableParams.size,
@@ -253,50 +313,95 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
 }
 
 export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
-  const { http, hiddenColumns, mode, DSL, dataSourceMDSId, availableWidth, openFlyout } = props;
+  const { hiddenColumns, mode, availableWidth, openFlyout } = props;
   const [items, setItems] = useState<Span[]>([]);
   const [_total, setTotal] = useState(0);
   const [expandedRows, setExpandedRows] = useState(new Set<string>());
   const [isSpansTableDataLoading, setIsSpansTableDataLoading] = useState(false);
 
   useEffect(() => {
-    setIsSpansTableDataLoading(true);
-    const spanSearchParams = {
-      from: 0,
-      size: 10000,
-      sortingColumns: [],
-    };
-    handleSpansRequest(
-      http,
-      (data) => {
-        const hierarchy = buildHierarchy(data);
-        setItems(hierarchy);
-      },
-      setTotal,
-      spanSearchParams,
-      DSL,
-      mode,
-      dataSourceMDSId
-    ).finally(() => setIsSpansTableDataLoading(false));
-  }, [DSL, http, mode, dataSourceMDSId]);
+    if (!props.payloadData) return;
+    try {
+      const hitsArray = parseHits(props.payloadData);
+
+      let spans = hitsArray.map((hit: any) => hit._source);
+
+      if (props.filters.length > 0) {
+        spans = spans.filter((span: any) => {
+          return props.filters.every(
+            ({ field, value }: { field: string; value: any }) => span[field] === value
+          );
+        });
+      }
+
+      const hierarchy = buildHierarchy(spans);
+      setItems(hierarchy);
+      setTotal(hierarchy.length);
+    } catch (error) {
+      console.error('Error parsing payloadData in SpanDetailTableHierarchy:', error);
+    } finally {
+      setIsSpansTableDataLoading(false);
+    }
+  }, [props.payloadData, props.DSL, props.mode, props.dataSourceMDSId, props.filters]);
 
   type SpanMap = Record<string, Span>;
+
+  interface SpanReference {
+    refType: 'CHILD_OF' | 'FOLLOWS_FROM';
+    spanID: string;
+  }
+
+  const addRootSpan = (
+    spanId: string,
+    spanMap: SpanMap,
+    rootSpans: Span[],
+    alreadyAddedRootSpans: Set<string>
+  ) => {
+    if (!alreadyAddedRootSpans.has(spanId)) {
+      rootSpans.push(spanMap[spanId]);
+      alreadyAddedRootSpans.add(spanId);
+    }
+  };
 
   const buildHierarchy = (spans: Span[]): Span[] => {
     const spanMap: SpanMap = {};
 
     spans.forEach((span) => {
-      spanMap[span.spanId] = { ...span, children: [] };
+      const spanIdKey = props.mode === 'jaeger' ? 'spanID' : 'spanId';
+      spanMap[span[spanIdKey]] = { ...span, children: [] };
     });
 
     const rootSpans: Span[] = [];
+    const alreadyAddedRootSpans: Set<string> = new Set(); // Track added root spans
 
     spans.forEach((span) => {
-      if (span.parentSpanId && spanMap[span.parentSpanId]) {
-        // If the parent span exists, add this span to its children array
-        spanMap[span.parentSpanId].children.push(spanMap[span.spanId]);
+      const spanIdKey = props.mode === 'jaeger' ? 'spanID' : 'spanId';
+      const references: SpanReference[] = span.references || [];
+
+      if (props.mode === 'jaeger') {
+        references.forEach((ref: SpanReference) => {
+          if (ref.refType === 'CHILD_OF') {
+            const parentSpan = spanMap[ref.spanID];
+            if (parentSpan) {
+              parentSpan.children.push(spanMap[span[spanIdKey]]);
+            }
+          }
+
+          if (ref.refType === 'FOLLOWS_FROM' && !alreadyAddedRootSpans.has(span[spanIdKey])) {
+            addRootSpan(span[spanIdKey], spanMap, rootSpans, alreadyAddedRootSpans);
+          }
+        });
+
+        if (references.length === 0 || references.every((ref) => ref.refType === 'FOLLOWS_FROM')) {
+          addRootSpan(span[spanIdKey], spanMap, rootSpans, alreadyAddedRootSpans);
+        }
       } else {
-        rootSpans.push(spanMap[span.spanId]);
+        // Data Prepper
+        if (span.parentSpanId && spanMap[span.parentSpanId]) {
+          spanMap[span.parentSpanId].children.push(spanMap[span[spanIdKey]]);
+        } else {
+          addRootSpan(span[spanIdKey], spanMap, rootSpans, alreadyAddedRootSpans);
+        }
       }
     });
 
@@ -305,15 +410,16 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
 
   const flattenHierarchy = (spans: Span[], level = 0, isParentExpanded = true): Span[] => {
     return spans.flatMap((span) => {
-      const isExpanded = expandedRows.has(span.spanId);
+      const isExpanded = expandedRows.has(span.spanId || span.spanID);
       const shouldShow = level === 0 || isParentExpanded;
+
       const row = shouldShow ? [{ ...span, level }] : [];
       const children = flattenHierarchy(span.children || [], level + 1, isExpanded && shouldShow);
       return [...row, ...children];
     });
   };
 
-  const flattenedItems = useMemo(() => flattenHierarchy(items), [items, expandedRows]);
+  const flattenedItems = useMemo(() => flattenHierarchy(items), [items, expandedRows, mode]);
 
   const columns = useMemo(() => getColumns(mode), [mode]);
   const visibleColumns = useMemo(
@@ -325,7 +431,7 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
     const allSpanIds = new Set<string>();
     const gather = (spanList: Span[]) => {
       spanList.forEach((span) => {
-        allSpanIds.add(span.spanId);
+        allSpanIds.add(span.spanId || span.spanID);
         if (span.children.length > 0) {
           gather(span.children);
         }
@@ -340,21 +446,23 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
       const item = flattenedItems[rowIndex];
       const value = item[columnId];
 
-      if (columnId === 'spanId') {
+      const spanIdKey = props.mode === 'jaeger' ? 'spanID' : 'spanId';
+
+      if (columnId === 'spanId' || columnId === 'spanID') {
         const indentation = `${(item.level || 0) * 20}px`;
-        const isExpanded = expandedRows.has(item.spanId);
+        const isExpanded = expandedRows.has(item[spanIdKey]);
         return (
           <div style={{ display: 'flex', alignItems: 'center', paddingLeft: indentation }}>
-            {item.children.length > 0 ? (
+            {item.children && item.children.length > 0 ? (
               <EuiIcon
                 type={isExpanded ? 'arrowDown' : 'arrowRight'}
                 onClick={() => {
                   setExpandedRows((prev) => {
                     const newSet = new Set(prev);
-                    if (newSet.has(item.spanId)) {
-                      newSet.delete(item.spanId);
+                    if (newSet.has(item[spanIdKey])) {
+                      newSet.delete(item[spanIdKey]);
                     } else {
-                      newSet.add(item.spanId);
+                      newSet.add(item[spanIdKey]);
                     }
                     return newSet;
                   });
@@ -369,7 +477,7 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
               <span>{value}</span>
             ) : (
               <EuiLink
-                onClick={() => openFlyout(value)}
+                onClick={() => openFlyout(item[spanIdKey])}
                 color="primary"
                 data-test-subj="spanId-flyout-button"
               >
@@ -389,7 +497,7 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
         props,
       });
     },
-    [flattenedItems, expandedRows, openFlyout]
+    [flattenedItems, expandedRows, openFlyout, props.mode]
   );
 
   const toolbarButtons = [
