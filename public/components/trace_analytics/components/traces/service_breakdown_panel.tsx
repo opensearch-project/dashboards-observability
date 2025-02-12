@@ -77,6 +77,19 @@ export function ServiceBreakdownPanel(props: { data: ServiceBreakdownData[]; isL
     );
   };
 
+  const pieChartData = useMemo(() => {
+    if (props.data.length === 0) return [];
+
+    return [
+      {
+        ...props.data[0],
+        type: 'pie',
+        textinfo: 'none',
+        hoverinfo: 'label+percent',
+      },
+    ];
+  }, [props.data]);
+
   const stats = useMemo(() => renderStats(), [props.data]);
 
   return (
@@ -91,7 +104,7 @@ export function ServiceBreakdownPanel(props: { data: ServiceBreakdownData[]; isL
           <EuiHorizontalRule margin="m" />
           <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={3}>
-              {props.data?.length > 0 ? <Plt data={props.data} layout={layout} /> : null}
+              {pieChartData.length > 0 ? <Plt data={pieChartData} layout={layout} /> : null}
             </EuiFlexItem>
             <EuiFlexItem grow={3}>{stats}</EuiFlexItem>
           </EuiFlexGroup>

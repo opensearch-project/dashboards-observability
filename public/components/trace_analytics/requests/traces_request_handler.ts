@@ -19,19 +19,19 @@ import {
   getTimestampPrecision,
   microToMilliSec,
   nanoToMilliSec,
+  parseIsoToNano,
 } from '../components/common/helper_functions';
 import { SpanSearchParams } from '../components/traces/span_detail_table';
 import {
   getCustomIndicesTracesQuery,
   getPayloadQuery,
-  getServiceBreakdownQuery,
-  getSpanDetailQuery,
   getSpanFlyoutQuery,
   getSpansQuery,
   getTraceGroupPercentilesQuery,
   getTracesQuery,
 } from './queries/traces_queries';
 import { handleDslRequest } from './request_handler';
+import { MILI_TO_SEC } from '../components/common/constants';
 
 export const handleCustomIndicesTracesRequest = async (
   http: HttpSetup,
@@ -204,152 +204,6 @@ export const handleTracesRequest = async (
     });
 };
 
-export const handleTraceViewRequest = (
-  traceId: string,
-  http: HttpSetup,
-  fields: {},
-  setFields: (fields: any) => void,
-  mode: TraceAnalyticsMode,
-  dataSourceMDSId?: string
-) => {
-  return handleDslRequest(http, null, getTracesQuery(mode, traceId), mode, dataSourceMDSId)
-    .then(async (response) => {
-      // Check if the mode hasn't been set first
-      if (mode === 'jaeger' && !response?.aggregations?.service_type?.buckets) {
-        console.warn('No traces or aggregations found.');
-        return [];
-      }
-      const bucket = response.aggregations.traces.buckets[0];
-      return {
-        trace_id: bucket.key,
-        trace_group: bucket.trace_group.buckets[0]?.key,
-        last_updated: moment(bucket.last_updated.value).format(TRACE_ANALYTICS_DATE_FORMAT),
-        user_id: 'N/A',
-        latency: bucket.latency.value,
-        latency_vs_benchmark: 'N/A',
-        percentile_in_trace_group: 'N/A',
-        error_count: bucket.error_count.doc_count,
-        errors_vs_benchmark: 'N/A',
-      };
-    })
-    .then((newFields) => {
-      setFields(newFields);
-    })
-    .catch((error) => {
-      console.error('Error in handleTraceViewRequest:', error);
-      coreRefs.core?.notifications.toasts.addError(error, {
-        title: `Failed to retrieve trace view for trace ID: ${traceId}`,
-        toastLifeTimeMs: 10000,
-      });
-    });
-};
-
-// setColorMap sets serviceName to color mappings
-export const handleServicesPieChartRequest = async (
-  traceId: string,
-  http: HttpSetup,
-  setServiceBreakdownData: (serviceBreakdownData: any) => void,
-  setColorMap: (colorMap: any) => void,
-  mode: TraceAnalyticsMode,
-  dataSourceMDSId?: string
-) => {
-  const colors = [
-    '#7492e7',
-    '#c33d69',
-    '#2ea597',
-    '#8456ce',
-    '#e07941',
-    '#3759ce',
-    '#ce567c',
-    '#9469d6',
-    '#4066df',
-    '#da7596',
-    '#a783e1',
-    '#5978e3',
-  ];
-  const colorMap: any = {};
-  let index = 0;
-  await handleDslRequest(http, null, getServiceBreakdownQuery(traceId, mode), mode, dataSourceMDSId)
-    .then((response) => {
-      // Check if the mode hasn't been set first
-      if (mode === 'jaeger' && !response?.aggregations?.service_type?.buckets) {
-        console.warn(`No service breakdown found for trace ID: ${traceId}`);
-        return [];
-      }
-
-      return Promise.all(
-        response.aggregations.service_type.buckets.map((bucket: any) => {
-          colorMap[bucket.key] = colors[index++ % colors.length];
-          return {
-            name: bucket.key,
-            color: colorMap[bucket.key],
-            value: bucket.total_latency.value,
-            benchmark: 0,
-          };
-        })
-      );
-    })
-    .then((newItems) => {
-      if (!newItems.length) return; // No data to process
-      const latencySum = newItems.map((item) => item.value).reduce((a, b) => a + b, 0);
-      return [
-        {
-          values: newItems.map((item) =>
-            latencySum === 0 ? 100 : (item.value / latencySum) * 100
-          ),
-          labels: newItems.map((item) => item.name),
-          benchmarks: newItems.map((item) => item.benchmark),
-          marker: {
-            colors: newItems.map((item) => item.color),
-          },
-          type: 'pie',
-          textinfo: 'none',
-          hovertemplate: '%{label}<br>%{value:.2f}%<extra></extra>',
-        },
-      ];
-    })
-    .then((newItems) => {
-      if (newItems) {
-        setServiceBreakdownData(newItems);
-        setColorMap(colorMap);
-      }
-    })
-    .catch((error) => {
-      console.error('Error in handleServicesPieChartRequest:', error);
-      coreRefs.core?.notifications.toasts.addError(error, {
-        title: `Failed to retrieve service breakdown for trace ID: ${traceId}`,
-        toastLifeTimeMs: 10000,
-      });
-    });
-};
-
-export const handleSpansGanttRequest = (
-  traceId: string,
-  http: HttpSetup,
-  setSpanDetailData: (spanDetailData: any) => void,
-  colorMap: any,
-  spanFiltersDSL: any,
-  mode: TraceAnalyticsMode,
-  dataSourceMDSId?: string
-) => {
-  return handleDslRequest(
-    http,
-    spanFiltersDSL,
-    getSpanDetailQuery(mode, traceId),
-    mode,
-    dataSourceMDSId
-  )
-    .then((response) => hitsToSpanDetailData(response.hits.hits, colorMap, mode))
-    .then((newItems) => setSpanDetailData(newItems))
-    .catch((error) => {
-      console.error('Error in handleSpansGanttRequest:', error);
-      coreRefs.core?.notifications.toasts.addError(error, {
-        title: `Failed to retrieve spans Gantt chart for trace ID: ${traceId}`,
-        toastLifeTimeMs: 10000,
-      });
-    });
-};
-
 export const handleSpansFlyoutRequest = (
   http: HttpSetup,
   spanId: string,
@@ -370,7 +224,7 @@ export const handleSpansFlyoutRequest = (
     });
 };
 
-const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyticsMode) => {
+export const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyticsMode) => {
   const data: { gantt: any[]; table: any[]; ganttMaxX: number } = {
     gantt: [],
     table: [],
@@ -472,6 +326,28 @@ const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyti
   return data;
 };
 
+interface Hit {
+  _index: string;
+  _id: string;
+  _score: number;
+  _source: any;
+  sort?: any[];
+}
+
+interface ParsedResponse {
+  hits?: {
+    hits: Hit[];
+  };
+  [key: string]: any;
+}
+
+export function normalizePayload(parsed: ParsedResponse): Hit[] {
+  if (parsed.hits && Array.isArray(parsed.hits.hits)) {
+    return parsed.hits.hits;
+  }
+  return [];
+}
+
 export const handlePayloadRequest = (
   traceId: string,
   http: HttpSetup,
@@ -481,7 +357,24 @@ export const handlePayloadRequest = (
   dataSourceMDSId?: string
 ) => {
   return handleDslRequest(http, null, getPayloadQuery(mode, traceId), mode, dataSourceMDSId)
-    .then((response) => setPayloadData(JSON.stringify(response.hits.hits, null, 2)))
+    .then((response) => {
+      const normalizedData = normalizePayload(response);
+      const sortedData = normalizedData
+        .map((hit) => {
+          const time =
+            mode === 'jaeger'
+              ? Number(hit._source.startTime) * MILI_TO_SEC
+              : parseIsoToNano(hit._source.startTime);
+
+          return {
+            ...hit,
+            sort: hit.sort && hit.sort[0] ? hit.sort : [time],
+          };
+        })
+        .sort((a, b) => b.sort[0] - a.sort[0]); // Sort in descending order by the sort field
+
+      setPayloadData(JSON.stringify(sortedData, null, 2));
+    })
     .catch((error) => {
       console.error('Error in handlePayloadRequest:', error);
       coreRefs.core?.notifications.toasts.addError(error, {

@@ -28,6 +28,7 @@ import { FieldCapResponse } from '../../../common/types';
 import { serviceMapColorPalette } from './color_palette';
 import { FilterType } from './filters/filters';
 import { ServiceObject } from './plots/service_map';
+import { NANOS_TO_MS, ParsedHit } from './constants';
 
 const missingJaegerTracesConfigurationMessage = `The indices required for trace analytics (${JAEGER_INDEX_NAME} and ${JAEGER_SERVICE_INDEX_NAME}) do not exist or you do not have permission to access them.`;
 
@@ -614,4 +615,40 @@ export const generateServiceUrl = (
   }
 
   return url;
+};
+
+/*
+ * Parse an ISO timestamp with up to nanosecond precision.
+ * For example, "2025-01-28T03:12:37.293990144Z" will be converted
+ * to a number representing the total nanoseconds since the Unix epoch.
+ */
+export function parseIsoToNano(iso: string): number {
+  const match = iso.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d+))?Z$/);
+  if (!match) {
+    throw new Error(`Invalid ISO timestamp: ${iso}`);
+  }
+  // Parse the base part using Date.parse (which gives ms)
+  const baseMs = new Date(match[1] + 'Z').getTime();
+  // Get the fractional part (if any), pad to 9 digits for nanosecond precision
+  let fraction = match[2] || '0';
+  fraction = fraction.padEnd(9, '0'); // ensure it has 9 digits
+  return baseMs * NANOS_TO_MS + Number(fraction);
+}
+
+export const parseHits = (payloadData: string): ParsedHit[] => {
+  try {
+    const parsed = JSON.parse(payloadData);
+    let hits: ParsedHit[] = [];
+
+    if (parsed.hits && Array.isArray(parsed.hits.hits)) {
+      hits = parsed.hits.hits;
+    } else if (Array.isArray(parsed)) {
+      hits = parsed;
+    }
+
+    return hits;
+  } catch (error) {
+    console.error('Error processing payloadData:', error);
+    return [];
+  }
 };

@@ -322,7 +322,7 @@ describe('Viewing application', () => {
     cy.get('[title="03f9c770db5ee2f1caac0afc36db49ba"]').click();
     cy.get('[data-test-subj="traceDetailFlyoutTitle"]').should('be.visible');
     cy.get('[data-test-subj="traceDetailFlyout"]').within(($flyout) => {
-      cy.get('[data-test-subj="LatencyDescriptionList"]').should('contain', '224.99');
+      cy.get('[data-test-subj="LatencyDescriptionList"]').should('contain', '225.00');
     });
     cy.get('[data-test-subj="euiFlyoutCloseButton"]').click();
     cy.get('[data-test-subj="traceDetailFlyout"]').should('not.exist');

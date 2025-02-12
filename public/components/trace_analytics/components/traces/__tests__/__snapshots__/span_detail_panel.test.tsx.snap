@@ -16,7 +16,7 @@ exports[`SpanDetailPanel component renders correctly with default props 1`] = `
           <EuiFlexItem>
             <PanelTitle
               title="Spans"
-              totalItems={0.5}
+              totalItems={0}
             />
           </EuiFlexItem>
           <EuiFlexItem
@@ -42,7 +42,6 @@ exports[`SpanDetailPanel component renders correctly with default props 1`] = `
               >
                 <EuiButtonGroup
                   idSelected="timeline"
-                  isDisabled={false}
                   legend="Select view of spans"
                   onChange={[Function]}
                   options={
@@ -74,26 +73,7 @@ exports[`SpanDetailPanel component renders correctly with default props 1`] = `
         grow={false}
       >
         <Plt
-          data={
-            Array [
-              Object {
-                "hoverinfo": "none",
-                "marker": Object {
-                  "color": "#fff",
-                },
-                "orientation": "h",
-                "showlegend": false,
-                "type": "bar",
-                "width": 0.4,
-                "x": Array [
-                  10,
-                ],
-                "y": Array [
-                  "service1",
-                ],
-              },
-            ]
-          }
+          data={Array []}
           layout={
             Object {
               "dragmode": "select",
@@ -116,7 +96,7 @@ exports[`SpanDetailPanel component renders correctly with default props 1`] = `
                   },
                   "type": "rect",
                   "x0": 0,
-                  "x1": 22,
+                  "x1": 0,
                   "xref": "x",
                   "y0": 0,
                   "y1": 1,
@@ -128,7 +108,7 @@ exports[`SpanDetailPanel component renders correctly with default props 1`] = `
                 "color": "#91989c",
                 "range": Array [
                   0,
-                  22,
+                  0,
                 ],
                 "showline": true,
                 "side": "top",
@@ -153,31 +133,10 @@ exports[`SpanDetailPanel component renders correctly with default props 1`] = `
         }
       >
         <Plt
-          data={
-            Array [
-              Object {
-                "hoverinfo": "none",
-                "marker": Object {
-                  "color": "#fff",
-                },
-                "orientation": "h",
-                "showlegend": false,
-                "text": "10.00 ms",
-                "textposition": "outside",
-                "type": "bar",
-                "width": 0.4,
-                "x": Array [
-                  10,
-                ],
-                "y": Array [
-                  "service1",
-                ],
-              },
-            ]
-          }
+          data={Array []}
           layout={
             Object {
-              "height": 85,
+              "height": 60,
               "margin": Object {
                 "b": 30,
                 "l": 150,
@@ -191,7 +150,7 @@ exports[`SpanDetailPanel component renders correctly with default props 1`] = `
                 "color": "#91989c",
                 "range": Array [
                   0,
-                  22,
+                  0,
                 ],
                 "showline": true,
                 "side": "top",
@@ -200,12 +159,8 @@ exports[`SpanDetailPanel component renders correctly with default props 1`] = `
               "yaxis": Object {
                 "fixedrange": true,
                 "showgrid": false,
-                "ticktext": Array [
-                  "",
-                ],
-                "tickvals": Array [
-                  "service1",
-                ],
+                "ticktext": Array [],
+                "tickvals": Array [],
               },
             }
           }
