@@ -28,7 +28,7 @@ import { FieldCapResponse } from '../../../common/types';
 import { serviceMapColorPalette } from './color_palette';
 import { FilterType } from './filters/filters';
 import { ServiceObject } from './plots/service_map';
-import { NANOS_TO_MS } from './constants';
+import { NANOS_TO_MS, ParsedHit } from './constants';
 
 const missingJaegerTracesConfigurationMessage = `The indices required for trace analytics (${JAEGER_INDEX_NAME} and ${JAEGER_SERVICE_INDEX_NAME}) do not exist or you do not have permission to access them.`;
 
@@ -633,44 +633,6 @@ export function parseIsoToNano(iso: string): number {
   let fraction = match[2] || '0';
   fraction = fraction.padEnd(9, '0'); // ensure it has 9 digits
   return baseMs * NANOS_TO_MS + Number(fraction);
-}
-interface Span {
-  traceId: string;
-  spanId: string;
-  traceState: string;
-  parentSpanId: string;
-  name: string;
-  kind: string;
-  startTime: string;
-  endTime: string;
-  durationInNanos: number;
-  serviceName: string;
-  events: any[];
-  links: any[];
-  droppedAttributesCount: number;
-  droppedEventsCount: number;
-  droppedLinksCount: number;
-  traceGroup: string;
-  traceGroupFields: {
-    endTime: string;
-    durationInNanos: number;
-    statusCode: number;
-  };
-  status: {
-    code: number;
-  };
-  instrumentationLibrary: {
-    name: string;
-    version: string;
-  };
-}
-
-interface ParsedHit {
-  _index: string;
-  _id: string;
-  _score: number;
-  _source: Span;
-  sort?: any[];
 }
 
 export const parseHits = (payloadData: string): ParsedHit[] => {

@@ -19,6 +19,7 @@ import {
   getTimestampPrecision,
   microToMilliSec,
   nanoToMilliSec,
+  parseIsoToNano,
 } from '../components/common/helper_functions';
 import { SpanSearchParams } from '../components/traces/span_detail_table';
 import {
@@ -30,6 +31,7 @@ import {
   getTracesQuery,
 } from './queries/traces_queries';
 import { handleDslRequest } from './request_handler';
+import { MILI_TO_SEC } from '../components/common/constants';
 
 export const handleCustomIndicesTracesRequest = async (
   http: HttpSetup,
@@ -222,6 +224,7 @@ export const handleSpansFlyoutRequest = (
     });
 };
 
+// ADAM HERE //replace sort with starttime
 export const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyticsMode) => {
   const data: { gantt: any[]; table: any[]; ganttMaxX: number } = {
     gantt: [],
@@ -340,9 +343,6 @@ interface ParsedResponse {
 }
 
 export function normalizePayload(parsed: ParsedResponse): Hit[] {
-  if (Array.isArray(parsed)) {
-    return parsed;
-  }
   if (parsed.hits && Array.isArray(parsed.hits.hits)) {
     return parsed.hits.hits;
   }
@@ -361,13 +361,30 @@ export const handlePayloadRequest = (
     .then((response) => {
       const normalizedData = normalizePayload(response);
 
-      // Sort the data by start time (ascending)
-      const sortedData = normalizedData.sort((a, b) => {
-        const startTimeA = a._source.startTime;
-        const startTimeB = b._source.startTime;
-        return startTimeA - startTimeB;
+      // Sort the data by start time (ascending) //check mode
+      // const sortedData = normalizedData.sort((a, b) => {
+      //   const startTimeA = a._source.startTime;
+      //   const startTimeB = b._source.startTime;
+      //   return startTimeA - startTimeB;
+      // });
+      // ADAM HERE
+      const updatedData = normalizedData.map((hit) => {
+        if (!hit.sort || !hit.sort[0]) {
+          const time =
+            mode === 'jaeger'
+              ? Number(hit._source.startTime) * MILI_TO_SEC
+              : parseIsoToNano(hit._source.startTime);
+
+          return {
+            ...hit,
+            sort: [time],
+          };
+        }
+        return hit;
       });
 
+      // Sort the data by the sort field (descending)
+      const sortedData = updatedData.sort((a, b) => b.sort[0] - a.sort[0]);
       setPayloadData(JSON.stringify(sortedData, null, 2));
     })
     .catch((error) => {

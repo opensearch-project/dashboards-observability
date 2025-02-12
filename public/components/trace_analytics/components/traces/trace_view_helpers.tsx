@@ -8,7 +8,7 @@ import { MILI_TO_SEC, NANOS_TO_MS, pieChartColors } from '../common/constants';
 
 export function getOverviewFields(parsed: any, mode: string) {
   if (parsed.length === 0) return null;
-  const firstSpan = parsed[0]._source;
+  const firstSpan = parsed[parsed.length - 1]._source;
   if (!firstSpan) return null;
 
   let fallbackValueUsed = false;

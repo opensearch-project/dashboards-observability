@@ -21,11 +21,10 @@ import { HttpSetup } from '../../../../../../../src/core/public';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { coreRefs } from '../../../../framework/core_refs';
 import { Plt } from '../../../visualizations/plotly/plot';
-import { PanelTitle, parseHits, parseIsoToNano } from '../common/helper_functions';
+import { PanelTitle, parseHits } from '../common/helper_functions';
 import { SpanDetailFlyout } from './span_detail_flyout';
 import { SpanDetailTable, SpanDetailTableHierarchy } from './span_detail_table';
 import { hitsToSpanDetailData } from '../../requests/traces_request_handler';
-import { MILI_TO_SEC } from '../common/constants';
 
 export function SpanDetailPanel(props: {
   http: HttpSetup;
@@ -142,23 +141,6 @@ export function SpanDetailPanel(props: {
   ) => {
     try {
       let hits = parseHits(props.payloadData);
-
-      hits = hits.map((hit) => {
-        if (!hit.sort || !hit.sort[0]) {
-          const time =
-            traceMode === 'jaeger'
-              ? Number(hit._source.startTime) * MILI_TO_SEC
-              : parseIsoToNano(hit._source.startTime);
-
-          return {
-            ...hit,
-            sort: [time],
-          };
-        }
-        return hit;
-      });
-
-      hits.sort((a, b) => b.sort[0] - a.sort[0]);
 
       if (payloadSpanFilters.length > 0) {
         hits = hits.filter((hit) => {

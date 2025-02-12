@@ -69,10 +69,6 @@ const jaegerPayload = {
 
 describe('overviewAndPieHelpers', () => {
   describe('normalizePayload', () => {
-    it('should return the same array if the input is already an array', () => {
-      const arr = [1, 2, 3];
-      expect(normalizePayload(arr)).toEqual(arr);
-    });
     it('should return hits.hits if payload is an object with that structure', () => {
       const obj = { hits: { hits: [4, 5, 6] } };
       expect(normalizePayload(obj)).toEqual([4, 5, 6]);
@@ -85,7 +81,11 @@ describe('overviewAndPieHelpers', () => {
 
   describe('getOverviewFields', () => {
     it('should return correct overview fields for jaeger mode', () => {
-      const overview = getOverviewFields(jaegerPayload.hits.hits, 'jaeger');
+      // Sorting as handlePayloadRequest does in descending order
+      const sortedJaegerPayload = jaegerPayload.hits.hits.sort(
+        (a, b) => b._source.startTime - a._source.startTime
+      );
+      const overview = getOverviewFields(sortedJaegerPayload, 'jaeger');
       expect(overview).toBeTruthy();
       expect(overview?.trace_id).toBe('abc');
       expect(overview?.trace_group).toBe('opA');
@@ -100,11 +100,16 @@ describe('overviewAndPieHelpers', () => {
     });
 
     it('should return correct overview fields for data prepper mode', () => {
-      const overview = getOverviewFields(dataPrepperPayload.hits.hits, 'data_prepper');
+      // Sorting as handlePayloadRequest does in descending order
+      const sortedDataPrepperPayload = dataPrepperPayload.hits.hits.sort(
+        (a, b) =>
+          new Date(b._source.traceGroupFields.endTime).getTime() -
+          new Date(a._source.traceGroupFields.endTime).getTime()
+      );
+      const overview = getOverviewFields(sortedDataPrepperPayload, 'data_prepper');
       expect(overview).toBeTruthy();
       expect(overview?.trace_id).toBe('def');
       expect(overview?.trace_group).toBe('TestGroup');
-      // For data prepper, we use traceGroupFields.endTime for last_updated.
       const expectedLastUpdated = moment('2023-02-05T12:00:00Z').format('MM/DD/YYYY HH:mm:ss.SSS');
       expect(overview?.last_updated).toBe(expectedLastUpdated);
       expect(overview?.latency).toBe('5.00 ms');

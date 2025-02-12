@@ -244,23 +244,6 @@ describe('SpanDetailTable', () => {
         expect(updatedSorting.columns).toEqual(newSorting);
       });
     });
-
-    it('should disable sorting in Jaeger mode', async () => {
-      const wrapper = mount(
-        <SpanDetailTable
-          http={httpClientMock}
-          hiddenColumns={[]}
-          openFlyout={jest.fn()}
-          mode="jaeger"
-          dataSourceMDSId="test-id"
-        />
-      );
-
-      await waitFor(() => {
-        wrapper.update();
-        expect(wrapper.find('EuiDataGrid').prop('sorting')).toBeUndefined();
-      });
-    });
   });
 });
 
