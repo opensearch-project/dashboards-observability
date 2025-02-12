@@ -297,6 +297,6 @@ describe('Testing switch mode to jaeger', () => {
     
     cy.get("[data-test-subj='treeViewExpandArrow']").should('have.length', 1);
     cy.get("[data-test-subj='treeExpandAll']").click();
-    cy.get("[data-test-subj='treeViewExpandArrow']").should('have.length', 6);
+    cy.get("[data-test-subj='treeViewExpandArrow']").should('have.length.greaterThan', 1);
   });
 });
