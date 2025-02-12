@@ -241,8 +241,16 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
   const applySorting = (spans: Span[]) => {
     return spans.sort((a, b) => {
       for (const { id, direction } of tableParams.sortingColumns) {
-        const aValue = a[id];
-        const bValue = b[id];
+        let aValue = a[id];
+        let bValue = b[id];
+
+        // Handle sorting for "Errors" column in Jaeger mode
+        if (id === 'tag' && props.mode === 'jaeger') {
+          const aHasError = a.tag?.error === true ? 1 : 0;
+          const bHasError = b.tag?.error === true ? 1 : 0;
+          aValue = aHasError;
+          bValue = bHasError;
+        }
 
         if (aValue < bValue) return direction === 'asc' ? -1 : 1;
         if (aValue > bValue) return direction === 'asc' ? 1 : -1;

@@ -422,6 +422,14 @@ export function SpanDetailPanel(props: {
     () => (
       <Plt
         data={data.gantt.map((trace) => {
+          const hasError = trace.text && trace.text[0] && trace.text[0].includes('Error');
+
+          if (hasError) {
+            return {
+              ...trace,
+            };
+          }
+
           const duration = trace.x[0] ? trace.x[0].toFixed(2) : '0.00'; // Format duration to 2 decimal places
 
           return {
