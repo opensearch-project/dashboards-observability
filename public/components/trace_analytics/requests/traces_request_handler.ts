@@ -224,7 +224,6 @@ export const handleSpansFlyoutRequest = (
     });
 };
 
-// ADAM HERE //replace sort with starttime
 export const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyticsMode) => {
   const data: { gantt: any[]; table: any[]; ganttMaxX: number } = {
     gantt: [],
@@ -360,16 +359,8 @@ export const handlePayloadRequest = (
   return handleDslRequest(http, null, getPayloadQuery(mode, traceId), mode, dataSourceMDSId)
     .then((response) => {
       const normalizedData = normalizePayload(response);
-
-      // Sort the data by start time (ascending) //check mode
-      // const sortedData = normalizedData.sort((a, b) => {
-      //   const startTimeA = a._source.startTime;
-      //   const startTimeB = b._source.startTime;
-      //   return startTimeA - startTimeB;
-      // });
-      // ADAM HERE
-      const updatedData = normalizedData.map((hit) => {
-        if (!hit.sort || !hit.sort[0]) {
+      const sortedData = normalizedData
+        .map((hit) => {
           const time =
             mode === 'jaeger'
               ? Number(hit._source.startTime) * MILI_TO_SEC
@@ -377,14 +368,11 @@ export const handlePayloadRequest = (
 
           return {
             ...hit,
-            sort: [time],
+            sort: hit.sort && hit.sort[0] ? hit.sort : [time],
           };
-        }
-        return hit;
-      });
+        })
+        .sort((a, b) => b.sort[0] - a.sort[0]); // Sort in descending order by the sort field
 
-      // Sort the data by the sort field (descending)
-      const sortedData = updatedData.sort((a, b) => b.sort[0] - a.sort[0]);
       setPayloadData(JSON.stringify(sortedData, null, 2));
     })
     .catch((error) => {
