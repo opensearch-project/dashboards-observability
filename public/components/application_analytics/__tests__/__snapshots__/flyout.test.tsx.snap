@@ -1258,14 +1258,6 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                         "dragmode": "select",
                         "height": 100,
                         "hovermode": "closest",
-                        "layout": Object {
-                          "annotations": Array [
-                            Object {
-                              "showarrow": true,
-                              "xanchor": "right",
-                            },
-                          ],
-                        },
                         "legend": Object {
                           "orientation": "h",
                           "traceorder": "normal",
@@ -1405,14 +1397,6 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                         "barmode": "stack",
                         "height": 60,
                         "hovermode": "closest",
-                        "layout": Object {
-                          "annotations": Array [
-                            Object {
-                              "showarrow": true,
-                              "xanchor": "right",
-                            },
-                          ],
-                        },
                         "legend": Object {
                           "orientation": "h",
                           "traceorder": "normal",
