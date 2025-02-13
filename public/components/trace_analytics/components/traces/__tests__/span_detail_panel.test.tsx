@@ -87,15 +87,18 @@ describe('SpanDetailPanel component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('displays loading chart initially', () => {
-    const wrapper = mount(<SpanDetailPanel {...mockProps} />);
+  it('displays loading chart when isGanttChartLoading is true', () => {
+    const wrapper = mount(<SpanDetailPanel {...mockProps} isGanttChartLoading={true} />);
     expect(wrapper.find('EuiLoadingChart')).toHaveLength(1);
+  });
+
+  it('does not display loading chart when isGanttChartLoading is false', () => {
+    const wrapper = mount(<SpanDetailPanel {...mockProps} isGanttChartLoading={false} />);
+    expect(wrapper.find('EuiLoadingChart')).toHaveLength(0);
   });
 
   it('renders gantt chart and mini-map correctly', async () => {
     const wrapper = mount(<SpanDetailPanel {...mockProps} />);
-
-    expect(wrapper.find('EuiLoadingChart')).toHaveLength(1); // Ensure loading state appears
 
     await waitFor(() => {
       wrapper.update();

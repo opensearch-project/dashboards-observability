@@ -135,6 +135,7 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
                 data={
                   Array [
                     Object {
+                      "hoverinfo": "label+percent",
                       "hovertemplate": "%{label}<br>%{value:.2f}%<extra></extra>",
                       "labels": Array [
                         "inventory",
@@ -177,6 +178,7 @@ exports[`Service breakdown panel component renders service breakdown panel 1`] =
                   data={
                     Array [
                       Object {
+                        "hoverinfo": "label+percent",
                         "hovertemplate": "%{label}<br>%{value:.2f}%<extra></extra>",
                         "labels": Array [
                           "inventory",

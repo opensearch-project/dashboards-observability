@@ -750,6 +750,7 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
     mode="jaeger"
     openSpanFlyout={[Function]}
     page="app"
+    payloadData=""
     traceId="mockTrace"
   >
     <EuiPanel
@@ -888,7 +889,6 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                               >
                                 <EuiButtonGroup
                                   idSelected="timeline"
-                                  isDisabled={true}
                                   legend="Select view of spans"
                                   onChange={[Function]}
                                   options={
@@ -909,8 +909,8 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                                   }
                                 >
                                   <fieldset
-                                    className="euiButtonGroup euiButtonGroup--small euiButtonGroup--text euiButtonGroup--isDisabled"
-                                    disabled={true}
+                                    className="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
+                                    disabled={false}
                                   >
                                     <EuiScreenReaderOnly>
                                       <legend
@@ -926,7 +926,7 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                                         color="text"
                                         element="label"
                                         id="timeline"
-                                        isDisabled={true}
+                                        isDisabled={false}
                                         isIconOnly={false}
                                         isSelected={true}
                                         key="0"
@@ -939,12 +939,10 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                                           baseClassName="euiButtonGroupButton"
                                           className="euiButtonGroupButton-isSelected"
                                           color="text"
-                                          data-test-subj="timeline"
-                                          element="button"
+                                          element="label"
                                           fill={true}
-                                          id="random_html_id"
-                                          isDisabled={true}
-                                          isSelected={true}
+                                          htmlFor="random_html_id"
+                                          isDisabled={false}
                                           onClick={[Function]}
                                           size="s"
                                           textProps={
@@ -955,21 +953,17 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                                               "title": "Timeline",
                                             }
                                           }
-                                          type="button"
                                         >
-                                          <button
-                                            aria-pressed={true}
-                                            className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isDisabled euiButtonGroupButton-isSelected"
-                                            data-test-subj="timeline"
-                                            disabled={true}
-                                            id="random_html_id"
+                                          <label
+                                            className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
+                                            disabled={false}
+                                            htmlFor="random_html_id"
                                             onClick={[Function]}
                                             style={
                                               Object {
                                                 "minWidth": undefined,
                                               }
                                             }
-                                            type="button"
                                           >
                                             <EuiButtonContent
                                               className="euiButton__content"
@@ -992,18 +986,28 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                                                   data-text="Timeline"
                                                   title="Timeline"
                                                 >
+                                                  <input
+                                                    checked={true}
+                                                    className="euiScreenReaderOnly"
+                                                    data-test-subj="timeline"
+                                                    disabled={false}
+                                                    id="random_html_id"
+                                                    name="random_html_id"
+                                                    onChange={[Function]}
+                                                    type="radio"
+                                                  />
                                                   Timeline
                                                 </span>
                                               </span>
                                             </EuiButtonContent>
-                                          </button>
+                                          </label>
                                         </EuiButtonDisplay>
                                       </EuiButtonGroupButton>
                                       <EuiButtonGroupButton
                                         color="text"
                                         element="label"
                                         id="span_list"
-                                        isDisabled={true}
+                                        isDisabled={false}
                                         isIconOnly={false}
                                         isSelected={false}
                                         key="1"
@@ -1016,12 +1020,10 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                                           baseClassName="euiButtonGroupButton"
                                           className=""
                                           color="text"
-                                          data-test-subj="span_list"
-                                          element="button"
+                                          element="label"
                                           fill={false}
-                                          id="random_html_id"
-                                          isDisabled={true}
-                                          isSelected={false}
+                                          htmlFor="random_html_id"
+                                          isDisabled={false}
                                           onClick={[Function]}
                                           size="s"
                                           textProps={
@@ -1032,21 +1034,17 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                                               "title": "Span list",
                                             }
                                           }
-                                          type="button"
                                         >
-                                          <button
-                                            aria-pressed={false}
-                                            className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isDisabled"
-                                            data-test-subj="span_list"
-                                            disabled={true}
-                                            id="random_html_id"
+                                          <label
+                                            className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                                            disabled={false}
+                                            htmlFor="random_html_id"
                                             onClick={[Function]}
                                             style={
                                               Object {
                                                 "minWidth": undefined,
                                               }
                                             }
-                                            type="button"
                                           >
                                             <EuiButtonContent
                                               className="euiButton__content"
@@ -1069,18 +1067,28 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                                                   data-text="Span list"
                                                   title="Span list"
                                                 >
+                                                  <input
+                                                    checked={false}
+                                                    className="euiScreenReaderOnly"
+                                                    data-test-subj="span_list"
+                                                    disabled={false}
+                                                    id="random_html_id"
+                                                    name="random_html_id"
+                                                    onChange={[Function]}
+                                                    type="radio"
+                                                  />
                                                   Span list
                                                 </span>
                                               </span>
                                             </EuiButtonContent>
-                                          </button>
+                                          </label>
                                         </EuiButtonDisplay>
                                       </EuiButtonGroupButton>
                                       <EuiButtonGroupButton
                                         color="text"
                                         element="label"
                                         id="hierarchy_span_list"
-                                        isDisabled={true}
+                                        isDisabled={false}
                                         isIconOnly={false}
                                         isSelected={false}
                                         key="2"
@@ -1093,12 +1101,10 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                                           baseClassName="euiButtonGroupButton"
                                           className=""
                                           color="text"
-                                          data-test-subj="hierarchy_span_list"
-                                          element="button"
+                                          element="label"
                                           fill={false}
-                                          id="random_html_id"
-                                          isDisabled={true}
-                                          isSelected={false}
+                                          htmlFor="random_html_id"
+                                          isDisabled={false}
                                           onClick={[Function]}
                                           size="s"
                                           textProps={
@@ -1109,21 +1115,17 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                                               "title": "Tree view",
                                             }
                                           }
-                                          type="button"
                                         >
-                                          <button
-                                            aria-pressed={false}
-                                            className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isDisabled"
-                                            data-test-subj="hierarchy_span_list"
-                                            disabled={true}
-                                            id="random_html_id"
+                                          <label
+                                            className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                                            disabled={false}
+                                            htmlFor="random_html_id"
                                             onClick={[Function]}
                                             style={
                                               Object {
                                                 "minWidth": undefined,
                                               }
                                             }
-                                            type="button"
                                           >
                                             <EuiButtonContent
                                               className="euiButton__content"
@@ -1146,11 +1148,21 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                                                   data-text="Tree view"
                                                   title="Tree view"
                                                 >
+                                                  <input
+                                                    checked={false}
+                                                    className="euiScreenReaderOnly"
+                                                    data-test-subj="hierarchy_span_list"
+                                                    disabled={false}
+                                                    id="random_html_id"
+                                                    name="random_html_id"
+                                                    onChange={[Function]}
+                                                    type="radio"
+                                                  />
                                                   Tree view
                                                 </span>
                                               </span>
                                             </EuiButtonContent>
-                                          </button>
+                                          </label>
                                         </EuiButtonDisplay>
                                       </EuiButtonGroupButton>
                                     </div>
@@ -1166,30 +1178,282 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                 </EuiFlexGroup>
               </div>
             </EuiFlexItem>
-            <div
-              className="center-loading-div"
+            <EuiHorizontalRule
+              margin="m"
             >
-              <EuiLoadingChart
-                size="l"
+              <hr
+                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+              />
+            </EuiHorizontalRule>
+            <EuiFlexItem
+              grow={false}
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <span
-                  className="euiLoadingChart euiLoadingChart--large"
+                <Plt
+                  data={Array []}
+                  layout={
+                    Object {
+                      "dragmode": "select",
+                      "height": 100,
+                      "margin": Object {
+                        "b": 30,
+                        "l": 150,
+                        "r": 5,
+                        "t": 30,
+                      },
+                      "paper_bgcolor": "rgba(0, 0, 0, 0)",
+                      "plot_bgcolor": "rgba(0, 0, 0, 0)",
+                      "shapes": Array [
+                        Object {
+                          "editable": true,
+                          "fillcolor": "rgba(128, 128, 128, 0.3)",
+                          "line": Object {
+                            "color": "rgba(255, 0, 0, 0.6)",
+                            "width": 1,
+                          },
+                          "type": "rect",
+                          "x0": 0,
+                          "x1": 0,
+                          "xref": "x",
+                          "y0": 0,
+                          "y1": 1,
+                          "yref": "paper",
+                        },
+                      ],
+                      "width": 412,
+                      "xaxis": Object {
+                        "color": "#91989c",
+                        "range": Array [
+                          0,
+                          0,
+                        ],
+                        "showline": true,
+                        "side": "top",
+                        "ticksuffix": " ms",
+                      },
+                      "yaxis": Object {
+                        "fixedrange": true,
+                        "visible": false,
+                      },
+                    }
+                  }
+                  onRelayout={[Function]}
+                  onSelectedHandler={[Function]}
                 >
-                  <span
-                    className="euiLoadingChart__bar"
-                  />
-                  <span
-                    className="euiLoadingChart__bar"
-                  />
-                  <span
-                    className="euiLoadingChart__bar"
-                  />
-                  <span
-                    className="euiLoadingChart__bar"
-                  />
-                </span>
-              </EuiLoadingChart>
-            </div>
+                  <PlotlyComponent
+                    config={
+                      Object {
+                        "displayModeBar": false,
+                      }
+                    }
+                    data={Array []}
+                    debug={false}
+                    divId="explorerPlotComponent"
+                    layout={
+                      Object {
+                        "autosize": true,
+                        "barmode": "stack",
+                        "dragmode": "select",
+                        "height": 100,
+                        "hovermode": "closest",
+                        "legend": Object {
+                          "orientation": "h",
+                          "traceorder": "normal",
+                        },
+                        "margin": Object {
+                          "b": 30,
+                          "l": 150,
+                          "r": 5,
+                          "t": 30,
+                        },
+                        "paper_bgcolor": "rgba(0, 0, 0, 0)",
+                        "plot_bgcolor": "rgba(0, 0, 0, 0)",
+                        "shapes": Array [
+                          Object {
+                            "editable": true,
+                            "fillcolor": "rgba(128, 128, 128, 0.3)",
+                            "line": Object {
+                              "color": "rgba(255, 0, 0, 0.6)",
+                              "width": 1,
+                            },
+                            "type": "rect",
+                            "x0": 0,
+                            "x1": 0,
+                            "xref": "x",
+                            "y0": 0,
+                            "y1": 1,
+                            "yref": "paper",
+                          },
+                        ],
+                        "showlegend": false,
+                        "width": 412,
+                        "xaxis": Object {
+                          "color": "#91989c",
+                          "range": Array [
+                            0,
+                            0,
+                          ],
+                          "showline": true,
+                          "side": "top",
+                          "ticksuffix": " ms",
+                        },
+                        "yaxis": Object {
+                          "fixedrange": true,
+                          "visible": false,
+                        },
+                      }
+                    }
+                    onRelayout={[Function]}
+                    onSelected={[Function]}
+                    style={
+                      Object {
+                        "height": "100%",
+                        "width": "100%",
+                      }
+                    }
+                    useResizeHandler={true}
+                  >
+                    <div
+                      id="explorerPlotComponent"
+                      style={
+                        Object {
+                          "height": "100%",
+                          "width": "100%",
+                        }
+                      }
+                    />
+                  </PlotlyComponent>
+                </Plt>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem
+              style={
+                Object {
+                  "maxHeight": 500,
+                  "overflowY": "auto",
+                }
+              }
+            >
+              <div
+                className="euiFlexItem"
+                style={
+                  Object {
+                    "maxHeight": 500,
+                    "overflowY": "auto",
+                  }
+                }
+              >
+                <Plt
+                  data={Array []}
+                  layout={
+                    Object {
+                      "height": 60,
+                      "margin": Object {
+                        "b": 30,
+                        "l": 150,
+                        "r": 5,
+                        "t": 30,
+                      },
+                      "paper_bgcolor": "rgba(0, 0, 0, 0)",
+                      "plot_bgcolor": "rgba(0, 0, 0, 0)",
+                      "width": 412,
+                      "xaxis": Object {
+                        "color": "#91989c",
+                        "range": Array [
+                          0,
+                          0,
+                        ],
+                        "showline": true,
+                        "side": "top",
+                        "ticksuffix": " ms",
+                      },
+                      "yaxis": Object {
+                        "fixedrange": true,
+                        "showgrid": false,
+                        "ticktext": Array [],
+                        "tickvals": Array [],
+                      },
+                    }
+                  }
+                  onClickHandler={[Function]}
+                  onHoverHandler={[Function]}
+                  onRelayout={[Function]}
+                  onUnhoverHandler={[Function]}
+                >
+                  <PlotlyComponent
+                    config={
+                      Object {
+                        "displayModeBar": false,
+                      }
+                    }
+                    data={Array []}
+                    debug={false}
+                    divId="explorerPlotComponent"
+                    layout={
+                      Object {
+                        "autosize": true,
+                        "barmode": "stack",
+                        "height": 60,
+                        "hovermode": "closest",
+                        "legend": Object {
+                          "orientation": "h",
+                          "traceorder": "normal",
+                        },
+                        "margin": Object {
+                          "b": 30,
+                          "l": 150,
+                          "r": 5,
+                          "t": 30,
+                        },
+                        "paper_bgcolor": "rgba(0, 0, 0, 0)",
+                        "plot_bgcolor": "rgba(0, 0, 0, 0)",
+                        "showlegend": false,
+                        "width": 412,
+                        "xaxis": Object {
+                          "color": "#91989c",
+                          "range": Array [
+                            0,
+                            0,
+                          ],
+                          "showline": true,
+                          "side": "top",
+                          "ticksuffix": " ms",
+                        },
+                        "yaxis": Object {
+                          "fixedrange": true,
+                          "showgrid": false,
+                          "ticktext": Array [],
+                          "tickvals": Array [],
+                        },
+                      }
+                    }
+                    onClick={[Function]}
+                    onHover={[Function]}
+                    onRelayout={[Function]}
+                    onUnhover={[Function]}
+                    style={
+                      Object {
+                        "height": "100%",
+                        "width": "100%",
+                      }
+                    }
+                    useResizeHandler={true}
+                  >
+                    <div
+                      id="explorerPlotComponent"
+                      style={
+                        Object {
+                          "height": "100%",
+                          "width": "100%",
+                        }
+                      }
+                    />
+                  </PlotlyComponent>
+                </Plt>
+              </div>
+            </EuiFlexItem>
           </div>
         </EuiFlexGroup>
       </div>
