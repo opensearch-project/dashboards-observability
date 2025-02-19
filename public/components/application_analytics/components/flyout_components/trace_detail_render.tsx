@@ -7,14 +7,15 @@ import { EuiCodeBlock, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eu
 import React, { useEffect, useMemo, useState } from 'react';
 import { HttpStart } from '../../../../../../../src/core/public';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
+import { TraceFilter } from '../../../trace_analytics/components/common/constants';
 import { ServiceBreakdownPanel } from '../../../trace_analytics/components/traces/service_breakdown_panel';
 import { SpanDetailPanel } from '../../../trace_analytics/components/traces/span_detail_panel';
-import { handlePayloadRequest } from '../../../trace_analytics/requests/traces_request_handler';
-import { getListItem } from '../../helpers/utils';
 import {
   getOverviewFields,
   getServiceBreakdownData,
 } from '../../../trace_analytics/components/traces/trace_view_helpers';
+import { handlePayloadRequest } from '../../../trace_analytics/requests/traces_request_handler';
+import { getListItem } from '../../helpers/utils';
 
 interface TraceDetailRenderProps {
   traceId: string;
@@ -35,6 +36,17 @@ export const TraceDetailRender = ({
   const [serviceBreakdownData, setServiceBreakdownData] = useState([]);
   const [payloadData, setPayloadData] = useState('');
   const [colorMap, setColorMap] = useState({});
+
+  const storedFilters = sessionStorage.getItem('TraceAnalyticsSpanFilters');
+  const [spanFilters, setSpanFilters] = useState<TraceFilter[]>(() =>
+    storedFilters ? JSON.parse(storedFilters) : []
+  );
+
+  const setSpanFiltersWithStorage = (newFilters: TraceFilter[]) => {
+    handlePayloadRequest(traceId, http, payloadData, setPayloadData, mode);
+    setSpanFilters(newFilters);
+    sessionStorage.setItem('TraceAnalyticsSpanFilters', JSON.stringify(newFilters));
+  };
 
   const renderContent = useMemo(() => {
     if (!traceId) return <></>;
@@ -79,6 +91,8 @@ export const TraceDetailRender = ({
           dataSourceMDSId={dataSourceMDSId}
           isApplicationFlyout={true}
           payloadData={payloadData}
+          spanFilters={spanFilters}
+          setSpanFiltersWithStorage={setSpanFiltersWithStorage}
         />
         <EuiSpacer size="xs" />
         <EuiHorizontalRule margin="s" />
