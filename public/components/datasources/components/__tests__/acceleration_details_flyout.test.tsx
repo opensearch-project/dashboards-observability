@@ -85,6 +85,56 @@ describe('AccelerationDetailsFlyout Component Tests', () => {
     expect(coreRefsModule.coreRefs.dslService!.fetchIndices).toHaveBeenCalledWith('testIndex', '');
   });
 
+  it('fetches acceleration details with specific mdsId', async () => {
+    mount(
+      <AccelerationDetailsFlyout
+        index="mockIndex"
+        acceleration={mockAcceleration}
+        dataSourceName="mockDataSource"
+        dataSourceMDSId="746ebe20-ee4a-11ef-823a-bd0a7d9fd697"
+      />
+    );
+
+    expect(coreRefsModule.coreRefs.dslService!.fetchFields).toHaveBeenCalledWith(
+      'testIndex',
+      '746ebe20-ee4a-11ef-823a-bd0a7d9fd697'
+    );
+    expect(coreRefsModule.coreRefs.dslService!.fetchSettings).toHaveBeenCalledWith(
+      'testIndex',
+      '746ebe20-ee4a-11ef-823a-bd0a7d9fd697'
+    );
+    expect(coreRefsModule.coreRefs.dslService!.fetchIndices).toHaveBeenCalledWith(
+      'testIndex',
+      '746ebe20-ee4a-11ef-823a-bd0a7d9fd697'
+    );
+  });
+
+  it('renders the correct tab content on tab switch', async () => {
+    const wrapper = mount(
+      <AccelerationDetailsFlyout
+        index="mockIndex"
+        acceleration={mockAcceleration}
+        dataSourceName="mockDataSource"
+      />
+    );
+    await new Promise(setImmediate);
+    wrapper.update();
+
+    const detailsTab = wrapper.find('EuiTab').filterWhere((node) => node.text() === 'Details');
+    detailsTab.simulate('click');
+    await new Promise(setImmediate);
+    wrapper.update();
+
+    expect(wrapper.find('AccelerationDetailsTab').exists()).toBe(true);
+
+    const schemaTab = wrapper.find('EuiTab').filterWhere((node) => node.text() === 'Schema');
+    schemaTab.simulate('click');
+    await new Promise(setImmediate);
+    wrapper.update();
+
+    expect(wrapper.find('AccelerationSchemaTab').exists()).toBe(true);
+  });
+
   it('switches tabs correctly', async () => {
     const wrapper = mount(
       <AccelerationDetailsFlyout
