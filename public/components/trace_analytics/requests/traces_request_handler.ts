@@ -15,6 +15,7 @@ import { BarOrientation } from '../../../../common/constants/shared';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode, TraceQueryMode } from '../../../../common/types/trace_analytics';
 import { coreRefs } from '../../../../public/framework/core_refs';
+import { MILI_TO_SEC } from '../components/common/constants';
 import {
   getTimestampPrecision,
   microToMilliSec,
@@ -31,7 +32,6 @@ import {
   getTracesQuery,
 } from './queries/traces_queries';
 import { handleDslRequest } from './request_handler';
-import { MILI_TO_SEC } from '../components/common/constants';
 
 export const handleCustomIndicesTracesRequest = async (
   http: HttpSetup,
@@ -351,12 +351,12 @@ export function normalizePayload(parsed: ParsedResponse): Hit[] {
 export const handlePayloadRequest = (
   traceId: string,
   http: HttpSetup,
-  payloadData: any,
+  spanDSL: any,
   setPayloadData: (payloadData: any) => void,
   mode: TraceAnalyticsMode,
   dataSourceMDSId?: string
 ) => {
-  return handleDslRequest(http, null, getPayloadQuery(mode, traceId), mode, dataSourceMDSId)
+  return handleDslRequest(http, spanDSL, getPayloadQuery(mode, traceId), mode, dataSourceMDSId)
     .then((response) => {
       const normalizedData = normalizePayload(response);
       const sortedData = normalizedData

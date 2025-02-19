@@ -4,7 +4,7 @@
  */
 
 import moment from 'moment';
-import { MILI_TO_SEC, NANOS_TO_MS, pieChartColors } from '../common/constants';
+import { MILI_TO_SEC, NANOS_TO_MS, pieChartColors, TraceFilter } from '../common/constants';
 
 export function getOverviewFields(parsed: any, mode: string) {
   if (parsed.length === 0) return null;
@@ -121,3 +121,26 @@ export function getServiceBreakdownData(parsed: any, mode: string) {
 
   return { serviceBreakdownData, colorMap };
 }
+
+export const spanFiltersToDSL = (spanFilters: TraceFilter[]) => {
+  const spanDSL: any = {
+    query: {
+      bool: {
+        must: [],
+        filter: [],
+        should: [],
+        must_not: [],
+      },
+    },
+  };
+  spanFilters.map(({ field, value }) => {
+    if (value != null) {
+      spanDSL.query.bool.must.push({
+        term: {
+          [field]: value,
+        },
+      });
+    }
+  });
+  return spanDSL;
+};

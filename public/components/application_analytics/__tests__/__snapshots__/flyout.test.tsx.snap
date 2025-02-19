@@ -751,6 +751,8 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
     openSpanFlyout={[Function]}
     page="app"
     payloadData=""
+    setSpanFiltersWithStorage={[Function]}
+    spanFilters={Array []}
     traceId="mockTrace"
   >
     <EuiPanel

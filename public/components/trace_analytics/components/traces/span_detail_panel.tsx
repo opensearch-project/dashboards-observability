@@ -21,10 +21,11 @@ import { HttpSetup } from '../../../../../../../src/core/public';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { coreRefs } from '../../../../framework/core_refs';
 import { Plt } from '../../../visualizations/plotly/plot';
+import { hitsToSpanDetailData } from '../../requests/traces_request_handler';
+import { TraceFilter } from '../common/constants';
 import { PanelTitle, parseHits } from '../common/helper_functions';
 import { SpanDetailFlyout } from './span_detail_flyout';
 import { SpanDetailTable, SpanDetailTableHierarchy } from './span_detail_table';
-import { hitsToSpanDetailData } from '../../requests/traces_request_handler';
 
 export function SpanDetailPanel(props: {
   http: HttpSetup;
@@ -33,6 +34,8 @@ export function SpanDetailPanel(props: {
   mode: TraceAnalyticsMode;
   dataSourceMDSId: string;
   dataSourceMDSLabel: string | undefined;
+  spanFilters: TraceFilter[];
+  setSpanFiltersWithStorage: (newFilters: TraceFilter[]) => void;
   page?: string;
   openSpanFlyout?: any;
   data?: { gantt: any[]; table: any[]; ganttMaxX: number };
@@ -44,11 +47,8 @@ export function SpanDetailPanel(props: {
 }) {
   const { chrome } = coreRefs;
   const { mode } = props;
-  const storedFilters = sessionStorage.getItem('TraceAnalyticsSpanFilters');
   const fromApp = props.page === 'app';
-  const [spanFilters, setSpanFilters] = useState<Array<{ field: string; value: any }>>(
-    storedFilters ? JSON.parse(storedFilters) : []
-  );
+
   let data: { gantt: any[]; table: any[]; ganttMaxX: number };
   let setData: (data: { gantt: any[]; table: any[]; ganttMaxX: number }) => void;
   const [localData, localSetData] = useState<{ gantt: any[]; table: any[]; ganttMaxX: number }>({
@@ -109,70 +109,34 @@ export function SpanDetailPanel(props: {
     setSelectedRange(fullRange);
   }, [data.ganttMaxX]);
 
-  const setSpanFiltersWithStorage = (newFilters: Array<{ field: string; value: any }>) => {
-    setSpanFilters(newFilters);
-    sessionStorage.setItem('TraceAnalyticsSpanFilters', JSON.stringify(newFilters));
-  };
-
   const addSpanFilter = (field: string, value: any) => {
-    const newFilters = [...spanFilters];
+    const newFilters = [...props.spanFilters];
     const index = newFilters.findIndex(({ field: filterField }) => field === filterField);
     if (index === -1) {
       newFilters.push({ field, value });
     } else {
       newFilters.splice(index, 1, { field, value });
     }
-    setSpanFiltersWithStorage(newFilters);
+    props.setSpanFiltersWithStorage(newFilters);
   };
 
   const removeSpanFilter = (field: string) => {
-    const newFilters = [...spanFilters];
+    const newFilters = [...props.spanFilters];
     const index = newFilters.findIndex(({ field: filterField }) => field === filterField);
     if (index !== -1) {
       newFilters.splice(index, 1);
-      setSpanFiltersWithStorage(newFilters);
-    }
-  };
-
-  const parseAndFilterHits = (
-    payloadData: string,
-    traceMode: string,
-    payloadSpanFilters: any[]
-  ) => {
-    try {
-      let hits = parseHits(props.payloadData);
-
-      if (payloadSpanFilters.length > 0) {
-        hits = hits.filter((hit) => {
-          return payloadSpanFilters.every(({ field, value }) => {
-            const fieldValue = field.split('.').reduce((acc, part) => acc?.[part], hit._source);
-            return fieldValue === value;
-          });
-        });
-      }
-
-      hits = hits.filter((hit) => {
-        if (traceMode === 'jaeger') {
-          return Boolean(hit._source?.process?.serviceName);
-        } else {
-          return Boolean(hit._source?.serviceName);
-        }
-      });
-
-      return hits;
-    } catch (error) {
-      console.error('Error processing payloadData in parseAndFilterHits:', error);
-      return [];
+      props.setSpanFiltersWithStorage(newFilters);
     }
   };
 
   useEffect(() => {
     if (!props.payloadData) {
-      console.warn('No payloadData provided to SpanDetailPanel');
+      props.setGanttChartLoading?.(false);
+      console.error('No payloadData provided to SpanDetailPanel');
       return;
     }
 
-    const hits = parseAndFilterHits(props.payloadData, mode, spanFilters);
+    const hits = parseHits(props.payloadData);
 
     if (hits.length === 0) {
       return;
@@ -186,11 +150,9 @@ export function SpanDetailPanel(props: {
         console.error('Error in hitsToSpanDetailData:', error);
       })
       .finally(() => {
-        if (props.setGanttChartLoading) {
-          props.setGanttChartLoading(false);
-        }
+        props.setGanttChartLoading?.(false);
       });
-  }, [props.payloadData, props.colorMap, mode, spanFilters]);
+  }, [props.payloadData, props.colorMap, mode, props.spanFilters]);
 
   const getSpanDetailLayout = (
     plotTraces: Plotly.Data[],
@@ -317,7 +279,7 @@ export function SpanDetailPanel(props: {
   );
 
   const renderFilters = useMemo(() => {
-    return spanFilters.map(({ field, value }) => (
+    return props.spanFilters.map(({ field, value }) => (
       <EuiFlexItem grow={false} key={`span-filter-badge-${field}`}>
         <EuiBadge
           iconType="cross"
@@ -329,7 +291,7 @@ export function SpanDetailPanel(props: {
         </EuiBadge>
       </EuiFlexItem>
     ));
-  }, [spanFilters]);
+  }, [props.spanFilters]);
 
   const onHover = useCallback(() => {
     const dragLayer = document.getElementsByClassName('nsewdrag')?.[0];
@@ -387,11 +349,11 @@ export function SpanDetailPanel(props: {
           dataSourceMDSId={props.dataSourceMDSId}
           availableWidth={dynamicLayoutAdjustment}
           payloadData={props.payloadData}
-          filters={spanFilters}
+          filters={props.spanFilters}
         />
       </div>
     ),
-    [setCurrentSpan, dynamicLayoutAdjustment, props.payloadData, spanFilters]
+    [setCurrentSpan, dynamicLayoutAdjustment, props.payloadData, props.spanFilters]
   );
 
   const spanDetailTableHierarchy = useMemo(
@@ -411,11 +373,11 @@ export function SpanDetailPanel(props: {
           dataSourceMDSId={props.dataSourceMDSId}
           availableWidth={dynamicLayoutAdjustment}
           payloadData={props.payloadData}
-          filters={spanFilters}
+          filters={props.spanFilters}
         />
       </div>
     ),
-    [setCurrentSpan, dynamicLayoutAdjustment, props.payloadData, spanFilters]
+    [setCurrentSpan, dynamicLayoutAdjustment, props.payloadData, props.spanFilters]
   );
 
   const ganttChart = useMemo(
@@ -491,7 +453,7 @@ export function SpanDetailPanel(props: {
             </div>
           ) : (
             <>
-              {spanFilters.length > 0 && (
+              {props.spanFilters.length > 0 && (
                 <EuiFlexItem grow={false}>
                   <EuiSpacer size="s" />
                   <EuiFlexGroup gutterSize="s" wrap>
