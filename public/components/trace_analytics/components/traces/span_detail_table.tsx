@@ -11,9 +11,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
+import { handleSpansRequest } from '../../requests/traces_request_handler';
 import { microToMilliSec, nanoToMilliSec, parseHits } from '../common/helper_functions';
 import { RenderCustomDataGrid } from '../common/shared_components/custom_datagrid';
-import { handleSpansRequest } from '../../requests/traces_request_handler';
 
 interface SpanDetailTableProps {
   http: HttpSetup;
@@ -25,7 +25,7 @@ interface SpanDetailTableProps {
   dataSourceMDSId: string;
   availableWidth?: number;
   payloadData: string;
-  filters: Array<{ field: string; value: any }>;
+  filters: TraceFilter[];
 }
 
 interface Span {

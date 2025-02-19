@@ -19,9 +19,9 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import round from 'lodash/round';
 import React, { useEffect, useState } from 'react';
-import { i18n } from '@osd/i18n';
 import { MountPoint } from '../../../../../../../src/core/public';
 import { DataSourceManagementPluginSetup } from '../../../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
@@ -31,11 +31,12 @@ import { coreRefs } from '../../../../framework/core_refs';
 import { TraceAnalyticsCoreDeps } from '../../home';
 import { handleServiceMapRequest } from '../../requests/services_request_handler';
 import { handlePayloadRequest } from '../../requests/traces_request_handler';
+import { TraceFilter } from '../common/constants';
 import { PanelTitle, filtersToDsl, processTimeStamp } from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { ServiceBreakdownPanel } from './service_breakdown_panel';
 import { SpanDetailPanel } from './span_detail_panel';
-import { getOverviewFields, getServiceBreakdownData } from './trace_view_helpers';
+import { getOverviewFields, getServiceBreakdownData, spanFiltersToDSL } from './trace_view_helpers';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
@@ -84,6 +85,12 @@ export function TraceView(props: TraceViewProps) {
   const [isTracePayloadLoading, setTracePayloadLoading] = useState(false);
   const [isServicesPieChartLoading, setIsServicesPieChartLoading] = useState(false);
   const [isGanttChartLoading, setIsGanttChartLoading] = useState(false);
+
+  const storedFilters = sessionStorage.getItem('TraceAnalyticsSpanFilters');
+  const [spanFilters, setSpanFilters] = useState<TraceFilter[]>(() =>
+    storedFilters ? JSON.parse(storedFilters) : []
+  );
+  const [filteredPayload, setFilteredPayload] = useState('');
 
   const renderOverview = (overviewFields: any) => {
     return (
@@ -224,10 +231,36 @@ export function TraceView(props: TraceViewProps) {
     ).finally(() => setIsServicesDataLoading(false));
   };
 
+  const setSpanFiltersWithStorage = (newFilters: TraceFilter[]) => {
+    refreshFilteredPayload(newFilters);
+    setSpanFilters(newFilters);
+    sessionStorage.setItem('TraceAnalyticsSpanFilters', JSON.stringify(newFilters));
+  };
+
+  const refreshFilteredPayload = async (newFilters: TraceFilter[]) => {
+    const spanDSL = spanFiltersToDSL(newFilters);
+    setIsGanttChartLoading(true);
+    handlePayloadRequest(
+      props.traceId,
+      props.http,
+      spanDSL,
+      setFilteredPayload,
+      mode,
+      props.dataSourceMDSId[0].id
+    );
+  };
+
   useEffect(() => {
     if (!payloadData) return;
 
     try {
+      if (spanFilters.length > 0) {
+        refreshFilteredPayload(spanFilters);
+      } else {
+        setFilteredPayload(payloadData);
+      }
+
+      setFilteredPayload(payloadData);
       const parsedPayload = JSON.parse(payloadData);
       const overview = getOverviewFields(parsedPayload, mode);
       if (overview) {
@@ -330,9 +363,11 @@ export function TraceView(props: TraceViewProps) {
                 setGanttData={setGanttData}
                 dataSourceMDSId={props.dataSourceMDSId[0].id}
                 dataSourceMDSLabel={props.dataSourceMDSId[0].label}
-                payloadData={payloadData}
+                payloadData={filteredPayload}
                 isGanttChartLoading={isGanttChartLoading}
                 setGanttChartLoading={setIsGanttChartLoading}
+                spanFilters={spanFilters}
+                setSpanFiltersWithStorage={setSpanFiltersWithStorage}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

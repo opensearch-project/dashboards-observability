@@ -45,6 +45,7 @@ import {
   handleServiceMapRequest,
   handleServiceViewRequest,
 } from '../../requests/services_request_handler';
+import { TraceFilter } from '../common/constants';
 import { FilterType } from '../common/filters/filters';
 import {
   PanelTitle,
@@ -442,12 +443,12 @@ export function ServiceView(props: ServiceViewProps) {
 
   const [currentSpan, setCurrentSpan] = useState('');
   const storedFilters = sessionStorage.getItem('TraceAnalyticsSpanFilters');
-  const [spanFilters, setSpanFilters] = useState<Array<{ field: string; value: any }>>(
+  const [spanFilters, setSpanFilters] = useState<TraceFilter[]>(
     storedFilters ? JSON.parse(storedFilters) : []
   );
   const [DSL, setDSL] = useState<any>({});
 
-  const setSpanFiltersWithStorage = (newFilters: Array<{ field: string; value: any }>) => {
+  const setSpanFiltersWithStorage = (newFilters: TraceFilter[]) => {
     setSpanFilters(newFilters);
     sessionStorage.setItem('TraceAnalyticsSpanFilters', JSON.stringify(newFilters));
   };

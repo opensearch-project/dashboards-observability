@@ -194,7 +194,7 @@ export const getTracesQuery = (
   return mode === 'jaeger' ? jaegerQuery : dataPrepperQuery;
 };
 
-export const getPayloadQuery = (mode: TraceAnalyticsMode, traceId: string, size = 1000) => {
+export const getPayloadQuery = (mode: TraceAnalyticsMode, traceId: string, size = 3000) => {
   if (mode === 'jaeger') {
     return {
       size,
