@@ -79,6 +79,8 @@ const mockProps = {
   setData: mockSetData,
   addSpanFilter: mockAddSpanFilter,
   removeSpanFilter: jest.fn(),
+  spanFilters: [],
+  setSpanFiltersWithStorage: jest.fn(),
 };
 
 describe('SpanDetailPanel component', () => {

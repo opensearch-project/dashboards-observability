@@ -59,3 +59,8 @@ export interface ParsedHit {
   _source: Span;
   sort?: any[];
 }
+
+export interface TraceFilter {
+  field: string;
+  value: any;
+}

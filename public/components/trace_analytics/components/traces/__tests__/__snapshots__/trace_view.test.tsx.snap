@@ -147,6 +147,8 @@ exports[`Trace view component renders trace view 1`] = `
             payloadData=""
             setGanttChartLoading={[Function]}
             setGanttData={[Function]}
+            setSpanFiltersWithStorage={[Function]}
+            spanFilters={Array []}
             traceId="test"
           />
         </EuiFlexItem>
