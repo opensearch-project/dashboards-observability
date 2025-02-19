@@ -87,7 +87,7 @@ export function TraceView(props: TraceViewProps) {
   const [isGanttChartLoading, setIsGanttChartLoading] = useState(false);
 
   const storedFilters = sessionStorage.getItem('TraceAnalyticsSpanFilters');
-  const [spanFilters, setSpanFilters] = useState<TraceFilter[]>(
+  const [spanFilters, setSpanFilters] = useState<TraceFilter[]>(() =>
     storedFilters ? JSON.parse(storedFilters) : []
   );
   const [filteredPayload, setFilteredPayload] = useState('');

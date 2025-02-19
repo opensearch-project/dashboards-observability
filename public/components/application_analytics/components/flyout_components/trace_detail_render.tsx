@@ -38,7 +38,7 @@ export const TraceDetailRender = ({
   const [colorMap, setColorMap] = useState({});
 
   const storedFilters = sessionStorage.getItem('TraceAnalyticsSpanFilters');
-  const [spanFilters, setSpanFilters] = useState<TraceFilter[]>(
+  const [spanFilters, setSpanFilters] = useState<TraceFilter[]>(() =>
     storedFilters ? JSON.parse(storedFilters) : []
   );
 
