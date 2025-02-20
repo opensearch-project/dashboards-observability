@@ -37,16 +37,25 @@ export interface AccelerationDetailsFlyoutProps {
   dataSourceMDSId?: string;
 }
 
-const getMappings = (index: string): Promise<OpenSearchDashboardsResponse> | undefined => {
-  return coreRefs.dslService?.fetchFields(index);
+const getMappings = (
+  index: string,
+  dataSourceMDSId?: string
+): Promise<OpenSearchDashboardsResponse> | undefined => {
+  return coreRefs.dslService?.fetchFields(index, dataSourceMDSId);
 };
 
-const getSettings = (index: string): Promise<OpenSearchDashboardsResponse> | undefined => {
-  return coreRefs.dslService?.fetchSettings(index);
+const getSettings = (
+  index: string,
+  dataSourceMDSId?: string
+): Promise<OpenSearchDashboardsResponse> | undefined => {
+  return coreRefs.dslService?.fetchSettings(index, dataSourceMDSId);
 };
 
-const getIndexInfo = (index: string): Promise<OpenSearchDashboardsResponse> | undefined => {
-  return coreRefs.dslService?.fetchIndices(index);
+const getIndexInfo = (
+  index: string,
+  dataSourceMDSId?: string
+): Promise<OpenSearchDashboardsResponse> | undefined => {
+  return coreRefs.dslService?.fetchIndices(index, dataSourceMDSId);
 };
 
 const handleDetailsFetchingPromise = (
@@ -59,7 +68,7 @@ const handleDetailsFetchingPromise = (
 };
 
 export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps) => {
-  const { dataSourceName, acceleration, resetFlyout, handleRefresh } = props;
+  const { dataSourceName, acceleration, resetFlyout, handleRefresh, dataSourceMDSId } = props;
   const { flintIndexName } = acceleration;
   const [selectedTab, setSelectedTab] = useState('details');
   const tabsMap: { [key: string]: any } = {
@@ -113,9 +122,9 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
 
   const getAccDetail = (selectedIndex: string) => {
     Promise.all([
-      handleDetailsFetchingPromise(getMappings(selectedIndex), 'getMappings'),
-      handleDetailsFetchingPromise(getSettings(selectedIndex), 'getSettings'),
-      handleDetailsFetchingPromise(getIndexInfo(selectedIndex), 'getIndexInfo'),
+      handleDetailsFetchingPromise(getMappings(selectedIndex, dataSourceMDSId), 'getMappings'),
+      handleDetailsFetchingPromise(getSettings(selectedIndex, dataSourceMDSId), 'getSettings'),
+      handleDetailsFetchingPromise(getIndexInfo(selectedIndex, dataSourceMDSId), 'getIndexInfo'),
     ])
       .then((results) => {
         updateMapping(results[0]);

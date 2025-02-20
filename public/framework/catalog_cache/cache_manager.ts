@@ -100,12 +100,11 @@ export class CatalogCacheManager {
       );
     } else {
       index = accCacheData.dataSources.findIndex(
-        (ds: CachedAccelerationByDataSource) =>
-          ds.name === dataSource.name && ds.dataSourceMDSId === dataSourceMDSId
+        (ds: CachedAccelerationByDataSource) => ds.name === dataSource.name
       );
     }
     if (index !== -1) {
-      accCacheData.dataSources[index] = dataSource;
+      accCacheData.dataSources[index] = { ...dataSource, dataSourceMDSId };
     } else {
       accCacheData.dataSources.push(dataSource);
     }
@@ -161,8 +160,11 @@ export class CatalogCacheManager {
         (ds: CachedDataSource) =>
           ds.name === dataSource.name && ds.dataSourceMDSId === dataSourceMDSId
       );
+    } else {
+      index = cacheData.dataSources.findIndex(
+        (ds: CachedDataSource) => ds.name === dataSource.name
+      );
     }
-    index = cacheData.dataSources.findIndex((ds: CachedDataSource) => ds.name === dataSource.name);
     if (index !== -1) {
       cacheData.dataSources[index] = dataSource;
     } else {
