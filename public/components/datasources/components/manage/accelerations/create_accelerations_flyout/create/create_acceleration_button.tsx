@@ -21,6 +21,7 @@ interface CreateAccelerationButtonProps {
   setAccelerationFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
   resetFlyout: () => void;
   refreshHandler?: () => void;
+  dataSourceMDSId?: string;
 }
 
 export const CreateAccelerationButton = ({
@@ -28,6 +29,7 @@ export const CreateAccelerationButton = ({
   setAccelerationFormData,
   resetFlyout,
   refreshHandler,
+  dataSourceMDSId,
 }: CreateAccelerationButtonProps) => {
   const { setToast } = useToast();
   const { loadStatus: directqueryLoadStatus, startLoading: startDirectQuery } = useDirectQuery();
@@ -45,8 +47,7 @@ export const CreateAccelerationButton = ({
       query: accelerationQueryBuilder(accelerationFormData).replaceAll(SANITIZE_QUERY_REGEX, ' '),
       datasource: accelerationFormData.dataSource,
     };
-
-    startDirectQuery(requestPayload);
+    startDirectQuery(requestPayload, dataSourceMDSId);
     setIsLoading(true);
   };
 

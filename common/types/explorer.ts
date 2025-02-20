@@ -438,4 +438,5 @@ export interface DirectQueryRequest {
   lang: string;
   datasource: string;
   sessionId?: string;
+  dataSourceMDSId?: string;
 }
