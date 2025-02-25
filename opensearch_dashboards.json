@@ -1,6 +1,6 @@
 {
   "id": "observabilityDashboards",
-  "version": "3.0.0.0",
+  "version": "3.0.0.0-alpha1",
   "opensearchDashboardsVersion": "3.0.0",
   "server": true,
   "ui": true,
@@ -26,12 +26,7 @@
     "dataSource",
     "dataSourceManagement"
   ],
-  "configPath": [
-    "observability"
-  ],
+  "configPath": ["observability"],
   "supportedOSDataSourceVersions": ">=2.9.0",
-  "requiredOSDataSourcePlugins": [
-    "opensearch-sql",
-    "opensearch-observability"
-  ]
+  "requiredOSDataSourcePlugins": ["opensearch-sql", "opensearch-observability"]
 }
