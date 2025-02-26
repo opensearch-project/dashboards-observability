@@ -2,7 +2,7 @@ name: 'Install Dashboards with Plugin via Binary'
 
 on: [push, pull_request]
 env:
-  OPENSEARCH_VERSION: '3.0.0'
+  OPENSEARCH_VERSION: '3.0.0-alpha1'
   CI: 1
   # avoid warnings like "tput: No value for $TERM and no -T specified"
   TERM: xterm
@@ -16,7 +16,7 @@ jobs:
         os: [ubuntu-latest]
         # TODO: add windows support when OSD core is stable on windows
     runs-on: ${{ matrix.os }}
-    steps:  
+    steps:
       - name: Checkout Branch
         uses: actions/checkout@v3
 
@@ -42,15 +42,14 @@ jobs:
           built_plugin_name: observabilityDashboards
           built_plugin_suffix: ${{ env.OPENSEARCH_VERSION }}
           install_zip: true
-          
+
       - name: Start the binary
-        run: | 
+        run: |
           nohup ./bin/opensearch-dashboards &
         working-directory: ${{ steps.setup-dashboards.outputs.dashboards-binary-directory }}
         shell: bash
 
-      - name: Health check 
+      - name: Health check
         run: |
           timeout 300 bash -c 'while [[ "$(curl http://localhost:5601/api/status | jq -r '.status.overall.state')" != "green" ]]; do sleep 5; done'
         shell: bash
-
