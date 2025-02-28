@@ -65,7 +65,6 @@ export function ServicesContent(props: ServicesProps) {
   useEffect(() => {
     const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
     chrome.setBreadcrumbs([...(isNavGroupEnabled ? [] : [parentBreadcrumb]), ...childBreadcrumbs]);
-
     const validFilters = getValidFilterFields(mode, 'services', attributesFilterFields);
 
     setFilters([

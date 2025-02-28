@@ -80,7 +80,6 @@ export function TracesContent(props: TracesProps) {
       ...childBreadcrumbs,
     ]);
     const validFilters = getValidFilterFields(mode, 'traces', attributesFilterFields);
-
     setFilters([
       ...filters.map((filter) => ({
         ...filter,
