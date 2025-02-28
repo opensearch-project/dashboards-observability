@@ -14,7 +14,6 @@ import {
   handleServicesRequest,
   handleServiceTrendsRequest,
 } from '../../requests/services_request_handler';
-import { getValidFilterFields } from '../common/filters/filter_helpers';
 import { Filters, FilterType } from '../common/filters/filters';
 import { filtersToDsl, processTimeStamp } from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
@@ -65,14 +64,7 @@ export function ServicesContent(props: ServicesProps) {
   useEffect(() => {
     const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
     chrome.setBreadcrumbs([...(isNavGroupEnabled ? [] : [parentBreadcrumb]), ...childBreadcrumbs]);
-    const validFilters = getValidFilterFields(mode, 'services', attributesFilterFields);
 
-    setFilters([
-      ...filters.map((filter) => ({
-        ...filter,
-        locked: validFilters.indexOf(filter.field) === -1,
-      })),
-    ]);
     setRedirect(false);
     props.setDataSourceMenuSelectable?.(true);
   }, [mode, props.setDataSourceMenuSelectable, props.currentSelectedService]);

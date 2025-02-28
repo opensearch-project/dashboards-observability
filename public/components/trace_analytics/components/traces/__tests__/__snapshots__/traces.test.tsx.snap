@@ -224,21 +224,7 @@ exports[`Traces component renders empty traces page 1`] = `
   }
   query=""
   setEndTime={[MockFunction]}
-  setFilters={
-    [MockFunction] {
-      "calls": Array [
-        Array [
-          Array [],
-        ],
-      ],
-      "results": Array [
-        Object {
-          "type": "return",
-          "value": undefined,
-        },
-      ],
-    }
-  }
+  setFilters={[MockFunction]}
   setQuery={[MockFunction]}
   setStartTime={[MockFunction]}
   startTime="now-5m"
@@ -466,21 +452,7 @@ exports[`Traces component renders empty traces page 1`] = `
     }
     query=""
     setEndTime={[MockFunction]}
-    setFilters={
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Array [],
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-        ],
-      }
-    }
+    setFilters={[MockFunction]}
     setQuery={[MockFunction]}
     setStartTime={[MockFunction]}
     startTime="now-5m"
@@ -667,21 +639,7 @@ exports[`Traces component renders empty traces page 1`] = `
                       query=""
                       refresh={[Function]}
                       setEndTime={[MockFunction]}
-                      setFilters={
-                        [MockFunction] {
-                          "calls": Array [
-                            Array [
-                              Array [],
-                            ],
-                          ],
-                          "results": Array [
-                            Object {
-                              "type": "return",
-                              "value": undefined,
-                            },
-                          ],
-                        }
-                      }
+                      setFilters={[MockFunction]}
                       setQuery={[MockFunction]}
                       setStartTime={[MockFunction]}
                       startTime="now-5m"
@@ -713,21 +671,7 @@ exports[`Traces component renders empty traces page 1`] = `
                                     filters={Array []}
                                     mode="data_prepper"
                                     page="traces"
-                                    setFilters={
-                                      [MockFunction] {
-                                        "calls": Array [
-                                          Array [
-                                            Array [],
-                                          ],
-                                        ],
-                                        "results": Array [
-                                          Object {
-                                            "type": "return",
-                                            "value": undefined,
-                                          },
-                                        ],
-                                      }
-                                    }
+                                    setFilters={[MockFunction]}
                                   />
                                 }
                                 value=""
@@ -743,21 +687,7 @@ exports[`Traces component renders empty traces page 1`] = `
                                       filters={Array []}
                                       mode="data_prepper"
                                       page="traces"
-                                      setFilters={
-                                        [MockFunction] {
-                                          "calls": Array [
-                                            Array [
-                                              Array [],
-                                            ],
-                                          ],
-                                          "results": Array [
-                                            Object {
-                                              "type": "return",
-                                              "value": undefined,
-                                            },
-                                          ],
-                                        }
-                                      }
+                                      setFilters={[MockFunction]}
                                     />
                                   }
                                 >
@@ -771,21 +701,7 @@ exports[`Traces component renders empty traces page 1`] = `
                                       key="0/.0"
                                       mode="data_prepper"
                                       page="traces"
-                                      setFilters={
-                                        [MockFunction] {
-                                          "calls": Array [
-                                            Array [
-                                              Array [],
-                                            ],
-                                          ],
-                                          "results": Array [
-                                            Object {
-                                              "type": "return",
-                                              "value": undefined,
-                                            },
-                                          ],
-                                        }
-                                      }
+                                      setFilters={[MockFunction]}
                                     >
                                       <EuiPopover
                                         anchorPosition="downLeft"
@@ -1449,21 +1365,7 @@ exports[`Traces component renders empty traces page 1`] = `
               filters={Array []}
               mode="data_prepper"
               page="traces"
-              setFilters={
-                [MockFunction] {
-                  "calls": Array [
-                    Array [
-                      Array [],
-                    ],
-                  ],
-                  "results": Array [
-                    Object {
-                      "type": "return",
-                      "value": undefined,
-                    },
-                  ],
-                }
-              }
+              setFilters={[MockFunction]}
             />
             <EuiSpacer
               size="s"
@@ -2679,21 +2581,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
   }
   query=""
   setEndTime={[MockFunction]}
-  setFilters={
-    [MockFunction] {
-      "calls": Array [
-        Array [
-          Array [],
-        ],
-      ],
-      "results": Array [
-        Object {
-          "type": "return",
-          "value": undefined,
-        },
-      ],
-    }
-  }
+  setFilters={[MockFunction]}
   setQuery={[MockFunction]}
   setStartTime={[MockFunction]}
   startTime="now-5m"
@@ -2921,21 +2809,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
     }
     query=""
     setEndTime={[MockFunction]}
-    setFilters={
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Array [],
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-        ],
-      }
-    }
+    setFilters={[MockFunction]}
     setQuery={[MockFunction]}
     setStartTime={[MockFunction]}
     startTime="now-5m"
@@ -3123,21 +2997,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                       query=""
                       refresh={[Function]}
                       setEndTime={[MockFunction]}
-                      setFilters={
-                        [MockFunction] {
-                          "calls": Array [
-                            Array [
-                              Array [],
-                            ],
-                          ],
-                          "results": Array [
-                            Object {
-                              "type": "return",
-                              "value": undefined,
-                            },
-                          ],
-                        }
-                      }
+                      setFilters={[MockFunction]}
                       setQuery={[MockFunction]}
                       setStartTime={[MockFunction]}
                       startTime="now-5m"
@@ -3169,21 +3029,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                                     filters={Array []}
                                     mode="jaeger"
                                     page="traces"
-                                    setFilters={
-                                      [MockFunction] {
-                                        "calls": Array [
-                                          Array [
-                                            Array [],
-                                          ],
-                                        ],
-                                        "results": Array [
-                                          Object {
-                                            "type": "return",
-                                            "value": undefined,
-                                          },
-                                        ],
-                                      }
-                                    }
+                                    setFilters={[MockFunction]}
                                   />
                                 }
                                 value=""
@@ -3199,21 +3045,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                                       filters={Array []}
                                       mode="jaeger"
                                       page="traces"
-                                      setFilters={
-                                        [MockFunction] {
-                                          "calls": Array [
-                                            Array [
-                                              Array [],
-                                            ],
-                                          ],
-                                          "results": Array [
-                                            Object {
-                                              "type": "return",
-                                              "value": undefined,
-                                            },
-                                          ],
-                                        }
-                                      }
+                                      setFilters={[MockFunction]}
                                     />
                                   }
                                 >
@@ -3227,21 +3059,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                                       key="0/.0"
                                       mode="jaeger"
                                       page="traces"
-                                      setFilters={
-                                        [MockFunction] {
-                                          "calls": Array [
-                                            Array [
-                                              Array [],
-                                            ],
-                                          ],
-                                          "results": Array [
-                                            Object {
-                                              "type": "return",
-                                              "value": undefined,
-                                            },
-                                          ],
-                                        }
-                                      }
+                                      setFilters={[MockFunction]}
                                     >
                                       <EuiPopover
                                         anchorPosition="downLeft"
@@ -3909,21 +3727,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
               filters={Array []}
               mode="jaeger"
               page="traces"
-              setFilters={
-                [MockFunction] {
-                  "calls": Array [
-                    Array [
-                      Array [],
-                    ],
-                  ],
-                  "results": Array [
-                    Object {
-                      "type": "return",
-                      "value": undefined,
-                    },
-                  ],
-                }
-              }
+              setFilters={[MockFunction]}
             />
             <EuiSpacer
               size="s"
@@ -4973,21 +4777,7 @@ exports[`Traces component renders traces page 1`] = `
   }
   query=""
   setEndTime={[MockFunction]}
-  setFilters={
-    [MockFunction] {
-      "calls": Array [
-        Array [
-          Array [],
-        ],
-      ],
-      "results": Array [
-        Object {
-          "type": "return",
-          "value": undefined,
-        },
-      ],
-    }
-  }
+  setFilters={[MockFunction]}
   setQuery={[MockFunction]}
   setStartTime={[MockFunction]}
   startTime="now-5m"
@@ -5214,21 +5004,7 @@ exports[`Traces component renders traces page 1`] = `
     }
     query=""
     setEndTime={[MockFunction]}
-    setFilters={
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Array [],
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-        ],
-      }
-    }
+    setFilters={[MockFunction]}
     setQuery={[MockFunction]}
     setStartTime={[MockFunction]}
     startTime="now-5m"
@@ -5416,21 +5192,7 @@ exports[`Traces component renders traces page 1`] = `
                       query=""
                       refresh={[Function]}
                       setEndTime={[MockFunction]}
-                      setFilters={
-                        [MockFunction] {
-                          "calls": Array [
-                            Array [
-                              Array [],
-                            ],
-                          ],
-                          "results": Array [
-                            Object {
-                              "type": "return",
-                              "value": undefined,
-                            },
-                          ],
-                        }
-                      }
+                      setFilters={[MockFunction]}
                       setQuery={[MockFunction]}
                       setStartTime={[MockFunction]}
                       startTime="now-5m"
@@ -5462,21 +5224,7 @@ exports[`Traces component renders traces page 1`] = `
                                     filters={Array []}
                                     mode="data_prepper"
                                     page="traces"
-                                    setFilters={
-                                      [MockFunction] {
-                                        "calls": Array [
-                                          Array [
-                                            Array [],
-                                          ],
-                                        ],
-                                        "results": Array [
-                                          Object {
-                                            "type": "return",
-                                            "value": undefined,
-                                          },
-                                        ],
-                                      }
-                                    }
+                                    setFilters={[MockFunction]}
                                   />
                                 }
                                 value=""
@@ -5492,21 +5240,7 @@ exports[`Traces component renders traces page 1`] = `
                                       filters={Array []}
                                       mode="data_prepper"
                                       page="traces"
-                                      setFilters={
-                                        [MockFunction] {
-                                          "calls": Array [
-                                            Array [
-                                              Array [],
-                                            ],
-                                          ],
-                                          "results": Array [
-                                            Object {
-                                              "type": "return",
-                                              "value": undefined,
-                                            },
-                                          ],
-                                        }
-                                      }
+                                      setFilters={[MockFunction]}
                                     />
                                   }
                                 >
@@ -5520,21 +5254,7 @@ exports[`Traces component renders traces page 1`] = `
                                       key="0/.0"
                                       mode="data_prepper"
                                       page="traces"
-                                      setFilters={
-                                        [MockFunction] {
-                                          "calls": Array [
-                                            Array [
-                                              Array [],
-                                            ],
-                                          ],
-                                          "results": Array [
-                                            Object {
-                                              "type": "return",
-                                              "value": undefined,
-                                            },
-                                          ],
-                                        }
-                                      }
+                                      setFilters={[MockFunction]}
                                     >
                                       <EuiPopover
                                         anchorPosition="downLeft"
@@ -6202,21 +5922,7 @@ exports[`Traces component renders traces page 1`] = `
               filters={Array []}
               mode="data_prepper"
               page="traces"
-              setFilters={
-                [MockFunction] {
-                  "calls": Array [
-                    Array [
-                      Array [],
-                    ],
-                  ],
-                  "results": Array [
-                    Object {
-                      "type": "return",
-                      "value": undefined,
-                    },
-                  ],
-                }
-              }
+              setFilters={[MockFunction]}
             />
             <EuiSpacer
               size="s"

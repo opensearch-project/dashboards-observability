@@ -222,21 +222,7 @@ exports[`Dashboard component renders dashboard 1`] = `
   }
   query=""
   setEndTime={[MockFunction]}
-  setFilters={
-    [MockFunction] {
-      "calls": Array [
-        Array [
-          Array [],
-        ],
-      ],
-      "results": Array [
-        Object {
-          "type": "return",
-          "value": undefined,
-        },
-      ],
-    }
-  }
+  setFilters={[MockFunction]}
   setQuery={[MockFunction]}
   setStartTime={[MockFunction]}
   startTime="now-5m"
@@ -617,21 +603,7 @@ exports[`Dashboard component renders dashboard 1`] = `
     }
     query=""
     setEndTime={[MockFunction]}
-    setFilters={
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Array [],
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-        ],
-      }
-    }
+    setFilters={[MockFunction]}
     setQuery={[MockFunction]}
     setStartTime={[MockFunction]}
     startTime="now-5m"
@@ -2870,21 +2842,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
   }
   query=""
   setEndTime={[MockFunction]}
-  setFilters={
-    [MockFunction] {
-      "calls": Array [
-        Array [
-          Array [],
-        ],
-      ],
-      "results": Array [
-        Object {
-          "type": "return",
-          "value": undefined,
-        },
-      ],
-    }
-  }
+  setFilters={[MockFunction]}
   setQuery={[MockFunction]}
   setStartTime={[MockFunction]}
   startTime="now-5m"
@@ -3264,21 +3222,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
     }
     query=""
     setEndTime={[MockFunction]}
-    setFilters={
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Array [],
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-        ],
-      }
-    }
+    setFilters={[MockFunction]}
     setQuery={[MockFunction]}
     setStartTime={[MockFunction]}
     startTime="now-5m"
@@ -5517,21 +5461,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
   }
   query=""
   setEndTime={[MockFunction]}
-  setFilters={
-    [MockFunction] {
-      "calls": Array [
-        Array [
-          Array [],
-        ],
-      ],
-      "results": Array [
-        Object {
-          "type": "return",
-          "value": undefined,
-        },
-      ],
-    }
-  }
+  setFilters={[MockFunction]}
   setQuery={[MockFunction]}
   setStartTime={[MockFunction]}
   startTime="now-5m"
@@ -5913,21 +5843,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
     }
     query=""
     setEndTime={[MockFunction]}
-    setFilters={
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Array [],
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-        ],
-      }
-    }
+    setFilters={[MockFunction]}
     setQuery={[MockFunction]}
     setStartTime={[MockFunction]}
     startTime="now-5m"
