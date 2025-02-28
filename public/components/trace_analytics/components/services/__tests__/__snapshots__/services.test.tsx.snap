@@ -214,7 +214,21 @@ exports[`Services component renders empty services page 1`] = `
   }
   query=""
   setEndTime={[MockFunction]}
-  setFilters={[MockFunction]}
+  setFilters={
+    [MockFunction] {
+      "calls": Array [
+        Array [
+          Array [],
+        ],
+      ],
+      "results": Array [
+        Object {
+          "type": "return",
+          "value": undefined,
+        },
+      ],
+    }
+  }
   setQuery={[MockFunction]}
   setStartTime={[MockFunction]}
   startTime="now-5m"
@@ -433,7 +447,21 @@ exports[`Services component renders empty services page 1`] = `
     }
     query=""
     setEndTime={[MockFunction]}
-    setFilters={[MockFunction]}
+    setFilters={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [],
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      }
+    }
     setQuery={[MockFunction]}
     setStartTime={[MockFunction]}
     startTime="now-5m"
@@ -620,7 +648,21 @@ exports[`Services component renders empty services page 1`] = `
                       query=""
                       refresh={[Function]}
                       setEndTime={[MockFunction]}
-                      setFilters={[MockFunction]}
+                      setFilters={
+                        [MockFunction] {
+                          "calls": Array [
+                            Array [
+                              Array [],
+                            ],
+                          ],
+                          "results": Array [
+                            Object {
+                              "type": "return",
+                              "value": undefined,
+                            },
+                          ],
+                        }
+                      }
                       setQuery={[MockFunction]}
                       setStartTime={[MockFunction]}
                       startTime="now-5m"
@@ -652,7 +694,21 @@ exports[`Services component renders empty services page 1`] = `
                                     filters={Array []}
                                     mode="data_prepper"
                                     page="services"
-                                    setFilters={[MockFunction]}
+                                    setFilters={
+                                      [MockFunction] {
+                                        "calls": Array [
+                                          Array [
+                                            Array [],
+                                          ],
+                                        ],
+                                        "results": Array [
+                                          Object {
+                                            "type": "return",
+                                            "value": undefined,
+                                          },
+                                        ],
+                                      }
+                                    }
                                   />
                                 }
                                 value=""
@@ -668,7 +724,21 @@ exports[`Services component renders empty services page 1`] = `
                                       filters={Array []}
                                       mode="data_prepper"
                                       page="services"
-                                      setFilters={[MockFunction]}
+                                      setFilters={
+                                        [MockFunction] {
+                                          "calls": Array [
+                                            Array [
+                                              Array [],
+                                            ],
+                                          ],
+                                          "results": Array [
+                                            Object {
+                                              "type": "return",
+                                              "value": undefined,
+                                            },
+                                          ],
+                                        }
+                                      }
                                     />
                                   }
                                 >
@@ -682,7 +752,21 @@ exports[`Services component renders empty services page 1`] = `
                                       key="0/.0"
                                       mode="data_prepper"
                                       page="services"
-                                      setFilters={[MockFunction]}
+                                      setFilters={
+                                        [MockFunction] {
+                                          "calls": Array [
+                                            Array [
+                                              Array [],
+                                            ],
+                                          ],
+                                          "results": Array [
+                                            Object {
+                                              "type": "return",
+                                              "value": undefined,
+                                            },
+                                          ],
+                                        }
+                                      }
                                     >
                                       <EuiPopover
                                         anchorPosition="downLeft"
@@ -1346,7 +1430,21 @@ exports[`Services component renders empty services page 1`] = `
               filters={Array []}
               mode="data_prepper"
               page="services"
-              setFilters={[MockFunction]}
+              setFilters={
+                [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      Array [],
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": undefined,
+                    },
+                  ],
+                }
+              }
             />
             <EuiSpacer
               size="s"
@@ -2604,7 +2702,21 @@ exports[`Services component renders empty services page 1`] = `
               mode="data_prepper"
               page="services"
               serviceMap={Object {}}
-              setFilters={[MockFunction]}
+              setFilters={
+                [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      Array [],
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": undefined,
+                    },
+                  ],
+                }
+              }
               setIdSelected={[Function]}
             >
               <EuiPanel>
@@ -3497,7 +3609,21 @@ exports[`Services component renders jaeger services page 1`] = `
   }
   query=""
   setEndTime={[MockFunction]}
-  setFilters={[MockFunction]}
+  setFilters={
+    [MockFunction] {
+      "calls": Array [
+        Array [
+          Array [],
+        ],
+      ],
+      "results": Array [
+        Object {
+          "type": "return",
+          "value": undefined,
+        },
+      ],
+    }
+  }
   setQuery={[MockFunction]}
   setStartTime={[MockFunction]}
   startTime="now-5m"
@@ -3716,7 +3842,21 @@ exports[`Services component renders jaeger services page 1`] = `
     }
     query=""
     setEndTime={[MockFunction]}
-    setFilters={[MockFunction]}
+    setFilters={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [],
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      }
+    }
     setQuery={[MockFunction]}
     setStartTime={[MockFunction]}
     startTime="now-5m"
@@ -3904,7 +4044,21 @@ exports[`Services component renders jaeger services page 1`] = `
                       query=""
                       refresh={[Function]}
                       setEndTime={[MockFunction]}
-                      setFilters={[MockFunction]}
+                      setFilters={
+                        [MockFunction] {
+                          "calls": Array [
+                            Array [
+                              Array [],
+                            ],
+                          ],
+                          "results": Array [
+                            Object {
+                              "type": "return",
+                              "value": undefined,
+                            },
+                          ],
+                        }
+                      }
                       setQuery={[MockFunction]}
                       setStartTime={[MockFunction]}
                       startTime="now-5m"
@@ -3936,7 +4090,21 @@ exports[`Services component renders jaeger services page 1`] = `
                                     filters={Array []}
                                     mode="jaeger"
                                     page="services"
-                                    setFilters={[MockFunction]}
+                                    setFilters={
+                                      [MockFunction] {
+                                        "calls": Array [
+                                          Array [
+                                            Array [],
+                                          ],
+                                        ],
+                                        "results": Array [
+                                          Object {
+                                            "type": "return",
+                                            "value": undefined,
+                                          },
+                                        ],
+                                      }
+                                    }
                                   />
                                 }
                                 value=""
@@ -3952,7 +4120,21 @@ exports[`Services component renders jaeger services page 1`] = `
                                       filters={Array []}
                                       mode="jaeger"
                                       page="services"
-                                      setFilters={[MockFunction]}
+                                      setFilters={
+                                        [MockFunction] {
+                                          "calls": Array [
+                                            Array [
+                                              Array [],
+                                            ],
+                                          ],
+                                          "results": Array [
+                                            Object {
+                                              "type": "return",
+                                              "value": undefined,
+                                            },
+                                          ],
+                                        }
+                                      }
                                     />
                                   }
                                 >
@@ -3966,7 +4148,21 @@ exports[`Services component renders jaeger services page 1`] = `
                                       key="0/.0"
                                       mode="jaeger"
                                       page="services"
-                                      setFilters={[MockFunction]}
+                                      setFilters={
+                                        [MockFunction] {
+                                          "calls": Array [
+                                            Array [
+                                              Array [],
+                                            ],
+                                          ],
+                                          "results": Array [
+                                            Object {
+                                              "type": "return",
+                                              "value": undefined,
+                                            },
+                                          ],
+                                        }
+                                      }
                                     >
                                       <EuiPopover
                                         anchorPosition="downLeft"
@@ -4634,7 +4830,21 @@ exports[`Services component renders jaeger services page 1`] = `
               filters={Array []}
               mode="jaeger"
               page="services"
-              setFilters={[MockFunction]}
+              setFilters={
+                [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      Array [],
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": undefined,
+                    },
+                  ],
+                }
+              }
             />
             <EuiSpacer
               size="s"
@@ -5903,7 +6113,21 @@ exports[`Services component renders services page 1`] = `
   }
   query=""
   setEndTime={[MockFunction]}
-  setFilters={[MockFunction]}
+  setFilters={
+    [MockFunction] {
+      "calls": Array [
+        Array [
+          Array [],
+        ],
+      ],
+      "results": Array [
+        Object {
+          "type": "return",
+          "value": undefined,
+        },
+      ],
+    }
+  }
   setQuery={[MockFunction]}
   setStartTime={[MockFunction]}
   startTime="now-5m"
@@ -6121,7 +6345,21 @@ exports[`Services component renders services page 1`] = `
     }
     query=""
     setEndTime={[MockFunction]}
-    setFilters={[MockFunction]}
+    setFilters={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [],
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      }
+    }
     setQuery={[MockFunction]}
     setStartTime={[MockFunction]}
     startTime="now-5m"
@@ -6309,7 +6547,21 @@ exports[`Services component renders services page 1`] = `
                       query=""
                       refresh={[Function]}
                       setEndTime={[MockFunction]}
-                      setFilters={[MockFunction]}
+                      setFilters={
+                        [MockFunction] {
+                          "calls": Array [
+                            Array [
+                              Array [],
+                            ],
+                          ],
+                          "results": Array [
+                            Object {
+                              "type": "return",
+                              "value": undefined,
+                            },
+                          ],
+                        }
+                      }
                       setQuery={[MockFunction]}
                       setStartTime={[MockFunction]}
                       startTime="now-5m"
@@ -6341,7 +6593,21 @@ exports[`Services component renders services page 1`] = `
                                     filters={Array []}
                                     mode="data_prepper"
                                     page="services"
-                                    setFilters={[MockFunction]}
+                                    setFilters={
+                                      [MockFunction] {
+                                        "calls": Array [
+                                          Array [
+                                            Array [],
+                                          ],
+                                        ],
+                                        "results": Array [
+                                          Object {
+                                            "type": "return",
+                                            "value": undefined,
+                                          },
+                                        ],
+                                      }
+                                    }
                                   />
                                 }
                                 value=""
@@ -6357,7 +6623,21 @@ exports[`Services component renders services page 1`] = `
                                       filters={Array []}
                                       mode="data_prepper"
                                       page="services"
-                                      setFilters={[MockFunction]}
+                                      setFilters={
+                                        [MockFunction] {
+                                          "calls": Array [
+                                            Array [
+                                              Array [],
+                                            ],
+                                          ],
+                                          "results": Array [
+                                            Object {
+                                              "type": "return",
+                                              "value": undefined,
+                                            },
+                                          ],
+                                        }
+                                      }
                                     />
                                   }
                                 >
@@ -6371,7 +6651,21 @@ exports[`Services component renders services page 1`] = `
                                       key="0/.0"
                                       mode="data_prepper"
                                       page="services"
-                                      setFilters={[MockFunction]}
+                                      setFilters={
+                                        [MockFunction] {
+                                          "calls": Array [
+                                            Array [
+                                              Array [],
+                                            ],
+                                          ],
+                                          "results": Array [
+                                            Object {
+                                              "type": "return",
+                                              "value": undefined,
+                                            },
+                                          ],
+                                        }
+                                      }
                                     >
                                       <EuiPopover
                                         anchorPosition="downLeft"
@@ -7039,7 +7333,21 @@ exports[`Services component renders services page 1`] = `
               filters={Array []}
               mode="data_prepper"
               page="services"
-              setFilters={[MockFunction]}
+              setFilters={
+                [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      Array [],
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": undefined,
+                    },
+                  ],
+                }
+              }
             />
             <EuiSpacer
               size="s"
@@ -8298,7 +8606,21 @@ exports[`Services component renders services page 1`] = `
               mode="data_prepper"
               page="services"
               serviceMap={Object {}}
-              setFilters={[MockFunction]}
+              setFilters={
+                [MockFunction] {
+                  "calls": Array [
+                    Array [
+                      Array [],
+                    ],
+                  ],
+                  "results": Array [
+                    Object {
+                      "type": "return",
+                      "value": undefined,
+                    },
+                  ],
+                }
+              }
               setIdSelected={[Function]}
             >
               <EuiPanel>

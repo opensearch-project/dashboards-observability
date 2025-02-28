@@ -23,6 +23,7 @@ import {
   handleCustomIndicesTracesRequest,
   handleTracesRequest,
 } from '../../requests/traces_request_handler';
+import { getValidFilterFields } from '../common/filters/filter_helpers';
 import { Filters, FilterType } from '../common/filters/filters';
 import { filtersToDsl, processTimeStamp } from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
@@ -78,7 +79,14 @@ export function TracesContent(props: TracesProps) {
       ...(isNavGroupEnabled ? [] : [props.parentBreadcrumb]),
       ...childBreadcrumbs,
     ]);
+    const validFilters = getValidFilterFields(mode, 'traces', attributesFilterFields);
 
+    setFilters([
+      ...filters.map((filter) => ({
+        ...filter,
+        locked: validFilters.indexOf(filter.field) === -1,
+      })),
+    ]);
     setRedirect(false);
   }, []);
 
