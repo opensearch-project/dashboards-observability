@@ -17,7 +17,6 @@ import {
   handleJaegerDashboardRequest,
   handleJaegerErrorDashboardRequest,
 } from '../../requests/dashboard_request_handler';
-import { getValidFilterFields } from '../common/filters/filter_helpers';
 import { FilterType } from '../common/filters/filters';
 import {
   MissingConfigurationMessage,
@@ -54,7 +53,6 @@ export function DashboardContent(props: DashboardProps) {
     jaegerIndicesExist,
     toasts,
     dataSourceMDSId,
-    attributesFilterFields,
   } = props;
   const [tableItems, setTableItems] = useState([]);
   const [jaegerTableItems, setJaegerTableItems] = useState([]);
@@ -89,13 +87,6 @@ export function DashboardContent(props: DashboardProps) {
       chrome.setBreadcrumbs([parentBreadcrumb, ...childBreadcrumbs]);
     }
 
-    const validFilters = getValidFilterFields(mode, page, attributesFilterFields);
-    setFilters([
-      ...filters.map((filter) => ({
-        ...filter,
-        locked: validFilters.indexOf(filter.field) === -1,
-      })),
-    ]);
     setRedirect(false);
   }, []);
 

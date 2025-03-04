@@ -335,7 +335,7 @@ export function DashboardTable(props: {
                 inverted: false,
                 disabled: false,
               });
-              if (props.page !== 'app') {
+              if (!['app', 'traces'].includes(props.page)) {
                 props.setRedirect(true);
                 location.assign('#/traces');
               }
