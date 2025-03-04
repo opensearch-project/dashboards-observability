@@ -5,12 +5,14 @@
 
 import {
   SEARCH_SAVED_OBJECT,
+  TRACE_VIEW_SAVED_OBJECT,
   VISUALIZATION_SAVED_OBJECT,
 } from '../../../../common/types/observability_saved_object_attributes';
 import { ISavedObjectRequestParams } from '../event_analytics/saved_objects';
 import { OSDSavedObjectClient } from './osd_saved_objects/osd_saved_object_client';
 import { OSDSavedVisualizationClient } from './osd_saved_objects/saved_visualization';
 import { OSDSavedSearchClient } from './osd_saved_objects/saved_searches';
+import { OSDSavedTraceViewClient } from './osd_saved_objects/saved_trace_view';
 import { ObservabilitySavedObjectsType } from './osd_saved_objects/types';
 import { PPLSavedQueryClient } from './ppl';
 import {
@@ -35,6 +37,8 @@ export class SavedObjectsActions {
         return OSDSavedVisualizationClient.getInstance().get(params);
       case SEARCH_SAVED_OBJECT:
         return OSDSavedSearchClient.getInstance().get(params);
+      case TRACE_VIEW_SAVED_OBJECT:
+        return OSDSavedTraceViewClient.getInstance().get(params);
 
       default:
         // for non-osd objects it does not matter which client implementation
@@ -75,6 +79,21 @@ export class SavedObjectsActions {
       };
     }
 
+    if (params.objectType?.includes('savedTraceView')) {
+      const osdTraceViewObjects = await OSDSavedTraceViewClient.getInstance().getBulk();
+      if (objects.totalHits && osdTraceViewObjects.totalHits) {
+        objects.totalHits += osdTraceViewObjects.totalHits;
+      
+      }
+      objects = {
+        ...objects,
+        observabilityObjectList: [
+          ...objects.observabilityObjectList,
+          ...osdTraceViewObjects.observabilityObjectList,
+        ],
+      }
+    }
+
     if (params.sortOrder === 'asc') {
       objects.observabilityObjectList.sort((a, b) => a.lastUpdatedTimeMs - b.lastUpdatedTimeMs);
     } else {
@@ -90,6 +109,8 @@ export class SavedObjectsActions {
         return OSDSavedVisualizationClient.getInstance().delete(params);
       case SEARCH_SAVED_OBJECT:
         return OSDSavedSearchClient.getInstance().delete(params);
+      case TRACE_VIEW_SAVED_OBJECT:
+        return OSDSavedTraceViewClient.getInstance().delete(params);
 
       default:
         return PPLSavedQueryClient.getInstance().delete(params);
@@ -133,6 +154,16 @@ export class SavedObjectsActions {
       responses.deleteResponseList = {
         ...responses.deleteResponseList,
         ...searchDeleteResponses.deleteResponseList,
+      };
+    }
+
+    if (idMap[TRACE_VIEW_SAVED_OBJECT]?.length) {
+      const traceViewDeleteResponses = await OSDSavedTraceViewClient.getInstance().deleteBulk({
+        objectIdList: idMap[TRACE_VIEW_SAVED_OBJECT],
+      });
+      responses.deleteResponseList = {
+        ...responses.deleteResponseList,
+        ...traceViewDeleteResponses.deleteResponseList,
       };
     }
 

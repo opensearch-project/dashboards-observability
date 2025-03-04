@@ -4,7 +4,9 @@
  */
 
 import { SavedQuery, SavedVisualization } from '../../../../common/types/explorer';
+import { SavedTraceView } from 'common/types/trace_analytics';
 import { SAVED_QUERY, SAVED_VISUALIZATION } from '../../../../common/constants/explorer';
+import { SAVED_TRACE_VIEW } from 'common/constants/trace_analytics';
 
 export interface SavedObjectsCreateResponse {
   objectId: string;
@@ -27,7 +29,10 @@ export interface ObservabilitySavedQuery extends ObservabilitySavedObjectBase {
   [SAVED_QUERY]: SavedQuery;
 }
 
-export type ObservabilitySavedObject = ObservabilitySavedVisualization | ObservabilitySavedQuery;
+export interface ObservabilitySavedTraceView extends ObservabilitySavedObjectBase {
+  [SAVED_TRACE_VIEW]: SavedTraceView;
+}
+export type ObservabilitySavedObject = ObservabilitySavedVisualization | ObservabilitySavedQuery | ObservabilitySavedTraceView;
 
 export interface SavedObjectsGetParams {
   objectId: string;

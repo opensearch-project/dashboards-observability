@@ -4,11 +4,15 @@
  */
 
 import { SavedObjectsType } from '../../../../src/core/server';
-import { observabilityLogsID, observabilityNotebookID } from '../../common/constants/shared';
+import { 
+  observabilityLogsID, 
+  observabilityNotebookID
+} from '../../common/constants/shared';
 import {
   NOTEBOOK_SAVED_OBJECT,
   SEARCH_SAVED_OBJECT,
   VISUALIZATION_SAVED_OBJECT,
+  TRACE_VIEW_SAVED_OBJECT
 } from '../../common/types/observability_saved_object_attributes';
 
 export const getVisualizationSavedObject = (dataSourceEnabled: boolean): SavedObjectsType => ({
@@ -48,12 +52,12 @@ export const getVisualizationSavedObject = (dataSourceEnabled: boolean): SavedOb
 
 export const getSearchSavedObject = (dataSourceEnabled: boolean): SavedObjectsType => ({
   name: SEARCH_SAVED_OBJECT,
-  icon: 'editorCodeBlock',
   hidden: false,
   namespaceType: 'single',
   management: {
     defaultSearchField: 'title',
     importableAndExportable: true,
+    icon: 'editorCodeBlock',
     getTitle(obj) {
       return obj.attributes.title;
     },
@@ -98,6 +102,33 @@ export const notebookSavedObject: SavedObjectsType = {
         path: editUrl,
         uiCapabilitiesPath: 'observability.show',
       };
+    },
+  },
+  mappings: {
+    dynamic: false,
+    properties: {
+      title: {
+        type: 'text',
+      },
+      description: {
+        type: 'text',
+      },
+      version: { type: 'integer' },
+    },
+  },
+  migrations: {},
+};
+
+export const traceViewSavedObject: SavedObjectsType = {
+  name: TRACE_VIEW_SAVED_OBJECT,
+  hidden: false,
+  namespaceType: 'single',
+  management: {
+    defaultSearchField: 'title',
+    importableAndExportable: true,
+    icon: 'apmTrace',
+    getTitle(obj) {
+      return obj.attributes.title;
     },
   },
   mappings: {

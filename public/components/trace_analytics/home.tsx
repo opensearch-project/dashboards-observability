@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiGlobalToastList } from '@elastic/eui';
+import { EuiGlobalToastList, EuiSmallButton } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
 import React, { useEffect, useMemo, useState } from 'react';
 import { HashRouter, Redirect, Route, RouteComponentProps } from 'react-router-dom';
@@ -27,7 +27,13 @@ import {
   TRACE_CUSTOM_MODE_DEFAULT_SETTING,
   TRACE_TABLE_TYPE_KEY,
 } from '../../../common/constants/trace_analytics';
-import { TraceAnalyticsMode, TraceQueryMode } from '../../../common/types/trace_analytics';
+import { 
+  FilterOperator, 
+  LanguageTypes, 
+  TraceAnalyticsMode, 
+  TraceQueryMode, 
+  TracingSchema 
+} from '../../../common/types/trace_analytics';
 import { coreRefs } from '../../framework/core_refs';
 import { FilterType } from './components/common/filters/filters';
 import { getAttributeFieldNames, getSpanIndices } from './components/common/helper_functions';
@@ -42,6 +48,7 @@ import {
 } from './requests/request_handler';
 import { TraceSideBar } from './trace_side_nav';
 import { uiSettingsService } from '../../../common/utils';
+import { OSDSavedTraceViewClient } from '../../../public/services/saved_objects/saved_object_client/osd_saved_objects/saved_trace_view';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
@@ -331,6 +338,66 @@ export const Home = (props: HomeProps) => {
     },
   ];
 
+  const createDataPrepperSavedTraceView = () => {
+    let traceView = {
+      name: 'Data Prepper Default',
+      description: '',
+      schemaType: TracingSchema.DATA_PREPPER,
+      schemaVersion: {
+        major: 1,
+        minor: 0,
+        patch: 0,
+      },
+      startTime: 'now-15m',
+      endTime: 'now',
+      filters: [{
+        field: 'traceId',
+        operator: FilterOperator.EQUALS,
+        value: 'exists',
+        inverted: false,
+        disabled: false,
+      }],
+      searchBarFilters: {
+        language: LanguageTypes.DQL,
+        query: 'GET',
+      },
+      spanIndices: 'otel-v1-apm-span-*',
+      serviceIndices: 'otel-v1-apm-service-map-*',
+      persistedViews: {},
+    }
+    OSDSavedTraceViewClient.getInstance().create(traceView);
+  }
+
+  const createJaegerSavedTraceView = () => {
+    let traceView = {
+      name: 'Jaeger Default',
+      description: '',
+      schemaType: TracingSchema.JAEGER,
+      schemaVersion: {
+        major: 1,
+        minor: 0,
+        patch: 0,
+      },
+      startTime: 'now-15m',
+      endTime: 'now',
+      filters: [{
+        field: 'traceId',
+        operator: FilterOperator.EQUALS,
+        value: 'exists',
+        inverted: false,
+        disabled: false,
+      }],
+      searchBarFilters: {
+        language: LanguageTypes.DQL,
+        query: 'GET',
+      },
+      spanIndices: 'jaeger-span-*',
+      serviceIndices: 'jaeger-service-*',
+      persistedViews: {},
+    }
+    OSDSavedTraceViewClient.getInstance().create(traceView);
+  }
+
   const traceColumnAction = () => {
     const tracesPath = '#/traces';
     const dataSourceId = dataSourceMDSId[0]?.id || '';
@@ -548,6 +615,12 @@ export const Home = (props: HomeProps) => {
             }
           }}
         />
+        <EuiSmallButton onClick={createDataPrepperSavedTraceView}>
+          Data Prepper
+        </EuiSmallButton>
+        <EuiSmallButton onClick={createJaegerSavedTraceView}>
+          Jaeger
+        </EuiSmallButton>
         <Route path="/" render={() => <Redirect to={defaultRoute} />} />
         {flyout}
         {spanFlyoutComponent}

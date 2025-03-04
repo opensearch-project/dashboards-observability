@@ -28,6 +28,7 @@ import {
   getSearchSavedObject,
   getVisualizationSavedObject,
   notebookSavedObject,
+  traceViewSavedObject
 } from './saved_objects/observability_saved_object';
 import { AssistantPluginSetup, ObservabilityPluginSetup, ObservabilityPluginStart } from './types';
 
@@ -229,6 +230,7 @@ export class ObservabilityPlugin
     core.savedObjects.registerType(getVisualizationSavedObject(dataSourceEnabled));
     core.savedObjects.registerType(getSearchSavedObject(dataSourceEnabled));
     core.savedObjects.registerType(notebookSavedObject);
+    core.savedObjects.registerType(traceViewSavedObject);
     core.capabilities.registerProvider(() => ({
       observability: {
         show: true,
