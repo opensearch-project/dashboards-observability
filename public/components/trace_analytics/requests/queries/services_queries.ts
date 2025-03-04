@@ -90,46 +90,7 @@ export const getServicesQuery = (
   return query;
 };
 
-export const getRelatedServicesQuery = (serviceName: string) => {
-  const query = {
-    size: 0,
-    query: {
-      bool: {
-        must: [],
-        filter: [],
-        should: [],
-        must_not: [],
-      },
-    },
-    aggs: {
-      traces: {
-        terms: {
-          field: 'traceId',
-          size: 10000,
-        },
-        aggs: {
-          service: {
-            filter: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      serviceName,
-                    },
-                  },
-                ],
-                must_not: [],
-              },
-            },
-          },
-        },
-      },
-    },
-  };
-  return query;
-};
-
-export const getServiceNodesQuery = (mode: TraceAnalyticsMode) => {
+export const getServiceMapQuery = (mode: TraceAnalyticsMode) => {
   return {
     index: getServiceIndices(mode),
     size: 0,
@@ -154,43 +115,41 @@ export const getServiceNodesQuery = (mode: TraceAnalyticsMode) => {
               size: SERVICE_MAP_MAX_EDGES,
             },
           },
-        },
-      },
-    },
-  };
-};
-
-export const getServiceEdgesQuery = (
-  source: 'destination' | 'target',
-  mode: TraceAnalyticsMode
-) => {
-  return {
-    index: getServiceIndices(mode),
-    size: 0,
-    query: {
-      bool: {
-        must: [],
-        filter: [],
-        should: [],
-        must_not: [],
-      },
-    },
-    aggs: {
-      service_name: {
-        terms: {
-          field: 'serviceName',
-          size: SERVICE_MAP_MAX_EDGES,
-        },
-        aggs: {
-          resource: {
+          target_edges: {
             terms: {
-              field: `${source}.resource`,
+              field: 'target.resource',
               size: SERVICE_MAP_MAX_EDGES,
             },
             aggs: {
+              service: {
+                terms: {
+                  field: 'target.serviceName',
+                  size: SERVICE_MAP_MAX_EDGES,
+                },
+              },
               domain: {
                 terms: {
-                  field: `${source}.domain`,
+                  field: 'target.domain',
+                  size: SERVICE_MAP_MAX_EDGES,
+                },
+              },
+            },
+          },
+          destination_edges: {
+            terms: {
+              field: 'destination.resource',
+              size: SERVICE_MAP_MAX_EDGES,
+            },
+            aggs: {
+              service: {
+                terms: {
+                  field: 'destination.serviceName',
+                  size: SERVICE_MAP_MAX_EDGES,
+                },
+              },
+              domain: {
+                terms: {
+                  field: 'destination.domain',
                   size: SERVICE_MAP_MAX_EDGES,
                 },
               },
