@@ -163,13 +163,13 @@ jobs:
       - name: Check If OpenSearch Dashboards Is Ready
         if: ${{ runner.os == 'Linux' }}
         run: |
-          if timeout 1200 grep -q "bundles compiled successfully after" <(tail -n0 -f dashboard.log); then
-            echo "OpenSearch Dashboards compiled successfully."
+          cd ./OpenSearch-Dashboards
+          if timeout 1200 grep -q "http server running" <(tail -n +1 -f dashboard.log); then
+            echo "OpenSearch Dashboards started successfully."
           else
-            echo "Timeout for 1200 seconds reached. OpenSearch Dashboards did not finish compiling."
+            echo "Timeout of 1200 seconds reached. OpenSearch Dashboards did not start successfully."
             exit 1
-          fi
-        working-directory: OpenSearch-Dashboards
+          fi&
 
       - name: Upload Dashboards logs
         uses: actions/upload-artifact@v4
