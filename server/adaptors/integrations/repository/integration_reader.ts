@@ -51,17 +51,17 @@ export class IntegrationReader {
    */
   private async fetchDataOrReadFile(
     item: { data?: string },
-    fileParams: { filename: string; type?: IntegrationPart },
+    fileParams: FileParams,
     format: 'json'
   ): Promise<Result<object | object[]>>;
   private async fetchDataOrReadFile(
     item: { data?: string },
-    fileParams: { filename: string; type?: IntegrationPart },
+    fileParams: FileParams,
     format: 'binary'
   ): Promise<Result<Buffer>>;
   private async fetchDataOrReadFile(
     item: { data?: string },
-    fileParams: { filename: string; type?: IntegrationPart },
+    fileParams: FileParams,
     format: 'json' | 'binary'
   ): Promise<Result<object | object[] | Buffer>> {
     if (this.reader.isConfigLocalized) {
