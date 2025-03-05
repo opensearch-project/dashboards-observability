@@ -259,7 +259,6 @@ export const Search = (props: any) => {
       setSelectedIndex(reduxIndex);
       // sets the editor text and populates sidebar field for a particular index upon initialization
       const indexQuery = `source = ${reduxIndex[0].label}`;
-      handleQueryChange(indexQuery);
       getAvailableFields(indexQuery);
     }
     if (queryRedux.ollyQueryAssistant.length > 0) {
