@@ -49,6 +49,7 @@ import { TraceFilter } from '../common/constants';
 import { FilterType } from '../common/filters/filters';
 import {
   PanelTitle,
+  TraceSettings,
   filtersToDsl,
   generateServiceUrl,
   processTimeStamp,
@@ -201,6 +202,7 @@ export function ServiceView(props: ServiceViewProps) {
                 name: 'View logs',
                 'data-test-subj': 'viewLogsButton',
                 onClick: () => {
+                  const correlatedLogsIndex = TraceSettings.getCorrelatedLogsIndex();
                   // NOTE: Discover has issue with PPL Time filter, hence adding +3/-3 days to actual timestamp
                   const startTime =
                     dateMath
@@ -218,7 +220,7 @@ export function ServiceView(props: ServiceViewProps) {
                         props.dataSourceMDSId[0].id ?? ''
                       }',title:'${props.dataSourceMDSId[0].label}',type:DATA_SOURCE),id:'${
                         props.dataSourceMDSId[0].id ?? ''
-                      }::ss4o_logs-*',timeFieldName:'time',title:'ss4o_logs-*',type:INDEXES),language:PPL,query:'source%20%3D%20ss4o_logs-%2A%20%7C%20where%20serviceName%20%3D%20%22${
+                      }::${correlatedLogsIndex}',timeFieldName:'time',title:'${correlatedLogsIndex}',type:INDEXES),language:PPL,query:'source%20%3D%20${correlatedLogsIndex}%20%7C%20where%20serviceName%20%3D%20%22${
                         props.serviceName
                       }%22'))`,
                     });
@@ -228,7 +230,7 @@ export function ServiceView(props: ServiceViewProps) {
                       state: {
                         DEFAULT_DATA_SOURCE_NAME,
                         DEFAULT_DATA_SOURCE_TYPE,
-                        queryToRun: `source = ss4o_logs-* | where serviceName='${props.serviceName}'`,
+                        queryToRun: `source = ${correlatedLogsIndex} | where serviceName='${props.serviceName}'`,
                         startTimeRange: props.startTime,
                         endTimeRange: props.endTime,
                       },

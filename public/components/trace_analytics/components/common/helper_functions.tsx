@@ -15,6 +15,8 @@ import {
   JAEGER_INDEX_NAME,
   JAEGER_SERVICE_INDEX_NAME,
   TRACE_ANALYTICS_DOCUMENTATION_LINK,
+  TRACE_CORRELATED_LOGS_INDEX_SETTING,
+  TRACE_CUSTOM_MODE_DEFAULT_SETTING,
   TRACE_CUSTOM_SERVICE_INDEX_SETTING,
   TRACE_CUSTOM_SPAN_INDEX_SETTING,
 } from '../../../../../common/constants/trace_analytics';
@@ -26,9 +28,9 @@ import {
 import { uiSettingsService } from '../../../../../common/utils';
 import { FieldCapResponse } from '../../../common/types';
 import { serviceMapColorPalette } from './color_palette';
+import { NANOS_TO_MS, ParsedHit } from './constants';
 import { FilterType } from './filters/filters';
 import { ServiceObject } from './plots/service_map';
-import { NANOS_TO_MS, ParsedHit } from './constants';
 
 const missingJaegerTracesConfigurationMessage = `The indices required for trace analytics (${JAEGER_INDEX_NAME} and ${JAEGER_SERVICE_INDEX_NAME}) do not exist or you do not have permission to access them.`;
 
@@ -559,26 +561,32 @@ export const getAttributeFieldNames = (response: FieldCapResponse): string[] => 
   );
 };
 
-export const getTraceCustomSpanIndex = () => {
-  return uiSettingsService.get(TRACE_CUSTOM_SPAN_INDEX_SETTING);
-};
+export const TraceSettings = {
+  getCustomSpanIndex: () => uiSettingsService.get(TRACE_CUSTOM_SPAN_INDEX_SETTING),
 
-export const getTraceCustomServiceIndex = () => {
-  return uiSettingsService.get(TRACE_CUSTOM_SERVICE_INDEX_SETTING);
-};
+  getCustomServiceIndex: () => uiSettingsService.get(TRACE_CUSTOM_SERVICE_INDEX_SETTING),
 
-export const setTraceCustomSpanIndex = (value: string) => {
-  return uiSettingsService.set(TRACE_CUSTOM_SPAN_INDEX_SETTING, value);
-};
+  getCustomModeSetting: () => uiSettingsService.get(TRACE_CUSTOM_MODE_DEFAULT_SETTING) || false,
 
-export const setTraceCustomServiceIndex = (value: string) => {
-  return uiSettingsService.set(TRACE_CUSTOM_SERVICE_INDEX_SETTING, value);
+  getCorrelatedLogsIndex: () => uiSettingsService.get(TRACE_CORRELATED_LOGS_INDEX_SETTING),
+
+  setCustomSpanIndex: (value: string) =>
+    uiSettingsService.set(TRACE_CUSTOM_SPAN_INDEX_SETTING, value),
+
+  setCustomServiceIndex: (value: string) =>
+    uiSettingsService.set(TRACE_CUSTOM_SERVICE_INDEX_SETTING, value),
+
+  setCustomModeSetting: (value: boolean) =>
+    uiSettingsService.set(TRACE_CUSTOM_MODE_DEFAULT_SETTING, value),
+
+  setCorrelatedLogsIndex: (value: string) =>
+    uiSettingsService.set(TRACE_CORRELATED_LOGS_INDEX_SETTING, value),
 };
 
 export const getSpanIndices = (mode: TraceAnalyticsMode) => {
   switch (mode) {
     case 'custom_data_prepper':
-      return getTraceCustomSpanIndex();
+      return TraceSettings.getCustomSpanIndex();
     case 'data_prepper':
       return DATA_PREPPER_INDEX_NAME;
     case 'jaeger':
@@ -590,7 +598,7 @@ export const getSpanIndices = (mode: TraceAnalyticsMode) => {
 export const getServiceIndices = (mode: TraceAnalyticsMode) => {
   switch (mode) {
     case 'custom_data_prepper':
-      return getTraceCustomServiceIndex();
+      return TraceSettings.getCustomServiceIndex();
     case 'data_prepper':
       return DATA_PREPPER_SERVICE_INDEX_NAME;
     case 'jaeger':

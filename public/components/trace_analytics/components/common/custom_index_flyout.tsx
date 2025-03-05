@@ -21,13 +21,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { Fragment, useEffect, useState } from 'react';
-import {
-  TRACE_CUSTOM_SERVICE_INDEX_SETTING,
-  TRACE_CUSTOM_SPAN_INDEX_SETTING,
-  TRACE_CUSTOM_MODE_DEFAULT_SETTING,
-} from '../../../../../common/constants/trace_analytics';
 import { uiSettingsService } from '../../../../../common/utils';
 import { useToast } from '../../../common/toast';
+import { TraceSettings } from './helper_functions';
 
 interface CustomIndexFlyoutProps {
   isFlyoutVisible: boolean;
@@ -42,6 +38,7 @@ export const CustomIndexFlyout = ({
   const [spanIndices, setSpanIndices] = useState('');
   const [serviceIndices, setServiceIndices] = useState('');
   const [customModeDefault, setCustomModeDefault] = useState(false);
+  const [correlatedLogsIndices, setCorrelatedLogsIndices] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const onChangeSpanIndices = (e: { target: { value: React.SetStateAction<string> } }) => {
@@ -52,22 +49,30 @@ export const CustomIndexFlyout = ({
     setServiceIndices(e.target.value);
   };
 
+  const onChangeCorrelatedLogsIndices = (e: {
+    target: { value: React.SetStateAction<string> };
+  }) => {
+    setCorrelatedLogsIndices(e.target.value);
+  };
+
   const onToggleCustomModeDefault = (e: { target: { checked: boolean } }) => {
     setCustomModeDefault(e.target.checked);
   };
 
   useEffect(() => {
-    setSpanIndices(uiSettingsService.get(TRACE_CUSTOM_SPAN_INDEX_SETTING));
-    setServiceIndices(uiSettingsService.get(TRACE_CUSTOM_SERVICE_INDEX_SETTING));
-    setCustomModeDefault(uiSettingsService.get(TRACE_CUSTOM_MODE_DEFAULT_SETTING) || false);
+    setSpanIndices(TraceSettings.getCustomSpanIndex());
+    setServiceIndices(TraceSettings.getCustomServiceIndex());
+    setCorrelatedLogsIndices(TraceSettings.getCorrelatedLogsIndex());
+    setCustomModeDefault(TraceSettings.getCustomModeSetting());
   }, [uiSettingsService]);
 
   const onSaveSettings = async () => {
     try {
       setIsLoading(true);
-      await uiSettingsService.set(TRACE_CUSTOM_SPAN_INDEX_SETTING, spanIndices);
-      await uiSettingsService.set(TRACE_CUSTOM_SERVICE_INDEX_SETTING, serviceIndices);
-      await uiSettingsService.set(TRACE_CUSTOM_MODE_DEFAULT_SETTING, customModeDefault);
+      await TraceSettings.setCustomSpanIndex(spanIndices);
+      await TraceSettings.setCustomServiceIndex(serviceIndices);
+      await TraceSettings.setCorrelatedLogsIndex(correlatedLogsIndices);
+      await TraceSettings.setCustomModeSetting(customModeDefault);
       setIsLoading(false);
       setToast('Updated trace analytics settings successfully', 'success');
     } catch (error) {
@@ -140,6 +145,25 @@ export const CustomIndexFlyout = ({
                 placeholder="index1,cluster1:index2,cluster:index3"
                 value={serviceIndices}
                 onChange={onChangeServiceIndices}
+              />
+            </EuiFormRow>
+          </EuiDescribedFormGroup>
+          <EuiDescribedFormGroup
+            title={<h3>Correlated logs indices</h3>}
+            description={
+              <Fragment>
+                Configure custom logs indices to be used by the trace analytics plugin to correlate
+                spans and services
+              </Fragment>
+            }
+          >
+            <EuiFormRow label="Correlated logs indices">
+              <EuiCompressedFieldText
+                name="logsIndices"
+                aria-label="logsIndices"
+                placeholder="index1"
+                value={correlatedLogsIndices}
+                onChange={onChangeCorrelatedLogsIndices}
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
