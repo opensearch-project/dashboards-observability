@@ -10,6 +10,18 @@ import { FileSystemDataAdaptor } from './fs_data_adaptor';
 import { CatalogDataAdaptor, IntegrationPart } from './catalog_data_adaptor';
 import { foldResults, pruneConfig } from './utils';
 
+interface FileParams {
+  filename: string;
+  type?: IntegrationPart;
+}
+
+const formatParams = (fp: FileParams): string => {
+  if (fp.type) {
+    return `\`${fp.filename}\` (type=${fp.type})`;
+  }
+  return `\`${fp.filename}\``;
+};
+
 /**
  * The Integration class represents the data for Integration Templates.
  * It is backed by the repository file system.
@@ -69,15 +81,26 @@ export class IntegrationReader {
           return { ok: true, value: Buffer.from(item.data, 'base64') };
         }
       } catch (error) {
+        error.message = `While parsing integration data for ${formatParams(fileParams)}:\n${
+          error.message
+        }`;
         return { ok: false, error };
       }
     }
 
+    let result: Result<object | object[]>;
     if (format === 'json') {
-      return this.reader.readFile(fileParams.filename, fileParams.type);
+      result = await this.reader.readFile(fileParams.filename, fileParams.type);
     } else {
-      return this.reader.readFileRaw(fileParams.filename, fileParams.type);
+      result = await this.reader.readFileRaw(fileParams.filename, fileParams.type);
     }
+
+    if (!result.ok) {
+      result.error.message = `While reading integration data for ${formatParams(fileParams)}:\n${
+        result.error.message
+      }`;
+    }
+    return result;
   }
 
   private async readAsset(

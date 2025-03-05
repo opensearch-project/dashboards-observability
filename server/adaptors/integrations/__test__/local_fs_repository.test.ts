@@ -49,25 +49,40 @@ describe('The local repository', () => {
   });
 });
 
+// Nginx and VPC are specifically used in other tests, so we add dedicated checks for them.
+
 describe('Local Nginx Integration', () => {
   it('Should serialize without errors', async () => {
     const integration = await repository.getIntegration('nginx');
 
-    await expect(integration?.serialize()).resolves.toEqual({
-      ok: true,
-      value: expect.anything(),
-    });
+    expect(integration).not.toBeNull();
+    expectOkResult(await integration!.serialize());
   });
 
-  it('Should serialize to include the config', async () => {
+  it('Should contain its config in its serialized form', async () => {
     const integration = await repository.getIntegration('nginx');
     const config = await integration!.getConfig();
     const serialized = await integration!.serialize();
 
-    expect(serialized).toEqual({
-      ok: true,
-      value: expect.anything(),
-    });
+    expectOkResult(serialized);
+    expect(serialized.value).toMatchObject(config.value!);
+  });
+});
+
+describe('Local VPC Integration', () => {
+  it('Should serialize without errors', async () => {
+    const integration = await repository.getIntegration('amazon_vpc_flow');
+
+    expect(integration).not.toBeNull();
+    expectOkResult(await integration!.serialize());
+  });
+
+  it('Should contain its config in its serialized form', async () => {
+    const integration = await repository.getIntegration('amazon_vpc_flow');
+    const config = await integration!.getConfig();
+    const serialized = await integration!.serialize();
+
+    expectOkResult(serialized);
     expect(serialized.value).toMatchObject(config.value!);
   });
 });

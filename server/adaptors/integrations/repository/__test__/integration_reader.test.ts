@@ -8,6 +8,7 @@ import { IntegrationReader } from '../integration_reader';
 import { Dirent, Stats } from 'fs';
 import * as path from 'path';
 import { TEST_INTEGRATION_CONFIG } from '../../../../../test/constants';
+import { expectOkResult } from '../../__test__/custom_expects';
 
 jest.mock('fs/promises');
 
@@ -75,7 +76,7 @@ describe('Integration', () => {
 
       const result = await integration.getConfig(TEST_INTEGRATION_CONFIG.version);
 
-      expect(result.error?.message).toBe('data/version must be string');
+      expect(result.error?.message).toContain('data/version must be string');
     });
 
     it('should return an error if the config file has syntax errors', async () => {
@@ -83,7 +84,7 @@ describe('Integration', () => {
 
       const result = await integration.getConfig(TEST_INTEGRATION_CONFIG.version);
 
-      expect(result.error?.message).toBe(
+      expect(result.error?.message).toContain(
         "Unable to parse file 'sample-2.0.0.json' as JSON or NDJson"
       );
     });
@@ -114,7 +115,7 @@ describe('Integration', () => {
 
       const result = await integration.getAssets(TEST_INTEGRATION_CONFIG.version);
 
-      expect(result.ok).toBe(true);
+      expectOkResult(result);
       expect((result as { value: Array<{ data: object[] }> }).value[0].data).toEqual([
         { name: 'asset1' },
         { name: 'asset2' },
@@ -136,7 +137,7 @@ describe('Integration', () => {
 
       const result = await integration.getAssets(TEST_INTEGRATION_CONFIG.version);
 
-      expect(result.error?.message).toBe(
+      expect(result.error?.message).toContain(
         "Unable to parse file 'sample-1.0.1.ndjson' as JSON or NDJson"
       );
     });
@@ -178,7 +179,7 @@ describe('Integration', () => {
       );
       const result = await integration.getSchemas();
 
-      expect(result.error?.message).toBe("data must have required property 'name'");
+      expect(result.error?.message).toContain("data must have required property 'name'");
     });
 
     it('should reject with an error if a mapping file is invalid', async () => {
@@ -188,7 +189,7 @@ describe('Integration', () => {
         .mockRejectedValueOnce(new Error('Could not load schema'));
 
       const result = await integration.getSchemas();
-      expect(result.error?.message).toBe('Could not load schema');
+      expect(result.error?.message).toContain('Could not load schema');
     });
   });
 
@@ -200,8 +201,8 @@ describe('Integration', () => {
 
       const result = await integration.getStatic('logo.png');
 
-      expect(result.ok).toBe(true);
-      expect((result as { value: unknown }).value).toStrictEqual(Buffer.from('logo data', 'ascii'));
+      expectOkResult(result);
+      expect(result.value).toStrictEqual(Buffer.from('logo data', 'ascii'));
       expect(readFileMock).toBeCalledWith(path.join('sample', 'static', 'logo.png'));
     });
 
@@ -247,7 +248,7 @@ describe('Integration', () => {
 
       const result = await integration.getSampleData();
 
-      expect(result.ok).toBe(true);
+      expectOkResult(result);
       expect((result as { value: { sampleData: unknown } }).value.sampleData).toBeNull();
     });
 
@@ -266,7 +267,9 @@ describe('Integration', () => {
 
       const result = await integration.getSampleData();
 
-      expect(result.error?.message).toBe("Unable to parse file 'sample.json' as JSON or NDJson");
+      expect(result.error?.message).toContain(
+        "Unable to parse file 'sample.json' as JSON or NDJson"
+      );
     });
   });
 });
