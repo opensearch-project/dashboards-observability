@@ -38,7 +38,6 @@ export function QueryArea({
   const memoizedHandleQueryChange = useMemo(() => handleQueryChange, []);
   useEffect(() => {
     const indexQuery = `source = ${selectedIndex[0]?.label || ''}`;
-    memoizedHandleQueryChange(indexQuery);
     memoizedGetAvailableFields(indexQuery);
   }, [selectedIndex, memoizedGetAvailableFields, memoizedHandleQueryChange]);
   const [lastFocusedInput, setLastFocusedInput] = useState<'query_area' | 'nlq_input'>('nlq_input');
