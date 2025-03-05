@@ -39,6 +39,13 @@ module.exports = {
         ],
       },
     ],
+    'jest/expect-expect': [
+      'warn',
+      {
+        // Allow using custom expect test helpers as long as the name starts with `expect`.
+        assertFunctionNames: ["expect*"],
+      }
+    ]
   },
   overrides: [
     {
