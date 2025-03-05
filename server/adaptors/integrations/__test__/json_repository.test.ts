@@ -32,7 +32,9 @@ const fetchSerializedIntegrations = async (): Promise<Result<SerializedIntegrati
   const serializedIntegrationResults = await Promise.all(
     (readers.filter((x) => x !== null) as IntegrationReader[]).map((r) => r.serialize())
   );
-  return foldResults(serializedIntegrationResults);
+  const folded = foldResults(serializedIntegrationResults);
+  expectOkResult(folded);
+  return folded;
 };
 
 describe('The Local Serialized Catalog', () => {
@@ -49,7 +51,7 @@ describe('The Local Serialized Catalog', () => {
 
     for (const integ of await repository.getIntegrationList()) {
       const validationResult = await deepCheck(integ);
-      await expect(validationResult).toHaveProperty('ok', true);
+      expectOkResult(validationResult);
     }
   });
 
