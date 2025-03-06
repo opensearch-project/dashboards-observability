@@ -13,6 +13,7 @@ import path from 'path';
 import * as fs from 'fs/promises';
 import { JsonCatalogDataAdaptor } from '../repository/json_data_adaptor';
 import { deepCheck, foldResults } from '../repository/utils';
+import { expectErrorResult, expectOkResult } from './custom_expects';
 
 const fetchSerializedIntegrations = async (): Promise<Result<SerializedIntegration[], Error>> => {
   const directory = path.join(__dirname, '../__data__/repository');
@@ -31,13 +32,15 @@ const fetchSerializedIntegrations = async (): Promise<Result<SerializedIntegrati
   const serializedIntegrationResults = await Promise.all(
     (readers.filter((x) => x !== null) as IntegrationReader[]).map((r) => r.serialize())
   );
-  return foldResults(serializedIntegrationResults);
+  const folded = foldResults(serializedIntegrationResults);
+  expectOkResult(folded);
+  return folded;
 };
 
 describe('The Local Serialized Catalog', () => {
   it('Should serialize without errors', async () => {
     const serialized = await fetchSerializedIntegrations();
-    expect(serialized.ok).toBe(true);
+    expectOkResult(serialized);
   });
 
   it('Should pass deep validation for all serialized integrations', async () => {
@@ -48,7 +51,7 @@ describe('The Local Serialized Catalog', () => {
 
     for (const integ of await repository.getIntegrationList()) {
       const validationResult = await deepCheck(integ);
-      await expect(validationResult).toHaveProperty('ok', true);
+      expectOkResult(validationResult);
     }
   });
 
@@ -60,7 +63,7 @@ describe('The Local Serialized Catalog', () => {
     const integration = (await repository.getIntegration('nginx')) as IntegrationReader;
     const logoStatic = await integration.getStatic('logo.svg');
 
-    expect(logoStatic).toHaveProperty('ok', true);
+    expectOkResult(logoStatic);
     expect((logoStatic.value as Buffer).length).toBeGreaterThan(100);
   });
 
@@ -72,7 +75,7 @@ describe('The Local Serialized Catalog', () => {
     const integration = (await repository.getIntegration('nginx')) as IntegrationReader;
     const logoStatic = await integration.getStatic('dashboard1.png');
 
-    expect(logoStatic).toHaveProperty('ok', true);
+    expectOkResult(logoStatic);
     expect((logoStatic.value as Buffer).length).toBeGreaterThan(1000);
   });
 
@@ -94,7 +97,7 @@ describe('The Local Serialized Catalog', () => {
 
     const reader = new IntegrationReader('nginx', new JsonCatalogDataAdaptor([config]));
 
-    await expect(reader.getStatic('dark_logo.svg')).resolves.toHaveProperty('ok', true);
+    expectOkResult(await reader.getStatic('dark_logo.svg'));
   });
 
   it('Should correctly re-serialize', async () => {
@@ -107,6 +110,7 @@ describe('The Local Serialized Catalog', () => {
     const reader = new IntegrationReader('nginx', new JsonCatalogDataAdaptor([config]));
     const reserialized = await reader.serialize();
 
+    expectOkResult(reserialized);
     expect(reserialized.value).toEqual(config);
   });
 
@@ -129,6 +133,7 @@ describe('The Local Serialized Catalog', () => {
     const reader = new IntegrationReader('nginx', new JsonCatalogDataAdaptor([config]));
     const reserialized = await reader.serialize();
 
+    expectOkResult(reserialized);
     expect(reserialized.value).toEqual(config);
   });
 });
@@ -150,7 +155,7 @@ describe('Integration validation', () => {
       new JsonCatalogDataAdaptor(transformedSerialized)
     );
 
-    await expect(deepCheck(integration)).resolves.toHaveProperty('ok', false);
+    expectErrorResult(await deepCheck(integration));
   });
 
   it('Should correctly fail an integration without assets', async () => {
@@ -169,7 +174,7 @@ describe('Integration validation', () => {
       new JsonCatalogDataAdaptor(transformedSerialized)
     );
 
-    await expect(deepCheck(integration)).resolves.toHaveProperty('ok', false);
+    expectErrorResult(await deepCheck(integration));
   });
 });
 
@@ -196,10 +201,9 @@ describe('JSON Catalog with invalid data', () => {
       new JsonCatalogDataAdaptor([baseConfig])
     );
 
-    await expect(reader.getStatic('logo.svg')).resolves.toHaveProperty('ok', false);
-    await expect(reader.getStatic('dm_logo.svg')).resolves.toHaveProperty('ok', false);
-    await expect(reader.getStatic('1.png')).resolves.toHaveProperty('ok', false);
-    await expect(reader.getStatic('dm_1.png')).resolves.toHaveProperty('ok', false);
+    for (const img of ['logo.svg', 'dm_logo.svg', '1.png', 'dm_1.png']) {
+      expectErrorResult(await reader.getStatic(img));
+    }
   });
 
   it('Should report an error on read if a schema has invalid JSON', async () => {
@@ -217,6 +221,6 @@ describe('JSON Catalog with invalid data', () => {
       new JsonCatalogDataAdaptor([baseConfig])
     );
 
-    await expect(reader.getSchemas()).resolves.toHaveProperty('ok', false);
+    expectErrorResult(await reader.getSchemas());
   });
 });

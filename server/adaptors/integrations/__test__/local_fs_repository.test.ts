@@ -13,6 +13,7 @@ import path from 'path';
 import * as fs from 'fs/promises';
 import { deepCheck } from '../repository/utils';
 import { FileSystemDataAdaptor } from '../repository/fs_data_adaptor';
+import { expectOkResult } from './custom_expects';
 
 const repository: TemplateManager = new TemplateManager([
   new FileSystemDataAdaptor(path.join(__dirname, '../__data__/repository')),
@@ -31,7 +32,8 @@ describe('The local repository', () => {
         }
         // Otherwise, all directories must be integrations
         const integ = new IntegrationReader(integPath);
-        await expect(integ.getConfig()).resolves.toMatchObject({ ok: true });
+        const config = await integ.getConfig();
+        expectOkResult(config, { integration: integ.name });
       })
     );
   });
@@ -39,32 +41,48 @@ describe('The local repository', () => {
   it('Should pass deep validation for all local integrations.', async () => {
     const integrations: IntegrationReader[] = await repository.getIntegrationList();
     await Promise.all(
-      integrations.map(async (i: IntegrationReader) => {
-        const result = await deepCheck(i);
-        if (!result.ok) {
-          console.error(i.directory, result.error);
-        }
-        expect(result.ok).toBe(true);
+      integrations.map(async (integ: IntegrationReader) => {
+        const result = await deepCheck(integ);
+        expectOkResult(result, { integration: integ.name });
       })
     );
   });
 });
 
+// Nginx and VPC are specifically used in other tests, so we add dedicated checks for them.
+
 describe('Local Nginx Integration', () => {
   it('Should serialize without errors', async () => {
     const integration = await repository.getIntegration('nginx');
 
-    await expect(integration?.serialize()).resolves.toHaveProperty('ok', true);
+    expect(integration).not.toBeNull();
+    expectOkResult(await integration!.serialize());
   });
 
-  it('Should serialize to include the config', async () => {
+  it('Should contain its config in its serialized form', async () => {
     const integration = await repository.getIntegration('nginx');
     const config = await integration!.getConfig();
     const serialized = await integration!.serialize();
 
-    expect(serialized).toHaveProperty('ok', true);
-    expect((serialized as { value: object }).value).toMatchObject(
-      (config as { value: object }).value
-    );
+    expectOkResult(serialized);
+    expect(serialized.value).toMatchObject(config.value!);
+  });
+});
+
+describe('Local VPC Integration', () => {
+  it('Should serialize without errors', async () => {
+    const integration = await repository.getIntegration('amazon_vpc_flow');
+
+    expect(integration).not.toBeNull();
+    expectOkResult(await integration!.serialize());
+  });
+
+  it('Should contain its config in its serialized form', async () => {
+    const integration = await repository.getIntegration('amazon_vpc_flow');
+    const config = await integration!.getConfig();
+    const serialized = await integration!.serialize();
+
+    expectOkResult(serialized);
+    expect(serialized.value).toMatchObject(config.value!);
   });
 });
