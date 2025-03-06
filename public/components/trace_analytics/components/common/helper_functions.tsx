@@ -12,6 +12,7 @@ import React from 'react';
 import {
   DATA_PREPPER_INDEX_NAME,
   DATA_PREPPER_SERVICE_INDEX_NAME,
+  DEFAULT_CORRELATED_LOGS_FIELD_MAPPINGS,
   JAEGER_INDEX_NAME,
   JAEGER_SERVICE_INDEX_NAME,
   TRACE_ANALYTICS_DOCUMENTATION_LINK,
@@ -19,8 +20,10 @@ import {
   TRACE_CUSTOM_MODE_DEFAULT_SETTING,
   TRACE_CUSTOM_SERVICE_INDEX_SETTING,
   TRACE_CUSTOM_SPAN_INDEX_SETTING,
+  TRACE_LOGS_FIELD_MAPPNIGS_SETTING,
 } from '../../../../../common/constants/trace_analytics';
 import {
+  CorrelatedLogsFieldMappings,
   GraphVisEdge,
   GraphVisNode,
   TraceAnalyticsMode,
@@ -566,9 +569,19 @@ export const TraceSettings = {
 
   getCustomServiceIndex: () => uiSettingsService.get(TRACE_CUSTOM_SERVICE_INDEX_SETTING),
 
-  getCustomModeSetting: () => uiSettingsService.get(TRACE_CUSTOM_MODE_DEFAULT_SETTING) || false,
-
   getCorrelatedLogsIndex: () => uiSettingsService.get(TRACE_CORRELATED_LOGS_INDEX_SETTING),
+
+  getCorrelatedLogsFieldMappings: () => {
+    try {
+      const storedValue = uiSettingsService.get(TRACE_LOGS_FIELD_MAPPNIGS_SETTING);
+      return storedValue ? JSON.parse(storedValue) : DEFAULT_CORRELATED_LOGS_FIELD_MAPPINGS;
+    } catch (error) {
+      console.error('Error parsing TRACE_LOGS_FIELD_MAPPNIGS_SETTING:', error);
+      return DEFAULT_CORRELATED_LOGS_FIELD_MAPPINGS;
+    }
+  },
+
+  getCustomModeSetting: () => uiSettingsService.get(TRACE_CUSTOM_MODE_DEFAULT_SETTING) || false,
 
   setCustomSpanIndex: (value: string) =>
     uiSettingsService.set(TRACE_CUSTOM_SPAN_INDEX_SETTING, value),
@@ -576,11 +589,14 @@ export const TraceSettings = {
   setCustomServiceIndex: (value: string) =>
     uiSettingsService.set(TRACE_CUSTOM_SERVICE_INDEX_SETTING, value),
 
-  setCustomModeSetting: (value: boolean) =>
-    uiSettingsService.set(TRACE_CUSTOM_MODE_DEFAULT_SETTING, value),
-
   setCorrelatedLogsIndex: (value: string) =>
     uiSettingsService.set(TRACE_CORRELATED_LOGS_INDEX_SETTING, value),
+
+  setCorrelatedLogsFieldMappings: (value: CorrelatedLogsFieldMappings) =>
+    uiSettingsService.set(TRACE_LOGS_FIELD_MAPPNIGS_SETTING, JSON.stringify(value)),
+
+  setCustomModeSetting: (value: boolean) =>
+    uiSettingsService.set(TRACE_CUSTOM_MODE_DEFAULT_SETTING, value),
 };
 
 export const getSpanIndices = (mode: TraceAnalyticsMode) => {

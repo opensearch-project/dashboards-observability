@@ -21,6 +21,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { Fragment, useEffect, useState } from 'react';
+import { DEFAULT_CORRELATED_LOGS_FIELD_MAPPINGS } from '../../../../../common/constants/trace_analytics';
+import { CorrelatedLogsFieldMappings } from '../../../../../common/types/trace_analytics';
 import { uiSettingsService } from '../../../../../common/utils';
 import { useToast } from '../../../common/toast';
 import { TraceSettings } from './helper_functions';
@@ -39,6 +41,9 @@ export const CustomIndexFlyout = ({
   const [serviceIndices, setServiceIndices] = useState('');
   const [customModeDefault, setCustomModeDefault] = useState(false);
   const [correlatedLogsIndices, setCorrelatedLogsIndices] = useState('');
+  const [correlatedLogsFieldMappings, setCorrelatedLogsFieldMappings] = useState(
+    {} as CorrelatedLogsFieldMappings
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   const onChangeSpanIndices = (e: { target: { value: React.SetStateAction<string> } }) => {
@@ -55,6 +60,15 @@ export const CustomIndexFlyout = ({
     setCorrelatedLogsIndices(e.target.value);
   };
 
+  const onChangeLogsFieldMappings = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    setCorrelatedLogsFieldMappings((prevMappings) => ({
+      ...prevMappings,
+      [name]: value,
+    }));
+  };
+
   const onToggleCustomModeDefault = (e: { target: { checked: boolean } }) => {
     setCustomModeDefault(e.target.checked);
   };
@@ -63,6 +77,7 @@ export const CustomIndexFlyout = ({
     setSpanIndices(TraceSettings.getCustomSpanIndex());
     setServiceIndices(TraceSettings.getCustomServiceIndex());
     setCorrelatedLogsIndices(TraceSettings.getCorrelatedLogsIndex());
+    setCorrelatedLogsFieldMappings(TraceSettings.getCorrelatedLogsFieldMappings());
     setCustomModeDefault(TraceSettings.getCustomModeSetting());
   }, [uiSettingsService]);
 
@@ -72,6 +87,7 @@ export const CustomIndexFlyout = ({
       await TraceSettings.setCustomSpanIndex(spanIndices);
       await TraceSettings.setCustomServiceIndex(serviceIndices);
       await TraceSettings.setCorrelatedLogsIndex(correlatedLogsIndices);
+      await TraceSettings.setCorrelatedLogsFieldMappings(correlatedLogsFieldMappings);
       await TraceSettings.setCustomModeSetting(customModeDefault);
       setIsLoading(false);
       setToast('Updated trace analytics settings successfully', 'success');
@@ -80,6 +96,25 @@ export const CustomIndexFlyout = ({
       setToast('Failed to update trace analytics settings', 'danger');
     }
     setIsLoading(false);
+  };
+
+  const correlatedFieldsForm = () => {
+    const correlatedFieldsFromSettings: CorrelatedLogsFieldMappings = TraceSettings.getCorrelatedLogsFieldMappings();
+    return Object.keys(correlatedFieldsFromSettings).map((key) => {
+      return (
+        <>
+          <EuiFormRow label={key}>
+            <EuiCompressedFieldText
+              name={key}
+              aria-label={key}
+              placeholder={JSON.parse(DEFAULT_CORRELATED_LOGS_FIELD_MAPPINGS)[key]}
+              value={correlatedLogsFieldMappings[key]}
+              onChange={onChangeLogsFieldMappings}
+            />
+          </EuiFormRow>
+        </>
+      );
+    });
   };
 
   const callout = (
@@ -166,6 +201,17 @@ export const CustomIndexFlyout = ({
                 onChange={onChangeCorrelatedLogsIndices}
               />
             </EuiFormRow>
+          </EuiDescribedFormGroup>
+          <EuiDescribedFormGroup
+            title={<h3>Correlated logs fields</h3>}
+            description={
+              <Fragment>
+                Configure correlated logs fields, to be used by the trace analytics plugin for
+                correlate spans and services to logs
+              </Fragment>
+            }
+          >
+            {correlatedFieldsForm()}
           </EuiDescribedFormGroup>
           <EuiDescribedFormGroup
             title={<h3>Set default mode</h3>}

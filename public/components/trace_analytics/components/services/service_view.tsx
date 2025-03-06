@@ -203,6 +203,8 @@ export function ServiceView(props: ServiceViewProps) {
                 'data-test-subj': 'viewLogsButton',
                 onClick: () => {
                   const correlatedLogsIndex = TraceSettings.getCorrelatedLogsIndex();
+                  const correlatedServiceNameField = TraceSettings.getCorrelatedLogsFieldMappings()
+                    .serviceName;
                   // NOTE: Discover has issue with PPL Time filter, hence adding +3/-3 days to actual timestamp
                   const startTime =
                     dateMath
@@ -220,7 +222,7 @@ export function ServiceView(props: ServiceViewProps) {
                         props.dataSourceMDSId[0].id ?? ''
                       }',title:'${props.dataSourceMDSId[0].label}',type:DATA_SOURCE),id:'${
                         props.dataSourceMDSId[0].id ?? ''
-                      }::${correlatedLogsIndex}',timeFieldName:'time',title:'${correlatedLogsIndex}',type:INDEXES),language:PPL,query:'source%20%3D%20${correlatedLogsIndex}%20%7C%20where%20serviceName%20%3D%20%22${
+                      }::${correlatedLogsIndex}',timeFieldName:'time',title:'${correlatedLogsIndex}',type:INDEXES),language:PPL,query:'source%20%3D%20${correlatedLogsIndex}%20%7C%20where%20${correlatedServiceNameField}%20%3D%20%22${
                         props.serviceName
                       }%22'))`,
                     });
