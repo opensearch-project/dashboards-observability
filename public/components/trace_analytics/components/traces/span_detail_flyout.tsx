@@ -347,7 +347,7 @@ export function SpanDetailFlyout(props: {
         state: {
           DEFAULT_DATA_SOURCE_NAME,
           DEFAULT_DATA_SOURCE_TYPE,
-          queryToRun: `source = ${correlatedLogsIndex} | where ${spanField}='${spanId}'`,
+          queryToRun: `source = ${correlatedLogsIndex} | where ${correlatedSpanField}='${spanId}'`,
           startTimeRange: startTime,
           endTimeRange: endTime,
         },

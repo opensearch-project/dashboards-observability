@@ -232,7 +232,7 @@ export function ServiceView(props: ServiceViewProps) {
                       state: {
                         DEFAULT_DATA_SOURCE_NAME,
                         DEFAULT_DATA_SOURCE_TYPE,
-                        queryToRun: `source = ${correlatedLogsIndex} | where serviceName='${props.serviceName}'`,
+                        queryToRun: `source = ${correlatedLogsIndex} | where ${correlatedServiceNameField}='${props.serviceName}'`,
                         startTimeRange: props.startTime,
                         endTimeRange: props.endTime,
                       },
