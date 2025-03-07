@@ -321,6 +321,19 @@ export function IntegrationQueryInputs({
           isInvalid={config.connectionTableName.length === 0}
         />
       </EuiCompressedFormRow>
+      {/* Add the new database name field */}
+      <EuiCompressedFormRow
+        label="Database Name"
+        helpText="Enter the name of the database to store your data. The 'default' database will be used if no input is provided."
+      >
+        <EuiCompressedFieldText
+          placeholder="default"
+          value={config.databaseName}
+          onChange={(evt) => {
+            updateConfig({ databaseName: evt.target.value });
+          }}
+        />
+      </EuiCompressedFormRow>
       <EuiCompressedFormRow
         label="S3 Data Location"
         isInvalid={isBucketBlurred && !config.connectionLocation.startsWith('s3://')}

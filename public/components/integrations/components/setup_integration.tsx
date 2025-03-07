@@ -34,6 +34,7 @@ export interface IntegrationSetupInputs {
   connectionDataSource: string;
   connectionLocation: string;
   checkpointLocation: string;
+  databaseName: string;
   connectionTableName: string;
   enabledWorkflows: string[];
 }
@@ -109,7 +110,9 @@ const runQuery = async (
 };
 
 const makeTableName = (config: IntegrationSetupInputs): string => {
-  return `${config.connectionDataSource}.default.${config.connectionTableName}`;
+  return `${config.connectionDataSource}.${config.databaseName || 'default'}.${
+    config.connectionTableName
+  }`;
 };
 
 const prepareQuery = (query: string, config: IntegrationSetupInputs): string => {
@@ -151,85 +154,110 @@ const addIntegration = async ({
 }) => {
   setLoading(true);
   let sessionId: string | undefined;
-
-  if (config.connectionType === 'index') {
-    let enabledWorkflows: string[] | undefined;
-    if (integration.workflows) {
-      enabledWorkflows = integration.workflows
-        .filter((w) =>
-          w.applicable_data_sources ? w.applicable_data_sources.includes('index') : true
-        )
-        .map((w) => w.name);
-    }
-    const res = await addIntegrationRequest({
-      addSample: false,
-      templateName: integration.name,
-      integration,
-      setToast: setCalloutLikeToast,
-      dataSourceMDSId,
-      dataSourceMDSLabel,
-      name: config.displayName,
-      indexPattern: config.connectionDataSource,
-      skipRedirect: setIsInstalling ? true : false,
-      workflows: enabledWorkflows,
-    });
-    if (setIsInstalling) {
-      setIsInstalling(false, res);
-    }
-    if (!res) {
-      setLoading(false);
-    }
-  } else if (config.connectionType === 's3') {
-    const http = coreRefs.http!;
-
-    const assets: { data: ParsedIntegrationAsset[] } = await http.get(
-      `${INTEGRATIONS_BASE}/repository/${integration.name}/assets`
-    );
-    for (const query of assets.data.filter(
-      (a: ParsedIntegrationAsset): a is ParsedIntegrationAsset & { type: 'query' } =>
-        a.type === 'query'
-    )) {
-      // Skip any queries that have conditional workflows but aren't enabled
-      if (query.workflows && !query.workflows.some((w) => config.enabledWorkflows.includes(w))) {
-        continue;
-      }
-
-      const queryStr = prepareQuery(query.query, config);
+  try {
+    // First create the database if one is specified
+    if (config.databaseName) {
+      const createDbQuery = `CREATE DATABASE IF NOT EXISTS ${config.databaseName}`;
       const result = await runQuery(
-        queryStr,
+        createDbQuery,
         config.connectionDataSource,
         sessionId,
         dataSourceMDSId
       );
+
       if (!result.ok) {
         setLoading(false);
-        setCalloutLikeToast('Failed to add integration', 'danger', result.error.message);
+        setCalloutLikeToast('Failed to create database', 'danger', result.error.message);
         return;
       }
-      sessionId = result.value.sessionId ?? sessionId;
+      sessionId = result.value.sessionId;
     }
-    // Once everything is ready, add the integration to the new datasource as usual
-    const res = await addIntegrationRequest({
-      addSample: false,
-      templateName: integration.name,
-      integration,
-      setToast: setCalloutLikeToast,
-      dataSourceMDSId,
-      dataSourceMDSLabel,
-      name: config.displayName,
-      indexPattern: `flint_${config.connectionDataSource}_default_${config.connectionTableName}__*`,
-      workflows: config.enabledWorkflows,
-      skipRedirect: setIsInstalling ? true : false,
-      dataSourceInfo: { dataSource: config.connectionDataSource, tableName: makeTableName(config) },
-    });
-    if (setIsInstalling) {
-      setIsInstalling(false, res);
+
+    if (config.connectionType === 'index') {
+      let enabledWorkflows: string[] | undefined;
+      if (integration.workflows) {
+        enabledWorkflows = integration.workflows
+          .filter((w) =>
+            w.applicable_data_sources ? w.applicable_data_sources.includes('index') : true
+          )
+          .map((w) => w.name);
+      }
+      const res = await addIntegrationRequest({
+        addSample: false,
+        templateName: integration.name,
+        integration,
+        setToast: setCalloutLikeToast,
+        dataSourceMDSId,
+        dataSourceMDSLabel,
+        name: config.displayName,
+        indexPattern: config.connectionDataSource,
+        skipRedirect: setIsInstalling ? true : false,
+        workflows: enabledWorkflows,
+      });
+      if (setIsInstalling) {
+        setIsInstalling(false, res);
+      }
+      if (!res) {
+        setLoading(false);
+      }
+    } else if (config.connectionType === 's3') {
+      const http = coreRefs.http!;
+
+      const assets: { data: ParsedIntegrationAsset[] } = await http.get(
+        `${INTEGRATIONS_BASE}/repository/${integration.name}/assets`
+      );
+      for (const query of assets.data.filter(
+        (a: ParsedIntegrationAsset): a is ParsedIntegrationAsset & { type: 'query' } =>
+          a.type === 'query'
+      )) {
+        // Skip any queries that have conditional workflows but aren't enabled
+        if (query.workflows && !query.workflows.some((w) => config.enabledWorkflows.includes(w))) {
+          continue;
+        }
+
+        const queryStr = prepareQuery(query.query, config);
+        const result = await runQuery(
+          queryStr,
+          config.connectionDataSource,
+          sessionId,
+          dataSourceMDSId
+        );
+        if (!result.ok) {
+          setLoading(false);
+          setCalloutLikeToast('Failed to add integration', 'danger', result.error.message);
+          return;
+        }
+        sessionId = result.value.sessionId ?? sessionId;
+      }
+      // Once everything is ready, add the integration to the new datasource as usual
+      const res = await addIntegrationRequest({
+        addSample: false,
+        templateName: integration.name,
+        integration,
+        setToast: setCalloutLikeToast,
+        dataSourceMDSId,
+        dataSourceMDSLabel,
+        name: config.displayName,
+        indexPattern: `flint_${config.connectionDataSource}_${config.databaseName}_${config.connectionTableName}__*`,
+        workflows: config.enabledWorkflows,
+        skipRedirect: setIsInstalling ? true : false,
+        dataSourceInfo: {
+          dataSource: config.connectionDataSource,
+          tableName: makeTableName(config),
+        },
+      });
+      if (setIsInstalling) {
+        setIsInstalling(false, res);
+      }
+      if (!res) {
+        setLoading(false);
+      }
+    } else {
+      console.error('Invalid data source type');
     }
-    if (!res) {
-      setLoading(false);
-    }
-  } else {
-    console.error('Invalid data source type');
+  } catch (error) {
+    setCalloutLikeToast('Failed to add integration', 'danger');
+    setLoading(false);
   }
 };
 
@@ -237,6 +265,12 @@ const isConfigValid = (config: IntegrationSetupInputs, integration: IntegrationC
   if (config.displayName.length < 1 || config.connectionDataSource.length < 1) {
     return false;
   }
+
+  // Add database name validation
+  if (config.databaseName && !/^[a-zA-Z0-9_]+$/.test(config.databaseName)) {
+    return false;
+  }
+
   if (config.connectionType === 's3') {
     if (integration.workflows && config.enabledWorkflows.length < 1) {
       return false;
