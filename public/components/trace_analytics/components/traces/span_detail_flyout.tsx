@@ -33,7 +33,7 @@ import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/tra
 import { SpanField, TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { coreRefs } from '../../../../framework/core_refs';
 import { handleSpansFlyoutRequest } from '../../requests/traces_request_handler';
-import { microToMilliSec, nanoToMilliSec } from '../common/helper_functions';
+import { microToMilliSec, nanoToMilliSec, TraceSettings } from '../common/helper_functions';
 import { FlyoutListItem } from './flyout_list_item';
 
 const MODE_TO_FIELDS: Record<TraceAnalyticsMode, Record<SpanField, string | undefined>> = {
@@ -324,13 +324,15 @@ export function SpanDetailFlyout(props: {
   };
 
   const redirectToExplorer = () => {
+    const correlatedLogsIndex = TraceSettings.getCorrelatedLogsIndex();
+    const correlatedSpanField = TraceSettings.getCorrelatedLogsFieldMappings().spanId;
+    const correlatedTimestampField = TraceSettings.getCorrelatedLogsFieldMappings().timestamp;
     // NOTE: Discover has issue with PPL Time filter, hence adding +3/-3 days to actual timestamp
     const startTime =
       moment(span.startTime).subtract(3, 'days').format(TRACE_ANALYTICS_DATE_FORMAT) ?? 'now-3y';
     const endTime =
       moment(span.endTime).add(3, 'days').format(TRACE_ANALYTICS_DATE_FORMAT) ?? 'now';
     const spanId = getSpanValue(span, mode, 'SPAN_ID');
-    const spanField = getSpanFieldKey(mode, 'SPAN_ID');
 
     if (coreRefs?.dataSource?.dataSourceEnabled) {
       coreRefs?.application!.navigateToApp('data-explorer', {
@@ -338,7 +340,7 @@ export function SpanDetailFlyout(props: {
           props.dataSourceMDSId ?? ''
         }',title:${props.dataSourceMDSLabel},type:DATA_SOURCE),id:'${
           props.dataSourceMDSId ?? ''
-        }::ss4o_logs-*',timeFieldName:'time',title:'ss4o_logs-*',type:INDEXES),language:PPL,query:'source%20%3D%20ss4o_logs-*%20%7C%20where%20${spanField}%20%3D%20!'${spanId}!''))`,
+        }::${correlatedLogsIndex}',timeFieldName:'${correlatedTimestampField}',title:'${correlatedLogsIndex}',type:INDEXES),language:PPL,query:'source%20%3D%20${correlatedLogsIndex}%20%7C%20where%20${correlatedSpanField}%20%3D%20!'${spanId}!''))`,
       });
     } else {
       coreRefs?.application!.navigateToApp(observabilityLogsID, {
@@ -346,7 +348,8 @@ export function SpanDetailFlyout(props: {
         state: {
           DEFAULT_DATA_SOURCE_NAME,
           DEFAULT_DATA_SOURCE_TYPE,
-          queryToRun: `source = ss4o_logs-* | where ${spanField}='${spanId}'`,
+          queryToRun: `source = ${correlatedLogsIndex} | where ${correlatedSpanField}='${spanId}'`,
+          timestampField: correlatedTimestampField,
           startTimeRange: startTime,
           endTimeRange: endTime,
         },
