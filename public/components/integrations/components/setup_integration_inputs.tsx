@@ -292,6 +292,23 @@ export function IntegrationConnectionInputs({
   );
 }
 
+/**
+ * A component that renders input fields for integration setup configuration.
+ *
+ * @component
+ * @param {Object} props - The component props
+ * @param {IntegrationSetupInputs} props.config - The current configuration object for the integration setup
+ * @param {Function} props.updateConfig - Callback function to update the configuration
+ * @param {IntegrationConfig} props.integration - The integration configuration object
+ * @returns {JSX.Element} A React fragment containing form input fields
+ *
+ * @example
+ * <IntegrationQueryInputs
+ *   config={setupConfig}
+ *   updateConfig={handleConfigUpdate}
+ *   integration={integrationConfig}
+ * />
+ */
 export function IntegrationQueryInputs({
   config,
   updateConfig,

@@ -28,12 +28,16 @@ import { coreRefs } from '../../../framework/core_refs';
 import { addIntegrationRequest } from './create_integration_helpers';
 import { SetupIntegrationFormInputs } from './setup_integration_inputs';
 
+/**
+ * Configuration inputs for integration setup
+ */
 export interface IntegrationSetupInputs {
   displayName: string;
   connectionType: string;
   connectionDataSource: string;
   connectionLocation: string;
   checkpointLocation: string;
+  /** Name of the database to connect to */
   databaseName: string;
   connectionTableName: string;
   enabledWorkflows: string[];
@@ -109,6 +113,15 @@ const runQuery = async (
   }
 };
 
+/**
+ * Constructs a fully qualified table name from the integration configuration.
+ *
+ * @param config - The integration setup configuration object
+ * @param config.connectionDataSource - The data source connection name
+ * @param config.databaseName - The database name (defaults to 'default' if not provided)
+ * @param config.connectionTableName - The table name
+ * @returns A string representing the fully qualified table name in the format: dataSource.database.table
+ */
 const makeTableName = (config: IntegrationSetupInputs): string => {
   return `${config.connectionDataSource}.${config.databaseName || 'default'}.${
     config.connectionTableName
@@ -135,6 +148,24 @@ const prepareQuery = (query: string, config: IntegrationSetupInputs): string => 
   return queryStr;
 };
 
+/**
+ * Adds a new integration by setting up necessary database configurations and running required queries.
+ *
+ * @param {Object} params - The parameters object
+ * @param {IntegrationSetupInputs} params.config - Configuration settings for the integration setup
+ * @param {IntegrationConfig} params.integration - Integration configuration details
+ * @param {Function} params.setLoading - Callback function to update loading state
+ * @param {Function} params.setCalloutLikeToast - Callback function to display toast notifications
+ * @param {string} [params.dataSourceMDSId] - Optional MDS ID for the data source
+ * @param {string} [params.dataSourceMDSLabel] - Optional MDS label for the data source
+ * @param {Function} [params.setIsInstalling] - Optional callback to update installation status
+ *
+ * @throws Will throw an error if database creation or query execution fails
+ *
+ * The function handles different connection types:
+ * - For 'index' type: Sets up index-based integration
+ * - For 's3' type: Creates database, runs asset queries, and sets up S3 integration
+ */
 const addIntegration = async ({
   config,
   integration,
