@@ -23,14 +23,15 @@ import {
 } from '../../../../../src/plugins/data_source_management/public';
 import { DataSourceAttributes } from '../../../../../src/plugins/data_source_management/public/types';
 import { observabilityTracesNewNavID } from '../../../common/constants/shared';
-import {
-  TRACE_CUSTOM_MODE_DEFAULT_SETTING,
-  TRACE_TABLE_TYPE_KEY,
-} from '../../../common/constants/trace_analytics';
+import { TRACE_TABLE_TYPE_KEY } from '../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode, TraceQueryMode } from '../../../common/types/trace_analytics';
 import { coreRefs } from '../../framework/core_refs';
 import { FilterType } from './components/common/filters/filters';
-import { getAttributeFieldNames, getSpanIndices } from './components/common/helper_functions';
+import {
+  TraceSettings,
+  getAttributeFieldNames,
+  getSpanIndices,
+} from './components/common/helper_functions';
 import { SearchBarProps } from './components/common/search_bar';
 import { ServiceView, Services } from './components/services';
 import { ServiceFlyout } from './components/services/service_flyout';
@@ -41,7 +42,6 @@ import {
   handleJaegerIndicesExistRequest,
 } from './requests/request_handler';
 import { TraceSideBar } from './trace_side_nav';
-import { uiSettingsService } from '../../../common/utils';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
@@ -278,7 +278,7 @@ export const Home = (props: HomeProps) => {
       urlParts.length > 1 ? new URLSearchParams(urlParts[1].split('#')[0]) : new URLSearchParams();
 
     const urlMode = queryParams.get('mode');
-    const isCustomModeEnabled = uiSettingsService.get(TRACE_CUSTOM_MODE_DEFAULT_SETTING) || false;
+    const isCustomModeEnabled = TraceSettings.getCustomModeSetting();
 
     if (!urlMode && isCustomModeEnabled) {
       const newUrl = updateUrlWithMode('custom_data_prepper');
