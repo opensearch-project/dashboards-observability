@@ -571,13 +571,14 @@ export const TraceSettings = {
 
   getCorrelatedLogsIndex: () => uiSettingsService.get(TRACE_CORRELATED_LOGS_INDEX_SETTING),
 
-  getCorrelatedLogsFieldMappings: () => {
+  getCorrelatedLogsFieldMappings: (): CorrelatedLogsFieldMappings => {
+    const defaultMappings = JSON.parse(DEFAULT_CORRELATED_LOGS_FIELD_MAPPINGS);
     try {
       const storedValue = uiSettingsService.get(TRACE_LOGS_FIELD_MAPPNIGS_SETTING);
-      return storedValue ? JSON.parse(storedValue) : DEFAULT_CORRELATED_LOGS_FIELD_MAPPINGS;
+      return storedValue ? JSON.parse(storedValue) : defaultMappings;
     } catch (error) {
       console.error('Error parsing TRACE_LOGS_FIELD_MAPPNIGS_SETTING:', error);
-      return DEFAULT_CORRELATED_LOGS_FIELD_MAPPINGS;
+      return defaultMappings;
     }
   },
 

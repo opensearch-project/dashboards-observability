@@ -34,7 +34,8 @@ export const DEFAULT_SS4O_LOGS_INDEX = 'ss4o_logs-*';
 export const DEFAULT_CORRELATED_LOGS_FIELD_MAPPINGS = `
 {
   "serviceName": "serviceName",
-  "spanId": "spanId"
+  "spanId": "spanId",
+  "timestamp": "time"
 }`;
 
 export enum TRACE_TABLE_TITLES {

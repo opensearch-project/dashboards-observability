@@ -326,6 +326,7 @@ export function SpanDetailFlyout(props: {
   const redirectToExplorer = () => {
     const correlatedLogsIndex = TraceSettings.getCorrelatedLogsIndex();
     const correlatedSpanField = TraceSettings.getCorrelatedLogsFieldMappings().spanId;
+    const correlatedTimestampField = TraceSettings.getCorrelatedLogsFieldMappings().timestamp;
     // NOTE: Discover has issue with PPL Time filter, hence adding +3/-3 days to actual timestamp
     const startTime =
       moment(span.startTime).subtract(3, 'days').format(TRACE_ANALYTICS_DATE_FORMAT) ?? 'now-3y';
@@ -339,7 +340,7 @@ export function SpanDetailFlyout(props: {
           props.dataSourceMDSId ?? ''
         }',title:${props.dataSourceMDSLabel},type:DATA_SOURCE),id:'${
           props.dataSourceMDSId ?? ''
-        }::${correlatedLogsIndex}',timeFieldName:'time',title:'${correlatedLogsIndex}',type:INDEXES),language:PPL,query:'source%20%3D%20${correlatedLogsIndex}%20%7C%20where%20${correlatedSpanField}%20%3D%20!'${spanId}!''))`,
+        }::${correlatedLogsIndex}',timeFieldName:'${correlatedTimestampField}',title:'${correlatedLogsIndex}',type:INDEXES),language:PPL,query:'source%20%3D%20${correlatedLogsIndex}%20%7C%20where%20${correlatedSpanField}%20%3D%20!'${spanId}!''))`,
       });
     } else {
       coreRefs?.application!.navigateToApp(observabilityLogsID, {
@@ -348,6 +349,7 @@ export function SpanDetailFlyout(props: {
           DEFAULT_DATA_SOURCE_NAME,
           DEFAULT_DATA_SOURCE_TYPE,
           queryToRun: `source = ${correlatedLogsIndex} | where ${correlatedSpanField}='${spanId}'`,
+          timestampField: correlatedTimestampField,
           startTimeRange: startTime,
           endTimeRange: endTime,
         },

@@ -94,6 +94,7 @@ export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSet
       schema: schema.object({
         serviceName: schema.string(),
         spanId: schema.string(),
+        timestamp: schema.string(),
       }),
     },
   });

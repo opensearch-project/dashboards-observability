@@ -61,4 +61,5 @@ export type TraceQueryMode = keyof typeof TRACE_TABLE_TITLES;
 export interface CorrelatedLogsFieldMappings {
   serviceName: string;
   spanId: string;
+  timestamp: string;
 }
