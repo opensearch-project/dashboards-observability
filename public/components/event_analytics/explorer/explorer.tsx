@@ -111,8 +111,8 @@ import {
 import { getVizContainerProps } from '../../visualizations/charts/helpers';
 import { TabContext, useFetchEvents, useFetchPatterns, useFetchVisualizations } from '../hooks';
 import {
-  render as updateCountDistribution,
   selectCountDistribution,
+  render as updateCountDistribution,
 } from '../redux/slices/count_distribution_slice';
 import { selectFields, updateFields } from '../redux/slices/field_slice';
 import { selectQueryResult } from '../redux/slices/query_result_slice';
@@ -122,8 +122,8 @@ import { selectExplorerVisualization } from '../redux/slices/visualization_slice
 import {
   change as changeVisualizationConfig,
   change as changeVizConfig,
-  change as updateVizConfig,
   selectVisualizationConfig,
+  change as updateVizConfig,
 } from '../redux/slices/viualization_config_slice';
 import { getDefaultVisConfig } from '../utils';
 import { formatError, getContentTabTitle } from '../utils/utils';
@@ -274,6 +274,7 @@ export const Explorer = ({
       datasourceName,
       datasourceType,
       queryToRun,
+      timestampField,
       startTimeRange,
       endTimeRange,
     }: any = historyFromRedirection.location.state;
@@ -292,6 +293,14 @@ export const Explorer = ({
                 },
               ],
             },
+          })
+        );
+      }
+      if (timestampField) {
+        dispatch(
+          changeQuery({
+            tabId,
+            query: { [SELECTED_TIMESTAMP]: timestampField },
           })
         );
       }
