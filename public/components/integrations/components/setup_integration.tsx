@@ -123,9 +123,7 @@ const runQuery = async (
  * @returns A string representing the fully qualified table name in the format: dataSource.database.table
  */
 const makeTableName = (config: IntegrationSetupInputs): string => {
-  return `${config.connectionDataSource}.${config.databaseName || 'default'}.${
-    config.connectionTableName
-  }`;
+  return `${config.connectionDataSource}.${config.databaseName}.${config.connectionTableName}`;
 };
 
 const prepareQuery = (query: string, config: IntegrationSetupInputs): string => {
@@ -149,22 +147,19 @@ const prepareQuery = (query: string, config: IntegrationSetupInputs): string => 
 };
 
 /**
- * Adds a new integration by setting up necessary database configurations and running required queries.
+ * Handles the integration setup process based on the connection type.
  *
  * @param {Object} params - The parameters object
  * @param {IntegrationSetupInputs} params.config - Configuration settings for the integration setup
  * @param {IntegrationConfig} params.integration - Integration configuration details
- * @param {Function} params.setLoading - Callback function to update loading state
+ * @param {Function} params.setLoading - Callback function to set loading state
  * @param {Function} params.setCalloutLikeToast - Callback function to display toast notifications
  * @param {string} [params.dataSourceMDSId] - Optional MDS ID for the data source
  * @param {string} [params.dataSourceMDSLabel] - Optional MDS label for the data source
- * @param {Function} [params.setIsInstalling] - Optional callback to update installation status
+ * @param {Function} [params.setIsInstalling] - Optional callback to set installation status
  *
- * @throws Will throw an error if database creation or query execution fails
- *
- * The function handles different connection types:
- * - For 'index' type: Sets up index-based integration
- * - For 's3' type: Creates database, runs asset queries, and sets up S3 integration
+ * @throws {Error} Throws an error if the connection type is invalid
+ * @returns {Promise<void>} A promise that resolves when the integration is added
  */
 const addIntegration = async ({
   config,
@@ -182,112 +177,211 @@ const addIntegration = async ({
   dataSourceMDSId?: string;
   dataSourceMDSLabel?: string;
   setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
-}) => {
+}): Promise<void> => {
   setLoading(true);
+
+  if (config.connectionType === 'index') {
+    await addNativeIntegration({
+      config,
+      integration,
+      setLoading,
+      setCalloutLikeToast,
+      dataSourceMDSId,
+      dataSourceMDSLabel,
+      setIsInstalling,
+    });
+  } else if (config.connectionType === 's3') {
+    await addFlintIntegration({
+      config,
+      integration,
+      setLoading,
+      setCalloutLikeToast,
+      dataSourceMDSId,
+      dataSourceMDSLabel,
+      setIsInstalling,
+    });
+  } else {
+    console.error('Invalid data source type');
+    setLoading(false);
+  }
+};
+
+/**
+ * Handles the installation of an integration index by processing the configuration and making the integration request.
+ *
+ * @param {Object} params - The parameters object
+ * @param {IntegrationSetupInputs} params.config - Configuration inputs for the integration setup
+ * @param {IntegrationConfig} params.integration - Integration configuration object
+ * @param {Function} params.setLoading - Function to set the loading state
+ * @param {Function} params.setCalloutLikeToast - Function to display toast notifications
+ * @param {string} [params.dataSourceMDSId] - Optional MDS ID for the data source
+ * @param {string} [params.dataSourceMDSLabel] - Optional MDS label for the data source
+ * @param {Function} [params.setIsInstalling] - Optional function to set installation status
+ *
+ * @returns {Promise<void>} A promise that resolves when the installation is complete
+ *
+ * @example
+ * await addNativeIntegration({
+ *   config: setupInputs,
+ *   integration: integrationConfig,
+ *   setLoading: (loading) => setLoadingState(loading),
+ *   setCalloutLikeToast: (title, color, text) => showToast(title, color, text)
+ * });
+ */
+const addNativeIntegration = async ({
+  config,
+  integration,
+  setLoading,
+  setCalloutLikeToast,
+  dataSourceMDSId,
+  dataSourceMDSLabel,
+  setIsInstalling,
+}: {
+  config: IntegrationSetupInputs;
+  integration: IntegrationConfig;
+  setLoading: (loading: boolean) => void;
+  setCalloutLikeToast: (title: string, color?: Color, text?: string) => void;
+  dataSourceMDSId?: string;
+  dataSourceMDSLabel?: string;
+  setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
+}): Promise<void> => {
+  let enabledWorkflows: string[] | undefined;
+  if (integration.workflows) {
+    enabledWorkflows = integration.workflows
+      .filter((w) =>
+        w.applicable_data_sources ? w.applicable_data_sources.includes('index') : true
+      )
+      .map((w) => w.name);
+  }
+
+  const res = await addIntegrationRequest({
+    addSample: false,
+    templateName: integration.name,
+    integration,
+    setToast: setCalloutLikeToast,
+    dataSourceMDSId,
+    dataSourceMDSLabel,
+    name: config.displayName,
+    indexPattern: config.connectionDataSource,
+    skipRedirect: setIsInstalling ? true : false,
+    workflows: enabledWorkflows,
+  });
+
+  if (setIsInstalling) {
+    setIsInstalling(false, res);
+  }
+  if (!res) {
+    setLoading(false);
+  }
+};
+
+/**
+ * Handles the installation process for S3 integration by creating a database (if specified),
+ * processing integration assets, and executing necessary queries.
+ *
+ * @param {Object} params - The parameters object
+ * @param {IntegrationSetupInputs} params.config - Configuration settings for the integration setup
+ * @param {IntegrationConfig} params.integration - Integration configuration details
+ * @param {Function} params.setLoading - Callback function to set loading state
+ * @param {Function} params.setCalloutLikeToast - Callback function to display toast notifications
+ * @param {string} [params.dataSourceMDSId] - Optional MDS ID for the data source
+ * @param {string} [params.dataSourceMDSLabel] - Optional MDS label for the data source
+ * @param {Function} [params.setIsInstalling] - Optional callback to set installation status
+ *
+ * @returns {Promise<void>} A promise that resolves when the installation is complete
+ *
+ * @throws Will set error toast if database creation fails or integration addition fails
+ */
+const addFlintIntegration = async ({
+  config,
+  integration,
+  setLoading,
+  setCalloutLikeToast,
+  dataSourceMDSId,
+  dataSourceMDSLabel,
+  setIsInstalling,
+}: {
+  config: IntegrationSetupInputs;
+  integration: IntegrationConfig;
+  setLoading: (loading: boolean) => void;
+  setCalloutLikeToast: (title: string, color?: Color, text?: string) => void;
+  dataSourceMDSId?: string;
+  dataSourceMDSLabel?: string;
+  setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
+}): Promise<void> => {
   let sessionId: string | undefined;
-  try {
-    // First create the database if one is specified
-    if (config.databaseName) {
-      const createDbQuery = `CREATE DATABASE IF NOT EXISTS ${config.databaseName}`;
-      const result = await runQuery(
-        createDbQuery,
-        config.connectionDataSource,
-        sessionId,
-        dataSourceMDSId
-      );
 
-      if (!result.ok) {
-        setLoading(false);
-        setCalloutLikeToast('Failed to create database', 'danger', result.error.message);
-        return;
-      }
-      sessionId = result.value.sessionId;
+  // Create database if specified
+  if (config.databaseName) {
+    const createDbQuery = `CREATE DATABASE IF NOT EXISTS ${config.databaseName}`;
+    const result = await runQuery(
+      createDbQuery,
+      config.connectionDataSource,
+      sessionId,
+      dataSourceMDSId
+    );
+
+    if (!result.ok) {
+      setLoading(false);
+      setCalloutLikeToast('Failed to create database', 'danger', result.error.message);
+      return;
+    }
+    sessionId = result.value.sessionId;
+  }
+
+  // Process integration assets
+  const http = coreRefs.http!;
+  const assets: { data: ParsedIntegrationAsset[] } = await http.get(
+    `${INTEGRATIONS_BASE}/repository/${integration.name}/assets`
+  );
+
+  // Execute queries
+  for (const query of assets.data.filter(
+    (a: ParsedIntegrationAsset): a is ParsedIntegrationAsset & { type: 'query' } =>
+      a.type === 'query'
+  )) {
+    if (query.workflows && !query.workflows.some((w) => config.enabledWorkflows.includes(w))) {
+      continue;
     }
 
-    if (config.connectionType === 'index') {
-      let enabledWorkflows: string[] | undefined;
-      if (integration.workflows) {
-        enabledWorkflows = integration.workflows
-          .filter((w) =>
-            w.applicable_data_sources ? w.applicable_data_sources.includes('index') : true
-          )
-          .map((w) => w.name);
-      }
-      const res = await addIntegrationRequest({
-        addSample: false,
-        templateName: integration.name,
-        integration,
-        setToast: setCalloutLikeToast,
-        dataSourceMDSId,
-        dataSourceMDSLabel,
-        name: config.displayName,
-        indexPattern: config.connectionDataSource,
-        skipRedirect: setIsInstalling ? true : false,
-        workflows: enabledWorkflows,
-      });
-      if (setIsInstalling) {
-        setIsInstalling(false, res);
-      }
-      if (!res) {
-        setLoading(false);
-      }
-    } else if (config.connectionType === 's3') {
-      const http = coreRefs.http!;
+    const queryStr = prepareQuery(query.query, config);
+    const result = await runQuery(
+      queryStr,
+      config.connectionDataSource,
+      sessionId,
+      dataSourceMDSId
+    );
 
-      const assets: { data: ParsedIntegrationAsset[] } = await http.get(
-        `${INTEGRATIONS_BASE}/repository/${integration.name}/assets`
-      );
-      for (const query of assets.data.filter(
-        (a: ParsedIntegrationAsset): a is ParsedIntegrationAsset & { type: 'query' } =>
-          a.type === 'query'
-      )) {
-        // Skip any queries that have conditional workflows but aren't enabled
-        if (query.workflows && !query.workflows.some((w) => config.enabledWorkflows.includes(w))) {
-          continue;
-        }
-
-        const queryStr = prepareQuery(query.query, config);
-        const result = await runQuery(
-          queryStr,
-          config.connectionDataSource,
-          sessionId,
-          dataSourceMDSId
-        );
-        if (!result.ok) {
-          setLoading(false);
-          setCalloutLikeToast('Failed to add integration', 'danger', result.error.message);
-          return;
-        }
-        sessionId = result.value.sessionId ?? sessionId;
-      }
-      // Once everything is ready, add the integration to the new datasource as usual
-      const res = await addIntegrationRequest({
-        addSample: false,
-        templateName: integration.name,
-        integration,
-        setToast: setCalloutLikeToast,
-        dataSourceMDSId,
-        dataSourceMDSLabel,
-        name: config.displayName,
-        indexPattern: `flint_${config.connectionDataSource}_${config.databaseName}_${config.connectionTableName}__*`,
-        workflows: config.enabledWorkflows,
-        skipRedirect: setIsInstalling ? true : false,
-        dataSourceInfo: {
-          dataSource: config.connectionDataSource,
-          tableName: makeTableName(config),
-        },
-      });
-      if (setIsInstalling) {
-        setIsInstalling(false, res);
-      }
-      if (!res) {
-        setLoading(false);
-      }
-    } else {
-      console.error('Invalid data source type');
+    if (!result.ok) {
+      setLoading(false);
+      setCalloutLikeToast('Failed to add integration', 'danger', result.error.message);
+      return;
     }
-  } catch (error) {
-    setCalloutLikeToast('Failed to add integration', 'danger');
+    sessionId = result.value.sessionId ?? sessionId;
+  }
+
+  // Add integration to the new datasource
+  const res = await addIntegrationRequest({
+    addSample: false,
+    templateName: integration.name,
+    integration,
+    setToast: setCalloutLikeToast,
+    dataSourceMDSId,
+    dataSourceMDSLabel,
+    name: config.displayName,
+    indexPattern: `flint_${config.connectionDataSource}_${config.databaseName}_${config.connectionTableName}__*`,
+    workflows: config.enabledWorkflows,
+    skipRedirect: setIsInstalling ? true : false,
+    dataSourceInfo: {
+      dataSource: config.connectionDataSource,
+      tableName: makeTableName(config),
+    },
+  });
+
+  if (setIsInstalling) {
+    setIsInstalling(false, res);
+  }
+  if (!res) {
     setLoading(false);
   }
 };
@@ -452,6 +546,7 @@ export function SetupIntegrationForm({
     connectionLocation: '',
     checkpointLocation: '',
     connectionTableName: integration,
+    databaseName: 'default',
     enabledWorkflows: [],
   });
 
