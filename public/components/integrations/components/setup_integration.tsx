@@ -56,6 +56,32 @@ export interface IntegrationConfigProps {
   handleSelectedDataSourceChange: (dataSourceMDSId?: string, dataSourceMDSLabel?: string) => void;
 }
 
+/**
+ * Interface for the parameters used in the addIntegration function
+ */
+interface AddIntegrationParams {
+  /** Configuration settings for the integration setup */
+  config: IntegrationSetupInputs;
+
+  /** Integration configuration details */
+  integration: IntegrationConfig;
+
+  /** Callback function to set loading state */
+  setLoading: (loading: boolean) => void;
+
+  /** Callback function to display toast notifications */
+  setCalloutLikeToast: (title: string, color?: Color, text?: string) => void;
+
+  /** Optional MDS ID for the data source */
+  dataSourceMDSId?: string;
+
+  /** Optional MDS label for the data source */
+  dataSourceMDSLabel?: string;
+
+  /** Optional callback to set installation status */
+  setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
+}
+
 type SetupCallout = { show: true; title: string; color?: Color; text?: string } | { show: false };
 
 const sqlService = new SQLService(coreRefs.http!);
@@ -149,15 +175,6 @@ const prepareQuery = (query: string, config: IntegrationSetupInputs): string => 
 /**
  * Handles the integration setup process based on the connection type.
  *
- * @param {Object} params - The parameters object
- * @param {IntegrationSetupInputs} params.config - Configuration settings for the integration setup
- * @param {IntegrationConfig} params.integration - Integration configuration details
- * @param {Function} params.setLoading - Callback function to set loading state
- * @param {Function} params.setCalloutLikeToast - Callback function to display toast notifications
- * @param {string} [params.dataSourceMDSId] - Optional MDS ID for the data source
- * @param {string} [params.dataSourceMDSLabel] - Optional MDS label for the data source
- * @param {Function} [params.setIsInstalling] - Optional callback to set installation status
- *
  * @throws {Error} Throws an error if the connection type is invalid
  * @returns {Promise<void>} A promise that resolves when the integration is added
  */
@@ -169,15 +186,7 @@ const addIntegration = async ({
   dataSourceMDSId,
   dataSourceMDSLabel,
   setIsInstalling,
-}: {
-  config: IntegrationSetupInputs;
-  integration: IntegrationConfig;
-  setLoading: (loading: boolean) => void;
-  setCalloutLikeToast: (title: string, color?: Color, text?: string) => void;
-  dataSourceMDSId?: string;
-  dataSourceMDSLabel?: string;
-  setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
-}): Promise<void> => {
+}: AddIntegrationParams): Promise<void> => {
   setLoading(true);
 
   if (config.connectionType === 'index') {
@@ -209,24 +218,8 @@ const addIntegration = async ({
 /**
  * Handles the installation of an integration index by processing the configuration and making the integration request.
  *
- * @param {Object} params - The parameters object
- * @param {IntegrationSetupInputs} params.config - Configuration inputs for the integration setup
- * @param {IntegrationConfig} params.integration - Integration configuration object
- * @param {Function} params.setLoading - Function to set the loading state
- * @param {Function} params.setCalloutLikeToast - Function to display toast notifications
- * @param {string} [params.dataSourceMDSId] - Optional MDS ID for the data source
- * @param {string} [params.dataSourceMDSLabel] - Optional MDS label for the data source
- * @param {Function} [params.setIsInstalling] - Optional function to set installation status
- *
  * @returns {Promise<void>} A promise that resolves when the installation is complete
  *
- * @example
- * await addNativeIntegration({
- *   config: setupInputs,
- *   integration: integrationConfig,
- *   setLoading: (loading) => setLoadingState(loading),
- *   setCalloutLikeToast: (title, color, text) => showToast(title, color, text)
- * });
  */
 const addNativeIntegration = async ({
   config,
@@ -236,15 +229,7 @@ const addNativeIntegration = async ({
   dataSourceMDSId,
   dataSourceMDSLabel,
   setIsInstalling,
-}: {
-  config: IntegrationSetupInputs;
-  integration: IntegrationConfig;
-  setLoading: (loading: boolean) => void;
-  setCalloutLikeToast: (title: string, color?: Color, text?: string) => void;
-  dataSourceMDSId?: string;
-  dataSourceMDSLabel?: string;
-  setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
-}): Promise<void> => {
+}: AddIntegrationParams): Promise<void> => {
   let enabledWorkflows: string[] | undefined;
   if (integration.workflows) {
     enabledWorkflows = integration.workflows
@@ -279,15 +264,6 @@ const addNativeIntegration = async ({
  * Handles the installation process for S3 integration by creating a database (if specified),
  * processing integration assets, and executing necessary queries.
  *
- * @param {Object} params - The parameters object
- * @param {IntegrationSetupInputs} params.config - Configuration settings for the integration setup
- * @param {IntegrationConfig} params.integration - Integration configuration details
- * @param {Function} params.setLoading - Callback function to set loading state
- * @param {Function} params.setCalloutLikeToast - Callback function to display toast notifications
- * @param {string} [params.dataSourceMDSId] - Optional MDS ID for the data source
- * @param {string} [params.dataSourceMDSLabel] - Optional MDS label for the data source
- * @param {Function} [params.setIsInstalling] - Optional callback to set installation status
- *
  * @returns {Promise<void>} A promise that resolves when the installation is complete
  *
  * @throws Will set error toast if database creation fails or integration addition fails
@@ -300,34 +276,22 @@ const addFlintIntegration = async ({
   dataSourceMDSId,
   dataSourceMDSLabel,
   setIsInstalling,
-}: {
-  config: IntegrationSetupInputs;
-  integration: IntegrationConfig;
-  setLoading: (loading: boolean) => void;
-  setCalloutLikeToast: (title: string, color?: Color, text?: string) => void;
-  dataSourceMDSId?: string;
-  dataSourceMDSLabel?: string;
-  setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
-}): Promise<void> => {
+}: AddIntegrationParams): Promise<void> => {
   let sessionId: string | undefined;
 
   // Create database if specified
-  if (config.databaseName) {
-    const createDbQuery = `CREATE DATABASE IF NOT EXISTS ${config.databaseName}`;
-    const result = await runQuery(
-      createDbQuery,
-      config.connectionDataSource,
-      sessionId,
-      dataSourceMDSId
-    );
+  const dbResult = await createDatabase(
+    config,
+    sessionId,
+    dataSourceMDSId,
+    setLoading,
+    setCalloutLikeToast
+  );
 
-    if (!result.ok) {
-      setLoading(false);
-      setCalloutLikeToast('Failed to create database', 'danger', result.error.message);
-      return;
-    }
-    sessionId = result.value.sessionId;
+  if (!dbResult.success) {
+    return;
   }
+  sessionId = dbResult.sessionId;
 
   // Process integration assets
   const http = coreRefs.http!;
@@ -384,6 +348,53 @@ const addFlintIntegration = async ({
   if (!res) {
     setLoading(false);
   }
+};
+
+/**
+ * Creates a database if it doesn't already exist using the provided configuration.
+ *
+ * @param config - Configuration object containing database details
+ * @param config.databaseName - Name of the database to create
+ * @param config.connectionDataSource - Data source connection string
+ * @param sessionId - Current session identifier
+ * @param dataSourceMDSId - Data source MDS identifier
+ * @param setLoading - Callback function to update loading state
+ * @param setCalloutLikeToast - Callback function to display toast notifications
+ * @param setCalloutLikeToast.message - Message to display in the toast
+ * @param setCalloutLikeToast.type - Type of toast notification (e.g., 'danger')
+ * @param setCalloutLikeToast.details - Optional details for the toast message
+ *
+ * @returns Promise resolving to an object containing:
+ *          - success: boolean indicating if the operation was successful
+ *          - sessionId: the current or updated session identifier
+ *
+ */
+const createDatabase = async (
+  config: { databaseName: string; connectionDataSource: string },
+  sessionId: string,
+  dataSourceMDSId: string,
+  setLoading: (loading: boolean) => void,
+  setCalloutLikeToast: (message: string, type: string, details?: string) => void
+): Promise<{ success: boolean; sessionId: string }> => {
+  if (!config.databaseName) {
+    return { success: true, sessionId };
+  }
+
+  const createDbQuery = `CREATE DATABASE IF NOT EXISTS ${config.databaseName}`;
+  const result = await runQuery(
+    createDbQuery,
+    config.connectionDataSource,
+    sessionId,
+    dataSourceMDSId
+  );
+
+  if (!result.ok) {
+    setLoading(false);
+    setCalloutLikeToast('Failed to create database', 'danger', result.error.message);
+    return { success: false, sessionId };
+  }
+
+  return { success: true, sessionId: result.value.sessionId };
 };
 
 const isConfigValid = (config: IntegrationSetupInputs, integration: IntegrationConfig): boolean => {
