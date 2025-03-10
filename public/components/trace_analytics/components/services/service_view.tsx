@@ -41,10 +41,7 @@ import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_cru
 import { coreRefs } from '../../../../framework/core_refs';
 import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/plugin_headerControl';
 import { TraceAnalyticsComponentDeps } from '../../home';
-import {
-  handleServiceMapRequest,
-  handleServiceViewRequest,
-} from '../../requests/services_request_handler';
+import { handleServiceViewRequest } from '../../requests/services_request_handler';
 import { TraceFilter } from '../common/constants';
 import { FilterType } from '../common/filters/filters';
 import {
@@ -106,25 +103,19 @@ export function ServiceView(props: ServiceViewProps) {
     );
 
     setIsServiceOverviewLoading(true);
+    setIsServicesDataLoading(true);
     handleServiceViewRequest(
       props.serviceName,
       props.http,
       DSL,
       setFields,
       mode,
+      setServiceMap,
       props.dataSourceMDSId[0].id
-    ).finally(() => setIsServiceOverviewLoading(false));
-
-    if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
-      setIsServicesDataLoading(true);
-      handleServiceMapRequest(
-        props.http,
-        DSL,
-        mode,
-        props.dataSourceMDSId[0].id,
-        setServiceMap
-      ).finally(() => setIsServicesDataLoading(false));
-    }
+    ).finally(() => {
+      setIsServiceOverviewLoading(false);
+      setIsServicesDataLoading(false);
+    });
   };
 
   useEffect(() => {
