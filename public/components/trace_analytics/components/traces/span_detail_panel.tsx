@@ -132,7 +132,6 @@ export function SpanDetailPanel(props: {
   useEffect(() => {
     if (!props.payloadData) {
       props.setGanttChartLoading?.(false);
-      console.error('No payloadData provided to SpanDetailPanel');
       return;
     }
 

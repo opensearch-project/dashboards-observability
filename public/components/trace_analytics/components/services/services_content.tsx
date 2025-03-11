@@ -10,7 +10,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ServiceTrends } from '../../../../../common/types/trace_analytics';
 import { coreRefs } from '../../../../framework/core_refs';
 import {
-  handleServiceMapRequest,
   handleServicesRequest,
   handleServiceTrendsRequest,
 } from '../../requests/services_request_handler';
@@ -124,17 +123,28 @@ export function ServicesContent(props: ServicesProps) {
     );
 
     setIsServicesTableDataLoading(true);
-    handleServicesRequest(http, DSL, setTableItems, mode, dataSourceMDSId[0].id).finally(() =>
-      setIsServicesTableDataLoading(false)
-    );
+    handleServicesRequest(
+      http,
+      DSL,
+      setTableItems,
+      mode,
+      setServiceMap,
+      dataSourceMDSId[0].id
+    ).finally(() => setIsServicesTableDataLoading(false));
 
     setIsServicesDataLoading(true);
-    Promise.all([
-      handleServiceMapRequest(http, serviceMapDSL, mode, dataSourceMDSId[0].id, setServiceMap),
-      isServiceTrendEnabled
-        ? handleServiceTrendsRequest(http, '1h', setServiceTrends, mode, [], dataSourceMDSId[0].id)
-        : Promise.resolve(null),
-    ]).finally(() => setIsServicesDataLoading(false));
+    if (isServiceTrendEnabled) {
+      handleServiceTrendsRequest(
+        http,
+        '1h',
+        setServiceTrends,
+        mode,
+        [],
+        dataSourceMDSId[0].id
+      ).finally(() => setIsServicesDataLoading(false));
+    } else {
+      setIsServicesDataLoading(false);
+    }
   };
 
   const addFilter = (filter: FilterType) => {

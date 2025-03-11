@@ -27,8 +27,8 @@ export const handleServicesRequest = async (
   DSL: any,
   setItems: any,
   mode: TraceAnalyticsMode,
+  setServiceMap: (map: ServiceObject) => void,
   dataSourceMDSId?: string,
-  setServiceMap?: any,
   serviceNameFilter?: string
 ) => {
   return handleDslRequest(
@@ -215,6 +215,7 @@ export const handleServiceViewRequest = (
   DSL: any,
   setFields: any,
   mode: TraceAnalyticsMode,
+  setServiceMap: (map: ServiceObject) => void,
   dataSourceMDSId?: string
 ) => {
   return handleDslRequest(http, DSL, getServicesQuery(mode, serviceName), mode, dataSourceMDSId)
@@ -225,7 +226,8 @@ export const handleServiceViewRequest = (
         http,
         DSL,
         mode,
-        dataSourceMDSId
+        dataSourceMDSId,
+        setServiceMap
       );
       const connectedServices = [
         ...serviceObject[bucket.key].targetServices,
