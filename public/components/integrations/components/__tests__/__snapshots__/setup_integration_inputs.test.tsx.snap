@@ -2123,6 +2123,103 @@ exports[`Integration Setup Inputs Renders the query inputs 1`] = `
   <EuiCompressedFormRow
     describedByIds={Array []}
     display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText="Enter the name of the database to store your data. The 'default' database will be used if no input is provided."
+    label="Database Name"
+    labelType="label"
+  >
+    <div
+      className="euiFormRow euiFormRow--compressed"
+      id="random_html_id-row"
+    >
+      <div
+        className="euiFormRow__labelWrapper"
+      >
+        <EuiFormLabel
+          className="euiFormRow__label"
+          htmlFor="random_html_id"
+          isFocused={false}
+          type="label"
+        >
+          <label
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="random_html_id"
+          >
+            Database Name
+          </label>
+        </EuiFormLabel>
+      </div>
+      <div
+        className="euiFormRow__fieldWrapper"
+      >
+        <EuiCompressedFieldText
+          aria-describedby="random_html_id-help-0"
+          id="random_html_id"
+          onBlur={[Function]}
+          onChange={[Function]}
+          onFocus={[Function]}
+          placeholder="default"
+        >
+          <EuiFieldText
+            aria-describedby="random_html_id-help-0"
+            compressed={true}
+            id="random_html_id"
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            placeholder="default"
+          >
+            <EuiFormControlLayout
+              compressed={true}
+              fullWidth={false}
+              inputId="random_html_id"
+            >
+              <div
+                className="euiFormControlLayout euiFormControlLayout--compressed"
+              >
+                <div
+                  className="euiFormControlLayout__childrenWrapper"
+                >
+                  <EuiValidatableControl>
+                    <input
+                      aria-describedby="random_html_id-help-0"
+                      className="euiFieldText euiFieldText--compressed"
+                      id="random_html_id"
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      placeholder="default"
+                      type="text"
+                    />
+                  </EuiValidatableControl>
+                  <EuiFormControlLayoutIcons
+                    compressed={true}
+                  />
+                </div>
+              </div>
+            </EuiFormControlLayout>
+          </EuiFieldText>
+        </EuiCompressedFieldText>
+        <EuiFormHelpText
+          className="euiFormRow__text"
+          id="random_html_id-help-0"
+          key="Enter the name of the database to store your data. The 'default' database will be used if no input is provided."
+        >
+          <div
+            className="euiFormHelpText euiFormRow__text"
+            id="random_html_id-help-0"
+          >
+            Enter the name of the database to store your data. The 'default' database will be used if no input is provided.
+          </div>
+        </EuiFormHelpText>
+      </div>
+    </div>
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
     error={
       Array [
         "Must be a URL starting with 's3://'.",
