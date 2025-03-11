@@ -133,11 +133,18 @@ export function ServicesContent(props: ServicesProps) {
     ).finally(() => setIsServicesTableDataLoading(false));
 
     setIsServicesDataLoading(true);
-    Promise.all([
-      isServiceTrendEnabled
-        ? handleServiceTrendsRequest(http, '1h', setServiceTrends, mode, [], dataSourceMDSId[0].id)
-        : Promise.resolve(null),
-    ]).finally(() => setIsServicesDataLoading(false));
+    if (isServiceTrendEnabled) {
+      handleServiceTrendsRequest(
+        http,
+        '1h',
+        setServiceTrends,
+        mode,
+        [],
+        dataSourceMDSId[0].id
+      ).finally(() => setIsServicesDataLoading(false));
+    } else {
+      setIsServicesDataLoading(false);
+    }
   };
 
   const addFilter = (filter: FilterType) => {

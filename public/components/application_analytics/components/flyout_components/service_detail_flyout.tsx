@@ -131,9 +131,14 @@ export function ServiceDetailFlyout(props: ServiceFlyoutProps) {
     );
 
     setIsServicesDataLoading(true);
-    Promise.all([
-      handleServiceViewRequest(serviceName, http, serviceDSL, setFields, mode, setServiceMap),
-    ]).finally(() => setIsServicesDataLoading(false));
+    handleServiceViewRequest(
+      serviceName,
+      http,
+      serviceDSL,
+      setFields,
+      mode,
+      setServiceMap
+    ).finally(() => setIsServicesDataLoading(false));
 
     const spanDSL = filtersToDsl(mode, filters, query, startTime, endTime, 'app', appConfigs);
     spanDSL.query.bool.filter.push({
