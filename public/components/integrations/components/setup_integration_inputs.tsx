@@ -292,6 +292,23 @@ export function IntegrationConnectionInputs({
   );
 }
 
+/**
+ * A component that renders input fields for integration setup configuration.
+ *
+ * @component
+ * @param {Object} props - The component props
+ * @param {IntegrationSetupInputs} props.config - The current configuration object for the integration setup
+ * @param {Function} props.updateConfig - Callback function to update the configuration
+ * @param {IntegrationConfig} props.integration - The integration configuration object
+ * @returns {JSX.Element} A React fragment containing form input fields
+ *
+ * @example
+ * <IntegrationQueryInputs
+ *   config={setupConfig}
+ *   updateConfig={handleConfigUpdate}
+ *   integration={integrationConfig}
+ * />
+ */
 export function IntegrationQueryInputs({
   config,
   updateConfig,
@@ -319,6 +336,19 @@ export function IntegrationQueryInputs({
             updateConfig({ connectionTableName: evt.target.value });
           }}
           isInvalid={config.connectionTableName.length === 0}
+        />
+      </EuiCompressedFormRow>
+      {/* Add the new database name field */}
+      <EuiCompressedFormRow
+        label="Database Name"
+        helpText="Enter the name of the database to store your data. The 'default' database will be used if no input is provided."
+      >
+        <EuiCompressedFieldText
+          placeholder="default"
+          value={config.databaseName}
+          onChange={(evt) => {
+            updateConfig({ databaseName: evt.target.value });
+          }}
         />
       </EuiCompressedFormRow>
       <EuiCompressedFormRow
