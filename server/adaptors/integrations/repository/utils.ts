@@ -30,7 +30,11 @@ export async function deepCheck(reader: IntegrationReader): Promise<Result<Integ
 
   // Deep checks not included in default config validation
   const assets = await reader.getAssets();
-  if (!assets.ok || assets.value.length === 0) {
+  if (!assets.ok) {
+    return { ok: false, error: assets.error };
+  }
+
+  if (assets.value.length === 0) {
     return { ok: false, error: new Error('An integration must have at least one asset') };
   }
 

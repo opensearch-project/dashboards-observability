@@ -223,11 +223,21 @@ export class IntegrationReader {
 
       switch (asset.type) {
         case 'savedObjectBundle':
-          resultValue.push({
-            type: 'savedObjectBundle',
-            workflows: asset.workflows,
-            data: JSON.parse(serializedResult.value.data),
-          });
+          try {
+            resultValue.push({
+              type: 'savedObjectBundle',
+              workflows: asset.workflows,
+              data: JSON.parse(serializedResult.value.data),
+            });
+          } catch {
+            return {
+              ok: false,
+              error: new Error(
+                `While parsing integration data for \`${serializedResult.value.name}\`:\n` +
+                  'The data field is not valid JSON.'
+              ),
+            };
+          }
           break;
         case 'query':
           resultValue.push({
