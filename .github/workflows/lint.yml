@@ -4,7 +4,7 @@ on: [pull_request]
 
 env:
   PLUGIN_NAME: dashboards-observability
-  OPENSEARCH_DASHBOARDS_VERSION: 'feature/node-2x'
+  OPENSEARCH_DASHBOARDS_VERSION: 'main'
 
 jobs:
   build:

@@ -4,8 +4,7 @@ on: [pull_request, push]
 
 env:
   PLUGIN_NAME: dashboards-observability
-  OPENSEARCH_DASHBOARDS_VERSION: 'feature/node-2x'
-  OPENSEARCH_DASHBOARDS_FTR_VERSION: 'main'
+  OPENSEARCH_DASHBOARDS_VERSION: 'main'
   OPENSEARCH_VERSION: '3.0.0-alpha1'
   OPENSEARCH_PLUGIN_VERSION: '3.0.0.0-alpha1'
 
@@ -171,7 +170,7 @@ jobs:
         with:
           path: opensearch-dashboards-functional-test
           repository: opensearch-project/opensearch-dashboards-functional-test
-          ref: ${{ env.OPENSEARCH_DASHBOARDS_FTR_VERSION }}
+          ref: ${{ env.OPENSEARCH_DASHBOARDS_VERSION }}
           fetch-depth: 0
 
       - name: Install Cypress
