@@ -23,10 +23,7 @@ import { ServiceObject } from '../../../../../public/components/trace_analytics/
 import { ServiceMap } from '../../../../../public/components/trace_analytics/components/services';
 import { SpanDetailTable } from '../../../../../public/components/trace_analytics/components/traces/span_detail_table';
 import { TraceAnalyticsComponentDeps } from '../../../../../public/components/trace_analytics/home';
-import {
-  handleServiceMapRequest,
-  handleServiceViewRequest,
-} from '../../../../../public/components/trace_analytics/requests/services_request_handler';
+import { handleServiceViewRequest } from '../../../../../public/components/trace_analytics/requests/services_request_handler';
 import { getListItem } from '../../helpers/utils';
 
 interface ServiceFlyoutProps extends TraceAnalyticsComponentDeps {
@@ -134,10 +131,14 @@ export function ServiceDetailFlyout(props: ServiceFlyoutProps) {
     );
 
     setIsServicesDataLoading(true);
-    Promise.all([
-      handleServiceViewRequest(serviceName, http, serviceDSL, setFields, mode),
-      handleServiceMapRequest(http, serviceDSL, mode, '', setServiceMap),
-    ]).finally(() => setIsServicesDataLoading(false));
+    handleServiceViewRequest(
+      serviceName,
+      http,
+      serviceDSL,
+      setFields,
+      mode,
+      setServiceMap
+    ).finally(() => setIsServicesDataLoading(false));
 
     const spanDSL = filtersToDsl(mode, filters, query, startTime, endTime, 'app', appConfigs);
     spanDSL.query.bool.filter.push({
