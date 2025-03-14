@@ -4,36 +4,21 @@
  */
 
 import {
-  CriteriaWithPagination,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHighlight,
-  EuiHorizontalRule,
-  EuiInMemoryTable,
+  EuiButtonEmpty,
+  EuiLink,
   EuiPanel,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiSelectable,
-  EuiSelectableOption,
-  EuiSmallButtonEmpty,
-  EuiSpacer,
-  EuiTextColor,
+  EuiText,
   PropertySort,
 } from '@elastic/eui';
-import React, { Fragment, useMemo, useState } from 'react';
-import {
-  TRACE_TABLE_OPTIONS,
-  TRACE_TABLE_TITLES,
-  TRACE_TABLE_TYPE_KEY,
-  TRACES_MAX_NUM,
-} from '../../../../../common/constants/trace_analytics';
+import React, { useEffect, useMemo, useState } from 'react';
 import { TraceAnalyticsMode, TraceQueryMode } from '../../../../../common/types/trace_analytics';
 import {
   MissingConfigurationMessage,
   NoMatchMessage,
-  PanelTitle,
 } from '../common/helper_functions';
 import { getTableColumns } from './trace_table_helpers';
+import { RenderCustomDataGrid } from '../common/shared_components/custom_datagrid';
+import moment from 'moment';
 
 interface TracesLandingTableProps {
   columnItems: string[];
@@ -52,84 +37,59 @@ interface TracesLandingTableProps {
 export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
   const { columnItems, items, refresh, mode, loading, getTraceViewUri, openTraceFlyout } = props;
   const [showAttributes, setShowAttributes] = useState(false);
-  const [isTitlePopoverOpen, setIsTitlePopoverOpen] = useState(false);
-  const [tableOptions, setTableOptions] = useState<EuiSelectableOption[]>(() =>
-    TRACE_TABLE_OPTIONS.map((obj) =>
-      obj.key === props.tracesTableMode ? { ...obj, checked: 'on' } : obj
-    )
-  );
 
-  const titlePopoverButton = (totalItems?: number) => (
-    <EuiSmallButtonEmpty
-      onClick={() => setIsTitlePopoverOpen(!isTitlePopoverOpen)}
-      iconType="arrowDown"
-      iconSide="right"
-    >
-      <PanelTitle title={TRACE_TABLE_TITLES[props.tracesTableMode]} totalItems={totalItems} />
-    </EuiSmallButtonEmpty>
-  );
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
-  const renderTableOptions = (option: EuiSelectableOption, searchValue: string) => {
-    return (
-      <>
-        <EuiHighlight search={searchValue}>{TRACE_TABLE_TITLES[option.key]}</EuiHighlight>
-        <br />
-        <EuiTextColor color="subdued" className="popOverSelectableItem">
-          <small>{option['aria-describedby']}</small>
-        </EuiTextColor>
-      </>
-    );
+  const renderCellValue = ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
+    const value = items[rowIndex]?.[columnId];
+    
+    if (!value && columnId !== 'status.code' && columnId !== 'error_count') return '-';
+  
+    switch (columnId) {
+      case 'endTime':
+        return moment(value).format('MM/DD/YYYY HH:mm:ss.SSS');
+        
+      case 'trace_id':
+      case 'traceId':
+        return getTraceViewUri ? (
+          <EuiLink href={getTraceViewUri(value)}>{value}</EuiLink>
+        ) : (
+          value
+        );
+  
+      case "durationInNanos":
+        return `${(value / 1000000).toFixed(2)} ms`;
+  
+      case "status.code":
+        return value == 2 ? (
+          <EuiText color="danger" size="s">Yes</EuiText>
+        ) : (
+          'No'
+        );
+  
+      case 'error_count':
+        const errorCount = value?.doc_count ?? 0;
+        return errorCount > 0 ? (
+          <EuiText color="danger" size="s">Yes</EuiText>
+        ) : (
+          'No'
+        );
+  
+      default:
+        return value;
+    }
   };
-
-  const renderTitleBar = (totalItems?: number) => {
-    return (
-      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            button={titlePopoverButton(totalItems)}
-            isOpen={isTitlePopoverOpen}
-            closePopover={() => setIsTitlePopoverOpen(false)}
-          >
-            <EuiPopoverTitle className="tableModePopover">
-              Select trace table filter
-            </EuiPopoverTitle>
-            <EuiSelectable
-              singleSelection="always"
-              aria-label="Searchable trace mode"
-              searchable
-              searchProps={{
-                'data-test-subj': 'traceTableMode',
-              }}
-              renderOption={renderTableOptions}
-              listProps={{ rowHeight: 80 }}
-              options={tableOptions}
-              onChange={(newOptions) => {
-                setTableOptions(newOptions);
-                const tableMode = newOptions.filter((option) => option.checked === 'on')[0]
-                  .key as TraceQueryMode;
-                props.setTracesTableMode(tableMode);
-                sessionStorage.setItem(TRACE_TABLE_TYPE_KEY, tableMode);
-                setIsTitlePopoverOpen(false);
-              }}
-            >
-              {(list, search) => (
-                <Fragment>
-                  {search}
-                  {list}
-                </Fragment>
-              )}
-            </EuiSelectable>
-          </EuiPopover>
-        </EuiFlexItem>
-        {props.tracesTableMode !== 'traces' && (
-          <EuiFlexItem grow={false}>
-            <EuiSmallButtonEmpty onClick={() => setShowAttributes(!showAttributes)}>
-              {showAttributes ? 'Hide Attributes' : 'Show Attributes'}
-            </EuiSmallButtonEmpty>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    );
+  
+  const pagination = {
+    pageIndex,
+    pageSize,
+    pageSizeOptions: [5, 10, 15],
+    onChangePage: (newPage) => setPageIndex(newPage),
+    onChangeItemsPerPage: (newSize) => {
+      setPageSize(newSize);
+      setPageIndex(0);
+    },
   };
 
   const columns = useMemo(() => {
@@ -138,9 +98,10 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
       columnItems,
       mode,
       props.tracesTableMode,
-      getTraceViewUri,
-      openTraceFlyout
-    );
+      getTraceViewUri, openTraceFlyout).map(col => ({
+        id: col.field,
+        display: col.name,
+      }));
   }, [
     showAttributes,
     columnItems,
@@ -151,55 +112,60 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
     items,
   ]);
 
-  const titleBar = useMemo(() => renderTitleBar(items?.length), [
-    showAttributes,
-    items,
-    isTitlePopoverOpen,
-  ]);
+  //const [sortingColumns, setSortingColumns] = useState([{}]);
+  const [sortingColumns, setSortingColumns] = useState<{ id: string; direction: "desc" | "asc" }[]>([]);
 
-  const [sorting, setSorting] = useState<{ sort: PropertySort }>({
-    sort: {
-      field: 'trace_id',
-      direction: 'asc',
+  /** TEST */
+  // const [sortingColumns, setSortingColumns] = useState<{ id: string; direction: "desc" | "asc" }[]>([]);
+
+  // useEffect(() => {
+  //   const defaultSortField = props.tracesTableMode === 'traces' ? 'last_updated' : 'endTime';
+  //   setSortingColumns([{ id: defaultSortField, direction: "desc" }]);
+  //   refresh({ field: defaultSortField, direction: "desc" }).catch(console.error);
+  // }, [props.tracesTableMode]); // Runs when tracesTableMode changes
+
+  /** Default sorting based on tracesTableMode */
+  // const defaultSortField = props.tracesTableMode === 'traces' ? 'last_updated' : 'endTime';
+  // const [sortingColumns, setSortingColumns] = useState<{ id: string; direction: "desc" | "asc" }[]>([
+  //   { id: defaultSortField, direction: "desc" },
+  // ]);
+  
+  const sorting = {
+    columns: sortingColumns,
+    onSort: async (newSorting: { id: string; direction: "desc" | "asc" }[]) => {
+      setSortingColumns(newSorting);
+  
+      const sortField = newSorting[0].id;
+      const sortDirection = newSorting[0].direction;
+  
+      await refresh({
+        field: sortField,
+        direction: sortDirection,
+      });
     },
-  });
-
-  const onTableChange = async ({ sort }: CriteriaWithPagination<unknown>) => {
-    if (typeof sort?.field !== 'string') return;
-
-    // maps table column key to DSL aggregation name
-    const fieldMappings = {
-      trace_id: '_key',
-      trace_group: null,
-      latency: 'latency',
-      percentile_in_trace_group: null,
-      error_count: 'error_count',
-      last_updated: 'last_updated',
-    };
-    const field = fieldMappings[sort.field as keyof typeof fieldMappings];
-    if (!field || items?.length < TRACES_MAX_NUM) {
-      setSorting({ sort });
-      return;
-    }
-
-    // using await when sorting the default sorted field leads to a bug in UI,
-    // user needs to click one time more to change sort back to ascending
-    if (sort.field === 'trace_id') {
-      refresh({ ...sort, field });
-      setSorting({ sort });
-      return;
-    }
-
-    await refresh({ ...sort, field });
-    setSorting({ sort });
   };
+  
+  const attributesButton = (
+    <EuiButtonEmpty
+      size="xs"
+      onClick={() => setShowAttributes((prev) => !prev)}
+      key="toggleAttributes"
+      color="text"
+      data-test-subj="toggleAttributesButton"
+    >
+      {showAttributes ? 'Hide attributes' : 'Show attributes'}
+    </EuiButtonEmpty>
+  );
+
+  // useEffect(() => {
+  //   //ADAM DELETE
+  //   console.log(props.tracesTableMode)
+  //   console.log("THE COLUMNS", columns);
+  // }, [props.tracesTableMode, columns])
 
   return (
     <>
       <EuiPanel>
-        {titleBar}
-        <EuiSpacer size="m" />
-        <EuiHorizontalRule margin="none" />
         {!(
           mode === 'custom_data_prepper' ||
           (mode === 'data_prepper' && props.dataPrepperIndicesExist) ||
@@ -207,19 +173,17 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
         ) ? (
           <MissingConfigurationMessage mode={mode} />
         ) : items?.length > 0 || loading ? (
-          <EuiInMemoryTable
-            className="traces-scrollable-table"
-            tableLayout="auto"
-            allowNeutralSort={true}
-            items={items}
+          <RenderCustomDataGrid
+            key={columns.map(col => col.id).join('-')}//Force re-render for switching from spans to traces
             columns={columns}
-            pagination={{
-              initialPageSize: 10,
-              pageSizeOptions: [5, 10, 15],
-            }}
+            renderCellValue={renderCellValue}
+            rowCount={items.length}
             sorting={sorting}
-            onTableChange={onTableChange}
-            loading={loading}
+            pagination={pagination}
+            isTableDataLoading={loading}
+            tracesTableMode={props.tracesTableMode}
+            setTracesTableMode={props.setTracesTableMode}
+            {...(props.tracesTableMode !== 'traces' && { toggleAttributesButton: attributesButton })}
           />
         ) : (
           <NoMatchMessage size="xl" />
