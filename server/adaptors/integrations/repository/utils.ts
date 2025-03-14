@@ -32,7 +32,10 @@ export async function deepCheck(reader: IntegrationReader): Promise<Result<Integ
   const assets = await reader.getAssets();
   // Check if there was an error retrieving assets
   if (!assets.ok) {
-    return { ok: false, error: assets.error };
+    return {
+      ok: false,
+      error: new Error(`Failed to process assets while loading: ${assets.error.message}`),
+    };
   }
   // Validate that at least one asset exists for the integration
   if (assets.value.length === 0) {
