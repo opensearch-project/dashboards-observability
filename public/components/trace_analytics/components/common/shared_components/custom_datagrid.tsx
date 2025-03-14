@@ -9,12 +9,18 @@ import {
   EuiDataGrid,
   EuiDataGridColumn,
   EuiDataGridSorting,
+  EuiHighlight,
   EuiLoadingContent,
   EuiOverlayMask,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
+  EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useMemo, useState } from 'react';
 import { NoMatchMessage } from '../helper_functions';
+import { TRACE_TABLE_OPTIONS, TRACE_TABLE_TITLES, TRACE_TABLE_TYPE_KEY } from '../../../../../../common/constants/trace_analytics';
 
 interface FullScreenWrapperProps {
   children: React.ReactNode;
@@ -73,6 +79,9 @@ interface RenderCustomDataGridParams {
   defaultHeight?: string;
   visibleColumns?: string[];
   isTableDataLoading?: boolean;
+  tracesTableMode?: string;
+  setTracesTableMode?: (mode: string) => void;
+  toggleAttributesButton?: React.ReactNode;
 }
 
 export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
@@ -88,16 +97,72 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   defaultHeight = '500px',
   visibleColumns,
   isTableDataLoading,
+  tracesTableMode,
+  setTracesTableMode,
+  toggleAttributesButton
 }) => {
   const [localVisibleColumns, setLocalVisibleColumns] = useState(
     visibleColumns ?? columns.map((col) => col.id)
   );
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const tableOptions = tracesTableMode
+    ? TRACE_TABLE_OPTIONS.map((obj) =>
+      obj.key === tracesTableMode ? { ...obj, checked: 'on' } : obj
+    )
+    : [];
 
   const disableInteractions = useMemo(() => isFullScreen, [isFullScreen]);
 
+  const tableModeSelector = setTracesTableMode && tracesTableMode ? (
+    <EuiPopover
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      panelStyle={{ width: '350px' }}
+      button={
+        <EuiButtonEmpty
+          size="xs"
+          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          iconType="arrowDown"
+          data-test-subj="traceTableModeSelector"
+          color="text"
+        >
+          {TRACE_TABLE_TITLES[tracesTableMode]} ({rowCount})
+        </EuiButtonEmpty>
+      }
+    >
+      <EuiPopoverTitle>Select trace table filter</EuiPopoverTitle>
+      <EuiSelectable
+        singleSelection="always"
+        options={tableOptions}
+        listProps={{ rowHeight: 80 }}
+        renderOption={(option, searchValue) => (
+          <div style={{ padding: '6px 10px', width: '100%' }}>
+            <EuiHighlight search={searchValue}>{TRACE_TABLE_TITLES[option.key]}</EuiHighlight>
+            <br />
+            <EuiTextColor color="subdued" className="popOverSelectableItem">
+              <small>{option['aria-describedby'] || 'No description available'}</small>
+            </EuiTextColor>
+          </div>
+        )}
+        onChange={(newOptions) => {
+          const selectedMode = newOptions.find((option) => option.checked === 'on')?.key;
+          if (selectedMode) {
+            setTracesTableMode(selectedMode);
+            sessionStorage.setItem(TRACE_TABLE_TYPE_KEY, selectedMode);
+          }
+          setIsPopoverOpen(false);
+        }}
+      >
+        {(list) => list}
+      </EuiSelectable>
+    </EuiPopover>
+  ) : null;
+
   const toolbarControls = useMemo(
     () => [
+      ...(tableModeSelector ? [tableModeSelector] : []),
       <EuiButtonEmpty
         size="xs"
         onClick={() => setIsFullScreen((prev) => !prev)}
@@ -108,15 +173,16 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
       >
         {isFullScreen
           ? i18n.translate('toolbarControls.exitFullScreen', {
-              defaultMessage: 'Exit full screen',
-            })
+            defaultMessage: 'Exit full screen',
+          })
           : i18n.translate('toolbarControls.fullScreen', {
-              defaultMessage: 'Full screen',
-            })}
+            defaultMessage: 'Full screen',
+          })}
       </EuiButtonEmpty>,
       ...toolbarButtons,
+      ...(toggleAttributesButton ? [toggleAttributesButton] : [])
     ],
-    [isFullScreen, toolbarButtons]
+    [isFullScreen, toolbarButtons, tracesTableMode, toggleAttributesButton]
   );
 
   const gridStyle = useMemo(
