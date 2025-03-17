@@ -81,7 +81,6 @@ interface RenderCustomDataGridParams {
   isTableDataLoading?: boolean;
   tracesTableMode?: string;
   setTracesTableMode?: (mode: string) => void;
-  toggleAttributesButton?: React.ReactNode;
 }
 
 export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
@@ -99,11 +98,18 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   isTableDataLoading,
   tracesTableMode,
   setTracesTableMode,
-  toggleAttributesButton
 }) => {
+
+  const defaultVisibleColumns = useMemo(() => {
+    return columns
+      .filter((col) => !col.id.includes('attributes') && !col.id.includes('instrumentation'))
+      .map((col) => col.id);
+  }, [columns]);
+
   const [localVisibleColumns, setLocalVisibleColumns] = useState(
-    visibleColumns ?? columns.map((col) => col.id)
+    visibleColumns ?? defaultVisibleColumns
   );
+  
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -180,9 +186,8 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
           })}
       </EuiButtonEmpty>,
       ...toolbarButtons,
-      ...(toggleAttributesButton ? [toggleAttributesButton] : [])
     ],
-    [isFullScreen, toolbarButtons, tracesTableMode, toggleAttributesButton]
+    [isFullScreen, toolbarButtons, tracesTableMode]
   );
 
   const gridStyle = useMemo(

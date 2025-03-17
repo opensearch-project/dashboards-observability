@@ -38,8 +38,11 @@ export const handleCustomIndicesTracesRequest = async (
   DSL: any,
   items: any,
   setItems: (items: any) => void,
-  setColumns: (items: any) => void,
+  setColumns: (columns: any) => void,
   mode: TraceAnalyticsMode,
+  pageIndex: number = 0,
+  pageSize: number = 10,
+  setTotalHits: any,
   dataSourceMDSId?: string,
   sort?: PropertySort,
   queryMode?: TraceQueryMode,
@@ -48,7 +51,15 @@ export const handleCustomIndicesTracesRequest = async (
   const responsePromise = handleDslRequest(
     http,
     DSL,
-    getCustomIndicesTracesQuery(mode, undefined, sort, queryMode, isUnderOneHour),
+    getCustomIndicesTracesQuery(
+      mode,
+      undefined,
+      pageIndex,
+      pageSize,
+      sort,
+      queryMode,
+      isUnderOneHour
+    ),
     mode,
     dataSourceMDSId
   );
@@ -56,6 +67,11 @@ export const handleCustomIndicesTracesRequest = async (
   return Promise.allSettled([responsePromise])
     .then(([responseResult]) => {
       if (responseResult.status === 'rejected') return Promise.reject(responseResult.reason);
+
+      const responseData = responseResult.value;
+      
+      const totalHits = responseData.hits?.total?.value ?? 0;
+      setTotalHits(totalHits);
 
       if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
         const keys = new Set();
@@ -71,11 +87,11 @@ export const handleCustomIndicesTracesRequest = async (
           [undefined],
           responseResult.value.aggregations.traces.buckets.map((bucket: any) => {
             return {
-              trace_id: bucket.key,
-              latency: bucket.latency.value,
-              last_updated: moment(bucket.last_updated.value).format(TRACE_ANALYTICS_DATE_FORMAT),
-              error_count: bucket.error_count.doc_count,
-              actions: '#',
+          trace_id: bucket.key,
+          latency: bucket.latency.value,
+          last_updated: moment(bucket.last_updated.value).format(TRACE_ANALYTICS_DATE_FORMAT),
+          error_count: bucket.error_count.doc_count,
+          actions: '#',
             };
           }),
         ];

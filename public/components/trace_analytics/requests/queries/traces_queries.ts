@@ -292,6 +292,8 @@ export const getSpansQuery = (spanSearchParams: SpanSearchParams) => {
 export const getCustomIndicesTracesQuery = (
   mode: TraceAnalyticsMode,
   traceId: string = '',
+  pageIndex: number = 0,
+  pageSize: number = 10,
   sort?: PropertySort,
   queryMode?: TraceQueryMode,
   isUnderOneHour?: boolean
@@ -365,7 +367,8 @@ export const getCustomIndicesTracesQuery = (
   };
 
   const dataPrepperQuery: any = {
-    size: TRACES_MAX_NUM,
+    size: pageSize,
+    from: pageIndex * pageSize,
     _source: {
       includes: [
         'spanId',
@@ -388,7 +391,7 @@ export const getCustomIndicesTracesQuery = (
       },
     },
     ...(sort && { sort: [{ [sort.field]: { order: sort.direction } }] }),
-    track_total_hits: false,
+    track_total_hits: true,
   };
 
   if (queryMode === 'root_spans') {
