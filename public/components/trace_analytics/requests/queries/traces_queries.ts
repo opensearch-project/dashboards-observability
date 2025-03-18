@@ -50,6 +50,7 @@ export const getTraceGroupPercentilesQuery = () => {
 export const getTracesQuery = (
   mode: TraceAnalyticsMode,
   traceId: string = '',
+  maxTraces: number = TRACES_MAX_NUM,
   sort?: PropertySort,
   isUnderOneHour?: boolean
 ) => {
@@ -69,7 +70,7 @@ export const getTracesQuery = (
       traces: {
         terms: {
           field: 'traceID',
-          size: TRACES_MAX_NUM,
+          size: maxTraces,
           order: {
             [field]: direction,
           },
@@ -136,7 +137,7 @@ export const getTracesQuery = (
       traces: {
         terms: {
           field: 'traceId',
-          size: TRACES_MAX_NUM,
+          size: maxTraces,
           order: {
             [field]: direction,
           },

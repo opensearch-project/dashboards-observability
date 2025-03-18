@@ -22,7 +22,11 @@ import {
 import { i18n } from '@osd/i18n';
 import React, { useMemo, useState } from 'react';
 import { NoMatchMessage } from '../helper_functions';
-import { TRACE_TABLE_OPTIONS, TRACE_TABLE_TITLES, TRACE_TABLE_TYPE_KEY } from '../../../../../../common/constants/trace_analytics';
+import {
+  TRACE_TABLE_OPTIONS,
+  TRACE_TABLE_TITLES,
+  TRACE_TABLE_TYPE_KEY,
+} from '../../../../../../common/constants/trace_analytics';
 
 const MAX_DISPLAY_ROWS = 10000;
 interface FullScreenWrapperProps {
@@ -84,6 +88,8 @@ interface RenderCustomDataGridParams {
   isTableDataLoading?: boolean;
   tracesTableMode?: string;
   setTracesTableMode?: (mode: string) => void;
+  maxTraces: number;
+  setMaxTraces: (max: number) => void;
 }
 
 export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
@@ -101,8 +107,9 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   isTableDataLoading,
   tracesTableMode,
   setTracesTableMode,
+  maxTraces,
+  setMaxTraces,
 }) => {
-
   const defaultVisibleColumns = useMemo(() => {
     return columns
       .filter((col) => !col.id.includes('attributes') && !col.id.includes('instrumentation'))
@@ -112,76 +119,93 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   const [localVisibleColumns, setLocalVisibleColumns] = useState(
     visibleColumns ?? defaultVisibleColumns
   );
-  
+
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const displayedRowCount = rowCount > MAX_DISPLAY_ROWS ? MAX_DISPLAY_ROWS : rowCount;
   const isRowCountLimited = rowCount > MAX_DISPLAY_ROWS;
-  
+
   const tableOptions = tracesTableMode
     ? TRACE_TABLE_OPTIONS.map((obj) =>
-      obj.key === tracesTableMode ? { ...obj, checked: 'on' } : obj
-    )
+        obj.key === tracesTableMode ? { ...obj, checked: 'on' } : obj
+      )
     : [];
 
   const disableInteractions = useMemo(() => isFullScreen, [isFullScreen]);
 
-  const tableModeSelector = setTracesTableMode && tracesTableMode ? (
-    <EuiPopover
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-      panelStyle={{ width: '350px' }}
-      button={
-        <EuiButtonEmpty
-          size="xs"
-          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-          iconType="arrowDown"
-          data-test-subj="traceTableModeSelector"
-          color="text"
-        >
-          {TRACE_TABLE_TITLES[tracesTableMode]} ({displayedRowCount})
-          {isRowCountLimited && (
-            <EuiToolTip
-              content={`Actual hits: ${rowCount}. Only ${MAX_DISPLAY_ROWS} can be displayed.`}
-            >
-              <EuiIcon type="iInCircle" color="subdued" size="s" style={{ marginLeft: 6 }} />
-            </EuiToolTip>
-          )}
-        </EuiButtonEmpty>
-      }
-    >
-      <EuiPopoverTitle>Select trace table filter</EuiPopoverTitle>
-      <EuiSelectable
-        singleSelection="always"
-        options={tableOptions}
-        listProps={{ rowHeight: 80 }}
-        renderOption={(option, searchValue) => (
-          <div style={{ padding: '6px 10px', width: '100%' }}>
-            <EuiHighlight search={searchValue}>{TRACE_TABLE_TITLES[option.key]}</EuiHighlight>
-            <br />
-            <EuiTextColor color="subdued" className="popOverSelectableItem">
-              <small>{option['aria-describedby'] || 'No description available'}</small>
-            </EuiTextColor>
-          </div>
-        )}
-        onChange={(newOptions) => {
-          const selectedMode = newOptions.find((option) => option.checked === 'on')?.key;
-          if (selectedMode) {
-            setTracesTableMode(selectedMode);
-            sessionStorage.setItem(TRACE_TABLE_TYPE_KEY, selectedMode);
-          }
-          setIsPopoverOpen(false);
-        }}
+  const tableModeSelector =
+    setTracesTableMode && tracesTableMode ? (
+      <EuiPopover
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(false)}
+        panelStyle={{ width: '350px' }}
+        button={
+          <EuiButtonEmpty
+            size="xs"
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            iconType="arrowDown"
+            data-test-subj="traceTableModeSelector"
+            color="text"
+          >
+            {TRACE_TABLE_TITLES[tracesTableMode]} ({displayedRowCount})
+            {isRowCountLimited && (
+              <EuiToolTip
+                content={`Actual hits: ${rowCount}. Only ${MAX_DISPLAY_ROWS} can be displayed.`}
+              >
+                <EuiIcon type="iInCircle" color="subdued" size="s" style={{ marginLeft: 6 }} />
+              </EuiToolTip>
+            )}
+          </EuiButtonEmpty>
+        }
       >
-        {(list) => list}
-      </EuiSelectable>
-    </EuiPopover>
-  ) : null;
+        <EuiPopoverTitle>Select trace table filter</EuiPopoverTitle>
+        <EuiSelectable
+          singleSelection="always"
+          options={tableOptions}
+          listProps={{ rowHeight: 80 }}
+          renderOption={(option, searchValue) => (
+            <div style={{ padding: '6px 10px', width: '100%' }}>
+              <EuiHighlight search={searchValue}>{TRACE_TABLE_TITLES[option.key]}</EuiHighlight>
+              <br />
+              <EuiTextColor color="subdued" className="popOverSelectableItem">
+                <small>{option['aria-describedby'] || 'No description available'}</small>
+              </EuiTextColor>
+            </div>
+          )}
+          onChange={(newOptions) => {
+            const selectedMode = newOptions.find((option) => option.checked === 'on')?.key;
+            if (selectedMode) {
+              setTracesTableMode(selectedMode);
+              sessionStorage.setItem(TRACE_TABLE_TYPE_KEY, selectedMode);
+            }
+            setIsPopoverOpen(false);
+          }}
+        >
+          {(list) => list}
+        </EuiSelectable>
+      </EuiPopover>
+    ) : null;
+
+  const LoadMoreButton =
+    tracesTableMode === 'traces' && maxTraces < MAX_DISPLAY_ROWS ? (
+      <EuiButtonEmpty
+        size="xs"
+        onClick={() => {
+          setMaxTraces((prevMax) => Math.min(prevMax + 500, MAX_DISPLAY_ROWS));
+        }}
+        key="loadMore"
+        color="text"
+        data-test-subj="loadMoreButton"
+      >
+        Load more
+      </EuiButtonEmpty>
+    ) : null;
 
   const toolbarControls = useMemo(
     () => [
       ...(tableModeSelector ? [tableModeSelector] : []),
+      LoadMoreButton,
       <EuiButtonEmpty
         size="xs"
         onClick={() => setIsFullScreen((prev) => !prev)}
@@ -192,11 +216,11 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
       >
         {isFullScreen
           ? i18n.translate('toolbarControls.exitFullScreen', {
-            defaultMessage: 'Exit full screen',
-          })
+              defaultMessage: 'Exit full screen',
+            })
           : i18n.translate('toolbarControls.fullScreen', {
-            defaultMessage: 'Full screen',
-          })}
+              defaultMessage: 'Full screen',
+            })}
       </EuiButtonEmpty>,
       ...toolbarButtons,
     ],

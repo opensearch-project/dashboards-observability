@@ -315,6 +315,7 @@ exports[`SpanDetailTableHierarchy renders the empty component 1`] = `
         toolbarVisibility={
           Object {
             "additionalControls": Array [
+              null,
               <EuiButtonEmpty
                 color="text"
                 data-test-subj="fullScreenButton"

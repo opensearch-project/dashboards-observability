@@ -3,28 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiDataGridColumn,
-  EuiLink,
-  EuiPanel,
-  EuiText,
-  PropertySort,
-} from '@elastic/eui';
+import { EuiDataGridColumn, EuiLink, EuiPanel, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import moment from 'moment';
 import { TraceAnalyticsMode, TraceQueryMode } from '../../../../../common/types/trace_analytics';
-import {
-  MissingConfigurationMessage,
-  NoMatchMessage,
-} from '../common/helper_functions';
+import { MissingConfigurationMessage, NoMatchMessage } from '../common/helper_functions';
 import { getTableColumns } from './trace_table_helpers';
 import { RenderCustomDataGrid } from '../common/shared_components/custom_datagrid';
-import moment from 'moment';
 
 interface TracesLandingTableProps {
   columnItems: string[];
   items: any[];
   totalHits: number;
-  refresh: (sort?: PropertySort) => Promise<void>;
   mode: TraceAnalyticsMode;
   loading: boolean;
   getTraceViewUri?: (traceId: string) => string;
@@ -33,7 +23,7 @@ interface TracesLandingTableProps {
   dataPrepperIndicesExist: boolean;
   tracesTableMode: TraceQueryMode;
   setTracesTableMode: React.Dispatch<React.SetStateAction<TraceQueryMode>>;
-  sorting: { id: string; direction: "desc" | "asc" }[];
+  sorting: Array<{ id: string; direction: 'desc' | 'asc' }>;
   pagination: {
     pageIndex: number;
     pageSize: number;
@@ -41,7 +31,9 @@ interface TracesLandingTableProps {
     onChangePage: (newPage: number) => void;
     onChangeItemsPerPage: (newSize: number) => void;
   };
-  onSort: (columns: { id: string; direction: "desc" | "asc" }[]) => void;
+  onSort: (columns: Array<{ id: string; direction: 'desc' | 'asc' }>) => void;
+  maxTraces: number;
+  setMaxTraces: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
@@ -49,8 +41,6 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
     columnItems,
     items,
     totalHits,
-    refresh,
-    mode,
     loading,
     getTraceViewUri,
     openTraceFlyout,
@@ -62,34 +52,36 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
   const renderCellValue = useMemo(() => {
     return ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
       const isTracesMode = props.tracesTableMode === 'traces';
-      const adjustedRowIndex = isTracesMode ? rowIndex : rowIndex - pagination.pageIndex * pagination.pageSize;
-      
+      const adjustedRowIndex = isTracesMode
+        ? rowIndex
+        : rowIndex - pagination.pageIndex * pagination.pageSize;
+
       if (!items.hasOwnProperty(adjustedRowIndex)) return '-';
       const value = items[adjustedRowIndex]?.[columnId];
-  
+
       if (!value && columnId !== 'status.code' && columnId !== 'error_count') return '-';
-  
+
       switch (columnId) {
         case 'endTime':
           return moment(value).format('MM/DD/YYYY HH:mm:ss.SSS');
         case 'trace_id':
         case 'traceId':
-          return getTraceViewUri ? (
-            <EuiLink href={getTraceViewUri(value)}>{value}</EuiLink>
-          ) : (
-            value
-          );
+          return getTraceViewUri ? <EuiLink href={getTraceViewUri(value)}>{value}</EuiLink> : value;
         case 'durationInNanos':
           return `${(value / 1000000).toFixed(2)} ms`;
         case 'status.code':
-          return value == 2 ? (
-            <EuiText color="danger" size="s">Yes</EuiText>
+          return value === 2 ? (
+            <EuiText color="danger" size="s">
+              Yes
+            </EuiText>
           ) : (
             'No'
           );
         case 'error_count':
           return value > 0 ? (
-            <EuiText color="danger" size="s">Yes</EuiText>
+            <EuiText color="danger" size="s">
+              Yes
+            </EuiText>
           ) : (
             'No'
           );
@@ -98,41 +90,34 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
       }
     };
   }, [items, pagination.pageIndex, pagination.pageSize, props.tracesTableMode]);
-  
 
   const columns = useMemo(() => {
     return getTableColumns(
       columnItems,
-      mode,
+      props.mode,
       props.tracesTableMode,
       getTraceViewUri,
-      openTraceFlyout).map(col => ({
-        id: col.field,
-        display: col.name,
-        schema: 'string',
-        isSortable: col.sortable ?? false,
-      })) as EuiDataGridColumn[];
-  }, [
-    columnItems,
-    mode,
-    props.tracesTableMode,
-    getTraceViewUri,
-    openTraceFlyout,
-    items,
-  ]);
+      openTraceFlyout
+    ).map((col) => ({
+      id: col.field,
+      display: col.name,
+      schema: 'string',
+      isSortable: col.sortable ?? false,
+    })) as EuiDataGridColumn[];
+  }, [columnItems, props.tracesTableMode, getTraceViewUri, openTraceFlyout, items]);
 
   return (
     <>
       <EuiPanel>
         {!(
-          mode === 'custom_data_prepper' ||
-          (mode === 'data_prepper' && props.dataPrepperIndicesExist) ||
-          (mode === 'jaeger' && props.jaegerIndicesExist)
+          props.mode === 'custom_data_prepper' ||
+          (props.mode === 'data_prepper' && props.dataPrepperIndicesExist) ||
+          (props.mode === 'jaeger' && props.jaegerIndicesExist)
         ) ? (
-          <MissingConfigurationMessage mode={mode} />
+          <MissingConfigurationMessage mode={props.mode} />
         ) : items?.length > 0 || loading ? (
           <RenderCustomDataGrid
-            key={columns.map(col => col.id).join('-')}//Force re-render for switching from spans to traces
+            key={columns.map((col) => col.id).join('-')} // Force re-render for switching from spans to traces
             columns={columns}
             renderCellValue={renderCellValue}
             rowCount={props.tracesTableMode === 'traces' ? items.length : totalHits}
@@ -141,6 +126,8 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
             isTableDataLoading={loading}
             tracesTableMode={props.tracesTableMode}
             setTracesTableMode={(mode) => props.setTracesTableMode(mode as TraceQueryMode)}
+            maxTraces={props.maxTraces}
+            setMaxTraces={props.setMaxTraces}
           />
         ) : (
           <NoMatchMessage size="xl" />

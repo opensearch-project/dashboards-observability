@@ -69,7 +69,7 @@ export const handleCustomIndicesTracesRequest = async (
       if (responseResult.status === 'rejected') return Promise.reject(responseResult.reason);
 
       const responseData = responseResult.value;
-      
+
       const totalHits = responseData.hits?.total?.value ?? 0;
       setTotalHits(totalHits);
 
@@ -87,11 +87,11 @@ export const handleCustomIndicesTracesRequest = async (
           [undefined],
           responseResult.value.aggregations.traces.buckets.map((bucket: any) => {
             return {
-          trace_id: bucket.key,
-          latency: bucket.latency.value,
-          last_updated: moment(bucket.last_updated.value).format(TRACE_ANALYTICS_DATE_FORMAT),
-          error_count: bucket.error_count.doc_count,
-          actions: '#',
+              trace_id: bucket.key,
+              latency: bucket.latency.value,
+              last_updated: moment(bucket.last_updated.value).format(TRACE_ANALYTICS_DATE_FORMAT),
+              error_count: bucket.error_count.doc_count,
+              actions: '#',
             };
           }),
         ];
@@ -117,6 +117,7 @@ export const handleTracesRequest = async (
   items: any,
   setItems: (items: any) => void,
   mode: TraceAnalyticsMode,
+  maxTraces: number = 500,
   dataSourceMDSId?: string,
   sort?: PropertySort,
   isUnderOneHour?: boolean
@@ -137,7 +138,7 @@ export const handleTracesRequest = async (
   const responsePromise = handleDslRequest(
     http,
     DSL,
-    getTracesQuery(mode, undefined, sort, isUnderOneHour),
+    getTracesQuery(mode, undefined, maxTraces, sort, isUnderOneHour),
     mode,
     dataSourceMDSId
   );

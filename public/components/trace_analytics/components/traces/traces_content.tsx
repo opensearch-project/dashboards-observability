@@ -73,35 +73,36 @@ export function TracesContent(props: TracesProps) {
   >('');
   const [includeMetrics, setIncludeMetrics] = useState(false);
   const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
-
-  const [sortingColumns, setSortingColumns] = useState<{ id: string; direction: "desc" | "asc" }[]>([]);
-
+  const [maxTraces, setMaxTraces] = useState(500);
+  const [sortingColumns, setSortingColumns] = useState<
+    Array<{ id: string; direction: 'desc' | 'asc' }>
+  >([]);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
-  const onSort = (sortColumns: { id: string; direction: "desc" | "asc" }[]) => {
+  const onSort = (sortColumns: Array<{ id: string; direction: 'desc' | 'asc' }>) => {
     if (!sortColumns || sortColumns.length === 0) {
       setSortingColumns([]);
       return;
     }
-  
+
     const sortField = sortColumns[0]?.id;
     const sortDirection = sortColumns[0]?.direction;
-  
+
     if (!sortField || !sortDirection) {
-      console.error("Invalid sorting column:", sortColumns);
+      console.error('Invalid sorting column:', sortColumns);
       return;
     }
-  
+
     setSortingColumns(sortColumns);
-  
+
     if (tracesTableMode === 'traces') {
       const sortedItems = [...tableItems].sort((a, b) => {
         const valueA = a[sortField];
         const valueB = b[sortField];
         return sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
       });
-  
+
       setTableItems(sortedItems);
     } else {
       refresh({ field: sortField, direction: sortDirection }, query, pageIndex, pageSize);
@@ -121,18 +122,10 @@ export function TracesContent(props: TracesProps) {
         page,
         appConfigs
       ),
-      timeFilterDSL: filtersToDsl(
-        mode,
-        [],
-        '',
-        processTimeStamp(startTime, mode),
-        processTimeStamp(endTime, mode),
-        page
-      ),
       isUnderOneHour: datemath.parse(endTime)?.diff(datemath.parse(startTime), 'hours')! < 1,
     };
   };
-  
+
   const pagination = {
     pageIndex,
     pageSize,
@@ -142,20 +135,20 @@ export function TracesContent(props: TracesProps) {
       if (tracesTableMode === 'traces') {
         setPageIndex(newPage);
       } else {
-        const { DSL, isUnderOneHour, timeFilterDSL } = generateDSLs();
-        refreshTableDataOnly(newPage, pageSize, DSL, isUnderOneHour, timeFilterDSL);
+        const { DSL, isUnderOneHour } = generateDSLs();
+        refreshTableDataOnly(newPage, pageSize, DSL, isUnderOneHour);
       }
     },
     onChangeItemsPerPage: (newSize) => {
       if (tracesTableMode === 'traces') {
         setPageSize(newSize);
       } else {
-        const { DSL, isUnderOneHour, timeFilterDSL } = generateDSLs();
-        refreshTableDataOnly(0, newSize, DSL, isUnderOneHour, timeFilterDSL);
+        const { DSL, isUnderOneHour } = generateDSLs();
+        refreshTableDataOnly(0, newSize, DSL, isUnderOneHour);
       }
     },
   };
-  
+
   useEffect(() => {
     chrome.setBreadcrumbs([
       ...(isNavGroupEnabled ? [] : [props.parentBreadcrumb]),
@@ -201,6 +194,7 @@ export function TracesContent(props: TracesProps) {
     startTime,
     endTime,
     props.dataSourceMDSId,
+    maxTraces,
   ]);
 
   const onToggle = (isOpen: boolean) => {
@@ -227,17 +221,17 @@ export function TracesContent(props: TracesProps) {
     newPageIndex: number,
     newPageSize: number,
     DSL: any,
-    isUnderOneHour: boolean,
-    timeFilterDSL: any
+    isUnderOneHour: boolean
   ) => {
     setPageIndex(newPageIndex);
     setPageSize(newPageSize);
     setIsTraceTableLoading(true);
-  
-    const sortParams = sortingColumns.length > 0
-      ? { field: sortingColumns[0].id, direction: sortingColumns[0].direction }
-      : undefined;
-  
+
+    const sortParams =
+      sortingColumns.length > 0
+        ? { field: sortingColumns[0].id, direction: sortingColumns[0].direction }
+        : undefined;
+
     handleCustomIndicesTracesRequest(
       http,
       DSL,
@@ -254,7 +248,7 @@ export function TracesContent(props: TracesProps) {
       isUnderOneHour
     ).finally(() => setIsTraceTableLoading(false));
   };
-  
+
   const refresh = async (
     sort?: PropertySort,
     overrideQuery?: string,
@@ -293,31 +287,32 @@ export function TracesContent(props: TracesProps) {
       const tracesRequest =
         tracesTableMode !== 'traces'
           ? handleCustomIndicesTracesRequest(
-            http,
-            DSL,
-            tableItems,
-            setTableItems,
-            setColumns,
-            mode,
-            newPageIndex,
-            newPageSize,
-            setTotalHits,
-            props.dataSourceMDSId[0]?.id,
-            sort,
-            tracesTableMode,
-            isUnderOneHour
-          )
+              http,
+              DSL,
+              tableItems,
+              setTableItems,
+              setColumns,
+              mode,
+              newPageIndex,
+              newPageSize,
+              setTotalHits,
+              props.dataSourceMDSId[0]?.id,
+              sort,
+              tracesTableMode,
+              isUnderOneHour
+            )
           : handleTracesRequest(
-            http,
-            DSL,
-            timeFilterDSL,
-            tableItems,
-            setTableItems,
-            mode,
-            props.dataSourceMDSId[0].id,
-            sort,
-            isUnderOneHour
-          );
+              http,
+              DSL,
+              timeFilterDSL,
+              tableItems,
+              setTableItems,
+              mode,
+              maxTraces,
+              props.dataSourceMDSId[0].id,
+              sort,
+              isUnderOneHour
+            );
       tracesRequest.finally(() => setIsTraceTableLoading(false));
 
       setIsServicesDataLoading(true);
@@ -337,6 +332,7 @@ export function TracesContent(props: TracesProps) {
         tableItems,
         setTableItems,
         mode,
+        maxTraces,
         props.dataSourceMDSId[0].id,
         sort,
         isUnderOneHour
@@ -394,7 +390,6 @@ export function TracesContent(props: TracesProps) {
               columnItems={columns}
               items={tableItems}
               totalHits={totalHits}
-              refresh={refresh}
               mode={mode}
               loading={isTraceTableLoading}
               getTraceViewUri={getTraceViewUri}
@@ -406,6 +401,8 @@ export function TracesContent(props: TracesProps) {
               sorting={sortingColumns}
               pagination={pagination}
               onSort={onSort}
+              maxTraces={maxTraces}
+              setMaxTraces={setMaxTraces}
             />
           ) : (
             <TracesTable
