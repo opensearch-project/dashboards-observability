@@ -61,12 +61,14 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
 
   const renderCellValue = useMemo(() => {
     return ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-      const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
+      const isTracesMode = props.tracesTableMode === 'traces';
+      const adjustedRowIndex = isTracesMode ? rowIndex : rowIndex - pagination.pageIndex * pagination.pageSize;
+      
       if (!items.hasOwnProperty(adjustedRowIndex)) return '-';
       const value = items[adjustedRowIndex]?.[columnId];
-
+  
       if (!value && columnId !== 'status.code' && columnId !== 'error_count') return '-';
-
+  
       switch (columnId) {
         case 'endTime':
           return moment(value).format('MM/DD/YYYY HH:mm:ss.SSS');
@@ -85,17 +87,18 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
           ) : (
             'No'
           );
-          case 'error_count':
-            return value > 0 ? (
-              <EuiText color="danger" size="s">Yes</EuiText>
-            ) : (
-              'No'
-            );
+        case 'error_count':
+          return value > 0 ? (
+            <EuiText color="danger" size="s">Yes</EuiText>
+          ) : (
+            'No'
+          );
         default:
           return value;
       }
     };
-  }, [items, pagination.pageIndex, pagination.pageSize]);
+  }, [items, pagination.pageIndex, pagination.pageSize, props.tracesTableMode]);
+  
 
   const columns = useMemo(() => {
     return getTableColumns(
@@ -132,7 +135,7 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
             key={columns.map(col => col.id).join('-')}//Force re-render for switching from spans to traces
             columns={columns}
             renderCellValue={renderCellValue}
-            rowCount={totalHits}
+            rowCount={props.tracesTableMode === 'traces' ? items.length : totalHits}
             sorting={{ columns: sortingColumns, onSort }}
             pagination={pagination}
             isTableDataLoading={loading}

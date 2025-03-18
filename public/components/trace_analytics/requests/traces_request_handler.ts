@@ -25,7 +25,6 @@ import {
 import { SpanSearchParams } from '../components/traces/span_detail_table';
 import {
   getCustomIndicesTracesQuery,
-  getCustomTracesQuery,
   getPayloadQuery,
   getSpanFlyoutQuery,
   getSpansQuery,
@@ -214,125 +213,6 @@ export const handleTracesRequest = async (
     })
     .catch((error) => {
       console.error('Error in handleTracesRequest:', error);
-      coreRefs.core?.notifications.toasts.addError(error, {
-        title: 'Failed to retrieve traces',
-        toastLifeTimeMs: 10000,
-      });
-    });
-};
-
-export const handleCustomTracesRequest = async (
-  http: HttpSetup,
-  DSL: any,
-  timeFilterDSL: any,
-  items: any,
-  setItems: (items: any) => void,
-  setTotalHits: (total: number) => void,
-  mode: TraceAnalyticsMode,
-  pageIndex: number,
-  pageSize: number,
-  dataSourceMDSId?: string,
-  sort?: PropertySort,
-  isUnderOneHour?: boolean
-) => {
-  const binarySearch = (arr: number[], target: number) => {
-    if (!arr) return Number.NaN;
-    let low = 0;
-    let high = arr.length;
-    let mid;
-    while (low < high) {
-      mid = Math.floor((low + high) / 2);
-      if (arr[mid] < target) low = mid + 1;
-      else high = mid;
-    }
-    return Math.max(0, Math.min(100, low));
-  };
-
-  const from = pageIndex * pageSize;
-
-  const responsePromise = handleDslRequest(
-    http,
-    DSL,
-    getCustomTracesQuery(mode, from, pageSize, undefined, sort, isUnderOneHour),
-    mode,
-    dataSourceMDSId
-  );
-
-  // 🔹 Percentile query (only for `data_prepper` and `custom_data_prepper`)
-  const percentileRangesPromise =
-    mode === 'data_prepper' || mode === 'custom_data_prepper'
-      ? handleDslRequest(
-          http,
-          timeFilterDSL,
-          getTraceGroupPercentilesQuery(),
-          mode,
-          dataSourceMDSId
-        ).then((response) => {
-          const map: Record<string, number[]> = {};
-          response.aggregations.trace_group_name.buckets.forEach((traceGroup: any) => {
-            map[traceGroup.key] = Object.values(traceGroup.percentiles.values).map((value: any) =>
-              nanoToMilliSec(value)
-            );
-          });
-          return map;
-        })
-      : Promise.resolve({}); // Return empty map if not applicable
-
-  return Promise.allSettled([responsePromise, percentileRangesPromise])
-    .then(([responseResult, percentileRangesResult]) => {
-      if (responseResult.status === 'rejected') return Promise.reject(responseResult.reason);
-      const percentileRanges =
-        percentileRangesResult.status === 'fulfilled' ? percentileRangesResult.value : {};
-      const response = responseResult.value;
-
-      if ((response.statusCode && response.statusCode >= 400) || response.error) {
-        return Promise.reject(response);
-      }
-
-      // ✅ Extract and update `totalHits`
-      const totalHits = response.hits?.total?.value || 0;
-      setTotalHits(totalHits);
-
-      if (
-        !response ||
-        !response.aggregations ||
-        !response.aggregations.traces ||
-        !response.aggregations.traces.buckets ||
-        response.aggregations.traces.buckets.length === 0
-      ) {
-        setItems([]);
-        return [];
-      }
-
-      return response.aggregations.traces.buckets.map((bucket: any) => {
-        if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
-          return {
-            trace_id: bucket.key,
-            trace_group: bucket.trace_group.buckets[0]?.key,
-            latency: bucket.latency.value,
-            last_updated: moment(bucket.last_updated.value).format(TRACE_ANALYTICS_DATE_FORMAT),
-            error_count: bucket.error_count.doc_count,
-            percentile_in_trace_group: binarySearch(
-              percentileRanges[bucket.trace_group.buckets[0]?.key] || [],
-              bucket.latency.value
-            ),
-            actions: '#',
-          };
-        }
-        return {
-          trace_id: bucket.key,
-          latency: bucket.latency.value,
-          last_updated: moment(bucket.last_updated.value).format(TRACE_ANALYTICS_DATE_FORMAT),
-          error_count: bucket.error_count.doc_count,
-          actions: '#',
-        };
-      });
-    })
-    .then((newItems) => {
-      setItems(newItems);
-    })
-    .catch((error) => {
-      console.error('Error in handleCustomTracesRequest:', error);
       coreRefs.core?.notifications.toasts.addError(error, {
         title: 'Failed to retrieve traces',
         toastLifeTimeMs: 10000,

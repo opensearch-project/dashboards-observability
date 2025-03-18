@@ -21,7 +21,6 @@ import { coreRefs } from '../../../../framework/core_refs';
 import { handleServiceMapRequest } from '../../requests/services_request_handler';
 import {
   handleCustomIndicesTracesRequest,
-  handleCustomTracesRequest,
   handleTracesRequest,
 } from '../../requests/traces_request_handler';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
@@ -75,38 +74,38 @@ export function TracesContent(props: TracesProps) {
   const [includeMetrics, setIncludeMetrics] = useState(false);
   const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
 
-  //ADAM TESITNG DELETE console.log
-  // const defaultSortField = props.tracesTableMode === 'traces' ? 'last_updated' : 'endTime';
-  // const [sortingColumns, setSortingColumns] = useState<{ id: string; direction: "desc" | "asc" }[]>([{ id: defaultSortField, direction: "desc"}]);
-
   const [sortingColumns, setSortingColumns] = useState<{ id: string; direction: "desc" | "asc" }[]>([]);
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
   const onSort = (sortColumns: { id: string; direction: "desc" | "asc" }[]) => {
-
     if (!sortColumns || sortColumns.length === 0) {
       setSortingColumns([]);
-      refresh(undefined, query, pageIndex, pageSize);
       return;
     }
-
+  
     const sortField = sortColumns[0]?.id;
     const sortDirection = sortColumns[0]?.direction;
-
+  
     if (!sortField || !sortDirection) {
       console.error("Invalid sorting column:", sortColumns);
       return;
     }
-
+  
     setSortingColumns(sortColumns);
-    refresh(
-      { field: sortField, direction: sortDirection },
-      query,
-      pageIndex,
-      pageSize
-    );
+  
+    if (tracesTableMode === 'traces') {
+      const sortedItems = [...tableItems].sort((a, b) => {
+        const valueA = a[sortField];
+        const valueB = b[sortField];
+        return sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
+      });
+  
+      setTableItems(sortedItems);
+    } else {
+      refresh({ field: sortField, direction: sortDirection }, query, pageIndex, pageSize);
+    }
   };
 
   const [totalHits, setTotalHits] = useState(0);
@@ -140,12 +139,20 @@ export function TracesContent(props: TracesProps) {
     pageSizeOptions: [5, 10, 15],
     totalItemCount: totalHits,
     onChangePage: (newPage) => {
-      const { DSL, isUnderOneHour, timeFilterDSL } = generateDSLs();
-      refreshTableDataOnly(newPage, pageSize, DSL, isUnderOneHour, timeFilterDSL);
+      if (tracesTableMode === 'traces') {
+        setPageIndex(newPage);
+      } else {
+        const { DSL, isUnderOneHour, timeFilterDSL } = generateDSLs();
+        refreshTableDataOnly(newPage, pageSize, DSL, isUnderOneHour, timeFilterDSL);
+      }
     },
     onChangeItemsPerPage: (newSize) => {
-      const { DSL, isUnderOneHour, timeFilterDSL } = generateDSLs();
-      refreshTableDataOnly(0, newSize, DSL, isUnderOneHour, timeFilterDSL);
+      if (tracesTableMode === 'traces') {
+        setPageSize(newSize);
+      } else {
+        const { DSL, isUnderOneHour, timeFilterDSL } = generateDSLs();
+        refreshTableDataOnly(0, newSize, DSL, isUnderOneHour, timeFilterDSL);
+      }
     },
   };
   
@@ -231,39 +238,21 @@ export function TracesContent(props: TracesProps) {
       ? { field: sortingColumns[0].id, direction: sortingColumns[0].direction }
       : undefined;
   
-    const tracesRequest =
-      tracesTableMode !== 'traces'
-        ? handleCustomIndicesTracesRequest(
-            http,
-            DSL,
-            tableItems,
-            setTableItems,
-            setColumns,
-            mode,
-            newPageIndex,
-            newPageSize,
-            setTotalHits,
-            props.dataSourceMDSId[0]?.id,
-            sortParams,
-            tracesTableMode,
-            isUnderOneHour
-          )
-        : handleCustomTracesRequest(
-            http,
-            DSL,
-            timeFilterDSL,
-            tableItems,
-            setTableItems,
-            setTotalHits,
-            mode,
-            newPageIndex,
-            newPageSize,
-            props.dataSourceMDSId[0]?.id,
-            sortParams,
-            isUnderOneHour
-          );
-  
-    tracesRequest.finally(() => setIsTraceTableLoading(false));
+    handleCustomIndicesTracesRequest(
+      http,
+      DSL,
+      tableItems,
+      setTableItems,
+      setColumns,
+      mode,
+      newPageIndex,
+      newPageSize,
+      setTotalHits,
+      props.dataSourceMDSId[0]?.id,
+      sortParams,
+      tracesTableMode,
+      isUnderOneHour
+    ).finally(() => setIsTraceTableLoading(false));
   };
   
   const refresh = async (
@@ -318,17 +307,14 @@ export function TracesContent(props: TracesProps) {
             tracesTableMode,
             isUnderOneHour
           )
-          : handleCustomTracesRequest(
+          : handleTracesRequest(
             http,
             DSL,
             timeFilterDSL,
             tableItems,
             setTableItems,
-            setTotalHits,
             mode,
-            pageIndex,
-            pageSize,
-            props.dataSourceMDSId[0]?.id,
+            props.dataSourceMDSId[0].id,
             sort,
             isUnderOneHour
           );
