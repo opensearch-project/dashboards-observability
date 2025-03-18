@@ -10,7 +10,7 @@ import {
   EuiText,
   PropertySort,
 } from '@elastic/eui';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { TraceAnalyticsMode, TraceQueryMode } from '../../../../../common/types/trace_analytics';
 import {
   MissingConfigurationMessage,
@@ -59,15 +59,6 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
     onSort,
   } = props;
 
-  //ADAM DELETE console.log
-  //Clear sorting which switching mode
-  // useEffect(() => {
-  //   onSort([{id: "endTime", direction: "desc"}]);
-  // }, [props.tracesTableMode]);
-  useEffect(() => {
-    onSort([]);
-  }, [props.tracesTableMode]);
-
   const renderCellValue = useMemo(() => {
     return ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
       const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
@@ -94,12 +85,12 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
           ) : (
             'No'
           );
-        case 'error_count':
-          return value?.doc_count > 0 ? (
-            <EuiText color="danger" size="s">Yes</EuiText>
-          ) : (
-            'No'
-          );
+          case 'error_count':
+            return value > 0 ? (
+              <EuiText color="danger" size="s">Yes</EuiText>
+            ) : (
+              'No'
+            );
         default:
           return value;
       }

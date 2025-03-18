@@ -10,18 +10,21 @@ import {
   EuiDataGridColumn,
   EuiDataGridSorting,
   EuiHighlight,
+  EuiIcon,
   EuiLoadingContent,
   EuiOverlayMask,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
   EuiTextColor,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useMemo, useState } from 'react';
 import { NoMatchMessage } from '../helper_functions';
 import { TRACE_TABLE_OPTIONS, TRACE_TABLE_TITLES, TRACE_TABLE_TYPE_KEY } from '../../../../../../common/constants/trace_analytics';
 
+const MAX_DISPLAY_ROWS = 10000;
 interface FullScreenWrapperProps {
   children: React.ReactNode;
   onClose: () => void;
@@ -113,6 +116,9 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
+  const displayedRowCount = rowCount > MAX_DISPLAY_ROWS ? MAX_DISPLAY_ROWS : rowCount;
+  const isRowCountLimited = rowCount > MAX_DISPLAY_ROWS;
+  
   const tableOptions = tracesTableMode
     ? TRACE_TABLE_OPTIONS.map((obj) =>
       obj.key === tracesTableMode ? { ...obj, checked: 'on' } : obj
@@ -134,7 +140,14 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
           data-test-subj="traceTableModeSelector"
           color="text"
         >
-          {TRACE_TABLE_TITLES[tracesTableMode]} ({rowCount})
+          {TRACE_TABLE_TITLES[tracesTableMode]} ({displayedRowCount})
+          {isRowCountLimited && (
+            <EuiToolTip
+              content={`Actual hits: ${rowCount}. Only ${MAX_DISPLAY_ROWS} can be displayed.`}
+            >
+              <EuiIcon type="iInCircle" color="subdued" size="s" style={{ marginLeft: 6 }} />
+            </EuiToolTip>
+          )}
         </EuiButtonEmpty>
       }
     >
@@ -218,7 +231,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
               visibleColumns: localVisibleColumns,
               setVisibleColumns: setLocalVisibleColumns,
             }}
-            rowCount={rowCount}
+            rowCount={displayedRowCount}
             renderCellValue={(props) =>
               renderCellValue({
                 ...props,
