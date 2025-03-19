@@ -75,7 +75,9 @@
     "braces": "^3.0.3",
     "ws": "^8.18.0",
     "**/eslint/cross-spawn": "^7.0.5",
-    "nanoid": "3.3.8"
+    "nanoid": "3.3.8",
+    "serialize-javascript": "^6.0.2",
+    "@babel/runtime": "^7.26.10"
   },
   "eslintIgnore": [
     "common/query_manager/antlr/output/*",

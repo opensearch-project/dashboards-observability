@@ -84,14 +84,14 @@ jobs:
         shell: bash
 
       - name: Checkout OpenSearch Dashboards
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: opensearch-project/Opensearch-Dashboards
           ref: ${{ env.OPENSEARCH_DASHBOARDS_VERSION }}
           path: OpenSearch-Dashboards
 
       - name: Checkout dashboards observability
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: OpenSearch-Dashboards/plugins/dashboards-observability
 
@@ -166,7 +166,7 @@ jobs:
           path: OpenSearch-Dashboards/dashboard.log
 
       - name: Checkout Dashboards Functioanl Test Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: opensearch-dashboards-functional-test
           repository: opensearch-project/opensearch-dashboards-functional-test
