@@ -9,9 +9,12 @@ import {
   EuiDataGrid,
   EuiDataGridColumn,
   EuiDataGridSorting,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHighlight,
   EuiIcon,
   EuiLoadingContent,
+  EuiLoadingSpinner,
   EuiOverlayMask,
   EuiPopover,
   EuiPopoverTitle,
@@ -128,8 +131,8 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
 
   const tableOptions = tracesTableMode
     ? TRACE_TABLE_OPTIONS.map((obj) =>
-        obj.key === tracesTableMode ? { ...obj, checked: 'on' } : obj
-      )
+      obj.key === tracesTableMode ? { ...obj, checked: 'on' } : obj
+    )
     : [];
 
   const disableInteractions = useMemo(() => isFullScreen, [isFullScreen]);
@@ -141,22 +144,32 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
         closePopover={() => setIsPopoverOpen(false)}
         panelStyle={{ width: '350px' }}
         button={
-          <EuiButtonEmpty
-            size="xs"
-            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-            iconType="arrowDown"
-            data-test-subj="traceTableModeSelector"
-            color="text"
-          >
-            {TRACE_TABLE_TITLES[tracesTableMode]} ({displayedRowCount})
-            {isRowCountLimited && (
-              <EuiToolTip
-                content={`Actual hits: ${rowCount}. Only ${MAX_DISPLAY_ROWS} can be displayed.`}
-              >
-                <EuiIcon type="iInCircle" color="subdued" size="s" style={{ marginLeft: 6 }} />
-              </EuiToolTip>
+          <EuiFlexGroup alignItems="center" gutterSize="s" direction="row">
+
+            {isTableDataLoading && (
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
             )}
-          </EuiButtonEmpty>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                iconType="arrowDown"
+                data-test-subj="traceTableModeSelector"
+                color="text"
+              >
+                {TRACE_TABLE_TITLES[tracesTableMode]} ({displayedRowCount})
+                {isRowCountLimited && (
+                  <EuiToolTip
+                    content={`Actual hits: ${rowCount}. Only ${MAX_DISPLAY_ROWS} can be displayed.`}
+                  >
+                    <EuiIcon type="iInCircle" color="subdued" size="s" style={{ marginLeft: 6 }} />
+                  </EuiToolTip>
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
       >
         <EuiPopoverTitle>Select trace table filter</EuiPopoverTitle>
@@ -216,11 +229,11 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
       >
         {isFullScreen
           ? i18n.translate('toolbarControls.exitFullScreen', {
-              defaultMessage: 'Exit full screen',
-            })
+            defaultMessage: 'Exit full screen',
+          })
           : i18n.translate('toolbarControls.fullScreen', {
-              defaultMessage: 'Full screen',
-            })}
+            defaultMessage: 'Full screen',
+          })}
       </EuiButtonEmpty>,
       ...toolbarButtons,
     ],
@@ -240,7 +253,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
     []
   );
 
-  return isTableDataLoading ? (
+  return false ? ( //isTableDataLoading DELETE ADAM
     <div>
       <EuiLoadingContent lines={4} />
     </div>

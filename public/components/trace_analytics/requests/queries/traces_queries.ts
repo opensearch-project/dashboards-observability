@@ -151,6 +151,10 @@ export const getTracesQuery = (
                 if (doc.containsKey('traceGroupFields.durationInNanos') && !doc['traceGroupFields.durationInNanos'].empty) {
                   return Math.round(doc['traceGroupFields.durationInNanos'].value / 10000) / 100.0
                 }
+                if (doc.containsKey('durationInNanos') && !doc['durationInNanos'].empty) {
+                  return Math.round(doc['durationInNanos'].value / 10000) / 100.0
+                }
+
                 return 0
                 `,
                 lang: 'painless',
@@ -172,7 +176,19 @@ export const getTracesQuery = (
           },
           last_updated: {
             max: {
-              field: 'traceGroupFields.endTime',
+              script: {
+                source: `
+                if (doc.containsKey('traceGroupFields.endTime') && !doc['traceGroupFields.endTime'].empty) {
+                  return doc['traceGroupFields.endTime'].value
+                }
+                if (doc.containsKey('endTime') && !doc['endTime'].empty) {
+                  return doc['endTime'].value
+                }
+
+                return 0
+                `,
+                lang: 'painless',
+              },
             },
           },
         },

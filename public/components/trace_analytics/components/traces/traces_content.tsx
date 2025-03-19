@@ -85,27 +85,28 @@ export function TracesContent(props: TracesProps) {
       setSortingColumns([]);
       return;
     }
-
+  
     const sortField = sortColumns[0]?.id;
     const sortDirection = sortColumns[0]?.direction;
-
+  
     if (!sortField || !sortDirection) {
       console.error('Invalid sorting column:', sortColumns);
       return;
     }
-
+  
     setSortingColumns(sortColumns);
-
+  
     if (tracesTableMode === 'traces') {
       const sortedItems = [...tableItems].sort((a, b) => {
         const valueA = a[sortField];
         const valueB = b[sortField];
         return sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
       });
-
+  
       setTableItems(sortedItems);
     } else {
-      refresh({ field: sortField, direction: sortDirection }, query, pageIndex, pageSize);
+      const { DSL, isUnderOneHour } = generateDSLs();
+      refreshTableDataOnly(pageIndex, pageSize, DSL, isUnderOneHour, { field: sortField, direction: sortDirection });
     }
   };
 
@@ -221,17 +222,13 @@ export function TracesContent(props: TracesProps) {
     newPageIndex: number,
     newPageSize: number,
     DSL: any,
-    isUnderOneHour: boolean
+    isUnderOneHour: boolean,
+    sortParams?: { field: string; direction: 'desc' | 'asc' }
   ) => {
     setPageIndex(newPageIndex);
     setPageSize(newPageSize);
     setIsTraceTableLoading(true);
-
-    const sortParams =
-      sortingColumns.length > 0
-        ? { field: sortingColumns[0].id, direction: sortingColumns[0].direction }
-        : undefined;
-
+  
     handleCustomIndicesTracesRequest(
       http,
       DSL,
@@ -397,7 +394,10 @@ export function TracesContent(props: TracesProps) {
               jaegerIndicesExist={jaegerIndicesExist}
               dataPrepperIndicesExist={dataPrepperIndicesExist}
               tracesTableMode={tracesTableMode}
-              setTracesTableMode={setTracesTableMode}
+              setTracesTableMode={(mode) => {
+                setTracesTableMode(mode); 
+                setSortingColumns([]);
+              }}
               sorting={sortingColumns}
               pagination={pagination}
               onSort={onSort}
