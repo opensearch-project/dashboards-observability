@@ -35,7 +35,10 @@ import {
   DEFAULT_DATA_SOURCE_NAME,
   DEFAULT_DATA_SOURCE_TYPE,
 } from '../../../../../common/constants/data_sources';
-import { observabilityLogsID } from '../../../../../common/constants/shared';
+import {
+  observabilityLogsID,
+  observabilityTracesNewNavID,
+} from '../../../../../common/constants/shared';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
 import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
 import { coreRefs } from '../../../../framework/core_refs';
@@ -80,6 +83,7 @@ export function ServiceView(props: ServiceViewProps) {
   const location = useLocation();
   const [isServiceOverviewLoading, setIsServiceOverviewLoading] = useState(false);
   const [isServicesDataLoading, setIsServicesDataLoading] = useState(false);
+  const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
   useEffect(() => {
     try {
@@ -165,7 +169,25 @@ export function ServiceView(props: ServiceViewProps) {
       inverted: false,
       disabled: false,
     });
-    location.assign('#/traces');
+
+    const tracesPath = '#/traces';
+    const dataSourceId = props.dataSourceMDSId[0]?.id || '';
+    const urlParts = window.location.href.split('?');
+    const queryParams =
+      urlParts.length > 1 ? new URLSearchParams(urlParts[1]) : new URLSearchParams();
+
+    const modeParam = queryParams.get('mode') || '';
+    const modeQuery = modeParam ? `&mode=${encodeURIComponent(modeParam)}` : '';
+
+    if (newNavigation) {
+      coreRefs.application?.navigateToApp(observabilityTracesNewNavID, {
+        path: `${tracesPath}?datasourceId=${encodeURIComponent(dataSourceId)}${modeQuery}`,
+      });
+    } else {
+      window.location.assign(
+        `${tracesPath}?datasourceId=${encodeURIComponent(dataSourceId)}${modeQuery}`
+      );
+    }
   };
 
   useEffect(() => {
