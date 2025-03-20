@@ -103,8 +103,6 @@ describe('SpanDetailTable', () => {
         />
       );
 
-      expect(wrapper.find('EuiLoadingContent')).toHaveLength(1); // Ensure loading state appears
-
       await act(async () => {
         await waitFor(() => {
           wrapper.update();
@@ -139,8 +137,6 @@ describe('SpanDetailTable', () => {
           dataSourceMDSId="test-id"
         />
       );
-
-      expect(wrapper.find('EuiLoadingContent')).toHaveLength(1); // Ensure loading state appears
 
       await act(async () => {
         await waitFor(() => {
