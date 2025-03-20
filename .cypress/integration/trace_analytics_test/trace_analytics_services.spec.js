@@ -381,6 +381,49 @@ describe('Testing traces Spans table and verify columns functionality', () => {
   });
 });
 
+describe('Testing navigation from Services to Traces', () => {
+  beforeEach(() => {
+    cy.visit('app/observability-traces#/services', {
+      onBeforeLoad: (win) => {
+        win.sessionStorage.clear();
+      },
+    });
+
+    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    cy.get("[data-test-subj='data_prepper-mode']").click();
+    setTimeFilter();
+  });
+
+  it('Clicks on the "Traces" shortcut to redirect', () => {
+    cy.get('.euiLink.euiLink--primary').contains('74').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+    cy.get('[data-test-subj="filterBadge"]')
+      .should('exist')
+      .contains('serviceName: analytics-service');
+
+    cy.get('.euiText').contains('03f9c770db5ee2f1caac0afc36db49ba').should('exist');
+  });
+
+  it('Opens service flyout, clicks Actions, and selects View Traces', () => {
+    cy.get('[data-test-subj*="service-flyout-action-btntrace_service"]')
+      .should('exist')
+      .first()
+      .click();
+
+    cy.get('.euiButton').contains('Actions').click();
+
+    cy.get('.euiContextMenuItem').contains('View traces').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+    cy.get('[data-test-subj="filterBadge"]')
+    .should('exist')
+    .contains('serviceName: analytics-service');
+
+    cy.get('.euiText').contains('03f9c770db5ee2f1caac0afc36db49ba').should('exist');
+  });
+});
+
 describe('Testing switch mode to jaeger', () => {
   beforeEach(() => {
     cy.visit('app/observability-traces#/services', {
