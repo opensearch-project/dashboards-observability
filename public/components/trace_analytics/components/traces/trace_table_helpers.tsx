@@ -21,7 +21,9 @@ import { TraceAnalyticsMode, TraceQueryMode } from '../../../../../common/types/
 import { appendModeToTraceViewUri, nanoToMilliSec } from '../common/helper_functions';
 
 export const fetchDynamicColumns = (columnItems: string[]) => {
-  return columnItems
+  const safeColumnItems = Array.isArray(columnItems) ? columnItems : [];
+
+  return safeColumnItems
     .filter((col) => col.includes('attributes') || col.includes('instrumentation'))
     .map((col) => ({
       className: 'attributes-column',
@@ -52,7 +54,6 @@ export const fetchDynamicColumns = (columnItems: string[]) => {
 };
 
 export const getTableColumns = (
-  showAttributes: boolean,
   columnItems: string[],
   mode: TraceAnalyticsMode,
   tracesTableMode: TraceQueryMode,
@@ -188,7 +189,7 @@ export const getTableColumns = (
         render: renderDateField,
         className: 'span-group-column',
       },
-      ...(showAttributes ? fetchDynamicColumns(columnItems) : []),
+      ...fetchDynamicColumns(columnItems),
     ] as Array<EuiTableFieldDataColumnType<any>>;
   }
 
