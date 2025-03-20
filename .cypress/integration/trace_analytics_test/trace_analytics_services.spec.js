@@ -395,6 +395,7 @@ describe('Testing navigation from Services to Traces', () => {
   });
 
   it('Clicks on the "Traces" shortcut to redirect', () => {
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('.euiLink.euiLink--primary').contains('74').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
@@ -406,6 +407,7 @@ describe('Testing navigation from Services to Traces', () => {
   });
 
   it('Opens service flyout, clicks Actions, and selects View Traces', () => {
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('[data-test-subj*="service-flyout-action-btntrace_service"]')
       .should('exist')
       .first()
