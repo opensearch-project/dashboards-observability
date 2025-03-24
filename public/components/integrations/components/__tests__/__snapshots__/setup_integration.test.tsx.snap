@@ -38,6 +38,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                             "connectionLocation": "",
                             "connectionTableName": "sample",
                             "connectionType": "index",
+                            "databaseName": "default",
                             "displayName": "sample Integration",
                             "enabledWorkflows": Array [],
                           }
@@ -114,6 +115,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                   "connectionLocation": "",
                                   "connectionTableName": "sample",
                                   "connectionType": "index",
+                                  "databaseName": "default",
                                   "displayName": "sample Integration",
                                   "enabledWorkflows": Array [],
                                 }
@@ -262,6 +264,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                   "connectionLocation": "",
                                   "connectionTableName": "sample",
                                   "connectionType": "index",
+                                  "databaseName": "default",
                                   "displayName": "sample Integration",
                                   "enabledWorkflows": Array [],
                                 }
@@ -943,6 +946,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                             "connectionLocation": "",
                             "connectionTableName": "sample",
                             "connectionType": "index",
+                            "databaseName": "default",
                             "displayName": "sample Integration",
                             "enabledWorkflows": Array [],
                           }
