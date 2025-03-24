@@ -252,12 +252,10 @@ export function getServiceMapGraph({
 
     const averageLatency = `Average duration: ${
       map[service].latency! >= 0 ? map[service].latency + 'ms' : '-'
-      }`;
-
+    }`;
     const errorRate = `Error rate: ${
       map[service].error_rate! >= 0 ? map[service].error_rate + '%' : '-'
-      }`;
-
+    }`;
     const throughput =
       'Request rate: ' +
       (map[service].throughput! >= 0 ? `${map[service].throughput}` : '-') +
@@ -715,7 +713,7 @@ export const InjectElementsIntoGrid = (
 
           const textSpan = document.createElement('span');
           textSpan.appendChild(strongElement);
-          textSpan.appendChild(document.createTextNode(" results shown out of "));
+          textSpan.appendChild(document.createTextNode(' results shown out of '));
           textSpan.appendChild(document.createTextNode(` ${rowCount}`));
 
           warningDiv.appendChild(icon);
@@ -727,7 +725,7 @@ export const InjectElementsIntoGrid = (
 
       const pagination = document.querySelector('.euiDataGrid__pagination') as HTMLElement;
 
-      if (tracesTableMode !== "traces") {
+      if (tracesTableMode !== 'traces') {
         if (pagination) {
           const existingLoadMoreButton = pagination.querySelector('.trace-table-load-more');
           if (existingLoadMoreButton) {
