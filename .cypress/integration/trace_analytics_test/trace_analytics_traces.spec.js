@@ -294,9 +294,78 @@ describe('Testing switch mode to jaeger', () => {
     // Waiting time for render to complete
     cy.get("[data-test-subj='treeExpandAll']").click();
     cy.get("[data-test-subj='treeCollapseAll']").click();
-    
+
     cy.get("[data-test-subj='treeViewExpandArrow']").should('have.length', 1);
     cy.get("[data-test-subj='treeExpandAll']").click();
     cy.get("[data-test-subj='treeViewExpandArrow']").should('have.length.greaterThan', 1);
+  });
+});
+
+describe.only('Testing traces Custom source', () => {
+  beforeEach(() => {
+    cy.visit('app/observability-traces#/traces', {
+      onBeforeLoad: (win) => {
+        win.sessionStorage.clear();
+      },
+    });
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    cy.get("[data-test-subj='custom_data_prepper-mode']").click();
+    setTimeFilter();
+  });
+
+  it('Renders the traces custom source all spans as default, clicks trace view redirection ', () => {
+    cy.get('.euiDataGridHeaderCell__content').contains('Span Id').should('exist');
+    cy.get('.euiDataGridHeaderCell__content').contains('Trace Id').should('exist');
+    cy.get('.euiDataGridHeaderCell__content').contains('Parent Span Id').should('exist');
+    cy.get('.euiDataGridHeaderCell__content').contains('Trace group').should('exist');
+    cy.get('.euiDataGridHeaderCell__content').contains('Duration (ms)').should('exist');
+    cy.get('.euiDataGridHeaderCell__content').contains('Errors').should('exist');
+    cy.get('.euiDataGridHeaderCell__content').contains('Last updated').should('exist');
+
+    cy.get('a.euiLink.euiLink--primary').first().click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('.overview-content').should('contain.text', '4fa04f117be100f476b175e41096e736');
+  });
+
+  it('All spans column attributes as hidden, shows column when added', () => {
+    cy.get('span.euiButtonEmpty__text').contains('60 columns hidden').should('exist');
+    cy.get('span.euiButtonEmpty__text').contains('60 columns hidden').click();
+    cy.get('button[name="span.attributes.http@url"]').click();
+    cy.get('button[name="span.attributes.http@url"]').should('have.attr', 'aria-checked', 'true');
+    cy.get('.euiDataGridHeaderCell__content').contains('span.attributes.http@url').should('exist');
+  });
+
+  it('Verifies column sorting and pagination works correctly', () => {
+    cy.contains('Duration (ms)').click();
+    cy.contains('Sort Z-A').click();
+  
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.contains('467.03 ms').should('exist');
+  
+    cy.get('[data-test-subj="pagination-button-next"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.contains('399.10 ms').should('exist');
+  
+    cy.get('[data-test-subj="pagination-button-previous"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.contains('467.03 ms').should('exist');
+  });
+  
+  it('Renders the traces custom source traces, clicks trace view redirection', () => {
+    cy.get('[data-test-subj="trace-table-mode-selector"]').click();
+    cy.get('.euiSelectableListItem').contains('Traces').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+    cy.get('.euiDataGridHeaderCell__content').contains('Trace ID').should('exist');
+    cy.get('.euiDataGridHeaderCell__content').contains('Trace group').should('exist');
+    cy.get('.euiDataGridHeaderCell__content').contains('Duration (ms)').should('exist');
+    cy.get('.euiDataGridHeaderCell__content').contains('Percentile in trace group').should('exist');
+    cy.get('.euiDataGridHeaderCell__content').contains('Errors').should('exist');
+    cy.get('.euiDataGridHeaderCell__content').contains('Last updated').should('exist');
+
+    cy.get('a.euiLink.euiLink--primary').first().click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('.overview-content').should('contain.text', '02feb3a4f611abd81f2a53244d1278ae');
   });
 });

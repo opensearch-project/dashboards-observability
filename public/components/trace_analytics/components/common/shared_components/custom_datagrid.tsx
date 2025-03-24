@@ -150,6 +150,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
                   <EuiTextColor
+                    data-test-subj="trace-table-mode-selector"
                     color="success"
                     onClick={() => setIsPopoverOpen(!isPopoverOpen)}
                     style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
