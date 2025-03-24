@@ -301,7 +301,7 @@ describe('Testing switch mode to jaeger', () => {
   });
 });
 
-describe.only('Testing traces Custom source', () => {
+describe('Testing traces Custom source', () => {
   beforeEach(() => {
     cy.visit('app/observability-traces#/traces', {
       onBeforeLoad: (win) => {
@@ -328,7 +328,7 @@ describe.only('Testing traces Custom source', () => {
     cy.get('.overview-content').should('contain.text', '4fa04f117be100f476b175e41096e736');
   });
 
-  it('All spans column attributes as hidden, shows column when added', () => {
+  it('Renders all spans column attributes as hidden, shows column when added', () => {
     cy.get('span.euiButtonEmpty__text').contains('60 columns hidden').should('exist');
     cy.get('span.euiButtonEmpty__text').contains('60 columns hidden').click();
     cy.get('button[name="span.attributes.http@url"]').click();
