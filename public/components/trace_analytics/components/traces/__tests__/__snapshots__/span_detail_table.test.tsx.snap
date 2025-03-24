@@ -4,6 +4,7 @@ exports[`SpanDetailTable renders the component with data 1`] = `
 <div>
   <div
     class="normal-wrapper"
+    style="position: relative;"
   >
     <div
       data-focus-guard="true"
@@ -69,6 +70,12 @@ exports[`SpanDetailTable renders the empty component 1`] = `
   >
     <div
       className="normal-wrapper"
+      style={
+        Object {
+          "minHeight": "100px",
+          "position": "relative",
+        }
+      }
     >
       <EuiDataGrid
         aria-labelledby="custom-data-grid"
@@ -174,7 +181,6 @@ exports[`SpanDetailTable renders the empty component 1`] = `
         toolbarVisibility={
           Object {
             "additionalControls": Array [
-              null,
               <EuiButtonEmpty
                 color="text"
                 data-test-subj="fullScreenButton"
@@ -319,6 +325,17 @@ exports[`SpanDetailTable renders the empty component 1`] = `
           </ForwardRef>
         </EuiFocusTrap>
       </EuiDataGrid>
+      <div
+        className="grid-loading-overlay"
+      >
+        <EuiLoadingSpinner
+          size="xl"
+        >
+          <span
+            className="euiLoadingSpinner euiLoadingSpinner--xLarge"
+          />
+        </EuiLoadingSpinner>
+      </div>
     </div>
   </FullScreenWrapper>
   <NoMatchMessage
@@ -404,6 +421,7 @@ exports[`SpanDetailTable renders the jaeger component with data 1`] = `
 <div>
   <div
     class="normal-wrapper"
+    style="position: relative; min-height: 100px;"
   >
     <div
       data-focus-guard="true"
@@ -424,6 +442,13 @@ exports[`SpanDetailTable renders the jaeger component with data 1`] = `
       style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
       tabindex="-1"
     />
+    <div
+      class="grid-loading-overlay"
+    >
+      <span
+        class="euiLoadingSpinner euiLoadingSpinner--xLarge"
+      />
+    </div>
   </div>
   <div
     class="euiSpacer euiSpacer--xl"
@@ -463,6 +488,7 @@ exports[`SpanDetailTableHierarchy renders the component with data 1`] = `
 <div>
   <div
     class="normal-wrapper"
+    style="position: relative;"
   >
     <div
       data-focus-guard="true"
@@ -541,6 +567,12 @@ exports[`SpanDetailTableHierarchy renders the empty component 1`] = `
   >
     <div
       className="normal-wrapper"
+      style={
+        Object {
+          "minHeight": undefined,
+          "position": "relative",
+        }
+      }
     >
       <EuiDataGrid
         aria-labelledby="custom-data-grid"
@@ -627,7 +659,6 @@ exports[`SpanDetailTableHierarchy renders the empty component 1`] = `
         toolbarVisibility={
           Object {
             "additionalControls": Array [
-              null,
               <EuiButtonEmpty
                 color="text"
                 data-test-subj="fullScreenButton"
@@ -875,6 +906,7 @@ exports[`SpanDetailTableHierarchy renders the jaeger component with data 1`] = `
 <div>
   <div
     class="normal-wrapper"
+    style="position: relative;"
   >
     <div
       data-focus-guard="true"

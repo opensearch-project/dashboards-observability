@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiHighlight,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiOverlayMask,
   EuiPopover,
   EuiPopoverTitle,
@@ -108,7 +109,6 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   isTableDataLoading,
   tracesTableMode,
   setTracesTableMode,
-  maxTraces,
   setMaxTraces,
 }) => {
   const defaultVisibleColumns = useMemo(() => {
@@ -125,15 +125,14 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const displayedRowCount = rowCount > MAX_DISPLAY_ROWS ? MAX_DISPLAY_ROWS : rowCount;
-  const isRowCountLimited = rowCount > MAX_DISPLAY_ROWS;
 
   const tableOptions = tracesTableMode
     ? TRACE_TABLE_OPTIONS.map((obj) =>
-      obj.key === tracesTableMode ? { ...obj, checked: 'on' } : obj
-    )
+        obj.key === tracesTableMode ? { ...obj, checked: 'on' } : obj
+      )
     : [];
 
-  InjectElementsIntoGrid(rowCount, MAX_DISPLAY_ROWS, tracesTableMode ?? "", () => {
+  InjectElementsIntoGrid(rowCount, MAX_DISPLAY_ROWS, tracesTableMode ?? '', () => {
     setMaxTraces((prevMax: number) => Math.min(prevMax + 500, MAX_DISPLAY_ROWS));
   });
 
@@ -161,8 +160,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-            </EuiFlexItem>
+            <EuiFlexItem grow={false} />
           </EuiFlexGroup>
         }
       >
@@ -201,23 +199,23 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
       controls.push(tableModeSelector);
     }
 
-    if (!["all_spans", "root_spans", "service_entry_spans"].includes(tracesTableMode ?? "")) {
+    if (!['all_spans', 'root_spans', 'service_entry_spans'].includes(tracesTableMode ?? '')) {
       controls.push(
         <EuiButtonEmpty
           size="xs"
           onClick={() => setIsFullScreen((prev) => !prev)}
           key="fullScreen"
           color="text"
-        iconType={isFullScreen ? 'cross' : 'fullScreen'}
+          iconType={isFullScreen ? 'cross' : 'fullScreen'}
           data-test-subj="fullScreenButton"
         >
           {isFullScreen
-          ? i18n.translate('toolbarControls.exitFullScreen', {
-            defaultMessage: 'Exit full screen',
-            })
-          : i18n.translate('toolbarControls.fullScreen', {
-            defaultMessage: 'Full screen',
-            })}
+            ? i18n.translate('toolbarControls.exitFullScreen', {
+                defaultMessage: 'Exit full screen',
+              })
+            : i18n.translate('toolbarControls.fullScreen', {
+                defaultMessage: 'Full screen',
+              })}
         </EuiButtonEmpty>
       );
     }
@@ -226,7 +224,6 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
 
     return controls;
   }, [isFullScreen, toolbarButtons, tracesTableMode]);
-
 
   const gridStyle = useMemo(
     () => ({
@@ -244,7 +241,13 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   return (
     <>
       <FullScreenWrapper isFullScreen={isFullScreen} onClose={() => setIsFullScreen(false)}>
-        <div className={isFullScreen ? 'full-wrapper' : 'normal-wrapper'}>
+        <div
+          className={isFullScreen ? 'full-wrapper' : 'normal-wrapper'}
+          style={{
+            position: 'relative',
+            minHeight: isTableDataLoading && rowCount === 0 ? '100px' : undefined,
+          }}
+        >
           <EuiDataGrid
             aria-labelledby="custom-data-grid"
             columns={columns}
@@ -273,6 +276,11 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
               height: isFullScreen ? '100%' : pagination ? 'auto' : defaultHeight,
             }}
           />
+          {isTableDataLoading && (
+            <div className="grid-loading-overlay">
+              <EuiLoadingSpinner size="xl" />
+            </div>
+          )}
         </div>
       </FullScreenWrapper>
       {rowCount === 0 && <NoMatchMessage size={noMatchMessageSize} />}

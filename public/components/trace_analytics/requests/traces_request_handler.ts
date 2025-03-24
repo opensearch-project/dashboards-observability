@@ -38,7 +38,6 @@ export const handleCustomIndicesTracesRequest = async (
   DSL: any,
   items: any,
   setItems: (items: any) => void,
-  setColumns: (columns: any) => void,
   mode: TraceAnalyticsMode,
   pageIndex: number = 0,
   pageSize: number = 10,
@@ -98,7 +97,6 @@ export const handleCustomIndicesTracesRequest = async (
       }
     })
     .then((newItems) => {
-      setColumns([...newItems[0]]);
       setItems(newItems[1]);
     })
     .catch((error) => {

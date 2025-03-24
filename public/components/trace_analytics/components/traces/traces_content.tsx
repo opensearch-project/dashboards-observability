@@ -61,7 +61,6 @@ export function TracesContent(props: TracesProps) {
     setTracesTableMode,
   } = props;
   const [tableItems, setTableItems] = useState([]);
-  const [columns, setColumns] = useState([]);
   const [redirect, setRedirect] = useState(true);
   const [isTraceTableLoading, setIsTraceTableLoading] = useState(false);
   const [isServicesDataLoading, setIsServicesDataLoading] = useState(false);
@@ -85,28 +84,31 @@ export function TracesContent(props: TracesProps) {
       setSortingColumns([]);
       return;
     }
-  
+
     const sortField = sortColumns[0]?.id;
     const sortDirection = sortColumns[0]?.direction;
-  
+
     if (!sortField || !sortDirection) {
       console.error('Invalid sorting column:', sortColumns);
       return;
     }
-  
+
     setSortingColumns(sortColumns);
-  
+
     if (tracesTableMode === 'traces') {
       const sortedItems = [...tableItems].sort((a, b) => {
         const valueA = a[sortField];
         const valueB = b[sortField];
         return sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
       });
-  
+
       setTableItems(sortedItems);
     } else {
       const { DSL, isUnderOneHour } = generateDSLs();
-      refreshTableDataOnly(pageIndex, pageSize, DSL, isUnderOneHour, { field: sortField, direction: sortDirection });
+      refreshTableDataOnly(pageIndex, pageSize, DSL, isUnderOneHour, {
+        field: sortField,
+        direction: sortDirection,
+      });
     }
   };
 
@@ -137,7 +139,10 @@ export function TracesContent(props: TracesProps) {
         setPageIndex(newPage);
       } else {
         const { DSL, isUnderOneHour } = generateDSLs();
-        refreshTableDataOnly(newPage, pageSize, DSL, isUnderOneHour);
+        const currentSort = sortingColumns[0]
+          ? { field: sortingColumns[0].id, direction: sortingColumns[0].direction }
+          : undefined;
+        refreshTableDataOnly(newPage, pageSize, DSL, isUnderOneHour, currentSort);
       }
     },
     onChangeItemsPerPage: (newSize) => {
@@ -145,7 +150,10 @@ export function TracesContent(props: TracesProps) {
         setPageSize(newSize);
       } else {
         const { DSL, isUnderOneHour } = generateDSLs();
-        refreshTableDataOnly(0, newSize, DSL, isUnderOneHour);
+        const currentSort = sortingColumns[0]
+          ? { field: sortingColumns[0].id, direction: sortingColumns[0].direction }
+          : undefined;
+        refreshTableDataOnly(0, newSize, DSL, isUnderOneHour, currentSort);
       }
     },
   };
@@ -228,13 +236,12 @@ export function TracesContent(props: TracesProps) {
     setPageIndex(newPageIndex);
     setPageSize(newPageSize);
     setIsTraceTableLoading(true);
-  
+
     handleCustomIndicesTracesRequest(
       http,
       DSL,
       tableItems,
       setTableItems,
-      setColumns,
       mode,
       newPageIndex,
       newPageSize,
@@ -288,7 +295,6 @@ export function TracesContent(props: TracesProps) {
               DSL,
               tableItems,
               setTableItems,
-              setColumns,
               mode,
               newPageIndex,
               newPageSize,
@@ -384,7 +390,7 @@ export function TracesContent(props: TracesProps) {
           {/* Switch between custom data prepper and regular table */}
           {mode === 'custom_data_prepper' ? (
             <TracesCustomIndicesTable
-              columnItems={columns}
+              columnItems={attributesFilterFields}
               items={tableItems}
               totalHits={totalHits}
               mode={mode}
@@ -394,8 +400,8 @@ export function TracesContent(props: TracesProps) {
               jaegerIndicesExist={jaegerIndicesExist}
               dataPrepperIndicesExist={dataPrepperIndicesExist}
               tracesTableMode={tracesTableMode}
-              setTracesTableMode={(mode) => {
-                setTracesTableMode(mode); 
+              setTracesTableMode={(tableMode) => {
+                setTracesTableMode(tableMode);
                 setSortingColumns([]);
               }}
               sorting={sortingColumns}
