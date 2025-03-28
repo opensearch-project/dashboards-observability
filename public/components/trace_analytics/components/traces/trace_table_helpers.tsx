@@ -21,9 +21,7 @@ import { TraceAnalyticsMode, TraceQueryMode } from '../../../../../common/types/
 import { appendModeToTraceViewUri, nanoToMilliSec } from '../common/helper_functions';
 
 export const fetchDynamicColumns = (columnItems: string[]) => {
-  const safeColumnItems = Array.isArray(columnItems) ? columnItems : [];
-
-  return safeColumnItems
+  return columnItems
     .filter((col) => col.includes('attributes') || col.includes('instrumentation'))
     .map((col) => ({
       className: 'attributes-column',

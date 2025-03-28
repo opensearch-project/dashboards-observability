@@ -23,12 +23,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useMemo, useState } from 'react';
-import { InjectElementsIntoGrid, NoMatchMessage } from '../helper_functions';
+import { NoMatchMessage } from '../helper_functions';
 import {
   TRACE_TABLE_OPTIONS,
   TRACE_TABLE_TITLES,
   TRACE_TABLE_TYPE_KEY,
 } from '../../../../../../common/constants/trace_analytics';
+import { useInjectElementsIntoGrid } from './component_helper_functions';
+import { uiSettingsService } from '../../../../../../common/utils';
 
 const MAX_DISPLAY_ROWS = 10000;
 interface FullScreenWrapperProps {
@@ -44,7 +46,6 @@ const FullScreenWrapper: React.FC<FullScreenWrapperProps> = ({
   isFullScreen,
 }) => {
   if (!isFullScreen) return <>{children}</>;
-
   return (
     <EuiOverlayMask>
       <div className="full-screen-wrapper">
@@ -126,13 +127,15 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
 
   const displayedRowCount = rowCount > MAX_DISPLAY_ROWS ? MAX_DISPLAY_ROWS : rowCount;
 
+  const isDarkMode = uiSettingsService.get('theme:darkMode');
+
   const tableOptions = tracesTableMode
     ? TRACE_TABLE_OPTIONS.map((obj) =>
         obj.key === tracesTableMode ? { ...obj, checked: 'on' } : obj
       )
     : [];
 
-  InjectElementsIntoGrid(rowCount, MAX_DISPLAY_ROWS, tracesTableMode ?? '', () => {
+  useInjectElementsIntoGrid(rowCount, MAX_DISPLAY_ROWS, tracesTableMode ?? '', () => {
     setMaxTraces((prevMax: number) => Math.min(prevMax + 500, MAX_DISPLAY_ROWS));
   });
 
@@ -243,7 +246,12 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
     <>
       <FullScreenWrapper isFullScreen={isFullScreen} onClose={() => setIsFullScreen(false)}>
         <div
-          className={isFullScreen ? 'full-wrapper' : 'normal-wrapper'}
+          className={[
+            isFullScreen ? 'full-wrapper' : 'normal-wrapper',
+            isFullScreen && isDarkMode && 'dark-mode-enabled',
+          ]
+            .filter(Boolean)
+            .join(' ')}
           style={{
             position: 'relative',
             minHeight: isTableDataLoading && rowCount === 0 ? '100px' : undefined,

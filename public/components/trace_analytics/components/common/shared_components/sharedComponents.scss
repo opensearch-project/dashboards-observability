@@ -35,3 +35,20 @@
   justify-content: center;
   z-index: 2;
 }
+
+.dark-mode-enabled {
+  .euiDataGrid__pagination {
+    background-color: $euiColorEmptyShade;
+
+    color: #d3dae6;
+    border-top: 1px solid #343741;
+
+    .euiButtonEmpty {
+      color: #d3dae6;
+
+      &:hover {
+        background-color: #2a2d2f;
+      }
+    }
+  }
+}

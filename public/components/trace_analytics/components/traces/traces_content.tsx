@@ -132,7 +132,7 @@ export function TracesContent(props: TracesProps) {
   const pagination = {
     pageIndex,
     pageSize,
-    pageSizeOptions: [5, 10, 15],
+    pageSizeOptions: [10, 20, 50],
     totalItemCount: totalHits,
     onChangePage: (newPage) => {
       if (tracesTableMode === 'traces') {
