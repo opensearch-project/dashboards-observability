@@ -19,25 +19,25 @@ The collector allows to optimize and reduce data redundancies and simplify the m
 The following dashboards are part of the first OpenTelemetry services investigation use case offered by open search observability plugin.
 
 ### Ingestion Rate View
-![](https://github.com/opensearch-project/opentelemetry-demo/blob/main/tutorial/img/otel-ingestion-rate-dashboard.png?raw=true)
+
 
 Open Telemetry ingestion rate for signals: Traces , Metrics, Logs
 
 ### General Services View
-![](https://github.com/opensearch-project/opentelemetry-demo/blob/main/tutorial/img/services-general-dashboard.png?raw=true)
+
 
 All the services views including their RED metrics details: Requests, Errors, Durations
 
 ### Specific Service Projection detailed View
-![](https://github.com/opensearch-project/opentelemetry-demo/blob/main/tutorial/img/specific-service-dashboard.png?raw=true)
+
 
 A specific service details including its metrics related indications
 ### Network Metrics Monitor View
-![](https://github.com/opensearch-project/opentelemetry-demo/blob/main/tutorial/img/amp-services-network-metrics-details.png)
+
 
 The collections of network related metrics for service/s
 ### System Metrics Monitor View
-![](https://github.com/opensearch-project/opentelemetry-demo/blob/main/tutorial/img/amp-services-system-metrics-details.png?raw=true)
+
 
 The collections of system related metrics for service/s
 ---
