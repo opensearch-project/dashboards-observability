@@ -229,7 +229,11 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
         spans = applySorting(spans);
       }
 
-      setItems(spans);
+      const start = tableParams.page * tableParams.size;
+      const end = start + tableParams.size;
+      const pageSpans = spans.slice(start, end);
+
+      setItems(pageSpans);
       setTotal(spans.length);
     } catch (error) {
       console.error('Error parsing payloadData in SpanDetailTable:', error);

@@ -253,11 +253,9 @@ export function getServiceMapGraph({
     const averageLatency = `Average duration: ${
       map[service].latency! >= 0 ? map[service].latency + 'ms' : '-'
     }`;
-
     const errorRate = `Error rate: ${
       map[service].error_rate! >= 0 ? map[service].error_rate + '%' : '-'
     }`;
-
     const throughput =
       'Request rate: ' +
       (map[service].throughput! >= 0 ? `${map[service].throughput}` : '-') +
