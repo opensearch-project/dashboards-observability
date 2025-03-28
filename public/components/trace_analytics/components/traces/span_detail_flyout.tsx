@@ -327,11 +327,12 @@ export function SpanDetailFlyout(props: {
     const correlatedLogsIndex = TraceSettings.getCorrelatedLogsIndex();
     const correlatedSpanField = TraceSettings.getCorrelatedLogsFieldMappings().spanId;
     const correlatedTimestampField = TraceSettings.getCorrelatedLogsFieldMappings().timestamp;
-    // NOTE: Discover has issue with PPL Time filter, hence adding +3/-3 days to actual timestamp
+    // For telemetry lag, moving time range to +-30 minutes of startTime and endTime
     const startTime =
-      moment(span.startTime).subtract(3, 'days').format(TRACE_ANALYTICS_DATE_FORMAT) ?? 'now-3y';
+      moment(span.startTime).subtract(30, 'minutes').format(TRACE_ANALYTICS_DATE_FORMAT) ??
+      'now-30m';
     const endTime =
-      moment(span.endTime).add(3, 'days').format(TRACE_ANALYTICS_DATE_FORMAT) ?? 'now';
+      moment(span.endTime).add(30, 'minutes').format(TRACE_ANALYTICS_DATE_FORMAT) ?? 'now';
     const spanId = getSpanValue(span, mode, 'SPAN_ID');
 
     if (coreRefs?.dataSource?.dataSourceEnabled) {
@@ -376,9 +377,11 @@ export function SpanDetailFlyout(props: {
             </EuiFlexItem>
             {(mode === 'data_prepper' || mode === 'custom_data_prepper') && (
               <EuiFlexItem>
-                <EuiButtonEmpty size="xs" onClick={redirectToExplorer}>
-                  View associated logs
-                </EuiButtonEmpty>
+                {!isSpanDataLoading && !isEmpty(span) && (
+                  <EuiButtonEmpty size="xs" onClick={redirectToExplorer}>
+                    View associated logs
+                  </EuiButtonEmpty>
+                )}
               </EuiFlexItem>
             )}
             {props.serviceName && (

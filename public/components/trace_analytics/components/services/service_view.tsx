@@ -220,16 +220,12 @@ export function ServiceView(props: ServiceViewProps) {
                     .serviceName;
                   const correlatedTimestampField = TraceSettings.getCorrelatedLogsFieldMappings()
                     .timestamp;
-                  // NOTE: Discover has issue with PPL Time filter, hence adding +3/-3 days to actual timestamp
                   const startTime =
-                    dateMath
-                      .parse(props.startTime)!
-                      .subtract(3, 'days')
-                      .format(TRACE_ANALYTICS_DATE_FORMAT) ?? 'now-3y';
+                    dateMath.parse(props.startTime)!.format(TRACE_ANALYTICS_DATE_FORMAT) ??
+                    'now-30m';
                   const endTime =
                     dateMath
                       .parse(props.endTime, { roundUp: true })!
-                      .add(3, 'days')
                       .format(TRACE_ANALYTICS_DATE_FORMAT) ?? 'now';
                   if (coreRefs?.dataSource?.dataSourceEnabled) {
                     coreRefs?.application!.navigateToApp('data-explorer', {
