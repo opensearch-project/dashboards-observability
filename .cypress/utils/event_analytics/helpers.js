@@ -20,6 +20,7 @@ export const querySearch = (query, rangeSelected) => {
   cy.get('[data-test-subj="superDatePickerToggleQuickMenuButton"]').click();
   cy.get(rangeSelected).click();
   cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 };
 
 export const landOnEventHome = () => {
@@ -30,6 +31,7 @@ export const landOnEventExplorer = () => {
   cy.visit(
     `${Cypress.env('opensearchDashboards')}/app/observability-logs#/explorer`
   );
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 };
 
 export const landOnEventVisualizations = () => {

@@ -340,6 +340,7 @@ describe('Viewing application', () => {
   it('Opens span detail flyout when Span ID is clicked', () => {
     cy.get('[data-test-subj="app-analytics-traceTab"]').click();
     cy.get('input[type="search"]').click().type(`5ff3516909562c60`);
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('[data-test-subj="dataGridRowCell"]').contains('5ff3516909562c60').click();
     cy.get('[data-test-subj="spanDetailFlyout"]').should('be.visible');
     cy.get('[data-test-subj="spanDetailFlyout"]').within(($flyout) => {
