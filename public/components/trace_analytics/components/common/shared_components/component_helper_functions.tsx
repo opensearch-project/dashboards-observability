@@ -24,19 +24,6 @@ export const useInjectElementsIntoGrid = (
         if (!warningDiv) {
           warningDiv = document.createElement('div');
           warningDiv.className = 'trace-table-warning';
-          warningDiv.style.marginLeft = 'auto';
-          warningDiv.style.color = '#a87900';
-          warningDiv.style.fontSize = '13px';
-          warningDiv.style.display = 'flex';
-          warningDiv.style.alignItems = 'center';
-          warningDiv.style.padding = '2px 8px';
-          warningDiv.style.borderRadius = '4px';
-          warningDiv.style.whiteSpace = 'nowrap';
-
-          const icon = document.createElement('span');
-          icon.className = 'euiIcon euiIcon--medium euiIcon--warning';
-          icon.setAttribute('aria-label', 'Warning');
-          icon.style.marginRight = '4px';
 
           const strongElement = document.createElement('strong');
           strongElement.textContent = `${maxDisplayRows}`;
@@ -46,7 +33,6 @@ export const useInjectElementsIntoGrid = (
           textSpan.appendChild(document.createTextNode(' results shown out of '));
           textSpan.appendChild(document.createTextNode(` ${rowCount}`));
 
-          warningDiv.appendChild(icon);
           warningDiv.appendChild(textSpan);
 
           toolbar.appendChild(warningDiv);

@@ -97,9 +97,35 @@ export function TracesContent(props: TracesProps) {
 
     if (tracesTableMode === 'traces') {
       const sortedItems = [...tableItems].sort((a, b) => {
-        const valueA = a[sortField];
-        const valueB = b[sortField];
-        return sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
+        let valueA = a[sortField];
+        let valueB = b[sortField];
+
+        if (sortField === 'last_updated') {
+          const dateA = new Date(valueA);
+          const dateB = new Date(valueB);
+
+          const isValidA = !isNaN(dateA.getTime());
+          const isValidB = !isNaN(dateB.getTime());
+
+          // Treat invalid dates as the lowest value
+          valueA = isValidA ? dateA.getTime() : -Infinity;
+          valueB = isValidB ? dateB.getTime() : -Infinity;
+        } else if (sortField === 'trace_group') {
+          valueA = typeof valueA === 'string' ? valueA.toLowerCase() : '';
+          valueB = typeof valueB === 'string' ? valueB.toLowerCase() : '';
+        }
+
+        if (typeof valueA === 'number' && typeof valueB === 'number') {
+          return sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
+        }
+
+        if (typeof valueA === 'string' && typeof valueB === 'string') {
+          return sortDirection === 'asc'
+            ? valueA.localeCompare(valueB)
+            : valueB.localeCompare(valueA);
+        }
+
+        return 0;
       });
 
       setTableItems(sortedItems);

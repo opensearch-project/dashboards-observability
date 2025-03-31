@@ -10,6 +10,7 @@ import { TraceAnalyticsMode, TraceQueryMode } from '../../../../../common/types/
 import { MissingConfigurationMessage, NoMatchMessage } from '../common/helper_functions';
 import { getTableColumns } from './trace_table_helpers';
 import { RenderCustomDataGrid } from '../common/shared_components/custom_datagrid';
+import { uiSettingsService } from '../../../../../common/utils';
 
 interface TracesLandingTableProps {
   columnItems: string[];
@@ -62,8 +63,10 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
       if (!value && columnId !== 'status.code' && columnId !== 'error_count') return '-';
 
       switch (columnId) {
+        case 'last_updated':
         case 'endTime':
-          return moment(value).format('MM/DD/YYYY HH:mm:ss.SSS');
+          // return moment(value).format('MM/DD/YYYY HH:mm:ss.SSS');
+          return moment(value).format(uiSettingsService.get('dateFormat'));
         case 'trace_id':
         case 'traceId':
           return getTraceViewUri ? <EuiLink href={getTraceViewUri(value)}>{value}</EuiLink> : value;

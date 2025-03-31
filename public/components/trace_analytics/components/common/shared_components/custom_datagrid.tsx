@@ -203,7 +203,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
       controls.push(tableModeSelector);
     }
 
-    if (!['all_spans', 'root_spans', 'service_entry_spans'].includes(tracesTableMode ?? '')) {
+    if (tracesTableMode === 'traces' || tracesTableMode === undefined) {
       controls.push(
         <EuiButtonEmpty
           size="xs"
