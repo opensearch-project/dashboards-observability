@@ -133,7 +133,7 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
             setMaxTraces={props.setMaxTraces}
           />
         ) : (
-          <NoMatchMessage size="xl" />
+          <NoMatchMessage size="xl" mode={mode} />
         )}
       </EuiPanel>
     </>

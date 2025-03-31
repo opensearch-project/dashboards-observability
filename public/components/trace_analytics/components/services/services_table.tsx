@@ -302,7 +302,7 @@ export function ServicesTable(props: ServicesTableProps) {
             itemId="itemId"
           />
         ) : (
-          <NoMatchMessage size="xl" />
+          <NoMatchMessage size="xl" mode={mode} />
         )}
       </EuiPanel>
     </>

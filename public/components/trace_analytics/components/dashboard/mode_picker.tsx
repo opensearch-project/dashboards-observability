@@ -4,21 +4,15 @@
  */
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
+  EuiBetaBadge,
   EuiPopover,
-  EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiSmallButton,
   EuiSmallButtonEmpty,
-  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
-import { CustomIndexFlyout } from '../common/custom_index_flyout';
 
 const labels = new Map([
   ['jaeger', 'Jaeger'],
@@ -36,7 +30,6 @@ export function DataSourcePicker(props: {
 }) {
   const { modes = [], selectedMode, setMode } = props;
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   const trigger = {
     label: labels.get(selectedMode),
@@ -106,6 +99,14 @@ export function DataSourcePicker(props: {
               label: x.title,
               key: x.id,
               value: x.id,
+              append:
+                x.id === 'custom_data_prepper' ? (
+                  <EuiToolTip content="Custom trace and service indices is an experimental feature">
+                    <EuiBetaBadge size="s" label="E" color="subdued" />
+                  </EuiToolTip>
+                ) : (
+                  <></>
+                ),
               checked: x.id === selectedMode ? 'on' : undefined,
               'data-test-subj': x.id + '-mode',
             }))}
@@ -131,33 +132,8 @@ export function DataSourcePicker(props: {
               </>
             )}
           </EuiSelectable>
-          <EuiPopoverFooter>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiSmallButton
-                  onClick={() => {
-                    setIsFlyoutVisible(true);
-                    setPopoverIsOpen(false);
-                  }}
-                >
-                  Manage custom source
-                </EuiSmallButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText>
-                  <EuiToolTip content="Custom trace and service indices is an experimental feature">
-                    <EuiIcon type="iInCircle" />
-                  </EuiToolTip>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPopoverFooter>
         </div>
       </EuiPopover>
-      <CustomIndexFlyout
-        isFlyoutVisible={isFlyoutVisible}
-        setIsFlyoutVisible={setIsFlyoutVisible}
-      />
     </>
   );
 }

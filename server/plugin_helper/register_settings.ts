@@ -7,6 +7,8 @@ import { schema } from '@osd/config-schema';
 import { i18n } from '@osd/i18n';
 import { UiSettingsServiceSetup } from '../../../../src/core/server/ui_settings';
 import {
+  DATA_PREPPER_INDEX_NAME,
+  DATA_PREPPER_SERVICE_INDEX_NAME,
   DEFAULT_CORRELATED_LOGS_FIELD_MAPPINGS,
   DEFAULT_SS4O_LOGS_INDEX,
   TRACE_CORRELATED_LOGS_INDEX_SETTING,
@@ -22,7 +24,7 @@ export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSet
       name: i18n.translate('observability.traceAnalyticsCustomSpanIndices.name', {
         defaultMessage: 'Trace analytics custom span indices',
       }),
-      value: '',
+      value: DATA_PREPPER_INDEX_NAME,
       category: ['Observability'],
       description: i18n.translate('observability.traceAnalyticsCustomSpanIndices.description', {
         defaultMessage:
@@ -37,7 +39,7 @@ export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSet
       name: i18n.translate('observability.traceAnalyticsCustomServiceIndices.name', {
         defaultMessage: 'Trace analytics custom service indices',
       }),
-      value: '',
+      value: DATA_PREPPER_SERVICE_INDEX_NAME,
       category: ['Observability'],
       description: i18n.translate('observability.traceAnalyticsCustomServiceIndices.description', {
         defaultMessage:

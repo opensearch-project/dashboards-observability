@@ -22,7 +22,10 @@ import {
 import React, { useEffect, useMemo, useState } from 'react';
 // @ts-ignore
 import Graph from 'react-graph-vis';
-import { ServiceNodeDetails } from '../../../../../../common/types/trace_analytics';
+import {
+  ServiceNodeDetails,
+  TraceAnalyticsMode,
+} from '../../../../../../common/types/trace_analytics';
 import { FilterType } from '../filters/filters';
 import {
   calculateTicks,
@@ -84,7 +87,7 @@ export function ServiceMap({
   setCurrentSelectedService?: (value: React.SetStateAction<string>) => void;
   filterByCurrService?: boolean;
   includeMetricsCallback?: () => void;
-  mode?: string;
+  mode?: TraceAnalyticsMode;
   filters: FilterType[];
   setFilters: (filters: FilterType[]) => void;
   hideSearchBar?: boolean;
@@ -580,7 +583,7 @@ export function ServiceMap({
           </EuiFlexGroup>
         ) : (
           <div style={{ minHeight: 434 }}>
-            <NoMatchMessage size="s" />
+            <NoMatchMessage size="s" mode={mode} />
           </div>
         )}
       </EuiPanel>
