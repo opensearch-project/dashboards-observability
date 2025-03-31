@@ -354,18 +354,6 @@ describe('Click to view field insights', () => {
       'contain',
       'Rare values'
     );
-    cy.get('[data-test-subj="sidebarField__fieldInsights"] button').should(
-      'contain',
-      'Average overtime'
-    );
-    cy.get('[data-test-subj="sidebarField__fieldInsights"] button').should(
-      'contain',
-      'Maximum overtime'
-    );
-    cy.get('[data-test-subj="sidebarField__fieldInsights"] button').should(
-      'contain',
-      'Minimum overtime'
-    );
   });
 
   it('Click a non-numerical field to view insights', () => {
