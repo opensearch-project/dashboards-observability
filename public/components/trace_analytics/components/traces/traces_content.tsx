@@ -4,7 +4,6 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import datemath from '@elastic/datemath';
 import {
   EuiAccordion,
   EuiFlexGroup,
@@ -25,7 +24,7 @@ import {
 } from '../../requests/traces_request_handler';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
 import { Filters, FilterType } from '../common/filters/filters';
-import { filtersToDsl, processTimeStamp } from '../common/helper_functions';
+import { filtersToDsl, isUnderOneHourRange, processTimeStamp } from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBar } from '../common/search_bar';
 import { DashboardContent } from '../dashboard/dashboard_content';
@@ -101,10 +100,11 @@ export function TracesContent(props: TracesProps) {
 
     setSortingColumns(sortColumns);
 
+    // The columns that can not be used in a query, only rendered on page
     const localOnlyFields = ['trace_group', 'percentile_in_trace_group', 'trace_id'];
 
     if (tracesTableMode === 'traces') {
-      //  Client-side sort if field is local-only
+      // Client-side sort if field is local-only
       if (localOnlyFields.includes(sortField)) {
         const sorted = [...tableItems].sort((a, b) => {
           let valueA = a[sortField];
@@ -154,7 +154,7 @@ export function TracesContent(props: TracesProps) {
         page,
         appConfigs
       ),
-      isUnderOneHour: datemath.parse(endTime)?.diff(datemath.parse(startTime), 'hours')! < 1,
+      isUnderOneHour: isUnderOneHourRange(startTime, endTime),
     };
   };
 
@@ -312,7 +312,7 @@ export function TracesContent(props: TracesProps) {
       page
     );
 
-    const isUnderOneHour = datemath.parse(endTime)?.diff(datemath.parse(startTime), 'hours')! < 1;
+    const isUnderOneHour = isUnderOneHourRange(startTime, endTime);
 
     await handleTracesRequest(
       http,
@@ -352,7 +352,7 @@ export function TracesContent(props: TracesProps) {
       processTimeStamp(endTime, mode),
       page
     );
-    const isUnderOneHour = datemath.parse(endTime)?.diff(datemath.parse(startTime), 'hours')! < 1;
+    const isUnderOneHour = isUnderOneHourRange(startTime, endTime);
     const newSort = sort ?? getDefaultSort();
 
     setIsTraceTableLoading(true);
