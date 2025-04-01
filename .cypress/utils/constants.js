@@ -83,7 +83,7 @@ export const setTimeFilter = (setEndTime = false, refresh = true) => {
       .type('{selectall}' + endTime, { force: true });
   }
   if (refresh) cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
-  cy.get('.euiTableRow').should('have.length.greaterThan', 3); //Replaces Wait
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist'); //Replaces Wait
 };
 
 export const expandServiceView = (rowIndex = 0) => {

@@ -323,9 +323,10 @@ describe('Testing traces Spans table verify table headers functionality', () => 
       .should('exist')
       .click();
     cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection"]').click();
-    cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-spanId').click();
+    cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-durationInNanos').click();
     cy.get('[data-test-subj="dataGridColumnSortingButton"]').should('have.text', '1 fields sorted');
-    cy.get('[data-test-subj="dataGridColumnSortingButton"]').should('exist').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('button.euiLink.euiLink--primary').eq(4).contains('96e7fdedd82ab53c').click();
   });
 });
 
