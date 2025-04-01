@@ -79,6 +79,12 @@ export function TracesContent(props: TracesProps) {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
+  const getDefaultSort = () => {
+    return tracesTableMode === 'traces'
+      ? { field: 'last_updated', direction: 'desc' as const }
+      : { field: 'endTime', direction: 'desc' as const };
+  };
+
   const onSort = (sortColumns: Array<{ id: string; direction: 'desc' | 'asc' }>) => {
     if (!sortColumns || sortColumns.length === 0) {
       setSortingColumns([]);
@@ -95,43 +101,40 @@ export function TracesContent(props: TracesProps) {
 
     setSortingColumns(sortColumns);
 
+    const localOnlyFields = ['trace_group', 'percentile_in_trace_group', 'trace_id'];
+
     if (tracesTableMode === 'traces') {
-      const sortedItems = [...tableItems].sort((a, b) => {
-        let valueA = a[sortField];
-        let valueB = b[sortField];
+      //  Client-side sort if field is local-only
+      if (localOnlyFields.includes(sortField)) {
+        const sorted = [...tableItems].sort((a, b) => {
+          let valueA = a[sortField];
+          let valueB = b[sortField];
 
-        if (sortField === 'last_updated') {
-          const dateA = new Date(valueA);
-          const dateB = new Date(valueB);
+          if (typeof valueA === 'string' && typeof valueB === 'string') {
+            valueA = valueA.toLowerCase();
+            valueB = valueB.toLowerCase();
+            return sortDirection === 'asc'
+              ? valueA.localeCompare(valueB)
+              : valueB.localeCompare(valueA);
+          }
 
-          const isValidA = !isNaN(dateA.getTime());
-          const isValidB = !isNaN(dateB.getTime());
+          if (typeof valueA === 'number' && typeof valueB === 'number') {
+            return sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
+          }
 
-          // Treat invalid dates as the lowest value
-          valueA = isValidA ? dateA.getTime() : -Infinity;
-          valueB = isValidB ? dateB.getTime() : -Infinity;
-        } else if (sortField === 'trace_group') {
-          valueA = typeof valueA === 'string' ? valueA.toLowerCase() : '';
-          valueB = typeof valueB === 'string' ? valueB.toLowerCase() : '';
-        }
+          return 0;
+        });
 
-        if (typeof valueA === 'number' && typeof valueB === 'number') {
-          return sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
-        }
+        setTableItems(sorted);
+        return;
+      }
 
-        if (typeof valueA === 'string' && typeof valueB === 'string') {
-          return sortDirection === 'asc'
-            ? valueA.localeCompare(valueB)
-            : valueB.localeCompare(valueA);
-        }
-
-        return 0;
-      });
-
-      setTableItems(sortedItems);
+      // Server-side sort for supported fields
+      const sort = { field: sortField, direction: sortDirection };
+      refreshTracesTableData(sort, 0, pageSize);
     } else {
       const { DSL, isUnderOneHour } = generateDSLs();
-      refreshTableDataOnly(pageIndex, pageSize, DSL, isUnderOneHour, {
+      refreshSpanTableData(pageIndex, pageSize, DSL, isUnderOneHour, {
         field: sortField,
         direction: sortDirection,
       });
@@ -168,7 +171,7 @@ export function TracesContent(props: TracesProps) {
         const currentSort = sortingColumns[0]
           ? { field: sortingColumns[0].id, direction: sortingColumns[0].direction }
           : undefined;
-        refreshTableDataOnly(newPage, pageSize, DSL, isUnderOneHour, currentSort);
+        refreshSpanTableData(newPage, pageSize, DSL, isUnderOneHour, currentSort);
       }
     },
     onChangeItemsPerPage: (newSize) => {
@@ -179,7 +182,7 @@ export function TracesContent(props: TracesProps) {
         const currentSort = sortingColumns[0]
           ? { field: sortingColumns[0].id, direction: sortingColumns[0].direction }
           : undefined;
-        refreshTableDataOnly(0, newSize, DSL, isUnderOneHour, currentSort);
+        refreshSpanTableData(0, newSize, DSL, isUnderOneHour, currentSort);
       }
     },
   };
@@ -252,7 +255,7 @@ export function TracesContent(props: TracesProps) {
     setFilters(newFilters);
   };
 
-  const refreshTableDataOnly = async (
+  const refreshSpanTableData = async (
     newPageIndex: number,
     newPageSize: number,
     DSL: any,
@@ -262,6 +265,7 @@ export function TracesContent(props: TracesProps) {
     setPageIndex(newPageIndex);
     setPageSize(newPageSize);
     setIsTraceTableLoading(true);
+    const sort = sortParams ?? getDefaultSort();
 
     handleCustomIndicesTracesRequest(
       http,
@@ -273,8 +277,53 @@ export function TracesContent(props: TracesProps) {
       newPageSize,
       setTotalHits,
       props.dataSourceMDSId[0]?.id,
-      sortParams,
+      sort,
       tracesTableMode,
+      isUnderOneHour
+    ).finally(() => setIsTraceTableLoading(false));
+  };
+
+  const refreshTracesTableData = async (
+    sortParams?: { field: string; direction: 'desc' | 'asc' },
+    newPageIndex: number = pageIndex,
+    newPageSize: number = pageSize
+  ) => {
+    setPageIndex(newPageIndex);
+    setPageSize(newPageSize);
+    setIsTraceTableLoading(true);
+    const sort = sortParams ?? getDefaultSort();
+
+    const DSL = filtersToDsl(
+      mode,
+      filters,
+      query,
+      processTimeStamp(startTime, mode),
+      processTimeStamp(endTime, mode),
+      page,
+      appConfigs
+    );
+
+    const timeFilterDSL = filtersToDsl(
+      mode,
+      [],
+      '',
+      processTimeStamp(startTime, mode),
+      processTimeStamp(endTime, mode),
+      page
+    );
+
+    const isUnderOneHour = datemath.parse(endTime)?.diff(datemath.parse(startTime), 'hours')! < 1;
+
+    await handleTracesRequest(
+      http,
+      DSL,
+      timeFilterDSL,
+      tableItems,
+      setTableItems,
+      mode,
+      maxTraces,
+      props.dataSourceMDSId[0].id,
+      sort,
       isUnderOneHour
     ).finally(() => setIsTraceTableLoading(false));
   };
@@ -304,6 +353,7 @@ export function TracesContent(props: TracesProps) {
       page
     );
     const isUnderOneHour = datemath.parse(endTime)?.diff(datemath.parse(startTime), 'hours')! < 1;
+    const newSort = sort ?? getDefaultSort();
 
     setIsTraceTableLoading(true);
 
@@ -326,7 +376,7 @@ export function TracesContent(props: TracesProps) {
               newPageSize,
               setTotalHits,
               props.dataSourceMDSId[0]?.id,
-              sort,
+              newSort,
               tracesTableMode,
               isUnderOneHour
             )
@@ -339,7 +389,7 @@ export function TracesContent(props: TracesProps) {
               mode,
               maxTraces,
               props.dataSourceMDSId[0].id,
-              sort,
+              newSort,
               isUnderOneHour
             );
       tracesRequest.finally(() => setIsTraceTableLoading(false));
@@ -363,7 +413,7 @@ export function TracesContent(props: TracesProps) {
         mode,
         maxTraces,
         props.dataSourceMDSId[0].id,
-        sort,
+        newSort,
         isUnderOneHour
       ).finally(() => setIsTraceTableLoading(false));
     }
