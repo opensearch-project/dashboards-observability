@@ -38,8 +38,10 @@ export const handleCustomIndicesTracesRequest = async (
   DSL: any,
   items: any,
   setItems: (items: any) => void,
-  setColumns: (items: any) => void,
   mode: TraceAnalyticsMode,
+  pageIndex: number = 0,
+  pageSize: number = 10,
+  setTotalHits: any,
   dataSourceMDSId?: string,
   sort?: PropertySort,
   queryMode?: TraceQueryMode,
@@ -48,7 +50,15 @@ export const handleCustomIndicesTracesRequest = async (
   const responsePromise = handleDslRequest(
     http,
     DSL,
-    getCustomIndicesTracesQuery(mode, undefined, sort, queryMode, isUnderOneHour),
+    getCustomIndicesTracesQuery(
+      mode,
+      undefined,
+      pageIndex,
+      pageSize,
+      sort,
+      queryMode,
+      isUnderOneHour
+    ),
     mode,
     dataSourceMDSId
   );
@@ -56,6 +66,11 @@ export const handleCustomIndicesTracesRequest = async (
   return Promise.allSettled([responsePromise])
     .then(([responseResult]) => {
       if (responseResult.status === 'rejected') return Promise.reject(responseResult.reason);
+
+      const responseData = responseResult.value;
+
+      const totalHits = responseData.hits?.total?.value ?? 0;
+      setTotalHits(totalHits);
 
       if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
         const keys = new Set();
@@ -82,7 +97,6 @@ export const handleCustomIndicesTracesRequest = async (
       }
     })
     .then((newItems) => {
-      setColumns([...newItems[0]]);
       setItems(newItems[1]);
     })
     .catch((error) => {
@@ -101,6 +115,7 @@ export const handleTracesRequest = async (
   items: any,
   setItems: (items: any) => void,
   mode: TraceAnalyticsMode,
+  maxTraces: number = 500,
   dataSourceMDSId?: string,
   sort?: PropertySort,
   isUnderOneHour?: boolean
@@ -121,7 +136,7 @@ export const handleTracesRequest = async (
   const responsePromise = handleDslRequest(
     http,
     DSL,
-    getTracesQuery(mode, undefined, sort, isUnderOneHour),
+    getTracesQuery(mode, undefined, maxTraces, sort, isUnderOneHour),
     mode,
     dataSourceMDSId
   );

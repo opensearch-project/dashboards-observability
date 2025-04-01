@@ -52,7 +52,6 @@ export const fetchDynamicColumns = (columnItems: string[]) => {
 };
 
 export const getTableColumns = (
-  showAttributes: boolean,
   columnItems: string[],
   mode: TraceAnalyticsMode,
   tracesTableMode: TraceQueryMode,
@@ -188,7 +187,7 @@ export const getTableColumns = (
         render: renderDateField,
         className: 'span-group-column',
       },
-      ...(showAttributes ? fetchDynamicColumns(columnItems) : []),
+      ...fetchDynamicColumns(columnItems),
     ] as Array<EuiTableFieldDataColumnType<any>>;
   }
 

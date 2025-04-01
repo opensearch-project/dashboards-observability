@@ -9,13 +9,30 @@ import {
   EuiDataGrid,
   EuiDataGridColumn,
   EuiDataGridSorting,
-  EuiLoadingContent,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHighlight,
+  EuiIcon,
+  EuiLoadingSpinner,
   EuiOverlayMask,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useMemo, useState } from 'react';
 import { NoMatchMessage } from '../helper_functions';
+import {
+  TRACE_TABLE_OPTIONS,
+  TRACE_TABLE_TITLES,
+  TRACE_TABLE_TYPE_KEY,
+} from '../../../../../../common/constants/trace_analytics';
+import { useInjectElementsIntoGrid } from './component_helper_functions';
+import { uiSettingsService } from '../../../../../../common/utils';
 
+const MAX_DISPLAY_ROWS = 10000;
 interface FullScreenWrapperProps {
   children: React.ReactNode;
   onClose: () => void;
@@ -29,7 +46,6 @@ const FullScreenWrapper: React.FC<FullScreenWrapperProps> = ({
   isFullScreen,
 }) => {
   if (!isFullScreen) return <>{children}</>;
-
   return (
     <EuiOverlayMask>
       <div className="full-screen-wrapper">
@@ -73,6 +89,10 @@ interface RenderCustomDataGridParams {
   defaultHeight?: string;
   visibleColumns?: string[];
   isTableDataLoading?: boolean;
+  tracesTableMode?: string;
+  setTracesTableMode?: (mode: string) => void;
+  maxTraces: number;
+  setMaxTraces: (max: number) => void;
 }
 
 export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
@@ -88,36 +108,126 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   defaultHeight = '500px',
   visibleColumns,
   isTableDataLoading,
+  tracesTableMode,
+  setTracesTableMode,
+  setMaxTraces,
 }) => {
+  const defaultVisibleColumns = useMemo(() => {
+    return columns
+      .filter((col) => !col.id.includes('attributes') && !col.id.includes('instrumentation'))
+      .map((col) => col.id);
+  }, [columns]);
+
   const [localVisibleColumns, setLocalVisibleColumns] = useState(
-    visibleColumns ?? columns.map((col) => col.id)
+    visibleColumns ?? defaultVisibleColumns
   );
+
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const displayedRowCount = rowCount > MAX_DISPLAY_ROWS ? MAX_DISPLAY_ROWS : rowCount;
+
+  const isDarkMode = uiSettingsService.get('theme:darkMode');
+
+  const tableOptions = tracesTableMode
+    ? TRACE_TABLE_OPTIONS.map((obj) =>
+        obj.key === tracesTableMode ? { ...obj, checked: 'on' } : obj
+      )
+    : [];
+
+  useInjectElementsIntoGrid(rowCount, MAX_DISPLAY_ROWS, tracesTableMode ?? '', () => {
+    setMaxTraces((prevMax: number) => Math.min(prevMax + 500, MAX_DISPLAY_ROWS));
+  });
 
   const disableInteractions = useMemo(() => isFullScreen, [isFullScreen]);
 
-  const toolbarControls = useMemo(
-    () => [
-      <EuiButtonEmpty
-        size="xs"
-        onClick={() => setIsFullScreen((prev) => !prev)}
-        key="fullScreen"
-        color="text"
-        iconType={isFullScreen ? 'cross' : 'fullScreen'}
-        data-test-subj="fullScreenButton"
+  const tableModeSelector =
+    setTracesTableMode && tracesTableMode ? (
+      <EuiPopover
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(false)}
+        panelStyle={{ width: '350px' }}
+        button={
+          <EuiFlexGroup alignItems="center" gutterSize="s" direction="row">
+            <EuiFlexGroup alignItems="center" gutterSize="xs" direction="row">
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <EuiTextColor
+                    data-test-subj="trace-table-mode-selector"
+                    color="success"
+                    onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                  >
+                    {TRACE_TABLE_TITLES[tracesTableMode]} ({displayedRowCount})
+                    <EuiIcon type="arrowDown" size="s" color="success" style={{ marginLeft: 4 }} />
+                  </EuiTextColor>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiFlexItem grow={false} />
+          </EuiFlexGroup>
+        }
       >
-        {isFullScreen
-          ? i18n.translate('toolbarControls.exitFullScreen', {
-              defaultMessage: 'Exit full screen',
-            })
-          : i18n.translate('toolbarControls.fullScreen', {
-              defaultMessage: 'Full screen',
-            })}
-      </EuiButtonEmpty>,
-      ...toolbarButtons,
-    ],
-    [isFullScreen, toolbarButtons]
-  );
+        <EuiPopoverTitle>Select trace table filter</EuiPopoverTitle>
+        <EuiSelectable
+          singleSelection="always"
+          options={tableOptions}
+          listProps={{ rowHeight: 80 }}
+          renderOption={(option, searchValue) => (
+            <div style={{ padding: '6px 10px', width: '100%' }}>
+              <EuiHighlight search={searchValue}>{TRACE_TABLE_TITLES[option.key]}</EuiHighlight>
+              <br />
+              <EuiTextColor color="subdued" className="popOverSelectableItem">
+                <small>{option['aria-describedby'] || 'No description available'}</small>
+              </EuiTextColor>
+            </div>
+          )}
+          onChange={(newOptions) => {
+            const selectedMode = newOptions.find((option) => option.checked === 'on')?.key;
+            if (selectedMode && selectedMode !== tracesTableMode) {
+              setTracesTableMode(selectedMode);
+              sessionStorage.setItem(TRACE_TABLE_TYPE_KEY, selectedMode);
+            }
+            setIsPopoverOpen(false);
+          }}
+        >
+          {(list) => list}
+        </EuiSelectable>
+      </EuiPopover>
+    ) : null;
+
+  const toolbarControls = useMemo(() => {
+    const controls = [];
+
+    if (tableModeSelector) {
+      controls.push(tableModeSelector);
+    }
+
+    if (tracesTableMode === 'traces' || tracesTableMode === undefined) {
+      controls.push(
+        <EuiButtonEmpty
+          size="xs"
+          onClick={() => setIsFullScreen((prev) => !prev)}
+          key="fullScreen"
+          color="text"
+          iconType={isFullScreen ? 'cross' : 'fullScreen'}
+          data-test-subj="fullScreenButton"
+        >
+          {isFullScreen
+            ? i18n.translate('toolbarControls.exitFullScreen', {
+                defaultMessage: 'Exit full screen',
+              })
+            : i18n.translate('toolbarControls.fullScreen', {
+                defaultMessage: 'Full screen',
+              })}
+        </EuiButtonEmpty>
+      );
+    }
+
+    controls.push(...toolbarButtons);
+
+    return controls;
+  }, [isFullScreen, toolbarButtons, tracesTableMode]);
 
   const gridStyle = useMemo(
     () => ({
@@ -132,14 +242,21 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
     []
   );
 
-  return isTableDataLoading ? (
-    <div>
-      <EuiLoadingContent lines={4} />
-    </div>
-  ) : (
+  return (
     <>
       <FullScreenWrapper isFullScreen={isFullScreen} onClose={() => setIsFullScreen(false)}>
-        <div className={isFullScreen ? 'full-wrapper' : 'normal-wrapper'}>
+        <div
+          className={[
+            isFullScreen ? 'full-wrapper' : 'normal-wrapper',
+            isFullScreen && isDarkMode && 'dark-mode-enabled',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          style={{
+            position: 'relative',
+            minHeight: isTableDataLoading && rowCount === 0 ? '100px' : undefined,
+          }}
+        >
           <EuiDataGrid
             aria-labelledby="custom-data-grid"
             columns={columns}
@@ -147,7 +264,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
               visibleColumns: localVisibleColumns,
               setVisibleColumns: setLocalVisibleColumns,
             }}
-            rowCount={rowCount}
+            rowCount={displayedRowCount}
             renderCellValue={(props) =>
               renderCellValue({
                 ...props,
@@ -168,6 +285,11 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
               height: isFullScreen ? '100%' : pagination ? 'auto' : defaultHeight,
             }}
           />
+          {isTableDataLoading && (
+            <div className="grid-loading-overlay">
+              <EuiLoadingSpinner size="xl" />
+            </div>
+          )}
         </div>
       </FullScreenWrapper>
       {rowCount === 0 && <NoMatchMessage size={noMatchMessageSize} />}

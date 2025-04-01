@@ -103,7 +103,7 @@ describe('SpanDetailTable', () => {
         />
       );
 
-      expect(wrapper.find('EuiLoadingContent')).toHaveLength(1); // Ensure loading state appears
+      expect(wrapper.find('EuiLoadingSpinner')).toHaveLength(1); // Ensure loading state appears
 
       await act(async () => {
         await waitFor(() => {
@@ -140,7 +140,7 @@ describe('SpanDetailTable', () => {
         />
       );
 
-      expect(wrapper.find('EuiLoadingContent')).toHaveLength(1); // Ensure loading state appears
+      expect(wrapper.find('EuiLoadingSpinner')).toHaveLength(1); // Ensure loading state appears
 
       await act(async () => {
         await waitFor(() => {
