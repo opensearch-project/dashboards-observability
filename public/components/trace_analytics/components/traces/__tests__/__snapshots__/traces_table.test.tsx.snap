@@ -1875,6 +1875,7 @@ exports[`Traces table component renders traces table 1`] = `
               "align": "right",
               "field": "latency",
               "name": "Duration (ms)",
+              "render": [Function],
               "sortable": true,
               "truncateText": true,
             },
@@ -1962,6 +1963,7 @@ exports[`Traces table component renders traces table 1`] = `
                 "align": "right",
                 "field": "latency",
                 "name": "Duration (ms)",
+                "render": [Function],
                 "sortable": true,
                 "truncateText": true,
               },
@@ -2853,7 +2855,7 @@ exports[`Traces table component renders traces table 1`] = `
                               }
                             }
                             setScopeRow={false}
-                            textOnly={true}
+                            textOnly={false}
                             truncateText={true}
                           >
                             <td
@@ -2870,13 +2872,9 @@ exports[`Traces table component renders traces table 1`] = `
                                 Duration (ms)
                               </div>
                               <div
-                                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText"
+                                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                               >
-                                <span
-                                  className="euiTableCellContent__text"
-                                >
-                                  19.91
-                                </span>
+                                19.91
                               </div>
                             </td>
                           </EuiTableRowCell>
