@@ -224,21 +224,25 @@ export function ServicesTable(props: ServicesTableProps) {
         render: (item: any, row: any) => (
           <>
             {item === 0 || item ? (
-              <EuiLink
-                onClick={() => {
-                  setRedirect(true);
-                  addFilter({
-                    field: mode === 'jaeger' ? 'process.serviceName' : 'serviceName',
-                    operator: 'is',
-                    value: row.name,
-                    inverted: false,
-                    disabled: false,
-                  });
-                  traceColumnAction();
-                }}
-              >
+              page === 'app' ? (
+                <EuiLink
+                  onClick={() => {
+                    setRedirect(true);
+                    addFilter({
+                      field: mode === 'jaeger' ? 'process.serviceName' : 'serviceName',
+                      operator: 'is',
+                      value: row.name,
+                      inverted: false,
+                      disabled: false,
+                    });
+                    traceColumnAction();
+                  }}
+                >
+                  <EuiI18nNumber value={item} />
+                </EuiLink>
+              ) : (
                 <EuiI18nNumber value={item} />
-              </EuiLink>
+              )
             ) : (
               '-'
             )}

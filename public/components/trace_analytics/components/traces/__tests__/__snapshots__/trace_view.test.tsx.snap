@@ -4,17 +4,42 @@ exports[`Trace view component renders trace view 1`] = `
 <Fragment>
   <EuiPage>
     <EuiPageBody>
-      <EuiFlexItem>
-        <EuiText
-          size="s"
-        >
-          <h1
-            className="overview-content"
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+      >
+        <EuiFlexItem>
+          <EuiText
+            size="s"
           >
-            test
-          </h1>
-        </EuiText>
-      </EuiFlexItem>
+            <h1
+              className="overview-content"
+            >
+              test
+            </h1>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          onClick={[Function]}
+        >
+          <EuiToolTip
+            content="View logs associated with the trace"
+            delay="regular"
+            position="top"
+          >
+            <EuiLink
+              data-test-subj="trace-view-logs-redirection-btn"
+            >
+              <EuiSmallButton
+                iconType="discoverApp"
+                isLoading={false}
+              >
+                View associated logs
+              </EuiSmallButton>
+            </EuiLink>
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiFlexGroup
         alignItems="stretch"
         gutterSize="s"

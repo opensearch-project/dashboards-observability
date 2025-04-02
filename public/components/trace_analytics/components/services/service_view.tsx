@@ -346,20 +346,7 @@ export function ServiceView(props: ServiceViewProps) {
                       <EuiText className="overview-title">Traces</EuiText>
                       <EuiText size="s" className="overview-content">
                         {fields.traces === 0 || fields.traces ? (
-                          <EuiLink
-                            onClick={() =>
-                              redirectToServiceTraces({
-                                mode: props.mode,
-                                addFilter: props.addFilter,
-                                dataSourceMDSId: props.dataSourceMDSId,
-                                serviceName: props.serviceName,
-                                setRedirect,
-                                setCurrentSelectedService,
-                              })
-                            }
-                          >
-                            <EuiI18nNumber value={fields.traces} />
-                          </EuiLink>
+                          <EuiI18nNumber value={fields.traces} />
                         ) : (
                           '-'
                         )}

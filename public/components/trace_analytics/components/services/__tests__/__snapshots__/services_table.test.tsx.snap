@@ -139,6 +139,7 @@ exports[`Services table component renders empty jaeger services table message 1`
         />
       </EuiHorizontalRule>
       <NoMatchMessage
+        mode="jaeger"
         size="xl"
       >
         <EuiSpacer
@@ -397,6 +398,7 @@ exports[`Services table component renders empty services table message 1`] = `
         />
       </EuiHorizontalRule>
       <NoMatchMessage
+        mode="data_prepper"
         size="xl"
       >
         <EuiSpacer
@@ -1885,22 +1887,11 @@ exports[`Services table component renders jaeger services table 1`] = `
                               <div
                                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                               >
-                                <EuiLink
-                                  onClick={[Function]}
+                                <EuiI18nNumber
+                                  value={31}
                                 >
-                                  <button
-                                    className="euiLink euiLink--primary"
-                                    disabled={false}
-                                    onClick={[Function]}
-                                    type="button"
-                                  >
-                                    <EuiI18nNumber
-                                      value={31}
-                                    >
-                                      31
-                                    </EuiI18nNumber>
-                                  </button>
-                                </EuiLink>
+                                  31
+                                </EuiI18nNumber>
                               </div>
                             </td>
                           </EuiTableRowCell>
@@ -1934,11 +1925,12 @@ exports[`Services table component renders jaeger services table 1`] = `
                               >
                                 <EuiFlexGroup
                                   className=""
+                                  gutterSize="m"
                                   justifyContent="center"
                                   key=".0"
                                 >
                                   <div
-                                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                    className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                                   >
                                     <EuiFlexItem
                                       grow={false}
@@ -1948,45 +1940,128 @@ exports[`Services table component renders jaeger services table 1`] = `
                                         className="euiFlexItem euiFlexItem--flexGrowZero"
                                         onClick={[Function]}
                                       >
-                                        <EuiLink
-                                          data-test-subj="service-flyout-action-btnundefined"
+                                        <EuiToolTip
+                                          content="View service details"
+                                          delay="regular"
+                                          position="top"
                                         >
-                                          <button
-                                            className="euiLink euiLink--primary"
-                                            data-test-subj="service-flyout-action-btnundefined"
-                                            disabled={false}
-                                            type="button"
+                                          <span
+                                            className="euiToolTipAnchor"
+                                            onKeyUp={[Function]}
+                                            onMouseOut={[Function]}
+                                            onMouseOver={[Function]}
                                           >
-                                            <EuiIcon
-                                              color="primary"
-                                              type="inspect"
+                                            <EuiLink
+                                              data-test-subj="service-flyout-action-btnundefined"
+                                              onBlur={[Function]}
+                                              onFocus={[Function]}
                                             >
-                                              <EuiIconInspect
-                                                aria-hidden={true}
-                                                className="euiIcon euiIcon--medium euiIcon--primary"
-                                                focusable="false"
-                                                role="img"
-                                                style={null}
+                                              <button
+                                                className="euiLink euiLink--primary"
+                                                data-test-subj="service-flyout-action-btnundefined"
+                                                disabled={false}
+                                                onBlur={[Function]}
+                                                onFocus={[Function]}
+                                                type="button"
                                               >
-                                                <svg
-                                                  aria-hidden={true}
-                                                  className="euiIcon euiIcon--medium euiIcon--primary"
-                                                  focusable="false"
-                                                  height={16}
-                                                  role="img"
-                                                  style={null}
-                                                  viewBox="0 0 16 16"
-                                                  width={16}
-                                                  xmlns="http://www.w3.org/2000/svg"
+                                                <EuiIcon
+                                                  color="primary"
+                                                  type="inspect"
                                                 >
-                                                  <path
-                                                    d="M15.363 14.658a.5.5 0 1 1-.713.7l-2.97-3.023a.5.5 0 0 1 .001-.7A3.9 3.9 0 1 0 8.9 12.8a.5.5 0 1 1 0 .999 4.9 4.9 0 1 1 3.821-1.833l2.642 2.691ZM3.094 13a.5.5 0 1 1 0 1H2.5A2.5 2.5 0 0 1 0 11.5v-9A2.5 2.5 0 0 1 2.5 0h9A2.5 2.5 0 0 1 14 2.5v.599a.5.5 0 1 1-1 0V2.5A1.5 1.5 0 0 0 11.5 1h-9A1.5 1.5 0 0 0 1 2.5v9A1.5 1.5 0 0 0 2.5 13h.594ZM2.5 3a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm2 0a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm2 0a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm-4 2a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm2 0a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm-2 1a.5.5 0 1 1 0 1 .5.5 0 0 1 0-1Zm0 3a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm6-6a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm2 0a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm-8 8a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Z"
-                                                  />
-                                                </svg>
-                                              </EuiIconInspect>
-                                            </EuiIcon>
-                                          </button>
-                                        </EuiLink>
+                                                  <EuiIconInspect
+                                                    aria-hidden={true}
+                                                    className="euiIcon euiIcon--medium euiIcon--primary"
+                                                    focusable="false"
+                                                    role="img"
+                                                    style={null}
+                                                  >
+                                                    <svg
+                                                      aria-hidden={true}
+                                                      className="euiIcon euiIcon--medium euiIcon--primary"
+                                                      focusable="false"
+                                                      height={16}
+                                                      role="img"
+                                                      style={null}
+                                                      viewBox="0 0 16 16"
+                                                      width={16}
+                                                      xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                      <path
+                                                        d="M15.363 14.658a.5.5 0 1 1-.713.7l-2.97-3.023a.5.5 0 0 1 .001-.7A3.9 3.9 0 1 0 8.9 12.8a.5.5 0 1 1 0 .999 4.9 4.9 0 1 1 3.821-1.833l2.642 2.691ZM3.094 13a.5.5 0 1 1 0 1H2.5A2.5 2.5 0 0 1 0 11.5v-9A2.5 2.5 0 0 1 2.5 0h9A2.5 2.5 0 0 1 14 2.5v.599a.5.5 0 1 1-1 0V2.5A1.5 1.5 0 0 0 11.5 1h-9A1.5 1.5 0 0 0 1 2.5v9A1.5 1.5 0 0 0 2.5 13h.594ZM2.5 3a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm2 0a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm2 0a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm-4 2a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm2 0a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm-2 1a.5.5 0 1 1 0 1 .5.5 0 0 1 0-1Zm0 3a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm6-6a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm2 0a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm-8 8a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Z"
+                                                      />
+                                                    </svg>
+                                                  </EuiIconInspect>
+                                                </EuiIcon>
+                                              </button>
+                                            </EuiLink>
+                                          </span>
+                                        </EuiToolTip>
+                                      </div>
+                                    </EuiFlexItem>
+                                    <EuiFlexItem
+                                      grow={false}
+                                      onClick={[Function]}
+                                    >
+                                      <div
+                                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                                        onClick={[Function]}
+                                      >
+                                        <EuiToolTip
+                                          content="View service traces"
+                                          delay="regular"
+                                          position="top"
+                                        >
+                                          <span
+                                            className="euiToolTipAnchor"
+                                            onKeyUp={[Function]}
+                                            onMouseOut={[Function]}
+                                            onMouseOver={[Function]}
+                                          >
+                                            <EuiLink
+                                              data-test-subj="service-traces-redirection-btnundefined"
+                                              onBlur={[Function]}
+                                              onFocus={[Function]}
+                                            >
+                                              <button
+                                                className="euiLink euiLink--primary"
+                                                data-test-subj="service-traces-redirection-btnundefined"
+                                                disabled={false}
+                                                onBlur={[Function]}
+                                                onFocus={[Function]}
+                                                type="button"
+                                              >
+                                                <EuiIcon
+                                                  color="primary"
+                                                  type="apmTrace"
+                                                >
+                                                  <EuiIconApmTrace
+                                                    aria-hidden={true}
+                                                    className="euiIcon euiIcon--medium euiIcon--primary"
+                                                    focusable="false"
+                                                    role="img"
+                                                    style={null}
+                                                  >
+                                                    <svg
+                                                      aria-hidden={true}
+                                                      className="euiIcon euiIcon--medium euiIcon--primary"
+                                                      focusable="false"
+                                                      height={16}
+                                                      role="img"
+                                                      style={null}
+                                                      viewBox="0 0 16 16"
+                                                      width={16}
+                                                      xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                      <path
+                                                        d="M2 0h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2Zm0 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H2Zm.5 2h10a.5.5 0 1 1 0 1h-10a.5.5 0 0 1 0-1Zm1 3h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1 0-1Zm2 3h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1 0-1Zm3 3h5a.5.5 0 1 1 0 1h-5a.5.5 0 1 1 0-1Z"
+                                                      />
+                                                    </svg>
+                                                  </EuiIconApmTrace>
+                                                </EuiIcon>
+                                              </button>
+                                            </EuiLink>
+                                          </span>
+                                        </EuiToolTip>
                                       </div>
                                     </EuiFlexItem>
                                   </div>
@@ -4138,22 +4213,11 @@ exports[`Services table component renders services table 1`] = `
                               <div
                                 className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                               >
-                                <EuiLink
-                                  onClick={[Function]}
+                                <EuiI18nNumber
+                                  value={31}
                                 >
-                                  <button
-                                    className="euiLink euiLink--primary"
-                                    disabled={false}
-                                    onClick={[Function]}
-                                    type="button"
-                                  >
-                                    <EuiI18nNumber
-                                      value={31}
-                                    >
-                                      31
-                                    </EuiI18nNumber>
-                                  </button>
-                                </EuiLink>
+                                  31
+                                </EuiI18nNumber>
                               </div>
                             </td>
                           </EuiTableRowCell>
@@ -4187,11 +4251,12 @@ exports[`Services table component renders services table 1`] = `
                               >
                                 <EuiFlexGroup
                                   className=""
+                                  gutterSize="m"
                                   justifyContent="center"
                                   key=".0"
                                 >
                                   <div
-                                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                    className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                                   >
                                     <EuiFlexItem
                                       grow={false}
@@ -4201,45 +4266,194 @@ exports[`Services table component renders services table 1`] = `
                                         className="euiFlexItem euiFlexItem--flexGrowZero"
                                         onClick={[Function]}
                                       >
-                                        <EuiLink
-                                          data-test-subj="service-flyout-action-btnundefined"
+                                        <EuiToolTip
+                                          content="View service details"
+                                          delay="regular"
+                                          position="top"
                                         >
-                                          <button
-                                            className="euiLink euiLink--primary"
-                                            data-test-subj="service-flyout-action-btnundefined"
-                                            disabled={false}
-                                            type="button"
+                                          <span
+                                            className="euiToolTipAnchor"
+                                            onKeyUp={[Function]}
+                                            onMouseOut={[Function]}
+                                            onMouseOver={[Function]}
                                           >
-                                            <EuiIcon
-                                              color="primary"
-                                              type="inspect"
+                                            <EuiLink
+                                              data-test-subj="service-flyout-action-btnundefined"
+                                              onBlur={[Function]}
+                                              onFocus={[Function]}
                                             >
-                                              <EuiIconBeaker
-                                                aria-hidden={true}
-                                                className="euiIcon euiIcon--medium euiIcon--primary euiIcon-isLoading"
-                                                focusable="false"
-                                                role="img"
-                                                style={null}
+                                              <button
+                                                className="euiLink euiLink--primary"
+                                                data-test-subj="service-flyout-action-btnundefined"
+                                                disabled={false}
+                                                onBlur={[Function]}
+                                                onFocus={[Function]}
+                                                type="button"
                                               >
-                                                <svg
-                                                  aria-hidden={true}
-                                                  className="euiIcon euiIcon--medium euiIcon--primary euiIcon-isLoading"
-                                                  focusable="false"
-                                                  height={16}
-                                                  role="img"
-                                                  style={null}
-                                                  viewBox="0 0 16 16"
-                                                  width={16}
-                                                  xmlns="http://www.w3.org/2000/svg"
+                                                <EuiIcon
+                                                  color="primary"
+                                                  type="inspect"
                                                 >
-                                                  <path
-                                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                  />
-                                                </svg>
-                                              </EuiIconBeaker>
-                                            </EuiIcon>
-                                          </button>
-                                        </EuiLink>
+                                                  <EuiIconBeaker
+                                                    aria-hidden={true}
+                                                    className="euiIcon euiIcon--medium euiIcon--primary euiIcon-isLoading"
+                                                    focusable="false"
+                                                    role="img"
+                                                    style={null}
+                                                  >
+                                                    <svg
+                                                      aria-hidden={true}
+                                                      className="euiIcon euiIcon--medium euiIcon--primary euiIcon-isLoading"
+                                                      focusable="false"
+                                                      height={16}
+                                                      role="img"
+                                                      style={null}
+                                                      viewBox="0 0 16 16"
+                                                      width={16}
+                                                      xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                      <path
+                                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                      />
+                                                    </svg>
+                                                  </EuiIconBeaker>
+                                                </EuiIcon>
+                                              </button>
+                                            </EuiLink>
+                                          </span>
+                                        </EuiToolTip>
+                                      </div>
+                                    </EuiFlexItem>
+                                    <EuiFlexItem
+                                      grow={false}
+                                      onClick={[Function]}
+                                    >
+                                      <div
+                                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                                        onClick={[Function]}
+                                      >
+                                        <EuiToolTip
+                                          content="View service traces"
+                                          delay="regular"
+                                          position="top"
+                                        >
+                                          <span
+                                            className="euiToolTipAnchor"
+                                            onKeyUp={[Function]}
+                                            onMouseOut={[Function]}
+                                            onMouseOver={[Function]}
+                                          >
+                                            <EuiLink
+                                              data-test-subj="service-traces-redirection-btnundefined"
+                                              onBlur={[Function]}
+                                              onFocus={[Function]}
+                                            >
+                                              <button
+                                                className="euiLink euiLink--primary"
+                                                data-test-subj="service-traces-redirection-btnundefined"
+                                                disabled={false}
+                                                onBlur={[Function]}
+                                                onFocus={[Function]}
+                                                type="button"
+                                              >
+                                                <EuiIcon
+                                                  color="primary"
+                                                  type="apmTrace"
+                                                >
+                                                  <EuiIconBeaker
+                                                    aria-hidden={true}
+                                                    className="euiIcon euiIcon--medium euiIcon--primary euiIcon-isLoading"
+                                                    focusable="false"
+                                                    role="img"
+                                                    style={null}
+                                                  >
+                                                    <svg
+                                                      aria-hidden={true}
+                                                      className="euiIcon euiIcon--medium euiIcon--primary euiIcon-isLoading"
+                                                      focusable="false"
+                                                      height={16}
+                                                      role="img"
+                                                      style={null}
+                                                      viewBox="0 0 16 16"
+                                                      width={16}
+                                                      xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                      <path
+                                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                      />
+                                                    </svg>
+                                                  </EuiIconBeaker>
+                                                </EuiIcon>
+                                              </button>
+                                            </EuiLink>
+                                          </span>
+                                        </EuiToolTip>
+                                      </div>
+                                    </EuiFlexItem>
+                                    <EuiFlexItem
+                                      grow={false}
+                                      onClick={[Function]}
+                                    >
+                                      <div
+                                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                                        onClick={[Function]}
+                                      >
+                                        <EuiToolTip
+                                          content="View service logs"
+                                          delay="regular"
+                                          position="top"
+                                        >
+                                          <span
+                                            className="euiToolTipAnchor"
+                                            onKeyUp={[Function]}
+                                            onMouseOut={[Function]}
+                                            onMouseOver={[Function]}
+                                          >
+                                            <EuiLink
+                                              data-test-subj="service-logs-redirection-btnundefined"
+                                              onBlur={[Function]}
+                                              onFocus={[Function]}
+                                            >
+                                              <button
+                                                className="euiLink euiLink--primary"
+                                                data-test-subj="service-logs-redirection-btnundefined"
+                                                disabled={false}
+                                                onBlur={[Function]}
+                                                onFocus={[Function]}
+                                                type="button"
+                                              >
+                                                <EuiIcon
+                                                  color="primary"
+                                                  type="discoverApp"
+                                                >
+                                                  <EuiIconBeaker
+                                                    aria-hidden={true}
+                                                    className="euiIcon euiIcon--medium euiIcon--primary euiIcon-isLoading"
+                                                    focusable="false"
+                                                    role="img"
+                                                    style={null}
+                                                  >
+                                                    <svg
+                                                      aria-hidden={true}
+                                                      className="euiIcon euiIcon--medium euiIcon--primary euiIcon-isLoading"
+                                                      focusable="false"
+                                                      height={16}
+                                                      role="img"
+                                                      style={null}
+                                                      viewBox="0 0 16 16"
+                                                      width={16}
+                                                      xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                      <path
+                                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                                                      />
+                                                    </svg>
+                                                  </EuiIconBeaker>
+                                                </EuiIcon>
+                                              </button>
+                                            </EuiLink>
+                                          </span>
+                                        </EuiToolTip>
                                       </div>
                                     </EuiFlexItem>
                                   </div>
