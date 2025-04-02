@@ -18,7 +18,8 @@
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
       "yarn lint --fix"
-    ]
+    ],
+    "*.{test,spec,cy}.{js,ts}": "git diff --cached --name-only | xargs grep -l '.only(' && (echo '❌ Found .only in test files. Remove it before committing!' && exit 1) || exit 0"
   },
   "dependencies": {
     "@algolia/autocomplete-core": "^1.4.1",
