@@ -35,7 +35,7 @@ const redirectionToLogsApp = ({
 }) => {
   const correlatedLogsIndex = TraceSettings.getCorrelatedLogsIndex();
   const correlatedTimestampField = TraceSettings.getCorrelatedLogsFieldMappings().timestamp;
-  if (coreRefs?.dataSource?.dataSourceEnabled) {
+  if (coreRefs?.dataSource?.dataSourceEnabled || coreRefs.chrome?.navGroup.getNavGroupEnabled()) {
     coreRefs?.application!.navigateToApp('data-explorer', {
       path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'${startTime}',to:'${endTime}'))&_q=(filters:!(),query:(dataset:(dataSource:(id:'${
         dataSourceMDSId[0].id ?? ''

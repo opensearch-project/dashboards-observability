@@ -4,13 +4,13 @@
  */
 
 import { EuiDataGridColumn, EuiLink, EuiPanel, EuiText } from '@elastic/eui';
-import React, { useMemo } from 'react';
 import moment from 'moment';
+import React, { useMemo } from 'react';
 import { TraceAnalyticsMode, TraceQueryMode } from '../../../../../common/types/trace_analytics';
-import { MissingConfigurationMessage, NoMatchMessage } from '../common/helper_functions';
-import { getTableColumns } from './trace_table_helpers';
-import { RenderCustomDataGrid } from '../common/shared_components/custom_datagrid';
 import { uiSettingsService } from '../../../../../common/utils';
+import { MissingConfigurationMessage, NoMatchMessage } from '../common/helper_functions';
+import { RenderCustomDataGrid } from '../common/shared_components/custom_datagrid';
+import { getTableColumns } from './trace_table_helpers';
 
 interface TracesLandingTableProps {
   columnItems: string[];
@@ -133,7 +133,7 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
             setMaxTraces={props.setMaxTraces}
           />
         ) : (
-          <NoMatchMessage size="xl" mode={mode} />
+          <NoMatchMessage size="xl" mode={props.mode} />
         )}
       </EuiPanel>
     </>
