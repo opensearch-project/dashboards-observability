@@ -65,7 +65,7 @@ export function TraceView(props: TraceViewProps) {
                 <h1 className="overview-content">{traceId}</h1>
               </EuiText>
             </EuiFlexItem>
-            {TracetoLogsButton()}
+            {TracetoLogsButton}
           </EuiFlexGroup>
         }
       </>
@@ -256,36 +256,34 @@ export function TraceView(props: TraceViewProps) {
     );
   };
 
-  const TracetoLogsButton = () => {
-    return useMemo(
-      () =>
-        mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
-          <EuiFlexItem
-            grow={false}
-            onClick={() => {
-              const payloadJson = JSON.parse(payloadData);
-              redirectTraceToLogs({
-                traceId: payloadJson[0]._source.traceId,
-                fromTime: payloadJson[0]._source.startTime,
-                toTime: fields.last_updated,
-                dataSourceMDSId: props.dataSourceMDSId,
-              });
-            }}
-          >
-            <EuiToolTip content="View associated logs using Trace Id">
-              <EuiLink data-test-subj="trace-view-logs-redirection-btn">
-                <EuiSmallButton iconType="discoverApp" isLoading={isTracePayloadLoading}>
-                  View associated logs
-                </EuiSmallButton>
-              </EuiLink>
-            </EuiToolTip>
-          </EuiFlexItem>
-        ) : (
-          <></>
-        ),
-      [payloadData, isTracePayloadLoading, props.dataSourceMDSId, fields]
-    );
-  };
+  const TracetoLogsButton = useMemo(
+    () =>
+      mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
+        <EuiFlexItem
+          grow={false}
+          onClick={() => {
+            const payloadJson = JSON.parse(payloadData);
+            redirectTraceToLogs({
+              traceId: payloadJson[0]._source.traceId,
+              fromTime: payloadJson[0]._source.startTime,
+              toTime: fields.last_updated,
+              dataSourceMDSId: props.dataSourceMDSId,
+            });
+          }}
+        >
+          <EuiToolTip content="View associated logs using Trace Id">
+            <EuiLink data-test-subj="trace-view-logs-redirection-btn">
+              <EuiSmallButton iconType="discoverApp" isLoading={isTracePayloadLoading}>
+                View associated logs
+              </EuiSmallButton>
+            </EuiLink>
+          </EuiToolTip>
+        </EuiFlexItem>
+      ) : (
+        <></>
+      ),
+    [payloadData, isTracePayloadLoading, props.dataSourceMDSId, fields, mode]
+  );
 
   useEffect(() => {
     if (!payloadData) return;
@@ -381,7 +379,7 @@ export function TraceView(props: TraceViewProps) {
           {!coreRefs.chrome?.navGroup.getNavGroupEnabled() ? (
             renderTitle(props.traceId)
           ) : (
-            <HeaderControlledComponentsWrapper components={[TracetoLogsButton()]} />
+            <HeaderControlledComponentsWrapper components={[TracetoLogsButton]} />
           )}
           <EuiFlexGroup alignItems="stretch" gutterSize="s">
             <EuiFlexItem grow={5}>{renderOverview(fields)}</EuiFlexItem>

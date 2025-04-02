@@ -267,16 +267,16 @@ export function ServicesTable(props: ServicesTableProps) {
             </EuiFlexItem>
             <EuiFlexItem
               grow={false}
-              onClick={() =>
+              onClick={() => {
+                if (setCurrentSelectedService) setCurrentSelectedService('');
+                setRedirect(true);
                 redirectToServiceTraces({
                   mode,
                   addFilter,
                   dataSourceMDSId,
                   serviceName: row.name,
-                  setRedirect: () => {},
-                  setCurrentSelectedService,
-                })
-              }
+                });
+              }}
             >
               <EuiToolTip content="View service traces">
                 <EuiLink data-test-subj={'service-traces-redirection-btn' + row.itemId}>

@@ -141,22 +141,22 @@ export function ServiceView(props: ServiceViewProps) {
     else if (setCurrentSelectedService) setCurrentSelectedService(service);
   };
 
-  const serviceActionsMenu = (isFlyout: boolean) => {
+  const renderServiceActionsMenu = (isFlyout: boolean) => {
     return (
       <EuiFlexItem grow={false}>
         <EuiFlexGroup justifyContent="center" gutterSize="s">
           <EuiFlexItem
             grow={false}
-            onClick={() =>
+            onClick={() => {
+              if (setCurrentSelectedService) setCurrentSelectedService('');
+              setRedirect(true);
               redirectToServiceTraces({
                 mode: props.mode,
                 addFilter: props.addFilter,
                 dataSourceMDSId: props.dataSourceMDSId,
                 serviceName: props.serviceName,
-                setRedirect,
-                setCurrentSelectedService,
-              })
-            }
+              });
+            }}
           >
             <EuiToolTip content="View service traces">
               <EuiLink data-test-subj={'service-view-traces-redirection-btn'}>
@@ -216,17 +216,16 @@ export function ServiceView(props: ServiceViewProps) {
   );
 
   const renderTitle = (
-    serviceName: string,
     startTime: SearchBarProps['startTime'],
     setStartTime: SearchBarProps['setStartTime'],
     endTime: SearchBarProps['endTime'],
     setEndTime: SearchBarProps['setEndTime'],
     _addFilter: (filter: FilterType) => void,
-    _page?: string
+    currentPage?: string
   ) => {
     return (
       <>
-        {_page === 'serviceFlyout' ? (
+        {currentPage === 'serviceFlyout' ? (
           <EuiFlyoutHeader hasBorder>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem>{serviceHeader}</EuiFlexItem>
@@ -235,14 +234,14 @@ export function ServiceView(props: ServiceViewProps) {
               <EuiFlexItem grow={true}>
                 {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}
               </EuiFlexItem>
-              {serviceActionsMenu(_page === 'serviceFlyout')}
+              {renderServiceActionsMenu(currentPage === 'serviceFlyout')}
             </EuiFlexGroup>
           </EuiFlyoutHeader>
         ) : coreRefs?.chrome?.navGroup.getNavGroupEnabled() ? (
           <HeaderControlledComponentsWrapper
             components={[
               renderDatePicker(startTime, setStartTime, endTime, setEndTime),
-              serviceActionsMenu(_page === 'serviceFlyout'),
+              renderServiceActionsMenu(currentPage === 'serviceFlyout'),
             ]}
           />
         ) : (
@@ -251,7 +250,7 @@ export function ServiceView(props: ServiceViewProps) {
             <EuiFlexItem grow={false}>
               {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}
             </EuiFlexItem>
-            {serviceActionsMenu(_page === 'serviceFlyout')}
+            {renderServiceActionsMenu(currentPage === 'serviceFlyout')}
           </EuiFlexGroup>
         )}
       </>
@@ -372,7 +371,6 @@ export function ServiceView(props: ServiceViewProps) {
   const title = useMemo(
     () =>
       renderTitle(
-        props.serviceName,
         props.startTime,
         props.setStartTime,
         props.endTime,
@@ -380,7 +378,7 @@ export function ServiceView(props: ServiceViewProps) {
         props.addFilter,
         page
       ),
-    [props.serviceName, props.startTime, props.endTime, page]
+    [props.startTime, props.endTime, page]
   );
 
   const activeFilters = useMemo(

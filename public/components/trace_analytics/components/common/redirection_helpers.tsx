@@ -41,7 +41,9 @@ const redirectionToLogsApp = ({
         dataSourceMDSId[0].id ?? ''
       }',title:'${dataSourceMDSId[0].label}',type:DATA_SOURCE),id:'${
         dataSourceMDSId[0].id ?? ''
-      }::${correlatedLogsIndex}',timeFieldName:'${correlatedTimestampField}',title:'${correlatedLogsIndex}',type:INDEXES),language:PPL,query:'source%20%3D%20${correlatedLogsIndex}%20%7C%20where%20${correlatedFieldName}%20%3D%20%22${correlatedFieldValue}%22'))`,
+      }::${correlatedLogsIndex}',timeFieldName:'${correlatedTimestampField}',title:'${correlatedLogsIndex}',type:INDEXES),language:PPL,query:'${encodeURIComponent(
+        `source = ${correlatedLogsIndex} | where ${correlatedFieldName} = "${correlatedFieldValue}"`
+      )}'))`,
     });
   } else {
     coreRefs?.application!.navigateToApp(observabilityLogsID, {
@@ -137,19 +139,13 @@ export const redirectToServiceTraces = ({
   addFilter,
   dataSourceMDSId,
   serviceName,
-  setRedirect,
-  setCurrentSelectedService,
 }: {
   mode: TraceAnalyticsMode;
   addFilter: (filter: FilterType) => void;
   dataSourceMDSId: DataSourceOption[];
   serviceName: string;
-  setRedirect: (value: React.SetStateAction<boolean>) => void;
-  setCurrentSelectedService?: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
-  if (setCurrentSelectedService) setCurrentSelectedService('');
-  setRedirect(true);
   const filterField =
     mode === 'data_prepper' || mode === 'custom_data_prepper'
       ? 'serviceName'
