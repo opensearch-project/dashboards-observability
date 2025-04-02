@@ -87,7 +87,7 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                       </div>
                     </div>
                     <div
-                      class="euiFlexItem"
+                      class="euiFlexItem euiFlexItem--flexGrowZero"
                     />
                   </div>
                 </div>
@@ -291,7 +291,7 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                               </div>
                             </div>
                             <div
-                              class="euiFlexItem"
+                              class="euiFlexItem euiFlexItem--flexGrowZero"
                             />
                           </div>
                         </div>
@@ -427,7 +427,7 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem"
+                                class="euiFlexItem euiFlexItem--flexGrowZero"
                               />
                             </div>
                           </div>
@@ -563,7 +563,7 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                                   </div>
                                 </div>
                                 <div
-                                  class="euiFlexItem"
+                                  class="euiFlexItem euiFlexItem--flexGrowZero"
                                 />
                               </div>
                             </div>
@@ -687,7 +687,7 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                                     </div>
                                   </div>
                                   <div
-                                    class="euiFlexItem"
+                                    class="euiFlexItem euiFlexItem--flexGrowZero"
                                   />
                                 </div>
                               </div>
@@ -884,9 +884,11 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                                     </EuiText>
                                   </div>
                                 </EuiFlexItem>
-                                <EuiFlexItem>
+                                <EuiFlexItem
+                                  grow={false}
+                                >
                                   <div
-                                    className="euiFlexItem"
+                                    className="euiFlexItem euiFlexItem--flexGrowZero"
                                   />
                                 </EuiFlexItem>
                               </div>

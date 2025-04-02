@@ -578,19 +578,19 @@ exports[`Mode picker component renders mode picker 2`] = `
                                   options={
                                     Array [
                                       Object {
-                                        "append": <React.Fragment />,
                                         "checked": "on",
                                         "data-test-subj": "jaeger-mode",
                                         "key": "jaeger",
                                         "label": "Jaeger",
+                                        "prepend": <React.Fragment />,
                                         "value": "jaeger",
                                       },
                                       Object {
-                                        "append": <React.Fragment />,
                                         "checked": undefined,
                                         "data-test-subj": "data_prepper-mode",
                                         "key": "data_prepper",
                                         "label": "Data Prepper",
+                                        "prepend": <React.Fragment />,
                                         "value": "data_prepper",
                                       },
                                     ]
@@ -626,19 +626,19 @@ exports[`Mode picker component renders mode picker 2`] = `
                                         options={
                                           Array [
                                             Object {
-                                              "append": <React.Fragment />,
                                               "checked": "on",
                                               "data-test-subj": "jaeger-mode",
                                               "key": "jaeger",
                                               "label": "Jaeger",
+                                              "prepend": <React.Fragment />,
                                               "value": "jaeger",
                                             },
                                             Object {
-                                              "append": <React.Fragment />,
                                               "checked": undefined,
                                               "data-test-subj": "data_prepper-mode",
                                               "key": "data_prepper",
                                               "label": "Data Prepper",
+                                              "prepend": <React.Fragment />,
                                               "value": "data_prepper",
                                             },
                                           ]
@@ -763,19 +763,19 @@ exports[`Mode picker component renders mode picker 2`] = `
                                         options={
                                           Array [
                                             Object {
-                                              "append": <React.Fragment />,
                                               "checked": "on",
                                               "data-test-subj": "jaeger-mode",
                                               "key": "jaeger",
                                               "label": "Jaeger",
+                                              "prepend": <React.Fragment />,
                                               "value": "jaeger",
                                             },
                                             Object {
-                                              "append": <React.Fragment />,
                                               "checked": undefined,
                                               "data-test-subj": "data_prepper-mode",
                                               "key": "data_prepper",
                                               "label": "Data Prepper",
+                                              "prepend": <React.Fragment />,
                                               "value": "data_prepper",
                                             },
                                           ]
@@ -788,19 +788,19 @@ exports[`Mode picker component renders mode picker 2`] = `
                                         visibleOptions={
                                           Array [
                                             Object {
-                                              "append": <React.Fragment />,
                                               "checked": "on",
                                               "data-test-subj": "jaeger-mode",
                                               "key": "jaeger",
                                               "label": "Jaeger",
+                                              "prepend": <React.Fragment />,
                                               "value": "jaeger",
                                             },
                                             Object {
-                                              "append": <React.Fragment />,
                                               "checked": undefined,
                                               "data-test-subj": "data_prepper-mode",
                                               "key": "data_prepper",
                                               "label": "Data Prepper",
+                                              "prepend": <React.Fragment />,
                                               "value": "data_prepper",
                                             },
                                           ]

@@ -338,7 +338,7 @@ export function SpanDetailFlyout(props: {
               </EuiText>
             </EuiFlexItem>
             {(mode === 'data_prepper' || mode === 'custom_data_prepper') && (
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 {!isSpanDataLoading && !isEmpty(span) && (
                   <EuiToolTip content="View associated logs using Span Id">
                     <EuiSmallButton

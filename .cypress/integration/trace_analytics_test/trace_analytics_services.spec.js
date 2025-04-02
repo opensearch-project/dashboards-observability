@@ -314,7 +314,7 @@ describe('Testing traces Spans table verify table headers functionality', () => 
     cy.contains('.euiButtonContent', 'Expanded density').find('.euiButtonContent__icon').click();
   });
 
-  it('Render Spans table and and click on sort', () => {
+  it.only('Render Spans table and and click on sort', () => {
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
     expandServiceView(1);
     verify_traces_spans_data_grid_cols_exists();
@@ -327,7 +327,12 @@ describe('Testing traces Spans table verify table headers functionality', () => 
     cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-durationInNanos').click();
     cy.get('[data-test-subj="dataGridColumnSortingButton"]').should('have.text', '1 fields sorted');
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('button.euiLink.euiLink--primary').eq(4).contains('96e7fdedd82ab53c').click();
+    cy.get('[data-test-subj="dataGridHeaderCell-durationInNanos"]').should(
+      'have.attr',
+      'aria-sort',
+      'ascending'
+    );
+    cy.get('button.euiLink.euiLink--primary').eq(5).contains('96e7fdedd82ab53c').click();
   });
 });
 

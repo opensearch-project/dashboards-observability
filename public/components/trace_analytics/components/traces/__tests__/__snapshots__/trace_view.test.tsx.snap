@@ -23,7 +23,7 @@ exports[`Trace view component renders trace view 1`] = `
           onClick={[Function]}
         >
           <EuiToolTip
-            content="View logs associated with the trace"
+            content="View associated logs using Trace Id"
             delay="regular"
             position="top"
           >
