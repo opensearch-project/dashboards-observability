@@ -314,7 +314,7 @@ describe('Testing traces Spans table verify table headers functionality', () => 
     cy.contains('.euiButtonContent', 'Expanded density').find('.euiButtonContent__icon').click();
   });
 
-  it.only('Render Spans table and and click on sort', () => {
+  it('Render Spans table and and click on sort', () => {
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
     expandServiceView(1);
     verify_traces_spans_data_grid_cols_exists();
