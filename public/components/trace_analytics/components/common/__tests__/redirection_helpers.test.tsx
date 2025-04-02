@@ -90,7 +90,6 @@ describe('Redirect Functions', () => {
     coreRefs.chrome = {
       navGroup: { getNavGroupEnabled: () => true },
     };
-    const mockSetRedirect = jest.fn();
     const mockAddFilter = jest.fn();
 
     redirectToServiceTraces({
@@ -98,7 +97,6 @@ describe('Redirect Functions', () => {
       addFilter: mockAddFilter,
       dataSourceMDSId: mockDataSource,
       serviceName,
-      setRedirect: mockSetRedirect,
     });
     expect(coreRefs.application?.navigateToApp).toHaveBeenCalled();
   });
@@ -107,7 +105,6 @@ describe('Redirect Functions', () => {
     coreRefs.chrome = {
       navGroup: { getNavGroupEnabled: () => false },
     };
-    const mockSetRedirect = jest.fn();
     const mockAddFilter = jest.fn();
 
     delete window.location;
@@ -118,7 +115,6 @@ describe('Redirect Functions', () => {
       addFilter: mockAddFilter,
       dataSourceMDSId: mockDataSource,
       serviceName,
-      setRedirect: mockSetRedirect,
     });
     expect(window.location.assign).toHaveBeenCalled();
   });
