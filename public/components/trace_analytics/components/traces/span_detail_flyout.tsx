@@ -18,6 +18,7 @@ import {
   EuiSmallButtonIcon,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
@@ -339,22 +340,24 @@ export function SpanDetailFlyout(props: {
             {(mode === 'data_prepper' || mode === 'custom_data_prepper') && (
               <EuiFlexItem>
                 {!isSpanDataLoading && !isEmpty(span) && (
-                  <EuiSmallButton
-                    onClick={() => {
-                      const spanId = getSpanValue(span, mode, 'SPAN_ID');
-                      redirectSpansToLogs({
-                        fromTime: span.startTime,
-                        toTime: span.endTime,
-                        spanId,
-                        dataSourceMDSId: [
-                          { id: props.dataSourceMDSId, label: props.dataSourceMDSLabel },
-                        ],
-                      });
-                    }}
-                    iconType="discoverApp"
-                  >
-                    View associated logs
-                  </EuiSmallButton>
+                  <EuiToolTip content="View associated logs using Span Id">
+                    <EuiSmallButton
+                      onClick={() => {
+                        const spanId = getSpanValue(span, mode, 'SPAN_ID');
+                        redirectSpansToLogs({
+                          fromTime: span.startTime,
+                          toTime: span.endTime,
+                          spanId,
+                          dataSourceMDSId: [
+                            { id: props.dataSourceMDSId, label: props.dataSourceMDSLabel! },
+                          ],
+                        });
+                      }}
+                      iconType="discoverApp"
+                    >
+                      View associated logs
+                    </EuiSmallButton>
+                  </EuiToolTip>
                 )}
               </EuiFlexItem>
             )}

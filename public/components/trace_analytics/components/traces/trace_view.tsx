@@ -272,7 +272,7 @@ export function TraceView(props: TraceViewProps) {
               });
             }}
           >
-            <EuiToolTip content="View logs associated with the trace">
+            <EuiToolTip content="View associated logs using Trace Id">
               <EuiLink data-test-subj="trace-view-logs-redirection-btn">
                 <EuiSmallButton iconType="discoverApp" isLoading={isTracePayloadLoading}>
                   View associated logs

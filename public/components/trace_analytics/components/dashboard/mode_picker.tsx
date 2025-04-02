@@ -99,9 +99,9 @@ export function DataSourcePicker(props: {
               label: x.title,
               key: x.id,
               value: x.id,
-              append:
+              prepend:
                 x.id === 'custom_data_prepper' ? (
-                  <EuiToolTip content="Custom trace and service indices is an experimental feature">
+                  <EuiToolTip content="Custom source is an experimental feature, Configure traces and services indexes in advanced settings">
                     <EuiBetaBadge size="s" label="E" color="subdued" />
                   </EuiToolTip>
                 ) : (

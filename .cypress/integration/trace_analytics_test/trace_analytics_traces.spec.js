@@ -301,7 +301,7 @@ describe('Testing switch mode to jaeger', () => {
   });
 });
 
-describe.only('Testing traces Custom source', () => {
+describe('Testing traces Custom source', () => {
   beforeEach(() => {
     cy.visit('app/observability-traces#/traces', {
       onBeforeLoad: (win) => {
