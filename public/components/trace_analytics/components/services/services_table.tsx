@@ -30,6 +30,7 @@ import {
   NoMatchMessage,
   PanelTitle,
 } from '../common/helper_functions';
+import { redirectToServiceLogs, redirectToServiceTraces } from '../common/redirection_helpers';
 import { ServiceTrendsPlots } from './service_trends_plots';
 
 interface ServicesTableProps {
@@ -49,6 +50,8 @@ interface ServicesTableProps {
   setIsServiceTrendEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   serviceTrends: ServiceTrends;
   dataSourceMDSId: DataSourceOption[];
+  startTime: string;
+  endTime: string;
   page: 'app' | 'services';
 }
 
@@ -70,6 +73,8 @@ export function ServicesTable(props: ServicesTableProps) {
     setIsServiceTrendEnabled,
     serviceTrends,
     dataSourceMDSId,
+    startTime,
+    endTime,
     page,
   } = props;
 
@@ -248,12 +253,54 @@ export function ServicesTable(props: ServicesTableProps) {
         name: 'Actions',
         align: 'center',
         render: (_item: any, row: any) => (
-          <EuiFlexGroup justifyContent="center">
+          <EuiFlexGroup justifyContent="center" gutterSize="m">
             <EuiFlexItem grow={false} onClick={() => setCurrentSelectedService(row.name)}>
-              <EuiLink data-test-subj={'service-flyout-action-btn' + row.itemId}>
-                <EuiIcon type="inspect" color="primary" />
-              </EuiLink>
+              <EuiToolTip content="View service details">
+                <EuiLink data-test-subj={'service-flyout-action-btn' + row.itemId}>
+                  <EuiIcon type="inspect" color="primary" />
+                </EuiLink>
+              </EuiToolTip>
             </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+              onClick={() =>
+                redirectToServiceTraces({
+                  mode,
+                  addFilter,
+                  dataSourceMDSId,
+                  serviceName: row.name,
+                  setRedirect: () => {},
+                  setCurrentSelectedService,
+                })
+              }
+            >
+              <EuiToolTip content="View service traces">
+                <EuiLink data-test-subj={'service-traces-redirection-btn' + row.itemId}>
+                  <EuiIcon type="apmTrace" color="primary" />
+                </EuiLink>
+              </EuiToolTip>
+            </EuiFlexItem>
+            {(mode === 'data_prepper' || mode === 'custom_data_prepper') && (
+              <>
+                <EuiFlexItem
+                  grow={false}
+                  onClick={() =>
+                    redirectToServiceLogs({
+                      fromTime: startTime,
+                      toTime: endTime,
+                      dataSourceMDSId,
+                      serviceName: row.name,
+                    })
+                  }
+                >
+                  <EuiToolTip content="View service logs">
+                    <EuiLink data-test-subj={'service-logs-redirection-btn' + row.itemId}>
+                      <EuiIcon type="discoverApp" color="primary" />
+                    </EuiLink>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              </>
+            )}
           </EuiFlexGroup>
         ),
         sortable: false,

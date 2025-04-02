@@ -62,4 +62,5 @@ export interface CorrelatedLogsFieldMappings {
   serviceName: string;
   spanId: string;
   timestamp: string;
+  traceId: string;
 }

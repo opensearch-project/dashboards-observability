@@ -4,11 +4,8 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import dateMath from '@elastic/datemath';
 import {
   EuiBadge,
-  EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -21,25 +18,16 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPanel,
-  EuiPopover,
-  EuiSmallButton,
+  EuiSmallButtonIcon,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import round from 'lodash/round';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { DataSourceManagementPluginSetup } from '../../../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
-import {
-  DEFAULT_DATA_SOURCE_NAME,
-  DEFAULT_DATA_SOURCE_TYPE,
-} from '../../../../../common/constants/data_sources';
-import {
-  observabilityLogsID,
-  observabilityTracesNewNavID,
-} from '../../../../../common/constants/shared';
-import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
 import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
 import { coreRefs } from '../../../../framework/core_refs';
 import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/plugin_headerControl';
@@ -49,12 +37,12 @@ import { TraceFilter } from '../common/constants';
 import { FilterType } from '../common/filters/filters';
 import {
   PanelTitle,
-  TraceSettings,
   filtersToDsl,
   generateServiceUrl,
   processTimeStamp,
 } from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
+import { redirectToServiceLogs, redirectToServiceTraces } from '../common/redirection_helpers';
 import { SearchBarProps, renderDatePicker } from '../common/search_bar';
 import { SpanDetailFlyout } from '../traces/span_detail_flyout';
 import { SpanDetailTable } from '../traces/span_detail_table';
@@ -78,12 +66,10 @@ export function ServiceView(props: ServiceViewProps) {
     'latency' | 'error_rate' | 'throughput'
   >('latency');
   const [redirect, setRedirect] = useState(false);
-  const [actionsMenuPopover, setActionsMenuPopover] = useState(false);
   const [serviceId, setServiceId] = useState<string | null>(null);
   const location = useLocation();
   const [isServiceOverviewLoading, setIsServiceOverviewLoading] = useState(false);
   const [isServicesDataLoading, setIsServicesDataLoading] = useState(false);
-  const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
   useEffect(() => {
     try {
@@ -155,121 +141,73 @@ export function ServiceView(props: ServiceViewProps) {
     else if (setCurrentSelectedService) setCurrentSelectedService(service);
   };
 
-  const redirectToServiceTraces = () => {
-    if (setCurrentSelectedService) setCurrentSelectedService('');
-    setRedirect(true);
-    const filterField =
-      mode === 'data_prepper' || mode === 'custom_data_prepper'
-        ? 'serviceName'
-        : 'process.serviceName';
-    props.addFilter({
-      field: filterField,
-      operator: 'is',
-      value: props.serviceName,
-      inverted: false,
-      disabled: false,
-    });
-
-    const tracesPath = '#/traces';
-    const dataSourceId = props.dataSourceMDSId[0]?.id || '';
-    const urlParts = window.location.href.split('?');
-    const queryParams =
-      urlParts.length > 1 ? new URLSearchParams(urlParts[1]) : new URLSearchParams();
-
-    const modeParam = queryParams.get('mode') || '';
-    const modeQuery = modeParam ? `&mode=${encodeURIComponent(modeParam)}` : '';
-
-    if (newNavigation) {
-      coreRefs.application?.navigateToApp(observabilityTracesNewNavID, {
-        path: `${tracesPath}?datasourceId=${encodeURIComponent(dataSourceId)}${modeQuery}`,
-      });
-    } else {
-      window.location.assign(
-        `${tracesPath}?datasourceId=${encodeURIComponent(dataSourceId)}${modeQuery}`
-      );
-    }
+  const serviceActionsMenu = (isFlyout: boolean) => {
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup justifyContent="center" gutterSize="s">
+          <EuiFlexItem
+            grow={false}
+            onClick={() =>
+              redirectToServiceTraces({
+                mode: props.mode,
+                addFilter: props.addFilter,
+                dataSourceMDSId: props.dataSourceMDSId,
+                serviceName: props.serviceName,
+                setRedirect,
+                setCurrentSelectedService,
+              })
+            }
+          >
+            <EuiToolTip content="View service traces">
+              <EuiLink data-test-subj={'service-view-traces-redirection-btn'}>
+                <EuiSmallButtonIcon iconType="apmTrace" display="base" />
+              </EuiLink>
+            </EuiToolTip>
+          </EuiFlexItem>
+          {(mode === 'data_prepper' || mode === 'custom_data_prepper') && (
+            <>
+              <EuiFlexItem
+                grow={false}
+                onClick={() =>
+                  redirectToServiceLogs({
+                    fromTime: props.startTime,
+                    toTime: props.endTime,
+                    dataSourceMDSId: props.dataSourceMDSId,
+                    serviceName: props.serviceName,
+                  })
+                }
+              >
+                <EuiToolTip content="View service logs">
+                  <EuiLink data-test-subj={'service-view-logs-redirection-btn'}>
+                    <EuiSmallButtonIcon iconType="discoverApp" display="base" />
+                  </EuiLink>
+                </EuiToolTip>
+              </EuiFlexItem>
+              {isFlyout && (
+                <EuiFlexItem
+                  grow={false}
+                  onClick={() => {
+                    redirectToServicePage(props.serviceName);
+                    if (setCurrentSelectedService) setCurrentSelectedService('');
+                  }}
+                >
+                  <EuiToolTip content="View service page">
+                    <EuiLink data-test-subj={'service-view-flyout-action-btn'}>
+                      <EuiSmallButtonIcon iconType="graphApp" display="base" />
+                    </EuiLink>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+            </>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    );
   };
 
   useEffect(() => {
     if (!redirect) refresh();
   }, [props.startTime, props.endTime, props.serviceName, props.mode]);
-
-  const actionsButton = (
-    <EuiSmallButton
-      data-test-subj="ActionContextMenu"
-      iconType="arrowDown"
-      iconSide="right"
-      onClick={() => setActionsMenuPopover(!actionsMenuPopover)}
-    >
-      Actions
-    </EuiSmallButton>
-  );
-
-  const actionsMenu: EuiContextMenuPanelDescriptor[] = [
-    {
-      id: 0,
-      items: [
-        ...(mode === 'data_prepper' || mode === 'custom_data_prepper'
-          ? [
-              {
-                name: 'View logs',
-                'data-test-subj': 'viewLogsButton',
-                onClick: () => {
-                  const correlatedLogsIndex = TraceSettings.getCorrelatedLogsIndex();
-                  const correlatedServiceNameField = TraceSettings.getCorrelatedLogsFieldMappings()
-                    .serviceName;
-                  const correlatedTimestampField = TraceSettings.getCorrelatedLogsFieldMappings()
-                    .timestamp;
-                  const startTime =
-                    dateMath.parse(props.startTime)!.format(TRACE_ANALYTICS_DATE_FORMAT) ??
-                    'now-30m';
-                  const endTime =
-                    dateMath
-                      .parse(props.endTime, { roundUp: true })!
-                      .format(TRACE_ANALYTICS_DATE_FORMAT) ?? 'now';
-                  if (coreRefs?.dataSource?.dataSourceEnabled) {
-                    coreRefs?.application!.navigateToApp('data-explorer', {
-                      path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'${startTime}',to:'${endTime}'))&_q=(filters:!(),query:(dataset:(dataSource:(id:'${
-                        props.dataSourceMDSId[0].id ?? ''
-                      }',title:'${props.dataSourceMDSId[0].label}',type:DATA_SOURCE),id:'${
-                        props.dataSourceMDSId[0].id ?? ''
-                      }::${correlatedLogsIndex}',timeFieldName:'${correlatedTimestampField}',title:'${correlatedLogsIndex}',type:INDEXES),language:PPL,query:'source%20%3D%20${correlatedLogsIndex}%20%7C%20where%20${correlatedServiceNameField}%20%3D%20%22${
-                        props.serviceName
-                      }%22'))`,
-                    });
-                  } else {
-                    coreRefs?.application!.navigateToApp(observabilityLogsID, {
-                      path: `#/explorer`,
-                      state: {
-                        DEFAULT_DATA_SOURCE_NAME,
-                        DEFAULT_DATA_SOURCE_TYPE,
-                        queryToRun: `source = ${correlatedLogsIndex} | where ${correlatedServiceNameField}='${props.serviceName}'`,
-                        timestampField: correlatedTimestampField,
-                        startTimeRange: props.startTime,
-                        endTimeRange: props.endTime,
-                      },
-                    });
-                  }
-                },
-              },
-            ]
-          : []),
-        {
-          name: 'View traces',
-          'data-test-subj': 'viewTracesButton',
-          onClick: redirectToServiceTraces,
-        },
-        {
-          name: 'Expand view',
-          'data-test-subj': 'viewServiceButton',
-          onClick: () => {
-            if (setCurrentSelectedService) setCurrentSelectedService('');
-            redirectToServicePage(props.serviceName);
-          },
-        },
-      ],
-    },
-  ];
 
   const serviceHeader = (
     <EuiText size="s">
@@ -297,21 +235,15 @@ export function ServiceView(props: ServiceViewProps) {
               <EuiFlexItem grow={true}>
                 {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiPopover
-                  panelPaddingSize="none"
-                  button={actionsButton}
-                  isOpen={actionsMenuPopover}
-                  closePopover={() => setActionsMenuPopover(false)}
-                >
-                  <EuiContextMenu initialPanelId={0} panels={actionsMenu} size="s" />
-                </EuiPopover>
-              </EuiFlexItem>
+              {serviceActionsMenu(_page === 'serviceFlyout')}
             </EuiFlexGroup>
           </EuiFlyoutHeader>
         ) : coreRefs?.chrome?.navGroup.getNavGroupEnabled() ? (
           <HeaderControlledComponentsWrapper
-            components={[renderDatePicker(startTime, setStartTime, endTime, setEndTime)]}
+            components={[
+              renderDatePicker(startTime, setStartTime, endTime, setEndTime),
+              serviceActionsMenu(_page === 'serviceFlyout'),
+            ]}
           />
         ) : (
           <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -319,6 +251,7 @@ export function ServiceView(props: ServiceViewProps) {
             <EuiFlexItem grow={false}>
               {renderDatePicker(startTime, setStartTime, endTime, setEndTime)}
             </EuiFlexItem>
+            {serviceActionsMenu(_page === 'serviceFlyout')}
           </EuiFlexGroup>
         )}
       </>
@@ -413,7 +346,18 @@ export function ServiceView(props: ServiceViewProps) {
                       <EuiText className="overview-title">Traces</EuiText>
                       <EuiText size="s" className="overview-content">
                         {fields.traces === 0 || fields.traces ? (
-                          <EuiLink onClick={redirectToServiceTraces}>
+                          <EuiLink
+                            onClick={() =>
+                              redirectToServiceTraces({
+                                mode: props.mode,
+                                addFilter: props.addFilter,
+                                dataSourceMDSId: props.dataSourceMDSId,
+                                serviceName: props.serviceName,
+                                setRedirect,
+                                setCurrentSelectedService,
+                              })
+                            }
+                          >
                             <EuiI18nNumber value={fields.traces} />
                           </EuiLink>
                         ) : (
@@ -449,7 +393,7 @@ export function ServiceView(props: ServiceViewProps) {
         props.addFilter,
         page
       ),
-    [props.serviceName, props.startTime, props.endTime, page, actionsMenuPopover]
+    [props.serviceName, props.startTime, props.endTime, page]
   );
 
   const activeFilters = useMemo(

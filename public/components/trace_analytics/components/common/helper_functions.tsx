@@ -66,7 +66,7 @@ export function NoMatchMessage(props: { size: SpacerSize; mode?: TraceAnalyticsM
             {props.mode === 'custom_data_prepper' && (
               <>
                 {' '}
-                Configure your index in{' '}
+                Configure your custom indexes in{' '}
                 <EuiLink
                   onClick={() =>
                     // Ideally we want to use navigateToApp and navigateToURL here, but there are limitations in advanced settings today

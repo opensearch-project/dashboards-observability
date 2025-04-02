@@ -14,6 +14,7 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiLoadingContent,
+  EuiSmallButton,
   EuiSmallButtonIcon,
   EuiSpacer,
   EuiText,
@@ -24,16 +25,11 @@ import round from 'lodash/round';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { HttpSetup } from '../../../../../../../src/core/public';
-import {
-  DEFAULT_DATA_SOURCE_NAME,
-  DEFAULT_DATA_SOURCE_TYPE,
-} from '../../../../../common/constants/data_sources';
-import { observabilityLogsID } from '../../../../../common/constants/shared';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../../common/constants/trace_analytics';
 import { SpanField, TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
-import { coreRefs } from '../../../../framework/core_refs';
 import { handleSpansFlyoutRequest } from '../../requests/traces_request_handler';
-import { microToMilliSec, nanoToMilliSec, TraceSettings } from '../common/helper_functions';
+import { microToMilliSec, nanoToMilliSec } from '../common/helper_functions';
+import { redirectSpansToLogs } from '../common/redirection_helpers';
 import { FlyoutListItem } from './flyout_list_item';
 
 const MODE_TO_FIELDS: Record<TraceAnalyticsMode, Record<SpanField, string | undefined>> = {
@@ -323,41 +319,6 @@ export function SpanDetailFlyout(props: {
     );
   };
 
-  const redirectToExplorer = () => {
-    const correlatedLogsIndex = TraceSettings.getCorrelatedLogsIndex();
-    const correlatedSpanField = TraceSettings.getCorrelatedLogsFieldMappings().spanId;
-    const correlatedTimestampField = TraceSettings.getCorrelatedLogsFieldMappings().timestamp;
-    // For telemetry lag, moving time range to +-30 minutes of startTime and endTime
-    const startTime =
-      moment(span.startTime).subtract(30, 'minutes').format(TRACE_ANALYTICS_DATE_FORMAT) ??
-      'now-30m';
-    const endTime =
-      moment(span.endTime).add(30, 'minutes').format(TRACE_ANALYTICS_DATE_FORMAT) ?? 'now';
-    const spanId = getSpanValue(span, mode, 'SPAN_ID');
-
-    if (coreRefs?.dataSource?.dataSourceEnabled) {
-      coreRefs?.application!.navigateToApp('data-explorer', {
-        path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'${startTime}',to:'${endTime}'))&_q=(filters:!(),query:(dataset:(dataSource:(id:'${
-          props.dataSourceMDSId ?? ''
-        }',title:${props.dataSourceMDSLabel},type:DATA_SOURCE),id:'${
-          props.dataSourceMDSId ?? ''
-        }::${correlatedLogsIndex}',timeFieldName:'${correlatedTimestampField}',title:'${correlatedLogsIndex}',type:INDEXES),language:PPL,query:'source%20%3D%20${correlatedLogsIndex}%20%7C%20where%20${correlatedSpanField}%20%3D%20!'${spanId}!''))`,
-      });
-    } else {
-      coreRefs?.application!.navigateToApp(observabilityLogsID, {
-        path: `#/explorer`,
-        state: {
-          DEFAULT_DATA_SOURCE_NAME,
-          DEFAULT_DATA_SOURCE_TYPE,
-          queryToRun: `source = ${correlatedLogsIndex} | where ${correlatedSpanField}='${spanId}'`,
-          timestampField: correlatedTimestampField,
-          startTimeRange: startTime,
-          endTimeRange: endTime,
-        },
-      });
-    }
-  };
-
   return (
     <>
       <EuiFlyout
@@ -378,9 +339,22 @@ export function SpanDetailFlyout(props: {
             {(mode === 'data_prepper' || mode === 'custom_data_prepper') && (
               <EuiFlexItem>
                 {!isSpanDataLoading && !isEmpty(span) && (
-                  <EuiButtonEmpty size="xs" onClick={redirectToExplorer}>
+                  <EuiSmallButton
+                    onClick={() => {
+                      const spanId = getSpanValue(span, mode, 'SPAN_ID');
+                      redirectSpansToLogs({
+                        fromTime: span.startTime,
+                        toTime: span.endTime,
+                        spanId,
+                        dataSourceMDSId: [
+                          { id: props.dataSourceMDSId, label: props.dataSourceMDSLabel },
+                        ],
+                      });
+                    }}
+                    iconType="discoverApp"
+                  >
                     View associated logs
-                  </EuiButtonEmpty>
+                  </EuiSmallButton>
                 )}
               </EuiFlexItem>
             )}
