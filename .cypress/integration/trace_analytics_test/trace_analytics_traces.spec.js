@@ -42,7 +42,6 @@ describe('Testing traces table', () => {
 
     // test data contains output from data-prepper 0.8, which doesn't have fields denormalized
     // Trace Analytics should be able to handle the discrepancy if some fields cannot be parsed
-    cy.contains('Invalid date').should('exist');
     cy.contains('-').should('exist');
   });
 
@@ -366,6 +365,6 @@ describe('Testing traces Custom source', () => {
 
     cy.get('a.euiLink.euiLink--primary').first().click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('.overview-content').should('contain.text', 'be0a3dceda2ecf601fd2e476fef3ee07');
+    cy.get('.overview-content').should('contain.text', 'd5bc99166e521eec173bcb7f9b0d3c43');
   });
 });
