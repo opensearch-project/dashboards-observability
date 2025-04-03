@@ -294,7 +294,7 @@ export function TracesTable(props: TracesTableProps) {
             loading={loading}
           />
         ) : (
-          <NoMatchMessage size="xl" />
+          <NoMatchMessage size="xl" mode={mode} />
         )}
       </EuiPanel>
     </>

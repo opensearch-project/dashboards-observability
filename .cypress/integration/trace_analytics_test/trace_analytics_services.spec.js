@@ -81,7 +81,8 @@ describe('Testing services table', () => {
 
   it('Navigate from Services to Traces', () => {
     cy.get('.euiTableCellContent__text[title="Traces"]').should('exist');
-    cy.contains('74').should('exist').click();
+    cy.contains('74').should('exist');
+    cy.get('[data-test-subj^="service-traces-redirection-btntrace_service_"]').first().click();
     cy.get('.euiText.euiText--medium .panel-title').should('exist');
     cy.get('.euiBadge__childButton[data-test-subj="filterBadge"]').should('exist');
   });
@@ -326,7 +327,12 @@ describe('Testing traces Spans table verify table headers functionality', () => 
     cy.get('[data-test-subj="dataGridColumnSortingPopoverColumnSelection-durationInNanos').click();
     cy.get('[data-test-subj="dataGridColumnSortingButton"]').should('have.text', '1 fields sorted');
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('button.euiLink.euiLink--primary').eq(4).contains('96e7fdedd82ab53c').click();
+    cy.get('[data-test-subj="dataGridHeaderCell-durationInNanos"]').should(
+      'have.attr',
+      'aria-sort',
+      'ascending'
+    );
+    cy.get('button.euiLink.euiLink--primary').eq(5).contains('96e7fdedd82ab53c').click();
   });
 });
 
@@ -397,7 +403,8 @@ describe('Testing navigation from Services to Traces', () => {
 
   it('Clicks on the "Traces" shortcut to redirect', () => {
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('.euiLink.euiLink--primary').contains('74').click();
+    cy.contains('74').should('exist');
+    cy.get('[data-test-subj^="service-traces-redirection-btntrace_service_"]').first().click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
     cy.get('[data-test-subj="filterBadge"]')
@@ -414,14 +421,12 @@ describe('Testing navigation from Services to Traces', () => {
       .first()
       .click();
 
-    cy.get('.euiButton').contains('Actions').click();
-
-    cy.get('.euiContextMenuItem').contains('View traces').click();
+    cy.get('[data-test-subj="service-view-traces-redirection-btn"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
     cy.get('[data-test-subj="filterBadge"]')
-    .should('exist')
-    .contains('serviceName: analytics-service');
+      .should('exist')
+      .contains('serviceName: analytics-service');
 
     cy.get('.euiText').contains('03f9c770db5ee2f1caac0afc36db49ba').should('exist');
   });
@@ -453,7 +458,8 @@ describe('Testing switch mode to jaeger', () => {
 
   it('Verifies traces links to traces page with filter applied', () => {
     cy.get('.euiTableRow').should('have.length.lessThan', 7); //Replaces Wait
-    cy.get('.euiLink').contains('7').click();
+    cy.contains('7').should('exist');
+    cy.get('[data-test-subj^="service-traces-redirection-btntrace_"]').first().click();
     cy.contains(' (7)').should('exist');
     cy.get("[data-test-subj='filterBadge']").eq(0).contains('process.serviceName: customer');
   });

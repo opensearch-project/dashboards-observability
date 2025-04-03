@@ -87,23 +87,8 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                       </div>
                     </div>
                     <div
-                      class="euiFlexItem"
-                    >
-                      <button
-                        class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
-                        type="button"
-                      >
-                        <span
-                          class="euiButtonContent euiButtonEmpty__content"
-                        >
-                          <span
-                            class="euiButtonEmpty__text"
-                          >
-                            View associated logs
-                          </span>
-                        </span>
-                      </button>
-                    </div>
+                      class="euiFlexItem euiFlexItem--flexGrowZero"
+                    />
                   </div>
                 </div>
                 <div
@@ -306,23 +291,8 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                               </div>
                             </div>
                             <div
-                              class="euiFlexItem"
-                            >
-                              <button
-                                class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
-                                type="button"
-                              >
-                                <span
-                                  class="euiButtonContent euiButtonEmpty__content"
-                                >
-                                  <span
-                                    class="euiButtonEmpty__text"
-                                  >
-                                    View associated logs
-                                  </span>
-                                </span>
-                              </button>
-                            </div>
+                              class="euiFlexItem euiFlexItem--flexGrowZero"
+                            />
                           </div>
                         </div>
                         <div
@@ -457,23 +427,8 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem"
-                              >
-                                <button
-                                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
-                                  type="button"
-                                >
-                                  <span
-                                    class="euiButtonContent euiButtonEmpty__content"
-                                  >
-                                    <span
-                                      class="euiButtonEmpty__text"
-                                    >
-                                      View associated logs
-                                    </span>
-                                  </span>
-                                </button>
-                              </div>
+                                class="euiFlexItem euiFlexItem--flexGrowZero"
+                              />
                             </div>
                           </div>
                           <div
@@ -608,23 +563,8 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                                   </div>
                                 </div>
                                 <div
-                                  class="euiFlexItem"
-                                >
-                                  <button
-                                    class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
-                                    type="button"
-                                  >
-                                    <span
-                                      class="euiButtonContent euiButtonEmpty__content"
-                                    >
-                                      <span
-                                        class="euiButtonEmpty__text"
-                                      >
-                                        View associated logs
-                                      </span>
-                                    </span>
-                                  </button>
-                                </div>
+                                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                                />
                               </div>
                             </div>
                             <div
@@ -747,23 +687,8 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                                     </div>
                                   </div>
                                   <div
-                                    class="euiFlexItem"
-                                  >
-                                    <button
-                                      class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
-                                      type="button"
-                                    >
-                                      <span
-                                        class="euiButtonContent euiButtonEmpty__content"
-                                      >
-                                        <span
-                                          class="euiButtonEmpty__text"
-                                        >
-                                          View associated logs
-                                        </span>
-                                      </span>
-                                    </button>
-                                  </div>
+                                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                                  />
                                 </div>
                               </div>
                               <div
@@ -959,44 +884,12 @@ exports[`<SpanDetailFlyout /> spec renders the empty component 1`] = `
                                     </EuiText>
                                   </div>
                                 </EuiFlexItem>
-                                <EuiFlexItem>
+                                <EuiFlexItem
+                                  grow={false}
+                                >
                                   <div
-                                    className="euiFlexItem"
-                                  >
-                                    <EuiButtonEmpty
-                                      onClick={[Function]}
-                                      size="xs"
-                                    >
-                                      <button
-                                        className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
-                                        disabled={false}
-                                        onClick={[Function]}
-                                        type="button"
-                                      >
-                                        <EuiButtonContent
-                                          className="euiButtonEmpty__content"
-                                          iconGap="m"
-                                          iconSide="left"
-                                          iconSize="s"
-                                          textProps={
-                                            Object {
-                                              "className": "euiButtonEmpty__text",
-                                            }
-                                          }
-                                        >
-                                          <span
-                                            className="euiButtonContent euiButtonEmpty__content"
-                                          >
-                                            <span
-                                              className="euiButtonEmpty__text"
-                                            >
-                                              View associated logs
-                                            </span>
-                                          </span>
-                                        </EuiButtonContent>
-                                      </button>
-                                    </EuiButtonEmpty>
-                                  </div>
+                                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                                  />
                                 </EuiFlexItem>
                               </div>
                             </EuiFlexGroup>

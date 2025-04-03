@@ -325,7 +325,7 @@ describe('Testing traces Custom source', () => {
 
     cy.get('a.euiLink.euiLink--primary').first().click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('.overview-content').should('contain.text', '4fa04f117be100f476b175e41096e736');
+    cy.get('.overview-content').should('contain.text', 'd5bc99166e521eec173bcb7f9b0d3c43');
   });
 
   it('Renders all spans column attributes as hidden, shows column when added', () => {
@@ -339,19 +339,19 @@ describe('Testing traces Custom source', () => {
   it('Verifies column sorting and pagination works correctly', () => {
     cy.contains('Duration (ms)').click();
     cy.contains('Sort Z-A').click();
-  
+
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.contains('467.03 ms').should('exist');
-  
+
     cy.get('[data-test-subj="pagination-button-next"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.contains('399.10 ms').should('exist');
-  
+
     cy.get('[data-test-subj="pagination-button-previous"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.contains('467.03 ms').should('exist');
   });
-  
+
   it('Renders the traces custom source traces, clicks trace view redirection', () => {
     cy.get('[data-test-subj="trace-table-mode-selector"]').click();
     cy.get('.euiSelectableListItem').contains('Traces').click();
@@ -366,6 +366,6 @@ describe('Testing traces Custom source', () => {
 
     cy.get('a.euiLink.euiLink--primary').first().click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('.overview-content').should('contain.text', '02feb3a4f611abd81f2a53244d1278ae');
+    cy.get('.overview-content').should('contain.text', 'be0a3dceda2ecf601fd2e476fef3ee07');
   });
 });

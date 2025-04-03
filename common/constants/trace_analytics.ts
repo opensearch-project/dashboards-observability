@@ -35,7 +35,8 @@ export const DEFAULT_CORRELATED_LOGS_FIELD_MAPPINGS = `
 {
   "serviceName": "serviceName",
   "spanId": "spanId",
-  "timestamp": "time"
+  "timestamp": "time",
+  "traceId": "traceId"
 }`;
 
 export enum TRACE_TABLE_TITLES {
