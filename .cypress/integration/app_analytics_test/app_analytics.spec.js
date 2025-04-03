@@ -432,6 +432,7 @@ describe('Viewing application', () => {
     changeTimeTo24('months');
     cy.get('[data-test-subj="app-analytics-logTab"]').click();
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('[id="explorerPlotComponent"]', { timeout: timeoutDelay }).should('exist');
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').focus();
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').type('      ' + query_two, {
