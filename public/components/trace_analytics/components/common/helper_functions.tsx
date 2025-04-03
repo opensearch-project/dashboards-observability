@@ -698,3 +698,12 @@ export const parseHits = (payloadData: string): ParsedHit[] => {
     return [];
   }
 };
+
+export const isUnderOneHourRange = (startTime: string, endTime: string): boolean => {
+  const start = dateMath.parse(startTime);
+  const end = dateMath.parse(endTime);
+
+  if (!start || !end) return false;
+
+  return end.diff(start, 'hours')! < 1;
+};
