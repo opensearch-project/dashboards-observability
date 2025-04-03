@@ -624,12 +624,6 @@ exports[`Services component renders empty services page 1`] = `
                           </div>
                         </div>
                       </EuiPopover>
-                      <CustomIndexFlyout
-                        isFlyoutVisible={false}
-                        setIsFlyoutVisible={[Function]}
-                      >
-                        <div />
-                      </CustomIndexFlyout>
                     </DataSourcePicker>
                   </div>
                 </EuiFlexItem>
@@ -1465,6 +1459,7 @@ exports[`Services component renders empty services page 1`] = `
                   },
                 ]
               }
+              endTime="now"
               isServiceTrendEnabled={false}
               items={Array []}
               loading={true}
@@ -1475,6 +1470,7 @@ exports[`Services component renders empty services page 1`] = `
               setIsServiceTrendEnabled={[Function]}
               setRedirect={[Function]}
               setSelectedItems={[Function]}
+              startTime="now-5m"
               traceColumnAction={[Function]}
             >
               <EuiPanel>
@@ -4020,12 +4016,6 @@ exports[`Services component renders jaeger services page 1`] = `
                           </div>
                         </div>
                       </EuiPopover>
-                      <CustomIndexFlyout
-                        isFlyoutVisible={false}
-                        setIsFlyoutVisible={[Function]}
-                      >
-                        <div />
-                      </CustomIndexFlyout>
                     </DataSourcePicker>
                   </div>
                 </EuiFlexItem>
@@ -4865,6 +4855,7 @@ exports[`Services component renders jaeger services page 1`] = `
                   },
                 ]
               }
+              endTime="now"
               isServiceTrendEnabled={false}
               items={Array []}
               jaegerIndicesExist={true}
@@ -4876,6 +4867,7 @@ exports[`Services component renders jaeger services page 1`] = `
               setIsServiceTrendEnabled={[Function]}
               setRedirect={[Function]}
               setSelectedItems={[Function]}
+              startTime="now-5m"
               traceColumnAction={[Function]}
             >
               <EuiPanel>
@@ -6523,12 +6515,6 @@ exports[`Services component renders services page 1`] = `
                           </div>
                         </div>
                       </EuiPopover>
-                      <CustomIndexFlyout
-                        isFlyoutVisible={false}
-                        setIsFlyoutVisible={[Function]}
-                      >
-                        <div />
-                      </CustomIndexFlyout>
                     </DataSourcePicker>
                   </div>
                 </EuiFlexItem>
@@ -7368,6 +7354,7 @@ exports[`Services component renders services page 1`] = `
                   },
                 ]
               }
+              endTime="now"
               isServiceTrendEnabled={false}
               items={Array []}
               loading={true}
@@ -7378,6 +7365,7 @@ exports[`Services component renders services page 1`] = `
               setIsServiceTrendEnabled={[Function]}
               setRedirect={[Function]}
               setSelectedItems={[Function]}
+              startTime="now-5m"
               traceColumnAction={[Function]}
             >
               <EuiPanel>

@@ -642,12 +642,6 @@ exports[`Traces component renders empty traces page 1`] = `
                           </div>
                         </div>
                       </EuiPopover>
-                      <CustomIndexFlyout
-                        isFlyoutVisible={false}
-                        setIsFlyoutVisible={[Function]}
-                      >
-                        <div />
-                      </CustomIndexFlyout>
                     </DataSourcePicker>
                   </div>
                 </EuiFlexItem>
@@ -3098,12 +3092,6 @@ exports[`Traces component renders jaeger traces page 1`] = `
                           </div>
                         </div>
                       </EuiPopover>
-                      <CustomIndexFlyout
-                        isFlyoutVisible={false}
-                        setIsFlyoutVisible={[Function]}
-                      >
-                        <div />
-                      </CustomIndexFlyout>
                     </DataSourcePicker>
                   </div>
                 </EuiFlexItem>
@@ -5391,12 +5379,6 @@ exports[`Traces component renders traces page 1`] = `
                           </div>
                         </div>
                       </EuiPopover>
-                      <CustomIndexFlyout
-                        isFlyoutVisible={false}
-                        setIsFlyoutVisible={[Function]}
-                      >
-                        <div />
-                      </CustomIndexFlyout>
                     </DataSourcePicker>
                   </div>
                 </EuiFlexItem>

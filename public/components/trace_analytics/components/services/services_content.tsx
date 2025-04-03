@@ -234,6 +234,8 @@ export function ServicesContent(props: ServicesProps) {
             serviceTrends={serviceTrends}
             dataSourceMDSId={props.dataSourceMDSId}
             page={page}
+            startTime={startTime}
+            endTime={endTime}
           />
           <EuiSpacer size="s" />
           {mode === 'custom_data_prepper' ||

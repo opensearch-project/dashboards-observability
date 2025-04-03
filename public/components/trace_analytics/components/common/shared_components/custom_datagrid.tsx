@@ -85,7 +85,7 @@ interface RenderCustomDataGridParams {
   toolbarButtons?: React.ReactNode[];
   fullScreen?: boolean;
   availableWidth?: number;
-  noMatchMessageSize?: string;
+  noMatchMessageSize?: SpacerSize;
   defaultHeight?: string;
   visibleColumns?: string[];
   isTableDataLoading?: boolean;

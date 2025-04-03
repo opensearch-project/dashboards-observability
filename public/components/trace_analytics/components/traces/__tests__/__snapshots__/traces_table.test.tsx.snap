@@ -295,6 +295,7 @@ exports[`Traces table component renders empty traces table message 2`] = `
         />
       </EuiHorizontalRule>
       <NoMatchMessage
+        mode="data_prepper"
         size="xl"
       >
         <EuiSpacer
