@@ -17,6 +17,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
+      ".husky/hooks/check-test-only.sh",
       "yarn lint --fix"
     ]
   },
