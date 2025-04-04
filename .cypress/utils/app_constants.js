@@ -140,6 +140,7 @@ export const changeTimeTo24 = (timeUnit) => {
   cy.get('[aria-label="Time unit"]').select(timeUnit);
   cy.get('.euiButton').contains('Apply').click();
   cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 };
 
 export const expectMessageOnHover = (button, message) => {

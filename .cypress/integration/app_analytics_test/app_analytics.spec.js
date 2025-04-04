@@ -303,6 +303,7 @@ describe('Viewing application', () => {
 
   it('Opens service detail flyout when Service Name is clicked', () => {
     cy.get('[data-test-subj="app-analytics-serviceTab"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('*[data-test-subj^="service-link"]').eq(0).click();
     cy.get('[data-test-subj="serviceDetailFlyoutTitle"]').should('be.visible');
     cy.get('[data-test-subj="Number of connected servicesDescriptionList"]').should('contain', '3');
@@ -319,6 +320,7 @@ describe('Viewing application', () => {
 
   it('Opens trace detail flyout when Trace ID is clicked', () => {
     cy.get('[data-test-subj="app-analytics-traceTab"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('[title="03f9c770db5ee2f1caac0afc36db49ba"]').click();
     cy.get('[data-test-subj="traceDetailFlyoutTitle"]').should('be.visible');
     cy.get('[data-test-subj="traceDetailFlyout"]').within(($flyout) => {
@@ -339,6 +341,7 @@ describe('Viewing application', () => {
 
   it('Opens span detail flyout when Span ID is clicked', () => {
     cy.get('[data-test-subj="app-analytics-traceTab"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('input[type="search"]').click().type(`5ff3516909562c60`);
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('[data-test-subj="dataGridRowCell"]').contains('5ff3516909562c60').click();
@@ -432,6 +435,7 @@ describe('Viewing application', () => {
     changeTimeTo24('months');
     cy.get('[data-test-subj="app-analytics-logTab"]').click();
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('[id="explorerPlotComponent"]', { timeout: timeoutDelay }).should('exist');
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').focus();
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').type('      ' + query_two, {
