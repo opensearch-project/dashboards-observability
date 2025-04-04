@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { coreRefs } from '../../../../public/framework/core_refs';
 import { CoreStart } from '../../../../../../src/core/public';
 import {
   TRACE_ANALYTICS_DATA_PREPPER_INDICES_ROUTE,
@@ -35,6 +36,50 @@ export async function handleDslRequest(
   const query = {
     dataSourceMDSId,
   };
+
+  const handleError = (error: any) => {
+    let parsedError = {};
+
+    try {
+      if (typeof error?.response === 'string') {
+        parsedError = JSON.parse(error.response);
+      } else if (typeof error?.body === 'string') {
+        parsedError = JSON.parse(error.body);
+      } else {
+        parsedError = error?.body || error;
+
+        // Check if message is a JSON string
+        if (typeof parsedError.message === 'string') {
+          try {
+            const innerParsed = JSON.parse(parsedError.message);
+            if (innerParsed?.error) {
+              parsedError = innerParsed;
+            }
+          } catch {
+            // not JSON, skip
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to parse error response as JSON', e);
+    }
+
+    const errorType = parsedError?.error?.caused_by?.type || parsedError?.error?.type || '';
+    const errorReason = parsedError?.error?.caused_by?.reason || parsedError?.error?.reason || '';
+
+    if (errorType === 'too_many_buckets_exception') {
+      coreRefs.core?.notifications.toasts.addDanger({
+        title: 'Too many buckets in aggregation',
+        text:
+          errorReason ||
+          'Try using a shorter time range or increase the "search.max_buckets" cluster setting.',
+        toastLifeTimeMs: 10000,
+      });
+    } else {
+      console.error(error);
+    }
+  };
+
   if (setShowTimeoutToast) {
     const id = setTimeout(() => setShowTimeoutToast(), 25000); // 25 seconds
 
@@ -44,7 +89,7 @@ export async function handleDslRequest(
         query,
       });
     } catch (error) {
-      console.error(error);
+      handleError(error);
     } finally {
       clearTimeout(id);
     }
@@ -54,10 +99,11 @@ export async function handleDslRequest(
         body: JSON.stringify(body),
         query,
       });
-    } catch (error_1) {
-      console.error(error_1);
+    } catch (error) {
+      handleError(error);
     }
   }
+  return undefined;
 }
 
 export async function handleJaegerIndicesExistRequest(

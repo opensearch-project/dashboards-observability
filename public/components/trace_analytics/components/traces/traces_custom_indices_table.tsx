@@ -123,7 +123,7 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
             key={columns.map((col) => col.id).join('-')} // Force re-render for switching from spans to traces
             columns={columns}
             renderCellValue={renderCellValue}
-            rowCount={props.tracesTableMode === 'traces' ? items.length : totalHits}
+            rowCount={totalHits}
             sorting={{ columns: sortingColumns, onSort }}
             pagination={pagination}
             isTableDataLoading={loading}

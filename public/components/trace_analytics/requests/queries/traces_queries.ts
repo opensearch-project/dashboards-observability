@@ -187,7 +187,7 @@ export const getTracesQuery = (
         },
       },
     },
-    track_total_hits: false,
+    track_total_hits: true,
   };
   if (traceId) {
     jaegerQuery.query.bool.filter.push({

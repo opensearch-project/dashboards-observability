@@ -10,23 +10,34 @@ export const useInjectElementsIntoGrid = (
   rowCount: number,
   maxDisplayRows: number,
   tracesTableMode: string,
-  loadMoreHandler?: () => void
+  loadMoreHandler?: () => void,
+  maxTraces?: number
 ) => {
   useEffect(() => {
     setTimeout(() => {
       const toolbar = document.querySelector<HTMLElement>('.euiDataGrid__controls');
-      if (toolbar && rowCount > maxDisplayRows) {
-        toolbar.style.display = 'flex';
-        toolbar.style.alignItems = 'center';
-        toolbar.style.justifyContent = 'space-between';
 
-        let warningDiv = toolbar.querySelector<HTMLElement>('.trace-table-warning');
-        if (!warningDiv) {
-          warningDiv = document.createElement('div');
+      const shouldShowWarning =
+        (tracesTableMode === 'traces' && maxTraces != null && maxTraces < rowCount) ||
+        (tracesTableMode !== 'traces' && rowCount > maxDisplayRows);
+
+      if (toolbar) {
+        const existingWarning = toolbar.querySelector('.trace-table-warning');
+        if (existingWarning) {
+          existingWarning.remove();
+        }
+
+        if (shouldShowWarning) {
+          toolbar.style.display = 'flex';
+          toolbar.style.alignItems = 'center';
+          toolbar.style.justifyContent = 'space-between';
+
+          const warningDiv = document.createElement('div');
           warningDiv.className = 'trace-table-warning';
 
           const strongElement = document.createElement('strong');
-          strongElement.textContent = `${maxDisplayRows}`;
+          strongElement.textContent =
+            tracesTableMode === 'traces' ? `${maxTraces ?? maxDisplayRows}` : `${maxDisplayRows}`;
 
           const textSpan = document.createElement('span');
           textSpan.appendChild(strongElement);
@@ -69,5 +80,5 @@ export const useInjectElementsIntoGrid = (
         }
       }
     }, 100);
-  }, [rowCount, tracesTableMode, loadMoreHandler]);
+  }, [rowCount, tracesTableMode, loadMoreHandler, maxTraces, maxDisplayRows]);
 };
