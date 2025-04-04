@@ -324,7 +324,8 @@ export function TracesContent(props: TracesProps) {
       maxTraces,
       props.dataSourceMDSId[0].id,
       sort,
-      isUnderOneHour
+      isUnderOneHour,
+      setTotalHits
     ).finally(() => setIsTraceTableLoading(false));
   };
 
@@ -390,7 +391,8 @@ export function TracesContent(props: TracesProps) {
               maxTraces,
               props.dataSourceMDSId[0].id,
               newSort,
-              isUnderOneHour
+              isUnderOneHour,
+              setTotalHits
             );
       tracesRequest.finally(() => setIsTraceTableLoading(false));
 
