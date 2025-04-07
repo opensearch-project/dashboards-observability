@@ -110,6 +110,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   isTableDataLoading,
   tracesTableMode,
   setTracesTableMode,
+  maxTraces,
   setMaxTraces,
 }) => {
   const defaultVisibleColumns = useMemo(() => {
@@ -125,7 +126,8 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const displayedRowCount = rowCount > MAX_DISPLAY_ROWS ? MAX_DISPLAY_ROWS : rowCount;
+  const displayedRowCount =
+    tracesTableMode === 'traces' ? maxTraces : Math.min(rowCount, MAX_DISPLAY_ROWS);
 
   const isDarkMode = uiSettingsService.get('theme:darkMode');
 
@@ -135,9 +137,15 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
       )
     : [];
 
-  useInjectElementsIntoGrid(rowCount, MAX_DISPLAY_ROWS, tracesTableMode ?? '', () => {
-    setMaxTraces((prevMax: number) => Math.min(prevMax + 500, MAX_DISPLAY_ROWS));
-  });
+  useInjectElementsIntoGrid(
+    rowCount,
+    MAX_DISPLAY_ROWS,
+    tracesTableMode ?? '',
+    () => {
+      setMaxTraces((prevMax: number) => Math.min(prevMax + 500, MAX_DISPLAY_ROWS));
+    },
+    maxTraces
+  );
 
   const disableInteractions = useMemo(() => isFullScreen, [isFullScreen]);
 

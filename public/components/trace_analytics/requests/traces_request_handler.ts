@@ -113,7 +113,8 @@ export const handleTracesRequest = async (
   maxTraces: number = 500,
   dataSourceMDSId?: string,
   sort?: PropertySort,
-  isUnderOneHour?: boolean
+  isUnderOneHour?: boolean,
+  setTotalHits?: (count: number) => void
 ) => {
   const binarySearch = (arr: number[], target: number) => {
     if (!arr) return Number.NaN;
@@ -166,6 +167,11 @@ export const handleTracesRequest = async (
       const percentileRanges =
         percentileRangesResult.status === 'fulfilled' ? percentileRangesResult.value : {};
       const response = responseResult.value;
+
+      if (setTotalHits) {
+        const totalHits = response?.hits?.total?.value ?? 0;
+        setTotalHits(totalHits);
+      }
 
       if (
         !response?.aggregations?.traces?.buckets ||
