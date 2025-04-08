@@ -23,6 +23,8 @@ import 'cypress-watch-and-reload/support'
 // Import commands.js using ES2015 syntax:
 import './commands';
 
+import ResizeObserverPolyfill from 'resize-observer-polyfill';
+
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 
@@ -31,3 +33,7 @@ if (Cypress.env('security_enabled')) {
   Cypress.env('opensearch', 'https://localhost:9200');
 }
 
+// Fix for electron crash https://github.com/cypress-io/cypress/issues/27415#issuecomment-2594288913
+Cypress.on('window:before:load', (win) => {
+  win.ResizeObserver = ResizeObserverPolyfill;
+});
