@@ -95,29 +95,13 @@ export class Main extends React.Component<MainProps, MainState> {
 
   // Fetches path and id for all stored notebooks
   fetchNotebooks = () => {
-    if (this.props.dataSourceEnabled) {
-      // If `MDS` is enabled, only fetch from the first endpoint.
-      return this.props.http
-        .get(`${NOTEBOOKS_API_PREFIX}/savedNotebook`)
-        .then((savedNotebooksResponse) => {
-          this.setState({ data: savedNotebooksResponse.data });
-        })
-        .catch((err) => {
-          console.error('Issue in fetching the notebooks', err.body.message);
-        });
-    }
-    // If `MDS` is not enabled /savedNotebook API returns notebooks stored as saved objects, and the other one returns notebooks stored as observability objects.
-    // ${NOTEBOOKS_API_PREFIX}/savedNotebook: this point to new notebooks saved in saved objects
-    // ${NOTEBOOKS_API_PREFIX}/: this point to old notebooks saved in observability index
-    return Promise.all([
-      this.props.http.get(`${NOTEBOOKS_API_PREFIX}/savedNotebook`),
-      this.props.http.get(`${NOTEBOOKS_API_PREFIX}/`),
-    ])
-      .then(([savedNotebooksResponse, secondResponse]) => {
-        const combinedData = {
-          data: [...savedNotebooksResponse.data, ...secondResponse.data],
-        };
-        this.setState(combinedData);
+    // Notebooks plugin only supports savedNotebooks stored in .kibana
+    // The support for notebooks in .opensearch-observability is removed in OSD 3.0.0 version
+    // Related Issue: https://github.com/opensearch-project/dashboards-observability/issues/2350
+    return this.props.http
+      .get(`${NOTEBOOKS_API_PREFIX}/savedNotebook`)
+      .then((savedNotebooksResponse) => {
+        this.setState({ data: savedNotebooksResponse.data });
       })
       .catch((err) => {
         console.error('Issue in fetching the notebooks', err.body.message);
