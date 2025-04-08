@@ -137,14 +137,26 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
       )
     : [];
 
+  const isLastPage =
+    tracesTableMode === 'traces' && pagination?.pageSize && maxTraces != null
+      ? (pagination.pageIndex + 1) * pagination.pageSize >= maxTraces &&
+        rowCount > maxTraces &&
+        maxTraces < MAX_DISPLAY_ROWS
+      : false;
+
   useInjectElementsIntoGrid(
     rowCount,
     MAX_DISPLAY_ROWS,
     tracesTableMode ?? '',
     () => {
-      setMaxTraces((prevMax: number) => Math.min(prevMax + 500, MAX_DISPLAY_ROWS));
+      // Add 500 more traces at a time untill all traces present
+      const nextIncrement = Math.min(500, rowCount - maxTraces);
+      if (nextIncrement > 0 && maxTraces < MAX_DISPLAY_ROWS) {
+        setMaxTraces((prevMax) => Math.min(prevMax + nextIncrement, MAX_DISPLAY_ROWS));
+      }
     },
-    maxTraces
+    maxTraces,
+    isLastPage
   );
 
   const disableInteractions = useMemo(() => isFullScreen, [isFullScreen]);

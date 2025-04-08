@@ -100,36 +100,7 @@ export function TracesContent(props: TracesProps) {
 
     setSortingColumns(sortColumns);
 
-    // The columns that can not be used in a query, only rendered on page
-    const localOnlyFields = ['trace_group', 'percentile_in_trace_group', 'trace_id'];
-
     if (tracesTableMode === 'traces') {
-      // Client-side sort if field is local-only
-      if (localOnlyFields.includes(sortField)) {
-        const sorted = [...tableItems].sort((a, b) => {
-          let valueA = a[sortField];
-          let valueB = b[sortField];
-
-          if (typeof valueA === 'string' && typeof valueB === 'string') {
-            valueA = valueA.toLowerCase();
-            valueB = valueB.toLowerCase();
-            return sortDirection === 'asc'
-              ? valueA.localeCompare(valueB)
-              : valueB.localeCompare(valueA);
-          }
-
-          if (typeof valueA === 'number' && typeof valueB === 'number') {
-            return sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
-          }
-
-          return 0;
-        });
-
-        setTableItems(sorted);
-        return;
-      }
-
-      // Server-side sort for supported fields
       const sort = { field: sortField, direction: sortDirection };
       refreshTracesTableData(sort, 0, pageSize);
     } else {
@@ -232,8 +203,23 @@ export function TracesContent(props: TracesProps) {
     startTime,
     endTime,
     props.dataSourceMDSId,
-    maxTraces,
   ]);
+
+  useEffect(() => {
+    if (tracesTableMode !== 'traces') return;
+
+    const currentSort = sortingColumns[0];
+
+    const sort = currentSort
+      ? { field: currentSort.id, direction: currentSort.direction }
+      : undefined;
+
+    refreshTracesTableData(sort, pageIndex, pageSize);
+  }, [maxTraces]);
+
+  useEffect(() => {
+    setPageIndex(0);
+  }, [tracesTableMode]);
 
   const onToggle = (isOpen: boolean) => {
     const newState = isOpen ? 'open' : 'closed';
