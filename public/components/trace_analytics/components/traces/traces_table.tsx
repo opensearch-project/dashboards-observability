@@ -122,6 +122,7 @@ export function TracesTable(props: TracesTableProps) {
           align: 'right',
           sortable: true,
           truncateText: true,
+          render: (item) => (item === 0 || item ? item : '-'),
         },
         {
           field: 'percentile_in_trace_group',
@@ -293,7 +294,7 @@ export function TracesTable(props: TracesTableProps) {
             loading={loading}
           />
         ) : (
-          <NoMatchMessage size="xl" />
+          <NoMatchMessage size="xl" mode={mode} />
         )}
       </EuiPanel>
     </>

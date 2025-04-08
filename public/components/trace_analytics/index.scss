@@ -84,7 +84,7 @@ th[data-test-subj^='tableHeaderCell_dashboard_latency_variance'] {
 
 .popOverContainer {
   width: 10vw;
-  min-width: 200px;
+  min-width: 250px;
 }
 
 .traces-scrollable-table {
@@ -102,6 +102,8 @@ th[data-test-subj^='tableHeaderCell_dashboard_latency_variance'] {
   overflow: hidden;
   text-overflow: ellipsis;
   padding-left: 8px;
+  font-size: small;
+  font-weight: bold;
 }
 
 .trace-group-column {

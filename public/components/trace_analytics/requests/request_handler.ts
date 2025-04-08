@@ -11,6 +11,7 @@ import {
 } from '../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode } from '../../../../common/types/trace_analytics';
 import { getSpanIndices } from '../components/common/helper_functions';
+import { handleError } from './helper_functions';
 
 export async function handleDslRequest(
   http: CoreStart['http'],
@@ -35,6 +36,7 @@ export async function handleDslRequest(
   const query = {
     dataSourceMDSId,
   };
+
   if (setShowTimeoutToast) {
     const id = setTimeout(() => setShowTimeoutToast(), 25000); // 25 seconds
 
@@ -44,7 +46,7 @@ export async function handleDslRequest(
         query,
       });
     } catch (error) {
-      console.error(error);
+      handleError(error);
     } finally {
       clearTimeout(id);
     }
@@ -54,10 +56,11 @@ export async function handleDslRequest(
         body: JSON.stringify(body),
         query,
       });
-    } catch (error_1) {
-      console.error(error_1);
+    } catch (error) {
+      handleError(error);
     }
   }
+  return undefined;
 }
 
 export async function handleJaegerIndicesExistRequest(

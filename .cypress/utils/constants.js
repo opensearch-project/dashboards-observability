@@ -83,14 +83,13 @@ export const setTimeFilter = (setEndTime = false, refresh = true) => {
       .type('{selectall}' + endTime, { force: true });
   }
   if (refresh) cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
-  cy.get('.euiTableRow').should('have.length.greaterThan', 3); //Replaces Wait
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist'); //Replaces Wait
 };
 
 export const expandServiceView = (rowIndex = 0) => {
-  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');//Replaces wait
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist'); //Replaces wait
   cy.get('*[data-test-subj^="service-flyout-action-btntrace_service"]').eq(rowIndex).click();
-  cy.get('[data-test-subj="ActionContextMenu"]').click();
-  cy.get('[data-test-subj="viewServiceButton"]').click();
+  cy.get('[data-test-subj="service-view-flyout-action-btn"]').click();
 };
 
 // notebooks

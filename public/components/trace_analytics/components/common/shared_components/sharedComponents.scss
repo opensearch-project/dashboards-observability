@@ -2,23 +2,63 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
- 
+
 .ellipsis-left {
-    direction: rtl; 
-    unicode-bidi: plaintext;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  direction: rtl;
+  unicode-bidi: plaintext;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.full-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.normal-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+}
+
+.grid-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.dark-mode-enabled {
+  .euiDataGrid__pagination {
+    background-color: $euiColorEmptyShade;
+
+    color: $euiTextColor;
+
+    .euiButtonEmpty {
+      color: $euiTextColor;
+
+      &:hover {
+        background-color: $euiColorMediumShade;
+      }
+    }
   }
-  
-  .full-wrapper {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-  }
-  
-  .normal-wrapper {
-    display: flex;
-    flex-direction: column;
-    height: auto;
-  }
+}
+
+.trace-table-warning {
+  margin-left: auto;
+  color: $euiColorWarning;
+  font-size: $euiFontSizeS;
+  display: flex;
+  align-items: center;
+  padding: $euiSizeXS $euiSize;
+  border-radius: $euiBorderRadius;
+  white-space: nowrap;
+}

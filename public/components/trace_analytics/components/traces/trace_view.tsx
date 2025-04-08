@@ -11,34 +11,37 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIconTip,
+  EuiLink,
   EuiLoadingContent,
   EuiPage,
   EuiPageBody,
   EuiPanel,
+  EuiSmallButton,
   EuiSmallButtonIcon,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import round from 'lodash/round';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { MountPoint } from '../../../../../../../src/core/public';
 import { DataSourceManagementPluginSetup } from '../../../../../../../src/plugins/data_source_management/public';
 import { DataSourceOption } from '../../../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_crumbs';
 import { coreRefs } from '../../../../framework/core_refs';
+import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/plugin_headerControl';
 import { TraceAnalyticsCoreDeps } from '../../home';
 import { handleServiceMapRequest } from '../../requests/services_request_handler';
 import { handlePayloadRequest } from '../../requests/traces_request_handler';
 import { TraceFilter } from '../common/constants';
 import { PanelTitle, filtersToDsl, processTimeStamp } from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
+import { redirectTraceToLogs } from '../common/redirection_helpers';
 import { ServiceBreakdownPanel } from './service_breakdown_panel';
 import { SpanDetailPanel } from './span_detail_panel';
 import { getOverviewFields, getServiceBreakdownData, spanFiltersToDSL } from './trace_view_helpers';
-
-const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
 
 interface TraceViewProps extends TraceAnalyticsCoreDeps {
   traceId: string;
@@ -55,13 +58,16 @@ export function TraceView(props: TraceViewProps) {
   const renderTitle = (traceId: string) => {
     return (
       <>
-        {!newNavigation && (
-          <EuiFlexItem>
-            <EuiText size="s">
-              <h1 className="overview-content">{traceId}</h1>
-            </EuiText>
-          </EuiFlexItem>
-        )}
+        {
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <EuiText size="s">
+                <h1 className="overview-content">{traceId}</h1>
+              </EuiText>
+            </EuiFlexItem>
+            {TracetoLogsButton}
+          </EuiFlexGroup>
+        }
       </>
     );
   };
@@ -250,6 +256,35 @@ export function TraceView(props: TraceViewProps) {
     );
   };
 
+  const TracetoLogsButton = useMemo(
+    () =>
+      mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
+        <EuiFlexItem
+          grow={false}
+          onClick={() => {
+            const payloadJson = JSON.parse(payloadData);
+            redirectTraceToLogs({
+              traceId: payloadJson[0]._source.traceId,
+              fromTime: payloadJson[0]._source.startTime,
+              toTime: fields.last_updated,
+              dataSourceMDSId: props.dataSourceMDSId,
+            });
+          }}
+        >
+          <EuiToolTip content="View associated logs using Trace Id">
+            <EuiLink data-test-subj="trace-view-logs-redirection-btn">
+              <EuiSmallButton iconType="discoverApp" isLoading={isTracePayloadLoading}>
+                View associated logs
+              </EuiSmallButton>
+            </EuiLink>
+          </EuiToolTip>
+        </EuiFlexItem>
+      ) : (
+        <></>
+      ),
+    [payloadData, isTracePayloadLoading, props.dataSourceMDSId, fields, mode]
+  );
+
   useEffect(() => {
     if (!payloadData) return;
 
@@ -341,7 +376,11 @@ export function TraceView(props: TraceViewProps) {
     <>
       <EuiPage>
         <EuiPageBody>
-          {renderTitle(props.traceId)}
+          {!coreRefs.chrome?.navGroup.getNavGroupEnabled() ? (
+            renderTitle(props.traceId)
+          ) : (
+            <HeaderControlledComponentsWrapper components={[TracetoLogsButton]} />
+          )}
           <EuiFlexGroup alignItems="stretch" gutterSize="s">
             <EuiFlexItem grow={5}>{renderOverview(fields)}</EuiFlexItem>
             <EuiFlexItem grow={3}>
