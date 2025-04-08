@@ -14,7 +14,7 @@ module.exports = defineConfig({
   defaultCommandTimeout: 60000,
   //experimentalNetworkStubbing: true,
   experimentalMemoryManagement: true,
-  numTestsKeptInMemory: 0, //Default value 50, chrome crashes without lowering
+  numTestsKeptInMemory: 5, //Default value 50, chrome crashes without lowering
   env: {
     opensearch: 'localhost:9200',
     opensearchDashboards: 'localhost:5601',
@@ -30,6 +30,5 @@ module.exports = defineConfig({
     baseUrl: 'http://localhost:5601',
     specPattern: '.cypress/integration/**/*.spec.{js,jsx,ts,tsx}',
     supportFile: '.cypress/support/index.js',
-    testIsolation: false,
   },
 });

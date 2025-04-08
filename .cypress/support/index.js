@@ -32,7 +32,7 @@ if (Cypress.env('security_enabled')) {
 }
 
 // Fix for ResizeObserver crash in Electron
-// https://github.com/cypress-io/cypress/issues/27415#issuecomment-2594288913
+// https://github.com/cypress-io/cypress/issues/27415#issuecomment-2169155274
 Cypress.on('window:before:load', (win) => {
   const RealResizeObserver = win.ResizeObserver;
 
