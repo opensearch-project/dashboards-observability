@@ -12,7 +12,7 @@ import {
   VIS_TYPE_LINE,
   TESTING_PANEL,
 } from '../../utils/metrics_constants';
-import { suppressResizeObserverIssue, COMMAND_TIMEOUT_LONG } from '../../utils/constants';
+import { suppressResizeObserverIssue } from '../../utils/constants';
 import { landOnPanels, clearQuerySearchBoxText } from '../../utils/event_analytics/helpers';
 
 describe('Metrics Analytics', () => {
@@ -168,7 +168,7 @@ describe('Metrics Analytics', () => {
         landOnPanels();
         cy.get('[data-test-subj="customPanels__createNewPanels"]').click();
         cy.get('input.euiFieldText').type(TESTING_PANEL);
-        cy.get('.euiButton__text', { timeout: COMMAND_TIMEOUT_LONG })
+        cy.get('.euiButton__text')
           .contains(/^Create$/)
           .click();
         cy.wait(delay * 3);
@@ -186,8 +186,7 @@ describe('Metrics Analytics', () => {
       it('Redirect to correct page on breadcrumb click', () => {
         cy.get('[data-test-subj="metricsSearch"]').should('exist');
         cy.get('.euiTitle').contains('Metrics').should('exist');
-        cy.get('.euiBreadcrumb[href="observability-logs#/"]').click(),
-          { timeout: COMMAND_TIMEOUT_LONG };
+        cy.get('.euiBreadcrumb[href="observability-logs#/"]').click();
         cy.get('.euiTitle').contains('Logs').should('exist');
       });
     });
@@ -225,9 +224,7 @@ const createCustomMetric = ({ testMetricIndex }) => {
     .type(PPL_METRICS_NAMES[testMetricIndex], { force: true });
   cy.get('[data-test-subj="eventExplorer__metricSaveName"]').click({ force: true });
   cy.wait(delay * 10);
-  cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]', {
-    timeout: COMMAND_TIMEOUT_LONG,
-  }).click();
+  cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click();
   cy.get('.euiToastHeader__title').contains('successfully').should('exist');
 };
 

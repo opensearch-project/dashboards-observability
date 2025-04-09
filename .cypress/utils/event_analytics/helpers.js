@@ -3,16 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { COMMAND_TIMEOUT_LONG, suppressResizeObserverIssue } from '../constants';
+import {  suppressResizeObserverIssue } from '../constants';
 
 export const clearQuerySearchBoxText = (testSubjectName) => {
-  cy.get(`[data-test-subj="${testSubjectName}"]`, {
-    timeout: COMMAND_TIMEOUT_LONG,
-  }).clear({ force: true });
+  cy.get(`[data-test-subj="${testSubjectName}"]`).clear({ force: true });
 };
 
 export const querySearch = (query, rangeSelected) => {
-  cy.get('[data-test-subj="searchAutocompleteTextArea"]', { timeout: COMMAND_TIMEOUT_LONG })
+  cy.get('[data-test-subj="searchAutocompleteTextArea"]')
     .clear()
     .focus()
     .type(query);

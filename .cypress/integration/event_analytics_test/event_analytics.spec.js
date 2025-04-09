@@ -25,7 +25,6 @@ import {
   FIELD_HOST,
   FIELD_AGENT
 } from '../../utils/event_analytics/constants';
-import { suppressResizeObserverIssue, COMMAND_TIMEOUT_LONG } from '../../utils/constants';
 
 import {
   querySearch,
@@ -52,7 +51,7 @@ describe('Adding sample data and visualization', () => {
 describe('Has working breadcrumbs', () => {
   it('Redirect to correct page on breadcrumb click', () => {
     landOnEventExplorer();
-    cy.get('.euiBreadcrumb[href="observability-logs#/"]').click(), { timeout: COMMAND_TIMEOUT_LONG };
+    cy.get('.euiBreadcrumb[href="observability-logs#/"]').click();
     cy.get('.euiTitle').contains('Logs').should('exist');
   });
 });
@@ -76,6 +75,7 @@ describe('Open flyout for a data row to see details', () => {
     cy.get('.observability-flyout .osdDocViewer .euiTabs span.euiTab__content')
       .contains('Traces')
       .should('be.visible');
+    cy.get('[data-test-subj="euiFlyoutCloseButton"]').click();
   });
 
   it('Should be able to see surrounding docs', () => {
@@ -213,12 +213,12 @@ describe('Saves a query on explorer page', () => {
     landOnPanels();
     cy.get('[data-test-subj="customPanels__createNewPanels"]').click();
     cy.get('input.euiFieldText').type(TESTING_PANEL);
-    cy.get('.euiButton__text', { timeout: COMMAND_TIMEOUT_LONG })
+    cy.get('.euiButton__text')
       .contains(/^Create$/)
       .click();
     landOnEventExplorer();
     querySearch(TEST_QUERIES[1].query, TEST_QUERIES[1].dateRangeDOM);
-    cy.get('button[id="main-content-vis"]', { timeout: COMMAND_TIMEOUT_LONG })
+    cy.get('button[id="main-content-vis"]')
       .contains('Visualizations')
       .click();
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
@@ -238,9 +238,9 @@ describe('Saves a query on explorer page', () => {
     cy.get('.tab-title').contains('Events').click();
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
     cy.get('[data-test-subj="eventExplorer__querySaveName"]').type(SAVE_QUERY1);
-    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]', { timeout: COMMAND_TIMEOUT_LONG }).click();
+    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click();
 
-    cy.get('.euiToastHeader__title', { timeout: COMMAND_TIMEOUT_LONG })
+    cy.get('.euiToastHeader__title')
       .contains('successfully')
       .should('exist');
 
@@ -256,8 +256,8 @@ describe('Saves a query on explorer page', () => {
     cy.get('.tab-title').contains('Events').click();
     cy.get('[data-test-subj="eventExplorer__saveManagementPopover"]').click();
     cy.get('[data-test-subj="eventExplorer__querySaveName"]').type(SAVE_QUERY4);
-    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]', { timeout: COMMAND_TIMEOUT_LONG }).click();
-    cy.get('.euiToastHeader__title', { timeout: COMMAND_TIMEOUT_LONG })
+    cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click();
+    cy.get('.euiToastHeader__title')
       .contains('successfully')
       .should('exist');
 
@@ -269,9 +269,7 @@ describe('Saves a query on explorer page', () => {
       .click();
 
     cy.url().should('contain', '#/explorer');
-    cy.get('[data-test-subj="searchAutocompleteTextArea"]', {
-      timeout: COMMAND_TIMEOUT_LONG,
-    }).contains(TEST_QUERIES[0].query);
+    cy.get('[data-test-subj="searchAutocompleteTextArea"]').contains(TEST_QUERIES[0].query);
   });
 });
 
@@ -404,10 +402,8 @@ describe('Live tail stop automatically', () => {
   });
 
   it.skip('Click to switch to another tab', () => {
-    cy.get('[data-test-subj="eventExplorer__addNewTab"]', {
-      timeout: COMMAND_TIMEOUT_LONG,
-    }).click();
-    cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]', { timeout: COMMAND_TIMEOUT_LONG })
+    cy.get('[data-test-subj="eventExplorer__addNewTab"]').click();
+    cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
       .find('button.euiTab')
       .first()
       .click();
@@ -419,12 +415,8 @@ describe('Live tail stop automatically', () => {
   });
 
   it.skip('Close current selected tab', () => {
-    cy.get('[data-test-subj="eventExplorer__addNewTab"]', {
-      timeout: COMMAND_TIMEOUT_LONG,
-    }).click();
-    cy.get('[data-test-subj="eventExplorer__addNewTab"]', {
-      timeout: COMMAND_TIMEOUT_LONG,
-    }).click();
+    cy.get('[data-test-subj="eventExplorer__addNewTab"]').click();
+    cy.get('[data-test-subj="eventExplorer__addNewTab"]').click();
     cy.get('[data-test-subj="eventExplorer__topLevelTabbing"]')
       .find('button.euiTab')
       .then((lists) => {
@@ -499,7 +491,7 @@ describe('Visualizing data', () => {
       .type(FIELD_AGENT);
     cy.get(`input[value="${FIELD_AGENT}"]`).click();
     cy.get('[data-test-subj="panelCloseBtn"]').click();
-    cy.get('[data-test-subj="visualizeEditorRenderButton"]', { timeout: COMMAND_TIMEOUT_LONG }).click();
+    cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
 
     cy.get('.infolayer .legendtext').as('legandTxt');
     cy.get('@legandTxt').should('contain', BAR_LEG_TEXT_1);
