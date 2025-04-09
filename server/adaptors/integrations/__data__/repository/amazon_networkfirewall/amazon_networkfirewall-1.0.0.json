@@ -7,7 +7,7 @@
     "type": "logs_amazon_networkfirewall",
     "labels": ["Observability", "Logs", "AWS", "Cloud", "S3 Glue"],
     "author": "OpenSearch",
-    "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/releases/tag/amazon_vpc_flow_1.1.0",
+    "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/releases/",
     "workflows": [
       {
         "name": "queries",
