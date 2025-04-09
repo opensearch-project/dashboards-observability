@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+export const COMMAND_TIMEOUT_LONG = 10000;
+
 //BASE Constants
 export const BACKEND_BASE_PATH = Cypress.env('opensearch');
 export const FONTEND_BASE_PATH = Cypress.env('opensearchDashboards');
