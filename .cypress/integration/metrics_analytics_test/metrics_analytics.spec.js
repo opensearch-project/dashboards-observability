@@ -41,7 +41,14 @@ describe('Metrics Analytics', () => {
       createSavedObjectMetric({ testMetricIndex: 1 });
 
       moveToMetricsHome();
-      cy.get('[data-test-subj="comboBoxToggleListButton"]').click();
+      cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+      cy.get('body').then(($body) => {
+        if ($body.find('[data-test-subj="comboBoxClearButton"]').length > 0) {
+          cy.get('[data-test-subj="comboBoxClearButton"]').first().click();
+        }
+      });
+      cy.get('[data-test-subj="metricsDataSourcePicker"]').click();
       cy.get('[data-test-subj="prometheusOption"]').click();
       cy.get('[data-test-subj="metricsListItems_availableMetrics"]')
         .contains(PPL_METRICS_NAMES[1])
@@ -59,11 +66,25 @@ describe('Metrics Analytics', () => {
 
     describe('Check data source picker', () => {
       it('Index picker should be only available under Otel metric datasource', () => {
-        cy.get('[data-test-subj="comboBoxToggleListButton"]').click();
-        cy.get('[data-test-subj="prometheusOption"]').click();
+        cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+        cy.get('body').then(($body) => {
+          if ($body.find('[data-test-subj="comboBoxClearButton"]').length > 0) {
+            cy.get('[data-test-subj="comboBoxClearButton"]').first().click();
+          }
+        });
+        cy.get('[data-test-subj="metricsDataSourcePicker"]').click();
+        cy.get('[data-test-subj="prometheusOption"]').first().click();
         cy.get('[data-test-subj="metricsIndexPicker"]').should('not.exist');
 
-        cy.get('[data-test-subj="comboBoxToggleListButton"]').click();
+        cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+        cy.get('body').then(($body) => {
+          if ($body.find('[data-test-subj="comboBoxClearButton"]').length > 0) {
+            cy.get('[data-test-subj="comboBoxClearButton"]').first().click();
+          }
+        });
+        cy.get('[data-test-subj="metricsDataSourcePicker"]').click();
         cy.get('[data-test-subj="openTelemetryOption"]').click();
         cy.get('[data-test-subj="metricsIndexPicker"]').should('exist');
       });
@@ -71,6 +92,13 @@ describe('Metrics Analytics', () => {
 
     describe('Search for metrics in search bar', () => {
       it('Search for metrics in search bar from available metrics', () => {
+        cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+        cy.get('body').then(($body) => {
+          if ($body.find('[data-test-subj="comboBoxClearButton"]').length > 0) {
+            cy.get('[data-test-subj="comboBoxClearButton"]').first().click();
+          }
+        });
         cy.get('[data-test-subj="metricsDataSourcePicker"]').click();
         cy.get('[data-test-subj="prometheusOption"]').click();
         cy.get('[data-test-subj="metricsSearch"]').type('metric', { wait: 50 });
@@ -92,8 +120,10 @@ describe('Metrics Analytics', () => {
 
     describe('Select and unselect metrics in sidebar', () => {
       it('Select and unselect metrics in sidebar', () => {
+        cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
         cy.get('[data-test-subj="metricsDataSourcePicker"]').click();
-        cy.get('[data-test-subj="prometheusOption"]').click();
+        cy.get('[data-test-subj="prometheusOption"]').first().click();
         cy.get('[data-test-subj="metricsListItems_availableMetrics"]')
           .contains(PPL_METRICS_NAMES[0])
           .trigger('mouseover')
@@ -131,6 +161,13 @@ describe('Metrics Analytics', () => {
 
     describe('Test Metric Visualizations', () => {
       beforeEach(() => {
+        cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+        cy.get('body').then(($body) => {
+          if ($body.find('[data-test-subj="comboBoxClearButton"]').length > 0) {
+            cy.get('[data-test-subj="comboBoxClearButton"]').first().click();
+          }
+        });
         cy.get('[data-test-subj="metricsDataSourcePicker"]').click();
         cy.get('[data-test-subj="prometheusOption"]').click();
         cy.get('[data-test-subj="metricsListItems_availableMetrics"]')
