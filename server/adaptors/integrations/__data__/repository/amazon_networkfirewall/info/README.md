@@ -35,11 +35,11 @@ AWS Network Firewall can be used for various purposes, such as:
 
 For more details, please see the following:
 
--> [What is AWS Network Firewall?](docs.aws.amazon.comnetwork-firewalllatestwhat-is-aws-network-firewall.html)
+-> [What is AWS Network Firewall?](https://docs.aws.amazon.com/network-firewall/latest/developerguide/what-is-aws-network-firewall.html)
 
--> [Firewall behavior in AWS Network Firewall](docs.aws.amazon.comnetwork-firewalllatestfirewall-behavior.html)
+-> [Firewall behavior in AWS Network Firewall](https://docs.aws.amazon.com/network-firewall/latest/developerguide/firewall-behavior.html)
 
--> [AWS Network Firewall Features](aws.amazon.comnetwork-firewallfeatures)
+-> [AWS Network Firewall Features](https://aws.amazon.com/network-firewall/features/)
 
 ## What is AWS Network Firewall Integration?
 
