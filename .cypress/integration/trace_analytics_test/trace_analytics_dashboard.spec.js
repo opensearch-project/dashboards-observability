@@ -121,6 +121,7 @@ describe('Testing dashboard table', () => {
     setTimeFilter(true);
     cy.get('.euiButtonIcon[aria-label="Open popover"]').first().click();
     cy.get('text.ytitle[data-unformatted="Hourly latency (ms)"]').should('exist');
+    cy.get('button[aria-label="Remove filter"]').should('be.visible').first().click();
   });
 
   it('Redirects to traces table with filter', () => {
@@ -132,6 +133,7 @@ describe('Testing dashboard table', () => {
     cy.get('.euiSideNavItemButton__label').contains('Trace analytics').click();
 
     cy.contains('client_create_order').should('exist');
+    cy.get('button[aria-label="Remove filter"]').should('be.visible').first().click();
   });
 });
 
@@ -372,6 +374,13 @@ describe('Testing switch mode to jaeger', () => {
   });
 
   it('Verifies errors mode columns and data', () => {
+    cy.get('[data-test-subj="search-bar-input-box"]').should('be.visible').clear();
+    cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').should('be.visible').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.reload()
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+    cy.get('[data-test-subj="trace-groups-service-operation-accordian"]').click();
     cy.contains('redis,GetDriver').should('exist');
     cy.contains('14.7').should('exist');
     cy.contains('100%').should('exist');
