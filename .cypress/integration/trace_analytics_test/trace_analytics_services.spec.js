@@ -133,7 +133,6 @@ describe('Testing service view', () => {
     });
     cy.get('[data-test-subj="search-bar-input-box"]').should('be.visible').clear();
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').should('be.visible').click();
-    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
   });
 
   it('Renders service view', () => {

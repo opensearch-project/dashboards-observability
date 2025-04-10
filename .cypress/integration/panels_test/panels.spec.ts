@@ -573,7 +573,10 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
       cy.get('button[data-test-subj="createNewVizContextMenuItem"]').click();
 
       cy.url().should('match', new RegExp('(.*)#/explorer'));
-      cy.get('[id^=autocomplete-textarea]').focus().type(PPL_VISUALIZATIONS[0]);
+      cy.get('[id^=autocomplete-textarea]')
+      .focus()
+      .clear()
+      .type(PPL_VISUALIZATIONS[0]);
       cy.get('.euiButton__text').contains('Run').trigger('mouseover').click();
 
       cy.get('button[id="main-content-vis"]')
