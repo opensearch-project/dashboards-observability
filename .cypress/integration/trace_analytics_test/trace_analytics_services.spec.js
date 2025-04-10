@@ -121,7 +121,7 @@ describe('Testing service view', () => {
     setTimeFilter();
     cy.get('input[type="search"]').first().focus().type(`${SERVICE_NAME}`);
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
-    cy.get('.euiTableRow').should('have.length.lessThan', 3); //Replaces wait
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     expandServiceView(0);
   });
 
@@ -136,6 +136,7 @@ describe('Testing service view', () => {
   });
 
   it('Renders service view', () => {
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('h1.overview-content').contains(SERVICE_NAME).should('exist');
     cy.contains('178.6').should('exist');
     cy.contains('3.57%').should('exist');
@@ -143,6 +144,7 @@ describe('Testing service view', () => {
   });
 
   it('Has working breadcrumbs', () => {
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('.euiBreadcrumb').contains(SERVICE_NAME).click();
     cy.get('h1.overview-content').contains(SERVICE_NAME).should('exist');
     cy.get('.euiBreadcrumb').contains('Services').click();
