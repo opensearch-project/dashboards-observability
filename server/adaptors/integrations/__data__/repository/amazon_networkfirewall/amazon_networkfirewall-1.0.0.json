@@ -7,7 +7,7 @@
     "type": "logs_amazon_networkfirewall",
     "labels": ["Observability", "Logs", "AWS", "Cloud", "S3 Glue"],
     "author": "OpenSearch",
-    "sourceUrl": "https://github.com/opensearch-project/opensearch-catalog/releases/",
+    "sourceUrl": "https://github.com/opensearch-project/dashboards-observability/tree/main/server/adaptors/integrations/__data__/repository/amazon_networkfirewall",
     "workflows": [
       {
         "name": "queries",
