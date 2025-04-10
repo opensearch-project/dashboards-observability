@@ -578,6 +578,7 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
       .clear()
       .type(PPL_VISUALIZATIONS[0]);
       cy.get('.euiButton__text').contains('Run').trigger('mouseover').click();
+      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
       cy.get('button[id="main-content-vis"]')
         .contains('Visualizations')
