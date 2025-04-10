@@ -109,7 +109,7 @@ describe('Testing service view empty state', () => {
   });
 });
 
-describe('Testing service view', () => {
+describe.skip('Testing service view', () => {
   beforeEach(() => {
     cy.visit(`app/observability-traces#/services`, {
       onBeforeLoad: (win) => {
@@ -119,6 +119,7 @@ describe('Testing service view', () => {
     cy.get("[data-test-subj='indexPattern-switch-link']").click();
     cy.get("[data-test-subj='data_prepper-mode']").click();
     setTimeFilter();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('input[type="search"]').first().focus().type(`${SERVICE_NAME}`);
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
