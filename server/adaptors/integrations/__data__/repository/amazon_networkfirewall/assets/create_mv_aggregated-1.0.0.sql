@@ -18,10 +18,10 @@ SELECT
   event_http_url AS `aws.networkfirewall.event.http.url`,
   event_http_http_user_agent AS `aws.networkfirewall.event.http.http_user_agent`,
   event_tls_sni AS `aws.networkfirewall.event.tls.sni`,
+  event_netflow_age AS `aws.networkfirewall.event.netflow.age`,
   /* Aggregations */  
-  SUM(CAST(event_netflow_bytes AS BIGINT)) AS `aws.networkfirewall.total_bytes`,
-  SUM(CAST(event_netflow_pkts AS BIGINT)) AS `aws.networkfirewall.event.netflow.pkts`,
-  AVG(CAST(event_netflow_age AS DOUBLE)) AS `aws.networkfirewall.event.netflow.age`,
+  SUM(CAST(event_netflow_bytes AS BIGINT)) AS `aws.networkfirewall.event.netflow.bytes`,
+  SUM(CAST(event_netflow_pkts AS BIGINT)) AS `aws.networkfirewall.event.netflow.pkts`,  
   COUNT(*) AS `aws.networkfirewall.total_count`
 FROM (
   SELECT
@@ -67,7 +67,8 @@ GROUP BY
   event_http_hostname,
   event_http_url,
   event_http_http_user_agent,
-  event_tls_sni
+  event_tls_sni,
+  event_netflow_age
 WITH (
   auto_refresh = true,
   refresh_interval = '15 Minute',
