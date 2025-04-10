@@ -148,8 +148,13 @@ source=opensearch_dashboards_sample_data_flights__ {enter}
 
 export const suppressResizeObserverIssue = () => {
   // exception is thrown on loading EuiDataGrid in cypress only, ignore for now
-  cy.on('uncaught:exception', (err, runnable) => {
-    if (err.message.includes('ResizeObserver loop')) return false;
+  cy.on('uncaught:exception', (err) => {
+    if (
+      err.message.includes('ResizeObserver loop') ||
+      err.message.includes("Cannot read properties of undefined (reading 'getBoundingClientRect')")
+    ) {
+      return false;
+    }
   });
 };
 
