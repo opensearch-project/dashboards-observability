@@ -144,16 +144,6 @@ describe('Testing service view', () => {
     cy.get('div.vis-network').should('exist');
   });
 
-  it.skip('Has working breadcrumbs', () => {
-    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('.euiBreadcrumb').contains(SERVICE_NAME).click();
-    cy.get('h1.overview-content').contains(SERVICE_NAME).should('exist');
-    cy.get('.euiBreadcrumb').contains('Services').click();
-    cy.get('.euiBreadcrumb').contains('Trace analytics').click();
-    cy.get('.euiBreadcrumb').contains('Observability').click();
-    cy.get('.euiTitle').contains('Logs').should('exist');
-  });
-
   it('Renders spans data grid, flyout, filters', () => {
     cy.get("[data-test-subj='spanId-link']")
       .contains(SERVICE_SPAN_ID)
@@ -166,6 +156,24 @@ describe('Testing service view', () => {
     cy.get('.euiBadge__text').contains('spanId: ').should('exist');
     cy.get('[data-test-subj="euiFlyoutCloseButton"]').click({ force: true });
     cy.contains('Spans (1)').should('exist');
+  });
+
+  it('Has working breadcrumbs', () => {
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('.euiBreadcrumb').contains(SERVICE_NAME).click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('h1.overview-content').contains(SERVICE_NAME).should('exist');
+    cy.get('.euiBreadcrumb').contains('Services').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('span.panel-title').contains('Services').should('exist');
+
+    cy.get('.euiBreadcrumb').contains('Trace analytics').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('span.panel-title').contains('Traces').should('exist');
+
+    cy.get('.euiBreadcrumb').contains('Observability').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('.euiTitle').contains('Logs').should('exist');
   });
 });
 
