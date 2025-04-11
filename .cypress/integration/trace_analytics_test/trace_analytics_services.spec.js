@@ -109,7 +109,7 @@ describe('Testing service view empty state', () => {
   });
 });
 
-describe.skip('Testing service view', () => {
+describe('Testing service view', () => {
   beforeEach(() => {
     cy.visit(`app/observability-traces#/services`, {
       onBeforeLoad: (win) => {
@@ -144,7 +144,7 @@ describe.skip('Testing service view', () => {
     cy.get('div.vis-network').should('exist');
   });
 
-  it('Has working breadcrumbs', () => {
+  it.skip('Has working breadcrumbs', () => {
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('.euiBreadcrumb').contains(SERVICE_NAME).click();
     cy.get('h1.overview-content').contains(SERVICE_NAME).should('exist');
