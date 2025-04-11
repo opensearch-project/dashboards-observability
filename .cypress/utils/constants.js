@@ -83,7 +83,11 @@ export const setTimeFilter = (setEndTime = false, refresh = true) => {
       .type('{selectall}' + endTime, { force: true });
   }
   if (refresh) cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
-  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist'); //Replaces Wait
+  cy.get('body').then(($body) => {
+    if ($body.find('[data-test-subj="globalLoadingIndicator"]').length > 0) {
+      cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 10000 }).should('not.exist');
+    }
+  });
 };
 
 export const expandServiceView = (rowIndex = 0) => {

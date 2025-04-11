@@ -57,6 +57,10 @@ describe('Testing services table', () => {
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
     cy.contains(' (1)').should('exist');
     cy.contains('3.57%').should('exist');
+
+    cy.get('[data-test-subj="search-bar-input-box"]').should('be.visible').clear();
+    cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').should('be.visible').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
   });
 
   it('Verify columns in Services table', () => {
@@ -85,6 +89,7 @@ describe('Testing services table', () => {
     cy.get('[data-test-subj^="service-traces-redirection-btntrace_service_"]').first().click();
     cy.get('.euiText.euiText--medium .panel-title').should('exist');
     cy.get('.euiBadge__childButton[data-test-subj="filterBadge"]').should('exist');
+    cy.get('button[aria-label="Remove filter"]').should('be.visible').first().click();
   });
 });
 
@@ -114,26 +119,29 @@ describe('Testing service view', () => {
     cy.get("[data-test-subj='indexPattern-switch-link']").click();
     cy.get("[data-test-subj='data_prepper-mode']").click();
     setTimeFilter();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('input[type="search"]').first().focus().type(`${SERVICE_NAME}`);
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
-    cy.get('.euiTableRow').should('have.length.lessThan', 3); //Replaces wait
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     expandServiceView(0);
   });
 
+  after(() => {
+    cy.visit(`app/observability-traces#/services`, {
+      onBeforeLoad: (win) => {
+        win.sessionStorage.clear();
+      },
+    });
+    cy.get('[data-test-subj="search-bar-input-box"]').should('be.visible').clear();
+    cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').should('be.visible').click();
+  });
+
   it('Renders service view', () => {
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('h1.overview-content').contains(SERVICE_NAME).should('exist');
     cy.contains('178.6').should('exist');
     cy.contains('3.57%').should('exist');
     cy.get('div.vis-network').should('exist');
-  });
-
-  it('Has working breadcrumbs', () => {
-    cy.get('.euiBreadcrumb').contains(SERVICE_NAME).click();
-    cy.get('h1.overview-content').contains(SERVICE_NAME).should('exist');
-    cy.get('.euiBreadcrumb').contains('Services').click();
-    cy.get('.euiBreadcrumb').contains('Trace analytics').click();
-    cy.get('.euiBreadcrumb').contains('Observability').click();
-    cy.get('.euiTitle').contains('Logs').should('exist');
   });
 
   it('Renders spans data grid, flyout, filters', () => {
@@ -148,6 +156,24 @@ describe('Testing service view', () => {
     cy.get('.euiBadge__text').contains('spanId: ').should('exist');
     cy.get('[data-test-subj="euiFlyoutCloseButton"]').click({ force: true });
     cy.contains('Spans (1)').should('exist');
+  });
+
+  it('Has working breadcrumbs', () => {
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('.euiBreadcrumb').contains(SERVICE_NAME).click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('h1.overview-content').contains(SERVICE_NAME).should('exist');
+    cy.get('.euiBreadcrumb').contains('Services').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('span.panel-title').contains('Services').should('exist');
+
+    cy.get('.euiBreadcrumb').contains('Trace analytics').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('span.panel-title').contains('Traces').should('exist');
+
+    cy.get('.euiBreadcrumb').contains('Observability').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('.euiTitle').contains('Logs').should('exist');
   });
 });
 
@@ -258,6 +284,11 @@ describe('Testing traces Spans table verify table headers functionality', () => 
     cy.contains('analytics-service, frontend-client, recommendation').should('exist');
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
     expandServiceView(1);
+    cy.get('body').then(($body) => {
+      if ($body.find('button[aria-label="remove current filter"]').length > 0) {
+        cy.get('button[aria-label="remove current filter"]').click();
+      }
+    });
     cy.get('.panel-title').contains('Spans').should('exist');
     cy.get('.panel-title-count').contains('8').should('exist');
     verify_traces_spans_data_grid_cols_exists();
@@ -429,6 +460,7 @@ describe('Testing navigation from Services to Traces', () => {
       .contains('serviceName: analytics-service');
 
     cy.get('.euiText').contains('03f9c770db5ee2f1caac0afc36db49ba').should('exist');
+    cy.get('button[aria-label="Remove filter"]').should('be.visible').first().click();
   });
 });
 

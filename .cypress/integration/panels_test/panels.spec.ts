@@ -114,7 +114,8 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
       });
 
       it('Duplicates a legacy panel', () => {
-        cy.get('[data-test-subj="breadcrumb last"]').click({ force: true }); //reload page
+        cy.reload();
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
         cy.get('.euiTableRow').should('have.length', 1);
         selectThePanel();
         openActionsDropdown();
@@ -139,6 +140,7 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
           .then(($anchorElem) => {
             expectLegacyId(cy.wrap($anchorElem));
           });
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
         cy.get('.euiCheckbox__input[title="Select this row"]').first().click();
         openActionsDropdown();
         cy.get('button[data-test-subj="renameContextMenuItem"]').click();
@@ -146,17 +148,6 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
         cy.get('button[data-test-subj="runModalButton"]').click();
         const renamed = testPanelTableCell();
         expectLegacyId(renamed);
-      });
-
-      it('Deletes the panel', () => {
-        cy.get('input[data-test-subj="checkboxSelectAll"]').click();
-        openActionsDropdown();
-        cy.get('button[data-test-subj="deleteContextMenuItem"]').click();
-        cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('be.disabled');
-        cy.get('input.euiFieldText[placeholder="delete"]').focus().type('delete');
-        cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('not.be.disabled');
-        cy.get('button[data-test-subj="popoverModal__deleteButton"]').click();
-        cy.get('h2[data-test-subj="customPanels__noPanelsHome"]').should('exist');
       });
 
       it('Searches panels', () => {
@@ -180,14 +171,28 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
         cy.get('a.euiLink').contains('Saved Object').should('exist');
         cy.get('.euiTableRow').should('have.length', 1);
       });
+
+      it('Deletes the panel', () => {
+        cy.reload();
+        cy.get('[data-test-subj="tableHeaderSortButton"]').first().click();// Page needs click before checking box
+        cy.get('[data-test-subj="checkboxSelectAll"]').click({ force: true })
+        openActionsDropdown();
+        cy.get('button[data-test-subj="deleteContextMenuItem"]').click({ force: true });
+        
+        cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('be.disabled');
+        cy.get('input.euiFieldText[placeholder="delete"]').focus().type('delete');
+        cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('not.be.disabled');
+        cy.get('button[data-test-subj="popoverModal__deleteButton"]').click();
+        cy.get('h2[data-test-subj="customPanels__noPanelsHome"]').should('exist');
+      });
     });
 
     describe('with a SavedObjects Panel', () => {
       beforeEach(() => {
         createSavedObjectPanel();
         moveToPanelHome();
-        cy.get('[data-test-subj="breadcrumb last"]').click({ force: true }); //reload page
-        cy.get('.euiTableRow').should('have.length', 1);
+        cy.reload();
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
       });
 
       it('Duplicates the panel', () => {
@@ -208,6 +213,7 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
       });
 
       it('Renames a saved-objects panel', () => {
+        cy.get('[data-test-subj="tableHeaderSortButton"]').first().click();// Page needs click before checking box
         selectThePanel();
         openActionsDropdown();
         cy.get('button[data-test-subj="renameContextMenuItem"]').click();
@@ -261,8 +267,9 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
   });
 
   describe('Testing a panel', () => {
+    const test_name = `test_${new Date().getTime()}`;
+
     beforeEach(() => {
-      const test_name = `test_${new Date().getTime()}`;
       createSavedObjectPanel(test_name).as('thePanel');
       cy.then(function () {
         moveToThePanel(this.thePanel.id);
@@ -277,9 +284,10 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
 
     it('Redirects to correct page on breadcrumb click', () => {
       cy.get('a[data-test-subj="breadcrumb last"]').click();
+      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
       cy.then(function () {
         cy.get('h1[data-test-subj="panelNameHeader"]')
-          .contains(this.thePanel.attributes.title)
+          .contains(test_name)
           .should('exist');
       });
     });
@@ -561,12 +569,20 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
     });
 
     it('Add new visualization to panel', () => {
+      cy.clearLocalStorage();
+      cy.window().then((win) => win.sessionStorage.clear());
+      cy.reload();
+      
       cy.get('button[data-test-subj="addVisualizationButton"]').eq(0).click();
       cy.get('button[data-test-subj="createNewVizContextMenuItem"]').click();
 
       cy.url().should('match', new RegExp('(.*)#/explorer'));
-      cy.get('[id^=autocomplete-textarea]').focus().type(PPL_VISUALIZATIONS[0]);
+      cy.get('[id^=autocomplete-textarea]')
+      .focus()
+      .clear()
+      .type(PPL_VISUALIZATIONS[0], { force: true, delay: 50 });
       cy.get('.euiButton__text').contains('Run').trigger('mouseover').click();
+      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
       cy.get('button[id="main-content-vis"]')
         .contains('Visualizations')
