@@ -1,0 +1,1132 @@
+{
+  "template": {
+    "mappings": {
+      "_meta": {
+        "version": "1.0.0",
+        "catalog": "observability",
+        "type": "logs",
+        "component": "amazon_networkfirewall",
+        "labels": ["aws", "networkfirewall"]
+      },
+      "properties": {
+        "aws": {
+          "properties": {
+            "networkfirewall": {
+              "properties": {
+                "availability_zone": {
+                  "type": "keyword"
+                },
+                "event": {
+                  "properties": {
+                    "alert": {
+                      "properties": {
+                        "action": {
+                          "type": "keyword"
+                        },
+                        "category": {
+                          "type": "keyword"
+                        },
+                        "gid": {
+                          "type": "integer"
+                        },
+                        "rev": {
+                          "type": "integer"
+                        },
+                        "severity": {
+                          "type": "integer"
+                        },
+                        "signature": {
+                          "type": "keyword"
+                        },
+                        "signature_id": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "anomaly": {
+                      "properties": {
+                        "code": {
+                          "type": "keyword"
+                        },
+                        "event": {
+                          "type": "keyword"
+                        },
+                        "layer": {
+                          "type": "keyword"
+                        },
+                        "type": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "another_mqtt": {
+                      "properties": {
+                        "publish": {
+                          "properties": {
+                            "dup": {
+                              "type": "boolean"
+                            },
+                            "qos": {
+                              "type": "integer"
+                            },
+                            "retain": {
+                              "type": "boolean"
+                            },
+                            "skipped_length": {
+                              "type": "integer"
+                            },
+                            "truncated": {
+                              "type": "boolean"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "app_proto": {
+                      "type": "keyword"
+                    },
+                    "dest_ip": {
+                      "type": "keyword"
+                    },
+                    "dest_port": {
+                      "type": "integer"
+                    },
+                    "direction": {
+                      "type": "keyword"
+                    },
+                    "dns": {
+                      "properties": {
+                        "answers": {
+                          "properties": {
+                            "rdata": {
+                              "type": "keyword"
+                            },
+                            "rrname": {
+                              "type": "keyword"
+                            },
+                            "rrtype": {
+                              "type": "keyword"
+                            },
+                            "ttl": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "flags": {
+                          "type": "keyword"
+                        },
+                        "id": {
+                          "type": "integer"
+                        },
+                        "qr": {
+                          "type": "boolean"
+                        },
+                        "query": {
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "opcode": {
+                              "type": "integer"
+                            },
+                            "rrname": {
+                              "type": "keyword"
+                            },
+                            "rrtype": {
+                              "type": "keyword"
+                            },
+                            "tx_id": {
+                              "type": "integer"
+                            },
+                            "type": {
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "ra": {
+                          "type": "boolean"
+                        },
+                        "rcode": {
+                          "type": "keyword"
+                        },
+                        "rd": {
+                          "type": "boolean"
+                        },
+                        "rdata": {
+                          "type": "keyword"
+                        },
+                        "rrname": {
+                          "type": "keyword"
+                        },
+                        "rrtype": {
+                          "type": "keyword"
+                        },
+                        "ttl": {
+                          "type": "integer"
+                        },
+                        "type": {
+                          "type": "keyword"
+                        },
+                        "version": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "event": {
+                      "properties": {
+                        "ssh": {
+                          "properties": {
+                            "client": {
+                              "properties": {
+                                "hassh": {
+                                  "properties": {
+                                    "hash": {
+                                      "type": "keyword"
+                                    },
+                                    "string": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                },
+                                "proto_version": {
+                                  "type": "keyword"
+                                },
+                                "software_version": {
+                                  "type": "keyword"
+                                }
+                              }
+                            },
+                            "server": {
+                              "properties": {
+                                "hassh": {
+                                  "properties": {
+                                    "hash": {
+                                      "type": "keyword"
+                                    },
+                                    "string": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                },
+                                "proto_version": {
+                                  "type": "keyword"
+                                },
+                                "software_version": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "event_type": {
+                      "type": "keyword"
+                    },
+                    "flow_id": {
+                      "type": "long"
+                    },
+                    "ftp": {
+                      "properties": {
+                        "command": {
+                          "type": "keyword"
+                        },
+                        "command_data": {
+                          "type": "keyword"
+                        },
+                        "completion_code": {
+                          "type": "keyword"
+                        },
+                        "dynamic_port": {
+                          "type": "integer"
+                        },
+                        "mode": {
+                          "type": "keyword"
+                        },
+                        "reply": {
+                          "type": "keyword"
+                        },
+                        "reply_received": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "ftp_data": {
+                      "properties": {
+                        "command": {
+                          "type": "keyword"
+                        },
+                        "filename": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "http": {
+                      "properties": {
+                        "hostname": {
+                          "type": "keyword"
+                        },
+                        "http_content_type": {
+                          "type": "keyword"
+                        },
+                        "http_method": {
+                          "type": "keyword"
+                        },
+                        "http_refer": {
+                          "type": "keyword"
+                        },
+                        "http_user_agent": {
+                          "type": "keyword"
+                        },
+                        "length": {
+                          "type": "integer"
+                        },
+                        "protocol": {
+                          "type": "keyword"
+                        },
+                        "request_headers": {
+                          "properties": {
+                            "name": {
+                              "type": "keyword"
+                            },
+                            "value": {
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "response_headers": {
+                          "properties": {
+                            "name": {
+                              "type": "keyword"
+                            },
+                            "value": {
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "status": {
+                          "type": "keyword"
+                        },
+                        "url": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "http2": {
+                      "properties": {
+                        "request": {
+                          "properties": {
+                            "headers": {
+                              "properties": {
+                                "name": {
+                                  "type": "keyword"
+                                },
+                                "value": {
+                                  "type": "keyword"
+                                }
+                              }
+                            },
+                            "settings": {
+                              "properties": {
+                                "settings_id": {
+                                  "type": "keyword"
+                                },
+                                "settings_value": {
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "response": {
+                          "properties": {
+                            "headers": {
+                              "properties": {
+                                "name": {
+                                  "type": "keyword"
+                                },
+                                "value": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "icmp_code": {
+                      "type": "integer"
+                    },
+                    "icmp_type": {
+                      "type": "integer"
+                    },
+                    "mqtt": {
+                      "properties": {
+                        "auth": {
+                          "properties": {
+                            "dup": {
+                              "type": "boolean"
+                            },
+                            "qos": {
+                              "type": "integer"
+                            },
+                            "reason_code": {
+                              "type": "integer"
+                            },
+                            "retain": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "connack": {
+                          "properties": {
+                            "dup": {
+                              "type": "boolean"
+                            },
+                            "properties": {
+                              "properties": {
+                                "topic_alias_maximum": {
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "qos": {
+                              "type": "integer"
+                            },
+                            "retain": {
+                              "type": "boolean"
+                            },
+                            "return_code": {
+                              "type": "integer"
+                            },
+                            "session_present": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "connect": {
+                          "properties": {
+                            "client_id": {
+                              "type": "keyword"
+                            },
+                            "dup": {
+                              "type": "boolean"
+                            },
+                            "flags": {
+                              "properties": {
+                                "clean_session": {
+                                  "type": "boolean"
+                                },
+                                "password": {
+                                  "type": "boolean"
+                                },
+                                "username": {
+                                  "type": "boolean"
+                                },
+                                "will": {
+                                  "type": "boolean"
+                                },
+                                "will_retain": {
+                                  "type": "boolean"
+                                }
+                              }
+                            },
+                            "password": {
+                              "type": "keyword"
+                            },
+                            "properties": {
+                              "properties": {
+                                "maximum_packet_size": {
+                                  "type": "integer"
+                                },
+                                "receive_maximum": {
+                                  "type": "integer"
+                                },
+                                "session_expiry_interval": {
+                                  "type": "integer"
+                                },
+                                "topic_alias_maximum": {
+                                  "type": "integer"
+                                },
+                                "userprop1": {
+                                  "type": "keyword"
+                                },
+                                "userprop2": {
+                                  "type": "keyword"
+                                }
+                              }
+                            },
+                            "protocol_string": {
+                              "type": "keyword"
+                            },
+                            "protocol_version": {
+                              "type": "integer"
+                            },
+                            "qos": {
+                              "type": "integer"
+                            },
+                            "retain": {
+                              "type": "boolean"
+                            },
+                            "username": {
+                              "type": "keyword"
+                            },
+                            "will": {
+                              "properties": {
+                                "message": {
+                                  "type": "keyword"
+                                },
+                                "properties": {
+                                  "properties": {
+                                    "content_type": {
+                                      "type": "keyword"
+                                    },
+                                    "correlation_data": {
+                                      "type": "keyword"
+                                    },
+                                    "message_expiry_interval": {
+                                      "type": "integer"
+                                    },
+                                    "payload_format_indicator": {
+                                      "type": "integer"
+                                    },
+                                    "response_topic": {
+                                      "type": "keyword"
+                                    },
+                                    "topic_alias": {
+                                      "type": "integer"
+                                    },
+                                    "userprop": {
+                                      "type": "keyword"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "disconnect": {
+                          "properties": {
+                            "dup": {
+                              "type": "boolean"
+                            },
+                            "properties": {
+                              "properties": {
+                                "session_expiry_interval": {
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "qos": {
+                              "type": "integer"
+                            },
+                            "reason_code": {
+                              "type": "integer"
+                            },
+                            "retain": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "puback": {
+                          "properties": {
+                            "dup": {
+                              "type": "boolean"
+                            },
+                            "message_id": {
+                              "type": "integer"
+                            },
+                            "qos": {
+                              "type": "integer"
+                            },
+                            "reason_code": {
+                              "type": "integer"
+                            },
+                            "retain": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "publish": {
+                          "properties": {
+                            "dup": {
+                              "type": "boolean"
+                            },
+                            "qos": {
+                              "type": "integer"
+                            },
+                            "retain": {
+                              "type": "boolean"
+                            },
+                            "skipped_length": {
+                              "type": "integer"
+                            },
+                            "truncated": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "suback": {
+                          "properties": {
+                            "dup": {
+                              "type": "boolean"
+                            },
+                            "message_id": {
+                              "type": "integer"
+                            },
+                            "qos": {
+                              "type": "integer"
+                            },
+                            "qos_granted": {
+                              "type": "integer"
+                            },
+                            "retain": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "subscribe": {
+                          "properties": {
+                            "dup": {
+                              "type": "boolean"
+                            },
+                            "message_id": {
+                              "type": "integer"
+                            },
+                            "qos": {
+                              "type": "integer"
+                            },
+                            "retain": {
+                              "type": "boolean"
+                            },
+                            "topics": {
+                              "properties": {
+                                "qos": {
+                                  "type": "integer"
+                                },
+                                "topic": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "unsuback": {
+                          "properties": {
+                            "dup": {
+                              "type": "boolean"
+                            },
+                            "message_id": {
+                              "type": "integer"
+                            },
+                            "qos": {
+                              "type": "integer"
+                            },
+                            "retain": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "unsubscribe": {
+                          "properties": {
+                            "dup": {
+                              "type": "boolean"
+                            },
+                            "message_id": {
+                              "type": "integer"
+                            },
+                            "qos": {
+                              "type": "integer"
+                            },
+                            "retain": {
+                              "type": "boolean"
+                            },
+                            "topics": {
+                              "type": "keyword"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "netflow": {
+                      "properties": {
+                        "age": {
+                          "type": "integer"
+                        },
+                        "alerted": {
+                          "type": "boolean"
+                        },
+                        "bbypassed": {
+                          "properties": {
+                            "bytes_toclient": {
+                              "type": "integer"
+                            },
+                            "bytes_toserver": {
+                              "type": "integer"
+                            },
+                            "pkts_toclient": {
+                              "type": "integer"
+                            },
+                            "pkts_toserver": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "bypass": {
+                          "type": "keyword"
+                        },
+                        "bytes": {
+                          "type": "long"
+                        },
+                        "bytes_toclient": {
+                          "type": "integer"
+                        },
+                        "bytes_toserver": {
+                          "type": "integer"
+                        },
+                        "end": {
+                          "type": "date",
+                          "format": "strict_date_optional_time_nanos"
+                        },
+                        "max_ttl": {
+                          "type": "integer"
+                        },
+                        "min_ttl": {
+                          "type": "integer"
+                        },
+                        "pkts": {
+                          "type": "integer"
+                        },
+                        "pkts_toclient": {
+                          "type": "integer"
+                        },
+                        "pkts_toserver": {
+                          "type": "integer"
+                        },
+                        "reason": {
+                          "type": "keyword"
+                        },
+                        "start": {
+                          "type": "date",
+                          "format": "strict_date_optional_time_nanos"
+                        },
+                        "state": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "packet": {
+                      "type": "keyword"
+                    },
+                    "packet_info": {
+                      "properties": {
+                        "linktype": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "pcap_cnt": {
+                      "type": "integer"
+                    },
+                    "pkt_src": {
+                      "type": "keyword"
+                    },
+                    "proto": {
+                      "type": "keyword"
+                    },
+                    "rdp": {
+                      "properties": {
+                        "channels": {
+                          "type": "keyword"
+                        },
+                        "client": {
+                          "properties": {
+                            "build": {
+                              "type": "keyword"
+                            },
+                            "capabilities": {
+                              "type": "keyword"
+                            },
+                            "client_name": {
+                              "type": "keyword"
+                            },
+                            "color_depth": {
+                              "type": "integer"
+                            },
+                            "desktop_height": {
+                              "type": "integer"
+                            },
+                            "desktop_width": {
+                              "type": "integer"
+                            },
+                            "function_keys": {
+                              "type": "integer"
+                            },
+                            "id": {
+                              "type": "keyword"
+                            },
+                            "keyboard_layout": {
+                              "type": "keyword"
+                            },
+                            "keyboard_type": {
+                              "type": "keyword"
+                            },
+                            "product_id": {
+                              "type": "integer"
+                            },
+                            "version": {
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "cookie": {
+                          "type": "keyword"
+                        },
+                        "event_type": {
+                          "type": "keyword"
+                        },
+                        "protocol": {
+                          "type": "keyword"
+                        },
+                        "server_supports": {
+                          "type": "keyword"
+                        },
+                        "tx_id": {
+                          "type": "integer"
+                        },
+                        "x509_serials": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "rfb": {
+                      "properties": {
+                        "authentication": {
+                          "properties": {
+                            "security_result": {
+                              "type": "keyword"
+                            },
+                            "security_type": {
+                              "type": "integer"
+                            },
+                            "vnc": {
+                              "properties": {
+                                "challenge": {
+                                  "type": "keyword"
+                                },
+                                "response": {
+                                  "type": "keyword"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "client_protocol_version": {
+                          "properties": {
+                            "major": {
+                              "type": "keyword"
+                            },
+                            "minor": {
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "framebuffer": {
+                          "properties": {
+                            "height": {
+                              "type": "integer"
+                            },
+                            "name": {
+                              "type": "keyword"
+                            },
+                            "pixel_format": {
+                              "properties": {
+                                "big_endian": {
+                                  "type": "boolean"
+                                },
+                                "bits_per_pixel": {
+                                  "type": "integer"
+                                },
+                                "blue_max": {
+                                  "type": "integer"
+                                },
+                                "blue_shift": {
+                                  "type": "integer"
+                                },
+                                "depth": {
+                                  "type": "integer"
+                                },
+                                "green_max": {
+                                  "type": "integer"
+                                },
+                                "green_shift": {
+                                  "type": "integer"
+                                },
+                                "red_max": {
+                                  "type": "integer"
+                                },
+                                "red_shift": {
+                                  "type": "integer"
+                                },
+                                "true_color": {
+                                  "type": "boolean"
+                                }
+                              }
+                            },
+                            "width": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "screen_shared": {
+                          "type": "boolean"
+                        },
+                        "server_protocol_version": {
+                          "properties": {
+                            "major": {
+                              "type": "keyword"
+                            },
+                            "minor": {
+                              "type": "keyword"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "smb": {
+                      "properties": {
+                        "access": {
+                          "type": "keyword"
+                        },
+                        "accessed": {
+                          "type": "integer"
+                        },
+                        "changed": {
+                          "type": "integer"
+                        },
+                        "command": {
+                          "type": "keyword"
+                        },
+                        "created": {
+                          "type": "integer"
+                        },
+                        "dcerpc": {
+                          "properties": {
+                            "call_id": {
+                              "type": "integer"
+                            },
+                            "opnum": {
+                              "type": "integer"
+                            },
+                            "realm": {
+                              "type": "keyword"
+                            },
+                            "req": {
+                              "properties": {
+                                "frag_cnt": {
+                                  "type": "integer"
+                                },
+                                "stub_data_size": {
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "request": {
+                              "type": "keyword"
+                            },
+                            "res": {
+                              "properties": {
+                                "frag_cnt": {
+                                  "type": "integer"
+                                },
+                                "stub_data_size": {
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "response": {
+                              "type": "keyword"
+                            },
+                            "snames": {
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "dialect": {
+                          "type": "keyword"
+                        },
+                        "disposition": {
+                          "type": "keyword"
+                        },
+                        "filename": {
+                          "type": "keyword"
+                        },
+                        "fuid": {
+                          "type": "keyword"
+                        },
+                        "id": {
+                          "type": "integer"
+                        },
+                        "modified": {
+                          "type": "integer"
+                        },
+                        "ntlmssp": {
+                          "properties": {
+                            "domain": {
+                              "type": "keyword"
+                            },
+                            "host": {
+                              "type": "keyword"
+                            },
+                            "user": {
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "request": {
+                          "properties": {
+                            "native_lm": {
+                              "type": "keyword"
+                            },
+                            "native_os": {
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "response": {
+                          "properties": {
+                            "native_lm": {
+                              "type": "keyword"
+                            },
+                            "native_os": {
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "session_id": {
+                          "type": "long"
+                        },
+                        "size": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "keyword"
+                        },
+                        "status_code": {
+                          "type": "keyword"
+                        },
+                        "tree_id": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "src_ip": {
+                      "type": "keyword"
+                    },
+                    "src_port": {
+                      "type": "integer"
+                    },
+                    "tcp": {
+                      "properties": {
+                        "ack": {
+                          "type": "boolean"
+                        },
+                        "fin": {
+                          "type": "boolean"
+                        },
+                        "psh": {
+                          "type": "boolean"
+                        },
+                        "rst": {
+                          "type": "boolean"
+                        },
+                        "syn": {
+                          "type": "boolean"
+                        },
+                        "tcp_flags": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "tftp": {
+                      "properties": {
+                        "file": {
+                          "type": "keyword"
+                        },
+                        "mode": {
+                          "type": "keyword"
+                        },
+                        "packet": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "timestamp": {
+                      "type": "date",
+                      "format": "strict_date_optional_time_nanos"
+                    },
+                    "tls": {
+                      "properties": {
+                        "certificate": {
+                          "type": "keyword"
+                        },
+                        "fingerprint": {
+                          "type": "keyword"
+                        },
+                        "issuerdn": {
+                          "type": "keyword"
+                        },
+                        "notafter": {
+                          "type": "date",
+                          "format": "strict_date_optional_time_nanos"
+                        },
+                        "notbefore": {
+                          "type": "date",
+                          "format": "strict_date_optional_time_nanos"
+                        },
+                        "serial": {
+                          "type": "keyword"
+                        },
+                        "sni": {
+                          "type": "keyword"
+                        },
+                        "subject": {
+                          "type": "keyword"
+                        },
+                        "version": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "tls_inspected": {
+                      "type": "boolean"
+                    },
+                    "tx_id": {
+                      "type": "integer"
+                    },
+                    "verdict": {
+                      "properties": {
+                        "action": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "vlan": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "event_timestamp": {
+                  "type": "keyword"
+                },
+                "firewall_name": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
