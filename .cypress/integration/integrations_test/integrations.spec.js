@@ -58,10 +58,12 @@ describe('Integrations plugin', () => {
     cy.get('[data-test-subj="fields"]').click();
     cy.get('input[type="search"]').eq(0).focus().clear().type('severity.observe');
     cy.get('.euiTableRow').should('have.length', 2); //Filters correctly to the field name
+    cy.get('input[type="search"]').eq(0).focus().clear()
   });
 
   it('Uses the filter of assets table', () => {
     moveToAvailableNginxIntegration();
+    cy.get('[data-test-subj="assets"]').click();
     cy.get('.euiFilterGroup').trigger('mouseover').click();
     cy.get('.euiFilterSelectItem').contains('visualization').click();
     cy.get('.euiTableRow').should('have.length', 6); //Filters correctly to visualization types
