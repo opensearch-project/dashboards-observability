@@ -11,7 +11,8 @@ export const useInjectElementsIntoGrid = (
   maxDisplayRows: number,
   tracesTableMode: string,
   loadMoreHandler?: () => void,
-  maxTraces?: number
+  maxTraces?: number,
+  isLastPage?: boolean
 ) => {
   useEffect(() => {
     setTimeout(() => {
@@ -51,18 +52,16 @@ export const useInjectElementsIntoGrid = (
       }
 
       const pagination = document.querySelector<HTMLElement>('.euiDataGrid__pagination');
+      const existingLoadMoreButton = pagination?.querySelector('.trace-table-load-more');
 
-      if (tracesTableMode !== 'traces') {
-        if (pagination) {
-          const existingLoadMoreButton = pagination.querySelector('.trace-table-load-more');
-          if (existingLoadMoreButton) {
-            existingLoadMoreButton.remove();
-          }
+      if (tracesTableMode !== 'traces' || !pagination || !loadMoreHandler || !isLastPage) {
+        if (existingLoadMoreButton) {
+          existingLoadMoreButton.remove();
         }
         return;
       }
 
-      if (pagination && loadMoreHandler) {
+      if (pagination && loadMoreHandler && isLastPage) {
         pagination.style.display = 'flex';
         pagination.style.alignItems = 'center';
         pagination.style.justifyContent = 'space-between';
@@ -72,13 +71,20 @@ export const useInjectElementsIntoGrid = (
           loadMoreButton = document.createElement('button');
           loadMoreButton.className = 'trace-table-load-more euiButtonEmpty euiButtonEmpty--text';
           loadMoreButton.style.marginLeft = '12px';
-          loadMoreButton.innerText = 'Load more data';
+          loadMoreButton.innerText = '... Load more';
 
           loadMoreButton.onclick = () => loadMoreHandler();
 
-          pagination.appendChild(loadMoreButton);
+          const paginationList = pagination.querySelector('.euiPagination__list');
+
+          if (paginationList) {
+            const listItem = document.createElement('li');
+            listItem.className = 'euiPagination__item trace-table-load-more';
+            listItem.appendChild(loadMoreButton);
+            paginationList.appendChild(listItem);
+          }
         }
       }
     }, 100);
-  }, [rowCount, tracesTableMode, loadMoreHandler, maxTraces, maxDisplayRows]);
+  }, [rowCount, tracesTableMode, loadMoreHandler, maxTraces, maxDisplayRows, isLastPage]);
 };

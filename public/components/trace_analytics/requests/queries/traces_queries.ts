@@ -56,6 +56,7 @@ export const getTracesQuery = (
 ) => {
   const field = sort?.field || '_key';
   const direction = sort?.direction || 'asc';
+  // Need aggregation because filtering considers the children
   const jaegerQuery: any = {
     size: 0,
     query: {
@@ -187,7 +188,7 @@ export const getTracesQuery = (
         },
       },
     },
-    track_total_hits: true,
+    track_total_hits: false,
   };
   if (traceId) {
     jaegerQuery.query.bool.filter.push({
