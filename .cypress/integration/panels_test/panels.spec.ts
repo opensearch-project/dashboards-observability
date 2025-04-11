@@ -569,6 +569,10 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
     });
 
     it('Add new visualization to panel', () => {
+      cy.clearLocalStorage();
+      cy.window().then((win) => win.sessionStorage.clear());
+      cy.reload();
+      
       cy.get('button[data-test-subj="addVisualizationButton"]').eq(0).click();
       cy.get('button[data-test-subj="createNewVizContextMenuItem"]').click();
 
@@ -576,7 +580,7 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
       cy.get('[id^=autocomplete-textarea]')
       .focus()
       .clear()
-      .type(PPL_VISUALIZATIONS[0]);
+      .type(PPL_VISUALIZATIONS[0], { force: true, delay: 50 });
       cy.get('.euiButton__text').contains('Run').trigger('mouseover').click();
       cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
