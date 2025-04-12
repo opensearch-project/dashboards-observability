@@ -69,10 +69,21 @@ describe('Testing trace view', () => {
     cy.get("[data-test-subj='indexPattern-switch-link']").click();
     cy.get("[data-test-subj='data_prepper-mode']").click();
     setTimeFilter();
-    cy.get('input[type="search"]').focus().type(`${TRACE_ID}`);
+    cy.get('input[type="search"]').focus().clear().type(`${TRACE_ID}`);
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
     cy.get('.euiTableRow').should('have.length.lessThan', 3); //Replaces wait
     cy.get('[data-test-subj="trace-link"]').eq(0).click();
+  });
+
+  after(() => {
+    cy.visit(`app/observability-traces#/traces`, {
+      onBeforeLoad: (win) => {
+        win.sessionStorage.clear();
+      },
+    });
+    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    cy.get("[data-test-subj='data_prepper-mode']").click();
+    cy.get('input[type="search"]').first().focus().clear();
   });
 
   it('Renders the trace view', () => {
@@ -173,6 +184,11 @@ describe('Testing traces tree view', () => {
 
   it('Verifies tree view and table toggle functionality with expand/collapse logic', () => {
     cy.get('.euiButtonGroup').contains('Tree view').click();
+    cy.get('body').then(($body) => {
+      if ($body.find('button[aria-label="remove current filter"]').length > 0) {
+        cy.get('button[aria-label="remove current filter"]').click();
+      }
+    });
     cy.contains('Expand all').should('exist');
     cy.contains('Collapse all').should('exist');
     //Waiting time for render to complete

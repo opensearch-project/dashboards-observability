@@ -12,7 +12,7 @@ import {
   VIS_TYPE_LINE,
   TESTING_PANEL,
 } from '../../utils/metrics_constants';
-import { suppressResizeObserverIssue, COMMAND_TIMEOUT_LONG } from '../../utils/constants';
+import { suppressResizeObserverIssue } from '../../utils/constants';
 import { landOnPanels, clearQuerySearchBoxText } from '../../utils/event_analytics/helpers';
 
 describe('Metrics Analytics', () => {
@@ -41,7 +41,14 @@ describe('Metrics Analytics', () => {
       createSavedObjectMetric({ testMetricIndex: 1 });
 
       moveToMetricsHome();
-      cy.get('[data-test-subj="comboBoxToggleListButton"]').click();
+      cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+      cy.get('body').then(($body) => {
+        if ($body.find('[data-test-subj="comboBoxClearButton"]').length > 0) {
+          cy.get('[data-test-subj="comboBoxClearButton"]').first().click();
+        }
+      });
+      cy.get('[data-test-subj="metricsDataSourcePicker"]').click();
       cy.get('[data-test-subj="prometheusOption"]').click();
       cy.get('[data-test-subj="metricsListItems_availableMetrics"]')
         .contains(PPL_METRICS_NAMES[1])
@@ -59,11 +66,25 @@ describe('Metrics Analytics', () => {
 
     describe('Check data source picker', () => {
       it('Index picker should be only available under Otel metric datasource', () => {
-        cy.get('[data-test-subj="comboBoxToggleListButton"]').click();
-        cy.get('[data-test-subj="prometheusOption"]').click();
+        cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+        cy.get('body').then(($body) => {
+          if ($body.find('[data-test-subj="comboBoxClearButton"]').length > 0) {
+            cy.get('[data-test-subj="comboBoxClearButton"]').first().click();
+          }
+        });
+        cy.get('[data-test-subj="metricsDataSourcePicker"]').click();
+        cy.get('[data-test-subj="prometheusOption"]').first().click();
         cy.get('[data-test-subj="metricsIndexPicker"]').should('not.exist');
 
-        cy.get('[data-test-subj="comboBoxToggleListButton"]').click();
+        cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+        cy.get('body').then(($body) => {
+          if ($body.find('[data-test-subj="comboBoxClearButton"]').length > 0) {
+            cy.get('[data-test-subj="comboBoxClearButton"]').first().click();
+          }
+        });
+        cy.get('[data-test-subj="metricsDataSourcePicker"]').click();
         cy.get('[data-test-subj="openTelemetryOption"]').click();
         cy.get('[data-test-subj="metricsIndexPicker"]').should('exist');
       });
@@ -71,6 +92,13 @@ describe('Metrics Analytics', () => {
 
     describe('Search for metrics in search bar', () => {
       it('Search for metrics in search bar from available metrics', () => {
+        cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+        cy.get('body').then(($body) => {
+          if ($body.find('[data-test-subj="comboBoxClearButton"]').length > 0) {
+            cy.get('[data-test-subj="comboBoxClearButton"]').first().click();
+          }
+        });
         cy.get('[data-test-subj="metricsDataSourcePicker"]').click();
         cy.get('[data-test-subj="prometheusOption"]').click();
         cy.get('[data-test-subj="metricsSearch"]').type('metric', { wait: 50 });
@@ -92,8 +120,10 @@ describe('Metrics Analytics', () => {
 
     describe('Select and unselect metrics in sidebar', () => {
       it('Select and unselect metrics in sidebar', () => {
+        cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
         cy.get('[data-test-subj="metricsDataSourcePicker"]').click();
-        cy.get('[data-test-subj="prometheusOption"]').click();
+        cy.get('[data-test-subj="prometheusOption"]').first().click();
         cy.get('[data-test-subj="metricsListItems_availableMetrics"]')
           .contains(PPL_METRICS_NAMES[0])
           .trigger('mouseover')
@@ -131,6 +161,13 @@ describe('Metrics Analytics', () => {
 
     describe('Test Metric Visualizations', () => {
       beforeEach(() => {
+        cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+        cy.get('body').then(($body) => {
+          if ($body.find('[data-test-subj="comboBoxClearButton"]').length > 0) {
+            cy.get('[data-test-subj="comboBoxClearButton"]').first().click();
+          }
+        });
         cy.get('[data-test-subj="metricsDataSourcePicker"]').click();
         cy.get('[data-test-subj="prometheusOption"]').click();
         cy.get('[data-test-subj="metricsListItems_availableMetrics"]')
@@ -168,7 +205,7 @@ describe('Metrics Analytics', () => {
         landOnPanels();
         cy.get('[data-test-subj="customPanels__createNewPanels"]').click();
         cy.get('input.euiFieldText').type(TESTING_PANEL);
-        cy.get('.euiButton__text', { timeout: COMMAND_TIMEOUT_LONG })
+        cy.get('.euiButton__text')
           .contains(/^Create$/)
           .click();
         cy.wait(delay * 3);
@@ -186,8 +223,7 @@ describe('Metrics Analytics', () => {
       it('Redirect to correct page on breadcrumb click', () => {
         cy.get('[data-test-subj="metricsSearch"]').should('exist');
         cy.get('.euiTitle').contains('Metrics').should('exist');
-        cy.get('.euiBreadcrumb[href="observability-logs#/"]').click(),
-          { timeout: COMMAND_TIMEOUT_LONG };
+        cy.get('.euiBreadcrumb[href="observability-logs#/"]').click();
         cy.get('.euiTitle').contains('Logs').should('exist');
       });
     });
@@ -225,9 +261,7 @@ const createCustomMetric = ({ testMetricIndex }) => {
     .type(PPL_METRICS_NAMES[testMetricIndex], { force: true });
   cy.get('[data-test-subj="eventExplorer__metricSaveName"]').click({ force: true });
   cy.wait(delay * 10);
-  cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]', {
-    timeout: COMMAND_TIMEOUT_LONG,
-  }).click();
+  cy.get('[data-test-subj="eventExplorer__querySaveConfirm"]').click();
   cy.get('.euiToastHeader__title').contains('successfully').should('exist');
 };
 
