@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import round from 'lodash/round';
@@ -91,6 +92,7 @@ export function TraceView(props: TraceViewProps) {
   const [isTracePayloadLoading, setTracePayloadLoading] = useState(false);
   const [isServicesPieChartLoading, setIsServicesPieChartLoading] = useState(false);
   const [isGanttChartLoading, setIsGanttChartLoading] = useState(false);
+  const [traceIdError, setTraceIdError] = useState(false);
 
   const storedFilters = sessionStorage.getItem('TraceAnalyticsSpanFilters');
   const [spanFilters, setSpanFilters] = useState<TraceFilter[]>(() =>
@@ -222,10 +224,26 @@ export function TraceView(props: TraceViewProps) {
       props.traceId,
       props.http,
       payloadData,
-      setPayloadData,
+      (data: string) => {
+        setPayloadData(data);
+        try {
+          const parsed = JSON.parse(data);
+          if (!Array.isArray(parsed) || parsed.length === 0) {
+            setTraceIdError(true);
+            setFields({});
+          } else {
+            setTraceIdError(false);
+          }
+        } catch {
+          setTraceIdError(true);
+          setFields({});
+        }
+      },
       mode,
       props.dataSourceMDSId[0].id
-    ).finally(() => setTracePayloadLoading(false));
+    ).finally(() => {
+      setTracePayloadLoading(false);
+    });
 
     setIsServicesDataLoading(true);
     handleServiceMapRequest(
@@ -370,12 +388,33 @@ export function TraceView(props: TraceViewProps) {
     );
     props.setDataSourceMenuSelectable?.(false);
     refresh();
-  }, [props.mode, props.setDataSourceMenuSelectable]);
+  }, [props.traceId, props.mode, props.setDataSourceMenuSelectable]);
 
   return (
     <>
       <EuiPage>
         <EuiPageBody>
+          {traceIdError && (
+            <>
+              <EuiCallOut
+                title={i18n.translate('traceView.callout.errorTitle', {
+                  defaultMessage: 'Error loading trace Id: {traceId}',
+                  values: { traceId: props.traceId },
+                })}
+                color="danger"
+                iconType="alert"
+              >
+                <p>
+                  {i18n.translate('traceView.callout.errorDescription', {
+                    defaultMessage:
+                      'The Trace Id is invalid or could not be found. Please check the URL or try again.',
+                  })}
+                </p>
+              </EuiCallOut>
+              <EuiSpacer size="m" />
+            </>
+          )}
+
           {!coreRefs.chrome?.navGroup.getNavGroupEnabled() ? (
             renderTitle(props.traceId)
           ) : (

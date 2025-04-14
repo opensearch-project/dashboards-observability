@@ -6,6 +6,7 @@
 
 import {
   EuiBadge,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -23,6 +24,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import round from 'lodash/round';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -70,6 +72,7 @@ export function ServiceView(props: ServiceViewProps) {
   const location = useLocation();
   const [isServiceOverviewLoading, setIsServiceOverviewLoading] = useState(false);
   const [isServicesDataLoading, setIsServicesDataLoading] = useState(false);
+  const [serviceIdError, setServiceIdError] = useState(false);
 
   useEffect(() => {
     try {
@@ -98,7 +101,23 @@ export function ServiceView(props: ServiceViewProps) {
       props.serviceName,
       props.http,
       DSL,
-      setFields,
+      (data) => {
+        try {
+          if (!data || Object.keys(data).length === 0) {
+            setServiceIdError(true);
+            setFields({});
+            setServiceMap({});
+          } else {
+            setServiceIdError(false);
+            setFields(data);
+          }
+        } catch (e) {
+          console.error('Failed to parse service response:', e);
+          setServiceIdError(true);
+          setFields({});
+          setServiceMap({});
+        }
+      },
       mode,
       setServiceMap,
       props.dataSourceMDSId[0].id
@@ -492,6 +511,27 @@ export function ServiceView(props: ServiceViewProps) {
         </EuiText>
       )}
       <EuiSpacer size="m" />
+      {serviceIdError && (
+        <>
+          <EuiCallOut
+            title={i18n.translate('serviceView.callout.errorTitle', {
+              defaultMessage: 'Error loading service: {serviceName}',
+              values: { serviceName: props.serviceName },
+            })}
+            color="danger"
+            iconType="alert"
+          >
+            <p>
+              {i18n.translate('serviceView.callout.errorDescription', {
+                defaultMessage:
+                  'The service name is invalid or could not be found. Please check the URL or try again.',
+              })}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
+
       {overview}
 
       {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
