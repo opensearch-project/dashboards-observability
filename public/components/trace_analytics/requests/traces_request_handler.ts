@@ -418,7 +418,7 @@ export const handlePayloadRequest = (
     .catch((error) => {
       console.error('Error in handlePayloadRequest:', error);
       coreRefs.core?.notifications.toasts.addError(error, {
-        title: `Failed to retrieve payload for trace ID: ${traceId}`,
+        title: `Failed to retrieve payload for trace Id: ${traceId}`,
         toastLifeTimeMs: 10000,
       });
     });

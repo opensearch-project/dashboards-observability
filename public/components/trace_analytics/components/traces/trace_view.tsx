@@ -113,7 +113,7 @@ export function TraceView(props: TraceViewProps) {
               <EuiFlexItem>
                 <EuiFlexGroup direction="column">
                   <EuiFlexItem grow={false}>
-                    <EuiText className="overview-title">Trace ID</EuiText>
+                    <EuiText className="overview-title">Trace Id</EuiText>
                     {overviewFields.trace_id && (
                       <EuiFlexGroup gutterSize="s" alignItems="center">
                         <EuiFlexItem grow={false}>

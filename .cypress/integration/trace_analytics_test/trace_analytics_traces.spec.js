@@ -137,7 +137,7 @@ describe('Testing traces table', () => {
   });
 
   it('Renders the traces table and verify Table Column, Pagination and Rows Data ', () => {
-    cy.get('.euiTableCellContent__text').contains('Trace ID').should('exist');
+    cy.get('.euiTableCellContent__text').contains('Trace Id').should('exist');
     cy.get('.euiTableCellContent__text').contains('Trace group').should('exist');
     cy.get('.euiTableCellContent__text').contains('Duration (ms)').should('exist');
     cy.get('.euiTableCellContent__text').contains('Percentile in trace group').should('exist');
@@ -287,7 +287,7 @@ describe('Testing switch mode to jaeger', () => {
     cy.contains('No').should('exist');
     cy.contains('01/24/2023 08:33:35').should('exist');
     cy.contains('Latency (ms)').should('exist');
-    cy.contains('Trace ID').should('exist');
+    cy.contains('Trace Id').should('exist');
     cy.contains('Errors').should('exist');
     cy.contains('Last updated').should('exist');
   });
@@ -372,7 +372,7 @@ describe('Testing traces Custom source', () => {
     cy.get('.euiSelectableListItem').contains('Traces').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
-    cy.get('.euiDataGridHeaderCell__content').contains('Trace ID').should('exist');
+    cy.get('.euiDataGridHeaderCell__content').contains('Trace Id').should('exist');
     cy.get('.euiDataGridHeaderCell__content').contains('Trace group').should('exist');
     cy.get('.euiDataGridHeaderCell__content').contains('Duration (ms)').should('exist');
     cy.get('.euiDataGridHeaderCell__content').contains('Percentile in trace group').should('exist');

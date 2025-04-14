@@ -410,9 +410,9 @@ describe('Testing traces Spans table and verify columns functionality', () => {
     expandServiceView(1);
     verify_traces_spans_data_grid_cols_exists();
     cy.get('[data-test-subj="service-dep-table"]').should('exist');
-    cy.get('.euiDataGridHeaderCell__content').contains('Span ID').click();
+    cy.get('.euiDataGridHeaderCell__content').contains('Span Id').click();
     cy.get('.euiListGroupItem__label').contains('Hide column').click();
-    cy.get('.euiDataGridHeaderCell__content').contains('Trace ID').click();
+    cy.get('.euiDataGridHeaderCell__content').contains('Trace Id').click();
     cy.get('.euiListGroupItem__label').contains('Sort A-Z').click();
     cy.get('.euiDataGridHeaderCell__content').contains('Trace group').click();
     cy.get('.euiListGroupItem__label').contains('Move left').click();

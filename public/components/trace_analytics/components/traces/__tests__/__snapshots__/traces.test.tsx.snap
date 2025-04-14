@@ -700,7 +700,7 @@ exports[`Traces component renders empty traces page 1`] = `
                                 isLoading={false}
                                 onChange={[Function]}
                                 onSearch={[Function]}
-                                placeholder="Trace ID, trace group name, service name"
+                                placeholder="Trace Id, trace group name, service name"
                                 prepend={
                                   <GlobalFilterButton
                                     attributesFilterFields={Array []}
@@ -913,7 +913,7 @@ exports[`Traces component renders empty traces page 1`] = `
                                           data-test-subj="search-bar-input-box"
                                           onChange={[Function]}
                                           onKeyUp={[Function]}
-                                          placeholder="Trace ID, trace group name, service name"
+                                          placeholder="Trace Id, trace group name, service name"
                                           type="search"
                                           value=""
                                         />
@@ -1540,7 +1540,7 @@ exports[`Traces component renders empty traces page 1`] = `
                         Object {
                           "align": "left",
                           "field": "trace_id",
-                          "name": "Trace ID",
+                          "name": "Trace Id",
                           "render": [Function],
                           "sortable": true,
                           "truncateText": false,
@@ -1616,7 +1616,7 @@ exports[`Traces component renders empty traces page 1`] = `
                           Object {
                             "align": "left",
                             "field": "trace_id",
-                            "name": "Trace ID",
+                            "name": "Trace Id",
                             "render": [Function],
                             "sortable": true,
                             "truncateText": false,
@@ -1685,7 +1685,7 @@ exports[`Traces component renders empty traces page 1`] = `
                           "allowNeutralSort": false,
                           "sort": Object {
                             "direction": "asc",
-                            "field": "Trace ID",
+                            "field": "Trace Id",
                           },
                         }
                       }
@@ -1727,7 +1727,7 @@ exports[`Traces component renders empty traces page 1`] = `
                                               "isSortAscending": true,
                                               "isSorted": true,
                                               "key": "_data_s_trace_id_0",
-                                              "name": "Trace ID",
+                                              "name": "Trace Id",
                                               "onSort": [Function],
                                             },
                                             Object {
@@ -1950,15 +1950,15 @@ exports[`Traces component renders empty traces page 1`] = `
                                                   values={
                                                     Object {
                                                       "description": undefined,
-                                                      "innerText": "Trace ID",
+                                                      "innerText": "Trace Id",
                                                     }
                                                   }
                                                 >
                                                   <span
                                                     className="euiTableCellContent__text"
-                                                    title="Trace ID"
+                                                    title="Trace Id"
                                                   >
-                                                    Trace ID
+                                                    Trace Id
                                                   </span>
                                                 </EuiI18n>
                                               </EuiInnerText>
@@ -3152,7 +3152,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                                 isLoading={false}
                                 onChange={[Function]}
                                 onSearch={[Function]}
-                                placeholder="Trace ID, trace group name, service name"
+                                placeholder="Trace Id, trace group name, service name"
                                 prepend={
                                   <GlobalFilterButton
                                     attributesFilterFields={Array []}
@@ -3367,7 +3367,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                                           data-test-subj="search-bar-input-box"
                                           onChange={[Function]}
                                           onKeyUp={[Function]}
-                                          placeholder="Trace ID, trace group name, service name"
+                                          placeholder="Trace Id, trace group name, service name"
                                           type="search"
                                           value=""
                                         />
@@ -3997,7 +3997,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                         Object {
                           "align": "left",
                           "field": "trace_id",
-                          "name": "Trace ID",
+                          "name": "Trace Id",
                           "render": [Function],
                           "sortable": true,
                           "truncateText": true,
@@ -4055,7 +4055,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                           Object {
                             "align": "left",
                             "field": "trace_id",
-                            "name": "Trace ID",
+                            "name": "Trace Id",
                             "render": [Function],
                             "sortable": true,
                             "truncateText": true,
@@ -4106,7 +4106,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                           "allowNeutralSort": false,
                           "sort": Object {
                             "direction": "asc",
-                            "field": "Trace ID",
+                            "field": "Trace Id",
                           },
                         }
                       }
@@ -4148,7 +4148,7 @@ exports[`Traces component renders jaeger traces page 1`] = `
                                               "isSortAscending": true,
                                               "isSorted": true,
                                               "key": "_data_s_trace_id_0",
-                                              "name": "Trace ID",
+                                              "name": "Trace Id",
                                               "onSort": [Function],
                                             },
                                             Object {
@@ -4356,15 +4356,15 @@ exports[`Traces component renders jaeger traces page 1`] = `
                                                   values={
                                                     Object {
                                                       "description": undefined,
-                                                      "innerText": "Trace ID",
+                                                      "innerText": "Trace Id",
                                                     }
                                                   }
                                                 >
                                                   <span
                                                     className="euiTableCellContent__text"
-                                                    title="Trace ID"
+                                                    title="Trace Id"
                                                   >
-                                                    Trace ID
+                                                    Trace Id
                                                   </span>
                                                 </EuiI18n>
                                               </EuiInnerText>
@@ -5439,7 +5439,7 @@ exports[`Traces component renders traces page 1`] = `
                                 isLoading={false}
                                 onChange={[Function]}
                                 onSearch={[Function]}
-                                placeholder="Trace ID, trace group name, service name"
+                                placeholder="Trace Id, trace group name, service name"
                                 prepend={
                                   <GlobalFilterButton
                                     attributesFilterFields={Array []}
@@ -5654,7 +5654,7 @@ exports[`Traces component renders traces page 1`] = `
                                           data-test-subj="search-bar-input-box"
                                           onChange={[Function]}
                                           onKeyUp={[Function]}
-                                          placeholder="Trace ID, trace group name, service name"
+                                          placeholder="Trace Id, trace group name, service name"
                                           type="search"
                                           value=""
                                         />
@@ -6283,7 +6283,7 @@ exports[`Traces component renders traces page 1`] = `
                         Object {
                           "align": "left",
                           "field": "trace_id",
-                          "name": "Trace ID",
+                          "name": "Trace Id",
                           "render": [Function],
                           "sortable": true,
                           "truncateText": false,
@@ -6359,7 +6359,7 @@ exports[`Traces component renders traces page 1`] = `
                           Object {
                             "align": "left",
                             "field": "trace_id",
-                            "name": "Trace ID",
+                            "name": "Trace Id",
                             "render": [Function],
                             "sortable": true,
                             "truncateText": false,
@@ -6428,7 +6428,7 @@ exports[`Traces component renders traces page 1`] = `
                           "allowNeutralSort": false,
                           "sort": Object {
                             "direction": "asc",
-                            "field": "Trace ID",
+                            "field": "Trace Id",
                           },
                         }
                       }
@@ -6470,7 +6470,7 @@ exports[`Traces component renders traces page 1`] = `
                                               "isSortAscending": true,
                                               "isSorted": true,
                                               "key": "_data_s_trace_id_0",
-                                              "name": "Trace ID",
+                                              "name": "Trace Id",
                                               "onSort": [Function],
                                             },
                                             Object {
@@ -6694,15 +6694,15 @@ exports[`Traces component renders traces page 1`] = `
                                                   values={
                                                     Object {
                                                       "description": undefined,
-                                                      "innerText": "Trace ID",
+                                                      "innerText": "Trace Id",
                                                     }
                                                   }
                                                 >
                                                   <span
                                                     className="euiTableCellContent__text"
-                                                    title="Trace ID"
+                                                    title="Trace Id"
                                                   >
-                                                    Trace ID
+                                                    Trace Id
                                                   </span>
                                                 </EuiI18n>
                                               </EuiInnerText>

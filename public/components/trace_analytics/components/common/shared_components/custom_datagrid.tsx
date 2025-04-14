@@ -22,7 +22,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { NoMatchMessage } from '../helper_functions';
 import {
   TRACE_TABLE_OPTIONS,
@@ -143,6 +143,18 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
         rowCount > maxTraces &&
         maxTraces < MAX_DISPLAY_ROWS
       : false;
+
+  // Used for when trace count less than default maxTraces
+  useEffect(() => {
+    if (
+      tracesTableMode === 'traces' &&
+      rowCount > 0 &&
+      rowCount < maxTraces &&
+      maxTraces !== rowCount
+    ) {
+      setMaxTraces(rowCount);
+    }
+  }, [rowCount, maxTraces, tracesTableMode]);
 
   useInjectElementsIntoGrid(
     rowCount,

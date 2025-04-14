@@ -221,6 +221,12 @@ export function TracesContent(props: TracesProps) {
     setPageIndex(0);
   }, [tracesTableMode]);
 
+  useEffect(() => {
+    if (mode !== 'custom_data_prepper') {
+      setMaxTraces(500);
+    }
+  }, [mode]);
+
   const onToggle = (isOpen: boolean) => {
     const newState = isOpen ? 'open' : 'closed';
     setTrigger(newState);

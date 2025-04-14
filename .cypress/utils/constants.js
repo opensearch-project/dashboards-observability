@@ -154,8 +154,8 @@ export const suppressResizeObserverIssue = () => {
 };
 
 export const verify_traces_spans_data_grid_cols_exists = () => {
-  cy.get('.euiDataGridHeaderCell__content').contains('Span ID').should('exist');
-  cy.get('.euiDataGridHeaderCell__content').contains('Trace ID').should('exist');
+  cy.get('.euiDataGridHeaderCell__content').contains('Span Id').should('exist');
+  cy.get('.euiDataGridHeaderCell__content').contains('Trace Id').should('exist');
   cy.get('.euiDataGridHeaderCell__content').contains('Operation').should('exist');
   cy.get('.euiDataGridHeaderCell__content').contains('Duration').should('exist');
   cy.get('.euiDataGridHeaderCell__content').contains('Start time').should('exist');
