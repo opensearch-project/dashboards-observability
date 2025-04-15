@@ -86,6 +86,24 @@ export function ServiceView(props: ServiceViewProps) {
 
   const hideSearchBarCheck = page === 'serviceFlyout' || serviceId !== '';
 
+  const handleServiceDataResponse = (data: any) => {
+    try {
+      if (!data || Object.keys(data).length === 0) {
+        setServiceIdError(true);
+        setFields({});
+        setServiceMap({});
+      } else {
+        setServiceIdError(false);
+        setFields(data);
+      }
+    } catch (e) {
+      console.error('Failed to parse service response:', e);
+      setServiceIdError(true);
+      setFields({});
+      setServiceMap({});
+    }
+  };
+
   const refresh = () => {
     const DSL = filtersToDsl(
       mode,
@@ -101,23 +119,7 @@ export function ServiceView(props: ServiceViewProps) {
       props.serviceName,
       props.http,
       DSL,
-      (data) => {
-        try {
-          if (!data || Object.keys(data).length === 0) {
-            setServiceIdError(true);
-            setFields({});
-            setServiceMap({});
-          } else {
-            setServiceIdError(false);
-            setFields(data);
-          }
-        } catch (e) {
-          console.error('Failed to parse service response:', e);
-          setServiceIdError(true);
-          setFields({});
-          setServiceMap({});
-        }
-      },
+      handleServiceDataResponse,
       mode,
       setServiceMap,
       props.dataSourceMDSId[0].id
