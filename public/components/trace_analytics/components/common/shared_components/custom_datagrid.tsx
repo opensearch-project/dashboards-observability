@@ -161,7 +161,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
     MAX_DISPLAY_ROWS,
     tracesTableMode ?? '',
     () => {
-      // Add 500 more traces at a time untill all traces present
+      // Add 500 more traces at a time until all traces present
       const nextIncrement = Math.min(500, rowCount - maxTraces);
       if (nextIncrement > 0 && maxTraces < MAX_DISPLAY_ROWS) {
         setMaxTraces((prevMax) => Math.min(prevMax + nextIncrement, MAX_DISPLAY_ROWS));

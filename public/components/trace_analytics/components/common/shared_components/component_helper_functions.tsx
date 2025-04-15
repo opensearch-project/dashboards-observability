@@ -61,28 +61,26 @@ export const useInjectElementsIntoGrid = (
         return;
       }
 
-      if (pagination && loadMoreHandler && isLastPage) {
-        pagination.style.display = 'flex';
-        pagination.style.alignItems = 'center';
-        pagination.style.justifyContent = 'space-between';
+      pagination.style.display = 'flex';
+      pagination.style.alignItems = 'center';
+      pagination.style.justifyContent = 'space-between';
 
-        let loadMoreButton = pagination.querySelector<HTMLElement>('.trace-table-load-more');
-        if (!loadMoreButton) {
-          loadMoreButton = document.createElement('button');
-          loadMoreButton.className = 'trace-table-load-more euiButtonEmpty euiButtonEmpty--text';
-          loadMoreButton.style.marginLeft = '12px';
-          loadMoreButton.innerText = '... Load more';
+      let loadMoreButton = pagination.querySelector<HTMLElement>('.trace-table-load-more');
+      if (!loadMoreButton) {
+        loadMoreButton = document.createElement('button');
+        loadMoreButton.className = 'trace-table-load-more euiButtonEmpty euiButtonEmpty--text';
+        loadMoreButton.style.marginLeft = '12px';
+        loadMoreButton.innerText = '... Load more';
 
-          loadMoreButton.onclick = () => loadMoreHandler();
+        loadMoreButton.onclick = () => loadMoreHandler();
 
-          const paginationList = pagination.querySelector('.euiPagination__list');
+        const paginationList = pagination.querySelector('.euiPagination__list');
 
-          if (paginationList) {
-            const listItem = document.createElement('li');
-            listItem.className = 'euiPagination__item trace-table-load-more';
-            listItem.appendChild(loadMoreButton);
-            paginationList.appendChild(listItem);
-          }
+        if (paginationList) {
+          const listItem = document.createElement('li');
+          listItem.className = 'euiPagination__item trace-table-load-more';
+          listItem.appendChild(loadMoreButton);
+          paginationList.appendChild(listItem);
         }
       }
     }, 100);
