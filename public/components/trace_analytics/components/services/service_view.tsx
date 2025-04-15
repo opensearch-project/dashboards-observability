@@ -526,7 +526,7 @@ export function ServiceView(props: ServiceViewProps) {
             <p>
               {i18n.translate('serviceView.callout.errorDescription', {
                 defaultMessage:
-                  'The service name is invalid or could not be found. Please check the URL or try again.',
+                  'The service name is invalid or could not be found. Please check the URL, selected time range, or try again.',
               })}
             </p>
           </EuiCallOut>
