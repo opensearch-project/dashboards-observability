@@ -1,7 +1,7 @@
 <img src="https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_default.svg" height="64px">
 
 - [Observability](#observability)
-  - [Code Summary                                                                                      |](#code-summary--------------------------------------------------------------------------------------)
+  - [Code Summary](#code-summary)
     - [Dashboards-Observability](#dashboards-observability)
     - [Repository Checks](#repository-checks)
     - [Issues](#issues)
@@ -27,7 +27,7 @@
 
 Observability is collection of plugins and applications that let you visualize data-driven events by using Piped Processing Language to explore, discover, and query data stored in OpenSearch.
 
-## Code Summary                                                                                      |
+## Code Summary
 
 ### Dashboards-Observability
 
