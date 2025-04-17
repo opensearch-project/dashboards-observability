@@ -95,7 +95,7 @@ describe('Testing services table', () => {
 });
 
 describe('Testing service view empty state and invalid url', () => {
-  it('Renders service view empty state', () => {
+  it('Renders service view empty state and invalid url', () => {
     cy.visit(`app/observability-traces#/services/${SERVICE_NAME}`, {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
@@ -104,9 +104,8 @@ describe('Testing service view empty state and invalid url', () => {
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.contains('frontend-client').should('exist');
     cy.contains('No matches').should('exist');
-  });
 
-  it('Renders service view invalid url state', () => {
+    // Renders service view invalid url state
     cy.visit(`app/observability-traces#/services?serviceId=${INVALID_URL}`, {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
