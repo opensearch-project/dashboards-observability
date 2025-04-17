@@ -126,7 +126,7 @@ describe('Testing trace view', () => {
 
 describe('Testing trace view invalid url', () => {
   beforeEach(() => {
-    cy.visit(`app/observability-traces-nav#/traces?traceId=${INVALID_URL}`, {
+    cy.visit(`app/observability-traces#/traces?traceId=${INVALID_URL}`, {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
       },

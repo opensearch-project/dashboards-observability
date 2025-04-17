@@ -112,14 +112,14 @@ describe('Testing service view empty state', () => {
 
 describe('Testing service view invalid url call out', () => {
   beforeEach(() => {
-    cy.visit(`app/observability-traces#/services/${INVALID_URL}`, {
+    cy.visit(`app/observability-traces#/services?serviceId=${INVALID_URL}`, {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
       },
     });
   });
 
-  it('Renders service view empty state', () => {
+  it('Renders service view invalid url state', () => {
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.contains(`${INVALID_URL}`).should('exist');
     cy.get('.euiCallOut.euiCallOut--danger')
