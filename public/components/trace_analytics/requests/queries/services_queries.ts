@@ -161,6 +161,29 @@ export const getServiceMapQuery = (mode: TraceAnalyticsMode) => {
   };
 };
 
+export const getServiceValidQuery = (mode: TraceAnalyticsMode) => {
+  return {
+    index: getServiceIndices(mode),
+    size: 0,
+    query: {
+      bool: {
+        must: [],
+        filter: [],
+        should: [],
+        must_not: [],
+      },
+    },
+    aggs: {
+      service_name: {
+        terms: {
+          field: 'serviceName',
+          size: SERVICE_MAP_MAX_NODES,
+        },
+      },
+    },
+  };
+};
+
 export const getServiceMetricsQuery = (
   DSL: any,
   serviceNames: string[],

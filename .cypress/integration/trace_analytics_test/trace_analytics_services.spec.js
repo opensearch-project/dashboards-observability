@@ -13,6 +13,7 @@ import {
   verify_traces_spans_data_grid_cols_exists,
   count_table_row,
   AUTH_SERVICE_SPAN_ID,
+  INVALID_URL,
 } from '../../utils/constants';
 import { suppressResizeObserverIssue } from '../../utils/constants';
 
@@ -103,9 +104,36 @@ describe('Testing service view empty state', () => {
   });
 
   it('Renders service view empty state', () => {
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.contains('frontend-client').should('exist');
-    cy.get('.euiText').contains('0').should('exist');
-    cy.get('.euiText').contains('-').should('exist');
+    cy.contains('No matches').should('exist');
+  });
+});
+
+describe('Testing service view invalid url call out', () => {
+  beforeEach(() => {
+    cy.visit(`app/observability-traces#/services/${INVALID_URL}`, {
+      onBeforeLoad: (win) => {
+        win.sessionStorage.clear();
+      },
+    });
+  });
+
+  it('Renders service view empty state', () => {
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.contains(`${INVALID_URL}`).should('exist');
+    cy.get('.euiCallOut.euiCallOut--danger')
+      .should('exist')
+      .within(() => {
+        cy.get('.euiCallOutHeader__title')
+          .should('contain.text', `Error loading service: ${INVALID_URL}`);
+        cy.get('p')
+          .should(
+            'contain.text',
+            'The service name is invalid or could not be found. Please check the URL or try again.'
+          );
+      });
+    cy.contains('No matches').should('exist');
   });
 });
 

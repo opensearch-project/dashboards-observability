@@ -5,7 +5,7 @@
 
 /// <reference types="cypress" />
 
-import { setTimeFilter, SPAN_ID, TRACE_ID, SPAN_ID_TREE_VIEW } from '../../utils/constants';
+import { setTimeFilter, SPAN_ID, TRACE_ID, SPAN_ID_TREE_VIEW, INVALID_URL } from '../../utils/constants';
 
 describe('Testing traces table empty state', () => {
   beforeEach(() => {
@@ -121,6 +121,32 @@ describe('Testing trace view', () => {
 
     cy.get('.euiBadge__text').contains('spanId: ').should('exist');
     cy.contains('Spans (1)').should('exist');
+  });
+});
+
+describe('Testing trace view invalid url', () => {
+  beforeEach(() => {
+    cy.visit(`app/observability-traces-nav#/traces?traceId=${INVALID_URL}`, {
+      onBeforeLoad: (win) => {
+        win.sessionStorage.clear();
+      },
+    });
+  });
+
+  it('Handles a invalid trace url', () => {
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.contains(`${INVALID_URL}`).should('exist');
+    cy.get('.euiCallOut.euiCallOut--danger')
+      .should('exist')
+      .within(() => {
+        cy.get('.euiCallOutHeader__title')
+          .should('contain.text', `Error loading Trace Id: ${INVALID_URL}`);
+        cy.get('p')
+          .should(
+            'contain.text',
+            'The Trace Id is invalid or could not be found. Please check the URL or try again.'
+          );
+      });
   });
 });
 

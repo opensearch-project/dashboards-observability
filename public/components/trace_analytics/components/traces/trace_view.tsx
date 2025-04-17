@@ -400,7 +400,7 @@ export function TraceView(props: TraceViewProps) {
             <>
               <EuiCallOut
                 title={i18n.translate('traceView.callout.errorTitle', {
-                  defaultMessage: 'Error loading trace Id: {traceId}',
+                  defaultMessage: 'Error loading Trace Id: {traceId}',
                   values: { traceId: props.traceId },
                 })}
                 color="danger"

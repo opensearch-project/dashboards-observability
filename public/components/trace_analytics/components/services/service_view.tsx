@@ -34,10 +34,14 @@ import { setNavBreadCrumbs } from '../../../../../common/utils/set_nav_bread_cru
 import { coreRefs } from '../../../../framework/core_refs';
 import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/plugin_headerControl';
 import { TraceAnalyticsComponentDeps } from '../../home';
-import { handleServiceViewRequest } from '../../requests/services_request_handler';
+import {
+  fetchValidServiceNames,
+  handleServiceViewRequest,
+} from '../../requests/services_request_handler';
 import { TraceFilter } from '../common/constants';
 import { FilterType } from '../common/filters/filters';
 import {
+  NoMatchMessage,
   PanelTitle,
   filtersToDsl,
   generateServiceUrl,
@@ -73,6 +77,7 @@ export function ServiceView(props: ServiceViewProps) {
   const [isServiceOverviewLoading, setIsServiceOverviewLoading] = useState(false);
   const [isServicesDataLoading, setIsServicesDataLoading] = useState(false);
   const [serviceIdError, setServiceIdError] = useState(false);
+  const [serviceIdEmpty, setserviceIdEmpty] = useState(false);
 
   useEffect(() => {
     try {
@@ -84,27 +89,31 @@ export function ServiceView(props: ServiceViewProps) {
     }
   }, [location]);
 
+  useEffect(() => {
+    setServiceIdError(false);
+    setserviceIdEmpty(false);
+  }, [props.serviceName]);
+
   const hideSearchBarCheck = page === 'serviceFlyout' || serviceId !== '';
 
   const handleServiceDataResponse = (data: any) => {
     try {
       if (!data || Object.keys(data).length === 0) {
-        setServiceIdError(true);
+        setserviceIdEmpty(true);
         setFields({});
         setServiceMap({});
       } else {
-        setServiceIdError(false);
+        setserviceIdEmpty(false);
         setFields(data);
       }
     } catch (e) {
-      console.error('Failed to parse service response:', e);
-      setServiceIdError(true);
+      setserviceIdEmpty(true);
       setFields({});
       setServiceMap({});
     }
   };
 
-  const refresh = () => {
+  const refresh = async () => {
     const DSL = filtersToDsl(
       mode,
       props.filters,
@@ -115,6 +124,18 @@ export function ServiceView(props: ServiceViewProps) {
 
     setIsServiceOverviewLoading(true);
     setIsServicesDataLoading(true);
+
+    const validNames = await fetchValidServiceNames(props.http, mode, props.dataSourceMDSId[0].id);
+
+    if (!validNames.includes(props.serviceName)) {
+      setServiceIdError(true);
+      setFields({});
+      setServiceMap({});
+      setIsServiceOverviewLoading(false);
+      setIsServicesDataLoading(false);
+      return;
+    }
+
     handleServiceViewRequest(
       props.serviceName,
       props.http,
@@ -290,92 +311,100 @@ export function ServiceView(props: ServiceViewProps) {
           ) : (
             <>
               <EuiHorizontalRule margin="m" />
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiFlexGroup direction="column">
-                    <EuiFlexItem grow={false}>
-                      <EuiText className="overview-title">Name</EuiText>
-                      <EuiText size="s" className="overview-content">
-                        {props.serviceName || '-'}
-                      </EuiText>
-                    </EuiFlexItem>
-                    {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiText className="overview-title">Number of connected services</EuiText>
-                        <EuiText size="s" className="overview-content">
-                          {fields.number_of_connected_services !== undefined
-                            ? fields.number_of_connected_services
-                            : 0}
-                        </EuiText>
-                      </EuiFlexItem>
-                    ) : (
-                      <EuiFlexItem />
-                    )}
-                    {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiText className="overview-title">Connected services</EuiText>
-                        <EuiText size="s" className="overview-content">
-                          {fields.connected_services && fields.connected_services.length
-                            ? fields.connected_services
-                                .map((service: string) => (
-                                  <EuiLink
-                                    onClick={() => onClickConnectedService(service)}
-                                    key={service}
-                                  >
-                                    {service}
-                                  </EuiLink>
-                                ))
-                                .reduce((prev: React.ReactNode, curr: React.ReactNode) => {
-                                  return [prev, ', ', curr];
-                                })
-                            : '-'}
-                        </EuiText>
-                      </EuiFlexItem>
-                    ) : (
-                      <EuiFlexItem />
-                    )}
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFlexGroup direction="column">
-                    <EuiFlexItem grow={false}>
-                      <EuiText className="overview-title">Average duration (ms)</EuiText>
-                      <EuiText size="s" className="overview-content">
-                        {fields.average_latency !== undefined ? fields.average_latency : '-'}
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText className="overview-title">Error rate</EuiText>
-                      <EuiText size="s" className="overview-content">
-                        {fields.error_rate !== undefined
-                          ? round(fields.error_rate, 2).toString() + '%'
-                          : '-'}
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText className="overview-title">Request rate</EuiText>
-                      <EuiText size="s" className="overview-content">
-                        {fields.throughput !== undefined ? (
-                          <EuiI18nNumber value={fields.throughput} />
+              {serviceIdEmpty || serviceIdError ? (
+                <NoMatchMessage size="xl" mode={mode} />
+              ) : (
+                <>
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <EuiFlexGroup direction="column">
+                        <EuiFlexItem grow={false}>
+                          <EuiText className="overview-title">Name</EuiText>
+                          <EuiText size="s" className="overview-content">
+                            {props.serviceName || '-'}
+                          </EuiText>
+                        </EuiFlexItem>
+                        {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
+                          <EuiFlexItem grow={false}>
+                            <EuiText className="overview-title">
+                              Number of connected services
+                            </EuiText>
+                            <EuiText size="s" className="overview-content">
+                              {fields.number_of_connected_services !== undefined
+                                ? fields.number_of_connected_services
+                                : 0}
+                            </EuiText>
+                          </EuiFlexItem>
                         ) : (
-                          '-'
+                          <EuiFlexItem />
                         )}
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText className="overview-title">Traces</EuiText>
-                      <EuiText size="s" className="overview-content">
-                        {fields.traces === 0 || fields.traces ? (
-                          <EuiI18nNumber value={fields.traces} />
+                        {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
+                          <EuiFlexItem grow={false}>
+                            <EuiText className="overview-title">Connected services</EuiText>
+                            <EuiText size="s" className="overview-content">
+                              {fields.connected_services && fields.connected_services.length
+                                ? fields.connected_services
+                                    .map((service: string) => (
+                                      <EuiLink
+                                        onClick={() => onClickConnectedService(service)}
+                                        key={service}
+                                      >
+                                        {service}
+                                      </EuiLink>
+                                    ))
+                                    .reduce((prev: React.ReactNode, curr: React.ReactNode) => {
+                                      return [prev, ', ', curr];
+                                    })
+                                : '-'}
+                            </EuiText>
+                          </EuiFlexItem>
                         ) : (
-                          '-'
+                          <EuiFlexItem />
                         )}
-                      </EuiText>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiFlexGroup direction="column">
+                        <EuiFlexItem grow={false}>
+                          <EuiText className="overview-title">Average duration (ms)</EuiText>
+                          <EuiText size="s" className="overview-content">
+                            {fields.average_latency !== undefined ? fields.average_latency : '-'}
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText className="overview-title">Error rate</EuiText>
+                          <EuiText size="s" className="overview-content">
+                            {fields.error_rate !== undefined
+                              ? round(fields.error_rate, 2).toString() + '%'
+                              : '-'}
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText className="overview-title">Request rate</EuiText>
+                          <EuiText size="s" className="overview-content">
+                            {fields.throughput !== undefined ? (
+                              <EuiI18nNumber value={fields.throughput} />
+                            ) : (
+                              '-'
+                            )}
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText className="overview-title">Traces</EuiText>
+                          <EuiText size="s" className="overview-content">
+                            {fields.traces === 0 || fields.traces ? (
+                              <EuiI18nNumber value={fields.traces} />
+                            ) : (
+                              '-'
+                            )}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiFlexItem>
                   </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer />
+                  <EuiSpacer />
+                </>
+              )}
             </>
           )}
         </EuiPanel>
@@ -526,7 +555,7 @@ export function ServiceView(props: ServiceViewProps) {
             <p>
               {i18n.translate('serviceView.callout.errorDescription', {
                 defaultMessage:
-                  'The service name is invalid or could not be found. Please check the URL, selected time range, or try again.',
+                  'The service name is invalid or could not be found. Please check the URL or try again.',
               })}
             </p>
           </EuiCallOut>

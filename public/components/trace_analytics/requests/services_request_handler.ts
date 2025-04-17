@@ -16,11 +16,32 @@ import { fixedIntervalToMilli } from '../components/common/helper_functions';
 import { ServiceObject } from '../components/common/plots/service_map';
 import {
   getServiceMapQuery,
+  getServiceValidQuery,
   getServiceMetricsQuery,
   getServicesQuery,
   getServiceTrendsQuery,
 } from './queries/services_queries';
 import { handleDslRequest } from './request_handler';
+
+export const fetchValidServiceNames = async (
+  http: HttpSetup,
+  mode: TraceAnalyticsMode,
+  dataSourceMDSId?: string
+): Promise<string[]> => {
+  return handleDslRequest(http, null, getServiceValidQuery(mode), mode, dataSourceMDSId)
+    .then((response) => {
+      const buckets = response.aggregations?.service_name?.buckets ?? [];
+      return buckets.map((bucket: any) => bucket.key);
+    })
+    .catch((error) => {
+      console.error('Error fetching valid service names:', error);
+      coreRefs.core?.notifications.toasts.addError(error, {
+        title: 'Failed to fetch valid services',
+        toastLifeTimeMs: 10000,
+      });
+      return [];
+    });
+};
 
 export const handleServicesRequest = async (
   http: HttpSetup,
