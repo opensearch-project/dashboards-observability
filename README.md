@@ -1,21 +1,33 @@
-<img src="https://opensearch.org/assets/img/opensearch-logo-themed.svg" height="64px">
+<img src="https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_default.svg" height="64px">
 
 - [Observability](#observability)
-- [Code Summary](#code-summary)
-- [Plugin Components](#plugin-components)
-- [Documentation](#documentation)
-- [Contributing](#contributing)
-- [Getting Help](#getting-help)
-- [Code of Conduct](#code-of-conduct)
-- [Security](#security)
-- [License](#license)
-- [Copyright](#copyright)
+  - [Code Summary](#code-summary)
+    - [Dashboards-Observability](#dashboards-observability)
+    - [Repository Checks](#repository-checks)
+    - [Issues](#issues)
+  - [Plugin Components](#plugin-components)
+    - [Trace Analytics](#trace-analytics)
+    - [Event Analytics](#event-analytics)
+    - [Metrics Analytics](#metrics-analytics)
+    - [Operational Panels](#operational-panels)
+    - [Notebooks](#notebooks)
+    - [Integrations](#integrations)
+    - [Observability Correlation](#observability-correlation)
+  - [WIKI Home](#wiki-home)
+  - [Documentation](#documentation)
+  - [Contributing](#contributing)
+  - [Getting Help](#getting-help)
+  - [Code of Conduct](#code-of-conduct)
+  - [Security](#security)
+  - [License](#license)
+  - [Copyright](#copyright)
+  - [Screenshots](#screenshots)
 
 # Observability
 
 Observability is collection of plugins and applications that let you visualize data-driven events by using Piped Processing Language to explore, discover, and query data stored in OpenSearch.
 
-## Code Summary                                                                                      |
+## Code Summary
 
 ### Dashboards-Observability
 
