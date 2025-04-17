@@ -94,32 +94,24 @@ describe('Testing services table', () => {
   });
 });
 
-describe('Testing service view empty state', () => {
-  beforeEach(() => {
+describe('Testing service view empty state and invalid url', () => {
+  it('Renders service view empty state', () => {
     cy.visit(`app/observability-traces#/services/${SERVICE_NAME}`, {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
       },
     });
-  });
-
-  it('Renders service view empty state', () => {
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.contains('frontend-client').should('exist');
     cy.contains('No matches').should('exist');
   });
-});
 
-describe('Testing service view invalid url call out', () => {
-  beforeEach(() => {
+  it('Renders service view invalid url state', () => {
     cy.visit(`app/observability-traces#/services?serviceId=${INVALID_URL}`, {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
       },
     });
-  });
-
-  it('Renders service view invalid url state', () => {
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.contains(`${INVALID_URL}`).should('exist');
     cy.get('.euiCallOut.euiCallOut--danger')

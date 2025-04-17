@@ -91,8 +91,8 @@ interface RenderCustomDataGridParams {
   isTableDataLoading?: boolean;
   tracesTableMode?: string;
   setTracesTableMode?: (mode: string) => void;
-  maxTraces: number;
-  setMaxTraces: (max: number) => void;
+  maxTraces?: number;
+  setMaxTraces?: (max: number) => void;
 }
 
 export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
@@ -156,17 +156,18 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
     }
   }, [rowCount, maxTraces, tracesTableMode]);
 
+  const incrementTraceCount = () => {
+    const nextIncrement = Math.min(500, rowCount - maxTraces);
+    if (nextIncrement > 0 && maxTraces < MAX_DISPLAY_ROWS) {
+      setMaxTraces((prevMax) => Math.min(prevMax + nextIncrement, MAX_DISPLAY_ROWS));
+    }
+  };
+
   useInjectElementsIntoGrid(
     rowCount,
     MAX_DISPLAY_ROWS,
     tracesTableMode ?? '',
-    () => {
-      // Add 500 more traces at a time until all traces present
-      const nextIncrement = Math.min(500, rowCount - maxTraces);
-      if (nextIncrement > 0 && maxTraces < MAX_DISPLAY_ROWS) {
-        setMaxTraces((prevMax) => Math.min(prevMax + nextIncrement, MAX_DISPLAY_ROWS));
-      }
-    },
+    incrementTraceCount,
     maxTraces,
     isLastPage
   );
