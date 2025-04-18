@@ -5,7 +5,7 @@
 
 /// <reference types="cypress" />
 
-import { setTimeFilter, SPAN_ID, TRACE_ID, SPAN_ID_TREE_VIEW } from '../../utils/constants';
+import { setTimeFilter, SPAN_ID, TRACE_ID, SPAN_ID_TREE_VIEW, INVALID_URL } from '../../utils/constants';
 
 describe('Testing traces table empty state', () => {
   beforeEach(() => {
@@ -124,6 +124,32 @@ describe('Testing trace view', () => {
   });
 });
 
+describe('Testing trace view invalid url', () => {
+  beforeEach(() => {
+    cy.visit(`app/observability-traces#/traces?traceId=${INVALID_URL}`, {
+      onBeforeLoad: (win) => {
+        win.sessionStorage.clear();
+      },
+    });
+  });
+
+  it('Handles a invalid trace url', () => {
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.contains(`${INVALID_URL}`).should('exist');
+    cy.get('.euiCallOut.euiCallOut--danger')
+      .should('exist')
+      .within(() => {
+        cy.get('.euiCallOutHeader__title')
+          .should('contain.text', `Error loading Trace Id: ${INVALID_URL}`);
+        cy.get('p')
+          .should(
+            'contain.text',
+            'The Trace Id is invalid or could not be found. Please check the URL or try again.'
+          );
+      });
+  });
+});
+
 describe('Testing traces table', () => {
   beforeEach(() => {
     cy.visit('app/observability-traces#/traces', {
@@ -137,7 +163,7 @@ describe('Testing traces table', () => {
   });
 
   it('Renders the traces table and verify Table Column, Pagination and Rows Data ', () => {
-    cy.get('.euiTableCellContent__text').contains('Trace ID').should('exist');
+    cy.get('.euiTableCellContent__text').contains('Trace Id').should('exist');
     cy.get('.euiTableCellContent__text').contains('Trace group').should('exist');
     cy.get('.euiTableCellContent__text').contains('Duration (ms)').should('exist');
     cy.get('.euiTableCellContent__text').contains('Percentile in trace group').should('exist');
@@ -287,7 +313,7 @@ describe('Testing switch mode to jaeger', () => {
     cy.contains('No').should('exist');
     cy.contains('01/24/2023 08:33:35').should('exist');
     cy.contains('Latency (ms)').should('exist');
-    cy.contains('Trace ID').should('exist');
+    cy.contains('Trace Id').should('exist');
     cy.contains('Errors').should('exist');
     cy.contains('Last updated').should('exist');
   });
@@ -372,7 +398,7 @@ describe('Testing traces Custom source', () => {
     cy.get('.euiSelectableListItem').contains('Traces').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
-    cy.get('.euiDataGridHeaderCell__content').contains('Trace ID').should('exist');
+    cy.get('.euiDataGridHeaderCell__content').contains('Trace Id').should('exist');
     cy.get('.euiDataGridHeaderCell__content').contains('Trace group').should('exist');
     cy.get('.euiDataGridHeaderCell__content').contains('Duration (ms)').should('exist');
     cy.get('.euiDataGridHeaderCell__content').contains('Percentile in trace group').should('exist');

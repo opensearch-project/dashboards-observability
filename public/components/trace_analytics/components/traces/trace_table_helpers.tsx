@@ -139,7 +139,7 @@ export const getTableColumns = (
         field: 'spanId',
         name: 'Span Id',
         align: 'left',
-        sortable: true,
+        sortable: false,
         render: renderIdField,
         className: 'span-group-column',
       },
@@ -147,14 +147,14 @@ export const getTableColumns = (
         field: 'traceId',
         name: 'Trace Id',
         align: 'left',
-        sortable: true,
+        sortable: false,
         render: renderTraceLinkField,
       },
       {
         field: 'parentSpanId',
         name: 'Parent Span Id',
         align: 'left',
-        sortable: true,
+        sortable: false,
         render: renderIdField,
         className: 'span-group-column',
       },
@@ -162,7 +162,7 @@ export const getTableColumns = (
         field: 'traceGroup',
         name: 'Trace group',
         align: 'left',
-        sortable: true,
+        sortable: false,
         truncateText: true,
       },
       {
@@ -196,16 +196,16 @@ export const getTableColumns = (
     return [
       {
         field: 'trace_id',
-        name: 'Trace ID',
+        name: 'Trace Id',
         align: 'left',
-        sortable: true,
+        sortable: false,
         render: renderTraceLinkField,
       },
       {
         field: 'trace_group',
         name: 'Trace group',
         align: 'left',
-        sortable: true,
+        sortable: false,
         truncateText: true,
       },
       {
@@ -219,7 +219,7 @@ export const getTableColumns = (
         field: 'percentile_in_trace_group',
         name: 'Percentile in trace group',
         align: 'right',
-        sortable: true,
+        sortable: false,
         render: (item) => (item ? `${round(item, 2)}th` : '-'),
       },
       {
@@ -243,9 +243,9 @@ export const getTableColumns = (
   return [
     {
       field: 'trace_id',
-      name: 'Trace ID',
+      name: 'Trace Id',
       align: 'left',
-      sortable: true,
+      sortable: false,
       render: renderTraceLinkField,
     },
     { field: 'latency', name: 'Latency (ms)', align: 'right', sortable: true },
