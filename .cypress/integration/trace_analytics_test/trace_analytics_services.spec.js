@@ -96,7 +96,7 @@ describe('Testing services table', () => {
 
 describe('Testing service view empty state and invalid url', () => {
   it('Renders service view empty state and invalid url', () => {
-    cy.visit(`app/observability-traces#/services/${SERVICE_NAME}`, {
+    cy.visit(`app/observability-traces#/services?serviceId=${SERVICE_NAME}`, {
       onBeforeLoad: (win) => {
         win.sessionStorage.clear();
       },
