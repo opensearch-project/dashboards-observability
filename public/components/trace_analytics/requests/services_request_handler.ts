@@ -23,24 +23,29 @@ import {
 } from './queries/services_queries';
 import { handleDslRequest } from './request_handler';
 
-export const fetchValidServiceNames = async (
+export const checkValidServiceName = async (
   http: HttpSetup,
   mode: TraceAnalyticsMode,
+  serviceName: string,
   dataSourceMDSId?: string
-): Promise<string[]> => {
-  return handleDslRequest(http, null, getServiceValidQuery(mode), mode, dataSourceMDSId)
-    .then((response) => {
-      const buckets = response.aggregations?.service_name?.buckets ?? [];
-      return buckets.map((bucket: any) => bucket.key);
-    })
-    .catch((error) => {
-      console.error('Error fetching valid service names:', error);
-      coreRefs.core?.notifications.toasts.addError(error, {
-        title: 'Failed to fetch valid services',
-        toastLifeTimeMs: 10000,
-      });
-      return [];
+): Promise<boolean> => {
+  try {
+    const response = await handleDslRequest(
+      http,
+      null,
+      getServiceValidQuery(mode, serviceName),
+      mode,
+      dataSourceMDSId
+    );
+    return response?.hits?.total?.value > 0;
+  } catch (error) {
+    console.error('Error checking service name:', error);
+    coreRefs.core?.notifications.toasts.addError(error, {
+      title: 'Failed to verify service name',
+      toastLifeTimeMs: 10000,
     });
+    return false;
+  }
 };
 
 export const handleServicesRequest = async (

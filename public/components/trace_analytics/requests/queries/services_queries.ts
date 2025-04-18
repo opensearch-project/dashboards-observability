@@ -161,24 +161,24 @@ export const getServiceMapQuery = (mode: TraceAnalyticsMode) => {
   };
 };
 
-export const getServiceValidQuery = (mode: TraceAnalyticsMode) => {
+export const getServiceValidQuery = (mode: TraceAnalyticsMode, serviceName: string) => {
   return {
     index: getServiceIndices(mode),
     size: 0,
     query: {
       bool: {
-        must: [],
+        must: [
+          {
+            term: {
+              serviceName: {
+                value: serviceName,
+              },
+            },
+          },
+        ],
         filter: [],
         should: [],
         must_not: [],
-      },
-    },
-    aggs: {
-      service_name: {
-        terms: {
-          field: 'serviceName',
-          size: SERVICE_MAP_MAX_NODES,
-        },
       },
     },
   };

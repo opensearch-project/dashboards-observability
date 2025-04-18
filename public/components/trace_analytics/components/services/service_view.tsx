@@ -35,7 +35,7 @@ import { coreRefs } from '../../../../framework/core_refs';
 import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/plugin_headerControl';
 import { TraceAnalyticsComponentDeps } from '../../home';
 import {
-  fetchValidServiceNames,
+  checkValidServiceName,
   handleServiceViewRequest,
 } from '../../requests/services_request_handler';
 import { TraceFilter } from '../common/constants';
@@ -125,9 +125,14 @@ export function ServiceView(props: ServiceViewProps) {
     setIsServiceOverviewLoading(true);
     setIsServicesDataLoading(true);
 
-    const validNames = await fetchValidServiceNames(props.http, mode, props.dataSourceMDSId[0].id);
+    const validService = await checkValidServiceName(
+      props.http,
+      mode,
+      props.serviceName,
+      props.dataSourceMDSId[0].id
+    );
 
-    if (!validNames.includes(props.serviceName)) {
+    if (!validService) {
       setServiceIdError(true);
       setFields({});
       setServiceMap({});
