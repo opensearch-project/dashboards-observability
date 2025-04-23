@@ -477,7 +477,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
                 <EuiSmallButtonIcon
                   aria-label="Open paragraph menu"
                   iconType="boxesHorizontal"
-                  onClick={() => setIsPopoverOpen(true)}
+                  onClick={() => setIsPopoverOpen(!isPopoverOpen)}
                 />
               }
               isOpen={isPopoverOpen}
