@@ -540,17 +540,19 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
   };
 
   const sqlIcon = (
-    <EuiLink href={SQL_DOCUMENTATION_URL} target="_blank">
-      {' '}
-      SQL <EuiIcon type="popout" size="s" />{' '}
-    </EuiLink>
+    <>
+      <EuiLink href={SQL_DOCUMENTATION_URL} target="_blank">
+        SQL
+      </EuiLink>{' '}
+    </>
   );
 
   const pplIcon = (
-    <EuiLink href={PPL_DOCUMENTATION_URL} target="_blank">
-      {' '}
-      PPL <EuiIcon type="popout" size="s" />
-    </EuiLink>
+    <>
+      <EuiLink href={PPL_DOCUMENTATION_URL} target="_blank">
+        PPL
+      </EuiLink>{' '}
+    </>
   );
 
   const paragraphLabel = !para.isVizualisation ? (
