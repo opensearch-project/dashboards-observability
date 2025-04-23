@@ -1,6 +1,6 @@
 # SOP - OpenSearch Integration Setup
 
-**Date:** Jan 01, 2024
+**Date:** Apr 16, 2024
 
 ## Introduction
 
@@ -473,9 +473,9 @@ This feature allows users to bypass manual configuration by reusing pre-configur
 - During import, resolve conflicts by mapping the `.ndjson` index pattern to an existing one.
 - Ensure that required index patterns are created before importing visualizations.
 
-## Publish to OpenSearch Catalog Repository
+## Publish to OpenSearch Dashboards Observability Repository
 
-Once the integration has been validated and confirmed to function correctly, the final step is to share your work with a broader audience or make it accessible for reuse within your organization or community. Publishing your integration involves uploading the associated files and documentation to the OpenSearch Catalog GitHub repository, ensuring that other developers or teams can benefit from your efforts. This section provides a high-level guide to preparing, uploading, and publishing your integration.
+Once the integration has been validated and confirmed to function correctly, the final step is to share your work with a broader audience or make it accessible for reuse within your organization or community. Publishing your integration involves uploading the associated files and documentation to the OpenSearch Dashboards Observability GitHub repository, ensuring that other developers or teams can benefit from your efforts. This section provides a high-level guide to preparing, uploading, and publishing your integration.
 
 Preparing for Publication
 
@@ -484,7 +484,7 @@ Preparing for Publication
   - Ensure all relevant files are properly structured and clearly named, including:
     - Materialized View Queries: Save queries in a .sql file for easy reference.
     - .ndjson Files: Include all visualization and dashboard files.
-    - Integration Documentation: Provide a README describing the integration setup, use case, and troubleshooting tips. Here is an example for an existing version of [Amazon CloudFront Integration’s README.md in OpenSearch Catalog Repo](https://github.com/opensearch-project/opensearch-catalog/blob/main/integrations/observability/amazon_cloudfront/README.md).
+    - Integration Documentation: Provide a `README.md` describing the integration setup, use case, and troubleshooting tips. Here is an example for an existing version of [AWS Network Firewall Integration’s README.md in OpenSearch Dashboards Observability Repo](https://github.com/opensearch-project/dashboards-observability/blob/main/server/adaptors/integrations/__data__/repository/amazon_networkfirewall/info/README.md).
 
 **2. Include Metadata:**
 
@@ -497,11 +497,8 @@ Preparing for Publication
 
   - Test the integration end-to-end to confirm all components (e.g., dashboards, queries, indices) work as expected.
 
-For detailed instructions on how to upload and manage integrations in the OpenSearch Catalog, please refer to the [OpenSearch Catalog Integration Documentation](https://github.com/opensearch-project/opensearch-catalog/blob/main/docs/integrations/README.md).
-
 ## Reference
 
 - Creating Dashboards in OpenSearch: https://opensearch.org/docs/latest/dashboards/dashboard/index/
 - Flint Assets in OpenSearch Spark: https://github.com/opensearch-project/opensearch-spark/blob/main/docs/index.md
 - Documentation of Integrations in OpenSearch Dashboards: https://opensearch.org/docs/latest/integrations/
-- Guidance of Publish OpenSearch Integration Assets: https://github.com/opensearch-project/opensearch-catalog/blob/main/docs/integrations/README.md

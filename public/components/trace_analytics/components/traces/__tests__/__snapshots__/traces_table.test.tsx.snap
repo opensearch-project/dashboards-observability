@@ -462,7 +462,7 @@ exports[`Traces table component renders jaeger traces table 1`] = `
             Object {
               "align": "left",
               "field": "trace_id",
-              "name": "Trace ID",
+              "name": "Trace Id",
               "render": [Function],
               "sortable": true,
               "truncateText": true,
@@ -531,7 +531,7 @@ exports[`Traces table component renders jaeger traces table 1`] = `
               Object {
                 "align": "left",
                 "field": "trace_id",
-                "name": "Trace ID",
+                "name": "Trace Id",
                 "render": [Function],
                 "sortable": true,
                 "truncateText": true,
@@ -593,7 +593,7 @@ exports[`Traces table component renders jaeger traces table 1`] = `
               "allowNeutralSort": false,
               "sort": Object {
                 "direction": "asc",
-                "field": "Trace ID",
+                "field": "Trace Id",
               },
             }
           }
@@ -635,7 +635,7 @@ exports[`Traces table component renders jaeger traces table 1`] = `
                                   "isSortAscending": true,
                                   "isSorted": true,
                                   "key": "_data_s_trace_id_0",
-                                  "name": "Trace ID",
+                                  "name": "Trace Id",
                                   "onSort": [Function],
                                 },
                                 Object {
@@ -843,15 +843,15 @@ exports[`Traces table component renders jaeger traces table 1`] = `
                                       values={
                                         Object {
                                           "description": undefined,
-                                          "innerText": "Trace ID",
+                                          "innerText": "Trace Id",
                                         }
                                       }
                                     >
                                       <span
                                         className="euiTableCellContent__text"
-                                        title="Trace ID"
+                                        title="Trace Id"
                                       >
-                                        Trace ID
+                                        Trace Id
                                       </span>
                                     </EuiI18n>
                                   </EuiInnerText>
@@ -1081,7 +1081,7 @@ exports[`Traces table component renders jaeger traces table 1`] = `
                             key="_data_column_trace_id_0_0"
                             mobileOptions={
                               Object {
-                                "header": "Trace ID",
+                                "header": "Trace Id",
                                 "render": undefined,
                               }
                             }
@@ -1100,7 +1100,7 @@ exports[`Traces table component renders jaeger traces table 1`] = `
                               <div
                                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                               >
-                                Trace ID
+                                Trace Id
                               </div>
                               <div
                                 className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
@@ -1859,7 +1859,7 @@ exports[`Traces table component renders traces table 1`] = `
             Object {
               "align": "left",
               "field": "trace_id",
-              "name": "Trace ID",
+              "name": "Trace Id",
               "render": [Function],
               "sortable": true,
               "truncateText": false,
@@ -1947,7 +1947,7 @@ exports[`Traces table component renders traces table 1`] = `
               Object {
                 "align": "left",
                 "field": "trace_id",
-                "name": "Trace ID",
+                "name": "Trace Id",
                 "render": [Function],
                 "sortable": true,
                 "truncateText": false,
@@ -2028,7 +2028,7 @@ exports[`Traces table component renders traces table 1`] = `
               "allowNeutralSort": false,
               "sort": Object {
                 "direction": "asc",
-                "field": "Trace ID",
+                "field": "Trace Id",
               },
             }
           }
@@ -2070,7 +2070,7 @@ exports[`Traces table component renders traces table 1`] = `
                                   "isSortAscending": true,
                                   "isSorted": true,
                                   "key": "_data_s_trace_id_0",
-                                  "name": "Trace ID",
+                                  "name": "Trace Id",
                                   "onSort": [Function],
                                 },
                                 Object {
@@ -2293,15 +2293,15 @@ exports[`Traces table component renders traces table 1`] = `
                                       values={
                                         Object {
                                           "description": undefined,
-                                          "innerText": "Trace ID",
+                                          "innerText": "Trace Id",
                                         }
                                       }
                                     >
                                       <span
                                         className="euiTableCellContent__text"
-                                        title="Trace ID"
+                                        title="Trace Id"
                                       >
-                                        Trace ID
+                                        Trace Id
                                       </span>
                                     </EuiI18n>
                                   </EuiInnerText>
@@ -2649,7 +2649,7 @@ exports[`Traces table component renders traces table 1`] = `
                             key="_data_column_trace_id_0_0"
                             mobileOptions={
                               Object {
-                                "header": "Trace ID",
+                                "header": "Trace Id",
                                 "render": undefined,
                               }
                             }
@@ -2668,7 +2668,7 @@ exports[`Traces table component renders traces table 1`] = `
                               <div
                                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                               >
-                                Trace ID
+                                Trace Id
                               </div>
                               <div
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"

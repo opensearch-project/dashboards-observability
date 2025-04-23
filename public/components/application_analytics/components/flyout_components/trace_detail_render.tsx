@@ -51,7 +51,7 @@ export const TraceDetailRender = ({
   const renderContent = useMemo(() => {
     if (!traceId) return <></>;
     const overviewList = [
-      getListItem('Trace ID', traceId),
+      getListItem('Trace Id', traceId),
       getListItem('Trace group name', fields.trace_group || '-'),
       getListItem('Latency', fields.latency),
       getListItem('Last updated', fields.last_updated),

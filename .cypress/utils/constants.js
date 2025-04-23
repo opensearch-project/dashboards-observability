@@ -21,6 +21,7 @@ export const SPAN_ID_TREE_VIEW = 'fe4076542b41d40b';
 export const SERVICE_NAME = 'frontend-client';
 export const SERVICE_SPAN_ID = 'e275ac9d21929e9b';
 export const AUTH_SERVICE_SPAN_ID = '277a5934acf55dcf';
+export const INVALID_URL = 'invalid_url';
 
 export const testDataSet = [
   {
@@ -154,8 +155,8 @@ export const suppressResizeObserverIssue = () => {
 };
 
 export const verify_traces_spans_data_grid_cols_exists = () => {
-  cy.get('.euiDataGridHeaderCell__content').contains('Span ID').should('exist');
-  cy.get('.euiDataGridHeaderCell__content').contains('Trace ID').should('exist');
+  cy.get('.euiDataGridHeaderCell__content').contains('Span Id').should('exist');
+  cy.get('.euiDataGridHeaderCell__content').contains('Trace Id').should('exist');
   cy.get('.euiDataGridHeaderCell__content').contains('Operation').should('exist');
   cy.get('.euiDataGridHeaderCell__content').contains('Duration').should('exist');
   cy.get('.euiDataGridHeaderCell__content').contains('Start time').should('exist');
