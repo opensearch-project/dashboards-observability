@@ -179,6 +179,7 @@ exports[`Panel Grid Component renders panel grid component with empty visualizat
       "getIsVisible$": [MockFunction],
       "globalSearch": Object {
         "getAllSearchCommands": [MockFunction],
+        "unregisterSearchCommand": [MockFunction],
       },
       "logos": Object {
         "AnimatedMark": Object {

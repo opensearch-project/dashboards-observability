@@ -223,7 +223,9 @@ export function registerParaRoute(router: IRouter) {
         const updateResponse = await opensearchNotebooksClient.update(
           NOTEBOOK_SAVED_OBJECT,
           request.body.noteId,
-          updateNotebook
+          {
+            savedNotebook: updateNotebook,
+          }
         );
         console.log('1');
         return response.ok({

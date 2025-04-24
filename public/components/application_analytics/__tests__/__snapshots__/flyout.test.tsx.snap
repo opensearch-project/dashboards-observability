@@ -28,12 +28,12 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
     />
   </EuiSpacer>
   <div
-    key="list-item-Trace ID"
+    key="list-item-Trace Id"
   >
     <EuiDescriptionList
       align="center"
       compressed={true}
-      data-test-subj="Trace IDDescriptionList"
+      data-test-subj="Trace IdDescriptionList"
       listItems={
         Array [
           Object {
@@ -61,7 +61,7 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                 }
               }
             >
-              Trace ID
+              Trace Id
             </EuiText>,
           },
         ]
@@ -70,7 +70,7 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
     >
       <dl
         className="euiDescriptionList euiDescriptionList--column euiDescriptionList--center euiDescriptionList--compressed"
-        data-test-subj="Trace IDDescriptionList"
+        data-test-subj="Trace IdDescriptionList"
       >
         <EuiDescriptionListTitle
           key="title-0"
@@ -104,7 +104,7 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                   <div
                     className="euiTextColor euiTextColor--subdued"
                   >
-                    Trace ID
+                    Trace Id
                   </div>
                 </EuiTextColor>
               </div>
