@@ -318,7 +318,7 @@ describe('Viewing application', () => {
     cy.get('[data-test-subj="spanDetailFlyout"]').should('not.exist');
   });
 
-  it('Opens trace detail flyout when Trace ID is clicked', () => {
+  it('Opens trace detail flyout when Trace Id is clicked', () => {
     cy.get('[data-test-subj="app-analytics-traceTab"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('[title="03f9c770db5ee2f1caac0afc36db49ba"]').click();

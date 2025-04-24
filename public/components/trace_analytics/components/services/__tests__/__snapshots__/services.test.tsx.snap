@@ -683,7 +683,7 @@ exports[`Services component renders empty services page 1`] = `
                                 isLoading={false}
                                 onChange={[Function]}
                                 onSearch={[Function]}
-                                placeholder="Trace ID, trace group name, service name"
+                                placeholder="Trace Id, trace group name, service name"
                                 prepend={
                                   <GlobalFilterButton
                                     attributesFilterFields={Array []}
@@ -896,7 +896,7 @@ exports[`Services component renders empty services page 1`] = `
                                           data-test-subj="search-bar-input-box"
                                           onChange={[Function]}
                                           onKeyUp={[Function]}
-                                          placeholder="Trace ID, trace group name, service name"
+                                          placeholder="Trace Id, trace group name, service name"
                                           type="search"
                                           value=""
                                         />
@@ -4077,7 +4077,7 @@ exports[`Services component renders jaeger services page 1`] = `
                                 isLoading={false}
                                 onChange={[Function]}
                                 onSearch={[Function]}
-                                placeholder="Trace ID, trace group name, service name"
+                                placeholder="Trace Id, trace group name, service name"
                                 prepend={
                                   <GlobalFilterButton
                                     attributesFilterFields={Array []}
@@ -4292,7 +4292,7 @@ exports[`Services component renders jaeger services page 1`] = `
                                           data-test-subj="search-bar-input-box"
                                           onChange={[Function]}
                                           onKeyUp={[Function]}
-                                          placeholder="Trace ID, trace group name, service name"
+                                          placeholder="Trace Id, trace group name, service name"
                                           type="search"
                                           value=""
                                         />
@@ -6578,7 +6578,7 @@ exports[`Services component renders services page 1`] = `
                                 isLoading={false}
                                 onChange={[Function]}
                                 onSearch={[Function]}
-                                placeholder="Trace ID, trace group name, service name"
+                                placeholder="Trace Id, trace group name, service name"
                                 prepend={
                                   <GlobalFilterButton
                                     attributesFilterFields={Array []}
@@ -6793,7 +6793,7 @@ exports[`Services component renders services page 1`] = `
                                           data-test-subj="search-bar-input-box"
                                           onChange={[Function]}
                                           onKeyUp={[Function]}
-                                          placeholder="Trace ID, trace group name, service name"
+                                          placeholder="Trace Id, trace group name, service name"
                                           type="search"
                                           value=""
                                         />
