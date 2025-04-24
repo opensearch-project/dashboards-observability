@@ -225,6 +225,7 @@ export function registerParaRoute(router: IRouter) {
           request.body.noteId,
           updateNotebook
         );
+        console.log('1');
         return response.ok({
           body: updateResponse,
         });
