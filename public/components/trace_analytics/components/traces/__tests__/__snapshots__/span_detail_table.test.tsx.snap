@@ -97,15 +97,15 @@ exports[`SpanDetailTable renders the empty component 1`] = `
         columns={
           Array [
             Object {
-              "display": "Span ID",
+              "display": "Span Id",
               "id": "spanId",
             },
             Object {
-              "display": "Parent span ID",
+              "display": "Parent span Id",
               "id": "parentSpanId",
             },
             Object {
-              "display": "Trace ID",
+              "display": "Trace Id",
               "id": "traceId",
             },
             Object {
@@ -594,15 +594,15 @@ exports[`SpanDetailTableHierarchy renders the empty component 1`] = `
         columns={
           Array [
             Object {
-              "display": "Span ID",
+              "display": "Span Id",
               "id": "spanId",
             },
             Object {
-              "display": "Parent span ID",
+              "display": "Parent span Id",
               "id": "parentSpanId",
             },
             Object {
-              "display": "Trace ID",
+              "display": "Trace Id",
               "id": "traceId",
             },
             Object {

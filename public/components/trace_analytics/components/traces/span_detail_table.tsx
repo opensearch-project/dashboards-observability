@@ -46,15 +46,15 @@ export interface SpanSearchParams {
 const getColumns = (mode: TraceAnalyticsMode): EuiDataGridColumn[] => [
   {
     id: mode === 'jaeger' ? 'spanID' : 'spanId',
-    display: 'Span ID',
+    display: 'Span Id',
   },
   {
     id: mode === 'jaeger' ? 'references' : 'parentSpanId',
-    display: 'Parent span ID',
+    display: 'Parent span Id',
   },
   {
     id: mode === 'jaeger' ? 'traceID' : 'traceId',
-    display: 'Trace ID',
+    display: 'Trace Id',
   },
   ...(mode !== 'jaeger'
     ? [

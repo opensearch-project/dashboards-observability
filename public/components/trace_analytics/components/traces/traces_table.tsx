@@ -66,7 +66,7 @@ export function TracesTable(props: TracesTableProps) {
       return [
         {
           field: 'trace_id',
-          name: 'Trace ID',
+          name: 'Trace Id',
           align: 'left',
           sortable: true,
           truncateText: false,
@@ -160,7 +160,7 @@ export function TracesTable(props: TracesTableProps) {
       return [
         {
           field: 'trace_id',
-          name: 'Trace ID',
+          name: 'Trace Id',
           align: 'left',
           sortable: true,
           truncateText: true,
