@@ -34,7 +34,7 @@ export const fetchDynamicColumns = (columnItems: string[]) => {
         </EuiText>
       ),
       align: 'right',
-      sortable: true,
+      sortable: false,
       truncateText: true,
       render: (item) =>
         item ? (
