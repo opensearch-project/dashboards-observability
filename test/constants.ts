@@ -763,6 +763,20 @@ export const fieldCapQueryResponse1 = {
         aggregatable: false,
       },
     },
+    'attributes.url': {
+      text: {
+        type: 'text',
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'attributes.custom_field.keyword': {
+      keyword: {
+        type: 'keyword',
+        searchable: true,
+        aggregatable: true,
+      },
+    },
   },
 };
 
