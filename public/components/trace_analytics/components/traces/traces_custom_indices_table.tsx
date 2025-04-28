@@ -79,7 +79,7 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
 
       if (!items.hasOwnProperty(adjustedRowIndex)) return '-';
       const value = resolveFieldValue(items[adjustedRowIndex], columnId);
-      // const value = items[adjustedRowIndex]?.[columnId];//old
+
       if (!value && columnId !== 'status.code' && columnId !== 'error_count') return '-';
 
       switch (columnId) {
