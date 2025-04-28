@@ -22,6 +22,7 @@ exports[`Log Config component renders empty log config 1`] = `
       "getIsVisible$": [MockFunction],
       "globalSearch": Object {
         "getAllSearchCommands": [MockFunction],
+        "unregisterSearchCommand": [MockFunction],
       },
       "logos": Object {
         "AnimatedMark": Object {
@@ -694,6 +695,7 @@ exports[`Log Config component renders with query 1`] = `
       "getIsVisible$": [MockFunction],
       "globalSearch": Object {
         "getAllSearchCommands": [MockFunction],
+        "unregisterSearchCommand": [MockFunction],
       },
       "logos": Object {
         "AnimatedMark": Object {

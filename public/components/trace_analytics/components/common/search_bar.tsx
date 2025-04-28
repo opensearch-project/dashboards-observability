@@ -87,7 +87,7 @@ export const SearchBar = forwardRef((props: SearchBarOwnProps, ref) => {
               fullWidth
               isClearable={false}
               placeholder={i18n.translate('traceAnalytics.searchBar.placeholder', {
-                defaultMessage: 'Trace ID, trace group name, service name',
+                defaultMessage: 'Trace Id, trace group name, service name',
               })}
               data-test-subj="search-bar-input-box"
               value={query}
