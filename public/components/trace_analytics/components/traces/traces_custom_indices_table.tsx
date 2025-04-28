@@ -50,6 +50,26 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
     onSort,
   } = props;
 
+  const resolveFieldValue = (item: any, field: string) => {
+    if (!item) return '-';
+
+    const matchPrefix = (prefix: string, container?: any) => {
+      if (field.startsWith(prefix) && container) {
+        const attr = field.slice(prefix.length);
+        return container[attr] ?? '-';
+      }
+      return null;
+    };
+
+    return (
+      matchPrefix('resource.attributes.', item.resource?.attributes) ??
+      matchPrefix('span.attributes.', item.attributes) ??
+      matchPrefix('attributes.', item.attributes) ??
+      item[field] ??
+      '-'
+    );
+  };
+
   const renderCellValue = useMemo(() => {
     return ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
       const isTracesMode = props.tracesTableMode === 'traces';
@@ -58,7 +78,7 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
         : rowIndex - pagination.pageIndex * pagination.pageSize;
 
       if (!items.hasOwnProperty(adjustedRowIndex)) return '-';
-      const value = items[adjustedRowIndex]?.[columnId];
+      const value = resolveFieldValue(items[adjustedRowIndex], columnId);
 
       if (!value && columnId !== 'status.code' && columnId !== 'error_count') return '-';
 

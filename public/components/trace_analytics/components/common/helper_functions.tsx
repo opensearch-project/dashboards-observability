@@ -581,7 +581,10 @@ export const filtersToDsl = (
 
 export const getAttributeFieldNames = (response: FieldCapResponse): string[] => {
   return Object.keys(response.fields).filter(
-    (field) => field.startsWith('resource.attributes') || field.startsWith('span.attributes')
+    (field) =>
+      field.startsWith('resource.attributes') ||
+      field.startsWith('span.attributes') ||
+      field.startsWith('attributes')
   );
 };
 

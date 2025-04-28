@@ -171,13 +171,15 @@ describe('Trace analytics helper functions', () => {
   });
 
   describe('getAttributeFieldNames', () => {
-    it("should return only field names starting with 'resource.attributes' or 'span.attributes'", () => {
+    it("should return only field names starting with 'resource.attributes' or 'span.attributes' or 'attributes'", () => {
       const expectedFields = [
         'span.attributes.http@url',
         'span.attributes.net@peer@ip',
         'span.attributes.http@user_agent.keyword',
         'resource.attributes.telemetry@sdk@version.keyword',
         'resource.attributes.host@hostname.keyword',
+        'attributes.url',
+        'attributes.custom_field.keyword',
       ];
       const result = getAttributeFieldNames(fieldCapQueryResponse1);
       expect(result).toEqual(expectedFields);
