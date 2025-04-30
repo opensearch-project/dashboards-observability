@@ -35,6 +35,7 @@ interface TracesLandingTableProps {
   onSort: (columns: Array<{ id: string; direction: 'desc' | 'asc' }>) => void;
   maxTraces: number;
   setMaxTraces: React.Dispatch<React.SetStateAction<number>>;
+  uniqueTraces: number;
 }
 
 export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
@@ -151,6 +152,7 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
             setTracesTableMode={(mode) => props.setTracesTableMode(mode as TraceQueryMode)}
             maxTraces={props.maxTraces}
             setMaxTraces={props.setMaxTraces}
+            uniqueTraces={props.uniqueTraces}
           />
         ) : (
           <NoMatchMessage size="xl" mode={props.mode} />

@@ -115,7 +115,8 @@ export const handleTracesRequest = async (
   dataSourceMDSId?: string,
   sort?: PropertySort,
   isUnderOneHour?: boolean,
-  setTotalHits?: (count: number) => void
+  setTotalHits?: (count: number) => void,
+  setUniqueTraces?: (count: number) => void
 ) => {
   const binarySearch = (arr: number[], target: number) => {
     if (!arr) return Number.NaN;
@@ -200,6 +201,11 @@ export const handleTracesRequest = async (
 
       if (setTotalHits && totalHitsResult?.status === 'fulfilled') {
         setTotalHits(totalHitsResult.value);
+      }
+
+      if (setUniqueTraces) {
+        const uniqueTraces = response?.aggregations?.unique_traces?.value ?? 0;
+        setUniqueTraces(uniqueTraces);
       }
 
       if (

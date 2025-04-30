@@ -41,16 +41,22 @@ interface TracesTableProps {
   jaegerIndicesExist: boolean;
   dataPrepperIndicesExist: boolean;
   page?: 'traces' | 'app';
+  uniqueTraces: number;
 }
 
 export function TracesTable(props: TracesTableProps) {
-  const { items, refresh, mode, loading, getTraceViewUri, openTraceFlyout } = props;
-  const renderTitleBar = (totalItems?: number) => {
+  const { items, refresh, mode, loading, getTraceViewUri, openTraceFlyout, uniqueTraces } = props;
+  const renderTitleBar = (rowCount: number, totalCount: number) => {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={10}>
-          <PanelTitle title="Traces" totalItems={totalItems} />
+          <PanelTitle title="Traces" totalItems={rowCount} />
         </EuiFlexItem>
+        {totalCount > rowCount && (
+          <span className="trace-table-warning">
+            {`${rowCount} results shown out of ${totalCount}`}
+          </span>
+        )}
       </EuiFlexGroup>
     );
   };
@@ -228,7 +234,10 @@ export function TracesTable(props: TracesTableProps) {
     }
   }, [items]);
 
-  const titleBar = useMemo(() => renderTitleBar(items?.length), [items]);
+  const titleBar = useMemo(() => renderTitleBar(items?.length, uniqueTraces), [
+    items,
+    uniqueTraces,
+  ]);
 
   const [sorting, setSorting] = useState<{ sort: PropertySort }>({
     sort: {

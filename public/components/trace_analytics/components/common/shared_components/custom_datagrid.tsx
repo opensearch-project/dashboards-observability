@@ -22,7 +22,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { NoMatchMessage } from '../helper_functions';
 import {
   TRACE_TABLE_OPTIONS,
@@ -91,8 +91,9 @@ interface RenderCustomDataGridParams {
   isTableDataLoading?: boolean;
   tracesTableMode?: string;
   setTracesTableMode?: (mode: string) => void;
-  maxTraces?: number;
-  setMaxTraces?: (max: number) => void;
+  maxTraces: number;
+  setMaxTraces: React.Dispatch<React.SetStateAction<number>>;
+  uniqueTraces: number;
 }
 
 export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
@@ -112,6 +113,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   setTracesTableMode,
   maxTraces,
   setMaxTraces,
+  uniqueTraces,
 }) => {
   const defaultVisibleColumns = useMemo(() => {
     return columns
@@ -127,7 +129,9 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const displayedRowCount =
-    tracesTableMode === 'traces' ? maxTraces : Math.min(rowCount, MAX_DISPLAY_ROWS);
+    tracesTableMode === 'traces'
+      ? Math.min(maxTraces, uniqueTraces, MAX_DISPLAY_ROWS)
+      : Math.min(rowCount, MAX_DISPLAY_ROWS);
 
   const isDarkMode = uiSettingsService.get('theme:darkMode');
 
@@ -137,39 +141,25 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
       )
     : [];
 
-  const isLastPage =
-    tracesTableMode === 'traces' && pagination?.pageSize && maxTraces != null
-      ? (pagination.pageIndex + 1) * pagination.pageSize >= maxTraces &&
-        rowCount > maxTraces &&
-        maxTraces < MAX_DISPLAY_ROWS
-      : false;
-
-  // Used for when trace count less than default maxTraces
-  useEffect(() => {
-    if (
-      tracesTableMode === 'traces' &&
-      rowCount > 0 &&
-      rowCount < maxTraces &&
-      maxTraces !== rowCount
-    ) {
-      setMaxTraces(rowCount);
-    }
-  }, [rowCount, maxTraces, tracesTableMode]);
-
-  const incrementTraceCount = () => {
-    const nextIncrement = Math.min(500, rowCount - maxTraces);
-    if (nextIncrement > 0 && maxTraces < MAX_DISPLAY_ROWS) {
-      setMaxTraces((prevMax) => Math.min(prevMax + nextIncrement, MAX_DISPLAY_ROWS));
-    }
-  };
+  const isLastPage = Boolean(
+    pagination?.pageSize &&
+      (pagination.pageIndex + 1) * pagination.pageSize >= maxTraces &&
+      rowCount > maxTraces &&
+      maxTraces < MAX_DISPLAY_ROWS
+  );
 
   useInjectElementsIntoGrid(
-    rowCount,
+    displayedRowCount,
     MAX_DISPLAY_ROWS,
-    tracesTableMode ?? '',
-    incrementTraceCount,
-    maxTraces,
-    isLastPage
+    tracesTableMode === 'traces' ? uniqueTraces : rowCount,
+    tracesTableMode === 'traces'
+      ? () => {
+          setMaxTraces((prevMax: number) =>
+            Math.min(prevMax + 500, uniqueTraces, MAX_DISPLAY_ROWS)
+          );
+        }
+      : undefined,
+    tracesTableMode === 'traces' ? isLastPage : false
   );
 
   const disableInteractions = useMemo(() => isFullScreen, [isFullScreen]);
