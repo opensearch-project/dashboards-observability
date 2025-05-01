@@ -18,11 +18,11 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0
 - Custom Traces- Sorting/Toast ([#2397](https://github.com/opensearch-project/dashboards-observability/pull/2397))
 - Event Analytics - Cypress flaky fix ([#2395](https://github.com/opensearch-project/dashboards-observability/pull/2395))
 - Services to Traces - Flyout redirection ([#2392](https://github.com/opensearch-project/dashboards-observability/pull/2392))
-- [Bug] Traces/Services remove toast message on empty data ([#2346] (https://github.com/opensearch-project/dashboards-observability/pull/2346))
-- Restore spans limit to 3000 in trace view ([#2353] (https://github.com/opensearch-project/dashboards-observability/pull/2353))
-- [BUG] Updated cache for the sub tree in Workbench ([#2351] (https://github.com/opensearch-project/dashboards-observability/pull/2351))
-- Trace Groups Optimization - Remove duplicate filters ([#2368] (https://github.com/opensearch-project/dashboards-observability/pull/2368))
-- [Bug] Traces redirection while QA enabled ([#2369] (https://github.com/opensearch-project/dashboards-observability/pull/2369))
+- [Bug] Traces/Services remove toast message on empty data ([#2346](https://github.com/opensearch-project/dashboards-observability/pull/2346))
+- Restore spans limit to 3000 in trace view ([#2353](https://github.com/opensearch-project/dashboards-observability/pull/2353))
+- [BUG] Updated cache for the sub tree in Workbench ([#2351](https://github.com/opensearch-project/dashboards-observability/pull/2351))
+- Trace Groups Optimization - Remove duplicate filters ([#2368](https://github.com/opensearch-project/dashboards-observability/pull/2368))
+- [Bug] Traces redirection while QA enabled ([#2369](https://github.com/opensearch-project/dashboards-observability/pull/2369))
 
 ### Enhancements
 
@@ -34,12 +34,12 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0
 - Traces - Custom source switch to data grid ([#2390](https://github.com/opensearch-project/dashboards-observability/pull/2390))
 - Service Content/View Optimizationsc ([#2383](https://github.com/opensearch-project/dashboards-observability/pull/2383))
 - Database selector in "Set Up Integration" page ([#2380](https://github.com/opensearch-project/dashboards-observability/pull/2380))
-- Support custom logs correlation ([#2375] (https://github.com/opensearch-project/dashboards-observability/pull/2375))
+- Support custom logs correlation ([#2375](https://github.com/opensearch-project/dashboards-observability/pull/2375))
 
 ### Infrastructure
 
 - Improve error handling when setting up and reading a new integration ([#2387](https://github.com/opensearch-project/dashboards-observability/pull/2387))
-- Improve the test results for Integrations internals ([#2376] (https://github.com/opensearch-project/dashboards-observability/pull/2376))
+- Improve the test results for Integrations internals ([#2376](https://github.com/opensearch-project/dashboards-observability/pull/2376))
 
 ### Maintenance
 
@@ -51,9 +51,9 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0
 - Update README.md for unblocking PRs to be merged ([#2394](https://github.com/opensearch-project/dashboards-observability/pull/2394))
 - Bump dep serialize-javascript version to 6.0.2 and @babel/runtime to 7.26.10 ([#2389](https://github.com/opensearch-project/dashboards-observability/pull/2389))
 - Minor CI updates and workflow fixes ([#2388](https://github.com/opensearch-project/dashboards-observability/pull/2388))
-- TraceView - Optimization of queries ([#2349] (https://github.com/opensearch-project/dashboards-observability/pull/2349))
-- [Integration] Remove maxFilesPerTrigger from all the integrations queries ([#2354] (https://github.com/opensearch-project/dashboards-observability/pull/2354))
-- Bump dashboards observability to version 3.0.0.0-alpha1 ([#2364] (https://github.com/opensearch-project/dashboards-observability/pull/2364))
-- ServiceMap Query Optimizations ([#2367] (https://github.com/opensearch-project/dashboards-observability/pull/2367))
-- Increase dashboards timeout & store logs on failure ([#2371] (https://github.com/opensearch-project/dashboards-observability/pull/2371))
-- Clear ADMINS.md. ([#2363] (https://github.com/opensearch-project/dashboards-observability/pull/2363))
+- TraceView - Optimization of queries ([#2349](https://github.com/opensearch-project/dashboards-observability/pull/2349))
+- [Integration] Remove maxFilesPerTrigger from all the integrations queries ([#2354](https://github.com/opensearch-project/dashboards-observability/pull/2354))
+- Bump dashboards observability to version 3.0.0.0-alpha1 ([#2364](https://github.com/opensearch-project/dashboards-observability/pull/2364))
+- ServiceMap Query Optimizations ([#2367](https://github.com/opensearch-project/dashboards-observability/pull/2367))
+- Increase dashboards timeout & store logs on failure ([#2371](https://github.com/opensearch-project/dashboards-observability/pull/2371))
+- Clear ADMINS.md. ([#2363](https://github.com/opensearch-project/dashboards-observability/pull/2363))
