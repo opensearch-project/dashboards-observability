@@ -1,6 +1,6 @@
-## Version 3.0.0-beta1 Release Notes
+## Version 3.0.0 Release Notes
 
-Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0-beta1
+Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0
 
 ### Breaking Changes
 
