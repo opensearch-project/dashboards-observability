@@ -219,10 +219,6 @@ export function TracesContent(props: TracesProps) {
   }, [maxTraces]);
 
   useEffect(() => {
-    setPageIndex(0);
-  }, [tracesTableMode]);
-
-  useEffect(() => {
     if (mode !== 'custom_data_prepper') {
       setMaxTraces(500);
     }
@@ -477,6 +473,7 @@ export function TracesContent(props: TracesProps) {
               setTracesTableMode={(tableMode) => {
                 setTracesTableMode(tableMode);
                 setSortingColumns([]);
+                setPageIndex(0);
               }}
               sorting={sortingColumns}
               pagination={pagination}
