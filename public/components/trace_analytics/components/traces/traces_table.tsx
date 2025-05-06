@@ -56,9 +56,7 @@ export function TracesTable(props: TracesTableProps) {
           <PanelTitle title="Traces" totalItems={rowCount} />
         </EuiFlexItem>
         {totalCount > rowCount && (
-          <span className="trace-table-warning">
-            {`${rowCount} results out of ${totalCountText}`}
-          </span>
+          <span className="trace-table-warning">{`Results out of ${totalCountText}`}</span>
         )}
       </EuiFlexGroup>
     );

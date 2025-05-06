@@ -36,13 +36,9 @@ export const useInjectElementsIntoGrid = (
           const warningDiv = document.createElement('div');
           warningDiv.className = 'trace-table-warning';
 
-          const strongElement = document.createElement('strong');
-          strongElement.textContent = `${Math.min(rowCount, maxDisplayRows)}`;
-
           const textSpan = document.createElement('span');
-          textSpan.appendChild(strongElement);
           const totalCountText = totalCount > maxDisplayRows ? `${maxDisplayRows}+` : totalCount;
-          textSpan.appendChild(document.createTextNode(` results out of ${totalCountText}`));
+          textSpan.appendChild(document.createTextNode(`Results out of ${totalCountText}`));
 
           warningDiv.appendChild(textSpan);
 
