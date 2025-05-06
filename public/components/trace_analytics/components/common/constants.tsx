@@ -8,6 +8,8 @@ export const NANOS_TO_MS = 1e6;
 
 export const MILI_TO_SEC = 1000;
 
+export const MAX_DISPLAY_ROWS = 10000;
+
 export const pieChartColors = [
   '#7492e7',
   '#c33d69',

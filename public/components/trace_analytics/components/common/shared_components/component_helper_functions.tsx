@@ -40,10 +40,9 @@ export const useInjectElementsIntoGrid = (
           strongElement.textContent = `${Math.min(rowCount, maxDisplayRows)}`;
 
           const textSpan = document.createElement('span');
-          textSpan.appendChild(document.createTextNode('Showing '));
           textSpan.appendChild(strongElement);
           const totalCountText = totalCount > maxDisplayRows ? `${maxDisplayRows}+` : totalCount;
-          textSpan.appendChild(document.createTextNode(` of ${totalCountText} results`));
+          textSpan.appendChild(document.createTextNode(` results out of ${totalCountText}`));
 
           warningDiv.appendChild(textSpan);
 

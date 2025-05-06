@@ -30,6 +30,7 @@ import {
   NoMatchMessage,
   PanelTitle,
 } from '../common/helper_functions';
+import { MAX_DISPLAY_ROWS } from '../common/constants';
 
 interface TracesTableProps {
   items: any[];
@@ -47,6 +48,8 @@ interface TracesTableProps {
 export function TracesTable(props: TracesTableProps) {
   const { items, refresh, mode, loading, getTraceViewUri, openTraceFlyout, uniqueTraces } = props;
   const renderTitleBar = (rowCount: number, totalCount: number) => {
+    const totalCountText = totalCount > MAX_DISPLAY_ROWS ? `${MAX_DISPLAY_ROWS}+` : totalCount;
+
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={10}>
@@ -54,7 +57,7 @@ export function TracesTable(props: TracesTableProps) {
         </EuiFlexItem>
         {totalCount > rowCount && (
           <span className="trace-table-warning">
-            {`${rowCount} results shown out of ${totalCount}`}
+            {`${rowCount} results out of ${totalCountText}`}
           </span>
         )}
       </EuiFlexGroup>
