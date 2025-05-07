@@ -91,9 +91,9 @@ interface RenderCustomDataGridParams {
   isTableDataLoading?: boolean;
   tracesTableMode?: string;
   setTracesTableMode?: (mode: string) => void;
-  maxTraces: number;
-  setMaxTraces: React.Dispatch<React.SetStateAction<number>>;
-  uniqueTraces: number;
+  maxTraces?: number;
+  setMaxTraces?: React.Dispatch<React.SetStateAction<number>>;
+  uniqueTraces?: number;
 }
 
 /**
@@ -123,9 +123,9 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   isTableDataLoading,
   tracesTableMode,
   setTracesTableMode,
-  maxTraces,
+  maxTraces = 0,
   setMaxTraces,
-  uniqueTraces,
+  uniqueTraces = 0,
 }) => {
   const defaultVisibleColumns = useMemo(() => {
     return columns
@@ -167,7 +167,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
     isTracesMode ? uniqueTraces : rowCount,
     isTracesMode
       ? () => {
-          setMaxTraces((prevMax: number) =>
+          setMaxTraces?.((prevMax: number) =>
             Math.min(prevMax + 500, uniqueTraces, MAX_DISPLAY_ROWS)
           );
         }
