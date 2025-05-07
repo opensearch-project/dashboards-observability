@@ -5,23 +5,23 @@
 
 import { useEffect } from 'react';
 
-// Injects the size warning and Load buttons into the corners of EUI Data Grid
+// Injects Size warning and Load more button into the corners of EUI Data Grid
+// 1. When rowCount > maxDisplayRows, show warning (some data is hidden)
+// 2. When rowCount < totalCount, show warning (more data to load), and Load more button when isLastPage is true
 export const useInjectElementsIntoGrid = (
   rowCount: number,
   maxDisplayRows: number,
-  tracesTableMode: string,
+  totalCount: number,
   loadMoreHandler?: () => void,
-  maxTraces?: number,
   isLastPage?: boolean
 ) => {
   useEffect(() => {
     setTimeout(() => {
+      const moreToShow = rowCount > maxDisplayRows;
+      const moreToLoad = rowCount < totalCount;
+      const shouldShowWarning = moreToShow || moreToLoad;
+
       const toolbar = document.querySelector<HTMLElement>('.euiDataGrid__controls');
-
-      const shouldShowWarning =
-        (tracesTableMode === 'traces' && maxTraces != null && maxTraces < rowCount) ||
-        (tracesTableMode !== 'traces' && rowCount > maxDisplayRows);
-
       if (toolbar) {
         const existingWarning = toolbar.querySelector('.trace-table-warning');
         if (existingWarning) {
@@ -36,14 +36,9 @@ export const useInjectElementsIntoGrid = (
           const warningDiv = document.createElement('div');
           warningDiv.className = 'trace-table-warning';
 
-          const strongElement = document.createElement('strong');
-          strongElement.textContent =
-            tracesTableMode === 'traces' ? `${maxTraces ?? maxDisplayRows}` : `${maxDisplayRows}`;
-
           const textSpan = document.createElement('span');
-          textSpan.appendChild(strongElement);
-          textSpan.appendChild(document.createTextNode(' results shown out of '));
-          textSpan.appendChild(document.createTextNode(` ${rowCount}`));
+          const totalCountText = totalCount > maxDisplayRows ? `${maxDisplayRows}+` : totalCount;
+          textSpan.appendChild(document.createTextNode(`Results out of ${totalCountText}`));
 
           warningDiv.appendChild(textSpan);
 
@@ -52,37 +47,32 @@ export const useInjectElementsIntoGrid = (
       }
 
       const pagination = document.querySelector<HTMLElement>('.euiDataGrid__pagination');
-      const existingLoadMoreButton = pagination?.querySelector('.trace-table-load-more');
+      if (pagination) {
+        pagination.style.display = 'flex';
+        pagination.style.alignItems = 'center';
+        pagination.style.justifyContent = 'space-between';
 
-      if (tracesTableMode !== 'traces' || !pagination || !loadMoreHandler || !isLastPage) {
+        const existingLoadMoreButton = pagination.querySelector('.trace-table-load-more');
         if (existingLoadMoreButton) {
           existingLoadMoreButton.remove();
         }
-        return;
-      }
 
-      pagination.style.display = 'flex';
-      pagination.style.alignItems = 'center';
-      pagination.style.justifyContent = 'space-between';
+        if (moreToLoad && loadMoreHandler && isLastPage) {
+          const loadMoreButton = document.createElement('button');
+          loadMoreButton.className = 'trace-table-load-more euiButtonEmpty euiButtonEmpty--text';
+          loadMoreButton.style.marginLeft = '12px';
+          loadMoreButton.innerText = '... Load more';
+          loadMoreButton.onclick = () => loadMoreHandler();
 
-      let loadMoreButton = pagination.querySelector<HTMLElement>('.trace-table-load-more');
-      if (!loadMoreButton) {
-        loadMoreButton = document.createElement('button');
-        loadMoreButton.className = 'trace-table-load-more euiButtonEmpty euiButtonEmpty--text';
-        loadMoreButton.style.marginLeft = '12px';
-        loadMoreButton.innerText = '... Load more';
-
-        loadMoreButton.onclick = () => loadMoreHandler();
-
-        const paginationList = pagination.querySelector('.euiPagination__list');
-
-        if (paginationList) {
-          const listItem = document.createElement('li');
-          listItem.className = 'euiPagination__item trace-table-load-more';
-          listItem.appendChild(loadMoreButton);
-          paginationList.appendChild(listItem);
+          const paginationList = pagination.querySelector('.euiPagination__list');
+          if (paginationList) {
+            const listItem = document.createElement('li');
+            listItem.className = 'euiPagination__item trace-table-load-more';
+            listItem.appendChild(loadMoreButton);
+            paginationList.appendChild(listItem);
+          }
         }
       }
     }, 100);
-  }, [rowCount, tracesTableMode, loadMoreHandler, maxTraces, maxDisplayRows, isLastPage]);
+  }, [rowCount, maxDisplayRows, totalCount, loadMoreHandler, isLastPage]);
 };

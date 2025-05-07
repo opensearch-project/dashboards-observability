@@ -135,6 +135,11 @@ export const getTracesQuery = (
       },
     },
     aggs: {
+      unique_traces: {
+        cardinality: {
+          field: 'traceId',
+        },
+      },
       traces: {
         terms: {
           field: 'traceId',

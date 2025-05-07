@@ -72,6 +72,7 @@ export function TracesContent(props: TracesProps) {
   const [includeMetrics, setIncludeMetrics] = useState(false);
   const isNavGroupEnabled = coreRefs?.chrome?.navGroup.getNavGroupEnabled();
   const [maxTraces, setMaxTraces] = useState(500);
+  const [uniqueTraces, setUniqueTraces] = useState(0);
   const [sortingColumns, setSortingColumns] = useState<
     Array<{ id: string; direction: 'desc' | 'asc' }>
   >([]);
@@ -312,8 +313,7 @@ export function TracesContent(props: TracesProps) {
       maxTraces,
       props.dataSourceMDSId[0].id,
       sort,
-      isUnderOneHour,
-      setTotalHits
+      isUnderOneHour
     ).finally(() => setIsTraceTableLoading(false));
   };
 
@@ -380,7 +380,7 @@ export function TracesContent(props: TracesProps) {
               props.dataSourceMDSId[0].id,
               newSort,
               isUnderOneHour,
-              setTotalHits
+              setUniqueTraces
             );
       tracesRequest.finally(() => setIsTraceTableLoading(false));
 
@@ -404,7 +404,8 @@ export function TracesContent(props: TracesProps) {
         maxTraces,
         props.dataSourceMDSId[0].id,
         sort,
-        isUnderOneHour
+        isUnderOneHour,
+        setUniqueTraces
       ).finally(() => setIsTraceTableLoading(false));
     }
   };
@@ -476,6 +477,7 @@ export function TracesContent(props: TracesProps) {
               onSort={onSort}
               maxTraces={maxTraces}
               setMaxTraces={setMaxTraces}
+              uniqueTraces={uniqueTraces}
             />
           ) : (
             <TracesTable
@@ -488,6 +490,7 @@ export function TracesContent(props: TracesProps) {
               jaegerIndicesExist={jaegerIndicesExist}
               dataPrepperIndicesExist={dataPrepperIndicesExist}
               page={page}
+              uniqueTraces={uniqueTraces}
             />
           )}
 

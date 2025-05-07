@@ -22,7 +22,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { NoMatchMessage } from '../helper_functions';
 import {
   TRACE_TABLE_OPTIONS,
@@ -31,8 +31,8 @@ import {
 } from '../../../../../../common/constants/trace_analytics';
 import { useInjectElementsIntoGrid } from './component_helper_functions';
 import { uiSettingsService } from '../../../../../../common/utils';
+import { MAX_DISPLAY_ROWS } from '../constants';
 
-const MAX_DISPLAY_ROWS = 10000;
 interface FullScreenWrapperProps {
   children: React.ReactNode;
   onClose: () => void;
@@ -92,9 +92,22 @@ interface RenderCustomDataGridParams {
   tracesTableMode?: string;
   setTracesTableMode?: (mode: string) => void;
   maxTraces?: number;
-  setMaxTraces?: (max: number) => void;
+  setMaxTraces?: React.Dispatch<React.SetStateAction<number>>;
+  uniqueTraces?: number;
 }
 
+/**
+ * A custom data grid component that supports two distinct modes of operation:
+ * 1. All spans mode (all_spans, root_spans, entry_spans): Displays all rows at once, limited to MAX_DISPLAY_ROWS
+ * 2. Traces mode: Implements lazy loading by initially limiting rows to maxTraces, with ability to load more
+ *    traces incrementally up to MAX_DISPLAY_ROWS
+ *
+ * Key properties:
+ * - tracesTableMode: Current mode of the table ('traces', 'all_spans', 'root_spans', or 'entry_spans')
+ * - rowCount: Total number of hits returned from the query for all_spans, root_spans, entry_spans modes (0 if traces mode)
+ * - uniqueTraces: Total number of unique traces returned from the query when in traces mode (0 if all_spans, root_spans, or entry_spans mode)
+ * - maxTraces: Current number of traces is being displayed in the grid (can be increased to load more traces)
+ */
 export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   columns,
   renderCellValue,
@@ -110,8 +123,9 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   isTableDataLoading,
   tracesTableMode,
   setTracesTableMode,
-  maxTraces,
+  maxTraces = 0,
   setMaxTraces,
+  uniqueTraces = 0,
 }) => {
   const defaultVisibleColumns = useMemo(() => {
     return columns
@@ -126,8 +140,11 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   const [isFullScreen, setIsFullScreen] = useState(fullScreen);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const displayedRowCount =
-    tracesTableMode === 'traces' ? maxTraces : Math.min(rowCount, MAX_DISPLAY_ROWS);
+  const isTracesMode = tracesTableMode === 'traces';
+  const isEmpty = isTracesMode ? uniqueTraces === 0 : rowCount === 0;
+  const displayedRowCount = isTracesMode
+    ? Math.min(maxTraces, uniqueTraces, MAX_DISPLAY_ROWS)
+    : Math.min(rowCount, MAX_DISPLAY_ROWS);
 
   const isDarkMode = uiSettingsService.get('theme:darkMode');
 
@@ -137,39 +154,25 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
       )
     : [];
 
-  const isLastPage =
-    tracesTableMode === 'traces' && pagination?.pageSize && maxTraces != null
-      ? (pagination.pageIndex + 1) * pagination.pageSize >= maxTraces &&
-        rowCount > maxTraces &&
-        maxTraces < MAX_DISPLAY_ROWS
-      : false;
-
-  // Used for when trace count less than default maxTraces
-  useEffect(() => {
-    if (
-      tracesTableMode === 'traces' &&
-      rowCount > 0 &&
-      rowCount < maxTraces &&
-      maxTraces !== rowCount
-    ) {
-      setMaxTraces(rowCount);
-    }
-  }, [rowCount, maxTraces, tracesTableMode]);
-
-  const incrementTraceCount = () => {
-    const nextIncrement = Math.min(500, rowCount - maxTraces);
-    if (nextIncrement > 0 && maxTraces < MAX_DISPLAY_ROWS) {
-      setMaxTraces((prevMax) => Math.min(prevMax + nextIncrement, MAX_DISPLAY_ROWS));
-    }
-  };
+  const isTracesModeLastPage = Boolean(
+    pagination?.pageSize &&
+      (pagination.pageIndex + 1) * pagination.pageSize >= maxTraces &&
+      uniqueTraces > maxTraces &&
+      maxTraces < MAX_DISPLAY_ROWS
+  );
 
   useInjectElementsIntoGrid(
-    rowCount,
+    displayedRowCount,
     MAX_DISPLAY_ROWS,
-    tracesTableMode ?? '',
-    incrementTraceCount,
-    maxTraces,
-    isLastPage
+    isTracesMode ? uniqueTraces : rowCount,
+    isTracesMode
+      ? () => {
+          setMaxTraces?.((prevMax: number) =>
+            Math.min(prevMax + 500, uniqueTraces, MAX_DISPLAY_ROWS)
+          );
+        }
+      : undefined,
+    isTracesMode ? isTracesModeLastPage : false
   );
 
   const disableInteractions = useMemo(() => isFullScreen, [isFullScreen]);
@@ -287,7 +290,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
             .join(' ')}
           style={{
             position: 'relative',
-            minHeight: isTableDataLoading && rowCount === 0 ? '100px' : undefined,
+            minHeight: isTableDataLoading && isEmpty ? '100px' : undefined,
           }}
         >
           <EuiDataGrid
@@ -325,7 +328,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
           )}
         </div>
       </FullScreenWrapper>
-      {rowCount === 0 && <NoMatchMessage size={noMatchMessageSize} />}
+      {isEmpty && <NoMatchMessage size={noMatchMessageSize} />}
     </>
   );
 };

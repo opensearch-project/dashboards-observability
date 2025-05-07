@@ -8,7 +8,6 @@ import { isArray, isObject } from 'lodash';
 import get from 'lodash/get';
 import omitBy from 'lodash/omitBy';
 import round from 'lodash/round';
-import cloneDeep from 'lodash/cloneDeep';
 import moment from 'moment';
 import { v1 as uuid } from 'uuid';
 import { HttpSetup } from '../../../../../../src/core/public';
@@ -115,7 +114,7 @@ export const handleTracesRequest = async (
   dataSourceMDSId?: string,
   sort?: PropertySort,
   isUnderOneHour?: boolean,
-  setTotalHits?: (count: number) => void
+  setUniqueTraces?: (count: number) => void
 ) => {
   const binarySearch = (arr: number[], target: number) => {
     if (!arr) return Number.NaN;
@@ -158,37 +157,10 @@ export const handleTracesRequest = async (
         })
       : Promise.resolve({});
 
-  let rootSpansTotalHitsPromise: Promise<number> | undefined;
-
-  if (setTotalHits && (mode === 'data_prepper' || mode === 'custom_data_prepper')) {
-    const rootSpansDSL = cloneDeep(timeFilterDSL);
-    rootSpansDSL.query.bool.filter.push({
-      term: {
-        parentSpanId: '',
-      },
-    });
-
-    const rootSpansQuery = {
-      size: 0,
-      query: rootSpansDSL.query,
-      index: getTracesQuery(mode).index,
-      track_total_hits: true, // Override default 10,000 cap
-    };
-
-    rootSpansTotalHitsPromise = handleDslRequest(
-      http,
-      {},
-      rootSpansQuery,
-      mode,
-      dataSourceMDSId
-    ).then((res) => res?.hits?.total?.value ?? 0);
-  }
-
   const promises = [responsePromise, percentileRangesPromise];
-  if (rootSpansTotalHitsPromise) promises.push(rootSpansTotalHitsPromise);
 
   return Promise.allSettled(promises)
-    .then(([responseResult, percentileRangesResult, totalHitsResult]) => {
+    .then(([responseResult, percentileRangesResult]) => {
       if (responseResult.status === 'rejected') {
         setItems([]);
         return;
@@ -198,8 +170,9 @@ export const handleTracesRequest = async (
         percentileRangesResult.status === 'fulfilled' ? percentileRangesResult.value : {};
       const response = responseResult.value;
 
-      if (setTotalHits && totalHitsResult?.status === 'fulfilled') {
-        setTotalHits(totalHitsResult.value);
+      if (setUniqueTraces) {
+        const uniqueTraces = response?.aggregations?.unique_traces?.value ?? 0;
+        setUniqueTraces(uniqueTraces);
       }
 
       if (
