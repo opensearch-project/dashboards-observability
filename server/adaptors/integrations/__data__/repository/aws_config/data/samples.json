@@ -1,0 +1,783 @@
+[
+  {
+    "@timestamp": "2023-07-17T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":
+    }
+  },
+  {
+    "@timestamp": "2023-07-17T04:12:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-13T01:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-16T03:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-12T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-10T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-09T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-18T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-19T01:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-12T01:00:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-13T12:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-20T12:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-11T10:00:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-09T08:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-01T12:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-19T00:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-13T11:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-21T05:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-11T12:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-12T01:04:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-10T00:10:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-03T03:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-04T04:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-07T07:14:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-08T08:08:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-09T09:09:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-10T10:10:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-11T11:11:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-12T08:12:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  },
+  {
+    "@timestamp": "2023-07-13T08:13:05.000Z",
+    "event": {
+      "result": "ACCEPT",
+      "name": "config",
+      "domain": "config"
+    },
+    "attributes": {
+      "data_stream": {
+        "dataset": "config_log",
+        "namespace": "production",
+        "type": "config_logs"
+      }
+    },
+    "cloud": {
+      "provider": "aws",
+      "account": {
+        "id": "111111111111"
+      },
+      "region": "ap-southeast-2",
+      "resource_id": "vpc-0d4d4e82b7d743527",
+      "platform": "aws_vpc"
+    },
+    "aws": {
+      "config":     }
+  }
+]
