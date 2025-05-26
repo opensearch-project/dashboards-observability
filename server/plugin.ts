@@ -49,6 +49,7 @@ export class ObservabilityPlugin
     deps: {
       assistantDashboards?: AssistantPluginSetup;
       dataSource: ObservabilityPluginSetupDependencies;
+      notebookDashboards?: Record<string, any>;
     }
   ) {
     const { assistantDashboards, dataSource } = deps;
@@ -64,7 +65,6 @@ export class ObservabilityPlugin
     );
     if (dataSourceEnabled) {
       dataSource.registerCustomApiSchema(PPLPlugin);
-      dataSource.registerCustomApiSchema(OpenSearchObservabilityPlugin);
     }
     // @ts-ignore
     core.http.registerRouteHandlerContext('observability_plugin', (_context, _request) => {
@@ -224,11 +224,14 @@ export class ObservabilityPlugin
       client: openSearchObservabilityClient,
       dataSourceEnabled,
       logger: this.logger,
+      notebook: deps.notebook,
     });
 
     core.savedObjects.registerType(getVisualizationSavedObject(dataSourceEnabled));
     core.savedObjects.registerType(getSearchSavedObject(dataSourceEnabled));
-    core.savedObjects.registerType(notebookSavedObject);
+    if (!deps.notebook) {
+      core.savedObjects.registerType(notebookSavedObject);
+    }
     core.capabilities.registerProvider(() => ({
       observability: {
         show: true,
