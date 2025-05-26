@@ -31,11 +31,13 @@ export function setupRoutes({
   client,
   dataSourceEnabled,
   logger,
+  notebookDashboards,
 }: {
   router: IRouter;
   client: ILegacyClusterClient;
   dataSourceEnabled: boolean;
   logger: Logger;
+  notebookDashboards?: Record<string, any>;
 }) {
   PanelsRouter(router);
   VisualizationsRouter(router);
@@ -48,9 +50,11 @@ export function setupRoutes({
   registerTraceAnalyticsDslRouter(router, dataSourceEnabled);
 
   // notebooks routes
-  registerParaRoute(router);
-  registerNoteRoute(router);
-  registerVizRoute(router, dataSourceEnabled);
+  if (!notebookDashboards) {
+    registerParaRoute(router);
+    registerNoteRoute(router);
+    registerVizRoute(router, dataSourceEnabled);
+  }
   const queryService = new QueryService(client, logger);
   registerSqlRoute(router, queryService, dataSourceEnabled);
 
