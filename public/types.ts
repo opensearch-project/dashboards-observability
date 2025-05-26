@@ -50,6 +50,7 @@ export interface SetupDependencies {
   dataSource: DataSourcePluginSetup;
   dataSourceManagement: DataSourceManagementPluginSetup;
   contentManagement?: ContentManagementPluginSetup;
+  notebookDashboards?: Record<string, any>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

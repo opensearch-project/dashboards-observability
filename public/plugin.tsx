@@ -416,13 +416,15 @@ export class ObservabilityPlugin
       }
     }
 
-    core.application.register({
-      id: observabilityNotebookID,
-      title: observabilityNotebookTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityNotebookPluginOrder,
-      mount: appMountWithStartPage('notebooks'),
-    });
+    if (!setupDeps.notebookDashboards) {
+      core.application.register({
+        id: observabilityNotebookID,
+        title: observabilityNotebookTitle,
+        category: OBSERVABILITY_APP_CATEGORIES.observability,
+        order: observabilityNotebookPluginOrder,
+        mount: appMountWithStartPage('notebooks'),
+      });
+    }
 
     registerAllPluginNavGroups(core);
 
