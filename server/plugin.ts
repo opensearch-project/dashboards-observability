@@ -224,12 +224,12 @@ export class ObservabilityPlugin
       client: openSearchObservabilityClient,
       dataSourceEnabled,
       logger: this.logger,
-      notebook: deps.notebook,
+      notebookDashboards: deps.notebookDashboards,
     });
 
     core.savedObjects.registerType(getVisualizationSavedObject(dataSourceEnabled));
     core.savedObjects.registerType(getSearchSavedObject(dataSourceEnabled));
-    if (!deps.notebook) {
+    if (!deps.notebookDashboards) {
       core.savedObjects.registerType(notebookSavedObject);
     }
     core.capabilities.registerProvider(() => ({
