@@ -11,8 +11,9 @@ import ReactDOM from 'react-dom';
 import { act } from 'react-dom/test-utils';
 import { HttpResponse } from '../../../../../../../../src/core/public';
 import { TEST_SPAN_RESPONSE } from '../../../../../../test/constants';
+// eslint-disable-next-line jest/no-mocks-import
 import httpClientMock from '../../../../../../test/__mocks__/httpClientMock';
-import { SpanDetailFlyout , flattenObject } from '../span_detail_flyout';
+import { SpanDetailFlyout, flattenObject } from '../span_detail_flyout';
 
 describe('<SpanDetailFlyout /> spec', () => {
   configure({ adapter: new Adapter() });
@@ -43,7 +44,7 @@ describe('<SpanDetailFlyout /> spec', () => {
     httpClientMock.post = jest.fn(() =>
       Promise.resolve((TEST_SPAN_RESPONSE as unknown) as HttpResponse)
     );
-    let container = document.createElement('div');
+    const container = document.createElement('div');
     const closeFlyout = jest.fn();
     const addSpanFilter = jest.fn();
     await act(() => {
@@ -124,8 +125,7 @@ describe('flattenObject', () => {
     const actual = flattenObject(sample);
     const expected = {
       traceId: '005cf53c07193a497fae2aa9ebedb8d3',
-      'instrumentationScope.name':
-        '@opentelemetry/instrumentation-http',
+      'instrumentationScope.name': '@opentelemetry/instrumentation-http',
       'instrumentationScope.version': '0.57.1',
       'resource.attributes.service.name': 'frontend',
       'resource.attributes.host.name': '1e4c87e3bcaf',
