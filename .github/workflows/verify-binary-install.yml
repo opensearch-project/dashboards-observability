@@ -43,6 +43,7 @@ jobs:
           built_plugin_name: observabilityDashboards
           built_plugin_suffix: ${{ env.OPENSEARCH_VERSION }}
           install_zip: true
+          jdk-version: 21
 
       - name: Start the binary
         run: |
