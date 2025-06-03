@@ -33,6 +33,7 @@ jobs:
         with:
           opensearch-version: ${{ env.OPENSEARCH_VERSION }}
           security-enabled: false
+          jdk-version: 21
 
       - name: Run Dashboard
         id: setup-dashboards
