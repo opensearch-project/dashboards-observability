@@ -75,7 +75,7 @@ const getSpanValue = (span: object, mode: TraceAnalyticsMode, field: SpanField) 
 };
 
 // Flatten nested objects with dot notation
-const flattenObject = (
+export const flattenObject = (
   obj: any,
   prefix = '',
   result: Record<string, any> = {}
@@ -92,11 +92,6 @@ const flattenObject = (
     }
   }
   return result;
-};
-
-// Get all span attributes including nested ones
-const getAllSpanAttributes = (span: any): Record<string, any> => {
-  return flattenObject(span);
 };
 
 export function SpanDetailFlyout(props: {
@@ -292,7 +287,7 @@ export function SpanDetailFlyout(props: {
       'traceGroupFields.statusCode',
       'traceGroupFields.durationInNanos',
     ]);
-    const allAttributes = getAllSpanAttributes(span);
+    const allAttributes = flattenObject(span);
 
     const attributesList = Object.keys(allAttributes)
       .filter((key) => !ignoredKeys.has(key))
