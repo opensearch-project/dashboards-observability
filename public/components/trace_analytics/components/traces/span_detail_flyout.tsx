@@ -135,7 +135,9 @@ export function SpanDetailFlyout(props: {
         description={description}
         key={`list-item-${title}`}
         addSpanFilter={
-          fieldKey ? () => props.addSpanFilter(fieldKey, get(span, fieldKey)) : undefined
+          fieldKey
+            ? () => props.addSpanFilter(fieldKey, get(flattenObject(span), fieldKey))
+            : undefined
         }
       />
     );
@@ -299,28 +301,10 @@ export function SpanDetailFlyout(props: {
         return -1;
       })
       .map((key) => {
-        if (_isEmpty(allAttributes[key])) {
-          return (
-            <FlyoutListItem
-              title={key}
-              description="-"
-              key={`list-item-${key}`}
-              addSpanFilter={() => props.addSpanFilter(key, allAttributes[key])}
-            />
-          );
-        }
-
+        if (_isEmpty(allAttributes[key])) return getListItem(key, key, '-');
         let value = allAttributes[key];
         if (typeof value === 'object') value = JSON.stringify(value);
-
-        return (
-          <FlyoutListItem
-            title={key}
-            description={value}
-            key={`list-item-${key}`}
-            addSpanFilter={() => props.addSpanFilter(key, allAttributes[key])}
-          />
-        );
+        return getListItem(key, key, value);
       });
 
     const eventsComponent = isEmpty(span.events) ? null : (
