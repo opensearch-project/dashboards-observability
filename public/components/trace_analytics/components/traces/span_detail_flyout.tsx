@@ -299,10 +299,28 @@ export function SpanDetailFlyout(props: {
         return -1;
       })
       .map((key) => {
-        if (_isEmpty(allAttributes[key])) return getListItem(key, key, '-');
+        if (_isEmpty(allAttributes[key])) {
+          return (
+            <FlyoutListItem
+              title={key}
+              description="-"
+              key={`list-item-${key}`}
+              addSpanFilter={() => props.addSpanFilter(key, allAttributes[key])}
+            />
+          );
+        }
+
         let value = allAttributes[key];
         if (typeof value === 'object') value = JSON.stringify(value);
-        return getListItem(key, key, value);
+
+        return (
+          <FlyoutListItem
+            title={key}
+            description={value}
+            key={`list-item-${key}`}
+            addSpanFilter={() => props.addSpanFilter(key, allAttributes[key])}
+          />
+        );
       });
 
     const eventsComponent = isEmpty(span.events) ? null : (
