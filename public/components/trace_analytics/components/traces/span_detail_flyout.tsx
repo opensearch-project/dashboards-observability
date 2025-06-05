@@ -74,6 +74,26 @@ const getSpanValue = (span: object, mode: TraceAnalyticsMode, field: SpanField) 
   return get(span, fieldKey);
 };
 
+// Flatten nested objects with dot notation
+export const flattenObject = (
+  obj: any,
+  prefix = '',
+  result: Record<string, any> = {}
+): Record<string, any> => {
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      const newKey = prefix ? `${prefix}.${key}` : key;
+
+      if (obj[key] !== null && typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
+        flattenObject(obj[key], newKey, result);
+      } else {
+        result[newKey] = obj[key];
+      }
+    }
+  }
+  return result;
+};
+
 export function SpanDetailFlyout(props: {
   http: HttpSetup;
   spanId: string;
@@ -115,7 +135,9 @@ export function SpanDetailFlyout(props: {
         description={description}
         key={`list-item-${title}`}
         addSpanFilter={
-          fieldKey ? () => props.addSpanFilter(fieldKey, get(span, fieldKey)) : undefined
+          fieldKey
+            ? () => props.addSpanFilter(fieldKey, get(flattenObject(span), fieldKey))
+            : undefined
         }
       />
     );
@@ -267,18 +289,20 @@ export function SpanDetailFlyout(props: {
       'traceGroupFields.statusCode',
       'traceGroupFields.durationInNanos',
     ]);
-    const attributesList = Object.keys(span)
+    const allAttributes = flattenObject(span);
+
+    const attributesList = Object.keys(allAttributes)
       .filter((key) => !ignoredKeys.has(key))
       .sort((keyA, keyB) => {
-        const isANull = _isEmpty(span[keyA]);
-        const isBNull = _isEmpty(span[keyB]);
+        const isANull = _isEmpty(allAttributes[keyA]);
+        const isBNull = _isEmpty(allAttributes[keyB]);
         if ((isANull && isBNull) || (!isANull && !isBNull)) return keyA < keyB ? -1 : 1;
         if (isANull) return 1;
         return -1;
       })
       .map((key) => {
-        if (_isEmpty(span[key])) return getListItem(key, key, '-');
-        let value = span[key];
+        if (_isEmpty(allAttributes[key])) return getListItem(key, key, '-');
+        let value = allAttributes[key];
         if (typeof value === 'object') value = JSON.stringify(value);
         return getListItem(key, key, value);
       });
