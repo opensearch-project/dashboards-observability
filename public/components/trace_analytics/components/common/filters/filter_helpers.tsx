@@ -11,9 +11,9 @@ import {
   EuiFormControlLayoutDelimited,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import get from 'lodash/get';
 import React from 'react';
-import { i18n } from '@osd/i18n';
 import { TraceAnalyticsMode } from '../../../../../../common/types/trace_analytics';
 
 const getFields = (
@@ -21,7 +21,7 @@ const getFields = (
   page: 'dashboard' | 'traces' | 'services' | 'app',
   attributesFilterFields: string[]
 ) =>
-  mode === 'data_prepper' || mode === 'custom_data_prepper'
+  mode === 'data_prepper'
     ? {
         dashboard: ['traceGroup', 'serviceName', 'error', 'status.message', 'latency'],
         traces: [

@@ -180,7 +180,6 @@ exports[`Services component renders empty services page 1`] = `
       "setIsVisible": [MockFunction],
     }
   }
-  dataPrepperIndicesExist={true}
   dataSourceMDSId={
     Array [
       Object {
@@ -414,7 +413,6 @@ exports[`Services component renders empty services page 1`] = `
         "setIsVisible": [MockFunction],
       }
     }
-    dataPrepperIndicesExist={true}
     dataSourceMDSId={
       Array [
         Object {
@@ -1452,7 +1450,6 @@ exports[`Services component renders empty services page 1`] = `
             <ServicesTable
               addFilter={[Function]}
               addServicesGroupFilter={[Function]}
-              dataPrepperIndicesExist={true}
               dataSourceMDSId={
                 Array [
                   Object {
@@ -3570,7 +3567,6 @@ exports[`Services component renders jaeger services page 1`] = `
       "setIsVisible": [MockFunction],
     }
   }
-  dataPrepperIndicesExist={false}
   dataSourceMDSId={
     Array [
       Object {
@@ -3804,7 +3800,6 @@ exports[`Services component renders jaeger services page 1`] = `
         "setIsVisible": [MockFunction],
       }
     }
-    dataPrepperIndicesExist={false}
     dataSourceMDSId={
       Array [
         Object {
@@ -4850,7 +4845,6 @@ exports[`Services component renders jaeger services page 1`] = `
             <ServicesTable
               addFilter={[Function]}
               addServicesGroupFilter={[Function]}
-              dataPrepperIndicesExist={false}
               dataSourceMDSId={
                 Array [
                   Object {
@@ -6073,7 +6067,6 @@ exports[`Services component renders services page 1`] = `
       "setIsVisible": [MockFunction],
     }
   }
-  dataPrepperIndicesExist={true}
   dataSourceMDSId={
     Array [
       Object {
@@ -6306,7 +6299,6 @@ exports[`Services component renders services page 1`] = `
         "setIsVisible": [MockFunction],
       }
     }
-    dataPrepperIndicesExist={true}
     dataSourceMDSId={
       Array [
         Object {
@@ -7351,7 +7343,6 @@ exports[`Services component renders services page 1`] = `
             <ServicesTable
               addFilter={[Function]}
               addServicesGroupFilter={[Function]}
-              dataPrepperIndicesExist={true}
               dataSourceMDSId={
                 Array [
                   Object {

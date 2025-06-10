@@ -38,8 +38,6 @@ import { ServiceObject } from './plots/service_map';
 
 const missingJaegerTracesConfigurationMessage = `The indices required for trace analytics (${JAEGER_INDEX_NAME} and ${JAEGER_SERVICE_INDEX_NAME}) do not exist or you do not have permission to access them.`;
 
-const missingDataPrepperTracesConfigurationMessage = `The indices required for trace analytics (${DATA_PREPPER_INDEX_NAME} and ${DATA_PREPPER_SERVICE_INDEX_NAME}) do not exist or you do not have permission to access them.`;
-
 const missingCustomDataPrepperTracesConfigurationMessage = `The indices required for trace analytics (${DATA_PREPPER_INDEX_NAME} and ${DATA_PREPPER_SERVICE_INDEX_NAME}) do not exist or you do not have permission to access them. Update the indices for custom source in advanced settings`;
 
 export function PanelTitle({ title, totalItems }: { title: string; totalItems?: number }) {
@@ -63,7 +61,7 @@ export function NoMatchMessage(props: { size: SpacerSize; mode?: TraceAnalyticsM
           <EuiText size="s">
             No data matches the selected filter. Clear the filter and/or increase the time range to
             see more results.
-            {props.mode === 'custom_data_prepper' && (
+            {props.mode === 'data_prepper' && (
               <>
                 {' '}
                 Configure your custom indexes in{' '}
@@ -92,9 +90,7 @@ export function MissingConfigurationMessage(props: { mode: TraceAnalyticsMode })
   const missingConfigurationBody =
     props.mode === 'jaeger'
       ? missingJaegerTracesConfigurationMessage
-      : props.mode === 'custom_data_prepper'
-      ? missingCustomDataPrepperTracesConfigurationMessage
-      : missingDataPrepperTracesConfigurationMessage;
+      : missingCustomDataPrepperTracesConfigurationMessage;
 
   return (
     <>
@@ -489,13 +485,13 @@ export const filtersToDsl = (
       let filterQuery = {};
       let field = filter.field;
       if (field === 'latency') {
-        if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
+        if (mode === 'data_prepper') {
           field = 'traceGroupFields.durationInNanos';
         } else if (mode === 'jaeger') {
           field = 'duration';
         }
       } else if (field === 'error') {
-        if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
+        if (mode === 'data_prepper') {
           field = 'traceGroupFields.statusCode';
         } else if (mode === 'jaeger') {
           field = 'tag.error';
@@ -626,10 +622,8 @@ export const TraceSettings = {
 
 export const getSpanIndices = (mode: TraceAnalyticsMode) => {
   switch (mode) {
-    case 'custom_data_prepper':
-      return TraceSettings.getCustomSpanIndex();
     case 'data_prepper':
-      return DATA_PREPPER_INDEX_NAME;
+      return TraceSettings.getCustomSpanIndex();
     case 'jaeger':
     default:
       return JAEGER_INDEX_NAME;
@@ -638,10 +632,8 @@ export const getSpanIndices = (mode: TraceAnalyticsMode) => {
 
 export const getServiceIndices = (mode: TraceAnalyticsMode) => {
   switch (mode) {
-    case 'custom_data_prepper':
-      return TraceSettings.getCustomServiceIndex();
     case 'data_prepper':
-      return DATA_PREPPER_SERVICE_INDEX_NAME;
+      return TraceSettings.getCustomServiceIndex();
     case 'jaeger':
     default:
       return JAEGER_SERVICE_INDEX_NAME;

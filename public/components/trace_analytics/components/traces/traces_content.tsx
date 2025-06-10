@@ -52,7 +52,6 @@ export function TracesContent(props: TracesProps) {
     setStartTime,
     setEndTime,
     mode,
-    dataPrepperIndicesExist,
     jaegerIndicesExist,
     attributesFilterFields,
     setCurrentSelectedService,
@@ -175,6 +174,7 @@ export function TracesContent(props: TracesProps) {
   }, []);
 
   useEffect(() => {
+    setPageIndex(0);
     let newFilteredService = '';
     for (const filter of filters) {
       if (filter.field === 'serviceName') {
@@ -183,12 +183,7 @@ export function TracesContent(props: TracesProps) {
       }
     }
     setFilteredService(newFilteredService);
-    if (
-      !redirect &&
-      (mode === 'custom_data_prepper' ||
-        (mode === 'data_prepper' && dataPrepperIndicesExist) ||
-        (mode === 'jaeger' && jaegerIndicesExist))
-    )
+    if (!redirect && (mode === 'data_prepper' || (mode === 'jaeger' && jaegerIndicesExist)))
       props.setDataSourceMenuSelectable?.(true);
     refresh();
   }, [
@@ -197,7 +192,6 @@ export function TracesContent(props: TracesProps) {
     redirect,
     mode,
     jaegerIndicesExist,
-    dataPrepperIndicesExist,
     includeMetrics,
     tracesTableMode,
     props.setDataSourceMenuSelectable,
@@ -217,12 +211,6 @@ export function TracesContent(props: TracesProps) {
 
     refreshTracesTableData(sort, pageIndex, pageSize);
   }, [maxTraces]);
-
-  useEffect(() => {
-    if (mode !== 'custom_data_prepper') {
-      setMaxTraces(500);
-    }
-  }, [mode]);
 
   const onToggle = (isOpen: boolean) => {
     const newState = isOpen ? 'open' : 'closed';
@@ -346,7 +334,7 @@ export function TracesContent(props: TracesProps) {
 
     setIsTraceTableLoading(true);
 
-    if (mode === 'custom_data_prepper') {
+    if (mode === 'data_prepper') {
       // Remove serviceName filter from service map query
       const serviceMapDSL = cloneDeep(DSL);
       serviceMapDSL.query.bool.must = serviceMapDSL.query.bool.must.filter(
@@ -454,8 +442,8 @@ export function TracesContent(props: TracesProps) {
           />
           <EuiSpacer size="s" />
 
-          {/* Switch between custom data prepper and regular table */}
-          {mode === 'custom_data_prepper' ? (
+          {/* Switch between data prepper and Jaeger table */}
+          {mode === 'data_prepper' && page !== 'app' ? (
             <TracesCustomIndicesTable
               columnItems={attributesFilterFields}
               items={tableItems}
@@ -465,7 +453,6 @@ export function TracesContent(props: TracesProps) {
               getTraceViewUri={getTraceViewUri}
               openTraceFlyout={openTraceFlyout}
               jaegerIndicesExist={jaegerIndicesExist}
-              dataPrepperIndicesExist={dataPrepperIndicesExist}
               tracesTableMode={tracesTableMode}
               setTracesTableMode={(tableMode) => {
                 setTracesTableMode(tableMode);
@@ -488,14 +475,13 @@ export function TracesContent(props: TracesProps) {
               getTraceViewUri={getTraceViewUri}
               openTraceFlyout={openTraceFlyout}
               jaegerIndicesExist={jaegerIndicesExist}
-              dataPrepperIndicesExist={dataPrepperIndicesExist}
               page={page}
               uniqueTraces={uniqueTraces}
             />
           )}
 
-          {/* Show services list and graph when mode is custom data prepper */}
-          {mode === 'custom_data_prepper' && (
+          {/* Show services list and graph when mode is data prepper */}
+          {mode === 'data_prepper' && page !== 'app' && (
             <>
               <EuiSpacer size="m" />
               <EuiFlexGroup>
@@ -536,11 +522,7 @@ export function TracesContent(props: TracesProps) {
           <EuiPanel>
             <EuiAccordion
               id="accordion1"
-              buttonContent={
-                mode === 'data_prepper' || mode === 'custom_data_prepper'
-                  ? 'Trace Groups'
-                  : 'Service and Operations'
-              }
+              buttonContent={mode === 'data_prepper' ? 'Trace Groups' : 'Service and Operations'}
               forceState={trigger}
               onToggle={onToggle}
               data-test-subj="trace-groups-service-operation-accordian"

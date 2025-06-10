@@ -22,13 +22,13 @@ export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSet
   uiSettings.register({
     [TRACE_CUSTOM_SPAN_INDEX_SETTING]: {
       name: i18n.translate('observability.traceAnalyticsCustomSpanIndices.name', {
-        defaultMessage: 'Trace analytics custom span indices',
+        defaultMessage: 'Trace analytics span indices',
       }),
       value: DATA_PREPPER_INDEX_NAME,
       category: ['Observability'],
       description: i18n.translate('observability.traceAnalyticsCustomSpanIndices.description', {
         defaultMessage:
-          '<strong>Experimental feature:</strong> Configure custom span indices that adhere to data prepper schema, to be used by the trace analytics plugin',
+          'Configure span indices that adhere to Data Prepper schema, to be used by the trace analytics plugin',
       }),
       schema: schema.string(),
     },
@@ -37,13 +37,13 @@ export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSet
   uiSettings.register({
     [TRACE_CUSTOM_SERVICE_INDEX_SETTING]: {
       name: i18n.translate('observability.traceAnalyticsCustomServiceIndices.name', {
-        defaultMessage: 'Trace analytics custom service indices',
+        defaultMessage: 'Trace analytics service indices',
       }),
       value: DATA_PREPPER_SERVICE_INDEX_NAME,
       category: ['Observability'],
       description: i18n.translate('observability.traceAnalyticsCustomServiceIndices.description', {
         defaultMessage:
-          '<strong>Experimental feature:</strong> Configure custom service indices that adhere to data prepper schema, to be used by the trace analytics plugin',
+          'Configure service indices that adhere to Data Prepper schema, to be used by the trace analytics plugin',
       }),
       schema: schema.string(),
     },
@@ -52,13 +52,12 @@ export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSet
   uiSettings.register({
     [TRACE_CUSTOM_MODE_DEFAULT_SETTING]: {
       name: i18n.translate('observability.traceAnalyticsCustomModeDefault.name', {
-        defaultMessage: 'Trace analytics custom mode default',
+        defaultMessage: 'Trace analytics default mode',
       }),
       value: false,
       category: ['Observability'],
       description: i18n.translate('observability.traceAnalyticsCustomModeDefault.description', {
-        defaultMessage:
-          '<strong>Experimental feature:</strong> Enable this to default to "custom_data_prepper" mode in the trace analytics plugin',
+        defaultMessage: 'Enable this to default to Data Prepper mode in the trace analytics plugin',
       }),
       schema: schema.boolean(),
     },
@@ -73,7 +72,7 @@ export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSet
       category: ['Observability'],
       description: i18n.translate('observability.traceAnalyticsCorrelatedLogsIndices.description', {
         defaultMessage:
-          '<strong>Experimental feature:</strong> Configure correlated logs indices, to be used by the trace analytics plugin to correlate spans and services to logs',
+          'Configure correlated logs indices, to be used by the trace analytics plugin to correlate spans and services to logs',
       }),
       schema: schema.string(),
     },
@@ -90,7 +89,7 @@ export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSet
         'observability.traceAnalyticsCorrelatedLogsFieldMappings.description',
         {
           defaultMessage:
-            '<strong>Experimental feature:</strong> Configure correlated logs fields, to be used by the trace analytics plugin for correlate spans and services to logs',
+            'Configure correlated logs fields, to be used by the trace analytics plugin for correlate spans and services to logs',
         }
       ),
       schema: schema.object({

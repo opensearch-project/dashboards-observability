@@ -54,16 +54,6 @@ const MODE_TO_FIELDS: Record<TraceAnalyticsMode, Record<SpanField, string | unde
     END_TIME: undefined,
     ERRORS: 'tag.error',
   },
-  custom_data_prepper: {
-    SPAN_ID: 'spanId',
-    PARENT_SPAN_ID: 'parentSpanId',
-    SERVICE: 'serviceName',
-    OPERATION: 'name',
-    DURATION: 'durationInNanos',
-    START_TIME: 'startTime',
-    END_TIME: 'endTime',
-    ERRORS: 'status.code',
-  },
 };
 
 const getSpanFieldKey = (mode: TraceAnalyticsMode, field: SpanField) => MODE_TO_FIELDS[mode][field];
@@ -190,11 +180,7 @@ export function SpanDetailFlyout(props: {
           <EuiFlexGroup gutterSize="xs" style={{ marginTop: -4, marginBottom: -4 }}>
             <EuiFlexItem grow={false}>
               <EuiCopy
-                textToCopy={
-                  mode === 'data_prepper' || mode === 'custom_data_prepper'
-                    ? span.parentSpanId
-                    : span.references[0].spanID
-                }
+                textToCopy={mode === 'data_prepper' ? span.parentSpanId : span.references[0].spanID}
               >
                 {(copy) => (
                   <EuiSmallButtonIcon
@@ -206,9 +192,7 @@ export function SpanDetailFlyout(props: {
               </EuiCopy>
             </EuiFlexItem>
             <EuiFlexItem data-test-subj="parentSpanId">
-              {mode === 'data_prepper' || mode === 'custom_data_prepper'
-                ? span.parentSpanId
-                : span.references[0].spanID}
+              {mode === 'data_prepper' ? span.parentSpanId : span.references[0].spanID}
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
@@ -229,7 +213,7 @@ export function SpanDetailFlyout(props: {
         getSpanFieldKey(mode, 'DURATION'),
         'Duration',
         `${
-          mode === 'data_prepper' || mode === 'custom_data_prepper'
+          mode === 'data_prepper'
             ? round(nanoToMilliSec(Math.max(0, span.durationInNanos)), 2)
             : round(microToMilliSec(Math.max(0, span.duration)), 2)
         } ms`
@@ -237,7 +221,7 @@ export function SpanDetailFlyout(props: {
       getListItem(
         getSpanFieldKey(mode, 'START_TIME'),
         'Start time',
-        mode === 'data_prepper' || mode === 'custom_data_prepper'
+        mode === 'data_prepper'
           ? moment(span.startTime).format(TRACE_ANALYTICS_DATE_FORMAT)
           : moment(round(microToMilliSec(Math.max(0, span.startTime)), 2)).format(
               TRACE_ANALYTICS_DATE_FORMAT
@@ -246,7 +230,7 @@ export function SpanDetailFlyout(props: {
       getListItem(
         getSpanFieldKey(mode, 'END_TIME'),
         'End time',
-        mode === 'data_prepper' || mode === 'custom_data_prepper'
+        mode === 'data_prepper'
           ? moment(span.endTime).format(TRACE_ANALYTICS_DATE_FORMAT)
           : moment(round(microToMilliSec(Math.max(0, span.startTime + span.duration)), 2)).format(
               TRACE_ANALYTICS_DATE_FORMAT
@@ -255,11 +239,7 @@ export function SpanDetailFlyout(props: {
       getListItem(
         getSpanFieldKey(mode, 'ERRORS'),
         'Errors',
-        (
-          mode === 'data_prepper' || mode === 'custom_data_prepper'
-            ? span['status.code'] === 2
-            : span.tag?.error
-        ) ? (
+        (mode === 'data_prepper' ? span['status.code'] === 2 : span.tag?.error) ? (
           <EuiText color="danger" size="s" style={{ fontWeight: 700 }}>
             Yes
           </EuiText>
@@ -361,7 +341,7 @@ export function SpanDetailFlyout(props: {
                 <h2>Span detail</h2>
               </EuiText>
             </EuiFlexItem>
-            {(mode === 'data_prepper' || mode === 'custom_data_prepper') && (
+            {mode === 'data_prepper' && (
               <EuiFlexItem grow={false}>
                 {!isSpanDataLoading && !isEmpty(span) && (
                   <EuiToolTip content="View associated logs using Span Id">

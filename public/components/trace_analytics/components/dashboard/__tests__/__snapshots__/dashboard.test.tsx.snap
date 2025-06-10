@@ -187,7 +187,6 @@ exports[`Dashboard component renders dashboard 1`] = `
       "setIsVisible": [MockFunction],
     }
   }
-  dataPrepperIndicesExist={true}
   dataSourceMDSId={
     Array [
       Object {
@@ -563,7 +562,6 @@ exports[`Dashboard component renders dashboard 1`] = `
         "setIsVisible": [MockFunction],
       }
     }
-    dataPrepperIndicesExist={true}
     dataSourceMDSId={
       Array [
         Object {
@@ -2803,7 +2801,6 @@ exports[`Dashboard component renders empty dashboard 1`] = `
       "setIsVisible": [MockFunction],
     }
   }
-  dataPrepperIndicesExist={true}
   dataSourceMDSId={
     Array [
       Object {
@@ -3178,7 +3175,6 @@ exports[`Dashboard component renders empty dashboard 1`] = `
         "setIsVisible": [MockFunction],
       }
     }
-    dataPrepperIndicesExist={true}
     dataSourceMDSId={
       Array [
         Object {
@@ -5417,7 +5413,6 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
       "setIsVisible": [MockFunction],
     }
   }
-  dataPrepperIndicesExist={false}
   dataSourceMDSId={
     Array [
       Object {
@@ -5794,7 +5789,6 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
         "setIsVisible": [MockFunction],
       }
     }
-    dataPrepperIndicesExist={false}
     dataSourceMDSId={
       Array [
         Object {

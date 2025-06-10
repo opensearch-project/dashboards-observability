@@ -116,13 +116,14 @@ describe('Testing service view empty state and invalid url', () => {
     cy.get('.euiCallOut.euiCallOut--danger')
       .should('exist')
       .within(() => {
-        cy.get('.euiCallOutHeader__title')
-          .should('contain.text', `Error loading service: ${INVALID_URL}`);
-        cy.get('p')
-          .should(
-            'contain.text',
-            'The service name is invalid or could not be found. Please check the URL or try again.'
-          );
+        cy.get('.euiCallOutHeader__title').should(
+          'contain.text',
+          `Error loading service: ${INVALID_URL}`
+        );
+        cy.get('p').should(
+          'contain.text',
+          'The service name is invalid or could not be found. Please check the URL or try again.'
+        );
       });
     cy.contains('No matches').should('exist');
   });
@@ -139,6 +140,7 @@ describe('Testing service view', () => {
     cy.get("[data-test-subj='data_prepper-mode']").click();
     setTimeFilter();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('input[type="search"]').first().focus().clear();
     cy.get('input[type="search"]').first().focus().type(`${SERVICE_NAME}`);
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
@@ -184,11 +186,11 @@ describe('Testing service view', () => {
     cy.get('h1.overview-content').contains(SERVICE_NAME).should('exist');
     cy.get('.euiBreadcrumb').contains('Services').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('span.panel-title').contains('Services').should('exist');
+    cy.get('[data-test-subj="breadcrumb last"]').contains('Services').should('exist');
 
     cy.get('.euiBreadcrumb').contains('Trace analytics').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('span.panel-title').contains('Traces').should('exist');
+    cy.get('[data-test-subj="breadcrumb last"]').contains('Traces').should('exist');
 
     cy.get('.euiBreadcrumb').contains('Observability').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
@@ -460,8 +462,9 @@ describe('Testing navigation from Services to Traces', () => {
     cy.get('[data-test-subj="filterBadge"]')
       .should('exist')
       .contains('serviceName: analytics-service');
-
-    cy.get('.euiText').contains('03f9c770db5ee2f1caac0afc36db49ba').should('exist');
+    cy.get('[data-test-subj="trace-table-mode-selector"]').click();
+    cy.get('.euiSelectableListItem__content').contains('Traces').click();
+    cy.get('.euiLink--primary').contains('e447ed617aa651a7593c720d7e976625').should('exist');
   });
 
   it('Opens service flyout, clicks Actions, and selects View Traces', () => {
@@ -477,8 +480,9 @@ describe('Testing navigation from Services to Traces', () => {
     cy.get('[data-test-subj="filterBadge"]')
       .should('exist')
       .contains('serviceName: analytics-service');
-
-    cy.get('.euiText').contains('03f9c770db5ee2f1caac0afc36db49ba').should('exist');
+    cy.get('[data-test-subj="trace-table-mode-selector"]').click();
+    cy.get('.euiSelectableListItem__content').contains('Traces').click();
+    cy.get('.euiLink--primary').contains('e447ed617aa651a7593c720d7e976625').should('exist');
     cy.get('button[aria-label="Remove filter"]').should('be.visible').first().click();
   });
 });

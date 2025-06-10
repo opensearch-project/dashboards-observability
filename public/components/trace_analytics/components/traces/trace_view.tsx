@@ -5,6 +5,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import {
+  EuiCallOut,
   EuiCodeBlock,
   EuiCopy,
   EuiFlexGroup,
@@ -21,7 +22,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
-  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import round from 'lodash/round';
@@ -139,7 +139,7 @@ export function TraceView(props: TraceViewProps) {
                       </EuiFlexGroup>
                     )}
                   </EuiFlexItem>
-                  {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
+                  {mode === 'data_prepper' ? (
                     <EuiFlexItem grow={false}>
                       <EuiText className="overview-title">Trace group name</EuiText>
                       <EuiText size="s" className="overview-content">
@@ -278,7 +278,7 @@ export function TraceView(props: TraceViewProps) {
 
   const TracetoLogsButton = useMemo(
     () =>
-      mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
+      mode === 'data_prepper' ? (
         <EuiFlexItem
           grow={false}
           onClick={() => {
@@ -473,7 +473,7 @@ export function TraceView(props: TraceViewProps) {
             )}
           </EuiPanel>
           <EuiSpacer />
-          {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
+          {mode === 'data_prepper' ? (
             <ServiceMap
               addFilter={undefined}
               serviceMap={traceFilteredServiceMap}

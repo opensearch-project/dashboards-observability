@@ -93,7 +93,7 @@ describe('Redirect Functions', () => {
     const mockAddFilter = jest.fn();
 
     redirectToServiceTraces({
-      mode: 'custom_data_prepper',
+      mode: 'data_prepper',
       addFilter: mockAddFilter,
       dataSourceMDSId: mockDataSource,
       serviceName,
@@ -111,7 +111,7 @@ describe('Redirect Functions', () => {
     window.location = { assign: jest.fn(), href: '' };
 
     redirectToServiceTraces({
-      mode: 'custom_data_prepper',
+      mode: 'data_prepper',
       addFilter: mockAddFilter,
       dataSourceMDSId: mockDataSource,
       serviceName,

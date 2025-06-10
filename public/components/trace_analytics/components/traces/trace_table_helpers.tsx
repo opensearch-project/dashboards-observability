@@ -132,8 +132,8 @@ export const getTableColumns = (
   const renderDateField = (item: number) =>
     item === 0 || item ? moment(item).format(TRACE_ANALYTICS_DATE_FORMAT) : '-';
 
-  // Columns for custom_data_prepper mode
-  if (mode === 'custom_data_prepper' && tracesTableMode !== 'traces') {
+  // Columns for data_prepper mode
+  if (mode === 'data_prepper' && tracesTableMode !== 'traces') {
     return [
       {
         field: 'spanId',
@@ -191,8 +191,8 @@ export const getTableColumns = (
     ] as Array<EuiTableFieldDataColumnType<any>>;
   }
 
-  // Columns for non-jaeger traces mode
-  if (mode !== 'jaeger' && tracesTableMode === 'traces') {
+  // Columns for data_prepper traces mode
+  if (mode === 'data_prepper' && tracesTableMode === 'traces') {
     return [
       {
         field: 'trace_id',
@@ -239,7 +239,7 @@ export const getTableColumns = (
     ] as Array<EuiTableFieldDataColumnType<any>>;
   }
 
-  // Default columns for other modes
+  // Default columns for Jaeger mode
   return [
     {
       field: 'trace_id',

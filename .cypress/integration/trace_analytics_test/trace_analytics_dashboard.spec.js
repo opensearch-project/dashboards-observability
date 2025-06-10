@@ -125,9 +125,11 @@ describe('Testing dashboard table', () => {
   });
 
   it('Redirects to traces table with filter', () => {
+    cy.get('[data-test-subj="trace-table-mode-selector"]').click();
+    cy.get('.euiSelectableListItem__content').contains('Traces').click();
     cy.get('.euiLink').contains('13').click();
 
-    cy.contains(' (13)').should('exist');
+    cy.contains('13').should('exist');
     cy.contains('client_create_order').should('exist');
 
     cy.get('.euiSideNavItemButton__label').contains('Trace analytics').click();
@@ -239,7 +241,7 @@ describe('Latency by trace group table', () => {
   });
 
   it('Verify Search engine on Trace dashboard', () => {
-    cy.get('.euiFieldSearch.euiFieldSearch--fullWidth').click().type('client_pay_order');
+    cy.get('[data-test-subj="search-bar-input-box"]').click().type('client_pay_order');
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
     cy.get(
       '.euiTableCellContent.euiTableCellContent--alignRight.euiTableCellContent--overflowingContent'
@@ -377,7 +379,7 @@ describe('Testing switch mode to jaeger', () => {
     cy.get('[data-test-subj="search-bar-input-box"]').should('be.visible').clear();
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').should('be.visible').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.reload()
+    cy.reload();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
     cy.get('[data-test-subj="trace-groups-service-operation-accordian"]').click();
