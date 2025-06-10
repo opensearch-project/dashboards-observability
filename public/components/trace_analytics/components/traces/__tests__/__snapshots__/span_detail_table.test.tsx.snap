@@ -45,7 +45,7 @@ exports[`SpanDetailTable renders the empty component 1`] = `
           Array [
             "/api/observability/trace_analytics/query",
             Object {
-              "body": "{\\"size\\":10,\\"from\\":0,\\"query\\":{\\"bool\\":{\\"must\\":[],\\"filter\\":[],\\"should\\":[],\\"must_not\\":[]}},\\"sort\\":[],\\"index\\":\\"otel-v1-apm-span-*\\"}",
+              "body": "{\\"size\\":10,\\"from\\":0,\\"query\\":{\\"bool\\":{\\"must\\":[],\\"filter\\":[],\\"should\\":[],\\"must_not\\":[]}},\\"sort\\":[],\\"index\\":\\"\\"}",
               "query": Object {
                 "dataSourceMDSId": "testDataSource",
               },

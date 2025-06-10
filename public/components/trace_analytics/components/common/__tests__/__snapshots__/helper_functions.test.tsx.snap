@@ -108,7 +108,7 @@ exports[`Trace analytics helper functions renders no match and missing configura
       <EuiText
         size="s"
       >
-        The indices required for trace analytics (otel-v1-apm-span-* and otel-v1-apm-service-map*) do not exist or you do not have permission to access them.
+        The indices required for trace analytics (otel-v1-apm-span-* and otel-v1-apm-service-map*) do not exist or you do not have permission to access them. Update the indices for custom source in advanced settings
       </EuiText>
     }
     title={

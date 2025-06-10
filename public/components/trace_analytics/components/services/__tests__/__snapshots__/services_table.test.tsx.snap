@@ -3,7 +3,6 @@
 exports[`Services table component renders empty jaeger services table message 1`] = `
 <ServicesTable
   addFilter={[MockFunction]}
-  dataPrepperIndicesExist={false}
   items={Array []}
   jaegerIndicesExist={true}
   loading={false}
@@ -223,7 +222,6 @@ exports[`Services table component renders empty jaeger services table message 1`
 exports[`Services table component renders empty services table message 1`] = `
 <ServicesTable
   addFilter={[MockFunction]}
-  dataPrepperIndicesExist={true}
   items={Array []}
   jaegerIndicesExist={false}
   loading={false}
@@ -414,6 +412,16 @@ exports[`Services table component renders empty services table message 1`] = `
               size="s"
             >
               No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+              <React.Fragment>
+                 
+                Configure your custom indexes in
+                 
+                <EuiLink
+                  onClick={[Function]}
+                >
+                  advanced settings
+                </EuiLink>
+              </React.Fragment>
             </EuiText>
           }
           title={
@@ -458,6 +466,21 @@ exports[`Services table component renders empty services table message 1`] = `
                         className="euiText euiText--small"
                       >
                         No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                         
+                        Configure your custom indexes in
+                         
+                        <EuiLink
+                          onClick={[Function]}
+                        >
+                          <button
+                            className="euiLink euiLink--primary"
+                            disabled={false}
+                            onClick={[Function]}
+                            type="button"
+                          >
+                            advanced settings
+                          </button>
+                        </EuiLink>
                       </div>
                     </EuiText>
                   </div>
@@ -482,7 +505,6 @@ exports[`Services table component renders empty services table message 1`] = `
 exports[`Services table component renders jaeger services table 1`] = `
 <ServicesTable
   addFilter={[MockFunction]}
-  dataPrepperIndicesExist={false}
   items={
     Array [
       Object {
@@ -2498,7 +2520,6 @@ exports[`Services table component renders jaeger services table 1`] = `
 exports[`Services table component renders services table 1`] = `
 <ServicesTable
   addFilter={[MockFunction]}
-  dataPrepperIndicesExist={true}
   items={
     Array [
       Object {
