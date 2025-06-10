@@ -191,6 +191,54 @@ export const getTableColumns = (
     ] as Array<EuiTableFieldDataColumnType<any>>;
   }
 
+  // Columns for data_prepper traces mode
+  if (mode === 'data_prepper' && tracesTableMode === 'traces') {
+    return [
+      {
+        field: 'trace_id',
+        name: 'Trace Id',
+        align: 'left',
+        sortable: false,
+        render: renderTraceLinkField,
+      },
+      {
+        field: 'trace_group',
+        name: 'Trace group',
+        align: 'left',
+        sortable: false,
+        truncateText: true,
+      },
+      {
+        field: 'latency',
+        name: 'Duration (ms)',
+        align: 'right',
+        sortable: true,
+        truncateText: true,
+      },
+      {
+        field: 'percentile_in_trace_group',
+        name: 'Percentile in trace group',
+        align: 'right',
+        sortable: false,
+        render: (item) => (item ? `${round(item, 2)}th` : '-'),
+      },
+      {
+        field: 'error_count',
+        name: 'Errors',
+        align: 'right',
+        sortable: true,
+        render: renderErrorsField,
+      },
+      {
+        field: 'last_updated',
+        name: 'Last updated',
+        align: 'left',
+        sortable: true,
+        className: 'span-group-column',
+      },
+    ] as Array<EuiTableFieldDataColumnType<any>>;
+  }
+
   // Default columns for Jaeger mode
   return [
     {

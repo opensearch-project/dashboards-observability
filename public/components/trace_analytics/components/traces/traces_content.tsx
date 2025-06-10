@@ -174,6 +174,7 @@ export function TracesContent(props: TracesProps) {
   }, []);
 
   useEffect(() => {
+    setPageIndex(0);
     let newFilteredService = '';
     for (const filter of filters) {
       if (filter.field === 'serviceName') {
