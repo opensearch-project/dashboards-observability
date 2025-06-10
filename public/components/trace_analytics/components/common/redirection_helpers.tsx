@@ -146,10 +146,7 @@ export const redirectToServiceTraces = ({
   serviceName: string;
 }) => {
   const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
-  const filterField =
-    mode === 'data_prepper' || mode === 'custom_data_prepper'
-      ? 'serviceName'
-      : 'process.serviceName';
+  const filterField = mode === 'data_prepper' ? 'serviceName' : 'process.serviceName';
   addFilter({
     field: filterField,
     operator: 'is',

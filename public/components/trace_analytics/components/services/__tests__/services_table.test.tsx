@@ -6,8 +6,8 @@
 import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
-import { ServicesTable } from '../services_table';
 import { generateServiceUrl } from '../../common/helper_functions';
+import { ServicesTable } from '../services_table';
 
 describe('Services table component', () => {
   configure({ adapter: new Adapter() });
@@ -23,7 +23,6 @@ describe('Services table component', () => {
         traceColumnAction={traceColumnAction}
         addFilter={addFilter}
         jaegerIndicesExist={false}
-        dataPrepperIndicesExist={true}
         mode="data_prepper"
         setRedirect={setRedirect}
         loading={false}
@@ -44,7 +43,6 @@ describe('Services table component', () => {
         traceColumnAction={traceColumnAction}
         addFilter={addFilter}
         jaegerIndicesExist={true}
-        dataPrepperIndicesExist={false}
         mode="jaeger"
         setRedirect={setRedirect}
         loading={false}
@@ -75,7 +73,6 @@ describe('Services table component', () => {
         selectedItems={[]}
         traceColumnAction={traceColumnAction}
         mode="data_prepper"
-        dataPrepperIndicesExist={true}
         jaegerIndicesExist={false}
         addFilter={addFilter}
         setRedirect={setRedirect}
@@ -105,7 +102,6 @@ describe('Services table component', () => {
         selectedItems={[]}
         traceColumnAction={traceColumnAction}
         mode="jaeger"
-        dataPrepperIndicesExist={false}
         jaegerIndicesExist={true}
         addFilter={addFilter}
         setRedirect={setRedirect}
@@ -148,7 +144,6 @@ describe('Services table component', () => {
         setRedirect={jest.fn()}
         mode="data_prepper"
         jaegerIndicesExist={false}
-        dataPrepperIndicesExist={true}
         isServiceTrendEnabled={false}
         setIsServiceTrendEnabled={jest.fn()}
         serviceTrends={{}}

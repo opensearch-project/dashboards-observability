@@ -211,7 +211,7 @@ export function ServiceView(props: ServiceViewProps) {
               </EuiLink>
             </EuiToolTip>
           </EuiFlexItem>
-          {(mode === 'data_prepper' || mode === 'custom_data_prepper') && (
+          {mode === 'data_prepper' && (
             <>
               <EuiFlexItem
                 grow={false}
@@ -329,7 +329,7 @@ export function ServiceView(props: ServiceViewProps) {
                             {props.serviceName || '-'}
                           </EuiText>
                         </EuiFlexItem>
-                        {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
+                        {mode === 'data_prepper' ? (
                           <EuiFlexItem grow={false}>
                             <EuiText className="overview-title">
                               Number of connected services
@@ -343,7 +343,7 @@ export function ServiceView(props: ServiceViewProps) {
                         ) : (
                           <EuiFlexItem />
                         )}
-                        {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
+                        {mode === 'data_prepper' ? (
                           <EuiFlexItem grow={false}>
                             <EuiText className="overview-title">Connected services</EuiText>
                             <EuiText size="s" className="overview-content">
@@ -461,7 +461,7 @@ export function ServiceView(props: ServiceViewProps) {
       processTimeStamp(props.startTime, mode),
       processTimeStamp(props.endTime, mode)
     );
-    if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
+    if (mode === 'data_prepper') {
       spanDSL.query.bool.filter.push({
         term: {
           serviceName: props.serviceName,
@@ -570,7 +570,7 @@ export function ServiceView(props: ServiceViewProps) {
 
       {overview}
 
-      {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
+      {mode === 'data_prepper' ? (
         <>
           <EuiSpacer />
           <ServiceMetrics

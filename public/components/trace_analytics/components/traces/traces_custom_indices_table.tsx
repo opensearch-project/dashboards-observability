@@ -21,7 +21,6 @@ interface TracesLandingTableProps {
   getTraceViewUri?: (traceId: string) => string;
   openTraceFlyout?: (traceId: string) => void;
   jaegerIndicesExist: boolean;
-  dataPrepperIndicesExist: boolean;
   tracesTableMode: TraceQueryMode;
   setTracesTableMode: React.Dispatch<React.SetStateAction<TraceQueryMode>>;
   sorting: Array<{ id: string; direction: 'desc' | 'asc' }>;
@@ -134,8 +133,7 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
     <>
       <EuiPanel>
         {!(
-          props.mode === 'custom_data_prepper' ||
-          (props.mode === 'data_prepper' && props.dataPrepperIndicesExist) ||
+          props.mode === 'data_prepper' ||
           (props.mode === 'jaeger' && props.jaegerIndicesExist)
         ) ? (
           <MissingConfigurationMessage mode={props.mode} />

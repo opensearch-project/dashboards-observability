@@ -55,7 +55,7 @@ export interface GraphVisEdge {
   color: string;
 }
 
-export type TraceAnalyticsMode = 'jaeger' | 'data_prepper' | 'custom_data_prepper';
+export type TraceAnalyticsMode = 'jaeger' | 'data_prepper';
 export type TraceQueryMode = keyof typeof TRACE_TABLE_TITLES;
 
 export interface CorrelatedLogsFieldMappings {

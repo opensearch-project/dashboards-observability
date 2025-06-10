@@ -45,7 +45,6 @@ interface ServicesTableProps {
   setRedirect: (redirect: boolean) => void;
   mode: TraceAnalyticsMode;
   jaegerIndicesExist: boolean;
-  dataPrepperIndicesExist: boolean;
   isServiceTrendEnabled: boolean;
   setIsServiceTrendEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   serviceTrends: ServiceTrends;
@@ -68,7 +67,6 @@ export function ServicesTable(props: ServicesTableProps) {
     addFilter,
     setRedirect,
     jaegerIndicesExist,
-    dataPrepperIndicesExist,
     isServiceTrendEnabled,
     setIsServiceTrendEnabled,
     serviceTrends,
@@ -109,7 +107,7 @@ export function ServicesTable(props: ServicesTableProps) {
                 </EuiButtonEmpty>
               </EuiToolTip>
             </EuiFlexItem>
-            {(mode === 'data_prepper' || mode === 'custom_data_prepper') && (
+            {mode === 'data_prepper' && (
               <EuiFlexItem>
                 <EuiButtonEmpty
                   size="xs"
@@ -184,7 +182,7 @@ export function ServicesTable(props: ServicesTableProps) {
           />
         ),
       },
-      ...(mode === 'data_prepper' || mode === 'custom_data_prepper'
+      ...(mode === 'data_prepper'
         ? [
             {
               field: 'number_of_connected_services',
@@ -197,7 +195,7 @@ export function ServicesTable(props: ServicesTableProps) {
             },
           ]
         : []),
-      ...(mode === 'data_prepper' || mode === 'custom_data_prepper'
+      ...(mode === 'data_prepper'
         ? [
             {
               field: 'connected_services',
@@ -284,7 +282,7 @@ export function ServicesTable(props: ServicesTableProps) {
                 </EuiLink>
               </EuiToolTip>
             </EuiFlexItem>
-            {(mode === 'data_prepper' || mode === 'custom_data_prepper') && (
+            {mode === 'data_prepper' && (
               <>
                 <EuiFlexItem
                   grow={false}
@@ -326,11 +324,7 @@ export function ServicesTable(props: ServicesTableProps) {
         {titleBar}
         <EuiSpacer size="m" />
         <EuiHorizontalRule margin="none" />
-        {!(
-          mode === 'custom_data_prepper' ||
-          (mode === 'data_prepper' && dataPrepperIndicesExist) ||
-          (mode === 'jaeger' && jaegerIndicesExist)
-        ) ? (
+        {!(mode === 'data_prepper' || (mode === 'jaeger' && jaegerIndicesExist)) ? (
           <MissingConfigurationMessage mode={mode} />
         ) : items?.length > 0 || loading ? (
           <EuiInMemoryTable

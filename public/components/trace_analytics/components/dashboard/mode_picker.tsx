@@ -3,21 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiBetaBadge,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiSelectable,
-  EuiSmallButtonEmpty,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiPopover, EuiPopoverTitle, EuiSelectable, EuiSmallButtonEmpty } from '@elastic/eui';
 import React, { useState } from 'react';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 
 const labels = new Map([
   ['jaeger', 'Jaeger'],
   ['data_prepper', 'Data Prepper'],
-  ['custom_data_prepper', 'Custom source'],
 ]);
 
 export function DataSourcePicker(props: {
@@ -99,14 +91,6 @@ export function DataSourcePicker(props: {
               label: x.title,
               key: x.id,
               value: x.id,
-              prepend:
-                x.id === 'custom_data_prepper' ? (
-                  <EuiToolTip content="Custom source is an experimental feature, Configure traces and services indexes in advanced settings">
-                    <EuiBetaBadge size="s" label="E" color="subdued" />
-                  </EuiToolTip>
-                ) : (
-                  <></>
-                ),
               checked: x.id === selectedMode ? 'on' : undefined,
               'data-test-subj': x.id + '-mode',
             }))}

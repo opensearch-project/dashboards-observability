@@ -132,8 +132,8 @@ export const getTableColumns = (
   const renderDateField = (item: number) =>
     item === 0 || item ? moment(item).format(TRACE_ANALYTICS_DATE_FORMAT) : '-';
 
-  // Columns for custom_data_prepper mode
-  if (mode === 'custom_data_prepper' && tracesTableMode !== 'traces') {
+  // Columns for data_prepper mode
+  if (mode === 'data_prepper' && tracesTableMode !== 'traces') {
     return [
       {
         field: 'spanId',
@@ -191,55 +191,7 @@ export const getTableColumns = (
     ] as Array<EuiTableFieldDataColumnType<any>>;
   }
 
-  // Columns for non-jaeger traces mode
-  if (mode !== 'jaeger' && tracesTableMode === 'traces') {
-    return [
-      {
-        field: 'trace_id',
-        name: 'Trace Id',
-        align: 'left',
-        sortable: false,
-        render: renderTraceLinkField,
-      },
-      {
-        field: 'trace_group',
-        name: 'Trace group',
-        align: 'left',
-        sortable: false,
-        truncateText: true,
-      },
-      {
-        field: 'latency',
-        name: 'Duration (ms)',
-        align: 'right',
-        sortable: true,
-        truncateText: true,
-      },
-      {
-        field: 'percentile_in_trace_group',
-        name: 'Percentile in trace group',
-        align: 'right',
-        sortable: false,
-        render: (item) => (item ? `${round(item, 2)}th` : '-'),
-      },
-      {
-        field: 'error_count',
-        name: 'Errors',
-        align: 'right',
-        sortable: true,
-        render: renderErrorsField,
-      },
-      {
-        field: 'last_updated',
-        name: 'Last updated',
-        align: 'left',
-        sortable: true,
-        className: 'span-group-column',
-      },
-    ] as Array<EuiTableFieldDataColumnType<any>>;
-  }
-
-  // Default columns for other modes
+  // Default columns for Jaeger mode
   return [
     {
       field: 'trace_id',

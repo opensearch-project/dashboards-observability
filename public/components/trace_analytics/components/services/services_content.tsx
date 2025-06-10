@@ -41,7 +41,6 @@ export function ServicesContent(props: ServicesProps) {
     setStartTime,
     setEndTime,
     mode,
-    dataPrepperIndicesExist,
     jaegerIndicesExist,
     dataSourceMDSId,
     attributesFilterFields,
@@ -85,12 +84,7 @@ export function ServicesContent(props: ServicesProps) {
       }
     }
     setFilteredService(newFilteredService);
-    if (
-      !redirect &&
-      (mode === 'custom_data_prepper' ||
-        (mode === 'data_prepper' && dataPrepperIndicesExist) ||
-        (mode === 'jaeger' && jaegerIndicesExist))
-    )
+    if (!redirect && (mode === 'data_prepper' || (mode === 'jaeger' && jaegerIndicesExist)))
       refresh(newFilteredService);
   }, [
     filters,
@@ -98,7 +92,6 @@ export function ServicesContent(props: ServicesProps) {
     redirect,
     mode,
     jaegerIndicesExist,
-    dataPrepperIndicesExist,
     isServiceTrendEnabled,
     startTime,
     endTime,
@@ -228,7 +221,6 @@ export function ServicesContent(props: ServicesProps) {
             traceColumnAction={traceColumnAction}
             setCurrentSelectedService={setCurrentSelectedService}
             jaegerIndicesExist={jaegerIndicesExist}
-            dataPrepperIndicesExist={dataPrepperIndicesExist}
             isServiceTrendEnabled={isServiceTrendEnabled}
             setIsServiceTrendEnabled={setIsServiceTrendEnabled}
             serviceTrends={serviceTrends}
@@ -238,8 +230,7 @@ export function ServicesContent(props: ServicesProps) {
             endTime={endTime}
           />
           <EuiSpacer size="s" />
-          {mode === 'custom_data_prepper' ||
-          (mode === 'data_prepper' && dataPrepperIndicesExist) ? (
+          {mode === 'data_prepper' ? (
             <ServiceMap
               addFilter={addFilter}
               filters={filters}

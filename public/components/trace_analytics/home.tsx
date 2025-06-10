@@ -37,10 +37,7 @@ import { ServiceView, Services } from './components/services';
 import { ServiceFlyout } from './components/services/service_flyout';
 import { TraceView, Traces } from './components/traces';
 import { SpanDetailFlyout } from './components/traces/span_detail_flyout';
-import {
-  handleDataPrepperIndicesExistRequest,
-  handleJaegerIndicesExistRequest,
-} from './requests/request_handler';
+import { handleJaegerIndicesExistRequest } from './requests/request_handler';
 import { TraceSideBar } from './trace_side_nav';
 
 const newNavigation = coreRefs.chrome?.navGroup.getNavGroupEnabled();
@@ -67,7 +64,7 @@ export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, Sea
   }>;
   setMode: (mode: TraceAnalyticsMode) => void;
   jaegerIndicesExist: boolean;
-  dataPrepperIndicesExist: boolean;
+  dataPrepperIndicesExist?: boolean;
   attributesFilterFields: string[];
   setSpanFlyout: ({
     spanId,
@@ -87,7 +84,6 @@ export interface TraceAnalyticsComponentDeps extends TraceAnalyticsCoreDeps, Sea
 }
 
 export const Home = (props: HomeProps) => {
-  const [dataPrepperIndicesExist, setDataPrepperIndicesExist] = useState(false);
   const [jaegerIndicesExist, setJaegerIndicesExist] = useState(false);
   const [attributesFilterFields, setAttributesFilterFields] = useState<string[]>([]);
   const [mode, setMode] = useState<TraceAnalyticsMode>(
@@ -215,15 +211,10 @@ export const Home = (props: HomeProps) => {
   };
 
   const isValidTraceAnalyticsMode = (urlMode: string | null): urlMode is TraceAnalyticsMode => {
-    return ['jaeger', 'data_prepper', 'custom_data_prepper'].includes(urlMode || '');
+    return ['jaeger', 'data_prepper'].includes(urlMode || '');
   };
 
   useEffect(() => {
-    handleDataPrepperIndicesExistRequest(
-      props.http,
-      setDataPrepperIndicesExist,
-      dataSourceMDSId[0].id
-    );
     handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist, dataSourceMDSId[0].id);
     // When datasource is loaded form the URL, the label is set to undefined
     if (dataSourceMDSId[0].id && dataSourceMDSId[0].label === undefined) {
@@ -234,11 +225,6 @@ export const Home = (props: HomeProps) => {
   const modes = [
     { id: 'jaeger', title: 'Jaeger', 'data-test-subj': 'jaeger-mode' },
     { id: 'data_prepper', title: 'Data Prepper', 'data-test-subj': 'data-prepper-mode' },
-    {
-      id: 'custom_data_prepper',
-      title: 'Custom source',
-      'data-test-subj': 'custom-data-prepper-mode',
-    },
   ];
 
   const fetchAttributesFields = () => {
@@ -253,15 +239,15 @@ export const Home = (props: HomeProps) => {
 
   useEffect(() => {
     if (!sessionStorage.getItem('TraceAnalyticsMode')) {
-      if (dataPrepperIndicesExist) {
-        setMode('data_prepper');
-        sessionStorage.setItem('TraceAnalyticsMode', 'data_prepper');
-      } else if (jaegerIndicesExist) {
+      if (jaegerIndicesExist) {
         setMode('jaeger');
         sessionStorage.setItem('TraceAnalyticsMode', 'jaeger');
+      } else {
+        setMode('data_prepper');
+        sessionStorage.setItem('TraceAnalyticsMode', 'data_prepper');
       }
     }
-  }, [jaegerIndicesExist, dataPrepperIndicesExist]);
+  }, [jaegerIndicesExist]);
 
   const updateUrlWithMode = (traceMode: string) => {
     const urlParts = window.location.href.split('?');
@@ -281,12 +267,12 @@ export const Home = (props: HomeProps) => {
     const isCustomModeEnabled = TraceSettings.getCustomModeSetting();
 
     if (!urlMode && isCustomModeEnabled) {
-      const newUrl = updateUrlWithMode('custom_data_prepper');
+      const newUrl = updateUrlWithMode('data_prepper');
       if (window.location.href !== newUrl) {
         window.history.replaceState(null, '', newUrl);
 
-        setMode('custom_data_prepper');
-        sessionStorage.setItem('TraceAnalyticsMode', 'custom_data_prepper');
+        setMode('data_prepper');
+        sessionStorage.setItem('TraceAnalyticsMode', 'data_prepper');
       }
     } else if (isValidTraceAnalyticsMode(urlMode)) {
       // Use the existing mode if valid
@@ -298,7 +284,7 @@ export const Home = (props: HomeProps) => {
   }, []);
 
   useEffect(() => {
-    if (mode === 'data_prepper' || mode === 'custom_data_prepper') fetchAttributesFields();
+    if (mode === 'data_prepper') fetchAttributesFields();
   }, [mode, dataSourceMDSId]);
 
   const serviceBreadcrumbs = [
@@ -415,7 +401,6 @@ export const Home = (props: HomeProps) => {
       setMode(traceMode);
     },
     jaegerIndicesExist,
-    dataPrepperIndicesExist,
     notifications: props.notifications,
     dataSourceEnabled: props.dataSourceEnabled,
     dataSourceManagement: props.dataSourceManagement,

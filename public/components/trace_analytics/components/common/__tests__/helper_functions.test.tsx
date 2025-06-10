@@ -229,12 +229,8 @@ describe('Trace analytics helper functions', () => {
     });
 
     it('handles URIs without a hash router', () => {
-      const result = appendModeToTraceViewUri(
-        '123',
-        (id) => `/traces/${id}`,
-        'custom_data_prepper'
-      );
-      expect(result).toEqual('/traces/123?mode=custom_data_prepper');
+      const result = appendModeToTraceViewUri('123', (id) => `/traces/${id}`, 'data_prepper');
+      expect(result).toEqual('/traces/123?mode=data_prepper');
     });
 
     it('handles URIs without a hash router and existing query params', () => {

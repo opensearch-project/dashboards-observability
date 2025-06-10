@@ -48,7 +48,6 @@ export function DashboardContent(props: DashboardProps) {
     setEndTime,
     setFilters,
     mode,
-    dataPrepperIndicesExist,
     jaegerIndicesExist,
     toasts,
     dataSourceMDSId,
@@ -89,23 +88,9 @@ export function DashboardContent(props: DashboardProps) {
   }, []);
 
   useEffect(() => {
-    if (
-      !redirect &&
-      (mode === 'custom_data_prepper' ||
-        (mode === 'data_prepper' && dataPrepperIndicesExist) ||
-        (mode === 'jaeger' && jaegerIndicesExist))
-    )
+    if (!redirect && (mode === 'data_prepper' || (mode === 'jaeger' && jaegerIndicesExist)))
       refresh();
-  }, [
-    filters,
-    startTime,
-    endTime,
-    appConfigs,
-    redirect,
-    mode,
-    dataPrepperIndicesExist,
-    jaegerIndicesExist,
-  ]);
+  }, [filters, startTime, endTime, appConfigs, redirect, mode, jaegerIndicesExist]);
 
   const refresh = async () => {
     const DSL = filtersToDsl(
@@ -271,11 +256,9 @@ export function DashboardContent(props: DashboardProps) {
 
   return (
     <>
-      {mode === 'custom_data_prepper' ||
-      (mode === 'data_prepper' && dataPrepperIndicesExist) ||
-      (mode === 'jaeger' && jaegerIndicesExist) ? (
+      {mode === 'data_prepper' || (mode === 'jaeger' && jaegerIndicesExist) ? (
         <div>
-          {mode === 'data_prepper' || mode === 'custom_data_prepper' ? (
+          {mode === 'data_prepper' ? (
             <>
               <DashboardTable
                 items={tableItems}

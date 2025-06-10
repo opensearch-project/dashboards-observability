@@ -74,7 +74,7 @@ export const handleCustomIndicesTracesRequest = async (
       return;
     }
 
-    if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
+    if (mode === 'data_prepper') {
       const keys = new Set();
       const results = hits.map((val) => {
         const source = omitBy(val._source, isArray || isObject);
@@ -139,7 +139,7 @@ export const handleTracesRequest = async (
 
   // percentile should only be affected by timefilter
   const percentileRangesPromise =
-    mode === 'data_prepper' || mode === 'custom_data_prepper'
+    mode === 'data_prepper'
       ? handleDslRequest(
           http,
           timeFilterDSL,
@@ -184,7 +184,7 @@ export const handleTracesRequest = async (
       }
 
       const newItems = response.aggregations.traces.buckets.map((bucket: any) => {
-        if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
+        if (mode === 'data_prepper') {
           return {
             trace_id: bucket.key,
             trace_group: bucket.trace_group.buckets[0]?.key,

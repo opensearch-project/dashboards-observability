@@ -24,13 +24,13 @@ import truncate from 'lodash/truncate';
 import React, { useMemo, useState } from 'react';
 import { TRACES_MAX_NUM } from '../../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
+import { MAX_DISPLAY_ROWS } from '../common/constants';
 import {
   appendModeToTraceViewUri,
   MissingConfigurationMessage,
   NoMatchMessage,
   PanelTitle,
 } from '../common/helper_functions';
-import { MAX_DISPLAY_ROWS } from '../common/constants';
 
 interface TracesTableProps {
   items: any[];
@@ -40,7 +40,6 @@ interface TracesTableProps {
   getTraceViewUri?: (traceId: string) => string;
   openTraceFlyout?: (traceId: string) => void;
   jaegerIndicesExist: boolean;
-  dataPrepperIndicesExist: boolean;
   page?: 'traces' | 'app';
   uniqueTraces: number;
 }
@@ -69,7 +68,7 @@ export function TracesTable(props: TracesTableProps) {
       new URLSearchParams(currentUrl.split('?')[1]).get('mode') ||
       sessionStorage.getItem('TraceAnalyticsMode');
 
-    if (mode === 'data_prepper' || mode === 'custom_data_prepper') {
+    if (mode === 'data_prepper') {
       return [
         {
           field: 'trace_id',
@@ -283,11 +282,7 @@ export function TracesTable(props: TracesTableProps) {
         {titleBar}
         <EuiSpacer size="m" />
         <EuiHorizontalRule margin="none" />
-        {!(
-          mode === 'custom_data_prepper' ||
-          (mode === 'data_prepper' && props.dataPrepperIndicesExist) ||
-          (mode === 'jaeger' && props.jaegerIndicesExist)
-        ) ? (
+        {!(mode === 'data_prepper' || (mode === 'jaeger' && props.jaegerIndicesExist)) ? (
           <MissingConfigurationMessage mode={mode} />
         ) : items?.length > 0 || loading ? (
           <EuiInMemoryTable
