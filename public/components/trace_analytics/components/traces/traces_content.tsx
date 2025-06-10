@@ -442,7 +442,7 @@ export function TracesContent(props: TracesProps) {
           <EuiSpacer size="s" />
 
           {/* Switch between data prepper and Jaeger table */}
-          {mode === 'data_prepper' ? (
+          {mode === 'data_prepper' && page !== 'app' ? (
             <TracesCustomIndicesTable
               columnItems={attributesFilterFields}
               items={tableItems}
@@ -480,7 +480,7 @@ export function TracesContent(props: TracesProps) {
           )}
 
           {/* Show services list and graph when mode is data prepper */}
-          {mode === 'data_prepper' && (
+          {mode === 'data_prepper' && page !== 'app' && (
             <>
               <EuiSpacer size="m" />
               <EuiFlexGroup>

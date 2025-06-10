@@ -5,7 +5,13 @@
 
 /// <reference types="cypress" />
 
-import { setTimeFilter, SPAN_ID, TRACE_ID, SPAN_ID_TREE_VIEW, INVALID_URL } from '../../utils/constants';
+import {
+  setTimeFilter,
+  SPAN_ID,
+  TRACE_ID,
+  SPAN_ID_TREE_VIEW,
+  INVALID_URL,
+} from '../../utils/constants';
 
 describe('Testing traces table empty state', () => {
   beforeEach(() => {
@@ -139,13 +145,14 @@ describe('Testing trace view invalid url', () => {
     cy.get('.euiCallOut.euiCallOut--danger')
       .should('exist')
       .within(() => {
-        cy.get('.euiCallOutHeader__title')
-          .should('contain.text', `Error loading Trace Id: ${INVALID_URL}`);
-        cy.get('p')
-          .should(
-            'contain.text',
-            'The Trace Id is invalid or could not be found. Please check the URL or try again.'
-          );
+        cy.get('.euiCallOutHeader__title').should(
+          'contain.text',
+          `Error loading Trace Id: ${INVALID_URL}`
+        );
+        cy.get('p').should(
+          'contain.text',
+          'The Trace Id is invalid or could not be found. Please check the URL or try again.'
+        );
       });
   });
 });
@@ -342,7 +349,7 @@ describe('Testing switch mode to jaeger', () => {
   });
 });
 
-describe('Testing traces Custom source', () => {
+describe('Testing traces Custom source features', () => {
   beforeEach(() => {
     cy.visit('app/observability-traces#/traces', {
       onBeforeLoad: (win) => {
@@ -351,7 +358,7 @@ describe('Testing traces Custom source', () => {
     });
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get("[data-test-subj='indexPattern-switch-link']").click();
-    cy.get("[data-test-subj='custom_data_prepper-mode']").click();
+    cy.get("[data-test-subj='data_prepper-mode']").click();
     setTimeFilter();
   });
 
