@@ -27,9 +27,9 @@ FROM (
   SELECT
     CAST(event.timestamp AS TIMESTAMP) AS `@timestamp`,
     COALESCE(CAST(firewall_name AS STRING), 'UNKNOWN_FIREWALL') AS `firewall_name`,
-    COALESCE(CAST(event.src_ip AS STRING), '0.0.0.0') AS `event_src_ip`,
+    COALESCE(CAST(event.src_ip AS STRING), '-') AS `event_src_ip`,
     COALESCE(CAST(event.src_port AS INTEGER), -1) AS `event_src_port`,
-    COALESCE(CAST(event.dest_ip AS STRING), '0.0.0.0') AS `event_dest_ip`,
+    COALESCE(CAST(event.dest_ip AS STRING), '-') AS `event_dest_ip`,
     COALESCE(CAST(event.dest_port AS INTEGER), -1) AS `event_dest_port`,
     COALESCE(CAST(event.proto AS STRING), 'UNKNOWN_PROTO') AS `event_proto`,
     COALESCE(CAST(event.app_proto AS STRING), 'UNKNOWN_APP') AS `event_app_proto`,
@@ -43,8 +43,8 @@ FROM (
     COALESCE(CAST(event.http.url AS STRING), '/') AS event_http_url,
     COALESCE(CAST(event.http.http_user_agent AS STRING), 'UNKNOWN_AGENT') AS `event_http_http_user_agent`,
     COALESCE(CAST(event.tls.sni AS STRING), 'UNKNOWN_SNI') AS `event_tls_sni`,
-    COALESCE(CAST(event.netflow.pkts AS BIGINT), 0) AS `event_netflow_pkts`,
-    COALESCE(CAST(event.netflow.bytes AS BIGINT), 0) AS `event_netflow_bytes`,
+    COALESCE(CAST(event.netflow.pkts AS LONG), 0) AS `event_netflow_pkts`,
+    COALESCE(CAST(event.netflow.bytes AS LONG), 0) AS `event_netflow_bytes`,
     COALESCE(CAST(event.netflow.age AS INTEGER), 0) AS `event_netflow_age`
   FROM
     {table_name}
