@@ -40,7 +40,7 @@ FROM (
     COALESCE(CAST(event.alert.signature_id AS STRING), 'UNKNOWN_SIGID') AS `event_alert_signature_id`,
     COALESCE(CAST(event.alert.signature AS STRING), 'UNKNOWN_SIGNATURE') AS `event_alert_signature`,
     COALESCE(CAST(event.http.hostname AS STRING), 'UNKNOWN_HOST') AS `event_http_hostname`,
-    COALESCE(CAST(event.http.url AS STRING), '/') AS event_http_url,
+    COALESCE(CAST(event.http.url AS STRING), '/') AS `event_http_url`,
     COALESCE(CAST(event.http.http_user_agent AS STRING), 'UNKNOWN_AGENT') AS `event_http_http_user_agent`,
     COALESCE(CAST(event.tls.sni AS STRING), 'UNKNOWN_SNI') AS `event_tls_sni`,
     COALESCE(CAST(event.netflow.pkts AS LONG), 0) AS `event_netflow_pkts`,
