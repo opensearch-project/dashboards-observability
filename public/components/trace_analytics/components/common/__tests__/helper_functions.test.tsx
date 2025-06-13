@@ -29,6 +29,7 @@ import {
   nanoToMilliSec,
   NoMatchMessage,
   PanelTitle,
+  processTimeStamp,
   renderBenchmark,
 } from '../helper_functions';
 
@@ -236,6 +237,25 @@ describe('Trace analytics helper functions', () => {
     it('handles URIs without a hash router and existing query params', () => {
       const result = appendModeToTraceViewUri('123', (id) => `/traces/${id}?foo=bar`, 'jaeger');
       expect(result).toEqual('/traces/123?foo=bar&mode=jaeger');
+    });
+  });
+
+  describe('processTimeStamp', () => {
+    it('returns microseconds for jaeger mode (start time)', () => {
+      const time = '2024-01-01T00:00:00Z';
+      const expected = Math.floor(new Date(time).getTime() / 1000) * 1000000;
+      expect(processTimeStamp(time, 'jaeger', false)).toEqual(expected);
+    });
+
+    it('returns microseconds for jaeger mode (end time)', () => {
+      const time = '2024-01-01T00:00:00Z';
+      const expected = Math.floor(new Date(time).getTime() / 1000) * 1000000;
+      expect(processTimeStamp(time, 'jaeger', true)).toEqual(expected);
+    });
+
+    it('returns input time for non-jaeger mode', () => {
+      const time = 'now-5m';
+      expect(processTimeStamp(time, 'data_prepper')).toBe(time);
     });
   });
 });
