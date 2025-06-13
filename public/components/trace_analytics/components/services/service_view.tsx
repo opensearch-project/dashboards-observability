@@ -119,7 +119,7 @@ export function ServiceView(props: ServiceViewProps) {
       props.filters,
       props.query,
       processTimeStamp(props.startTime, mode),
-      processTimeStamp(props.endTime, mode)
+      processTimeStamp(props.endTime, mode, true)
     );
 
     setIsServiceOverviewLoading(true);
@@ -459,7 +459,7 @@ export function ServiceView(props: ServiceViewProps) {
       props.filters,
       props.query,
       processTimeStamp(props.startTime, mode),
-      processTimeStamp(props.endTime, mode)
+      processTimeStamp(props.endTime, mode, true)
     );
     if (mode === 'data_prepper') {
       spanDSL.query.bool.filter.push({

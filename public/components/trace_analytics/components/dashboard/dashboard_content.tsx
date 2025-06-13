@@ -98,7 +98,7 @@ export function DashboardContent(props: DashboardProps) {
       filters,
       query,
       processTimeStamp(startTime, mode),
-      processTimeStamp(endTime, mode),
+      processTimeStamp(endTime, mode, true),
       page,
       appConfigs
     );
@@ -107,7 +107,7 @@ export function DashboardContent(props: DashboardProps) {
       [],
       '',
       processTimeStamp(startTime, mode),
-      processTimeStamp(endTime, mode),
+      processTimeStamp(endTime, mode, true),
       page,
       appConfigs
     );
@@ -120,7 +120,7 @@ export function DashboardContent(props: DashboardProps) {
       filters,
       query,
       processTimeStamp(latencyTrendStartTime, mode),
-      processTimeStamp(endTime, mode),
+      processTimeStamp(endTime, mode, true),
       page,
       appConfigs
     );
