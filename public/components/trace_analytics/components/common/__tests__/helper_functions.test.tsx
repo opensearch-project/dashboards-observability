@@ -257,5 +257,14 @@ describe('Trace analytics helper functions', () => {
       const time = 'now-5m';
       expect(processTimeStamp(time, 'data_prepper')).toBe(time);
     });
+
+    it('returns different values for start and end time for now/y, now/M, now/d, now/w in jaeger mode', () => {
+      const formats = ['now/y', 'now/M', 'now/d', 'now/w'];
+      formats.forEach((format) => {
+        const start = processTimeStamp(format, 'jaeger', false);
+        const end = processTimeStamp(format, 'jaeger', true);
+        expect(end).not.toEqual(start);
+      });
+    });
   });
 });
