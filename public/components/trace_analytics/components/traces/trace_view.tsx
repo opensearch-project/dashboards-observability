@@ -228,7 +228,7 @@ export function TraceView(props: TraceViewProps) {
       [],
       '',
       processTimeStamp('now', mode),
-      processTimeStamp('now', mode),
+      processTimeStamp('now', mode, true),
       page
     );
 
