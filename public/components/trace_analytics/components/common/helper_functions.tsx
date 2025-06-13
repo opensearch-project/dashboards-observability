@@ -696,7 +696,7 @@ export const parseHits = (payloadData: string): ParsedHit[] => {
 
 export const isUnderOneHourRange = (startTime: string, endTime: string): boolean => {
   const start = dateMath.parse(startTime);
-  const end = dateMath.parse(endTime);
+  const end = dateMath.parse(endTime, { roundUp: true });
 
   if (!start || !end) return false;
 
