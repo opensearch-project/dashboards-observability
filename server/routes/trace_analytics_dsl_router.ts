@@ -158,7 +158,10 @@ export function registerTraceAnalyticsDslRouter(router: IRouter, dataSourceEnabl
         if (error.statusCode !== 404) console.error(error);
         return response.custom({
           statusCode: error.statusCode || 400,
-          body: error.response,
+          body: {
+            message: error.message || error.reason || 'Unknown error occurred',
+            error: error.response || error.body || error,
+          },
         });
       }
     }
