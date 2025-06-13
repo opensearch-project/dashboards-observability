@@ -105,7 +105,7 @@ export function ServicesContent(props: ServicesProps) {
       filters,
       filterQuery,
       processTimeStamp(startTime, mode),
-      processTimeStamp(endTime, mode),
+      processTimeStamp(endTime, mode, true),
       page,
       appConfigs
     );

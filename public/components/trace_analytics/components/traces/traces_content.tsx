@@ -121,7 +121,7 @@ export function TracesContent(props: TracesProps) {
         filters,
         query,
         processTimeStamp(startTime, mode),
-        processTimeStamp(endTime, mode),
+        processTimeStamp(endTime, mode, true),
         page,
         appConfigs
       ),
@@ -275,7 +275,7 @@ export function TracesContent(props: TracesProps) {
       filters,
       query,
       processTimeStamp(startTime, mode),
-      processTimeStamp(endTime, mode),
+      processTimeStamp(endTime, mode, true),
       page,
       appConfigs
     );
@@ -285,7 +285,7 @@ export function TracesContent(props: TracesProps) {
       [],
       '',
       processTimeStamp(startTime, mode),
-      processTimeStamp(endTime, mode),
+      processTimeStamp(endTime, mode, true),
       page
     );
 
@@ -317,7 +317,7 @@ export function TracesContent(props: TracesProps) {
       filters,
       filterQuery,
       processTimeStamp(startTime, mode),
-      processTimeStamp(endTime, mode),
+      processTimeStamp(endTime, mode, true),
       page,
       appConfigs
     );
@@ -326,7 +326,7 @@ export function TracesContent(props: TracesProps) {
       [],
       '',
       processTimeStamp(startTime, mode),
-      processTimeStamp(endTime, mode),
+      processTimeStamp(endTime, mode, true),
       page
     );
     const isUnderOneHour = isUnderOneHourRange(startTime, endTime);
