@@ -19,3 +19,4 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.1.0
 ### Maintenance
 
 - Increment version to 3.1.0.0 ([#2443](https://github.com/opensearch-project/dashboards-observability/pull/2443))
+- Adding release notes for 3.1.0 ([#2464](https://github.com/opensearch-project/dashboards-observability/pull/2464))
