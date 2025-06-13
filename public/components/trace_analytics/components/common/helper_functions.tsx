@@ -113,9 +113,9 @@ export function MissingConfigurationMessage(props: { mode: TraceAnalyticsMode })
 }
 
 // Processes time (like 'now-5y') to microseconds for jaeger since this is how they store the start time. Otherwise leave it the same.
-export function processTimeStamp(time: string, mode: TraceAnalyticsMode) {
+export function processTimeStamp(time: string, mode: TraceAnalyticsMode, isEndTime = false) {
   if (mode === 'jaeger') {
-    const timeMoment = dateMath.parse(time)!;
+    const timeMoment = isEndTime ? dateMath.parse(time, { roundUp: true })! : dateMath.parse(time)!;
     return timeMoment.unix() * 1000000;
   }
   return time;
@@ -696,7 +696,7 @@ export const parseHits = (payloadData: string): ParsedHit[] => {
 
 export const isUnderOneHourRange = (startTime: string, endTime: string): boolean => {
   const start = dateMath.parse(startTime);
-  const end = dateMath.parse(endTime);
+  const end = dateMath.parse(endTime, { roundUp: true });
 
   if (!start || !end) return false;
 
