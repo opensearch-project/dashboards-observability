@@ -35,14 +35,15 @@ import { coreRefs } from '../../../../framework/core_refs';
 import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/plugin_headerControl';
 import { TraceAnalyticsCoreDeps } from '../../home';
 import { handleServiceMapRequest } from '../../requests/services_request_handler';
-import { handlePayloadRequest } from '../../requests/traces_request_handler';
+import { handlePayloadRequest, hitsToServiceMapData } from '../../requests/traces_request_handler';
 import { TraceFilter } from '../common/constants';
-import { PanelTitle, filtersToDsl, processTimeStamp } from '../common/helper_functions';
+import { PanelTitle, filtersToDsl, parseHits, processTimeStamp } from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { redirectTraceToLogs } from '../common/redirection_helpers';
 import { ServiceBreakdownPanel } from './service_breakdown_panel';
 import { SpanDetailPanel } from './span_detail_panel';
 import { getOverviewFields, getServiceBreakdownData, spanFiltersToDSL } from './trace_view_helpers';
+import { SpanDetailFlyout } from './span_detail_flyout';
 
 interface TraceViewProps extends TraceAnalyticsCoreDeps {
   traceId: string;
@@ -77,11 +78,6 @@ export function TraceView(props: TraceViewProps) {
   const [serviceBreakdownData, setServiceBreakdownData] = useState([]);
   const [payloadData, setPayloadData] = useState('');
   const [colorMap, setColorMap] = useState({});
-  const [ganttData, setGanttData] = useState<{ gantt: any[]; table: any[]; ganttMaxX: number }>({
-    gantt: [],
-    table: [],
-    ganttMaxX: 0,
-  });
   const [serviceMap, setServiceMap] = useState<ServiceObject>({});
   const [traceFilteredServiceMap, setTraceFilteredServiceMap] = useState<ServiceObject>({});
   const [serviceMapIdSelected, setServiceMapIdSelected] = useState<
@@ -99,6 +95,7 @@ export function TraceView(props: TraceViewProps) {
     storedFilters ? JSON.parse(storedFilters) : []
   );
   const [filteredPayload, setFilteredPayload] = useState('');
+  const [currentSpan, setCurrentSpan] = useState('');
 
   const renderOverview = (overviewFields: any) => {
     return (
@@ -244,6 +241,7 @@ export function TraceView(props: TraceViewProps) {
       mode,
       props.dataSourceMDSId[0].id
     ).finally(() => {
+      setIsGanttChartLoading(false);
       setTracePayloadLoading(false);
     });
 
@@ -263,6 +261,17 @@ export function TraceView(props: TraceViewProps) {
     sessionStorage.setItem('TraceAnalyticsSpanFilters', JSON.stringify(newFilters));
   };
 
+  const addSpanFilter = (field: string, value: any) => {
+    const newFilters = [...spanFilters];
+    const index = newFilters.findIndex(({ field: filterField }) => field === filterField);
+    if (index === -1) {
+      newFilters.push({ field, value });
+    } else {
+      newFilters.splice(index, 1, { field, value });
+    }
+    setSpanFiltersWithStorage(newFilters);
+  };
+
   const refreshFilteredPayload = async (newFilters: TraceFilter[]) => {
     const spanDSL = spanFiltersToDSL(newFilters);
     setIsGanttChartLoading(true);
@@ -273,7 +282,9 @@ export function TraceView(props: TraceViewProps) {
       setFilteredPayload,
       mode,
       props.dataSourceMDSId[0].id
-    );
+    ).finally(() => {
+      setIsGanttChartLoading(false);
+    });
   };
 
   const TracetoLogsButton = useMemo(
@@ -337,9 +348,11 @@ export function TraceView(props: TraceViewProps) {
   }, [payloadData, mode]);
 
   useEffect(() => {
-    if (!Object.keys(serviceMap).length || !ganttData.table.length) return;
-    const services: any = {};
-    ganttData.table.forEach((service: any) => {
+    const hits = parseHits(payloadData);
+    const serviceMapData = hitsToServiceMapData(hits, mode);
+    if (!Object.keys(serviceMap).length || !serviceMapData.length) return;
+    const services: Record<string, { latency: number; errors: number; throughput: number }> = {};
+    serviceMapData.forEach((service) => {
       if (!services[service.service_name]) {
         services[service.service_name] = {
           latency: 0,
@@ -352,7 +365,7 @@ export function TraceView(props: TraceViewProps) {
       services[service.service_name].throughput++;
     });
     const filteredServiceMap: ServiceObject = {};
-    Object.entries(services).forEach(([serviceName, service]: [string, any]) => {
+    Object.entries(services).forEach(([serviceName, service]) => {
       if (!serviceMap[serviceName]) return;
       filteredServiceMap[serviceName] = serviceMap[serviceName];
       filteredServiceMap[serviceName].latency = round(service.latency / service.throughput, 2);
@@ -366,7 +379,7 @@ export function TraceView(props: TraceViewProps) {
       ].destServices.filter((destService) => services[destService]);
     });
     setTraceFilteredServiceMap(filteredServiceMap);
-  }, [serviceMap, ganttData]);
+  }, [serviceMap, payloadData]);
 
   useEffect(() => {
     setNavBreadCrumbs(
@@ -439,15 +452,13 @@ export function TraceView(props: TraceViewProps) {
                 http={props.http}
                 colorMap={colorMap}
                 mode={mode}
-                data={ganttData}
-                setGanttData={setGanttData}
                 dataSourceMDSId={props.dataSourceMDSId[0].id}
                 dataSourceMDSLabel={props.dataSourceMDSId[0].label}
                 payloadData={filteredPayload}
-                isGanttChartLoading={isGanttChartLoading}
-                setGanttChartLoading={setIsGanttChartLoading}
                 spanFilters={spanFilters}
                 setSpanFiltersWithStorage={setSpanFiltersWithStorage}
+                onSpanClick={setCurrentSpan}
+                isLoading={isGanttChartLoading}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -487,6 +498,18 @@ export function TraceView(props: TraceViewProps) {
           )}
         </EuiPageBody>
       </EuiPage>
+      {!!currentSpan && (
+        <SpanDetailFlyout
+          http={props.http}
+          spanId={currentSpan}
+          isFlyoutVisible={!!currentSpan}
+          closeFlyout={() => setCurrentSpan('')}
+          addSpanFilter={addSpanFilter}
+          mode={mode}
+          dataSourceMDSId={props.dataSourceMDSId[0].id}
+          dataSourceMDSLabel={props.dataSourceMDSId[0].label}
+        />
+      )}
     </>
   );
 }

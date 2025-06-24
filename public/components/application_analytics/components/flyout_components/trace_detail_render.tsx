@@ -85,14 +85,12 @@ export const TraceDetailRender = ({
           traceId={traceId}
           http={http}
           colorMap={colorMap}
-          page="app"
-          openSpanFlyout={openSpanFlyout}
           mode={mode}
           dataSourceMDSId={dataSourceMDSId}
-          isApplicationFlyout={true}
           payloadData={payloadData}
           spanFilters={spanFilters}
           setSpanFiltersWithStorage={setSpanFiltersWithStorage}
+          onSpanClick={openSpanFlyout}
         />
         <EuiSpacer size="xs" />
         <EuiHorizontalRule margin="s" />
