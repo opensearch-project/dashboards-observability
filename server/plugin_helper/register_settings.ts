@@ -114,7 +114,7 @@ export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSet
       category: ['Observability'],
       description: i18n.translate('observability.traceAnalyticsServiceMapMaxNodes.description', {
         defaultMessage:
-          'Set the number of maximum nodes, to be used by the trace analytics plugin to display on service maps',
+          'Set the maximum number of nodes that the trace analytics plugin should request for rendering of service maps',
       }),
       schema: schema.number({
         min: 1,
@@ -131,10 +131,10 @@ export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSet
       category: ['Observability'],
       description: i18n.translate('observability.traceAnalyticsServiceMapMaxEdges.description', {
         defaultMessage:
-          'Set the number of maximum edges, to be used by the trace analytics plugin to display on service maps',
+          'Set the maximum number of edges that the trace analytics plugin should request for rendering of service maps',
       }),
       schema: schema.number({
-        min: 2,
+        min: 1,
       }),
     },
   });
