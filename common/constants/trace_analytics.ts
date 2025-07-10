@@ -29,6 +29,7 @@ export const TRACE_CORRELATED_LOGS_INDEX_SETTING =
   'observability:traceAnalyticsCorrelatedLogsIndices';
 export const TRACE_LOGS_FIELD_MAPPNIGS_SETTING =
   'observability:traceAnalyticsCorrelatedLogsFieldMappings';
+export const TRACE_SERVICE_MAP_MAX_NODES = 'observability:traceAnalyticsServiceMapMaxNodes';
 
 export const DEFAULT_SS4O_LOGS_INDEX = 'ss4o_logs-*';
 export const DEFAULT_CORRELATED_LOGS_FIELD_MAPPINGS = `
@@ -38,6 +39,7 @@ export const DEFAULT_CORRELATED_LOGS_FIELD_MAPPINGS = `
   "timestamp": "time",
   "traceId": "traceId"
 }`;
+export const DEFAULT_SERVICE_MAP_MAX_NODES = 500;
 
 export enum TRACE_TABLE_TITLES {
   all_spans = 'All Spans',
