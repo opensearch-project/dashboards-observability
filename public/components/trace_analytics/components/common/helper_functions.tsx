@@ -21,6 +21,7 @@ import {
   TRACE_CUSTOM_SERVICE_INDEX_SETTING,
   TRACE_CUSTOM_SPAN_INDEX_SETTING,
   TRACE_LOGS_FIELD_MAPPNIGS_SETTING,
+  TRACE_SERVICE_MAP_MAX_NODES,
 } from '../../../../../common/constants/trace_analytics';
 import {
   CorrelatedLogsFieldMappings,
@@ -604,6 +605,8 @@ export const TraceSettings = {
 
   getCustomModeSetting: () => uiSettingsService.get(TRACE_CUSTOM_MODE_DEFAULT_SETTING) || false,
 
+  getServiceMapMaxNodes: () => uiSettingsService.get(TRACE_SERVICE_MAP_MAX_NODES),
+
   setCustomSpanIndex: (value: string) =>
     uiSettingsService.set(TRACE_CUSTOM_SPAN_INDEX_SETTING, value),
 
@@ -618,6 +621,9 @@ export const TraceSettings = {
 
   setCustomModeSetting: (value: boolean) =>
     uiSettingsService.set(TRACE_CUSTOM_MODE_DEFAULT_SETTING, value),
+
+  setServiceMapMaxNodes: (value: number) =>
+    uiSettingsService.set(TRACE_SERVICE_MAP_MAX_NODES, value),
 };
 
 export const getSpanIndices = (mode: TraceAnalyticsMode) => {

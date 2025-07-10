@@ -3,12 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  SERVICE_MAP_MAX_EDGES,
-  SERVICE_MAP_MAX_NODES,
-} from '../../../../../common/constants/trace_analytics';
+import { SERVICE_MAP_MAX_EDGES } from '../../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
-import { getServiceIndices } from '../../components/common/helper_functions';
+import { TraceSettings, getServiceIndices } from '../../components/common/helper_functions';
 import { ServiceObject } from '../../components/common/plots/service_map';
 
 export const getServicesQuery = (
@@ -91,6 +88,8 @@ export const getServicesQuery = (
 };
 
 export const getServiceMapQuery = (mode: TraceAnalyticsMode) => {
+  const serviceMapMaxNodes = TraceSettings.getServiceMapMaxNodes();
+
   return {
     index: getServiceIndices(mode),
     size: 0,
@@ -106,7 +105,7 @@ export const getServiceMapQuery = (mode: TraceAnalyticsMode) => {
       service_name: {
         terms: {
           field: 'serviceName',
-          size: SERVICE_MAP_MAX_NODES,
+          size: serviceMapMaxNodes,
         },
         aggs: {
           target_resource: {
@@ -190,6 +189,8 @@ export const getServiceMetricsQuery = (
   map: ServiceObject,
   mode: TraceAnalyticsMode
 ) => {
+  const serviceMapMaxNodes = TraceSettings.getServiceMapMaxNodes();
+
   const targetResource = [].concat(
     ...Object.keys(map).map((service) => map[service].targetResources)
   );
@@ -249,7 +250,7 @@ export const getServiceMetricsQuery = (
       service_name: {
         terms: {
           field: 'process.serviceName',
-          size: SERVICE_MAP_MAX_NODES,
+          size: serviceMapMaxNodes,
           min_doc_count: 1,
           shard_min_doc_count: 0,
           show_term_doc_count_error: false,
@@ -359,7 +360,7 @@ export const getServiceMetricsQuery = (
       service_name: {
         terms: {
           field: 'serviceName',
-          size: SERVICE_MAP_MAX_NODES,
+          size: serviceMapMaxNodes,
           min_doc_count: 1,
           shard_min_doc_count: 0,
           show_term_doc_count_error: false,
