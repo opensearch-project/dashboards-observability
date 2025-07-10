@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SERVICE_MAP_MAX_EDGES } from '../../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { TraceSettings, getServiceIndices } from '../../components/common/helper_functions';
 import { ServiceObject } from '../../components/common/plots/service_map';
@@ -89,6 +88,7 @@ export const getServicesQuery = (
 
 export const getServiceMapQuery = (mode: TraceAnalyticsMode) => {
   const serviceMapMaxNodes = TraceSettings.getServiceMapMaxNodes();
+  const serviceMapMaxEdges = TraceSettings.getServiceMapMaxEdges();
 
   return {
     index: getServiceIndices(mode),
@@ -111,25 +111,25 @@ export const getServiceMapQuery = (mode: TraceAnalyticsMode) => {
           target_resource: {
             terms: {
               field: 'target.resource',
-              size: SERVICE_MAP_MAX_EDGES,
+              size: serviceMapMaxEdges,
             },
           },
           target_edges: {
             terms: {
               field: 'target.resource',
-              size: SERVICE_MAP_MAX_EDGES,
+              size: serviceMapMaxEdges,
             },
             aggs: {
               service: {
                 terms: {
                   field: 'target.serviceName',
-                  size: SERVICE_MAP_MAX_EDGES,
+                  size: serviceMapMaxEdges,
                 },
               },
               domain: {
                 terms: {
                   field: 'target.domain',
-                  size: SERVICE_MAP_MAX_EDGES,
+                  size: serviceMapMaxEdges,
                 },
               },
             },
@@ -137,19 +137,19 @@ export const getServiceMapQuery = (mode: TraceAnalyticsMode) => {
           destination_edges: {
             terms: {
               field: 'destination.resource',
-              size: SERVICE_MAP_MAX_EDGES,
+              size: serviceMapMaxEdges,
             },
             aggs: {
               service: {
                 terms: {
                   field: 'destination.serviceName',
-                  size: SERVICE_MAP_MAX_EDGES,
+                  size: serviceMapMaxEdges,
                 },
               },
               domain: {
                 terms: {
                   field: 'destination.domain',
-                  size: SERVICE_MAP_MAX_EDGES,
+                  size: serviceMapMaxEdges,
                 },
               },
             },
