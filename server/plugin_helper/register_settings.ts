@@ -12,12 +12,14 @@ import {
   DEFAULT_CORRELATED_LOGS_FIELD_MAPPINGS,
   DEFAULT_SS4O_LOGS_INDEX,
   DEFAULT_SERVICE_MAP_MAX_NODES,
+  DEFAULT_SERVICE_MAP_MAX_EDGES,
   TRACE_CORRELATED_LOGS_INDEX_SETTING,
   TRACE_CUSTOM_MODE_DEFAULT_SETTING,
   TRACE_CUSTOM_SERVICE_INDEX_SETTING,
   TRACE_CUSTOM_SPAN_INDEX_SETTING,
   TRACE_LOGS_FIELD_MAPPNIGS_SETTING,
   TRACE_SERVICE_MAP_MAX_NODES,
+  TRACE_SERVICE_MAP_MAX_EDGES,
 } from '../../common/constants/trace_analytics';
 
 export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSetup) => {
@@ -112,10 +114,27 @@ export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSet
       category: ['Observability'],
       description: i18n.translate('observability.traceAnalyticsServiceMapMaxNodes.description', {
         defaultMessage:
-          'Set the number of nodes to be displayed, to be used by the trace analytics plugin to display on the service maps',
+          'Set the number of maximum nodes, to be used by the trace analytics plugin to display on service maps',
       }),
       schema: schema.number({
         min: 1,
+      }),
+    },
+  });
+
+  uiSettings.register({
+    [TRACE_SERVICE_MAP_MAX_EDGES]: {
+      name: i18n.translate('observability.traceAnalyticsServiceMapMaxEdges.name', {
+        defaultMessage: 'Trace analytics service map maximum edges',
+      }),
+      value: DEFAULT_SERVICE_MAP_MAX_EDGES,
+      category: ['Observability'],
+      description: i18n.translate('observability.traceAnalyticsServiceMapMaxEdges.description', {
+        defaultMessage:
+          'Set the number of maximum edges, to be used by the trace analytics plugin to display on service maps',
+      }),
+      schema: schema.number({
+        min: 2,
       }),
     },
   });
