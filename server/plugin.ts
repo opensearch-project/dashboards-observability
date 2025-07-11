@@ -49,7 +49,7 @@ export class ObservabilityPlugin
     deps: {
       assistantDashboards?: AssistantPluginSetup;
       dataSource: ObservabilityPluginSetupDependencies;
-      notebookDashboards?: Record<string, any>;
+      investigationDashboards?: Record<string, any>;
     }
   ) {
     const { assistantDashboards, dataSource } = deps;
@@ -224,12 +224,11 @@ export class ObservabilityPlugin
       client: openSearchObservabilityClient,
       dataSourceEnabled,
       logger: this.logger,
-      notebookDashboards: deps.notebookDashboards,
     });
 
     core.savedObjects.registerType(getVisualizationSavedObject(dataSourceEnabled));
     core.savedObjects.registerType(getSearchSavedObject(dataSourceEnabled));
-    if (!deps.notebookDashboards) {
+    if (!deps.investigationDashboards) {
       core.savedObjects.registerType(notebookSavedObject);
     }
     core.capabilities.registerProvider(() => ({
