@@ -9,9 +9,6 @@ export const DATA_PREPPER_INDEX_NAME = 'otel-v1-apm-span-*';
 export const DATA_PREPPER_SERVICE_INDEX_NAME = 'otel-v1-apm-service-map*';
 export const TRACE_ANALYTICS_DATE_FORMAT = 'MM/DD/YYYY HH:mm:ss.SSS';
 export const TRACE_ANALYTICS_PLOTS_DATE_FORMAT = 'MMM D, YYYY HH:mm:ss.SSS';
-export const SERVICE_MAP_MAX_NODES = 500;
-// size limit when requesting edge related queries, not necessarily the number of edges
-export const SERVICE_MAP_MAX_EDGES = 1000;
 export const TRACES_MAX_NUM = 500;
 export const TRACE_ANALYTICS_DOCUMENTATION_LINK =
   'https://opensearch.org/docs/latest/observability-plugin/trace/index/';
@@ -29,6 +26,8 @@ export const TRACE_CORRELATED_LOGS_INDEX_SETTING =
   'observability:traceAnalyticsCorrelatedLogsIndices';
 export const TRACE_LOGS_FIELD_MAPPNIGS_SETTING =
   'observability:traceAnalyticsCorrelatedLogsFieldMappings';
+export const TRACE_SERVICE_MAP_MAX_NODES = 'observability:traceAnalyticsServiceMapMaxNodes';
+export const TRACE_SERVICE_MAP_MAX_EDGES = 'observability:traceAnalyticsServiceMapMaxEdges';
 
 export const DEFAULT_SS4O_LOGS_INDEX = 'ss4o_logs-*';
 export const DEFAULT_CORRELATED_LOGS_FIELD_MAPPINGS = `
@@ -38,6 +37,8 @@ export const DEFAULT_CORRELATED_LOGS_FIELD_MAPPINGS = `
   "timestamp": "time",
   "traceId": "traceId"
 }`;
+export const DEFAULT_SERVICE_MAP_MAX_NODES = 500;
+export const DEFAULT_SERVICE_MAP_MAX_EDGES = 1000;
 
 export enum TRACE_TABLE_TITLES {
   all_spans = 'All Spans',
