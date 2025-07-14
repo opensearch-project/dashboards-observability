@@ -416,7 +416,7 @@ export class ObservabilityPlugin
       }
     }
 
-    if (!setupDeps.notebookDashboards) {
+    if (!setupDeps.investigationDashboards) {
       core.application.register({
         id: observabilityNotebookID,
         title: observabilityNotebookTitle,
