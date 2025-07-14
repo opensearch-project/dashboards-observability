@@ -65,6 +65,7 @@ export class ObservabilityPlugin
     );
     if (dataSourceEnabled) {
       dataSource.registerCustomApiSchema(PPLPlugin);
+      dataSource.registerCustomApiSchema(OpenSearchObservabilityPlugin);
     }
     // @ts-ignore
     core.http.registerRouteHandlerContext('observability_plugin', (_context, _request) => {
