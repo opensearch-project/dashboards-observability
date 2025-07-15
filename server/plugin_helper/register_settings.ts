@@ -11,11 +11,15 @@ import {
   DATA_PREPPER_SERVICE_INDEX_NAME,
   DEFAULT_CORRELATED_LOGS_FIELD_MAPPINGS,
   DEFAULT_SS4O_LOGS_INDEX,
+  DEFAULT_SERVICE_MAP_MAX_NODES,
+  DEFAULT_SERVICE_MAP_MAX_EDGES,
   TRACE_CORRELATED_LOGS_INDEX_SETTING,
   TRACE_CUSTOM_MODE_DEFAULT_SETTING,
   TRACE_CUSTOM_SERVICE_INDEX_SETTING,
   TRACE_CUSTOM_SPAN_INDEX_SETTING,
   TRACE_LOGS_FIELD_MAPPNIGS_SETTING,
+  TRACE_SERVICE_MAP_MAX_NODES,
+  TRACE_SERVICE_MAP_MAX_EDGES,
 } from '../../common/constants/trace_analytics';
 
 export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSetup) => {
@@ -97,6 +101,40 @@ export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSet
         spanId: schema.string(),
         timestamp: schema.string(),
         traceId: schema.string(),
+      }),
+    },
+  });
+
+  uiSettings.register({
+    [TRACE_SERVICE_MAP_MAX_NODES]: {
+      name: i18n.translate('observability.traceAnalyticsServiceMapMaxNodes.name', {
+        defaultMessage: 'Trace analytics service map maximum nodes',
+      }),
+      value: DEFAULT_SERVICE_MAP_MAX_NODES,
+      category: ['Observability'],
+      description: i18n.translate('observability.traceAnalyticsServiceMapMaxNodes.description', {
+        defaultMessage:
+          'Set the maximum number of nodes that the trace analytics plugin should request for rendering of service maps',
+      }),
+      schema: schema.number({
+        min: 1,
+      }),
+    },
+  });
+
+  uiSettings.register({
+    [TRACE_SERVICE_MAP_MAX_EDGES]: {
+      name: i18n.translate('observability.traceAnalyticsServiceMapMaxEdges.name', {
+        defaultMessage: 'Trace analytics service map maximum edges',
+      }),
+      value: DEFAULT_SERVICE_MAP_MAX_EDGES,
+      category: ['Observability'],
+      description: i18n.translate('observability.traceAnalyticsServiceMapMaxEdges.description', {
+        defaultMessage:
+          'Set the maximum number of edges that the trace analytics plugin should request for rendering of service maps',
+      }),
+      schema: schema.number({
+        min: 1,
       }),
     },
   });
