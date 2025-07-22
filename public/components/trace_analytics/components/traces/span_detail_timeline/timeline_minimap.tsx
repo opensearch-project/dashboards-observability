@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import throttle from 'lodash/throttle';
 import { ScaleLinear } from 'd3-scale';
 import { TraceAnalyticsMode } from '../../../../../../common/types/trace_analytics';
@@ -71,61 +71,51 @@ export const TimelineMinimap = React.forwardRef<HTMLDivElement, TimelineMinimapP
       }
     };
 
-    const handleMouseMove = useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!isMinimapDragging || !dragType || !ref || typeof ref === 'function' || !ref.current)
-          return;
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!isMinimapDragging || !dragType || !ref || typeof ref === 'function' || !ref.current)
+        return;
 
-        const rect = ref.current.getBoundingClientRect();
-        const currentPosition = ((e.clientX - rect.left) / rect.width) * 100;
-        const deltaPosition = currentPosition - dragStartPosition * 100;
+      const rect = ref.current.getBoundingClientRect();
+      const currentPosition = ((e.clientX - rect.left) / rect.width) * 100;
+      const deltaPosition = currentPosition - dragStartPosition * 100;
 
-        let newDomain: [number, number] = [...selectedDomain];
+      let newDomain: [number, number] = [...selectedDomain];
 
-        switch (dragType) {
-          case 'move':
-            const domainSize = initialDomain[1] - initialDomain[0];
-            const newStart = Math.max(
-              0,
-              Math.min(100 - domainSize, initialDomain[0] + deltaPosition)
-            );
-            newDomain = [newStart, newStart + domainSize];
-            break;
+      switch (dragType) {
+        case 'move':
+          const domainSize = initialDomain[1] - initialDomain[0];
+          const newStart = Math.max(
+            0,
+            Math.min(100 - domainSize, initialDomain[0] + deltaPosition)
+          );
+          newDomain = [newStart, newStart + domainSize];
+          break;
 
-          case 'resize-left':
-            const newLeft = Math.max(
-              0,
-              Math.min(selectedDomain[1] - 2, initialDomain[0] + deltaPosition)
-            );
-            newDomain = [newLeft, selectedDomain[1]];
-            break;
+        case 'resize-left':
+          const newLeft = Math.max(
+            0,
+            Math.min(initialDomain[1] - 2, initialDomain[0] + deltaPosition)
+          );
+          newDomain = [newLeft, initialDomain[1]];
+          break;
 
-          case 'resize-right':
-            const newRight = Math.min(
-              100,
-              Math.max(selectedDomain[0] + 2, initialDomain[1] + deltaPosition)
-            );
-            newDomain = [selectedDomain[0], newRight];
-            break;
-        }
+        case 'resize-right':
+          const newRight = Math.min(
+            100,
+            Math.max(initialDomain[0] + 2, initialDomain[1] + deltaPosition)
+          );
+          newDomain = [initialDomain[0], newRight];
+          break;
+      }
 
-        throttledDomainUpdate(newDomain);
-      },
-      [
-        isMinimapDragging,
-        dragType,
-        dragStartPosition,
-        initialDomain,
-        selectedDomain,
-        throttledDomainUpdate,
-      ]
-    );
+      throttledDomainUpdate(newDomain);
+    };
 
-    const handleMouseUp = useCallback(() => {
+    const handleMouseUp = () => {
       setIsMinimapDragging(false);
       setDragType(null);
       throttledDomainUpdate.cancel();
-    }, [throttledDomainUpdate]);
+    };
 
     useEffect(() => {
       if (isMinimapDragging) {
@@ -141,7 +131,7 @@ export const TimelineMinimap = React.forwardRef<HTMLDivElement, TimelineMinimapP
           document.removeEventListener('mousemove', handleDocumentMouseMove);
         };
       }
-    }, [isMinimapDragging, handleMouseMove, handleMouseUp]);
+    }, [isMinimapDragging]);
 
     const layoutMetrics = useMemo(() => {
       // Calculate total number of rows needed
