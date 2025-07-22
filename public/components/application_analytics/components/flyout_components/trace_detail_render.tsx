@@ -91,6 +91,7 @@ export const TraceDetailRender = ({
           spanFilters={spanFilters}
           setSpanFiltersWithStorage={setSpanFiltersWithStorage}
           onSpanClick={openSpanFlyout}
+          isApplicationFlyout={true}
         />
         <EuiSpacer size="xs" />
         <EuiHorizontalRule margin="s" />

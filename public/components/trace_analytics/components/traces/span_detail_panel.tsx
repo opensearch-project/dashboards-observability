@@ -22,6 +22,7 @@ import { coreRefs } from '../../../../framework/core_refs';
 import { TraceFilter } from '../common/constants';
 import { PanelTitle, parseHits } from '../common/helper_functions';
 import { SpanDetailTable, SpanDetailTableHierarchy } from './span_detail_table';
+import { SpanDetailTimeline } from './span_detail_timeline/span_detail_timeline';
 
 export function SpanDetailPanel(props: {
   http: HttpSetup;
@@ -35,6 +36,7 @@ export function SpanDetailPanel(props: {
   onSpanClick: (spanId: string) => void;
   payloadData: string;
   isLoading?: boolean;
+  isApplicationFlyout?: boolean;
 }) {
   const { chrome } = coreRefs;
   const { mode } = props;
@@ -82,17 +84,14 @@ export function SpanDetailPanel(props: {
     }
   };
 
-  useEffect(() => {
+  const spansCount = useMemo(() => {
     if (!props.payloadData) {
-      return;
+      return 0;
     }
 
     const hits = parseHits(props.payloadData);
-
-    if (hits.length === 0) {
-      return;
-    }
-  }, [props.payloadData, props.colorMap, mode, props.spanFilters]);
+    return hits.length;
+  }, [props.payloadData]);
 
   const renderFilters = useMemo(() => {
     return props.spanFilters.map(({ field, value }) => (
@@ -167,12 +166,12 @@ export function SpanDetailPanel(props: {
 
   return (
     <>
-      <EuiPanel data-test-subj="span-gantt-chart-panel">
+      <EuiPanel data-test-subj="span-gantt-chart-panel" panelRef={containerRef}>
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup>
               <EuiFlexItem>
-                <PanelTitle title="Spans" totalItems={0} />
+                <PanelTitle title="Spans" totalItems={spansCount} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
@@ -206,9 +205,16 @@ export function SpanDetailPanel(props: {
 
               <EuiHorizontalRule margin="m" />
 
-              <EuiFlexItem style={{ overflowY: 'auto', maxHeight: 500 }}>
+              <EuiFlexItem>
                 {toggleIdSelected === 'timeline' ? (
-                  <div>New Timeline Here</div>
+                  <SpanDetailTimeline
+                    mode={mode}
+                    payloadData={props.payloadData}
+                    colorMap={props.colorMap}
+                    onSpanClick={props.onSpanClick}
+                    filters={props.spanFilters}
+                    compact={props.isApplicationFlyout}
+                  />
                 ) : toggleIdSelected === 'span_list' ? (
                   spanDetailTable
                 ) : (
