@@ -166,7 +166,7 @@ export function SpanDetailPanel(props: {
 
   return (
     <>
-      <EuiPanel data-test-subj="span-gantt-chart-panel" panelRef={containerRef}>
+      <EuiPanel data-test-subj="span-timeline-panel" panelRef={containerRef}>
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup>

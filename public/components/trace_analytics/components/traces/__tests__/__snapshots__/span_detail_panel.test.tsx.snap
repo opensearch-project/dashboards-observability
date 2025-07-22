@@ -3,7 +3,12 @@
 exports[`SpanDetailPanel component renders correctly with default props 1`] = `
 <Fragment>
   <EuiPanel
-    data-test-subj="span-gantt-chart-panel"
+    data-test-subj="span-timeline-panel"
+    panelRef={
+      Object {
+        "current": null,
+      }
+    }
   >
     <EuiFlexGroup
       direction="column"
@@ -27,16 +32,6 @@ exports[`SpanDetailPanel component renders correctly with default props 1`] = `
               gutterSize="s"
               justifyContent="flexEnd"
             >
-              <EuiFlexItem
-                grow={false}
-              >
-                <EuiSmallButton
-                  isDisabled={true}
-                  onClick={[Function]}
-                >
-                  Reset zoom
-                </EuiSmallButton>
-              </EuiFlexItem>
               <EuiFlexItem
                 grow={false}
               >
@@ -69,105 +64,17 @@ exports[`SpanDetailPanel component renders correctly with default props 1`] = `
       <EuiHorizontalRule
         margin="m"
       />
-      <EuiFlexItem
-        grow={false}
-      >
-        <Plt
-          data={Array []}
-          layout={
+      <EuiFlexItem>
+        <SpanDetailTimeline
+          colorMap={
             Object {
-              "dragmode": "select",
-              "height": 100,
-              "margin": Object {
-                "b": 30,
-                "l": 150,
-                "r": 5,
-                "t": 30,
-              },
-              "paper_bgcolor": "rgba(0, 0, 0, 0)",
-              "plot_bgcolor": "rgba(0, 0, 0, 0)",
-              "shapes": Array [
-                Object {
-                  "editable": true,
-                  "fillcolor": "rgba(128, 128, 128, 0.3)",
-                  "line": Object {
-                    "color": "rgba(255, 0, 0, 0.6)",
-                    "width": 1,
-                  },
-                  "type": "rect",
-                  "x0": 0,
-                  "x1": 0,
-                  "xref": "x",
-                  "y0": 0,
-                  "y1": 1,
-                  "yref": "paper",
-                },
-              ],
-              "width": 824,
-              "xaxis": Object {
-                "color": "#91989c",
-                "range": Array [
-                  0,
-                  0,
-                ],
-                "showline": true,
-                "side": "top",
-                "ticksuffix": " ms",
-              },
-              "yaxis": Object {
-                "fixedrange": true,
-                "visible": false,
-              },
+              "service1": "#7492e7",
             }
           }
-          onRelayout={[Function]}
-          onSelectedHandler={[Function]}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem
-        style={
-          Object {
-            "maxHeight": 500,
-            "overflowY": "auto",
-          }
-        }
-      >
-        <Plt
-          data={Array []}
-          layout={
-            Object {
-              "height": 60,
-              "margin": Object {
-                "b": 30,
-                "l": 150,
-                "r": 5,
-                "t": 30,
-              },
-              "paper_bgcolor": "rgba(0, 0, 0, 0)",
-              "plot_bgcolor": "rgba(0, 0, 0, 0)",
-              "width": 824,
-              "xaxis": Object {
-                "color": "#91989c",
-                "range": Array [
-                  0,
-                  0,
-                ],
-                "showline": true,
-                "side": "top",
-                "ticksuffix": " ms",
-              },
-              "yaxis": Object {
-                "fixedrange": true,
-                "showgrid": false,
-                "ticktext": Array [],
-                "tickvals": Array [],
-              },
-            }
-          }
-          onClickHandler={[Function]}
-          onHoverHandler={[Function]}
-          onRelayout={[Function]}
-          onUnhoverHandler={[Function]}
+          filters={Array []}
+          mode="data_prepper"
+          onSpanClick={[MockFunction]}
+          payloadData="{\\"traceId\\":\\"trace1\\",\\"spanId\\":\\"span1\\",\\"parentSpanId\\":\\"span0\\",\\"operationName\\":\\"GET /api/users\\",\\"serviceName\\":\\"user-service\\",\\"startTime\\":1640995200000,\\"endTime\\":1640995210000,\\"duration\\":10000,\\"tags\\":{\\"http.method\\":\\"GET\\",\\"http.url\\":\\"/api/users\\",\\"http.status_code\\":200,\\"component\\":\\"spring-web\\"},\\"process\\":{\\"serviceName\\":\\"user-service\\",\\"tags\\":{\\"jaeger.version\\":\\"1.35.0\\",\\"hostname\\":\\"user-service-pod-123\\"}}}"
         />
       </EuiFlexItem>
     </EuiFlexGroup>

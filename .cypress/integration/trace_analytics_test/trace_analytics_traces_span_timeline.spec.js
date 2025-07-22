@@ -19,7 +19,7 @@ describe('Testing Span Detail Timeline', () => {
 
     cy.get('body', { timeout: timeoutDelay }).should('be.visible');
     cy.get('[data-test-subj="span-detail-timeline"]', { timeout: timeoutDelay }).should('exist');
-    cy.get('[data-test-subj="span-gantt-chart-panel"]').scrollIntoView({
+    cy.get('[data-test-subj="span-timeline-panel"]').scrollIntoView({
       offset: { top: -120 }, // dashboards page has a fixed header
     });
     cy.get('input[data-test-subj="timeline"]').should('be.checked');
