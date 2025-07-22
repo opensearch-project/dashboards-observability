@@ -49,7 +49,7 @@ export class ObservabilityPlugin
     deps: {
       assistantDashboards?: AssistantPluginSetup;
       dataSource: ObservabilityPluginSetupDependencies;
-      investigationDashboards?: Record<string, any>;
+      investigationDashboards?: unknown;
     }
   ) {
     const { assistantDashboards, dataSource } = deps;

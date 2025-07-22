@@ -426,7 +426,7 @@ export class ObservabilityPlugin
       });
     }
 
-    registerAllPluginNavGroups(core);
+    registerAllPluginNavGroups(core, setupDeps);
 
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
       getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,
