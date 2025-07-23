@@ -4479,6 +4479,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
         autoFocus="initial"
         className="vis-config-tabs"
         onTabClick={[Function]}
+        preserveTabContent={false}
         selectedTab={
           Object {
             "content": <VizDataPanel
