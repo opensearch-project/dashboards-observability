@@ -61,10 +61,18 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
       return null;
     };
 
+    // Handle nested field paths like 'status.code'
+    const getNestedValue = (obj: any, path: string) => {
+      return path.split('.').reduce((current, key) => {
+        return current && current[key] !== undefined ? current[key] : undefined;
+      }, obj);
+    };
+
     return (
       matchPrefix('resource.attributes.', item.resource?.attributes) ??
       matchPrefix('span.attributes.', item.attributes) ??
       matchPrefix('attributes.', item.attributes) ??
+      getNestedValue(item, field) ??
       item[field] ??
       '-'
     );

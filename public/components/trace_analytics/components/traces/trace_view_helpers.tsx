@@ -58,7 +58,16 @@ export function getOverviewFields(parsed: any, mode: string) {
 
     const computedLastUpdated = traceGroupFields?.endTime || firstSpan.endTime || null;
     const tgStatus = traceGroupFields?.statusCode;
-    const errorCount = tgStatus != null ? (Number(tgStatus) === 2 ? 1 : 0) : 0;
+    let errorCount = tgStatus != null ? (Number(tgStatus) === 2 ? 1 : 0) : 0;
+
+    // If no trace group error found, check individual spans for errors
+    if (errorCount === 0) {
+      errorCount = parsed.some(
+        (span: any) => span._source?.status?.code === 2 || span._source?.['status.code'] === 2
+      )
+        ? 1
+        : 0;
+    }
 
     return {
       trace_id: firstSpan.traceId || '-',
