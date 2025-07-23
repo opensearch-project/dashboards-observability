@@ -4,6 +4,8 @@
  */
 
 import '@testing-library/jest-dom/extend-expect';
+// eslint-disable-next-line jest/no-mocks-import
+import './__mocks__/worker.mock';
 import { configure } from '@testing-library/react';
 import { setOSDHttp, setOSDSavedObjectsClient } from '../common/utils';
 import { coreRefs } from '../public/framework/core_refs';
