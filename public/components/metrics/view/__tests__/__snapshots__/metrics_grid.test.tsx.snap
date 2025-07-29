@@ -32,7 +32,6 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
         "getIsVisible$": [MockFunction],
         "globalSearch": Object {
           "getAllSearchCommands": [MockFunction],
-          "unregisterSearchCommand": [MockFunction],
         },
         "logos": Object {
           "AnimatedMark": Object {
@@ -212,7 +211,6 @@ exports[`Metrics Grid Component renders Metrics Grid Component 1`] = `
           "getIsVisible$": [MockFunction],
           "globalSearch": Object {
             "getAllSearchCommands": [MockFunction],
-            "unregisterSearchCommand": [MockFunction],
           },
           "logos": Object {
             "AnimatedMark": Object {

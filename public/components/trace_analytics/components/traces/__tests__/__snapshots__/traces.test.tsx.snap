@@ -35,7 +35,6 @@ exports[`Traces component renders empty traces page 1`] = `
       "getIsVisible$": [MockFunction],
       "globalSearch": Object {
         "getAllSearchCommands": [MockFunction],
-        "unregisterSearchCommand": [MockFunction],
       },
       "logos": Object {
         "AnimatedMark": Object {
@@ -277,7 +276,6 @@ exports[`Traces component renders empty traces page 1`] = `
         "getIsVisible$": [MockFunction],
         "globalSearch": Object {
           "getAllSearchCommands": [MockFunction],
-          "unregisterSearchCommand": [MockFunction],
         },
         "logos": Object {
           "AnimatedMark": Object {
@@ -3054,7 +3052,6 @@ exports[`Traces component renders jaeger traces page 1`] = `
       "getIsVisible$": [MockFunction],
       "globalSearch": Object {
         "getAllSearchCommands": [MockFunction],
-        "unregisterSearchCommand": [MockFunction],
       },
       "logos": Object {
         "AnimatedMark": Object {
@@ -3296,7 +3293,6 @@ exports[`Traces component renders jaeger traces page 1`] = `
         "getIsVisible$": [MockFunction],
         "globalSearch": Object {
           "getAllSearchCommands": [MockFunction],
-          "unregisterSearchCommand": [MockFunction],
         },
         "logos": Object {
           "AnimatedMark": Object {
@@ -5343,7 +5339,6 @@ exports[`Traces component renders traces page 1`] = `
       "getIsVisible$": [MockFunction],
       "globalSearch": Object {
         "getAllSearchCommands": [MockFunction],
-        "unregisterSearchCommand": [MockFunction],
       },
       "logos": Object {
         "AnimatedMark": Object {
@@ -5584,7 +5579,6 @@ exports[`Traces component renders traces page 1`] = `
         "getIsVisible$": [MockFunction],
         "globalSearch": Object {
           "getAllSearchCommands": [MockFunction],
-          "unregisterSearchCommand": [MockFunction],
         },
         "logos": Object {
           "AnimatedMark": Object {
