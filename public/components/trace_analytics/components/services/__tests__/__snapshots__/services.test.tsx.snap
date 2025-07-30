@@ -35,6 +35,7 @@ exports[`Services component renders empty services page 1`] = `
       "getIsVisible$": [MockFunction],
       "globalSearch": Object {
         "getAllSearchCommands": [MockFunction],
+        "unregisterSearchCommand": [MockFunction],
       },
       "logos": Object {
         "AnimatedMark": Object {
@@ -267,6 +268,7 @@ exports[`Services component renders empty services page 1`] = `
         "getIsVisible$": [MockFunction],
         "globalSearch": Object {
           "getAllSearchCommands": [MockFunction],
+          "unregisterSearchCommand": [MockFunction],
         },
         "logos": Object {
           "AnimatedMark": Object {
@@ -3423,6 +3425,7 @@ exports[`Services component renders jaeger services page 1`] = `
       "getIsVisible$": [MockFunction],
       "globalSearch": Object {
         "getAllSearchCommands": [MockFunction],
+        "unregisterSearchCommand": [MockFunction],
       },
       "logos": Object {
         "AnimatedMark": Object {
@@ -3655,6 +3658,7 @@ exports[`Services component renders jaeger services page 1`] = `
         "getIsVisible$": [MockFunction],
         "globalSearch": Object {
           "getAllSearchCommands": [MockFunction],
+          "unregisterSearchCommand": [MockFunction],
         },
         "logos": Object {
           "AnimatedMark": Object {
@@ -5921,6 +5925,7 @@ exports[`Services component renders services page 1`] = `
       "getIsVisible$": [MockFunction],
       "globalSearch": Object {
         "getAllSearchCommands": [MockFunction],
+        "unregisterSearchCommand": [MockFunction],
       },
       "logos": Object {
         "AnimatedMark": Object {
@@ -6152,6 +6157,7 @@ exports[`Services component renders services page 1`] = `
         "getIsVisible$": [MockFunction],
         "globalSearch": Object {
           "getAllSearchCommands": [MockFunction],
+          "unregisterSearchCommand": [MockFunction],
         },
         "logos": Object {
           "AnimatedMark": Object {
