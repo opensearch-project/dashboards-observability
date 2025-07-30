@@ -9,15 +9,12 @@ import get from 'lodash/get';
 import omitBy from 'lodash/omitBy';
 import round from 'lodash/round';
 import moment from 'moment';
-import { v1 as uuid } from 'uuid';
 import { HttpSetup } from '../../../../../../src/core/public';
-import { BarOrientation } from '../../../../common/constants/shared';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode, TraceQueryMode } from '../../../../common/types/trace_analytics';
 import { coreRefs } from '../../../../public/framework/core_refs';
 import { MILI_TO_SEC } from '../components/common/constants';
 import {
-  getTimestampPrecision,
   microToMilliSec,
   nanoToMilliSec,
   parseIsoToNano,
@@ -237,43 +234,17 @@ export const handleSpansFlyoutRequest = (
     });
 };
 
-export const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: TraceAnalyticsMode) => {
-  const data: { gantt: any[]; table: any[]; ganttMaxX: number } = {
-    gantt: [],
-    table: [],
-    ganttMaxX: 0,
-  };
-  if (hits.length === 0) return data;
+export const hitsToServiceMapData = (
+  hits: any,
+  mode: TraceAnalyticsMode
+): Array<{
+  service_name: string;
+  latency: number;
+  error: string;
+}> => {
+  if (hits.length === 0) return [];
 
-  const timestampPrecision = getTimestampPrecision(hits[hits.length - 1].sort[0]);
-
-  const minStartTime = (() => {
-    switch (timestampPrecision) {
-      case 'micros':
-        return microToMilliSec(hits[hits.length - 1].sort[0]);
-      case 'nanos':
-        return nanoToMilliSec(hits[hits.length - 1].sort[0]);
-      default:
-        // 'millis'
-        return hits[hits.length - 1].sort[0];
-    }
-  })();
-
-  let maxEndTime = 0;
-
-  hits.forEach((hit: any) => {
-    const startTime = (() => {
-      switch (timestampPrecision) {
-        case 'micros':
-          return microToMilliSec(hit.sort[0]) - minStartTime;
-        case 'nanos':
-          return nanoToMilliSec(hit.sort[0]) - minStartTime;
-        default:
-          // 'millis'
-          return hit.sort[0] - minStartTime;
-      }
-    })();
-
+  return hits.map((hit: any) => {
     const duration =
       mode === 'jaeger'
         ? round(microToMilliSec(hit._source.duration), 2)
@@ -282,7 +253,6 @@ export const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: Trace
       mode === 'jaeger'
         ? get(hit, ['_source', 'process']).serviceName
         : get(hit, ['_source', 'serviceName']);
-    const name = mode === 'jaeger' ? get(hit, '_source.operationName') : get(hit, '_source.name');
     const error =
       mode === 'jaeger'
         ? hit._source.tag?.['error'] === true
@@ -291,52 +261,13 @@ export const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: Trace
         : hit._source['status.code'] === 2
         ? ' \u26a0 Error'
         : '';
-    const uniqueLabel = `${serviceName} <br>${name} ` + uuid();
-    maxEndTime = Math.max(maxEndTime, startTime + duration);
 
-    data.table.push({
+    return {
       service_name: serviceName,
-      span_id: hit._source.spanID,
       latency: duration,
-      vs_benchmark: 0,
       error,
-      start_time: hit._source.startTime,
-      end_time: hit._source.endTime,
-    });
-    data.gantt.push(
-      {
-        x: [startTime],
-        y: [uniqueLabel],
-        marker: {
-          color: 'rgba(0, 0, 0, 0)',
-        },
-        width: 0.4,
-        type: 'bar',
-        orientation: BarOrientation.horizontal,
-        hoverinfo: 'none',
-        showlegend: false,
-        spanId: mode === 'jaeger' ? hit._source.spanID : hit._source.spanId,
-      },
-      {
-        x: [duration],
-        y: [uniqueLabel],
-        text: [error],
-        textfont: { color: ['#c14125'] },
-        textposition: 'outside',
-        marker: {
-          color: colorMap[serviceName],
-        },
-        width: 0.4,
-        type: 'bar',
-        orientation: BarOrientation.horizontal,
-        hovertemplate: '%{x}<extra></extra>',
-        spanId: mode === 'jaeger' ? hit._source.spanID : hit._source.spanId,
-      }
-    );
+    };
   });
-
-  data.ganttMaxX = maxEndTime;
-  return data;
 };
 
 interface Hit {

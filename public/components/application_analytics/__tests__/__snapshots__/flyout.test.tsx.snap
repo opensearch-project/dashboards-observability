@@ -748,19 +748,185 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
     http={[MockFunction]}
     isApplicationFlyout={true}
     mode="jaeger"
-    openSpanFlyout={[Function]}
-    page="app"
+    onSpanClick={[Function]}
     payloadData=""
     setSpanFiltersWithStorage={[Function]}
     spanFilters={Array []}
     traceId="mockTrace"
   >
     <EuiPanel
-      data-test-subj="span-gantt-chart-panel"
+      data-test-subj="span-timeline-panel"
+      panelRef={
+        Object {
+          "current": <div
+            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            data-test-subj="span-timeline-panel"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <div
+                    class="euiFlexItem"
+                  >
+                    <div
+                      class="euiText euiText--medium"
+                    >
+                      <span
+                        class="panel-title"
+                      >
+                        Spans
+                      </span>
+                      <span
+                        class="panel-title-count"
+                      >
+                         (0)
+                      </span>
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    >
+                      <div
+                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <fieldset
+                          class="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
+                        >
+                          <legend
+                            class="euiScreenReaderOnly"
+                          >
+                            Select view of spans
+                          </legend>
+                          <div
+                            class="euiButtonGroup__buttons"
+                          >
+                            <label
+                              class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
+                              for="random_html_id"
+                            >
+                              <span
+                                class="euiButtonContent euiButton__content"
+                              >
+                                <span
+                                  class="euiButton__text euiButtonGroupButton__textShift"
+                                  data-text="Timeline"
+                                  title="Timeline"
+                                >
+                                  <input
+                                    checked=""
+                                    class="euiScreenReaderOnly"
+                                    data-test-subj="timeline"
+                                    id="random_html_id"
+                                    name="random_html_id"
+                                    type="radio"
+                                    value=""
+                                  />
+                                  Timeline
+                                </span>
+                              </span>
+                            </label>
+                            <label
+                              class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                              for="random_html_id"
+                            >
+                              <span
+                                class="euiButtonContent euiButton__content"
+                              >
+                                <span
+                                  class="euiButton__text euiButtonGroupButton__textShift"
+                                  data-text="Span list"
+                                  title="Span list"
+                                >
+                                  <input
+                                    class="euiScreenReaderOnly"
+                                    data-test-subj="span_list"
+                                    id="random_html_id"
+                                    name="random_html_id"
+                                    type="radio"
+                                    value=""
+                                  />
+                                  Span list
+                                </span>
+                              </span>
+                            </label>
+                            <label
+                              class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                              for="random_html_id"
+                            >
+                              <span
+                                class="euiButtonContent euiButton__content"
+                              >
+                                <span
+                                  class="euiButton__text euiButtonGroupButton__textShift"
+                                  data-text="Tree view"
+                                  title="Tree view"
+                                >
+                                  <input
+                                    class="euiScreenReaderOnly"
+                                    data-test-subj="hierarchy_span_list"
+                                    id="random_html_id"
+                                    name="random_html_id"
+                                    type="radio"
+                                    value=""
+                                  />
+                                  Tree view
+                                </span>
+                              </span>
+                            </label>
+                          </div>
+                        </fieldset>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <hr
+                class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+              />
+              <div
+                class="euiFlexItem"
+              >
+                <div
+                  class="euiEmptyPrompt"
+                >
+                  <h2
+                    class="euiTitle euiTitle--medium"
+                  >
+                    No spans found
+                  </h2>
+                  <span
+                    class="euiTextColor euiTextColor--subdued"
+                  >
+                    <div
+                      class="euiSpacer euiSpacer--m"
+                    />
+                    <div
+                      class="euiText euiText--medium"
+                    >
+                      <p>
+                        No spans found for the selected filters
+                      </p>
+                    </div>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>,
+        }
+      }
     >
       <div
         className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
-        data-test-subj="span-gantt-chart-panel"
+        data-test-subj="span-timeline-panel"
       >
         <EuiFlexGroup
           direction="column"
@@ -822,67 +988,6 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                           <div
                             className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
                           >
-                            <EuiFlexItem
-                              grow={false}
-                            >
-                              <div
-                                className="euiFlexItem euiFlexItem--flexGrowZero"
-                              >
-                                <EuiSmallButton
-                                  isDisabled={true}
-                                  onClick={[Function]}
-                                >
-                                  <EuiButton
-                                    isDisabled={true}
-                                    onClick={[Function]}
-                                    size="s"
-                                  >
-                                    <EuiButtonDisplay
-                                      baseClassName="euiButton"
-                                      disabled={true}
-                                      element="button"
-                                      isDisabled={true}
-                                      onClick={[Function]}
-                                      size="s"
-                                      type="button"
-                                    >
-                                      <button
-                                        className="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
-                                        disabled={true}
-                                        onClick={[Function]}
-                                        style={
-                                          Object {
-                                            "minWidth": undefined,
-                                          }
-                                        }
-                                        type="button"
-                                      >
-                                        <EuiButtonContent
-                                          className="euiButton__content"
-                                          iconGap="m"
-                                          iconSide="left"
-                                          textProps={
-                                            Object {
-                                              "className": "euiButton__text",
-                                            }
-                                          }
-                                        >
-                                          <span
-                                            className="euiButtonContent euiButton__content"
-                                          >
-                                            <span
-                                              className="euiButton__text"
-                                            >
-                                              Reset zoom
-                                            </span>
-                                          </span>
-                                        </EuiButtonContent>
-                                      </button>
-                                    </EuiButtonDisplay>
-                                  </EuiButton>
-                                </EuiSmallButton>
-                              </div>
-                            </EuiFlexItem>
                             <EuiFlexItem
                               grow={false}
                             >
@@ -1187,289 +1292,69 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
                 className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
               />
             </EuiHorizontalRule>
-            <EuiFlexItem
-              grow={false}
-            >
-              <div
-                className="euiFlexItem euiFlexItem--flexGrowZero"
-              >
-                <Plt
-                  data={Array []}
-                  layout={
-                    Object {
-                      "dragmode": "select",
-                      "height": 100,
-                      "margin": Object {
-                        "b": 30,
-                        "l": 150,
-                        "r": 5,
-                        "t": 30,
-                      },
-                      "paper_bgcolor": "rgba(0, 0, 0, 0)",
-                      "plot_bgcolor": "rgba(0, 0, 0, 0)",
-                      "shapes": Array [
-                        Object {
-                          "editable": true,
-                          "fillcolor": "rgba(128, 128, 128, 0.3)",
-                          "line": Object {
-                            "color": "rgba(255, 0, 0, 0.6)",
-                            "width": 1,
-                          },
-                          "type": "rect",
-                          "x0": 0,
-                          "x1": 0,
-                          "xref": "x",
-                          "y0": 0,
-                          "y1": 1,
-                          "yref": "paper",
-                        },
-                      ],
-                      "width": 412,
-                      "xaxis": Object {
-                        "color": "#91989c",
-                        "range": Array [
-                          0,
-                          0,
-                        ],
-                        "showline": true,
-                        "side": "top",
-                        "ticksuffix": " ms",
-                      },
-                      "yaxis": Object {
-                        "fixedrange": true,
-                        "visible": false,
-                      },
-                    }
-                  }
-                  onRelayout={[Function]}
-                  onSelectedHandler={[Function]}
-                >
-                  <PlotlyComponent
-                    config={
-                      Object {
-                        "displayModeBar": false,
-                      }
-                    }
-                    data={Array []}
-                    debug={false}
-                    divId="explorerPlotComponent"
-                    layout={
-                      Object {
-                        "autosize": true,
-                        "barmode": "stack",
-                        "dragmode": "select",
-                        "height": 100,
-                        "hovermode": "closest",
-                        "layout": Object {
-                          "annotations": Array [
-                            Object {
-                              "showarrow": true,
-                              "xanchor": "right",
-                            },
-                          ],
-                        },
-                        "legend": Object {
-                          "orientation": "h",
-                          "traceorder": "normal",
-                        },
-                        "margin": Object {
-                          "b": 30,
-                          "l": 150,
-                          "r": 5,
-                          "t": 30,
-                        },
-                        "paper_bgcolor": "rgba(0, 0, 0, 0)",
-                        "plot_bgcolor": "rgba(0, 0, 0, 0)",
-                        "shapes": Array [
-                          Object {
-                            "editable": true,
-                            "fillcolor": "rgba(128, 128, 128, 0.3)",
-                            "line": Object {
-                              "color": "rgba(255, 0, 0, 0.6)",
-                              "width": 1,
-                            },
-                            "type": "rect",
-                            "x0": 0,
-                            "x1": 0,
-                            "xref": "x",
-                            "y0": 0,
-                            "y1": 1,
-                            "yref": "paper",
-                          },
-                        ],
-                        "showlegend": false,
-                        "width": 412,
-                        "xaxis": Object {
-                          "color": "#91989c",
-                          "range": Array [
-                            0,
-                            0,
-                          ],
-                          "showline": true,
-                          "side": "top",
-                          "ticksuffix": " ms",
-                        },
-                        "yaxis": Object {
-                          "fixedrange": true,
-                          "visible": false,
-                        },
-                      }
-                    }
-                    onRelayout={[Function]}
-                    onSelected={[Function]}
-                    style={
-                      Object {
-                        "height": "100%",
-                        "width": "100%",
-                      }
-                    }
-                    useResizeHandler={true}
-                  >
-                    <div
-                      id="explorerPlotComponent"
-                      style={
-                        Object {
-                          "height": "100%",
-                          "width": "100%",
-                        }
-                      }
-                    />
-                  </PlotlyComponent>
-                </Plt>
-              </div>
-            </EuiFlexItem>
-            <EuiFlexItem
-              style={
-                Object {
-                  "maxHeight": 500,
-                  "overflowY": "auto",
-                }
-              }
-            >
+            <EuiFlexItem>
               <div
                 className="euiFlexItem"
-                style={
-                  Object {
-                    "maxHeight": 500,
-                    "overflowY": "auto",
-                  }
-                }
               >
-                <Plt
-                  data={Array []}
-                  layout={
-                    Object {
-                      "height": 60,
-                      "margin": Object {
-                        "b": 30,
-                        "l": 150,
-                        "r": 5,
-                        "t": 30,
-                      },
-                      "paper_bgcolor": "rgba(0, 0, 0, 0)",
-                      "plot_bgcolor": "rgba(0, 0, 0, 0)",
-                      "width": 412,
-                      "xaxis": Object {
-                        "color": "#91989c",
-                        "range": Array [
-                          0,
-                          0,
-                        ],
-                        "showline": true,
-                        "side": "top",
-                        "ticksuffix": " ms",
-                      },
-                      "yaxis": Object {
-                        "fixedrange": true,
-                        "showgrid": false,
-                        "ticktext": Array [],
-                        "tickvals": Array [],
-                      },
-                    }
-                  }
-                  onClickHandler={[Function]}
-                  onHoverHandler={[Function]}
-                  onRelayout={[Function]}
-                  onUnhoverHandler={[Function]}
+                <SpanDetailTimeline
+                  colorMap={Object {}}
+                  compact={true}
+                  filters={Array []}
+                  mode="jaeger"
+                  onSpanClick={[Function]}
+                  payloadData=""
                 >
-                  <PlotlyComponent
-                    config={
-                      Object {
-                        "displayModeBar": false,
-                      }
+                  <EuiEmptyPrompt
+                    body={
+                      <p>
+                        No spans found for the selected filters
+                      </p>
                     }
-                    data={Array []}
-                    debug={false}
-                    divId="explorerPlotComponent"
-                    layout={
-                      Object {
-                        "autosize": true,
-                        "barmode": "stack",
-                        "height": 60,
-                        "hovermode": "closest",
-                        "layout": Object {
-                          "annotations": Array [
-                            Object {
-                              "showarrow": true,
-                              "xanchor": "right",
-                            },
-                          ],
-                        },
-                        "legend": Object {
-                          "orientation": "h",
-                          "traceorder": "normal",
-                        },
-                        "margin": Object {
-                          "b": 30,
-                          "l": 150,
-                          "r": 5,
-                          "t": 30,
-                        },
-                        "paper_bgcolor": "rgba(0, 0, 0, 0)",
-                        "plot_bgcolor": "rgba(0, 0, 0, 0)",
-                        "showlegend": false,
-                        "width": 412,
-                        "xaxis": Object {
-                          "color": "#91989c",
-                          "range": Array [
-                            0,
-                            0,
-                          ],
-                          "showline": true,
-                          "side": "top",
-                          "ticksuffix": " ms",
-                        },
-                        "yaxis": Object {
-                          "fixedrange": true,
-                          "showgrid": false,
-                          "ticktext": Array [],
-                          "tickvals": Array [],
-                        },
-                      }
+                    title={
+                      <h2>
+                        No spans found
+                      </h2>
                     }
-                    onClick={[Function]}
-                    onHover={[Function]}
-                    onRelayout={[Function]}
-                    onUnhover={[Function]}
-                    style={
-                      Object {
-                        "height": "100%",
-                        "width": "100%",
-                      }
-                    }
-                    useResizeHandler={true}
                   >
                     <div
-                      id="explorerPlotComponent"
-                      style={
-                        Object {
-                          "height": "100%",
-                          "width": "100%",
-                        }
-                      }
-                    />
-                  </PlotlyComponent>
-                </Plt>
+                      className="euiEmptyPrompt"
+                    >
+                      <EuiTitle
+                        size="m"
+                      >
+                        <h2
+                          className="euiTitle euiTitle--medium"
+                        >
+                          No spans found
+                        </h2>
+                      </EuiTitle>
+                      <EuiTextColor
+                        color="subdued"
+                      >
+                        <span
+                          className="euiTextColor euiTextColor--subdued"
+                        >
+                          <EuiSpacer
+                            size="m"
+                          >
+                            <div
+                              className="euiSpacer euiSpacer--m"
+                            />
+                          </EuiSpacer>
+                          <EuiText>
+                            <div
+                              className="euiText euiText--medium"
+                            >
+                              <p>
+                                No spans found for the selected filters
+                              </p>
+                            </div>
+                          </EuiText>
+                        </span>
+                      </EuiTextColor>
+                    </div>
+                  </EuiEmptyPrompt>
+                </SpanDetailTimeline>
               </div>
             </EuiFlexItem>
           </div>
