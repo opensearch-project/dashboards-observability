@@ -15,6 +15,7 @@ exports[`Datagrid Doc viewer component Renders Doc viewer component 1`] = `
     <EuiTabbedContent
       autoFocus="initial"
       onTabClick={[Function]}
+      preserveTabContent={false}
       selectedTab={
         Object {
           "content": <EuiPanel
