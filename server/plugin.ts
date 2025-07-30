@@ -243,7 +243,7 @@ export class ObservabilityPlugin
         name: 'Observability default dashboard',
         value: '',
         description: 'The default dashboard to display in Observability overview page',
-        schema: schema.string(),
+        schema: schema.nullable(schema.string()),
         scope: core.workspace.isWorkspaceEnabled()
           ? UiSettingScope.WORKSPACE
           : UiSettingScope.GLOBAL,
@@ -255,7 +255,7 @@ export class ObservabilityPlugin
         name: 'Observability overview cards',
         value: true,
         description: 'Show the Observability overview page cards',
-        schema: schema.boolean(),
+        schema: schema.nullable(schema.boolean()),
         scope: core.workspace.isWorkspaceEnabled()
           ? UiSettingScope.WORKSPACE
           : UiSettingScope.GLOBAL,
