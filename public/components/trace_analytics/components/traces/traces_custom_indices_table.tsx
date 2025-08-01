@@ -37,6 +37,34 @@ interface TracesLandingTableProps {
   uniqueTraces: number;
 }
 
+export const resolveFieldValue = (item: any, field: string) => {
+  if (!item) return '-';
+
+  const matchPrefix = (prefix: string, container?: any) => {
+    if (field.startsWith(prefix) && container) {
+      const attr = field.slice(prefix.length);
+      return container[attr] ?? '-';
+    }
+    return null;
+  };
+
+  // Handle nested field paths like 'status.code'
+  const getNestedValue = (obj: any, path: string) => {
+    return path.split('.').reduce((current, key) => {
+      return current && current[key] !== undefined ? current[key] : undefined;
+    }, obj);
+  };
+
+  return (
+    matchPrefix('resource.attributes.', item.resource?.attributes) ??
+    matchPrefix('span.attributes.', item.attributes) ??
+    matchPrefix('attributes.', item.attributes) ??
+    getNestedValue(item, field) ??
+    item[field] ??
+    '-'
+  );
+};
+
 export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
   const {
     columnItems,
@@ -49,26 +77,6 @@ export function TracesCustomIndicesTable(props: TracesLandingTableProps) {
     pagination,
     onSort,
   } = props;
-
-  const resolveFieldValue = (item: any, field: string) => {
-    if (!item) return '-';
-
-    const matchPrefix = (prefix: string, container?: any) => {
-      if (field.startsWith(prefix) && container) {
-        const attr = field.slice(prefix.length);
-        return container[attr] ?? '-';
-      }
-      return null;
-    };
-
-    return (
-      matchPrefix('resource.attributes.', item.resource?.attributes) ??
-      matchPrefix('span.attributes.', item.attributes) ??
-      matchPrefix('attributes.', item.attributes) ??
-      item[field] ??
-      '-'
-    );
-  };
 
   const renderCellValue = useMemo(() => {
     return ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {

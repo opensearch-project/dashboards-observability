@@ -288,7 +288,7 @@ export const hitsToSpanDetailData = async (hits: any, colorMap: any, mode: Trace
         ? hit._source.tag?.['error'] === true
           ? ' \u26a0 Error'
           : ''
-        : hit._source['status.code'] === 2
+        : hit._source.status?.code === 2 || hit._source['status.code'] === 2
         ? ' \u26a0 Error'
         : '';
     const uniqueLabel = `${serviceName} <br>${name} ` + uuid();
