@@ -450,7 +450,7 @@ export const fetchAggregatedBinCount = async (
         endTime,
         documentName,
         index: selectedOtelIndex,
-        dataSourceMDSId,
+        dataSourceMDSId: dataSourceMDSId ?? '',
       }),
     });
     return response;
