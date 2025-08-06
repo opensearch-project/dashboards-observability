@@ -157,21 +157,13 @@ exports[`Trace view component renders trace view 1`] = `
         <EuiFlexItem>
           <SpanDetailPanel
             colorMap={Object {}}
-            data={
-              Object {
-                "gantt": Array [],
-                "ganttMaxX": 0,
-                "table": Array [],
-              }
-            }
             dataSourceMDSId=""
             dataSourceMDSLabel=""
             http={[MockFunction]}
-            isGanttChartLoading={false}
+            isLoading={false}
             mode="data_prepper"
+            onSpanClick={[Function]}
             payloadData=""
-            setGanttChartLoading={[Function]}
-            setGanttData={[Function]}
             setSpanFiltersWithStorage={[Function]}
             spanFilters={Array []}
             traceId="test"
