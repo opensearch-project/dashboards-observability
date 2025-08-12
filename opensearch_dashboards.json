@@ -24,7 +24,8 @@
     "assistantDashboards",
     "securityDashboards",
     "dataSource",
-    "dataSourceManagement"
+    "dataSourceManagement",
+    "investigationDashboards"
   ],
   "configPath": [
     "observability"
