@@ -12,10 +12,13 @@ import {
   observabilityOverviewID,
 } from '../../common/constants/shared';
 import { CoreSetup } from '../../../../src/core/public';
-import { AppPluginStartDependencies } from '../types';
+import { AppPluginStartDependencies, SetupDependencies } from '../types';
 import { DEFAULT_NAV_GROUPS, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 
-export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDependencies>) {
+export function registerAllPluginNavGroups(
+  core: CoreSetup<AppPluginStartDependencies>,
+  setupDeps: SetupDependencies
+) {
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
     {
       id: observabilityOverviewID,
@@ -68,27 +71,29 @@ export function registerAllPluginNavGroups(core: CoreSetup<AppPluginStartDepende
     },
   ]);
 
-  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
-    {
-      id: observabilityNotebookID,
-      category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
-      order: 400,
-    },
-  ]);
-  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS[`security-analytics`], [
-    {
-      id: observabilityNotebookID,
-      category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
-      order: 400,
-    },
-  ]);
-  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
-    {
-      id: observabilityNotebookID,
-      category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
-      order: 400,
-    },
-  ]);
+  if (!setupDeps.investigationDashboards) {
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+      {
+        id: observabilityNotebookID,
+        category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
+        order: 400,
+      },
+    ]);
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS[`security-analytics`], [
+      {
+        id: observabilityNotebookID,
+        category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
+        order: 400,
+      },
+    ]);
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+      {
+        id: observabilityNotebookID,
+        category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
+        order: 400,
+      },
+    ]);
+  }
 
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
     {
