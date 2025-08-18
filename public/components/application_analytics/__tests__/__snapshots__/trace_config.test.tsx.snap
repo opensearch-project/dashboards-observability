@@ -14,6 +14,7 @@ exports[`Trace Config component renders empty trace config 1`] = `
       "getBreadcrumbs$": [MockFunction],
       "getBreadcrumbsEnricher$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
+      "getGlobalBanner$": [MockFunction],
       "getHeaderComponent": [MockFunction],
       "getHeaderVariant$": [MockFunction],
       "getHelpExtension$": [MockFunction],
@@ -125,10 +126,12 @@ exports[`Trace Config component renders empty trace config 1`] = `
       "setBreadcrumbs": [MockFunction],
       "setBreadcrumbsEnricher": [MockFunction],
       "setCustomNavLink": [MockFunction],
+      "setGlobalBanner": [MockFunction],
       "setHeaderVariant": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
       "setIsVisible": [MockFunction],
+      "useUpdatedHeader": false,
     }
   }
   description=""
@@ -2467,6 +2470,7 @@ exports[`Trace Config component renders with one trace selected 1`] = `
       "getBreadcrumbs$": [MockFunction],
       "getBreadcrumbsEnricher$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
+      "getGlobalBanner$": [MockFunction],
       "getHeaderComponent": [MockFunction],
       "getHeaderVariant$": [MockFunction],
       "getHelpExtension$": [MockFunction],
@@ -2578,10 +2582,12 @@ exports[`Trace Config component renders with one trace selected 1`] = `
       "setBreadcrumbs": [MockFunction],
       "setBreadcrumbsEnricher": [MockFunction],
       "setCustomNavLink": [MockFunction],
+      "setGlobalBanner": [MockFunction],
       "setHeaderVariant": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
       "setIsVisible": [MockFunction],
+      "useUpdatedHeader": false,
     }
   }
   description=""

@@ -15,6 +15,7 @@ exports[`Log Config component renders empty log config 1`] = `
       "getBreadcrumbs$": [MockFunction],
       "getBreadcrumbsEnricher$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
+      "getGlobalBanner$": [MockFunction],
       "getHeaderComponent": [MockFunction],
       "getHeaderVariant$": [MockFunction],
       "getHelpExtension$": [MockFunction],
@@ -126,10 +127,12 @@ exports[`Log Config component renders empty log config 1`] = `
       "setBreadcrumbs": [MockFunction],
       "setBreadcrumbsEnricher": [MockFunction],
       "setCustomNavLink": [MockFunction],
+      "setGlobalBanner": [MockFunction],
       "setHeaderVariant": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
       "setIsVisible": [MockFunction],
+      "useUpdatedHeader": false,
     }
   }
   description=""
@@ -688,6 +691,7 @@ exports[`Log Config component renders with query 1`] = `
       "getBreadcrumbs$": [MockFunction],
       "getBreadcrumbsEnricher$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
+      "getGlobalBanner$": [MockFunction],
       "getHeaderComponent": [MockFunction],
       "getHeaderVariant$": [MockFunction],
       "getHelpExtension$": [MockFunction],
@@ -799,10 +803,12 @@ exports[`Log Config component renders with query 1`] = `
       "setBreadcrumbs": [MockFunction],
       "setBreadcrumbsEnricher": [MockFunction],
       "setCustomNavLink": [MockFunction],
+      "setGlobalBanner": [MockFunction],
       "setHeaderVariant": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
       "setIsVisible": [MockFunction],
+      "useUpdatedHeader": false,
     }
   }
   description=""
