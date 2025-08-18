@@ -4,9 +4,12 @@
  */
 
 import '@testing-library/jest-dom/extend-expect';
+// eslint-disable-next-line jest/no-mocks-import
+import './__mocks__/worker.mock';
 import { configure } from '@testing-library/react';
 import { setOSDHttp, setOSDSavedObjectsClient } from '../common/utils';
 import { coreRefs } from '../public/framework/core_refs';
+// eslint-disable-next-line jest/no-mocks-import
 import { coreStartMock } from './__mocks__/coreMocks';
 
 configure({ testIdAttribute: 'data-test-subj' });
@@ -49,3 +52,18 @@ coreRefs.http = coreStartMock.http;
 coreRefs.savedObjectsClient = coreStartMock.savedObjects.client;
 coreRefs.toasts = coreStartMock.notifications.toasts;
 coreRefs.chrome = coreStartMock.chrome;
+
+// Mock window.matchMedia for Monaco editor
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation((query) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(), // Deprecated
+    removeListener: jest.fn(), // Deprecated
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});
