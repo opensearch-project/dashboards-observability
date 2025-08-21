@@ -27,6 +27,12 @@ module.exports = {
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/test/__mocks__/fileMock.js',
     '\\@algolia/autocomplete-theme-classic$': '<rootDir>/test/__mocks__/styleMock.js',
     '^!!raw-loader!.*': 'jest-raw-loader',
+    // OpenSearch Dashboards path mappings
+    '^opensearch-dashboards/public$': '<rootDir>/../../src/core/public',
+    '^opensearch-dashboards/public/(.*)$': '<rootDir>/../../src/core/public/$1',
+    '^opensearch-dashboards/server$': '<rootDir>/../../src/core/server',
+    '^opensearch-dashboards/server/(.*)$': '<rootDir>/../../src/core/server/$1',
+    '^opensearch-dashboards$': '<rootDir>/../../opensearch_dashboards',
   },
   testEnvironment: 'jsdom',
 };
