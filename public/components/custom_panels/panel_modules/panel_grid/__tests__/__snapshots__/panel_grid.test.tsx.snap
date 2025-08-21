@@ -14,6 +14,7 @@ exports[`Panel Grid Component renders panel grid component with empty visualizat
       "getBreadcrumbs$": [MockFunction],
       "getBreadcrumbsEnricher$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
+      "getGlobalBanner$": [MockFunction],
       "getHeaderComponent": [MockFunction],
       "getHeaderVariant$": [MockFunction],
       "getHelpExtension$": [MockFunction],
@@ -283,10 +284,12 @@ exports[`Panel Grid Component renders panel grid component with empty visualizat
       "setBreadcrumbs": [MockFunction],
       "setBreadcrumbsEnricher": [MockFunction],
       "setCustomNavLink": [MockFunction],
+      "setGlobalBanner": [MockFunction],
       "setHeaderVariant": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
       "setIsVisible": [MockFunction],
+      "useUpdatedHeader": false,
     }
   }
   cloneVisualization={[MockFunction]}

@@ -893,6 +893,7 @@ exports[`Panels View Component renders panel view container with visualizations 
         "getBreadcrumbs$": [MockFunction],
         "getBreadcrumbsEnricher$": [MockFunction],
         "getCustomNavLink$": [MockFunction],
+        "getGlobalBanner$": [MockFunction],
         "getHeaderComponent": [MockFunction],
         "getHeaderVariant$": [MockFunction],
         "getHelpExtension$": [MockFunction],
@@ -1298,10 +1299,12 @@ exports[`Panels View Component renders panel view container with visualizations 
         },
         "setBreadcrumbsEnricher": [MockFunction],
         "setCustomNavLink": [MockFunction],
+        "setGlobalBanner": [MockFunction],
         "setHeaderVariant": [MockFunction],
         "setHelpExtension": [MockFunction],
         "setHelpSupportUrl": [MockFunction],
         "setIsVisible": [MockFunction],
+        "useUpdatedHeader": false,
       }
     }
     cloneCustomPanel={[MockFunction]}
@@ -2803,6 +2806,7 @@ exports[`Panels View Component renders panel view container with visualizations 
                         "getBreadcrumbs$": [MockFunction],
                         "getBreadcrumbsEnricher$": [MockFunction],
                         "getCustomNavLink$": [MockFunction],
+                        "getGlobalBanner$": [MockFunction],
                         "getHeaderComponent": [MockFunction],
                         "getHeaderVariant$": [MockFunction],
                         "getHelpExtension$": [MockFunction],
@@ -3208,10 +3212,12 @@ exports[`Panels View Component renders panel view container with visualizations 
                         },
                         "setBreadcrumbsEnricher": [MockFunction],
                         "setCustomNavLink": [MockFunction],
+                        "setGlobalBanner": [MockFunction],
                         "setHeaderVariant": [MockFunction],
                         "setHelpExtension": [MockFunction],
                         "setHelpSupportUrl": [MockFunction],
                         "setIsVisible": [MockFunction],
+                        "useUpdatedHeader": false,
                       }
                     }
                     cloneVisualization={[Function]}
@@ -3378,6 +3384,7 @@ exports[`Panels View Component renders panel view container without visualizatio
         "getBreadcrumbs$": [MockFunction],
         "getBreadcrumbsEnricher$": [MockFunction],
         "getCustomNavLink$": [MockFunction],
+        "getGlobalBanner$": [MockFunction],
         "getHeaderComponent": [MockFunction],
         "getHeaderVariant$": [MockFunction],
         "getHelpExtension$": [MockFunction],
@@ -3672,10 +3679,12 @@ exports[`Panels View Component renders panel view container without visualizatio
         },
         "setBreadcrumbsEnricher": [MockFunction],
         "setCustomNavLink": [MockFunction],
+        "setGlobalBanner": [MockFunction],
         "setHeaderVariant": [MockFunction],
         "setHelpExtension": [MockFunction],
         "setHelpSupportUrl": [MockFunction],
         "setIsVisible": [MockFunction],
+        "useUpdatedHeader": false,
       }
     }
     cloneCustomPanel={[MockFunction]}
@@ -5172,6 +5181,7 @@ exports[`Panels View Component renders panel view container without visualizatio
                         "getBreadcrumbs$": [MockFunction],
                         "getBreadcrumbsEnricher$": [MockFunction],
                         "getCustomNavLink$": [MockFunction],
+                        "getGlobalBanner$": [MockFunction],
                         "getHeaderComponent": [MockFunction],
                         "getHeaderVariant$": [MockFunction],
                         "getHelpExtension$": [MockFunction],
@@ -5466,10 +5476,12 @@ exports[`Panels View Component renders panel view container without visualizatio
                         },
                         "setBreadcrumbsEnricher": [MockFunction],
                         "setCustomNavLink": [MockFunction],
+                        "setGlobalBanner": [MockFunction],
                         "setHeaderVariant": [MockFunction],
                         "setHelpExtension": [MockFunction],
                         "setHelpSupportUrl": [MockFunction],
                         "setIsVisible": [MockFunction],
+                        "useUpdatedHeader": false,
                       }
                     }
                     cloneVisualization={[Function]}

@@ -28,6 +28,7 @@ exports[`Dashboard component renders dashboard 1`] = `
       "getBreadcrumbs$": [MockFunction],
       "getBreadcrumbsEnricher$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
+      "getGlobalBanner$": [MockFunction],
       "getHeaderComponent": [MockFunction],
       "getHeaderVariant$": [MockFunction],
       "getHelpExtension$": [MockFunction],
@@ -181,10 +182,12 @@ exports[`Dashboard component renders dashboard 1`] = `
       },
       "setBreadcrumbsEnricher": [MockFunction],
       "setCustomNavLink": [MockFunction],
+      "setGlobalBanner": [MockFunction],
       "setHeaderVariant": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
       "setIsVisible": [MockFunction],
+      "useUpdatedHeader": false,
     }
   }
   dataSourceMDSId={
@@ -403,6 +406,7 @@ exports[`Dashboard component renders dashboard 1`] = `
         "getBreadcrumbs$": [MockFunction],
         "getBreadcrumbsEnricher$": [MockFunction],
         "getCustomNavLink$": [MockFunction],
+        "getGlobalBanner$": [MockFunction],
         "getHeaderComponent": [MockFunction],
         "getHeaderVariant$": [MockFunction],
         "getHelpExtension$": [MockFunction],
@@ -556,10 +560,12 @@ exports[`Dashboard component renders dashboard 1`] = `
         },
         "setBreadcrumbsEnricher": [MockFunction],
         "setCustomNavLink": [MockFunction],
+        "setGlobalBanner": [MockFunction],
         "setHeaderVariant": [MockFunction],
         "setHelpExtension": [MockFunction],
         "setHelpSupportUrl": [MockFunction],
         "setIsVisible": [MockFunction],
+        "useUpdatedHeader": false,
       }
     }
     dataSourceMDSId={
@@ -2642,6 +2648,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
       "getBreadcrumbs$": [MockFunction],
       "getBreadcrumbsEnricher$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
+      "getGlobalBanner$": [MockFunction],
       "getHeaderComponent": [MockFunction],
       "getHeaderVariant$": [MockFunction],
       "getHelpExtension$": [MockFunction],
@@ -2795,10 +2802,12 @@ exports[`Dashboard component renders empty dashboard 1`] = `
       },
       "setBreadcrumbsEnricher": [MockFunction],
       "setCustomNavLink": [MockFunction],
+      "setGlobalBanner": [MockFunction],
       "setHeaderVariant": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
       "setIsVisible": [MockFunction],
+      "useUpdatedHeader": false,
     }
   }
   dataSourceMDSId={
@@ -3016,6 +3025,7 @@ exports[`Dashboard component renders empty dashboard 1`] = `
         "getBreadcrumbs$": [MockFunction],
         "getBreadcrumbsEnricher$": [MockFunction],
         "getCustomNavLink$": [MockFunction],
+        "getGlobalBanner$": [MockFunction],
         "getHeaderComponent": [MockFunction],
         "getHeaderVariant$": [MockFunction],
         "getHelpExtension$": [MockFunction],
@@ -3169,10 +3179,12 @@ exports[`Dashboard component renders empty dashboard 1`] = `
         },
         "setBreadcrumbsEnricher": [MockFunction],
         "setCustomNavLink": [MockFunction],
+        "setGlobalBanner": [MockFunction],
         "setHeaderVariant": [MockFunction],
         "setHelpExtension": [MockFunction],
         "setHelpSupportUrl": [MockFunction],
         "setIsVisible": [MockFunction],
+        "useUpdatedHeader": false,
       }
     }
     dataSourceMDSId={
@@ -5254,6 +5266,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
       "getBreadcrumbs$": [MockFunction],
       "getBreadcrumbsEnricher$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
+      "getGlobalBanner$": [MockFunction],
       "getHeaderComponent": [MockFunction],
       "getHeaderVariant$": [MockFunction],
       "getHelpExtension$": [MockFunction],
@@ -5407,10 +5420,12 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
       },
       "setBreadcrumbsEnricher": [MockFunction],
       "setCustomNavLink": [MockFunction],
+      "setGlobalBanner": [MockFunction],
       "setHeaderVariant": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
       "setIsVisible": [MockFunction],
+      "useUpdatedHeader": false,
     }
   }
   dataSourceMDSId={
@@ -5630,6 +5645,7 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
         "getBreadcrumbs$": [MockFunction],
         "getBreadcrumbsEnricher$": [MockFunction],
         "getCustomNavLink$": [MockFunction],
+        "getGlobalBanner$": [MockFunction],
         "getHeaderComponent": [MockFunction],
         "getHeaderVariant$": [MockFunction],
         "getHelpExtension$": [MockFunction],
@@ -5783,10 +5799,12 @@ exports[`Dashboard component renders empty jaeger dashboard 1`] = `
         },
         "setBreadcrumbsEnricher": [MockFunction],
         "setCustomNavLink": [MockFunction],
+        "setGlobalBanner": [MockFunction],
         "setHeaderVariant": [MockFunction],
         "setHelpExtension": [MockFunction],
         "setHelpSupportUrl": [MockFunction],
         "setIsVisible": [MockFunction],
+        "useUpdatedHeader": false,
       }
     }
     dataSourceMDSId={

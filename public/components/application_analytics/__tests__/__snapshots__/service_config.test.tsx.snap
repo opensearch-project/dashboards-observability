@@ -15,6 +15,7 @@ exports[`Service Config component renders empty service config 1`] = `
       "getBreadcrumbs$": [MockFunction],
       "getBreadcrumbsEnricher$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
+      "getGlobalBanner$": [MockFunction],
       "getHeaderComponent": [MockFunction],
       "getHeaderVariant$": [MockFunction],
       "getHelpExtension$": [MockFunction],
@@ -126,10 +127,12 @@ exports[`Service Config component renders empty service config 1`] = `
       "setBreadcrumbs": [MockFunction],
       "setBreadcrumbsEnricher": [MockFunction],
       "setCustomNavLink": [MockFunction],
+      "setGlobalBanner": [MockFunction],
       "setHeaderVariant": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
       "setIsVisible": [MockFunction],
+      "useUpdatedHeader": false,
     }
   }
   description=""
@@ -1370,6 +1373,7 @@ exports[`Service Config component renders with one service selected 1`] = `
       "getBreadcrumbs$": [MockFunction],
       "getBreadcrumbsEnricher$": [MockFunction],
       "getCustomNavLink$": [MockFunction],
+      "getGlobalBanner$": [MockFunction],
       "getHeaderComponent": [MockFunction],
       "getHeaderVariant$": [MockFunction],
       "getHelpExtension$": [MockFunction],
@@ -1481,10 +1485,12 @@ exports[`Service Config component renders with one service selected 1`] = `
       "setBreadcrumbs": [MockFunction],
       "setBreadcrumbsEnricher": [MockFunction],
       "setCustomNavLink": [MockFunction],
+      "setGlobalBanner": [MockFunction],
       "setHeaderVariant": [MockFunction],
       "setHelpExtension": [MockFunction],
       "setHelpSupportUrl": [MockFunction],
       "setIsVisible": [MockFunction],
+      "useUpdatedHeader": false,
     }
   }
   description=""
