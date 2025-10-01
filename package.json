@@ -41,7 +41,6 @@
     "sanitize-filename": "^1.6.3"
   },
   "devDependencies": {
-    "@cypress/request": "^3.0.9",
     "@cypress/skip-test": "^2.6.1",
     "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/mime": "^3.0.1",
