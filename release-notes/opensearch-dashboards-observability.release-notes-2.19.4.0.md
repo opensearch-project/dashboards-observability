@@ -7,3 +7,4 @@ Compatible with OpenSearch and OpenSearch Dashboards version 2.19.4
 
 ### Maintenance
 * Added cve fix CVE-2025-7783 ([#2519](https://github.com/opensearch-project/dashboards-observability/pull/2519))
+* Bump serialize to 6.0.2 ([#2521](https://github.com/opensearch-project/dashboards-observability/pull/2521))
