@@ -74,6 +74,7 @@
     "@babel/helpers": "^7.27.0",
     "@babel/runtime": "^7.27.0",
     "@babel/runtime-corejs3": "^7.27.0",
-    "**/form-data": "^4.0.4"
+    "**/form-data": "^4.0.4",
+    "serialize-javascript": "^6.0.2"
   }
 }
