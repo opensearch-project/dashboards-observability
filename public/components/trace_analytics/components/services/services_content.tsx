@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPageBody, EuiSpacer } from '@ela
 import cloneDeep from 'lodash/cloneDeep';
 import React, { useEffect, useRef, useState } from 'react';
 import { ServiceTrends } from '../../../../../common/types/trace_analytics';
+import { ApmToggle } from '../../../common/apm_toggle';
 import { coreRefs } from '../../../../framework/core_refs';
 import {
   handleServicesRequest,
@@ -174,6 +175,7 @@ export function ServicesContent(props: ServicesProps) {
     <>
       <EuiPage paddingSize="m">
         <EuiPageBody>
+          <ApmToggle />
           <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <DataSourcePicker

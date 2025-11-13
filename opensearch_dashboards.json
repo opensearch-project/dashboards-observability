@@ -1,7 +1,7 @@
 {
   "id": "observabilityDashboards",
   "version": "3.3.0.0",
-  "opensearchDashboardsVersion": "3.3.0",
+  "opensearchDashboardsVersion": "3.4.0",
   "server": true,
   "ui": true,
   "requiredPlugins": [
