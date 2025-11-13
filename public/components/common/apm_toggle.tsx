@@ -13,11 +13,22 @@ export const ApmToggle = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Read current value from workspace uiSettings
-    const subscription = coreRefs.workspaces?.currentWorkspace$.subscribe((workspace) => {
-      const apmEnabled = workspace?.uiSettings?.['observability:apmEnabled'];
-      setIsEnabled(apmEnabled === true);
-    });
+    // Read current value from uiSettingsClient
+    const loadSetting = async () => {
+      if (coreRefs.core?.uiSettings) {
+        const apmEnabled = coreRefs.core.uiSettings.get<boolean>('observability:apmEnabled', false);
+        setIsEnabled(apmEnabled);
+      }
+    };
+
+    loadSetting();
+
+    // Subscribe to changes
+    const subscription = coreRefs.core?.uiSettings
+      .get$('observability:apmEnabled')
+      .subscribe((value) => {
+        setIsEnabled(value === true);
+      });
 
     return () => subscription?.unsubscribe();
   }, []);
@@ -25,14 +36,15 @@ export const ApmToggle = () => {
   const handleToggle = async (checked: boolean) => {
     setIsLoading(true);
     try {
-      const workspace = coreRefs.workspaces?.currentWorkspace$.getValue();
-      if (workspace?.id && coreRefs.core?.uiSettings) {
+      if (coreRefs.core?.uiSettings) {
+        // Update the setting using uiSettingsClient
+        await coreRefs.core.uiSettings.set('observability:apmEnabled', checked);
+
         coreRefs.toasts?.addSuccess(
           `APM integration ${checked ? 'enabled' : 'disabled'}. Redirecting...`
         );
 
         // Navigate to the appropriate services page - apps are always registered but hidden
-        // This avoids a race condition where the page is disabled and shows an error before redirect happens
         const targetAppId = checked ? observabilityApmServicesID : 'observability-services-nav';
         coreRefs.application?.navigateToApp(targetAppId).then(() => {
           // Reload after navigation to update the navigation sidebar
