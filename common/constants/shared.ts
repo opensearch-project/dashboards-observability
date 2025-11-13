@@ -90,6 +90,10 @@ export const observabilityDataConnectionsID = 'datasources';
 export const observabilityDataConnectionsTitle = 'Data sources';
 export const observabilityDataConnectionsPluginOrder = 9030;
 
+export const observabilityApmServicesID = 'observability-apm';
+export const observabilityApmServicesTitle = 'Services';
+export const observabilityApmServicesPluginOrder = 8501;
+
 export const queryWorkbenchPluginID = 'opensearch-query-workbench';
 export const queryWorkbenchPluginCheck = 'plugin:queryWorkbenchDashboards';
 

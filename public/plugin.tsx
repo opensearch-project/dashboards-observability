@@ -9,9 +9,11 @@ import React from 'react';
 import {
   AppCategory,
   AppMountParameters,
+  AppStatus,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
+  DEFAULT_NAV_GROUPS,
   Plugin,
   PluginInitializerContext,
   SavedObject,
@@ -57,6 +59,9 @@ import {
   observabilityServicesNewNavID,
   observabilityServicesPluginOrder,
   observabilityServicesTitle,
+  observabilityApmServicesID,
+  observabilityApmServicesPluginOrder,
+  observabilityApmServicesTitle,
   observabilityTracesID,
   observabilityTracesNewNavID,
   observabilityTracesPluginOrder,
@@ -81,6 +86,7 @@ import { Search } from './components/common/search/search';
 import { AccelerationDetailsFlyout } from './components/datasources/components/manage/accelerations/acceleration_details_flyout';
 import { CreateAcceleration } from './components/datasources/components/manage/accelerations/create_accelerations_flyout';
 import { AssociatedObjectsDetailsFlyout } from './components/datasources/components/manage/associated_objects/associated_objects_details_flyout';
+import { ApmServicesPage } from './components/apm/services_page';
 import { convertLegacyNotebooksUrl } from './components/notebooks/components/helpers/legacy_route_helpers';
 import {
   convertLegacyTraceAnalyticsUrl,
@@ -252,6 +258,13 @@ export class ObservabilityPlugin
         }),
         order: observabilityPluginOrder,
       },
+      apm: {
+        id: 'apm',
+        label: i18n.translate('core.ui.apmNavList.label', {
+          defaultMessage: 'Application Monitoring',
+        }),
+        order: 8500,
+      },
     });
 
     // Adding a variation entails associating a key-value pair, where a change in the key results in
@@ -304,6 +317,9 @@ export class ObservabilityPlugin
       s3glue: s3DataSourcePluggable,
       // prometheus: openSearchLocalDataSourcePluggable
     };
+
+    // Read UI setting for new APM toggle from workspace settings
+    const enableNewAPM = core.uiSettings.get('observability:apmEnabled', false);
 
     const appMountWithStartPage = (startPage: string, defaultRoute?: string) => async (
       params: AppMountParameters
@@ -382,12 +398,14 @@ export class ObservabilityPlugin
         mount: appMountWithStartPage('traces', '/traces'),
       });
 
+      // Always register Services under Investigate, hide if New APM is enabled
       core.application.register({
         id: observabilityServicesNewNavID,
         title: observabilityServicesTitle,
         order: observabilityServicesPluginOrder,
         category: DEFAULT_APP_CATEGORIES.investigate,
         mount: appMountWithStartPage('traces', '/services'),
+        status: enableNewAPM ? AppStatus.inaccessible : AppStatus.accessible,
       });
     } else {
       core.application.register({
@@ -423,6 +441,30 @@ export class ObservabilityPlugin
         category: OBSERVABILITY_APP_CATEGORIES.observability,
         order: observabilityNotebookPluginOrder,
         mount: appMountWithStartPage('notebooks'),
+      });
+    }
+
+    // Always register New APM category, hide if disabled
+    core.application.register({
+      id: observabilityApmServicesID,
+      title: observabilityApmServicesTitle,
+      category: OBSERVABILITY_APP_CATEGORIES.apm,
+      order: observabilityApmServicesPluginOrder,
+      mount: ApmServicesPage,
+      status: enableNewAPM ? AppStatus.accessible : AppStatus.inaccessible,
+    });
+
+    // Add navigation links for Apm category if nav groups are enabled
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      [DEFAULT_NAV_GROUPS.all, DEFAULT_NAV_GROUPS.observability].forEach((navGroup) => {
+        core.chrome.navGroup.addNavLinksToGroup(navGroup, [
+          {
+            id: observabilityApmServicesID,
+            title: observabilityApmServicesTitle,
+            category: OBSERVABILITY_APP_CATEGORIES.apm,
+            order: observabilityApmServicesPluginOrder,
+          },
+        ]);
       });
     }
 
