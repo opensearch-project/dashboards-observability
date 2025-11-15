@@ -561,7 +561,7 @@ export function SetupIntegrationForm({
     connectionTableName: integration,
     databaseName: 'default',
     enabledWorkflows: [],
-    refreshRangeDays: 7,
+    refreshRangeDays: 0,
   });
 
   const [template, setTemplate] = useState({
