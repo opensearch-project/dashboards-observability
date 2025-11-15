@@ -41,6 +41,7 @@ export const ACCELERATION_REFRESH_TIME_INTERVAL = [
 ];
 
 export const MATERIALIZED_VIEW_REFRESH_RANGE_OPTIONS = [
+  { text: 'No limit (all data)', value: 0 },
   { text: '1 Day', value: 1 },
   { text: '7 Days', value: 7 },
 ];
