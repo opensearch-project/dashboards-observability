@@ -40,6 +40,11 @@ export const ACCELERATION_REFRESH_TIME_INTERVAL = [
   { text: 'week(s)', value: 'week' },
 ];
 
+export const MATERIALIZED_VIEW_REFRESH_RANGE_OPTIONS = [
+  { text: '1 Day', value: 1 },
+  { text: '7 Days', value: 7 },
+];
+
 export const ACCELERATION_ADD_FIELDS_TEXT = '(add fields here)';
 export const ACCELERATION_INDEX_NAME_REGEX = /^[a-z0-9_]+$/;
 export const ACCELERATION_S3_URL_REGEX = /^(s3|s3a):\/\/[a-zA-Z0-9.\-]+/;

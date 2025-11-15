@@ -18,6 +18,7 @@ import React, { useEffect, useState } from 'react';
 import { NotificationsStart, SavedObjectsStart } from '../../../../../../src/core/public';
 import { DataSourceManagementPluginSetup } from '../../../../../../src/plugins/data_source_management/public';
 import { CONSOLE_PROXY, DATACONNECTIONS_BASE } from '../../../../common/constants/shared';
+import { MATERIALIZED_VIEW_REFRESH_RANGE_OPTIONS } from '../../../../common/constants/data_sources';
 import { dataSourceFilterFn } from '../../../../common/utils/shared';
 import { coreRefs } from '../../../framework/core_refs';
 import { IntegrationConfigProps, IntegrationSetupInputs } from './setup_integration';
@@ -349,6 +350,16 @@ export function IntegrationQueryInputs({
           onChange={(evt) => {
             updateConfig({ databaseName: evt.target.value });
           }}
+        />
+      </EuiCompressedFormRow>
+      <EuiCompressedFormRow
+        label="Initial Data Range"
+        helpText="Select the initial time range of data to include in the materialized view."
+      >
+        <EuiCompressedSelect
+          options={MATERIALIZED_VIEW_REFRESH_RANGE_OPTIONS}
+          value={config.refreshRangeDays}
+          onChange={(event) => updateConfig({ refreshRangeDays: parseInt(event.target.value, 10) })}
         />
       </EuiCompressedFormRow>
       <EuiCompressedFormRow
