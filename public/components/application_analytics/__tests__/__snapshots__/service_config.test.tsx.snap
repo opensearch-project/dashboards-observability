@@ -23,6 +23,8 @@ exports[`Service Config component renders empty service config 1`] = `
       "getIsVisible$": [MockFunction],
       "globalSearch": Object {
         "getAllSearchCommands": [MockFunction],
+        "getAllSearchCommands$": [MockFunction],
+        "registerSearchCommand": [MockFunction],
         "unregisterSearchCommand": [MockFunction],
       },
       "logos": Object {
@@ -1381,6 +1383,8 @@ exports[`Service Config component renders with one service selected 1`] = `
       "getIsVisible$": [MockFunction],
       "globalSearch": Object {
         "getAllSearchCommands": [MockFunction],
+        "getAllSearchCommands$": [MockFunction],
+        "registerSearchCommand": [MockFunction],
         "unregisterSearchCommand": [MockFunction],
       },
       "logos": Object {
