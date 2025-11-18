@@ -22,6 +22,8 @@ exports[`Trace Config component renders empty trace config 1`] = `
       "getIsVisible$": [MockFunction],
       "globalSearch": Object {
         "getAllSearchCommands": [MockFunction],
+        "getAllSearchCommands$": [MockFunction],
+        "registerSearchCommand": [MockFunction],
         "unregisterSearchCommand": [MockFunction],
       },
       "logos": Object {
@@ -2478,6 +2480,8 @@ exports[`Trace Config component renders with one trace selected 1`] = `
       "getIsVisible$": [MockFunction],
       "globalSearch": Object {
         "getAllSearchCommands": [MockFunction],
+        "getAllSearchCommands$": [MockFunction],
+        "registerSearchCommand": [MockFunction],
         "unregisterSearchCommand": [MockFunction],
       },
       "logos": Object {

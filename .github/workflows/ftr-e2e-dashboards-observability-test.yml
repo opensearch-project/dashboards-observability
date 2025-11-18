@@ -165,7 +165,7 @@ jobs:
           name: dashboard.logs
           path: OpenSearch-Dashboards/dashboard.log
 
-      - name: Checkout Dashboards Functioanl Test Repo
+      - name: Checkout Dashboards Functional Test Repo
         uses: actions/checkout@v4
         with:
           path: opensearch-dashboards-functional-test

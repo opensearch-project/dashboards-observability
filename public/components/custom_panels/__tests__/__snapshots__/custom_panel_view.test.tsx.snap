@@ -1170,6 +1170,8 @@ exports[`Panels View Component renders panel view container with visualizations 
         "getIsVisible$": [MockFunction],
         "globalSearch": Object {
           "getAllSearchCommands": [MockFunction],
+          "getAllSearchCommands$": [MockFunction],
+          "registerSearchCommand": [MockFunction],
           "unregisterSearchCommand": [MockFunction],
         },
         "logos": Object {
@@ -3083,6 +3085,8 @@ exports[`Panels View Component renders panel view container with visualizations 
                         "getIsVisible$": [MockFunction],
                         "globalSearch": Object {
                           "getAllSearchCommands": [MockFunction],
+                          "getAllSearchCommands$": [MockFunction],
+                          "registerSearchCommand": [MockFunction],
                           "unregisterSearchCommand": [MockFunction],
                         },
                         "logos": Object {
@@ -3550,6 +3554,8 @@ exports[`Panels View Component renders panel view container without visualizatio
         "getIsVisible$": [MockFunction],
         "globalSearch": Object {
           "getAllSearchCommands": [MockFunction],
+          "getAllSearchCommands$": [MockFunction],
+          "registerSearchCommand": [MockFunction],
           "unregisterSearchCommand": [MockFunction],
         },
         "logos": Object {
@@ -5347,6 +5353,8 @@ exports[`Panels View Component renders panel view container without visualizatio
                         "getIsVisible$": [MockFunction],
                         "globalSearch": Object {
                           "getAllSearchCommands": [MockFunction],
+                          "getAllSearchCommands$": [MockFunction],
+                          "registerSearchCommand": [MockFunction],
                           "unregisterSearchCommand": [MockFunction],
                         },
                         "logos": Object {
