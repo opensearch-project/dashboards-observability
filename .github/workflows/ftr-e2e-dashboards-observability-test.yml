@@ -32,24 +32,48 @@ jobs:
           distribution: 'corretto'
           java-version: '21'
 
+      - name: Get latest Job Scheduler snapshot version
+        id: job-scheduler-snapshot
+        run: |
+          METADATA_URL="https://ci.opensearch.org/ci/dbc/snapshots/maven/org/opensearch/plugin/opensearch-job-scheduler/${{ env.OPENSEARCH_PLUGIN_VERSION }}/maven-metadata.xml"
+          SNAPSHOT_VERSION=$(curl -s $METADATA_URL | grep '<value>' | head -1 | sed 's/.*<value>\(.*\)<\/value>.*/\1/')
+          echo "version=$SNAPSHOT_VERSION" >> $GITHUB_OUTPUT
+          echo "Job Scheduler snapshot version: $SNAPSHOT_VERSION"
+
       - name: Download Job Scheduler artifact
         uses: suisei-cn/actions-download-file@v1.4.0
         with:
-          url: https://aws.oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=org.opensearch.plugin&a=opensearch-job-scheduler&v=${{ env.OPENSEARCH_PLUGIN_VERSION }}-SNAPSHOT&p=zip
+          url: https://ci.opensearch.org/ci/dbc/snapshots/maven/org/opensearch/plugin/opensearch-job-scheduler/${{ env.OPENSEARCH_PLUGIN_VERSION }}/opensearch-job-scheduler-${{ steps.job-scheduler-snapshot.outputs.version }}.zip
           target: plugin-artifacts/
           filename: opensearch-job-scheduler.zip
+
+      - name: Get latest Observability snapshot version
+        id: observability-snapshot
+        run: |
+          METADATA_URL="https://ci.opensearch.org/ci/dbc/snapshots/maven/org/opensearch/plugin/opensearch-observability/${{ env.OPENSEARCH_PLUGIN_VERSION }}/maven-metadata.xml"
+          SNAPSHOT_VERSION=$(curl -s $METADATA_URL | grep '<value>' | head -1 | sed 's/.*<value>\(.*\)<\/value>.*/\1/')
+          echo "version=$SNAPSHOT_VERSION" >> $GITHUB_OUTPUT
+          echo "Observability snapshot version: $SNAPSHOT_VERSION"
 
       - name: Download observability artifact
         uses: suisei-cn/actions-download-file@v1.4.0
         with:
-          url: https://aws.oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=org.opensearch.plugin&a=opensearch-observability&v=${{ env.OPENSEARCH_PLUGIN_VERSION }}-SNAPSHOT&p=zip
+          url: https://ci.opensearch.org/ci/dbc/snapshots/maven/org/opensearch/plugin/opensearch-observability/${{ env.OPENSEARCH_PLUGIN_VERSION }}/opensearch-observability-${{ steps.observability-snapshot.outputs.version }}.zip
           target: plugin-artifacts/
           filename: observability.zip
+
+      - name: Get latest SQL Plugin snapshot version
+        id: sql-snapshot
+        run: |
+          METADATA_URL="https://ci.opensearch.org/ci/dbc/snapshots/maven/org/opensearch/plugin/opensearch-sql-plugin/${{ env.OPENSEARCH_PLUGIN_VERSION }}/maven-metadata.xml"
+          SNAPSHOT_VERSION=$(curl -s $METADATA_URL | grep '<value>' | head -1 | sed 's/.*<value>\(.*\)<\/value>.*/\1/')
+          echo "version=$SNAPSHOT_VERSION" >> $GITHUB_OUTPUT
+          echo "SQL Plugin snapshot version: $SNAPSHOT_VERSION"
 
       - name: Download SQL artifact
         uses: suisei-cn/actions-download-file@v1.4.0
         with:
-          url: https://aws.oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=org.opensearch.plugin&a=opensearch-sql-plugin&v=${{ env.OPENSEARCH_PLUGIN_VERSION }}-SNAPSHOT&p=zip
+          url: https://ci.opensearch.org/ci/dbc/snapshots/maven/org/opensearch/plugin/opensearch-sql-plugin/${{ env.OPENSEARCH_PLUGIN_VERSION }}/opensearch-sql-plugin-${{ steps.sql-snapshot.outputs.version }}.zip
           target: plugin-artifacts/
           filename: sql.zip
 
