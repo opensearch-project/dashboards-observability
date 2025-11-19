@@ -5,7 +5,7 @@ on: [pull_request, push]
 env:
   PLUGIN_NAME: dashboards-observability
   OPENSEARCH_DASHBOARDS_VERSION: 'main'
-  OPENSEARCH_PLUGIN_VERSION: '3.1.0.0'
+  OPENSEARCH_PLUGIN_VERSION: '3.4.0.0'
 
 jobs:
   Get-CI-Image-Tag:
