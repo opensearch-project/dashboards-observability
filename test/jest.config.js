@@ -21,7 +21,7 @@ module.exports = {
     '<rootDir>/test/',
     '<rootDir>/public/requests/',
   ],
-  transformIgnorePatterns: ['<rootDir>/node_modules'],
+  transformIgnorePatterns: ['<rootDir>/node_modules/(?!(d3-.+|internmap))'],
   moduleNameMapper: {
     '\\.(css|less|sass|scss)$': '<rootDir>/test/__mocks__/styleMock.js',
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/test/__mocks__/fileMock.js',

@@ -332,7 +332,7 @@ describe('Testing switch mode to jaeger', () => {
     cy.contains('08ee9fd9bf964384').should('exist');
     cy.contains('08ee9fd9bf964384').click();
     cy.contains('Time spent by service').should('exist');
-    cy.get("[data-test-subj='span-gantt-chart-panel']").should('exist');
+    cy.get("[data-test-subj='span-timeline-panel']").should('exist');
   });
 
   it('Checks tree view for specific traceId in Jaeger mode', () => {

@@ -14,6 +14,8 @@ import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics'
 import { handleSpansRequest } from '../../requests/traces_request_handler';
 import { microToMilliSec, nanoToMilliSec, parseHits } from '../common/helper_functions';
 import { RenderCustomDataGrid } from '../common/shared_components/custom_datagrid';
+import { buildHierarchy } from './span_detail_timeline/utils';
+import { TraceFilter } from '../common/constants';
 
 interface SpanDetailTableProps {
   http: HttpSetup;
@@ -263,15 +265,20 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
     });
   };
 
-  const onSort = (sortingColumns) => {
+  const onSort = (
+    sortingColumns: Array<{
+      id: string;
+      direction: 'asc' | 'desc';
+    }>
+  ) => {
     setTableParams((prev) => ({ ...prev, sortingColumns }));
   };
 
-  const onChangePage = (page) => {
+  const onChangePage = (page: number) => {
     setTableParams((prev) => ({ ...prev, page }));
   };
 
-  const onChangeItemsPerPage = (size) => {
+  const onChangeItemsPerPage = (size: number) => {
     setTableParams((prev) => ({ ...prev, size, page: 0 }));
   };
 
@@ -338,7 +345,7 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
         });
       }
 
-      const hierarchy = buildHierarchy(spans);
+      const hierarchy = buildHierarchy(mode, spans);
       setItems(hierarchy);
       setTotal(hierarchy.length);
     } catch (error) {
@@ -347,70 +354,6 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
       setIsSpansTableDataLoading(false);
     }
   }, [props.payloadData, props.DSL, props.mode, props.dataSourceMDSId, props.filters]);
-
-  type SpanMap = Record<string, Span>;
-
-  interface SpanReference {
-    refType: 'CHILD_OF' | 'FOLLOWS_FROM';
-    spanID: string;
-  }
-
-  const addRootSpan = (
-    spanId: string,
-    spanMap: SpanMap,
-    rootSpans: Span[],
-    alreadyAddedRootSpans: Set<string>
-  ) => {
-    if (!alreadyAddedRootSpans.has(spanId)) {
-      rootSpans.push(spanMap[spanId]);
-      alreadyAddedRootSpans.add(spanId);
-    }
-  };
-
-  const buildHierarchy = (spans: Span[]): Span[] => {
-    const spanMap: SpanMap = {};
-
-    spans.forEach((span) => {
-      const spanIdKey = props.mode === 'jaeger' ? 'spanID' : 'spanId';
-      spanMap[span[spanIdKey]] = { ...span, children: [] };
-    });
-
-    const rootSpans: Span[] = [];
-    const alreadyAddedRootSpans: Set<string> = new Set(); // Track added root spans
-
-    spans.forEach((span) => {
-      const spanIdKey = props.mode === 'jaeger' ? 'spanID' : 'spanId';
-      const references: SpanReference[] = span.references || [];
-
-      if (props.mode === 'jaeger') {
-        references.forEach((ref: SpanReference) => {
-          if (ref.refType === 'CHILD_OF') {
-            const parentSpan = spanMap[ref.spanID];
-            if (parentSpan) {
-              parentSpan.children.push(spanMap[span[spanIdKey]]);
-            }
-          }
-
-          if (ref.refType === 'FOLLOWS_FROM' && !alreadyAddedRootSpans.has(span[spanIdKey])) {
-            addRootSpan(span[spanIdKey], spanMap, rootSpans, alreadyAddedRootSpans);
-          }
-        });
-
-        if (references.length === 0 || references.every((ref) => ref.refType === 'FOLLOWS_FROM')) {
-          addRootSpan(span[spanIdKey], spanMap, rootSpans, alreadyAddedRootSpans);
-        }
-      } else {
-        // Data Prepper
-        if (span.parentSpanId && spanMap[span.parentSpanId]) {
-          spanMap[span.parentSpanId].children.push(spanMap[span[spanIdKey]]);
-        } else {
-          addRootSpan(span[spanIdKey], spanMap, rootSpans, alreadyAddedRootSpans);
-        }
-      }
-    });
-
-    return rootSpans;
-  };
 
   const flattenHierarchy = (spans: Span[], level = 0, isParentExpanded = true): Span[] => {
     return spans.flatMap((span) => {
