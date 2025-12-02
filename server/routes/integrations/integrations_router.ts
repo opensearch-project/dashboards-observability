@@ -5,6 +5,7 @@
 
 import { schema } from '@osd/config-schema';
 import * as mime from 'mime';
+import DOMPurify from 'isomorphic-dompurify';
 import sanitize from 'sanitize-filename';
 import { IRouter } from '../../../../../src/core/server';
 import {
@@ -13,6 +14,11 @@ import {
 } from '../../../../../src/core/server/http/router';
 import { INTEGRATIONS_BASE } from '../../../common/constants/shared';
 import { IntegrationsManager } from '../../adaptors/integrations/integrations_manager';
+
+interface RequestError {
+  message?: string;
+  statusCode?: number;
+}
 
 /**
  * Handle an `OpenSearchDashboardsRequest` using the provided `callback` function.
@@ -40,12 +46,47 @@ export const handleWithCallback = async <T>(
         data,
       },
     }) as OpenSearchDashboardsResponse<{ data: T }>;
-  } catch (err) {
+  } catch (e) {
+    const err = e as RequestError;
     console.error(`handleWithCallback: callback failed with error "${err.message}"`);
     return response.custom({
       statusCode: err.statusCode || 500,
       body: err.message,
     });
+  }
+};
+
+export const serveStaticImage = (
+  path: string,
+  content: Buffer,
+  response: OpenSearchDashboardsResponseFactory
+): OpenSearchDashboardsResponse => {
+  const mtype = mime.getType(path);
+  switch (mime.getType(path)) {
+    case 'image/gif':
+    case 'image/jpeg':
+    case 'image/png':
+    case 'image/tiff':
+    case 'image/webp':
+    case 'image/avif':
+      return response.ok({
+        headers: {
+          'Content-Type': mtype,
+        },
+        body: content,
+      });
+    case 'image/svg+xml':
+      return response.ok({
+        headers: {
+          'Content-Type': mtype,
+        },
+        body: DOMPurify.sanitize(content.toString('utf8')),
+      });
+    default:
+      return response.custom({
+        body: `not a supported image type: ${mtype}`,
+        statusCode: 400,
+      });
   }
 };
 
@@ -137,13 +178,9 @@ export function registerIntegrationsRoute(router: IRouter) {
       try {
         const requestPath = sanitize(request.params.path);
         const result = await adaptor.getStatic(request.params.id, requestPath);
-        return response.ok({
-          headers: {
-            'Content-Type': mime.getType(request.params.path),
-          },
-          body: result,
-        });
-      } catch (err) {
+        return serveStaticImage(request.params.path, result, response);
+      } catch (e) {
+        const err = e as RequestError;
         return response.custom({
           statusCode: err.statusCode ? err.statusCode : 500,
           body: err.message,
