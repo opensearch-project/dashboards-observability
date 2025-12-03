@@ -6,9 +6,12 @@
 import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import {
   AppCategory,
   AppMountParameters,
+  AppNavLinkStatus,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -174,6 +177,7 @@ export class ObservabilityPlugin
     this.config = initializerContext.config.get<PublicConfig>();
   }
   private mdsFlagStatus: boolean = false;
+  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
@@ -416,17 +420,16 @@ export class ObservabilityPlugin
       }
     }
 
-    if (!setupDeps.investigationDashboards) {
-      core.application.register({
-        id: observabilityNotebookID,
-        title: observabilityNotebookTitle,
-        category: OBSERVABILITY_APP_CATEGORIES.observability,
-        order: observabilityNotebookPluginOrder,
-        mount: appMountWithStartPage('notebooks'),
-      });
-    }
+    core.application.register({
+      id: observabilityNotebookID,
+      title: observabilityNotebookTitle,
+      category: OBSERVABILITY_APP_CATEGORIES.observability,
+      order: observabilityNotebookPluginOrder,
+      mount: appMountWithStartPage('notebooks'),
+      updater$: this.appUpdater$,
+    });
 
-    registerAllPluginNavGroups(core, setupDeps);
+    registerAllPluginNavGroups(core);
 
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
       getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,
@@ -462,6 +465,12 @@ export class ObservabilityPlugin
     coreRefs.navigation = startDeps.navigation;
     coreRefs.contentManagement = startDeps.contentManagement;
     coreRefs.workspaces = core.workspaces;
+
+    if (core.application.capabilities.investigation?.enabled) {
+      this.appUpdater$.next(() => ({
+        navLinkStatus: AppNavLinkStatus.hidden,
+      }));
+    }
 
     // redirect trace URL based on new navigation
     if (window.location.pathname.includes(observabilityTracesID)) {
