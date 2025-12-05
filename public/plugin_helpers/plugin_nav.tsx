@@ -3,6 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
+import {
+  CoreSetup,
+  AppCategory,
+  DEFAULT_NAV_GROUPS,
+  DEFAULT_APP_CATEGORIES,
+} from '../../../../src/core/public';
 import {
   observabilityApplicationsID,
   observabilityGettingStartedID,
@@ -11,14 +18,27 @@ import {
   observabilityNotebookID,
   observabilityOverviewID,
 } from '../../common/constants/shared';
-import { CoreSetup } from '../../../../src/core/public';
+import {
+  observabilityApmServicesID,
+  observabilityApmApplicationMapID,
+} from '../../common/constants/apm';
 import { AppPluginStartDependencies, SetupDependencies } from '../types';
-import { DEFAULT_NAV_GROUPS, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 
 export function registerAllPluginNavGroups(
   core: CoreSetup<AppPluginStartDependencies>,
-  setupDeps: SetupDependencies
+  setupDeps: SetupDependencies,
+  dataSourceEnabled: boolean,
+  apmEnabled: boolean
 ) {
+  // Custom category for APM features
+  const APPLICATION_MONITORING_CATEGORY: AppCategory = {
+    id: 'applicationMonitoring',
+    label: i18n.translate('observability.ui.applicationMonitoringNav.label', {
+      defaultMessage: 'Application Monitoring',
+    }),
+    order: 800,
+  };
+
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
     {
       id: observabilityOverviewID,
@@ -95,18 +115,37 @@ export function registerAllPluginNavGroups(
     ]);
   }
 
-  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
-    {
-      id: 'observability-traces-nav',
-      category: DEFAULT_APP_CATEGORIES.investigate,
-      showInAllNavGroup: true,
-      order: 300,
-    },
-    {
-      id: 'observability-services-nav',
-      category: DEFAULT_APP_CATEGORIES.investigate,
-      showInAllNavGroup: true,
-      order: 100,
-    },
-  ]);
+  if (dataSourceEnabled && apmEnabled) {
+    // APM Mode - register nav links for Services and Application Map
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+      {
+        id: observabilityApmServicesID,
+        category: APPLICATION_MONITORING_CATEGORY, // Explicitly pass custom category
+        showInAllNavGroup: true,
+        order: 100,
+      },
+      {
+        id: observabilityApmApplicationMapID,
+        category: APPLICATION_MONITORING_CATEGORY, // Explicitly pass custom category
+        showInAllNavGroup: true,
+        order: 200,
+      },
+    ]);
+  } else {
+    // Trace Analytics Mode
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+      {
+        id: 'observability-traces-nav',
+        category: DEFAULT_APP_CATEGORIES.investigate,
+        showInAllNavGroup: true,
+        order: 300,
+      },
+      {
+        id: 'observability-services-nav',
+        category: DEFAULT_APP_CATEGORIES.investigate,
+        showInAllNavGroup: true,
+        order: 100,
+      },
+    ]);
+  }
 }
