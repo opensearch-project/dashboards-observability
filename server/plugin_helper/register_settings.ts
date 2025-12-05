@@ -5,7 +5,7 @@
 
 import { schema } from '@osd/config-schema';
 import { i18n } from '@osd/i18n';
-import { UiSettingsServiceSetup } from '../../../../src/core/server/ui_settings';
+import { UiSettingScope, UiSettingsServiceSetup } from '../../../../src/core/server/ui_settings';
 import {
   DATA_PREPPER_INDEX_NAME,
   DATA_PREPPER_SERVICE_INDEX_NAME,
@@ -21,6 +21,7 @@ import {
   TRACE_SERVICE_MAP_MAX_NODES,
   TRACE_SERVICE_MAP_MAX_EDGES,
 } from '../../common/constants/trace_analytics';
+import { APM_ENABLED_SETTING } from '../../common/constants/apm';
 
 export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSetup) => {
   uiSettings.register({
@@ -136,6 +137,24 @@ export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSet
       schema: schema.number({
         min: 1,
       }),
+    },
+  });
+
+  // APM Feature Toggle - requires MDS to be enabled
+  uiSettings.register({
+    [APM_ENABLED_SETTING]: {
+      name: i18n.translate('observability.apmEnabled.name', {
+        defaultMessage: 'Enable APM',
+      }),
+      value: true,
+      category: ['Observability'],
+      description: i18n.translate('observability.apmEnabled.description', {
+        defaultMessage:
+          'Enable the APM (Application Performance Monitoring) feature. When enabled, APM services, service map, and diagnostics pages replace trace analytics pages in the navigation. Note: This feature requires Multi Data Source (MDS) to be enabled.',
+      }),
+      schema: schema.boolean(),
+      requiresPageReload: true,
+      scope: UiSettingScope.GLOBAL,
     },
   });
 };
