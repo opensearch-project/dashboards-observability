@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { i18n } from '@osd/i18n';
 import {
   CoreSetup,
   AppCategory,
@@ -28,17 +27,9 @@ export function registerAllPluginNavGroups(
   core: CoreSetup<AppPluginStartDependencies>,
   setupDeps: SetupDependencies,
   dataSourceEnabled: boolean,
-  apmEnabled: boolean
+  apmEnabled: boolean,
+  applicationMonitoringCategory: AppCategory
 ) {
-  // Custom category for APM features
-  const APPLICATION_MONITORING_CATEGORY: AppCategory = {
-    id: 'applicationMonitoring',
-    label: i18n.translate('observability.ui.applicationMonitoringNav.label', {
-      defaultMessage: 'Application Monitoring',
-    }),
-    order: 800,
-  };
-
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
     {
       id: observabilityOverviewID,
@@ -120,13 +111,13 @@ export function registerAllPluginNavGroups(
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
       {
         id: observabilityApmServicesID,
-        category: APPLICATION_MONITORING_CATEGORY, // Explicitly pass custom category
+        category: applicationMonitoringCategory, // Explicitly pass custom category
         showInAllNavGroup: true,
         order: 100,
       },
       {
         id: observabilityApmApplicationMapID,
-        category: APPLICATION_MONITORING_CATEGORY, // Explicitly pass custom category
+        category: applicationMonitoringCategory, // Explicitly pass custom category
         showInAllNavGroup: true,
         order: 200,
       },

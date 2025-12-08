@@ -272,6 +272,14 @@ export class ObservabilityPlugin
       },
     });
 
+    const APPLICATION_MONITORING_CATEGORY: AppCategory = {
+      id: 'applicationMonitoring',
+      label: i18n.translate('observability.ui.applicationMonitoringNav.label', {
+        defaultMessage: 'Application Monitoring',
+      }),
+      order: 800,
+    };
+
     // Adding a variation entails associating a key-value pair, where a change in the key results in
     // a switch of UI/services to its corresponding context. In the following cases, for an S3 datasource,
     // selecting SQL will render SQL-specific UI components or services, while selecting PPL will
@@ -397,7 +405,7 @@ export class ObservabilityPlugin
         core.application.register({
           id: observabilityApmServicesID,
           title: observabilityApmServicesTitle,
-          category: DEFAULT_APP_CATEGORIES.observability,
+          category: APPLICATION_MONITORING_CATEGORY,
           order: observabilityApmServicesPluginOrder,
           mount: appMountWithStartPage('apm-services', '/services'),
         });
@@ -405,7 +413,7 @@ export class ObservabilityPlugin
         core.application.register({
           id: observabilityApmApplicationMapID,
           title: observabilityApmApplicationMapTitle,
-          category: DEFAULT_APP_CATEGORIES.observability,
+          category: APPLICATION_MONITORING_CATEGORY,
           order: observabilityApmApplicationMapPluginOrder,
           mount: appMountWithStartPage('apm-application-map', '/application-map'),
         });
@@ -465,7 +473,13 @@ export class ObservabilityPlugin
       });
     }
 
-    registerAllPluginNavGroups(core, setupDeps, this.mdsFlagStatus, this.apmEnabled);
+    registerAllPluginNavGroups(
+      core,
+      setupDeps,
+      this.mdsFlagStatus,
+      this.apmEnabled,
+      APPLICATION_MONITORING_CATEGORY
+    );
 
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
       getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,
