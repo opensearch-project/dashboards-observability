@@ -23,6 +23,8 @@ import { Main as NotebooksHome } from './notebooks/components/main';
 import { Home as TraceAnalyticsHome } from './trace_analytics/home';
 import { Home as GettingStartedHome } from './getting_started/home';
 import { Home as OverviewHome } from './overview/home';
+import { Services as ApmServices } from './apm/services';
+import { ApplicationMap as ApmApplicationMap } from './apm/application_map';
 
 interface ObservabilityAppDeps {
   CoreStartProp: CoreStart;
@@ -56,6 +58,8 @@ const pages = {
   dataconnections: DataConnectionsHome,
   gettingStarted: GettingStartedHome,
   overview: OverviewHome,
+  'apm-services': ApmServices,
+  'apm-application-map': ApmApplicationMap,
 };
 
 export const App = ({

@@ -15,6 +15,7 @@ import {
   Plugin,
   PluginInitializerContext,
   SavedObject,
+  UiSettingScope,
 } from '../../../src/core/public';
 import { toMountPoint } from '../../../src/plugins/opensearch_dashboards_react/public/';
 import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/public';
@@ -62,6 +63,15 @@ import {
   observabilityTracesPluginOrder,
   observabilityTracesTitle,
 } from '../common/constants/shared';
+import {
+  APM_ENABLED_SETTING,
+  observabilityApmServicesID,
+  observabilityApmServicesTitle,
+  observabilityApmServicesPluginOrder,
+  observabilityApmApplicationMapID,
+  observabilityApmApplicationMapTitle,
+  observabilityApmApplicationMapPluginOrder,
+} from '../common/constants/apm';
 import { QueryManager } from '../common/query_manager';
 import {
   RenderAccelerationDetailsFlyoutParams,
@@ -174,11 +184,12 @@ export class ObservabilityPlugin
     this.config = initializerContext.config.get<PublicConfig>();
   }
   private mdsFlagStatus: boolean = false;
+  private apmEnabled: boolean = false;
 
-  public setup(
+  public async setup(
     core: CoreSetup<AppPluginStartDependencies>,
     setupDeps: SetupDependencies
-  ): ObservabilitySetup {
+  ): Promise<ObservabilitySetup> {
     uiSettingsService.init(core.uiSettings, core.notifications);
     const pplService = new PPLService(core.http);
     const qm = new QueryManager();
@@ -191,6 +202,13 @@ export class ObservabilityPlugin
     const page = setupOverviewPage(setupDeps.contentManagement!);
     setOverviewPage(page);
     this.mdsFlagStatus = !!setupDeps.dataSource;
+
+    // Read APM enabled setting from GLOBAL scope - only honor if MDS is enabled
+    const apmSettingValue = await core.uiSettings.getUserProvidedWithScope(
+      APM_ENABLED_SETTING,
+      UiSettingScope.GLOBAL
+    );
+    this.apmEnabled = this.mdsFlagStatus && (apmSettingValue ?? true); // default to true if not set
 
     // redirect legacy notebooks URL to current URL under observability
     if (window.location.pathname.includes('notebooks-dashboards')) {
@@ -253,6 +271,14 @@ export class ObservabilityPlugin
         order: observabilityPluginOrder,
       },
     });
+
+    const APPLICATION_MONITORING_CATEGORY: AppCategory = {
+      id: 'applicationMonitoring',
+      label: i18n.translate('observability.ui.applicationMonitoringNav.label', {
+        defaultMessage: 'Application Monitoring',
+      }),
+      order: 800,
+    };
 
     // Adding a variation entails associating a key-value pair, where a change in the key results in
     // a switch of UI/services to its corresponding context. In the following cases, for an S3 datasource,
@@ -374,22 +400,43 @@ export class ObservabilityPlugin
         mount: appMountWithStartPage('gettingStarted'),
       });
 
-      core.application.register({
-        id: observabilityTracesNewNavID,
-        title: observabilityTracesTitle,
-        order: observabilityTracesPluginOrder,
-        category: DEFAULT_APP_CATEGORIES.investigate,
-        mount: appMountWithStartPage('traces', '/traces'),
-      });
+      if (this.mdsFlagStatus && this.apmEnabled) {
+        // APM Mode - register APM applications with custom category
+        core.application.register({
+          id: observabilityApmServicesID,
+          title: observabilityApmServicesTitle,
+          category: APPLICATION_MONITORING_CATEGORY,
+          order: observabilityApmServicesPluginOrder,
+          mount: appMountWithStartPage('apm-services', '/services'),
+        });
 
-      core.application.register({
-        id: observabilityServicesNewNavID,
-        title: observabilityServicesTitle,
-        order: observabilityServicesPluginOrder,
-        category: DEFAULT_APP_CATEGORIES.investigate,
-        mount: appMountWithStartPage('traces', '/services'),
-      });
+        core.application.register({
+          id: observabilityApmApplicationMapID,
+          title: observabilityApmApplicationMapTitle,
+          category: APPLICATION_MONITORING_CATEGORY,
+          order: observabilityApmApplicationMapPluginOrder,
+          mount: appMountWithStartPage('apm-application-map', '/application-map'),
+        });
+      } else {
+        // Trace Analytics Mode - register trace analytics applications
+        core.application.register({
+          id: observabilityTracesNewNavID,
+          title: observabilityTracesTitle,
+          order: observabilityTracesPluginOrder,
+          category: DEFAULT_APP_CATEGORIES.investigate,
+          mount: appMountWithStartPage('traces', '/traces'),
+        });
+
+        core.application.register({
+          id: observabilityServicesNewNavID,
+          title: observabilityServicesTitle,
+          order: observabilityServicesPluginOrder,
+          category: DEFAULT_APP_CATEGORIES.investigate,
+          mount: appMountWithStartPage('traces', '/services'),
+        });
+      }
     } else {
+      // Old navigation - always trace analytics
       core.application.register({
         id: observabilityTracesID,
         title: observabilityTracesTitle,
@@ -426,7 +473,13 @@ export class ObservabilityPlugin
       });
     }
 
-    registerAllPluginNavGroups(core, setupDeps);
+    registerAllPluginNavGroups(
+      core,
+      setupDeps,
+      this.mdsFlagStatus,
+      this.apmEnabled,
+      APPLICATION_MONITORING_CATEGORY
+    );
 
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
       getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,
