@@ -163,10 +163,31 @@ const prepareQuery = (query: string, config: IntegrationSetupInputs): string => 
     : config.checkpointLocation + '/';
   checkpointLocation += `${config.connectionDataSource}-${config.connectionTableName}-${querySpecificUUID}`;
 
+  // Generate refresh range filter based on selected days
+  let refreshRangeFilter = '';
+  if (config.refreshRangeDays > 0) {
+    const now = new Date();
+    const startDate = new Date(now.getTime() - config.refreshRangeDays * 24 * 60 * 60 * 1000);
+
+    // TODO: Change this design - Check if this is VPC Flow (uses Unix timestamp 'start' field)
+    if (query.includes('FROM_UNIXTIME(start')) {
+      const startTimestamp = Math.floor(startDate.getTime() / 1000); // Convert to Unix timestamp
+      refreshRangeFilter = `WHERE start >= ${startTimestamp}`;
+    } else {
+      // For other integrations that create @timestamp in SELECT
+      const startTimestamp = startDate
+        .toISOString()
+        .replace('T', ' ')
+        .replace(/\.\d{3}Z$/, '');
+      refreshRangeFilter = `WHERE \`@timestamp\` >= '${startTimestamp}'`;
+    }
+  }
+
   let queryStr = query.replaceAll('{table_name}', makeTableName(config));
   queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
   queryStr = queryStr.replaceAll('{s3_checkpoint_location}', checkpointLocation);
   queryStr = queryStr.replaceAll('{object_name}', config.connectionTableName);
+  queryStr = queryStr.replaceAll('{refresh_range_filter}', refreshRangeFilter);
   // TODO spark API only supports single-line queries, but directly replacing all whitespace leads
   // to issues with single-line comments and quoted strings with more whitespace. A more robust
   // implementation would remove comments before flattening and ignore strings.
