@@ -30,6 +30,7 @@ SELECT
   event.netflow.age AS `aws.networkfirewall.event.netflow.age`  
 FROM
   {table_name}
+  {refresh_range_filter}
 WITH (
   auto_refresh = true,
   refresh_interval = '15 Minute',
