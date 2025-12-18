@@ -27,6 +27,7 @@ import { SQLService } from '../../../../public/services/requests/sql';
 import { coreRefs } from '../../../framework/core_refs';
 import { addIntegrationRequest } from './create_integration_helpers';
 import { SetupIntegrationFormInputs } from './setup_integration_inputs';
+import { generateTimestampFilter } from './integraiton_timefield_strategies';
 
 /**
  * Configuration inputs for integration setup
@@ -154,7 +155,11 @@ const makeTableName = (config: IntegrationSetupInputs): string => {
   return `${config.connectionDataSource}.${config.databaseName}.${config.connectionTableName}`;
 };
 
-const prepareQuery = (query: string, config: IntegrationSetupInputs): string => {
+const prepareQuery = (
+  query: string,
+  config: IntegrationSetupInputs,
+  integrationName: string
+): string => {
   // To prevent checkpoint collisions, each query needs a unique checkpoint name, we use an enriched
   // UUID to create subfolders under the given checkpoint location per-query.
   const querySpecificUUID = crypto.randomUUID();
@@ -163,25 +168,8 @@ const prepareQuery = (query: string, config: IntegrationSetupInputs): string => 
     : config.checkpointLocation + '/';
   checkpointLocation += `${config.connectionDataSource}-${config.connectionTableName}-${querySpecificUUID}`;
 
-  // Generate refresh range filter based on selected days
-  let refreshRangeFilter = '';
-  if (config.refreshRangeDays > 0) {
-    const now = new Date();
-    const startDate = new Date(now.getTime() - config.refreshRangeDays * 24 * 60 * 60 * 1000);
-
-    // TODO: Change this design - Check if this is VPC Flow (uses Unix timestamp 'start' field)
-    if (query.includes('FROM_UNIXTIME(start')) {
-      const startTimestamp = Math.floor(startDate.getTime() / 1000); // Convert to Unix timestamp
-      refreshRangeFilter = `WHERE start >= ${startTimestamp}`;
-    } else {
-      // For other integrations that create @timestamp in SELECT
-      const startTimestamp = startDate
-        .toISOString()
-        .replace('T', ' ')
-        .replace(/\.\d{3}Z$/, '');
-      refreshRangeFilter = `WHERE \`@timestamp\` >= '${startTimestamp}'`;
-    }
-  }
+  // Generate refresh range filter using centralized strategy
+  const refreshRangeFilter = generateTimestampFilter(integrationName, config.refreshRangeDays);
 
   let queryStr = query.replaceAll('{table_name}', makeTableName(config));
   queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
@@ -331,7 +319,7 @@ const addFlintIntegration = async ({
       continue;
     }
 
-    const queryStr = prepareQuery(query.query, config);
+    const queryStr = prepareQuery(query.query, config, integration.name);
     const result = await runQuery(
       queryStr,
       config.connectionDataSource,
