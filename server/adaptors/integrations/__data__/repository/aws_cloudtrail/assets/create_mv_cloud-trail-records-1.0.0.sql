@@ -46,6 +46,7 @@ SELECT
 FROM
   {table_name}
   LATERAL VIEW explode(Records) explodedCloudTrailsTable AS rec
+  {refresh_range_filter}
 WITH (
   auto_refresh = true,
   refresh_interval = '15 Minute',
