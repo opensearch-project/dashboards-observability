@@ -17,6 +17,7 @@ export type TimestampStrategyType =
   | 'timestamp_field' // Already TIMESTAMP type (e.g., ELB)
   | 'string_cast' // STRING that needs CAST to TIMESTAMP (e.g., CloudTrail)
   | 'date_string' // ISO date string YYYY-MM-DD (e.g., CloudFront)
+  | 's3_timestamp' // S3 log format: [06/Feb/2019:00:00:38 +0000] with bracket wrapping
   | 'complex'; // Complex parsing (e.g., nginx, apache) - skip filtering
 
 export interface TimestampStrategy {
@@ -72,9 +73,9 @@ export const TIMESTAMP_STRATEGIES: Record<string, TimestampStrategy> = {
     sourceField: 'date',
   },
 
-  // S3: Complex parsing with multiple string operations
+  // S3: Bracket-wrapped timestamp format [dd/MMM/yyyy:HH:mm:ss +0000]
   amazon_s3: {
-    type: 'complex',
+    type: 's3_timestamp',
     sourceField: 'request_time',
   },
 
@@ -179,6 +180,16 @@ export function generateTimestampFilter(integrationName: string, refreshRangeDay
     case 'date_string': {
       const dateString = startDate.toISOString().split('T')[0]; // "2025-12-08"
       return `WHERE \`${strategy.sourceField}\` >= '${dateString}'`;
+    }
+
+    case 's3_timestamp': {
+      // S3 format: request_time = '[06/Feb/2019:00:00:38', request_time_zone = '+0000]'
+      // MV uses: to_timestamp(CONCAT(SUBSTRING(request_time, 2), ' ', SUBSTRING(request_time_zone, 1, LENGTH(request_time_zone) - 1)), 'dd/MMM/yyyy:HH:mm:ss Z')
+      const isoString = startDate
+        .toISOString()
+        .replace('T', ' ')
+        .replace(/\.\d{3}Z$/, '');
+      return `WHERE to_timestamp(CONCAT(SUBSTRING(request_time, 2), ' ', SUBSTRING(request_time_zone, 1, LENGTH(request_time_zone) - 1)), 'dd/MMM/yyyy:HH:mm:ss Z') >= '${isoString}'`;
     }
 
     default:
