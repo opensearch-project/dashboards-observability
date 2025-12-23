@@ -510,11 +510,9 @@ export class ObservabilityPlugin
     coreRefs.dslService = dslService;
     coreRefs.toasts = core.notifications.toasts;
     coreRefs.chrome = core.chrome;
-    coreRefs.data = startDeps.data;
     coreRefs.dataSources = startDeps.data.dataSources;
     coreRefs.application = core.application;
     coreRefs.dashboard = startDeps.dashboard;
-    coreRefs.embeddable = startDeps.embeddable;
     coreRefs.queryAssistEnabled = this.config.query_assist.enabled;
     coreRefs.summarizeEnabled = this.config.summarize.enabled;
     coreRefs.overlays = core.overlays;
