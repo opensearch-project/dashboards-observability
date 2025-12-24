@@ -24,6 +24,8 @@ import { PPLPlugin } from './adaptors/ppl_plugin';
 import { PPLParsers } from './parsers/ppl_parser';
 import { registerObservabilityUISettings } from './plugin_helper/register_settings';
 import { setupRoutes } from './routes/index';
+import { MLCommonsRCFFacet } from './services/facets/ml_commons_rcf_facet';
+import { registerMLCommonsRCFRoute } from './routes/ml_commons_rcf';
 import {
   getSearchSavedObject,
   getVisualizationSavedObject,
@@ -226,6 +228,10 @@ export class ObservabilityPlugin
       dataSourceEnabled,
       logger: this.logger,
     });
+
+    // Initialize ML Commons RCF facet and register routes
+    const mlCommonsRCFFacet = new MLCommonsRCFFacet();
+    registerMLCommonsRCFRoute({ router, facet: mlCommonsRCFFacet });
 
     core.savedObjects.registerType(getVisualizationSavedObject(dataSourceEnabled));
     core.savedObjects.registerType(getSearchSavedObject(dataSourceEnabled));

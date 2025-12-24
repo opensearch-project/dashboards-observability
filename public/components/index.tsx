@@ -28,12 +28,17 @@ export const Observability = (
 ) => {
   const { setHeaderActionMenu } = AppMountParametersProp;
   const { dataSource } = DepsStart;
+  
+  // Get ML Commons RCF service from the observability plugin start
+  const mlCommonsRCFService = (DepsStart as any).mlCommonsRCFService;
+  
   ReactDOM.render(
     <App
       CoreStartProp={CoreStartProp}
       DepsStart={DepsStart}
       pplService={pplService}
       dslService={dslService}
+      mlCommonsRCFService={mlCommonsRCFService}
       savedObjects={savedObjects}
       timestampUtils={timestampUtils}
       queryManager={queryManager}

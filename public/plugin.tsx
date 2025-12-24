@@ -121,6 +121,7 @@ import { registerAllPluginNavGroups } from './plugin_helpers/plugin_nav';
 import { setupOverviewPage } from './plugin_helpers/plugin_overview';
 import DSLService from './services/requests/dsl';
 import PPLService from './services/requests/ppl';
+import MLCommonsRCFService from './services/requests/ml_commons_rcf';
 import SavedObjects from './services/saved_objects/event_analytics/saved_objects';
 import TimestampUtils from './services/timestamp/timestamp';
 import {
@@ -340,9 +341,13 @@ export class ObservabilityPlugin
       const savedObjects = new SavedObjects(coreStart.http);
       const timestampUtils = new TimestampUtils(dslService, pplService);
       const { dataSourceManagement } = setupDeps;
+      
+      // Get ML Commons RCF service from the start dependencies
+      const mlCommonsRCFService = new MLCommonsRCFService(coreStart.http);
+      
       return Observability(
         coreStart,
-        depsStart as AppPluginStartDependencies,
+        { ...depsStart, mlCommonsRCFService } as AppPluginStartDependencies,
         params,
         pplService,
         dslService,
@@ -497,6 +502,7 @@ export class ObservabilityPlugin
   public start(core: CoreStart, startDeps: AppPluginStartDependencies): ObservabilityStart {
     const pplService: PPLService = new PPLService(core.http);
     const dslService = new DSLService(core.http);
+    const mlCommonsRCFService = new MLCommonsRCFService(core.http);
 
     coreRefs.core = core;
     coreRefs.http = core.http;
@@ -665,6 +671,7 @@ export class ObservabilityPlugin
       useLoadTablesToCacheHook,
       useLoadTableColumnsToCacheHook,
       useLoadAccelerationsToCacheHook,
+      mlCommonsRCFService,
     };
   }
 

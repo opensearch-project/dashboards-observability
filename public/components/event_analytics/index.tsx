@@ -22,6 +22,7 @@ export const EventAnalytics = ({
   parentBreadcrumbs,
   pplService,
   dslService,
+  mlCommonsRCFService,
   savedObjects,
   timestampUtils,
   http,
@@ -83,6 +84,7 @@ export const EventAnalytics = ({
                     savedObjectId={routerProps.match.params.id}
                     pplService={pplService}
                     dslService={dslService}
+                    mlCommonsRCFService={mlCommonsRCFService}
                     savedObjects={savedObjects}
                     timestampUtils={timestampUtils}
                     http={http}

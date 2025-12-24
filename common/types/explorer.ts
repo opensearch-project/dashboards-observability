@@ -100,6 +100,7 @@ export interface EmptyTabParams {
 export interface ILogExplorerProps {
   pplService: PPLService;
   dslService: DSLService;
+  mlCommonsRCFService: any;
   savedObjects: SavedObjects;
   http: HttpStart;
   history: History;
@@ -119,6 +120,7 @@ export interface ILogExplorerProps {
 export interface IExplorerProps {
   pplService: PPLService;
   dslService: DSLService;
+  mlCommonsRCFService: any;
   tabId: string;
   savedObjects: SavedObjects;
   timestampUtils: TimestampUtils;
@@ -335,6 +337,7 @@ export interface EventAnalyticsProps {
   parentBreadcrumbs: ChromeBreadcrumb[];
   pplService: any;
   dslService: any;
+  mlCommonsRCFService: any;
   savedObjects: SavedObjectsStart;
   timestampUtils: TimestampUtils;
   http: HttpStart;

@@ -31,6 +31,7 @@ interface ObservabilityAppDeps {
   DepsStart: AppPluginStartDependencies;
   pplService: any;
   dslService: any;
+  mlCommonsRCFService: any;
   savedObjects: any;
   timestampUtils: any;
   queryManager: QueryManager;
@@ -67,6 +68,7 @@ export const App = ({
   DepsStart,
   pplService,
   dslService,
+  mlCommonsRCFService,
   savedObjects,
   timestampUtils,
   queryManager,
@@ -101,6 +103,7 @@ export const App = ({
             }
             pplService={pplService}
             dslService={dslService}
+            mlCommonsRCFService={mlCommonsRCFService}
             savedObjects={savedObjects}
             timestampUtils={timestampUtils}
             queryManager={queryManager}
