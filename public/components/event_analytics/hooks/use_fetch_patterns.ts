@@ -114,9 +114,9 @@ export const useFetchPatterns = ({ pplService, mlCommonsRCFService, requestParam
           try {
             // Transform PPL results to ML Commons format
             const timeSeriesData = timeSeriesResp.value.datarows.map((row) => ({
-              timestamp: row[0],
-              category: row[1],
-              value: row[2] || 0,
+              timestamp: row[1], // timestamp is the second column in time series query
+              category: row[2],  // patterns_field is the third column
+              value: row[0] || 0, // count is the first column
             }));
 
             // Skip anomaly detection if no time series data
@@ -124,7 +124,7 @@ export const useFetchPatterns = ({ pplService, mlCommonsRCFService, requestParam
               console.warn('No time series data available for anomaly detection');
               anomaliesResultsAvailable = false;
             } else {
-              // Call ML Commons RCF API
+              // Call ML Commons RCF API with correct parameters
               const rcfResponse = await mlCommonsRCFService.predictAnomalies({
                 data: timeSeriesData,
                 parameters: {
@@ -136,15 +136,19 @@ export const useFetchPatterns = ({ pplService, mlCommonsRCFService, requestParam
                   anomaly_rate: 0.005,
                   time_field: 'timestamp',
                   category_field: 'category',
+                  date_format: 'yyyy-MM-dd HH:mm:ss',
+                  time_zone: 'UTC',
                 },
               });
 
-              // Process anomaly detection results
-              if (rcfResponse.anomalies && rcfResponse.anomalies.length > 0) {
-                rcfResponse.anomalies.forEach((anomaly: any) => {
-                  if (anomaly.isAnomaly) {
-                    const category = anomaly.category;
-                    anomaliesMap[category] = (anomaliesMap[category] || 0) + 1;
+              // Process anomaly detection results - count anomalies per pattern
+              // This matches the original PPL AD logic: anomaliesMap[pattern] = count of anomalies
+              if (rcfResponse.data && rcfResponse.data.anomalies && rcfResponse.data.anomalies.length > 0) {
+                rcfResponse.data.anomalies.forEach((anomaly: any) => {
+                  if (anomaly.isAnomaly && anomaly.score > 0) {
+                    // Use category as pattern identifier (patterns_field)
+                    const pattern = anomaly.category;
+                    anomaliesMap[pattern] = (anomaliesMap[pattern] || 0) + 1;
                   }
                 });
               }

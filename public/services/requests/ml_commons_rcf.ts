@@ -44,6 +44,8 @@ export default class MLCommonsRCFService {
         anomaly_rate?: number;
         time_field: string;
         category_field?: string;
+        date_format?: string;
+        time_zone?: string;
       };
     },
     dataSourceMDSId?: string,

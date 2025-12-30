@@ -39,6 +39,8 @@ export function registerMLCommonsRCFRoute({
             anomaly_rate: schema.maybe(schema.number({ defaultValue: 0.005 })),
             time_field: schema.string({ defaultValue: 'timestamp' }),
             category_field: schema.maybe(schema.string()),
+            date_format: schema.maybe(schema.string({ defaultValue: 'yyyy-MM-dd HH:mm:ss' })),
+            time_zone: schema.maybe(schema.string({ defaultValue: 'UTC' })),
           }),
         }),
         query: schema.object({
