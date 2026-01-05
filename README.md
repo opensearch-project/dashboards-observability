@@ -34,15 +34,9 @@ Observability is collection of plugins and applications that let you visualize d
 |                          |                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------ |
 | Test and build           | [![Observability Dashboards CI][dashboard-build-badge]][dashboard-build-link]                                      |
+| Link Checker             | [![Link Checker][link-check-badge]][link-check-link]                                                               |
 | Code coverage            | [![codecov][dashboard-codecov-badge]][codecov-link]                                                                |
 | Distribution build tests | [![cypress tests][cypress-test-badge]][cypress-test-link] [![cypress code][cypress-code-badge]][cypress-code-link] |
-
-### Repository Checks
-
-|              |                                                                 |
-| ------------ | --------------------------------------------------------------- |
-| DCO Checker  | [![Developer certificate of origin][dco-badge]][dco-badge-link] |
-| Link Checker | [![Link Checker][link-check-badge]][link-check-link]            |
 
 ### Issues
 
@@ -55,8 +49,7 @@ Observability is collection of plugins and applications that let you visualize d
 | [![untriaged open][untriaged-badge]][untriaged-link]           |
 | [![nolabel open][nolabel-badge]][nolabel-link]                 |
 
-[dco-badge]: https://github.com/opensearch-project/dashboards-observability/actions/workflows/dco.yml/badge.svg
-[dco-badge-link]: https://github.com/opensearch-project/dashboards-observability/actions/workflows/dco.yml
+
 [link-check-badge]: https://github.com/opensearch-project/dashboards-observability/actions/workflows/link-checker.yml/badge.svg
 [link-check-link]: https://github.com/opensearch-project/dashboards-observability/actions/workflows/link-checker.yml
 [dashboard-build-badge]: https://github.com/opensearch-project/dashboards-observability/actions/workflows/dashboards-observability-test-and-build-workflow.yml/badge.svg
