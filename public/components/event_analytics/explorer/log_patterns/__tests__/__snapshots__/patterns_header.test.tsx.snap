@@ -468,7 +468,9 @@ exports[`Patterns header component Renders header of log patterns 1`] = `
                                     }
                                     onMutation={[Function]}
                                   >
-                                    <div>
+                                    <div
+                                      onMouseDown={[Function]}
+                                    >
                                       <EuiTitle
                                         size="xxs"
                                       >

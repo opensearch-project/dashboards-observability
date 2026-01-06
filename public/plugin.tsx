@@ -71,6 +71,9 @@ import {
   observabilityApmApplicationMapID,
   observabilityApmApplicationMapTitle,
   observabilityApmApplicationMapPluginOrder,
+  observabilityApmApplicationConfigID,
+  observabilityApmApplicationConfigTitle,
+  observabilityApmApplicationConfigPluginOrder,
 } from '../common/constants/apm';
 import { QueryManager } from '../common/query_manager';
 import {
@@ -203,15 +206,15 @@ export class ObservabilityPlugin
     setOverviewPage(page);
     this.mdsFlagStatus = !!setupDeps.dataSource;
 
-    // Read APM enabled setting from GLOBAL scope 
+    // Read APM enabled setting from GLOBAL scope
     try {
       const apmSettingValue = await core.uiSettings.getUserProvidedWithScope(
         APM_ENABLED_SETTING,
         UiSettingScope.GLOBAL
       );
-      this.apmEnabled = apmSettingValue ?? false; 
+      this.apmEnabled = apmSettingValue ?? false;
     } catch (error) {
-      // Handle authentication errors during setup 
+      // Handle authentication errors during setup
       this.apmEnabled = false;
     }
 
@@ -421,6 +424,14 @@ export class ObservabilityPlugin
           category: APPLICATION_MONITORING_CATEGORY,
           order: observabilityApmApplicationMapPluginOrder,
           mount: appMountWithStartPage('apm-application-map', '/application-map'),
+        });
+
+        core.application.register({
+          id: observabilityApmApplicationConfigID,
+          title: observabilityApmApplicationConfigTitle,
+          category: APPLICATION_MONITORING_CATEGORY,
+          order: observabilityApmApplicationConfigPluginOrder,
+          mount: appMountWithStartPage('apm-application-config', '/application-config'),
         });
       } else {
         // Trace Analytics Mode - register trace analytics applications

@@ -25,6 +25,7 @@ import { Home as GettingStartedHome } from './getting_started/home';
 import { Home as OverviewHome } from './overview/home';
 import { Services as ApmServices } from './apm/services';
 import { ApplicationMap as ApmApplicationMap } from './apm/application_map';
+import { ApplicationConfig as ApmApplicationConfig } from './apm/application_config';
 
 interface ObservabilityAppDeps {
   CoreStartProp: CoreStart;
@@ -60,6 +61,7 @@ const pages = {
   overview: OverviewHome,
   'apm-services': ApmServices,
   'apm-application-map': ApmApplicationMap,
+  'apm-application-config': ApmApplicationConfig,
 };
 
 export const App = ({
