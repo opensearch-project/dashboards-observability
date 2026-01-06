@@ -340,13 +340,15 @@ export const ApplicationConfig = (props: ApmApplicationConfigProps) => {
               </p>
             </EuiText>
             <EuiSpacer size="m" />
-            <div
-              style={{ textAlign: 'center', overflow: 'auto' }}
-              // eslint-disable-next-line react/no-danger
-              dangerouslySetInnerHTML={{
-                __html: isDarkMode ? ApmArchitectureSvgDark : ApmArchitectureSvgLight,
-              }}
-            />
+            <div style={{ textAlign: 'center', overflow: 'auto' }}>
+              <img
+                src={`data:image/svg+xml;utf8,${encodeURIComponent(
+                  isDarkMode ? ApmArchitectureSvgDark : ApmArchitectureSvgLight
+                )}`}
+                alt="APM Architecture Diagram"
+                style={{ maxWidth: '100%', height: 'auto' }}
+              />
+            </div>
           </EuiAccordion>
         </EuiPanel>
 
