@@ -86,11 +86,13 @@ export const ApplicationConfig = (props: ApmApplicationConfigProps) => {
 
   // Load existing config
   const [existingConfig, setExistingConfig] = useState<ResolvedApmConfig | null>(null);
-  const [_isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   // Theme detection
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode] = useState(() => {
+    const theme = CoreStartProp?.uiSettings?.get('theme:darkMode');
+    return theme === true || theme === 'true';
+  });
 
   // Data loading hooks - combined datasets hook for efficiency
   const {
@@ -124,25 +126,6 @@ export const ApplicationConfig = (props: ApmApplicationConfigProps) => {
       },
     ]);
   }, [chrome]);
-
-  // Detect theme
-  useEffect(() => {
-    const checkTheme = () => {
-      const theme = CoreStartProp?.uiSettings?.get('theme:darkMode');
-      setIsDarkMode(theme === true || theme === 'true');
-    };
-
-    checkTheme();
-
-    // Subscribe to theme changes
-    const subscription = CoreStartProp?.uiSettings?.get$('theme:darkMode').subscribe(() => {
-      checkTheme();
-    });
-
-    return () => {
-      subscription?.unsubscribe();
-    };
-  }, [CoreStartProp]);
 
   // Load existing config on mount
   useEffect(() => {
@@ -180,7 +163,6 @@ export const ApplicationConfig = (props: ApmApplicationConfigProps) => {
   }, [correlatedLogsError, notifications]);
 
   const loadExistingConfig = async () => {
-    setIsLoading(true);
     try {
       const client = OSDSavedApmConfigClient.getInstance();
       const { configs } = await client.getBulkWithResolvedReferences({ perPage: 1 });
@@ -241,8 +223,6 @@ export const ApplicationConfig = (props: ApmApplicationConfigProps) => {
         text: err.message || 'An error occurred while loading the configuration.',
       });
       setExistingConfig(null);
-    } finally {
-      setIsLoading(false);
     }
   };
 

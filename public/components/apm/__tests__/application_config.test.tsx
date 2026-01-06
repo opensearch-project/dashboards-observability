@@ -171,12 +171,6 @@ describe('ApplicationConfig Component', () => {
       // Component should use dark theme
       expect(mockProps.CoreStartProp.uiSettings.get).toHaveBeenCalledWith('theme:darkMode');
     });
-
-    it('should subscribe to theme changes', () => {
-      mount(<ApplicationConfig {...mockProps} />);
-
-      expect(mockProps.CoreStartProp.uiSettings.get$).toHaveBeenCalledWith('theme:darkMode');
-    });
   });
 
   describe('Data Loading Tests - Success Cases', () => {
@@ -484,32 +478,6 @@ describe('ApplicationConfig Component', () => {
 
       // Verify navigation function is available
       expect(mockProps.CoreStartProp.application.navigateToApp).toBeDefined();
-    });
-
-    it('should update SVG on theme change', () => {
-      const wrapper = mount(<ApplicationConfig {...mockProps} />);
-
-      // Simulate theme change
-      const subscribeCallback =
-        mockProps.CoreStartProp.uiSettings.get$.mock.results[0].value.subscribe.mock.calls[0][0];
-
-      if (subscribeCallback) {
-        mockProps.CoreStartProp.uiSettings.get.mockReturnValue(true);
-        subscribeCallback();
-        wrapper.update();
-      }
-
-      expect(wrapper.exists()).toBe(true);
-    });
-  });
-
-  describe('Cleanup Tests', () => {
-    it('should unsubscribe from theme changes on unmount', () => {
-      const wrapper = mount(<ApplicationConfig {...mockProps} />);
-
-      wrapper.unmount();
-
-      expect(mockSubscription.unsubscribe).toHaveBeenCalled();
     });
   });
 
