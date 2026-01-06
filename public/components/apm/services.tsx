@@ -14,17 +14,16 @@ export interface ApmServicesProps {
 }
 
 export const Services = (props: ApmServicesProps) => {
-  const { chrome, parentBreadcrumb } = props;
+  const { chrome } = props;
 
   React.useEffect(() => {
     chrome.setBreadcrumbs([
-      parentBreadcrumb,
       {
         text: 'Services',
         href: '#/services',
       },
     ]);
-  }, [chrome, parentBreadcrumb]);
+  }, [chrome]);
 
   return (
     <EuiPage>

@@ -31,3 +31,32 @@ export interface SearchSavedObjectAttributes extends SavedObjectAttributes {
   createdTimeMs: number;
   savedQuery: SavedQuery;
 }
+
+// APM Configuration Types (reuses correlations saved object type)
+export interface ApmConfigEntity {
+  tracesDataset?: { id: string };
+  serviceMapDataset?: { id: string };
+  prometheusDataSource?: { id: string };
+}
+
+export interface ApmConfigAttributes extends SavedObjectAttributes {
+  correlationType: string; // 'APM-Config-<workspace-id>'
+  version: string; // '1.0.0'
+  entities: ApmConfigEntity[];
+}
+
+export interface ResolvedApmConfig extends Omit<ApmConfigAttributes, 'entities'> {
+  objectId?: string;
+  tracesDataset: {
+    id: string;
+    title: string;
+  } | null;
+  serviceMapDataset: {
+    id: string;
+    title: string;
+  } | null;
+  prometheusDataSource: {
+    id: string;
+    title: string;
+  } | null;
+}

@@ -14,17 +14,16 @@ export interface ApmApplicationMapProps {
 }
 
 export const ApplicationMap = (props: ApmApplicationMapProps) => {
-  const { chrome, parentBreadcrumb } = props;
+  const { chrome } = props;
 
   React.useEffect(() => {
     chrome.setBreadcrumbs([
-      parentBreadcrumb,
       {
         text: 'Application Map',
         href: '#/application-map',
       },
     ]);
-  }, [chrome, parentBreadcrumb]);
+  }, [chrome]);
 
   return (
     <EuiPage>
