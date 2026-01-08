@@ -27,6 +27,7 @@ import { SQLService } from '../../../../public/services/requests/sql';
 import { coreRefs } from '../../../framework/core_refs';
 import { addIntegrationRequest } from './create_integration_helpers';
 import { SetupIntegrationFormInputs } from './setup_integration_inputs';
+import { generateTimestampFilter } from './integraiton_timefield_strategies';
 
 /**
  * Configuration inputs for integration setup
@@ -41,6 +42,8 @@ export interface IntegrationSetupInputs {
   databaseName: string;
   connectionTableName: string;
   enabledWorkflows: string[];
+  /** Number of days for initial data range (1 or 7) */
+  refreshRangeDays: number;
 }
 
 export interface IntegrationConfigProps {
@@ -152,7 +155,11 @@ const makeTableName = (config: IntegrationSetupInputs): string => {
   return `${config.connectionDataSource}.${config.databaseName}.${config.connectionTableName}`;
 };
 
-const prepareQuery = (query: string, config: IntegrationSetupInputs): string => {
+const prepareQuery = (
+  query: string,
+  config: IntegrationSetupInputs,
+  integrationName: string
+): string => {
   // To prevent checkpoint collisions, each query needs a unique checkpoint name, we use an enriched
   // UUID to create subfolders under the given checkpoint location per-query.
   const querySpecificUUID = crypto.randomUUID();
@@ -161,10 +168,14 @@ const prepareQuery = (query: string, config: IntegrationSetupInputs): string => 
     : config.checkpointLocation + '/';
   checkpointLocation += `${config.connectionDataSource}-${config.connectionTableName}-${querySpecificUUID}`;
 
+  // Generate refresh range filter using centralized strategy
+  const refreshRangeFilter = generateTimestampFilter(integrationName, config.refreshRangeDays);
+
   let queryStr = query.replaceAll('{table_name}', makeTableName(config));
   queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
   queryStr = queryStr.replaceAll('{s3_checkpoint_location}', checkpointLocation);
   queryStr = queryStr.replaceAll('{object_name}', config.connectionTableName);
+  queryStr = queryStr.replaceAll('{refresh_range_filter}', refreshRangeFilter);
   // TODO spark API only supports single-line queries, but directly replacing all whitespace leads
   // to issues with single-line comments and quoted strings with more whitespace. A more robust
   // implementation would remove comments before flattening and ignore strings.
@@ -308,7 +319,7 @@ const addFlintIntegration = async ({
       continue;
     }
 
-    const queryStr = prepareQuery(query.query, config);
+    const queryStr = prepareQuery(query.query, config, integration.name);
     const result = await runQuery(
       queryStr,
       config.connectionDataSource,
@@ -559,6 +570,7 @@ export function SetupIntegrationForm({
     connectionTableName: integration,
     databaseName: 'default',
     enabledWorkflows: [],
+    refreshRangeDays: 0,
   });
 
   const [template, setTemplate] = useState({

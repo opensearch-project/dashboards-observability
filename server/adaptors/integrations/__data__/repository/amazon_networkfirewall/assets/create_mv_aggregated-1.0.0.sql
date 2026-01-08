@@ -48,6 +48,7 @@ FROM (
     COALESCE(CAST(event.netflow.age AS INTEGER), 0) AS `event_netflow_age`
   FROM
     {table_name}
+    {refresh_range_filter}
 )
 GROUP BY
   TUMBLE(`@timestamp`, '5 Minute'),
