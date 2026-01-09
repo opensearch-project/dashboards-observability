@@ -9,16 +9,36 @@ import { embeddablePluginMock } from '../../../src/plugins/embeddable/public/moc
 import { visualizationsPluginMock } from '../../../src/plugins/visualizations/public/mocks';
 import { dataPluginMock } from '../../../src/plugins/data/public/mocks';
 import { uiActionsPluginMock } from '../../../src/plugins/ui_actions/public/mocks';
-import { SetupDependencies } from './types';
-import { observabilityNotebookID } from '../common/constants/shared';
-import { DEFAULT_NAV_GROUPS } from '../../../src/core/public';
+import { AppPluginStartDependencies, SetupDependencies } from './types';
 import { contentManagementPluginMocks } from '../../../src/plugins/content_management/public';
+import { BehaviorSubject } from 'rxjs';
+import { AppNavLinkStatus } from '../../../src/core/public';
 
 describe('#setup', () => {
-  it('should not register notebook application and call add notebook into nav group when investigation plugin present', async () => {
-    const intializerContextMock = coreMock.createPluginInitializerContext();
-    const coreSetup = coreMock.createSetup();
-    const observabilityPlugin = new ObservabilityPlugin(intializerContextMock);
+  it('should hide notebook entry when capabilities.investigation is enabled', async () => {
+    const initializerContextMock = coreMock.createPluginInitializerContext();
+    initializerContextMock.config.get = jest.fn().mockReturnValue({
+      query_assist: {
+        enabled: false,
+      },
+      summarize: {
+        enabled: false,
+      },
+    });
+    const coreSetupContract = coreMock.createSetup();
+    let updater$ = new BehaviorSubject<() => {}>(() => ({}));
+    const coreSetup = {
+      ...coreSetupContract,
+      application: {
+        ...coreSetupContract.application,
+        register: jest.fn((args) => {
+          if (args.updater$) {
+            updater$ = args.updater$;
+          }
+        }),
+      },
+    };
+    const observabilityPlugin = new ObservabilityPlugin(initializerContextMock);
     coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
     coreSetup.uiSettings.getUserProvidedWithScope = jest.fn().mockResolvedValue(true);
     await observabilityPlugin.setup(coreSetup, ({
@@ -27,7 +47,7 @@ describe('#setup', () => {
       visualizations: visualizationsPluginMock.createSetupContract(),
       data: dataPluginMock.createSetupContract(),
       uiActions: uiActionsPluginMock.createSetupContract(),
-      dataSource: undefined,
+      dataSource: {},
       dataSourceManagement: undefined,
       contentManagement: contentManagementPluginMocks.createSetupContract(),
       dashboard: {
@@ -38,32 +58,29 @@ describe('#setup', () => {
     expect(coreSetup.application.register).toBeCalled();
     expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toBeCalled();
 
-    expect(coreSetup.application.register).not.toBeCalledWith(
-      expect.objectContaining({
-        type: observabilityNotebookID,
-      })
+    const coreStart = coreMock.createStart();
+
+    observabilityPlugin.start(
+      {
+        ...coreStart,
+        application: {
+          ...coreStart.application,
+          capabilities: {
+            ...coreStart.application.capabilities,
+            investigation: {
+              enabled: true,
+            },
+          },
+        },
+      },
+      ({
+        data: dataPluginMock.createStartContract(),
+      } as unknown) as AppPluginStartDependencies
     );
 
-    expect(coreSetup.chrome.navGroup.addNavLinksToGroup).not.toBeCalledWith(
-      DEFAULT_NAV_GROUPS.observability,
-      expect.objectContaining({
-        type: observabilityNotebookID,
-      })
-    );
-
-    expect(coreSetup.chrome.navGroup.addNavLinksToGroup).not.toBeCalledWith(
-      DEFAULT_NAV_GROUPS['security-analytics'],
-      expect.objectContaining({
-        type: observabilityNotebookID,
-      })
-    );
-
-    expect(coreSetup.chrome.navGroup.addNavLinksToGroup).not.toBeCalledWith(
-      DEFAULT_NAV_GROUPS.all,
-      expect.objectContaining({
-        type: observabilityNotebookID,
-      })
-    );
+    expect(updater$.getValue()()).toEqual({
+      navLinkStatus: AppNavLinkStatus.hidden,
+    });
   });
 });
 
