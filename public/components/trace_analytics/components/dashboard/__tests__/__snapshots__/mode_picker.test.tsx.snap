@@ -560,7 +560,9 @@ exports[`Mode picker component renders mode picker 2`] = `
                             }
                             onMutation={[Function]}
                           >
-                            <div>
+                            <div
+                              onMouseDown={[Function]}
+                            >
                               <div
                                 className="popOverContainer"
                               >
