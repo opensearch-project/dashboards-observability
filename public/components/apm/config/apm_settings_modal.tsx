@@ -23,7 +23,10 @@ import {
   EuiBadge,
   EuiCallOut,
 } from '@elastic/eui';
+<<<<<<< HEAD
 import { i18n } from '@osd/i18n';
+=======
+>>>>>>> b9ca851c (Add APM config and provider)
 import { NotificationsStart, CoreStart } from '../../../../../../src/core/public';
 import { getWorkspaceIdFromUrl } from '../../../../../../src/core/public/utils';
 import { useDatasets, usePrometheusDataSources, useCorrelatedLogs } from './hooks';
@@ -241,6 +244,7 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
     try {
       const client = OSDSavedApmConfigClient.getInstance();
 
+<<<<<<< HEAD
       if (existingConfig?.objectId) {
         // Update existing config in place (atomic operation)
         await client.update({
@@ -259,6 +263,21 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
         });
       }
 
+=======
+      // Delete existing config if present
+      if (existingConfig?.objectId) {
+        await client.delete({ objectId: existingConfig.objectId });
+      }
+
+      // Create new config (always fresh)
+      await client.create({
+        workspaceId,
+        tracesDatasetId: formData.tracesDatasetId,
+        serviceMapDatasetId: formData.serviceMapDatasetId,
+        prometheusDataSourceId: formData.prometheusDataSourceId,
+      });
+
+>>>>>>> b9ca851c (Add APM config and provider)
       notifications.toasts.addSuccess({
         title: existingConfig
           ? 'Configuration updated successfully'
@@ -281,11 +300,15 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
     <EuiOverlayMask>
       <EuiModal onClose={() => onClose()} style={{ width: 700, maxWidth: '90vw' }}>
         <EuiModalHeader>
+<<<<<<< HEAD
           <EuiModalHeaderTitle>
             {i18n.translate('observability.apm.settings.modalTitle', {
               defaultMessage: 'Application monitoring settings',
             })}
           </EuiModalHeaderTitle>
+=======
+          <EuiModalHeaderTitle>Application monitoring settings</EuiModalHeaderTitle>
+>>>>>>> b9ca851c (Add APM config and provider)
         </EuiModalHeader>
 
         <EuiModalBody>
@@ -294,11 +317,15 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
             id="apm-architecture-accordion"
             buttonContent={
               <EuiText size="s">
+<<<<<<< HEAD
                 <strong>
                   {i18n.translate('observability.apm.settings.telemetryFlowTitle', {
                     defaultMessage: 'Application Telemetry Flow',
                   })}
                 </strong>
+=======
+                <strong>Application Telemetry Flow</strong>
+>>>>>>> b9ca851c (Add APM config and provider)
               </EuiText>
             }
             initialIsOpen={true}
@@ -306,10 +333,15 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
           >
             <EuiText size="xs" color="subdued">
               <p>
+<<<<<<< HEAD
                 {i18n.translate('observability.apm.settings.telemetryFlowDescription', {
                   defaultMessage:
                     'Configure Data Prepper pipelines first to collect and export Traces, Services data, and RED metrics into OpenSearch datasets and into Prometheus.',
                 })}
+=======
+                Configure Data Prepper pipelines first to collect and export Traces, Services data,
+                and RED metrics into OpenSearch datasets and into Prometheus.
+>>>>>>> b9ca851c (Add APM config and provider)
               </p>
             </EuiText>
             <EuiSpacer size="s" />
@@ -328,6 +360,7 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
 
           {/* Configuration Form */}
           <EuiText size="s">
+<<<<<<< HEAD
             <strong>
               {i18n.translate('observability.apm.settings.configureDataTitle', {
                 defaultMessage: 'Configure data for Application Monitoring',
@@ -341,6 +374,12 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
                   'Select the Traces, Services, RED Metric data store configured from the pipeline.',
               })}
             </p>
+=======
+            <strong>Configure data for Application Monitoring</strong>
+          </EuiText>
+          <EuiText size="xs" color="subdued">
+            <p>Select the Traces, Services, RED Metric data store configured from the pipeline.</p>
+>>>>>>> b9ca851c (Add APM config and provider)
           </EuiText>
           <EuiSpacer size="m" />
 
@@ -348,18 +387,27 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
           {existingConfig && !showErrors && (
             <>
               <EuiCallOut
+<<<<<<< HEAD
                 title={i18n.translate('observability.apm.settings.activeConfigTitle', {
                   defaultMessage: 'Active configuration exists',
                 })}
+=======
+                title="Active configuration exists"
+>>>>>>> b9ca851c (Add APM config and provider)
                 color="success"
                 iconType="check"
                 size="s"
               >
                 <p>
+<<<<<<< HEAD
                   {i18n.translate('observability.apm.settings.activeConfigDescription', {
                     defaultMessage:
                       'This workspace has an active APM configuration. Update the options below and click Update to save your changes.',
                   })}
+=======
+                  This workspace has an active APM configuration. Update the options below and click
+                  Update to save your changes.
+>>>>>>> b9ca851c (Add APM config and provider)
                 </p>
               </EuiCallOut>
               <EuiSpacer size="m" />
@@ -369,21 +417,30 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
           <EuiForm component="form" isInvalid={showErrors}>
             {/* Traces Dataset */}
             <EuiFormRow
+<<<<<<< HEAD
               label={i18n.translate('observability.apm.settings.tracesLabel', {
                 defaultMessage: 'Traces',
               })}
               helpText={i18n.translate('observability.apm.settings.tracesHelpText', {
                 defaultMessage: 'Select dataset for Trace data',
               })}
+=======
+              label="Traces"
+              helpText="Select dataset for Trace data"
+>>>>>>> b9ca851c (Add APM config and provider)
               isInvalid={showErrors && errors.tracesDataset.length > 0}
               error={errors.tracesDataset}
               fullWidth
             >
               <EuiComboBox
                 compressed
+<<<<<<< HEAD
                 placeholder={i18n.translate('observability.apm.settings.tracesPlaceholder', {
                   defaultMessage: 'Select traces dataset',
                 })}
+=======
+                placeholder="Select traces dataset"
+>>>>>>> b9ca851c (Add APM config and provider)
                 singleSelection={{ asPlainText: true }}
                 options={tracesDatasets}
                 selectedOptions={selectedTracesDataset}
@@ -404,12 +461,16 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
                     iconType="refresh"
                     onClick={refreshDatasets}
                     isDisabled={datasetsLoading}
+<<<<<<< HEAD
                     aria-label={i18n.translate(
                       'observability.apm.settings.refreshDatasetsAriaLabel',
                       {
                         defaultMessage: 'Refresh datasets',
                       }
                     )}
+=======
+                    aria-label="Refresh datasets"
+>>>>>>> b9ca851c (Add APM config and provider)
                   />
                 }
                 fullWidth
@@ -424,11 +485,15 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
                   id="correlated-logs-accordion"
                   buttonContent={
                     <EuiText size="xs">
+<<<<<<< HEAD
                       <strong>
                         {i18n.translate('observability.apm.settings.correlatedLogsTitle', {
                           defaultMessage: 'Correlated Logs',
                         })}
                       </strong>
+=======
+                      <strong>Correlated Logs</strong>
+>>>>>>> b9ca851c (Add APM config and provider)
                       {correlatedLogs.length > 0 && (
                         <EuiBadge color="hollow" style={{ marginLeft: '8px' }}>
                           {correlatedLogs.length}
@@ -446,12 +511,17 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
                       }}
                     >
                       {correlatedLogs.length === 0
+<<<<<<< HEAD
                         ? i18n.translate('observability.apm.settings.viewCorrelatedLogs', {
                             defaultMessage: 'View correlated logs',
                           })
                         : i18n.translate('observability.apm.settings.updateCorrelatedLogs', {
                             defaultMessage: 'Update correlated logs',
                           })}
+=======
+                        ? 'View correlated logs'
+                        : 'Update correlated logs'}
+>>>>>>> b9ca851c (Add APM config and provider)
                     </EuiButtonEmpty>
                   }
                   initialIsOpen={false}
@@ -459,19 +529,27 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
                 >
                   {correlatedLogsLoading ? (
                     <EuiText size="xs" color="subdued">
+<<<<<<< HEAD
                       {i18n.translate('observability.apm.settings.loadingCorrelatedLogs', {
                         defaultMessage: 'Loading correlated logs...',
                       })}
+=======
+                      Loading correlated logs...
+>>>>>>> b9ca851c (Add APM config and provider)
                     </EuiText>
                   ) : correlatedLogs.length > 0 ? (
                     <div>
                       <EuiText size="xs" color="subdued">
+<<<<<<< HEAD
                         <p>
                           {i18n.translate('observability.apm.settings.correlatedLogsDescription', {
                             defaultMessage:
                               'The following log datasets are correlated with this trace dataset:',
                           })}
                         </p>
+=======
+                        <p>The following log datasets are correlated with this trace dataset:</p>
+>>>>>>> b9ca851c (Add APM config and provider)
                       </EuiText>
                       <EuiSpacer size="xs" />
                       {correlatedLogs.map((log) => (
@@ -486,9 +564,13 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
                     </div>
                   ) : (
                     <EuiText size="xs" color="subdued">
+<<<<<<< HEAD
                       {i18n.translate('observability.apm.settings.noCorrelatedLogs', {
                         defaultMessage: 'No correlated log datasets found for this trace dataset.',
                       })}
+=======
+                      No correlated log datasets found for this trace dataset.
+>>>>>>> b9ca851c (Add APM config and provider)
                     </EuiText>
                   )}
                 </EuiAccordion>
@@ -498,21 +580,30 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
 
             {/* Service Map Dataset */}
             <EuiFormRow
+<<<<<<< HEAD
               label={i18n.translate('observability.apm.settings.servicesLabel', {
                 defaultMessage: 'Services',
               })}
               helpText={i18n.translate('observability.apm.settings.servicesHelpText', {
                 defaultMessage: 'Select dataset for Services Map data',
               })}
+=======
+              label="Services"
+              helpText="Select dataset for Services Map data"
+>>>>>>> b9ca851c (Add APM config and provider)
               isInvalid={showErrors && errors.serviceMapDataset.length > 0}
               error={errors.serviceMapDataset}
               fullWidth
             >
               <EuiComboBox
                 compressed
+<<<<<<< HEAD
                 placeholder={i18n.translate('observability.apm.settings.servicesPlaceholder', {
                   defaultMessage: 'Select service map dataset',
                 })}
+=======
+                placeholder="Select service map dataset"
+>>>>>>> b9ca851c (Add APM config and provider)
                 singleSelection={{ asPlainText: true }}
                 options={allDatasets}
                 selectedOptions={selectedServiceMapDataset}
@@ -533,12 +624,16 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
                     iconType="refresh"
                     onClick={refreshDatasets}
                     isDisabled={datasetsLoading}
+<<<<<<< HEAD
                     aria-label={i18n.translate(
                       'observability.apm.settings.refreshDatasetsAriaLabel',
                       {
                         defaultMessage: 'Refresh datasets',
                       }
                     )}
+=======
+                    aria-label="Refresh datasets"
+>>>>>>> b9ca851c (Add APM config and provider)
                   />
                 }
                 fullWidth
@@ -549,21 +644,30 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
 
             {/* Prometheus Data Source */}
             <EuiFormRow
+<<<<<<< HEAD
               label={i18n.translate('observability.apm.settings.redMetricsLabel', {
                 defaultMessage: 'RED Metrics',
               })}
               helpText={i18n.translate('observability.apm.settings.redMetricsHelpText', {
                 defaultMessage: 'Select a Prometheus data source',
               })}
+=======
+              label="RED Metrics"
+              helpText="Select a Prometheus data source"
+>>>>>>> b9ca851c (Add APM config and provider)
               isInvalid={showErrors && errors.prometheusDataSource.length > 0}
               error={errors.prometheusDataSource}
               fullWidth
             >
               <EuiComboBox
                 compressed
+<<<<<<< HEAD
                 placeholder={i18n.translate('observability.apm.settings.redMetricsPlaceholder', {
                   defaultMessage: 'Select Prometheus data source',
                 })}
+=======
+                placeholder="Select Prometheus data source"
+>>>>>>> b9ca851c (Add APM config and provider)
                 singleSelection={{ asPlainText: true }}
                 options={prometheusDataSources}
                 selectedOptions={selectedPrometheusDS}
@@ -584,12 +688,16 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
                     iconType="refresh"
                     onClick={refreshPrometheus}
                     isDisabled={prometheusLoading}
+<<<<<<< HEAD
                     aria-label={i18n.translate(
                       'observability.apm.settings.refreshDataSourcesAriaLabel',
                       {
                         defaultMessage: 'Refresh data sources',
                       }
                     )}
+=======
+                    aria-label="Refresh data sources"
+>>>>>>> b9ca851c (Add APM config and provider)
                   />
                 }
                 fullWidth
@@ -599,6 +707,7 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
         </EuiModalBody>
 
         <EuiModalFooter>
+<<<<<<< HEAD
           <EuiButtonEmpty onClick={() => onClose()}>
             {i18n.translate('observability.apm.settings.cancelButton', {
               defaultMessage: 'Cancel',
@@ -612,6 +721,11 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
               : i18n.translate('observability.apm.settings.applyButton', {
                   defaultMessage: 'Apply',
                 })}
+=======
+          <EuiButtonEmpty onClick={() => onClose()}>Cancel</EuiButtonEmpty>
+          <EuiButton fill onClick={handleApply} isLoading={isSaving} disabled={isSaving}>
+            {existingConfig ? 'Update' : 'Apply'}
+>>>>>>> b9ca851c (Add APM config and provider)
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>
