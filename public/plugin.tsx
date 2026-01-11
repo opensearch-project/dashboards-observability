@@ -71,9 +71,6 @@ import {
   observabilityApmApplicationMapID,
   observabilityApmApplicationMapTitle,
   observabilityApmApplicationMapPluginOrder,
-  observabilityApmApplicationConfigID,
-  observabilityApmApplicationConfigTitle,
-  observabilityApmApplicationConfigPluginOrder,
 } from '../common/constants/apm';
 import { QueryManager } from '../common/query_manager';
 import {
@@ -424,14 +421,6 @@ export class ObservabilityPlugin
           category: APPLICATION_MONITORING_CATEGORY,
           order: observabilityApmApplicationMapPluginOrder,
           mount: appMountWithStartPage('apm-application-map', '/application-map'),
-        });
-
-        core.application.register({
-          id: observabilityApmApplicationConfigID,
-          title: observabilityApmApplicationConfigTitle,
-          category: APPLICATION_MONITORING_CATEGORY,
-          order: observabilityApmApplicationConfigPluginOrder,
-          mount: appMountWithStartPage('apm-application-config', '/application-config'),
         });
       } else {
         // Trace Analytics Mode - register trace analytics applications

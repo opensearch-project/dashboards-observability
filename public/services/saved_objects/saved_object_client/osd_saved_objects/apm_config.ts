@@ -4,14 +4,15 @@
  */
 
 import { SavedObjectsFindOptions } from '../../../../../../../src/core/public';
+import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import {
   ApmConfigAttributes,
+  ApmConfigEntity,
   ResolvedApmConfig,
+  CORRELATIONS_SAVED_OBJECT,
 } from '../../../../../common/types/observability_saved_object_attributes';
 import { getOSDSavedObjectsClient } from '../../../../../common/utils';
 import { OSDSavedObjectClient } from './osd_saved_object_client';
-
-const CORRELATIONS_SAVED_OBJECT = 'correlations';
 const APM_CONFIG_PREFIX = 'APM-Config-';
 
 interface CreateApmConfigParams {
@@ -66,6 +67,53 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
     ];
   }
 
+  /**
+   * Parses an entity to extract its type and reference index
+   * Entity format: { tracesDataset: { id: 'references[0].id' } }
+   * Returns: { entityType: 'tracesDataset', referenceIndex: 0 }
+   */
+  private parseEntityReference(
+    entity: ApmConfigEntity
+  ): { entityType: string; referenceIndex: number } | null {
+    const keys = Object.keys(entity);
+    if (keys.length === 0) return null;
+
+    const entityType = keys[0]; // e.g., 'tracesDataset'
+    const entityValue = entity[entityType as keyof ApmConfigEntity];
+    if (!entityValue?.id) return null;
+
+    // Parse 'references[0].id' to extract index 0
+    const match = entityValue.id.match(/references\[(\d+)\]\.id/);
+    if (!match) return null;
+
+    return {
+      entityType,
+      referenceIndex: parseInt(match[1], 10),
+    };
+  }
+
+  /**
+   * Builds a map of entityType -> reference from entities array and references
+   */
+  private buildEntityRefsMap(
+    entities: ApmConfigEntity[],
+    references: Array<{ id: string; type: string; name: string }>
+  ): Record<string, { id: string; type: string } | undefined> {
+    const entityRefs: Record<string, { id: string; type: string } | undefined> = {};
+
+    for (const entity of entities) {
+      const parsed = this.parseEntityReference(entity);
+      if (parsed && references[parsed.referenceIndex]) {
+        entityRefs[parsed.entityType] = {
+          id: references[parsed.referenceIndex].id,
+          type: references[parsed.referenceIndex].type,
+        };
+      }
+    }
+
+    return entityRefs;
+  }
+
   async create(params: CreateApmConfigParams) {
     const references = this.createReferences(params);
     const entities = this.createEntities();
@@ -95,11 +143,19 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
     // Get existing config to preserve values not being updated
     const existing = await this.client.get<ApmConfigAttributes>(CORRELATIONS_SAVED_OBJECT, uuid);
 
-    // Build new references array
+    // Build entity refs map to find existing reference IDs by entity type
+    const existingEntityRefs = this.buildEntityRefsMap(
+      existing.attributes.entities,
+      existing.references
+    );
+
+    // Build new references array using entity-based lookup for existing values
     const references = this.createReferences({
-      tracesDatasetId: params.tracesDatasetId || existing.references[0].id,
-      serviceMapDatasetId: params.serviceMapDatasetId || existing.references[1].id,
-      prometheusDataSourceId: params.prometheusDataSourceId || existing.references[2].id,
+      tracesDatasetId: params.tracesDatasetId || existingEntityRefs.tracesDataset?.id || '',
+      serviceMapDatasetId:
+        params.serviceMapDatasetId || existingEntityRefs.serviceMapDataset?.id || '',
+      prometheusDataSourceId:
+        params.prometheusDataSourceId || existingEntityRefs.prometheusDataSource?.id || '',
     });
 
     const entities = this.createEntities();
@@ -126,12 +182,12 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
   /**
    * Resolves references to get actual dataset/datasource info
    * Filters for APM configs by correlationType prefix 'APM-Config-'
+   * @param dataService - Required data service for fetching DataView details (name, datasourceId)
    */
   async getBulkWithResolvedReferences(
-    params: Partial<SavedObjectsFindOptions> = {}
+    dataService: DataPublicPluginStart
   ): Promise<{ configs: ResolvedApmConfig[]; total: number }> {
     const findParams: SavedObjectsFindOptions = {
-      ...params,
       type: CORRELATIONS_SAVED_OBJECT,
       perPage: 1000, // Fetch all correlations, then filter client-side
     };
@@ -146,47 +202,48 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
     // Resolve all references to get titles
     const configs = await Promise.all(
       apmConfigs.map(async (obj) => {
-        const tracesDataset = obj.references.find((ref) => ref.name === 'entities[0].index');
-        const serviceMapDataset = obj.references.find((ref) => ref.name === 'entities[1].index');
-        const prometheusDS = obj.references.find(
-          (ref) => ref.name === 'entities[2].dataConnection'
-        );
+        // Build entity refs map to find references by entity type (not by index)
+        const entityRefs = this.buildEntityRefsMap(obj.attributes.entities, obj.references);
 
-        // Fetch saved objects to get titles
-        const [traces, serviceMap, prometheus] = await Promise.all([
-          tracesDataset
-            ? this.client.get('index-pattern', tracesDataset.id).catch(() => null)
-            : null,
-          serviceMapDataset
-            ? this.client.get('index-pattern', serviceMapDataset.id).catch(() => null)
-            : null,
-          prometheusDS
-            ? this.client.get('data-connection', prometheusDS.id).catch(() => null)
+        const tracesRef = entityRefs.tracesDataset;
+        const serviceMapRef = entityRefs.serviceMapDataset;
+        const prometheusRef = entityRefs.prometheusDataSource;
+
+        // Fetch DataViews to get title, displayName, and dataSourceRef
+        const [tracesDataView, serviceMapDataView, prometheus] = await Promise.all([
+          tracesRef ? dataService.dataViews.get(tracesRef.id).catch(() => null) : null,
+          serviceMapRef ? dataService.dataViews.get(serviceMapRef.id).catch(() => null) : null,
+          prometheusRef
+            ? this.client.get('data-connection', prometheusRef.id).catch(() => null)
             : null,
         ]);
 
         return {
           ...obj.attributes,
           objectId: this.prependTypeToId(obj.id),
-          tracesDataset: traces
+          tracesDataset: tracesRef
             ? {
-                id: tracesDataset!.id,
-                title: traces.attributes?.title || tracesDataset!.id,
+                id: tracesRef.id,
+                title: tracesDataView?.title || tracesRef.id,
+                name: tracesDataView?.getDisplayName?.(),
+                datasourceId: tracesDataView?.dataSourceRef?.id,
               }
             : null,
-          serviceMapDataset: serviceMap
+          serviceMapDataset: serviceMapRef
             ? {
-                id: serviceMapDataset!.id,
-                title: serviceMap.attributes?.title || serviceMapDataset!.id,
+                id: serviceMapRef.id,
+                title: serviceMapDataView?.title || serviceMapRef.id,
+                name: serviceMapDataView?.getDisplayName?.(),
+                datasourceId: serviceMapDataView?.dataSourceRef?.id,
               }
             : null,
           prometheusDataSource: prometheus
             ? {
-                id: prometheusDS!.id,
+                id: prometheusRef!.id,
                 title:
                   prometheus.attributes?.title ||
                   prometheus.attributes?.connectionId ||
-                  prometheusDS!.id,
+                  prometheusRef!.id,
               }
             : null,
         };
