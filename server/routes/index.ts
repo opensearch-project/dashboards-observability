@@ -8,7 +8,6 @@ import { DSLFacet } from '../services/facets/dsl_facet';
 import { PPLFacet } from '../services/facets/ppl_facet';
 import SavedObjectFacet from '../services/facets/saved_objects';
 import { QueryService } from '../services/queryService';
-import { registerApmRoutes } from './apm/apm_router';
 import { registerAppAnalyticsRouter } from './application_analytics/app_analytics_router';
 import { PanelsRouter } from './custom_panels/panels_router';
 import { VisualizationsRouter } from './custom_panels/visualizations_router';
@@ -32,7 +31,7 @@ export function setupRoutes({
   client,
   dataSourceEnabled,
   logger,
-  core,
+  core: _core,
 }: {
   router: IRouter;
   client: ILegacyClusterClient;
@@ -68,7 +67,4 @@ export function setupRoutes({
   }
 
   registerGettingStartedRoutes(router);
-
-  // APM routes (uses core.getStartServices() for PromQL queries)
-  registerApmRoutes(router, core, logger);
 }

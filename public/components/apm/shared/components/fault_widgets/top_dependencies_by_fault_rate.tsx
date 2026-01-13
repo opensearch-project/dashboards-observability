@@ -1,0 +1,210 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useMemo } from 'react';
+import {
+  EuiText,
+  EuiSpacer,
+  EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiLink,
+} from '@elastic/eui';
+import { useTopDependenciesByFaultRate } from '../../hooks/use_top_dependencies_by_fault_rate';
+import { TimeRange } from '../../../types/service_types';
+import { FaultRateCell, getRelativePercentage } from './fault_rate_cell';
+import { ServiceCell } from './service_cell';
+
+export interface TopDependenciesByFaultRateProps {
+  timeRange: TimeRange;
+  refreshTrigger?: number;
+  onServiceClick?: (serviceName: string, environment: string) => void;
+  searchQuery?: string;
+}
+
+interface DependencyFaultRateItem {
+  source: string;
+  target: string;
+  sourceEnvironment: string;
+  faultRate: number;
+  relativePercentage: number;
+  sourceHref?: string;
+}
+
+/**
+ * Widget displaying top service dependencies ranked by fault rate
+ * Shows remote service -> calling service and fault rate percentage with progress bar
+ */
+export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProps> = ({
+  timeRange,
+  refreshTrigger,
+  onServiceClick,
+  searchQuery,
+}) => {
+  // Parse time range - handle both absolute and relative times
+  // Memoize to prevent creating new Date objects on every render
+  const { startTime, endTime } = useMemo(() => {
+    const start = timeRange.from.startsWith('now')
+      ? new Date(Date.now() - 15 * 60 * 1000) // Default to 15 min for relative
+      : new Date(timeRange.from);
+    const end = timeRange.to === 'now' ? new Date() : new Date(timeRange.to);
+    return { startTime: start, endTime: end };
+  }, [timeRange.from, timeRange.to]);
+
+  const { data: dependencies, isLoading, error } = useTopDependenciesByFaultRate({
+    startTime,
+    endTime,
+    limit: 5,
+    refreshTrigger,
+  });
+
+  // Calculate relative percentages for progress bars
+  const tableItems: DependencyFaultRateItem[] = useMemo(() => {
+    if (!dependencies || dependencies.length === 0) {
+      return [];
+    }
+
+    // Filter by search query if provided
+    let filteredDependencies = dependencies;
+    if (searchQuery?.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filteredDependencies = dependencies.filter(
+        (d) =>
+          d.source.toLowerCase().includes(query) ||
+          d.target.toLowerCase().includes(query) ||
+          d.environment.toLowerCase().includes(query)
+      );
+    }
+
+    // Calculate sum for relative percentages
+    const faultRateSum = filteredDependencies.reduce((sum, d) => sum + d.faultRate, 0);
+
+    return filteredDependencies.map((dep) => ({
+      source: dep.source,
+      target: dep.target,
+      sourceEnvironment: dep.environment,
+      faultRate: dep.faultRate,
+      relativePercentage: getRelativePercentage(dep.faultRate, faultRateSum),
+      sourceHref: `#/service-details/${encodeURIComponent(dep.source)}/${encodeURIComponent(
+        dep.environment
+      )}`,
+    }));
+  }, [dependencies, searchQuery]);
+
+  // Define table columns
+  const columns: Array<EuiBasicTableColumn<DependencyFaultRateItem>> = [
+    {
+      field: 'target',
+      name: 'Remote Service',
+      width: '30%',
+      truncateText: true,
+      render: (target: string) => (
+        <EuiLink href="#">
+          <EuiText size="s">
+            <strong>{target}</strong>
+          </EuiText>
+        </EuiLink>
+      ),
+    },
+    {
+      name: 'Service',
+      width: '30%',
+      truncateText: true,
+      render: (item: DependencyFaultRateItem) => (
+        <ServiceCell
+          service={item.source}
+          environment={item.sourceEnvironment}
+          href={item.sourceHref}
+          onClick={
+            onServiceClick ? () => onServiceClick(item.source, item.sourceEnvironment) : undefined
+          }
+        />
+      ),
+    },
+    {
+      name: 'Fault Rate',
+      width: '40%',
+      render: (item: DependencyFaultRateItem) => (
+        <FaultRateCell faultRate={item.faultRate} relativePercentage={item.relativePercentage} />
+      ),
+    },
+  ];
+
+  if (isLoading) {
+    return (
+      <EuiFlexItem>
+        <EuiPanel>
+          <EuiText size="m">
+            <h4>Top Dependency Paths by Fault Rate</h4>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 150 }}>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="l" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiFlexItem>
+    );
+  }
+
+  if (error) {
+    const isConfigError = error.message.includes('No Prometheus connection configured');
+    const isAuthError =
+      error.message.includes('Unauthorized') || error.message.includes('Authentication');
+
+    return (
+      <EuiFlexItem>
+        <EuiPanel>
+          <EuiText size="m">
+            <h4>Top Dependency Paths by Fault Rate</h4>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiText color="subdued" size="s">
+            {isConfigError || isAuthError ? (
+              <p>
+                Prometheus connection required. Configure a Prometheus data source to view
+                dependency fault rate metrics.
+              </p>
+            ) : (
+              <p>Error loading dependency fault rate data: {error.message}</p>
+            )}
+          </EuiText>
+        </EuiPanel>
+      </EuiFlexItem>
+    );
+  }
+
+  if (!dependencies || dependencies.length === 0) {
+    return (
+      <EuiFlexItem>
+        <EuiPanel>
+          <EuiText size="m">
+            <h4>Top Dependency Paths by Fault Rate</h4>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiText color="subdued" size="s">
+            <p>No dependency fault rate data available</p>
+          </EuiText>
+        </EuiPanel>
+      </EuiFlexItem>
+    );
+  }
+
+  return (
+    <EuiFlexItem>
+      <EuiPanel>
+        <EuiText size="m">
+          <h4>Top Dependency Paths by Fault Rate</h4>
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiBasicTable items={tableItems} columns={columns} tableLayout="auto" />
+      </EuiPanel>
+    </EuiFlexItem>
+  );
+};

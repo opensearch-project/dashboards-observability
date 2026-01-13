@@ -7,8 +7,6 @@ import React, { useState, useEffect } from 'react';
 import {
   EuiPage,
   EuiPageBody,
-  EuiSpacer,
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -20,6 +18,7 @@ import { ApmSettingsModal } from './config/apm_settings_modal';
 import { ApmEmptyState } from './common/apm_empty_state';
 import { HeaderControlledComponentsWrapper } from '../../plugin_helpers/plugin_headerControl';
 import { useApmConfig } from './config/apm_config_context';
+import { ServicesHome } from './pages/services';
 
 export interface ApmServicesProps {
   chrome: any;
@@ -120,24 +119,28 @@ export const Services = (props: ApmServicesProps) => {
 
   // Show normal content with APM Settings button when config exists
   return (
-    <EuiPage>
-      <EuiPageBody>
-        <HeaderControlledComponentsWrapper components={[settingsButton]} />
+    <>
+      <HeaderControlledComponentsWrapper components={[settingsButton]} />
 
-        <EuiSpacer size="l" />
-        <EuiText>
-          <p>APM Services page content goes here.</p>
-        </EuiText>
+      <ServicesHome
+        chrome={chrome}
+        parentBreadcrumb={props.parentBreadcrumb}
+        onServiceClick={(serviceName, environment) => {
+          // Navigate to service details page
+          window.location.href = `#/service-details/${encodeURIComponent(
+            serviceName
+          )}/${encodeURIComponent(environment)}`;
+        }}
+      />
 
-        {isSettingsModalVisible && (
-          <ApmSettingsModal
-            onClose={handleModalClose}
-            notifications={notifications}
-            CoreStartProp={CoreStartProp}
-            DepsStart={DepsStart}
-          />
-        )}
-      </EuiPageBody>
-    </EuiPage>
+      {isSettingsModalVisible && (
+        <ApmSettingsModal
+          onClose={handleModalClose}
+          notifications={notifications}
+          CoreStartProp={CoreStartProp}
+          DepsStart={DepsStart}
+        />
+      )}
+    </>
   );
 };

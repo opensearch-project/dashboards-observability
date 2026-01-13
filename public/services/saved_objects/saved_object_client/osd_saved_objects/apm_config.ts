@@ -243,7 +243,7 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
                 id: tracesRef.id,
                 title: tracesDataView?.title || tracesRef.id,
                 name: tracesDataView?.getDisplayName?.(),
-                datasourceId: tracesDataView?.dataSourceRef?.id,
+                datasourceId: tracesDataView?.dataSourceRef?.id ?? '',
               }
             : null,
           serviceMapDataset: serviceMapRef
@@ -251,7 +251,7 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
                 id: serviceMapRef.id,
                 title: serviceMapDataView?.title || serviceMapRef.id,
                 name: serviceMapDataView?.getDisplayName?.(),
-                datasourceId: serviceMapDataView?.dataSourceRef?.id,
+                datasourceId: serviceMapDataView?.dataSourceRef?.id ?? '',
               }
             : null,
           prometheusDataSource: prometheus
