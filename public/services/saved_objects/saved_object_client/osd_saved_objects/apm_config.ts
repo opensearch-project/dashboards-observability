@@ -150,12 +150,20 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
     );
 
     // Build new references array using entity-based lookup for existing values
+    const tracesId = params.tracesDatasetId || existingEntityRefs.tracesDataset?.id;
+    const serviceMapId = params.serviceMapDatasetId || existingEntityRefs.serviceMapDataset?.id;
+    const prometheusId =
+      params.prometheusDataSourceId || existingEntityRefs.prometheusDataSource?.id;
+
+    // Validate all required reference IDs are present
+    if (!tracesId || !serviceMapId || !prometheusId) {
+      throw new Error('Cannot update config: missing required reference IDs');
+    }
+
     const references = this.createReferences({
-      tracesDatasetId: params.tracesDatasetId || existingEntityRefs.tracesDataset?.id || '',
-      serviceMapDatasetId:
-        params.serviceMapDatasetId || existingEntityRefs.serviceMapDataset?.id || '',
-      prometheusDataSourceId:
-        params.prometheusDataSourceId || existingEntityRefs.prometheusDataSource?.id || '',
+      tracesDatasetId: tracesId,
+      serviceMapDatasetId: serviceMapId,
+      prometheusDataSourceId: prometheusId,
     });
 
     const entities = this.createEntities();

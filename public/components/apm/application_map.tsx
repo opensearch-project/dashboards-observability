@@ -32,7 +32,7 @@ export interface ApmApplicationMapProps {
 
 export const ApplicationMap = (props: ApmApplicationMapProps) => {
   const { chrome, notifications, CoreStartProp, DepsStart } = props;
-  const { config, loading, refresh } = useApmConfig();
+  const { config, loading, error, refresh } = useApmConfig();
 
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
 
@@ -45,6 +45,16 @@ export const ApplicationMap = (props: ApmApplicationMapProps) => {
       },
     ]);
   }, [chrome]);
+
+  // Show toast when config fetch error occurs
+  useEffect(() => {
+    if (error) {
+      notifications.toasts.addDanger({
+        title: 'Failed to load APM configuration',
+        text: error.message || 'An error occurred while loading the configuration.',
+      });
+    }
+  }, [error, notifications]);
 
   const handleModalClose = (saved?: boolean) => {
     setIsSettingsModalVisible(false);
