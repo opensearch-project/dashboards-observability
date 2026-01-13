@@ -4,9 +4,9 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import { PromQLSearchService } from '../../services/promql_search_service';
+import { PromQLSearchService } from '../../query_services/promql_search_service';
 import { getTimeInSeconds } from '../utils/time_utils';
-import { QUERY_TOP_SERVICES_BY_FAULT_RATE } from '../../services/query_requests/promql_queries';
+import { QUERY_TOP_SERVICES_BY_FAULT_RATE } from '../../query_services/query_requests/promql_queries';
 import { useApmConfig } from '../../config/apm_config_context';
 
 export interface ServiceFaultRateItem {

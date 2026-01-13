@@ -37,7 +37,7 @@ import { TopServicesByFaultRate } from '../../shared/components/fault_widgets/to
 import { TopDependenciesByFaultRate } from '../../shared/components/fault_widgets/top_dependencies_by_fault_rate';
 import { TimeRange, ServiceTableItem } from '../../types/service_types';
 import { parseTimeRange } from '../../shared/utils/time_utils';
-import { parseEnvironmentType } from '../../services/query_requests/response_processor';
+import { parseEnvironmentType } from '../../query_services/query_requests/response_processor';
 import {
   navigateToServiceMap,
   navigateToServiceLogs,
@@ -50,6 +50,7 @@ import {
   matchesAnyFailureRateThreshold,
 } from '../../shared/components/filters';
 import { getEnvironmentDisplayName } from '../../shared/utils/constants';
+import { servicesI18nTexts as i18nTexts } from './services_i18n';
 
 /**
  * Gets a nested value from an object using dot notation path
@@ -109,7 +110,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     chrome.setBreadcrumbs([
       parentBreadcrumb,
       {
-        text: 'Services',
+        text: i18nTexts.breadcrumb,
         href: '#/services',
       },
     ]);
@@ -390,7 +391,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     () => [
       {
         field: 'serviceName',
-        name: 'Service Name',
+        name: i18nTexts.table.serviceName,
         sortable: true,
         width: '20%',
         render: (serviceName: string, item: ServiceTableItem) => {
@@ -419,7 +420,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       },
       {
         field: 'environment',
-        name: 'Environment',
+        name: i18nTexts.table.environment,
         sortable: true,
         align: 'center',
         width: '10%',
@@ -429,7 +430,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       },
       {
         field: 'latency' as any,
-        name: 'Latency (P95)',
+        name: i18nTexts.table.latencyP95,
         width: '21%',
         align: 'center',
         sortable: (item: ServiceTableItem) => {
@@ -470,7 +471,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       },
       {
         field: 'throughput' as any,
-        name: 'Throughput',
+        name: i18nTexts.table.throughput,
         width: '21%',
         align: 'center',
         sortable: (item: ServiceTableItem) => {
@@ -511,7 +512,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       },
       {
         field: 'failureRatio' as any,
-        name: 'Failure Ratio',
+        name: i18nTexts.table.failureRatio,
         width: '21%',
         align: 'center',
         sortable: (item: ServiceTableItem) => {
@@ -551,7 +552,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         },
       },
       {
-        name: 'Actions',
+        name: i18nTexts.table.actions,
         width: '7%',
         align: 'center',
         render: (item: ServiceTableItem) => (
@@ -562,20 +563,20 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             justifyContent="center"
           >
             <EuiFlexItem grow={false}>
-              <EuiToolTip content="View service map">
+              <EuiToolTip content={i18nTexts.actions.viewServiceMap}>
                 <EuiButtonIcon
                   iconType="graphApp"
-                  aria-label="View service map"
+                  aria-label={i18nTexts.actions.viewServiceMap}
                   onClick={() => navigateToServiceMap(item.serviceName, item.environment)}
                   data-test-subj={`serviceMapButton-${item.serviceName}`}
                 />
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content="View logs">
+              <EuiToolTip content={i18nTexts.actions.viewLogs}>
                 <EuiButtonIcon
                   iconType="discoverApp"
-                  aria-label="View logs"
+                  aria-label={i18nTexts.actions.viewLogs}
                   onClick={() =>
                     navigateToServiceLogs(item.serviceName, item.environment, timeRange)
                   }
@@ -584,10 +585,10 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content="View traces">
+              <EuiToolTip content={i18nTexts.actions.viewTraces}>
                 <EuiButtonIcon
                   iconType="apmTrace"
-                  aria-label="View traces"
+                  aria-label={i18nTexts.actions.viewTraces}
                   onClick={() =>
                     navigateToServiceTraces(item.serviceName, item.environment, timeRange)
                   }
@@ -608,7 +609,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         <EuiPageBody>
           <EuiPageContent>
             <EuiPageContentBody>
-              <EuiCallOut title="Error loading services" color="danger" iconType="alert">
+              <EuiCallOut title={i18nTexts.error.title} color="danger" iconType="alert">
                 <p>{error.message}</p>
               </EuiCallOut>
             </EuiPageContentBody>
@@ -638,8 +639,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             {showEmptyState ? (
               <EuiPanel style={{ marginTop: '8px' }}>
                 <EmptyState
-                  title="No services found"
-                  body="Services will appear here once they start sending telemetry data."
+                  title={i18nTexts.empty.title}
+                  body={i18nTexts.empty.body}
                   iconType="search"
                 />
               </EuiPanel>
@@ -660,12 +661,12 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                       <EuiPanel style={{ height: '100%' }}>
                         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                           <EuiFlexItem grow={false}>
-                            <strong>Filters</strong>
+                            <strong>{i18nTexts.filters.title}</strong>
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
                             <EuiButtonIcon
                               color="text"
-                              aria-label="Toggle filter sidebar"
+                              aria-label={i18nTexts.filters.toggleAriaLabel}
                               iconType="menuLeft"
                               onClick={() => togglePanel('filter-sidebar', { direction: 'left' })}
                               data-test-subj="filter-sidebar-toggle"
@@ -680,7 +681,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                           id="environmentAccordion"
                           buttonContent={
                             <EuiText size="xs">
-                              <strong>Environment</strong>
+                              <strong>{i18nTexts.filters.environment}</strong>
                             </EuiText>
                           }
                           initialIsOpen={true}
@@ -699,7 +700,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                             />
                           ) : (
                             <EuiText size="s" color="subdued">
-                              No environments available
+                              {i18nTexts.filters.noEnvironments}
                             </EuiText>
                           )}
                         </EuiAccordion>
@@ -711,7 +712,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                           id="latencyAccordion"
                           buttonContent={
                             <EuiText size="xs">
-                              <strong>Latency (P95)</strong>
+                              <strong>{i18nTexts.filters.latency}</strong>
                             </EuiText>
                           }
                           initialIsOpen={true}
@@ -734,7 +735,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                           id="throughputAccordion"
                           buttonContent={
                             <EuiText size="xs">
-                              <strong>Throughput</strong>
+                              <strong>{i18nTexts.filters.throughput}</strong>
                             </EuiText>
                           }
                           initialIsOpen={true}
@@ -757,7 +758,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                           id="failureRateAccordion"
                           buttonContent={
                             <EuiText size="xs">
-                              <strong>Failure Ratio</strong>
+                              <strong>{i18nTexts.filters.failureRatio}</strong>
                             </EuiText>
                           }
                           initialIsOpen={true}
@@ -781,7 +782,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                                 id="attributesAccordion"
                                 buttonContent={
                                   <EuiText size="s">
-                                    <strong>Attributes</strong>
+                                    <strong>{i18nTexts.filters.attributes}</strong>
                                   </EuiText>
                                 }
                                 initialIsOpen={true}
@@ -847,7 +848,9 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                                                     data-test-subj={`attribute-${attrPath}-selectAll`}
                                                     color="primary"
                                                   >
-                                                    <EuiText size="xs">Select all</EuiText>
+                                                    <EuiText size="xs">
+                                                      {i18nTexts.filters.selectAll}
+                                                    </EuiText>
                                                   </EuiLink>
                                                 </EuiFlexItem>
                                                 <EuiFlexItem grow={false}>
@@ -858,7 +861,9 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                                                     data-test-subj={`attribute-${attrPath}-clearAll`}
                                                     color="primary"
                                                   >
-                                                    <EuiText size="xs">Clear all</EuiText>
+                                                    <EuiText size="xs">
+                                                      {i18nTexts.filters.clearAll}
+                                                    </EuiText>
                                                   </EuiLink>
                                                 </EuiFlexItem>
                                               </EuiFlexGroup>
@@ -905,7 +910,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                                                   >
                                                     <EuiText size="xs">
                                                       {isExpanded
-                                                        ? 'Show less'
+                                                        ? i18nTexts.filters.showLess
                                                         : `+${remainingCount} more`}
                                                     </EuiText>
                                                   </EuiLink>
@@ -914,7 +919,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                                             </>
                                           ) : (
                                             <EuiText size="s" color="subdued">
-                                              No matching values
+                                              {i18nTexts.filters.noMatchingValues}
                                             </EuiText>
                                           )}
                                         </EuiAccordion>
@@ -961,8 +966,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                       <EuiPanel>
                         {displayedServices.length === 0 ? (
                           <EmptyState
-                            title="No matching services"
-                            body="Try adjusting your search query or filters."
+                            title={i18nTexts.noMatching.title}
+                            body={i18nTexts.noMatching.body}
                             iconType="search"
                           />
                         ) : (

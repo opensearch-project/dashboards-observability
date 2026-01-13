@@ -15,10 +15,40 @@ import {
   EuiBasicTableColumn,
   EuiLink,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { useTopDependenciesByFaultRate } from '../../hooks/use_top_dependencies_by_fault_rate';
 import { TimeRange } from '../../../types/service_types';
 import { FaultRateCell, getRelativePercentage } from './fault_rate_cell';
 import { ServiceCell } from './service_cell';
+
+// i18n translations
+const i18nTexts = {
+  title: i18n.translate('observability.apm.faultWidgets.dependencies.title', {
+    defaultMessage: 'Top Dependency Paths by Fault Rate',
+  }),
+  columnRemoteService: i18n.translate(
+    'observability.apm.faultWidgets.dependencies.columnRemoteService',
+    {
+      defaultMessage: 'Remote Service',
+    }
+  ),
+  columnService: i18n.translate('observability.apm.faultWidgets.dependencies.columnService', {
+    defaultMessage: 'Service',
+  }),
+  columnFaultRate: i18n.translate('observability.apm.faultWidgets.dependencies.columnFaultRate', {
+    defaultMessage: 'Fault Rate',
+  }),
+  prometheusRequired: i18n.translate(
+    'observability.apm.faultWidgets.dependencies.prometheusRequired',
+    {
+      defaultMessage:
+        'Prometheus connection required. Configure a Prometheus data source to view dependency fault rate metrics.',
+    }
+  ),
+  noData: i18n.translate('observability.apm.faultWidgets.dependencies.noData', {
+    defaultMessage: 'No dependency fault rate data available',
+  }),
+};
 
 export interface TopDependenciesByFaultRateProps {
   timeRange: TimeRange;
@@ -100,7 +130,7 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
   const columns: Array<EuiBasicTableColumn<DependencyFaultRateItem>> = [
     {
       field: 'target',
-      name: 'Remote Service',
+      name: i18nTexts.columnRemoteService,
       width: '30%',
       truncateText: true,
       render: (target: string) => (
@@ -112,7 +142,7 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
       ),
     },
     {
-      name: 'Service',
+      name: i18nTexts.columnService,
       width: '30%',
       truncateText: true,
       render: (item: DependencyFaultRateItem) => (
@@ -127,7 +157,7 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
       ),
     },
     {
-      name: 'Fault Rate',
+      name: i18nTexts.columnFaultRate,
       width: '40%',
       render: (item: DependencyFaultRateItem) => (
         <FaultRateCell faultRate={item.faultRate} relativePercentage={item.relativePercentage} />
@@ -140,7 +170,7 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
       <EuiFlexItem>
         <EuiPanel>
           <EuiText size="m">
-            <h4>Top Dependency Paths by Fault Rate</h4>
+            <h4>{i18nTexts.title}</h4>
           </EuiText>
           <EuiSpacer size="s" />
           <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 150 }}>
@@ -162,17 +192,19 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
       <EuiFlexItem>
         <EuiPanel>
           <EuiText size="m">
-            <h4>Top Dependency Paths by Fault Rate</h4>
+            <h4>{i18nTexts.title}</h4>
           </EuiText>
           <EuiSpacer size="s" />
           <EuiText color="subdued" size="s">
             {isConfigError || isAuthError ? (
-              <p>
-                Prometheus connection required. Configure a Prometheus data source to view
-                dependency fault rate metrics.
-              </p>
+              <p>{i18nTexts.prometheusRequired}</p>
             ) : (
-              <p>Error loading dependency fault rate data: {error.message}</p>
+              <p>
+                {i18n.translate('observability.apm.faultWidgets.dependencies.error', {
+                  defaultMessage: 'Error loading dependency fault rate data: {errorMessage}',
+                  values: { errorMessage: error.message },
+                })}
+              </p>
             )}
           </EuiText>
         </EuiPanel>
@@ -185,11 +217,11 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
       <EuiFlexItem>
         <EuiPanel>
           <EuiText size="m">
-            <h4>Top Dependency Paths by Fault Rate</h4>
+            <h4>{i18nTexts.title}</h4>
           </EuiText>
           <EuiSpacer size="s" />
           <EuiText color="subdued" size="s">
-            <p>No dependency fault rate data available</p>
+            <p>{i18nTexts.noData}</p>
           </EuiText>
         </EuiPanel>
       </EuiFlexItem>
@@ -200,7 +232,7 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
     <EuiFlexItem>
       <EuiPanel>
         <EuiText size="m">
-          <h4>Top Dependency Paths by Fault Rate</h4>
+          <h4>{i18nTexts.title}</h4>
         </EuiText>
         <EuiSpacer size="s" />
         <EuiBasicTable items={tableItems} columns={columns} tableLayout="auto" />

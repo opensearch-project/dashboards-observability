@@ -8,7 +8,7 @@ import { useServices } from '../use_services';
 
 // Mock the PPLSearchService
 const mockListServices = jest.fn();
-jest.mock('../../../services/ppl_search_service', () => ({
+jest.mock('../../../query_services/ppl_search_service', () => ({
   PPLSearchService: jest.fn().mockImplementation(() => ({
     listServices: mockListServices,
   })),

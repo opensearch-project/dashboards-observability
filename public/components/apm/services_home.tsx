@@ -18,7 +18,7 @@ import { ApmSettingsModal } from './config/apm_settings_modal';
 import { ApmEmptyState } from './common/apm_empty_state';
 import { HeaderControlledComponentsWrapper } from '../../plugin_helpers/plugin_headerControl';
 import { useApmConfig } from './config/apm_config_context';
-import { ServicesHome } from './pages/services';
+import { ServicesHome } from './pages/services_home';
 
 export interface ApmServicesProps {
   chrome: any;
@@ -31,11 +31,7 @@ export interface ApmServicesProps {
 
 export const Services = (props: ApmServicesProps) => {
   const { chrome, notifications, CoreStartProp, DepsStart } = props;
-<<<<<<< HEAD
   const { config, loading, error, refresh } = useApmConfig();
-=======
-  const { config, loading, refresh } = useApmConfig();
->>>>>>> b9ca851c (Add APM config and provider)
 
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
 
@@ -49,7 +45,6 @@ export const Services = (props: ApmServicesProps) => {
     ]);
   }, [chrome]);
 
-<<<<<<< HEAD
   // Show toast when config fetch error occurs
   useEffect(() => {
     if (error) {
@@ -60,8 +55,6 @@ export const Services = (props: ApmServicesProps) => {
     }
   }, [error, notifications]);
 
-=======
->>>>>>> b9ca851c (Add APM config and provider)
   const handleModalClose = (saved?: boolean) => {
     setIsSettingsModalVisible(false);
     if (saved) {

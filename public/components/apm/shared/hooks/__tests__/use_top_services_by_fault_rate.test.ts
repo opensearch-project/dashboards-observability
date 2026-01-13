@@ -8,7 +8,7 @@ import { useTopServicesByFaultRate } from '../use_top_services_by_fault_rate';
 
 // Mock the PromQLSearchService
 const mockExecuteMetricRequest = jest.fn();
-jest.mock('../../../services/promql_search_service', () => ({
+jest.mock('../../../query_services/promql_search_service', () => ({
   PromQLSearchService: jest.fn().mockImplementation(() => ({
     executeMetricRequest: mockExecuteMetricRequest,
   })),

@@ -150,7 +150,6 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
     );
 
     // Build new references array using entity-based lookup for existing values
-<<<<<<< HEAD
     const tracesId = params.tracesDatasetId || existingEntityRefs.tracesDataset?.id;
     const serviceMapId = params.serviceMapDatasetId || existingEntityRefs.serviceMapDataset?.id;
     const prometheusId =
@@ -165,14 +164,6 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
       tracesDatasetId: tracesId,
       serviceMapDatasetId: serviceMapId,
       prometheusDataSourceId: prometheusId,
-=======
-    const references = this.createReferences({
-      tracesDatasetId: params.tracesDatasetId || existingEntityRefs.tracesDataset?.id || '',
-      serviceMapDatasetId:
-        params.serviceMapDatasetId || existingEntityRefs.serviceMapDataset?.id || '',
-      prometheusDataSourceId:
-        params.prometheusDataSourceId || existingEntityRefs.prometheusDataSource?.id || '',
->>>>>>> b9ca851c (Add APM config and provider)
     });
 
     const entities = this.createEntities();
@@ -243,7 +234,7 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
                 id: tracesRef.id,
                 title: tracesDataView?.title || tracesRef.id,
                 name: tracesDataView?.getDisplayName?.(),
-                datasourceId: tracesDataView?.dataSourceRef?.id ?? '',
+                datasourceId: tracesDataView?.dataSourceRef?.id,
               }
             : null,
           serviceMapDataset: serviceMapRef
@@ -251,7 +242,7 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
                 id: serviceMapRef.id,
                 title: serviceMapDataView?.title || serviceMapRef.id,
                 name: serviceMapDataView?.getDisplayName?.(),
-                datasourceId: serviceMapDataView?.dataSourceRef?.id ?? '',
+                datasourceId: serviceMapDataView?.dataSourceRef?.id,
               }
             : null,
           prometheusDataSource: prometheus

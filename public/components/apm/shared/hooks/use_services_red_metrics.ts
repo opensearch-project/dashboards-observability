@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import { PromQLSearchService } from '../../services/promql_search_service';
+import { PromQLSearchService } from '../../query_services/promql_search_service';
 import { getTimeInSeconds } from '../utils/time_utils';
 import { useApmConfig } from '../../config/apm_config_context';
 

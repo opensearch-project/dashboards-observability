@@ -5,8 +5,13 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { TimeRangePicker } from './time_filter';
 import { TimeRange } from '../../types/service_types';
+
+const searchPlaceholder = i18n.translate('observability.apm.services.search.placeholder', {
+  defaultMessage: 'Filter by service name or environment',
+});
 
 export interface ApmPageHeaderProps {
   timeRange: TimeRange;
@@ -34,7 +39,7 @@ export const ApmPageHeader: React.FC<ApmPageHeaderProps> = ({
       {/* Search bar on the left - takes available space */}
       <EuiFlexItem grow={true}>
         <EuiFieldSearch
-          placeholder="Filter by service name or environment"
+          placeholder={searchPlaceholder}
           value={searchQuery}
           onChange={(e) => onSearchChange?.(e.target.value)}
           isClearable

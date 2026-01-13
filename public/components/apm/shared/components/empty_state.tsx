@@ -5,6 +5,24 @@
 
 import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+
+// i18n translations
+const i18nTexts = {
+  errorTitle: i18n.translate('observability.apm.emptyState.errorTitle', {
+    defaultMessage: 'Error loading data',
+  }),
+  noDataTitle: i18n.translate('observability.apm.emptyState.noDataTitle', {
+    defaultMessage: 'No services found',
+  }),
+  errorBody: i18n.translate('observability.apm.emptyState.errorBody', {
+    defaultMessage: 'There was an error loading the services. Please try again.',
+  }),
+  noDataBody: i18n.translate('observability.apm.emptyState.noDataBody', {
+    defaultMessage:
+      'No services match your search criteria. Try adjusting your filters or time range.',
+  }),
+};
 
 interface EmptyStateProps {
   isError?: boolean;
@@ -22,10 +40,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   body,
   iconType,
 }) => {
-  const defaultTitle = isError ? 'Error loading data' : 'No services found';
-  const defaultBody = isError
-    ? 'There was an error loading the services. Please try again.'
-    : 'No services match your search criteria. Try adjusting your filters or time range.';
+  const defaultTitle = isError ? i18nTexts.errorTitle : i18nTexts.noDataTitle;
+  const defaultBody = isError ? i18nTexts.errorBody : i18nTexts.noDataBody;
   const defaultIcon = isError ? 'alert' : 'search';
 
   return (

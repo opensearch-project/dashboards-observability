@@ -125,8 +125,13 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
 
       if (!hasAllReferences) {
         notifications.toasts.addWarning({
-          title: 'Configuration could not be loaded',
-          text: 'Some referenced data sources are missing or unavailable. Please reconfigure.',
+          title: i18n.translate('observability.apm.settings.toast.configLoadWarningTitle', {
+            defaultMessage: 'Configuration could not be loaded',
+          }),
+          text: i18n.translate('observability.apm.settings.toast.configLoadWarningText', {
+            defaultMessage:
+              'Some referenced data sources are missing or unavailable. Please reconfigure.',
+          }),
         });
         return;
       }
@@ -176,8 +181,14 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
   useEffect(() => {
     if (datasetsError) {
       notifications.toasts.addWarning({
-        title: 'Failed to load datasets',
-        text: datasetsError.message || 'An error occurred while loading datasets.',
+        title: i18n.translate('observability.apm.settings.toast.datasetsErrorTitle', {
+          defaultMessage: 'Failed to load datasets',
+        }),
+        text:
+          datasetsError.message ||
+          i18n.translate('observability.apm.settings.toast.datasetsErrorText', {
+            defaultMessage: 'An error occurred while loading datasets.',
+          }),
       });
     }
   }, [datasetsError, notifications]);
@@ -185,8 +196,14 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
   useEffect(() => {
     if (prometheusError) {
       notifications.toasts.addWarning({
-        title: 'Failed to load Prometheus data sources',
-        text: prometheusError.message || 'An error occurred while loading Prometheus data sources.',
+        title: i18n.translate('observability.apm.settings.toast.prometheusErrorTitle', {
+          defaultMessage: 'Failed to load Prometheus data sources',
+        }),
+        text:
+          prometheusError.message ||
+          i18n.translate('observability.apm.settings.toast.prometheusErrorText', {
+            defaultMessage: 'An error occurred while loading Prometheus data sources.',
+          }),
       });
     }
   }, [prometheusError, notifications]);
@@ -194,9 +211,14 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
   useEffect(() => {
     if (correlatedLogsError) {
       notifications.toasts.addWarning({
-        title: 'Failed to load correlated logs',
+        title: i18n.translate('observability.apm.settings.toast.correlatedLogsErrorTitle', {
+          defaultMessage: 'Failed to load correlated logs',
+        }),
         text:
-          correlatedLogsError.message || 'An error occurred while loading correlated log datasets.',
+          correlatedLogsError.message ||
+          i18n.translate('observability.apm.settings.toast.correlatedLogsErrorText', {
+            defaultMessage: 'An error occurred while loading correlated log datasets.',
+          }),
       });
     }
   }, [correlatedLogsError, notifications]);
@@ -209,13 +231,25 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
     };
 
     if (!formData.tracesDatasetId) {
-      newErrors.tracesDataset.push('Traces dataset is required');
+      newErrors.tracesDataset.push(
+        i18n.translate('observability.apm.settings.validation.tracesRequired', {
+          defaultMessage: 'Traces dataset is required',
+        })
+      );
     }
     if (!formData.serviceMapDatasetId) {
-      newErrors.serviceMapDataset.push('Service map dataset is required');
+      newErrors.serviceMapDataset.push(
+        i18n.translate('observability.apm.settings.validation.serviceMapRequired', {
+          defaultMessage: 'Service map dataset is required',
+        })
+      );
     }
     if (!formData.prometheusDataSourceId) {
-      newErrors.prometheusDataSource.push('Prometheus data source is required');
+      newErrors.prometheusDataSource.push(
+        i18n.translate('observability.apm.settings.validation.prometheusRequired', {
+          defaultMessage: 'Prometheus data source is required',
+        })
+      );
     }
 
     setErrors(newErrors);
@@ -231,8 +265,12 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
 
     if (!workspaceId) {
       notifications.toasts.addDanger({
-        title: 'Cannot save configuration',
-        text: 'No workspace ID found',
+        title: i18n.translate('observability.apm.settings.toast.noWorkspaceTitle', {
+          defaultMessage: 'Cannot save configuration',
+        }),
+        text: i18n.translate('observability.apm.settings.toast.noWorkspaceText', {
+          defaultMessage: 'No workspace ID found',
+        }),
       });
       return;
     }
@@ -261,8 +299,12 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
 
       notifications.toasts.addSuccess({
         title: existingConfig
-          ? 'Configuration updated successfully'
-          : 'Configuration saved successfully',
+          ? i18n.translate('observability.apm.settings.toast.configUpdatedSuccess', {
+              defaultMessage: 'Configuration updated successfully',
+            })
+          : i18n.translate('observability.apm.settings.toast.configSavedSuccess', {
+              defaultMessage: 'Configuration saved successfully',
+            }),
       });
 
       setShowErrors(false);
@@ -270,7 +312,9 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
       onClose(true);
     } catch (error) {
       notifications.toasts.addError(toError(error), {
-        title: 'Failed to save configuration',
+        title: i18n.translate('observability.apm.settings.toast.saveErrorTitle', {
+          defaultMessage: 'Failed to save configuration',
+        }),
       });
     } finally {
       setIsSaving(false);
@@ -318,7 +362,9 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
                 src={`data:image/svg+xml;utf8,${encodeURIComponent(
                   isDarkMode ? ApmArchitectureSvgDark : ApmArchitectureSvgLight
                 )}`}
-                alt="APM Architecture Diagram"
+                alt={i18n.translate('observability.apm.settings.architectureDiagramAlt', {
+                  defaultMessage: 'APM Architecture Diagram',
+                })}
                 style={{ maxWidth: '100%', height: 'auto' }}
               />
             </div>

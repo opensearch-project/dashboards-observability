@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { Services } from '../services';
+import { Services } from '../services_home';
 
 // Mock child components
 jest.mock('../config/apm_settings_modal', () => ({
@@ -29,7 +29,7 @@ jest.mock('../common/apm_empty_state', () => ({
   )),
 }));
 
-jest.mock('../pages/services', () => ({
+jest.mock('../pages/services_home', () => ({
   ServicesHome: jest.fn(({ onServiceClick }) => (
     <div data-test-subj="services-home">
       <button onClick={() => onServiceClick('test-service', 'prod')}>Test Service</button>
@@ -270,7 +270,7 @@ describe('Services', () => {
 
       // Mock ServicesHome to use special characters
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { ServicesHome } = require('../pages/services');
+      const { ServicesHome } = require('../pages/services_home');
       ServicesHome.mockImplementation(
         ({ onServiceClick }: { onServiceClick: (name: string, env: string) => void }) => (
           <div data-test-subj="services-home">

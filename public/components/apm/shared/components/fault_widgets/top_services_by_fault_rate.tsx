@@ -14,10 +14,31 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { useTopServicesByFaultRate } from '../../hooks/use_top_services_by_fault_rate';
 import { TimeRange } from '../../../types/service_types';
 import { FaultRateCell, getRelativePercentage } from './fault_rate_cell';
 import { ServiceCell } from './service_cell';
+
+// i18n translations
+const i18nTexts = {
+  title: i18n.translate('observability.apm.faultWidgets.services.title', {
+    defaultMessage: 'Top Services by Fault Rate',
+  }),
+  columnService: i18n.translate('observability.apm.faultWidgets.services.columnService', {
+    defaultMessage: 'Service',
+  }),
+  columnFaultRate: i18n.translate('observability.apm.faultWidgets.services.columnFaultRate', {
+    defaultMessage: 'Fault Rate',
+  }),
+  prometheusRequired: i18n.translate('observability.apm.faultWidgets.services.prometheusRequired', {
+    defaultMessage:
+      'Prometheus connection required. Configure a Prometheus data source to view fault rate metrics.',
+  }),
+  noData: i18n.translate('observability.apm.faultWidgets.services.noData', {
+    defaultMessage: 'No fault rate data available',
+  }),
+};
 
 export interface TopServicesByFaultRateProps {
   timeRange: TimeRange;
@@ -94,7 +115,7 @@ export const TopServicesByFaultRate: React.FC<TopServicesByFaultRateProps> = ({
   // Define table columns
   const columns: Array<EuiBasicTableColumn<ServiceFaultRateItem>> = [
     {
-      name: 'Service',
+      name: i18nTexts.columnService,
       width: '40%',
       truncateText: true,
       render: (item: ServiceFaultRateItem) => (
@@ -109,7 +130,7 @@ export const TopServicesByFaultRate: React.FC<TopServicesByFaultRateProps> = ({
       ),
     },
     {
-      name: 'Fault Rate',
+      name: i18nTexts.columnFaultRate,
       width: '60%',
       render: (item: ServiceFaultRateItem) => (
         <FaultRateCell faultRate={item.faultRate} relativePercentage={item.relativePercentage} />
@@ -122,7 +143,7 @@ export const TopServicesByFaultRate: React.FC<TopServicesByFaultRateProps> = ({
       <EuiFlexItem>
         <EuiPanel>
           <EuiText size="m">
-            <h5>Top Services by Fault Rate</h5>
+            <h5>{i18nTexts.title}</h5>
           </EuiText>
           <EuiSpacer size="s" />
           <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 150 }}>
@@ -144,17 +165,19 @@ export const TopServicesByFaultRate: React.FC<TopServicesByFaultRateProps> = ({
       <EuiFlexItem>
         <EuiPanel>
           <EuiText size="m">
-            <h4>Top Services by Fault Rate</h4>
+            <h4>{i18nTexts.title}</h4>
           </EuiText>
           <EuiSpacer size="s" />
           <EuiText color="subdued" size="s">
             {isConfigError || isAuthError ? (
-              <p>
-                Prometheus connection required. Configure a Prometheus data source to view fault
-                rate metrics.
-              </p>
+              <p>{i18nTexts.prometheusRequired}</p>
             ) : (
-              <p>Error loading fault rate data: {error.message}</p>
+              <p>
+                {i18n.translate('observability.apm.faultWidgets.services.error', {
+                  defaultMessage: 'Error loading fault rate data: {errorMessage}',
+                  values: { errorMessage: error.message },
+                })}
+              </p>
             )}
           </EuiText>
         </EuiPanel>
@@ -167,11 +190,11 @@ export const TopServicesByFaultRate: React.FC<TopServicesByFaultRateProps> = ({
       <EuiFlexItem>
         <EuiPanel>
           <EuiText size="m">
-            <h4>Top Services by Fault Rate</h4>
+            <h4>{i18nTexts.title}</h4>
           </EuiText>
           <EuiSpacer size="s" />
           <EuiText color="subdued" size="s">
-            <p>No fault rate data available</p>
+            <p>{i18nTexts.noData}</p>
           </EuiText>
         </EuiPanel>
       </EuiFlexItem>
@@ -182,7 +205,7 @@ export const TopServicesByFaultRate: React.FC<TopServicesByFaultRateProps> = ({
     <EuiFlexItem>
       <EuiPanel>
         <EuiText size="m">
-          <h4>Top Services by Fault Rate</h4>
+          <h4>{i18nTexts.title}</h4>
         </EuiText>
         <EuiSpacer size="s" />
         <EuiBasicTable items={tableItems} columns={columns} tableLayout="auto" />

@@ -8,7 +8,7 @@ import { useServicesRedMetrics } from '../use_services_red_metrics';
 
 // Mock the PromQLSearchService
 const mockExecuteMetricRequest = jest.fn();
-jest.mock('../../../services/promql_search_service', () => ({
+jest.mock('../../../query_services/promql_search_service', () => ({
   PromQLSearchService: jest.fn().mockImplementation(() => ({
     executeMetricRequest: mockExecuteMetricRequest,
   })),
