@@ -9,10 +9,12 @@ import { SavedQuery, SavedVisualization } from './explorer';
 export const VISUALIZATION_SAVED_OBJECT = 'observability-visualization';
 export const SEARCH_SAVED_OBJECT = 'observability-search';
 export const NOTEBOOK_SAVED_OBJECT = 'observability-notebook';
+export const CORRELATIONS_SAVED_OBJECT = 'correlations';
 export const OBSERVABILTY_SAVED_OBJECTS = [
   VISUALIZATION_SAVED_OBJECT,
   SEARCH_SAVED_OBJECT,
   NOTEBOOK_SAVED_OBJECT,
+  CORRELATIONS_SAVED_OBJECT,
 ] as const;
 export const SAVED_OBJECT_VERSION = 1;
 
@@ -50,10 +52,14 @@ export interface ResolvedApmConfig extends Omit<ApmConfigAttributes, 'entities'>
   tracesDataset: {
     id: string;
     title: string;
+    name?: string;
+    datasourceId?: string;
   } | null;
   serviceMapDataset: {
     id: string;
     title: string;
+    name?: string;
+    datasourceId?: string;
   } | null;
   prometheusDataSource: {
     id: string;

@@ -20,7 +20,6 @@ import {
 import {
   observabilityApmServicesID,
   observabilityApmApplicationMapID,
-  observabilityApmApplicationConfigID,
 } from '../../common/constants/apm';
 import { AppPluginStartDependencies, SetupDependencies } from '../types';
 
@@ -108,7 +107,7 @@ export function registerAllPluginNavGroups(
   }
 
   if (dataSourceEnabled && apmEnabled) {
-    // APM Mode - register nav links for Services, Application Map, and Application Monitoring Config
+    // APM Mode - register nav links for Services and Application Map
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
       {
         id: observabilityApmServicesID,
@@ -121,12 +120,6 @@ export function registerAllPluginNavGroups(
         category: applicationMonitoringCategory, // Explicitly pass custom category
         showInAllNavGroup: true,
         order: 200,
-      },
-      {
-        id: observabilityApmApplicationConfigID,
-        category: applicationMonitoringCategory, // Explicitly pass custom category
-        showInAllNavGroup: true,
-        order: 300,
       },
     ]);
   } else {
