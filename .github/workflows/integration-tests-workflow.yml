@@ -121,36 +121,10 @@ jobs:
           cat << 'EOF' >> ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/config/opensearch.yml
           action.auto_create_index: true
           EOF
-
-          echo "=== OpenSearch configuration file (last 10 lines) ==="
-          tail -10 ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/config/opensearch.yml
         shell: bash
 
       - name: Run OpenSearch
-        run: /bin/bash -c "./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch -Ecluster.routing.allocation.disk.threshold_enabled=false -Ecluster.routing.allocation.disk.watermark.low=1gb -Ecluster.routing.allocation.disk.watermark.high=500mb -Ecluster.routing.allocation.disk.watermark.flood_stage=100mb -Ecluster.blocks.read_only_allow_delete=false > opensearch.log 2>&1 &"
-        shell: bash
-
-      - name: Wait for OpenSearch to start
-        run: |
-          echo "Waiting for OpenSearch to be ready..."
-          for i in {1..60}; do
-            if curl -s -u admin:admin http://localhost:9200 > /dev/null 2>&1; then
-              echo "OpenSearch is ready!"
-              curl -XGET -u admin:admin http://localhost:9200
-              break
-            fi
-            if [ $i -eq 60 ]; then
-              echo "Timeout waiting for OpenSearch to start"
-              echo "=== OpenSearch logs (last 100 lines) ==="
-              tail -100 opensearch.log
-              exit 1
-            fi
-            echo "Attempt $i/60: OpenSearch not ready yet, waiting 5 seconds..."
-            sleep 5
-          done
-
-          echo "=== Verifying cluster health ==="
-          curl -XGET -u admin:admin http://localhost:9200/_cluster/health?pretty
+        run: /bin/bash -c "./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch -Ecluster.routing.allocation.disk.threshold_enabled=false -Ecluster.routing.allocation.disk.watermark.low=1gb -Ecluster.routing.allocation.disk.watermark.high=500mb -Ecluster.routing.allocation.disk.watermark.flood_stage=100mb -Ecluster.blocks.read_only_allow_delete=false &"
         shell: bash
 
       - name: Checkout OpenSearch Dashboards
@@ -183,10 +157,6 @@ jobs:
           rm -rf ./config/opensearch_dashboards.yml
           cat << 'EOT' > ./config/opensearch_dashboards.yml
           server.host: "0.0.0.0"
-          opensearch.hosts: ["http://localhost:9200"]
-          opensearch.username: "admin"
-          opensearch.password: "admin"
-          opensearch.ssl.verificationMode: none
           home.disableWelcomeScreen: true
           EOT
         working-directory: OpenSearch-Dashboards
@@ -209,19 +179,7 @@ jobs:
       - name: Bootstrap OpenSearch Dashboards
         run: |
           cd OpenSearch-Dashboards
-          # Retry bootstrap up to 3 times to handle intermittent network issues
-          for i in {1..3}; do
-            if yarn osd bootstrap --single-version=loose; then
-              echo "Bootstrap successful!"
-              break
-            fi
-            if [ $i -eq 3 ]; then
-              echo "Bootstrap failed after 3 attempts"
-              exit 1
-            fi
-            echo "Bootstrap attempt $i failed, retrying in 10 seconds..."
-            sleep 10
-          done
+          yarn osd bootstrap --single-version=loose
 
       - name: Compile OpenSearch Dashboards
         run: |
@@ -252,13 +210,6 @@ jobs:
         with:
           name: dashboard.logs
           path: OpenSearch-Dashboards/dashboard.log
-
-      - name: Upload OpenSearch logs
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: opensearch-logs-${{ matrix.testgroups }}
-          path: opensearch.log
 
       - name: Get Cypress version
         id: cypress_version
