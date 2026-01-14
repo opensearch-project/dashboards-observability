@@ -119,7 +119,7 @@ jobs:
       - name: Configure OpenSearch for auto index creation
         run: |
           cat << 'EOF' >> ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/config/opensearch.yml
-          action.auto_create_index: "*"
+          action.auto_create_index: true
           EOF
 
           echo "=== OpenSearch configuration file (last 10 lines) ==="
