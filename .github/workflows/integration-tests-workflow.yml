@@ -116,8 +116,15 @@ jobs:
           /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install file:$(pwd)/plugin-artifacts/sql.zip"
         shell: bash
 
+      - name: Configure OpenSearch for auto index creation
+        run: |
+          cat << 'EOF' >> ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/config/opensearch.yml
+          action.auto_create_index: true
+          EOF
+        shell: bash
+
       - name: Run OpenSearch
-        run: /bin/bash -c "./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch &"
+        run: /bin/bash -c "./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch -Ecluster.routing.allocation.disk.threshold_enabled=false -Ecluster.routing.allocation.disk.watermark.low=1gb -Ecluster.routing.allocation.disk.watermark.high=500mb -Ecluster.routing.allocation.disk.watermark.flood_stage=100mb -Ecluster.blocks.read_only_allow_delete=false &"
         shell: bash
 
       - name: Checkout OpenSearch Dashboards
