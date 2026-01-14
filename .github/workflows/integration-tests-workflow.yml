@@ -120,16 +120,10 @@ jobs:
         run: |
           cat << 'EOF' >> ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/config/opensearch.yml
           action.auto_create_index: "*"
-          plugins.security.allow_default_init_securityindex: true
-          plugins.security.allow_unsafe_democertificates: true
-          plugins.security.audit.type: internal_opensearch
-          plugins.security.enable_snapshot_restore_privilege: true
-          plugins.security.check_snapshot_restore_write_privileges: true
-          plugins.security.restapi.roles_enabled: ["all_access", "security_rest_api_access"]
           EOF
 
-          echo "=== OpenSearch configuration file (last 15 lines) ==="
-          tail -15 ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/config/opensearch.yml
+          echo "=== OpenSearch configuration file (last 10 lines) ==="
+          tail -10 ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/config/opensearch.yml
         shell: bash
 
       - name: Run OpenSearch
@@ -147,6 +141,8 @@ jobs:
             fi
             if [ $i -eq 60 ]; then
               echo "Timeout waiting for OpenSearch to start"
+              echo "=== OpenSearch logs (last 100 lines) ==="
+              tail -100 opensearch.log
               exit 1
             fi
             echo "Attempt $i/60: OpenSearch not ready yet, waiting 5 seconds..."
@@ -200,6 +196,12 @@ jobs:
 
           echo "=== Deleting test observability index ==="
           curl -X DELETE -u admin:admin "http://localhost:9200/.opensearch-observability-test"
+
+          echo "=== Waiting 10 seconds for security plugin to fully initialize ==="
+          sleep 10
+
+          echo "=== Final check: OpenSearch is ready for Dashboards ==="
+          curl -XGET -u admin:admin http://localhost:9200/_cluster/health?pretty
         shell: bash
 
       - name: Checkout OpenSearch Dashboards
