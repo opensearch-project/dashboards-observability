@@ -119,11 +119,17 @@ jobs:
       - name: Configure OpenSearch for auto index creation
         run: |
           cat << 'EOF' >> ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/config/opensearch.yml
-          action.auto_create_index: true
+          action.auto_create_index: "*"
+          plugins.security.allow_default_init_securityindex: true
+          plugins.security.allow_unsafe_democertificates: true
+          plugins.security.audit.type: internal_opensearch
+          plugins.security.enable_snapshot_restore_privilege: true
+          plugins.security.check_snapshot_restore_write_privileges: true
+          plugins.security.restapi.roles_enabled: ["all_access", "security_rest_api_access"]
           EOF
 
-          echo "=== OpenSearch configuration file (last 10 lines) ==="
-          tail -10 ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/config/opensearch.yml
+          echo "=== OpenSearch configuration file (last 15 lines) ==="
+          tail -15 ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/config/opensearch.yml
         shell: bash
 
       - name: Run OpenSearch
@@ -184,22 +190,16 @@ jobs:
           echo "=== OpenSearch startup logs (searching for auto_create_index) ==="
           grep -i "auto_create_index\|create.*index.*block" opensearch.log || echo "No relevant logs found"
 
-          echo "=== OpenSearch startup logs (last 50 lines) ==="
-          tail -50 opensearch.log
+          echo "=== OpenSearch startup logs (last 30 lines) ==="
+          tail -30 opensearch.log
 
-          echo "=== Configuring security plugin to allow index creation ==="
-          curl -X PUT -u admin:admin "http://localhost:9200/_plugins/_security/api/roles/all_access" \
+          echo "=== FINAL VERIFICATION: Trying to create observability-like index ==="
+          curl -X PUT -u admin:admin "http://localhost:9200/.opensearch-observability-test" \
             -H 'Content-Type: application/json' \
-            -d '{
-              "cluster_permissions": ["*"],
-              "index_permissions": [{
-                "index_patterns": ["*"],
-                "allowed_actions": ["*"]
-              }]
-            }'
+            -d '{"settings": {"number_of_shards": 1}}'
 
-          echo "=== Verifying admin user has all_access role ==="
-          curl -X GET -u admin:admin "http://localhost:9200/_plugins/_security/api/rolesmapping/all_access"
+          echo "=== Deleting test observability index ==="
+          curl -X DELETE -u admin:admin "http://localhost:9200/.opensearch-observability-test"
         shell: bash
 
       - name: Checkout OpenSearch Dashboards
