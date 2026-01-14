@@ -121,6 +121,9 @@ jobs:
           cat << 'EOF' >> ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/config/opensearch.yml
           action.auto_create_index: true
           EOF
+
+          echo "=== OpenSearch configuration file (last 10 lines) ==="
+          tail -10 ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/config/opensearch.yml
         shell: bash
 
       - name: Run OpenSearch
@@ -144,13 +147,31 @@ jobs:
             sleep 5
           done
 
-          echo "Verifying and setting auto_create_index via API..."
-          curl -X PUT -u admin:admin "http://localhost:9200/_cluster/settings" \
-            -H 'Content-Type: application/json' \
-            -d '{"persistent": {"action.auto_create_index": "true"}}'
+          echo "=== Checking current cluster settings BEFORE update ==="
+          curl -X GET -u admin:admin "http://localhost:9200/_cluster/settings?flat_settings=true&include_defaults=true" | jq '.defaults."action.auto_create_index"'
 
-          echo "Verifying cluster settings..."
-          curl -X GET -u admin:admin "http://localhost:9200/_cluster/settings?include_defaults=true&filter_path=**.auto_create_index"
+          echo "=== Setting auto_create_index to allow all indices (as boolean) ==="
+          RESPONSE=$(curl -X PUT -u admin:admin "http://localhost:9200/_cluster/settings" \
+            -H 'Content-Type: application/json' \
+            -d '{"persistent": {"action.auto_create_index": "true"}}')
+          echo "API Response: $RESPONSE"
+
+          echo "=== Also trying with pattern to explicitly allow observability indices ==="
+          RESPONSE2=$(curl -X PUT -u admin:admin "http://localhost:9200/_cluster/settings" \
+            -H 'Content-Type: application/json' \
+            -d '{"persistent": {"action.auto_create_index": ".opensearch-*,.opendistro-*,*"}}')
+          echo "API Response: $RESPONSE2"
+
+          echo "=== Verifying cluster settings AFTER update ==="
+          curl -X GET -u admin:admin "http://localhost:9200/_cluster/settings?flat_settings=true&include_defaults=true" | jq '.'
+
+          echo "=== Trying to create a test index to verify ==="
+          curl -X PUT -u admin:admin "http://localhost:9200/test-index-creation" \
+            -H 'Content-Type: application/json' \
+            -d '{"settings": {"number_of_shards": 1}}'
+
+          echo "=== Deleting test index ==="
+          curl -X DELETE -u admin:admin "http://localhost:9200/test-index-creation"
         shell: bash
 
       - name: Checkout OpenSearch Dashboards
