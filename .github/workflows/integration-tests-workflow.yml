@@ -127,7 +127,7 @@ jobs:
         shell: bash
 
       - name: Run OpenSearch
-        run: /bin/bash -c "./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch &"
+        run: /bin/bash -c "./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch > opensearch.log 2>&1 &"
         shell: bash
 
       - name: Wait for OpenSearch to start
@@ -156,10 +156,10 @@ jobs:
             -d '{"persistent": {"action.auto_create_index": "true"}}')
           echo "API Response: $RESPONSE"
 
-          echo "=== Also trying with pattern to explicitly allow observability indices ==="
+          echo "=== Setting auto_create_index to allow ALL indices (wildcard) ==="
           RESPONSE2=$(curl -X PUT -u admin:admin "http://localhost:9200/_cluster/settings" \
             -H 'Content-Type: application/json' \
-            -d '{"persistent": {"action.auto_create_index": ".opensearch-*,.opendistro-*,*"}}')
+            -d '{"persistent": {"action.auto_create_index": "*"}}')
           echo "API Response: $RESPONSE2"
 
           echo "=== Verifying cluster settings AFTER update ==="
@@ -172,6 +172,34 @@ jobs:
 
           echo "=== Deleting test index ==="
           curl -X DELETE -u admin:admin "http://localhost:9200/test-index-creation"
+
+          echo "=== Checking for cluster blocks ==="
+          curl -X GET -u admin:admin "http://localhost:9200/_cluster/state/blocks?pretty"
+
+          echo "=== Attempting to remove any index creation blocks ==="
+          curl -X PUT -u admin:admin "http://localhost:9200/_cluster/settings" \
+            -H 'Content-Type: application/json' \
+            -d '{"transient": {"cluster.blocks.create_index": false}}'
+
+          echo "=== OpenSearch startup logs (searching for auto_create_index) ==="
+          grep -i "auto_create_index\|create.*index.*block" opensearch.log || echo "No relevant logs found"
+
+          echo "=== OpenSearch startup logs (last 50 lines) ==="
+          tail -50 opensearch.log
+
+          echo "=== Configuring security plugin to allow index creation ==="
+          curl -X PUT -u admin:admin "http://localhost:9200/_plugins/_security/api/roles/all_access" \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "cluster_permissions": ["*"],
+              "index_permissions": [{
+                "index_patterns": ["*"],
+                "allowed_actions": ["*"]
+              }]
+            }'
+
+          echo "=== Verifying admin user has all_access role ==="
+          curl -X GET -u admin:admin "http://localhost:9200/_plugins/_security/api/rolesmapping/all_access"
         shell: bash
 
       - name: Checkout OpenSearch Dashboards
@@ -273,6 +301,13 @@ jobs:
         with:
           name: dashboard.logs
           path: OpenSearch-Dashboards/dashboard.log
+
+      - name: Upload OpenSearch logs
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: opensearch-logs-${{ matrix.testgroups }}
+          path: opensearch.log
 
       - name: Get Cypress version
         id: cypress_version
