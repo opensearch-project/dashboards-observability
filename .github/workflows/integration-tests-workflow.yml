@@ -127,7 +127,7 @@ jobs:
         shell: bash
 
       - name: Run OpenSearch
-        run: /bin/bash -c "./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch > opensearch.log 2>&1 &"
+        run: /bin/bash -c "./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch -Ecluster.routing.allocation.disk.threshold_enabled=false -Ecluster.routing.allocation.disk.watermark.low=1gb -Ecluster.routing.allocation.disk.watermark.high=500mb -Ecluster.routing.allocation.disk.watermark.flood_stage=100mb -Ecluster.blocks.read_only_allow_delete=false > opensearch.log 2>&1 &"
         shell: bash
 
       - name: Wait for OpenSearch to start
@@ -274,7 +274,7 @@ jobs:
       - name: Run Cypress tests for test group of ${{ matrix.testgroups }}
         run: |
           cd ./OpenSearch-Dashboards/plugins/dashboards-observability
-          yarn cypress:run --headless --browser chrome --env security_enabled=true --spec '.cypress/integration/${{ matrix.testgroups }}/*'
+          yarn cypress:run --headless --spec '.cypress/integration/${{ matrix.testgroups }}/*'
 
       - name: Capture failure screenshots
         uses: actions/upload-artifact@v4
