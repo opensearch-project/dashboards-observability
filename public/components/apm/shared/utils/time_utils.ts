@@ -4,7 +4,7 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { TimeRange, ParsedTimeRange } from '../../types/service_types';
+import { TimeRange, ParsedTimeRange } from '../../common/types/service_types';
 
 /**
  * Convert time string to Unix timestamp in seconds

@@ -7,7 +7,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { TimeRangePicker } from './time_filter';
-import { TimeRange } from '../../types/service_types';
+import { TimeRange } from '../../common/types/service_types';
 
 const searchPlaceholder = i18n.translate('observability.apm.services.search.placeholder', {
   defaultMessage: 'Filter by service name or environment',

@@ -6,8 +6,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { PPLSearchService } from '../../query_services/ppl_search_service';
 import { getTimeInSeconds } from '../utils/time_utils';
-import { ServiceTableItem } from '../../types/service_types';
-import { DatasetConfig } from '../../types/apm_types';
+import { ServiceTableItem } from '../../common/types/service_types';
+import { DatasetConfig } from '../../common/types/apm_types';
 import { useApmConfig } from '../../config/apm_config_context';
 
 export interface UseServicesParams {

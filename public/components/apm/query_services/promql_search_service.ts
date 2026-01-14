@@ -5,7 +5,7 @@
 
 import { coreRefs } from '../../../framework/core_refs';
 import { PromQLQueryBuilder } from './query_requests/promql_query_builder';
-import { ExecuteMetricRequestParams } from '../types/prometheus_types';
+import { ExecuteMetricRequestParams } from '../common/types/prometheus_types';
 
 /**
  * PromQLSearchService - Frontend service for executing PromQL queries

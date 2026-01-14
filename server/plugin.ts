@@ -225,7 +225,6 @@ export class ObservabilityPlugin
       client: openSearchObservabilityClient,
       dataSourceEnabled,
       logger: this.logger,
-      core,
     });
 
     core.savedObjects.registerType(getVisualizationSavedObject(dataSourceEnabled));

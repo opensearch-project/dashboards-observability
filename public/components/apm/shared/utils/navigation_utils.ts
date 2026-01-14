@@ -3,9 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TimeRange } from '../../types/service_types';
+import { TimeRange } from '../../common/types/service_types';
 import { DATA_PREPPER_INDEX_NAME } from '../../../../../common/constants/trace_analytics';
 import { coreRefs } from '../../../../framework/core_refs';
+
+/**
+ * Escapes special characters in strings for safe PPL query interpolation
+ * Prevents PPL injection attacks
+ */
+function escapePPLString(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
 
 // Constants for navigation
 // TODO: These should eventually come from APM config or be resolved dynamically
@@ -27,7 +35,9 @@ export function navigateToErrorTraces(serviceName: string, timeRange: TimeRange)
   const indexPattern = DATA_PREPPER_INDEX_NAME;
 
   // Construct PPL query to filter by service name and error status
-  const pplQuery = `| where serviceName = "${serviceName}" | where \`status.code\` > 0`;
+  const pplQuery = `| where serviceName = "${escapePPLString(
+    serviceName
+  )}" | where \`status.code\` > 0`;
 
   // Build path using RISON-like format (OpenSearch Dashboards URL state format)
   // Format: _q=(dataset:(...),language:PPL,query:'...')&_g=(...)
@@ -73,8 +83,8 @@ export function navigateToServiceLogs(
   const indexPattern = DEFAULT_LOGS_DATASET;
 
   // Construct PPL query to filter by service name and environment
-  const pplQuery = `| where service.name = "${serviceName}"${
-    environment ? ` | where deployment.environment = "${environment}"` : ''
+  const pplQuery = `| where service.name = "${escapePPLString(serviceName)}"${
+    environment ? ` | where deployment.environment = "${escapePPLString(environment)}"` : ''
   }`;
 
   // Build path using RISON-like format (OpenSearch Dashboards URL state format)
@@ -107,8 +117,8 @@ export function navigateToServiceTraces(
   const indexPattern = DEFAULT_TRACES_DATASET;
 
   // Construct PPL query to filter by service name and environment
-  const pplQuery = `| where serviceName = "${serviceName}"${
-    environment ? ` | where environment = "${environment}"` : ''
+  const pplQuery = `| where serviceName = "${escapePPLString(serviceName)}"${
+    environment ? ` | where environment = "${escapePPLString(environment)}"` : ''
   }`;
 
   // Build path using RISON-like format (OpenSearch Dashboards URL state format)

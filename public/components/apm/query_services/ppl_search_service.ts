@@ -19,7 +19,7 @@ import {
   ListServiceDependenciesRequest,
   GetServiceMapRequest,
   DatasetConfig,
-} from '../types/apm_types';
+} from '../common/types/apm_types';
 
 /**
  * PPLSearchService - Frontend service for executing PPL queries

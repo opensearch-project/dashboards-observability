@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useTopDependenciesByFaultRate } from '../../hooks/use_top_dependencies_by_fault_rate';
-import { TimeRange } from '../../../types/service_types';
+import { TimeRange } from '../../../common/types/service_types';
 import { FaultRateCell, getRelativePercentage } from './fault_rate_cell';
 import { ServiceCell } from './service_cell';
 

@@ -5,9 +5,9 @@
 
 import { useEffect, useState } from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { SavedObjectsClientContract } from '../../../../../../src/core/public';
-import { getOSDSavedObjectsClient } from '../../../../common/utils';
+import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { SavedObjectsClientContract } from '../../../../../../../src/core/public';
+import { getOSDSavedObjectsClient } from '../../../../../common/utils';
 
 interface DatasetOptionData {
   id: string;

@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { Services } from '../services_home';
+import { Services } from '../services';
 
 // Mock child components
 jest.mock('../config/apm_settings_modal', () => ({

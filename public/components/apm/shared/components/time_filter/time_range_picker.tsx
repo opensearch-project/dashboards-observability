@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { EuiSuperDatePicker, OnTimeChangeProps, OnRefreshProps } from '@elastic/eui';
-import { TimeRange } from '../../../types/service_types';
+import { TimeRange } from '../../../common/types/service_types';
 
 export interface TimeRangePickerProps {
   timeRange: TimeRange;

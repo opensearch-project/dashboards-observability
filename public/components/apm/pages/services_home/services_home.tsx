@@ -26,6 +26,7 @@ import {
   EuiHorizontalRule,
   EuiResizableContainer,
 } from '@elastic/eui';
+import get from 'lodash/get';
 import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
 import { useServices } from '../../shared/hooks/use_services';
 import { useServicesRedMetrics } from '../../shared/hooks/use_services_red_metrics';
@@ -35,7 +36,7 @@ import { LanguageIcon } from '../../shared/components/language_icon';
 import { MetricSparkline } from '../../shared/components/metric_sparkline';
 import { TopServicesByFaultRate } from '../../shared/components/fault_widgets/top_services_by_fault_rate';
 import { TopDependenciesByFaultRate } from '../../shared/components/fault_widgets/top_dependencies_by_fault_rate';
-import { TimeRange, ServiceTableItem } from '../../types/service_types';
+import { TimeRange, ServiceTableItem } from '../../common/types/service_types';
 import { parseTimeRange } from '../../shared/utils/time_utils';
 import { parseEnvironmentType } from '../../query_services/query_requests/response_processor';
 import {
@@ -49,29 +50,20 @@ import {
   FailureRateThresholdFilter,
   matchesAnyFailureRateThreshold,
 } from '../../shared/components/filters';
-import { getEnvironmentDisplayName } from '../../shared/utils/constants';
+import {
+  getEnvironmentDisplayName,
+  APM_CONSTANTS,
+  ENVIRONMENT_PLATFORM_MAP,
+} from '../../shared/utils/constants';
 import { servicesI18nTexts as i18nTexts } from './services_i18n';
 
-/**
- * Gets a nested value from an object using dot notation path
- * Example: getNestedValue({ telemetry: { sdk: { language: "python" } } }, "telemetry.sdk.language") -> "python"
- */
-function getNestedValue(obj: Record<string, any>, path: string): unknown {
-  if (!obj || !path) return undefined;
-  return path.split('.').reduce((current: any, key) => current?.[key], obj);
-}
-
-// Available environment types (platform types)
-const AVAILABLE_ENVIRONMENTS = ['generic', 'EKS', 'ECS', 'EC2', 'Lambda'];
+const AVAILABLE_ENVIRONMENTS = Object.values(ENVIRONMENT_PLATFORM_MAP);
 
 export interface ServicesHomeProps {
   chrome: any;
   parentBreadcrumb: ChromeBreadcrumb;
   onServiceClick?: (serviceName: string, environment: string) => void;
 }
-
-// Maximum number of attribute values shown before "Show more" link
-const ATTRIBUTE_VALUES_INITIAL_LIMIT = 5;
 
 /**
  * ServicesHome - Main page listing all APM services
@@ -216,12 +208,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         const platform = envDetails.platform.toUpperCase();
 
         // Map platform to filter options
-        let matchKey = '';
-        if (platform === 'GENERIC') matchKey = 'generic';
-        else if (platform === 'EKS') matchKey = 'EKS';
-        else if (platform === 'ECS') matchKey = 'ECS';
-        else if (platform === 'EC2') matchKey = 'EC2';
-        else if (platform === 'LAMBDA') matchKey = 'Lambda';
+        const matchKey = ENVIRONMENT_PLATFORM_MAP[platform] || '';
 
         return selectedEnvironments[matchKey] === true;
       });
@@ -242,7 +229,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
           if (!hasSelectedValues) continue;
 
           // Get service's value for this attribute path
-          const serviceValue = getNestedValue(service.groupByAttributes || {}, attrPath);
+          const serviceValue = get(service.groupByAttributes || {}, attrPath);
 
           // Check if service's value is selected
           const matches = Object.entries(selectedValues).some(
@@ -258,7 +245,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     return filtered;
   }, [services, searchQuery, selectedEnvironments, selectedGroupByAttributes]);
 
-  // Fetch RED metrics for ALL services (not filtered) to avoid re-fetching on search/filter changes
+  // Fetch RED (Request rate, Error rate, Duration) metrics for ALL services
+  // Fetched separately and before filtering to avoid re-fetching on filter changes
   const { metricsMap, isLoading: metricsLoading, refetch: refetchMetrics } = useServicesRedMetrics({
     services: (services || []).map((s) => ({
       serviceName: s.serviceName,
@@ -460,9 +448,9 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                 <MetricSparkline
                   data={latencyData}
                   isLoading={metricsLoading}
-                  color="#6092C0"
-                  height={20}
-                  width={120}
+                  color={APM_CONSTANTS.COLORS.LATENCY}
+                  height={APM_CONSTANTS.SPARKLINE_HEIGHT}
+                  width={APM_CONSTANTS.SPARKLINE_WIDTH}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -501,9 +489,9 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                 <MetricSparkline
                   data={throughputData}
                   isLoading={metricsLoading}
-                  color="#54B399"
-                  height={20}
-                  width={120}
+                  color={APM_CONSTANTS.COLORS.THROUGHPUT}
+                  height={APM_CONSTANTS.SPARKLINE_HEIGHT}
+                  width={APM_CONSTANTS.SPARKLINE_WIDTH}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -542,9 +530,9 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                 <MetricSparkline
                   data={failureData}
                   isLoading={metricsLoading}
-                  color="#D36086"
-                  height={20}
-                  width={120}
+                  color={APM_CONSTANTS.COLORS.FAILURE_RATE}
+                  height={APM_CONSTANTS.SPARKLINE_HEIGHT}
+                  width={APM_CONSTANTS.SPARKLINE_WIDTH}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -798,9 +786,13 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                                     const isExpanded = expandedAttributes[attrPath] || false;
                                     const displayedValues = isExpanded
                                       ? filteredValues
-                                      : filteredValues.slice(0, ATTRIBUTE_VALUES_INITIAL_LIMIT);
+                                      : filteredValues.slice(
+                                          0,
+                                          APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT
+                                        );
                                     const remainingCount =
-                                      filteredValues.length - ATTRIBUTE_VALUES_INITIAL_LIMIT;
+                                      filteredValues.length -
+                                      APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT;
 
                                     return (
                                       <React.Fragment key={attrPath}>
@@ -896,7 +888,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                                               />
                                               {/* Show more / Show less link */}
                                               {filteredValues.length >
-                                                ATTRIBUTE_VALUES_INITIAL_LIMIT && (
+                                                APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT && (
                                                 <>
                                                   <EuiSpacer size="xs" />
                                                   <EuiLink
@@ -975,8 +967,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                             items={displayedServices}
                             columns={columns}
                             pagination={{
-                              initialPageSize: 10,
-                              pageSizeOptions: [10, 20, 50, 100],
+                              initialPageSize: APM_CONSTANTS.DEFAULT_PAGE_SIZE,
+                              pageSizeOptions: [...APM_CONSTANTS.PAGE_SIZE_OPTIONS],
                             }}
                             sorting={{
                               sort: {

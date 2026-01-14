@@ -23,7 +23,7 @@ import { Main as NotebooksHome } from './notebooks/components/main';
 import { Home as TraceAnalyticsHome } from './trace_analytics/home';
 import { Home as GettingStartedHome } from './getting_started/home';
 import { Home as OverviewHome } from './overview/home';
-import { Services as ApmServices, ApmServicesProps } from './apm/services_home';
+import { Services as ApmServices, ApmServicesProps } from './apm/services';
 import { ApplicationMap as ApmApplicationMap, ApmApplicationMapProps } from './apm/application_map';
 import { ApmConfigProvider } from './apm/config/apm_config_context';
 

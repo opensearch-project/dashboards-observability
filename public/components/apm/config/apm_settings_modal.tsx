@@ -26,7 +26,11 @@ import {
 import { i18n } from '@osd/i18n';
 import { NotificationsStart, CoreStart } from '../../../../../../src/core/public';
 import { getWorkspaceIdFromUrl } from '../../../../../../src/core/public/utils';
-import { useDatasets, usePrometheusDataSources, useCorrelatedLogs } from './hooks';
+import {
+  useDatasets,
+  usePrometheusDataSources,
+  useCorrelatedLogs,
+} from '../shared/hooks/use_apm_config';
 import { useApmConfig } from './apm_config_context';
 import { OSDSavedApmConfigClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/apm_config';
 import { ApmArchitectureSvgLight, ApmArchitectureSvgDark } from './apm-architecture-svg';
