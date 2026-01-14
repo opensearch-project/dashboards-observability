@@ -120,7 +120,6 @@ jobs:
         run: |
           cat << 'EOF' >> ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/config/opensearch.yml
           action.auto_create_index: true
-          plugins.security.disabled: true
           EOF
         shell: bash
 
@@ -132,9 +131,9 @@ jobs:
         run: |
           echo "Waiting for OpenSearch to be ready..."
           for i in {1..60}; do
-            if curl -s http://localhost:9200 > /dev/null 2>&1; then
+            if curl -s -u admin:admin http://localhost:9200 > /dev/null 2>&1; then
               echo "OpenSearch is ready!"
-              curl -XGET http://localhost:9200
+              curl -XGET -u admin:admin http://localhost:9200
               break
             fi
             if [ $i -eq 60 ]; then
@@ -146,12 +145,12 @@ jobs:
           done
 
           echo "Verifying and setting auto_create_index via API..."
-          curl -X PUT "http://localhost:9200/_cluster/settings" \
+          curl -X PUT -u admin:admin "http://localhost:9200/_cluster/settings" \
             -H 'Content-Type: application/json' \
             -d '{"persistent": {"action.auto_create_index": "true"}}'
 
           echo "Verifying cluster settings..."
-          curl -X GET "http://localhost:9200/_cluster/settings?include_defaults=true&filter_path=**.auto_create_index"
+          curl -X GET -u admin:admin "http://localhost:9200/_cluster/settings?include_defaults=true&filter_path=**.auto_create_index"
         shell: bash
 
       - name: Checkout OpenSearch Dashboards
@@ -185,6 +184,9 @@ jobs:
           cat << 'EOT' > ./config/opensearch_dashboards.yml
           server.host: "0.0.0.0"
           opensearch.hosts: ["http://localhost:9200"]
+          opensearch.username: "admin"
+          opensearch.password: "admin"
+          opensearch.ssl.verificationMode: none
           home.disableWelcomeScreen: true
           EOT
         working-directory: OpenSearch-Dashboards
