@@ -23,7 +23,7 @@ jest.mock('../../../../../../../src/core/public/utils', () => ({
   getWorkspaceIdFromUrl: jest.fn().mockReturnValue('test-workspace-id'),
 }));
 
-jest.mock('../hooks', () => ({
+jest.mock('../../shared/hooks/use_apm_config', () => ({
   useDatasets: jest.fn().mockReturnValue({
     tracesDatasets: [{ label: 'Traces Dataset', value: { id: 'traces-1', title: 'Traces' } }],
     allDatasets: [

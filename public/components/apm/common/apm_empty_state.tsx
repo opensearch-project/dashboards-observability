@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import servicesPreview from './assets/services-preview.png';
+import { apmEmptyStateI18nTexts as i18nTexts, getPreviewImageAlt } from './apm_empty_state_i18n';
 
 const APM_DOCS_URL = 'https://docs.opensearch.org/latest/observing-your-data/';
 
@@ -28,27 +29,23 @@ interface TabContent {
 const tabs: TabContent[] = [
   {
     id: 'services',
-    name: 'Services',
-    description:
-      'Monitor service health, latency, and error rates. View detailed metrics for each service in your distributed system.',
+    name: i18nTexts.tabs.services.name,
+    description: i18nTexts.tabs.services.description,
   },
   {
     id: 'application-map',
-    name: 'Application Map',
-    description:
-      'Visualize service dependencies and topology. Understand how your services communicate and identify bottlenecks.',
+    name: i18nTexts.tabs.applicationMap.name,
+    description: i18nTexts.tabs.applicationMap.description,
   },
   {
     id: 'correlate-traces-logs',
-    name: 'Correlate traces and logs',
-    description:
-      'Connect distributed traces with log data. Quickly navigate from trace spans to related logs for faster debugging.',
+    name: i18nTexts.tabs.correlateTracesLogs.name,
+    description: i18nTexts.tabs.correlateTracesLogs.description,
   },
   {
     id: 'slo-alerts',
-    name: 'SLO alerts',
-    description:
-      'Set and monitor Service Level Objectives. Get alerted when your services fall below target performance thresholds.',
+    name: i18nTexts.tabs.sloAlerts.name,
+    description: i18nTexts.tabs.sloAlerts.description,
   },
 ];
 
@@ -66,7 +63,7 @@ export const ApmEmptyState = ({ onGetStartedClick }: ApmEmptyStateProps) => {
       <EuiFlexItem grow={false}>
         <EuiSpacer size="xxl" />
         <EuiText textAlign="center">
-          <h1>Start monitoring applications with OpenSearch</h1>
+          <h1>{i18nTexts.title}</h1>
         </EuiText>
 
         <EuiSpacer size="l" />
@@ -74,7 +71,7 @@ export const ApmEmptyState = ({ onGetStartedClick }: ApmEmptyStateProps) => {
         <EuiFlexGroup justifyContent="center" gutterSize="m">
           <EuiFlexItem grow={false}>
             <EuiButton fill onClick={onGetStartedClick}>
-              Get started
+              {i18nTexts.getStarted}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -84,7 +81,7 @@ export const ApmEmptyState = ({ onGetStartedClick }: ApmEmptyStateProps) => {
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false}>
             <EuiLink href={APM_DOCS_URL} target="_blank" external={false}>
-              View documentation
+              {i18nTexts.viewDocs}
             </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -124,7 +121,7 @@ export const ApmEmptyState = ({ onGetStartedClick }: ApmEmptyStateProps) => {
         >
           <EuiImage
             src={servicesPreview}
-            alt={`${selectedTab.name} preview`}
+            alt={getPreviewImageAlt(selectedTab.name)}
             style={{ width: '100%', display: 'block' }}
           />
         </div>

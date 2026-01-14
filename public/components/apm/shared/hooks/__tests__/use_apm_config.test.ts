@@ -4,10 +4,10 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useDatasets, usePrometheusDataSources, useCorrelatedLogs } from '../hooks';
+import { useDatasets, usePrometheusDataSources, useCorrelatedLogs } from '../use_apm_config';
 
 // Mock the utils module (used internally by hooks)
-jest.mock('../../../../../common/utils', () => ({
+jest.mock('../../../../../../common/utils', () => ({
   getOSDSavedObjectsClient: jest.fn(),
 }));
 
