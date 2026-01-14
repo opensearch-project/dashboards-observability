@@ -175,6 +175,13 @@ export const usePrometheusDataSources = (dataService: DataPublicPluginStart) => 
   return { ...state, refresh: () => setRefresh({}) };
 };
 
+export interface CorrelatedLogDataset {
+  id: string;
+  displayName: string;
+  title: string;
+  schemaMappings?: Record<string, string>;
+}
+
 /**
  * Hook for loading correlated log datasets using SavedObjectsClient directly
  */
@@ -184,7 +191,7 @@ export const useCorrelatedLogs = (
   traceDatasetId?: string
 ) => {
   const [state, setState] = useState<{
-    data: Array<{ id: string; displayName: string }>;
+    data: CorrelatedLogDataset[];
     loading: boolean;
     error?: Error;
   }>({ data: [], loading: false });
@@ -236,14 +243,34 @@ export const useCorrelatedLogs = (
           });
         });
 
-        // Fetch display names for each log dataset
+        // Fetch display names and schema mappings for each log dataset
         const logDatasets = await Promise.all(
           Array.from(logDatasetIds).map(async (logId) => {
             try {
               const dataView = await dataService.dataViews.get(logId);
+
+              // Get schema mappings from saved object - return as-is, no defaults
+              let schemaMappings: Record<string, string> | undefined;
+              try {
+                const savedObject = await savedObjectsClient.get('index-pattern', logId);
+                const schemaMappingsStr = (savedObject.attributes as any)?.schemaMappings;
+                if (schemaMappingsStr) {
+                  const parsed = JSON.parse(schemaMappingsStr);
+                  // Get first mapping type (e.g., otelLogs)
+                  const firstMapping = Object.values(parsed)[0] as Record<string, string>;
+                  if (firstMapping) {
+                    schemaMappings = firstMapping;
+                  }
+                }
+              } catch (e) {
+                console.warn(`Failed to parse schema mappings for ${logId}:`, e);
+              }
+
               return {
                 id: logId,
                 displayName: dataView.getDisplayName(),
+                title: dataView.title,
+                schemaMappings,
               };
             } catch (err) {
               console.error(`Failed to fetch log dataset ${logId}:`, err);
@@ -254,10 +281,7 @@ export const useCorrelatedLogs = (
 
         if (!abortController.signal.aborted) {
           setState({
-            data: logDatasets.filter((item) => item !== null) as Array<{
-              id: string;
-              displayName: string;
-            }>,
+            data: logDatasets.filter((item) => item !== null) as CorrelatedLogDataset[],
             loading: false,
           });
         }

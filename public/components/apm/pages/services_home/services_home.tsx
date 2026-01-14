@@ -27,7 +27,8 @@ import {
   EuiResizableContainer,
 } from '@elastic/eui';
 import get from 'lodash/get';
-import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
+import { ChromeBreadcrumb, CoreStart } from '../../../../../../../src/core/public';
+import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { useServices } from '../../shared/hooks/use_services';
 import { useServicesRedMetrics } from '../../shared/hooks/use_services_red_metrics';
 import { ApmPageHeader } from '../../shared/components/apm_page_header';
@@ -39,11 +40,8 @@ import { TopDependenciesByFaultRate } from '../../shared/components/fault_widget
 import { TimeRange, ServiceTableItem } from '../../common/types/service_types';
 import { parseTimeRange } from '../../shared/utils/time_utils';
 import { parseEnvironmentType } from '../../query_services/query_requests/response_processor';
-import {
-  navigateToServiceMap,
-  navigateToServiceLogs,
-  navigateToServiceTraces,
-} from '../../shared/utils/navigation_utils';
+import { navigateToServiceMap } from '../../shared/utils/navigation_utils';
+import { ServiceDetailsFlyout } from './service_details_flyout';
 import {
   LatencyRangeFilter,
   ThroughputRangeFilter,
@@ -63,6 +61,14 @@ export interface ServicesHomeProps {
   chrome: any;
   parentBreadcrumb: ChromeBreadcrumb;
   onServiceClick?: (serviceName: string, environment: string) => void;
+  coreStart: CoreStart;
+  dataService: DataPublicPluginStart;
+}
+
+interface FlyoutState {
+  serviceName: string;
+  environment: string;
+  tab: 'spans' | 'logs';
 }
 
 /**
@@ -77,11 +83,16 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   chrome,
   parentBreadcrumb,
   onServiceClick,
+  coreStart,
+  dataService,
 }) => {
   const [timeRange, setTimeRange] = useState<TimeRange>({
     from: 'now-15m',
     to: 'now',
   });
+
+  // Flyout state
+  const [flyoutState, setFlyoutState] = useState<FlyoutState | null>(null);
 
   const [selectedEnvironments, setSelectedEnvironments] = useState<Record<string, boolean>>({});
   const [selectedGroupByAttributes, setSelectedGroupByAttributes] = useState<
@@ -566,21 +577,29 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                   iconType="discoverApp"
                   aria-label={i18nTexts.actions.viewLogs}
                   onClick={() =>
-                    navigateToServiceLogs(item.serviceName, item.environment, timeRange)
+                    setFlyoutState({
+                      serviceName: item.serviceName,
+                      environment: item.environment,
+                      tab: 'logs',
+                    })
                   }
                   data-test-subj={`serviceLogsButton-${item.serviceName}`}
                 />
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18nTexts.actions.viewTraces}>
+              <EuiToolTip content={i18nTexts.actions.viewSpans}>
                 <EuiButtonIcon
                   iconType="apmTrace"
-                  aria-label={i18nTexts.actions.viewTraces}
+                  aria-label={i18nTexts.actions.viewSpans}
                   onClick={() =>
-                    navigateToServiceTraces(item.serviceName, item.environment, timeRange)
+                    setFlyoutState({
+                      serviceName: item.serviceName,
+                      environment: item.environment,
+                      tab: 'spans',
+                    })
                   }
-                  data-test-subj={`serviceTracesButton-${item.serviceName}`}
+                  data-test-subj={`serviceSpansButton-${item.serviceName}`}
                 />
               </EuiToolTip>
             </EuiFlexItem>
@@ -588,7 +607,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         ),
       },
     ],
-    [onServiceClick, metricsMap, metricsLoading, timeRange]
+    [onServiceClick, metricsMap, metricsLoading]
   );
 
   if (error) {
@@ -989,6 +1008,19 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>
+
+      {/* Service Details Flyout */}
+      {flyoutState && (
+        <ServiceDetailsFlyout
+          serviceName={flyoutState.serviceName}
+          environment={flyoutState.environment}
+          timeRange={timeRange}
+          initialTab={flyoutState.tab}
+          onClose={() => setFlyoutState(null)}
+          coreStart={coreStart}
+          dataService={dataService}
+        />
+      )}
     </EuiPage>
   );
 };

@@ -124,6 +124,8 @@ export const Services = (props: ApmServicesProps) => {
             serviceName
           )}/${encodeURIComponent(environment)}`;
         }}
+        coreStart={CoreStartProp}
+        dataService={DepsStart.data}
       />
 
       {isSettingsModalVisible && (

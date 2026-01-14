@@ -39,8 +39,40 @@ export const servicesI18nTexts = {
     viewLogs: i18n.translate('observability.apm.services.actions.viewLogs', {
       defaultMessage: 'View logs',
     }),
-    viewTraces: i18n.translate('observability.apm.services.actions.viewTraces', {
-      defaultMessage: 'View traces',
+    viewSpans: i18n.translate('observability.apm.services.actions.viewSpans', {
+      defaultMessage: 'View spans',
+    }),
+  },
+  flyout: {
+    title: i18n.translate('observability.apm.services.flyout.title', {
+      defaultMessage: 'Service Details',
+    }),
+    tabSpans: i18n.translate('observability.apm.services.flyout.tabSpans', {
+      defaultMessage: 'Correlated spans',
+    }),
+    tabLogs: i18n.translate('observability.apm.services.flyout.tabLogs', {
+      defaultMessage: 'Associated logs',
+    }),
+    loading: i18n.translate('observability.apm.services.flyout.loading', {
+      defaultMessage: 'Loading...',
+    }),
+    noSpans: i18n.translate('observability.apm.services.flyout.noSpans', {
+      defaultMessage: 'No spans found for this service',
+    }),
+    noLogs: i18n.translate('observability.apm.services.flyout.noLogs', {
+      defaultMessage: 'No logs found for this service',
+    }),
+    noCorrelatedLogs: i18n.translate('observability.apm.services.flyout.noCorrelatedLogs', {
+      defaultMessage: 'No correlated log datasets configured',
+    }),
+    viewInDiscover: i18n.translate('observability.apm.services.flyout.viewInDiscover', {
+      defaultMessage: 'View in Discover',
+    }),
+    dataset: i18n.translate('observability.apm.services.flyout.dataset', {
+      defaultMessage: 'Dataset',
+    }),
+    results: i18n.translate('observability.apm.services.flyout.results', {
+      defaultMessage: 'results',
     }),
   },
   error: {
