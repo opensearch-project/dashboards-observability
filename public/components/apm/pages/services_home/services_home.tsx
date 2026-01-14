@@ -54,8 +54,8 @@ import {
   getEnvironmentDisplayName,
   APM_CONSTANTS,
   ENVIRONMENT_PLATFORM_MAP,
-} from '../../shared/utils/constants';
-import { servicesI18nTexts as i18nTexts } from './services_i18n';
+} from '../../common/constants';
+import { servicesI18nTexts as i18nTexts } from './services_home_i18n';
 
 const AVAILABLE_ENVIRONMENTS = Object.values(ENVIRONMENT_PLATFORM_MAP);
 
