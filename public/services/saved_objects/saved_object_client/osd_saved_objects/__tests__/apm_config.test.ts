@@ -14,6 +14,7 @@ jest.mock('../../../../../../common/utils', () => ({
 describe('OSDSavedApmConfigClient', () => {
   let client: OSDSavedApmConfigClient;
   let mockSavedObjectsClient: any;
+  let mockDataService: any;
 
   beforeEach(() => {
     mockSavedObjectsClient = {
@@ -22,6 +23,13 @@ describe('OSDSavedApmConfigClient', () => {
       find: jest.fn(),
       get: jest.fn(),
       delete: jest.fn(),
+    };
+
+    // Default mock dataService - tests can override as needed
+    mockDataService = {
+      dataViews: {
+        get: jest.fn().mockResolvedValue(null),
+      },
     };
 
     (utils.getOSDSavedObjectsClient as jest.Mock).mockReturnValue(mockSavedObjectsClient);
@@ -172,7 +180,11 @@ describe('OSDSavedApmConfigClient', () => {
       attributes: {
         correlationType: 'APM-Config-workspace-123',
         version: '1.0.0',
-        entities: [],
+        entities: [
+          { tracesDataset: { id: 'references[0].id' } },
+          { serviceMapDataset: { id: 'references[1].id' } },
+          { prometheusDataSource: { id: 'references[2].id' } },
+        ],
       },
       references: [
         { name: 'entities[0].index', type: 'index-pattern', id: 'old-trace-dataset' },
@@ -188,10 +200,10 @@ describe('OSDSavedApmConfigClient', () => {
 
         await client.update(mockUpdateParams);
 
-        // extractTypeAndUUID returns the full objectId as uuid since 'correlations' is not in OBSERVABILTY_SAVED_OBJECTS
+        // extractTypeAndUUID correctly extracts just the UUID from 'correlations:uuid' format
         expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
           'correlations',
-          `correlations:${mockUuid}`,
+          mockUuid,
           expect.any(Object),
           expect.any(Object)
         );
@@ -217,12 +229,11 @@ describe('OSDSavedApmConfigClient', () => {
 
         await client.update(mockUpdateParams);
 
-        // extractTypeAndUUID returns the full objectId as uuid since 'correlations' is not in OBSERVABILTY_SAVED_OBJECTS
-        const expectedUuid = `correlations:${mockUuid}`;
-        expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('correlations', expectedUuid);
+        // extractTypeAndUUID correctly extracts just the UUID from 'correlations:uuid' format
+        expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('correlations', mockUuid);
         expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
           'correlations',
-          expectedUuid,
+          mockUuid,
           expect.any(Object),
           expect.any(Object)
         );
@@ -250,10 +261,10 @@ describe('OSDSavedApmConfigClient', () => {
 
         await client.update(mockUpdateParams);
 
-        // extractTypeAndUUID returns the full objectId as uuid since 'correlations' is not in OBSERVABILTY_SAVED_OBJECTS
+        // extractTypeAndUUID correctly extracts just the UUID from 'correlations:uuid' format
         expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
           'correlations',
-          `correlations:${mockUuid}`,
+          mockUuid,
           expect.objectContaining({
             correlationType: 'APM-Config-workspace-123',
             version: '1.0.0',
@@ -269,6 +280,44 @@ describe('OSDSavedApmConfigClient', () => {
         const result = await client.update(mockUpdateParams);
 
         expect(result.objectId).toBe(`correlations:${mockUuid}`);
+      });
+
+      it('should resolve existing references correctly regardless of entity order', async () => {
+        // Existing config with entities in different order (prometheus first)
+        const configWithDifferentOrder = {
+          id: mockUuid,
+          attributes: {
+            correlationType: 'APM-Config-workspace-123',
+            version: '1.0.0',
+            entities: [
+              { prometheusDataSource: { id: 'references[0].id' } },
+              { tracesDataset: { id: 'references[1].id' } },
+              { serviceMapDataset: { id: 'references[2].id' } },
+            ],
+          },
+          references: [
+            { name: 'entities[0].dataConnection', type: 'data-connection', id: 'old-prometheus' },
+            { name: 'entities[1].index', type: 'index-pattern', id: 'old-trace-dataset' },
+            { name: 'entities[2].index', type: 'index-pattern', id: 'old-service-map' },
+          ],
+        };
+
+        mockSavedObjectsClient.get.mockResolvedValue(configWithDifferentOrder);
+        mockSavedObjectsClient.update.mockResolvedValue({ id: mockUuid });
+
+        // Only update traces, preserve others
+        await client.update({
+          objectId: `correlations:${mockUuid}`,
+          tracesDatasetId: 'new-traces',
+        });
+
+        const updateCall = mockSavedObjectsClient.update.mock.calls[0];
+        const references = updateCall[3].references;
+
+        // Should correctly preserve existing values based on entity type, not index
+        expect(references[0].id).toBe('new-traces'); // Updated traces
+        expect(references[1].id).toBe('old-service-map'); // Preserved service map
+        expect(references[2].id).toBe('old-prometheus'); // Preserved prometheus
       });
     });
 
@@ -293,13 +342,13 @@ describe('OSDSavedApmConfigClient', () => {
   });
 
   describe('getBulkWithResolvedReferences()', () => {
-    describe('Success Cases', () => {
+    describe('Basic behavior', () => {
       it('should fetch all correlations', async () => {
         mockSavedObjectsClient.find.mockResolvedValue({
           savedObjects: [],
         });
 
-        await client.getBulkWithResolvedReferences();
+        await client.getBulkWithResolvedReferences(mockDataService);
 
         expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -344,14 +393,14 @@ describe('OSDSavedApmConfigClient', () => {
 
         mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
 
-        const result = await client.getBulkWithResolvedReferences();
+        const result = await client.getBulkWithResolvedReferences(mockDataService);
 
         expect(result.total).toBe(2);
         expect(result.configs).toHaveLength(2);
         expect(result.configs.every((c) => c.correlationType.startsWith('APM-Config-'))).toBe(true);
       });
 
-      it('should resolve references to get titles', async () => {
+      it('should return dataset ids as titles when dataViews.get fails', async () => {
         const mockResponse = {
           savedObjects: [
             {
@@ -359,7 +408,11 @@ describe('OSDSavedApmConfigClient', () => {
               attributes: {
                 correlationType: 'APM-Config-workspace-1',
                 version: '1.0.0',
-                entities: [],
+                entities: [
+                  { tracesDataset: { id: 'references[0].id' } },
+                  { serviceMapDataset: { id: 'references[1].id' } },
+                  { prometheusDataSource: { id: 'references[2].id' } },
+                ],
               },
               references: [
                 { name: 'entities[0].index', type: 'index-pattern', id: 'trace-1' },
@@ -371,26 +424,28 @@ describe('OSDSavedApmConfigClient', () => {
         };
 
         mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
-        mockSavedObjectsClient.get
-          .mockResolvedValueOnce({ attributes: { title: 'Traces Dataset' } })
-          .mockResolvedValueOnce({ attributes: { title: 'Service Map Dataset' } })
-          .mockResolvedValueOnce({ attributes: { title: 'Prometheus Source' } });
+        mockSavedObjectsClient.get.mockResolvedValue({
+          attributes: { title: 'Prometheus Source' },
+        });
+        // Mock dataViews.get to return null (simulating failure/not found)
+        mockDataService.dataViews.get.mockResolvedValue(null);
 
-        const result = await client.getBulkWithResolvedReferences();
+        const result = await client.getBulkWithResolvedReferences(mockDataService);
 
-        expect(mockSavedObjectsClient.get).toHaveBeenCalledTimes(3);
-        expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('index-pattern', 'trace-1');
-        expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('index-pattern', 'service-map-1');
-        expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('data-connection', 'prom-1');
-
+        // When dataViews.get returns null, datasets use id as fallback title
         expect(result.configs[0].tracesDataset).toEqual({
           id: 'trace-1',
-          title: 'Traces Dataset',
+          title: 'trace-1',
+          name: undefined,
+          datasourceId: undefined,
         });
         expect(result.configs[0].serviceMapDataset).toEqual({
           id: 'service-map-1',
-          title: 'Service Map Dataset',
+          title: 'service-map-1',
+          name: undefined,
+          datasourceId: undefined,
         });
+        // Prometheus still uses savedObjectsClient.get
         expect(result.configs[0].prometheusDataSource).toEqual({
           id: 'prom-1',
           title: 'Prometheus Source',
@@ -414,7 +469,7 @@ describe('OSDSavedApmConfigClient', () => {
 
         mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
 
-        const result = await client.getBulkWithResolvedReferences();
+        const result = await client.getBulkWithResolvedReferences(mockDataService);
 
         expect(result.configs[0].tracesDataset).toBeNull();
         expect(result.configs[0].serviceMapDataset).toBeNull();
@@ -438,7 +493,7 @@ describe('OSDSavedApmConfigClient', () => {
 
         mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
 
-        const result = await client.getBulkWithResolvedReferences();
+        const result = await client.getBulkWithResolvedReferences(mockDataService);
 
         expect(result.configs[0].objectId).toBe('correlations:config-1');
         expect(result.configs[0].correlationType).toBe('APM-Config-workspace-1');
@@ -453,10 +508,10 @@ describe('OSDSavedApmConfigClient', () => {
               attributes: {
                 correlationType: 'APM-Config-workspace-1',
                 version: '1.0.0',
-                entities: [],
+                entities: [{ prometheusDataSource: { id: 'references[0].id' } }],
               },
               references: [
-                { name: 'entities[2].dataConnection', type: 'data-connection', id: 'prom-1' },
+                { name: 'entities[0].dataConnection', type: 'data-connection', id: 'prom-1' },
               ],
             },
           ],
@@ -467,12 +522,13 @@ describe('OSDSavedApmConfigClient', () => {
           attributes: { connectionId: 'prometheus-prod' },
         });
 
-        const result = await client.getBulkWithResolvedReferences();
+        const result = await client.getBulkWithResolvedReferences(mockDataService);
 
         expect(result.configs[0].prometheusDataSource?.title).toBe('prometheus-prod');
       });
 
-      it('should fallback to id if title is missing', async () => {
+      it('should resolve entities regardless of their order in array', async () => {
+        // Entities in different order than standard (prometheus first, then service map, then traces)
         const mockResponse = {
           savedObjects: [
             {
@@ -480,33 +536,49 @@ describe('OSDSavedApmConfigClient', () => {
               attributes: {
                 correlationType: 'APM-Config-workspace-1',
                 version: '1.0.0',
-                entities: [],
+                entities: [
+                  { prometheusDataSource: { id: 'references[0].id' } },
+                  { serviceMapDataset: { id: 'references[1].id' } },
+                  { tracesDataset: { id: 'references[2].id' } },
+                ],
               },
-              references: [{ name: 'entities[0].index', type: 'index-pattern', id: 'trace-1' }],
+              references: [
+                { name: 'entities[0].dataConnection', type: 'data-connection', id: 'prom-1' },
+                { name: 'entities[1].index', type: 'index-pattern', id: 'service-map-1' },
+                { name: 'entities[2].index', type: 'index-pattern', id: 'trace-1' },
+              ],
             },
           ],
         };
 
         mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
-        mockSavedObjectsClient.get.mockResolvedValue({ attributes: {} });
+        mockSavedObjectsClient.get.mockResolvedValue({
+          attributes: { connectionId: 'prometheus-prod' },
+        });
 
-        const result = await client.getBulkWithResolvedReferences();
+        const result = await client.getBulkWithResolvedReferences(mockDataService);
 
-        expect(result.configs[0].tracesDataset?.title).toBe('trace-1');
+        // Should correctly resolve based on entity type, not index
+        expect(result.configs[0].tracesDataset?.id).toBe('trace-1');
+        expect(result.configs[0].serviceMapDataset?.id).toBe('service-map-1');
+        expect(result.configs[0].prometheusDataSource?.id).toBe('prom-1');
       });
     });
 
-    describe('Failure Cases', () => {
-      it('should handle find error', async () => {
-        const mockError = new Error('Failed to find correlations');
-        mockSavedObjectsClient.find.mockRejectedValue(mockError);
+    describe('With dataViews resolution', () => {
+      let mockDataServiceWithViews: any;
+      let mockDataViews: any;
 
-        await expect(client.getBulkWithResolvedReferences()).rejects.toThrow(
-          'Failed to find correlations'
-        );
+      beforeEach(() => {
+        mockDataViews = {
+          get: jest.fn(),
+        };
+        mockDataServiceWithViews = {
+          dataViews: mockDataViews,
+        };
       });
 
-      it('should handle get errors for individual refs and return null', async () => {
+      it('should use dataViews.get to resolve dataset info', async () => {
         const mockResponse = {
           savedObjects: [
             {
@@ -514,22 +586,64 @@ describe('OSDSavedApmConfigClient', () => {
               attributes: {
                 correlationType: 'APM-Config-workspace-1',
                 version: '1.0.0',
-                entities: [],
+                entities: [
+                  { tracesDataset: { id: 'references[0].id' } },
+                  { serviceMapDataset: { id: 'references[1].id' } },
+                  { prometheusDataSource: { id: 'references[2].id' } },
+                ],
               },
-              references: [{ name: 'entities[0].index', type: 'index-pattern', id: 'trace-1' }],
+              references: [
+                { name: 'entities[0].index', type: 'index-pattern', id: 'trace-1' },
+                { name: 'entities[1].index', type: 'index-pattern', id: 'service-map-1' },
+                { name: 'entities[2].dataConnection', type: 'data-connection', id: 'prom-1' },
+              ],
             },
           ],
         };
 
         mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
-        mockSavedObjectsClient.get.mockRejectedValue(new Error('Dataset not found'));
 
-        const result = await client.getBulkWithResolvedReferences();
+        // Mock DataView responses with getDisplayName method
+        mockDataViews.get
+          .mockResolvedValueOnce({
+            title: 'traces-index-*',
+            getDisplayName: () => 'Traces Dataset',
+            dataSourceRef: { id: 'opensearch-ds-1' },
+          })
+          .mockResolvedValueOnce({
+            title: 'service-map-index-*',
+            getDisplayName: () => 'Service Map Dataset',
+            dataSourceRef: { id: 'opensearch-ds-2' },
+          });
 
-        expect(result.configs[0].tracesDataset).toBeNull();
+        mockSavedObjectsClient.get.mockResolvedValue({
+          attributes: { connectionId: 'prometheus-prod' },
+        });
+
+        const result = await client.getBulkWithResolvedReferences(mockDataServiceWithViews);
+
+        expect(mockDataViews.get).toHaveBeenCalledWith('trace-1');
+        expect(mockDataViews.get).toHaveBeenCalledWith('service-map-1');
+
+        expect(result.configs[0].tracesDataset).toEqual({
+          id: 'trace-1',
+          title: 'traces-index-*',
+          name: 'Traces Dataset',
+          datasourceId: 'opensearch-ds-1',
+        });
+        expect(result.configs[0].serviceMapDataset).toEqual({
+          id: 'service-map-1',
+          title: 'service-map-index-*',
+          name: 'Service Map Dataset',
+          datasourceId: 'opensearch-ds-2',
+        });
+        expect(result.configs[0].prometheusDataSource).toEqual({
+          id: 'prom-1',
+          title: 'prometheus-prod',
+        });
       });
 
-      it('should return null for missing datasets/sources', async () => {
+      it('should handle dataViews.get errors gracefully', async () => {
         const mockResponse = {
           savedObjects: [
             {
@@ -537,7 +651,10 @@ describe('OSDSavedApmConfigClient', () => {
               attributes: {
                 correlationType: 'APM-Config-workspace-1',
                 version: '1.0.0',
-                entities: [],
+                entities: [
+                  { tracesDataset: { id: 'references[0].id' } },
+                  { serviceMapDataset: { id: 'references[1].id' } },
+                ],
               },
               references: [
                 { name: 'entities[0].index', type: 'index-pattern', id: 'trace-1' },
@@ -548,17 +665,65 @@ describe('OSDSavedApmConfigClient', () => {
         };
 
         mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
-        mockSavedObjectsClient.get
-          .mockRejectedValueOnce(new Error('Not found'))
-          .mockResolvedValueOnce({ attributes: { title: 'Service Map' } });
+        mockDataViews.get
+          .mockRejectedValueOnce(new Error('Dataset not found'))
+          .mockResolvedValueOnce({
+            title: 'service-map-index-*',
+            getDisplayName: () => 'Service Map',
+            dataSourceRef: { id: 'ds-1' },
+          });
 
-        const result = await client.getBulkWithResolvedReferences();
+        const result = await client.getBulkWithResolvedReferences(mockDataServiceWithViews);
 
-        expect(result.configs[0].tracesDataset).toBeNull();
+        // First dataset failed, so uses id as fallback title
+        expect(result.configs[0].tracesDataset).toEqual({
+          id: 'trace-1',
+          title: 'trace-1',
+          name: undefined,
+          datasourceId: undefined,
+        });
+        // Second dataset succeeded
         expect(result.configs[0].serviceMapDataset).toEqual({
           id: 'service-map-1',
-          title: 'Service Map',
+          title: 'service-map-index-*',
+          name: 'Service Map',
+          datasourceId: 'ds-1',
         });
+      });
+    });
+
+    describe('Failure Cases', () => {
+      it('should handle find error', async () => {
+        const mockError = new Error('Failed to find correlations');
+        mockSavedObjectsClient.find.mockRejectedValue(mockError);
+
+        await expect(client.getBulkWithResolvedReferences(mockDataService)).rejects.toThrow(
+          'Failed to find correlations'
+        );
+      });
+
+      it('should handle prometheus get error and return null', async () => {
+        const mockResponse = {
+          savedObjects: [
+            {
+              id: 'config-1',
+              attributes: {
+                correlationType: 'APM-Config-workspace-1',
+                version: '1.0.0',
+                entities: [{ prometheusDataSource: { id: 'references[0].id' } }],
+              },
+              references: [
+                { name: 'entities[0].dataConnection', type: 'data-connection', id: 'prom-1' },
+              ],
+            },
+          ],
+        };
+
+        mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
+        mockSavedObjectsClient.get.mockRejectedValue(new Error('Connection not found'));
+
+        const result = await client.getBulkWithResolvedReferences(mockDataService);
+
         expect(result.configs[0].prometheusDataSource).toBeNull();
       });
     });
@@ -573,11 +738,8 @@ describe('OSDSavedApmConfigClient', () => {
 
         await client.delete({ objectId: `correlations:${mockUuid}` });
 
-        // extractTypeAndUUID returns the full objectId as uuid since 'correlations' is not in OBSERVABILTY_SAVED_OBJECTS
-        expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
-          'correlations',
-          `correlations:${mockUuid}`
-        );
+        // extractTypeAndUUID correctly extracts just the UUID from 'correlations:uuid' format
+        expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith('correlations', mockUuid);
       });
 
       it('should return delete response', async () => {

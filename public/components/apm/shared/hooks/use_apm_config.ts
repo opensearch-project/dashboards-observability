@@ -5,9 +5,9 @@
 
 import { useEffect, useState } from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { SavedObjectsClientContract } from '../../../../../../src/core/public';
-import { getOSDSavedObjectsClient } from '../../../../common/utils';
+import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { SavedObjectsClientContract } from '../../../../../../../src/core/public';
+import { getOSDSavedObjectsClient } from '../../../../../common/utils';
 
 interface DatasetOptionData {
   id: string;
@@ -111,9 +111,10 @@ export const useDatasets = (dataService?: DataPublicPluginStart) => {
 };
 
 /**
- * Hook for loading Prometheus data connections from SavedObjects
+ * Hook for loading Prometheus data connections
+ * Uses datasetService.getType('PROMETHEUS').fetch() to list Prometheus connections
  */
-export const usePrometheusDataSources = () => {
+export const usePrometheusDataSources = (dataService: DataPublicPluginStart) => {
   const [state, setState] = useState<{
     data: Array<EuiComboBoxOptionOption<{ id: string; title: string }>>;
     loading: boolean;
@@ -126,45 +127,56 @@ export const usePrometheusDataSources = () => {
     const abortController = new AbortController();
     setState({ data: [], loading: true });
 
-    const client = getOSDSavedObjectsClient();
+    const fetchPrometheus = async () => {
+      try {
+        const datasetService = dataService.query?.queryString?.getDatasetService?.();
+        const prometheusType = datasetService?.getType('PROMETHEUS');
 
-    client
-      .find({
-        type: 'data-connection',
-        perPage: 10000,
-      })
-      .then((response) => {
+        if (!prometheusType) {
+          if (!abortController.signal.aborted) {
+            setState({ data: [], loading: false });
+          }
+          return;
+        }
+
+        // Use the prometheus type's fetch method
+        const rootDataStructure = {
+          id: 'PROMETHEUS',
+          title: 'Prometheus',
+          type: 'PROMETHEUS',
+        };
+        const result = await prometheusType.fetch(
+          { savedObjects: { client: getOSDSavedObjectsClient() } } as any,
+          [rootDataStructure]
+        );
+
         if (!abortController.signal.aborted) {
-          // Filter for Prometheus data connections only (attributes.type === 'Prometheus')
-          const prometheusDataSources = response.savedObjects.filter(
-            (obj) => obj.attributes.type === 'Prometheus'
-          );
-
-          const options = prometheusDataSources.map((obj) => ({
-            label: obj.attributes.connectionId || obj.attributes.title || obj.id,
+          const options = (result.children || []).map((conn) => ({
+            label: conn.title,
             value: {
-              id: obj.id,
-              title: obj.attributes.connectionId || obj.attributes.title || obj.id,
+              id: conn.id,
+              title: conn.title,
             },
           }));
           setState({ data: options, loading: false });
         }
-      })
-      .catch((error) => {
+      } catch (error) {
         if (!abortController.signal.aborted) {
           setState({ data: [], loading: false, error: toError(error) });
         }
-      });
+      }
+    };
+
+    fetchPrometheus();
 
     return () => abortController.abort();
-  }, [refresh]);
+  }, [dataService, refresh]);
 
   return { ...state, refresh: () => setRefresh({}) };
 };
 
 /**
  * Hook for loading correlated log datasets using SavedObjectsClient directly
- * This bypasses the need for dataset_management's non-public CorrelationsClient
  */
 export const useCorrelatedLogs = (
   dataService?: DataPublicPluginStart,

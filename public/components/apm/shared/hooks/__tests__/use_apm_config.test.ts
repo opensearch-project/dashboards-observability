@@ -4,11 +4,10 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useDatasets, usePrometheusDataSources, useCorrelatedLogs } from '../hooks';
-import * as utils from '../../../../../common/utils';
+import { useDatasets, usePrometheusDataSources, useCorrelatedLogs } from '../use_apm_config';
 
-// Mock the utils module
-jest.mock('../../../../../common/utils', () => ({
+// Mock the utils module (used internally by hooks)
+jest.mock('../../../../../../common/utils', () => ({
   getOSDSavedObjectsClient: jest.fn(),
 }));
 
@@ -240,114 +239,114 @@ describe('useDatasets', () => {
 });
 
 describe('usePrometheusDataSources', () => {
-  const mockSavedObjectsClient = {
-    find: jest.fn(),
-  };
+  const mockFetch = jest.fn();
+  const mockGetType = jest.fn();
+  const mockGetDatasetService = jest.fn();
+
+  const createMockDataService = () => ({
+    query: {
+      queryString: {
+        getDatasetService: mockGetDatasetService,
+      },
+    },
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (utils.getOSDSavedObjectsClient as jest.Mock).mockReturnValue(mockSavedObjectsClient);
+    mockGetDatasetService.mockReturnValue({
+      getType: mockGetType,
+    });
+    mockGetType.mockReturnValue({
+      fetch: mockFetch,
+    });
   });
 
   describe('Success Cases', () => {
+    it('should return empty array when PROMETHEUS type is not available', async () => {
+      mockGetType.mockReturnValue(undefined);
+      const mockDataService = createMockDataService();
+
+      const { result } = renderHook(() => usePrometheusDataSources(mockDataService as any));
+
+      // Early return path sets loading false synchronously
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      expect(result.current.loading).toBe(false);
+      expect(result.current.data).toEqual([]);
+    });
+
     it('should fetch Prometheus data connections', async () => {
-      const mockResponse = {
-        savedObjects: [
-          {
-            id: 'prom-1',
-            attributes: {
-              type: 'Prometheus',
-              connectionId: 'prometheus-prod',
-              title: 'Production Prometheus',
-            },
-          },
-        ],
-      };
+      const mockDataService = createMockDataService();
+      mockFetch.mockResolvedValue({
+        children: [{ id: 'prom-1', title: 'Production Prometheus' }],
+      });
 
-      mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
-
-      const { result, waitForNextUpdate } = renderHook(() => usePrometheusDataSources());
+      const { result, waitForNextUpdate } = renderHook(() =>
+        usePrometheusDataSources(mockDataService as any)
+      );
 
       expect(result.current.loading).toBe(true);
       await waitForNextUpdate();
 
       expect(result.current.loading).toBe(false);
       expect(result.current.data).toHaveLength(1);
-      expect(result.current.data[0].label).toBe('prometheus-prod');
+      expect(result.current.data[0].label).toBe('Production Prometheus');
+      expect(result.current.data[0].value.id).toBe('prom-1');
     });
 
-    it('should filter for type === "Prometheus"', async () => {
-      const mockResponse = {
-        savedObjects: [
-          {
-            id: 'prom-1',
-            attributes: { type: 'Prometheus', connectionId: 'prom-1' },
-          },
-          {
-            id: 'influx-1',
-            attributes: { type: 'InfluxDB', connectionId: 'influx-1' },
-          },
-          {
-            id: 'prom-2',
-            attributes: { type: 'Prometheus', connectionId: 'prom-2' },
-          },
+    it('should map all Prometheus connections from fetch result', async () => {
+      const mockDataService = createMockDataService();
+      mockFetch.mockResolvedValue({
+        children: [
+          { id: 'prom-1', title: 'Prometheus 1' },
+          { id: 'prom-2', title: 'Prometheus 2' },
+          { id: 'prom-3', title: 'Prometheus 3' },
         ],
-      };
+      });
 
-      mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
-
-      const { result, waitForNextUpdate } = renderHook(() => usePrometheusDataSources());
+      const { result, waitForNextUpdate } = renderHook(() =>
+        usePrometheusDataSources(mockDataService as any)
+      );
 
       await waitForNextUpdate();
 
-      expect(result.current.data).toHaveLength(2);
-      expect(result.current.data.every((item) => item.label.startsWith('prom-'))).toBe(true);
+      expect(result.current.data).toHaveLength(3);
+      expect(result.current.data[0].label).toBe('Prometheus 1');
+      expect(result.current.data[1].label).toBe('Prometheus 2');
+      expect(result.current.data[2].label).toBe('Prometheus 3');
     });
 
-    it('should use connectionId || title || id for labels', async () => {
-      const mockResponse = {
-        savedObjects: [
-          {
-            id: 'prom-1',
-            attributes: { type: 'Prometheus', connectionId: 'connection-id' },
-          },
-          {
-            id: 'prom-2',
-            attributes: { type: 'Prometheus', title: 'title-only' },
-          },
-          {
-            id: 'prom-3',
-            attributes: { type: 'Prometheus' },
-          },
-        ],
-      };
+    it('should use title for label and value', async () => {
+      const mockDataService = createMockDataService();
+      mockFetch.mockResolvedValue({
+        children: [{ id: 'prom-1', title: 'My Prometheus Server' }],
+      });
 
-      mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
-
-      const { result, waitForNextUpdate } = renderHook(() => usePrometheusDataSources());
+      const { result, waitForNextUpdate } = renderHook(() =>
+        usePrometheusDataSources(mockDataService as any)
+      );
 
       await waitForNextUpdate();
 
-      expect(result.current.data[0].label).toBe('connection-id');
-      expect(result.current.data[1].label).toBe('title-only');
-      expect(result.current.data[2].label).toBe('prom-3');
+      expect(result.current.data[0].label).toBe('My Prometheus Server');
+      expect(result.current.data[0].value.title).toBe('My Prometheus Server');
     });
 
     it('should handle refresh', async () => {
-      mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: [] });
+      const mockDataService = createMockDataService();
+      mockFetch.mockResolvedValue({ children: [] });
 
-      const { result, waitForNextUpdate } = renderHook(() => usePrometheusDataSources());
+      const { result, waitForNextUpdate } = renderHook(() =>
+        usePrometheusDataSources(mockDataService as any)
+      );
 
       await waitForNextUpdate();
 
-      mockSavedObjectsClient.find.mockClear();
-      mockSavedObjectsClient.find.mockResolvedValue({
-        savedObjects: [
-          {
-            id: 'new-prom',
-            attributes: { type: 'Prometheus', connectionId: 'new' },
-          },
-        ],
+      mockFetch.mockClear();
+      mockFetch.mockResolvedValue({
+        children: [{ id: 'new-prom', title: 'New Prometheus' }],
       });
 
       act(() => {
@@ -356,16 +355,48 @@ describe('usePrometheusDataSources', () => {
 
       await waitForNextUpdate();
 
-      expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(result.current.data).toHaveLength(1);
+    });
+
+    it('should handle empty children array', async () => {
+      const mockDataService = createMockDataService();
+      mockFetch.mockResolvedValue({ children: [] });
+
+      const { result, waitForNextUpdate } = renderHook(() =>
+        usePrometheusDataSources(mockDataService as any)
+      );
+
+      await waitForNextUpdate();
+
+      expect(result.current.data).toEqual([]);
+      expect(result.current.loading).toBe(false);
+    });
+
+    it('should handle missing children property', async () => {
+      const mockDataService = createMockDataService();
+      mockFetch.mockResolvedValue({});
+
+      const { result, waitForNextUpdate } = renderHook(() =>
+        usePrometheusDataSources(mockDataService as any)
+      );
+
+      await waitForNextUpdate();
+
+      expect(result.current.data).toEqual([]);
+      expect(result.current.loading).toBe(false);
     });
   });
 
   describe('Failure Cases', () => {
-    it('should handle find errors', async () => {
-      const mockError = new Error('Failed to find saved objects');
-      mockSavedObjectsClient.find.mockRejectedValue(mockError);
+    it('should handle fetch errors', async () => {
+      const mockDataService = createMockDataService();
+      const mockError = new Error('Failed to fetch Prometheus connections');
+      mockFetch.mockRejectedValue(mockError);
 
-      const { result, waitForNextUpdate } = renderHook(() => usePrometheusDataSources());
+      const { result, waitForNextUpdate } = renderHook(() =>
+        usePrometheusDataSources(mockDataService as any)
+      );
 
       await waitForNextUpdate();
 
@@ -375,14 +406,32 @@ describe('usePrometheusDataSources', () => {
     });
 
     it('should set error state correctly with toError helper', async () => {
-      mockSavedObjectsClient.find.mockRejectedValue('String error');
+      const mockDataService = createMockDataService();
+      mockFetch.mockRejectedValue('String error');
 
-      const { result, waitForNextUpdate } = renderHook(() => usePrometheusDataSources());
+      const { result, waitForNextUpdate } = renderHook(() =>
+        usePrometheusDataSources(mockDataService as any)
+      );
 
       await waitForNextUpdate();
 
       expect(result.current.error).toBeInstanceOf(Error);
       expect(result.current.error?.message).toBe('String error');
+    });
+
+    it('should return empty when datasetService is not available', async () => {
+      mockGetDatasetService.mockReturnValue(undefined);
+      const mockDataService = createMockDataService();
+
+      const { result } = renderHook(() => usePrometheusDataSources(mockDataService as any));
+
+      // Early return path sets loading false synchronously
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      expect(result.current.data).toEqual([]);
+      expect(result.current.loading).toBe(false);
     });
   });
 });
