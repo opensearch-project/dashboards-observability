@@ -42,11 +42,6 @@ const tabs: TabContent[] = [
     name: i18nTexts.tabs.correlateTracesLogs.name,
     description: i18nTexts.tabs.correlateTracesLogs.description,
   },
-  {
-    id: 'slo-alerts',
-    name: i18nTexts.tabs.sloAlerts.name,
-    description: i18nTexts.tabs.sloAlerts.description,
-  },
 ];
 
 export interface ApmEmptyStateProps {

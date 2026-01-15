@@ -14,7 +14,7 @@ export const servicesI18nTexts = {
   }),
   table: {
     serviceName: i18n.translate('observability.apm.services.table.serviceName', {
-      defaultMessage: 'Service Name',
+      defaultMessage: 'Service',
     }),
     environment: i18n.translate('observability.apm.services.table.environment', {
       defaultMessage: 'Environment',
@@ -29,7 +29,18 @@ export const servicesI18nTexts = {
       defaultMessage: 'Failure Ratio',
     }),
     actions: i18n.translate('observability.apm.services.table.actions', {
-      defaultMessage: 'Actions',
+      defaultMessage: 'Correlations',
+    }),
+  },
+  tableTooltips: {
+    latency: i18n.translate('observability.apm.services.table.tooltip.latency', {
+      defaultMessage: '95th percentile response time over the selected time range',
+    }),
+    throughput: i18n.translate('observability.apm.services.table.tooltip.throughput', {
+      defaultMessage: 'Number of requests processed per minute',
+    }),
+    failureRatio: i18n.translate('observability.apm.services.table.tooltip.failureRatio', {
+      defaultMessage: 'Percentage of requests that resulted in faults (5xx) and errors (4xx)',
     }),
   },
   actions: {
@@ -41,38 +52,6 @@ export const servicesI18nTexts = {
     }),
     viewSpans: i18n.translate('observability.apm.services.actions.viewSpans', {
       defaultMessage: 'View spans',
-    }),
-  },
-  flyout: {
-    title: i18n.translate('observability.apm.services.flyout.title', {
-      defaultMessage: 'Service Details',
-    }),
-    tabSpans: i18n.translate('observability.apm.services.flyout.tabSpans', {
-      defaultMessage: 'Correlated spans',
-    }),
-    tabLogs: i18n.translate('observability.apm.services.flyout.tabLogs', {
-      defaultMessage: 'Associated logs',
-    }),
-    loading: i18n.translate('observability.apm.services.flyout.loading', {
-      defaultMessage: 'Loading...',
-    }),
-    noSpans: i18n.translate('observability.apm.services.flyout.noSpans', {
-      defaultMessage: 'No spans found for this service',
-    }),
-    noLogs: i18n.translate('observability.apm.services.flyout.noLogs', {
-      defaultMessage: 'No logs found for this service',
-    }),
-    noCorrelatedLogs: i18n.translate('observability.apm.services.flyout.noCorrelatedLogs', {
-      defaultMessage: 'No correlated log datasets configured',
-    }),
-    viewInDiscover: i18n.translate('observability.apm.services.flyout.viewInDiscover', {
-      defaultMessage: 'View in Discover',
-    }),
-    dataset: i18n.translate('observability.apm.services.flyout.dataset', {
-      defaultMessage: 'Dataset',
-    }),
-    results: i18n.translate('observability.apm.services.flyout.results', {
-      defaultMessage: 'results',
     }),
   },
   error: {

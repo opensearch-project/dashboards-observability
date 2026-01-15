@@ -5,9 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
-import { SavedObjectsClientContract } from '../../../../../../../src/core/public';
-import { getOSDSavedObjectsClient } from '../../../../../common/utils';
+import { coreRefs } from '../../../../framework/core_refs';
 
 interface DatasetOptionData {
   id: string;
@@ -28,8 +26,9 @@ function toError(error: unknown): Error {
 /**
  * Combined hook for loading all datasets and filtering traces
  * More efficient than separate calls since it fetches all datasets only once
+ * Uses coreRefs.data for data service access
  */
-export const useDatasets = (dataService?: DataPublicPluginStart) => {
+export const useDatasets = () => {
   const [state, setState] = useState<{
     tracesDatasets: Array<EuiComboBoxOptionOption<DatasetOptionData>>;
     allDatasets: Array<EuiComboBoxOptionOption<DatasetOptionData>>;
@@ -40,6 +39,7 @@ export const useDatasets = (dataService?: DataPublicPluginStart) => {
   const [refresh, setRefresh] = useState({});
 
   useEffect(() => {
+    const dataService = coreRefs.data;
     if (!dataService) {
       setState({ tracesDatasets: [], allDatasets: [], loading: false });
       return;
@@ -105,7 +105,7 @@ export const useDatasets = (dataService?: DataPublicPluginStart) => {
     fetchDatasets();
 
     return () => abortController.abort();
-  }, [dataService, refresh]);
+  }, [refresh]);
 
   return { ...state, refresh: () => setRefresh({}) };
 };
@@ -113,8 +113,9 @@ export const useDatasets = (dataService?: DataPublicPluginStart) => {
 /**
  * Hook for loading Prometheus data connections
  * Uses datasetService.getType('PROMETHEUS').fetch() to list Prometheus connections
+ * Uses coreRefs.data for data service access
  */
-export const usePrometheusDataSources = (dataService: DataPublicPluginStart) => {
+export const usePrometheusDataSources = () => {
   const [state, setState] = useState<{
     data: Array<EuiComboBoxOptionOption<{ id: string; title: string }>>;
     loading: boolean;
@@ -124,6 +125,14 @@ export const usePrometheusDataSources = (dataService: DataPublicPluginStart) => 
   const [refresh, setRefresh] = useState({});
 
   useEffect(() => {
+    const dataService = coreRefs.data;
+    const savedObjectsClient = coreRefs.savedObjectsClient;
+
+    if (!dataService || !savedObjectsClient) {
+      setState({ data: [], loading: false });
+      return;
+    }
+
     const abortController = new AbortController();
     setState({ data: [], loading: true });
 
@@ -146,7 +155,7 @@ export const usePrometheusDataSources = (dataService: DataPublicPluginStart) => 
           type: 'PROMETHEUS',
         };
         const result = await prometheusType.fetch(
-          { savedObjects: { client: getOSDSavedObjectsClient() } } as any,
+          { savedObjects: { client: savedObjectsClient } } as any,
           [rootDataStructure]
         );
 
@@ -170,7 +179,7 @@ export const usePrometheusDataSources = (dataService: DataPublicPluginStart) => 
     fetchPrometheus();
 
     return () => abortController.abort();
-  }, [dataService, refresh]);
+  }, [refresh]);
 
   return { ...state, refresh: () => setRefresh({}) };
 };
@@ -184,12 +193,9 @@ export interface CorrelatedLogDataset {
 
 /**
  * Hook for loading correlated log datasets using SavedObjectsClient directly
+ * Uses coreRefs.data and coreRefs.savedObjectsClient
  */
-export const useCorrelatedLogs = (
-  dataService?: DataPublicPluginStart,
-  savedObjectsClient?: SavedObjectsClientContract,
-  traceDatasetId?: string
-) => {
+export const useCorrelatedLogs = (traceDatasetId?: string) => {
   const [state, setState] = useState<{
     data: CorrelatedLogDataset[];
     loading: boolean;
@@ -197,6 +203,9 @@ export const useCorrelatedLogs = (
   }>({ data: [], loading: false });
 
   useEffect(() => {
+    const dataService = coreRefs.data;
+    const savedObjectsClient = coreRefs.savedObjectsClient;
+
     if (!traceDatasetId || !dataService || !savedObjectsClient) {
       setState({ data: [], loading: false });
       return;
@@ -296,7 +305,7 @@ export const useCorrelatedLogs = (
     fetchCorrelatedLogs();
 
     return () => abortController.abort();
-  }, [dataService, savedObjectsClient, traceDatasetId]);
+  }, [traceDatasetId]);
 
   return state;
 };

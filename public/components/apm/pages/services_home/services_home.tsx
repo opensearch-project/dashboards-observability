@@ -25,10 +25,10 @@ import {
   EuiText,
   EuiHorizontalRule,
   EuiResizableContainer,
+  EuiIcon,
 } from '@elastic/eui';
 import get from 'lodash/get';
-import { ChromeBreadcrumb, CoreStart } from '../../../../../../../src/core/public';
-import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
 import { useServices } from '../../shared/hooks/use_services';
 import { useServicesRedMetrics } from '../../shared/hooks/use_services_red_metrics';
 import { ApmPageHeader } from '../../shared/components/apm_page_header';
@@ -41,7 +41,7 @@ import { TimeRange, ServiceTableItem } from '../../common/types/service_types';
 import { parseTimeRange } from '../../shared/utils/time_utils';
 import { parseEnvironmentType } from '../../query_services/query_requests/response_processor';
 import { navigateToServiceMap } from '../../shared/utils/navigation_utils';
-import { ServiceDetailsFlyout } from './service_details_flyout';
+import { ServiceCorrelationsFlyout } from '../../shared/components/service_correlations_flyout';
 import {
   LatencyRangeFilter,
   ThroughputRangeFilter,
@@ -61,13 +61,12 @@ export interface ServicesHomeProps {
   chrome: any;
   parentBreadcrumb: ChromeBreadcrumb;
   onServiceClick?: (serviceName: string, environment: string) => void;
-  coreStart: CoreStart;
-  dataService: DataPublicPluginStart;
 }
 
 interface FlyoutState {
   serviceName: string;
   environment: string;
+  language?: string;
   tab: 'spans' | 'logs';
 }
 
@@ -83,8 +82,6 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   chrome,
   parentBreadcrumb,
   onServiceClick,
-  coreStart,
-  dataService,
 }) => {
   const [timeRange, setTimeRange] = useState<TimeRange>({
     from: 'now-15m',
@@ -418,18 +415,80 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         },
       },
       {
-        field: 'environment',
-        name: i18nTexts.table.environment,
-        sortable: true,
-        align: 'center',
+        name: (
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{i18nTexts.table.actions}</EuiFlexItem>
+          </EuiFlexGroup>
+        ),
         width: '10%',
-        render: (environment: string) => {
-          return <EuiText size="s">{getEnvironmentDisplayName(environment)}</EuiText>;
-        },
+        align: 'center',
+        render: (item: ServiceTableItem) => (
+          <EuiFlexGroup
+            gutterSize="s"
+            responsive={false}
+            alignItems="center"
+            justifyContent="center"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18nTexts.actions.viewLogs}>
+                <EuiButtonIcon
+                  iconType="discoverApp"
+                  autoFocus={false}
+                  aria-label={i18nTexts.actions.viewLogs}
+                  onClick={() =>
+                    setFlyoutState({
+                      serviceName: item.serviceName,
+                      environment: item.environment,
+                      language: item.groupByAttributes?.telemetry?.sdk?.language,
+                      tab: 'logs',
+                    })
+                  }
+                  data-test-subj={`serviceLogsButton-${item.serviceName}`}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18nTexts.actions.viewSpans}>
+                <EuiButtonIcon
+                  iconType="apmTrace"
+                  aria-label={i18nTexts.actions.viewSpans}
+                  onClick={() =>
+                    setFlyoutState({
+                      serviceName: item.serviceName,
+                      environment: item.environment,
+                      language: item.groupByAttributes?.telemetry?.sdk?.language,
+                      tab: 'spans',
+                    })
+                  }
+                  data-test-subj={`serviceSpansButton-${item.serviceName}`}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18nTexts.actions.viewServiceMap}>
+                <EuiButtonIcon
+                  iconType="graphApp"
+                  aria-label={i18nTexts.actions.viewServiceMap}
+                  onClick={() => navigateToServiceMap(item.serviceName, item.environment)}
+                  data-test-subj={`serviceMapButton-${item.serviceName}`}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
       },
       {
         field: 'latency' as any,
-        name: i18nTexts.table.latencyP95,
+        name: (
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{i18nTexts.table.latencyP95}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18nTexts.tableTooltips.latency}>
+                <EuiIcon type="questionInCircle" size="s" color="subdued" />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
         width: '21%',
         align: 'center',
         sortable: (item: ServiceTableItem) => {
@@ -470,7 +529,16 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       },
       {
         field: 'throughput' as any,
-        name: i18nTexts.table.throughput,
+        name: (
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{i18nTexts.table.throughput}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18nTexts.tableTooltips.throughput}>
+                <EuiIcon type="questionInCircle" size="s" color="subdued" />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
         width: '21%',
         align: 'center',
         sortable: (item: ServiceTableItem) => {
@@ -511,8 +579,17 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       },
       {
         field: 'failureRatio' as any,
-        name: i18nTexts.table.failureRatio,
-        width: '21%',
+        name: (
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{i18nTexts.table.failureRatio}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18nTexts.tableTooltips.failureRatio}>
+                <EuiIcon type="questionInCircle" size="s" color="subdued" />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        width: '100px',
         align: 'center',
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
@@ -551,60 +628,18 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         },
       },
       {
-        name: i18nTexts.table.actions,
-        width: '7%',
-        align: 'center',
-        render: (item: ServiceTableItem) => (
-          <EuiFlexGroup
-            gutterSize="s"
-            responsive={false}
-            alignItems="center"
-            justifyContent="center"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18nTexts.actions.viewServiceMap}>
-                <EuiButtonIcon
-                  iconType="graphApp"
-                  aria-label={i18nTexts.actions.viewServiceMap}
-                  onClick={() => navigateToServiceMap(item.serviceName, item.environment)}
-                  data-test-subj={`serviceMapButton-${item.serviceName}`}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18nTexts.actions.viewLogs}>
-                <EuiButtonIcon
-                  iconType="discoverApp"
-                  aria-label={i18nTexts.actions.viewLogs}
-                  onClick={() =>
-                    setFlyoutState({
-                      serviceName: item.serviceName,
-                      environment: item.environment,
-                      tab: 'logs',
-                    })
-                  }
-                  data-test-subj={`serviceLogsButton-${item.serviceName}`}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18nTexts.actions.viewSpans}>
-                <EuiButtonIcon
-                  iconType="apmTrace"
-                  aria-label={i18nTexts.actions.viewSpans}
-                  onClick={() =>
-                    setFlyoutState({
-                      serviceName: item.serviceName,
-                      environment: item.environment,
-                      tab: 'spans',
-                    })
-                  }
-                  data-test-subj={`serviceSpansButton-${item.serviceName}`}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
+        field: 'environment',
+        name: (
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{i18nTexts.table.environment}</EuiFlexItem>
           </EuiFlexGroup>
         ),
+        sortable: true,
+        align: 'center',
+        width: '10%',
+        render: (environment: string) => {
+          return <EuiText size="s">{getEnvironmentDisplayName(environment)}</EuiText>;
+        },
       },
     ],
     [onServiceClick, metricsMap, metricsLoading]
@@ -1009,16 +1044,15 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         </EuiPageContent>
       </EuiPageBody>
 
-      {/* Service Details Flyout */}
+      {/* Service Correlations Flyout */}
       {flyoutState && (
-        <ServiceDetailsFlyout
+        <ServiceCorrelationsFlyout
           serviceName={flyoutState.serviceName}
           environment={flyoutState.environment}
+          language={flyoutState.language}
           timeRange={timeRange}
           initialTab={flyoutState.tab}
           onClose={() => setFlyoutState(null)}
-          coreStart={coreStart}
-          dataService={dataService}
         />
       )}
     </EuiPage>

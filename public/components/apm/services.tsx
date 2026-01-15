@@ -12,8 +12,7 @@ import {
   EuiLoadingSpinner,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { ChromeBreadcrumb, CoreStart, NotificationsStart } from '../../../../../src/core/public';
-import { AppPluginStartDependencies } from '../../types';
+import { ChromeBreadcrumb, NotificationsStart } from '../../../../../src/core/public';
 import { ApmSettingsModal } from './config/apm_settings_modal';
 import { ApmEmptyState } from './common/apm_empty_state';
 import { HeaderControlledComponentsWrapper } from '../../plugin_helpers/plugin_headerControl';
@@ -24,13 +23,11 @@ export interface ApmServicesProps {
   chrome: any;
   parentBreadcrumb: ChromeBreadcrumb;
   notifications: NotificationsStart;
-  CoreStartProp: CoreStart;
-  DepsStart: AppPluginStartDependencies;
   [key: string]: any;
 }
 
 export const Services = (props: ApmServicesProps) => {
-  const { chrome, notifications, CoreStartProp, DepsStart } = props;
+  const { chrome, notifications } = props;
   const { config, loading, error, refresh } = useApmConfig();
 
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
@@ -98,12 +95,7 @@ export const Services = (props: ApmServicesProps) => {
           <ApmEmptyState onGetStartedClick={handleGetStartedClick} />
 
           {isSettingsModalVisible && (
-            <ApmSettingsModal
-              onClose={handleModalClose}
-              notifications={notifications}
-              CoreStartProp={CoreStartProp}
-              DepsStart={DepsStart}
-            />
+            <ApmSettingsModal onClose={handleModalClose} notifications={notifications} />
           )}
         </EuiPageBody>
       </EuiPage>
@@ -124,17 +116,10 @@ export const Services = (props: ApmServicesProps) => {
             serviceName
           )}/${encodeURIComponent(environment)}`;
         }}
-        coreStart={CoreStartProp}
-        dataService={DepsStart.data}
       />
 
       {isSettingsModalVisible && (
-        <ApmSettingsModal
-          onClose={handleModalClose}
-          notifications={notifications}
-          CoreStartProp={CoreStartProp}
-          DepsStart={DepsStart}
-        />
+        <ApmSettingsModal onClose={handleModalClose} notifications={notifications} />
       )}
     </>
   );

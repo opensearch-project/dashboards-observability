@@ -511,6 +511,7 @@ export class ObservabilityPlugin
     coreRefs.toasts = core.notifications.toasts;
     coreRefs.chrome = core.chrome;
     coreRefs.dataSources = startDeps.data.dataSources;
+    coreRefs.data = startDeps.data;
     coreRefs.application = core.application;
     coreRefs.dashboard = startDeps.dashboard;
     coreRefs.queryAssistEnabled = this.config.query_assist.enabled;
