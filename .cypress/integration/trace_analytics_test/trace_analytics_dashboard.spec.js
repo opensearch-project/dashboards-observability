@@ -394,7 +394,9 @@ describe('Testing switch mode to jaeger', () => {
   });
 
   it('Verifies traces links to traces page', () => {
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('[data-test-subj="dashboard-table-traces-button"]').contains('7').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
     cy.contains(' (7)').should('exist');
     cy.get("[data-test-subj='filterBadge']").eq(0).contains('process.serviceName: redis');
