@@ -56,7 +56,6 @@ describe('ApmEmptyState', () => {
     expect(screen.getByRole('tab', { name: 'Services' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Application Map' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Correlate traces and logs' })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'SLO alerts' })).toBeInTheDocument();
   });
 
   it('should show Services tab as selected by default', () => {

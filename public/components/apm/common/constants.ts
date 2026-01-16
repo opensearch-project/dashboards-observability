@@ -4,6 +4,11 @@
  */
 
 /**
+ * App ID for Explore application used in navigation
+ */
+export const EXPLORE_APP_ID = 'explore';
+
+/**
  * Constants for APM components
  */
 export const APM_CONSTANTS = {
@@ -16,7 +21,7 @@ export const APM_CONSTANTS = {
 
   // Sparklines
   SPARKLINE_HEIGHT: 20,
-  SPARKLINE_WIDTH: 120,
+  SPARKLINE_WIDTH: 100,
 
   // Colors for metrics
   COLORS: {
@@ -24,6 +29,15 @@ export const APM_CONSTANTS = {
     THROUGHPUT: '#54B399',
     FAILURE_RATE: '#D36086',
   },
+
+  // Query limits for fetching data
+  QUERY_LIMITS: {
+    SPANS: 50,
+    LOGS_PER_DATASET: 10,
+  },
+
+  // Truncation length for log messages in table display
+  MESSAGE_TRUNCATION_LENGTH: 200,
 } as const;
 
 /**

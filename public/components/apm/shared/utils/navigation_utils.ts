@@ -4,55 +4,8 @@
  */
 
 import { TimeRange } from '../../common/types/service_types';
-import { DATA_PREPPER_INDEX_NAME } from '../../../../../common/constants/trace_analytics';
+import { EXPLORE_APP_ID } from '../../common/constants';
 import { coreRefs } from '../../../../framework/core_refs';
-
-/**
- * Escapes special characters in strings for safe PPL query interpolation
- * Prevents PPL injection attacks
- */
-function escapePPLString(value: string): string {
-  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-}
-
-// Constants for navigation
-// TODO: These should eventually come from APM config or be resolved dynamically
-const DEFAULT_PPL_DATA_SOURCE_ID = '43e06e00-eb53-11f0-9094-6128e3ef36f7';
-const DEFAULT_LOGS_DATASET = 'ss4o_logs-*-*';
-const DEFAULT_TRACES_DATASET = 'ss4o_traces-*-*';
-const INDEX_PATTERN_ID = '49e6bf8f-dfbd-4267-947b-a02c3bf9f3bd';
-const EXPLORE_APP_ID = 'explore';
-
-/**
- * Navigates to the discover/traces page filtered by service error spans
- * Uses navigateToApp to automatically handle workspace context
- *
- * @param serviceName - The service to filter by
- * @param timeRange - The time range for the query
- */
-export function navigateToErrorTraces(serviceName: string, timeRange: TimeRange): void {
-  const dataSourceId = DEFAULT_PPL_DATA_SOURCE_ID;
-  const indexPattern = DATA_PREPPER_INDEX_NAME;
-
-  // Construct PPL query to filter by service name and error status
-  const pplQuery = `| where serviceName = "${escapePPLString(
-    serviceName
-  )}" | where \`status.code\` > 0`;
-
-  // Build path using RISON-like format (OpenSearch Dashboards URL state format)
-  // Format: _q=(dataset:(...),language:PPL,query:'...')&_g=(...)
-  // Note: We only URL-encode the PPL query string content
-  const path = `traces/#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
-    timeRange.from
-  },to:${
-    timeRange.to
-  }))&_q=(dataset:(dataSource:(id:'${dataSourceId}',title:os-3.3,type:OpenSearch,version:'3.3.0'),id:'${dataSourceId}::${INDEX_PATTERN_ID}',schemaMappings:(),signalType:traces,timeFieldName:startTime,title:'${indexPattern}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
-    pplQuery
-  )}')`;
-
-  // Use navigateToApp to handle workspace context automatically
-  coreRefs.application?.navigateToApp(EXPLORE_APP_ID, { path });
-}
 
 /**
  * Navigates to the service map view filtered by service
@@ -67,69 +20,150 @@ export function navigateToServiceMap(_serviceName: string, _environment: string)
 }
 
 /**
- * Navigates to the discover/logs page filtered by service
- * Uses navigateToApp to automatically handle workspace context
+ * Navigates to explore/traces page with service filter
+ * Uses basePath.prepend for workspace context handling
  *
+ * @param datasetId - The trace dataset ID
+ * @param datasetTitle - The trace dataset title
  * @param serviceName - The service to filter by
- * @param environment - The environment to filter by
  * @param timeRange - The time range for the query
+ * @param dataSourceId - Optional datasource ID
+ * @param dataSourceTitle - Optional datasource title
  */
-export function navigateToServiceLogs(
+export function navigateToExploreTraces(
+  datasetId: string,
+  datasetTitle: string,
   serviceName: string,
-  environment: string,
-  timeRange: TimeRange
+  timeRange: TimeRange,
+  dataSourceId?: string,
+  dataSourceTitle?: string
 ): void {
-  const dataSourceId = DEFAULT_PPL_DATA_SOURCE_ID;
-  const indexPattern = DEFAULT_LOGS_DATASET;
+  // PPL query - URL encoded via encodeURIComponent
+  const pplQuery = `| where serviceName = "${serviceName}"`;
 
-  // Construct PPL query to filter by service name and environment
-  const pplQuery = `| where service.name = "${escapePPLString(serviceName)}"${
-    environment ? ` | where deployment.environment = "${escapePPLString(environment)}"` : ''
-  }`;
-
-  // Build path using RISON-like format (OpenSearch Dashboards URL state format)
-  const path = `logs/#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
+  // Build path using RISON format matching expected explore traces URL format
+  // Note: Empty strings in RISON must be quoted as ''
+  // Note: datasetId may already contain the composite id (dataSourceId::datasetId), so don't prepend again
+  const dsTitle = dataSourceTitle ? dataSourceTitle : "''";
+  const fullDatasetId = datasetId.includes('::')
+    ? datasetId
+    : `${dataSourceId || ''}::${datasetId}`;
+  const path = `traces/#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
     timeRange.from
-  },to:${
-    timeRange.to
-  }))&_q=(dataset:(dataSource:(id:'${dataSourceId}',title:os-3.3,type:OpenSearch,version:'3.3.0'),id:'${dataSourceId}::${INDEX_PATTERN_ID}',schemaMappings:(),signalType:logs,timeFieldName:@timestamp,title:'${indexPattern}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
+  },to:${timeRange.to}))&_q=(dataset:(dataSource:(id:'${
+    dataSourceId || ''
+  }',title:${dsTitle},type:OpenSearch),id:'${fullDatasetId}',schemaMappings:(),signalType:traces,timeFieldName:startTime,title:'${datasetTitle}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
     pplQuery
-  )}')`;
+  )}')&_a=(legacy:(columns:!(spanId,status.code,attributes.http.status_code,resource.attributes.service.name,kind,name,durationNano,durationInNanos),interval:auto,isDirty:!f,sort:!()),tab:(logs:(),patterns:(patternsField:'',usingRegexPatterns:!f)),ui:(activeTabId:logs,showHistogram:!t))`;
 
-  // Use navigateToApp to handle workspace context automatically
-  coreRefs.application?.navigateToApp(EXPLORE_APP_ID, { path });
+  // Use basePath.prepend to properly handle workspace context
+  const fullUrl =
+    coreRefs.http?.basePath.prepend(`/app/${EXPLORE_APP_ID}/${path}`) ||
+    `/app/${EXPLORE_APP_ID}/${path}`;
+
+  // Open in new tab
+  window.open(fullUrl, '_blank');
 }
 
 /**
- * Navigates to the discover/traces page filtered by service
- * Uses navigateToApp to automatically handle workspace context
+ * Navigates to span/trace details in explore/traces
+ * Uses basePath.prepend for workspace context handling
  *
- * @param serviceName - The service to filter by
- * @param environment - The environment to filter by
- * @param timeRange - The time range for the query
+ * @param datasetId - The trace dataset ID (combined format: dataSourceId::datasetId)
+ * @param datasetTitle - The trace dataset title
+ * @param spanId - The span ID to view
+ * @param traceId - The trace ID for the span
+ * @param dataSourceId - Optional datasource ID
+ * @param dataSourceTitle - Optional datasource title
  */
-export function navigateToServiceTraces(
-  serviceName: string,
-  environment: string,
-  timeRange: TimeRange
+export function navigateToSpanDetails(
+  datasetId: string,
+  datasetTitle: string,
+  spanId: string,
+  traceId: string,
+  dataSourceId?: string,
+  dataSourceTitle?: string
 ): void {
-  const dataSourceId = DEFAULT_PPL_DATA_SOURCE_ID;
-  const indexPattern = DEFAULT_TRACES_DATASET;
+  // Build path for trace details page with spanId and traceId
+  // Note: Empty strings in RISON must be quoted as ''
+  // Note: datasetId may already contain the composite id (dataSourceId::datasetId), so don't prepend again
+  const dsTitle = dataSourceTitle ? `'${dataSourceTitle}'` : "''";
+  const fullDatasetId = datasetId.includes('::')
+    ? datasetId
+    : `${dataSourceId || ''}::${datasetId}`;
+  const path = `traces/traceDetails#/?_a=(dataset:(id:'${fullDatasetId}',title:'${datasetTitle}',type:'INDEX_PATTERN',timeFieldName:'startTime',dataSource:(id:'${
+    dataSourceId || ''
+  }',title:${dsTitle},type:'OpenSearch')),spanId:'${spanId}',traceId:'${traceId}')`;
 
-  // Construct PPL query to filter by service name and environment
-  const pplQuery = `| where serviceName = "${escapePPLString(serviceName)}"${
-    environment ? ` | where environment = "${escapePPLString(environment)}"` : ''
-  }`;
+  // Use basePath.prepend to properly handle workspace context
+  const fullUrl =
+    coreRefs.http?.basePath.prepend(`/app/${EXPLORE_APP_ID}/${path}`) ||
+    `/app/${EXPLORE_APP_ID}/${path}`;
 
-  // Build path using RISON-like format (OpenSearch Dashboards URL state format)
-  const path = `traces/#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
+  // Open in new tab
+  window.open(fullUrl, '_blank');
+}
+
+/**
+ * Navigates to explore/logs page with service filter
+ * Uses basePath.prepend for workspace context handling
+ *
+ * @param datasetId - The log dataset ID
+ * @param datasetTitle - The log dataset title
+ * @param serviceName - The service to filter by
+ * @param serviceNameField - The field name for service (from schemaMappings)
+ * @param timeRange - The time range for the query
+ * @param dataSourceId - Optional datasource ID
+ * @param dataSourceTitle - Optional datasource title
+ */
+export function navigateToExploreLogs(
+  datasetId: string,
+  datasetTitle: string,
+  serviceName: string,
+  serviceNameField: string,
+  timeRange: TimeRange,
+  dataSourceId?: string,
+  dataSourceTitle?: string
+): void {
+  // PPL query - URL encoded via encodeURIComponent below
+  const pplQuery = `| where \`${serviceNameField}\` = "${serviceName}"`;
+
+  // Build path using RISON format matching expected explore logs URL format
+  const dsTitle = dataSourceTitle ? dataSourceTitle : "''";
+  const fullDatasetId = datasetId.includes('::')
+    ? datasetId
+    : `${dataSourceId || ''}::${datasetId}`;
+
+  const path = `logs/#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
     timeRange.from
-  },to:${
-    timeRange.to
-  }))&_q=(dataset:(dataSource:(id:'${dataSourceId}',title:os-3.3,type:OpenSearch,version:'3.3.0'),id:'${dataSourceId}::${INDEX_PATTERN_ID}',schemaMappings:(),signalType:traces,timeFieldName:startTime,title:'${indexPattern}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
+  },to:${timeRange.to}))&_q=(dataset:(dataSource:(id:'${
+    dataSourceId || ''
+  }',title:${dsTitle},type:OpenSearch),id:'${fullDatasetId}',timeFieldName:time,title:'${datasetTitle}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
     pplQuery
-  )}')`;
+  )}')&_a=(legacy:(columns:!(_source),interval:auto,isDirty:!f,sort:!()),tab:(logs:(),patterns:(patternsField:'',usingRegexPatterns:!f)),ui:(activeTabId:logs,showHistogram:!t))`;
 
-  // Use navigateToApp to handle workspace context automatically
-  coreRefs.application?.navigateToApp(EXPLORE_APP_ID, { path });
+  // Use basePath.prepend to properly handle workspace context
+  const fullUrl =
+    coreRefs.http?.basePath.prepend(`/app/${EXPLORE_APP_ID}/${path}`) ||
+    `/app/${EXPLORE_APP_ID}/${path}`;
+
+  // Open in new tab
+  window.open(fullUrl, '_blank');
+}
+
+/**
+ * Navigates to the dataset correlations setup page
+ * Uses basePath.prepend for workspace context handling
+ *
+ * @param datasetId - The trace dataset ID (may include datasource prefix)
+ */
+export function navigateToDatasetCorrelations(datasetId: string): void {
+  const encodedDatasetId = encodeURIComponent(datasetId);
+  const path = `datasets/patterns/${encodedDatasetId}#/?_a=(tab:correlatedDatasets)`;
+
+  // Use basePath.prepend to properly handle workspace context
+  const fullUrl = coreRefs.http?.basePath.prepend(`/app/${path}`) || `/app/${path}`;
+
+  // Navigate in same tab
+  window.location.href = fullUrl;
 }
