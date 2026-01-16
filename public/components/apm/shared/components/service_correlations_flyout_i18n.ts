@@ -14,7 +14,7 @@ export const correlationsFlyoutI18nTexts = {
     defaultMessage: 'Correlated spans',
   }),
   tabLogs: i18n.translate('observability.apm.correlationsFlyout.tabLogs', {
-    defaultMessage: 'Associated logs',
+    defaultMessage: 'Correlated logs',
   }),
 
   // Empty states
@@ -30,7 +30,7 @@ export const correlationsFlyoutI18nTexts = {
   noCorrelatedLogsBody: i18n.translate(
     'observability.apm.correlationsFlyout.noCorrelatedLogsBody',
     {
-      defaultMessage: 'Configure correlated log datasets to view associated logs for this service.',
+      defaultMessage: 'Configure correlated log datasets to view related logs for this service.',
     }
   ),
 

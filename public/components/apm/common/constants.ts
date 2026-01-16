@@ -29,6 +29,15 @@ export const APM_CONSTANTS = {
     THROUGHPUT: '#54B399',
     FAILURE_RATE: '#D36086',
   },
+
+  // Query limits for fetching data
+  QUERY_LIMITS: {
+    SPANS: 50,
+    LOGS_PER_DATASET: 10,
+  },
+
+  // Truncation length for log messages in table display
+  MESSAGE_TRUNCATION_LENGTH: 200,
 } as const;
 
 /**

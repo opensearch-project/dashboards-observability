@@ -83,3 +83,11 @@ export function normalizeLogLevel(level: string, severityNumber?: number): strin
   if (levelLower.includes('trace')) return 'trace';
   return 'other';
 }
+
+/**
+ * Sanitizes a string value for safe use in PPL queries.
+ * Escapes backslashes and single quotes to prevent query injection.
+ */
+export function sanitizeQueryValue(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
