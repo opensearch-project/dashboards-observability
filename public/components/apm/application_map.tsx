@@ -14,8 +14,7 @@ import {
   EuiLoadingSpinner,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { ChromeBreadcrumb, CoreStart, NotificationsStart } from '../../../../../src/core/public';
-import { AppPluginStartDependencies } from '../../types';
+import { ChromeBreadcrumb, NotificationsStart } from '../../../../../src/core/public';
 import { ApmSettingsModal } from './config/apm_settings_modal';
 import { ApmEmptyState } from './common/apm_empty_state';
 import { HeaderControlledComponentsWrapper } from '../../plugin_helpers/plugin_headerControl';
@@ -25,13 +24,11 @@ export interface ApmApplicationMapProps {
   chrome: any;
   parentBreadcrumb: ChromeBreadcrumb;
   notifications: NotificationsStart;
-  CoreStartProp: CoreStart;
-  DepsStart: AppPluginStartDependencies;
   [key: string]: any;
 }
 
 export const ApplicationMap = (props: ApmApplicationMapProps) => {
-  const { chrome, notifications, CoreStartProp, DepsStart } = props;
+  const { chrome, notifications } = props;
   const { config, loading, error, refresh } = useApmConfig();
 
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
@@ -99,12 +96,7 @@ export const ApplicationMap = (props: ApmApplicationMapProps) => {
           <ApmEmptyState onGetStartedClick={handleGetStartedClick} />
 
           {isSettingsModalVisible && (
-            <ApmSettingsModal
-              onClose={handleModalClose}
-              notifications={notifications}
-              CoreStartProp={CoreStartProp}
-              DepsStart={DepsStart}
-            />
+            <ApmSettingsModal onClose={handleModalClose} notifications={notifications} />
           )}
         </EuiPageBody>
       </EuiPage>
@@ -123,12 +115,7 @@ export const ApplicationMap = (props: ApmApplicationMapProps) => {
         </EuiText>
 
         {isSettingsModalVisible && (
-          <ApmSettingsModal
-            onClose={handleModalClose}
-            notifications={notifications}
-            CoreStartProp={CoreStartProp}
-            DepsStart={DepsStart}
-          />
+          <ApmSettingsModal onClose={handleModalClose} notifications={notifications} />
         )}
       </EuiPageBody>
     </EuiPage>

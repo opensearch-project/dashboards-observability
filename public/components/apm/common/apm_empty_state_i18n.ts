@@ -49,15 +49,6 @@ export const apmEmptyStateI18nTexts = {
         }
       ),
     },
-    sloAlerts: {
-      name: i18n.translate('observability.apm.emptyState.tabs.sloAlerts.name', {
-        defaultMessage: 'SLO alerts',
-      }),
-      description: i18n.translate('observability.apm.emptyState.tabs.sloAlerts.description', {
-        defaultMessage:
-          'Set and monitor Service Level Objectives. Get alerted when your services fall below target performance thresholds.',
-      }),
-    },
   },
 };
 

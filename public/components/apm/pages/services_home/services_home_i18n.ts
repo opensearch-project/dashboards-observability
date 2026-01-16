@@ -14,7 +14,7 @@ export const servicesI18nTexts = {
   }),
   table: {
     serviceName: i18n.translate('observability.apm.services.table.serviceName', {
-      defaultMessage: 'Service Name',
+      defaultMessage: 'Service',
     }),
     environment: i18n.translate('observability.apm.services.table.environment', {
       defaultMessage: 'Environment',
@@ -29,7 +29,18 @@ export const servicesI18nTexts = {
       defaultMessage: 'Failure Ratio',
     }),
     actions: i18n.translate('observability.apm.services.table.actions', {
-      defaultMessage: 'Actions',
+      defaultMessage: 'Correlations',
+    }),
+  },
+  tableTooltips: {
+    latency: i18n.translate('observability.apm.services.table.tooltip.latency', {
+      defaultMessage: '95th percentile response time over the selected time range',
+    }),
+    throughput: i18n.translate('observability.apm.services.table.tooltip.throughput', {
+      defaultMessage: 'Number of requests processed per minute',
+    }),
+    failureRatio: i18n.translate('observability.apm.services.table.tooltip.failureRatio', {
+      defaultMessage: 'Percentage of requests that resulted in faults (5xx) and errors (4xx)',
     }),
   },
   actions: {
@@ -39,8 +50,8 @@ export const servicesI18nTexts = {
     viewLogs: i18n.translate('observability.apm.services.actions.viewLogs', {
       defaultMessage: 'View logs',
     }),
-    viewTraces: i18n.translate('observability.apm.services.actions.viewTraces', {
-      defaultMessage: 'View traces',
+    viewSpans: i18n.translate('observability.apm.services.actions.viewSpans', {
+      defaultMessage: 'View spans',
     }),
   },
   error: {

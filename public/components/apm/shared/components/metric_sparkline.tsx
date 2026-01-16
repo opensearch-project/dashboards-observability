@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { EuiLoadingChart, EuiText } from '@elastic/eui';
-import { Plt } from '../../../visualizations/plotly/plot';
+import * as echarts from 'echarts';
 
 export interface MetricDataPoint {
   timestamp: number;
@@ -21,10 +21,22 @@ interface MetricSparklineProps {
   width?: number;
 }
 
+// Helper to convert hex color to RGB components
+const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null;
+};
+
 /**
  * MetricSparkline - Lightweight inline sparkline chart for metrics
  *
- * Renders a minimal Plotly chart with no axes or interactivity.
+ * Renders a minimal ECharts chart with gradient fill and no axes or interactivity.
  * Shows loading chart, "-" for errors/empty data, or the sparkline.
  *
  * @param data - Array of metric data points with timestamp and value
@@ -42,6 +54,85 @@ export const MetricSparkline: React.FC<MetricSparklineProps> = ({
   height = 20,
   width,
 }) => {
+  const chartRef = useRef<HTMLDivElement>(null);
+  const chartInstance = useRef<echarts.ECharts | null>(null);
+
+  useEffect(() => {
+    if (!chartRef.current || isLoading || isError || !data || data.length === 0) {
+      return;
+    }
+
+    // Initialize chart if not already created
+    if (!chartInstance.current) {
+      chartInstance.current = echarts.init(chartRef.current);
+    }
+
+    const rgb = hexToRgb(color) || { r: 84, g: 179, b: 153 };
+
+    const option: echarts.EChartsOption = {
+      grid: {
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+      },
+      xAxis: {
+        type: 'category',
+        show: false,
+        data: data.map((d) => d.timestamp),
+        boundaryGap: false,
+      },
+      yAxis: {
+        type: 'value',
+        show: false,
+      },
+      tooltip: {
+        show: false, // Add this - disables tooltip
+      },
+      series: [
+        {
+          type: 'line',
+          data: data.map((d) => d.value),
+          smooth: true,
+          symbol: 'none',
+          lineStyle: {
+            color,
+            width: 1.5,
+          },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.4)` },
+              { offset: 1, color: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0)` },
+            ]),
+          },
+          emphasis: {
+            disabled: true,
+          },
+          silent: true,
+        },
+      ],
+    };
+
+    chartInstance.current.setOption(option);
+  }, [data, color, isLoading, isError]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      chartInstance.current?.dispose();
+      chartInstance.current = null;
+    };
+  }, []);
+
+  // Handle resize
+  useEffect(() => {
+    const handleResize = () => {
+      chartInstance.current?.resize();
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const containerStyle = {
     display: 'flex',
     alignItems: 'center',
@@ -68,50 +159,7 @@ export const MetricSparkline: React.FC<MetricSparklineProps> = ({
     );
   }
 
-  // Transform data for Plotly
-  const plotData = [
-    {
-      x: data.map((d) => new Date(d.timestamp * 1000)),
-      y: data.map((d) => d.value),
-      type: 'scatter',
-      mode: 'lines',
-      line: {
-        color,
-        width: 1.5,
-      },
-      hoverinfo: 'y',
-      showlegend: false,
-    },
-  ];
-
-  const layout: Record<string, any> = {
-    margin: { l: 0, r: 0, t: 0, b: 0 },
-    xaxis: {
-      visible: false,
-      showgrid: false,
-    },
-    yaxis: {
-      visible: false,
-      showgrid: false,
-    },
-    showlegend: false,
-    height,
-    paper_bgcolor: 'transparent',
-    plot_bgcolor: 'transparent',
-  };
-
-  if (width) {
-    layout.width = width;
-  }
-
-  const config = {
-    displayModeBar: false,
-    staticPlot: true, // Disable interactivity for performance
-  };
-
   return (
-    <div style={{ width: width ? `${width}px` : '100%', height: `${height}px` }}>
-      <Plt data={plotData} layout={layout} config={config} />
-    </div>
+    <div ref={chartRef} style={{ width: width ? `${width}px` : '100%', height: `${height}px` }} />
   );
 };

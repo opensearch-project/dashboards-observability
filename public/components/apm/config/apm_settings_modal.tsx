@@ -24,17 +24,18 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { NotificationsStart, CoreStart } from '../../../../../../src/core/public';
+import { NotificationsStart } from '../../../../../../src/core/public';
 import { getWorkspaceIdFromUrl } from '../../../../../../src/core/public/utils';
+import { coreRefs } from '../../../framework/core_refs';
 import {
   useDatasets,
   usePrometheusDataSources,
   useCorrelatedLogs,
 } from '../shared/hooks/use_apm_config';
 import { useApmConfig } from './apm_config_context';
+import { navigateToDatasetCorrelations } from '../shared/utils/navigation_utils';
 import { OSDSavedApmConfigClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/apm_config';
 import { ApmArchitectureSvgLight, ApmArchitectureSvgDark } from './apm-architecture-svg';
-import { AppPluginStartDependencies } from '../../../types';
 
 /**
  * Type guard to safely check if an unknown value is an Error
@@ -49,21 +50,15 @@ function toError(error: unknown): Error {
 export interface ApmSettingsModalProps {
   onClose: (saved?: boolean) => void;
   notifications: NotificationsStart;
-  CoreStartProp: CoreStart;
-  DepsStart: AppPluginStartDependencies;
 }
 
 export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
-  const { onClose, notifications, CoreStartProp, DepsStart } = props;
+  const { onClose, notifications } = props;
 
-  // Get data service for dataset queries from DepsStart (plugin dependencies)
-  const dataService = DepsStart?.data;
-  const savedObjectsClient = CoreStartProp?.savedObjects?.client;
-
-  // Get current workspace ID from URL
+  // Get current workspace ID from URL using coreRefs
   const workspaceId = getWorkspaceIdFromUrl(
     window.location.href,
-    CoreStartProp?.http?.basePath?.serverBasePath || ''
+    coreRefs.http?.basePath?.serverBasePath || ''
   );
 
   // Form state - minimal fields only
@@ -89,34 +84,34 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
   const { config: existingConfig } = useApmConfig();
   const [isSaving, setIsSaving] = useState(false);
 
-  // Theme detection
+  // Theme detection using coreRefs
   const [isDarkMode] = useState(() => {
-    const theme = CoreStartProp?.uiSettings?.get('theme:darkMode');
+    const theme = coreRefs.core?.uiSettings?.get('theme:darkMode');
     return theme === true || theme === 'true';
   });
 
-  // Data loading hooks - combined datasets hook for efficiency
+  // Data loading hooks - using coreRefs internally
   const {
     tracesDatasets,
     allDatasets,
     loading: datasetsLoading,
     error: datasetsError,
     refresh: refreshDatasets,
-  } = useDatasets(dataService);
+  } = useDatasets();
 
   const {
     data: prometheusDataSources,
     loading: prometheusLoading,
     error: prometheusError,
     refresh: refreshPrometheus,
-  } = usePrometheusDataSources(dataService);
+  } = usePrometheusDataSources();
 
   // Load correlated log datasets for the selected trace dataset
   const {
     data: correlatedLogs,
     loading: correlatedLogsLoading,
     error: correlatedLogsError,
-  } = useCorrelatedLogs(dataService, savedObjectsClient, formData.tracesDatasetId);
+  } = useCorrelatedLogs(formData.tracesDatasetId);
 
   // Populate form when existing config is available from context
   useEffect(() => {
@@ -489,11 +484,7 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
                   extraAction={
                     <EuiButtonEmpty
                       size="xs"
-                      onClick={() => {
-                        CoreStartProp.application.navigateToApp('datasets', {
-                          path: `/patterns/${formData.tracesDatasetId}#/?_a=(tab:correlatedDatasets)`,
-                        });
-                      }}
+                      onClick={() => navigateToDatasetCorrelations(formData.tracesDatasetId)}
                     >
                       {correlatedLogs.length === 0
                         ? i18n.translate('observability.apm.settings.viewCorrelatedLogs', {
