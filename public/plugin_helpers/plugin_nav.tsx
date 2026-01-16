@@ -25,7 +25,6 @@ import { AppPluginStartDependencies, SetupDependencies } from '../types';
 
 export function registerAllPluginNavGroups(
   core: CoreSetup<AppPluginStartDependencies>,
-  setupDeps: SetupDependencies,
   dataSourceEnabled: boolean,
   apmEnabled: boolean,
   applicationMonitoringCategory: AppCategory
@@ -82,29 +81,27 @@ export function registerAllPluginNavGroups(
     },
   ]);
 
-  if (!setupDeps.investigationDashboards) {
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
-      {
-        id: observabilityNotebookID,
-        category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
-        order: 400,
-      },
-    ]);
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS[`security-analytics`], [
-      {
-        id: observabilityNotebookID,
-        category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
-        order: 400,
-      },
-    ]);
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
-      {
-        id: observabilityNotebookID,
-        category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
-        order: 400,
-      },
-    ]);
-  }
+  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+    {
+      id: observabilityNotebookID,
+      category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
+      order: 400,
+    },
+  ]);
+  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS[`security-analytics`], [
+    {
+      id: observabilityNotebookID,
+      category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
+      order: 400,
+    },
+  ]);
+  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+    {
+      id: observabilityNotebookID,
+      category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
+      order: 400,
+    },
+  ]);
 
   if (dataSourceEnabled && apmEnabled) {
     // APM Mode - register nav links for Services and Application Map
