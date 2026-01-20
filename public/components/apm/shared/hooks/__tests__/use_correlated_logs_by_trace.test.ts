@@ -270,7 +270,13 @@ describe('useCorrelatedLogsByTrace', () => {
         })
       );
 
-      await waitForNextUpdate();
+      // Schema validation fails synchronously (no await reached), so state updates
+      // happen during initial render. Wait for the state to settle.
+      try {
+        await waitForNextUpdate({ timeout: 100 });
+      } catch {
+        // Expected - updates may have already occurred synchronously
+      }
 
       expect(mockAddDanger).toHaveBeenCalled();
       expect(result.current.logResults[0].error).toBeDefined();
@@ -293,7 +299,13 @@ describe('useCorrelatedLogsByTrace', () => {
         })
       );
 
-      await waitForNextUpdate();
+      // Schema validation fails synchronously (no await reached), so state updates
+      // happen during initial render. Wait for the state to settle.
+      try {
+        await waitForNextUpdate({ timeout: 100 });
+      } catch {
+        // Expected - updates may have already occurred synchronously
+      }
 
       expect(mockAddDanger).toHaveBeenCalled();
       expect(result.current.logResults[0].error).toBeDefined();

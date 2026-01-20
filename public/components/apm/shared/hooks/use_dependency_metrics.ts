@@ -60,7 +60,8 @@ export const useDependencyMetrics = (
 
   useEffect(() => {
     if (!params.dependencies || params.dependencies.length === 0 || !promqlService) {
-      setMetrics(new Map());
+      // Only update if not already empty to avoid infinite re-renders
+      setMetrics((prev) => (prev.size === 0 ? prev : new Map()));
       return;
     }
 

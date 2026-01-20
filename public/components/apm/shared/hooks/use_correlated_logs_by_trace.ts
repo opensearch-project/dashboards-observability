@@ -47,19 +47,28 @@ export const useCorrelatedLogsByTrace = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
+  // Extract timestamps for stable dependency comparison
+  const minTimeMs = spanTimeRange?.minTime?.getTime();
+  const maxTimeMs = spanTimeRange?.maxTime?.getTime();
+
+  // Create stable string keys for arrays to avoid re-renders on reference changes
+  const traceIdsKey = traceIds.join(',');
+  const logDatasetsKey = logDatasets.map((d) => d.id).join(',');
+
   // Calculate time range with buffer (5 minutes on each side)
   const timeRangeWithBuffer = useMemo(() => {
-    if (!spanTimeRange) return null;
+    if (minTimeMs === undefined || maxTimeMs === undefined) return null;
     const bufferMs = CORRELATION_CONSTANTS.TELEMETRY_LAG_BUFFER_MS;
     return {
-      minTime: new Date(spanTimeRange.minTime.getTime() - bufferMs),
-      maxTime: new Date(spanTimeRange.maxTime.getTime() + bufferMs),
+      minTime: new Date(minTimeMs - bufferMs),
+      maxTime: new Date(maxTimeMs + bufferMs),
     };
-  }, [spanTimeRange]);
+  }, [minTimeMs, maxTimeMs]);
 
   useEffect(() => {
     if (!enabled || logDatasets.length === 0) {
-      setLogResults([]);
+      // Only update if not already empty to avoid infinite re-renders
+      setLogResults((prev) => (prev.length === 0 ? prev : []));
       return;
     }
 
@@ -163,7 +172,8 @@ export const useCorrelatedLogsByTrace = ({
     };
 
     fetchLogsForDatasets();
-  }, [enabled, traceIds, logDatasets, serviceName, timeRangeWithBuffer]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, traceIdsKey, logDatasetsKey, serviceName, timeRangeWithBuffer]);
 
   return {
     logResults,
