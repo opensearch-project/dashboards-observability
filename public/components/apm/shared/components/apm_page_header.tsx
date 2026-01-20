@@ -19,6 +19,7 @@ export interface ApmPageHeaderProps {
   onRefresh: () => void;
   searchQuery?: string;
   onSearchChange?: (query: string) => void;
+  showSearchBar?: boolean; // default true - set to false to hide search bar
 }
 
 /**
@@ -33,23 +34,30 @@ export const ApmPageHeader: React.FC<ApmPageHeaderProps> = ({
   onRefresh,
   searchQuery = '',
   onSearchChange,
+  showSearchBar = true,
 }) => {
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="m">
-      {/* Search bar on the left - takes available space */}
-      <EuiFlexItem grow={true}>
-        <EuiFieldSearch
-          placeholder={searchPlaceholder}
-          value={searchQuery}
-          onChange={(e) => onSearchChange?.(e.target.value)}
-          isClearable
-          fullWidth
-          compressed
-          data-test-subj="servicesSearchBar"
-        />
-      </EuiFlexItem>
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="m"
+      justifyContent={showSearchBar ? 'flexStart' : 'flexEnd'}
+    >
+      {/* Search bar on the left - takes available space (conditionally rendered) */}
+      {showSearchBar && (
+        <EuiFlexItem grow={true}>
+          <EuiFieldSearch
+            placeholder={searchPlaceholder}
+            value={searchQuery}
+            onChange={(e) => onSearchChange?.(e.target.value)}
+            isClearable
+            fullWidth
+            compressed
+            data-test-subj="servicesSearchBar"
+          />
+        </EuiFlexItem>
+      )}
 
-      {/* Time range picker on the right */}
+      {/* Time range picker - positioned at right end when search bar is hidden */}
       <EuiFlexItem grow={false}>
         <TimeRangePicker
           timeRange={timeRange}

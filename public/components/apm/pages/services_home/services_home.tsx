@@ -18,6 +18,7 @@ import {
   EuiLink,
   EuiPanel,
   EuiButtonIcon,
+  EuiButtonGroup,
   EuiToolTip,
   EuiCheckboxGroup,
   EuiAccordion,
@@ -40,7 +41,10 @@ import { TopDependenciesByFaultRate } from '../../shared/components/fault_widget
 import { TimeRange, ServiceTableItem } from '../../common/types/service_types';
 import { parseTimeRange } from '../../shared/utils/time_utils';
 import { parseEnvironmentType } from '../../query_services/query_requests/response_processor';
-import { navigateToServiceMap } from '../../shared/utils/navigation_utils';
+import {
+  navigateToServiceMap,
+  navigateToServiceDetails,
+} from '../../shared/utils/navigation_utils';
 import { ServiceCorrelationsFlyout } from '../../shared/components/service_correlations_flyout';
 import {
   LatencyRangeFilter,
@@ -48,19 +52,32 @@ import {
   FailureRateThresholdFilter,
   matchesAnyFailureRateThreshold,
 } from '../../shared/components/filters';
+import { ActiveFilterBadges, FilterBadge } from '../../shared/components/active_filter_badges';
 import {
   getEnvironmentDisplayName,
   APM_CONSTANTS,
   ENVIRONMENT_PLATFORM_MAP,
 } from '../../common/constants';
 import { servicesI18nTexts as i18nTexts } from './services_home_i18n';
+import { formatCount } from '../../common/format_utils';
 
 const AVAILABLE_ENVIRONMENTS = Object.values(ENVIRONMENT_PLATFORM_MAP);
+
+const LATENCY_PERCENTILE_OPTIONS = [
+  { id: 'p99', label: 'P99' },
+  { id: 'p90', label: 'P90' },
+  { id: 'p50', label: 'P50' },
+];
 
 export interface ServicesHomeProps {
   chrome: any;
   parentBreadcrumb: ChromeBreadcrumb;
-  onServiceClick?: (serviceName: string, environment: string) => void;
+  onServiceClick?: (
+    serviceName: string,
+    environment: string,
+    language?: string,
+    timeRange?: TimeRange
+  ) => void;
 }
 
 interface FlyoutState {
@@ -104,6 +121,9 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   const [latencyRange, setLatencyRange] = useState<[number, number]>([0, 0]);
   const [throughputRange, setThroughputRange] = useState<[number, number]>([0, 0]);
   const [selectedFailureRateThresholds, setSelectedFailureRateThresholds] = useState<string[]>([]);
+
+  // Latency percentile selector state
+  const [latencyPercentile, setLatencyPercentile] = useState<'p99' | 'p90' | 'p50'>('p99');
 
   // Set breadcrumbs
   React.useEffect(() => {
@@ -262,6 +282,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     })),
     startTime: parsedTimeRange.startTime,
     endTime: parsedTimeRange.endTime,
+    latencyPercentile,
   });
 
   const handleRefresh = useCallback(() => {
@@ -269,6 +290,9 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     refetch();
     refetchMetrics();
   }, [refetch, refetchMetrics]);
+
+  // Combined loading state for table and filters
+  const isTableLoading = isLoading || metricsLoading;
 
   // Compute min/max values for range filters based on filtered services' metrics
   const metricRanges = useMemo(() => {
@@ -383,6 +407,97 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     selectedFailureRateThresholds,
   ]);
 
+  // Build active filter badges from current filter state
+  const activeFilters: FilterBadge[] = useMemo(() => {
+    const badges: FilterBadge[] = [];
+
+    // Environment filter badges
+    const selectedEnvValues = Object.entries(selectedEnvironments)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([env]) => env);
+    if (selectedEnvValues.length > 0) {
+      badges.push({
+        key: 'environment',
+        category: i18nTexts.filters.environment,
+        values: selectedEnvValues,
+        onRemove: () => setSelectedEnvironments({}),
+      });
+    }
+
+    // Latency range filter badge (only if modified from default bounds)
+    const isLatencyModified =
+      latencyRange[0] > metricRanges.latencyMin || latencyRange[1] < metricRanges.latencyMax;
+    if (isLatencyModified) {
+      badges.push({
+        key: 'latency',
+        category: i18nTexts.filters.latency,
+        values: [`${latencyRange[0].toFixed(0)}-${latencyRange[1].toFixed(0)}ms`],
+        onRemove: () => setLatencyRange([metricRanges.latencyMin, metricRanges.latencyMax]),
+      });
+    }
+
+    // Throughput range filter badge (only if modified from default bounds)
+    const isThroughputModified =
+      throughputRange[0] > metricRanges.throughputMin ||
+      throughputRange[1] < metricRanges.throughputMax;
+    if (isThroughputModified) {
+      badges.push({
+        key: 'throughput',
+        category: i18nTexts.filters.requests,
+        values: [`${throughputRange[0].toFixed(0)}-${throughputRange[1].toFixed(0)}`],
+        onRemove: () =>
+          setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]),
+      });
+    }
+
+    // Failure rate threshold badges
+    if (selectedFailureRateThresholds.length > 0) {
+      badges.push({
+        key: 'failureRate',
+        category: i18nTexts.filters.failureRatio,
+        values: selectedFailureRateThresholds,
+        onRemove: () => setSelectedFailureRateThresholds([]),
+      });
+    }
+
+    // GroupByAttributes filter badges
+    Object.entries(selectedGroupByAttributes).forEach(([attrPath, selections]) => {
+      const selectedValues = Object.entries(selections)
+        .filter(([_, isSelected]) => isSelected)
+        .map(([value]) => value);
+      if (selectedValues.length > 0) {
+        badges.push({
+          key: `attr-${attrPath}`,
+          category: attrPath,
+          values: selectedValues,
+          onRemove: () =>
+            setSelectedGroupByAttributes((prev) => ({
+              ...prev,
+              [attrPath]: {},
+            })),
+        });
+      }
+    });
+
+    return badges;
+  }, [
+    selectedEnvironments,
+    latencyRange,
+    throughputRange,
+    selectedFailureRateThresholds,
+    selectedGroupByAttributes,
+    metricRanges,
+  ]);
+
+  // Clear all filters handler
+  const handleClearAllFilters = useCallback(() => {
+    setSelectedEnvironments({});
+    setLatencyRange([metricRanges.latencyMin, metricRanges.latencyMax]);
+    setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]);
+    setSelectedFailureRateThresholds([]);
+    setSelectedGroupByAttributes({});
+  }, [metricRanges]);
+
   const columns: Array<EuiBasicTableColumn<ServiceTableItem>> = useMemo(
     () => [
       {
@@ -402,7 +517,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                 <EuiLink
                   onClick={() => {
                     if (onServiceClick) {
-                      onServiceClick(serviceName, item.environment);
+                      onServiceClick(serviceName, item.environment, language, timeRange);
                     }
                   }}
                   data-test-subj={`serviceLink-${serviceName}`}
@@ -481,7 +596,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         field: 'latency' as any,
         name: (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>{i18nTexts.table.latencyP95}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{`Latency (${latencyPercentile.toUpperCase()})`}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip content={i18nTexts.tableTooltips.latency}>
                 <EuiIcon type="questionInCircle" size="s" color="subdued" />
@@ -531,9 +646,9 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         field: 'throughput' as any,
         name: (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>{i18nTexts.table.throughput}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{i18nTexts.table.requests}</EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18nTexts.tableTooltips.throughput}>
+              <EuiToolTip content={i18nTexts.tableTooltips.requests}>
                 <EuiIcon type="questionInCircle" size="s" color="subdued" />
               </EuiToolTip>
             </EuiFlexItem>
@@ -552,7 +667,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
           const throughputData = metrics?.throughput || [];
           const latestValue =
             throughputData.length > 0 ? throughputData[throughputData.length - 1].value : 0;
-          const throughputFormatted = latestValue.toFixed(0);
+          const requestsFormatted = formatCount(latestValue);
 
           return (
             <EuiFlexGroup
@@ -562,7 +677,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               responsive={false}
             >
               <EuiFlexItem grow={false} style={{ minWidth: '70px' }}>
-                <EuiText size="s">{throughputFormatted} req/m</EuiText>
+                <EuiText size="s">{requestsFormatted}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <MetricSparkline
@@ -642,7 +757,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         },
       },
     ],
-    [onServiceClick, metricsMap, metricsLoading]
+    [onServiceClick, metricsMap, metricsLoading, timeRange, latencyPercentile]
   );
 
   if (error) {
@@ -677,6 +792,18 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               onSearchChange={setSearchQuery}
             />
 
+            {/* Active filter badges */}
+            {activeFilters.length > 0 && (
+              <>
+                <EuiSpacer size="s" />
+                <ActiveFilterBadges
+                  filters={activeFilters}
+                  onClearAll={handleClearAllFilters}
+                  disabled={isTableLoading}
+                />
+              </>
+            )}
+
             {/* Empty state when no services found */}
             {showEmptyState ? (
               <EuiPanel style={{ marginTop: '8px' }}>
@@ -698,7 +825,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                       initialSize={15}
                       minSize="10%"
                       paddingSize="none"
-                      style={{ paddingTop: '8px', paddingRight: '8px', paddingBottom: '8px' }}
+                      style={{ paddingTop: '8px', paddingRight: '8px' }}
                     >
                       <EuiPanel style={{ height: '100%' }}>
                         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -738,6 +865,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                               idToSelectedMap={selectedEnvironments}
                               onChange={onEnvironmentChange}
                               compressed
+                              disabled={isTableLoading}
                               data-test-subj="environment-checkboxGroup"
                             />
                           ) : (
@@ -767,6 +895,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                             min={metricRanges.latencyMin}
                             max={metricRanges.latencyMax}
                             dataTestSubj="latencyRangeFilter"
+                            disabled={isTableLoading}
                           />
                         </EuiAccordion>
 
@@ -777,7 +906,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                           id="throughputAccordion"
                           buttonContent={
                             <EuiText size="xs">
-                              <strong>{i18nTexts.filters.throughput}</strong>
+                              <strong>{i18nTexts.filters.requests}</strong>
                             </EuiText>
                           }
                           initialIsOpen={true}
@@ -790,6 +919,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                             min={metricRanges.throughputMin}
                             max={metricRanges.throughputMax}
                             dataTestSubj="throughputRangeFilter"
+                            disabled={isTableLoading}
                           />
                         </EuiAccordion>
 
@@ -811,169 +941,164 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                             selectedThresholds={selectedFailureRateThresholds}
                             onSelectionChange={setSelectedFailureRateThresholds}
                             dataTestSubj="failureRateThresholdFilter"
+                            disabled={isTableLoading}
                           />
                         </EuiAccordion>
 
                         <EuiHorizontalRule margin="xs" />
 
-                        {/* Dynamic GroupByAttributes Filters - Accordion Structure */}
+                        {/* Dynamic GroupByAttributes Filters */}
                         {availableGroupByAttributes &&
                           Object.keys(availableGroupByAttributes).length > 0 && (
                             <>
-                              <EuiAccordion
-                                id="attributesAccordion"
-                                buttonContent={
-                                  <EuiText size="s">
-                                    <strong>{i18nTexts.filters.attributes}</strong>
-                                  </EuiText>
-                                }
-                                initialIsOpen={true}
-                                data-test-subj="attributesAccordion"
-                              >
-                                <EuiSpacer size="s" />
+                              <EuiText size="s" data-test-subj="attributesTitle">
+                                <strong>{i18nTexts.filters.attributes}</strong>
+                              </EuiText>
+                              <EuiSpacer size="s" />
 
-                                {/* Inner accordions for each attribute */}
-                                {Object.entries(availableGroupByAttributes).map(
-                                  ([attrPath, _values], index) => {
-                                    const filteredValues = filteredAttributeValues[attrPath] || [];
-                                    const attrSearchQuery = attributeSearchQueries[attrPath] || '';
-                                    const isExpanded = expandedAttributes[attrPath] || false;
-                                    const displayedValues = isExpanded
-                                      ? filteredValues
-                                      : filteredValues.slice(
-                                          0,
-                                          APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT
-                                        );
-                                    const remainingCount =
-                                      filteredValues.length -
-                                      APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT;
+                              {/* Inner accordions for each attribute */}
+                              {Object.entries(availableGroupByAttributes).map(
+                                ([attrPath, _values], index) => {
+                                  const filteredValues = filteredAttributeValues[attrPath] || [];
+                                  const attrSearchQuery = attributeSearchQueries[attrPath] || '';
+                                  const isExpanded = expandedAttributes[attrPath] || false;
+                                  const displayedValues = isExpanded
+                                    ? filteredValues
+                                    : filteredValues.slice(
+                                        0,
+                                        APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT
+                                      );
+                                  const remainingCount =
+                                    filteredValues.length -
+                                    APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT;
 
-                                    return (
-                                      <React.Fragment key={attrPath}>
-                                        {index > 0 && <EuiHorizontalRule margin="xs" />}
+                                  return (
+                                    <React.Fragment key={attrPath}>
+                                      {index > 0 && <EuiHorizontalRule margin="xs" />}
 
-                                        <EuiAccordion
-                                          id={`attribute-${attrPath}-accordion`}
-                                          buttonContent={
-                                            <EuiText size="xs">
-                                              <strong>{attrPath}</strong>
-                                            </EuiText>
+                                      <EuiAccordion
+                                        id={`attribute-${attrPath}-accordion`}
+                                        buttonContent={
+                                          <EuiText size="xs">
+                                            <strong>{attrPath}</strong>
+                                          </EuiText>
+                                        }
+                                        initialIsOpen={index === 0}
+                                        data-test-subj={`attribute-${attrPath}-accordion`}
+                                      >
+                                        <EuiSpacer size="s" />
+
+                                        {/* Search box */}
+                                        <EuiFieldSearch
+                                          placeholder=""
+                                          value={attrSearchQuery}
+                                          onChange={(e) =>
+                                            handleSearchChange(attrPath, e.target.value)
                                           }
-                                          initialIsOpen={false}
-                                          data-test-subj={`attribute-${attrPath}-accordion`}
-                                        >
-                                          <EuiSpacer size="s" />
+                                          isClearable
+                                          fullWidth
+                                          compressed
+                                          disabled={isTableLoading}
+                                          data-test-subj={`attribute-${attrPath}-search`}
+                                        />
 
-                                          {/* Search box */}
-                                          <EuiFieldSearch
-                                            placeholder=""
-                                            value={attrSearchQuery}
-                                            onChange={(e) =>
-                                              handleSearchChange(attrPath, e.target.value)
-                                            }
-                                            isClearable
-                                            fullWidth
-                                            compressed
-                                            data-test-subj={`attribute-${attrPath}-search`}
-                                          />
+                                        <EuiSpacer size="s" />
 
-                                          <EuiSpacer size="s" />
+                                        {/* Select all / Clear all links */}
+                                        {filteredValues.length > 0 && (
+                                          <>
+                                            <EuiFlexGroup
+                                              gutterSize="s"
+                                              justifyContent="spaceBetween"
+                                            >
+                                              <EuiFlexItem grow={false}>
+                                                <EuiLink
+                                                  onClick={() =>
+                                                    handleSelectAllForAttribute(attrPath)
+                                                  }
+                                                  data-test-subj={`attribute-${attrPath}-selectAll`}
+                                                  color="primary"
+                                                >
+                                                  <EuiText size="xs">
+                                                    {i18nTexts.filters.selectAll}
+                                                  </EuiText>
+                                                </EuiLink>
+                                              </EuiFlexItem>
+                                              <EuiFlexItem grow={false}>
+                                                <EuiLink
+                                                  onClick={() =>
+                                                    handleClearAllForAttribute(attrPath)
+                                                  }
+                                                  data-test-subj={`attribute-${attrPath}-clearAll`}
+                                                  color="primary"
+                                                >
+                                                  <EuiText size="xs">
+                                                    {i18nTexts.filters.clearAll}
+                                                  </EuiText>
+                                                </EuiLink>
+                                              </EuiFlexItem>
+                                            </EuiFlexGroup>
+                                            <EuiSpacer size="s" />
+                                          </>
+                                        )}
 
-                                          {/* Select all / Clear all links */}
-                                          {filteredValues.length > 0 && (
-                                            <>
-                                              <EuiFlexGroup
-                                                gutterSize="s"
-                                                justifyContent="spaceBetween"
-                                              >
-                                                <EuiFlexItem grow={false}>
-                                                  <EuiLink
-                                                    onClick={() =>
-                                                      handleSelectAllForAttribute(attrPath)
-                                                    }
-                                                    data-test-subj={`attribute-${attrPath}-selectAll`}
-                                                    color="primary"
-                                                  >
-                                                    <EuiText size="xs">
-                                                      {i18nTexts.filters.selectAll}
-                                                    </EuiText>
-                                                  </EuiLink>
-                                                </EuiFlexItem>
-                                                <EuiFlexItem grow={false}>
-                                                  <EuiLink
-                                                    onClick={() =>
-                                                      handleClearAllForAttribute(attrPath)
-                                                    }
-                                                    data-test-subj={`attribute-${attrPath}-clearAll`}
-                                                    color="primary"
-                                                  >
-                                                    <EuiText size="xs">
-                                                      {i18nTexts.filters.clearAll}
-                                                    </EuiText>
-                                                  </EuiLink>
-                                                </EuiFlexItem>
-                                              </EuiFlexGroup>
-                                              <EuiSpacer size="s" />
-                                            </>
-                                          )}
-
-                                          {/* Checkbox list */}
-                                          {filteredValues.length > 0 ? (
-                                            <>
-                                              <EuiCheckboxGroup
-                                                options={displayedValues.map((value) => ({
-                                                  id: value,
-                                                  label: value,
-                                                }))}
-                                                idToSelectedMap={
-                                                  selectedGroupByAttributes[attrPath] || {}
-                                                }
-                                                onChange={(id) => {
-                                                  setSelectedGroupByAttributes((prev) => ({
-                                                    ...prev,
-                                                    [attrPath]: {
-                                                      ...(prev[attrPath] || {}),
-                                                      [id]: !prev[attrPath]?.[id],
-                                                    },
-                                                  }));
-                                                }}
-                                                compressed
-                                                data-test-subj={`attribute-${attrPath}-checkboxGroup`}
-                                              />
-                                              {/* Show more / Show less link */}
-                                              {filteredValues.length >
-                                                APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT && (
-                                                <>
-                                                  <EuiSpacer size="xs" />
-                                                  <EuiLink
-                                                    onClick={() =>
-                                                      setExpandedAttributes((prev) => ({
-                                                        ...prev,
-                                                        [attrPath]: !prev[attrPath],
-                                                      }))
-                                                    }
-                                                    data-test-subj={`attribute-${attrPath}-showMore`}
-                                                  >
-                                                    <EuiText size="xs">
-                                                      {isExpanded
-                                                        ? i18nTexts.filters.showLess
-                                                        : `+${remainingCount} more`}
-                                                    </EuiText>
-                                                  </EuiLink>
-                                                </>
-                                              )}
-                                            </>
-                                          ) : (
-                                            <EuiText size="s" color="subdued">
-                                              {i18nTexts.filters.noMatchingValues}
-                                            </EuiText>
-                                          )}
-                                        </EuiAccordion>
-                                      </React.Fragment>
-                                    );
-                                  }
-                                )}
-                              </EuiAccordion>
+                                        {/* Checkbox list */}
+                                        {filteredValues.length > 0 ? (
+                                          <>
+                                            <EuiCheckboxGroup
+                                              options={displayedValues.map((value) => ({
+                                                id: value,
+                                                label: value,
+                                              }))}
+                                              idToSelectedMap={
+                                                selectedGroupByAttributes[attrPath] || {}
+                                              }
+                                              onChange={(id) => {
+                                                setSelectedGroupByAttributes((prev) => ({
+                                                  ...prev,
+                                                  [attrPath]: {
+                                                    ...(prev[attrPath] || {}),
+                                                    [id]: !prev[attrPath]?.[id],
+                                                  },
+                                                }));
+                                              }}
+                                              compressed
+                                              disabled={isTableLoading}
+                                              data-test-subj={`attribute-${attrPath}-checkboxGroup`}
+                                            />
+                                            {/* Show more / Show less link */}
+                                            {filteredValues.length >
+                                              APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT && (
+                                              <>
+                                                <EuiSpacer size="xs" />
+                                                <EuiLink
+                                                  onClick={() =>
+                                                    setExpandedAttributes((prev) => ({
+                                                      ...prev,
+                                                      [attrPath]: !prev[attrPath],
+                                                    }))
+                                                  }
+                                                  data-test-subj={`attribute-${attrPath}-showMore`}
+                                                >
+                                                  <EuiText size="xs">
+                                                    {isExpanded
+                                                      ? i18nTexts.filters.showLess
+                                                      : `+${remainingCount} more`}
+                                                  </EuiText>
+                                                </EuiLink>
+                                              </>
+                                            )}
+                                          </>
+                                        ) : (
+                                          <EuiText size="s" color="subdued">
+                                            {i18nTexts.filters.noMatchingValues}
+                                          </EuiText>
+                                        )}
+                                      </EuiAccordion>
+                                    </React.Fragment>
+                                  );
+                                }
+                              )}
                             </>
                           )}
                       </EuiPanel>
@@ -988,20 +1113,35 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                       minSize="50%"
                       paddingSize="none"
                       scrollable={false}
-                      style={{ padding: '8px 0px 8px 8px' }}
+                      style={{ padding: '8px 0px 0px 8px' }}
                     >
                       {/* Top Widgets Row */}
                       <EuiFlexGroup gutterSize="s" direction="row" alignItems="stretch">
                         <TopServicesByFaultRate
                           timeRange={timeRange}
-                          onServiceClick={onServiceClick}
+                          onServiceClick={(serviceName, environment) => {
+                            if (onServiceClick) {
+                              onServiceClick(serviceName, environment, undefined, timeRange);
+                            }
+                          }}
                           refreshTrigger={refreshTrigger}
                           searchQuery={searchQuery}
                         />
                         <TopDependenciesByFaultRate
                           timeRange={timeRange}
                           refreshTrigger={refreshTrigger}
-                          onServiceClick={onServiceClick}
+                          onServiceClick={(serviceName, environment) => {
+                            if (onServiceClick) {
+                              onServiceClick(serviceName, environment, undefined, timeRange);
+                            }
+                          }}
+                          onDependencyClick={(sourceService, dependencyService, environment) => {
+                            navigateToServiceDetails(sourceService, environment, {
+                              tab: 'dependencies',
+                              dependency: dependencyService,
+                              timeRange,
+                            });
+                          }}
                           searchQuery={searchQuery}
                         />
                       </EuiFlexGroup>
@@ -1010,7 +1150,35 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
                       {/* Services Table */}
                       <EuiPanel>
-                        {displayedServices.length === 0 ? (
+                        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                          <EuiFlexItem grow={false}>
+                            <EuiText size="m">
+                              <h4>Service Catalog</h4>
+                            </EuiText>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiFlexGroup gutterSize="s" alignItems="center">
+                              <EuiFlexItem grow={false}>
+                                <EuiText size="s">
+                                  <strong>Latency</strong>
+                                </EuiText>
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <EuiButtonGroup
+                                  legend="Select latency percentile"
+                                  options={LATENCY_PERCENTILE_OPTIONS}
+                                  idSelected={latencyPercentile}
+                                  onChange={(id) =>
+                                    setLatencyPercentile(id as 'p99' | 'p90' | 'p50')
+                                  }
+                                  buttonSize="compressed"
+                                />
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                        <EuiSpacer size="s" />
+                        {!isTableLoading && displayedServices.length === 0 ? (
                           <EmptyState
                             title={i18nTexts.noMatching.title}
                             body={i18nTexts.noMatching.body}
@@ -1018,7 +1186,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                           />
                         ) : (
                           <EuiInMemoryTable
-                            items={displayedServices}
+                            items={isTableLoading ? [] : displayedServices}
                             columns={columns}
                             pagination={{
                               initialPageSize: APM_CONSTANTS.DEFAULT_PAGE_SIZE,
@@ -1030,7 +1198,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                                 direction: 'asc',
                               },
                             }}
-                            loading={isLoading}
+                            loading={isTableLoading}
                             data-test-subj="servicesTable"
                           />
                         )}

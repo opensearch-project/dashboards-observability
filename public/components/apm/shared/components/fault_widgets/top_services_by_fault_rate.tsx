@@ -17,6 +17,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { useTopServicesByFaultRate } from '../../hooks/use_top_services_by_fault_rate';
 import { TimeRange } from '../../../common/types/service_types';
+import { parseTimeRange } from '../../utils/time_utils';
 import { FaultRateCell, getRelativePercentage } from './fault_rate_cell';
 import { ServiceCell } from './service_cell';
 
@@ -65,15 +66,12 @@ export const TopServicesByFaultRate: React.FC<TopServicesByFaultRateProps> = ({
   refreshTrigger,
   searchQuery,
 }) => {
-  // Parse time range - handle both absolute and relative times
-  // Memoize to prevent creating new Date objects on every render
+  // Parse time range using datemath for proper handling of all relative formats
+  // Recalculate when refreshTrigger changes to get fresh timestamps
   const { startTime, endTime } = useMemo(() => {
-    const start = timeRange.from.startsWith('now')
-      ? new Date(Date.now() - 15 * 60 * 1000) // Default to 15 min for relative
-      : new Date(timeRange.from);
-    const end = timeRange.to === 'now' ? new Date() : new Date(timeRange.to);
-    return { startTime: start, endTime: end };
-  }, [timeRange.from, timeRange.to]);
+    return parseTimeRange(timeRange);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeRange, refreshTrigger]);
 
   const { data: services, isLoading, error } = useTopServicesByFaultRate({
     startTime,
@@ -143,7 +141,7 @@ export const TopServicesByFaultRate: React.FC<TopServicesByFaultRateProps> = ({
       <EuiFlexItem>
         <EuiPanel>
           <EuiText size="m">
-            <h5>{i18nTexts.title}</h5>
+            <h4>{i18nTexts.title}</h4>
           </EuiText>
           <EuiSpacer size="s" />
           <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 150 }}>

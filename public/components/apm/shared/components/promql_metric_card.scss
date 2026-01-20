@@ -1,0 +1,133 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.promql-metric-card {
+  position: relative;
+  height: 100%;
+  min-height: 120px;
+  background-color: $euiColorEmptyShade;
+  border-radius: 6px;
+  overflow: hidden;
+
+  &__content {
+    position: relative;
+    z-index: 2;
+    padding: 12px 16px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__title {
+    font-size: 14px;
+    font-weight: 600;
+    color: $euiTextColor;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  &__subtitle {
+    font-size: 12px;
+    color: $euiColorDarkShade;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  &__value-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+  }
+
+  &__value {
+    font-size: 28px;
+    font-weight: 600;
+    color: $euiTextColor;
+    line-height: 1;
+
+    &--loading {
+      opacity: 0.5;
+    }
+
+    &--error {
+      color: $euiColorDanger;
+    }
+
+    &--positive {
+      color: $euiColorSuccess;
+    }
+
+    &--negative {
+      color: $euiColorDanger;
+    }
+  }
+
+  &__trend {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 8px;
+    font-size: 12px;
+    font-weight: 500;
+
+    &--up {
+      color: $euiColorSuccess;
+    }
+
+    &--down {
+      color: $euiColorDanger;
+    }
+
+    &--neutral {
+      color: $euiColorDarkShade;
+    }
+
+    // Invert colors when increase is bad (e.g., errors, latency)
+    &--inverted {
+      &.promql-metric-card__trend--up {
+        color: $euiColorDanger;
+      }
+
+      &.promql-metric-card__trend--down {
+        color: $euiColorSuccess;
+      }
+    }
+  }
+
+  &__trend-percent {
+    margin-left: 2px;
+  }
+
+  &__chart {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    z-index: 1;
+    opacity: 0.6;
+  }
+
+  &__loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+
+  &__error {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: $euiColorDanger;
+  }
+}

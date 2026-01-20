@@ -16,10 +16,16 @@ export const correlationsFlyoutI18nTexts = {
   tabLogs: i18n.translate('observability.apm.correlationsFlyout.tabLogs', {
     defaultMessage: 'Correlated logs',
   }),
+  tabAttributes: i18n.translate('observability.apm.correlationsFlyout.tabAttributes', {
+    defaultMessage: 'Service attributes',
+  }),
 
   // Empty states
   noSpans: i18n.translate('observability.apm.correlationsFlyout.noSpans', {
     defaultMessage: 'No spans found for this service',
+  }),
+  noAttributes: i18n.translate('observability.apm.correlationsFlyout.noAttributes', {
+    defaultMessage: 'No attributes found for this service',
   }),
   noLogs: i18n.translate('observability.apm.correlationsFlyout.noLogs', {
     defaultMessage: 'No logs found for this service',
@@ -103,6 +109,20 @@ export const correlationsFlyoutI18nTexts = {
     defaultMessage:
       'Showing up to 10 most recent logs from each correlated dataset. Use the filter to narrow by log level.',
   }),
+  attributesDescription: i18n.translate(
+    'observability.apm.correlationsFlyout.attributesDescription',
+    {
+      defaultMessage: 'Service attributes extracted from trace data.',
+    }
+  ),
+
+  // Attributes tab labels
+  environment: i18n.translate('observability.apm.correlationsFlyout.environment', {
+    defaultMessage: 'Environment',
+  }),
+  attributes: i18n.translate('observability.apm.correlationsFlyout.attributes', {
+    defaultMessage: 'Attributes',
+  }),
 
   // Errors
   errorLoadingSpans: i18n.translate('observability.apm.correlationsFlyout.errorLoadingSpans', {
@@ -111,4 +131,18 @@ export const correlationsFlyoutI18nTexts = {
   errorPrefix: i18n.translate('observability.apm.correlationsFlyout.errorPrefix', {
     defaultMessage: 'Error',
   }),
+
+  // Filter badge labels (for operation/dependency context)
+  filterBadgeOperation: i18n.translate(
+    'observability.apm.correlationsFlyout.filterBadgeOperation',
+    {
+      defaultMessage: 'Operation',
+    }
+  ),
+  filterBadgeDependency: i18n.translate(
+    'observability.apm.correlationsFlyout.filterBadgeDependency',
+    {
+      defaultMessage: 'Dependency',
+    }
+  ),
 };

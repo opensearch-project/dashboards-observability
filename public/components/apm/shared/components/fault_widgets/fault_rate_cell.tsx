@@ -46,7 +46,7 @@ export const FaultRateCell: React.FC<FaultRateCellProps> = ({
           value={relativePercentage}
           max={100}
           size="m"
-          color="vis2"
+          color="vis1"
         />
       </EuiFlexItem>
     </EuiFlexGroup>

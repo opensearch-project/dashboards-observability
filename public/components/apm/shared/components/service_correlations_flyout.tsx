@@ -28,11 +28,15 @@ import {
   EuiSuperSelect,
   EuiLink,
   EuiIcon,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
 } from '@elastic/eui';
 import moment from 'moment';
 import { coreRefs } from '../../../../framework/core_refs';
 import { useApmConfig } from '../../config/apm_config_context';
 import { useCorrelatedLogs } from '../hooks/use_apm_config';
+import { useServiceAttributes } from '../hooks/use_service_attributes';
 import { PPLSearchService } from '../../query_services/ppl_search_service';
 import { TimeRange } from '../../common/types/service_types';
 import { parseTimeRange } from '../utils/time_utils';
@@ -43,9 +47,13 @@ import {
   navigateToExploreLogs,
   navigateToDatasetCorrelations,
 } from '../utils/navigation_utils';
-import { getEnvironmentDisplayName, APM_CONSTANTS } from '../../common/constants';
+import {
+  getEnvironmentDisplayName,
+  APM_CONSTANTS,
+  CORRELATION_CONSTANTS,
+} from '../../common/constants';
 import { uiSettingsService } from '../../../../../common/utils';
-import { SpanData, LogData, LogDatasetResult } from '../types/correlations_types';
+import { SpanData, LogData, LogDatasetResult } from '../../common/types/correlations_types';
 import { LanguageIcon } from './language_icon';
 import {
   formatSpanKind,
@@ -54,7 +62,6 @@ import {
   getLogLevelColor,
   getHttpStatusColor,
   normalizeLogLevel,
-  sanitizeQueryValue,
 } from '../utils/format_utils';
 
 /**
@@ -85,8 +92,14 @@ interface ServiceCorrelationsFlyoutProps {
   environment: string;
   language?: string;
   timeRange: TimeRange;
-  initialTab: 'spans' | 'logs';
+  initialTab: 'spans' | 'logs' | 'attributes';
   onClose: () => void;
+  /** Optional: Filter spans by operation name (for operations table) */
+  operationFilter?: string;
+  /** Optional: Filter spans by remote service name (for dependencies table) */
+  remoteServiceFilter?: string;
+  /** Optional: Filter spans by remote operation name (for dependencies table) */
+  remoteOperationFilter?: string;
 }
 
 export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps> = ({
@@ -96,7 +109,12 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
   timeRange,
   initialTab,
   onClose,
+  operationFilter,
+  remoteServiceFilter,
+  remoteOperationFilter,
 }) => {
+  // Check if any filters are active (used for conditionally hiding Attributes tab and showing filter badge)
+  const hasFilters = Boolean(operationFilter || remoteServiceFilter || remoteOperationFilter);
   const { config } = useApmConfig();
   const traceDatasetId = config?.tracesDataset?.id;
 
@@ -149,6 +167,18 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
   };
 
   const parsedTimeRange = useMemo(() => parseTimeRange(timeRange), [timeRange]);
+
+  // Fetch service attributes for the Attributes tab
+  const {
+    attributes: serviceAttributes,
+    isLoading: attributesLoading,
+    error: attributesError,
+  } = useServiceAttributes({
+    serviceName,
+    environment,
+    startTime: parsedTimeRange.startTime,
+    endTime: parsedTimeRange.endTime,
+  });
 
   // Filter options for status/HTTP status filter
   // Status codes use badges, HTTP codes use colored text matching table display
@@ -236,7 +266,13 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     });
   }, [spans, statusFilter, spanSortField, spanSortDirection]);
 
-  // Fetch spans
+  // State for traceIds extracted from spans (used for log correlation)
+  const [extractedTraceIds, setExtractedTraceIds] = useState<string[]>([]);
+  const [spanTimeRange, setSpanTimeRange] = useState<{ minTime: Date; maxTime: Date } | undefined>(
+    undefined
+  );
+
+  // Fetch spans with optional filters
   useEffect(() => {
     if (!config?.tracesDataset) return;
 
@@ -254,9 +290,77 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
             : undefined,
         };
 
-        const pplQuery = `source=${dataset.title} | where serviceName = '${sanitizeQueryValue(
-          serviceName
-        )}' | sort - startTime | head ${APM_CONSTANTS.QUERY_LIMITS.SPANS}`;
+        // Build PPL query with optional filters
+        let pplQuery = `source=${dataset.title} | where serviceName = '${serviceName}'`;
+
+        // Add operation filter if specified
+        if (operationFilter) {
+          pplQuery += ` | where name = '${operationFilter}'`;
+        }
+
+        // Add remote service filter if specified (for dependencies)
+        // Uses coalesce to check multiple possible fields for remote service name.
+        // The fields are ordered to prioritize service names over IP addresses:
+        // - net.peer.name is most common and reliable (contains "cart", "checkout", etc.)
+        // - server.address is moved to the end as it often contains IP addresses
+        // Note: This filter may not match for all services (e.g., checkout uses different attributes)
+        // The remoteOperationFilter below provides an additional/fallback match.
+        if (remoteServiceFilter) {
+          const filter = remoteServiceFilter.toLowerCase();
+          // Remote service identification fields ordered by reliability
+          // (service names preferred over IPs, server.address last as it often contains IPs)
+          const remoteServiceFields = [
+            '`attributes.net.peer.name`', // Standard OTel network peer (frontend uses)
+            '`attributes.peer.service`', // Older OTel peer service
+            '`attributes.rpc.service`', // gRPC/RPC services (e.g., "oteldemo.CartService")
+            '`attributes.db.name`', // Database name
+            '`attributes.db.system`', // Database system type (redis, postgresql)
+            '`attributes.gen_ai.system`', // LLM/AI systems (openai)
+            '`attributes.http.host`', // HTTP host header
+            '`attributes.messaging.destination.name`', // Message queues (Kafka, RabbitMQ - newer)
+            '`attributes.messaging.destination`', // Message queues (older)
+            '`attributes.upstream_cluster`', // Envoy/Istio service mesh
+            '`attributes.upstream_cluster_name`', // Envoy alternative
+            '`attributes.server.address`', // Server address (often IP, so moved to end)
+            "''", // Empty string fallback
+          ].join(', ');
+          pplQuery += ` | eval _remoteService = coalesce(${remoteServiceFields})`;
+          // Use LIKE with lower() for case-insensitive partial match
+          // (e.g., "cart" matches "oteldemo.CartService" or "cart")
+          pplQuery += ` | where lower(_remoteService) LIKE '%${filter}%'`;
+        }
+
+        // Add remote operation filter if specified
+        // Service map stores: "POST /oteldemo.CartService/GetCart" (with HTTP method prefix)
+        // Span name is: "oteldemo.CartService/GetCart" or "grpc.oteldemo.CartService/GetCart"
+        // HTTP method is in: attributes.http.method or attributes.http.request.method
+        if (remoteOperationFilter) {
+          let opFilter = remoteOperationFilter;
+          let httpMethod: string | null = null;
+
+          // Extract HTTP method prefix if present (e.g., "POST " from "POST /path")
+          const httpMethodPrefixRegex = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)\s+/i;
+          const methodMatch = opFilter.match(httpMethodPrefixRegex);
+          if (methodMatch) {
+            httpMethod = methodMatch[1].toUpperCase();
+            opFilter = opFilter.replace(httpMethodPrefixRegex, '');
+          }
+
+          // Strip leading slash if present (e.g., "/oteldemo..." -> "oteldemo...")
+          opFilter = opFilter.replace(/^\//, '');
+
+          // 1. Filter by operation name (always applied)
+          pplQuery += ` | where lower(name) LIKE '%${opFilter.toLowerCase()}%'`;
+
+          // 2. Filter by HTTP method if extracted (for HTTP spans)
+          // gRPC spans won't have http.method, so we allow empty values through
+          if (httpMethod) {
+            pplQuery += ` | eval _httpMethod = coalesce(\`attributes.http.method\`, \`attributes.http.request.method\`, '')`;
+            pplQuery += ` | where _httpMethod = '${httpMethod}' OR _httpMethod = ''`;
+          }
+        }
+
+        pplQuery += ` | sort - startTime | head 50`;
         const response = await pplService.executeQuery(pplQuery, dataset);
 
         const spansData: SpanData[] = (response.jsonData || []).map((item: any, idx: number) => ({
@@ -275,6 +379,27 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
         }));
 
         setSpans(spansData);
+
+        // Extract unique traceIds for log correlation
+        const traceIds = [
+          ...new Set(
+            spansData.map((span) => span.raw.traceId).filter((id): id is string => Boolean(id))
+          ),
+        ];
+        setExtractedTraceIds(traceIds);
+
+        // Calculate time range from spans for log query buffer
+        if (spansData.length > 0) {
+          const timestamps = spansData
+            .map((span) => new Date(span.startTime).getTime())
+            .filter((t) => !isNaN(t));
+          if (timestamps.length > 0) {
+            setSpanTimeRange({
+              minTime: new Date(Math.min(...timestamps)),
+              maxTime: new Date(Math.max(...timestamps)),
+            });
+          }
+        }
       } catch (err) {
         setSpansError(err instanceof Error ? err : new Error(String(err)));
       } finally {
@@ -283,12 +408,24 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     };
 
     fetchSpans();
-  }, [config?.tracesDataset, serviceName, parsedTimeRange]);
+  }, [
+    config?.tracesDataset,
+    serviceName,
+    parsedTimeRange,
+    operationFilter,
+    remoteServiceFilter,
+    remoteOperationFilter,
+  ]);
 
-  // Fetch logs for each correlated dataset
+  // Fetch logs for each correlated dataset using traceId correlation
   useEffect(() => {
     if (!correlatedLogDatasets || correlatedLogDatasets.length === 0) {
       setLogResults([]);
+      return;
+    }
+
+    // Wait for spans to load first so we have traceIds
+    if (spansLoading) {
       return;
     }
 
@@ -327,6 +464,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
 
         const serviceNameField = dataset.schemaMappings.serviceName;
         const timestampField = dataset.schemaMappings.timestamp;
+        const traceIdField = dataset.schemaMappings?.traceId || 'traceId';
 
         try {
           const datasetConfig = {
@@ -334,16 +472,32 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
             title: dataset.title,
           };
 
-          // Use backticks for field names with dots
-          const pplQuery = `source=${
-            dataset.title
-          } | where \`${serviceNameField}\` = '${sanitizeQueryValue(
-            serviceName
-          )}' | sort - \`${timestampField}\` | head ${APM_CONSTANTS.QUERY_LIMITS.LOGS_PER_DATASET}`;
+          // Build PPL query with traceId correlation and fallback
+          let pplQuery = `source=${dataset.title}`;
+
+          // 1. Always filter by serviceName
+          pplQuery += ` | where \`${serviceNameField}\` = '${serviceName}'`;
+
+          // 2. Add timestamp filter with buffer if we have span time range (5 minutes on each side)
+          if (spanTimeRange) {
+            const bufferMs = CORRELATION_CONSTANTS.TELEMETRY_LAG_BUFFER_MS;
+            const minTimeStr = new Date(spanTimeRange.minTime.getTime() - bufferMs).toISOString();
+            const maxTimeStr = new Date(spanTimeRange.maxTime.getTime() + bufferMs).toISOString();
+            pplQuery += ` | where \`${timestampField}\` >= '${minTimeStr}' AND \`${timestampField}\` <= '${maxTimeStr}'`;
+          }
+
+          // 3. Add traceId correlation with fallback for empty/null traceIds
+          // Note: PPL uses isnull() function, not IS NULL syntax
+          if (extractedTraceIds.length > 0) {
+            const traceIdList = extractedTraceIds.map((id) => `'${id}'`).join(', ');
+            pplQuery += ` | where (\`${traceIdField}\` IN (${traceIdList}) OR \`${traceIdField}\` = '' OR isnull(\`${traceIdField}\`))`;
+          }
+
+          pplQuery += ` | sort - \`${timestampField}\` | head 10`;
           const response = await pplService.executeQuery(pplQuery, datasetConfig);
 
           const logsData: LogData[] = (response.jsonData || []).map((item: any, idx: number) => ({
-            _id: `${dataset.id}-${idx}`, // Use dataset ID + index for unique row ID
+            _id: `${dataset.id}-${idx}`,
             timestamp: item[timestampField] || item.time || item['@timestamp'] || '',
             level: item.severityText || item.severity || item.level || '',
             severityNumber: item.severityNumber || item['severity.number'] || undefined,
@@ -382,7 +536,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     };
 
     fetchLogsForDatasets();
-  }, [correlatedLogDatasets, serviceName]);
+  }, [correlatedLogDatasets, serviceName, extractedTraceIds, spanTimeRange, spansLoading]);
 
   // Toggle row expansion handlers using shared factory function
   const toggleSpanRow = createToggleRowHandler(setExpandedSpanRows);
@@ -783,8 +937,102 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     </>
   );
 
-  const tabs: EuiTabbedContentTab[] = [
-    {
+  // Attributes tab content
+  const attributesTabContent = (
+    <>
+      <EuiText size="xs" color="subdued">
+        {i18nTexts.attributesDescription}
+      </EuiText>
+      <EuiSpacer size="m" />
+
+      {attributesLoading ? (
+        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '200px' }}>
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : attributesError ? (
+        <EuiEmptyPrompt
+          iconType="alert"
+          title={<h3>{i18nTexts.errorPrefix}</h3>}
+          body={<p>{attributesError.message}</p>}
+        />
+      ) : Object.keys(serviceAttributes).length === 0 ? (
+        <EuiEmptyPrompt iconType="search" title={<h3>{i18nTexts.noAttributes}</h3>} />
+      ) : (
+        <>
+          {/* Environment */}
+          <EuiDescriptionList>
+            <EuiDescriptionListTitle>{i18nTexts.environment}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              <EuiBadge color="hollow">{getEnvironmentDisplayName(environment)}</EuiBadge>
+            </EuiDescriptionListDescription>
+          </EuiDescriptionList>
+
+          <EuiSpacer size="m" />
+
+          {/* Attributes */}
+          <EuiText size="s">
+            <strong>{i18nTexts.attributes}</strong>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiDescriptionList compressed>
+            {Object.entries(serviceAttributes).map(([key, value]) => (
+              <React.Fragment key={key}>
+                <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>{value}</EuiDescriptionListDescription>
+              </React.Fragment>
+            ))}
+          </EuiDescriptionList>
+        </>
+      )}
+    </>
+  );
+
+  // Build filter badge text for display
+  const filterBadgeText = useMemo(() => {
+    if (operationFilter) {
+      return `${i18nTexts.filterBadgeOperation}: ${operationFilter}`;
+    }
+    if (remoteServiceFilter && remoteOperationFilter) {
+      return `${i18nTexts.filterBadgeDependency}: ${remoteServiceFilter} → ${remoteOperationFilter}`;
+    }
+    if (remoteServiceFilter) {
+      return `${i18nTexts.filterBadgeDependency}: ${remoteServiceFilter}`;
+    }
+    return null;
+  }, [operationFilter, remoteServiceFilter, remoteOperationFilter]);
+
+  // Build tabs - conditionally include Attributes tab based on filters
+  const tabs: EuiTabbedContentTab[] = useMemo(() => {
+    const tabList: EuiTabbedContentTab[] = [];
+
+    // Only include Attributes tab when no filters are set (service-level view)
+    if (!hasFilters) {
+      tabList.push({
+        id: 'attributes',
+        name: (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon
+                type="navServices"
+                color={selectedTabId === 'attributes' ? 'primary' : 'inherit'}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{i18nTexts.tabAttributes}</EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        content: (
+          <>
+            <EuiSpacer size="m" />
+            {attributesTabContent}
+          </>
+        ),
+      });
+    }
+
+    // Always include Spans tab
+    tabList.push({
       id: 'spans',
       name: (
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -800,8 +1048,10 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
           {spansTabContent}
         </>
       ),
-    },
-    {
+    });
+
+    // Always include Logs tab
+    tabList.push({
       id: 'logs',
       name: (
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -817,8 +1067,10 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
           {logsTabContent}
         </>
       ),
-    },
-  ];
+    });
+
+    return tabList;
+  }, [hasFilters, selectedTabId, attributesTabContent, spansTabContent, logsTabContent]);
 
   const initialSelectedTab = tabs.find((tab) => tab.id === initialTab) || tabs[0];
 
@@ -838,6 +1090,15 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
             <EuiBadge color="hollow">{getEnvironmentDisplayName(environment)}</EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
+        {/* Filter badge - shown only when operation or dependency filters are active */}
+        {filterBadgeText && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiBadge color="primary" iconType="filter">
+              {filterBadgeText}
+            </EuiBadge>
+          </>
+        )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiTabbedContent

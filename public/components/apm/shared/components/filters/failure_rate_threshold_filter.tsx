@@ -15,6 +15,8 @@ export interface FailureRateThresholdFilterProps {
   onSelectionChange: (selected: string[]) => void;
   /** Data test subject prefix */
   dataTestSubj?: string;
+  /** Disable the filter */
+  disabled?: boolean;
 }
 
 /**
@@ -31,6 +33,7 @@ export const FailureRateThresholdFilter: React.FC<FailureRateThresholdFilterProp
   selectedThresholds,
   onSelectionChange,
   dataTestSubj = 'failureRateThresholdFilter',
+  disabled = false,
 }) => {
   // Build checkbox options with colored labels
   const checkboxOptions = useMemo(() => {
@@ -69,6 +72,7 @@ export const FailureRateThresholdFilter: React.FC<FailureRateThresholdFilterProp
       idToSelectedMap={idToSelectedMap}
       onChange={handleCheckboxChange}
       compressed
+      disabled={disabled}
       data-test-subj={`${dataTestSubj}-checkboxGroup`}
     />
   );
