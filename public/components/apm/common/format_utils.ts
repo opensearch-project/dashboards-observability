@@ -13,7 +13,7 @@
  * 1000 → 1K, 1000000 → 1M
  */
 export const formatCount = (value: number | undefined): string => {
-  if (value === undefined || isNaN(value)) return '-';
+  if (value === undefined || isNaN(value) || !isFinite(value)) return '-';
   if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
   if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
   return value.toFixed(0);

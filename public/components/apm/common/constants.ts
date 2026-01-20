@@ -155,3 +155,14 @@ export const CORRELATION_CONSTANTS = {
    */
   TELEMETRY_LAG_BUFFER_MS: 5 * 60 * 1000, // 5 minutes
 } as const;
+
+/**
+ * Query constants for Prometheus/PromQL queries
+ */
+export const PROMQL_CONSTANTS = {
+  /**
+   * Time window in milliseconds for instant-like queries.
+   * Used to simulate instant queries with range query API.
+   */
+  INSTANT_QUERY_WINDOW_MS: 5 * 60 * 1000, // 5 minutes
+} as const;

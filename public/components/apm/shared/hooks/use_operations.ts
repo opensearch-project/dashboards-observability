@@ -122,7 +122,7 @@ export const useOperations = (params: UseOperationsParams): UseOperationsResult 
     };
 
     fetchOperations();
-  }, [pplSearchService, fetchParams, refetchTrigger, params.refreshTrigger, queryIndex, dataset]);
+  }, [pplSearchService, fetchParams, refetchTrigger, params.refreshTrigger]);
 
   const refetch = () => {
     setRefetchTrigger((prev) => prev + 1);

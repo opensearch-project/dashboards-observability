@@ -15,6 +15,7 @@ import {
   getQueryAllOperationsAvailability,
   getQueryAllOperationsRequestCount,
 } from '../../query_services/query_requests/promql_queries';
+import { PROMQL_CONSTANTS } from '../../common/constants';
 
 export interface UseOperationMetricsParams {
   operations: Array<{ operationName: string }>;
@@ -70,9 +71,9 @@ export const useOperationMetrics = (
       setError(null);
 
       try {
-        // Use short time range (last 5 minutes) for instant-like queries
+        // Use short time range for instant-like queries
         const now = new Date();
-        const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+        const queryWindowStart = new Date(now.getTime() - PROMQL_CONSTANTS.INSTANT_QUERY_WINDOW_MS);
 
         // Make 7 consolidated queries (one per metric type)
         // Each query returns ALL operations in a single response
@@ -87,37 +88,37 @@ export const useOperationMetrics = (
         ] = await Promise.all([
           promqlService.executeMetricRequest({
             query: getQueryAllOperationsLatencyP50(params.environment, params.serviceName),
-            startTime: Math.floor(fiveMinutesAgo.getTime() / 1000),
+            startTime: Math.floor(queryWindowStart.getTime() / 1000),
             endTime: Math.floor(now.getTime() / 1000),
           }),
           promqlService.executeMetricRequest({
             query: getQueryAllOperationsLatencyP90(params.environment, params.serviceName),
-            startTime: Math.floor(fiveMinutesAgo.getTime() / 1000),
+            startTime: Math.floor(queryWindowStart.getTime() / 1000),
             endTime: Math.floor(now.getTime() / 1000),
           }),
           promqlService.executeMetricRequest({
             query: getQueryAllOperationsLatencyP99(params.environment, params.serviceName),
-            startTime: Math.floor(fiveMinutesAgo.getTime() / 1000),
+            startTime: Math.floor(queryWindowStart.getTime() / 1000),
             endTime: Math.floor(now.getTime() / 1000),
           }),
           promqlService.executeMetricRequest({
             query: getQueryAllOperationsFaultRate(params.environment, params.serviceName),
-            startTime: Math.floor(fiveMinutesAgo.getTime() / 1000),
+            startTime: Math.floor(queryWindowStart.getTime() / 1000),
             endTime: Math.floor(now.getTime() / 1000),
           }),
           promqlService.executeMetricRequest({
             query: getQueryAllOperationsErrorRate(params.environment, params.serviceName),
-            startTime: Math.floor(fiveMinutesAgo.getTime() / 1000),
+            startTime: Math.floor(queryWindowStart.getTime() / 1000),
             endTime: Math.floor(now.getTime() / 1000),
           }),
           promqlService.executeMetricRequest({
             query: getQueryAllOperationsAvailability(params.environment, params.serviceName),
-            startTime: Math.floor(fiveMinutesAgo.getTime() / 1000),
+            startTime: Math.floor(queryWindowStart.getTime() / 1000),
             endTime: Math.floor(now.getTime() / 1000),
           }),
           promqlService.executeMetricRequest({
             query: getQueryAllOperationsRequestCount(params.environment, params.serviceName),
-            startTime: Math.floor(fiveMinutesAgo.getTime() / 1000),
+            startTime: Math.floor(queryWindowStart.getTime() / 1000),
             endTime: Math.floor(now.getTime() / 1000),
           }),
         ]);
