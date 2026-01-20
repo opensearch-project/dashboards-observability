@@ -142,6 +142,7 @@ SELECT
 	) AS `http.flavor`,
     'haproxy.access' AS `event.domain`
 FROM {table_name}
+    {refresh_range_filter}
 WITH (
     auto_refresh = true,
     refresh_interval = '15 Minute',
