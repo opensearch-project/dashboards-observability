@@ -20,9 +20,10 @@ export class PromQLSearchService {
 
   /**
    * Execute a metric request (range query)
+   * Note: step parameter is calculated automatically by OSD core
    */
   async executeMetricRequest(params: ExecuteMetricRequestParams): Promise<any> {
-    const { query, startTime, endTime, step } = params;
+    const { query, startTime, endTime } = params;
 
     // Build request body matching query enhancements API format
     const requestBody = {
@@ -36,7 +37,6 @@ export class PromQLSearchService {
         from: new Date(startTime * 1000).toISOString(),
         to: new Date(endTime * 1000).toISOString(),
       },
-      ...(step && { step }),
     };
 
     try {
@@ -63,9 +63,8 @@ export class PromQLSearchService {
     interval: string;
     startTime: number;
     endTime: number;
-    step?: string;
   }): Promise<any> {
-    const { metricName, filters, stat, interval, startTime, endTime, step } = params;
+    const { metricName, filters, stat, interval, startTime, endTime } = params;
 
     // Build the PromQL query
     const query = PromQLQueryBuilder.buildQuery({
@@ -80,7 +79,6 @@ export class PromQLSearchService {
       query,
       startTime,
       endTime,
-      step,
     });
   }
 }

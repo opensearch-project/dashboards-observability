@@ -517,20 +517,34 @@ export function transformListServiceOperationsResponse(pplResponse: PPLDataFrame
 
   // PPL query already filters for ServiceOperationDetail events, no need to filter again
   // Extract operations from new nested structure
-  const operationMap = new Map<string, number>();
+  // Track both count and unique dependencies per operation
+  const operationMap = new Map<string, { count: number; dependencies: Set<string> }>();
 
   rows.forEach((row) => {
     const operationName = row.operation?.name || row['operation.name'];
 
     if (operationName && operationName !== 'unknown') {
-      const currentCount = operationMap.get(operationName) || 0;
-      operationMap.set(operationName, currentCount + 1);
+      // Get or create the operation entry
+      let opData = operationMap.get(operationName);
+      if (!opData) {
+        opData = { count: 0, dependencies: new Set() };
+        operationMap.set(operationName, opData);
+      }
+      opData.count += 1;
+
+      // Extract remote service name for dependency counting
+      const remoteServiceAttrs =
+        row.operation?.remoteService?.keyAttributes || row['operation.remoteService.keyAttributes'];
+      if (remoteServiceAttrs && remoteServiceAttrs.name && remoteServiceAttrs.name !== 'unknown') {
+        opData.dependencies.add(remoteServiceAttrs.name);
+      }
     }
   });
 
-  const operations = Array.from(operationMap.entries()).map(([name, count]) => ({
+  const operations = Array.from(operationMap.entries()).map(([name, data]) => ({
     Name: name,
-    Count: count,
+    Count: data.count,
+    DependencyCount: data.dependencies.size,
   }));
 
   const timestamps = rows

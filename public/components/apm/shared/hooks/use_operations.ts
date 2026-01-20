@@ -5,45 +5,44 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { PPLSearchService } from '../../query_services/ppl_search_service';
-import { ServiceTableItem } from '../../common/types/service_types';
+import { ServiceOperation } from '../../common/types/service_details_types';
 import { DatasetConfig } from '../../common/types/apm_types';
 import { useApmConfig } from '../../config/apm_config_context';
 
-export interface UseServicesParams {
+export interface UseOperationsParams {
+  serviceName: string;
+  environment?: string;
   startTime: Date;
   endTime: Date;
-  environment?: string;
   refreshTrigger?: number;
 }
 
-export interface UseServicesResult {
-  data: ServiceTableItem[];
+export interface UseOperationsResult {
+  data: ServiceOperation[];
   isLoading: boolean;
   error: Error | null;
-  availableGroupByAttributes: Record<string, string[]>;
   refetch: () => void;
 }
 
 /**
- * Hook for fetching list of services using PPL
+ * Hook for fetching service operations using PPL
  *
- * Returns list of services with their basic metadata.
+ * Returns a list of operations (endpoints/methods) for a service.
+ * Metrics (latency, error rate, etc.) are fetched separately via useOperationMetrics hook.
  *
  * @example
- * const { data, isLoading, error } = useServices({
+ * const { data, isLoading, error } = useOperations({
+ *   serviceName: 'payment-service',
+ *   environment: 'production',
  *   startTime: new Date(Date.now() - 3600000),
  *   endTime: new Date(),
- *   queryIndex: 'otel-apm-service-map',
  * });
  */
-export const useServices = (params: UseServicesParams): UseServicesResult => {
+export const useOperations = (params: UseOperationsParams): UseOperationsResult => {
   const { config } = useApmConfig();
-  const [data, setData] = useState<ServiceTableItem[]>([]);
+  const [data, setData] = useState<ServiceOperation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [availableGroupByAttributes, setAvailableGroupByAttributes] = useState<
-    Record<string, string[]>
-  >({});
   const [refetchTrigger, setRefetchTrigger] = useState(0);
 
   // Get config values
@@ -72,10 +71,13 @@ export const useServices = (params: UseServicesParams): UseServicesResult => {
       queryIndex,
       startTime: params.startTime,
       endTime: params.endTime,
-      environment: params.environment,
+      keyAttributes: {
+        Name: params.serviceName,
+        Environment: params.environment || 'unknown',
+      },
       dataset: dataset!,
     }),
-    [queryIndex, params.startTime, params.endTime, params.environment, dataset]
+    [queryIndex, params.startTime, params.endTime, params.serviceName, params.environment, dataset]
   );
 
   useEffect(() => {
@@ -86,34 +88,32 @@ export const useServices = (params: UseServicesParams): UseServicesResult => {
       return;
     }
 
-    const fetchServices = async () => {
+    const fetchOperations = async () => {
       setIsLoading(true);
       setError(null);
 
       try {
-        const response = await pplSearchService.listServices(fetchParams);
+        const response = await pplSearchService.listServiceOperations(fetchParams);
 
-        // Response is now an object with ServiceSummaries and AvailableGroupByAttributes
-        const availableAttributes = response.AvailableGroupByAttributes || {};
-        setAvailableGroupByAttributes(availableAttributes);
+        // Response structure: { Operations: [...], StartTime, EndTime, NextToken }
+        const operationsArray = response.Operations || [];
+        const operations: ServiceOperation[] = operationsArray.map((op: any) => ({
+          operationName: op.Name || 'unknown',
+          requestCount: parseInt(op.Count, 10) || 0,
+          // Metrics will be populated by useOperationMetrics hook
+          errorRate: 0,
+          faultRate: 0,
+          avgDuration: 0,
+          p50Duration: 0,
+          p90Duration: 0,
+          p99Duration: 0,
+          availability: 0,
+          dependencyCount: op.DependencyCount || 0,
+        }));
 
-        // Transform ServiceSummaries to ServiceTableItem[]
-        const servicesList = response.ServiceSummaries || [];
-        const services: ServiceTableItem[] = servicesList.map((svc: any) => {
-          const serviceName = svc.KeyAttributes?.Name || svc.serviceName || svc.name || 'unknown';
-          const environment = svc.KeyAttributes?.Environment || svc.environment || 'unknown';
-          const groupByAttributes = svc.GroupByAttributes || {};
-
-          return {
-            serviceName,
-            environment,
-            groupByAttributes,
-          };
-        });
-
-        setData(services);
+        setData(operations);
       } catch (err) {
-        console.error('[useServices] Error fetching services:', err);
+        console.error('[useOperations] Error fetching operations:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
         setData([]);
       } finally {
@@ -121,12 +121,12 @@ export const useServices = (params: UseServicesParams): UseServicesResult => {
       }
     };
 
-    fetchServices();
-  }, [pplSearchService, fetchParams, refetchTrigger, params.refreshTrigger, queryIndex, dataset]);
+    fetchOperations();
+  }, [pplSearchService, fetchParams, refetchTrigger, params.refreshTrigger]);
 
   const refetch = () => {
     setRefetchTrigger((prev) => prev + 1);
   };
 
-  return { data, isLoading, error, availableGroupByAttributes, refetch };
+  return { data, isLoading, error, refetch };
 };

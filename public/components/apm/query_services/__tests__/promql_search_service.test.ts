@@ -67,24 +67,10 @@ describe('PromQLSearchService', () => {
       expect(result).toEqual(mockResponse.body);
     });
 
-    it('should include step when provided', async () => {
-      const mockResponse = { body: { data: { result: [] } } };
-      (coreRefs.http!.post as jest.Mock).mockResolvedValue(mockResponse);
+    // Note: step parameter is not part of ExecuteMetricRequestParams and is
+    // calculated automatically by OSD core, so we don't test for it here.
 
-      await service.executeMetricRequest({
-        query: 'rate(error[5m])',
-        startTime: 1000,
-        endTime: 2000,
-        step: '60s',
-      });
-
-      const callArg = (coreRefs.http!.post as jest.Mock).mock.calls[0][1];
-      const body = JSON.parse(callArg.body);
-
-      expect(body.step).toBe('60s');
-    });
-
-    it('should not include step when not provided', async () => {
+    it('should not include step in request body (calculated by OSD core)', async () => {
       const mockResponse = { body: { data: { result: [] } } };
       (coreRefs.http!.post as jest.Mock).mockResolvedValue(mockResponse);
 
@@ -197,24 +183,8 @@ describe('PromQLSearchService', () => {
       expect(coreRefs.http!.post).toHaveBeenCalled();
     });
 
-    it('should pass step to executeMetricRequest', async () => {
-      const mockResponse = { body: { data: { result: [] } } };
-      (coreRefs.http!.post as jest.Mock).mockResolvedValue(mockResponse);
-
-      await service.executeBuiltQuery({
-        metricName: 'error',
-        filters: {},
-        interval: '5m',
-        startTime: 1000,
-        endTime: 2000,
-        step: '60s',
-      });
-
-      const callArg = (coreRefs.http!.post as jest.Mock).mock.calls[0][1];
-      const body = JSON.parse(callArg.body);
-
-      expect(body.step).toBe('60s');
-    });
+    // Note: step parameter is not part of executeBuiltQuery and is
+    // calculated automatically by OSD core, so we don't test for it here.
 
     it('should handle missing stat parameter', async () => {
       const mockResponse = { body: { data: { result: [] } } };

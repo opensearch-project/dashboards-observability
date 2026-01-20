@@ -4,8 +4,97 @@
  */
 
 import { TimeRange } from '../../common/types/service_types';
+import { TimeRange as ServiceDetailsTimeRange } from '../../common/types/service_details_types';
 import { EXPLORE_APP_ID } from '../../common/constants';
+import { observabilityApmServicesID } from '../../../../../common/constants/apm';
 import { coreRefs } from '../../../../framework/core_refs';
+
+/**
+ * Options for navigating to service details
+ */
+export interface NavigateToServiceDetailsOptions {
+  tab?: 'overview' | 'operations' | 'dependencies';
+  timeRange?: ServiceDetailsTimeRange;
+  filters?: Record<string, any>;
+  language?: string; // SDK language from telemetry.sdk.language
+  /** Operation name to pre-select in filters (for dependencies tab) */
+  operation?: string;
+  /** Dependency service name to pre-select in filters (for dependencies tab) */
+  dependency?: string;
+}
+
+/**
+ * Navigates to the service details page
+ * Uses navigateToApp for workspace-aware navigation
+ *
+ * @param serviceName - The service name to view
+ * @param environment - The environment (optional, defaults to 'generic:default')
+ * @param options - Optional navigation options (tab, timeRange, filters)
+ */
+export function navigateToServiceDetails(
+  serviceName: string,
+  environment?: string,
+  options?: NavigateToServiceDetailsOptions
+): void {
+  const encodedServiceName = encodeURIComponent(serviceName);
+  const encodedEnvironment = encodeURIComponent(environment || 'generic:default');
+
+  // Build query params
+  const params = new URLSearchParams();
+
+  if (options?.tab) {
+    params.set('tab', options.tab);
+  }
+
+  if (options?.timeRange) {
+    params.set('from', options.timeRange.from);
+    params.set('to', options.timeRange.to);
+  }
+
+  if (options?.filters) {
+    Object.entries(options.filters).forEach(([key, value]) => {
+      params.set(`filter.${key}`, String(value));
+    });
+  }
+
+  if (options?.language) {
+    params.set('lang', options.language);
+  }
+
+  // Add operation filter param (for dependencies tab pre-selection)
+  if (options?.operation) {
+    params.set('operation', options.operation);
+  }
+
+  // Add dependency filter param (for dependencies tab pre-selection)
+  if (options?.dependency) {
+    params.set('dependency', options.dependency);
+  }
+
+  // Build path for hash-based routing
+  const queryString = params.toString();
+  const path = `#/service-details/${encodedServiceName}/${encodedEnvironment}${
+    queryString ? `?${queryString}` : ''
+  }`;
+
+  // Use navigateToApp for workspace-aware navigation
+  coreRefs?.application?.navigateToApp(observabilityApmServicesID, { path });
+
+  // Dispatch hashchange event for HashRouter to detect the URL change
+  // (navigateToApp uses pushState which doesn't trigger hashchange)
+  window.dispatchEvent(new HashChangeEvent('hashchange'));
+}
+
+/**
+ * Navigates back to services list
+ * Uses navigateToApp for workspace-aware navigation
+ */
+export function navigateToServicesList(): void {
+  coreRefs?.application?.navigateToApp(observabilityApmServicesID, { path: '#/services' });
+
+  // Dispatch hashchange event for HashRouter to detect the URL change
+  window.dispatchEvent(new HashChangeEvent('hashchange'));
+}
 
 /**
  * Navigates to the service map view filtered by service
