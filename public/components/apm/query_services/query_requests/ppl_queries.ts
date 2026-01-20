@@ -10,46 +10,42 @@
  * - ServiceOperationDetail: Service and operation level details
  * - ServiceConnection: Service-to-service connections for topology
  *
- * All queries use numeric epoch timestamps for time filtering.
+ * All queries use ISO 8601 timestamps for time filtering.
  */
 
 /**
- * Converts a timestamp to epoch seconds
- * Handles Unix timestamps (seconds or milliseconds) and ISO strings
+ * Converts a timestamp to ISO 8601 string format
+ * Handles Date objects and ISO strings
+ *
+ * @param timestamp - Date object or ISO string
+ * @returns ISO 8601 formatted string (e.g., "2026-01-19T05:44:00.000Z")
  */
-function convertToEpochSeconds(timestamp: string | number): number {
-  if (typeof timestamp === 'number') {
-    // Unix timestamp - determine if seconds or milliseconds
-    if (timestamp > 10000000000) {
-      // Milliseconds - convert to seconds
-      return Math.floor(timestamp / 1000);
-    } else {
-      // Already in seconds
-      return timestamp;
-    }
+function convertToISOString(timestamp: string | Date): string {
+  // Handle Date object
+  if (timestamp instanceof Date) {
+    return timestamp.toISOString();
   }
 
-  // String - parse to Date and get epoch time in seconds
+  // Handle string - validate and normalize to ISO format
   const date = new Date(timestamp);
   if (isNaN(date.getTime())) {
     throw new Error(`Invalid timestamp: ${timestamp}`);
   }
-
-  return Math.floor(date.getTime() / 1000);
+  return date.toISOString();
 }
 
 /**
- * Builds a time filter clause for PPL queries using epoch seconds
+ * Builds a time filter clause for PPL queries using ISO 8601 timestamps
  *
- * @param startTime - Start time as Unix timestamp (seconds/milliseconds) or ISO string
- * @param endTime - End time as Unix timestamp (seconds/milliseconds) or ISO string
+ * @param startTime - Start time as Date object or ISO string
+ * @param endTime - End time as Date object or ISO string
  * @returns PPL WHERE clause filtering by timestamp, or empty string if either time is missing
  */
-function buildTimeFilterClause(startTime?: string | number, endTime?: string | number): string {
+function buildTimeFilterClause(startTime?: string | Date, endTime?: string | Date): string {
   if (startTime && endTime) {
-    const startEpoch = convertToEpochSeconds(startTime);
-    const endEpoch = convertToEpochSeconds(endTime);
-    return ` | where timestamp >= ${startEpoch} and timestamp <= ${endEpoch}`;
+    const startISO = convertToISOString(startTime);
+    const endISO = convertToISOString(endTime);
+    return ` | where timestamp >= '${startISO}' and timestamp <= '${endISO}'`;
   }
   return '';
 }
@@ -59,14 +55,14 @@ function buildTimeFilterClause(startTime?: string | number, endTime?: string | n
  * Fetches ServiceOperationDetail events and deduplicates by service identity
  *
  * @param queryIndex - Index name (default: otel-apm-service-map)
- * @param startTime - Start time for filtering
- * @param endTime - End time for filtering
+ * @param startTime - Start time for filtering (Date or ISO string)
+ * @param endTime - End time for filtering (Date or ISO string)
  * @returns PPL query string
  *
  * @example
  * ```
  * source=otel-apm-service-map
- * | where timestamp >= 1765405560 and timestamp <= 1765405860
+ * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
  * | where eventType = 'ServiceOperationDetail'
  * | dedup service.keyAttributes.name, service.keyAttributes.environment
  * | fields service.keyAttributes, service.groupByAttributes
@@ -74,8 +70,8 @@ function buildTimeFilterClause(startTime?: string | number, endTime?: string | n
  */
 export function getQueryListServices(
   queryIndex: string,
-  startTime?: string | number,
-  endTime?: string | number
+  startTime?: string | Date,
+  endTime?: string | Date
 ): string {
   let query = `source=${queryIndex}`;
   query += buildTimeFilterClause(startTime, endTime);
@@ -89,8 +85,8 @@ export function getQueryListServices(
  * Query to get service details by key attributes
  *
  * @param queryIndex - Index name
- * @param startTime - Start time for filtering
- * @param endTime - End time for filtering
+ * @param startTime - Start time for filtering (Date or ISO string)
+ * @param endTime - End time for filtering (Date or ISO string)
  * @param environment - Service environment (e.g., "generic:default", "production")
  * @param serviceName - Service name
  * @returns PPL query string
@@ -98,7 +94,7 @@ export function getQueryListServices(
  * @example
  * ```
  * source=otel-apm-service-map
- * | where timestamp >= 1765405560 and timestamp <= 1765405860
+ * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
  * | dedup hashCode
  * | where eventType = 'ServiceOperationDetail'
  * | where service.keyAttributes.environment = 'generic:default'
@@ -108,8 +104,8 @@ export function getQueryListServices(
  */
 export function getQueryGetService(
   queryIndex: string,
-  startTime?: string | number,
-  endTime?: string | number,
+  startTime?: string | Date,
+  endTime?: string | Date,
   environment?: string,
   serviceName?: string
 ): string {
@@ -131,11 +127,13 @@ export function getQueryGetService(
 }
 
 /**
- * Query to list service operations for a given service
+ * Query to get service attributes (groupByAttributes) for a specific service
  *
- * @param queryIndex - Index name
- * @param startTime - Start time for filtering
- * @param endTime - End time for filtering
+ * Sorts by timestamp descending to get the most recent attributes.
+ *
+ * @param queryIndex - Index name (from APM config serviceMapDataset)
+ * @param startTime - Start time for filtering (Date or ISO string)
+ * @param endTime - End time for filtering (Date or ISO string)
  * @param environment - Service environment
  * @param serviceName - Service name
  * @returns PPL query string
@@ -143,7 +141,47 @@ export function getQueryGetService(
  * @example
  * ```
  * source=otel-apm-service-map
- * | where timestamp >= 1765405560 and timestamp <= 1765405860
+ * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
+ * | where eventType = 'ServiceOperationDetail'
+ * | where service.keyAttributes.environment = 'generic:default'
+ * | where service.keyAttributes.name = 'frontend'
+ * | fields service.keyAttributes, service.groupByAttributes, timestamp
+ * | sort - timestamp
+ * | head 1
+ * ```
+ */
+export function getQueryServiceAttributes(
+  queryIndex: string,
+  startTime: string | Date,
+  endTime: string | Date,
+  environment: string,
+  serviceName: string
+): string {
+  let query = `source=${queryIndex}`;
+  query += buildTimeFilterClause(startTime, endTime);
+  query += ` | where eventType = 'ServiceOperationDetail'`;
+  query += ` | where service.keyAttributes.environment = '${environment}'`;
+  query += ` | where service.keyAttributes.name = '${serviceName}'`;
+  query += ` | fields service.keyAttributes, service.groupByAttributes, timestamp`;
+  query += ` | sort - timestamp`;
+  query += ` | head 1`;
+  return query;
+}
+
+/**
+ * Query to list service operations for a given service
+ *
+ * @param queryIndex - Index name
+ * @param startTime - Start time for filtering (Date or ISO string)
+ * @param endTime - End time for filtering (Date or ISO string)
+ * @param environment - Service environment
+ * @param serviceName - Service name
+ * @returns PPL query string
+ *
+ * @example
+ * ```
+ * source=otel-apm-service-map
+ * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
  * | dedup hashCode
  * | where eventType = 'ServiceOperationDetail'
  * | where service.keyAttributes.environment = 'generic:default'
@@ -153,8 +191,8 @@ export function getQueryGetService(
  */
 export function getQueryListServiceOperations(
   queryIndex: string,
-  startTime?: string | number,
-  endTime?: string | number,
+  startTime?: string | Date,
+  endTime?: string | Date,
   environment?: string,
   serviceName?: string
 ): string {
@@ -179,8 +217,8 @@ export function getQueryListServiceOperations(
  * Query to list service dependencies for a given service
  *
  * @param queryIndex - Index name
- * @param startTime - Start time for filtering
- * @param endTime - End time for filtering
+ * @param startTime - Start time for filtering (Date or ISO string)
+ * @param endTime - End time for filtering (Date or ISO string)
  * @param environment - Service environment
  * @param serviceName - Service name
  * @returns PPL query string
@@ -188,7 +226,7 @@ export function getQueryListServiceOperations(
  * @example
  * ```
  * source=otel-apm-service-map
- * | where timestamp >= 1765405560 and timestamp <= 1765405860
+ * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
  * | dedup hashCode
  * | where eventType = 'ServiceOperationDetail'
  * | where service.keyAttributes.environment = 'generic:default'
@@ -198,8 +236,8 @@ export function getQueryListServiceOperations(
  */
 export function getQueryListServiceDependencies(
   queryIndex: string,
-  startTime?: string | number,
-  endTime?: string | number,
+  startTime?: string | Date,
+  endTime?: string | Date,
   environment?: string,
   serviceName?: string
 ): string {
@@ -225,14 +263,14 @@ export function getQueryListServiceDependencies(
  * Fetches ServiceConnection events showing service-to-service relationships
  *
  * @param queryIndex - Index name
- * @param startTime - Start time for filtering
- * @param endTime - End time for filtering
+ * @param startTime - Start time for filtering (Date or ISO string)
+ * @param endTime - End time for filtering (Date or ISO string)
  * @returns PPL query string
  *
  * @example
  * ```
  * source=otel-apm-service-map
- * | where timestamp >= 1765405560 and timestamp <= 1765405860
+ * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
  * | dedup hashCode
  * | where eventType = 'ServiceConnection'
  * | fields service.keyAttributes, remoteService.keyAttributes, service.groupByAttributes, remoteService.groupByAttributes
@@ -240,8 +278,8 @@ export function getQueryListServiceDependencies(
  */
 export function getQueryGetServiceMap(
   queryIndex: string,
-  startTime?: string | number,
-  endTime?: string | number
+  startTime?: string | Date,
+  endTime?: string | Date
 ): string {
   let query = `source=${queryIndex}`;
   query += buildTimeFilterClause(startTime, endTime);
@@ -256,8 +294,8 @@ export function getQueryGetServiceMap(
  * Returns the count of unique remote services that the operation calls
  *
  * @param queryIndex - Index name
- * @param startTime - Start time for filtering
- * @param endTime - End time for filtering
+ * @param startTime - Start time for filtering (Date or ISO string)
+ * @param endTime - End time for filtering (Date or ISO string)
  * @param environment - Service environment
  * @param serviceName - Service name
  * @param operationName - Operation name to count dependencies for
@@ -266,7 +304,7 @@ export function getQueryGetServiceMap(
  * @example
  * ```
  * source=otel-apm-service-map
- * | where timestamp >= 1765405560 and timestamp <= 1765405860
+ * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
  * | dedup hashCode
  * | where eventType = 'ServiceOperationDetail'
  * | where service.keyAttributes.environment = 'generic:default'
@@ -277,8 +315,8 @@ export function getQueryGetServiceMap(
  */
 export function getQueryOperationDependenciesCount(
   queryIndex: string,
-  startTime?: string | number,
-  endTime?: string | number,
+  startTime?: string | Date,
+  endTime?: string | Date,
   environment?: string,
   serviceName?: string,
   operationName?: string
@@ -311,20 +349,20 @@ export function getQueryOperationDependenciesCount(
  * This is used in the dependencies table to show how many services each dependency connects to.
  *
  * @param index Index name
- * @param startTime Start time in seconds
- * @param endTime End time in seconds
+ * @param startTime Start time (Date or ISO string)
+ * @param endTime End time (Date or ISO string)
  * @param environment Environment filter
  * @param dependencyServiceName The dependency service name to count downstream services for
  */
 export function getQueryDependencyDownstreamCount(
   index: string,
-  startTime: number,
-  endTime: number,
+  startTime: string | Date,
+  endTime: string | Date,
   environment: string,
   dependencyServiceName: string
 ): string {
   let query = `source=${index}`;
-  query += ` | where timestamp >= ${startTime} and timestamp <= ${endTime}`;
+  query += buildTimeFilterClause(startTime, endTime);
   query += ` | dedup hashCode`;
   query += ` | where eventType = 'ServiceOperationDetail'`;
   query += ` | where service.keyAttributes.environment = '${environment}'`;

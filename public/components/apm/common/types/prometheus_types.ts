@@ -47,9 +47,9 @@ export interface PrometheusResponse {
 }
 
 // ExecuteMetricRequest params (matches our API)
+// Note: step is calculated automatically by OSD core
 export interface ExecuteMetricRequestParams {
   query: string;
   startTime: number;
   endTime: number;
-  step?: string;
 }

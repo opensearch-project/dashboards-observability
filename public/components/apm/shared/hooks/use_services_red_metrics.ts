@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
 import { getTimeInSeconds } from '../utils/time_utils';
 import { useApmConfig } from '../../config/apm_config_context';
@@ -23,6 +23,7 @@ export interface UseServicesRedMetricsParams {
   services: Array<{ serviceName: string; environment?: string }>;
   startTime: Date;
   endTime: Date;
+  latencyPercentile?: 'p99' | 'p90' | 'p50';
 }
 
 export interface UseServicesRedMetricsResult {
@@ -32,32 +33,50 @@ export interface UseServicesRedMetricsResult {
   refetch: () => void;
 }
 
+interface ThroughputFailureMetrics {
+  throughput: MetricDataPoint[];
+  failureRatio: MetricDataPoint[];
+}
+
 /**
  * Hook for batch-fetching RED metrics for multiple services
  *
  * Fetches metrics for all services on current page in 3 batch queries:
- * - Latency (P95): histogram_quantile over latency_seconds_seconds_bucket
+ * - Latency: histogram_quantile over latency_seconds_seconds_bucket (dependent on percentile)
  * - Throughput: sum of request gauge
  * - Failure Ratio: (error + fault) / request * 100
  *
  * Note: request, error, and fault are GAUGE metrics (not counters)
+ * Note: Latency is fetched separately so changing percentile only refetches latency
  *
  * @example
  * const { metricsMap, isLoading } = useServicesRedMetrics({
  *   services: [{ serviceName: 'service1', environment: 'prod' }],
  *   startTime: new Date(Date.now() - 3600000),
  *   endTime: new Date(),
- *   prometheusConnectionId: 'my-prom',
  * });
  */
 export const useServicesRedMetrics = (
   params: UseServicesRedMetricsParams
 ): UseServicesRedMetricsResult => {
   const { config } = useApmConfig();
-  const [metricsMap, setMetricsMap] = useState<Map<string, ServiceRedMetrics>>(new Map());
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [refetchTrigger, setRefetchTrigger] = useState(0);
+
+  // Separate state for latency vs throughput/failure
+  const [latencyMap, setLatencyMap] = useState<Map<string, MetricDataPoint[]>>(new Map());
+  const [throughputFailureMap, setThroughputFailureMap] = useState<
+    Map<string, ThroughputFailureMetrics>
+  >(new Map());
+
+  // Separate loading states
+  const [isLoadingLatency, setIsLoadingLatency] = useState(false);
+  const [isLoadingThroughputFailure, setIsLoadingThroughputFailure] = useState(false);
+
+  // Separate error states
+  const [latencyError, setLatencyError] = useState<Error | null>(null);
+  const [throughputFailureError, setThroughputFailureError] = useState<Error | null>(null);
+
+  // Separate refetch triggers
+  const [refetchAllTrigger, setRefetchAllTrigger] = useState(0);
 
   // Get config values
   const prometheusConnectionId = config?.prometheusDataSource?.id;
@@ -80,28 +99,19 @@ export const useServicesRedMetrics = (
   const startTimeSec = useMemo(() => getTimeInSeconds(params.startTime), [params.startTime]);
   const endTimeSec = useMemo(() => getTimeInSeconds(params.endTime), [params.endTime]);
 
+  // Effect 1: Fetch throughput + failure rate (NOT dependent on latencyPercentile)
   useEffect(() => {
     if (params.services.length === 0 || !promqlService) {
-      setMetricsMap(new Map());
-      setIsLoading(false);
+      setThroughputFailureMap(new Map());
+      setIsLoadingThroughputFailure(false);
       return;
     }
 
-    const fetchBatchMetrics = async () => {
-      setIsLoading(true);
-      setError(null);
+    const fetchThroughputFailure = async () => {
+      setIsLoadingThroughputFailure(true);
+      setThroughputFailureError(null);
 
       try {
-        // Build queries for all three metrics (batch query pattern)
-        // Note: request, error, fault are GAUGES not counters, so no rate()
-        const latencyQuery = `
-          histogram_quantile(0.95,
-            sum by (service, le) (
-              latency_seconds_seconds_bucket{${serviceFilter},namespace="span_derived"}
-            )
-          )
-        `.trim();
-
         const throughputQuery = `
           sum by (service) (
             request{${serviceFilter},namespace="span_derived"}
@@ -119,13 +129,7 @@ export const useServicesRedMetrics = (
           * 100
         `.trim();
 
-        // Execute all queries in parallel
-        const [latencyResp, throughputResp, failureRatioResp] = await Promise.all([
-          promqlService.executeMetricRequest({
-            query: latencyQuery,
-            startTime: startTimeSec,
-            endTime: endTimeSec,
-          }),
+        const [throughputResp, failureRatioResp] = await Promise.all([
           promqlService.executeMetricRequest({
             query: throughputQuery,
             startTime: startTimeSec,
@@ -138,40 +142,120 @@ export const useServicesRedMetrics = (
           }),
         ]);
 
-        // Transform responses into metrics map
-        const newMetricsMap = new Map<string, ServiceRedMetrics>();
-
+        const newMap = new Map<string, ThroughputFailureMetrics>();
         params.services.forEach(({ serviceName }) => {
-          const latencyData = extractServiceData(latencyResp, serviceName);
-          const throughputData = extractServiceData(throughputResp, serviceName);
-          const failureRatioData = extractServiceData(failureRatioResp, serviceName);
-
-          newMetricsMap.set(serviceName, {
-            latency: latencyData,
-            throughput: throughputData,
-            failureRatio: failureRatioData,
+          newMap.set(serviceName, {
+            throughput: extractServiceData(throughputResp, serviceName),
+            failureRatio: extractServiceData(failureRatioResp, serviceName),
           });
         });
 
-        setMetricsMap(newMetricsMap);
+        setThroughputFailureMap(newMap);
       } catch (err) {
-        console.error('[useServicesRedMetrics] Error fetching batch metrics:', err);
-        setError(err instanceof Error ? err : new Error('Unknown error'));
-        setMetricsMap(new Map());
+        console.error('[useServicesRedMetrics] Error fetching throughput/failure metrics:', err);
+        setThroughputFailureError(err instanceof Error ? err : new Error('Unknown error'));
+        setThroughputFailureMap(new Map());
       } finally {
-        setIsLoading(false);
+        setIsLoadingThroughputFailure(false);
       }
     };
 
-    fetchBatchMetrics();
+    fetchThroughputFailure();
     // Note: params.services is intentionally omitted to prevent infinite loops.
     // serviceFilter already tracks changes to the services list.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [promqlService, serviceFilter, startTimeSec, endTimeSec, refetchTrigger]);
+  }, [promqlService, serviceFilter, startTimeSec, endTimeSec, refetchAllTrigger]);
 
-  const refetch = () => {
-    setRefetchTrigger((prev) => prev + 1);
-  };
+  // Effect 2: Fetch latency (dependent on latencyPercentile)
+  useEffect(() => {
+    if (params.services.length === 0 || !promqlService) {
+      setLatencyMap(new Map());
+      setIsLoadingLatency(false);
+      return;
+    }
+
+    const fetchLatency = async () => {
+      setIsLoadingLatency(true);
+      setLatencyError(null);
+
+      try {
+        const percentileValue =
+          params.latencyPercentile === 'p50'
+            ? 0.5
+            : params.latencyPercentile === 'p90'
+            ? 0.9
+            : 0.99; // default p99
+
+        const latencyQuery = `
+          histogram_quantile(${percentileValue},
+            sum by (service, le) (
+              latency_seconds_seconds_bucket{${serviceFilter},namespace="span_derived"}
+            )
+          )
+        `.trim();
+
+        const latencyResp = await promqlService.executeMetricRequest({
+          query: latencyQuery,
+          startTime: startTimeSec,
+          endTime: endTimeSec,
+        });
+
+        const newMap = new Map<string, MetricDataPoint[]>();
+        params.services.forEach(({ serviceName }) => {
+          newMap.set(serviceName, extractServiceData(latencyResp, serviceName));
+        });
+
+        setLatencyMap(newMap);
+      } catch (err) {
+        console.error('[useServicesRedMetrics] Error fetching latency metrics:', err);
+        setLatencyError(err instanceof Error ? err : new Error('Unknown error'));
+        setLatencyMap(new Map());
+      } finally {
+        setIsLoadingLatency(false);
+      }
+    };
+
+    fetchLatency();
+    // Note: params.services is intentionally omitted to prevent infinite loops.
+    // serviceFilter already tracks changes to the services list.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    promqlService,
+    serviceFilter,
+    startTimeSec,
+    endTimeSec,
+    refetchAllTrigger,
+    params.latencyPercentile,
+  ]);
+
+  // Combine latency and throughput/failure into metricsMap
+  // Note: Use keys from the maps instead of params.services to avoid infinite loops
+  // (params.services is a new array reference on every render due to .map() in caller)
+  const metricsMap = useMemo(() => {
+    const combined = new Map<string, ServiceRedMetrics>();
+
+    // Collect all service names from both maps
+    const serviceNames = new Set([...latencyMap.keys(), ...throughputFailureMap.keys()]);
+
+    serviceNames.forEach((serviceName) => {
+      combined.set(serviceName, {
+        latency: latencyMap.get(serviceName) || [],
+        throughput: throughputFailureMap.get(serviceName)?.throughput || [],
+        failureRatio: throughputFailureMap.get(serviceName)?.failureRatio || [],
+      });
+    });
+    return combined;
+  }, [latencyMap, throughputFailureMap]);
+
+  // Combined loading state
+  const isLoading = isLoadingLatency || isLoadingThroughputFailure;
+
+  // Return first error encountered
+  const error = latencyError || throughputFailureError;
+
+  const refetch = useCallback(() => {
+    setRefetchAllTrigger((prev) => prev + 1);
+  }, []);
 
   return { metricsMap, isLoading, error, refetch };
 };
