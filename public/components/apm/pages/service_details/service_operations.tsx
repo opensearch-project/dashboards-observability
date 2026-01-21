@@ -27,7 +27,7 @@ import { TimeRange } from '../../common/types/service_details_types';
 import { PromQLLineChart } from '../../shared/components/promql_line_chart';
 import { SERVICE_DETAILS_CONSTANTS } from '../../common/constants';
 import {
-  getQueryOperationRequestsAndAvailabilityOverTime,
+  getQueryOperationRequestsOverTime,
   getQueryOperationFaultsAndErrorsOverTime,
   getQueryOperationLatencyPercentilesOverTime,
 } from '../../query_services/query_requests/promql_queries';
@@ -36,7 +36,7 @@ import { useOperationMetrics } from '../../shared/hooks/use_operation_metrics';
 import { parseTimeRange } from '../../shared/utils/time_utils';
 import { OperationFilterSidebar } from '../../shared/components/operation_filter_sidebar';
 import { ActiveFilterBadges, FilterBadge } from '../../shared/components/active_filter_badges';
-import { formatCount } from '../../common/format_utils';
+import { formatCount, formatLatency } from '../../common/format_utils';
 import { navigateToServiceDetails } from '../../shared/utils/navigation_utils';
 import { ServiceCorrelationsFlyout } from '../../shared/components/service_correlations_flyout';
 
@@ -45,19 +45,18 @@ const AVAILABILITY_THRESHOLDS = ['< 95%', '95-99%', '≥ 99%'];
 const ERROR_RATE_THRESHOLDS = ['< 1%', '1-5%', '> 5%'];
 
 // Threshold matching functions
+// Note: All values from PromQL are already in percentage (0-100) format
 const matchesAvailabilityThreshold = (availability: number, threshold: string): boolean => {
-  const pct = availability * 100;
-  if (threshold === '< 95%') return pct < 95;
-  if (threshold === '95-99%') return pct >= 95 && pct < 99;
-  if (threshold === '≥ 99%') return pct >= 99;
+  if (threshold === '< 95%') return availability < 95;
+  if (threshold === '95-99%') return availability >= 95 && availability < 99;
+  if (threshold === '≥ 99%') return availability >= 99;
   return false;
 };
 
 const matchesRateThreshold = (rate: number, threshold: string): boolean => {
-  const pct = rate * 100;
-  if (threshold === '< 1%') return pct < 1;
-  if (threshold === '1-5%') return pct >= 1 && pct <= 5;
-  if (threshold === '> 5%') return pct > 5;
+  if (threshold === '< 1%') return rate < 1;
+  if (threshold === '1-5%') return rate >= 1 && rate <= 5;
+  if (threshold === '> 5%') return rate > 5;
   return false;
 };
 
@@ -457,18 +456,12 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
     });
   }, []);
 
-  // Format functions
-  const formatLatency = (value: number): string => {
-    if (value === undefined || isNaN(value)) return '-';
-    return `${value.toFixed(2)} ms`;
-  };
-
+  // Note: rate values from PromQL are already in percentage (0-100) format
   const formatRate = (rate: number, operation: OperationRow): React.ReactNode => {
     // Show '-' if no data (no requests)
     if (rate === undefined || isNaN(rate) || operation.requestCount === 0) return '-';
-    const percentage = (rate * 100).toFixed(2);
-    const color =
-      rate === 0 ? 'success' : rate > 0.05 ? 'danger' : rate > 0.01 ? 'warning' : 'success';
+    const percentage = rate.toFixed(2);
+    const color = rate === 0 ? 'success' : rate > 5 ? 'danger' : rate > 1 ? 'warning' : 'success';
     return (
       <EuiToolTip content="< 1% = Healthy, 1-5% = Degraded, > 5% = Critical">
         <EuiHealth color={color}>{percentage}%</EuiHealth>
@@ -476,12 +469,13 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
     );
   };
 
+  // Note: availability values from PromQL are already in percentage (0-100) format
   const formatAvailability = (avail: number, operation: OperationRow): React.ReactNode => {
     // Show '-' if no data (no requests)
     if (avail === undefined || isNaN(avail) || operation.requestCount === 0) return '-';
-    const percentage = (avail * 100).toFixed(1);
+    const percentage = avail.toFixed(1);
     const color =
-      avail === 0 ? 'danger' : avail >= 0.99 ? 'success' : avail >= 0.95 ? 'warning' : 'danger';
+      avail === 0 ? 'danger' : avail >= 99 ? 'success' : avail >= 95 ? 'warning' : 'danger';
     return (
       <EuiToolTip content="≥ 99% = Healthy, 95-99% = Degraded, < 95% = Critical">
         <EuiHealth color={color}>{percentage}%</EuiHealth>
@@ -681,8 +675,8 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
               <PromQLLineChart
-                title="Requests and Availability"
-                promqlQuery={getQueryOperationRequestsAndAvailabilityOverTime(
+                title="Requests"
+                promqlQuery={getQueryOperationRequestsOverTime(
                   environment,
                   serviceName,
                   operationName

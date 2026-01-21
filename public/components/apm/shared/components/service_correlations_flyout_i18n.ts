@@ -132,17 +132,11 @@ export const correlationsFlyoutI18nTexts = {
     defaultMessage: 'Error',
   }),
 
-  // Filter badge labels (for operation/dependency context)
+  // Filter badge labels (for operation context)
   filterBadgeOperation: i18n.translate(
     'observability.apm.correlationsFlyout.filterBadgeOperation',
     {
       defaultMessage: 'Operation',
-    }
-  ),
-  filterBadgeDependency: i18n.translate(
-    'observability.apm.correlationsFlyout.filterBadgeDependency',
-    {
-      defaultMessage: 'Dependency',
     }
   ),
 };

@@ -54,3 +54,13 @@ export interface ParsedTimeRange {
   startTime: Date;
   endTime: Date;
 }
+
+/**
+ * Time axis configuration for ECharts
+ */
+export interface TimeAxisConfig {
+  /** Minimum interval between ticks in milliseconds */
+  minInterval: number;
+  /** Date format string for axis labels */
+  labelFormat: string;
+}

@@ -23,10 +23,10 @@ import { ServiceCorrelationsFlyout } from '../../shared/components/service_corre
 import './service_overview.scss';
 import {
   getQueryServiceRequests,
-  getQueryServiceFaults,
-  getQueryServiceErrors,
   getQueryServiceAvailability,
   getQueryServiceLatencyP99Card,
+  getQueryServiceFaultRateCard,
+  getQueryServiceErrorRateCard,
   getQueryServiceFaultRate,
   getQueryServiceErrorRateOverTime,
   getQueryServiceAvailabilityByOperations,
@@ -37,7 +37,7 @@ import {
   formatCount,
   formatPercentage,
   formatPercentageValue,
-  formatLatencyFromSeconds,
+  formatLatency,
 } from '../../common/format_utils';
 import { navigateToServiceDetails } from '../../shared/utils/navigation_utils';
 
@@ -204,49 +204,52 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem>
           <PromQLMetricCard
-            title={i18n.translate('observability.apm.serviceOverview.requests', {
-              defaultMessage: 'Requests',
+            title={i18n.translate('observability.apm.serviceOverview.throughput', {
+              defaultMessage: 'Throughput (req/int)',
             })}
-            subtitle={i18n.translate('observability.apm.serviceOverview.total', {
-              defaultMessage: 'Total',
+            subtitle={i18n.translate('observability.apm.serviceOverview.avg', {
+              defaultMessage: 'Avg',
             })}
             promqlQuery={getQueryServiceRequests(environment, serviceName)}
             timeRange={timeRange}
             prometheusConnectionId={prometheusConnectionId}
             formatValue={formatCount}
             refreshTrigger={refreshTrigger}
+            showTotal
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <PromQLMetricCard
-            title={i18n.translate('observability.apm.serviceOverview.faults', {
-              defaultMessage: 'Faults (5xx)',
+            title={i18n.translate('observability.apm.serviceOverview.faultRate', {
+              defaultMessage: 'Fault rate (5xx)',
             })}
-            subtitle={i18n.translate('observability.apm.serviceOverview.total', {
-              defaultMessage: 'Total',
+            subtitle={i18n.translate('observability.apm.serviceOverview.avg', {
+              defaultMessage: 'Avg',
             })}
-            promqlQuery={getQueryServiceFaults(environment, serviceName)}
+            promqlQuery={getQueryServiceFaultRateCard(environment, serviceName)}
             timeRange={timeRange}
             prometheusConnectionId={prometheusConnectionId}
-            formatValue={formatCount}
+            formatValue={formatPercentageValue}
             invertColor
             refreshTrigger={refreshTrigger}
+            showTotal
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <PromQLMetricCard
-            title={i18n.translate('observability.apm.serviceOverview.errors', {
-              defaultMessage: 'Errors (4xx)',
+            title={i18n.translate('observability.apm.serviceOverview.errorRate', {
+              defaultMessage: 'Error rate (4xx)',
             })}
-            subtitle={i18n.translate('observability.apm.serviceOverview.total', {
-              defaultMessage: 'Total',
+            subtitle={i18n.translate('observability.apm.serviceOverview.avg', {
+              defaultMessage: 'Avg',
             })}
-            promqlQuery={getQueryServiceErrors(environment, serviceName)}
+            promqlQuery={getQueryServiceErrorRateCard(environment, serviceName)}
             timeRange={timeRange}
             prometheusConnectionId={prometheusConnectionId}
-            formatValue={formatCount}
+            formatValue={formatPercentageValue}
             invertColor
             refreshTrigger={refreshTrigger}
+            showTotal
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -254,11 +257,15 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
             title={i18n.translate('observability.apm.serviceOverview.availability', {
               defaultMessage: 'Availability',
             })}
+            subtitle={i18n.translate('observability.apm.serviceOverview.avg', {
+              defaultMessage: 'Avg',
+            })}
             promqlQuery={getQueryServiceAvailability(environment, serviceName)}
             timeRange={timeRange}
             prometheusConnectionId={prometheusConnectionId}
             formatValue={formatPercentageValue}
             refreshTrigger={refreshTrigger}
+            showTotal
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -266,12 +273,16 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
             title={i18n.translate('observability.apm.serviceOverview.latencyP99', {
               defaultMessage: 'Latency (P99)',
             })}
+            subtitle={i18n.translate('observability.apm.serviceOverview.avg', {
+              defaultMessage: 'Avg',
+            })}
             promqlQuery={getQueryServiceLatencyP99Card(environment, serviceName)}
             timeRange={timeRange}
             prometheusConnectionId={prometheusConnectionId}
-            formatValue={formatLatencyFromSeconds}
+            formatValue={formatLatency}
             invertColor
             refreshTrigger={refreshTrigger}
+            showTotal
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -330,7 +341,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
               )}
               timeRange={timeRange}
               prometheusConnectionId={prometheusConnectionId}
-              formatValue={formatLatencyFromSeconds}
+              formatValue={formatLatency}
               refreshTrigger={refreshTrigger}
               labelField="remoteService"
             />

@@ -14,6 +14,12 @@ jest.mock('../../../query_services/promql_search_service', () => ({
   })),
 }));
 
+// Mock time_utils
+jest.mock('../../utils/time_utils', () => ({
+  getTimeInSeconds: jest.fn((date) => Math.floor(date.getTime() / 1000)),
+  calculateTimeRangeDuration: jest.fn(() => '1h'),
+}));
+
 // Mock the APM config context
 const mockConfig = {
   prometheusDataSource: {
@@ -185,7 +191,7 @@ describe('useTopServicesByFaultRate', () => {
   });
 
   describe('Prometheus response formats', () => {
-    it('should handle standard Prometheus result format', async () => {
+    it('should handle standard Prometheus result format with instant query', async () => {
       mockExecuteMetricRequest.mockResolvedValue({
         data: {
           result: [
@@ -205,30 +211,6 @@ describe('useTopServicesByFaultRate', () => {
 
       expect(result.current.data).toHaveLength(1);
       expect(result.current.data[0].faultRate).toBe(0.25);
-    });
-
-    it('should handle range query values format', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({
-        data: {
-          result: [
-            {
-              metric: { service: 'api-gateway' },
-              values: [
-                [1704067200, '0.10'],
-                [1704070800, '0.25'], // Use the last value
-              ],
-            },
-          ],
-        },
-      });
-
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useTopServicesByFaultRate(defaultParams)
-      );
-
-      await waitForNextUpdate();
-
-      expect(result.current.data[0].faultRate).toBe(0.25); // Last value
     });
 
     it('should fallback to service_name when service not present', async () => {

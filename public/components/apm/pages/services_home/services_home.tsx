@@ -59,7 +59,7 @@ import {
   ENVIRONMENT_PLATFORM_MAP,
 } from '../../common/constants';
 import { servicesI18nTexts as i18nTexts } from './services_home_i18n';
-import { formatCount } from '../../common/format_utils';
+import { formatThroughput } from '../../common/format_utils';
 
 const AVAILABLE_ENVIRONMENTS = Object.values(ENVIRONMENT_PLATFORM_MAP);
 
@@ -315,20 +315,18 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       const metrics = metricsMap.get(service.serviceName);
       if (!metrics) return;
 
-      // Get latest latency value (converted to ms)
-      const latencyData = metrics.latency || [];
-      if (latencyData.length > 0) {
-        const latencyMs = latencyData[latencyData.length - 1].value * 1000;
-        latencyMin = Math.min(latencyMin, latencyMs);
-        latencyMax = Math.max(latencyMax, latencyMs);
+      // Get average latency value over the time period (already in ms from PromQL)
+      const avgLatency = metrics.avgLatency || 0;
+      if (avgLatency > 0) {
+        latencyMin = Math.min(latencyMin, avgLatency);
+        latencyMax = Math.max(latencyMax, avgLatency);
       }
 
-      // Get latest throughput value
-      const throughputData = metrics.throughput || [];
-      if (throughputData.length > 0) {
-        const throughputVal = throughputData[throughputData.length - 1].value;
-        throughputMin = Math.min(throughputMin, throughputVal);
-        throughputMax = Math.max(throughputMax, throughputVal);
+      // Get average throughput value over the time period
+      const avgThroughput = metrics.avgThroughput || 0;
+      if (avgThroughput > 0) {
+        throughputMin = Math.min(throughputMin, avgThroughput);
+        throughputMax = Math.max(throughputMax, avgThroughput);
       }
     });
 
@@ -368,9 +366,10 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     if (isLatencyFilterActive) {
       filtered = filtered.filter((service) => {
         const metrics = metricsMap.get(service.serviceName);
-        if (!metrics || metrics.latency.length === 0) return false;
-        const latencyMs = metrics.latency[metrics.latency.length - 1].value * 1000;
-        return latencyMs >= latencyRange[0] && latencyMs <= latencyRange[1];
+        if (!metrics) return false;
+        // Use average latency for filtering
+        const avgLatency = metrics.avgLatency || 0;
+        return avgLatency >= latencyRange[0] && avgLatency <= latencyRange[1];
       });
     }
 
@@ -381,9 +380,10 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     if (isThroughputFilterActive) {
       filtered = filtered.filter((service) => {
         const metrics = metricsMap.get(service.serviceName);
-        if (!metrics || metrics.throughput.length === 0) return false;
-        const throughputVal = metrics.throughput[metrics.throughput.length - 1].value;
-        return throughputVal >= throughputRange[0] && throughputVal <= throughputRange[1];
+        if (!metrics) return false;
+        // Filter by total throughput over the time period
+        const avgThroughput = metrics.avgThroughput || 0;
+        return avgThroughput >= throughputRange[0] && avgThroughput <= throughputRange[1];
       });
     }
 
@@ -391,9 +391,10 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     if (selectedFailureRateThresholds.length > 0) {
       filtered = filtered.filter((service) => {
         const metrics = metricsMap.get(service.serviceName);
-        if (!metrics || metrics.failureRatio.length === 0) return false;
-        const failureRatio = metrics.failureRatio[metrics.failureRatio.length - 1].value;
-        return matchesAnyFailureRateThreshold(failureRatio, selectedFailureRateThresholds);
+        if (!metrics) return false;
+        // Use average failure ratio for filtering
+        const avgFailureRatio = metrics.avgFailureRatio || 0;
+        return matchesAnyFailureRateThreshold(avgFailureRatio, selectedFailureRateThresholds);
       });
     }
 
@@ -443,8 +444,10 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     if (isThroughputModified) {
       badges.push({
         key: 'throughput',
-        category: i18nTexts.filters.requests,
-        values: [`${throughputRange[0].toFixed(0)}-${throughputRange[1].toFixed(0)}`],
+        category: i18nTexts.filters.throughput,
+        values: [
+          `${formatThroughput(throughputRange[0])} - ${formatThroughput(throughputRange[1])}`,
+        ],
         onRemove: () =>
           setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]),
       });
@@ -596,7 +599,9 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         field: 'latency' as any,
         name: (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>{`Latency (${latencyPercentile.toUpperCase()})`}</EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >{`Avg. Latency (${latencyPercentile.toUpperCase()})`}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip content={i18nTexts.tableTooltips.latency}>
                 <EuiIcon type="questionInCircle" size="s" color="subdued" />
@@ -609,15 +614,14 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
           const metrics = metricsMap.get(item.serviceName);
-          const latency = metrics?.latency || [];
-          return latency.length > 0 ? latency[latency.length - 1].value : 0;
+          return metrics?.avgLatency || 0;
         },
         render: (_fieldValue: any, item: ServiceTableItem) => {
           const metrics = metricsMap.get(item.serviceName);
           const latencyData = metrics?.latency || [];
-          const latestValue =
-            latencyData.length > 0 ? latencyData[latencyData.length - 1].value : 0;
-          const latencyMs = (latestValue * 1000).toFixed(0);
+          // Use average latency over the time period
+          const avgLatency = metrics?.avgLatency || 0;
+          const latencyMs = avgLatency.toFixed(0);
 
           return (
             <EuiFlexGroup
@@ -646,9 +650,9 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         field: 'throughput' as any,
         name: (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>{i18nTexts.table.requests}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{i18nTexts.table.throughput}</EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18nTexts.tableTooltips.requests}>
+              <EuiToolTip content={i18nTexts.tableTooltips.throughput}>
                 <EuiIcon type="questionInCircle" size="s" color="subdued" />
               </EuiToolTip>
             </EuiFlexItem>
@@ -659,15 +663,15 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
           const metrics = metricsMap.get(item.serviceName);
-          const throughput = metrics?.throughput || [];
-          return throughput.length > 0 ? throughput[throughput.length - 1].value : 0;
+          // Sort by average throughput over the time period
+          return metrics?.avgThroughput || 0;
         },
         render: (_fieldValue: any, item: ServiceTableItem) => {
           const metrics = metricsMap.get(item.serviceName);
           const throughputData = metrics?.throughput || [];
-          const latestValue =
-            throughputData.length > 0 ? throughputData[throughputData.length - 1].value : 0;
-          const requestsFormatted = formatCount(latestValue);
+          // Display average throughput over the time period
+          const avgThroughput = metrics?.avgThroughput || 0;
+          const throughputFormatted = formatThroughput(avgThroughput);
 
           return (
             <EuiFlexGroup
@@ -676,8 +680,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               justifyContent="center"
               responsive={false}
             >
-              <EuiFlexItem grow={false} style={{ minWidth: '70px' }}>
-                <EuiText size="s">{requestsFormatted}</EuiText>
+              <EuiFlexItem grow={false} style={{ minWidth: '90px' }}>
+                <EuiText size="s">{throughputFormatted}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <MetricSparkline
@@ -709,15 +713,14 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
           const metrics = metricsMap.get(item.serviceName);
-          const failure = metrics?.failureRatio || [];
-          return failure.length > 0 ? failure[failure.length - 1].value : 0;
+          return metrics?.avgFailureRatio || 0;
         },
         render: (_fieldValue: any, item: ServiceTableItem) => {
           const metrics = metricsMap.get(item.serviceName);
           const failureData = metrics?.failureRatio || [];
-          const latestValue =
-            failureData.length > 0 ? failureData[failureData.length - 1].value : 0;
-          const failureFormatted = latestValue.toFixed(1);
+          // Use average failure ratio over the time period
+          const avgFailureRatio = metrics?.avgFailureRatio || 0;
+          const failureFormatted = avgFailureRatio.toFixed(1);
 
           return (
             <EuiFlexGroup
@@ -906,7 +909,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                           id="throughputAccordion"
                           buttonContent={
                             <EuiText size="xs">
-                              <strong>{i18nTexts.filters.requests}</strong>
+                              <strong>{i18nTexts.filters.throughput}</strong>
                             </EuiText>
                           }
                           initialIsOpen={true}

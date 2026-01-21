@@ -4,7 +4,7 @@
  */
 
 import React, { useRef, useEffect, useMemo, useState } from 'react';
-import { EuiLoadingChart, EuiPanel, EuiIcon } from '@elastic/eui';
+import { EuiLoadingChart, EuiPanel, EuiIcon, EuiToolTip } from '@elastic/eui';
 import * as echarts from 'echarts';
 import { usePromQLChartData } from '../hooks/use_promql_chart_data';
 import { TimeRange, MetricDataPoint } from '../../common/types/service_details_types';
@@ -21,6 +21,10 @@ export interface PromQLMetricCardProps {
   invertColor?: boolean; // true = increase is bad (red), false = increase is good (green)
   formatValue?: (value: number) => string;
   refreshTrigger?: number;
+  showTotal?: boolean; // If true, show total as primary value, latest as secondary
+  secondaryValue?: number; // Optional external secondary value (e.g., rate)
+  secondaryFormatValue?: (value: number) => string; // Formatter for secondary value
+  secondaryLabel?: string; // Label for secondary value (e.g., "rate", "latest")
 }
 
 /**
@@ -53,6 +57,10 @@ export const PromQLMetricCard: React.FC<PromQLMetricCardProps> = ({
   invertColor = false,
   formatValue,
   refreshTrigger,
+  showTotal = false,
+  secondaryValue,
+  secondaryFormatValue,
+  secondaryLabel,
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.ECharts | null>(null);
@@ -86,45 +94,108 @@ export const PromQLMetricCard: React.FC<PromQLMetricCardProps> = ({
   // Use current data if available, otherwise use previous data during refresh
   const displayChartData = chartData.length > 0 ? chartData : prevChartData;
 
-  // Calculate trend (compare latest value to average of previous values)
+  // Calculate trend by comparing two equal time windows (recent half vs earlier half)
   const trend = useMemo(() => {
-    if (chartData.length < 2) return null;
+    if (chartData.length < 4) return null; // Need at least 4 points for meaningful comparison
 
-    const currentValue = chartData[chartData.length - 1].value;
-    const previousValues = chartData.slice(0, -1).map((d) => d.value);
-    const avgPrevious = previousValues.reduce((a, b) => a + b, 0) / previousValues.length;
+    const midpoint = Math.floor(chartData.length / 2);
+    const earlierHalf = chartData.slice(0, midpoint).map((d) => d.value);
+    const recentHalf = chartData.slice(midpoint).map((d) => d.value);
 
-    if (avgPrevious === 0) return null;
+    const earlierAvg = earlierHalf.reduce((a, b) => a + b, 0) / earlierHalf.length;
+    const recentAvg = recentHalf.reduce((a, b) => a + b, 0) / recentHalf.length;
 
-    const percentChange = ((currentValue - avgPrevious) / avgPrevious) * 100;
+    if (earlierAvg === 0) return null;
+
+    const percentChange = ((recentAvg - earlierAvg) / earlierAvg) * 100;
     return {
-      direction: percentChange > 1 ? 'up' : percentChange < -1 ? 'down' : 'neutral',
+      direction:
+        percentChange > SERVICE_DETAILS_CONSTANTS.TREND_THRESHOLD_PERCENT
+          ? 'up'
+          : percentChange < -SERVICE_DETAILS_CONSTANTS.TREND_THRESHOLD_PERCENT
+          ? 'down'
+          : 'neutral',
       percent: Math.abs(percentChange),
     };
   }, [chartData]);
 
+  // Calculate average and latest from chart data (for showTotal mode)
+  const { avgValue, latestFromChart } = useMemo(() => {
+    if (chartData.length === 0) return { avgValue: 0, latestFromChart: 0 };
+    const sum = chartData.reduce((s, point) => s + point.value, 0);
+    const avg = sum / chartData.length;
+    const latest = chartData[chartData.length - 1].value;
+    return { avgValue: avg, latestFromChart: latest };
+  }, [chartData]);
+
+  // Determine primary value based on showTotal mode
+  // When showTotal is true, display average throughput instead of sum
+  const primaryValue = showTotal ? avgValue : latestValue;
+
   // Format the display value
   const displayValue = useMemo(() => {
-    if (latestValue === null || latestValue === undefined) {
+    if (primaryValue === null || primaryValue === undefined) {
       return '-';
     }
 
     if (formatValue) {
-      return formatValue(latestValue);
+      return formatValue(primaryValue);
     }
 
     // Default formatting based on value magnitude
-    if (latestValue >= 1000000) {
-      return `${(latestValue / 1000000).toFixed(1)}M`;
+    if (primaryValue >= 1000000) {
+      return `${(primaryValue / 1000000).toFixed(1)}M`;
     }
-    if (latestValue >= 1000) {
-      return `${(latestValue / 1000).toFixed(1)}K`;
+    if (primaryValue >= 1000) {
+      return `${(primaryValue / 1000).toFixed(1)}K`;
     }
-    if (latestValue < 1 && latestValue > 0) {
-      return `${(latestValue * 100).toFixed(1)}%`;
+    if (primaryValue < 1 && primaryValue > 0) {
+      return `${(primaryValue * 100).toFixed(1)}%`;
     }
-    return latestValue.toFixed(1);
-  }, [latestValue, formatValue]);
+    return primaryValue.toFixed(1);
+  }, [primaryValue, formatValue]);
+
+  // Format the secondary display value
+  const secondaryDisplayValue = useMemo(() => {
+    // If external secondary value is provided, use it
+    if (secondaryValue !== undefined) {
+      if (secondaryFormatValue) {
+        return secondaryFormatValue(secondaryValue);
+      }
+      return secondaryValue.toFixed(2);
+    }
+
+    // If showTotal mode, show latest value as secondary
+    if (showTotal && chartData.length > 0) {
+      if (formatValue) {
+        return formatValue(latestFromChart);
+      }
+      // Default formatting
+      if (latestFromChart >= 1000000) {
+        return `${(latestFromChart / 1000000).toFixed(1)}M`;
+      }
+      if (latestFromChart >= 1000) {
+        return `${(latestFromChart / 1000).toFixed(1)}K`;
+      }
+      return latestFromChart.toFixed(0);
+    }
+
+    return null;
+  }, [
+    secondaryValue,
+    secondaryFormatValue,
+    showTotal,
+    chartData.length,
+    latestFromChart,
+    formatValue,
+  ]);
+
+  // Determine secondary label
+  const computedSecondaryLabel = useMemo(() => {
+    if (secondaryLabel) return secondaryLabel;
+    if (showTotal && secondaryValue === undefined) return 'latest';
+    return '';
+  }, [secondaryLabel, showTotal, secondaryValue]);
 
   // Initialize and update chart
   // Use displayChartData to keep showing chart during refresh
@@ -235,17 +306,73 @@ export const PromQLMetricCard: React.FC<PromQLMetricCardProps> = ({
           ) : error ? (
             <span className="promql-metric-card__value promql-metric-card__value--error">-</span>
           ) : (
-            <>
-              <span className="promql-metric-card__value">{displayValue}</span>
-              {trend && trend.direction !== 'neutral' && (
-                <span className={`promql-metric-card__trend ${getTrendClass()}`}>
-                  <EuiIcon type={trend.direction === 'up' ? 'sortUp' : 'sortDown'} size="s" />
-                  <span className="promql-metric-card__trend-percent">
-                    {trend.percent.toFixed(1)}%
+            <div className="promql-metric-card__values-wrapper">
+              <div className="promql-metric-card__primary-row">
+                {showTotal ? (
+                  <EuiToolTip content="Average value over the selected time range" position="top">
+                    <span className="promql-metric-card__value">{displayValue}</span>
+                  </EuiToolTip>
+                ) : (
+                  <span className="promql-metric-card__value">{displayValue}</span>
+                )}
+                {/* Show trend on primary row only when there's no secondary row */}
+                {!secondaryDisplayValue && trend && trend.direction !== 'neutral' && (
+                  <span className={`promql-metric-card__trend ${getTrendClass()}`}>
+                    <EuiIcon type={trend.direction === 'up' ? 'sortUp' : 'sortDown'} size="s" />
+                    <span className="promql-metric-card__trend-percent">
+                      {trend.percent.toFixed(1)}%
+                    </span>
                   </span>
-                </span>
+                )}
+              </div>
+              {secondaryDisplayValue !== null && (
+                <div className="promql-metric-card__secondary-row">
+                  {showTotal ? (
+                    <EuiToolTip content="Most recent data point" position="top">
+                      <span className="promql-metric-card__secondary-value">
+                        {secondaryDisplayValue}
+                      </span>
+                    </EuiToolTip>
+                  ) : (
+                    <span className="promql-metric-card__secondary-value">
+                      {secondaryDisplayValue}
+                    </span>
+                  )}
+                  {/* Show label only when not in showTotal mode (external secondary values) */}
+                  {!showTotal && computedSecondaryLabel && (
+                    <span className="promql-metric-card__secondary-label">
+                      {computedSecondaryLabel}
+                    </span>
+                  )}
+                  {/* Show trend on secondary row when secondary value is displayed */}
+                  {trend &&
+                    trend.direction !== 'neutral' &&
+                    (showTotal ? (
+                      <EuiToolTip
+                        content="Percentage change comparing recent half to earlier half of the time range"
+                        position="top"
+                      >
+                        <span className={`promql-metric-card__trend ${getTrendClass()}`}>
+                          <EuiIcon
+                            type={trend.direction === 'up' ? 'sortUp' : 'sortDown'}
+                            size="s"
+                          />
+                          <span className="promql-metric-card__trend-percent">
+                            {trend.percent.toFixed(1)}%
+                          </span>
+                        </span>
+                      </EuiToolTip>
+                    ) : (
+                      <span className={`promql-metric-card__trend ${getTrendClass()}`}>
+                        <EuiIcon type={trend.direction === 'up' ? 'sortUp' : 'sortDown'} size="s" />
+                        <span className="promql-metric-card__trend-percent">
+                          {trend.percent.toFixed(1)}%
+                        </span>
+                      </span>
+                    ))}
+                </div>
               )}
-            </>
+            </div>
           )}
         </div>
       </div>

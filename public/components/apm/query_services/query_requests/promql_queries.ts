@@ -20,24 +20,6 @@
  * Note: span_kind label may not be available in all metrics
  */
 
-// Time range for rate calculations (5 minutes)
-const RATE_INTERVAL = '5m';
-
-/**
- * Top Operations by Latency (P95)
- * Returns top 5 operations by 95th percentile latency
- * Note: latency_seconds_seconds_bucket is a gauge, so we don't use rate()
- */
-export const QUERY_TOP_OPERATIONS_BY_LATENCY = `
-topk(5,
-  histogram_quantile(0.95,
-    sum by (environment, service, operation, le) (
-      latency_seconds_seconds_bucket
-    )
-  )
-)
-`;
-
 /**
  * Top Operations by Volume (Request Count) - for specific service
  * Returns top K operations by request count for a given service
@@ -66,32 +48,10 @@ label_replace(
 `;
 
 /**
- * Legacy global query - kept for backward compatibility
- */
-export const QUERY_TOP_OPERATIONS_BY_VOLUME = `
-topk(5,
-  sum by (environment, service, operation) (
-    request{namespace="span_derived"}
-  )
-)
-`;
-
-/**
- * Top Operations by Fault Count
- * Returns top 5 operations by fault count
- */
-export const QUERY_TOP_OPERATIONS_BY_FAULT = `
-topk(5,
-  sum by (environment, service, operation) (
-    fault
-  )
-)
-`;
-
-/**
  * Top Dependencies by Latency - for specific service
  * Returns top K service dependencies by specified percentile latency
  * Note: latency_seconds_seconds_bucket is a gauge, so we don't use rate()
+ * Returns milliseconds
  * @param environment - Environment filter
  * @param serviceName - Service name to filter
  * @param percentile - Latency percentile (default: 0.95)
@@ -106,9 +66,9 @@ export const getQueryTopDependenciesByLatency = (
 topk(${limit},
   histogram_quantile(${percentile},
     sum by (remoteService, le) (
-      latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived"}
+      latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""}
     )
-  )
+  ) * 1000
 )
 or
 label_replace(
@@ -116,37 +76,11 @@ label_replace(
     sum by (le) (
       latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived"}
     )
-  ),
+  ) * 1000,
   "remoteService",
   "overall",
   "",
   ""
-)
-`;
-
-/**
- * Legacy global query - kept for backward compatibility
- * Note: latency_seconds_seconds_bucket is a gauge, so we don't use rate()
- */
-export const QUERY_TOP_DEPENDENCIES_BY_LATENCY = `
-topk(5,
-  histogram_quantile(0.95,
-    sum by (environment, service, remoteService, le) (
-      latency_seconds_seconds_bucket{namespace="span_derived"}
-    )
-  )
-)
-`;
-
-/**
- * Top Dependencies by Volume (Call Count)
- * Returns top 5 dependencies by call count
- */
-export const QUERY_TOP_DEPENDENCIES_BY_VOLUME = `
-topk(5,
-  sum by (environment, service, remoteService) (
-    request
-  )
 )
 `;
 
@@ -207,29 +141,57 @@ topk(5,
 `;
 
 /**
- * Service Dependency Fault Rate for a specific service
- * Returns top 5 dependencies by fault rate percentage for a given service
- *
- * @param environment - Environment filter (e.g., "production", "generic:default")
- * @param serviceName - Service name to filter
+ * Top Services by Fault Rate over time range
+ * Uses sum_over_time for accurate total rate calculation
+ * @param timeRange - Time range (e.g., "1h", "24h")
+ * @param limit - Number of top services (default: 5)
  */
-export const QUERY_SERVICE_DEPENDENCY_FAULT_RATE = (
-  environment: string,
-  serviceName: string
-): string => `
-topk(5,
-  sum by (remoteService) (fault{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""})
-  /
-  sum by (remoteService) (request{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""}) * 100
+export const getQueryTopServicesByFaultRateAvg = (timeRange: string, limit: number = 5): string => `
+topk(${limit},
+  (
+    sum by (environment, service) (sum_over_time(fault{namespace="span_derived"}[${timeRange}:1m]))
+    /
+    sum by (environment, service) (sum_over_time(request{namespace="span_derived"}[${timeRange}:1m]))
+  ) * 100
 )
 `;
 
 /**
- * Service Request Rate (RED - Rate)
- * Returns total request count for a service
+ * Top Dependencies by Fault Rate over time range - Global view
+ * @param timeRange - Time range (e.g., "1h", "24h")
+ * @param limit - Number of top dependencies (default: 5)
  */
-export const getQueryServiceRequestRate = (environment: string, serviceName: string): string => `
-sum(request{environment="${environment}",service="${serviceName}"})
+export const getQueryTopDependenciesByFaultRateAvg = (
+  timeRange: string,
+  limit: number = 5
+): string => `
+topk(${limit},
+  (
+    sum by (environment, service, remoteService) (sum_over_time(fault{remoteService!="",namespace="span_derived"}[${timeRange}:1m]))
+    /
+    sum by (environment, service, remoteService) (sum_over_time(request{remoteService!="",namespace="span_derived"}[${timeRange}:1m]))
+  ) * 100
+)
+`;
+
+/**
+ * Top Dependencies by Fault Rate - Service-specific
+ * @param environment - Environment filter
+ * @param serviceName - Service name
+ * @param timeRange - Time range (e.g., "1h", "24h")
+ */
+export const getQueryServiceDependenciesByFaultRateAvg = (
+  environment: string,
+  serviceName: string,
+  timeRange: string
+): string => `
+topk(5,
+  (
+    sum by (remoteService) (sum_over_time(fault{environment="${environment}",service="${serviceName}",remoteService!="",namespace="span_derived"}[${timeRange}:1m]))
+    /
+    sum by (remoteService) (sum_over_time(request{environment="${environment}",service="${serviceName}",remoteService!="",namespace="span_derived"}[${timeRange}:1m]))
+  ) * 100
+)
 `;
 
 /**
@@ -240,32 +202,6 @@ export const getQueryServiceErrorRate = (environment: string, serviceName: strin
 sum(error{environment="${environment}",service="${serviceName}"})
 /
 sum(request{environment="${environment}",service="${serviceName}"})
-`;
-
-/**
- * Service Latency P95 (RED - Duration)
- * Returns 95th percentile latency for a service
- * Note: latency_seconds_seconds_bucket is a gauge, so we don't use rate()
- */
-export const getQueryServiceLatencyP95 = (environment: string, serviceName: string): string => `
-histogram_quantile(0.95,
-  sum by (le) (
-    latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}"}
-  )
-)
-`;
-
-/**
- * Service Latency P50 (Median)
- * Returns median latency for a service
- * Note: latency_seconds_seconds_bucket is a gauge, so we don't use rate()
- */
-export const getQueryServiceLatencyP50 = (environment: string, serviceName: string): string => `
-histogram_quantile(0.50,
-  sum by (le) (
-    latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}"}
-  )
-)
 `;
 
 /**
@@ -280,24 +216,6 @@ histogram_quantile(0.99,
   )
 )
 `;
-
-/**
- * Service Average Latency
- * Returns average latency for a service
- */
-export const getQueryServiceLatencyAvg = (environment: string, serviceName: string): string => `
-rate(latency_seconds_seconds_sum{environment="${environment}",service="${serviceName}"}[${RATE_INTERVAL}])
-/
-rate(latency_seconds_seconds_count{environment="${environment}",service="${serviceName}"}[${RATE_INTERVAL}])
-`;
-
-/**
- * Query builder for custom time ranges
- * Allows overriding the default 5m rate interval
- */
-export const buildQueryWithInterval = (queryTemplate: string, interval: string): string => {
-  return queryTemplate.replace(/\[5m\]/g, `[${interval}]`);
-};
 
 // ============================================================================
 // SERVICE DETAILS PAGE QUERIES
@@ -337,15 +255,42 @@ export const getQueryServiceAvailability = (environment: string, serviceName: st
 `;
 
 /**
+ * Service Fault Rate (5xx) as percentage
+ * For metric card display
+ * Formula: (faults / requests) * 100
+ */
+export const getQueryServiceFaultRateCard = (environment: string, serviceName: string): string => `
+(
+  sum(fault{environment="${environment}",service="${serviceName}",namespace="span_derived"})
+  /
+  sum(request{environment="${environment}",service="${serviceName}",namespace="span_derived"})
+) * 100
+`;
+
+/**
+ * Service Error Rate (4xx) as percentage
+ * For metric card display
+ * Formula: (errors / requests) * 100
+ */
+export const getQueryServiceErrorRateCard = (environment: string, serviceName: string): string => `
+(
+  sum(error{environment="${environment}",service="${serviceName}",namespace="span_derived"})
+  /
+  sum(request{environment="${environment}",service="${serviceName}",namespace="span_derived"})
+) * 100
+`;
+
+/**
  * Service Latency P99
  * For metric card display
+ * Returns milliseconds
  */
 export const getQueryServiceLatencyP99Card = (environment: string, serviceName: string): string => `
 histogram_quantile(0.99,
   sum by (le) (
     latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived"}
   )
-)
+) * 1000
 `;
 
 /**
@@ -449,6 +394,7 @@ label_replace(
 
 /**
  * CONSOLIDATED: Get all operations' fault rates for a service
+ * Returns percentage (0-100)
  */
 export const getQueryAllOperationsFaultRate = (
   environment: string,
@@ -458,11 +404,12 @@ export const getQueryAllOperationsFaultRate = (
   sum by (operation) (fault{environment="${environment}",service="${serviceName}",namespace="span_derived"})
   /
   sum by (operation) (request{environment="${environment}",service="${serviceName}",namespace="span_derived"})
-)
+) * 100
 `;
 
 /**
  * CONSOLIDATED: Get all operations' error rates (4xx) for a service
+ * Returns percentage (0-100)
  */
 export const getQueryAllOperationsErrorRate = (
   environment: string,
@@ -472,7 +419,7 @@ export const getQueryAllOperationsErrorRate = (
   sum by (operation) (error{environment="${environment}",service="${serviceName}",namespace="span_derived"})
   /
   sum by (operation) (request{environment="${environment}",service="${serviceName}",namespace="span_derived"})
-)
+) * 100
 `;
 
 /**
@@ -490,7 +437,7 @@ export const getQueryAllOperationsAvailability = (
 `;
 
 /**
- * CONSOLIDATED: Get all operations' request counts for a service
+ * CONSOLIDATED: Get all operations' request counts for a service (instant query)
  */
 export const getQueryAllOperationsRequestCount = (
   environment: string,
@@ -500,71 +447,115 @@ sum by (operation) (request{environment="${environment}",service="${serviceName}
 `;
 
 /**
+ * CONSOLIDATED: Get all operations' total request counts over time range
+ * Uses sum_over_time for true total count
+ */
+export const getQueryAllOperationsRequestCountTotal = (
+  environment: string,
+  serviceName: string,
+  timeRange: string
+): string => `
+sum by (operation) (
+  sum_over_time(request{environment="${environment}",service="${serviceName}",namespace="span_derived"}[${timeRange}:1m])
+)
+`;
+
+/**
+ * CONSOLIDATED: Get all operations' error rate over time range
+ * Uses sum_over_time for accurate total rate calculation
+ */
+export const getQueryAllOperationsErrorRateAvg = (
+  environment: string,
+  serviceName: string,
+  timeRange: string
+): string => `
+(
+  sum by (operation) (sum_over_time(error{environment="${environment}",service="${serviceName}",namespace="span_derived"}[${timeRange}:1m]))
+  /
+  sum by (operation) (sum_over_time(request{environment="${environment}",service="${serviceName}",namespace="span_derived"}[${timeRange}:1m]))
+) * 100
+`;
+
+/**
+ * CONSOLIDATED: Get all operations' availability over time range
+ * Uses sum_over_time for accurate total rate calculation
+ */
+export const getQueryAllOperationsAvailabilityAvg = (
+  environment: string,
+  serviceName: string,
+  timeRange: string
+): string => `
+(1 - (
+  sum by (operation) (sum_over_time(fault{environment="${environment}",service="${serviceName}",namespace="span_derived"}[${timeRange}:1m]))
+  /
+  sum by (operation) (sum_over_time(request{environment="${environment}",service="${serviceName}",namespace="span_derived"}[${timeRange}:1m]))
+)) * 100
+`;
+
+/**
  * CONSOLIDATED: Get all operations' P50 latency for a service
+ * Returns average P50 latency over the time range in milliseconds
  */
 export const getQueryAllOperationsLatencyP50 = (
   environment: string,
-  serviceName: string
+  serviceName: string,
+  timeRange: string
 ): string => `
-histogram_quantile(0.50,
-  sum by (operation, le) (
-    latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived"}
-  )
-)
+avg_over_time(
+  histogram_quantile(0.50,
+    sum by (operation, le) (
+      latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived"}
+    )
+  )[${timeRange}:1m]
+) * 1000
 `;
 
 /**
  * CONSOLIDATED: Get all operations' P90 latency for a service
+ * Returns average P90 latency over the time range in milliseconds
  */
 export const getQueryAllOperationsLatencyP90 = (
   environment: string,
-  serviceName: string
+  serviceName: string,
+  timeRange: string
 ): string => `
-histogram_quantile(0.90,
-  sum by (operation, le) (
-    latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived"}
-  )
-)
+avg_over_time(
+  histogram_quantile(0.90,
+    sum by (operation, le) (
+      latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived"}
+    )
+  )[${timeRange}:1m]
+) * 1000
 `;
 
 /**
  * CONSOLIDATED: Get all operations' P99 latency for a service
+ * Returns average P99 latency over the time range in milliseconds
  */
 export const getQueryAllOperationsLatencyP99 = (
   environment: string,
-  serviceName: string
+  serviceName: string,
+  timeRange: string
 ): string => `
-histogram_quantile(0.99,
-  sum by (operation, le) (
-    latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived"}
-  )
-)
+avg_over_time(
+  histogram_quantile(0.99,
+    sum by (operation, le) (
+      latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived"}
+    )
+  )[${timeRange}:1m]
+) * 1000
 `;
 
 /**
- * COMBINED: Operation Requests and Availability Over Time
+ * Operation Requests Over Time
  * For expandable row charts
  */
-export const getQueryOperationRequestsAndAvailabilityOverTime = (
+export const getQueryOperationRequestsOverTime = (
   environment: string,
   serviceName: string,
   operation: string
 ): string => `
-label_replace(
-  sum(request{environment="${environment}",service="${serviceName}",operation="${operation}",namespace="span_derived"}),
-  "metric_type", "Requests", "", ""
-)
-or
-label_replace(
-  (
-    1 - (
-      sum(fault{environment="${environment}",service="${serviceName}",operation="${operation}",namespace="span_derived"})
-      /
-      sum(request{environment="${environment}",service="${serviceName}",operation="${operation}",namespace="span_derived"})
-    )
-  ) * 100,
-  "metric_type", "Availability (%)", "", ""
-)
+sum(request{environment="${environment}",service="${serviceName}",operation="${operation}",namespace="span_derived"})
 `;
 
 /**
@@ -598,6 +589,7 @@ label_replace(
 /**
  * COMBINED: Operation Latency Percentiles Over Time
  * For expandable row charts
+ * Returns milliseconds
  */
 export const getQueryOperationLatencyPercentilesOverTime = (
   environment: string,
@@ -609,7 +601,7 @@ label_replace(
     sum by (le) (
       latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",operation="${operation}",namespace="span_derived"}
     )
-  ),
+  ) * 1000,
   "percentile",
   "p50",
   "",
@@ -621,7 +613,7 @@ label_replace(
     sum by (le) (
       latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",operation="${operation}",namespace="span_derived"}
     )
-  ),
+  ) * 1000,
   "percentile",
   "p90",
   "",
@@ -633,7 +625,7 @@ label_replace(
     sum by (le) (
       latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",operation="${operation}",namespace="span_derived"}
     )
-  ),
+  ) * 1000,
   "percentile",
   "p99",
   "",
@@ -647,6 +639,7 @@ label_replace(
 
 /**
  * CONSOLIDATED: Get all dependencies' fault rates for a service
+ * Returns percentage (0-100)
  */
 export const getQueryAllDependenciesFaultRate = (
   environment: string,
@@ -656,11 +649,12 @@ export const getQueryAllDependenciesFaultRate = (
   sum by (remoteService, operation, remoteOperation) (fault{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""})
   /
   sum by (remoteService, operation, remoteOperation) (request{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""})
-)
+) * 100
 `;
 
 /**
  * CONSOLIDATED: Get all dependencies' error rates for a service
+ * Returns percentage (0-100)
  */
 export const getQueryAllDependenciesErrorRate = (
   environment: string,
@@ -670,7 +664,7 @@ export const getQueryAllDependenciesErrorRate = (
   sum by (remoteService, operation, remoteOperation) (error{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""})
   /
   sum by (remoteService, operation, remoteOperation) (request{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""})
-)
+) * 100
 `;
 
 /**
@@ -689,48 +683,60 @@ export const getQueryAllDependenciesAvailability = (
 
 /**
  * CONSOLIDATED: Get all dependencies' p50 latency for a service
+ * Returns average P50 latency over the time range in milliseconds
  */
 export const getQueryAllDependenciesLatencyP50 = (
   environment: string,
-  serviceName: string
+  serviceName: string,
+  timeRange: string
 ): string => `
-histogram_quantile(0.50,
-  sum by (remoteService, operation, remoteOperation, le) (
-    latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""}
-  )
-)
+avg_over_time(
+  histogram_quantile(0.50,
+    sum by (remoteService, operation, remoteOperation, le) (
+      latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""}
+    )
+  )[${timeRange}:1m]
+) * 1000
 `;
 
 /**
  * CONSOLIDATED: Get all dependencies' p90 latency for a service
+ * Returns average P90 latency over the time range in milliseconds
  */
 export const getQueryAllDependenciesLatencyP90 = (
   environment: string,
-  serviceName: string
+  serviceName: string,
+  timeRange: string
 ): string => `
-histogram_quantile(0.90,
-  sum by (remoteService, operation, remoteOperation, le) (
-    latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""}
-  )
-)
+avg_over_time(
+  histogram_quantile(0.90,
+    sum by (remoteService, operation, remoteOperation, le) (
+      latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""}
+    )
+  )[${timeRange}:1m]
+) * 1000
 `;
 
 /**
  * CONSOLIDATED: Get all dependencies' p99 latency for a service
+ * Returns average P99 latency over the time range in milliseconds
  */
 export const getQueryAllDependenciesLatencyP99 = (
   environment: string,
-  serviceName: string
+  serviceName: string,
+  timeRange: string
 ): string => `
-histogram_quantile(0.99,
-  sum by (remoteService, operation, remoteOperation, le) (
-    latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""}
-  )
-)
+avg_over_time(
+  histogram_quantile(0.99,
+    sum by (remoteService, operation, remoteOperation, le) (
+      latency_seconds_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""}
+    )
+  )[${timeRange}:1m]
+) * 1000
 `;
 
 /**
- * CONSOLIDATED: Get all dependencies' request counts for a service
+ * CONSOLIDATED: Get all dependencies' request counts for a service (instant query)
  */
 export const getQueryAllDependenciesRequestCount = (
   environment: string,
@@ -742,28 +748,62 @@ sum by (remoteService, remoteOperation) (
 `;
 
 /**
- * Get requests and availability over time for a specific dependency
+ * CONSOLIDATED: Get all dependencies' total request counts over time range
+ * Uses sum_over_time for true total count
+ */
+export const getQueryAllDependenciesRequestCountTotal = (
+  environment: string,
+  serviceName: string,
+  timeRange: string
+): string => `
+sum by (remoteService, remoteOperation) (
+  sum_over_time(request{environment="${environment}",service="${serviceName}",remoteService!="",namespace="span_derived"}[${timeRange}:1m])
+)
+`;
+
+/**
+ * CONSOLIDATED: Get all dependencies' error rate over time range
+ * Uses sum_over_time for accurate total rate calculation
+ */
+export const getQueryAllDependenciesErrorRateAvg = (
+  environment: string,
+  serviceName: string,
+  timeRange: string
+): string => `
+(
+  sum by (remoteService, remoteOperation) (sum_over_time(error{environment="${environment}",service="${serviceName}",remoteService!="",namespace="span_derived"}[${timeRange}:1m]))
+  /
+  sum by (remoteService, remoteOperation) (sum_over_time(request{environment="${environment}",service="${serviceName}",remoteService!="",namespace="span_derived"}[${timeRange}:1m]))
+) * 100
+`;
+
+/**
+ * CONSOLIDATED: Get all dependencies' availability over time range
+ * Uses sum_over_time for accurate total rate calculation
+ */
+export const getQueryAllDependenciesAvailabilityAvg = (
+  environment: string,
+  serviceName: string,
+  timeRange: string
+): string => `
+(1 - (
+  sum by (remoteService, remoteOperation) (sum_over_time(fault{environment="${environment}",service="${serviceName}",remoteService!="",namespace="span_derived"}[${timeRange}:1m]))
+  /
+  sum by (remoteService, remoteOperation) (sum_over_time(request{environment="${environment}",service="${serviceName}",remoteService!="",namespace="span_derived"}[${timeRange}:1m]))
+)) * 100
+`;
+
+/**
+ * Dependency Requests Over Time
  * For expandable row charts
  */
-export const getQueryDependencyRequestsAndAvailabilityOverTime = (
+export const getQueryDependencyRequestsOverTime = (
   environment: string,
   serviceName: string,
   remoteService: string,
   remoteOperation: string
 ): string => `
-label_replace(
-  sum(request{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived",remoteService!=""}),
-  "metric", "Requests", "", ""
-)
-or
-label_replace(
-  (1 - (
-    sum(fault{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived",remoteService!=""})
-    /
-    sum(request{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived",remoteService!=""})
-  )) * 100,
-  "metric", "Availability (%)", "", ""
-)
+sum(request{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived",remoteService!=""})
 `;
 
 /**

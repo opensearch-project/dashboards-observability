@@ -217,13 +217,15 @@ describe('PromQLMetricCard', () => {
 
   describe('trend indicator', () => {
     it('should show upward trend when value is increasing', () => {
+      // Need at least 4 data points for trend calculation
       const increasingData: ChartSeriesData[] = [
         {
           name: 'value',
           data: [
             { timestamp: 1704067200000, value: 50 },
             { timestamp: 1704067260000, value: 50 },
-            { timestamp: 1704067320000, value: 100 }, // 100% increase from avg
+            { timestamp: 1704067320000, value: 100 },
+            { timestamp: 1704067380000, value: 100 }, // 100% increase from earlier half avg
           ],
         },
       ];
@@ -241,13 +243,15 @@ describe('PromQLMetricCard', () => {
     });
 
     it('should show downward trend when value is decreasing', () => {
+      // Need at least 4 data points for trend calculation
       const decreasingData: ChartSeriesData[] = [
         {
           name: 'value',
           data: [
             { timestamp: 1704067200000, value: 100 },
             { timestamp: 1704067260000, value: 100 },
-            { timestamp: 1704067320000, value: 50 }, // 50% decrease from avg
+            { timestamp: 1704067320000, value: 50 },
+            { timestamp: 1704067380000, value: 50 }, // 50% decrease from earlier half avg
           ],
         },
       ];
@@ -265,13 +269,15 @@ describe('PromQLMetricCard', () => {
     });
 
     it('should not show trend for neutral changes', () => {
+      // Need at least 4 data points for trend calculation
       const stableData: ChartSeriesData[] = [
         {
           name: 'value',
           data: [
             { timestamp: 1704067200000, value: 100 },
             { timestamp: 1704067260000, value: 100 },
-            { timestamp: 1704067320000, value: 100 }, // No change
+            { timestamp: 1704067320000, value: 100 },
+            { timestamp: 1704067380000, value: 100 }, // No change
           ],
         },
       ];
@@ -292,6 +298,7 @@ describe('PromQLMetricCard', () => {
 
   describe('inverted color mode', () => {
     it('should apply inverted class when invertColor is true', () => {
+      // Need at least 4 data points for trend calculation
       const increasingData: ChartSeriesData[] = [
         {
           name: 'value',
@@ -299,6 +306,7 @@ describe('PromQLMetricCard', () => {
             { timestamp: 1704067200000, value: 50 },
             { timestamp: 1704067260000, value: 50 },
             { timestamp: 1704067320000, value: 100 },
+            { timestamp: 1704067380000, value: 100 }, // 100% increase from earlier half avg
           ],
         },
       ];

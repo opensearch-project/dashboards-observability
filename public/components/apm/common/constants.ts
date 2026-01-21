@@ -56,6 +56,9 @@ export const SERVICE_DETAILS_CONSTANTS = {
 
   // Chart heights
   METRIC_CARD_HEIGHT: 120,
+
+  // Trend indicator threshold (percentage change below this is considered neutral)
+  TREND_THRESHOLD_PERCENT: 0.1,
   LINE_CHART_HEIGHT: 300,
   EXPANDED_ROW_CHART_HEIGHT: 250,
 

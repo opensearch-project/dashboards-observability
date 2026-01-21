@@ -20,13 +20,13 @@ export const servicesI18nTexts = {
       defaultMessage: 'Environment',
     }),
     latencyP99: i18n.translate('observability.apm.services.table.latencyP99', {
-      defaultMessage: 'Latency (P99)',
+      defaultMessage: 'Avg. Latency',
     }),
-    requests: i18n.translate('observability.apm.services.table.requests', {
-      defaultMessage: 'Requests',
+    throughput: i18n.translate('observability.apm.services.table.throughput', {
+      defaultMessage: 'Avg. Throughput',
     }),
     failureRatio: i18n.translate('observability.apm.services.table.failureRatio', {
-      defaultMessage: 'Failure Ratio',
+      defaultMessage: 'Avg. Failure Rate',
     }),
     actions: i18n.translate('observability.apm.services.table.actions', {
       defaultMessage: 'Correlations',
@@ -34,13 +34,14 @@ export const servicesI18nTexts = {
   },
   tableTooltips: {
     latency: i18n.translate('observability.apm.services.table.tooltip.latency', {
-      defaultMessage: 'Response time percentile over the selected time range',
+      defaultMessage: 'Average response time percentile over the selected time range',
     }),
-    requests: i18n.translate('observability.apm.services.table.tooltip.requests', {
-      defaultMessage: 'Total request count over the selected time range',
+    throughput: i18n.translate('observability.apm.services.table.tooltip.throughput', {
+      defaultMessage: 'Average request count per interval over the selected time range',
     }),
     failureRatio: i18n.translate('observability.apm.services.table.tooltip.failureRatio', {
-      defaultMessage: 'Percentage of requests that resulted in faults (5xx) and errors (4xx)',
+      defaultMessage:
+        'Average percentage of requests that resulted in faults (5xx) and errors (4xx) over the selected time range',
     }),
   },
   actions: {
@@ -83,8 +84,8 @@ export const servicesI18nTexts = {
     latency: i18n.translate('observability.apm.services.filters.latency', {
       defaultMessage: 'Latency',
     }),
-    requests: i18n.translate('observability.apm.services.filters.requests', {
-      defaultMessage: 'Requests',
+    throughput: i18n.translate('observability.apm.services.filters.throughput', {
+      defaultMessage: 'Throughput',
     }),
     failureRatio: i18n.translate('observability.apm.services.filters.failureRatio', {
       defaultMessage: 'Failure Ratio',

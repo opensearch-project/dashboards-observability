@@ -96,10 +96,6 @@ interface ServiceCorrelationsFlyoutProps {
   onClose: () => void;
   /** Optional: Filter spans by operation name (for operations table) */
   operationFilter?: string;
-  /** Optional: Filter spans by remote service name (for dependencies table) */
-  remoteServiceFilter?: string;
-  /** Optional: Filter spans by remote operation name (for dependencies table) */
-  remoteOperationFilter?: string;
 }
 
 export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps> = ({
@@ -110,11 +106,9 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
   initialTab,
   onClose,
   operationFilter,
-  remoteServiceFilter,
-  remoteOperationFilter,
 }) => {
   // Check if any filters are active (used for conditionally hiding Attributes tab and showing filter badge)
-  const hasFilters = Boolean(operationFilter || remoteServiceFilter || remoteOperationFilter);
+  const hasFilters = Boolean(operationFilter);
   const { config } = useApmConfig();
   const traceDatasetId = config?.tracesDataset?.id;
 
@@ -298,68 +292,6 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
           pplQuery += ` | where name = '${operationFilter}'`;
         }
 
-        // Add remote service filter if specified (for dependencies)
-        // Uses coalesce to check multiple possible fields for remote service name.
-        // The fields are ordered to prioritize service names over IP addresses:
-        // - net.peer.name is most common and reliable (contains "cart", "checkout", etc.)
-        // - server.address is moved to the end as it often contains IP addresses
-        // Note: This filter may not match for all services (e.g., checkout uses different attributes)
-        // The remoteOperationFilter below provides an additional/fallback match.
-        if (remoteServiceFilter) {
-          const filter = remoteServiceFilter.toLowerCase();
-          // Remote service identification fields ordered by reliability
-          // (service names preferred over IPs, server.address last as it often contains IPs)
-          const remoteServiceFields = [
-            '`attributes.net.peer.name`', // Standard OTel network peer (frontend uses)
-            '`attributes.peer.service`', // Older OTel peer service
-            '`attributes.rpc.service`', // gRPC/RPC services (e.g., "oteldemo.CartService")
-            '`attributes.db.name`', // Database name
-            '`attributes.db.system`', // Database system type (redis, postgresql)
-            '`attributes.gen_ai.system`', // LLM/AI systems (openai)
-            '`attributes.http.host`', // HTTP host header
-            '`attributes.messaging.destination.name`', // Message queues (Kafka, RabbitMQ - newer)
-            '`attributes.messaging.destination`', // Message queues (older)
-            '`attributes.upstream_cluster`', // Envoy/Istio service mesh
-            '`attributes.upstream_cluster_name`', // Envoy alternative
-            '`attributes.server.address`', // Server address (often IP, so moved to end)
-            "''", // Empty string fallback
-          ].join(', ');
-          pplQuery += ` | eval _remoteService = coalesce(${remoteServiceFields})`;
-          // Use LIKE with lower() for case-insensitive partial match
-          // (e.g., "cart" matches "oteldemo.CartService" or "cart")
-          pplQuery += ` | where lower(_remoteService) LIKE '%${filter}%'`;
-        }
-
-        // Add remote operation filter if specified
-        // Service map stores: "POST /oteldemo.CartService/GetCart" (with HTTP method prefix)
-        // Span name is: "oteldemo.CartService/GetCart" or "grpc.oteldemo.CartService/GetCart"
-        // HTTP method is in: attributes.http.method or attributes.http.request.method
-        if (remoteOperationFilter) {
-          let opFilter = remoteOperationFilter;
-          let httpMethod: string | null = null;
-
-          // Extract HTTP method prefix if present (e.g., "POST " from "POST /path")
-          const httpMethodPrefixRegex = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)\s+/i;
-          const methodMatch = opFilter.match(httpMethodPrefixRegex);
-          if (methodMatch) {
-            httpMethod = methodMatch[1].toUpperCase();
-            opFilter = opFilter.replace(httpMethodPrefixRegex, '');
-          }
-
-          // Strip leading slash if present (e.g., "/oteldemo..." -> "oteldemo...")
-          opFilter = opFilter.replace(/^\//, '');
-
-          // 1. Filter by operation name (always applied)
-          pplQuery += ` | where lower(name) LIKE '%${opFilter.toLowerCase()}%'`;
-
-          // 2. Filter by HTTP method if extracted (for HTTP spans)
-          // gRPC spans won't have http.method, so we allow empty values through
-          if (httpMethod) {
-            pplQuery += ` | eval _httpMethod = coalesce(\`attributes.http.method\`, \`attributes.http.request.method\`, '')`;
-            pplQuery += ` | where _httpMethod = '${httpMethod}' OR _httpMethod = ''`;
-          }
-        }
-
         pplQuery += ` | sort - startTime | head 50`;
         const response = await pplService.executeQuery(pplQuery, dataset);
 
@@ -391,7 +323,13 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
         // Calculate time range from spans for log query buffer
         if (spansData.length > 0) {
           const timestamps = spansData
-            .map((span) => new Date(span.startTime).getTime())
+            .map((span) => {
+              // Span timestamps are UTC but without 'Z' suffix - append 'Z' to parse as UTC
+              const timestamp = span.startTime.endsWith('Z')
+                ? span.startTime
+                : span.startTime + 'Z';
+              return new Date(timestamp).getTime();
+            })
             .filter((t) => !isNaN(t));
           if (timestamps.length > 0) {
             setSpanTimeRange({
@@ -408,14 +346,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     };
 
     fetchSpans();
-  }, [
-    config?.tracesDataset,
-    serviceName,
-    parsedTimeRange,
-    operationFilter,
-    remoteServiceFilter,
-    remoteOperationFilter,
-  ]);
+  }, [config?.tracesDataset, serviceName, parsedTimeRange, operationFilter]);
 
   // Fetch logs for each correlated dataset using traceId correlation
   useEffect(() => {
@@ -436,6 +367,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
         displayName: dataset.displayName,
         title: dataset.title,
         serviceNameField: dataset.schemaMappings?.serviceName || '',
+        traceIdField: dataset.schemaMappings?.traceId || 'traceId',
         logs: [],
         loading: true,
       }));
@@ -455,7 +387,12 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
           return {
             index,
             result: {
-              ...initialResults[index],
+              datasetId: dataset.id,
+              displayName: dataset.displayName || dataset.title,
+              title: dataset.title,
+              serviceNameField: '',
+              traceIdField: dataset.schemaMappings?.traceId || 'traceId',
+              logs: [],
               loading: false,
               error: new Error('Missing schema mappings'),
             },
@@ -464,7 +401,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
 
         const serviceNameField = dataset.schemaMappings.serviceName;
         const timestampField = dataset.schemaMappings.timestamp;
-        const traceIdField = dataset.schemaMappings?.traceId || 'traceId';
+        const traceIdFieldValue = dataset.schemaMappings?.traceId || 'traceId';
 
         try {
           const datasetConfig = {
@@ -486,11 +423,12 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
             pplQuery += ` | where \`${timestampField}\` >= '${minTimeStr}' AND \`${timestampField}\` <= '${maxTimeStr}'`;
           }
 
-          // 3. Add traceId correlation with fallback for empty/null traceIds
+          // 3. Add traceId correlation only when viewing filtered data (operations/dependencies)
+          // When no filters are set (service-level view), show all logs for the service
           // Note: PPL uses isnull() function, not IS NULL syntax
-          if (extractedTraceIds.length > 0) {
+          if (hasFilters && extractedTraceIds.length > 0) {
             const traceIdList = extractedTraceIds.map((id) => `'${id}'`).join(', ');
-            pplQuery += ` | where (\`${traceIdField}\` IN (${traceIdList}) OR \`${traceIdField}\` = '' OR isnull(\`${traceIdField}\`))`;
+            pplQuery += ` | where (\`${traceIdFieldValue}\` IN (${traceIdList}) OR \`${traceIdFieldValue}\` = '' OR isnull(\`${traceIdFieldValue}\`))`;
           }
 
           pplQuery += ` | sort - \`${timestampField}\` | head 10`;
@@ -509,7 +447,11 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
           return {
             index,
             result: {
-              ...initialResults[index],
+              datasetId: dataset.id,
+              displayName: dataset.displayName || dataset.title,
+              title: dataset.title,
+              serviceNameField,
+              traceIdField: traceIdFieldValue,
               logs: logsData,
               loading: false,
             },
@@ -518,7 +460,12 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
           return {
             index,
             result: {
-              ...initialResults[index],
+              datasetId: dataset.id,
+              displayName: dataset.displayName || dataset.title,
+              title: dataset.title,
+              serviceNameField,
+              traceIdField: traceIdFieldValue,
+              logs: [],
               loading: false,
               error: err instanceof Error ? err : new Error(String(err)),
             },
@@ -536,7 +483,14 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     };
 
     fetchLogsForDatasets();
-  }, [correlatedLogDatasets, serviceName, extractedTraceIds, spanTimeRange, spansLoading]);
+  }, [
+    correlatedLogDatasets,
+    serviceName,
+    extractedTraceIds,
+    spanTimeRange,
+    spansLoading,
+    hasFilters,
+  ]);
 
   // Toggle row expansion handlers using shared factory function
   const toggleSpanRow = createToggleRowHandler(setExpandedSpanRows);
@@ -740,7 +694,8 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
                     serviceName,
                     timeRange,
                     config?.tracesDataset?.datasourceId,
-                    undefined // dataSourceTitle - not available in config
+                    undefined, // dataSourceTitle - not available in config
+                    operationFilter // Pass the operation filter
                   )
                 }
               >
@@ -867,7 +822,11 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
                         result.title,
                         serviceName,
                         result.serviceNameField,
-                        timeRange
+                        timeRange,
+                        undefined, // dataSourceId
+                        undefined, // dataSourceTitle
+                        hasFilters ? extractedTraceIds : undefined, // Pass traceIds only when filtered
+                        hasFilters ? result.traceIdField : undefined // Pass traceIdField
                       )
                     }
                   >
@@ -994,14 +953,8 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     if (operationFilter) {
       return `${i18nTexts.filterBadgeOperation}: ${operationFilter}`;
     }
-    if (remoteServiceFilter && remoteOperationFilter) {
-      return `${i18nTexts.filterBadgeDependency}: ${remoteServiceFilter} → ${remoteOperationFilter}`;
-    }
-    if (remoteServiceFilter) {
-      return `${i18nTexts.filterBadgeDependency}: ${remoteServiceFilter}`;
-    }
     return null;
-  }, [operationFilter, remoteServiceFilter, remoteOperationFilter]);
+  }, [operationFilter]);
 
   // Build tabs - conditionally include Attributes tab based on filters
   const tabs: EuiTabbedContentTab[] = useMemo(() => {

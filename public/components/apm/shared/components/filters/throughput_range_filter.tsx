@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { EuiDualRange, EuiSpacer, EuiText } from '@elastic/eui';
-import { formatCount } from '../../../common/format_utils';
+import { formatThroughput } from '../../../common/format_utils';
 
 export interface ThroughputRangeFilterProps {
   /** Current range selection [min, max] */
@@ -49,12 +49,12 @@ export const ThroughputRangeFilter: React.FC<ThroughputRangeFilterProps> = ({
         showLabels
         compressed
         disabled={disabled || min === max}
-        aria-label="Requests range filter"
+        aria-label="Throughput range filter"
         data-test-subj={dataTestSubj}
       />
       <EuiSpacer size="xs" />
       <EuiText size="xs" color="subdued" textAlign="center">
-        {formatCount(value[0])} - {formatCount(value[1])}
+        {formatThroughput(value[0])} - {formatThroughput(value[1])}
       </EuiText>
     </>
   );

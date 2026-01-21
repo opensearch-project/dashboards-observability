@@ -26,7 +26,7 @@ import { TimeRange, GroupedDependency } from '../../common/types/service_details
 import { PromQLLineChart } from '../../shared/components/promql_line_chart';
 import { SERVICE_DETAILS_CONSTANTS } from '../../common/constants';
 import {
-  getQueryDependencyRequestsAndAvailabilityOverTime,
+  getQueryDependencyRequestsOverTime,
   getQueryDependencyFaultsAndErrorsOverTime,
   getQueryDependencyLatencyPercentilesOverTime,
 } from '../../query_services/query_requests/promql_queries';
@@ -35,8 +35,7 @@ import { useDependencyMetrics } from '../../shared/hooks/use_dependency_metrics'
 import { parseTimeRange } from '../../shared/utils/time_utils';
 import { DependencyFilterSidebar } from '../../shared/components/dependency_filter_sidebar';
 import { ActiveFilterBadges, FilterBadge } from '../../shared/components/active_filter_badges';
-import { formatCount } from '../../common/format_utils';
-import { ServiceCorrelationsFlyout } from '../../shared/components/service_correlations_flyout';
+import { formatCount, formatLatency } from '../../common/format_utils';
 
 // Filter threshold constants
 const AVAILABILITY_THRESHOLDS = ['< 95%', '95-99%', '≥ 99%'];
@@ -66,24 +65,23 @@ const tableTooltips = {
 };
 
 // Threshold matching functions
+// Note: All values from PromQL are already in percentage (0-100) format
 const matchesAvailabilityThreshold = (
   availability: number | undefined,
   threshold: string
 ): boolean => {
   if (availability === undefined) return false;
-  const pct = availability * 100;
-  if (threshold === '< 95%') return pct < 95;
-  if (threshold === '95-99%') return pct >= 95 && pct < 99;
-  if (threshold === '≥ 99%') return pct >= 99;
+  if (threshold === '< 95%') return availability < 95;
+  if (threshold === '95-99%') return availability >= 95 && availability < 99;
+  if (threshold === '≥ 99%') return availability >= 99;
   return false;
 };
 
 const matchesRateThreshold = (rate: number | undefined, threshold: string): boolean => {
   if (rate === undefined) return false;
-  const pct = rate * 100;
-  if (threshold === '< 1%') return pct < 1;
-  if (threshold === '1-5%') return pct >= 1 && pct <= 5;
-  if (threshold === '> 5%') return pct > 5;
+  if (threshold === '< 1%') return rate < 1;
+  if (threshold === '1-5%') return rate >= 1 && rate <= 5;
+  if (threshold === '> 5%') return rate > 5;
   return false;
 };
 
@@ -174,30 +172,6 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   // Search and latency selector state
   const [searchQuery, setSearchQuery] = useState('');
   const [latencyPercentile, setLatencyPercentile] = useState<'p99' | 'p90' | 'p50'>('p99');
-
-  // Flyout state for viewing correlated spans/logs
-  const [flyoutState, setFlyoutState] = useState<{
-    isOpen: boolean;
-    dependencyService: string | null;
-    remoteOperation: string | null;
-    initialTab: 'spans' | 'logs';
-  }>({ isOpen: false, dependencyService: null, remoteOperation: null, initialTab: 'spans' });
-
-  const openCorrelationsFlyout = useCallback(
-    (dependencyService: string, remoteOperation: string | null, tab: 'spans' | 'logs') => {
-      setFlyoutState({ isOpen: true, dependencyService, remoteOperation, initialTab: tab });
-    },
-    []
-  );
-
-  const closeFlyout = useCallback(() => {
-    setFlyoutState({
-      isOpen: false,
-      dependencyService: null,
-      remoteOperation: null,
-      initialTab: 'spans',
-    });
-  }, []);
 
   // Range filter states
   const [latencyRange, setLatencyRange] = useState<[number, number]>([0, 10000]);
@@ -576,17 +550,11 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     });
   }, []);
 
-  // Format functions
-  const formatLatency = (value: number | undefined): string => {
-    if (value === undefined || isNaN(value)) return '-';
-    return `${value.toFixed(2)} ms`;
-  };
-
+  // Note: rate values from PromQL are already in percentage (0-100) format
   const formatRate = (rate: number | undefined): React.ReactNode => {
     if (rate === undefined || isNaN(rate)) return '-';
-    const percentage = (rate * 100).toFixed(2);
-    const color =
-      rate === 0 ? 'success' : rate > 0.05 ? 'danger' : rate > 0.01 ? 'warning' : 'success';
+    const percentage = rate.toFixed(2);
+    const color = rate === 0 ? 'success' : rate > 5 ? 'danger' : rate > 1 ? 'warning' : 'success';
     return (
       <EuiToolTip content="< 1% = Healthy, 1-5% = Degraded, > 5% = Critical">
         <EuiHealth color={color}>{percentage}%</EuiHealth>
@@ -594,11 +562,12 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     );
   };
 
+  // Note: availability values from PromQL are already in percentage (0-100) format
   const formatAvailability = (avail: number | undefined): React.ReactNode => {
     if (avail === undefined || isNaN(avail)) return '-';
-    const percentage = (avail * 100).toFixed(1);
+    const percentage = avail.toFixed(1);
     const color =
-      avail === 0 ? 'danger' : avail >= 0.99 ? 'success' : avail >= 0.95 ? 'warning' : 'danger';
+      avail === 0 ? 'danger' : avail >= 99 ? 'success' : avail >= 95 ? 'warning' : 'danger';
     return (
       <EuiToolTip content="≥ 99% = Healthy, 95-99% = Degraded, < 95% = Critical">
         <EuiHealth color={color}>{percentage}%</EuiHealth>
@@ -748,56 +717,8 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
         width: '13%',
         render: formatAvailability,
       },
-      {
-        name: i18n.translate('observability.apm.dependencies.actions', {
-          defaultMessage: 'Actions',
-        }),
-        width: '100px',
-        render: (dependency: GroupedDependency) => (
-          <EuiFlexGroup gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate('observability.apm.dependencies.viewSpans', {
-                  defaultMessage: 'View correlated spans',
-                })}
-              >
-                <EuiButtonIcon
-                  iconType="apmTrace"
-                  aria-label="View spans"
-                  onClick={() =>
-                    openCorrelationsFlyout(
-                      dependency.serviceName,
-                      dependency.remoteOperation,
-                      'spans'
-                    )
-                  }
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate('observability.apm.dependencies.viewLogs', {
-                  defaultMessage: 'View associated logs',
-                })}
-              >
-                <EuiButtonIcon
-                  iconType="discoverApp"
-                  aria-label="View logs"
-                  onClick={() =>
-                    openCorrelationsFlyout(
-                      dependency.serviceName,
-                      dependency.remoteOperation,
-                      'logs'
-                    )
-                  }
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-      },
     ],
-    [toggleRowExpand, latencyPercentile, openCorrelationsFlyout]
+    [toggleRowExpand, latencyPercentile]
   );
 
   // Create expanded row content
@@ -815,8 +736,8 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem>
                 <PromQLLineChart
-                  title="Requests and Availability"
-                  promqlQuery={getQueryDependencyRequestsAndAvailabilityOverTime(
+                  title="Requests"
+                  promqlQuery={getQueryDependencyRequestsOverTime(
                     environment,
                     serviceName,
                     dependency.serviceName,
@@ -1018,19 +939,6 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
           </>
         )}
       </EuiResizableContainer>
-
-      {/* Correlations flyout for viewing spans/logs filtered by dependency */}
-      {flyoutState.isOpen && flyoutState.dependencyService && (
-        <ServiceCorrelationsFlyout
-          serviceName={serviceName}
-          environment={environment}
-          timeRange={timeRange}
-          initialTab={flyoutState.initialTab}
-          onClose={closeFlyout}
-          remoteServiceFilter={flyoutState.dependencyService}
-          remoteOperationFilter={flyoutState.remoteOperation || undefined}
-        />
-      )}
     </div>
   );
 };

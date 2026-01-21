@@ -82,12 +82,11 @@ describe('ActiveFilterBadges', () => {
 
       render(<ActiveFilterBadges filters={filters} onClearAll={mockOnClearAll} />);
 
-      // Find and click the badge's close button
-      const badge = screen.getByTestId('filterBadge-test-filter');
-      const closeButton = badge.querySelector('[data-euiicon-type="cross"]')?.closest('button');
+      // Find and click the badge's close button using aria-label
+      const closeButton = screen.getByLabelText('Remove Test Category filter');
 
       expect(closeButton).toBeTruthy();
-      fireEvent.click(closeButton!);
+      fireEvent.click(closeButton);
       expect(onRemove).toHaveBeenCalledTimes(1);
     });
 
@@ -105,18 +104,17 @@ describe('ActiveFilterBadges', () => {
       const onRemove1 = jest.fn();
       const onRemove2 = jest.fn();
       const filters = [
-        createMockFilter({ key: 'filter-1', onRemove: onRemove1 }),
-        createMockFilter({ key: 'filter-2', onRemove: onRemove2 }),
+        createMockFilter({ key: 'filter-1', category: 'Category 1', onRemove: onRemove1 }),
+        createMockFilter({ key: 'filter-2', category: 'Category 2', onRemove: onRemove2 }),
       ];
 
       render(<ActiveFilterBadges filters={filters} onClearAll={mockOnClearAll} />);
 
-      // Click first badge's close button
-      const badge1 = screen.getByTestId('filterBadge-filter-1');
-      const closeButton1 = badge1.querySelector('[data-euiicon-type="cross"]')?.closest('button');
+      // Click first badge's close button using aria-label
+      const closeButton1 = screen.getByLabelText('Remove Category 1 filter');
 
       expect(closeButton1).toBeTruthy();
-      fireEvent.click(closeButton1!);
+      fireEvent.click(closeButton1);
       expect(onRemove1).toHaveBeenCalledTimes(1);
       expect(onRemove2).not.toHaveBeenCalled();
     });

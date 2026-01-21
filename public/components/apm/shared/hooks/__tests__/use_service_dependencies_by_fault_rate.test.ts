@@ -16,12 +16,13 @@ jest.mock('../../../query_services/promql_search_service', () => ({
 
 // Mock promql_queries
 jest.mock('../../../query_services/query_requests/promql_queries', () => ({
-  getQueryTopDependenciesByFaultRate: jest.fn(() => 'mock_fault_rate_query'),
+  getQueryServiceDependenciesByFaultRateAvg: jest.fn(() => 'mock_fault_rate_query'),
 }));
 
 // Mock time_utils
 jest.mock('../../utils/time_utils', () => ({
   getTimeInSeconds: jest.fn((date) => Math.floor(date.getTime() / 1000)),
+  calculateTimeRangeDuration: jest.fn(() => '1h'),
 }));
 
 // Mock the APM config context
@@ -200,17 +201,17 @@ describe('useServiceDependenciesByFaultRate', () => {
   });
 
   describe('successful fetch - Prometheus format', () => {
-    it('should handle traditional Prometheus response', async () => {
+    it('should handle traditional Prometheus response with instant query format', async () => {
       const mockResponse = {
         data: {
           result: [
             {
               metric: { remoteService: 'cart' },
-              values: [[1704067200, '5.5']],
+              value: [1704067200, '5.5'],
             },
             {
               metric: { remoteService: 'payment' },
-              values: [[1704067200, '3.2']],
+              value: [1704067200, '3.2'],
             },
           ],
         },
@@ -229,40 +230,13 @@ describe('useServiceDependenciesByFaultRate', () => {
       expect(result.current.data[0].faultRate).toBe(5.5);
     });
 
-    it('should use latest value from time series', async () => {
-      const mockResponse = {
-        data: {
-          result: [
-            {
-              metric: { remoteService: 'cart' },
-              values: [
-                [1704067200, '3.0'],
-                [1704067260, '4.0'],
-                [1704067320, '5.5'], // Latest value
-              ],
-            },
-          ],
-        },
-      };
-
-      mockExecuteMetricRequest.mockResolvedValue(mockResponse);
-
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useServiceDependenciesByFaultRate(defaultParams)
-      );
-
-      await waitForNextUpdate();
-
-      expect(result.current.data[0].faultRate).toBe(5.5);
-    });
-
     it('should default to unknown for missing remoteService', async () => {
       const mockResponse = {
         data: {
           result: [
             {
               metric: {},
-              values: [[1704067200, '5.5']],
+              value: [1704067200, '5.5'],
             },
           ],
         },

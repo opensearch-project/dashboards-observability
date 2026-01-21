@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { EuiIcon, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import * as echarts from 'echarts';
@@ -11,6 +11,7 @@ import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { usePromQLChartData } from '../hooks/use_promql_chart_data';
 import { TimeRange, ChartSeriesData } from '../../common/types/service_details_types';
 import { SERVICE_DETAILS_CONSTANTS, CHART_COLORS } from '../../common/constants';
+import { parseTimeRange, getTimeAxisConfig } from '../utils/time_utils';
 import './promql_line_chart.scss';
 
 export interface PromQLLineChartProps {
@@ -66,6 +67,20 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.ECharts | null>(null);
 
+  // Calculate time axis configuration based on time range
+  const timeAxisConfig = useMemo(() => {
+    try {
+      const { startTime, endTime } = parseTimeRange(timeRange);
+      return getTimeAxisConfig(startTime, endTime);
+    } catch {
+      // Fallback config for invalid time ranges
+      return {
+        minInterval: 30 * 60 * 1000, // 30 minutes
+        labelFormat: '{HH}:{mm}',
+      };
+    }
+  }, [timeRange]);
+
   // Fetch chart data
   const { series, isLoading, error } = usePromQLChartData({
     promqlQuery,
@@ -87,8 +102,8 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
   // Initialize chart and handle loading/data updates
   useEffect(() => {
     if (!chartRef.current || error) {
-      // Dispose chart on error
-      if (chartInstance.current && error) {
+      // Dispose chart when ref is null (empty state) or on error
+      if (chartInstance.current) {
         chartInstance.current.dispose();
         chartInstance.current = null;
       }
@@ -209,6 +224,7 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
       },
       xAxis: {
         type: 'time',
+        minInterval: timeAxisConfig.minInterval,
         axisLine: {
           lineStyle: {
             color: euiThemeVars.euiColorLightShade,
@@ -222,6 +238,7 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
         axisLabel: {
           color: euiThemeVars.euiColorDarkShade,
           fontSize: 11,
+          formatter: timeAxisConfig.labelFormat,
         },
         splitLine: {
           show: false,
@@ -251,7 +268,16 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
     };
 
     chartInstance.current.setOption(option, true);
-  }, [series, isLoading, error, chartType, showLegend, formatValue, formatTooltipValue]);
+  }, [
+    series,
+    isLoading,
+    error,
+    chartType,
+    showLegend,
+    formatValue,
+    formatTooltipValue,
+    timeAxisConfig,
+  ]);
 
   // Cleanup on unmount
   useEffect(() => {
