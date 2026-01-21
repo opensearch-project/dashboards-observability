@@ -2,6 +2,18 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Third-Party Attributions:
+ * - Language icons from DevIcons (https://devicon.dev)
+ *   Copyright (c) 2015 konpa
+ *   License: MIT
+ *   Repository: https://github.com/devicons/devicon
+ */
+
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 
