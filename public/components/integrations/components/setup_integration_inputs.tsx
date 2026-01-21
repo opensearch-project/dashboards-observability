@@ -323,7 +323,6 @@ export function IntegrationQueryInputs({
 }) {
   const [isBucketBlurred, setIsBucketBlurred] = useState(false);
   const [isCheckpointBlurred, setIsCheckpointBlurred] = useState(false);
-  const [noTimeLimit, setNoTimeLimit] = useState(config.refreshRangeDays === 0);
 
   // Calculate the start date from refreshRangeDays (days back from now)
   const getStartDate = () => {
@@ -341,7 +340,6 @@ export function IntegrationQueryInputs({
   };
 
   const handleNoLimitToggle = (checked: boolean) => {
-    setNoTimeLimit(checked);
     if (checked) {
       updateConfig({ refreshRangeDays: 0 });
     } else {
@@ -387,10 +385,10 @@ export function IntegrationQueryInputs({
         <>
           <EuiCompressedSwitch
             label="Load all data (no time limit)"
-            checked={noTimeLimit}
+            checked={config.refreshRangeDays === 0}
             onChange={(e) => handleNoLimitToggle(e.target.checked)}
           />
-          {!noTimeLimit && (
+          {config.refreshRangeDays > 0 && (
             <>
               <EuiSpacer size="s" />
               <EuiDatePicker

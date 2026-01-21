@@ -42,7 +42,6 @@ export interface IntegrationSetupInputs {
   databaseName: string;
   connectionTableName: string;
   enabledWorkflows: string[];
-  /** Number of days for initial data range (1 or 7) */
   refreshRangeDays: number;
 }
 
@@ -570,7 +569,7 @@ export function SetupIntegrationForm({
     connectionTableName: integration,
     databaseName: 'default',
     enabledWorkflows: [],
-    refreshRangeDays: 0,
+    refreshRangeDays: 7,
   });
 
   const [template, setTemplate] = useState({
