@@ -791,11 +791,6 @@ define-properties@^1.1.3, define-properties@^1.2.0:
     has-property-descriptors "^1.0.0"
     object-keys "^1.1.1"
 
-devicon@^2.16.0:
-  version "2.17.0"
-  resolved "https://registry.yarnpkg.com/devicon/-/devicon-2.17.0.tgz#0473b8be45767b3483e63489ce07e3869c0d6113"
-  integrity sha512-2nKUdjobJlmRSaCHa50PGsVq0VDURnq9gVzQoJggsM/NKN0tLhC/Uq2zmy2pH36Q/1q3gvYwp/GjTgv/R0Ysbg==
-
 diff@5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/diff/-/diff-5.0.0.tgz#7ed6ad76d859d030787ec35855f5b1daf31d852b"
