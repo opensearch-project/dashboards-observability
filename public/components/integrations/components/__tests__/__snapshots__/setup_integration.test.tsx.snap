@@ -41,6 +41,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                             "databaseName": "default",
                             "displayName": "sample Integration",
                             "enabledWorkflows": Array [],
+                            "refreshRangeDays": 7,
                           }
                         }
                         handleSelectedDataSourceChange={[Function]}
@@ -118,6 +119,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                   "databaseName": "default",
                                   "displayName": "sample Integration",
                                   "enabledWorkflows": Array [],
+                                  "refreshRangeDays": 7,
                                 }
                               }
                               integration={
@@ -267,6 +269,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                                   "databaseName": "default",
                                   "displayName": "sample Integration",
                                   "enabledWorkflows": Array [],
+                                  "refreshRangeDays": 7,
                                 }
                               }
                               handleSelectedDataSourceChange={[Function]}
@@ -949,6 +952,7 @@ exports[`Integration Setup Page Renders integration setup page as expected 1`] =
                             "databaseName": "default",
                             "displayName": "sample Integration",
                             "enabledWorkflows": Array [],
+                            "refreshRangeDays": 7,
                           }
                         }
                         dataSourceMDSId=""
