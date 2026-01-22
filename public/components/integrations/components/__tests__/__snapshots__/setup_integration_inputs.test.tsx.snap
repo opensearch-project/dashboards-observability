@@ -2220,6 +2220,99 @@ exports[`Integration Setup Inputs Renders the query inputs 1`] = `
   <EuiCompressedFormRow
     describedByIds={Array []}
     display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText="Select the start date for the initial data to include. Data from this date to now will be loaded."
+    label="Initial Data Range"
+    labelType="label"
+  >
+    <div
+      className="euiFormRow euiFormRow--compressed"
+      id="random_html_id-row"
+    >
+      <div
+        className="euiFormRow__labelWrapper"
+      >
+        <EuiFormLabel
+          className="euiFormRow__label"
+          htmlFor="random_html_id"
+          isFocused={false}
+          type="label"
+        >
+          <label
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="random_html_id"
+          >
+            Initial Data Range
+          </label>
+        </EuiFormLabel>
+      </div>
+      <div
+        className="euiFormRow__fieldWrapper"
+      >
+        <EuiCompressedSwitch
+          checked={false}
+          label="Load all data (no time limit)"
+          onChange={[Function]}
+        >
+          <EuiSwitch
+            checked={false}
+            compressed={true}
+            label="Load all data (no time limit)"
+            onChange={[Function]}
+          >
+            <div
+              className="euiSwitch euiSwitch--primary euiSwitch--compressed"
+            >
+              <button
+                aria-checked={false}
+                aria-labelledby="random_html_id"
+                className="euiSwitch__button"
+                id="random_html_id"
+                onClick={[Function]}
+                role="switch"
+                type="button"
+              >
+                <span
+                  className="euiSwitch__body"
+                >
+                  <span
+                    className="euiSwitch__thumb"
+                  />
+                  <span
+                    className="euiSwitch__track"
+                  />
+                </span>
+              </button>
+              <span
+                className="euiSwitch__label"
+                id="random_html_id"
+                onClick={[Function]}
+              >
+                Load all data (no time limit)
+              </span>
+            </div>
+          </EuiSwitch>
+        </EuiCompressedSwitch>
+        <EuiFormHelpText
+          className="euiFormRow__text"
+          id="random_html_id-help-0"
+          key="Select the start date for the initial data to include. Data from this date to now will be loaded."
+        >
+          <div
+            className="euiFormHelpText euiFormRow__text"
+            id="random_html_id-help-0"
+          >
+            Select the start date for the initial data to include. Data from this date to now will be loaded.
+          </div>
+        </EuiFormHelpText>
+      </div>
+    </div>
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
     error={
       Array [
         "Must be a URL starting with 's3://'.",

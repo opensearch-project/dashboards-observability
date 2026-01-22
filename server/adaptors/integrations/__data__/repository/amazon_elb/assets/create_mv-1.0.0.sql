@@ -1,7 +1,8 @@
 CREATE MATERIALIZED VIEW {table_name}__mview AS
-SELECT
+SELECT * FROM (
+  SELECT
     type as `aws.elb.elb_type`,
-    time as `@timestamp`,
+    CAST(time AS TIMESTAMP) as `@timestamp`,
     time as `aws.elb.timestamp`,
     elb as `aws.elb.elb_name`,
     split_part (client_ip, ':', 1) as `communication.source.ip`,
@@ -49,8 +50,10 @@ SELECT
     lambda_error_reason as `aws.elb.lambda_error_reason`,
     classification as `aws.elb.classification`,
     classification_reason as `aws.elb.classification_reason`
-FROM
+  FROM
     {table_name}
+) AS subq
+{refresh_range_filter}
 WITH (
     auto_refresh = true,
     refresh_interval = '15 Minute',

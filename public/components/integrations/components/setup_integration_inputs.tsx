@@ -10,10 +10,13 @@ import {
   EuiCompressedFieldText,
   EuiCompressedFormRow,
   EuiCompressedSelect,
+  EuiCompressedSwitch,
+  EuiDatePicker,
   EuiForm,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { NotificationsStart, SavedObjectsStart } from '../../../../../../src/core/public';
 import { DataSourceManagementPluginSetup } from '../../../../../../src/plugins/data_source_management/public';
@@ -321,6 +324,30 @@ export function IntegrationQueryInputs({
   const [isBucketBlurred, setIsBucketBlurred] = useState(false);
   const [isCheckpointBlurred, setIsCheckpointBlurred] = useState(false);
 
+  // Calculate the start date from refreshRangeDays (days back from now)
+  const getStartDate = () => {
+    if (config.refreshRangeDays === 0) {
+      return null;
+    }
+    return moment().subtract(config.refreshRangeDays, 'days');
+  };
+
+  const handleDateChange = (date: moment.Moment | null) => {
+    if (date) {
+      const daysBack = moment().diff(date, 'days');
+      updateConfig({ refreshRangeDays: Math.max(0, daysBack) });
+    }
+  };
+
+  const handleNoLimitToggle = (checked: boolean) => {
+    if (checked) {
+      updateConfig({ refreshRangeDays: 0 });
+    } else {
+      // Default to 7 days when enabling time limit
+      updateConfig({ refreshRangeDays: 7 });
+    }
+  };
+
   return (
     <>
       <EuiCompressedFormRow
@@ -350,6 +377,31 @@ export function IntegrationQueryInputs({
             updateConfig({ databaseName: evt.target.value });
           }}
         />
+      </EuiCompressedFormRow>
+      <EuiCompressedFormRow
+        label="Initial Data Range"
+        helpText="Select the start date for the initial data to include. Data from this date to now will be loaded."
+      >
+        <>
+          <EuiCompressedSwitch
+            label="Load all data (no time limit)"
+            checked={config.refreshRangeDays === 0}
+            onChange={(e) => handleNoLimitToggle(e.target.checked)}
+          />
+          {config.refreshRangeDays > 0 && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiDatePicker
+                selected={getStartDate()}
+                onChange={handleDateChange}
+                maxDate={moment()}
+                showTimeSelect={false}
+                dateFormat="YYYY-MM-DD"
+                placeholder="Select start date"
+              />
+            </>
+          )}
+        </>
       </EuiCompressedFormRow>
       <EuiCompressedFormRow
         label="S3 Data Location"
