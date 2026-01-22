@@ -32,7 +32,9 @@ export function generateTimestampFilter(refreshRangeDays: number): string {
   const now = new Date();
   const startDate = new Date(now.getTime() - refreshRangeDays * 24 * 60 * 60 * 1000);
 
-  // Format as ISO-like string for SQL TIMESTAMP comparison
+  // Format as 'YYYY-MM-DD HH:mm:ss' for SQL TIMESTAMP comparison.
+  // Uses UTC which aligns with how source timestamps (Unix, ISO) are typically stored.
+  // This ensures consistent filtering since both @timestamp data and this filter use UTC.
   const isoString = startDate
     .toISOString()
     .replace('T', ' ')
