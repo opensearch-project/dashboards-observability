@@ -23,6 +23,10 @@
  * // Returns: "" (no filtering)
  */
 export function generateTimestampFilter(refreshRangeDays: number): string {
+  if (!Number.isInteger(refreshRangeDays) || refreshRangeDays < 0) {
+    throw new Error('refreshRangeDays must be a non-negative integer');
+  }
+
   // No filtering if refresh range is 0 (no limit)
   if (refreshRangeDays === 0) {
     return '';

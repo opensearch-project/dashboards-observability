@@ -79,20 +79,31 @@ describe('generateTimestampFilter', () => {
   });
 
   describe('edge cases', () => {
-    it('should handle negative values by returning a future date filter', () => {
-      // This tests the mathematical behavior - negative days would result in future dates
-      // The function doesn't explicitly guard against this
-      const result = generateTimestampFilter(-1);
-
-      // -1 day means 1 day in the future: 2026-01-23 12:00:00
-      expect(result).toBe("WHERE `@timestamp` >= '2026-01-23 12:00:00'");
-    });
-
     it('should handle large values', () => {
       const result = generateTimestampFilter(365);
 
       // 365 days before 2026-01-22 = 2025-01-22
       expect(result).toBe("WHERE `@timestamp` >= '2025-01-22 12:00:00'");
+    });
+  });
+
+  describe('input validation', () => {
+    it('should throw an error for negative values', () => {
+      expect(() => generateTimestampFilter(-1)).toThrow(
+        'refreshRangeDays must be a non-negative integer'
+      );
+    });
+
+    it('should throw an error for non-integer values', () => {
+      expect(() => generateTimestampFilter(7.5)).toThrow(
+        'refreshRangeDays must be a non-negative integer'
+      );
+    });
+
+    it('should throw an error for NaN', () => {
+      expect(() => generateTimestampFilter(NaN)).toThrow(
+        'refreshRangeDays must be a non-negative integer'
+      );
     });
   });
 });
