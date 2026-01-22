@@ -5,8 +5,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
-import { getTimeInSeconds } from '../utils/time_utils';
-import { QUERY_TOP_SERVICES_BY_FAULT_RATE } from '../../query_services/query_requests/promql_queries';
+import { getTimeInSeconds, calculateTimeRangeDuration } from '../utils/time_utils';
+import { getQueryTopServicesByFaultRateAvg } from '../../query_services/query_requests/promql_queries';
 import { useApmConfig } from '../../config/apm_config_context';
 
 export interface ServiceFaultRateItem {
@@ -67,6 +67,7 @@ export const useTopServicesByFaultRate = (
     () => ({
       startTime: getTimeInSeconds(params.startTime),
       endTime: getTimeInSeconds(params.endTime),
+      timeRange: calculateTimeRangeDuration(params.startTime, params.endTime),
       limit: params.limit || 5,
     }),
     [params.startTime, params.endTime, params.limit]
@@ -85,10 +86,10 @@ export const useTopServicesByFaultRate = (
       setError(null);
 
       try {
-        // Use the standardized query from promql_queries.ts
-        // This query calculates: topk(5, sum(fault) / sum(request))
+        // Use sum_over_time query for accurate total rate calculation
+        const query = getQueryTopServicesByFaultRateAvg(fetchParams.timeRange, fetchParams.limit);
         const response = await promqlSearchService.executeMetricRequest({
-          query: QUERY_TOP_SERVICES_BY_FAULT_RATE,
+          query,
           startTime: fetchParams.startTime,
           endTime: fetchParams.endTime,
         });
@@ -122,18 +123,11 @@ export const useTopServicesByFaultRate = (
                 series.metric?.service || series.metric?.service_name || 'unknown';
               const environment = series.metric?.environment || 'unknown';
 
-              // Handle both instant query (value) and range query (values) formats
+              // Instant query format: [timestamp, value]
+              // The query uses sum_over_time so it returns a single aggregated value
               let faultRate = 0;
               if (series.value && Array.isArray(series.value) && series.value.length > 1) {
-                // Instant query format: [timestamp, value]
                 faultRate = parseFloat(series.value[1]) || 0;
-              } else if (
-                series.values &&
-                Array.isArray(series.values) &&
-                series.values.length > 0
-              ) {
-                // Range query format: [[timestamp, value], ...]
-                faultRate = parseFloat(series.values[series.values.length - 1][1]) || 0;
               }
 
               services.push({

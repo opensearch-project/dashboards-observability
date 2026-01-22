@@ -118,6 +118,7 @@ export function navigateToServiceMap(_serviceName: string, _environment: string)
  * @param timeRange - The time range for the query
  * @param dataSourceId - Optional datasource ID
  * @param dataSourceTitle - Optional datasource title
+ * @param operationFilter - Optional operation name to filter by
  */
 export function navigateToExploreTraces(
   datasetId: string,
@@ -125,10 +126,14 @@ export function navigateToExploreTraces(
   serviceName: string,
   timeRange: TimeRange,
   dataSourceId?: string,
-  dataSourceTitle?: string
+  dataSourceTitle?: string,
+  operationFilter?: string
 ): void {
   // PPL query - URL encoded via encodeURIComponent
-  const pplQuery = `| where serviceName = "${serviceName}"`;
+  let pplQuery = `| where serviceName = "${serviceName}"`;
+  if (operationFilter) {
+    pplQuery += ` | where name = "${operationFilter}"`;
+  }
 
   // Build path using RISON format matching expected explore traces URL format
   // Note: Empty strings in RISON must be quoted as ''
@@ -204,6 +209,8 @@ export function navigateToSpanDetails(
  * @param timeRange - The time range for the query
  * @param dataSourceId - Optional datasource ID
  * @param dataSourceTitle - Optional datasource title
+ * @param traceIds - Optional array of trace IDs to filter by
+ * @param traceIdField - Optional field name for traceId (required when traceIds provided)
  */
 export function navigateToExploreLogs(
   datasetId: string,
@@ -212,10 +219,17 @@ export function navigateToExploreLogs(
   serviceNameField: string,
   timeRange: TimeRange,
   dataSourceId?: string,
-  dataSourceTitle?: string
+  dataSourceTitle?: string,
+  traceIds?: string[],
+  traceIdField?: string
 ): void {
   // PPL query - URL encoded via encodeURIComponent below
-  const pplQuery = `| where \`${serviceNameField}\` = "${serviceName}"`;
+  // Note: Use double quotes for string literals to avoid RISON single-quote conflicts
+  let pplQuery = `| where \`${serviceNameField}\` = "${serviceName}"`;
+  if (traceIds && traceIds.length > 0 && traceIdField) {
+    const traceIdList = traceIds.map((id) => `"${id}"`).join(', ');
+    pplQuery += ` | where \`${traceIdField}\` IN (${traceIdList})`;
+  }
 
   // Build path using RISON format matching expected explore logs URL format
   const dsTitle = dataSourceTitle ? dataSourceTitle : "''";

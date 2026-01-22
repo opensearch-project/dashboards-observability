@@ -5,8 +5,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
-import { getTimeInSeconds } from '../utils/time_utils';
-import { QUERY_TOP_DEPENDENCIES_BY_FAULT_RATE } from '../../query_services/query_requests/promql_queries';
+import { getTimeInSeconds, calculateTimeRangeDuration } from '../utils/time_utils';
+import { getQueryTopDependenciesByFaultRateAvg } from '../../query_services/query_requests/promql_queries';
 import { useApmConfig } from '../../config/apm_config_context';
 
 export interface DependencyFaultRateItem {
@@ -68,6 +68,7 @@ export const useTopDependenciesByFaultRate = (
     () => ({
       startTime: getTimeInSeconds(params.startTime),
       endTime: getTimeInSeconds(params.endTime),
+      timeRange: calculateTimeRangeDuration(params.startTime, params.endTime),
       limit: params.limit || 5,
     }),
     [params.startTime, params.endTime, params.limit]
@@ -86,10 +87,13 @@ export const useTopDependenciesByFaultRate = (
       setError(null);
 
       try {
-        // Use the standardized query from promql_queries.ts
-        // This query calculates: topk(5, sum(fault) / sum(request) by service, remote_service)
+        // Use sum_over_time query for accurate total rate calculation
+        const query = getQueryTopDependenciesByFaultRateAvg(
+          fetchParams.timeRange,
+          fetchParams.limit
+        );
         const response = await promqlSearchService.executeMetricRequest({
-          query: QUERY_TOP_DEPENDENCIES_BY_FAULT_RATE,
+          query,
           startTime: fetchParams.startTime,
           endTime: fetchParams.endTime,
         });
@@ -122,9 +126,12 @@ export const useTopDependenciesByFaultRate = (
             const target = series.metric.remoteService || 'unknown';
             const environment = series.metric.environment || 'unknown';
 
-            // Get the latest value from the time series (fault rate)
-            const values = series.values || [];
-            const faultRate = values.length > 0 ? parseFloat(values[values.length - 1][1]) : 0;
+            // Instant query format: [timestamp, value]
+            // The query uses sum_over_time so it returns a single aggregated value
+            let faultRate = 0;
+            if (series.value && Array.isArray(series.value) && series.value.length > 1) {
+              faultRate = parseFloat(series.value[1]) || 0;
+            }
 
             dependencies.push({
               source,

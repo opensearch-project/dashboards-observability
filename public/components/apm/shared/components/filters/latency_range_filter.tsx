@@ -17,10 +17,12 @@ export interface LatencyRangeFilterProps {
   max: number;
   /** Data test subject prefix */
   dataTestSubj?: string;
+  /** Disable the filter */
+  disabled?: boolean;
 }
 
 /**
- * LatencyRangeFilter - Dual range slider for filtering by P95 latency
+ * LatencyRangeFilter - Dual range slider for filtering by latency
  *
  * Designed for reuse across Services, Service Details, and Operations pages.
  */
@@ -30,6 +32,7 @@ export const LatencyRangeFilter: React.FC<LatencyRangeFilterProps> = ({
   min,
   max,
   dataTestSubj = 'latencyRangeFilter',
+  disabled = false,
 }) => {
   // Handle edge case where min === max (no range)
   const effectiveMax = min === max ? max + 1 : max;
@@ -47,7 +50,7 @@ export const LatencyRangeFilter: React.FC<LatencyRangeFilterProps> = ({
         onChange={(newValue) => onChange(newValue as [number, number])}
         showLabels
         compressed
-        disabled={min === max}
+        disabled={disabled || min === max}
         aria-label="Latency range filter"
         data-test-subj={dataTestSubj}
       />

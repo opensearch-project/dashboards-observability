@@ -38,6 +38,7 @@ export interface LogDatasetResult {
   displayName: string;
   title: string;
   serviceNameField: string;
+  traceIdField: string;
   logs: LogData[];
   loading: boolean;
   error?: Error;

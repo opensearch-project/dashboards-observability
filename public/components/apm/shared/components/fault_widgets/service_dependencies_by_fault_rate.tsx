@@ -16,81 +16,73 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { useTopDependenciesByFaultRate } from '../../hooks/use_top_dependencies_by_fault_rate';
+import { useServiceDependenciesByFaultRate } from '../../hooks/use_service_dependencies_by_fault_rate';
 import { TimeRange } from '../../../common/types/service_types';
 import { parseTimeRange } from '../../utils/time_utils';
 import { FaultRateCell, getRelativePercentage } from './fault_rate_cell';
-import { ServiceCell } from './service_cell';
 
 // i18n translations
 const i18nTexts = {
-  title: i18n.translate('observability.apm.faultWidgets.dependencies.title', {
-    defaultMessage: 'Top dependency paths by fault rate',
+  title: i18n.translate('observability.apm.faultWidgets.serviceDependencies.title', {
+    defaultMessage: 'Top dependencies by fault rate',
   }),
   columnDependencyService: i18n.translate(
-    'observability.apm.faultWidgets.dependencies.columnDependencyService',
+    'observability.apm.faultWidgets.serviceDependencies.columnDependencyService',
     {
       defaultMessage: 'Dependency service',
     }
   ),
-  columnService: i18n.translate('observability.apm.faultWidgets.dependencies.columnService', {
-    defaultMessage: 'Service',
-  }),
-  columnFaultRate: i18n.translate('observability.apm.faultWidgets.dependencies.columnFaultRate', {
-    defaultMessage: 'Fault rate',
-  }),
+  columnFaultRate: i18n.translate(
+    'observability.apm.faultWidgets.serviceDependencies.columnFaultRate',
+    {
+      defaultMessage: 'Fault rate',
+    }
+  ),
   prometheusRequired: i18n.translate(
-    'observability.apm.faultWidgets.dependencies.prometheusRequired',
+    'observability.apm.faultWidgets.serviceDependencies.prometheusRequired',
     {
       defaultMessage:
         'Prometheus connection required. Configure a Prometheus data source to view dependency fault rate metrics.',
     }
   ),
-  noData: i18n.translate('observability.apm.faultWidgets.dependencies.noData', {
+  noData: i18n.translate('observability.apm.faultWidgets.serviceDependencies.noData', {
     defaultMessage: 'No dependency fault rate data available',
   }),
 };
 
-export interface TopDependenciesByFaultRateProps {
+export interface ServiceDependenciesByFaultRateProps {
+  serviceName: string;
+  environment: string;
   timeRange: TimeRange;
   refreshTrigger?: number;
-  onServiceClick?: (serviceName: string, environment: string) => void;
-  onDependencyClick?: (
-    sourceService: string,
-    dependencyService: string,
-    environment: string
-  ) => void;
-  searchQuery?: string;
+  onDependencyClick?: (dependencyService: string) => void;
 }
 
 interface DependencyFaultRateItem {
-  source: string;
-  target: string;
-  sourceEnvironment: string;
+  remoteService: string;
   faultRate: number;
   relativePercentage: number;
-  sourceHref?: string;
 }
 
 /**
- * Widget displaying top service dependencies ranked by fault rate
- * Shows remote service -> calling service and fault rate percentage with progress bar
+ * Widget displaying top dependencies by fault rate for a specific service
+ * Shows only Remote Service and Fault Rate columns (service column removed since user already knows the service)
  */
-export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProps> = ({
+export const ServiceDependenciesByFaultRate: React.FC<ServiceDependenciesByFaultRateProps> = ({
+  serviceName,
+  environment,
   timeRange,
   refreshTrigger,
-  onServiceClick,
   onDependencyClick,
-  searchQuery,
 }) => {
-  // Parse time range using datemath for proper handling of all relative formats
-  // Recalculate when refreshTrigger changes to get fresh timestamps
+  // Parse time range using datemath for proper handling of relative dates
   const { startTime, endTime } = useMemo(() => {
     return parseTimeRange(timeRange);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeRange, refreshTrigger]);
+  }, [timeRange]);
 
-  const { data: dependencies, isLoading, error } = useTopDependenciesByFaultRate({
+  const { data: dependencies, isLoading, error } = useServiceDependenciesByFaultRate({
+    serviceName,
+    environment,
     startTime,
     endTime,
     limit: 5,
@@ -103,73 +95,37 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
       return [];
     }
 
-    // Filter by search query if provided
-    let filteredDependencies = dependencies;
-    if (searchQuery?.trim()) {
-      const query = searchQuery.toLowerCase().trim();
-      filteredDependencies = dependencies.filter(
-        (d) =>
-          d.source.toLowerCase().includes(query) ||
-          d.target.toLowerCase().includes(query) ||
-          d.environment.toLowerCase().includes(query)
-      );
-    }
-
     // Calculate sum for relative percentages
-    const faultRateSum = filteredDependencies.reduce((sum, d) => sum + d.faultRate, 0);
+    const faultRateSum = dependencies.reduce((sum, d) => sum + d.faultRate, 0);
 
-    return filteredDependencies.map((dep) => ({
-      source: dep.source,
-      target: dep.target,
-      sourceEnvironment: dep.environment,
+    return dependencies.map((dep) => ({
+      remoteService: dep.remoteService,
       faultRate: dep.faultRate,
       relativePercentage: getRelativePercentage(dep.faultRate, faultRateSum),
-      sourceHref: `#/service-details/${encodeURIComponent(dep.source)}/${encodeURIComponent(
-        dep.environment
-      )}`,
     }));
-  }, [dependencies, searchQuery]);
+  }, [dependencies]);
 
-  // Define table columns
+  // Define table columns - only 2 columns (no Service column)
   const columns: Array<EuiBasicTableColumn<DependencyFaultRateItem>> = [
     {
-      field: 'target',
+      field: 'remoteService',
       name: i18nTexts.columnDependencyService,
-      width: '30%',
+      width: '50%',
       truncateText: true,
-      render: (target: string, item: DependencyFaultRateItem) => (
+      render: (remoteService: string) => (
         <EuiLink
-          onClick={
-            onDependencyClick
-              ? () => onDependencyClick(item.source, target, item.sourceEnvironment)
-              : undefined
-          }
+          onClick={onDependencyClick ? () => onDependencyClick(remoteService) : undefined}
           style={{ cursor: onDependencyClick ? 'pointer' : 'default' }}
         >
           <EuiText size="s">
-            <strong>{target}</strong>
+            <strong>{remoteService}</strong>
           </EuiText>
         </EuiLink>
       ),
     },
     {
-      name: i18nTexts.columnService,
-      width: '30%',
-      truncateText: true,
-      render: (item: DependencyFaultRateItem) => (
-        <ServiceCell
-          service={item.source}
-          environment={item.sourceEnvironment}
-          href={item.sourceHref}
-          onClick={
-            onServiceClick ? () => onServiceClick(item.source, item.sourceEnvironment) : undefined
-          }
-        />
-      ),
-    },
-    {
       name: i18nTexts.columnFaultRate,
-      width: '40%',
+      width: '50%',
       render: (item: DependencyFaultRateItem) => (
         <FaultRateCell faultRate={item.faultRate} relativePercentage={item.relativePercentage} />
       ),
@@ -180,10 +136,10 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
     return (
       <EuiFlexItem>
         <EuiPanel>
-          <EuiText size="m">
+          <EuiText size="s">
             <h4>{i18nTexts.title}</h4>
           </EuiText>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="xs" />
           <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 150 }}>
             <EuiFlexItem grow={false}>
               <EuiLoadingSpinner size="l" />
@@ -202,16 +158,16 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
     return (
       <EuiFlexItem>
         <EuiPanel>
-          <EuiText size="m">
+          <EuiText size="s">
             <h4>{i18nTexts.title}</h4>
           </EuiText>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="xs" />
           <EuiText color="subdued" size="s">
             {isConfigError || isAuthError ? (
               <p>{i18nTexts.prometheusRequired}</p>
             ) : (
               <p>
-                {i18n.translate('observability.apm.faultWidgets.dependencies.error', {
+                {i18n.translate('observability.apm.faultWidgets.serviceDependencies.error', {
                   defaultMessage: 'Error loading dependency fault rate data: {errorMessage}',
                   values: { errorMessage: error.message },
                 })}
@@ -227,10 +183,10 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
     return (
       <EuiFlexItem>
         <EuiPanel>
-          <EuiText size="m">
+          <EuiText size="s">
             <h4>{i18nTexts.title}</h4>
           </EuiText>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="xs" />
           <EuiText color="subdued" size="s">
             <p>{i18nTexts.noData}</p>
           </EuiText>
@@ -242,10 +198,10 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
   return (
     <EuiFlexItem>
       <EuiPanel>
-        <EuiText size="m">
+        <EuiText size="s">
           <h4>{i18nTexts.title}</h4>
         </EuiText>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="xs" />
         <EuiBasicTable items={tableItems} columns={columns} tableLayout="auto" />
       </EuiPanel>
     </EuiFlexItem>

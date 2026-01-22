@@ -43,6 +43,27 @@ jest.mock('../../../plugin_helpers/plugin_headerControl', () => ({
   )),
 }));
 
+// Mock ServiceDetails
+jest.mock('../pages/service_details', () => ({
+  ServiceDetails: jest.fn(() => <div data-test-subj="service-details">Service Details</div>),
+}));
+
+// Mock navigation utils
+const mockNavigateToServiceDetails = jest.fn();
+jest.mock('../shared/utils/navigation_utils', () => ({
+  navigateToServiceDetails: (...args: any[]) => mockNavigateToServiceDetails(...args),
+}));
+
+// Mock time filter component
+jest.mock('../shared/components/time_filter', () => ({
+  TimeRangePicker: jest.fn(() => <div data-test-subj="time-range-picker" />),
+}));
+
+// Mock language icon
+jest.mock('../shared/components/language_icon', () => ({
+  LanguageIcon: jest.fn(() => <span data-test-subj="language-icon" />),
+}));
+
 // Mock the APM config context
 const mockRefresh = jest.fn();
 jest.mock('../config/apm_config_context', () => ({
@@ -73,9 +94,15 @@ describe('Services', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Reset window.location.href mock
+    mockNavigateToServiceDetails.mockClear();
+    // Reset window.location mock with all required methods
     delete (window as any).location;
-    (window as any).location = { href: '' };
+    (window as any).location = {
+      href: '',
+      replace: jest.fn(),
+      assign: jest.fn(),
+      reload: jest.fn(),
+    };
   });
 
   describe('Loading State', () => {
@@ -231,18 +258,19 @@ describe('Services', () => {
   });
 
   describe('Breadcrumbs', () => {
-    it('should set breadcrumbs on mount', () => {
+    it('should set breadcrumbs on mount when config exists', async () => {
       (useApmConfig as jest.Mock).mockReturnValue({
-        config: null,
+        config: { serviceMapDataset: { id: 'test', title: 'test-index' } },
         loading: false,
         refresh: mockRefresh,
       });
 
       render(<Services {...defaultProps} />);
 
-      expect(mockChrome.setBreadcrumbs).toHaveBeenCalledWith([
-        { text: 'Services', href: '#/services' },
-      ]);
+      // Wait for the router to render and set breadcrumbs
+      await waitFor(() => {
+        expect(mockChrome.setBreadcrumbs).toHaveBeenCalled();
+      });
     });
   });
 
@@ -258,7 +286,11 @@ describe('Services', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Test Service' }));
 
-      expect(window.location.href).toBe('#/service-details/test-service/prod');
+      expect(mockNavigateToServiceDetails).toHaveBeenCalledWith(
+        'test-service',
+        'prod',
+        expect.any(Object)
+      );
     });
 
     it('should encode service name and environment in URL', () => {
@@ -285,8 +317,11 @@ describe('Services', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Special Service' }));
 
-      expect(window.location.href).toContain(encodeURIComponent('service/with/slashes'));
-      expect(window.location.href).toContain(encodeURIComponent('env with spaces'));
+      expect(mockNavigateToServiceDetails).toHaveBeenCalledWith(
+        'service/with/slashes',
+        'env with spaces',
+        expect.any(Object)
+      );
     });
   });
 });

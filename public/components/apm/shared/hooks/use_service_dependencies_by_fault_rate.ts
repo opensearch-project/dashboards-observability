@@ -5,8 +5,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
-import { getTimeInSeconds } from '../utils/time_utils';
-import { getQueryTopDependenciesByFaultRate } from '../../query_services/query_requests/promql_queries';
+import { getTimeInSeconds, calculateTimeRangeDuration } from '../utils/time_utils';
+import { getQueryServiceDependenciesByFaultRateAvg } from '../../query_services/query_requests/promql_queries';
 import { useApmConfig } from '../../config/apm_config_context';
 
 export interface ServiceDependencyFaultRateItem {
@@ -33,8 +33,8 @@ export interface UseServiceDependenciesByFaultRateResult {
 /**
  * Hook for fetching top dependencies by fault rate for a specific service
  *
- * Uses getQueryTopDependenciesByFaultRate to filter dependencies for the
- * specified service only. Returns data grouped by remoteService.
+ * Uses getQueryServiceDependenciesByFaultRateAvg with sum_over_time for accurate
+ * total rate calculation. Returns data grouped by remoteService.
  *
  * @example
  * const { data, isLoading } = useServiceDependenciesByFaultRate({
@@ -68,6 +68,7 @@ export const useServiceDependenciesByFaultRate = (
     () => ({
       startTime: getTimeInSeconds(params.startTime),
       endTime: getTimeInSeconds(params.endTime),
+      timeRange: calculateTimeRangeDuration(params.startTime, params.endTime),
       limit: params.limit || 5,
     }),
     [params.startTime, params.endTime, params.limit]
@@ -93,8 +94,12 @@ export const useServiceDependenciesByFaultRate = (
       setError(null);
 
       try {
-        // Use service-specific query that filters by serviceName and environment
-        const query = getQueryTopDependenciesByFaultRate(params.environment, params.serviceName);
+        // Use sum_over_time query for accurate total rate calculation
+        const query = getQueryServiceDependenciesByFaultRateAvg(
+          params.environment,
+          params.serviceName,
+          fetchParams.timeRange
+        );
 
         const response = await promqlSearchService.executeMetricRequest({
           query,
@@ -122,9 +127,12 @@ export const useServiceDependenciesByFaultRate = (
           response.data.result.forEach((series: any) => {
             const remoteService = series.metric.remoteService || 'unknown';
 
-            // Get the latest value from the time series (fault rate)
-            const values = series.values || [];
-            const faultRate = values.length > 0 ? parseFloat(values[values.length - 1][1]) : 0;
+            // Instant query format: [timestamp, value]
+            // The query uses sum_over_time so it returns a single aggregated value
+            let faultRate = 0;
+            if (series.value && Array.isArray(series.value) && series.value.length > 1) {
+              faultRate = parseFloat(series.value[1]) || 0;
+            }
 
             dependencies.push({
               remoteService,

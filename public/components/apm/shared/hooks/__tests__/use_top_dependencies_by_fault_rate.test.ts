@@ -14,6 +14,12 @@ jest.mock('../../../query_services/promql_search_service', () => ({
   })),
 }));
 
+// Mock time_utils
+jest.mock('../../utils/time_utils', () => ({
+  getTimeInSeconds: jest.fn((date) => Math.floor(date.getTime() / 1000)),
+  calculateTimeRangeDuration: jest.fn(() => '1h'),
+}));
+
 // Mock the APM config context
 const mockConfig = {
   prometheusDataSource: {
@@ -168,13 +174,13 @@ describe('useTopDependenciesByFaultRate', () => {
   });
 
   describe('Prometheus response formats', () => {
-    it('should handle standard Prometheus result format', async () => {
+    it('should handle standard Prometheus result format with instant query', async () => {
       mockExecuteMetricRequest.mockResolvedValue({
         data: {
           result: [
             {
               metric: { service: 'api-gateway', remoteService: 'database', environment: 'prod' },
-              values: [[1704067200, '0.25']],
+              value: [1704067200, '0.25'],
             },
           ],
         },
@@ -190,30 +196,6 @@ describe('useTopDependenciesByFaultRate', () => {
       expect(result.current.data[0].source).toBe('api-gateway');
       expect(result.current.data[0].target).toBe('database');
       expect(result.current.data[0].faultRate).toBe(0.25);
-    });
-
-    it('should use last value from range query', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({
-        data: {
-          result: [
-            {
-              metric: { service: 'svc', remoteService: 'dep', environment: 'prod' },
-              values: [
-                [1704067200, '0.10'],
-                [1704070800, '0.30'], // Last value
-              ],
-            },
-          ],
-        },
-      });
-
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useTopDependenciesByFaultRate(defaultParams)
-      );
-
-      await waitForNextUpdate();
-
-      expect(result.current.data[0].faultRate).toBe(0.3);
     });
   });
 

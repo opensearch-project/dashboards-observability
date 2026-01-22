@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 
 export interface ColoredThresholdLabelProps {
   threshold: string;
@@ -27,7 +28,7 @@ export const ColoredThresholdLabel: React.FC<ColoredThresholdLabelProps> = ({
           height: 10,
           borderRadius: '50%',
           backgroundColor: color,
-          border: '1px solid rgba(0,0,0,0.1)',
+          border: `1px solid ${euiThemeVars.euiColorLightShade}`,
           flexShrink: 0,
         }}
       />
