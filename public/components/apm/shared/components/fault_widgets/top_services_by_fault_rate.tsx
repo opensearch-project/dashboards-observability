@@ -24,13 +24,13 @@ import { ServiceCell } from './service_cell';
 // i18n translations
 const i18nTexts = {
   title: i18n.translate('observability.apm.faultWidgets.services.title', {
-    defaultMessage: 'Top Services by Fault Rate',
+    defaultMessage: 'Top services by fault rate',
   }),
   columnService: i18n.translate('observability.apm.faultWidgets.services.columnService', {
     defaultMessage: 'Service',
   }),
   columnFaultRate: i18n.translate('observability.apm.faultWidgets.services.columnFaultRate', {
-    defaultMessage: 'Fault Rate',
+    defaultMessage: 'Fault rate',
   }),
   prometheusRequired: i18n.translate('observability.apm.faultWidgets.services.prometheusRequired', {
     defaultMessage:

@@ -37,7 +37,7 @@ const i18nTexts = {
     defaultMessage: 'Service',
   }),
   columnFaultRate: i18n.translate('observability.apm.faultWidgets.dependencies.columnFaultRate', {
-    defaultMessage: 'Fault Rate',
+    defaultMessage: 'Fault rate',
   }),
   prometheusRequired: i18n.translate(
     'observability.apm.faultWidgets.dependencies.prometheusRequired',

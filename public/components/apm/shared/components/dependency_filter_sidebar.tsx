@@ -18,48 +18,10 @@ import {
   EuiHorizontalRule,
   EuiDualRange,
 } from '@elastic/eui';
+import { ColoredThresholdLabel, getThemeAwareThresholdColor } from './filters';
 
 // Initial item count for checkbox lists (matching services home)
 const INITIAL_ITEM_LIMIT = 5;
-
-// Color indicator helper for threshold filters
-const getThresholdColor = (threshold: string, type: 'availability' | 'errorRate'): string => {
-  if (type === 'availability') {
-    if (threshold === '< 95%') return '#BD271E'; // danger
-    if (threshold === '95-99%') return '#F5A700'; // warning
-    if (threshold === '≥ 99%') return '#017D73'; // success
-  } else {
-    // For error rates, low is good
-    if (threshold === '> 5%') return '#BD271E'; // danger
-    if (threshold === '1-5%') return '#F5A700'; // warning
-    if (threshold === '< 1%') return '#017D73'; // success
-  }
-  return '#69707D'; // default subdued gray
-};
-
-// Colored label component for threshold checkboxes
-const ColoredThresholdLabel: React.FC<{ threshold: string; color: string }> = ({
-  threshold,
-  color,
-}) => (
-  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-    <EuiFlexItem grow={false}>
-      <div
-        style={{
-          width: 10,
-          height: 10,
-          borderRadius: '50%',
-          backgroundColor: color,
-          border: '1px solid rgba(0,0,0,0.1)',
-          flexShrink: 0,
-        }}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText size="s">{threshold}</EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
 
 export interface DependencyFilterSidebarProps {
   // Availability threshold filter
@@ -167,7 +129,7 @@ export const DependencyFilterSidebar: React.FC<DependencyFilterSidebarProps> = (
       label: (
         <ColoredThresholdLabel
           threshold={threshold}
-          color={getThresholdColor(threshold, 'availability')}
+          color={getThemeAwareThresholdColor(threshold, 'availability')}
         />
       ),
     }));
@@ -203,7 +165,7 @@ export const DependencyFilterSidebar: React.FC<DependencyFilterSidebarProps> = (
       label: (
         <ColoredThresholdLabel
           threshold={threshold}
-          color={getThresholdColor(threshold, 'errorRate')}
+          color={getThemeAwareThresholdColor(threshold, 'errorRate')}
         />
       ),
     }));
@@ -538,12 +500,12 @@ export const DependencyFilterSidebar: React.FC<DependencyFilterSidebarProps> = (
 
       <EuiHorizontalRule margin="xs" />
 
-      {/* Error Rate Threshold */}
+      {/* Error rate threshold */}
       <EuiAccordion
         id="errorRateThresholdAccordion"
         buttonContent={
           <EuiText size="xs">
-            <strong>Error Rate</strong>
+            <strong>Error rate</strong>
           </EuiText>
         }
         initialIsOpen={true}

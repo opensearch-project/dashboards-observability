@@ -6,7 +6,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { EuiCheckboxGroup } from '@elastic/eui';
 import { ColoredThresholdLabel } from './colored_threshold_label';
-import { FAILURE_RATE_THRESHOLDS, getThresholdColor } from './filter_utils';
+import { FAILURE_RATE_THRESHOLDS, getThemeAwareThresholdColor } from './filter_utils';
 
 export interface FailureRateThresholdFilterProps {
   /** Currently selected thresholds */
@@ -39,7 +39,12 @@ export const FailureRateThresholdFilter: React.FC<FailureRateThresholdFilterProp
   const checkboxOptions = useMemo(() => {
     return FAILURE_RATE_THRESHOLDS.map((threshold) => ({
       id: `failure-rate-${threshold}`,
-      label: <ColoredThresholdLabel threshold={threshold} color={getThresholdColor(threshold)} />,
+      label: (
+        <ColoredThresholdLabel
+          threshold={threshold}
+          color={getThemeAwareThresholdColor(threshold, 'errorRate')}
+        />
+      ),
     }));
   }, []);
 

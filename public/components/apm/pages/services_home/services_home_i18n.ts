@@ -20,13 +20,13 @@ export const servicesI18nTexts = {
       defaultMessage: 'Environment',
     }),
     latencyP99: i18n.translate('observability.apm.services.table.latencyP99', {
-      defaultMessage: 'Avg. Latency',
+      defaultMessage: 'Avg. latency',
     }),
     throughput: i18n.translate('observability.apm.services.table.throughput', {
-      defaultMessage: 'Avg. Throughput',
+      defaultMessage: 'Avg. throughput',
     }),
     failureRatio: i18n.translate('observability.apm.services.table.failureRatio', {
-      defaultMessage: 'Avg. Failure Rate',
+      defaultMessage: 'Avg. failure ratio',
     }),
     actions: i18n.translate('observability.apm.services.table.actions', {
       defaultMessage: 'Correlations',
@@ -88,7 +88,7 @@ export const servicesI18nTexts = {
       defaultMessage: 'Throughput',
     }),
     failureRatio: i18n.translate('observability.apm.services.filters.failureRatio', {
-      defaultMessage: 'Failure Ratio',
+      defaultMessage: 'Failure ratio',
     }),
     attributes: i18n.translate('observability.apm.services.filters.attributes', {
       defaultMessage: 'Attributes',

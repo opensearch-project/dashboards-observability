@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { euiThemeVars } from '@osd/ui-shared-deps/theme';
+
 /**
  * Available failure rate threshold options
  */
@@ -10,16 +12,36 @@ export const FAILURE_RATE_THRESHOLDS = ['< 1%', '1-5%', '> 5%'] as const;
 export type FailureRateThreshold = typeof FAILURE_RATE_THRESHOLDS[number];
 
 /**
- * Get color for failure rate threshold (SLO-style coloring)
- * - Low failure rate (< 1%) = green (success)
- * - Medium failure rate (1-5%) = yellow (warning)
- * - High failure rate (> 5%) = red (danger)
+ * Available availability threshold options
  */
-export const getThresholdColor = (threshold: string): string => {
-  if (threshold === '> 5%') return '#BD271E'; // danger
-  if (threshold === '1-5%') return '#F5A700'; // warning
-  if (threshold === '< 1%') return '#017D73'; // success
-  return '#69707D'; // default subdued gray
+export const AVAILABILITY_THRESHOLDS = ['< 95%', '95-99%', '≥ 99%'] as const;
+export type AvailabilityThreshold = typeof AVAILABILITY_THRESHOLDS[number];
+
+/**
+ * Get theme-aware color for threshold filters
+ * Supports both availability and error rate thresholds with proper dark/light mode colors
+ * Uses euiThemeVars which automatically adapts to the current theme
+ *
+ * @param threshold - The threshold string (e.g., '< 95%', '> 5%')
+ * @param type - The type of threshold ('availability' or 'errorRate')
+ * @returns The appropriate color from the theme
+ */
+export const getThemeAwareThresholdColor = (
+  threshold: string,
+  type: 'availability' | 'errorRate'
+): string => {
+  if (type === 'availability') {
+    // For availability, high is good (green), low is bad (red)
+    if (threshold === '< 95%') return euiThemeVars.euiColorDanger;
+    if (threshold === '95-99%') return euiThemeVars.euiColorWarning;
+    if (threshold === '≥ 99%') return euiThemeVars.euiColorSuccess;
+  } else {
+    // For error rates, low is good (green), high is bad (red)
+    if (threshold === '> 5%') return euiThemeVars.euiColorDanger;
+    if (threshold === '1-5%') return euiThemeVars.euiColorWarning;
+    if (threshold === '< 1%') return euiThemeVars.euiColorSuccess;
+  }
+  return euiThemeVars.euiColorMediumShade;
 };
 
 /**

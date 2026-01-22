@@ -6,6 +6,7 @@
 import React, { useRef, useEffect } from 'react';
 import { EuiLoadingChart, EuiText } from '@elastic/eui';
 import * as echarts from 'echarts';
+import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 
 export interface MetricDataPoint {
   timestamp: number;
@@ -42,7 +43,7 @@ const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
  * @param data - Array of metric data points with timestamp and value
  * @param isLoading - Show loading chart
  * @param isError - Show error state ("-")
- * @param color - Line color (default: #54B399 - OUI vis color)
+ * @param color - Line color (default: euiColorVis0 - theme-aware)
  * @param height - Chart height in pixels (default: 20)
  * @param width - Chart width in pixels (optional, defaults to 100%)
  */
@@ -50,7 +51,7 @@ export const MetricSparkline: React.FC<MetricSparklineProps> = ({
   data,
   isLoading = false,
   isError = false,
-  color = '#54B399',
+  color = euiThemeVars.euiColorVis0,
   height = 20,
   width,
 }) => {

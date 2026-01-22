@@ -36,6 +36,7 @@ import { parseTimeRange } from '../../shared/utils/time_utils';
 import { DependencyFilterSidebar } from '../../shared/components/dependency_filter_sidebar';
 import { ActiveFilterBadges, FilterBadge } from '../../shared/components/active_filter_badges';
 import { formatCount, formatLatency } from '../../common/format_utils';
+import { useDebouncedValue } from '../../shared/hooks/use_debounced_value';
 
 // Filter threshold constants
 const AVAILABILITY_THRESHOLDS = ['< 95%', '95-99%', '≥ 99%'];
@@ -171,6 +172,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
 
   // Search and latency selector state
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebouncedValue(searchQuery, 150);
   const [latencyPercentile, setLatencyPercentile] = useState<'p99' | 'p90' | 'p50'>('p99');
 
   // Range filter states
@@ -259,8 +261,9 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   const textFilteredDependencies = useMemo(() => {
     return dependencies.filter((dep) => {
       // Search filter - matches serviceName, remoteOperation, and serviceOperations
-      if (searchQuery) {
-        const searchLower = searchQuery.toLowerCase();
+      // Using debounced value for performance with large datasets
+      if (debouncedSearchQuery) {
+        const searchLower = debouncedSearchQuery.toLowerCase();
         const matchesServiceName = dep.serviceName.toLowerCase().includes(searchLower);
         const matchesRemoteOp = dep.remoteOperation?.toLowerCase().includes(searchLower);
         const matchesServiceOps = dep.serviceOperations?.some((op) =>
@@ -314,7 +317,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     });
   }, [
     dependencies,
-    searchQuery,
+    debouncedSearchQuery,
     selectedDependencies,
     selectedRemoteOperations,
     selectedServiceOperations,
@@ -348,13 +351,36 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   }, [textFilteredDependencies]);
 
   // Step 3: Reset slider ranges when bounds change
+  // Use functional update to prevent unnecessary re-renders when values haven't changed
   useEffect(() => {
-    setLatencyRange([latencyBounds.min, latencyBounds.max]);
+    setLatencyRange((prev) => {
+      if (prev[0] === latencyBounds.min && prev[1] === latencyBounds.max) {
+        return prev; // Return same reference to avoid re-render
+      }
+      return [latencyBounds.min, latencyBounds.max];
+    });
   }, [latencyBounds.min, latencyBounds.max]);
 
   useEffect(() => {
-    setRequestsRange([requestsBounds.min, requestsBounds.max]);
+    setRequestsRange((prev) => {
+      if (prev[0] === requestsBounds.min && prev[1] === requestsBounds.max) {
+        return prev; // Return same reference to avoid re-render
+      }
+      return [requestsBounds.min, requestsBounds.max];
+    });
   }, [requestsBounds.min, requestsBounds.max]);
+
+  // Cleanup expanded rows when dependencies list changes to remove stale entries
+  useEffect(() => {
+    if (dependencies.length === 0) return;
+    const currentKeys = new Set(
+      dependencies.map((dep) => `${dep.serviceName}:${dep.remoteOperation}`)
+    );
+    setExpandedRows((prev) => {
+      const cleaned = new Set([...prev].filter((key) => currentKeys.has(key)));
+      return cleaned.size === prev.size ? prev : cleaned;
+    });
+  }, [dependencies]);
 
   // Step 4: Apply metric filters (latency, requests ranges) on top of text-filtered data
   const filteredDependencies = useMemo(() => {

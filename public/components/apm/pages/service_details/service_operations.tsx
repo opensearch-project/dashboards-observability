@@ -39,6 +39,7 @@ import { ActiveFilterBadges, FilterBadge } from '../../shared/components/active_
 import { formatCount, formatLatency } from '../../common/format_utils';
 import { navigateToServiceDetails } from '../../shared/utils/navigation_utils';
 import { ServiceCorrelationsFlyout } from '../../shared/components/service_correlations_flyout';
+import { useDebouncedValue } from '../../shared/hooks/use_debounced_value';
 
 // Filter threshold constants
 const AVAILABILITY_THRESHOLDS = ['< 95%', '95-99%', '≥ 99%'];
@@ -149,6 +150,7 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
 
   // Search and latency selector states
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebouncedValue(searchQuery, 150);
   const [latencyPercentile, setLatencyPercentile] = useState<'p99' | 'p90' | 'p50'>('p99');
 
   // Flyout state for viewing correlated spans/logs
@@ -226,9 +228,9 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
   // These are used to compute dynamic bounds for sliders
   const textFilteredOperations = useMemo(() => {
     return operations.filter((op) => {
-      // Search query filter
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase().trim();
+      // Search query filter (using debounced value for performance)
+      if (debouncedSearchQuery.trim()) {
+        const query = debouncedSearchQuery.toLowerCase().trim();
         if (!op.operationName.toLowerCase().includes(query)) {
           return false;
         }
@@ -259,7 +261,7 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
     });
   }, [
     operations,
-    searchQuery,
+    debouncedSearchQuery,
     selectedOperations,
     selectedAvailabilityThresholds,
     selectedErrorRateThresholds,
@@ -288,13 +290,34 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
   }, [textFilteredOperations]);
 
   // Step 3: Reset slider ranges when bounds change
+  // Use functional update to prevent unnecessary re-renders when values haven't changed
   useEffect(() => {
-    setLatencyRange([latencyBounds.min, latencyBounds.max]);
+    setLatencyRange((prev) => {
+      if (prev[0] === latencyBounds.min && prev[1] === latencyBounds.max) {
+        return prev; // Return same reference to avoid re-render
+      }
+      return [latencyBounds.min, latencyBounds.max];
+    });
   }, [latencyBounds.min, latencyBounds.max]);
 
   useEffect(() => {
-    setRequestsRange([requestsBounds.min, requestsBounds.max]);
+    setRequestsRange((prev) => {
+      if (prev[0] === requestsBounds.min && prev[1] === requestsBounds.max) {
+        return prev; // Return same reference to avoid re-render
+      }
+      return [requestsBounds.min, requestsBounds.max];
+    });
   }, [requestsBounds.min, requestsBounds.max]);
+
+  // Cleanup expanded rows when operations list changes to remove stale entries
+  useEffect(() => {
+    if (operations.length === 0) return;
+    const currentOpNames = new Set(operations.map((op) => op.operationName));
+    setExpandedRows((prev) => {
+      const cleaned = new Set([...prev].filter((name) => currentOpNames.has(name)));
+      return cleaned.size === prev.size ? prev : cleaned;
+    });
+  }, [operations]);
 
   // Step 4: Apply metric filters (latency, requests ranges) on top of text-filtered data
   const filteredOperations = useMemo(() => {

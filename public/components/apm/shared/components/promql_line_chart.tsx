@@ -120,7 +120,7 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
       chartInstance.current.showLoading({
         text: '',
         spinnerRadius: 10,
-        color: '#006BB4',
+        color: euiThemeVars.euiColorPrimary,
         maskColor: 'rgba(255, 255, 255, 0.1)',
       });
       return;

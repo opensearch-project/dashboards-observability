@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { euiThemeVars } from '@osd/ui-shared-deps/theme';
+
 /**
  * App ID for Explore application used in navigation
  */
@@ -23,15 +25,15 @@ export const APM_CONSTANTS = {
   SPARKLINE_HEIGHT: 20,
   SPARKLINE_WIDTH: 100,
 
-  // Colors for metrics
+  // Colors for metrics (using EUI theme variables for dark/light mode support)
   COLORS: {
-    LATENCY: '#6092C0',
-    THROUGHPUT: '#54B399',
-    FAILURE_RATE: '#D36086',
-    ERROR: '#D36086',
-    FAULT: '#BD271E',
-    SUCCESS: '#54B399',
-    WARNING: '#D6BF57',
+    LATENCY: euiThemeVars.euiColorVis1,
+    THROUGHPUT: euiThemeVars.euiColorVis0,
+    FAILURE_RATE: euiThemeVars.euiColorVis2,
+    ERROR: euiThemeVars.euiColorVis2,
+    FAULT: euiThemeVars.euiColorDanger,
+    SUCCESS: euiThemeVars.euiColorVis0,
+    WARNING: euiThemeVars.euiColorVis5,
   },
 
   // Query limits for fetching data
@@ -90,19 +92,20 @@ export const SERVICE_DETAILS_CONSTANTS = {
 
 /**
  * Chart colors for multi-series line charts
+ * Using EUI theme visualization colors for dark/light mode support
  */
 export const CHART_COLORS = [
-  '#54B399', // Green
-  '#6092C0', // Blue
-  '#D36086', // Pink
-  '#9170B8', // Purple
-  '#CA8EAE', // Light Pink
-  '#D6BF57', // Yellow
-  '#B9A888', // Tan
-  '#DA8B45', // Orange
-  '#AA6556', // Brown
-  '#E7664C', // Red-Orange
-] as const;
+  euiThemeVars.euiColorVis0, // Green
+  euiThemeVars.euiColorVis1, // Blue
+  euiThemeVars.euiColorVis2, // Pink
+  euiThemeVars.euiColorVis3, // Purple
+  euiThemeVars.euiColorVis4, // Light Pink
+  euiThemeVars.euiColorVis5, // Yellow
+  euiThemeVars.euiColorVis6, // Tan
+  euiThemeVars.euiColorVis7, // Orange
+  euiThemeVars.euiColorVis8, // Brown
+  euiThemeVars.euiColorVis9, // Red-Orange
+];
 
 /**
  * Maps uppercase platform type to display key for environment filter

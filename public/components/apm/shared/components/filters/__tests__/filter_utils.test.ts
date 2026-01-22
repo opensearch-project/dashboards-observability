@@ -5,37 +5,26 @@
 
 import {
   FAILURE_RATE_THRESHOLDS,
-  getThresholdColor,
+  AVAILABILITY_THRESHOLDS,
+  getThemeAwareThresholdColor,
   matchesFailureRateThreshold,
   matchesAnyFailureRateThreshold,
 } from '../filter_utils';
+
+// Mock euiThemeVars for testing
+jest.mock('@osd/ui-shared-deps/theme', () => ({
+  euiThemeVars: {
+    euiColorDanger: '#FF0000',
+    euiColorWarning: '#FFFF00',
+    euiColorSuccess: '#00FF00',
+    euiColorMediumShade: '#888888',
+  },
+}));
 
 describe('filter_utils', () => {
   describe('FAILURE_RATE_THRESHOLDS', () => {
     it('should have correct threshold values', () => {
       expect(FAILURE_RATE_THRESHOLDS).toEqual(['< 1%', '1-5%', '> 5%']);
-    });
-  });
-
-  describe('getThresholdColor', () => {
-    it('should return danger color for > 5%', () => {
-      expect(getThresholdColor('> 5%')).toBe('#BD271E');
-    });
-
-    it('should return warning color for 1-5%', () => {
-      expect(getThresholdColor('1-5%')).toBe('#F5A700');
-    });
-
-    it('should return success color for < 1%', () => {
-      expect(getThresholdColor('< 1%')).toBe('#017D73');
-    });
-
-    it('should return subdued gray for unknown threshold', () => {
-      expect(getThresholdColor('unknown')).toBe('#69707D');
-    });
-
-    it('should return subdued gray for empty string', () => {
-      expect(getThresholdColor('')).toBe('#69707D');
     });
   });
 
@@ -152,6 +141,50 @@ describe('filter_utils', () => {
       // Exactly 5% - only matches '1-5%'
       expect(matchesAnyFailureRateThreshold(5, ['> 5%'])).toBe(false);
       expect(matchesAnyFailureRateThreshold(5, ['1-5%'])).toBe(true);
+    });
+  });
+
+  describe('AVAILABILITY_THRESHOLDS', () => {
+    it('should have correct threshold values', () => {
+      expect(AVAILABILITY_THRESHOLDS).toEqual(['< 95%', '95-99%', '≥ 99%']);
+    });
+  });
+
+  describe('getThemeAwareThresholdColor', () => {
+    describe('availability thresholds', () => {
+      it('should return danger color for < 95%', () => {
+        expect(getThemeAwareThresholdColor('< 95%', 'availability')).toBe('#FF0000');
+      });
+
+      it('should return warning color for 95-99%', () => {
+        expect(getThemeAwareThresholdColor('95-99%', 'availability')).toBe('#FFFF00');
+      });
+
+      it('should return success color for ≥ 99%', () => {
+        expect(getThemeAwareThresholdColor('≥ 99%', 'availability')).toBe('#00FF00');
+      });
+
+      it('should return medium shade for unknown threshold', () => {
+        expect(getThemeAwareThresholdColor('unknown', 'availability')).toBe('#888888');
+      });
+    });
+
+    describe('errorRate thresholds', () => {
+      it('should return danger color for > 5%', () => {
+        expect(getThemeAwareThresholdColor('> 5%', 'errorRate')).toBe('#FF0000');
+      });
+
+      it('should return warning color for 1-5%', () => {
+        expect(getThemeAwareThresholdColor('1-5%', 'errorRate')).toBe('#FFFF00');
+      });
+
+      it('should return success color for < 1%', () => {
+        expect(getThemeAwareThresholdColor('< 1%', 'errorRate')).toBe('#00FF00');
+      });
+
+      it('should return medium shade for unknown threshold', () => {
+        expect(getThemeAwareThresholdColor('unknown', 'errorRate')).toBe('#888888');
+      });
     });
   });
 });
