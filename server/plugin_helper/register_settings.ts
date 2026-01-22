@@ -146,11 +146,11 @@ export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSet
       name: i18n.translate('observability.apmEnabled.name', {
         defaultMessage: 'Enable APM',
       }),
-      value: false,
+      value: true,
       category: ['Observability'],
       description: i18n.translate('observability.apmEnabled.description', {
         defaultMessage:
-          'Enable the APM (Application Performance Monitoring) feature. When enabled, APM services, service map, and diagnostics pages replace trace analytics pages in the navigation. Note: This feature requires Multi Data Source (MDS) to be enabled.',
+          'Enable the APM (Application Performance Monitoring) feature. When enabled, APM Services and Application Map pages are available in the navigation. Note: This feature requires Multi Data Source (MDS) to be enabled.',
       }),
       schema: schema.boolean(),
       requiresPageReload: true,

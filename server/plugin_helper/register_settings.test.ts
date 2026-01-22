@@ -24,7 +24,7 @@ describe('registerObservabilityUISettings', () => {
 
     expect(apmSettingCall).toBeDefined();
     expect(apmSettingCall[0][APM_ENABLED_SETTING]).toMatchObject({
-      value: false,
+      value: true,
       category: ['Observability'],
       requiresPageReload: true,
     });
