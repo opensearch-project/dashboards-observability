@@ -27,7 +27,7 @@ import { SQLService } from '../../../../public/services/requests/sql';
 import { coreRefs } from '../../../framework/core_refs';
 import { addIntegrationRequest } from './create_integration_helpers';
 import { SetupIntegrationFormInputs } from './setup_integration_inputs';
-import { generateTimestampFilter } from './integraiton_timefield_strategies';
+import { generateTimestampFilter } from './integration_timefield_strategies';
 
 /**
  * Configuration inputs for integration setup

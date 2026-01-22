@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { generateTimestampFilter } from '../integraiton_timefield_strategies';
+import { generateTimestampFilter } from '../integration_timefield_strategies';
 
 describe('generateTimestampFilter', () => {
   beforeEach(() => {
