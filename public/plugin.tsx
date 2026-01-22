@@ -189,7 +189,6 @@ export class ObservabilityPlugin
   private mdsFlagStatus: boolean = false;
   private apmEnabled: boolean = false;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private apmAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   public async setup(
     core: CoreSetup<AppPluginStartDependencies>,
@@ -418,7 +417,6 @@ export class ObservabilityPlugin
           category: APPLICATION_MONITORING_CATEGORY,
           order: observabilityApmServicesPluginOrder,
           mount: appMountWithStartPage('apm-services', '/services'),
-          updater$: this.apmAppUpdater$,
         });
 
         core.application.register({
@@ -427,7 +425,6 @@ export class ObservabilityPlugin
           category: APPLICATION_MONITORING_CATEGORY,
           order: observabilityApmApplicationMapPluginOrder,
           mount: appMountWithStartPage('apm-application-map', '/application-map'),
-          updater$: this.apmAppUpdater$,
         });
       } else {
         // Trace Analytics Mode - register trace analytics applications
@@ -529,15 +526,6 @@ export class ObservabilityPlugin
 
     if (core.application.capabilities.investigation?.enabled) {
       this.appUpdater$.next(() => ({
-        navLinkStatus: AppNavLinkStatus.hidden,
-      }));
-    }
-
-    // Check if explore/traces is enabled by looking for its nav link
-    const exploreTracesNavLink = core.chrome.navLinks.get('explore/traces');
-    if (!exploreTracesNavLink && this.mdsFlagStatus && this.apmEnabled) {
-      // Hide APM apps since explore traces is not enabled
-      this.apmAppUpdater$.next(() => ({
         navLinkStatus: AppNavLinkStatus.hidden,
       }));
     }
