@@ -1,6 +1,7 @@
 CREATE MATERIALIZED VIEW {table_name}__mview AS
-SELECT
-  to_timestamp(trim(BOTH '[]' FROM concat(date, ' ', time)), 'yyyy-MM-dd HH:mm:ss') AS `@timestamp`,
+SELECT * FROM (
+  SELECT
+    to_timestamp(trim(BOTH '[]' FROM concat(date, ' ', time)), 'yyyy-MM-dd HH:mm:ss') AS `@timestamp`,
   c_ip AS `aws.cloudfront.c-ip`,
   c_port as `aws.cloudfront.c-port`,
   cs_cookie as `aws.cloudfront.cs-cookie`,
@@ -30,10 +31,12 @@ SELECT
   x_edge_request_id as `aws.cloudfront.x-edge-request-id`,
   x_edge_result_type as `aws.cloudfront.x-edge-result-type`,
   x_edge_response_result_type as `aws.cloudfront.x-edge-response-result-type`,
-  x_forwarded_for as `aws.cloudfront.x-forwarded-for`,
-  x_host_header as `aws.cloudfront.x-host-header`
-FROM 
-  {table_name}
+    x_forwarded_for as `aws.cloudfront.x-forwarded-for`,
+    x_host_header as `aws.cloudfront.x-host-header`
+  FROM
+    {table_name}
+) AS subq
+{refresh_range_filter}
 WITH (
   auto_refresh = true,
   refresh_interval = '15 Minute',

@@ -1,5 +1,6 @@
 CREATE MATERIALIZED VIEW {table_name}__mview AS
-SELECT
+SELECT * FROM (
+  SELECT
     CAST(FROM_UNIXTIME(`timestamp`/ 1000) AS TIMESTAMP) AS `@timestamp`,
     formatVersion AS `aws.waf.formatVersion`,
     webaclId AS `aws.waf.webaclId`,
@@ -18,8 +19,10 @@ SELECT
     captchaResponse AS `aws.waf.captchaResponse`,
     challengeResponse AS `aws.waf.challengeResponse`,
     ja3Fingerprint AS `aws.waf.ja3Fingerprint`
-FROM
+  FROM
     {table_name}
+) AS subq
+{refresh_range_filter}
 WITH (
   auto_refresh = true,
   refresh_interval = '15 Minute',

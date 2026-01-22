@@ -154,11 +154,7 @@ const makeTableName = (config: IntegrationSetupInputs): string => {
   return `${config.connectionDataSource}.${config.databaseName}.${config.connectionTableName}`;
 };
 
-const prepareQuery = (
-  query: string,
-  config: IntegrationSetupInputs,
-  integrationName: string
-): string => {
+const prepareQuery = (query: string, config: IntegrationSetupInputs): string => {
   // To prevent checkpoint collisions, each query needs a unique checkpoint name, we use an enriched
   // UUID to create subfolders under the given checkpoint location per-query.
   const querySpecificUUID = crypto.randomUUID();
@@ -167,8 +163,8 @@ const prepareQuery = (
     : config.checkpointLocation + '/';
   checkpointLocation += `${config.connectionDataSource}-${config.connectionTableName}-${querySpecificUUID}`;
 
-  // Generate refresh range filter using centralized strategy
-  const refreshRangeFilter = generateTimestampFilter(integrationName, config.refreshRangeDays);
+  // Generate refresh range filter using universal @timestamp filter
+  const refreshRangeFilter = generateTimestampFilter(config.refreshRangeDays);
 
   let queryStr = query.replaceAll('{table_name}', makeTableName(config));
   queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
@@ -318,7 +314,7 @@ const addFlintIntegration = async ({
       continue;
     }
 
-    const queryStr = prepareQuery(query.query, config, integration.name);
+    const queryStr = prepareQuery(query.query, config);
     const result = await runQuery(
       queryStr,
       config.connectionDataSource,

@@ -1,9 +1,11 @@
 CREATE MATERIALIZED VIEW {table_name}__mview AS
-SELECT
-  /* General log info */
-  firewall_name AS `aws.networkfirewall.firewall_name`,
-  /* General event info */
-  CAST( event.timestamp AS TIMESTAMP) AS `aws.networkfirewall.event.timestamp`,
+SELECT * FROM (
+  SELECT
+    /* General log info */
+    firewall_name AS `aws.networkfirewall.firewall_name`,
+    /* General event info */
+    CAST(event.timestamp AS TIMESTAMP) AS `@timestamp`,
+    CAST(event.timestamp AS TIMESTAMP) AS `aws.networkfirewall.event.timestamp`,
   event.src_ip AS `aws.networkfirewall.event.src_ip`,
   event.src_port AS `aws.networkfirewall.event.src_port`,
   event.dest_ip AS `aws.networkfirewall.event.dest_ip`,
@@ -26,11 +28,12 @@ SELECT
   event.tls.sni AS `aws.networkfirewall.event.tls.sni`,
   /* Netflow Events info */
   event.netflow.pkts AS `aws.networkfirewall.event.netflow.pkts`,
-  event.netflow.bytes AS `aws.networkfirewall.event.netflow.bytes`,
-  event.netflow.age AS `aws.networkfirewall.event.netflow.age`  
-FROM
-  {table_name}
-  {refresh_range_filter}
+    event.netflow.bytes AS `aws.networkfirewall.event.netflow.bytes`,
+    event.netflow.age AS `aws.networkfirewall.event.netflow.age`
+  FROM
+    {table_name}
+) AS subq
+{refresh_range_filter}
 WITH (
   auto_refresh = true,
   refresh_interval = '15 Minute',
