@@ -24,18 +24,18 @@ import { FaultRateCell, getRelativePercentage } from './fault_rate_cell';
 // i18n translations
 const i18nTexts = {
   title: i18n.translate('observability.apm.faultWidgets.serviceDependencies.title', {
-    defaultMessage: 'Top Dependencies by Fault Rate',
+    defaultMessage: 'Top dependencies by fault rate',
   }),
   columnDependencyService: i18n.translate(
     'observability.apm.faultWidgets.serviceDependencies.columnDependencyService',
     {
-      defaultMessage: 'Dependency Service',
+      defaultMessage: 'Dependency service',
     }
   ),
   columnFaultRate: i18n.translate(
     'observability.apm.faultWidgets.serviceDependencies.columnFaultRate',
     {
-      defaultMessage: 'Fault Rate',
+      defaultMessage: 'Fault rate',
     }
   ),
   prometheusRequired: i18n.translate(

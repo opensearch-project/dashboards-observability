@@ -424,7 +424,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
       badges.push({
         key: 'serviceOperations',
         category: i18n.translate('observability.apm.dependencies.filterCategory.serviceOp', {
-          defaultMessage: 'Service Op',
+          defaultMessage: 'Service op',
         }),
         values: selectedServiceOperations,
         onRemove: () => setSelectedServiceOperations([]),
@@ -436,7 +436,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
       badges.push({
         key: 'remoteOperations',
         category: i18n.translate('observability.apm.dependencies.filterCategory.remoteOp', {
-          defaultMessage: 'Remote Op',
+          defaultMessage: 'Remote op',
         }),
         values: selectedRemoteOperations,
         onRemove: () => setSelectedRemoteOperations([]),
@@ -460,7 +460,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
       badges.push({
         key: 'errorRate',
         category: i18n.translate('observability.apm.dependencies.filterCategory.errorRate', {
-          defaultMessage: 'Error Rate',
+          defaultMessage: 'Error rate',
         }),
         values: selectedErrorRateThresholds,
         onRemove: () => setSelectedErrorRateThresholds([]),

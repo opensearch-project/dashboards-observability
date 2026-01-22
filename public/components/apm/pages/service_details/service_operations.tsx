@@ -371,7 +371,7 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
       badges.push({
         key: 'errorRate',
         category: i18n.translate('observability.apm.operations.filterCategory.errorRate', {
-          defaultMessage: 'Error Rate',
+          defaultMessage: 'Error rate',
         }),
         values: selectedErrorRateThresholds,
         onRemove: () => setSelectedErrorRateThresholds([]),

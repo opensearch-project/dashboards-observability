@@ -71,7 +71,7 @@ describe('ServiceDependenciesByFaultRate', () => {
 
       render(<ServiceDependenciesByFaultRate {...defaultProps} />);
 
-      expect(screen.getByText('Top Dependencies by Fault Rate')).toBeInTheDocument();
+      expect(screen.getByText('Top dependencies by fault rate')).toBeInTheDocument();
     });
   });
 
@@ -159,7 +159,7 @@ describe('ServiceDependenciesByFaultRate', () => {
 
       render(<ServiceDependenciesByFaultRate {...defaultProps} />);
 
-      expect(screen.getByText('Top Dependencies by Fault Rate')).toBeInTheDocument();
+      expect(screen.getByText('Top dependencies by fault rate')).toBeInTheDocument();
     });
 
     it('should render dependency services', () => {
@@ -200,8 +200,8 @@ describe('ServiceDependenciesByFaultRate', () => {
       render(<ServiceDependenciesByFaultRate {...defaultProps} />);
 
       // EuiBasicTable renders column headers multiple times (for mobile and desktop)
-      expect(screen.getAllByText('Dependency Service').length).toBeGreaterThan(0);
-      expect(screen.getAllByText('Fault Rate').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Dependency service').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Fault rate').length).toBeGreaterThan(0);
     });
   });
 

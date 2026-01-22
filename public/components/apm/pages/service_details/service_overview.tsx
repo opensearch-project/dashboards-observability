@@ -162,7 +162,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
             <EuiText size="m">
               <h4>
                 {i18n.translate('observability.apm.serviceOverview.serviceMetadata', {
-                  defaultMessage: 'Service Metadata',
+                  defaultMessage: 'Service metadata',
                 })}
               </h4>
             </EuiText>
@@ -301,7 +301,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
                     <EuiText size="xs">
                       <h4 style={{ margin: 0 }}>
                         {i18n.translate('observability.apm.serviceOverview.latencyByDeps', {
-                          defaultMessage: 'Latency by Dependencies',
+                          defaultMessage: 'Latency by dependencies',
                         })}
                       </h4>
                     </EuiText>
@@ -362,7 +362,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
                     <EuiText size="xs">
                       <h4 style={{ margin: 0 }}>
                         {i18n.translate('observability.apm.serviceOverview.requestsByOps', {
-                          defaultMessage: 'Requests by Operations',
+                          defaultMessage: 'Requests by operations',
                         })}
                       </h4>
                     </EuiText>
@@ -422,7 +422,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
                     <EuiText size="xs">
                       <h4 style={{ margin: 0 }}>
                         {i18n.translate('observability.apm.serviceOverview.availabilityByOps', {
-                          defaultMessage: 'Availability by Operations',
+                          defaultMessage: 'Availability by operations',
                         })}
                       </h4>
                     </EuiText>
@@ -493,7 +493,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
                     <EuiText size="xs">
                       <h4 style={{ margin: 0 }}>
                         {i18n.translate('observability.apm.serviceOverview.faultRateByOps', {
-                          defaultMessage: 'Fault Rate by Operations',
+                          defaultMessage: 'Fault rate by operations',
                         })}
                       </h4>
                     </EuiText>
@@ -554,7 +554,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
                     <EuiText size="xs">
                       <h4 style={{ margin: 0 }}>
                         {i18n.translate('observability.apm.serviceOverview.errorRateByOps', {
-                          defaultMessage: 'Error Rate by Operations',
+                          defaultMessage: 'Error rate by operations',
                         })}
                       </h4>
                     </EuiText>

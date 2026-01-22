@@ -25,12 +25,12 @@ import { ServiceCell } from './service_cell';
 // i18n translations
 const i18nTexts = {
   title: i18n.translate('observability.apm.faultWidgets.dependencies.title', {
-    defaultMessage: 'Top Dependency Paths by Fault Rate',
+    defaultMessage: 'Top dependency paths by fault rate',
   }),
   columnDependencyService: i18n.translate(
     'observability.apm.faultWidgets.dependencies.columnDependencyService',
     {
-      defaultMessage: 'Dependency Service',
+      defaultMessage: 'Dependency service',
     }
   ),
   columnService: i18n.translate('observability.apm.faultWidgets.dependencies.columnService', {
