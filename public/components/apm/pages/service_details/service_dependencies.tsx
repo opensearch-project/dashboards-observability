@@ -24,7 +24,18 @@ import {
 import { i18n } from '@osd/i18n';
 import { TimeRange, GroupedDependency } from '../../common/types/service_details_types';
 import { PromQLLineChart } from '../../shared/components/promql_line_chart';
-import { SERVICE_DETAILS_CONSTANTS } from '../../common/constants';
+import {
+  SERVICE_DETAILS_CONSTANTS,
+  AvailabilityThreshold,
+  ErrorRateThreshold,
+  THRESHOLD_LABELS,
+  AVAILABILITY_THRESHOLD_OPTIONS,
+  ERROR_RATE_THRESHOLD_OPTIONS,
+} from '../../common/constants';
+import {
+  matchesAvailabilityThreshold,
+  matchesErrorRateThreshold,
+} from '../../shared/components/filters';
 import {
   getQueryDependencyRequestsOverTime,
   getQueryDependencyFaultsAndErrorsOverTime,
@@ -37,10 +48,6 @@ import { DependencyFilterSidebar } from '../../shared/components/dependency_filt
 import { ActiveFilterBadges, FilterBadge } from '../../shared/components/active_filter_badges';
 import { formatCount, formatLatency } from '../../common/format_utils';
 import { useDebouncedValue } from '../../shared/hooks/use_debounced_value';
-
-// Filter threshold constants
-const AVAILABILITY_THRESHOLDS = ['< 95%', '95-99%', '≥ 99%'];
-const ERROR_RATE_THRESHOLDS = ['< 1%', '1-5%', '> 5%'];
 
 // Latency percentile options for EuiSuperSelect
 const LATENCY_OPTIONS = [
@@ -63,27 +70,6 @@ const tableTooltips = {
   availability: i18n.translate('observability.apm.dependencies.tooltip.availability', {
     defaultMessage: 'Percentage of successful requests (excludes 5xx server faults)',
   }),
-};
-
-// Threshold matching functions
-// Note: All values from PromQL are already in percentage (0-100) format
-const matchesAvailabilityThreshold = (
-  availability: number | undefined,
-  threshold: string
-): boolean => {
-  if (availability === undefined) return false;
-  if (threshold === '< 95%') return availability < 95;
-  if (threshold === '95-99%') return availability >= 95 && availability < 99;
-  if (threshold === '≥ 99%') return availability >= 99;
-  return false;
-};
-
-const matchesRateThreshold = (rate: number | undefined, threshold: string): boolean => {
-  if (rate === undefined) return false;
-  if (threshold === '< 1%') return rate < 1;
-  if (threshold === '1-5%') return rate >= 1 && rate <= 5;
-  if (threshold === '> 5%') return rate > 5;
-  return false;
 };
 
 export interface ServiceDependenciesProps {
@@ -164,11 +150,13 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  // Threshold filter states
-  const [selectedAvailabilityThresholds, setSelectedAvailabilityThresholds] = useState<string[]>(
-    []
-  );
-  const [selectedErrorRateThresholds, setSelectedErrorRateThresholds] = useState<string[]>([]);
+  // Threshold filter states (using semantic enum keys)
+  const [selectedAvailabilityThresholds, setSelectedAvailabilityThresholds] = useState<
+    AvailabilityThreshold[]
+  >([]);
+  const [selectedErrorRateThresholds, setSelectedErrorRateThresholds] = useState<
+    ErrorRateThreshold[]
+  >([]);
 
   // Search and latency selector state
   const [searchQuery, setSearchQuery] = useState('');
@@ -299,16 +287,18 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
 
       // Availability threshold filter (OR logic)
       if (selectedAvailabilityThresholds.length > 0) {
+        if (dep.availability === undefined) return false;
         const matchesAny = selectedAvailabilityThresholds.some((threshold) =>
-          matchesAvailabilityThreshold(dep.availability, threshold)
+          matchesAvailabilityThreshold(dep.availability!, threshold)
         );
         if (!matchesAny) return false;
       }
 
       // Error rate threshold filter (OR logic)
       if (selectedErrorRateThresholds.length > 0) {
+        if (dep.errorRate === undefined) return false;
         const matchesAny = selectedErrorRateThresholds.some((threshold) =>
-          matchesRateThreshold(dep.errorRate, threshold)
+          matchesErrorRateThreshold(dep.errorRate!, threshold)
         );
         if (!matchesAny) return false;
       }
@@ -469,26 +459,30 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
       });
     }
 
-    // Availability threshold badges
+    // Availability threshold badges (display labels from THRESHOLD_LABELS)
     if (selectedAvailabilityThresholds.length > 0) {
       badges.push({
         key: 'availability',
         category: i18n.translate('observability.apm.dependencies.filterCategory.availability', {
           defaultMessage: 'Availability',
         }),
-        values: selectedAvailabilityThresholds,
+        values: selectedAvailabilityThresholds.map(
+          (threshold) => THRESHOLD_LABELS.availability[threshold]
+        ),
         onRemove: () => setSelectedAvailabilityThresholds([]),
       });
     }
 
-    // Error rate threshold badges
+    // Error rate threshold badges (display labels from THRESHOLD_LABELS)
     if (selectedErrorRateThresholds.length > 0) {
       badges.push({
         key: 'errorRate',
         category: i18n.translate('observability.apm.dependencies.filterCategory.errorRate', {
           defaultMessage: 'Error rate',
         }),
-        values: selectedErrorRateThresholds,
+        values: selectedErrorRateThresholds.map(
+          (threshold) => THRESHOLD_LABELS.errorRate[threshold]
+        ),
         onRemove: () => setSelectedErrorRateThresholds([]),
       });
     }
@@ -883,12 +877,18 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
               style={{ paddingRight: '8px' }}
             >
               <DependencyFilterSidebar
-                availabilityThresholds={AVAILABILITY_THRESHOLDS}
-                selectedAvailabilityThresholds={selectedAvailabilityThresholds}
-                onAvailabilityThresholdsChange={setSelectedAvailabilityThresholds}
-                errorRateThresholds={ERROR_RATE_THRESHOLDS}
-                selectedErrorRateThresholds={selectedErrorRateThresholds}
-                onErrorRateThresholdsChange={setSelectedErrorRateThresholds}
+                availabilityThresholds={(AVAILABILITY_THRESHOLD_OPTIONS as unknown) as string[]}
+                selectedAvailabilityThresholds={
+                  (selectedAvailabilityThresholds as unknown) as string[]
+                }
+                onAvailabilityThresholdsChange={
+                  setSelectedAvailabilityThresholds as (selected: string[]) => void
+                }
+                errorRateThresholds={(ERROR_RATE_THRESHOLD_OPTIONS as unknown) as string[]}
+                selectedErrorRateThresholds={(selectedErrorRateThresholds as unknown) as string[]}
+                onErrorRateThresholdsChange={
+                  setSelectedErrorRateThresholds as (selected: string[]) => void
+                }
                 dependencyNames={dependencyNames}
                 selectedDependencies={selectedDependencies}
                 onDependencyChange={setSelectedDependencies}

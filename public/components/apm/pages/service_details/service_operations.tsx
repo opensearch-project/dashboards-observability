@@ -25,7 +25,18 @@ import {
 import { i18n } from '@osd/i18n';
 import { TimeRange } from '../../common/types/service_details_types';
 import { PromQLLineChart } from '../../shared/components/promql_line_chart';
-import { SERVICE_DETAILS_CONSTANTS } from '../../common/constants';
+import {
+  SERVICE_DETAILS_CONSTANTS,
+  AvailabilityThreshold,
+  ErrorRateThreshold,
+  THRESHOLD_LABELS,
+  AVAILABILITY_THRESHOLD_OPTIONS,
+  ERROR_RATE_THRESHOLD_OPTIONS,
+} from '../../common/constants';
+import {
+  matchesAvailabilityThreshold,
+  matchesErrorRateThreshold,
+} from '../../shared/components/filters';
 import {
   getQueryOperationRequestsOverTime,
   getQueryOperationFaultsAndErrorsOverTime,
@@ -40,26 +51,6 @@ import { formatCount, formatLatency } from '../../common/format_utils';
 import { navigateToServiceDetails } from '../../shared/utils/navigation_utils';
 import { ServiceCorrelationsFlyout } from '../../shared/components/service_correlations_flyout';
 import { useDebouncedValue } from '../../shared/hooks/use_debounced_value';
-
-// Filter threshold constants
-const AVAILABILITY_THRESHOLDS = ['< 95%', '95-99%', '≥ 99%'];
-const ERROR_RATE_THRESHOLDS = ['< 1%', '1-5%', '> 5%'];
-
-// Threshold matching functions
-// Note: All values from PromQL are already in percentage (0-100) format
-const matchesAvailabilityThreshold = (availability: number, threshold: string): boolean => {
-  if (threshold === '< 95%') return availability < 95;
-  if (threshold === '95-99%') return availability >= 95 && availability < 99;
-  if (threshold === '≥ 99%') return availability >= 99;
-  return false;
-};
-
-const matchesRateThreshold = (rate: number, threshold: string): boolean => {
-  if (threshold === '< 1%') return rate < 1;
-  if (threshold === '1-5%') return rate >= 1 && rate <= 5;
-  if (threshold === '> 5%') return rate > 5;
-  return false;
-};
 
 // Tooltip content for column headers
 const tableTooltips = {
@@ -138,11 +129,13 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
   // Sidebar state is now managed by EuiResizableContainer
   const [selectedOperations, setSelectedOperations] = useState<string[]>([]);
 
-  // Threshold filter states
-  const [selectedAvailabilityThresholds, setSelectedAvailabilityThresholds] = useState<string[]>(
-    []
-  );
-  const [selectedErrorRateThresholds, setSelectedErrorRateThresholds] = useState<string[]>([]);
+  // Threshold filter states (using semantic enum keys)
+  const [selectedAvailabilityThresholds, setSelectedAvailabilityThresholds] = useState<
+    AvailabilityThreshold[]
+  >([]);
+  const [selectedErrorRateThresholds, setSelectedErrorRateThresholds] = useState<
+    ErrorRateThreshold[]
+  >([]);
 
   // Range filter states
   const [latencyRange, setLatencyRange] = useState<[number, number]>([0, 10000]);
@@ -252,7 +245,7 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
       // Error rate threshold filter (OR logic)
       if (selectedErrorRateThresholds.length > 0) {
         const matchesAny = selectedErrorRateThresholds.some((threshold) =>
-          matchesRateThreshold(op.errorRate, threshold)
+          matchesErrorRateThreshold(op.errorRate, threshold)
         );
         if (!matchesAny) return false;
       }
@@ -377,26 +370,30 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
       });
     }
 
-    // Availability threshold badges
+    // Availability threshold badges (display labels from THRESHOLD_LABELS)
     if (selectedAvailabilityThresholds.length > 0) {
       badges.push({
         key: 'availability',
         category: i18n.translate('observability.apm.operations.filterCategory.availability', {
           defaultMessage: 'Availability',
         }),
-        values: selectedAvailabilityThresholds,
+        values: selectedAvailabilityThresholds.map(
+          (threshold) => THRESHOLD_LABELS.availability[threshold]
+        ),
         onRemove: () => setSelectedAvailabilityThresholds([]),
       });
     }
 
-    // Error rate threshold badges
+    // Error rate threshold badges (display labels from THRESHOLD_LABELS)
     if (selectedErrorRateThresholds.length > 0) {
       badges.push({
         key: 'errorRate',
         category: i18n.translate('observability.apm.operations.filterCategory.errorRate', {
           defaultMessage: 'Error rate',
         }),
-        values: selectedErrorRateThresholds,
+        values: selectedErrorRateThresholds.map(
+          (threshold) => THRESHOLD_LABELS.errorRate[threshold]
+        ),
         onRemove: () => setSelectedErrorRateThresholds([]),
       });
     }
@@ -818,12 +815,18 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
               style={{ paddingRight: '8px' }}
             >
               <OperationFilterSidebar
-                availabilityThresholds={AVAILABILITY_THRESHOLDS}
-                selectedAvailabilityThresholds={selectedAvailabilityThresholds}
-                onAvailabilityThresholdsChange={setSelectedAvailabilityThresholds}
-                errorRateThresholds={ERROR_RATE_THRESHOLDS}
-                selectedErrorRateThresholds={selectedErrorRateThresholds}
-                onErrorRateThresholdsChange={setSelectedErrorRateThresholds}
+                availabilityThresholds={(AVAILABILITY_THRESHOLD_OPTIONS as unknown) as string[]}
+                selectedAvailabilityThresholds={
+                  (selectedAvailabilityThresholds as unknown) as string[]
+                }
+                onAvailabilityThresholdsChange={
+                  setSelectedAvailabilityThresholds as (selected: string[]) => void
+                }
+                errorRateThresholds={(ERROR_RATE_THRESHOLD_OPTIONS as unknown) as string[]}
+                selectedErrorRateThresholds={(selectedErrorRateThresholds as unknown) as string[]}
+                onErrorRateThresholdsChange={
+                  setSelectedErrorRateThresholds as (selected: string[]) => void
+                }
                 operationNames={operationNames}
                 selectedOperations={selectedOperations}
                 onOperationChange={setSelectedOperations}

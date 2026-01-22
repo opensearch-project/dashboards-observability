@@ -47,6 +47,56 @@ export const APM_CONSTANTS = {
 } as const;
 
 /**
+ * Semantic keys for availability threshold filters
+ */
+export enum AvailabilityThreshold {
+  LOW = 'LOW', // < 95%
+  MEDIUM = 'MEDIUM', // 95-99%
+  HIGH = 'HIGH', // ≥ 99%
+}
+
+/**
+ * Semantic keys for error/fault rate threshold filters
+ */
+export enum ErrorRateThreshold {
+  LOW = 'LOW', // < 1%
+  MEDIUM = 'MEDIUM', // 1-5%
+  HIGH = 'HIGH', // > 5%
+}
+
+/**
+ * Display labels for threshold filters
+ * Separated from logic keys for i18n support
+ */
+export const THRESHOLD_LABELS = {
+  availability: {
+    [AvailabilityThreshold.LOW]: '< 95%',
+    [AvailabilityThreshold.MEDIUM]: '95-99%',
+    [AvailabilityThreshold.HIGH]: '≥ 99%',
+  },
+  errorRate: {
+    [ErrorRateThreshold.LOW]: '< 1%',
+    [ErrorRateThreshold.MEDIUM]: '1-5%',
+    [ErrorRateThreshold.HIGH]: '> 5%',
+  },
+} as const;
+
+/**
+ * Ordered arrays for UI rendering
+ */
+export const AVAILABILITY_THRESHOLD_OPTIONS = [
+  AvailabilityThreshold.LOW,
+  AvailabilityThreshold.MEDIUM,
+  AvailabilityThreshold.HIGH,
+] as const;
+
+export const ERROR_RATE_THRESHOLD_OPTIONS = [
+  ErrorRateThreshold.LOW,
+  ErrorRateThreshold.MEDIUM,
+  ErrorRateThreshold.HIGH,
+] as const;
+
+/**
  * Service Details page constants
  */
 export const SERVICE_DETAILS_CONSTANTS = {
@@ -63,12 +113,6 @@ export const SERVICE_DETAILS_CONSTANTS = {
   TREND_THRESHOLD_PERCENT: 0.1,
   LINE_CHART_HEIGHT: 300,
   EXPANDED_ROW_CHART_HEIGHT: 250,
-
-  // Threshold values for availability filters
-  AVAILABILITY_THRESHOLDS: ['< 95%', '95-99%', '≥ 99%'] as const,
-
-  // Threshold values for error/fault rate filters
-  RATE_THRESHOLDS: ['< 1%', '1-5%', '> 5%'] as const,
 
   // Default slider ranges
   DEFAULT_LATENCY_RANGE: [0, 10000] as [number, number],

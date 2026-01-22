@@ -18,7 +18,13 @@ import {
   EuiHorizontalRule,
   EuiDualRange,
 } from '@elastic/eui';
-import { ColoredThresholdLabel, getThemeAwareThresholdColor } from './filters';
+import {
+  ColoredThresholdLabel,
+  getThemeAwareThresholdColor,
+  THRESHOLD_LABELS,
+  AvailabilityThreshold,
+  ErrorRateThreshold,
+} from './filters';
 
 // Initial item count for checkbox lists (matching services home)
 const INITIAL_ITEM_LIMIT = 5;
@@ -123,16 +129,22 @@ export const DependencyFilterSidebar: React.FC<DependencyFilterSidebarProps> = (
   const [showAllRemoteOperations, setShowAllRemoteOperations] = useState(false);
 
   // Availability threshold section
+  // Supports both enum keys (preferred) and display strings (backwards compat)
   const availabilityThresholdOptions = useMemo(() => {
-    return availabilityThresholds.map((threshold) => ({
-      id: `availability-${threshold}`,
-      label: (
-        <ColoredThresholdLabel
-          threshold={threshold}
-          color={getThemeAwareThresholdColor(threshold, 'availability')}
-        />
-      ),
-    }));
+    return availabilityThresholds.map((threshold) => {
+      // Get display label - check if it's an enum key or already a display string
+      const displayLabel =
+        THRESHOLD_LABELS.availability[threshold as AvailabilityThreshold] || threshold;
+      return {
+        id: `availability-${threshold}`,
+        label: (
+          <ColoredThresholdLabel
+            threshold={displayLabel}
+            color={getThemeAwareThresholdColor(threshold, 'availability')}
+          />
+        ),
+      };
+    });
   }, [availabilityThresholds]);
 
   const availabilityThresholdSelectionMap = useMemo(() => {
@@ -159,16 +171,21 @@ export const DependencyFilterSidebar: React.FC<DependencyFilterSidebarProps> = (
   );
 
   // Error rate threshold section
+  // Supports both enum keys (preferred) and display strings (backwards compat)
   const errorRateThresholdOptions = useMemo(() => {
-    return errorRateThresholds.map((threshold) => ({
-      id: `error-rate-${threshold}`,
-      label: (
-        <ColoredThresholdLabel
-          threshold={threshold}
-          color={getThemeAwareThresholdColor(threshold, 'errorRate')}
-        />
-      ),
-    }));
+    return errorRateThresholds.map((threshold) => {
+      // Get display label - check if it's an enum key or already a display string
+      const displayLabel = THRESHOLD_LABELS.errorRate[threshold as ErrorRateThreshold] || threshold;
+      return {
+        id: `error-rate-${threshold}`,
+        label: (
+          <ColoredThresholdLabel
+            threshold={displayLabel}
+            color={getThemeAwareThresholdColor(threshold, 'errorRate')}
+          />
+        ),
+      };
+    });
   }, [errorRateThresholds]);
 
   const errorRateThresholdSelectionMap = useMemo(() => {

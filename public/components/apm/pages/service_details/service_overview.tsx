@@ -162,7 +162,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
             <EuiText size="m">
               <h4>
                 {i18n.translate('observability.apm.serviceOverview.serviceMetadata', {
-                  defaultMessage: 'Service metadata',
+                  defaultMessage: 'Correlated data',
                 })}
               </h4>
             </EuiText>
@@ -189,7 +189,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty iconType="discoverApp" size="s" onClick={() => openFlyout('logs')}>
                   {i18n.translate('observability.apm.serviceOverview.viewLogs', {
-                    defaultMessage: 'View associated logs',
+                    defaultMessage: 'View correlated logs',
                   })}
                 </EuiButtonEmpty>
               </EuiFlexItem>

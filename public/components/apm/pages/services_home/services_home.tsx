@@ -50,7 +50,9 @@ import {
   LatencyRangeFilter,
   ThroughputRangeFilter,
   FailureRateThresholdFilter,
-  matchesAnyFailureRateThreshold,
+  ErrorRateThreshold,
+  matchesErrorRateThreshold,
+  THRESHOLD_LABELS,
 } from '../../shared/components/filters';
 import { ActiveFilterBadges, FilterBadge } from '../../shared/components/active_filter_badges';
 import {
@@ -120,7 +122,9 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   // Metric filter state
   const [latencyRange, setLatencyRange] = useState<[number, number]>([0, 0]);
   const [throughputRange, setThroughputRange] = useState<[number, number]>([0, 0]);
-  const [selectedFailureRateThresholds, setSelectedFailureRateThresholds] = useState<string[]>([]);
+  const [selectedFailureRateThresholds, setSelectedFailureRateThresholds] = useState<
+    ErrorRateThreshold[]
+  >([]);
 
   // Latency percentile selector state
   const [latencyPercentile, setLatencyPercentile] = useState<'p99' | 'p90' | 'p50'>('p99');
@@ -394,7 +398,9 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         if (!metrics) return false;
         // Use average failure ratio for filtering
         const avgFailureRatio = metrics.avgFailureRatio || 0;
-        return matchesAnyFailureRateThreshold(avgFailureRatio, selectedFailureRateThresholds);
+        return selectedFailureRateThresholds.some((threshold) =>
+          matchesErrorRateThreshold(avgFailureRatio, threshold)
+        );
       });
     }
 
@@ -453,12 +459,14 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       });
     }
 
-    // Failure rate threshold badges
+    // Failure rate threshold badges (display labels from THRESHOLD_LABELS)
     if (selectedFailureRateThresholds.length > 0) {
       badges.push({
         key: 'failureRate',
         category: i18nTexts.filters.failureRatio,
-        values: selectedFailureRateThresholds,
+        values: selectedFailureRateThresholds.map(
+          (threshold) => THRESHOLD_LABELS.errorRate[threshold]
+        ),
         onRemove: () => setSelectedFailureRateThresholds([]),
       });
     }

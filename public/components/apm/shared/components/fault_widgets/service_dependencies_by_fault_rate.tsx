@@ -77,15 +77,7 @@ export const ServiceDependenciesByFaultRate: React.FC<ServiceDependenciesByFault
 }) => {
   // Parse time range using datemath for proper handling of relative dates
   const { startTime, endTime } = useMemo(() => {
-    try {
-      return parseTimeRange(timeRange);
-    } catch (e) {
-      // Fallback to last 15 minutes if parsing fails
-      return {
-        startTime: new Date(Date.now() - 15 * 60 * 1000),
-        endTime: new Date(),
-      };
-    }
+    return parseTimeRange(timeRange);
   }, [timeRange]);
 
   const { data: dependencies, isLoading, error } = useServiceDependenciesByFaultRate({
