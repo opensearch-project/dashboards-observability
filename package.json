@@ -28,6 +28,7 @@
     "@nteract/presentational-components": "^3.4.3",
     "@reduxjs/toolkit": "^1.6.1",
     "ajv": "^8.11.0",
+    "echarts": "^6.0.0",
     "antlr4": "4.8.0",
     "antlr4ts": "^0.5.0-alpha.4",
     "isomorphic-dompurify": "~2.26.0",

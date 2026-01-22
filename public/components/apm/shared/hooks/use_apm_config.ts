@@ -222,11 +222,12 @@ export const useCorrelatedLogs = (traceDatasetId?: string) => {
           perPage: 1000,
         });
 
-        // Filter for APM correlations that reference our trace dataset
-        // Only include correlations with correlationType === 'APM-Correlation'
+        // Filter for trace-to-logs correlations that reference our trace dataset
+        // Only include correlations with correlationType starting with 'trace-to-logs-'
         const relevantCorrelations = response.savedObjects.filter((obj) => {
-          const isApmCorrelation = obj.attributes?.correlationType === 'APM-Correlation';
-          if (!isApmCorrelation) {
+          const correlationType = obj.attributes?.correlationType || '';
+          const isTraceToLogsCorrelation = correlationType.startsWith('trace-to-logs-');
+          if (!isTraceToLogsCorrelation) {
             return false;
           }
 

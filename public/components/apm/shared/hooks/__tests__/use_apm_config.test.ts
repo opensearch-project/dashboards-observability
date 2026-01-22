@@ -473,12 +473,12 @@ describe('useCorrelatedLogs', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    it('should find APM correlations with correlationType === "APM-Correlation"', async () => {
+    it('should find trace-to-logs correlations with correlationType starting with "trace-to-logs-"', async () => {
       const mockResponse = {
         savedObjects: [
           {
             id: 'corr-1',
-            attributes: { correlationType: 'APM-Correlation' },
+            attributes: { correlationType: 'trace-to-logs-my-trace-dataset' },
             references: [
               { type: 'index-pattern', id: 'trace-1' },
               { type: 'index-pattern', id: 'log-1' },
@@ -513,7 +513,7 @@ describe('useCorrelatedLogs', () => {
         savedObjects: [
           {
             id: 'corr-1',
-            attributes: { correlationType: 'APM-Correlation' },
+            attributes: { correlationType: 'trace-to-logs-trace-1' },
             references: [
               { type: 'index-pattern', id: 'trace-1' },
               { type: 'index-pattern', id: 'log-1' },
@@ -521,7 +521,7 @@ describe('useCorrelatedLogs', () => {
           },
           {
             id: 'corr-2',
-            attributes: { correlationType: 'APM-Correlation' },
+            attributes: { correlationType: 'trace-to-logs-trace-2' },
             references: [
               { type: 'index-pattern', id: 'trace-2' },
               { type: 'index-pattern', id: 'log-2' },
@@ -555,7 +555,7 @@ describe('useCorrelatedLogs', () => {
         savedObjects: [
           {
             id: 'corr-1',
-            attributes: { correlationType: 'APM-Correlation' },
+            attributes: { correlationType: 'trace-to-logs-trace-1' },
             references: [
               { type: 'index-pattern', id: 'trace-1' },
               { type: 'index-pattern', id: 'log-1' },
@@ -589,7 +589,7 @@ describe('useCorrelatedLogs', () => {
         savedObjects: [
           {
             id: 'corr-1',
-            attributes: { correlationType: 'APM-Correlation' },
+            attributes: { correlationType: 'trace-to-logs-trace-1' },
             references: [
               { type: 'index-pattern', id: 'trace-1' },
               { type: 'index-pattern', id: 'log-1' },
@@ -663,12 +663,12 @@ describe('useCorrelatedLogs', () => {
       consoleErrorSpy.mockRestore();
     });
 
-    it('should exclude non-APM-Correlation types', async () => {
+    it('should exclude non-trace-to-logs correlation types', async () => {
       const mockResponse = {
         savedObjects: [
           {
             id: 'corr-1',
-            attributes: { correlationType: 'APM-Correlation' },
+            attributes: { correlationType: 'trace-to-logs-trace-1' },
             references: [
               { type: 'index-pattern', id: 'trace-1' },
               { type: 'index-pattern', id: 'log-1' },
@@ -701,7 +701,7 @@ describe('useCorrelatedLogs', () => {
 
       await waitForNextUpdate();
 
-      // Should only include log-1 from APM-Correlation, not log-2 from APM-Config
+      // Should only include log-1 from trace-to-logs correlation, not log-2 from APM-Config
       expect(result.current.data).toHaveLength(1);
       expect(result.current.data[0].id).toBe('log-1');
     });

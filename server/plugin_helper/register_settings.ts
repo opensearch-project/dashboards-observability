@@ -146,7 +146,7 @@ export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSet
       name: i18n.translate('observability.apmEnabled.name', {
         defaultMessage: 'Enable APM',
       }),
-      value: false,
+      value: true,
       category: ['Observability'],
       description: i18n.translate('observability.apmEnabled.description', {
         defaultMessage:
