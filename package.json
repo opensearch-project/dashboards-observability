@@ -30,7 +30,6 @@
     "ajv": "^8.11.0",
     "antlr4": "4.8.0",
     "antlr4ts": "^0.5.0-alpha.4",
-    "devicon": "^2.16.0",
     "isomorphic-dompurify": "~2.26.0",
     "json5": "^2.2.3",
     "mime": "^3.0.0",
