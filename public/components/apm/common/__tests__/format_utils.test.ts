@@ -8,7 +8,7 @@ import {
   formatPercentage,
   formatPercentageValue,
   formatLatency,
-  formatLatencyFromSeconds,
+  formatThroughput,
 } from '../format_utils';
 
 describe('format_utils', () => {
@@ -96,47 +96,60 @@ describe('format_utils', () => {
     });
 
     it('formats as seconds for >= 1000ms', () => {
-      expect(formatLatency(1500)).toBe('1.50s');
-      expect(formatLatency(1000)).toBe('1.00s');
-      expect(formatLatency(2500)).toBe('2.50s');
+      expect(formatLatency(1500)).toBe('1.50 s');
+      expect(formatLatency(1000)).toBe('1.00 s');
+      expect(formatLatency(2500)).toBe('2.50 s');
     });
 
     it('formats as milliseconds for < 1000ms', () => {
-      expect(formatLatency(500)).toBe('500 ms');
-      expect(formatLatency(999)).toBe('999 ms');
-      expect(formatLatency(0)).toBe('0 ms');
+      expect(formatLatency(500)).toBe('500.00 ms');
+      expect(formatLatency(999)).toBe('999.00 ms');
+      expect(formatLatency(0)).toBe('0.00 ms');
     });
 
     it('handles edge cases at 1000ms boundary', () => {
-      expect(formatLatency(999)).toBe('999 ms');
-      expect(formatLatency(1000)).toBe('1.00s');
+      expect(formatLatency(999)).toBe('999.00 ms');
+      expect(formatLatency(1000)).toBe('1.00 s');
     });
   });
 
-  describe('formatLatencyFromSeconds', () => {
+  describe('formatThroughput', () => {
     it('returns "-" for undefined', () => {
-      expect(formatLatencyFromSeconds(undefined)).toBe('-');
+      expect(formatThroughput(undefined)).toBe('-');
     });
 
     it('returns "-" for NaN', () => {
-      expect(formatLatencyFromSeconds(NaN)).toBe('-');
+      expect(formatThroughput(NaN)).toBe('-');
     });
 
-    it('converts from seconds and formats >= 1s as seconds', () => {
-      expect(formatLatencyFromSeconds(1.5)).toBe('1.50s');
-      expect(formatLatencyFromSeconds(1)).toBe('1.00s');
-      expect(formatLatencyFromSeconds(2.5)).toBe('2.50s');
+    it('returns "-" for Infinity', () => {
+      expect(formatThroughput(Infinity)).toBe('-');
+      expect(formatThroughput(-Infinity)).toBe('-');
     });
 
-    it('converts from seconds and formats < 1s as milliseconds', () => {
-      expect(formatLatencyFromSeconds(0.5)).toBe('500 ms');
-      expect(formatLatencyFromSeconds(0.999)).toBe('999 ms');
-      expect(formatLatencyFromSeconds(0)).toBe('0 ms');
+    it('formats small numbers with req/int suffix', () => {
+      expect(formatThroughput(100)).toBe('100 req/int');
+      expect(formatThroughput(0)).toBe('0 req/int');
+      expect(formatThroughput(999)).toBe('999 req/int');
     });
 
-    it('handles edge cases at 1s boundary', () => {
-      expect(formatLatencyFromSeconds(0.999)).toBe('999 ms');
-      expect(formatLatencyFromSeconds(1)).toBe('1.00s');
+    it('formats thousands with K suffix', () => {
+      expect(formatThroughput(1500)).toBe('1.5K req/int');
+      expect(formatThroughput(1000)).toBe('1.0K req/int');
+      expect(formatThroughput(2500)).toBe('2.5K req/int');
+    });
+
+    it('formats millions with M suffix', () => {
+      expect(formatThroughput(1500000)).toBe('1.5M req/int');
+      expect(formatThroughput(1000000)).toBe('1.0M req/int');
+      expect(formatThroughput(2500000)).toBe('2.5M req/int');
+    });
+
+    it('handles edge cases at boundaries', () => {
+      expect(formatThroughput(999)).toBe('999 req/int');
+      expect(formatThroughput(1000)).toBe('1.0K req/int');
+      expect(formatThroughput(999999)).toBe('1000.0K req/int');
+      expect(formatThroughput(1000000)).toBe('1.0M req/int');
     });
   });
 });

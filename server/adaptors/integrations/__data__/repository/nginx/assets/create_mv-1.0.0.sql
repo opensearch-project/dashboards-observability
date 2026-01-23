@@ -1,5 +1,6 @@
 CREATE MATERIALIZED VIEW {table_name}__mview AS
-SELECT
+SELECT * FROM (
+  SELECT
     to_timestamp(trim(BOTH '[]' FROM concat(time_local_1, ' ', time_local_2)), 'dd/MMM/yyyy:HH:mm:ss Z') AS `@timestamp`,
     split_part (request, ' ', 1) as `http.request.method`,
     split_part (request, ' ', 2) as `http.url`,
@@ -7,7 +8,9 @@ SELECT
     status AS `http.response.status_code`,
     body_bytes_sent AS `http.response.bytes`,
     'nginx.access' AS `event.domain`
-FROM {table_name}
+  FROM {table_name}
+) AS subq
+{refresh_range_filter}
 WITH (
     auto_refresh = 'true',
     refresh_interval = '15 Minute',

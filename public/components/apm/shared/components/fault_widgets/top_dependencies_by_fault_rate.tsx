@@ -18,25 +18,26 @@ import {
 import { i18n } from '@osd/i18n';
 import { useTopDependenciesByFaultRate } from '../../hooks/use_top_dependencies_by_fault_rate';
 import { TimeRange } from '../../../common/types/service_types';
+import { parseTimeRange } from '../../utils/time_utils';
 import { FaultRateCell, getRelativePercentage } from './fault_rate_cell';
 import { ServiceCell } from './service_cell';
 
 // i18n translations
 const i18nTexts = {
   title: i18n.translate('observability.apm.faultWidgets.dependencies.title', {
-    defaultMessage: 'Top Dependency Paths by Fault Rate',
+    defaultMessage: 'Top dependency paths by fault rate',
   }),
-  columnRemoteService: i18n.translate(
-    'observability.apm.faultWidgets.dependencies.columnRemoteService',
+  columnDependencyService: i18n.translate(
+    'observability.apm.faultWidgets.dependencies.columnDependencyService',
     {
-      defaultMessage: 'Remote Service',
+      defaultMessage: 'Dependency service',
     }
   ),
   columnService: i18n.translate('observability.apm.faultWidgets.dependencies.columnService', {
     defaultMessage: 'Service',
   }),
   columnFaultRate: i18n.translate('observability.apm.faultWidgets.dependencies.columnFaultRate', {
-    defaultMessage: 'Fault Rate',
+    defaultMessage: 'Fault rate',
   }),
   prometheusRequired: i18n.translate(
     'observability.apm.faultWidgets.dependencies.prometheusRequired',
@@ -54,6 +55,11 @@ export interface TopDependenciesByFaultRateProps {
   timeRange: TimeRange;
   refreshTrigger?: number;
   onServiceClick?: (serviceName: string, environment: string) => void;
+  onDependencyClick?: (
+    sourceService: string,
+    dependencyService: string,
+    environment: string
+  ) => void;
   searchQuery?: string;
 }
 
@@ -74,17 +80,15 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
   timeRange,
   refreshTrigger,
   onServiceClick,
+  onDependencyClick,
   searchQuery,
 }) => {
-  // Parse time range - handle both absolute and relative times
-  // Memoize to prevent creating new Date objects on every render
+  // Parse time range using datemath for proper handling of all relative formats
+  // Recalculate when refreshTrigger changes to get fresh timestamps
   const { startTime, endTime } = useMemo(() => {
-    const start = timeRange.from.startsWith('now')
-      ? new Date(Date.now() - 15 * 60 * 1000) // Default to 15 min for relative
-      : new Date(timeRange.from);
-    const end = timeRange.to === 'now' ? new Date() : new Date(timeRange.to);
-    return { startTime: start, endTime: end };
-  }, [timeRange.from, timeRange.to]);
+    return parseTimeRange(timeRange);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeRange, refreshTrigger]);
 
   const { data: dependencies, isLoading, error } = useTopDependenciesByFaultRate({
     startTime,
@@ -130,11 +134,18 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
   const columns: Array<EuiBasicTableColumn<DependencyFaultRateItem>> = [
     {
       field: 'target',
-      name: i18nTexts.columnRemoteService,
+      name: i18nTexts.columnDependencyService,
       width: '30%',
       truncateText: true,
-      render: (target: string) => (
-        <EuiLink href="#">
+      render: (target: string, item: DependencyFaultRateItem) => (
+        <EuiLink
+          onClick={
+            onDependencyClick
+              ? () => onDependencyClick(item.source, target, item.sourceEnvironment)
+              : undefined
+          }
+          style={{ cursor: onDependencyClick ? 'pointer' : 'default' }}
+        >
           <EuiText size="s">
             <strong>{target}</strong>
           </EuiText>

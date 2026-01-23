@@ -42,16 +42,17 @@ export const formatPercentageValue = (value: number | undefined): string => {
  */
 export const formatLatency = (valueMs: number | undefined): string => {
   if (valueMs === undefined || isNaN(valueMs)) return '-';
-  if (valueMs >= 1000) return `${(valueMs / 1000).toFixed(2)}s`;
-  return `${valueMs.toFixed(0)} ms`;
+  if (valueMs >= 1000) return `${(valueMs / 1000).toFixed(2)} s`;
+  return `${valueMs.toFixed(2)} ms`;
 };
 
 /**
- * Format latency from seconds (PromQL returns seconds)
+ * Format throughput values with req/int unit (requests per interval)
+ * 1500 → 1.5K req/int
  */
-export const formatLatencyFromSeconds = (valueSec: number | undefined): string => {
-  if (valueSec === undefined || isNaN(valueSec)) return '-';
-  const ms = valueSec * 1000;
-  if (ms >= 1000) return `${(ms / 1000).toFixed(2)}s`;
-  return `${ms.toFixed(0)} ms`;
+export const formatThroughput = (value: number | undefined): string => {
+  if (value === undefined || isNaN(value) || !isFinite(value)) return '-';
+  if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M req/int`;
+  if (value >= 1000) return `${(value / 1000).toFixed(1)}K req/int`;
+  return `${value.toFixed(0)} req/int`;
 };

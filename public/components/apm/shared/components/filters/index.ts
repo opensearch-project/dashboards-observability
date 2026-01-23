@@ -11,9 +11,13 @@ export {
 } from './failure_rate_threshold_filter';
 export { ColoredThresholdLabel, ColoredThresholdLabelProps } from './colored_threshold_label';
 export {
-  FAILURE_RATE_THRESHOLDS,
-  FailureRateThreshold,
-  getThresholdColor,
-  matchesFailureRateThreshold,
-  matchesAnyFailureRateThreshold,
+  AvailabilityThreshold,
+  ErrorRateThreshold,
+  THRESHOLD_LABELS,
+  AVAILABILITY_THRESHOLD_OPTIONS,
+  ERROR_RATE_THRESHOLD_OPTIONS,
+  matchesAvailabilityThreshold,
+  matchesErrorRateThreshold,
+  getThresholdLabel,
+  getThemeAwareThresholdColor,
 } from './filter_utils';

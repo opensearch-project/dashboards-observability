@@ -20,9 +20,9 @@ jest.mock('../../../query_services/query_requests/promql_queries', () => ({
   getQueryAllOperationsLatencyP90: jest.fn(() => 'mock_p90_query'),
   getQueryAllOperationsLatencyP99: jest.fn(() => 'mock_p99_query'),
   getQueryAllOperationsFaultRate: jest.fn(() => 'mock_fault_rate_query'),
-  getQueryAllOperationsErrorRate: jest.fn(() => 'mock_error_rate_query'),
-  getQueryAllOperationsAvailability: jest.fn(() => 'mock_availability_query'),
-  getQueryAllOperationsRequestCount: jest.fn(() => 'mock_request_count_query'),
+  getQueryAllOperationsErrorRateAvg: jest.fn(() => 'mock_error_rate_avg_query'),
+  getQueryAllOperationsAvailabilityAvg: jest.fn(() => 'mock_availability_avg_query'),
+  getQueryAllOperationsRequestCountTotal: jest.fn(() => 'mock_request_count_total_query'),
 }));
 
 describe('useOperationMetrics', () => {
@@ -87,17 +87,19 @@ describe('useOperationMetrics', () => {
   describe('successful fetch', () => {
     it('should fetch and populate metrics for operations (data frame format)', async () => {
       // Mock 7 parallel responses (one per metric type)
+      // Note: PromQL queries now include unit conversions (* 1000 for latency, * 100 for rates)
+      // so mock values represent the already-converted values
       mockExecuteMetricRequest
         .mockResolvedValueOnce(
           createMockResponse([
-            { operation: 'GET /api/users', Value: '0.1' }, // 100ms in seconds
+            { operation: 'GET /api/users', Value: '100' }, // 100ms (already converted in PromQL)
           ])
         ) // p50
-        .mockResolvedValueOnce(createMockResponse([{ operation: 'GET /api/users', Value: '0.2' }])) // p90
-        .mockResolvedValueOnce(createMockResponse([{ operation: 'GET /api/users', Value: '0.5' }])) // p99
-        .mockResolvedValueOnce(createMockResponse([{ operation: 'GET /api/users', Value: '5' }])) // faultRate
-        .mockResolvedValueOnce(createMockResponse([{ operation: 'GET /api/users', Value: '2' }])) // errorRate
-        .mockResolvedValueOnce(createMockResponse([{ operation: 'GET /api/users', Value: '9900' }])) // availability (100 * percentage)
+        .mockResolvedValueOnce(createMockResponse([{ operation: 'GET /api/users', Value: '200' }])) // p90
+        .mockResolvedValueOnce(createMockResponse([{ operation: 'GET /api/users', Value: '500' }])) // p99
+        .mockResolvedValueOnce(createMockResponse([{ operation: 'GET /api/users', Value: '5' }])) // faultRate (percentage)
+        .mockResolvedValueOnce(createMockResponse([{ operation: 'GET /api/users', Value: '2' }])) // errorRate (percentage)
+        .mockResolvedValueOnce(createMockResponse([{ operation: 'GET /api/users', Value: '99' }])) // availability (percentage)
         .mockResolvedValueOnce(
           createMockResponse([{ operation: 'GET /api/users', Value: '1000' }])
         ); // requestCount
@@ -113,20 +115,20 @@ describe('useOperationMetrics', () => {
 
       const metrics = result.current.metrics.get('GET /api/users');
       expect(metrics).toBeDefined();
-      expect(metrics?.p50Duration).toBe(100); // 0.1s * 1000 = 100ms
+      expect(metrics?.p50Duration).toBe(100); // 100ms (no JS conversion)
       expect(metrics?.p90Duration).toBe(200);
       expect(metrics?.p99Duration).toBe(500);
       expect(metrics?.faultRate).toBe(5);
       expect(metrics?.errorRate).toBe(2);
-      expect(metrics?.availability).toBe(99); // 9900 * 0.01 = 99
+      expect(metrics?.availability).toBe(99); // 99% (no JS conversion)
       expect(metrics?.requestCount).toBe(1000);
     });
 
     it('should handle traditional Prometheus response format', async () => {
       mockExecuteMetricRequest
         .mockResolvedValueOnce(
-          createTraditionalMockResponse([{ operation: 'GET /api/users', value: '0.15' }])
-        ) // p50
+          createTraditionalMockResponse([{ operation: 'GET /api/users', value: '150' }])
+        ) // p50 in ms (already converted)
         .mockResolvedValue({ data: { result: [] } }); // Rest return empty
 
       const { result, waitForNextUpdate } = renderHook(() => useOperationMetrics(defaultParams));
@@ -134,7 +136,7 @@ describe('useOperationMetrics', () => {
       await waitForNextUpdate();
 
       const metrics = result.current.metrics.get('GET /api/users');
-      expect(metrics?.p50Duration).toBe(150); // 0.15s * 1000 = 150ms
+      expect(metrics?.p50Duration).toBe(150); // 150ms (no JS conversion)
     });
 
     it('should initialize metrics to default values when no data returned', async () => {
@@ -264,17 +266,19 @@ describe('useOperationMetrics', () => {
   });
 
   describe('query parameters', () => {
-    it('should use 5-minute time range for instant-like queries', async () => {
+    it('should use actual time range from params', async () => {
       mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
 
       const { waitForNextUpdate } = renderHook(() => useOperationMetrics(defaultParams));
 
       await waitForNextUpdate();
 
-      // Check that queries use a short time range (approximately 5 minutes)
+      // Check that queries use the time range from params
       const call = mockExecuteMetricRequest.mock.calls[0][0];
-      const timeDiff = call.endTime - call.startTime;
-      expect(timeDiff).toBeLessThanOrEqual(5 * 60); // 5 minutes in seconds
+      const expectedStartTime = Math.floor(defaultParams.startTime.getTime() / 1000);
+      const expectedEndTime = Math.floor(defaultParams.endTime.getTime() / 1000);
+      expect(call.startTime).toBe(expectedStartTime);
+      expect(call.endTime).toBe(expectedEndTime);
     });
   });
 });

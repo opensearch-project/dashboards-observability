@@ -6,16 +6,16 @@
 import { useState, useEffect, useMemo } from 'react';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
 import { OperationMetrics } from '../../common/types/service_details_types';
+import { calculateTimeRangeDuration } from '../utils/time_utils';
 import {
   getQueryAllOperationsLatencyP50,
   getQueryAllOperationsLatencyP90,
   getQueryAllOperationsLatencyP99,
   getQueryAllOperationsFaultRate,
-  getQueryAllOperationsErrorRate,
-  getQueryAllOperationsAvailability,
-  getQueryAllOperationsRequestCount,
+  getQueryAllOperationsErrorRateAvg,
+  getQueryAllOperationsAvailabilityAvg,
+  getQueryAllOperationsRequestCountTotal,
 } from '../../query_services/query_requests/promql_queries';
-import { PROMQL_CONSTANTS } from '../../common/constants';
 
 export interface UseOperationMetricsParams {
   operations: Array<{ operationName: string }>;
@@ -42,8 +42,7 @@ export interface UseOperationMetricsResult {
  * - Error rate from Prometheus
  * - Availability from Prometheus
  *
- * Uses short time range (5 minutes) queries and takes latest value
- * to simulate instant queries with existing range query API.
+ * Uses the time range specified in params for querying.
  */
 export const useOperationMetrics = (
   params: UseOperationMetricsParams
@@ -71,12 +70,13 @@ export const useOperationMetrics = (
       setError(null);
 
       try {
-        // Use short time range for instant-like queries
-        const now = new Date();
-        const queryWindowStart = new Date(now.getTime() - PROMQL_CONSTANTS.INSTANT_QUERY_WINDOW_MS);
+        // Calculate time range duration for aggregate queries
+        const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
 
         // Make 7 consolidated queries (one per metric type)
         // Each query returns ALL operations in a single response
+        // Request count uses sum_over_time for true total
+        // Error rate and availability use avg_over_time for accurate averages
         const [
           p50Response,
           p90Response,
@@ -87,39 +87,63 @@ export const useOperationMetrics = (
           requestCountResponse,
         ] = await Promise.all([
           promqlService.executeMetricRequest({
-            query: getQueryAllOperationsLatencyP50(params.environment, params.serviceName),
-            startTime: Math.floor(queryWindowStart.getTime() / 1000),
-            endTime: Math.floor(now.getTime() / 1000),
+            query: getQueryAllOperationsLatencyP50(
+              params.environment,
+              params.serviceName,
+              timeRangeDuration
+            ),
+            startTime: Math.floor(params.startTime.getTime() / 1000),
+            endTime: Math.floor(params.endTime.getTime() / 1000),
           }),
           promqlService.executeMetricRequest({
-            query: getQueryAllOperationsLatencyP90(params.environment, params.serviceName),
-            startTime: Math.floor(queryWindowStart.getTime() / 1000),
-            endTime: Math.floor(now.getTime() / 1000),
+            query: getQueryAllOperationsLatencyP90(
+              params.environment,
+              params.serviceName,
+              timeRangeDuration
+            ),
+            startTime: Math.floor(params.startTime.getTime() / 1000),
+            endTime: Math.floor(params.endTime.getTime() / 1000),
           }),
           promqlService.executeMetricRequest({
-            query: getQueryAllOperationsLatencyP99(params.environment, params.serviceName),
-            startTime: Math.floor(queryWindowStart.getTime() / 1000),
-            endTime: Math.floor(now.getTime() / 1000),
+            query: getQueryAllOperationsLatencyP99(
+              params.environment,
+              params.serviceName,
+              timeRangeDuration
+            ),
+            startTime: Math.floor(params.startTime.getTime() / 1000),
+            endTime: Math.floor(params.endTime.getTime() / 1000),
           }),
           promqlService.executeMetricRequest({
             query: getQueryAllOperationsFaultRate(params.environment, params.serviceName),
-            startTime: Math.floor(queryWindowStart.getTime() / 1000),
-            endTime: Math.floor(now.getTime() / 1000),
+            startTime: Math.floor(params.startTime.getTime() / 1000),
+            endTime: Math.floor(params.endTime.getTime() / 1000),
           }),
           promqlService.executeMetricRequest({
-            query: getQueryAllOperationsErrorRate(params.environment, params.serviceName),
-            startTime: Math.floor(queryWindowStart.getTime() / 1000),
-            endTime: Math.floor(now.getTime() / 1000),
+            query: getQueryAllOperationsErrorRateAvg(
+              params.environment,
+              params.serviceName,
+              timeRangeDuration
+            ),
+            startTime: Math.floor(params.startTime.getTime() / 1000),
+            endTime: Math.floor(params.endTime.getTime() / 1000),
           }),
           promqlService.executeMetricRequest({
-            query: getQueryAllOperationsAvailability(params.environment, params.serviceName),
-            startTime: Math.floor(queryWindowStart.getTime() / 1000),
-            endTime: Math.floor(now.getTime() / 1000),
+            query: getQueryAllOperationsAvailabilityAvg(
+              params.environment,
+              params.serviceName,
+              timeRangeDuration
+            ),
+            startTime: Math.floor(params.startTime.getTime() / 1000),
+            endTime: Math.floor(params.endTime.getTime() / 1000),
           }),
           promqlService.executeMetricRequest({
-            query: getQueryAllOperationsRequestCount(params.environment, params.serviceName),
-            startTime: Math.floor(queryWindowStart.getTime() / 1000),
-            endTime: Math.floor(now.getTime() / 1000),
+            query: getQueryAllOperationsRequestCountTotal(
+              params.environment,
+              params.serviceName,
+              timeRangeDuration
+            ),
+            startTime: Math.floor(params.startTime.getTime() / 1000),
+            endTime: Math.floor(params.endTime.getTime() / 1000),
           }),
         ]);
 
@@ -139,13 +163,14 @@ export const useOperationMetrics = (
         });
 
         // Extract metrics by operation from each response
-        extractMetricsByOperation(p50Response, metricsMap, 'p50Duration', 1000); // Convert seconds to ms
-        extractMetricsByOperation(p90Response, metricsMap, 'p90Duration', 1000);
-        extractMetricsByOperation(p99Response, metricsMap, 'p99Duration', 1000);
-        extractMetricsByOperation(faultRateResponse, metricsMap, 'faultRate', 1);
-        extractMetricsByOperation(errorRateResponse, metricsMap, 'errorRate', 1);
-        extractMetricsByOperation(availabilityResponse, metricsMap, 'availability', 0.01); // Convert 0-100 to 0-1
-        extractMetricsByOperation(requestCountResponse, metricsMap, 'requestCount', 1);
+        // Note: Unit conversions are now done in PromQL queries (latency * 1000, rates * 100)
+        extractMetricsByOperation(p50Response, metricsMap, 'p50Duration');
+        extractMetricsByOperation(p90Response, metricsMap, 'p90Duration');
+        extractMetricsByOperation(p99Response, metricsMap, 'p99Duration');
+        extractMetricsByOperation(faultRateResponse, metricsMap, 'faultRate');
+        extractMetricsByOperation(errorRateResponse, metricsMap, 'errorRate');
+        extractMetricsByOperation(availabilityResponse, metricsMap, 'availability');
+        extractMetricsByOperation(requestCountResponse, metricsMap, 'requestCount');
 
         setMetrics(metricsMap);
       } catch (err) {
@@ -173,16 +198,15 @@ export const useOperationMetrics = (
 
 /**
  * Extract metrics from consolidated PromQL response and populate metrics map
+ * Note: Unit conversions are done in PromQL queries, not here
  * @param response PromQL response with multiple time series (one per operation)
  * @param metricsMap Map to populate with metrics
  * @param metricField Field name to set in OperationMetrics
- * @param multiplier Value multiplier (e.g., 1000 for ms conversion, 0.01 for percentage conversion)
  */
 function extractMetricsByOperation(
   response: any,
   metricsMap: Map<string, OperationMetrics>,
-  metricField: keyof OperationMetrics,
-  multiplier: number
+  metricField: keyof OperationMetrics
 ): void {
   try {
     // Handle data frame format (query enhancements plugin response)
@@ -203,7 +227,7 @@ function extractMetricsByOperation(
           return;
         }
 
-        const value = (isNaN(rawValue) ? 0 : rawValue) * multiplier;
+        const value = isNaN(rawValue) ? 0 : rawValue;
 
         // Update metrics map
         const metrics = metricsMap.get(operationName);
@@ -238,7 +262,7 @@ function extractMetricsByOperation(
 
       const lastValue = values[values.length - 1];
       const rawValue = parseFloat(lastValue[1]);
-      const value = (isNaN(rawValue) ? 0 : rawValue) * multiplier;
+      const value = isNaN(rawValue) ? 0 : rawValue;
 
       // Update metrics map
       const metrics = metricsMap.get(operationName);

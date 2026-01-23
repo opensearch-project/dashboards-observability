@@ -6,16 +6,16 @@
 import { useState, useEffect, useMemo } from 'react';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
 import { DependencyMetrics, GroupedDependency } from '../../common/types/service_details_types';
+import { calculateTimeRangeDuration } from '../utils/time_utils';
 import {
   getQueryAllDependenciesLatencyP50,
   getQueryAllDependenciesLatencyP90,
   getQueryAllDependenciesLatencyP99,
   getQueryAllDependenciesFaultRate,
-  getQueryAllDependenciesErrorRate,
-  getQueryAllDependenciesAvailability,
-  getQueryAllDependenciesRequestCount,
+  getQueryAllDependenciesErrorRateAvg,
+  getQueryAllDependenciesAvailabilityAvg,
+  getQueryAllDependenciesRequestCountTotal,
 } from '../../query_services/query_requests/promql_queries';
-import { PROMQL_CONSTANTS } from '../../common/constants';
 
 export interface UseDependencyMetricsParams {
   dependencies: GroupedDependency[];
@@ -42,8 +42,7 @@ export interface UseDependencyMetricsResult {
  * - Error rate from Prometheus
  * - Availability from Prometheus
  *
- * Uses short time range (5 minutes) queries and takes latest value
- * to simulate instant queries with existing range query API.
+ * Uses the time range specified in params for querying.
  */
 export const useDependencyMetrics = (
   params: UseDependencyMetricsParams
@@ -71,12 +70,13 @@ export const useDependencyMetrics = (
       setError(null);
 
       try {
-        // Use short time range for instant-like queries
-        const now = new Date();
-        const queryWindowStart = new Date(now.getTime() - PROMQL_CONSTANTS.INSTANT_QUERY_WINDOW_MS);
+        // Calculate time range duration for aggregate queries
+        const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
 
         // Make 7 consolidated queries (one per metric type)
         // Each query returns ALL dependencies in a single response
+        // Request count uses sum_over_time for true total
+        // Error rate and availability use avg_over_time for accurate averages
         const [
           p50Response,
           p90Response,
@@ -87,39 +87,63 @@ export const useDependencyMetrics = (
           requestCountResponse,
         ] = await Promise.all([
           promqlService.executeMetricRequest({
-            query: getQueryAllDependenciesLatencyP50(params.environment, params.serviceName),
-            startTime: Math.floor(queryWindowStart.getTime() / 1000),
-            endTime: Math.floor(now.getTime() / 1000),
+            query: getQueryAllDependenciesLatencyP50(
+              params.environment,
+              params.serviceName,
+              timeRangeDuration
+            ),
+            startTime: Math.floor(params.startTime.getTime() / 1000),
+            endTime: Math.floor(params.endTime.getTime() / 1000),
           }),
           promqlService.executeMetricRequest({
-            query: getQueryAllDependenciesLatencyP90(params.environment, params.serviceName),
-            startTime: Math.floor(queryWindowStart.getTime() / 1000),
-            endTime: Math.floor(now.getTime() / 1000),
+            query: getQueryAllDependenciesLatencyP90(
+              params.environment,
+              params.serviceName,
+              timeRangeDuration
+            ),
+            startTime: Math.floor(params.startTime.getTime() / 1000),
+            endTime: Math.floor(params.endTime.getTime() / 1000),
           }),
           promqlService.executeMetricRequest({
-            query: getQueryAllDependenciesLatencyP99(params.environment, params.serviceName),
-            startTime: Math.floor(queryWindowStart.getTime() / 1000),
-            endTime: Math.floor(now.getTime() / 1000),
+            query: getQueryAllDependenciesLatencyP99(
+              params.environment,
+              params.serviceName,
+              timeRangeDuration
+            ),
+            startTime: Math.floor(params.startTime.getTime() / 1000),
+            endTime: Math.floor(params.endTime.getTime() / 1000),
           }),
           promqlService.executeMetricRequest({
             query: getQueryAllDependenciesFaultRate(params.environment, params.serviceName),
-            startTime: Math.floor(queryWindowStart.getTime() / 1000),
-            endTime: Math.floor(now.getTime() / 1000),
+            startTime: Math.floor(params.startTime.getTime() / 1000),
+            endTime: Math.floor(params.endTime.getTime() / 1000),
           }),
           promqlService.executeMetricRequest({
-            query: getQueryAllDependenciesErrorRate(params.environment, params.serviceName),
-            startTime: Math.floor(queryWindowStart.getTime() / 1000),
-            endTime: Math.floor(now.getTime() / 1000),
+            query: getQueryAllDependenciesErrorRateAvg(
+              params.environment,
+              params.serviceName,
+              timeRangeDuration
+            ),
+            startTime: Math.floor(params.startTime.getTime() / 1000),
+            endTime: Math.floor(params.endTime.getTime() / 1000),
           }),
           promqlService.executeMetricRequest({
-            query: getQueryAllDependenciesAvailability(params.environment, params.serviceName),
-            startTime: Math.floor(queryWindowStart.getTime() / 1000),
-            endTime: Math.floor(now.getTime() / 1000),
+            query: getQueryAllDependenciesAvailabilityAvg(
+              params.environment,
+              params.serviceName,
+              timeRangeDuration
+            ),
+            startTime: Math.floor(params.startTime.getTime() / 1000),
+            endTime: Math.floor(params.endTime.getTime() / 1000),
           }),
           promqlService.executeMetricRequest({
-            query: getQueryAllDependenciesRequestCount(params.environment, params.serviceName),
-            startTime: Math.floor(queryWindowStart.getTime() / 1000),
-            endTime: Math.floor(now.getTime() / 1000),
+            query: getQueryAllDependenciesRequestCountTotal(
+              params.environment,
+              params.serviceName,
+              timeRangeDuration
+            ),
+            startTime: Math.floor(params.startTime.getTime() / 1000),
+            endTime: Math.floor(params.endTime.getTime() / 1000),
           }),
         ]);
 
@@ -139,13 +163,14 @@ export const useDependencyMetrics = (
         });
 
         // Extract metrics by dependency from each response
-        extractMetricsByDependency(p50Response, metricsMap, 'p50Duration', 1000); // Convert seconds to ms
-        extractMetricsByDependency(p90Response, metricsMap, 'p90Duration', 1000);
-        extractMetricsByDependency(p99Response, metricsMap, 'p99Duration', 1000);
-        extractMetricsByDependency(faultRateResponse, metricsMap, 'faultRate', 1);
-        extractMetricsByDependency(errorRateResponse, metricsMap, 'errorRate', 1);
-        extractMetricsByDependency(availabilityResponse, metricsMap, 'availability', 0.01); // Convert 0-100 to 0-1
-        extractMetricsByDependency(requestCountResponse, metricsMap, 'requestCount', 1);
+        // Note: Unit conversions are now done in PromQL queries (latency * 1000, rates * 100)
+        extractMetricsByDependency(p50Response, metricsMap, 'p50Duration');
+        extractMetricsByDependency(p90Response, metricsMap, 'p90Duration');
+        extractMetricsByDependency(p99Response, metricsMap, 'p99Duration');
+        extractMetricsByDependency(faultRateResponse, metricsMap, 'faultRate');
+        extractMetricsByDependency(errorRateResponse, metricsMap, 'errorRate');
+        extractMetricsByDependency(availabilityResponse, metricsMap, 'availability');
+        extractMetricsByDependency(requestCountResponse, metricsMap, 'requestCount');
 
         setMetrics(metricsMap);
       } catch (err) {
@@ -173,16 +198,15 @@ export const useDependencyMetrics = (
 
 /**
  * Extract metrics from consolidated PromQL response and populate metrics map
+ * Note: Unit conversions are done in PromQL queries, not here
  * @param response PromQL response with multiple time series (one per dependency)
  * @param metricsMap Map to populate with metrics (key: "remoteService:remoteOperation")
  * @param metricField Field name to set in DependencyMetrics
- * @param multiplier Value multiplier (e.g., 1000 for ms conversion, 0.01 for percentage conversion)
  */
 function extractMetricsByDependency(
   response: any,
   metricsMap: Map<string, DependencyMetrics>,
-  metricField: keyof DependencyMetrics,
-  multiplier: number
+  metricField: keyof DependencyMetrics
 ): void {
   try {
     // Handle data frame format (query enhancements plugin response)
@@ -205,7 +229,7 @@ function extractMetricsByDependency(
         }
 
         const key = `${remoteService}:${remoteOperation}`;
-        const value = (isNaN(rawValue) ? 0 : rawValue) * multiplier;
+        const value = isNaN(rawValue) ? 0 : rawValue;
 
         // Update metrics map
         const metrics = metricsMap.get(key);
@@ -244,7 +268,7 @@ function extractMetricsByDependency(
 
       const lastValue = values[values.length - 1];
       const rawValue = parseFloat(lastValue[1]);
-      const value = (isNaN(rawValue) ? 0 : rawValue) * multiplier;
+      const value = isNaN(rawValue) ? 0 : rawValue;
 
       // Update metrics map
       const metrics = metricsMap.get(key);

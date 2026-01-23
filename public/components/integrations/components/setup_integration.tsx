@@ -27,6 +27,7 @@ import { SQLService } from '../../../../public/services/requests/sql';
 import { coreRefs } from '../../../framework/core_refs';
 import { addIntegrationRequest } from './create_integration_helpers';
 import { SetupIntegrationFormInputs } from './setup_integration_inputs';
+import { generateTimestampFilter } from './integration_timefield_strategies';
 
 /**
  * Configuration inputs for integration setup
@@ -41,6 +42,7 @@ export interface IntegrationSetupInputs {
   databaseName: string;
   connectionTableName: string;
   enabledWorkflows: string[];
+  refreshRangeDays: number;
 }
 
 export interface IntegrationConfigProps {
@@ -161,10 +163,14 @@ const prepareQuery = (query: string, config: IntegrationSetupInputs): string => 
     : config.checkpointLocation + '/';
   checkpointLocation += `${config.connectionDataSource}-${config.connectionTableName}-${querySpecificUUID}`;
 
+  // Generate refresh range filter using universal @timestamp filter
+  const refreshRangeFilter = generateTimestampFilter(config.refreshRangeDays);
+
   let queryStr = query.replaceAll('{table_name}', makeTableName(config));
   queryStr = queryStr.replaceAll('{s3_bucket_location}', config.connectionLocation);
   queryStr = queryStr.replaceAll('{s3_checkpoint_location}', checkpointLocation);
   queryStr = queryStr.replaceAll('{object_name}', config.connectionTableName);
+  queryStr = queryStr.replaceAll('{refresh_range_filter}', refreshRangeFilter);
   // TODO spark API only supports single-line queries, but directly replacing all whitespace leads
   // to issues with single-line comments and quoted strings with more whitespace. A more robust
   // implementation would remove comments before flattening and ignore strings.
@@ -559,6 +565,7 @@ export function SetupIntegrationForm({
     connectionTableName: integration,
     databaseName: 'default',
     enabledWorkflows: [],
+    refreshRangeDays: 7,
   });
 
   const [template, setTemplate] = useState({

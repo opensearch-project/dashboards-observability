@@ -6,15 +6,22 @@
 import React, { useMemo, useCallback } from 'react';
 import { EuiCheckboxGroup } from '@elastic/eui';
 import { ColoredThresholdLabel } from './colored_threshold_label';
-import { FAILURE_RATE_THRESHOLDS, getThresholdColor } from './filter_utils';
+import {
+  ErrorRateThreshold,
+  ERROR_RATE_THRESHOLD_OPTIONS,
+  THRESHOLD_LABELS,
+  getThemeAwareThresholdColor,
+} from './filter_utils';
 
 export interface FailureRateThresholdFilterProps {
   /** Currently selected thresholds */
-  selectedThresholds: string[];
+  selectedThresholds: ErrorRateThreshold[];
   /** Callback when selection changes */
-  onSelectionChange: (selected: string[]) => void;
+  onSelectionChange: (selected: ErrorRateThreshold[]) => void;
   /** Data test subject prefix */
   dataTestSubj?: string;
+  /** Disable the filter */
+  disabled?: boolean;
 }
 
 /**
@@ -31,12 +38,18 @@ export const FailureRateThresholdFilter: React.FC<FailureRateThresholdFilterProp
   selectedThresholds,
   onSelectionChange,
   dataTestSubj = 'failureRateThresholdFilter',
+  disabled = false,
 }) => {
   // Build checkbox options with colored labels
   const checkboxOptions = useMemo(() => {
-    return FAILURE_RATE_THRESHOLDS.map((threshold) => ({
+    return ERROR_RATE_THRESHOLD_OPTIONS.map((threshold) => ({
       id: `failure-rate-${threshold}`,
-      label: <ColoredThresholdLabel threshold={threshold} color={getThresholdColor(threshold)} />,
+      label: (
+        <ColoredThresholdLabel
+          threshold={THRESHOLD_LABELS.errorRate[threshold]}
+          color={getThemeAwareThresholdColor(threshold, 'errorRate')}
+        />
+      ),
     }));
   }, []);
 
@@ -52,7 +65,7 @@ export const FailureRateThresholdFilter: React.FC<FailureRateThresholdFilterProp
   // Handle checkbox change
   const handleCheckboxChange = useCallback(
     (optionId: string) => {
-      const threshold = optionId.replace('failure-rate-', '');
+      const threshold = optionId.replace('failure-rate-', '') as ErrorRateThreshold;
       const isSelected = selectedThresholds.includes(threshold);
       if (isSelected) {
         onSelectionChange(selectedThresholds.filter((t) => t !== threshold));
@@ -69,6 +82,7 @@ export const FailureRateThresholdFilter: React.FC<FailureRateThresholdFilterProp
       idToSelectedMap={idToSelectedMap}
       onChange={handleCheckboxChange}
       compressed
+      disabled={disabled}
       data-test-subj={`${dataTestSubj}-checkboxGroup`}
     />
   );

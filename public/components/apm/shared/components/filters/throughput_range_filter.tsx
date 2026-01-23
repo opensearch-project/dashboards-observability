@@ -5,9 +5,10 @@
 
 import React from 'react';
 import { EuiDualRange, EuiSpacer, EuiText } from '@elastic/eui';
+import { formatThroughput } from '../../../common/format_utils';
 
 export interface ThroughputRangeFilterProps {
-  /** Current range selection [min, max] in requests per minute */
+  /** Current range selection [min, max] */
   value: [number, number];
   /** Callback when range changes */
   onChange: (range: [number, number]) => void;
@@ -17,10 +18,12 @@ export interface ThroughputRangeFilterProps {
   max: number;
   /** Data test subject prefix */
   dataTestSubj?: string;
+  /** Disable the filter */
+  disabled?: boolean;
 }
 
 /**
- * ThroughputRangeFilter - Dual range slider for filtering by throughput
+ * ThroughputRangeFilter - Dual range slider for filtering by request count
  *
  * Designed for reuse across Services, Service Details, and Operations pages.
  */
@@ -30,12 +33,10 @@ export const ThroughputRangeFilter: React.FC<ThroughputRangeFilterProps> = ({
   min,
   max,
   dataTestSubj = 'throughputRangeFilter',
+  disabled = false,
 }) => {
   // Handle edge case where min === max (no range)
   const effectiveMax = min === max ? max + 1 : max;
-
-  // Format value for display (round to 2 decimal places)
-  const formatValue = (val: number) => val.toFixed(2);
 
   return (
     <>
@@ -47,13 +48,13 @@ export const ThroughputRangeFilter: React.FC<ThroughputRangeFilterProps> = ({
         onChange={(newValue) => onChange(newValue as [number, number])}
         showLabels
         compressed
-        disabled={min === max}
+        disabled={disabled || min === max}
         aria-label="Throughput range filter"
         data-test-subj={dataTestSubj}
       />
       <EuiSpacer size="xs" />
       <EuiText size="xs" color="subdued" textAlign="center">
-        {formatValue(value[0])} - {formatValue(value[1])} req/min
+        {formatThroughput(value[0])} - {formatThroughput(value[1])}
       </EuiText>
     </>
   );

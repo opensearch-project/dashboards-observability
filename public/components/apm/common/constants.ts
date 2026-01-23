@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { euiThemeVars } from '@osd/ui-shared-deps/theme';
+
 /**
  * App ID for Explore application used in navigation
  */
@@ -23,15 +25,15 @@ export const APM_CONSTANTS = {
   SPARKLINE_HEIGHT: 20,
   SPARKLINE_WIDTH: 100,
 
-  // Colors for metrics
+  // Colors for metrics (using EUI theme variables for dark/light mode support)
   COLORS: {
-    LATENCY: '#6092C0',
-    THROUGHPUT: '#54B399',
-    FAILURE_RATE: '#D36086',
-    ERROR: '#D36086',
-    FAULT: '#BD271E',
-    SUCCESS: '#54B399',
-    WARNING: '#D6BF57',
+    LATENCY: euiThemeVars.euiColorVis1,
+    THROUGHPUT: euiThemeVars.euiColorVis0,
+    FAILURE_RATE: euiThemeVars.euiColorVis2,
+    ERROR: euiThemeVars.euiColorVis2,
+    FAULT: euiThemeVars.euiColorDanger,
+    SUCCESS: euiThemeVars.euiColorVis0,
+    WARNING: euiThemeVars.euiColorVis5,
   },
 
   // Query limits for fetching data
@@ -45,6 +47,56 @@ export const APM_CONSTANTS = {
 } as const;
 
 /**
+ * Semantic keys for availability threshold filters
+ */
+export enum AvailabilityThreshold {
+  LOW = 'LOW', // < 95%
+  MEDIUM = 'MEDIUM', // 95-99%
+  HIGH = 'HIGH', // ≥ 99%
+}
+
+/**
+ * Semantic keys for error/fault rate threshold filters
+ */
+export enum ErrorRateThreshold {
+  LOW = 'LOW', // < 1%
+  MEDIUM = 'MEDIUM', // 1-5%
+  HIGH = 'HIGH', // > 5%
+}
+
+/**
+ * Display labels for threshold filters
+ * Separated from logic keys for i18n support
+ */
+export const THRESHOLD_LABELS = {
+  availability: {
+    [AvailabilityThreshold.LOW]: '< 95%',
+    [AvailabilityThreshold.MEDIUM]: '95-99%',
+    [AvailabilityThreshold.HIGH]: '≥ 99%',
+  },
+  errorRate: {
+    [ErrorRateThreshold.LOW]: '< 1%',
+    [ErrorRateThreshold.MEDIUM]: '1-5%',
+    [ErrorRateThreshold.HIGH]: '> 5%',
+  },
+} as const;
+
+/**
+ * Ordered arrays for UI rendering
+ */
+export const AVAILABILITY_THRESHOLD_OPTIONS = [
+  AvailabilityThreshold.LOW,
+  AvailabilityThreshold.MEDIUM,
+  AvailabilityThreshold.HIGH,
+] as const;
+
+export const ERROR_RATE_THRESHOLD_OPTIONS = [
+  ErrorRateThreshold.LOW,
+  ErrorRateThreshold.MEDIUM,
+  ErrorRateThreshold.HIGH,
+] as const;
+
+/**
  * Service Details page constants
  */
 export const SERVICE_DETAILS_CONSTANTS = {
@@ -56,14 +108,11 @@ export const SERVICE_DETAILS_CONSTANTS = {
 
   // Chart heights
   METRIC_CARD_HEIGHT: 120,
+
+  // Trend indicator threshold (percentage change below this is considered neutral)
+  TREND_THRESHOLD_PERCENT: 0.1,
   LINE_CHART_HEIGHT: 300,
   EXPANDED_ROW_CHART_HEIGHT: 250,
-
-  // Threshold values for availability filters
-  AVAILABILITY_THRESHOLDS: ['< 95%', '95-99%', '≥ 99%'] as const,
-
-  // Threshold values for error/fault rate filters
-  RATE_THRESHOLDS: ['< 1%', '1-5%', '> 5%'] as const,
 
   // Default slider ranges
   DEFAULT_LATENCY_RANGE: [0, 10000] as [number, number],
@@ -87,19 +136,20 @@ export const SERVICE_DETAILS_CONSTANTS = {
 
 /**
  * Chart colors for multi-series line charts
+ * Using EUI theme visualization colors for dark/light mode support
  */
 export const CHART_COLORS = [
-  '#54B399', // Green
-  '#6092C0', // Blue
-  '#D36086', // Pink
-  '#9170B8', // Purple
-  '#CA8EAE', // Light Pink
-  '#D6BF57', // Yellow
-  '#B9A888', // Tan
-  '#DA8B45', // Orange
-  '#AA6556', // Brown
-  '#E7664C', // Red-Orange
-] as const;
+  euiThemeVars.euiColorVis0, // Green
+  euiThemeVars.euiColorVis1, // Blue
+  euiThemeVars.euiColorVis2, // Pink
+  euiThemeVars.euiColorVis3, // Purple
+  euiThemeVars.euiColorVis4, // Light Pink
+  euiThemeVars.euiColorVis5, // Yellow
+  euiThemeVars.euiColorVis6, // Tan
+  euiThemeVars.euiColorVis7, // Orange
+  euiThemeVars.euiColorVis8, // Brown
+  euiThemeVars.euiColorVis9, // Red-Orange
+];
 
 /**
  * Maps uppercase platform type to display key for environment filter

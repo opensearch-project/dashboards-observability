@@ -10,8 +10,11 @@ import { useApmConfig } from '../../config/apm_config_context';
 
 export interface ServiceRedMetrics {
   latency: MetricDataPoint[];
+  avgLatency: number; // Average of all latency data points over the time period
   throughput: MetricDataPoint[];
+  avgThroughput: number; // Average of all throughput data points over the time period
   failureRatio: MetricDataPoint[];
+  avgFailureRatio: number; // Average of all failure ratio data points over the time period
 }
 
 export interface MetricDataPoint {
@@ -191,7 +194,7 @@ export const useServicesRedMetrics = (
             sum by (service, le) (
               latency_seconds_seconds_bucket{${serviceFilter},namespace="span_derived"}
             )
-          )
+          ) * 1000
         `.trim();
 
         const latencyResp = await promqlService.executeMetricRequest({
@@ -238,10 +241,31 @@ export const useServicesRedMetrics = (
     const serviceNames = new Set([...latencyMap.keys(), ...throughputFailureMap.keys()]);
 
     serviceNames.forEach((serviceName) => {
+      const latencyData = latencyMap.get(serviceName) || [];
+      const throughputData = throughputFailureMap.get(serviceName)?.throughput || [];
+      const failureData = throughputFailureMap.get(serviceName)?.failureRatio || [];
+
+      // Calculate averages over the time period
+      const avgLatency =
+        latencyData.length > 0
+          ? latencyData.reduce((sum, point) => sum + point.value, 0) / latencyData.length
+          : 0;
+      const avgThroughput =
+        throughputData.length > 0
+          ? throughputData.reduce((sum, point) => sum + point.value, 0) / throughputData.length
+          : 0;
+      const avgFailureRatio =
+        failureData.length > 0
+          ? failureData.reduce((sum, point) => sum + point.value, 0) / failureData.length
+          : 0;
+
       combined.set(serviceName, {
-        latency: latencyMap.get(serviceName) || [],
-        throughput: throughputFailureMap.get(serviceName)?.throughput || [],
-        failureRatio: throughputFailureMap.get(serviceName)?.failureRatio || [],
+        latency: latencyData,
+        avgLatency,
+        throughput: throughputData,
+        avgThroughput,
+        failureRatio: failureData,
+        avgFailureRatio,
       });
     });
     return combined;

@@ -21,9 +21,9 @@ jest.mock('../../../query_services/query_requests/promql_queries', () => ({
   getQueryAllDependenciesLatencyP90: jest.fn(() => 'mock_p90_query'),
   getQueryAllDependenciesLatencyP99: jest.fn(() => 'mock_p99_query'),
   getQueryAllDependenciesFaultRate: jest.fn(() => 'mock_fault_rate_query'),
-  getQueryAllDependenciesErrorRate: jest.fn(() => 'mock_error_rate_query'),
-  getQueryAllDependenciesAvailability: jest.fn(() => 'mock_availability_query'),
-  getQueryAllDependenciesRequestCount: jest.fn(() => 'mock_request_count_query'),
+  getQueryAllDependenciesErrorRateAvg: jest.fn(() => 'mock_error_rate_avg_query'),
+  getQueryAllDependenciesAvailabilityAvg: jest.fn(() => 'mock_availability_avg_query'),
+  getQueryAllDependenciesRequestCountTotal: jest.fn(() => 'mock_request_count_total_query'),
 }));
 
 describe('useDependencyMetrics', () => {
@@ -109,25 +109,27 @@ describe('useDependencyMetrics', () => {
   describe('successful fetch', () => {
     it('should fetch and populate metrics for dependencies (data frame format)', async () => {
       // Mock 7 parallel responses (one per metric type)
+      // Note: PromQL queries now include unit conversions (* 1000 for latency, * 100 for rates)
+      // so mock values represent the already-converted values
       mockExecuteMetricRequest
         .mockResolvedValueOnce(
-          createMockResponse([{ remoteService: 'cart', remoteOperation: 'AddItem', Value: '0.1' }])
-        ) // p50
+          createMockResponse([{ remoteService: 'cart', remoteOperation: 'AddItem', Value: '100' }])
+        ) // p50 in ms (already converted)
         .mockResolvedValueOnce(
-          createMockResponse([{ remoteService: 'cart', remoteOperation: 'AddItem', Value: '0.2' }])
+          createMockResponse([{ remoteService: 'cart', remoteOperation: 'AddItem', Value: '200' }])
         ) // p90
         .mockResolvedValueOnce(
-          createMockResponse([{ remoteService: 'cart', remoteOperation: 'AddItem', Value: '0.5' }])
+          createMockResponse([{ remoteService: 'cart', remoteOperation: 'AddItem', Value: '500' }])
         ) // p99
         .mockResolvedValueOnce(
           createMockResponse([{ remoteService: 'cart', remoteOperation: 'AddItem', Value: '5' }])
-        ) // faultRate
+        ) // faultRate (percentage)
         .mockResolvedValueOnce(
           createMockResponse([{ remoteService: 'cart', remoteOperation: 'AddItem', Value: '2' }])
-        ) // errorRate
+        ) // errorRate (percentage)
         .mockResolvedValueOnce(
-          createMockResponse([{ remoteService: 'cart', remoteOperation: 'AddItem', Value: '9900' }])
-        ) // availability
+          createMockResponse([{ remoteService: 'cart', remoteOperation: 'AddItem', Value: '99' }])
+        ) // availability (percentage)
         .mockResolvedValueOnce(
           createMockResponse([{ remoteService: 'cart', remoteOperation: 'AddItem', Value: '1000' }])
         ); // requestCount
@@ -144,12 +146,12 @@ describe('useDependencyMetrics', () => {
       // Key is "serviceName:remoteOperation"
       const metrics = result.current.metrics.get('cart:AddItem');
       expect(metrics).toBeDefined();
-      expect(metrics?.p50Duration).toBe(100); // 0.1s * 1000 = 100ms
+      expect(metrics?.p50Duration).toBe(100); // 100ms (no JS conversion)
       expect(metrics?.p90Duration).toBe(200);
       expect(metrics?.p99Duration).toBe(500);
       expect(metrics?.faultRate).toBe(5);
       expect(metrics?.errorRate).toBe(2);
-      expect(metrics?.availability).toBe(99); // 9900 * 0.01 = 99
+      expect(metrics?.availability).toBe(99); // 99% (no JS conversion)
       expect(metrics?.requestCount).toBe(1000);
     });
 
@@ -157,9 +159,9 @@ describe('useDependencyMetrics', () => {
       mockExecuteMetricRequest
         .mockResolvedValueOnce(
           createTraditionalMockResponse([
-            { remoteService: 'cart', remoteOperation: 'AddItem', value: '0.15' },
+            { remoteService: 'cart', remoteOperation: 'AddItem', value: '150' },
           ])
-        ) // p50
+        ) // p50 in ms (already converted)
         .mockResolvedValue({ data: { result: [] } }); // Rest return empty
 
       const { result, waitForNextUpdate } = renderHook(() => useDependencyMetrics(defaultParams));
@@ -167,7 +169,7 @@ describe('useDependencyMetrics', () => {
       await waitForNextUpdate();
 
       const metrics = result.current.metrics.get('cart:AddItem');
-      expect(metrics?.p50Duration).toBe(150); // 0.15s * 1000 = 150ms
+      expect(metrics?.p50Duration).toBe(150); // 150ms (no JS conversion)
     });
 
     it('should initialize metrics to default values when no data returned', async () => {
@@ -317,17 +319,19 @@ describe('useDependencyMetrics', () => {
   });
 
   describe('query parameters', () => {
-    it('should use 5-minute time range for instant-like queries', async () => {
+    it('should use actual time range from params', async () => {
       mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
 
       const { waitForNextUpdate } = renderHook(() => useDependencyMetrics(defaultParams));
 
       await waitForNextUpdate();
 
-      // Check that queries use a short time range (approximately 5 minutes)
+      // Check that queries use the time range from params
       const call = mockExecuteMetricRequest.mock.calls[0][0];
-      const timeDiff = call.endTime - call.startTime;
-      expect(timeDiff).toBeLessThanOrEqual(5 * 60); // 5 minutes in seconds
+      const expectedStartTime = Math.floor(defaultParams.startTime.getTime() / 1000);
+      const expectedEndTime = Math.floor(defaultParams.endTime.getTime() / 1000);
+      expect(call.startTime).toBe(expectedStartTime);
+      expect(call.endTime).toBe(expectedEndTime);
     });
   });
 
