@@ -98,8 +98,7 @@ describe('navigation_utils', () => {
       );
 
       const url = windowOpenSpy.mock.calls[0][0];
-      // PPL query is URL encoded
-      expect(url).toContain(encodeURIComponent('| where serviceName = "test-service"'));
+      expect(url).toContain(encodeURIComponent("| where serviceName = !'test-service!'"));
     });
 
     it('should include time range in URL', () => {
@@ -113,8 +112,8 @@ describe('navigation_utils', () => {
       );
 
       const url = windowOpenSpy.mock.calls[0][0];
-      expect(url).toContain('from:now-1h');
-      expect(url).toContain('to:now');
+      expect(url).toContain("from:'now-1h'");
+      expect(url).toContain("to:'now'");
     });
 
     it('should handle datasetId with existing :: prefix', () => {
@@ -286,9 +285,8 @@ describe('navigation_utils', () => {
       );
 
       const url = windowOpenSpy.mock.calls[0][0];
-      // PPL query uses backticks for field name and is URL encoded
       expect(url).toContain(
-        encodeURIComponent('| where `resource.attributes.service.name` = "test-service"')
+        encodeURIComponent("| where resource.attributes.service.name = !'test-service!'")
       );
     });
 
@@ -304,8 +302,8 @@ describe('navigation_utils', () => {
       );
 
       const url = windowOpenSpy.mock.calls[0][0];
-      expect(url).toContain('from:now-1h');
-      expect(url).toContain('to:now');
+      expect(url).toContain("from:'now-1h'");
+      expect(url).toContain("to:'now'");
     });
 
     it('should handle datasetId with existing :: prefix', () => {

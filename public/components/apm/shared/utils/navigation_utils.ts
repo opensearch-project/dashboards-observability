@@ -130,9 +130,9 @@ export function navigateToExploreTraces(
   operationFilter?: string
 ): void {
   // PPL query - URL encoded via encodeURIComponent
-  let pplQuery = `| where serviceName = "${serviceName}"`;
+  let pplQuery = `| where serviceName = !'${serviceName}!'`;
   if (operationFilter) {
-    pplQuery += ` | where name = "${operationFilter}"`;
+    pplQuery += ` | where name = !'${operationFilter}!'`;
   }
 
   // Build path using RISON format matching expected explore traces URL format
@@ -142,11 +142,11 @@ export function navigateToExploreTraces(
   const fullDatasetId = datasetId.includes('::')
     ? datasetId
     : `${dataSourceId || ''}::${datasetId}`;
-  const path = `traces/#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
+  const path = `traces/#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'${
     timeRange.from
-  },to:${timeRange.to}))&_q=(dataset:(dataSource:(id:'${
+  }',to:'${timeRange.to}'))&_q=(dataset:(dataSource:(id:'${
     dataSourceId || ''
-  }',title:${dsTitle},type:OpenSearch),id:'${fullDatasetId}',schemaMappings:(),signalType:traces,timeFieldName:startTime,title:'${datasetTitle}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
+  }',title:${dsTitle},type:'OpenSearch'),id:'${fullDatasetId}',schemaMappings:(),signalType:'traces',timeFieldName:'startTime',title:'${datasetTitle}',type:'INDEX_PATTERN'),language:PPL,query:'${encodeURIComponent(
     pplQuery
   )}')&_a=(legacy:(columns:!(spanId,status.code,attributes.http.status_code,resource.attributes.service.name,kind,name,durationNano,durationInNanos),interval:auto,isDirty:!f,sort:!()),tab:(logs:(),patterns:(patternsField:'',usingRegexPatterns:!f)),ui:(activeTabId:logs,showHistogram:!t))`;
 
@@ -224,11 +224,10 @@ export function navigateToExploreLogs(
   traceIdField?: string
 ): void {
   // PPL query - URL encoded via encodeURIComponent below
-  // Note: Use double quotes for string literals to avoid RISON single-quote conflicts
-  let pplQuery = `| where \`${serviceNameField}\` = "${serviceName}"`;
+  let pplQuery = `| where ${serviceNameField} = !'${serviceName}!'`;
   if (traceIds && traceIds.length > 0 && traceIdField) {
-    const traceIdList = traceIds.map((id) => `"${id}"`).join(', ');
-    pplQuery += ` | where \`${traceIdField}\` IN (${traceIdList})`;
+    const traceIdList = traceIds.map((id) => `!'${id}!'`).join(', ');
+    pplQuery += ` | where ${traceIdField} IN (${traceIdList})`;
   }
 
   // Build path using RISON format matching expected explore logs URL format
@@ -237,11 +236,11 @@ export function navigateToExploreLogs(
     ? datasetId
     : `${dataSourceId || ''}::${datasetId}`;
 
-  const path = `logs/#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
+  const path = `logs/#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'${
     timeRange.from
-  },to:${timeRange.to}))&_q=(dataset:(dataSource:(id:'${
+  }',to:'${timeRange.to}'))&_q=(dataset:(dataSource:(id:'${
     dataSourceId || ''
-  }',title:${dsTitle},type:OpenSearch),id:'${fullDatasetId}',timeFieldName:time,title:'${datasetTitle}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
+  }',title:${dsTitle},type:'OpenSearch'),id:'${fullDatasetId}',timeFieldName:'time',title:'${datasetTitle}',type:'INDEX_PATTERN'),language:PPL,query:'${encodeURIComponent(
     pplQuery
   )}')&_a=(legacy:(columns:!(_source),interval:auto,isDirty:!f,sort:!()),tab:(logs:(),patterns:(patternsField:'',usingRegexPatterns:!f)),ui:(activeTabId:logs,showHistogram:!t))`;
 
