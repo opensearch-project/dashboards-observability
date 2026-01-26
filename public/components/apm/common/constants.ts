@@ -216,3 +216,88 @@ export const PROMQL_CONSTANTS = {
    */
   INSTANT_QUERY_WINDOW_MS: 5 * 60 * 1000, // 5 minutes
 } as const;
+
+/**
+ * Application Map constants
+ */
+export const APPLICATION_MAP_CONSTANTS = {
+  /** Default time range for the map */
+  DEFAULT_TIME_RANGE: {
+    from: 'now-15m',
+    to: 'now',
+  },
+
+  /** Health status thresholds */
+  HEALTH_THRESHOLDS: {
+    /** Failure rate below this is considered healthy */
+    HEALTHY_FAILURE_RATE: 1,
+    /** Failure rate above this is considered critical */
+    CRITICAL_FAILURE_RATE: 5,
+  },
+
+  /** Service details panel chart heights */
+  CHART_HEIGHT: 150,
+  HEALTH_DONUT_SIZE: 100,
+
+  /** Filter sidebar width */
+  SIDEBAR_INITIAL_WIDTH: 15,
+  SIDEBAR_MIN_WIDTH: '10%',
+
+  /** Map container minimum height */
+  MAP_MIN_HEIGHT: 500,
+} as const;
+
+/**
+ * Platform type mapping for service map nodes
+ */
+export const PLATFORM_TYPE_MAP: Record<string, string> = {
+  'AWS::Lambda': 'Lambda',
+  'AWS::EKS': 'EKS',
+  'AWS::ECS': 'ECS',
+  'AWS::EC2': 'EC2',
+  Generic: 'Generic',
+};
+
+/**
+ * Get platform display name from platform type
+ * @param platformType - Platform type string (e.g., "AWS::EKS")
+ * @returns Display name (e.g., "EKS")
+ */
+export function getPlatformDisplayName(platformType: string): string {
+  return PLATFORM_TYPE_MAP[platformType] || 'Generic';
+}
+
+/**
+ * Get platform type from environment string
+ * @param environment - Environment string (e.g., "eks:cluster/namespace")
+ * @returns Platform type (e.g., "AWS::EKS")
+ */
+export function getPlatformTypeFromEnvironment(environment: string): string {
+  if (!environment || typeof environment !== 'string') {
+    return 'Generic';
+  }
+
+  const platform = environment.split(':')[0]?.toLowerCase();
+
+  switch (platform) {
+    case 'eks':
+      return 'AWS::EKS';
+    case 'ec2':
+      return 'AWS::EC2';
+    case 'ecs':
+      return 'AWS::ECS';
+    case 'lambda':
+      return 'AWS::Lambda';
+    default:
+      return 'Generic';
+  }
+}
+
+/**
+ * Convert OpenSearch path to Prometheus label format
+ * @param path - Dot-notation path (e.g., "telemetry.sdk.language")
+ * @returns Prometheus label format (e.g., "telemetry_sdk_language")
+ */
+export function toPrometheusLabel(path: string): string {
+  return path.replace(/\./g, '_');
+}

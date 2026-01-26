@@ -2,6 +2,20 @@
 
 > **Note:** This plugin is currently under active development. Features and APIs may change.
 
+## Implementation Status
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Services Home Page | ✅ Complete | Service catalog with RED metrics |
+| Service Details - Overview | ✅ Complete | Metric cards, charts, fault widgets |
+| Service Details - Operations | ✅ Complete | Operations table with filters |
+| Service Details - Dependencies | ✅ Complete | Dependencies table with filters |
+| Application Map | ✅ Complete | Interactive topology with CelestialMap |
+| APM Settings Modal | ✅ Complete | Configure data sources |
+| Service Correlations Flyout | ✅ Complete | Spans and logs correlation |
+
+---
+
 ## Overview
 
 The APM (Application Performance Monitoring) plugin for OpenSearch Dashboards provides comprehensive observability capabilities for distributed applications. It enables users to monitor service health, analyze latency patterns, track error rates, and visualize service dependencies.
@@ -9,6 +23,41 @@ The APM (Application Performance Monitoring) plugin for OpenSearch Dashboards pr
 The plugin implements a hybrid architecture that combines:
 - **OpenSearch** for storing trace topology and service metadata
 - **Prometheus** for storing time-series RED (Rate, Error, Duration) metrics
+
+---
+
+## End-to-End User Workflow
+
+### Entry Points
+Users can access APM features through two main entry points:
+1. **Services** (`#/services`) - Service catalog with list view
+2. **Application Map** (`#/application-map`) - Topology visualization
+
+### Typical User Journey
+
+1. **Configure APM** (First-time setup)
+   - User clicks "APM Settings" button
+   - Configures: Traces dataset, Service Map dataset, Prometheus connection
+   - Config saved as correlations saved object
+
+2. **Services Home** (`/services`)
+   - View list of all services with RED metrics
+   - Filter by environment, latency, throughput, fault rate
+   - Click service name → Navigate to Service Details
+   - Click map icon → Navigate to Application Map focused on service
+
+3. **Service Details** (`/service-details/{serviceName}/{environment}`)
+   - **Overview Tab**: Metric cards, trend charts, top dependencies
+   - **Operations Tab**: Operations table with expandable metrics
+   - **Dependencies Tab**: Dependencies table with RED metrics
+   - Click dependency count → Navigate to Dependencies tab with filter
+
+4. **Application Map** (`/application-map`)
+   - View topology of all services
+   - Apply Group By filter to cluster services
+   - Click node → View service details flyout
+   - Click edge → View dependency metrics flyout
+   - Double-click group node → Drill into services in group
 
 ---
 
@@ -357,6 +406,24 @@ Multi-tab interface for exploring a specific service's performance metrics.
 | Operations | `service_operations.tsx` | Operations table with expandable rows showing charts, Resizable filter sidebar (availability, error rate, latency, requests ranges), Metrics per operation, Click dependency count to navigate to Dependencies tab with filter |
 | Dependencies | `service_dependencies.tsx` | Dependencies table with expandable rows showing charts, Resizable filter sidebar (dependency, operation, availability, error rate), Metrics per dependency (latency, requests, error rate, availability), URL param support for filter pre-selection |
 
+#### Application Map Page (`pages/application_map/`)
+- Interactive service topology visualization using @osd/apm-topology CelestialMap
+- Hierarchical navigation (Application → Group → Services)
+- Features:
+  - Node representation for each service with health indicators
+  - Edge representation for service dependencies
+  - Click node to view service details flyout
+  - Click edge to view dependency metrics flyout
+  - Filter sidebar: Group By, Fault Rate, Error Rate, Environment
+  - Deep-linking support from Services Home
+  - URL params: `?service={name}&environment={env}&from={time}&to={time}`
+
+#### Service Map Components (`shared/components/service_map/`)
+- `ServiceMapGraph` - CelestialMap wrapper with data transformation
+- `ServiceMapSidebar` - Filter controls for the map
+- `ServiceDetailsPanel` - Flyout showing selected node metrics
+- `EdgeMetricsFlyout` - Flyout showing edge/dependency metrics
+
 #### PromQL Visualization Components (`shared/components/`)
 - **PromQL Line Chart** (`promql_line_chart.tsx`) - Time-series charts using PromQL data with multi-series support
   - Uses ECharts native `showLoading()` API for centered loading animation
@@ -372,13 +439,6 @@ Multi-tab interface for exploring a specific service's performance metrics.
 #### Filter Sidebars (`shared/components/`)
 - **Operation Filter Sidebar** (`operation_filter_sidebar.tsx`) - Filters for Operations tab
 - **Dependency Filter Sidebar** (`dependency_filter_sidebar.tsx`) - Filters for Dependencies tab
-
-### Planned (In Development)
-
-#### Application Map
-- Interactive service topology visualization
-- Node representation for each service
-- Edge representation for dependencies
 
 ---
 
@@ -421,13 +481,18 @@ public/components/apm/
 │   │   ├── index.ts
 │   │   ├── services_home.tsx      # Main services component
 │   │   └── services_home_i18n.ts  # i18n translations
-│   └── service_details/           # Service details page
+│   ├── service_details/           # Service details page
+│   │   ├── index.ts
+│   │   ├── service_details.tsx    # Main container with tabs
+│   │   ├── service_overview.tsx   # Overview tab
+│   │   ├── service_overview.scss
+│   │   ├── service_operations.tsx # Operations tab
+│   │   └── service_dependencies.tsx # Dependencies tab
+│   └── application_map/           # Application map page
 │       ├── index.ts
-│       ├── service_details.tsx    # Main container with tabs
-│       ├── service_overview.tsx   # Overview tab
-│       ├── service_overview.scss
-│       ├── service_operations.tsx # Operations tab
-│       └── service_dependencies.tsx # Dependencies tab
+│       ├── application_map_page.tsx
+│       ├── application_map.scss
+│       └── application_map_i18n.ts
 │
 ├── query_services/                # Query execution services
 │   ├── ppl_search_service.ts      # PPL query service
@@ -456,10 +521,17 @@ public/components/apm/
 │   │   │   ├── top_services_by_fault_rate.tsx
 │   │   │   ├── top_dependencies_by_fault_rate.tsx
 │   │   │   └── service_dependencies_by_fault_rate.tsx
-│   │   └── time_filter/           # Time picker
+│   │   ├── time_filter/           # Time picker
+│   │   └── service_map/           # Service map components
+│   │       ├── index.ts
+│   │       ├── service_map_graph.tsx
+│   │       ├── service_map_sidebar.tsx
+│   │       ├── service_details_panel.tsx
+│   │       └── edge_metrics_flyout.tsx
 │   ├── hooks/                     # Custom React hooks
-│   │   ├── use_services.ts
-│   │   ├── use_services_red_metrics.ts
+│   │   ├── use_apm_config.ts      # Access APM configuration
+│   │   ├── use_services.ts        # Fetch service list via PPL
+│   │   ├── use_services_red_metrics.ts # Batch RED metrics for services
 │   │   ├── use_top_services_by_fault_rate.ts
 │   │   ├── use_top_dependencies_by_fault_rate.ts
 │   │   ├── use_operations.ts      # Fetch operations via PPL
@@ -468,10 +540,20 @@ public/components/apm/
 │   │   ├── use_dependency_metrics.ts # RED metrics per dependency
 │   │   ├── use_service_attributes.ts # Service metadata
 │   │   ├── use_promql_chart_data.ts # Generic PromQL chart hook
-│   │   └── use_service_dependencies_by_fault_rate.ts
+│   │   ├── use_service_dependencies_by_fault_rate.ts
+│   │   ├── use_correlated_logs_by_trace.ts
+│   │   ├── use_debounced_value.ts
+│   │   ├── use_service_map.ts     # Fetch service map topology via PPL
+│   │   ├── use_service_map_metrics.ts # RED metrics for map nodes
+│   │   ├── use_edge_metrics.ts    # Metrics for service dependencies
+│   │   ├── use_selected_edge_metrics.ts # On-demand edge metrics
+│   │   └── use_group_metrics.ts   # Metrics aggregated by groupBy
+│   ├── styles/                    # Shared SCSS styles
 │   └── utils/                     # Utility functions
 │       ├── navigation_utils.ts    # Workspace-aware navigation
-│       └── time_utils.ts
+│       ├── time_utils.ts
+│       ├── format_utils.ts
+│       └── promql_response_utils.ts
 │
 ├── common/                        # Common types & utilities
 │   ├── constants.ts
@@ -479,9 +561,12 @@ public/components/apm/
 │   ├── apm_empty_state.tsx
 │   ├── apm_empty_state_i18n.ts
 │   └── types/
+│       ├── apm_types.ts
 │       ├── service_types.ts
 │       ├── service_details_types.ts
-│       └── prometheus_types.ts
+│       ├── prometheus_types.ts
+│       ├── correlations_types.ts
+│       └── service_map_types.ts
 ```
 
 ---
@@ -500,9 +585,11 @@ The plugin uses `application.navigateToApp()` for navigation to comply with Open
 |----------|---------|
 | `navigateToServiceDetails(serviceName, environment, options)` | Navigate to service details page with optional tab, filters |
 | `navigateToServicesList()` | Navigate back to services home |
+| `navigateToServiceMap(serviceName?, environment?, options?)` | Navigate to Application Map, optionally focused on a service |
 | `navigateToExploreTraces(...)` | Open traces in Explore (new tab) |
 | `navigateToExploreLogs(...)` | Open logs in Explore (new tab) |
 | `navigateToSpanDetails(...)` | Open span details in Explore (new tab) |
+| `navigateToDatasetCorrelations(datasetId)` | Navigate to dataset correlations setup |
 
 **URL Parameters for Service Details:**
 
@@ -514,16 +601,73 @@ The plugin uses `application.navigateToApp()` for navigation to comply with Open
 | `from`, `to` | Time range |
 | `lang` | SDK language for breadcrumb icon |
 
+**URL Parameters for Application Map:**
+
+| Parameter | Description |
+|-----------|-------------|
+| `service` | Focus on a specific service node |
+| `environment` | Filter by environment |
+| `from`, `to` | Time range |
+| `focus` | Highlight a specific service |
+
 **Example:**
 ```typescript
-import { navigateToServiceDetails } from './shared/utils/navigation_utils';
+import { navigateToServiceDetails, navigateToServiceMap } from './shared/utils/navigation_utils';
 
 // Navigate to dependencies tab with operation filter
 navigateToServiceDetails('my-service', 'production', {
   tab: 'dependencies',
   operation: 'GET /api/users',
 });
+
+// Navigate to Application Map focused on a service
+navigateToServiceMap('my-service', 'production', {
+  timeRange: { from: 'now-1h', to: 'now' },
+});
 ```
+
+---
+
+## Hooks Reference
+
+### Services & Metrics Hooks
+
+| Hook | Purpose |
+|------|---------|
+| `useApmConfig` | Access APM configuration from context |
+| `useServices` | Fetch service list via PPL from service map dataset |
+| `useServicesRedMetrics` | Batch fetch RED metrics for multiple services via PromQL |
+| `useTopServicesByFaultRate` | Get services sorted by fault rate |
+| `useTopDependenciesByFaultRate` | Get dependencies sorted by fault rate |
+
+### Service Details Hooks
+
+| Hook | Purpose |
+|------|---------|
+| `useOperations` | Fetch operations for a service via PPL |
+| `useOperationMetrics` | RED metrics per operation via PromQL |
+| `useDependencies` | Fetch dependencies for a service via PPL |
+| `useDependencyMetrics` | RED metrics per dependency via PromQL |
+| `useServiceAttributes` | Fetch service metadata (language, type, etc.) |
+| `useServiceDependenciesByFaultRate` | Dependencies ranked by fault rate |
+| `usePromqlChartData` | Generic hook for PromQL time-series data |
+
+### Service Map Hooks
+
+| Hook | Purpose |
+|------|---------|
+| `useServiceMap` | Fetch service map topology (nodes/edges) via PPL |
+| `useServiceMapMetrics` | Fetch RED metrics for all map nodes via PromQL |
+| `useEdgeMetrics` | Fetch metrics for service dependencies (edges) |
+| `useSelectedEdgeMetrics` | On-demand metrics for selected edge |
+| `useGroupMetrics` | Metrics aggregated by groupBy attribute |
+
+### Utility Hooks
+
+| Hook | Purpose |
+|------|---------|
+| `useCorrelatedLogsByTrace` | Fetch correlated log datasets for traces |
+| `useDebouncedValue` | Debounce rapidly changing values |
 
 ---
 
@@ -561,7 +705,9 @@ For files with many translations, extract to a separate `*_i18n.ts` file.
 
 ---
 
-## Data Flow Diagram
+## Data Flow Diagrams
+
+### Services Home Data Flow
 
 ```mermaid
 sequenceDiagram
@@ -588,6 +734,36 @@ sequenceDiagram
 
     Hook-->>UI: Combined data
     UI->>UI: Render component
+```
+
+### Application Map Data Flow
+
+```mermaid
+sequenceDiagram
+    participant UI as ApplicationMapPage
+    participant Hook as useServiceMap / useServiceMapMetrics
+    participant PPL as PPLSearchService
+    participant PromQL as PromQLSearchService
+    participant OS as OpenSearch
+    participant Prom as Prometheus
+
+    UI->>Hook: Request topology + metrics
+
+    par Fetch Topology
+        Hook->>PPL: getServiceMap(timeRange)
+        PPL->>OS: PPL Query (ServiceConnection events)
+        OS-->>PPL: Nodes + Edges
+        PPL-->>Hook: Topology data
+    and Fetch Node Metrics
+        Hook->>PromQL: getServiceMapMetrics(services)
+        PromQL->>Prom: PromQL batch queries
+        Prom-->>PromQL: RED metrics per service
+        PromQL-->>Hook: Metrics map
+    end
+
+    Hook-->>UI: Combined data
+    UI->>UI: Transform to CelestialMap format
+    UI->>UI: Render interactive map
 ```
 
 ---

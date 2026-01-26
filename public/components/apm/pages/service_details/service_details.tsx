@@ -27,6 +27,7 @@ import {
   ServiceDetailsUrlParams,
 } from '../../common/types/service_details_types';
 import { SERVICE_DETAILS_CONSTANTS } from '../../common/constants';
+import '../../shared/styles/apm_common.scss';
 
 export interface ServiceDetailsProps {
   serviceName: string;

@@ -6,7 +6,10 @@
 import { TimeRange } from '../../common/types/service_types';
 import { TimeRange as ServiceDetailsTimeRange } from '../../common/types/service_details_types';
 import { EXPLORE_APP_ID } from '../../common/constants';
-import { observabilityApmServicesID } from '../../../../../common/constants/apm';
+import {
+  observabilityApmServicesID,
+  observabilityApmApplicationMapID,
+} from '../../../../../common/constants/apm';
 import { coreRefs } from '../../../../framework/core_refs';
 
 /**
@@ -97,15 +100,55 @@ export function navigateToServicesList(): void {
 }
 
 /**
- * Navigates to the service map view filtered by service
- * TODO: Implement when topology/service map view is ready
- *
- * @param serviceName - The service to focus on
- * @param environment - The environment to filter by
+ * Options for navigating to the service map
  */
-export function navigateToServiceMap(_serviceName: string, _environment: string): void {
-  // TODO: Implement service map navigation when topology view is ready
-  // Placeholder - will navigate to application map/topology view
+export interface NavigateToServiceMapOptions {
+  timeRange?: TimeRange;
+  /** Focus on a specific service node */
+  focusService?: string;
+}
+
+/**
+ * Navigates to the application map view, optionally filtered by service
+ *
+ * @param serviceName - The service to focus on (optional)
+ * @param environment - The environment to filter by (optional)
+ * @param options - Optional navigation options
+ */
+export function navigateToServiceMap(
+  serviceName?: string,
+  environment?: string,
+  options?: NavigateToServiceMapOptions
+): void {
+  // Build query params
+  const params = new URLSearchParams();
+
+  if (serviceName) {
+    params.set('service', serviceName);
+  }
+
+  if (environment) {
+    params.set('environment', environment);
+  }
+
+  if (options?.timeRange) {
+    params.set('from', options.timeRange.from);
+    params.set('to', options.timeRange.to);
+  }
+
+  if (options?.focusService) {
+    params.set('focus', options.focusService);
+  }
+
+  // Build path for hash-based routing
+  const queryString = params.toString();
+  const path = `#/application-map${queryString ? `?${queryString}` : ''}`;
+
+  // Use navigateToApp for workspace-aware navigation
+  coreRefs?.application?.navigateToApp(observabilityApmApplicationMapID, { path });
+
+  // Dispatch hashchange event for HashRouter to detect the URL change
+  window.dispatchEvent(new HashChangeEvent('hashchange'));
 }
 
 /**

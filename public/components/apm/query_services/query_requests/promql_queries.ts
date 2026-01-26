@@ -653,35 +653,6 @@ export const getQueryAllDependenciesFaultRate = (
 `;
 
 /**
- * CONSOLIDATED: Get all dependencies' error rates for a service
- * Returns percentage (0-100)
- */
-export const getQueryAllDependenciesErrorRate = (
-  environment: string,
-  serviceName: string
-): string => `
-(
-  sum by (remoteService, operation, remoteOperation) (error{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""})
-  /
-  sum by (remoteService, operation, remoteOperation) (request{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""})
-) * 100
-`;
-
-/**
- * CONSOLIDATED: Get all dependencies' availability for a service
- */
-export const getQueryAllDependenciesAvailability = (
-  environment: string,
-  serviceName: string
-): string => `
-(1 - (
-  sum by (remoteService, operation, remoteOperation) (fault{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""})
-  /
-  sum by (remoteService, operation, remoteOperation) (request{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""})
-)) * 100
-`;
-
-/**
  * CONSOLIDATED: Get all dependencies' p50 latency for a service
  * Returns average P50 latency over the time range in milliseconds
  */
@@ -736,18 +707,6 @@ avg_over_time(
 `;
 
 /**
- * CONSOLIDATED: Get all dependencies' request counts for a service (instant query)
- */
-export const getQueryAllDependenciesRequestCount = (
-  environment: string,
-  serviceName: string
-): string => `
-sum by (remoteService, remoteOperation) (
-  request{environment="${environment}",service="${serviceName}",remoteService!="",namespace="span_derived"}
-)
-`;
-
-/**
  * CONSOLIDATED: Get all dependencies' total request counts over time range
  * Uses sum_over_time for true total count
  */
@@ -792,6 +751,175 @@ export const getQueryAllDependenciesAvailabilityAvg = (
   sum by (remoteService, remoteOperation) (sum_over_time(request{environment="${environment}",service="${serviceName}",remoteService!="",namespace="span_derived"}[${timeRange}:1m]))
 )) * 100
 `;
+
+// ============================================================================
+// APPLICATION-LEVEL QUERIES (aggregated across all services)
+// ============================================================================
+
+/**
+ * Application-level total requests (aggregated across all services)
+ * For Application Map root node
+ */
+export const getQueryApplicationRequests = (): string => `
+sum(request{namespace="span_derived"})
+`;
+
+/**
+ * Application-level total faults (5xx) (aggregated across all services)
+ * For Application Map root node
+ */
+export const getQueryApplicationFaults = (): string => `
+sum(fault{namespace="span_derived"})
+`;
+
+/**
+ * Application-level total errors (4xx) (aggregated across all services)
+ * For Application Map root node
+ */
+export const getQueryApplicationErrors = (): string => `
+sum(error{namespace="span_derived"})
+`;
+
+/**
+ * Application-level combined latency percentiles (aggregated across all services)
+ * Returns P99, P90, P50 in milliseconds
+ * For Application Map root node latency chart
+ */
+export const getQueryApplicationLatency = (): string => `
+label_replace(
+  histogram_quantile(0.99,
+    sum by (le) (
+      latency_seconds_seconds_bucket{namespace="span_derived"}
+    )
+  ) * 1000,
+  "percentile", "p99", "", ""
+)
+or
+label_replace(
+  histogram_quantile(0.90,
+    sum by (le) (
+      latency_seconds_seconds_bucket{namespace="span_derived"}
+    )
+  ) * 1000,
+  "percentile", "p90", "", ""
+)
+or
+label_replace(
+  histogram_quantile(0.50,
+    sum by (le) (
+      latency_seconds_seconds_bucket{namespace="span_derived"}
+    )
+  ) * 1000,
+  "percentile", "p50", "", ""
+)
+`;
+
+// ============================================================================
+// EDGE METRICS QUERIES (for Application Map connections)
+// ============================================================================
+
+/**
+ * Get all edge request counts (service->remoteService connections)
+ * For application map edge labels
+ */
+export const getQueryAllEdgeRequests = (): string => `
+sum by (service, environment, remoteService) (
+  request{namespace="span_derived",remoteService!=""}
+)
+`;
+
+/**
+ * Get all edge P95 latency (service->remoteService connections)
+ * Returns latency in milliseconds
+ */
+export const getQueryAllEdgeLatency = (): string => `
+histogram_quantile(0.95,
+  sum by (service, environment, remoteService, le) (
+    latency_seconds_seconds_bucket{namespace="span_derived",remoteService!=""}
+  )
+) * 1000
+`;
+
+/**
+ * Get all edge fault rates (service->remoteService connections)
+ * Returns percentage (0-100)
+ */
+export const getQueryAllEdgeFaultRate = (): string => `
+(
+  sum by (service, environment, remoteService) (fault{namespace="span_derived",remoteService!=""})
+  /
+  sum by (service, environment, remoteService) (request{namespace="span_derived",remoteService!=""})
+) * 100
+`;
+
+// ============================================================================
+// SINGLE EDGE METRICS QUERIES (for Edge Popup)
+// ============================================================================
+
+/**
+ * Get request count for a specific edge (service-to-service connection)
+ * @param service - Source service name
+ * @param environment - Source environment
+ * @param remoteService - Target service name
+ */
+export const getQueryEdgeRequests = (
+  service: string,
+  environment: string,
+  remoteService: string
+): string => `
+sum(request{namespace="span_derived",service="${service}",environment="${environment}",remoteService="${remoteService}"})
+`;
+
+/**
+ * Get P99 latency for a specific edge
+ * Returns latency in milliseconds
+ * @param service - Source service name
+ * @param environment - Source environment
+ * @param remoteService - Target service name
+ */
+export const getQueryEdgeLatencyP99 = (
+  service: string,
+  environment: string,
+  remoteService: string
+): string => `
+histogram_quantile(0.99,
+  sum by (le) (
+    latency_seconds_seconds_bucket{namespace="span_derived",service="${service}",environment="${environment}",remoteService="${remoteService}"}
+  )
+) * 1000
+`;
+
+/**
+ * Get fault count (5xx errors) for a specific edge
+ * @param service - Source service name
+ * @param environment - Source environment
+ * @param remoteService - Target service name
+ */
+export const getQueryEdgeFaults = (
+  service: string,
+  environment: string,
+  remoteService: string
+): string => `
+sum(fault{namespace="span_derived",service="${service}",environment="${environment}",remoteService="${remoteService}"})
+`;
+
+/**
+ * Get error count (4xx errors) for a specific edge
+ * @param service - Source service name
+ * @param environment - Source environment
+ * @param remoteService - Target service name
+ */
+export const getQueryEdgeErrors = (
+  service: string,
+  environment: string,
+  remoteService: string
+): string => `
+sum(error{namespace="span_derived",service="${service}",environment="${environment}",remoteService="${remoteService}"})
+`;
+
+// ============================================================================
+// DEPENDENCY CHART QUERIES
+// ============================================================================
 
 /**
  * Dependency Requests Over Time
@@ -872,3 +1000,95 @@ label_replace(
   "metric", "p99", "", ""
 )
 `;
+
+// ============================================================================
+// SERVICE MAP NODE METRICS
+// ============================================================================
+
+/**
+ * Service Map Node Throughput - aggregate requests by service
+ * Uses sum_over_time to aggregate over the selected time range
+ * @param serviceFilter - Service filter regex (e.g., service=~"svc1|svc2")
+ * @param timeRange - Time range string (e.g., "3600s")
+ */
+export const getQueryServiceMapThroughput = (serviceFilter: string, timeRange: string): string =>
+  `
+sum by (service) (
+  sum_over_time(request{${serviceFilter},namespace="span_derived"}[${timeRange}:1m])
+)
+`.trim();
+
+/**
+ * Service Map Node Faults - aggregate faults by service
+ * Uses sum_over_time to aggregate over the selected time range
+ * @param serviceFilter - Service filter regex (e.g., service=~"svc1|svc2")
+ * @param timeRange - Time range string (e.g., "3600s")
+ */
+export const getQueryServiceMapFaults = (serviceFilter: string, timeRange: string): string =>
+  `
+sum by (service) (
+  sum_over_time(fault{${serviceFilter},namespace="span_derived"}[${timeRange}:1m])
+)
+`.trim();
+
+/**
+ * Service Map Node Errors - aggregate errors by service
+ * Uses sum_over_time to aggregate over the selected time range
+ * @param serviceFilter - Service filter regex (e.g., service=~"svc1|svc2")
+ * @param timeRange - Time range string (e.g., "3600s")
+ */
+export const getQueryServiceMapErrors = (serviceFilter: string, timeRange: string): string =>
+  `
+sum by (service) (
+  sum_over_time(error{${serviceFilter},namespace="span_derived"}[${timeRange}:1m])
+)
+`.trim();
+
+// ============================================================================
+// GROUP METRICS (for Application Map Group By feature)
+// ============================================================================
+
+/**
+ * Group aggregated throughput
+ * Aggregates requests across all services with the specified label filter
+ * @param labelFilter - Label filter (e.g., telemetry_sdk_language="cpp",namespace="span_derived")
+ * @param timeRange - Time range string (e.g., "3600s")
+ */
+export const getQueryGroupThroughput = (labelFilter: string, timeRange: string): string =>
+  `
+sum(sum_over_time(request{${labelFilter}}[${timeRange}:1m]))
+`.trim();
+
+/**
+ * Group aggregated faults
+ * Aggregates faults across all services with the specified label filter
+ * @param labelFilter - Label filter (e.g., telemetry_sdk_language="cpp",namespace="span_derived")
+ * @param timeRange - Time range string (e.g., "3600s")
+ */
+export const getQueryGroupFaults = (labelFilter: string, timeRange: string): string =>
+  `
+sum(sum_over_time(fault{${labelFilter}}[${timeRange}:1m]))
+`.trim();
+
+/**
+ * Group aggregated errors
+ * Aggregates errors across all services with the specified label filter
+ * @param labelFilter - Label filter (e.g., telemetry_sdk_language="cpp",namespace="span_derived")
+ * @param timeRange - Time range string (e.g., "3600s")
+ */
+export const getQueryGroupErrors = (labelFilter: string, timeRange: string): string =>
+  `
+sum(sum_over_time(error{${labelFilter}}[${timeRange}:1m]))
+`.trim();
+
+/**
+ * Group latency percentile
+ * Calculates latency percentile aggregated across all services with the specified label filter
+ * @param labelFilter - Label filter (e.g., telemetry_sdk_language="cpp",namespace="span_derived")
+ * @param percentile - Percentile value (0.50, 0.90, 0.99)
+ * @returns Latency in milliseconds
+ */
+export const getQueryGroupLatencyPercentile = (labelFilter: string, percentile: number): string =>
+  `
+histogram_quantile(${percentile}, sum by (le) (rate(latency_seconds_seconds_bucket{${labelFilter}}[5m]))) * 1000
+`.trim();

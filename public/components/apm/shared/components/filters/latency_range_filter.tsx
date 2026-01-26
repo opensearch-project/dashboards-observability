@@ -42,18 +42,20 @@ export const LatencyRangeFilter: React.FC<LatencyRangeFilterProps> = ({
 
   return (
     <>
-      <EuiDualRange
-        min={min}
-        max={effectiveMax}
-        step={0.05}
-        value={value}
-        onChange={(newValue) => onChange(newValue as [number, number])}
-        showLabels
-        compressed
-        disabled={disabled || min === max}
-        aria-label="Latency range filter"
-        data-test-subj={dataTestSubj}
-      />
+      <div className="apm-range-filter">
+        <EuiDualRange
+          min={min}
+          max={effectiveMax}
+          step={0.05}
+          value={value}
+          onChange={(newValue) => onChange(newValue as [number, number])}
+          showLabels
+          compressed
+          disabled={disabled || min === max}
+          aria-label="Latency range filter"
+          data-test-subj={dataTestSubj}
+        />
+      </div>
       <EuiSpacer size="xs" />
       <EuiText size="xs" color="subdued" textAlign="center">
         {formatValue(value[0])}ms - {formatValue(value[1])}ms
