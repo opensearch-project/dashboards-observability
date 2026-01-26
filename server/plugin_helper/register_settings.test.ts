@@ -30,13 +30,13 @@ describe('registerObservabilityUISettings', () => {
     });
   });
 
-  it('should have description mentioning MDS requirement', () => {
+  it('should have description mentioning Discover Traces requirement', () => {
     registerObservabilityUISettings(mockUiSettings);
 
     const calls = (mockUiSettings.register as jest.Mock).mock.calls;
     const apmSettingCall = calls.find((call) => call[0][APM_ENABLED_SETTING]);
     const description = apmSettingCall[0][APM_ENABLED_SETTING].description;
 
-    expect(description).toContain('Multi Data Source');
+    expect(description).toContain('Discover Traces');
   });
 });
