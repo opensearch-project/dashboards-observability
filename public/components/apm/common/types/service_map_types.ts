@@ -5,43 +5,50 @@
 
 import { ErrorRateThreshold } from '../constants';
 
-/**
- * Node health status for CelestialMap visualization
- */
-export interface NodeHealth {
-  breached: number;
-  recovered: number;
-  total: number;
-  status: 'ok' | 'recovered' | 'breached';
-}
+// Re-export types from @osd/apm-topology library for consumers
+// These are the canonical types from the CelestialMap library
+export type {
+  CelestialNode,
+  CelestialEdge,
+  CelestialMapModel,
+  CelestialMapProps,
+} from '@osd/apm-topology';
+export type { Metrics, SloHealth, CelestialCardProps } from '@osd/apm-topology';
 
 /**
- * Node metrics for CelestialMap visualization
- */
-export interface NodeMetrics {
-  requests: number;
-  faults5xx: number;
-  errors4xx: number;
-}
-
-/**
- * CelestialMap node data structure
+ * Extended CelestialMap node data structure
+ * Extends CelestialCardProps from @osd/apm-topology with APM-specific properties
  */
 export interface CelestialNodeData {
   id: string;
   title: string;
-  subtitle: string;
-  icon: React.ReactNode;
-  isGroup: boolean;
+  subtitle?: string;
+  icon?: React.ReactNode;
+  isGroup?: boolean;
   keyAttributes: Record<string, string>;
+  /** APM-specific: Additional attributes used for group-by functionality */
   groupByAttributes?: Record<string, string>;
-  isInstrumented: boolean;
-  health: NodeHealth;
-  metrics: NodeMetrics;
+  isInstrumented?: boolean;
+  /** Health status using library's SloHealth structure */
+  health?: {
+    status: string;
+    breached: number;
+    recovered: number;
+    total: number;
+  };
+  /** Metrics using library's Metrics structure */
+  metrics?: {
+    requests: number;
+    faults5xx: number;
+    errors4xx: number;
+  };
+  /** Number of services (for group nodes) */
+  numberOfServices?: string;
 }
 
 /**
  * CelestialMap node structure for React Flow
+ * Based on library's CelestialNode type with APM-specific data
  */
 export interface CelestialMapNode {
   id: string;
@@ -52,7 +59,7 @@ export interface CelestialMapNode {
 
 /**
  * CelestialMap edge structure
- * Extends React Flow Edge with optional label properties
+ * Based on library's CelestialEdge type with additional styling properties
  */
 export interface CelestialMapEdge {
   id: string;

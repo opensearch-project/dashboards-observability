@@ -54,6 +54,48 @@ import {
 import { applicationMapI18nTexts as i18nTexts } from './application_map_i18n';
 import './application_map.scss';
 
+/**
+ * URL parameter validation constants
+ */
+const URL_PARAM_VALIDATION = {
+  /** Maximum allowed length for URL parameters */
+  MAX_PARAM_LENGTH: 256,
+  /** Allowed characters for service names (alphanumeric, dashes, underscores, dots, colons, slashes) */
+  SERVICE_NAME_REGEX: /^[a-zA-Z0-9_\-:./ ]+$/,
+  /** Allowed characters for time range values (e.g., "now-15m", "2024-01-01T00:00:00Z") */
+  TIME_RANGE_REGEX: /^[a-zA-Z0-9_\-:+.TZ]+$/,
+};
+
+/**
+ * Sanitize URL parameter to prevent XSS attacks
+ * @param value - Raw URL parameter value
+ * @param type - Type of parameter for appropriate validation
+ * @returns Sanitized value or null if invalid
+ */
+function sanitizeUrlParam(
+  value: string | null,
+  type: 'service' | 'environment' | 'time'
+): string | null {
+  if (!value) return null;
+
+  // Check length limit
+  if (value.length > URL_PARAM_VALIDATION.MAX_PARAM_LENGTH) {
+    return null;
+  }
+
+  // Apply appropriate regex validation based on type
+  const regex =
+    type === 'time'
+      ? URL_PARAM_VALIDATION.TIME_RANGE_REGEX
+      : URL_PARAM_VALIDATION.SERVICE_NAME_REGEX;
+
+  if (!regex.test(value)) {
+    return null;
+  }
+
+  return value;
+}
+
 export interface ApplicationMapPageProps {
   chrome: ChromeStart;
   notifications: NotificationsStart;
@@ -122,12 +164,12 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     if (hashParts.length < 2) return;
 
     const params = new URLSearchParams(hashParts[1]);
-    const serviceParam = params.get('service');
-    const environmentParam = params.get('environment');
-    const fromParam = params.get('from');
-    const toParam = params.get('to');
+    const serviceParam = sanitizeUrlParam(params.get('service'), 'service');
+    const environmentParam = sanitizeUrlParam(params.get('environment'), 'environment');
+    const fromParam = sanitizeUrlParam(params.get('from'), 'time');
+    const toParam = sanitizeUrlParam(params.get('to'), 'time');
 
-    // If service parameter exists, navigate to services level and queue node selection
+    // If service parameter exists and is valid, navigate to services level and queue node selection
     if (serviceParam) {
       // Mark that we initialized from URL to prevent groupBy effect from resetting
       initializedFromUrlRef.current = true;

@@ -676,7 +676,7 @@ function transformToCelestialFormat(
         id: node.NodeId,
         title: node.Name,
         subtitle: platformType,
-        icon: getIcon(platformType as any),
+        icon: getIcon(platformType),
         isGroup: false,
         keyAttributes: node.KeyAttributes,
         groupByAttributes: node.GroupByAttributes,
