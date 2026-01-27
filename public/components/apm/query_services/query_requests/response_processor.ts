@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { getPlatformTypeFromEnvironment } from '../../shared/utils/platform_utils';
+
 /**
  * Generic response processor for transforming query responses (PPL, PromQL)
  * into standardized API response formats.
@@ -635,32 +637,6 @@ export function transformListServiceDependenciesResponse(pplResponse: PPLDataFra
     EndTime,
     NextToken: null,
   };
-}
-
-/**
- * Determines platform type from environment string
- * @param environment Environment string like "eks:demo/default"
- * @returns Platform type like "AWS::EKS"
- */
-function getPlatformTypeFromEnvironment(environment: string): string {
-  if (!environment || typeof environment !== 'string') {
-    return 'Generic';
-  }
-
-  const platform = environment.split(':')[0]?.toLowerCase();
-
-  switch (platform) {
-    case 'eks':
-      return 'AWS::EKS';
-    case 'ec2':
-      return 'AWS::EC2';
-    case 'ecs':
-      return 'AWS::ECS';
-    case 'lambda':
-      return 'AWS::Lambda';
-    default:
-      return 'Generic';
-  }
 }
 
 /**

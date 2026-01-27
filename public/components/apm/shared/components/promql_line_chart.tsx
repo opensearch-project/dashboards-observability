@@ -27,6 +27,8 @@ export interface PromQLLineChartProps {
   formatTooltipValue?: (value: number, seriesName: string) => string;
   /** Label field to extract from Prometheus labels (e.g., 'remoteService', 'operation') */
   labelField?: string;
+  /** Override color for single-series charts */
+  color?: string;
 }
 
 /**
@@ -63,6 +65,7 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
   formatValue,
   formatTooltipValue,
   labelField,
+  color,
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.ECharts | null>(null);
@@ -136,11 +139,11 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
 
     const option: echarts.EChartsOption = {
       grid: {
-        left: 60,
+        left: 10,
         right: 20,
         top: showLegend ? 40 : 20,
-        bottom: 40,
-        containLabel: false,
+        bottom: 50,
+        containLabel: true,
       },
       legend: showLegend
         ? {
@@ -264,7 +267,7 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
           },
         },
       },
-      series: series.map((s, index) => createSeriesConfig(s, index, chartType)),
+      series: series.map((s, index) => createSeriesConfig(s, index, chartType, color)),
     };
 
     chartInstance.current.setOption(option, true);
@@ -277,6 +280,7 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
     formatValue,
     formatTooltipValue,
     timeAxisConfig,
+    color,
   ]);
 
   // Cleanup on unmount
@@ -357,9 +361,10 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
 function createSeriesConfig(
   seriesData: ChartSeriesData,
   index: number,
-  chartType: 'line' | 'area'
+  chartType: 'line' | 'area',
+  overrideColor?: string
 ): echarts.SeriesOption {
-  const color = seriesData.color || CHART_COLORS[index % CHART_COLORS.length];
+  const color = overrideColor || seriesData.color || CHART_COLORS[index % CHART_COLORS.length];
   const rgb = hexToRgb(color) || { r: 84, g: 179, b: 153 };
 
   return {

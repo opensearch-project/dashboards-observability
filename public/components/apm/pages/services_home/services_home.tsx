@@ -62,6 +62,7 @@ import {
 } from '../../common/constants';
 import { servicesI18nTexts as i18nTexts } from './services_home_i18n';
 import { formatThroughput } from '../../common/format_utils';
+import '../../shared/styles/apm_common.scss';
 
 const AVAILABLE_ENVIRONMENTS = Object.values(ENVIRONMENT_PLATFORM_MAP);
 
@@ -99,7 +100,7 @@ interface FlyoutState {
  */
 export const ServicesHome: React.FC<ServicesHomeProps> = ({
   chrome,
-  parentBreadcrumb,
+  parentBreadcrumb: _parentBreadcrumb,
   onServiceClick,
 }) => {
   const [timeRange, setTimeRange] = useState<TimeRange>({
@@ -132,13 +133,12 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   // Set breadcrumbs
   React.useEffect(() => {
     chrome.setBreadcrumbs([
-      parentBreadcrumb,
       {
         text: i18nTexts.breadcrumb,
         href: '#/services',
       },
     ]);
-  }, [chrome, parentBreadcrumb]);
+  }, [chrome]);
 
   const parsedTimeRange = useMemo(() => parseTimeRange(timeRange), [timeRange]);
 
@@ -595,7 +595,9 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                 <EuiButtonIcon
                   iconType="graphApp"
                   aria-label={i18nTexts.actions.viewServiceMap}
-                  onClick={() => navigateToServiceMap(item.serviceName, item.environment)}
+                  onClick={() =>
+                    navigateToServiceMap(item.serviceName, item.environment, { timeRange })
+                  }
                   data-test-subj={`serviceMapButton-${item.serviceName}`}
                 />
               </EuiToolTip>
@@ -953,6 +955,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                             onSelectionChange={setSelectedFailureRateThresholds}
                             dataTestSubj="failureRateThresholdFilter"
                             disabled={isTableLoading}
+                            idPrefix="failure-rate"
                           />
                         </EuiAccordion>
 

@@ -216,3 +216,41 @@ export const PROMQL_CONSTANTS = {
    */
   INSTANT_QUERY_WINDOW_MS: 5 * 60 * 1000, // 5 minutes
 } as const;
+
+/**
+ * Application Map constants
+ */
+export const APPLICATION_MAP_CONSTANTS = {
+  /** Default time range for the map */
+  DEFAULT_TIME_RANGE: {
+    from: 'now-15m',
+    to: 'now',
+  },
+
+  /** Health status thresholds */
+  HEALTH_THRESHOLDS: {
+    /** Failure rate below this is considered healthy */
+    HEALTHY_FAILURE_RATE: 1,
+    /** Failure rate above this is considered critical */
+    CRITICAL_FAILURE_RATE: 5,
+  },
+
+  /** Service details panel chart heights */
+  CHART_HEIGHT: 150,
+  HEALTH_DONUT_SIZE: 100,
+
+  /** Filter sidebar width */
+  SIDEBAR_INITIAL_WIDTH: 15,
+  SIDEBAR_MIN_WIDTH: '10%',
+
+  /** Map container minimum height */
+  MAP_MIN_HEIGHT: 500,
+} as const;
+
+// Platform utility functions moved to shared/utils/platform_utils.ts
+export {
+  PLATFORM_TYPE_MAP,
+  getPlatformDisplayName,
+  getPlatformTypeFromEnvironment,
+  toPrometheusLabel,
+} from '../shared/utils/platform_utils';

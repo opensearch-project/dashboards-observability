@@ -22,6 +22,8 @@ export interface FailureRateThresholdFilterProps {
   dataTestSubj?: string;
   /** Disable the filter */
   disabled?: boolean;
+  /** Unique ID prefix for checkbox IDs (required to avoid ID collisions when multiple instances exist) */
+  idPrefix: string;
 }
 
 /**
@@ -39,11 +41,12 @@ export const FailureRateThresholdFilter: React.FC<FailureRateThresholdFilterProp
   onSelectionChange,
   dataTestSubj = 'failureRateThresholdFilter',
   disabled = false,
+  idPrefix,
 }) => {
   // Build checkbox options with colored labels
   const checkboxOptions = useMemo(() => {
     return ERROR_RATE_THRESHOLD_OPTIONS.map((threshold) => ({
-      id: `failure-rate-${threshold}`,
+      id: `${idPrefix}-${threshold}`,
       label: (
         <ColoredThresholdLabel
           threshold={THRESHOLD_LABELS.errorRate[threshold]}
@@ -51,21 +54,21 @@ export const FailureRateThresholdFilter: React.FC<FailureRateThresholdFilterProp
         />
       ),
     }));
-  }, []);
+  }, [idPrefix]);
 
   // Build selection map for EuiCheckboxGroup
   const idToSelectedMap = useMemo(() => {
     const map: Record<string, boolean> = {};
     selectedThresholds.forEach((threshold) => {
-      map[`failure-rate-${threshold}`] = true;
+      map[`${idPrefix}-${threshold}`] = true;
     });
     return map;
-  }, [selectedThresholds]);
+  }, [selectedThresholds, idPrefix]);
 
   // Handle checkbox change
   const handleCheckboxChange = useCallback(
     (optionId: string) => {
-      const threshold = optionId.replace('failure-rate-', '') as ErrorRateThreshold;
+      const threshold = optionId.replace(`${idPrefix}-`, '') as ErrorRateThreshold;
       const isSelected = selectedThresholds.includes(threshold);
       if (isSelected) {
         onSelectionChange(selectedThresholds.filter((t) => t !== threshold));
@@ -73,7 +76,7 @@ export const FailureRateThresholdFilter: React.FC<FailureRateThresholdFilterProp
         onSelectionChange([...selectedThresholds, threshold]);
       }
     },
-    [selectedThresholds, onSelectionChange]
+    [selectedThresholds, onSelectionChange, idPrefix]
   );
 
   return (

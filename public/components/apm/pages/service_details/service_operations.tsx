@@ -529,6 +529,76 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
         render: (name: string) => <strong>{name}</strong>,
       },
       {
+        name: i18n.translate('observability.apm.operations.correlations', {
+          defaultMessage: 'Correlations',
+        }),
+        width: '100px',
+        render: (operation: OperationRow) => (
+          <EuiFlexGroup gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate('observability.apm.operations.viewSpans', {
+                  defaultMessage: 'View correlated spans',
+                })}
+              >
+                <EuiButtonIcon
+                  iconType="apmTrace"
+                  aria-label="View spans"
+                  onClick={() => openCorrelationsFlyout(operation.operationName, 'spans')}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate('observability.apm.operations.viewLogs', {
+                  defaultMessage: 'View associated logs',
+                })}
+              >
+                <EuiButtonIcon
+                  iconType="discoverApp"
+                  aria-label="View logs"
+                  onClick={() => openCorrelationsFlyout(operation.operationName, 'logs')}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+      },
+      {
+        field: 'dependencyCount',
+        name: (
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              {i18n.translate('observability.apm.operations.dependencies', {
+                defaultMessage: 'Dependencies',
+              })}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={tableTooltips.dependencies}>
+                <EuiIcon type="questionInCircle" size="s" color="subdued" />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        sortable: true,
+        render: (count: number, operation: OperationRow) => {
+          if (count === 0 || count === undefined) return '-';
+          return (
+            <EuiLink
+              onClick={() => {
+                // Navigate to dependencies tab with operation filter in URL
+                navigateToServiceDetails(serviceName, environment || 'default', {
+                  tab: 'dependencies',
+                  operation: operation.operationName,
+                });
+              }}
+            >
+              {count}
+            </EuiLink>
+          );
+        },
+      },
+      {
         field:
           latencyPercentile === 'p99'
             ? 'p99Duration'
@@ -609,76 +679,6 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
         ),
         sortable: true,
         render: (avail: number, operation: OperationRow) => formatAvailability(avail, operation),
-      },
-      {
-        field: 'dependencyCount',
-        name: (
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              {i18n.translate('observability.apm.operations.dependencies', {
-                defaultMessage: 'Dependencies',
-              })}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={tableTooltips.dependencies}>
-                <EuiIcon type="questionInCircle" size="s" color="subdued" />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-        sortable: true,
-        render: (count: number, operation: OperationRow) => {
-          if (count === 0 || count === undefined) return '-';
-          return (
-            <EuiLink
-              onClick={() => {
-                // Navigate to dependencies tab with operation filter in URL
-                navigateToServiceDetails(serviceName, environment || 'default', {
-                  tab: 'dependencies',
-                  operation: operation.operationName,
-                });
-              }}
-            >
-              {count}
-            </EuiLink>
-          );
-        },
-      },
-      {
-        name: i18n.translate('observability.apm.operations.actions', {
-          defaultMessage: 'Actions',
-        }),
-        width: '100px',
-        render: (operation: OperationRow) => (
-          <EuiFlexGroup gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate('observability.apm.operations.viewSpans', {
-                  defaultMessage: 'View correlated spans',
-                })}
-              >
-                <EuiButtonIcon
-                  iconType="apmTrace"
-                  aria-label="View spans"
-                  onClick={() => openCorrelationsFlyout(operation.operationName, 'spans')}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate('observability.apm.operations.viewLogs', {
-                  defaultMessage: 'View associated logs',
-                })}
-              >
-                <EuiButtonIcon
-                  iconType="discoverApp"
-                  aria-label="View logs"
-                  onClick={() => openCorrelationsFlyout(operation.operationName, 'logs')}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
       },
     ],
     [toggleRowExpand, latencyPercentile, serviceName, environment, openCorrelationsFlyout]

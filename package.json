@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@algolia/autocomplete-core": "^1.4.1",
+    "@osd/apm-topology": "npm:@ps48/apm-topology@^1.0.1",
     "@algolia/autocomplete-theme-classic": "^1.2.1",
     "@nteract/outputs": "^3.0.11",
     "@nteract/presentational-components": "^3.4.3",
