@@ -182,7 +182,8 @@ export const applicationMapI18nTexts = {
   // Error state
   error: {
     title: i18n.translate('observability.apm.applicationMap.error.title', {
-      defaultMessage: 'Error loading service map',
+      defaultMessage:
+        'Error loading services, verify your configuration setup and index schema under APM settings',
     }),
     retryButton: i18n.translate('observability.apm.applicationMap.error.retryButton', {
       defaultMessage: 'Retry',

@@ -370,6 +370,8 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
         traceIdField: dataset.schemaMappings?.traceId || 'traceId',
         logs: [],
         loading: true,
+        dataSourceId: dataset.dataSourceId,
+        dataSourceTitle: dataset.dataSourceTitle,
       }));
       setLogResults(initialResults);
 
@@ -395,6 +397,8 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
               logs: [],
               loading: false,
               error: new Error('Missing schema mappings'),
+              dataSourceId: dataset.dataSourceId,
+              dataSourceTitle: dataset.dataSourceTitle,
             },
           };
         }
@@ -454,6 +458,8 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
               traceIdField: traceIdFieldValue,
               logs: logsData,
               loading: false,
+              dataSourceId: dataset.dataSourceId,
+              dataSourceTitle: dataset.dataSourceTitle,
             },
           };
         } catch (err) {
@@ -468,6 +474,8 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
               logs: [],
               loading: false,
               error: err instanceof Error ? err : new Error(String(err)),
+              dataSourceId: dataset.dataSourceId,
+              dataSourceTitle: dataset.dataSourceTitle,
             },
           };
         }
@@ -571,7 +579,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
                 spanId,
                 item.raw.traceId || '',
                 config?.tracesDataset?.datasourceId,
-                undefined // dataSourceTitle - not available in config
+                config?.tracesDataset?.datasourceTitle
               )
             }
             style={{ fontFamily: 'monospace', fontSize: '12px' }}
@@ -645,7 +653,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
                 spanId,
                 item.raw.traceId || '',
                 config?.tracesDataset?.datasourceId,
-                undefined
+                config?.tracesDataset?.datasourceTitle
               )
             }
             style={{ fontFamily: 'monospace', fontSize: '12px' }}
@@ -687,6 +695,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
                 iconType="popout"
                 iconSide="right"
                 size="s"
+                disabled={!spansLoading && spans.length === 0}
                 onClick={() =>
                   navigateToExploreTraces(
                     config?.tracesDataset?.id || '',
@@ -816,6 +825,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
                     size="s"
                     iconType="popout"
                     iconSide="right"
+                    disabled={!result.loading && result.logs.length === 0}
                     onClick={() =>
                       navigateToExploreLogs(
                         result.datasetId,
@@ -823,8 +833,8 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
                         serviceName,
                         result.serviceNameField,
                         timeRange,
-                        undefined, // dataSourceId
-                        undefined, // dataSourceTitle
+                        result.dataSourceId,
+                        result.dataSourceTitle,
                         hasFilters ? extractedTraceIds : undefined, // Pass traceIds only when filtered
                         hasFilters ? result.traceIdField : undefined // Pass traceIdField
                       )

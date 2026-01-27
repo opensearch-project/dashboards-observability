@@ -556,6 +556,23 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             justifyContent="center"
           >
             <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18nTexts.actions.viewSpans}>
+                <EuiButtonIcon
+                  iconType="apmTrace"
+                  aria-label={i18nTexts.actions.viewSpans}
+                  onClick={() =>
+                    setFlyoutState({
+                      serviceName: item.serviceName,
+                      environment: item.environment,
+                      language: item.groupByAttributes?.telemetry?.sdk?.language,
+                      tab: 'spans',
+                    })
+                  }
+                  data-test-subj={`serviceSpansButton-${item.serviceName}`}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiToolTip content={i18nTexts.actions.viewLogs}>
                 <EuiButtonIcon
                   iconType="discoverApp"
@@ -570,23 +587,6 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                     })
                   }
                   data-test-subj={`serviceLogsButton-${item.serviceName}`}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18nTexts.actions.viewSpans}>
-                <EuiButtonIcon
-                  iconType="apmTrace"
-                  aria-label={i18nTexts.actions.viewSpans}
-                  onClick={() =>
-                    setFlyoutState({
-                      serviceName: item.serviceName,
-                      environment: item.environment,
-                      language: item.groupByAttributes?.telemetry?.sdk?.language,
-                      tab: 'spans',
-                    })
-                  }
-                  data-test-subj={`serviceSpansButton-${item.serviceName}`}
                 />
               </EuiToolTip>
             </EuiFlexItem>

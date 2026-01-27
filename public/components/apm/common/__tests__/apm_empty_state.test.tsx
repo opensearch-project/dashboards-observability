@@ -7,8 +7,10 @@ import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { ApmEmptyState } from '../apm_empty_state';
 
-// Mock the image import
-jest.mock('../assets/services-preview.png', () => 'mock-image-path.png');
+// Mock the image imports
+jest.mock('../assets/services-preview.jpg', () => 'mock-services-preview.jpg');
+jest.mock('../assets/application-map-preview.jpg', () => 'mock-application-map-preview.jpg');
+jest.mock('../assets/correlate-traces-preview.jpg', () => 'mock-correlate-traces-preview.jpg');
 
 describe('ApmEmptyState', () => {
   const mockOnGetStartedClick = jest.fn();

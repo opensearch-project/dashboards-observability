@@ -157,7 +157,9 @@ describe('ApmSettingsModal', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Services')).toBeInTheDocument();
-        expect(screen.getByText('Select dataset for Services Map data')).toBeInTheDocument();
+        expect(
+          screen.getByText('Select dataset/index-pattern for Services Map data')
+        ).toBeInTheDocument();
       });
     });
 

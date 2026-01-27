@@ -133,7 +133,7 @@ describe('navigation_utils', () => {
       expect(url).not.toContain('::ds-123::existing-dataset');
     });
 
-    it('should prefix datasetId when not already prefixed', () => {
+    it('should use datasetId as-is without adding prefix', () => {
       navigateToExploreTraces(
         'test-dataset',
         defaultParams.datasetTitle,
@@ -144,7 +144,8 @@ describe('navigation_utils', () => {
       );
 
       const url = windowOpenSpy.mock.calls[0][0];
-      expect(url).toContain("id:'ds-456::test-dataset'");
+      // datasetId should be used as-is (already in correct format from APM config)
+      expect(url).toContain("id:'test-dataset'");
     });
 
     it('should handle missing dataSourceTitle', () => {
@@ -227,8 +228,25 @@ describe('navigation_utils', () => {
       );
 
       const url = windowOpenSpy.mock.calls[0][0];
+      // datasetId should be used as-is
       expect(url).toContain("id:'ds-123::existing-dataset'");
       expect(url).not.toContain('::ds-123::existing-dataset');
+    });
+
+    it('should use datasetId as-is without adding prefix', () => {
+      navigateToSpanDetails(
+        'test-dataset',
+        defaultParams.datasetTitle,
+        defaultParams.spanId,
+        defaultParams.traceId,
+        'ds-456',
+        defaultParams.dataSourceTitle
+      );
+
+      const url = windowOpenSpy.mock.calls[0][0];
+      // datasetId should be used as-is (no dataSourceId:: prefix added)
+      expect(url).toContain("id:'test-dataset'");
+      expect(url).not.toContain("id:'ds-456::test-dataset'");
     });
   });
 

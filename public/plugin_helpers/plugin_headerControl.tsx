@@ -20,6 +20,7 @@ interface HeaderControlledComponentsWrapperProps {
   components?: Array<TopNavControlButtonData | TopNavControlLinkData | React.ReactElement>;
   badgeContent?: React.ReactElement | string | number;
   description?: string | DescriptionWithOptionalLink;
+  bottomControls?: React.ReactElement;
 }
 
 const renderHeaderComponent = (
@@ -62,6 +63,7 @@ export const HeaderControlledComponentsWrapper = ({
   components = [],
   badgeContent,
   description,
+  bottomControls,
 }: HeaderControlledComponentsWrapperProps) => {
   const HeaderControl = coreRefs.navigation?.ui.HeaderControl;
   const showActionsInHeader = coreRefs.chrome?.navGroup.getNavGroupEnabled();
@@ -138,6 +140,19 @@ export const HeaderControlledComponentsWrapper = ({
                 )
               )}
             </div>
+          )}
+        </>
+      )}
+
+      {bottomControls && (
+        <>
+          {showActionsInHeader && HeaderControl ? (
+            <HeaderControl
+              setMountPoint={coreRefs.application?.setAppBottomControls}
+              controls={[{ renderComponent: bottomControls }]}
+            />
+          ) : (
+            bottomControls
           )}
         </>
       )}

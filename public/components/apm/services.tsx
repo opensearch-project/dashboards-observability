@@ -25,7 +25,9 @@ import { ServiceDetails } from './pages/service_details';
 import { navigateToServiceDetails } from './shared/utils/navigation_utils';
 import { TimeRangePicker } from './shared/components/time_filter';
 import { LanguageIcon } from './shared/components/language_icon';
+import { LegacyBanner } from './shared/components/legacy_banner';
 import { TimeRange } from './common/types/service_types';
+import './shared/styles/apm_common.scss';
 
 export interface ApmServicesProps {
   chrome: any;
@@ -121,10 +123,21 @@ export const Services = (props: ApmServicesProps) => {
 
   // Show empty state if no config exists
   if (!config) {
+    // Set breadcrumbs for empty state
+    chrome.setBreadcrumbs([
+      {
+        text: 'Services',
+        href: '#/services',
+      },
+    ]);
+
     return (
       <EuiPage>
         <EuiPageBody>
-          <HeaderControlledComponentsWrapper components={[settingsButton]} />
+          <HeaderControlledComponentsWrapper
+            components={[settingsButton]}
+            bottomControls={<LegacyBanner />}
+          />
 
           <ApmEmptyState onGetStartedClick={handleGetStartedClick} />
 

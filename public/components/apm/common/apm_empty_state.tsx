@@ -15,10 +15,18 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import servicesPreview from './assets/services-preview.png';
+import servicesPreview from './assets/services-preview.jpg';
+import applicationMapPreview from './assets/application-map-preview.jpg';
+import correlateTracesPreview from './assets/correlate-traces-preview.jpg';
 import { apmEmptyStateI18nTexts as i18nTexts, getPreviewImageAlt } from './apm_empty_state_i18n';
+import { APM_DOCS_URL } from './constants';
 
-const APM_DOCS_URL = 'https://docs.opensearch.org/latest/observing-your-data/';
+// Map tab IDs to their preview images
+const tabPreviewImages: Record<string, string> = {
+  services: servicesPreview,
+  'application-map': applicationMapPreview,
+  'correlate-traces-logs': correlateTracesPreview,
+};
 
 interface TabContent {
   id: string;
@@ -75,7 +83,7 @@ export const ApmEmptyState = ({ onGetStartedClick }: ApmEmptyStateProps) => {
 
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false}>
-            <EuiLink href={APM_DOCS_URL} target="_blank" external={false}>
+            <EuiLink href={APM_DOCS_URL} target="_blank" external>
               {i18nTexts.viewDocs}
             </EuiLink>
           </EuiFlexItem>
@@ -115,7 +123,7 @@ export const ApmEmptyState = ({ onGetStartedClick }: ApmEmptyStateProps) => {
           }}
         >
           <EuiImage
-            src={servicesPreview}
+            src={tabPreviewImages[selectedTabId]}
             alt={getPreviewImageAlt(selectedTab.name)}
             style={{ width: '100%', display: 'block' }}
           />

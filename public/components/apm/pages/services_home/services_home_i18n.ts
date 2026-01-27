@@ -57,7 +57,7 @@ export const servicesI18nTexts = {
   },
   error: {
     title: i18n.translate('observability.apm.services.error.title', {
-      defaultMessage: 'Error loading services',
+      defaultMessage: 'Error loading services, verify your configuration setup under APM settings',
     }),
   },
   empty: {
