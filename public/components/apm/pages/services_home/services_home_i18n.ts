@@ -37,7 +37,8 @@ export const servicesI18nTexts = {
       defaultMessage: 'Average response time percentile over the selected time range',
     }),
     throughput: i18n.translate('observability.apm.services.table.tooltip.throughput', {
-      defaultMessage: 'Average request count per interval over the selected time range',
+      defaultMessage:
+        'Average request count per interval over the selected time range. Interval is determined by the window_duration option set during Data Prepper ingestion.',
     }),
     failureRatio: i18n.translate('observability.apm.services.table.tooltip.failureRatio', {
       defaultMessage:

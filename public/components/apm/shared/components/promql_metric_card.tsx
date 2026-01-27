@@ -13,6 +13,7 @@ import './promql_metric_card.scss';
 
 export interface PromQLMetricCardProps {
   title: string;
+  titleTooltip?: string;
   subtitle?: string;
   promqlQuery: string;
   timeRange: TimeRange;
@@ -49,6 +50,7 @@ export interface PromQLMetricCardProps {
  */
 export const PromQLMetricCard: React.FC<PromQLMetricCardProps> = ({
   title,
+  titleTooltip,
   subtitle,
   promqlQuery,
   timeRange,
@@ -296,7 +298,15 @@ export const PromQLMetricCard: React.FC<PromQLMetricCardProps> = ({
       {/* Content overlay */}
       <div className="promql-metric-card__content">
         <div className="promql-metric-card__header">
-          <h4 className="promql-metric-card__title">{title}</h4>
+          {titleTooltip ? (
+            <EuiToolTip content={titleTooltip} position="top">
+              <h4 className="promql-metric-card__title">
+                {title} <EuiIcon type="questionInCircle" size="s" color="subdued" />
+              </h4>
+            </EuiToolTip>
+          ) : (
+            <h4 className="promql-metric-card__title">{title}</h4>
+          )}
           {subtitle && <p className="promql-metric-card__subtitle">{subtitle}</p>}
         </div>
 

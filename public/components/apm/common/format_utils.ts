@@ -47,7 +47,8 @@ export const formatLatency = (valueMs: number | undefined): string => {
 };
 
 /**
- * Format throughput values with req/int unit (requests per interval)
+ * Format throughput values with req/int unit (requests per interval).
+ * The interval is determined by the window_duration option configured during Data Prepper ingestion.
  * 1500 → 1.5K req/int
  */
 export const formatThroughput = (value: number | undefined): string => {

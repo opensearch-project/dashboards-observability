@@ -278,7 +278,7 @@ export function navigateToExploreLogs(
     dataSourceId || ''
   }',title:${dsTitle},type:OpenSearch),id:'${datasetId}',timeFieldName:time,title:'${datasetTitle}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
     pplQuery
-  )}')&_a=(legacy:(columns:!(_source),interval:auto,isDirty:!f,sort:!()),tab:(logs:(),patterns:(usingRegexPatterns:!f)),ui:(activeTabId:logs,showHistogram:!t))`;
+  )}')&_a=(legacy:(interval:auto,isDirty:!f,sort:!()),tab:(logs:(),patterns:(usingRegexPatterns:!f)),ui:(activeTabId:logs,showHistogram:!t))`;
 
   // Use basePath.prepend to properly handle workspace context
   const fullUrl =

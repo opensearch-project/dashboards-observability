@@ -207,6 +207,10 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
             title={i18n.translate('observability.apm.serviceOverview.throughput', {
               defaultMessage: 'Throughput (req/int)',
             })}
+            titleTooltip={i18n.translate('observability.apm.serviceOverview.throughputTooltip', {
+              defaultMessage:
+                'Average request count per interval. Interval is determined by the window_duration option set during Data Prepper ingestion.',
+            })}
             subtitle={i18n.translate('observability.apm.serviceOverview.avg', {
               defaultMessage: 'Avg',
             })}

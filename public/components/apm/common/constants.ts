@@ -162,17 +162,6 @@ export const CHART_COLORS = [
 ];
 
 /**
- * Maps uppercase platform type to display key for environment filter
- */
-export const ENVIRONMENT_PLATFORM_MAP: Record<string, string> = {
-  GENERIC: 'generic',
-  EKS: 'EKS',
-  ECS: 'ECS',
-  EC2: 'EC2',
-  LAMBDA: 'Lambda',
-};
-
-/**
  * Maps raw environment values to display-friendly names
  * Example: "generic:default" → "generic"
  */
