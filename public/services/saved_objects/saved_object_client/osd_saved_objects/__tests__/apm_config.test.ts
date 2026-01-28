@@ -56,6 +56,7 @@ describe('OSDSavedApmConfigClient', () => {
           id: mockUuid,
           type: 'correlations',
           attributes: {
+            title: 'apm-config',
             correlationType: 'APM-Config-workspace-123',
             version: '1.0.0',
             entities: [
@@ -73,6 +74,7 @@ describe('OSDSavedApmConfigClient', () => {
         expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
           'correlations',
           expect.objectContaining({
+            title: 'apm-config',
             correlationType: 'APM-Config-workspace-123',
             version: '1.0.0',
           }),

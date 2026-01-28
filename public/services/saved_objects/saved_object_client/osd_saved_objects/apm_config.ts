@@ -118,10 +118,12 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
     const references = this.createReferences(params);
     const entities = this.createEntities();
     const correlationType = `${APM_CONFIG_PREFIX}${params.workspaceId}`;
+    const title = 'apm-config';
 
     const response = await this.client.create<ApmConfigAttributes>(
       CORRELATIONS_SAVED_OBJECT,
       {
+        title,
         correlationType,
         version: '1.0.0',
         entities,

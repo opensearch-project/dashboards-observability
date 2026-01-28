@@ -42,6 +42,7 @@ export interface ApmConfigEntity {
 }
 
 export interface ApmConfigAttributes extends SavedObjectAttributes {
+  title?: string; // 'apm-config'
   correlationType: string; // 'APM-Config-<workspace-id>'
   version: string; // '1.0.0'
   entities: ApmConfigEntity[];

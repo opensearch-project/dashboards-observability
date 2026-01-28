@@ -5,8 +5,10 @@
 
 export const JAEGER_INDEX_NAME = '*jaeger-span-*';
 export const JAEGER_SERVICE_INDEX_NAME = '*jaeger-service*';
-export const DATA_PREPPER_INDEX_NAME = 'otel-v1-apm-span-*';
-export const DATA_PREPPER_SERVICE_INDEX_NAME = 'otel-v1-apm-service-map*';
+export const DATA_PREPPER_INDEX_NAME =
+  'otel-v1-apm-span-*,opensearch_dashboards_sample_data_otel_spans*';
+export const DATA_PREPPER_SERVICE_INDEX_NAME =
+  'otel-v1-apm-service-map*,opensearch_dashboards_sample_data_otel_service_map*';
 export const TRACE_ANALYTICS_DATE_FORMAT = 'MM/DD/YYYY HH:mm:ss.SSS';
 export const TRACE_ANALYTICS_PLOTS_DATE_FORMAT = 'MMM D, YYYY HH:mm:ss.SSS';
 export const TRACES_MAX_NUM = 500;
@@ -29,7 +31,7 @@ export const TRACE_LOGS_FIELD_MAPPNIGS_SETTING =
 export const TRACE_SERVICE_MAP_MAX_NODES = 'observability:traceAnalyticsServiceMapMaxNodes';
 export const TRACE_SERVICE_MAP_MAX_EDGES = 'observability:traceAnalyticsServiceMapMaxEdges';
 
-export const DEFAULT_SS4O_LOGS_INDEX = 'ss4o_logs-*';
+export const DEFAULT_SS4O_LOGS_INDEX = 'ss4o_logs-*,opensearch_dashboards_sample_data_otel_logs*';
 export const DEFAULT_CORRELATED_LOGS_FIELD_MAPPINGS = `
 {
   "serviceName": "serviceName",
