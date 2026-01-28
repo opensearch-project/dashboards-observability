@@ -180,18 +180,15 @@ export function navigateToExploreTraces(
 
   // Build path using RISON format matching expected explore traces URL format
   // Note: Empty strings in RISON must be quoted as ''
-  // Note: datasetId may already contain the composite id (dataSourceId::datasetId), so don't prepend again
+  // Note: datasetId is already in correct format from APM config, use as-is
   const dsTitle = dataSourceTitle ? dataSourceTitle : "''";
-  const fullDatasetId = datasetId.includes('::')
-    ? datasetId
-    : `${dataSourceId || ''}::${datasetId}`;
-  const path = `traces/#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
+  const path = `traces/#?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
     timeRange.from
   },to:${timeRange.to}))&_q=(dataset:(dataSource:(id:'${
     dataSourceId || ''
-  }',title:${dsTitle},type:OpenSearch),id:'${fullDatasetId}',schemaMappings:(),signalType:traces,timeFieldName:startTime,title:'${datasetTitle}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
+  }',title:${dsTitle},type:OpenSearch),id:'${datasetId}',schemaMappings:(),signalType:traces,timeFieldName:startTime,title:'${datasetTitle}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
     pplQuery
-  )}')&_a=(legacy:(columns:!(spanId,status.code,attributes.http.status_code,resource.attributes.service.name,kind,name,durationNano,durationInNanos),interval:auto,isDirty:!f,sort:!()),tab:(logs:(),patterns:(patternsField:'',usingRegexPatterns:!f)),ui:(activeTabId:logs,showHistogram:!t))`;
+  )}')&_a=(legacy:(columns:!(spanId,status.code,attributes.http.status_code,resource.attributes.service.name,kind,name,durationNano,durationInNanos),interval:auto,isDirty:!f,sort:!()),tab:(logs:(),patterns:(usingRegexPatterns:!f)),ui:(activeTabId:logs,showHistogram:!t))`;
 
   // Use basePath.prepend to properly handle workspace context
   const fullUrl =
@@ -223,12 +220,9 @@ export function navigateToSpanDetails(
 ): void {
   // Build path for trace details page with spanId and traceId
   // Note: Empty strings in RISON must be quoted as ''
-  // Note: datasetId may already contain the composite id (dataSourceId::datasetId), so don't prepend again
+  // Note: datasetId is already in correct format from APM config, use as-is
   const dsTitle = dataSourceTitle ? `'${dataSourceTitle}'` : "''";
-  const fullDatasetId = datasetId.includes('::')
-    ? datasetId
-    : `${dataSourceId || ''}::${datasetId}`;
-  const path = `traces/traceDetails#/?_a=(dataset:(id:'${fullDatasetId}',title:'${datasetTitle}',type:'INDEX_PATTERN',timeFieldName:'startTime',dataSource:(id:'${
+  const path = `traces/traceDetails#/?_a=(dataset:(id:'${datasetId}',title:'${datasetTitle}',type:'INDEX_PATTERN',timeFieldName:'startTime',dataSource:(id:'${
     dataSourceId || ''
   }',title:${dsTitle},type:'OpenSearch')),spanId:'${spanId}',traceId:'${traceId}')`;
 
@@ -275,18 +269,16 @@ export function navigateToExploreLogs(
   }
 
   // Build path using RISON format matching expected explore logs URL format
+  // Note: datasetId is already in correct format from APM config, use as-is
   const dsTitle = dataSourceTitle ? dataSourceTitle : "''";
-  const fullDatasetId = datasetId.includes('::')
-    ? datasetId
-    : `${dataSourceId || ''}::${datasetId}`;
 
-  const path = `logs/#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
+  const path = `logs/#?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
     timeRange.from
   },to:${timeRange.to}))&_q=(dataset:(dataSource:(id:'${
     dataSourceId || ''
-  }',title:${dsTitle},type:OpenSearch),id:'${fullDatasetId}',timeFieldName:time,title:'${datasetTitle}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
+  }',title:${dsTitle},type:OpenSearch),id:'${datasetId}',timeFieldName:time,title:'${datasetTitle}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
     pplQuery
-  )}')&_a=(legacy:(columns:!(_source),interval:auto,isDirty:!f,sort:!()),tab:(logs:(),patterns:(patternsField:'',usingRegexPatterns:!f)),ui:(activeTabId:logs,showHistogram:!t))`;
+  )}')&_a=(legacy:(interval:auto,isDirty:!f,sort:!()),tab:(logs:(),patterns:(usingRegexPatterns:!f)),ui:(activeTabId:logs,showHistogram:!t))`;
 
   // Use basePath.prepend to properly handle workspace context
   const fullUrl =

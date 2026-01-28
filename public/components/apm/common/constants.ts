@@ -6,9 +6,19 @@
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 
 /**
+ * APM Documentation URL
+ */
+export const APM_DOCS_URL = 'https://docs.opensearch.org/latest/observing-your-data/';
+
+/**
  * App ID for Explore application used in navigation
  */
 export const EXPLORE_APP_ID = 'explore';
+
+/**
+ * LocalStorage key for tracking if the legacy banner has been dismissed
+ */
+export const LEGACY_BANNER_DISMISSED_KEY = 'apm.legacyBannerDismissed';
 
 /**
  * Constants for APM components
@@ -150,17 +160,6 @@ export const CHART_COLORS = [
   euiThemeVars.euiColorVis8, // Brown
   euiThemeVars.euiColorVis9, // Red-Orange
 ];
-
-/**
- * Maps uppercase platform type to display key for environment filter
- */
-export const ENVIRONMENT_PLATFORM_MAP: Record<string, string> = {
-  GENERIC: 'generic',
-  EKS: 'EKS',
-  ECS: 'ECS',
-  EC2: 'EC2',
-  LAMBDA: 'Lambda',
-};
 
 /**
  * Maps raw environment values to display-friendly names

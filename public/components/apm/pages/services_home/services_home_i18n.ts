@@ -37,7 +37,8 @@ export const servicesI18nTexts = {
       defaultMessage: 'Average response time percentile over the selected time range',
     }),
     throughput: i18n.translate('observability.apm.services.table.tooltip.throughput', {
-      defaultMessage: 'Average request count per interval over the selected time range',
+      defaultMessage:
+        'Average request count per interval over the selected time range. Interval is determined by the window_duration option set during Data Prepper ingestion.',
     }),
     failureRatio: i18n.translate('observability.apm.services.table.tooltip.failureRatio', {
       defaultMessage:
@@ -57,7 +58,7 @@ export const servicesI18nTexts = {
   },
   error: {
     title: i18n.translate('observability.apm.services.error.title', {
-      defaultMessage: 'Error loading services',
+      defaultMessage: 'Error loading services, verify your configuration setup under APM settings',
     }),
   },
   empty: {

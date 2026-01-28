@@ -95,10 +95,10 @@ export function getQueryListServices(
  * ```
  * source=otel-apm-service-map
  * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
- * | dedup hashCode
  * | where eventType = 'ServiceOperationDetail'
  * | where service.keyAttributes.environment = 'generic:default'
  * | where service.keyAttributes.name = 'frontend'
+ * | dedup hashCode
  * | fields service.keyAttributes, service.groupByAttributes
  * ```
  */
@@ -111,7 +111,6 @@ export function getQueryGetService(
 ): string {
   let query = `source=${queryIndex}`;
   query += buildTimeFilterClause(startTime, endTime);
-  query += ` | dedup hashCode`;
   query += ` | where eventType = 'ServiceOperationDetail'`;
 
   // Filter by service keyAttributes if provided
@@ -122,6 +121,7 @@ export function getQueryGetService(
     query += ` | where service.keyAttributes.name = '${serviceName}'`;
   }
 
+  query += ` | dedup hashCode`;
   query += ` | fields service.keyAttributes, service.groupByAttributes`;
   return query;
 }
@@ -182,10 +182,10 @@ export function getQueryServiceAttributes(
  * ```
  * source=otel-apm-service-map
  * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
- * | dedup hashCode
  * | where eventType = 'ServiceOperationDetail'
  * | where service.keyAttributes.environment = 'generic:default'
  * | where service.keyAttributes.name = 'frontend'
+ * | dedup hashCode
  * | fields service.keyAttributes, operation.name, operation.remoteService.keyAttributes, operation.remoteOperationName
  * ```
  */
@@ -198,7 +198,6 @@ export function getQueryListServiceOperations(
 ): string {
   let query = `source=${queryIndex}`;
   query += buildTimeFilterClause(startTime, endTime);
-  query += ` | dedup hashCode`;
   query += ` | where eventType = 'ServiceOperationDetail'`;
 
   // Filter by service keyAttributes if provided
@@ -209,6 +208,7 @@ export function getQueryListServiceOperations(
     query += ` | where service.keyAttributes.name = '${serviceName}'`;
   }
 
+  query += ` | dedup hashCode`;
   query += ` | fields service.keyAttributes, operation.name, operation.remoteService.keyAttributes, operation.remoteOperationName`;
   return query;
 }
@@ -227,10 +227,10 @@ export function getQueryListServiceOperations(
  * ```
  * source=otel-apm-service-map
  * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
- * | dedup hashCode
  * | where eventType = 'ServiceOperationDetail'
  * | where service.keyAttributes.environment = 'generic:default'
  * | where service.keyAttributes.name = 'frontend'
+ * | dedup hashCode
  * | fields service.keyAttributes, operation.remoteService.keyAttributes, operation.remoteOperationName
  * ```
  */
@@ -243,7 +243,6 @@ export function getQueryListServiceDependencies(
 ): string {
   let query = `source=${queryIndex}`;
   query += buildTimeFilterClause(startTime, endTime);
-  query += ` | dedup hashCode`;
   query += ` | where eventType = 'ServiceOperationDetail'`;
 
   // Filter by service keyAttributes if provided
@@ -254,6 +253,7 @@ export function getQueryListServiceDependencies(
     query += ` | where service.keyAttributes.name = '${serviceName}'`;
   }
 
+  query += ` | dedup hashCode`;
   query += ` | fields service.keyAttributes, operation.name, operation.remoteService.keyAttributes, operation.remoteOperationName`;
   return query;
 }
@@ -271,8 +271,8 @@ export function getQueryListServiceDependencies(
  * ```
  * source=otel-apm-service-map
  * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
- * | dedup hashCode
  * | where eventType = 'ServiceConnection'
+ * | dedup hashCode
  * | fields service.keyAttributes, remoteService.keyAttributes, service.groupByAttributes, remoteService.groupByAttributes
  * ```
  */
@@ -283,8 +283,8 @@ export function getQueryGetServiceMap(
 ): string {
   let query = `source=${queryIndex}`;
   query += buildTimeFilterClause(startTime, endTime);
-  query += ` | dedup hashCode`;
   query += ` | where eventType = 'ServiceConnection'`;
+  query += ` | dedup hashCode`;
   query += ` | fields service.keyAttributes, remoteService.keyAttributes, service.groupByAttributes, remoteService.groupByAttributes`;
   return query;
 }
@@ -305,12 +305,11 @@ export function getQueryGetServiceMap(
  * ```
  * source=otel-apm-service-map
  * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
- * | dedup hashCode
  * | where eventType = 'ServiceOperationDetail'
  * | where service.keyAttributes.environment = 'generic:default'
  * | where service.keyAttributes.name = 'frontend'
  * | where operation.name = 'GET /api/users'
- * | stats dc(operation.remoteService.keyAttributes.name) as dependency_count
+ * | stats distinct_count(operation.remoteService.keyAttributes.name) as dependency_count
  * ```
  */
 export function getQueryOperationDependenciesCount(
@@ -323,7 +322,6 @@ export function getQueryOperationDependenciesCount(
 ): string {
   let query = `source=${queryIndex}`;
   query += buildTimeFilterClause(startTime, endTime);
-  query += ` | dedup hashCode`;
   query += ` | where eventType = 'ServiceOperationDetail'`;
 
   // Filter by service keyAttributes if provided
@@ -336,9 +334,8 @@ export function getQueryOperationDependenciesCount(
   if (operationName) {
     query += ` | where operation.name = '${operationName}'`;
   }
-
   // Count distinct remote services (dependencies)
-  query += ` | stats dc(operation.remoteService.keyAttributes.name) as dependency_count`;
+  query += ` | stats distinct_count(operation.remoteService.keyAttributes.name) as dependency_count`;
   return query;
 }
 
@@ -363,12 +360,10 @@ export function getQueryDependencyDownstreamCount(
 ): string {
   let query = `source=${index}`;
   query += buildTimeFilterClause(startTime, endTime);
-  query += ` | dedup hashCode`;
   query += ` | where eventType = 'ServiceOperationDetail'`;
   query += ` | where service.keyAttributes.environment = '${environment}'`;
   query += ` | where service.keyAttributes.name = '${dependencyServiceName}'`;
-
   // Count distinct downstream services this dependency calls
-  query += ` | stats dc(operation.remoteService.keyAttributes.name) as dependency_count`;
+  query += ` | stats distinct_count(operation.remoteService.keyAttributes.name) as dependency_count`;
   return query;
 }

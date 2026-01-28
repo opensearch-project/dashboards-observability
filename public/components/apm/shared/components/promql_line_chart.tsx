@@ -141,17 +141,16 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
       grid: {
         left: 10,
         right: 20,
-        top: showLegend ? 40 : 20,
-        bottom: 50,
+        top: 20,
+        bottom: showLegend ? 35 : 30,
         containLabel: true,
       },
       legend: showLegend
         ? {
             show: true,
             type: 'scroll',
-            top: 0,
+            bottom: 0,
             left: 0,
-            right: 0,
             textStyle: {
               fontSize: 11,
               color: euiThemeVars.euiColorDarkShade,

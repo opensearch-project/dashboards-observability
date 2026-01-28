@@ -189,6 +189,8 @@ export interface CorrelatedLogDataset {
   displayName: string;
   title: string;
   schemaMappings?: Record<string, string>;
+  dataSourceId?: string;
+  dataSourceTitle?: string;
 }
 
 /**
@@ -259,6 +261,9 @@ export const useCorrelatedLogs = (traceDatasetId?: string) => {
             try {
               const dataView = await dataService.dataViews.get(logId);
 
+              // Get dataSource reference from the dataView
+              const dataSourceRef = dataView.dataSourceRef;
+
               // Get schema mappings from saved object - return as-is, no defaults
               let schemaMappings: Record<string, string> | undefined;
               try {
@@ -281,6 +286,8 @@ export const useCorrelatedLogs = (traceDatasetId?: string) => {
                 displayName: dataView.getDisplayName(),
                 title: dataView.title,
                 schemaMappings,
+                dataSourceId: dataSourceRef?.id,
+                dataSourceTitle: dataSourceRef?.name,
               };
             } catch (err) {
               console.error(`Failed to fetch log dataset ${logId}:`, err);

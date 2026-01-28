@@ -55,16 +55,10 @@ import {
   THRESHOLD_LABELS,
 } from '../../shared/components/filters';
 import { ActiveFilterBadges, FilterBadge } from '../../shared/components/active_filter_badges';
-import {
-  getEnvironmentDisplayName,
-  APM_CONSTANTS,
-  ENVIRONMENT_PLATFORM_MAP,
-} from '../../common/constants';
+import { getEnvironmentDisplayName, APM_CONSTANTS } from '../../common/constants';
 import { servicesI18nTexts as i18nTexts } from './services_home_i18n';
 import { formatThroughput } from '../../common/format_utils';
 import '../../shared/styles/apm_common.scss';
-
-const AVAILABLE_ENVIRONMENTS = Object.values(ENVIRONMENT_PLATFORM_MAP);
 
 const LATENCY_PERCENTILE_OPTIONS = [
   { id: 'p99', label: 'P99' },
@@ -169,13 +163,28 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     return result;
   }, [availableGroupByAttributes, attributeSearchQueries]);
 
-  // Create checkbox options for environments
+  // Extract unique environments from services data
+  const availableEnvironments = useMemo(() => {
+    const envSet = new Set<string>();
+    (services || []).forEach((service) => {
+      if (service.environment) {
+        const envDetails = parseEnvironmentType(service.environment);
+        const platform = envDetails.platform;
+        if (platform) {
+          envSet.add(platform);
+        }
+      }
+    });
+    return Array.from(envSet).sort((a, b) => a.localeCompare(b));
+  }, [services]);
+
+  // Create checkbox options from available environments
   const environmentCheckboxes = useMemo(() => {
-    return AVAILABLE_ENVIRONMENTS.map((env) => ({
+    return availableEnvironments.map((env) => ({
       id: env,
       label: env,
     }));
-  }, []);
+  }, [availableEnvironments]);
 
   // Handle environment filter changes
   const onEnvironmentChange = useCallback((id: string) => {
@@ -237,12 +246,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     if (hasSelectedEnvironments) {
       filtered = filtered.filter((service) => {
         const envDetails = parseEnvironmentType(service.environment);
-        const platform = envDetails.platform.toUpperCase();
-
-        // Map platform to filter options
-        const matchKey = ENVIRONMENT_PLATFORM_MAP[platform] || '';
-
-        return selectedEnvironments[matchKey] === true;
+        const platform = envDetails.platform;
+        return selectedEnvironments[platform] === true;
       });
     }
 
@@ -556,6 +561,23 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             justifyContent="center"
           >
             <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18nTexts.actions.viewSpans}>
+                <EuiButtonIcon
+                  iconType="apmTrace"
+                  aria-label={i18nTexts.actions.viewSpans}
+                  onClick={() =>
+                    setFlyoutState({
+                      serviceName: item.serviceName,
+                      environment: item.environment,
+                      language: item.groupByAttributes?.telemetry?.sdk?.language,
+                      tab: 'spans',
+                    })
+                  }
+                  data-test-subj={`serviceSpansButton-${item.serviceName}`}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiToolTip content={i18nTexts.actions.viewLogs}>
                 <EuiButtonIcon
                   iconType="discoverApp"
@@ -570,23 +592,6 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                     })
                   }
                   data-test-subj={`serviceLogsButton-${item.serviceName}`}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18nTexts.actions.viewSpans}>
-                <EuiButtonIcon
-                  iconType="apmTrace"
-                  aria-label={i18nTexts.actions.viewSpans}
-                  onClick={() =>
-                    setFlyoutState({
-                      serviceName: item.serviceName,
-                      environment: item.environment,
-                      language: item.groupByAttributes?.telemetry?.sdk?.language,
-                      tab: 'spans',
-                    })
-                  }
-                  data-test-subj={`serviceSpansButton-${item.serviceName}`}
                 />
               </EuiToolTip>
             </EuiFlexItem>

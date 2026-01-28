@@ -42,4 +42,6 @@ export interface LogDatasetResult {
   logs: LogData[];
   loading: boolean;
   error?: Error;
+  dataSourceId?: string;
+  dataSourceTitle?: string;
 }

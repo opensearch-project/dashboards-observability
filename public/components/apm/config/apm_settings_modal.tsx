@@ -22,6 +22,7 @@ import {
   EuiButtonIcon,
   EuiBadge,
   EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { NotificationsStart } from '../../../../../../src/core/public';
@@ -36,6 +37,7 @@ import { useApmConfig } from './apm_config_context';
 import { navigateToDatasetCorrelations } from '../shared/utils/navigation_utils';
 import { OSDSavedApmConfigClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/apm_config';
 import { ApmArchitectureSvgLight, ApmArchitectureSvgDark } from './apm-architecture-svg';
+import { APM_DOCS_URL } from '../common/constants';
 
 /**
  * Type guard to safely check if an unknown value is an Error
@@ -352,7 +354,12 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
                 {i18n.translate('observability.apm.settings.telemetryFlowDescription', {
                   defaultMessage:
                     'Configure Data Prepper pipelines first to collect and export Traces, Services data, and RED metrics into OpenSearch datasets and into Prometheus.',
-                })}
+                })}{' '}
+                <EuiLink href={APM_DOCS_URL} target="_blank" external>
+                  {i18n.translate('observability.apm.settings.learnMore', {
+                    defaultMessage: 'Learn more',
+                  })}
+                </EuiLink>
               </p>
             </EuiText>
             <EuiSpacer size="s" />
@@ -543,7 +550,7 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
                 defaultMessage: 'Services',
               })}
               helpText={i18n.translate('observability.apm.settings.servicesHelpText', {
-                defaultMessage: 'Select dataset for Services Map data',
+                defaultMessage: 'Select dataset/index-pattern for Services Map data',
               })}
               isInvalid={showErrors && errors.serviceMapDataset.length > 0}
               error={errors.serviceMapDataset}

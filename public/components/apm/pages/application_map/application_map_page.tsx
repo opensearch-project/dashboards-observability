@@ -52,7 +52,9 @@ import {
   getPlatformTypeFromEnvironment,
 } from '../../common/constants';
 import { applicationMapI18nTexts as i18nTexts } from './application_map_i18n';
+import { LegacyBanner } from '../../shared/components/legacy_banner';
 import './application_map.scss';
+import '../../shared/styles/apm_common.scss';
 
 /**
  * URL parameter validation constants
@@ -558,7 +560,10 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     return (
       <EuiPage>
         <EuiPageBody>
-          <HeaderControlledComponentsWrapper components={[settingsButton]} />
+          <HeaderControlledComponentsWrapper
+            components={[settingsButton]}
+            bottomControls={<LegacyBanner />}
+          />
 
           <ApmEmptyState onGetStartedClick={handleGetStartedClick} />
 
@@ -584,6 +589,10 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
             </EuiPageContentBody>
           </EuiPageContent>
         </EuiPageBody>
+
+        {isSettingsModalVisible && (
+          <ApmSettingsModal onClose={handleModalClose} notifications={notifications} />
+        )}
       </EuiPage>
     );
   }

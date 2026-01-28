@@ -50,6 +50,18 @@ export const apmEmptyStateI18nTexts = {
       ),
     },
   },
+  legacyBanner: {
+    title: i18n.translate('observability.apm.emptyState.legacyBanner.title', {
+      defaultMessage: 'Try out new APM experience',
+    }),
+    message: i18n.translate('observability.apm.emptyState.legacyBanner.message', {
+      defaultMessage:
+        'If you prefer the classic Trace Analytics experience, you can disable APM in settings.',
+    }),
+    linkText: i18n.translate('observability.apm.emptyState.legacyBanner.linkText', {
+      defaultMessage: 'Go to settings',
+    }),
+  },
 };
 
 /**

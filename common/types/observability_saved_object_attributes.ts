@@ -54,12 +54,14 @@ export interface ResolvedApmConfig extends Omit<ApmConfigAttributes, 'entities'>
     title: string;
     name?: string;
     datasourceId?: string;
+    datasourceTitle?: string;
   } | null;
   serviceMapDataset: {
     id: string;
     title: string;
     name?: string;
     datasourceId?: string;
+    datasourceTitle?: string;
   } | null;
   prometheusDataSource: {
     id: string;
