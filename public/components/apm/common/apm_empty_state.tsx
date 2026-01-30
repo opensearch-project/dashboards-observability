@@ -124,6 +124,7 @@ export const ApmEmptyState = ({ onGetStartedClick }: ApmEmptyStateProps) => {
               borderRadius: '6px',
               overflow: 'hidden',
               maxWidth: '900px',
+              lineHeight: 0,
             }}
           >
             <EuiImage
