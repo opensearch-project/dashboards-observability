@@ -61,13 +61,14 @@ export const useServiceMapMetrics = (
 
   // Get config values
   const prometheusConnectionId = config?.prometheusDataSource?.id;
+  const prometheusConnectionMeta = config?.prometheusDataSource?.meta;
 
   const promqlService = useMemo(() => {
     if (!prometheusConnectionId) {
       return null;
     }
-    return new PromQLSearchService(prometheusConnectionId);
-  }, [prometheusConnectionId]);
+    return new PromQLSearchService(prometheusConnectionId, prometheusConnectionMeta);
+  }, [prometheusConnectionId, prometheusConnectionMeta]);
 
   // Build service filter (service=~"service1|service2|...")
   const serviceFilter = useMemo(() => {

@@ -256,6 +256,7 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
                   prometheus.attributes?.title ||
                   prometheus.attributes?.connectionId ||
                   prometheusRef!.id,
+                meta: prometheus.attributes?.meta as Record<string, unknown> | undefined,
               }
             : null,
         };

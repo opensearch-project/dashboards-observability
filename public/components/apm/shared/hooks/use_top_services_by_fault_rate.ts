@@ -55,13 +55,14 @@ export const useTopServicesByFaultRate = (
 
   // Get config values
   const prometheusConnectionId = config?.prometheusDataSource?.id;
+  const prometheusConnectionMeta = config?.prometheusDataSource?.meta;
 
   const promqlSearchService = useMemo(() => {
     if (!prometheusConnectionId) {
       return null;
     }
-    return new PromQLSearchService(prometheusConnectionId);
-  }, [prometheusConnectionId]);
+    return new PromQLSearchService(prometheusConnectionId, prometheusConnectionMeta);
+  }, [prometheusConnectionId, prometheusConnectionMeta]);
 
   const fetchParams = useMemo(
     () => ({

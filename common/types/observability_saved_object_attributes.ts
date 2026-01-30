@@ -67,5 +67,6 @@ export interface ResolvedApmConfig extends Omit<ApmConfigAttributes, 'entities'>
   prometheusDataSource: {
     id: string;
     title: string;
+    meta?: Record<string, unknown>;
   } | null;
 }

@@ -54,13 +54,14 @@ export const useEdgeMetrics = (params: UseEdgeMetricsParams): UseEdgeMetricsResu
 
   // Get config values
   const prometheusConnectionId = config?.prometheusDataSource?.id;
+  const prometheusConnectionMeta = config?.prometheusDataSource?.meta;
 
   const promqlService = useMemo(() => {
     if (!prometheusConnectionId) {
       return null;
     }
-    return new PromQLSearchService(prometheusConnectionId);
-  }, [prometheusConnectionId]);
+    return new PromQLSearchService(prometheusConnectionId, prometheusConnectionMeta);
+  }, [prometheusConnectionId, prometheusConnectionMeta]);
 
   // Memoize time values to avoid unnecessary re-fetches
   const startTimeSec = useMemo(() => getTimeInSeconds(params.startTime), [params.startTime]);

@@ -58,13 +58,14 @@ export const useGroupMetrics = (params: UseGroupMetricsParams): UseGroupMetricsR
 
   // Get config values
   const prometheusConnectionId = config?.prometheusDataSource?.id;
+  const prometheusConnectionMeta = config?.prometheusDataSource?.meta;
 
   const promqlService = useMemo(() => {
     if (!prometheusConnectionId) {
       return null;
     }
-    return new PromQLSearchService(prometheusConnectionId);
-  }, [prometheusConnectionId]);
+    return new PromQLSearchService(prometheusConnectionId, prometheusConnectionMeta);
+  }, [prometheusConnectionId, prometheusConnectionMeta]);
 
   // Convert attribute name to Prometheus label format (dots to underscores)
   const prometheusLabel = useMemo(() => {
