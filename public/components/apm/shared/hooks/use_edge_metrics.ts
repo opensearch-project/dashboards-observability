@@ -53,7 +53,8 @@ export const useEdgeMetrics = (params: UseEdgeMetricsParams): UseEdgeMetricsResu
   const [refetchTrigger, setRefetchTrigger] = useState(0);
 
   // Get config values
-  const prometheusConnectionId = config?.prometheusDataSource?.id;
+  // Use .name (connectionId) for PromQL queries, not .id (saved object ID)
+  const prometheusConnectionId = config?.prometheusDataSource?.name;
   const prometheusConnectionMeta = config?.prometheusDataSource?.meta;
 
   const promqlService = useMemo(() => {

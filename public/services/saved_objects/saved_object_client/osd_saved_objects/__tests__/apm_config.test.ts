@@ -427,7 +427,7 @@ describe('OSDSavedApmConfigClient', () => {
 
         mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
         mockSavedObjectsClient.get.mockResolvedValue({
-          attributes: { title: 'Prometheus Source' },
+          attributes: { connectionId: 'prometheus-source' }, // data-connection uses connectionId, not title
         });
         // Mock dataViews.get to return null (simulating failure/not found)
         mockDataService.dataViews.get.mockResolvedValue(null);
@@ -447,10 +447,10 @@ describe('OSDSavedApmConfigClient', () => {
           name: undefined,
           datasourceId: undefined,
         });
-        // Prometheus still uses savedObjectsClient.get
+        // Prometheus still uses savedObjectsClient.get - name comes from connectionId
         expect(result.configs[0].prometheusDataSource).toEqual({
           id: 'prom-1',
-          title: 'Prometheus Source',
+          name: 'prometheus-source',
         });
       });
 
@@ -502,7 +502,7 @@ describe('OSDSavedApmConfigClient', () => {
         expect(result.configs[0].version).toBe('1.0.0');
       });
 
-      it('should use connectionId for Prometheus title', async () => {
+      it('should use connectionId for Prometheus name', async () => {
         const mockResponse = {
           savedObjects: [
             {
@@ -526,7 +526,7 @@ describe('OSDSavedApmConfigClient', () => {
 
         const result = await client.getBulkWithResolvedReferences(mockDataService);
 
-        expect(result.configs[0].prometheusDataSource?.title).toBe('prometheus-prod');
+        expect(result.configs[0].prometheusDataSource?.name).toBe('prometheus-prod');
       });
 
       it('should resolve entities regardless of their order in array', async () => {
@@ -641,7 +641,7 @@ describe('OSDSavedApmConfigClient', () => {
         });
         expect(result.configs[0].prometheusDataSource).toEqual({
           id: 'prom-1',
-          title: 'prometheus-prod',
+          name: 'prometheus-prod',
         });
       });
 

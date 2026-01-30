@@ -168,10 +168,10 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
       ]);
       setSelectedPrometheusDS([
         {
-          label: existingConfig.prometheusDataSource.title,
+          label: existingConfig.prometheusDataSource.name, // Use name for display
           value: {
             id: existingConfig.prometheusDataSource.id,
-            title: existingConfig.prometheusDataSource.title,
+            name: existingConfig.prometheusDataSource.name,
           },
         },
       ]);

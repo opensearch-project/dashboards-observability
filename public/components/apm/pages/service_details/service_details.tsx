@@ -145,8 +145,9 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
   );
 
   // Get Prometheus connection ID from config
+  // Use .name (connectionId) for PromQL queries, not .id (saved object ID)
   const prometheusConnectionId = useMemo(() => {
-    return config?.prometheusDataSource?.id || '';
+    return config?.prometheusDataSource?.name || '';
   }, [config]);
 
   // Get service map dataset from config

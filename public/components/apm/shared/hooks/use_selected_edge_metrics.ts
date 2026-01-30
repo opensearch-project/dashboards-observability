@@ -55,7 +55,8 @@ export const useSelectedEdgeMetrics = (
   const [error, setError] = useState<Error | null>(null);
 
   // Get config values
-  const prometheusConnectionId = config?.prometheusDataSource?.id;
+  // Use .name (connectionId) for PromQL queries, not .id (saved object ID)
+  const prometheusConnectionId = config?.prometheusDataSource?.name;
   const prometheusConnectionMeta = config?.prometheusDataSource?.meta;
 
   const promqlService = useMemo(() => {

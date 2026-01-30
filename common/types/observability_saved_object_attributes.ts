@@ -65,8 +65,8 @@ export interface ResolvedApmConfig extends Omit<ApmConfigAttributes, 'entities'>
     datasourceTitle?: string;
   } | null;
   prometheusDataSource: {
-    id: string;
-    title: string;
+    id: string; // Saved object ID (for fetching from store)
+    name: string; // ConnectionId (for PromQL dataset.id and display)
     meta?: Record<string, unknown>;
   } | null;
 }
