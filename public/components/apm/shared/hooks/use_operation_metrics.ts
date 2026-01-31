@@ -24,6 +24,7 @@ export interface UseOperationMetricsParams {
   startTime: Date;
   endTime: Date;
   prometheusConnectionId: string;
+  prometheusConnectionMeta?: Record<string, unknown>;
   refreshTrigger?: number;
 }
 
@@ -55,8 +56,8 @@ export const useOperationMetrics = (
     if (!params.prometheusConnectionId) {
       return null;
     }
-    return new PromQLSearchService(params.prometheusConnectionId);
-  }, [params.prometheusConnectionId]);
+    return new PromQLSearchService(params.prometheusConnectionId, params.prometheusConnectionMeta);
+  }, [params.prometheusConnectionId, params.prometheusConnectionMeta]);
 
   useEffect(() => {
     if (!params.operations || params.operations.length === 0 || !promqlService) {

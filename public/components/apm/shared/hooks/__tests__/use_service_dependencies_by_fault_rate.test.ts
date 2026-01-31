@@ -29,6 +29,7 @@ jest.mock('../../utils/time_utils', () => ({
 const mockConfig = {
   prometheusDataSource: {
     id: 'prometheus-1',
+    name: 'prometheus-1', // ConnectionId for PromQL queries
   },
 };
 

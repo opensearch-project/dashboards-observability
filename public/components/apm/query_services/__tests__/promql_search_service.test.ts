@@ -38,6 +38,17 @@ describe('PromQLSearchService', () => {
       const testService = new PromQLSearchService('test-connection');
       expect(testService).toBeDefined();
     });
+
+    it('should store prometheus connection ID and meta', () => {
+      const meta = { prometheusUrl: 'http://prometheus:9090' };
+      const testService = new PromQLSearchService('test-connection', meta);
+      expect(testService).toBeDefined();
+    });
+
+    it('should work with undefined meta', () => {
+      const testService = new PromQLSearchService('test-connection', undefined);
+      expect(testService).toBeDefined();
+    });
   });
 
   describe('executeMetricRequest', () => {
@@ -121,8 +132,44 @@ describe('PromQLSearchService', () => {
 
       expect(body.query.dataset.id).toBe(prometheusConnectionId);
       expect(body.query.dataset.type).toBe('PROMETHEUS');
-      expect(body.query.language).toBe('PromQL');
+      expect(body.query.language).toBe('PROMQL');
       expect(body.query.format).toBe('jdbc');
+    });
+
+    it('should include meta in dataSource when provided', async () => {
+      const meta = { arn: 'sample:arn' };
+      const serviceWithMeta = new PromQLSearchService(prometheusConnectionId, meta);
+      const mockResponse = { body: { data: { result: [] } } };
+      (coreRefs.http!.post as jest.Mock).mockResolvedValue(mockResponse);
+
+      await serviceWithMeta.executeMetricRequest({
+        query: 'rate(error[5m])',
+        startTime: 1000,
+        endTime: 2000,
+      });
+
+      const callArg = (coreRefs.http!.post as jest.Mock).mock.calls[0][1];
+      const body = JSON.parse(callArg.body);
+
+      expect(body.query.dataset.id).toBe(prometheusConnectionId);
+      expect(body.query.dataset.type).toBe('PROMETHEUS');
+      expect(body.query.dataset.dataSource).toEqual({ meta });
+    });
+
+    it('should include dataSource with undefined meta when meta not provided', async () => {
+      const mockResponse = { body: { data: { result: [] } } };
+      (coreRefs.http!.post as jest.Mock).mockResolvedValue(mockResponse);
+
+      await service.executeMetricRequest({
+        query: 'rate(error[5m])',
+        startTime: 1000,
+        endTime: 2000,
+      });
+
+      const callArg = (coreRefs.http!.post as jest.Mock).mock.calls[0][1];
+      const body = JSON.parse(callArg.body);
+
+      expect(body.query.dataset.dataSource).toEqual({ meta: undefined });
     });
 
     it('should throw error on query failure', async () => {

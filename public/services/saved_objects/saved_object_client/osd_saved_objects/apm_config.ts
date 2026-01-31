@@ -93,6 +93,44 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
   }
 
   /**
+   * Build metadata object for Prometheus data source from saved object attributes.
+   * Extracts relevant fields into a metadata object for query requests.
+   */
+  private buildPrometheusMetadata(
+    attributes: Record<string, unknown> | undefined
+  ): Record<string, unknown> | undefined {
+    if (!attributes) return undefined;
+
+    const meta: Record<string, unknown> = {};
+
+    // Include arn if present
+    if (attributes.arn) {
+      meta.arn = attributes.arn;
+    }
+
+    // Merge any existing meta fields (may be object or stringified JSON)
+    if (attributes.meta) {
+      let metaObj: Record<string, unknown> | null = null;
+
+      if (typeof attributes.meta === 'string') {
+        try {
+          metaObj = JSON.parse(attributes.meta);
+        } catch (e) {
+          console.error('[APM Config] Failed to parse data-connection meta:', e);
+        }
+      } else if (typeof attributes.meta === 'object') {
+        metaObj = attributes.meta as Record<string, unknown>;
+      }
+
+      if (metaObj) {
+        Object.assign(meta, metaObj);
+      }
+    }
+
+    return Object.keys(meta).length > 0 ? meta : undefined;
+  }
+
+  /**
    * Builds a map of entityType -> reference from entities array and references
    */
   private buildEntityRefsMap(
@@ -251,11 +289,11 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
             : null,
           prometheusDataSource: prometheus
             ? {
-                id: prometheusRef!.id,
-                title:
-                  prometheus.attributes?.title ||
-                  prometheus.attributes?.connectionId ||
-                  prometheusRef!.id,
+                id: prometheusRef!.id, // Saved object ID (for fetching from store)
+                name: prometheus.attributes?.connectionId || prometheusRef!.id, // ConnectionId (for PromQL and display)
+                meta: this.buildPrometheusMetadata(
+                  prometheus.attributes as Record<string, unknown> | undefined
+                ),
               }
             : null,
         };
