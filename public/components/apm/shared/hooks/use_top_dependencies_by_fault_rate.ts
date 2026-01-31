@@ -55,14 +55,16 @@ export const useTopDependenciesByFaultRate = (
   const [refetchTrigger, setRefetchTrigger] = useState(0);
 
   // Get config values
-  const prometheusConnectionId = config?.prometheusDataSource?.id;
+  // Use .name (connectionId) for PromQL queries, not .id (saved object ID)
+  const prometheusConnectionId = config?.prometheusDataSource?.name;
+  const prometheusConnectionMeta = config?.prometheusDataSource?.meta;
 
   const promqlSearchService = useMemo(() => {
     if (!prometheusConnectionId) {
       return null;
     }
-    return new PromQLSearchService(prometheusConnectionId);
-  }, [prometheusConnectionId]);
+    return new PromQLSearchService(prometheusConnectionId, prometheusConnectionMeta);
+  }, [prometheusConnectionId, prometheusConnectionMeta]);
 
   const fetchParams = useMemo(
     () => ({

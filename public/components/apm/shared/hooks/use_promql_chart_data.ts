@@ -17,6 +17,7 @@ export interface UsePromQLChartDataParams {
   promqlQuery: string;
   timeRange: TimeRange;
   prometheusConnectionId: string;
+  prometheusConnectionMeta?: Record<string, unknown>;
   refreshTrigger?: number;
   enabled?: boolean;
   /** Label field to extract from Prometheus labels (e.g., 'remoteService', 'operation') */
@@ -49,6 +50,7 @@ export const usePromQLChartData = (params: UsePromQLChartDataParams): UsePromQLC
     promqlQuery,
     timeRange,
     prometheusConnectionId,
+    prometheusConnectionMeta,
     refreshTrigger,
     enabled = true,
     labelField,
@@ -62,8 +64,8 @@ export const usePromQLChartData = (params: UsePromQLChartDataParams): UsePromQLC
 
   // Create PromQL search service
   const promqlSearchService = useMemo(() => {
-    return new PromQLSearchService(prometheusConnectionId);
-  }, [prometheusConnectionId]);
+    return new PromQLSearchService(prometheusConnectionId, prometheusConnectionMeta);
+  }, [prometheusConnectionId, prometheusConnectionMeta]);
 
   // Parse time range
   const parsedTimeRange = useMemo(() => {
