@@ -136,8 +136,8 @@ describe('PromQLSearchService', () => {
       expect(body.query.format).toBe('jdbc');
     });
 
-    it('should include meta in dataset when provided', async () => {
-      const meta = { prometheusUrl: 'http://prometheus:9090', customField: 'value' };
+    it('should include meta in dataSource when provided', async () => {
+      const meta = { arn: 'sample:arn' };
       const serviceWithMeta = new PromQLSearchService(prometheusConnectionId, meta);
       const mockResponse = { body: { data: { result: [] } } };
       (coreRefs.http!.post as jest.Mock).mockResolvedValue(mockResponse);
@@ -153,10 +153,10 @@ describe('PromQLSearchService', () => {
 
       expect(body.query.dataset.id).toBe(prometheusConnectionId);
       expect(body.query.dataset.type).toBe('PROMETHEUS');
-      expect(body.query.dataset.meta).toEqual(meta);
+      expect(body.query.dataset.dataSource).toEqual({ meta });
     });
 
-    it('should include undefined meta in dataset when not provided', async () => {
+    it('should include dataSource with undefined meta when meta not provided', async () => {
       const mockResponse = { body: { data: { result: [] } } };
       (coreRefs.http!.post as jest.Mock).mockResolvedValue(mockResponse);
 
@@ -169,7 +169,7 @@ describe('PromQLSearchService', () => {
       const callArg = (coreRefs.http!.post as jest.Mock).mock.calls[0][1];
       const body = JSON.parse(callArg.body);
 
-      expect(body.query.dataset.meta).toBeUndefined();
+      expect(body.query.dataset.dataSource).toEqual({ meta: undefined });
     });
 
     it('should throw error on query failure', async () => {

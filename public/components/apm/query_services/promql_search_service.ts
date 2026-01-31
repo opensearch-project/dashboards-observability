@@ -36,7 +36,7 @@ export class PromQLSearchService {
         dataset: {
           id: this.prometheusConnectionId,
           type: 'PROMETHEUS',
-          meta: this.prometheusConnectionMeta,
+          dataSource: { meta: this.prometheusConnectionMeta },
         },
         format: 'jdbc',
       },
