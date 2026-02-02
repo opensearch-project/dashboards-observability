@@ -148,6 +148,7 @@ interface ResolvedApmConfig {
   prometheusDataSource: {
     id: string;
     title: string;
+    meta?: Record<string, unknown>; // Metadata from data-connection (e.g., prometheusUrl)
   } | null;
 }
 ```

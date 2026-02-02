@@ -61,7 +61,7 @@ describe('ApmConfigContext', () => {
         objectId: 'test-id',
         tracesDataset: { id: 'traces-1', title: 'Traces' },
         serviceMapDataset: { id: 'services-1', title: 'Services' },
-        prometheusDataSource: { id: 'prom-1', title: 'Prometheus' },
+        prometheusDataSource: { id: 'prom-1', name: 'prom-1' },
       };
 
       mockGetBulkWithResolvedReferences.mockResolvedValue({

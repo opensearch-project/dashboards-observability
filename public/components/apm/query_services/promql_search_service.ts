@@ -16,7 +16,10 @@ import { ExecuteMetricRequestParams } from '../common/types/prometheus_types';
  * Pattern: React Component → PromQLSearchService → HTTP POST → Query Enhancements API → Prometheus
  */
 export class PromQLSearchService {
-  constructor(private readonly prometheusConnectionId: string) {}
+  constructor(
+    private readonly prometheusConnectionId: string,
+    private readonly prometheusConnectionMeta?: Record<string, unknown>
+  ) {}
 
   /**
    * Execute a metric request (range query)
@@ -29,8 +32,12 @@ export class PromQLSearchService {
     const requestBody = {
       query: {
         query,
-        language: 'PromQL',
-        dataset: { id: this.prometheusConnectionId, type: 'PROMETHEUS' },
+        language: 'PROMQL',
+        dataset: {
+          id: this.prometheusConnectionId,
+          type: 'PROMETHEUS',
+          dataSource: { meta: this.prometheusConnectionMeta },
+        },
         format: 'jdbc',
       },
       timeRange: {

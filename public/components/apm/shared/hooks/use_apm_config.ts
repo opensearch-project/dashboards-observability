@@ -113,11 +113,12 @@ export const useDatasets = () => {
 /**
  * Hook for loading Prometheus data connections
  * Uses datasetService.getType('PROMETHEUS').fetch() to list Prometheus connections
+ * Also fetches saved objects to map connectionId -> saved object ID
  * Uses coreRefs.data for data service access
  */
 export const usePrometheusDataSources = () => {
   const [state, setState] = useState<{
-    data: Array<EuiComboBoxOptionOption<{ id: string; title: string }>>;
+    data: Array<EuiComboBoxOptionOption<{ id: string; name: string }>>;
     loading: boolean;
     error?: Error;
   }>({ data: [], loading: false });
@@ -159,12 +160,28 @@ export const usePrometheusDataSources = () => {
           [rootDataStructure]
         );
 
+        // Fetch saved objects to get the mapping from connectionId to saved object ID
+        const savedObjectsResponse = await savedObjectsClient.find({
+          type: 'data-connection',
+          perPage: 1000,
+        });
+
+        // Build a map of connectionId -> saved object ID
+        const connectionIdToSavedObjectId = new Map<string, string>();
+        savedObjectsResponse.savedObjects.forEach((so: any) => {
+          const connectionId = so.attributes?.connectionId;
+          if (connectionId) {
+            connectionIdToSavedObjectId.set(connectionId, so.id);
+          }
+        });
+
         if (!abortController.signal.aborted) {
+          // Map options to include both saved object ID and connectionId (name)
           const options = (result.children || []).map((conn) => ({
-            label: conn.title,
+            label: conn.title, // Keep label for display (from prometheusType.fetch)
             value: {
-              id: conn.id,
-              title: conn.title,
+              id: connectionIdToSavedObjectId.get(conn.id) || conn.id, // Saved object ID
+              name: conn.id, // ConnectionId (for PromQL and display)
             },
           }));
           setState({ data: options, loading: false });

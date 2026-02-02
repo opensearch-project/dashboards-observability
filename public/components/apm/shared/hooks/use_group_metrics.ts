@@ -57,14 +57,16 @@ export const useGroupMetrics = (params: UseGroupMetricsParams): UseGroupMetricsR
   const [error, setError] = useState<Error | null>(null);
 
   // Get config values
-  const prometheusConnectionId = config?.prometheusDataSource?.id;
+  // Use .name (connectionId) for PromQL queries, not .id (saved object ID)
+  const prometheusConnectionId = config?.prometheusDataSource?.name;
+  const prometheusConnectionMeta = config?.prometheusDataSource?.meta;
 
   const promqlService = useMemo(() => {
     if (!prometheusConnectionId) {
       return null;
     }
-    return new PromQLSearchService(prometheusConnectionId);
-  }, [prometheusConnectionId]);
+    return new PromQLSearchService(prometheusConnectionId, prometheusConnectionMeta);
+  }, [prometheusConnectionId, prometheusConnectionMeta]);
 
   // Convert attribute name to Prometheus label format (dots to underscores)
   const prometheusLabel = useMemo(() => {
