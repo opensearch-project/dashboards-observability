@@ -4,7 +4,7 @@
  */
 
 import Plotly from 'plotly.js-dist';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import plotComponentFactory from 'react-plotly.js/factory';
 import { uiSettingsService } from '../../../../common/utils';
 
@@ -22,7 +22,14 @@ interface PltProps {
 }
 
 export function Plt(props: PltProps) {
+  const [isMounted, setIsMounted] = useState(false);
   const PlotComponent = plotComponentFactory(Plotly);
+
+  // Delay rendering until after mount to avoid getBoundingClientRect errors in React 18
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const darkLayout = uiSettingsService.get('theme:darkMode')
     ? {
         paper_bgcolor: '#1D1E24',
@@ -72,6 +79,11 @@ export function Plt(props: PltProps) {
     displayModeBar: false,
     ...props.config,
   };
+
+  // Don't render Plotly until component is mounted to avoid React 18 timing issues
+  if (!isMounted) {
+    return <div />;
+  }
 
   return (
     <PlotComponent
