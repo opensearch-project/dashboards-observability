@@ -168,6 +168,12 @@ jobs:
           echo "Installing yarn ${{ steps.versions_step.outputs.yarn_version }}"
           npm i -g yarn@${{ steps.versions_step.outputs.yarn_version }}
 
+      - name: Get Cypress version
+        id: cypress_version
+        run: |
+          cd ./OpenSearch-Dashboards/plugins/dashboards-observability
+          echo "::set-output name=cypress_version::$(cat ./package.json | jq '.dependencies.cypress' | tr -d '"')"
+
       - name: Yarn Cache
         uses: actions/cache@v4
         with:
@@ -176,10 +182,23 @@ jobs:
             OpenSearch-Dashboards/**/node_modules
           key: ${{ runner.OS }}-build-${{ hashFiles('OpenSearch-Dashboards/**/yarn.lock') }}
 
+      - name: Cache Cypress binary
+        uses: actions/cache@v4
+        with:
+          path: ${{ matrix.cypress_cache_folder }}
+          key: ${{ runner.OS }}-cypress-${{ steps.cypress_version.outputs.cypress_version }}
+          restore-keys: |
+            ${{ runner.OS }}-cypress-
+
       - name: Bootstrap OpenSearch Dashboards
         run: |
           cd OpenSearch-Dashboards
           yarn osd bootstrap --single-version=loose
+
+      - name: Install Cypress binary
+        run: |
+          cd ./OpenSearch-Dashboards/plugins/dashboards-observability
+          yarn cypress install
 
       - name: Compile OpenSearch Dashboards
         run: |
@@ -210,12 +229,6 @@ jobs:
         with:
           name: dashboard.logs
           path: OpenSearch-Dashboards/dashboard.log
-
-      - name: Get Cypress version
-        id: cypress_version
-        run: |
-          cd ./OpenSearch-Dashboards/plugins/dashboards-observability
-          echo "::set-output name=cypress_version::$(cat ./package.json | jq '.dependencies.cypress' | tr -d '"')"
 
       - name: Reset npm's script shell
         if: ${{ matrix.os == 'windows-latest' }}
