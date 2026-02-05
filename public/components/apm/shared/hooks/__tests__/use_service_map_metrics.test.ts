@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useServiceMapMetrics } from '../use_service_map_metrics';
 
 // Mock the PromQLSearchService
@@ -91,12 +91,14 @@ describe('useServiceMapMetrics', () => {
         // Errors
         .mockResolvedValueOnce(mockMetricResponse('api-gateway', 10));
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceMapMetrics(defaultParams));
+      const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
 
       // Initial loading state
       expect(result.current.isLoading).toBe(true);
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.isLoading).toBe(false);
       expect(result.current.metricsMap.size).toBe(2);
@@ -115,9 +117,11 @@ describe('useServiceMapMetrics', () => {
       mockExecuteMetricRequest.mockReset();
       mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceMapMetrics(defaultParams));
+      const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.metricsMap.size).toBe(2);
 
@@ -138,9 +142,11 @@ describe('useServiceMapMetrics', () => {
       const mockError = new Error('Prometheus connection failed');
       mockExecuteMetricRequest.mockRejectedValue(mockError);
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceMapMetrics(defaultParams));
+      const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toEqual(mockError);
       expect(result.current.metricsMap.size).toBe(0);
@@ -150,9 +156,11 @@ describe('useServiceMapMetrics', () => {
       mockExecuteMetricRequest.mockReset();
       mockExecuteMetricRequest.mockRejectedValue('string error');
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceMapMetrics(defaultParams));
+      const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toBeInstanceOf(Error);
       expect(result.current.error?.message).toBe('Unknown error');
@@ -164,9 +172,11 @@ describe('useServiceMapMetrics', () => {
       mockExecuteMetricRequest.mockReset();
       mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceMapMetrics(defaultParams));
+      const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const initialCallCount = mockExecuteMetricRequest.mock.calls.length;
 
@@ -174,7 +184,9 @@ describe('useServiceMapMetrics', () => {
         result.current.refetch();
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockExecuteMetricRequest.mock.calls.length).toBeGreaterThan(initialCallCount);
     });
@@ -194,9 +206,11 @@ describe('useServiceMapMetrics', () => {
 
       mockExecuteMetricRequest.mockResolvedValue(dataFrameResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceMapMetrics(defaultParams));
+      const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const gatewayMetrics = result.current.metricsMap.get('api-gateway::generic:default');
       expect(gatewayMetrics?.throughput.length).toBeGreaterThan(0);

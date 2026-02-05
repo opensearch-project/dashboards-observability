@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useServiceAttributes } from '../use_service_attributes';
 
 // Mock the PPLSearchService
@@ -111,11 +111,13 @@ describe('useServiceAttributes', () => {
 
       mockExecuteQuery.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceAttributes(defaultParams));
+      const { result } = renderHook(() => useServiceAttributes(defaultParams));
 
       expect(result.current.isLoading).toBe(true);
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.isLoading).toBe(false);
       expect(result.current.attributes).toEqual({
@@ -142,9 +144,11 @@ describe('useServiceAttributes', () => {
 
       mockExecuteQuery.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceAttributes(defaultParams));
+      const { result } = renderHook(() => useServiceAttributes(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.attributes).toEqual({
         'telemetry.sdk.language': 'java',
@@ -165,9 +169,11 @@ describe('useServiceAttributes', () => {
 
       mockExecuteQuery.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceAttributes(defaultParams));
+      const { result } = renderHook(() => useServiceAttributes(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.attributes).toEqual({
         language: 'python',
@@ -189,9 +195,11 @@ describe('useServiceAttributes', () => {
 
       mockExecuteQuery.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceAttributes(defaultParams));
+      const { result } = renderHook(() => useServiceAttributes(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.attributes).toEqual({
         count: '42',
@@ -202,9 +210,11 @@ describe('useServiceAttributes', () => {
     it('should handle empty jsonData response', async () => {
       mockExecuteQuery.mockResolvedValue({ jsonData: [] });
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceAttributes(defaultParams));
+      const { result } = renderHook(() => useServiceAttributes(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.attributes).toEqual({});
     });
@@ -214,9 +224,11 @@ describe('useServiceAttributes', () => {
         jsonData: [{ someOtherField: 'value' }],
       });
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceAttributes(defaultParams));
+      const { result } = renderHook(() => useServiceAttributes(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.attributes).toEqual({});
     });
@@ -232,9 +244,11 @@ describe('useServiceAttributes', () => {
 
       mockExecuteQuery.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceAttributes(defaultParams));
+      const { result } = renderHook(() => useServiceAttributes(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.attributes).toEqual({});
     });
@@ -245,9 +259,11 @@ describe('useServiceAttributes', () => {
       const mockError = new Error('PPL query failed');
       mockExecuteQuery.mockRejectedValue(mockError);
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceAttributes(defaultParams));
+      const { result } = renderHook(() => useServiceAttributes(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toEqual(mockError);
       expect(result.current.attributes).toEqual({});
@@ -257,9 +273,11 @@ describe('useServiceAttributes', () => {
     it('should wrap non-Error throws', async () => {
       mockExecuteQuery.mockRejectedValue('string error');
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceAttributes(defaultParams));
+      const { result } = renderHook(() => useServiceAttributes(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toBeInstanceOf(Error);
       expect(result.current.error?.message).toBe('Unknown error');
@@ -270,14 +288,13 @@ describe('useServiceAttributes', () => {
     it('should refetch when serviceName changes', async () => {
       mockExecuteQuery.mockResolvedValue({ jsonData: [] });
 
-      const { waitForNextUpdate, rerender } = renderHook(
-        ({ params }) => useServiceAttributes(params),
-        {
-          initialProps: { params: defaultParams },
-        }
-      );
+      const { result, rerender } = renderHook(({ params }) => useServiceAttributes(params), {
+        initialProps: { params: defaultParams },
+      });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       rerender({
         params: {
@@ -286,7 +303,9 @@ describe('useServiceAttributes', () => {
         },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockExecuteQuery).toHaveBeenCalledTimes(2);
     });
@@ -294,14 +313,13 @@ describe('useServiceAttributes', () => {
     it('should refetch when environment changes', async () => {
       mockExecuteQuery.mockResolvedValue({ jsonData: [] });
 
-      const { waitForNextUpdate, rerender } = renderHook(
-        ({ params }) => useServiceAttributes(params),
-        {
-          initialProps: { params: defaultParams },
-        }
-      );
+      const { result, rerender } = renderHook(({ params }) => useServiceAttributes(params), {
+        initialProps: { params: defaultParams },
+      });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       rerender({
         params: {
@@ -310,7 +328,9 @@ describe('useServiceAttributes', () => {
         },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockExecuteQuery).toHaveBeenCalledTimes(2);
     });
@@ -318,20 +338,21 @@ describe('useServiceAttributes', () => {
     it('should refetch when refreshTrigger changes', async () => {
       mockExecuteQuery.mockResolvedValue({ jsonData: [] });
 
-      const { waitForNextUpdate, rerender } = renderHook(
-        ({ params }) => useServiceAttributes(params),
-        {
-          initialProps: { params: { ...defaultParams, refreshTrigger: 0 } },
-        }
-      );
+      const { result, rerender } = renderHook(({ params }) => useServiceAttributes(params), {
+        initialProps: { params: { ...defaultParams, refreshTrigger: 0 } },
+      });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       rerender({
         params: { ...defaultParams, refreshTrigger: 1 },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockExecuteQuery).toHaveBeenCalledTimes(2);
     });
@@ -341,9 +362,11 @@ describe('useServiceAttributes', () => {
     it('should build correct dataset config with datasource', async () => {
       mockExecuteQuery.mockResolvedValue({ jsonData: [] });
 
-      const { waitForNextUpdate } = renderHook(() => useServiceAttributes(defaultParams));
+      const { result } = renderHook(() => useServiceAttributes(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const callArgs = mockExecuteQuery.mock.calls[0];
       const dataset = callArgs[1];
@@ -365,9 +388,11 @@ describe('useServiceAttributes', () => {
 
       mockExecuteQuery.mockResolvedValue({ jsonData: [] });
 
-      const { waitForNextUpdate } = renderHook(() => useServiceAttributes(defaultParams));
+      const { result } = renderHook(() => useServiceAttributes(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const callArgs = mockExecuteQuery.mock.calls[0];
       const dataset = callArgs[1];

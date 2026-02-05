@@ -3,16 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
 import { SavedQueryTable } from '../saved_objects_table';
 import { SAVED_HISTORIES } from '../../../../../test/event_analytics_constants';
 
 describe('Saved query table component', () => {
-  configure({ adapter: new Adapter() });
-
   it('Renders saved query table', async () => {
     const handleHistoryClick = jest.fn();
     const handleSelectHistory = jest.fn();
@@ -20,7 +16,7 @@ describe('Saved query table component', () => {
     const showDeleteConfirmation = jest.fn();
     const selectedHistories = [];
 
-    const wrapper = mount(
+    render(
       <SavedQueryTable
         savedHistories={SAVED_HISTORIES}
         handleHistoryClick={handleHistoryClick}
@@ -32,10 +28,8 @@ describe('Saved query table component', () => {
       />
     );
 
-    wrapper.update();
-
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 });

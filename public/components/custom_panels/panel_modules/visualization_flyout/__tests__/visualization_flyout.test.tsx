@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, screen, fireEvent } from '@testing-library/react';
 import PPLService from '../../../../../services/requests/ppl';
 import React from 'react';
 import { VisaulizationFlyout } from '../visualization_flyout';
@@ -16,8 +15,6 @@ import { SavedObjectsActions } from '../../../../../../public/services/saved_obj
 import { sampleSavedVisualization } from '../../../../../../test/panels_constants';
 
 describe('Visualization Flyout Component', () => {
-  configure({ adapter: new Adapter() });
-
   afterEach(() => {
     cleanup();
   });
@@ -33,7 +30,7 @@ describe('Visualization Flyout Component', () => {
     const pplService = new PPLService(httpClientMock);
     const isFlyoutReplacement = false;
 
-    const wrapper = mount(
+    render(
       <VisaulizationFlyout
         panelId={panelId}
         pplFilterValue={pplFilterValue}
@@ -48,7 +45,7 @@ describe('Visualization Flyout Component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('renders replace visualization Flyout', () => {
@@ -70,7 +67,7 @@ describe('Visualization Flyout Component', () => {
       })
     );
 
-    const wrapper = mount(
+    render(
       <VisaulizationFlyout
         panelId={panelId}
         pplFilterValue={pplFilterValue}
@@ -86,8 +83,9 @@ describe('Visualization Flyout Component', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="addFlyoutButton"]').first().simulate('click');
+    const addButton = screen.getByTestId('addFlyoutButton');
+    fireEvent.click(addButton);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 });

@@ -1,969 +1,803 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Builder components in materialized view renders builder components in materialized view with default options 1`] = `
-Array [
-  <div
-    className="euiText euiText--medium"
-    data-test-subj="skipping-index-builder"
-  >
-    <h3>
-      Skipping index definition
-    </h3>
-  </div>,
-  <div
-    className="euiSpacer euiSpacer--s"
-  />,
-  <div
-    className="euiBasicTable"
-    itemID="id"
-  >
-    <div>
-      <div
-        className="euiTableHeaderMobile"
-      >
-        <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
-        >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          />
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          />
-        </div>
-      </div>
-      <table
-        className="euiTable euiTable--responsive"
-        id="random_html_id"
-        tabIndex={-1}
-      >
-        <caption
-          className="euiScreenReaderOnly euiTableCaption"
-        />
-        <thead>
-          <tr>
-            <th
-              className="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_fieldName_0"
-              role="columnheader"
-              scope="col"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
-            >
-              <span
-                className="euiTableCellContent"
-              >
-                <span
-                  className="euiTableCellContent__text"
-                  title="Field name"
-                >
-                  Field name
-                </span>
-              </span>
-            </th>
-            <th
-              className="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_dataType_1"
-              role="columnheader"
-              scope="col"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
-            >
-              <span
-                className="euiTableCellContent"
-              >
-                <span
-                  className="euiTableCellContent__text"
-                  title="Datatype"
-                >
-                  Datatype
-                </span>
-              </span>
-            </th>
-            <th
-              className="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_Acceleration method_2"
-              role="columnheader"
-              scope="col"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
-            >
-              <span
-                className="euiTableCellContent"
-              >
-                <span
-                  className="euiTableCellContent__text"
-                  title="Acceleration method"
-                >
-                  Acceleration method
-                </span>
-              </span>
-            </th>
-            <th
-              className="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_Delete_3"
-              role="columnheader"
-              scope="col"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
-            >
-              <span
-                className="euiTableCellContent"
-              >
-                <span
-                  className="euiTableCellContent__text"
-                  title="Delete"
-                >
-                  Delete
-                </span>
-              </span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            className="euiTableRow"
-          >
-            <td
-              className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-              colSpan={4}
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
-            >
-              <div
-                className="euiTableCellContent euiTableCellContent--alignCenter"
-              >
-                <span
-                  className="euiTableCellContent__text"
-                >
-                  You have no definitions defined.
-                </span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>,
-  <div
-    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-  >
+<body>
+  <div>
     <div
-      className="euiFlexItem"
+      class="euiText euiText--medium"
+      data-test-subj="skipping-index-builder"
     >
-      <div
-        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
-      >
+      <h3>
+        Skipping index definition
+      </h3>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--s"
+    />
+    <div
+      class="euiBasicTable"
+      itemid="id"
+    >
+      <div>
         <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiTableHeaderMobile"
         >
-          <button
-            className="euiButton euiButton--primary euiButton--small"
-            disabled={false}
-            onClick={[Function]}
-            style={
-              Object {
-                "minWidth": undefined,
-              }
-            }
-            type="button"
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
           >
-            <span
-              className="euiButtonContent euiButton__content"
-            >
-              <span
-                className="euiButton__text"
-              >
-                Add fields
-              </span>
-            </span>
-          </button>
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            />
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            />
+          </div>
         </div>
-        <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
+        <table
+          class="euiTable euiTable--responsive"
+          id="random_html_id"
+          tabindex="-1"
         >
-          <button
-            className="euiButton euiButton--danger euiButton--small"
-            disabled={false}
-            onClick={[Function]}
-            style={
-              Object {
-                "minWidth": undefined,
-              }
-            }
-            type="button"
-          >
-            <span
-              className="euiButtonContent euiButton__content"
-            >
-              <span
-                className="euiButton__text"
+          <caption
+            class="euiScreenReaderOnly euiTableCaption"
+          />
+          <thead>
+            <tr>
+              <th
+                class="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_fieldName_0"
+                role="columnheader"
+                scope="col"
               >
-                Bulk delete
-              </span>
-            </span>
-          </button>
-        </div>
+                <span
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                    title="Field name"
+                  >
+                    Field name
+                  </span>
+                </span>
+              </th>
+              <th
+                class="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_dataType_1"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                    title="Datatype"
+                  >
+                    Datatype
+                  </span>
+                </span>
+              </th>
+              <th
+                class="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_Acceleration method_2"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                    title="Acceleration method"
+                  >
+                    Acceleration method
+                  </span>
+                </span>
+              </th>
+              <th
+                class="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_Delete_3"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                    title="Delete"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              class="euiTableRow"
+            >
+              <td
+                class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+                colspan="4"
+              >
+                <div
+                  class="euiTableCellContent euiTableCellContent--alignCenter"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    You have no definitions defined.
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
     <div
-      className="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
-      Array [
+      <div
+        class="euiFlexItem"
+      >
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
+        >
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <button
+              class="euiButton euiButton--primary euiButton--small"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButton__content"
+              >
+                <span
+                  class="euiButton__text"
+                >
+                  Add fields
+                </span>
+              </span>
+            </button>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <button
+              class="euiButton euiButton--danger euiButton--small"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButton__content"
+              >
+                <span
+                  class="euiButton__text"
+                >
+                  Bulk delete
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
+      >
         <button
-          className="euiButton euiButton--primary euiButton--small"
-          disabled={false}
-          onClick={[Function]}
-          style={
-            Object {
-              "minWidth": undefined,
-            }
-          }
+          class="euiButton euiButton--primary euiButton--small"
           type="button"
         >
           <span
-            className="euiButtonContent euiButton__content"
+            class="euiButtonContent euiButton__content"
           >
             <span
-              className="euiButton__text"
+              class="euiButton__text"
             >
               Generate
             </span>
           </span>
-        </button>,
-        "",
-      ]
+        </button>
+      </div>
     </div>
-  </div>,
-]
+  </div>
+</body>
 `;
 
 exports[`Builder components in materialized view renders builder components in materialized view with different options 1`] = `
-Array [
-  <div
-    className="euiText euiText--medium"
-    data-test-subj="skipping-index-builder"
-  >
-    <h3>
-      Skipping index definition
-    </h3>
-  </div>,
-  <div
-    className="euiSpacer euiSpacer--s"
-  />,
-  <div
-    className="euiBasicTable"
-    itemID="id"
-  >
-    <div>
-      <div
-        className="euiTableHeaderMobile"
-      >
-        <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
-        >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          />
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          />
-        </div>
-      </div>
-      <table
-        className="euiTable euiTable--responsive"
-        id="random_html_id"
-        tabIndex={-1}
-      >
-        <caption
-          className="euiScreenReaderOnly euiTableCaption"
-        />
-        <thead>
-          <tr>
-            <th
-              className="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_fieldName_0"
-              role="columnheader"
-              scope="col"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
-            >
-              <span
-                className="euiTableCellContent"
-              >
-                <span
-                  className="euiTableCellContent__text"
-                  title="Field name"
-                >
-                  Field name
-                </span>
-              </span>
-            </th>
-            <th
-              className="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_dataType_1"
-              role="columnheader"
-              scope="col"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
-            >
-              <span
-                className="euiTableCellContent"
-              >
-                <span
-                  className="euiTableCellContent__text"
-                  title="Datatype"
-                >
-                  Datatype
-                </span>
-              </span>
-            </th>
-            <th
-              className="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_Acceleration method_2"
-              role="columnheader"
-              scope="col"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
-            >
-              <span
-                className="euiTableCellContent"
-              >
-                <span
-                  className="euiTableCellContent__text"
-                  title="Acceleration method"
-                >
-                  Acceleration method
-                </span>
-              </span>
-            </th>
-            <th
-              className="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_Delete_3"
-              role="columnheader"
-              scope="col"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
-            >
-              <span
-                className="euiTableCellContent"
-              >
-                <span
-                  className="euiTableCellContent__text"
-                  title="Delete"
-                >
-                  Delete
-                </span>
-              </span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            className="euiTableRow euiTableRow-hasActions"
-          >
-            <td
-              className="euiTableRowCell"
-              readOnly={false}
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
-            >
-              <div
-                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-              >
-                Field name
-              </div>
-              <div
-                className="euiTableCellContent euiTableCellContent--truncateText"
-              >
-                <span
-                  className="euiTableCellContent__text"
-                >
-                  field1
-                </span>
-              </div>
-            </td>
-            <td
-              className="euiTableRowCell"
-              readOnly={false}
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
-            >
-              <div
-                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-              >
-                Datatype
-              </div>
-              <div
-                className="euiTableCellContent euiTableCellContent--truncateText"
-              >
-                <span
-                  className="euiTableCellContent__text"
-                >
-                  string
-                </span>
-              </div>
-            </td>
-            <td
-              className="euiTableRowCell"
-              readOnly={false}
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
-            >
-              <div
-                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-              >
-                Acceleration method
-              </div>
-              <div
-                className="euiTableCellContent euiTableCellContent--overflowingContent"
-              >
-                <div
-                  className="euiFormControlLayout euiFormControlLayout--compressed"
-                >
-                  <div
-                    className="euiFormControlLayout__childrenWrapper"
-                  >
-                    <select
-                      aria-label="Use aria labels when no actual label is in use"
-                      className="euiSelect euiSelect--compressed"
-                      id="selectDocExample"
-                      onChange={[Function]}
-                      onMouseUp={[Function]}
-                      value="PARTITION"
-                    >
-                      <option
-                        key="0"
-                        value="PARTITION"
-                      >
-                        Partition
-                      </option>
-                      <option
-                        key="1"
-                        value="VALUE_SET"
-                      >
-                        Value Set
-                      </option>
-                      <option
-                        key="2"
-                        value="BLOOM_FILTER"
-                      >
-                        Bloom Filter
-                      </option>
-                    </select>
-                    <div
-                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                    >
-                      <span
-                        className="euiFormControlLayoutCustomIcon"
-                      >
-                        <svg
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                          focusable="false"
-                          height={16}
-                          role="img"
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                          />
-                        </svg>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </td>
-            <td
-              className="euiTableRowCell"
-              readOnly={false}
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
-            >
-              <div
-                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-              >
-                Delete
-              </div>
-              <div
-                className="euiTableCellContent euiTableCellContent--overflowingContent"
-              >
-                <button
-                  className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--small"
-                  disabled={false}
-                  onClick={[Function]}
-                  type="button"
-                >
-                  <svg
-                    aria-hidden={true}
-                    className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                    focusable="false"
-                    height={16}
-                    role="img"
-                    style={null}
-                    viewBox="0 0 16 16"
-                    width={16}
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </td>
-          </tr>
-          <tr
-            className="euiTableRow euiTableRow-hasActions"
-          >
-            <td
-              className="euiTableRowCell"
-              readOnly={false}
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
-            >
-              <div
-                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-              >
-                Field name
-              </div>
-              <div
-                className="euiTableCellContent euiTableCellContent--truncateText"
-              >
-                <span
-                  className="euiTableCellContent__text"
-                >
-                  field2
-                </span>
-              </div>
-            </td>
-            <td
-              className="euiTableRowCell"
-              readOnly={false}
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
-            >
-              <div
-                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-              >
-                Datatype
-              </div>
-              <div
-                className="euiTableCellContent euiTableCellContent--truncateText"
-              >
-                <span
-                  className="euiTableCellContent__text"
-                >
-                  number
-                </span>
-              </div>
-            </td>
-            <td
-              className="euiTableRowCell"
-              readOnly={false}
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
-            >
-              <div
-                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-              >
-                Acceleration method
-              </div>
-              <div
-                className="euiTableCellContent euiTableCellContent--overflowingContent"
-              >
-                <div
-                  className="euiFormControlLayout euiFormControlLayout--compressed"
-                >
-                  <div
-                    className="euiFormControlLayout__childrenWrapper"
-                  >
-                    <select
-                      aria-label="Use aria labels when no actual label is in use"
-                      className="euiSelect euiSelect--compressed"
-                      id="selectDocExample"
-                      onChange={[Function]}
-                      onMouseUp={[Function]}
-                      value="VALUE_SET"
-                    >
-                      <option
-                        key="0"
-                        value="PARTITION"
-                      >
-                        Partition
-                      </option>
-                      <option
-                        key="1"
-                        value="VALUE_SET"
-                      >
-                        Value Set
-                      </option>
-                      <option
-                        key="2"
-                        value="MIN_MAX"
-                      >
-                        Min Max
-                      </option>
-                      <option
-                        key="3"
-                        value="BLOOM_FILTER"
-                      >
-                        Bloom Filter
-                      </option>
-                    </select>
-                    <div
-                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                    >
-                      <span
-                        className="euiFormControlLayoutCustomIcon"
-                      >
-                        <svg
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                          focusable="false"
-                          height={16}
-                          role="img"
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                          />
-                        </svg>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </td>
-            <td
-              className="euiTableRowCell"
-              readOnly={false}
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
-            >
-              <div
-                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-              >
-                Delete
-              </div>
-              <div
-                className="euiTableCellContent euiTableCellContent--overflowingContent"
-              >
-                <button
-                  className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--small"
-                  disabled={false}
-                  onClick={[Function]}
-                  type="button"
-                >
-                  <svg
-                    aria-hidden={true}
-                    className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                    focusable="false"
-                    height={16}
-                    role="img"
-                    style={null}
-                    viewBox="0 0 16 16"
-                    width={16}
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+<body>
+  <div>
+    <div
+      class="euiText euiText--medium"
+      data-test-subj="skipping-index-builder"
+    >
+      <h3>
+        Skipping index definition
+      </h3>
     </div>
-    <div>
-      <div
-        className="euiSpacer euiSpacer--m"
-      />
-      <div
-        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
-      >
+    <div
+      class="euiSpacer euiSpacer--s"
+    />
+    <div
+      class="euiBasicTable"
+      itemid="id"
+    >
+      <div>
         <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiTableHeaderMobile"
         >
           <div
-            className="euiPopover euiPopover--anchorUpRight"
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
           >
             <div
-              className="euiPopover__anchor"
-            >
-              <button
-                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
-                data-test-subj="tablePaginationPopoverButton"
-                disabled={false}
-                onClick={[Function]}
-                type="button"
-              >
-                <span
-                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
-                >
-                  <svg
-                    aria-hidden={true}
-                    className="euiIcon euiIcon--small euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                    focusable="false"
-                    height={16}
-                    role="img"
-                    style={null}
-                    viewBox="0 0 16 16"
-                    width={16}
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                    />
-                  </svg>
-                  <span
-                    className="euiButtonEmpty__text"
-                  >
-                    Rows per page
-                    : 
-                    20
-                  </span>
-                </span>
-              </button>
-            </div>
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            />
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            />
           </div>
         </div>
-        <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
+        <table
+          class="euiTable euiTable--responsive"
+          id="random_html_id"
+          tabindex="-1"
         >
-          <nav
-            className="euiPagination"
-          >
-            <button
-              aria-label="Previous page"
-              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
-              data-test-subj="pagination-button-previous"
-              disabled={true}
-              onClick={[Function]}
-              type="button"
-            >
-              <svg
-                aria-hidden={true}
-                className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                focusable="false"
-                height={16}
-                role="img"
-                style={null}
-                viewBox="0 0 16 16"
-                width={16}
-                xmlns="http://www.w3.org/2000/svg"
+          <caption
+            class="euiScreenReaderOnly euiTableCaption"
+          />
+          <thead>
+            <tr>
+              <th
+                class="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_fieldName_0"
+                role="columnheader"
+                scope="col"
               >
-                <path
-                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                />
-              </svg>
-            </button>
-            <ul
-              className="euiPagination__list"
+                <span
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                    title="Field name"
+                  >
+                    Field name
+                  </span>
+                </span>
+              </th>
+              <th
+                class="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_dataType_1"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                    title="Datatype"
+                  >
+                    Datatype
+                  </span>
+                </span>
+              </th>
+              <th
+                class="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_Acceleration method_2"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                    title="Acceleration method"
+                  >
+                    Acceleration method
+                  </span>
+                </span>
+              </th>
+              <th
+                class="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_Delete_3"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                    title="Delete"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              class="euiTableRow euiTableRow-hasActions"
             >
-              <li
-                className="euiPagination__item"
+              <td
+                class="euiTableRowCell"
+              >
+                <div
+                  class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                >
+                  Field name
+                </div>
+                <div
+                  class="euiTableCellContent euiTableCellContent--truncateText"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    field1
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell"
+              >
+                <div
+                  class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                >
+                  Datatype
+                </div>
+                <div
+                  class="euiTableCellContent euiTableCellContent--truncateText"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    string
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell"
+              >
+                <div
+                  class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                >
+                  Acceleration method
+                </div>
+                <div
+                  class="euiTableCellContent euiTableCellContent--overflowingContent"
+                >
+                  <div
+                    class="euiFormControlLayout euiFormControlLayout--compressed"
+                  >
+                    <div
+                      class="euiFormControlLayout__childrenWrapper"
+                    >
+                      <select
+                        aria-label="Use aria labels when no actual label is in use"
+                        class="euiSelect euiSelect--compressed"
+                        id="selectDocExample"
+                      >
+                        <option
+                          value="PARTITION"
+                        >
+                          Partition
+                        </option>
+                        <option
+                          value="VALUE_SET"
+                        >
+                          Value Set
+                        </option>
+                        <option
+                          value="BLOOM_FILTER"
+                        >
+                          Bloom Filter
+                        </option>
+                      </select>
+                      <div
+                        class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                      >
+                        <span
+                          class="euiFormControlLayoutCustomIcon"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                            />
+                          </svg>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell"
+              >
+                <div
+                  class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                >
+                  Delete
+                </div>
+                <div
+                  class="euiTableCellContent euiTableCellContent--overflowingContent"
+                >
+                  <button
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--small"
+                    type="button"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                      focusable="false"
+                      height="16"
+                      role="img"
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr
+              class="euiTableRow euiTableRow-hasActions"
+            >
+              <td
+                class="euiTableRowCell"
+              >
+                <div
+                  class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                >
+                  Field name
+                </div>
+                <div
+                  class="euiTableCellContent euiTableCellContent--truncateText"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    field2
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell"
+              >
+                <div
+                  class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                >
+                  Datatype
+                </div>
+                <div
+                  class="euiTableCellContent euiTableCellContent--truncateText"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    number
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell"
+              >
+                <div
+                  class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                >
+                  Acceleration method
+                </div>
+                <div
+                  class="euiTableCellContent euiTableCellContent--overflowingContent"
+                >
+                  <div
+                    class="euiFormControlLayout euiFormControlLayout--compressed"
+                  >
+                    <div
+                      class="euiFormControlLayout__childrenWrapper"
+                    >
+                      <select
+                        aria-label="Use aria labels when no actual label is in use"
+                        class="euiSelect euiSelect--compressed"
+                        id="selectDocExample"
+                      >
+                        <option
+                          value="PARTITION"
+                        >
+                          Partition
+                        </option>
+                        <option
+                          value="VALUE_SET"
+                        >
+                          Value Set
+                        </option>
+                        <option
+                          value="MIN_MAX"
+                        >
+                          Min Max
+                        </option>
+                        <option
+                          value="BLOOM_FILTER"
+                        >
+                          Bloom Filter
+                        </option>
+                      </select>
+                      <div
+                        class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                      >
+                        <span
+                          class="euiFormControlLayoutCustomIcon"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                            />
+                          </svg>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell"
+              >
+                <div
+                  class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                >
+                  Delete
+                </div>
+                <div
+                  class="euiTableCellContent euiTableCellContent--overflowingContent"
+                >
+                  <button
+                    class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--small"
+                    type="button"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                      focusable="false"
+                      height="16"
+                      role="img"
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div
+          class="euiSpacer euiSpacer--m"
+        />
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+        >
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              class="euiPopover euiPopover--anchorUpRight"
+            >
+              <div
+                class="euiPopover__anchor"
               >
                 <button
-                  aria-controls="random_html_id"
-                  aria-current={true}
-                  aria-label="Page 1 of 1"
-                  className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
-                  data-test-subj="pagination-button-0"
-                  disabled={true}
-                  onClick={[Function]}
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
+                  data-test-subj="tablePaginationPopoverButton"
                   type="button"
                 >
                   <span
-                    className="euiButtonContent euiButtonEmpty__content"
+                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                   >
-                    <span
-                      className="euiButtonEmpty__text"
+                    <svg
+                      aria-hidden="true"
+                      class="euiIcon euiIcon--small euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                      focusable="false"
+                      height="16"
+                      role="img"
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
-                      1
+                      <path
+                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                      />
+                    </svg>
+                    <span
+                      class="euiButtonEmpty__text"
+                    >
+                      Rows per page
+                      : 
+                      20
                     </span>
                   </span>
                 </button>
-              </li>
-            </ul>
-            <button
-              aria-label="Next page"
-              className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
-              data-test-subj="pagination-button-next"
-              disabled={true}
-              onClick={[Function]}
-              type="button"
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <nav
+              class="euiPagination"
             >
-              <svg
-                aria-hidden={true}
-                className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                focusable="false"
-                height={16}
-                role="img"
-                style={null}
-                viewBox="0 0 16 16"
-                width={16}
-                xmlns="http://www.w3.org/2000/svg"
+              <button
+                aria-label="Previous page"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                data-test-subj="pagination-button-previous"
+                disabled=""
+                type="button"
               >
-                <path
-                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                />
-              </svg>
-            </button>
-          </nav>
+                <svg
+                  aria-hidden="true"
+                  class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                  focusable="false"
+                  height="16"
+                  role="img"
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                  />
+                </svg>
+              </button>
+              <ul
+                class="euiPagination__list"
+              >
+                <li
+                  class="euiPagination__item"
+                >
+                  <button
+                    aria-controls="random_html_id"
+                    aria-current="true"
+                    aria-label="Page 1 of 1"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                    data-test-subj="pagination-button-0"
+                    disabled=""
+                    type="button"
+                  >
+                    <span
+                      class="euiButtonContent euiButtonEmpty__content"
+                    >
+                      <span
+                        class="euiButtonEmpty__text"
+                      >
+                        1
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              </ul>
+              <button
+                aria-label="Next page"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                data-test-subj="pagination-button-next"
+                disabled=""
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                  focusable="false"
+                  height="16"
+                  role="img"
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                  />
+                </svg>
+              </button>
+            </nav>
+          </div>
         </div>
       </div>
     </div>
-  </div>,
-  <div
-    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-  >
     <div
-      className="euiFlexItem"
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
       <div
-        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
+        class="euiFlexItem"
       >
         <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
         >
-          <button
-            className="euiButton euiButton--primary euiButton--small"
-            disabled={false}
-            onClick={[Function]}
-            style={
-              Object {
-                "minWidth": undefined,
-              }
-            }
-            type="button"
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
           >
-            <span
-              className="euiButtonContent euiButton__content"
+            <button
+              class="euiButton euiButton--primary euiButton--small"
+              type="button"
             >
               <span
-                className="euiButton__text"
+                class="euiButtonContent euiButton__content"
               >
-                Add fields
+                <span
+                  class="euiButton__text"
+                >
+                  Add fields
+                </span>
               </span>
-            </span>
-          </button>
-        </div>
-        <div
-          className="euiFlexItem euiFlexItem--flexGrowZero"
-        >
-          <button
-            className="euiButton euiButton--danger euiButton--small"
-            disabled={false}
-            onClick={[Function]}
-            style={
-              Object {
-                "minWidth": undefined,
-              }
-            }
-            type="button"
+            </button>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
           >
-            <span
-              className="euiButtonContent euiButton__content"
+            <button
+              class="euiButton euiButton--danger euiButton--small"
+              type="button"
             >
               <span
-                className="euiButton__text"
+                class="euiButtonContent euiButton__content"
               >
-                Bulk delete
+                <span
+                  class="euiButton__text"
+                >
+                  Bulk delete
+                </span>
               </span>
-            </span>
-          </button>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-    <div
-      className="euiFlexItem euiFlexItem--flexGrowZero"
-    >
-      Array [
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
+      >
         <button
-          className="euiButton euiButton--primary euiButton--small"
-          disabled={false}
-          onClick={[Function]}
-          style={
-            Object {
-              "minWidth": undefined,
-            }
-          }
+          class="euiButton euiButton--primary euiButton--small"
           type="button"
         >
           <span
-            className="euiButtonContent euiButton__content"
+            class="euiButtonContent euiButton__content"
           >
             <span
-              className="euiButton__text"
+              class="euiButton__text"
             >
               Generate
             </span>
           </span>
-        </button>,
-        "",
-      ]
+        </button>
+      </div>
     </div>
-  </div>,
-]
+  </div>
+</body>
 `;

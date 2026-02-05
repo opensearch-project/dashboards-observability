@@ -1,205 +1,614 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Trace view component renders trace view 1`] = `
-<Fragment>
-  <EuiPage>
-    <EuiPageBody>
-      <EuiFlexGroup
-        justifyContent="spaceBetween"
+<body>
+  <div>
+    <div
+      class="euiPage euiPage--paddingMedium euiPage--grow"
+    >
+      <div
+        class="euiPageBody euiPageBody--borderRadiusNone"
       >
-        <EuiFlexItem>
-          <EuiText
-            size="s"
-          >
-            <h1
-              className="overview-content"
-            >
-              test
-            </h1>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-          onClick={[Function]}
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
-          <EuiToolTip
-            content="View associated logs using Trace Id"
-            delay="regular"
-            position="top"
+          <div
+            class="euiFlexItem"
           >
-            <EuiLink
-              data-test-subj="trace-view-logs-redirection-btn"
+            <div
+              class="euiText euiText--small"
             >
-              <EuiSmallButton
-                iconType="discoverApp"
-                isLoading={false}
+              <h1
+                class="overview-content"
               >
-                View associated logs
-              </EuiSmallButton>
-            </EuiLink>
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup
-        alignItems="stretch"
-        gutterSize="s"
-      >
-        <EuiFlexItem
-          grow={5}
-        >
-          <EuiPanel>
-            <PanelTitle
-              title="Overview"
-            />
-            <EuiHorizontalRule
-              margin="m"
-            />
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiFlexGroup
-                  direction="column"
+                test
+              </h1>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <span
+              class="euiToolTipAnchor"
+            >
+              <button
+                class="euiLink euiLink--primary"
+                data-test-subj="trace-view-logs-redirection-btn"
+                type="button"
+              >
+                <button
+                  class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
+                  disabled=""
+                  type="button"
                 >
-                  <EuiFlexItem
-                    grow={false}
+                  <span
+                    class="euiButtonContent euiButton__content"
                   >
-                    <EuiText
-                      className="overview-title"
-                    >
-                      Trace Id
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    <EuiText
-                      className="overview-title"
-                    >
-                      Trace group name
-                    </EuiText>
-                    <EuiText
-                      className="overview-content"
-                      size="s"
-                    >
-                      -
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup
-                  direction="column"
-                >
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    <EuiText
-                      className="overview-title"
-                    >
-                      Latency
-                    </EuiText>
-                    <EuiText
-                      className="overview-content"
-                      size="s"
+                    <span
+                      class="euiLoadingSpinner euiLoadingSpinner--medium euiButtonContent__spinner"
                     />
-                  </EuiFlexItem>
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    <EuiText
-                      className="overview-title"
+                    <span
+                      class="euiButton__text"
                     >
-                      Last updated
-                    </EuiText>
-                    <EuiText
-                      className="overview-content"
-                      size="s"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup
-                  direction="column"
-                >
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    <EuiText
-                      className="overview-title"
-                    >
-                      Errors
-                    </EuiText>
-                    <EuiText
-                      className="overview-content"
-                      size="s"
-                    >
-                      -
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={3}
+                      View associated logs
+                    </span>
+                  </span>
+                </button>
+              </button>
+            </span>
+          </div>
+        </div>
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
-          <ServiceBreakdownPanel
-            data={Array []}
-            isLoading={false}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer
-        size="m"
-      />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <SpanDetailPanel
-            colorMap={Object {}}
-            data={
-              Object {
-                "gantt": Array [],
-                "ganttMaxX": 0,
-                "table": Array [],
-              }
-            }
-            dataSourceMDSId=""
-            dataSourceMDSLabel=""
-            http={[MockFunction]}
-            isGanttChartLoading={false}
-            mode="data_prepper"
-            payloadData=""
-            setGanttChartLoading={[Function]}
-            setGanttData={[Function]}
-            setSpanFiltersWithStorage={[Function]}
-            spanFilters={Array []}
-            traceId="test"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiPanel>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <PanelTitle
-              title="Payload"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiHorizontalRule
-          margin="m"
+          <div
+            class="euiFlexItem euiFlexItem--flexGrow5"
+          >
+            <div
+              class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            >
+              <div
+                class="euiText euiText--medium"
+              >
+                <span
+                  class="panel-title"
+                >
+                  Overview
+                </span>
+              </div>
+              <div>
+                <span
+                  class="euiLoadingContent"
+                >
+                  <span
+                    class="euiLoadingContent__singleLine"
+                  >
+                    <span
+                      class="euiLoadingContent__singleLineBackground"
+                    />
+                  </span>
+                  <span
+                    class="euiLoadingContent__singleLine"
+                  >
+                    <span
+                      class="euiLoadingContent__singleLineBackground"
+                    />
+                  </span>
+                  <span
+                    class="euiLoadingContent__singleLine"
+                  >
+                    <span
+                      class="euiLoadingContent__singleLineBackground"
+                    />
+                  </span>
+                  <span
+                    class="euiLoadingContent__singleLine"
+                  >
+                    <span
+                      class="euiLoadingContent__singleLineBackground"
+                    />
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrow3"
+          >
+            <div
+              class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+            >
+              <div
+                class="euiText euiText--medium"
+              >
+                <span
+                  class="panel-title"
+                >
+                  Time spent by service
+                </span>
+              </div>
+              <div
+                class="center-loading-div"
+              >
+                <span
+                  class="euiLoadingChart euiLoadingChart--large"
+                >
+                  <span
+                    class="euiLoadingChart__bar"
+                  />
+                  <span
+                    class="euiLoadingChart__bar"
+                  />
+                  <span
+                    class="euiLoadingChart__bar"
+                  />
+                  <span
+                    class="euiLoadingChart__bar"
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--m"
         />
-      </EuiPanel>
-      <EuiSpacer />
-      <ServiceMap
-        idSelected="latency"
-        isServicesDataLoading={false}
-        page="traceView"
-        serviceMap={Object {}}
-        setIdSelected={[Function]}
-      />
-    </EuiPageBody>
-  </EuiPage>
-</Fragment>
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <div
+            class="euiFlexItem"
+          >
+            <div
+              class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+              data-test-subj="span-gantt-chart-panel"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
+              >
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <div
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <div
+                      class="euiFlexItem"
+                    >
+                      <div
+                        class="euiText euiText--medium"
+                      >
+                        <span
+                          class="panel-title"
+                        >
+                          Spans
+                        </span>
+                        <span
+                          class="panel-title-count"
+                        >
+                           (0)
+                        </span>
+                      </div>
+                    </div>
+                    <div
+                      class="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      >
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <button
+                            class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
+                            disabled=""
+                            type="button"
+                          >
+                            <span
+                              class="euiButtonContent euiButton__content"
+                            >
+                              <span
+                                class="euiButton__text"
+                              >
+                                Reset zoom
+                              </span>
+                            </span>
+                          </button>
+                        </div>
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <fieldset
+                            class="euiButtonGroup euiButtonGroup--small euiButtonGroup--text euiButtonGroup--isDisabled"
+                            disabled=""
+                          >
+                            <legend
+                              class="euiScreenReaderOnly"
+                            >
+                              Select view of spans
+                            </legend>
+                            <div
+                              class="euiButtonGroup__buttons"
+                            >
+                              <button
+                                aria-pressed="true"
+                                class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isDisabled euiButtonGroupButton-isSelected"
+                                data-test-subj="timeline"
+                                disabled=""
+                                id="random_html_id"
+                                type="button"
+                              >
+                                <span
+                                  class="euiButtonContent euiButton__content"
+                                >
+                                  <span
+                                    class="euiButton__text euiButtonGroupButton__textShift"
+                                    data-text="Timeline"
+                                    title="Timeline"
+                                  >
+                                    Timeline
+                                  </span>
+                                </span>
+                              </button>
+                              <button
+                                aria-pressed="false"
+                                class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isDisabled"
+                                data-test-subj="span_list"
+                                disabled=""
+                                id="random_html_id"
+                                type="button"
+                              >
+                                <span
+                                  class="euiButtonContent euiButton__content"
+                                >
+                                  <span
+                                    class="euiButton__text euiButtonGroupButton__textShift"
+                                    data-text="Span list"
+                                    title="Span list"
+                                  >
+                                    Span list
+                                  </span>
+                                </span>
+                              </button>
+                              <button
+                                aria-pressed="false"
+                                class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isDisabled"
+                                data-test-subj="hierarchy_span_list"
+                                disabled=""
+                                id="random_html_id"
+                                type="button"
+                              >
+                                <span
+                                  class="euiButtonContent euiButton__content"
+                                >
+                                  <span
+                                    class="euiButton__text euiButtonGroupButton__textShift"
+                                    data-text="Tree view"
+                                    title="Tree view"
+                                  >
+                                    Tree view
+                                  </span>
+                                </span>
+                              </button>
+                            </div>
+                          </fieldset>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="center-loading-div"
+                >
+                  <span
+                    class="euiLoadingChart euiLoadingChart--large"
+                  >
+                    <span
+                      class="euiLoadingChart__bar"
+                    />
+                    <span
+                      class="euiLoadingChart__bar"
+                    />
+                    <span
+                      class="euiLoadingChart__bar"
+                    />
+                    <span
+                      class="euiLoadingChart__bar"
+                    />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
+        <div
+          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+        >
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem"
+            >
+              <div
+                class="euiText euiText--medium"
+              >
+                <span
+                  class="panel-title"
+                >
+                  Payload
+                </span>
+              </div>
+            </div>
+          </div>
+          <hr
+            class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+          />
+          <div>
+            <span
+              class="euiLoadingContent"
+            >
+              <span
+                class="euiLoadingContent__singleLine"
+              >
+                <span
+                  class="euiLoadingContent__singleLineBackground"
+                />
+              </span>
+              <span
+                class="euiLoadingContent__singleLine"
+              >
+                <span
+                  class="euiLoadingContent__singleLineBackground"
+                />
+              </span>
+              <span
+                class="euiLoadingContent__singleLine"
+              >
+                <span
+                  class="euiLoadingContent__singleLineBackground"
+                />
+              </span>
+              <span
+                class="euiLoadingContent__singleLine"
+              >
+                <span
+                  class="euiLoadingContent__singleLineBackground"
+                />
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
+        <div
+          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+        >
+          <div
+            class="euiText euiText--medium"
+          >
+            <span
+              class="panel-title"
+            >
+              Service map
+            </span>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--m"
+          />
+          <fieldset
+            class="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
+          >
+            <legend
+              class="euiScreenReaderOnly"
+            >
+              Select metric for service map display
+            </legend>
+            <div
+              class="euiButtonGroup__buttons"
+            >
+              <label
+                class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
+                for="random_html_id"
+              >
+                <span
+                  class="euiButtonContent euiButton__content"
+                >
+                  <span
+                    class="euiButton__text euiButtonGroupButton__textShift"
+                    data-text="Duration"
+                    title="Duration"
+                  >
+                    <input
+                      checked=""
+                      class="euiScreenReaderOnly"
+                      data-test-subj="latency"
+                      id="random_html_id"
+                      name="random_html_id"
+                      type="radio"
+                      value=""
+                    />
+                    Duration
+                  </span>
+                </span>
+              </label>
+              <label
+                class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                for="random_html_id"
+              >
+                <span
+                  class="euiButtonContent euiButton__content"
+                >
+                  <span
+                    class="euiButton__text euiButtonGroupButton__textShift"
+                    data-text="Errors"
+                    title="Errors"
+                  >
+                    <input
+                      class="euiScreenReaderOnly"
+                      data-test-subj="error_rate"
+                      id="random_html_id"
+                      name="random_html_id"
+                      type="radio"
+                      value=""
+                    />
+                    Errors
+                  </span>
+                </span>
+              </label>
+              <label
+                class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                for="random_html_id"
+              >
+                <span
+                  class="euiButtonContent euiButton__content"
+                >
+                  <span
+                    class="euiButton__text euiButtonGroupButton__textShift"
+                    data-text="Request Rate"
+                    title="Request Rate"
+                  >
+                    <input
+                      class="euiScreenReaderOnly"
+                      data-test-subj="throughput"
+                      id="random_html_id"
+                      name="random_html_id"
+                      type="radio"
+                      value=""
+                    />
+                    Request Rate
+                  </span>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+          <hr
+            class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+          />
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem euiFlexItem--flexGrow7"
+            >
+              <div
+                class="euiPopover euiPopover--anchorDownLeft"
+                id="service-select-dropdown"
+              >
+                <div
+                  class="euiPopover__anchor"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <div
+                      class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                    >
+                      <label
+                        class="euiFormLabel euiFormControlLayout__prepend"
+                      >
+                        Focus on
+                      </label>
+                      <div
+                        class="euiFormControlLayout__childrenWrapper"
+                      >
+                        <input
+                          aria-controls="service-select-dropdown"
+                          class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
+                          placeholder="Service name"
+                          type="search"
+                          value=""
+                        />
+                        <div
+                          class="euiFormControlLayoutIcons"
+                        >
+                          <span
+                            class="euiFormControlLayoutCustomIcon"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                              focusable="false"
+                              height="16"
+                              role="img"
+                              viewBox="0 0 16 16"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                              />
+                            </svg>
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        aria-label="Clear focus and refresh the service map"
+                        class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
+                        data-test-subj="serviceMapRefreshButton"
+                        type="button"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                          focusable="false"
+                          height="16"
+                          role="img"
+                          viewBox="0 0 16 16"
+                          width="16"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+          <div
+            class="euiFlexGroup euiFlexGroup--directionRow"
+          >
+            <div
+              class="euiFlexItem"
+            >
+              <div
+                style="position: relative;"
+              >
+                <div
+                  style="position: absolute; top: 0px; left: 0px; right: 0px; bottom: 0px; display: flex; align-items: center; justify-content: center; background-color: transparent; z-index: 1000;"
+                >
+                  <span
+                    aria-label="Service map is loading"
+                    class="euiLoadingSpinner euiLoadingSpinner--xLarge"
+                  />
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <div
+                style="min-height: 400px; min-width: 65px;"
+              />
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--m"
+        />
+      </div>
+    </div>
+  </div>
+</body>
 `;

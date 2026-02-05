@@ -3,10 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { waitFor } from '@testing-library/dom';
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-import toJson from 'enzyme-to-json';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { queryWorkbenchPluginCheck } from '../../../../../../../../../common/constants/shared';
 import { CreateAccelerationForm } from '../../../../../../../../../common/types/data_connections';
@@ -30,25 +27,18 @@ global.fetch = jest.fn(() =>
 );
 
 describe('Preview SQL acceleration components', () => {
-  configure({ adapter: new Adapter() });
-
   it('renders Preview SQL settings with default options', async () => {
     const accelerationFormData = createAccelerationEmptyDataMock;
     const setAccelerationFormData = jest.fn();
-    const wrapper = mount(
+    render(
       <PreviewSQLDefinition
         accelerationFormData={accelerationFormData}
         setAccelerationFormData={setAccelerationFormData}
       />
     );
-    wrapper.update();
+
     await waitFor(() => {
-      expect(
-        toJson(wrapper, {
-          noKey: false,
-          mode: 'deep',
-        })
-      ).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
@@ -58,20 +48,15 @@ describe('Preview SQL acceleration components', () => {
       accelerationIndexType: 'covering',
     };
     const setAccelerationFormData = jest.fn();
-    const wrapper = mount(
+    render(
       <PreviewSQLDefinition
         accelerationFormData={accelerationFormData}
         setAccelerationFormData={setAccelerationFormData}
       />
     );
-    wrapper.update();
+
     await waitFor(() => {
-      expect(
-        toJson(wrapper, {
-          noKey: false,
-          mode: 'deep',
-        })
-      ).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
@@ -81,20 +66,15 @@ describe('Preview SQL acceleration components', () => {
       accelerationIndexType: 'covering',
     };
     const setAccelerationFormData = jest.fn();
-    const wrapper = mount(
+    render(
       <PreviewSQLDefinition
         accelerationFormData={accelerationFormData}
         setAccelerationFormData={setAccelerationFormData}
       />
     );
-    wrapper.update();
+
     await waitFor(() => {
-      expect(
-        toJson(wrapper, {
-          noKey: false,
-          mode: 'deep',
-        })
-      ).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
@@ -104,20 +84,15 @@ describe('Preview SQL acceleration components', () => {
       accelerationIndexType: 'invlalid_state',
     };
     const setAccelerationFormData = jest.fn();
-    const wrapper = mount(
+    render(
       <PreviewSQLDefinition
         accelerationFormData={accelerationFormData}
         setAccelerationFormData={setAccelerationFormData}
       />
     );
-    wrapper.update();
+
     await waitFor(() => {
-      expect(
-        toJson(wrapper, {
-          noKey: false,
-          mode: 'deep',
-        })
-      ).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 });

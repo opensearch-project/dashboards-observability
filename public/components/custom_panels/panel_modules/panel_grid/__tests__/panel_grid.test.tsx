@@ -3,19 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
+// eslint-disable-next-line jest/no-mocks-import
 import httpClientMock from '../../../../../../test/__mocks__/httpClientMock';
 import { PanelGrid } from '../panel_grid';
 import PPLService from '../../../../../services/requests/ppl';
 import { VisualizationType } from '../../../../../../common/types/custom_panels';
+// eslint-disable-next-line jest/no-mocks-import
 import { coreStartMock } from '../../../../../../test/__mocks__/coreMocks';
-import { waitFor } from '@testing-library/react';
 
 describe('Panel Grid Component', () => {
-  configure({ adapter: new Adapter() });
-
   it('renders panel grid component with empty visualizations', async () => {
     const http = httpClientMock;
     const core = coreStartMock;
@@ -35,7 +33,7 @@ describe('Panel Grid Component', () => {
       window.location.assign(`#/event_analytics/explorer/${savedVisId}`);
     };
 
-    const wrapper = mount(
+    render(
       <PanelGrid
         http={http}
         panelId={panelId}
@@ -54,10 +52,9 @@ describe('Panel Grid Component', () => {
         onEditClick={onEditClick}
       />
     );
-    wrapper.update();
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 });

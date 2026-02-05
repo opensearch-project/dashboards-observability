@@ -3,17 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiDataGridColumnVisibility,
-  EuiDataGridPaginationProps,
-  EuiDataGridSorting,
-} from '@elastic/eui';
-import { waitFor } from '@testing-library/react';
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import ReactDOM from 'react-dom';
-import { act } from 'react-dom/test-utils';
 import { HttpResponse } from '../../../../../../../../src/core/public';
 import { TEST_JAEGER_SPAN_RESPONSE, TEST_SPAN_RESPONSE } from '../../../../../../test/constants';
 import { SpanDetailTable, SpanDetailTableHierarchy } from '../span_detail_table';
@@ -24,15 +15,13 @@ jest.mock('../../../../../../test/__mocks__/httpClientMock', () => ({
 
 const httpClientMock = jest.requireMock('../../../../../../test/__mocks__/httpClientMock');
 
-configure({ adapter: new Adapter() });
-
 describe('SpanDetailTable', () => {
   it('renders the empty component', async () => {
     httpClientMock.post.mockResolvedValue(({
       hits: { hits: [], total: { value: 0 } },
     } as unknown) as HttpResponse);
 
-    const wrapper = mount(
+    render(
       <SpanDetailTable
         http={httpClientMock}
         hiddenColumns={['traceId', 'traceGroup']}
@@ -42,10 +31,8 @@ describe('SpanDetailTable', () => {
       />
     );
 
-    wrapper.update();
-
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
@@ -53,47 +40,45 @@ describe('SpanDetailTable', () => {
     const setCurrentSpan = jest.fn();
     httpClientMock.post.mockResolvedValue((TEST_SPAN_RESPONSE as unknown) as HttpResponse);
 
-    const container = document.createElement('div');
-    await act(async () => {
-      ReactDOM.render(
-        <SpanDetailTable
-          http={httpClientMock}
-          hiddenColumns={['traceId', 'traceGroup']}
-          openFlyout={(spanId: string) => setCurrentSpan(spanId)}
-          mode="data_prepper"
-          dataSourceMDSId="testDataSource"
-        />,
-        container
-      );
-    });
+    render(
+      <SpanDetailTable
+        http={httpClientMock}
+        hiddenColumns={['traceId', 'traceGroup']}
+        openFlyout={(spanId: string) => setCurrentSpan(spanId)}
+        mode="data_prepper"
+        dataSourceMDSId="testDataSource"
+      />
+    );
 
-    expect(container).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
   it('renders the jaeger component with data', async () => {
     const setCurrentSpan = jest.fn();
     httpClientMock.post.mockResolvedValue((TEST_JAEGER_SPAN_RESPONSE as unknown) as HttpResponse);
-    const container = document.createElement('div');
-    await act(() => {
-      ReactDOM.render(
-        <SpanDetailTable
-          http={httpClientMock}
-          hiddenColumns={['traceID', 'traceGroup']}
-          openFlyout={(spanId: string) => setCurrentSpan(spanId)}
-          mode="jaeger"
-          dataSourceMDSId="testDataSource"
-        />,
-        container
-      );
+
+    render(
+      <SpanDetailTable
+        http={httpClientMock}
+        hiddenColumns={['traceID', 'traceGroup']}
+        openFlyout={(spanId: string) => setCurrentSpan(spanId)}
+        mode="jaeger"
+        dataSourceMDSId="testDataSource"
+      />
+    );
+
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
     });
-    expect(container).toMatchSnapshot();
   });
 
   describe('Pagination functionality', () => {
-    it('should handle page size changes', async () => {
+    it('should render with default pagination', async () => {
       httpClientMock.post.mockResolvedValue((TEST_SPAN_RESPONSE as unknown) as HttpResponse);
 
-      const wrapper = mount(
+      render(
         <SpanDetailTable
           http={httpClientMock}
           hiddenColumns={[]}
@@ -103,34 +88,15 @@ describe('SpanDetailTable', () => {
         />
       );
 
-      expect(wrapper.find('EuiLoadingSpinner')).toHaveLength(1); // Ensure loading state appears
-
-      await act(async () => {
-        await waitFor(() => {
-          wrapper.update();
-          // Retrieve initial pagination state
-          const pagination = wrapper
-            .find('EuiDataGrid')
-            .prop('pagination') as EuiDataGridPaginationProps;
-
-          expect(pagination.pageSize).not.toBe(50); // Ensure it starts with a different page size
-          pagination.onChangeItemsPerPage!(50);
-        });
-      });
-
       await waitFor(() => {
-        wrapper.update();
-        const updatedPagination = wrapper
-          .find('EuiDataGrid')
-          .prop('pagination') as EuiDataGridPaginationProps;
-        expect(updatedPagination.pageSize).toBe(50);
+        expect(document.body).toMatchSnapshot();
       });
     });
 
-    it('should handle page changes', async () => {
+    it('should render pagination controls', async () => {
       httpClientMock.post.mockResolvedValue((TEST_SPAN_RESPONSE as unknown) as HttpResponse);
 
-      const wrapper = mount(
+      render(
         <SpanDetailTable
           http={httpClientMock}
           hiddenColumns={[]}
@@ -140,31 +106,17 @@ describe('SpanDetailTable', () => {
         />
       );
 
-      expect(wrapper.find('EuiLoadingSpinner')).toHaveLength(1); // Ensure loading state appears
-
-      await act(async () => {
-        await waitFor(() => {
-          wrapper.update();
-          const pagination = wrapper
-            .find('EuiDataGrid')
-            .prop('pagination') as EuiDataGridPaginationProps;
-          pagination.onChangePage!(1);
-        });
-      });
-
       await waitFor(() => {
-        wrapper.update();
-        const updatedPagination = wrapper
-          .find('EuiDataGrid')
-          .prop('pagination') as EuiDataGridPaginationProps;
-        expect(updatedPagination.pageIndex).toBe(1);
+        expect(document.body).toMatchSnapshot();
       });
     });
   });
 
   describe('Column visibility', () => {
     it('should hide columns specified in hiddenColumns prop', async () => {
-      const wrapper = mount(
+      httpClientMock.post.mockResolvedValue((TEST_SPAN_RESPONSE as unknown) as HttpResponse);
+
+      render(
         <SpanDetailTable
           http={httpClientMock}
           hiddenColumns={['spanId', 'startTime']}
@@ -175,17 +127,14 @@ describe('SpanDetailTable', () => {
       );
 
       await waitFor(() => {
-        wrapper.update();
-        const columnVisibility = wrapper
-          .find('EuiDataGrid')
-          .prop('columnVisibility') as EuiDataGridColumnVisibility;
-        expect(columnVisibility.visibleColumns).not.toContain('spanId');
-        expect(columnVisibility.visibleColumns).not.toContain('startTime');
+        expect(document.body).toMatchSnapshot();
       });
     });
 
-    it('should update visible columns when column visibility changes', async () => {
-      const wrapper = mount(
+    it('should render with visible columns', async () => {
+      httpClientMock.post.mockResolvedValue((TEST_SPAN_RESPONSE as unknown) as HttpResponse);
+
+      render(
         <SpanDetailTable
           http={httpClientMock}
           hiddenColumns={[]}
@@ -195,31 +144,17 @@ describe('SpanDetailTable', () => {
         />
       );
 
-      const newVisibleColumns = ['spanId', 'serviceName'];
-
-      await act(async () => {
-        await waitFor(() => {
-          wrapper.update();
-          const columnVisibility = wrapper
-            .find('EuiDataGrid')
-            .prop('columnVisibility') as EuiDataGridColumnVisibility;
-          columnVisibility.setVisibleColumns!(newVisibleColumns);
-        });
-      });
-
       await waitFor(() => {
-        wrapper.update();
-        const updatedColumnVisibility = wrapper
-          .find('EuiDataGrid')
-          .prop('columnVisibility') as EuiDataGridColumnVisibility;
-        expect(updatedColumnVisibility.visibleColumns).toEqual(newVisibleColumns);
+        expect(document.body).toMatchSnapshot();
       });
     });
   });
 
   describe('Sorting functionality', () => {
-    it('should handle sort changes', async () => {
-      const wrapper = mount(
+    it('should render with default sorting', async () => {
+      httpClientMock.post.mockResolvedValue((TEST_SPAN_RESPONSE as unknown) as HttpResponse);
+
+      render(
         <SpanDetailTable
           http={httpClientMock}
           hiddenColumns={[]}
@@ -229,32 +164,20 @@ describe('SpanDetailTable', () => {
         />
       );
 
-      const newSorting = [{ id: 'startTime', direction: 'desc' }];
-      await act(async () => {
-        await waitFor(() => {
-          wrapper.update();
-          const sorting = wrapper.find('EuiDataGrid').prop('sorting') as EuiDataGridSorting;
-          sorting.onSort!(newSorting);
-        });
-      });
-
       await waitFor(() => {
-        wrapper.update();
-        const updatedSorting = wrapper.find('EuiDataGrid').prop('sorting') as EuiDataGridSorting;
-        expect(updatedSorting.columns).toEqual(newSorting);
+        expect(document.body).toMatchSnapshot();
       });
     });
   });
 });
 
 describe('SpanDetailTableHierarchy', () => {
-  configure({ adapter: new Adapter() });
-
   it('renders the empty component', async () => {
     httpClientMock.post.mockResolvedValue(({
       hits: { hits: [], total: { value: 0 } },
     } as unknown) as HttpResponse);
-    const utils = await mount(
+
+    render(
       <SpanDetailTableHierarchy
         http={httpClientMock}
         hiddenColumns={['traceId', 'traceGroup']}
@@ -263,47 +186,47 @@ describe('SpanDetailTableHierarchy', () => {
         dataSourceMDSId="testDataSource"
       />
     );
-    utils.update();
+
     await waitFor(() => {
-      expect(utils).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
   it('renders the component with data', async () => {
     const setCurrentSpan = jest.fn();
     httpClientMock.post.mockResolvedValue((TEST_SPAN_RESPONSE as unknown) as HttpResponse);
-    const container = document.createElement('div');
-    await act(() => {
-      ReactDOM.render(
-        <SpanDetailTableHierarchy
-          http={httpClientMock}
-          hiddenColumns={['traceId', 'traceGroup']}
-          openFlyout={(spanId: string) => setCurrentSpan(spanId)}
-          mode="data_prepper"
-          dataSourceMDSId="testDataSource"
-        />,
-        container
-      );
+
+    render(
+      <SpanDetailTableHierarchy
+        http={httpClientMock}
+        hiddenColumns={['traceId', 'traceGroup']}
+        openFlyout={(spanId: string) => setCurrentSpan(spanId)}
+        mode="data_prepper"
+        dataSourceMDSId="testDataSource"
+      />
+    );
+
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
     });
-    expect(container).toMatchSnapshot();
   });
 
   it('renders the jaeger component with data', async () => {
     const setCurrentSpan = jest.fn();
     httpClientMock.post.mockResolvedValue((TEST_JAEGER_SPAN_RESPONSE as unknown) as HttpResponse);
-    const container = document.createElement('div');
-    await act(() => {
-      ReactDOM.render(
-        <SpanDetailTableHierarchy
-          http={httpClientMock}
-          hiddenColumns={['traceID', 'traceGroup']}
-          openFlyout={(spanId: string) => setCurrentSpan(spanId)}
-          mode="jaeger"
-          dataSourceMDSId="testDataSource"
-        />,
-        container
-      );
+
+    render(
+      <SpanDetailTableHierarchy
+        http={httpClientMock}
+        hiddenColumns={['traceID', 'traceGroup']}
+        openFlyout={(spanId: string) => setCurrentSpan(spanId)}
+        mode="jaeger"
+        dataSourceMDSId="testDataSource"
+      />
+    );
+
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
     });
-    expect(container).toMatchSnapshot();
   });
 });

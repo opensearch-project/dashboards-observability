@@ -4,15 +4,13 @@
  */
 
 import React from 'react';
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render } from '@testing-library/react';
 import { LogConfig } from '../components/config_components/log_config';
+// eslint-disable-next-line jest/no-mocks-import
 import { coreStartMock } from '../../../../test/__mocks__/coreMocks';
 import DSLService from 'public/services/requests/dsl';
 
 describe('Log Config component', () => {
-  configure({ adapter: new Adapter() });
-
   it('renders empty log config', () => {
     const core = coreStartMock;
     const setQuery = jest.fn();
@@ -33,7 +31,7 @@ describe('Log Config component', () => {
       fetchIndices: jest.fn(),
       fetchFields: jest.fn(),
     } as unknown) as DSLService;
-    const wrapper = mount(
+    render(
       <LogConfig
         http={core.http}
         chrome={core.chrome}
@@ -63,7 +61,7 @@ describe('Log Config component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('renders with query', () => {
@@ -86,7 +84,7 @@ describe('Log Config component', () => {
       fetchIndices: jest.fn(),
       fetchFields: jest.fn(),
     } as unknown) as DSLService;
-    const wrapper = mount(
+    render(
       <LogConfig
         http={core.http}
         chrome={core.chrome}
@@ -116,6 +114,6 @@ describe('Log Config component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 });

@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor, fireEvent } from '@testing-library/react';
 import {
   getFilterFields,
   getInvertedOperator,
@@ -14,8 +13,6 @@ import {
 } from '../filter_helpers';
 
 describe('Filter helper functions', () => {
-  configure({ adapter: new Adapter() });
-
   it('returns fields by page', () => {
     const fields = getFilterFields('data_prepper', 'dashboard', []);
     expect(fields).toEqual(['traceGroup', 'serviceName', 'error', 'status.message', 'latency']);
@@ -82,32 +79,32 @@ describe('Filter helper functions', () => {
     ]);
   });
 
-  it('renders textfield filter', () => {
+  it('renders textfield filter', async () => {
     const setValue = jest.fn((_v) => {});
-    const wrapper = mount(getValueComponent('serviceName', 'is', 0, setValue));
-    expect(wrapper).toMatchSnapshot();
+    const { container } = render(getValueComponent('serviceName', 'is', 0, setValue));
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
 
-    wrapper.find('input').simulate('change', { target: { value: '100' } });
+    const input = container.querySelector('input');
+    fireEvent.change(input, { target: { value: '100' } });
     expect(setValue).toBeCalledWith('100');
   });
 
-  it('renders range field filter', () => {
+  it('renders range field filter', async () => {
     const setValue = jest.fn((_v) => {});
-    const wrapper = mount(
+    const { container } = render(
       getValueComponent('latency', 'is not between', { from: '0', to: '100' }, setValue)
     );
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
 
-    wrapper
-      .find('input')
-      .at(0)
-      .simulate('change', { target: { value: '50' } });
+    const inputs = container.querySelectorAll('input');
+    fireEvent.change(inputs[0], { target: { value: '50' } });
     expect(setValue).toBeCalledWith({ from: '50', to: '100' });
 
-    wrapper
-      .find('input')
-      .at(1)
-      .simulate('change', { target: { value: '200' } });
+    fireEvent.change(inputs[1], { target: { value: '200' } });
     expect(setValue).toBeCalledWith({ from: '0', to: '200' });
   });
 });

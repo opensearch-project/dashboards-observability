@@ -8,8 +8,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 import { waitFor } from '@testing-library/react';
 import { sampleSavedMetric } from '../../../../../test/metrics_constants';
 import { applyMiddleware, createStore } from '@reduxjs/toolkit';
@@ -65,7 +63,6 @@ export function renderWithMetricsProviders(
 }
 
 describe('Export Metrics Panel Component', () => {
-  configure({ adapter: new Adapter() });
   const store = createStore(rootReducer, applyMiddleware(thunk));
   coreRefs.savedObjectsClient.find = jest.fn(() =>
     Promise.resolve({
@@ -77,15 +74,14 @@ describe('Export Metrics Panel Component', () => {
   it('renders Export Metrics Panel Component', async () => {
     mockSavedObjectActions({ get: [{ savedVisualization: sampleSavedMetric }] });
 
-    const wrapper = mount(
+    render(
       <Provider store={store}>
         <MetricsExport />
       </Provider>
     );
-    wrapper.update();
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
   it('opens metric export panel on Save button, closes on Cancel', async () => {
@@ -178,12 +174,20 @@ describe('Export Metrics Panel Component', () => {
     // Assert
     const saveButton = await screen.findByText(/Save/);
     expect(saveButton).toBeInTheDocument();
-    await act(async () => {
-      fireEvent.click(saveButton);
+    fireEvent.click(saveButton);
 
-      expect(await screen.findByTestId('metrics__querySaveName')).toBeInTheDocument();
-      const modalSaveButton = await screen.findByTestId('metrics__SaveConfirm');
-      expect(modalSaveButton).toBeInTheDocument();
+    // Wait for modal to open and elements to be available
+    const saveNameInput = await screen.findByTestId(
+      'metrics__querySaveName',
+      {},
+      { timeout: 3000 }
+    );
+    expect(saveNameInput).toBeInTheDocument();
+
+    const modalSaveButton = await screen.findByTestId('metrics__SaveConfirm');
+    expect(modalSaveButton).toBeInTheDocument();
+
+    await act(async () => {
       fireEvent.click(modalSaveButton);
     });
   });

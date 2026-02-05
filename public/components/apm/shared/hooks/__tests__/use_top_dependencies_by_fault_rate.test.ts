@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useTopDependenciesByFaultRate } from '../use_top_dependencies_by_fault_rate';
 
 // Mock the PromQLSearchService
@@ -87,11 +87,11 @@ describe('useTopDependenciesByFaultRate', () => {
         },
       });
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useTopDependenciesByFaultRate(defaultParams)
-      );
+      const { result } = renderHook(() => useTopDependenciesByFaultRate(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.isLoading).toBe(false);
       expect(result.current.data).toHaveLength(2);
@@ -113,11 +113,11 @@ describe('useTopDependenciesByFaultRate', () => {
         },
       });
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useTopDependenciesByFaultRate(defaultParams)
-      );
+      const { result } = renderHook(() => useTopDependenciesByFaultRate(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data[0].target).toBe('high');
       expect(result.current.data[1].target).toBe('medium');
@@ -136,11 +136,11 @@ describe('useTopDependenciesByFaultRate', () => {
         },
       });
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useTopDependenciesByFaultRate(defaultParams)
-      );
+      const { result } = renderHook(() => useTopDependenciesByFaultRate(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data).toHaveLength(1);
       expect(result.current.data[0].target).toBe('has-faults');
@@ -160,14 +160,16 @@ describe('useTopDependenciesByFaultRate', () => {
         },
       });
 
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useTopDependenciesByFaultRate({
           ...defaultParams,
           limit: 3,
         })
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data).toHaveLength(3);
     });
@@ -186,11 +188,11 @@ describe('useTopDependenciesByFaultRate', () => {
         },
       });
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useTopDependenciesByFaultRate(defaultParams)
-      );
+      const { result } = renderHook(() => useTopDependenciesByFaultRate(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data).toHaveLength(1);
       expect(result.current.data[0].source).toBe('api-gateway');
@@ -204,11 +206,11 @@ describe('useTopDependenciesByFaultRate', () => {
       const mockError = new Error('Query failed');
       mockExecuteMetricRequest.mockRejectedValue(mockError);
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useTopDependenciesByFaultRate(defaultParams)
-      );
+      const { result } = renderHook(() => useTopDependenciesByFaultRate(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toEqual(mockError);
       expect(result.current.data).toEqual([]);
@@ -221,11 +223,11 @@ describe('useTopDependenciesByFaultRate', () => {
         meta: { instantData: { rows: [] } },
       });
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useTopDependenciesByFaultRate(defaultParams)
-      );
+      const { result } = renderHook(() => useTopDependenciesByFaultRate(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(1);
 
@@ -233,7 +235,9 @@ describe('useTopDependenciesByFaultRate', () => {
         result.current.refetch();
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(2);
     });
@@ -245,14 +249,16 @@ describe('useTopDependenciesByFaultRate', () => {
         meta: { instantData: { rows: [] } },
       });
 
-      const { waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         ({ params }) => useTopDependenciesByFaultRate(params),
         {
           initialProps: { params: defaultParams },
         }
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       rerender({
         params: {
@@ -261,7 +267,9 @@ describe('useTopDependenciesByFaultRate', () => {
         },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(2);
     });
@@ -271,20 +279,24 @@ describe('useTopDependenciesByFaultRate', () => {
         meta: { instantData: { rows: [] } },
       });
 
-      const { waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         ({ params }) => useTopDependenciesByFaultRate(params),
         {
           initialProps: { params: { ...defaultParams, refreshTrigger: 0 } },
         }
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       rerender({
         params: { ...defaultParams, refreshTrigger: 1 },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(2);
     });

@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 import { handleError } from '../helper_functions';
 import { handleDslRequest } from '../request_handler';
 import { coreRefs } from '../../../../../public/framework/core_refs';
@@ -47,8 +45,6 @@ const mockHttp: jest.Mocked<CoreStart['http']> = {
 };
 
 describe('Trace Analytics Error Handling', () => {
-  configure({ adapter: new Adapter() });
-
   beforeEach(() => {
     jest.clearAllMocks();
     // @ts-ignore

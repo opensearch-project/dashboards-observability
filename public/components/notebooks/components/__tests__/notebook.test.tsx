@@ -5,8 +5,6 @@
 
 import '@testing-library/jest-dom';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
-import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { HttpResponse } from '../../../../../../../src/core/public';
 import { getOSDHttp } from '../../../../../common/utils';
@@ -46,7 +44,6 @@ global.fetch = jest.fn(() =>
 );
 
 describe('<Notebook /> spec', () => {
-  configure({ adapter: new Adapter() });
   const httpClient = getOSDHttp();
   const pplService = new PPLService(httpClient);
   const setBreadcrumbs = jest.fn();
@@ -82,7 +79,7 @@ describe('<Notebook /> spec', () => {
     await waitFor(() => {
       expect(utils.getByText('sample-notebook-1')).toBeInTheDocument();
     });
-    expect(utils.container.firstChild).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('Adds a code block', async () => {
@@ -209,11 +206,14 @@ describe('<Notebook /> spec', () => {
       expect(utils.getByPlaceholderText(codePlaceholderText)).toBeInTheDocument();
     });
 
+    const inputField = utils.getByPlaceholderText(codePlaceholderText);
+    const runButton = utils.getByText('Run');
+
     act(() => {
-      fireEvent.input(utils.getByPlaceholderText(codePlaceholderText), {
+      fireEvent.input(inputField, {
         target: { value: '%md \\n hello' },
       });
-      fireEvent.click(utils.getByText('Run'));
+      fireEvent.click(runButton);
     });
 
     await waitFor(() => {
@@ -224,6 +224,13 @@ describe('<Notebook /> spec', () => {
 
   it('toggles between input/output only views', async () => {
     httpClient.get = jest.fn(() => Promise.resolve((emptyNotebook as unknown) as HttpResponse));
+    let postFlag = 1;
+    httpClient.post = jest.fn(() => {
+      if (postFlag === 1) {
+        postFlag += 1;
+        return Promise.resolve((addCodeBlockResponse as unknown) as HttpResponse);
+      } else return Promise.resolve((runCodeBlockResponse as unknown) as HttpResponse);
+    });
     const utils = render(
       <Notebook
         pplService={pplService}
@@ -263,6 +270,21 @@ describe('<Notebook /> spec', () => {
 
     act(() => {
       utils.getByLabelText('Toggle show input').click();
+    });
+
+    // Run the code block to generate output with "hello"
+    const inputField = utils.getByPlaceholderText(codePlaceholderText);
+    const runButton = utils.getByText('Run');
+
+    act(() => {
+      fireEvent.input(inputField, {
+        target: { value: '%md \\n hello' },
+      });
+      fireEvent.click(runButton);
+    });
+
+    await waitFor(() => {
+      expect(utils.getByText('hello')).toBeInTheDocument();
     });
 
     act(() => {
@@ -598,7 +620,7 @@ describe('<Notebook /> spec', () => {
         })),
       } as unknown) as HttpResponse)
     );
-    const utils = render(
+    const _utils = render(
       <Notebook
         pplService={pplService}
         openedNoteId={sampleNotebook1.id}
@@ -617,7 +639,7 @@ describe('<Notebook /> spec', () => {
     );
 
     await waitFor(() => {
-      expect(utils.container.firstChild).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 

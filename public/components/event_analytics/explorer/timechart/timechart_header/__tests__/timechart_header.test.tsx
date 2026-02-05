@@ -3,10 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
 import { TimechartHeader } from '../timechart_header';
 import { TIME_INTERVAL_OPTIONS } from '../../../../../../../common/constants/explorer';
 import {
@@ -15,12 +13,10 @@ import {
 } from '../../../../../../../test/event_analytics_constants';
 
 describe('Time chart header component', () => {
-  configure({ adapter: new Adapter() });
-
   it('Renders Time chart header component', async () => {
     const onChangeInterval = jest.fn();
 
-    const wrapper = mount(
+    render(
       <TimechartHeader
         onChangeInterval={onChangeInterval}
         options={TIME_INTERVAL_OPTIONS}
@@ -30,10 +26,8 @@ describe('Time chart header component', () => {
       />
     );
 
-    wrapper.update();
-
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 });

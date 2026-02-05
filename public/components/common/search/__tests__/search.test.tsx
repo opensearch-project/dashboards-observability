@@ -4,9 +4,7 @@
  */
 
 import { applyMiddleware, createStore } from '@reduxjs/toolkit';
-import { render } from '@testing-library/react';
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
@@ -17,17 +15,17 @@ import * as hookExports from '../../../event_analytics/explorer/query_assist/hoo
 import { Search } from '../search';
 
 describe('Explorer Search component', () => {
-  configure({ adapter: new Adapter() });
   const store = createStore(rootReducer, applyMiddleware(thunk));
 
-  it('renders basic component', () => {
-    const wrapper = mount(
+  it('renders basic component', async () => {
+    render(
       <Provider store={store}>
         <Search tabId={initialTabId} />
       </Provider>
     );
-    wrapper.update();
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 });
 

@@ -1,343 +1,97 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Time chart header component Renders Time chart header component 1`] = `
-<TimechartHeader
-  endTime="Aug 28, 2023 @ 20:00:00.408"
-  onChangeInterval={[MockFunction]}
-  options={
-    Array [
-      Object {
-        "text": "Minute",
-        "value": "m",
-      },
-      Object {
-        "text": "Hour",
-        "value": "h",
-      },
-      Object {
-        "text": "Day",
-        "value": "d",
-      },
-      Object {
-        "text": "Week",
-        "value": "w",
-      },
-      Object {
-        "text": "Month",
-        "value": "M",
-      },
-      Object {
-        "text": "Year",
-        "value": "y",
-      },
-    ]
-  }
-  startTime="Aug 28, 2023 @ 20:00:00.406"
-  stateInterval="w"
->
-  <I18nProvider>
-    <IntlProvider
-      defaultLocale="en"
-      formats={
-        Object {
-          "date": Object {
-            "full": Object {
-              "day": "numeric",
-              "month": "long",
-              "weekday": "long",
-              "year": "numeric",
-            },
-            "long": Object {
-              "day": "numeric",
-              "month": "long",
-              "year": "numeric",
-            },
-            "medium": Object {
-              "day": "numeric",
-              "month": "short",
-              "year": "numeric",
-            },
-            "short": Object {
-              "day": "numeric",
-              "month": "numeric",
-              "year": "2-digit",
-            },
-          },
-          "number": Object {
-            "currency": Object {
-              "style": "currency",
-            },
-            "percent": Object {
-              "style": "percent",
-            },
-          },
-          "relative": Object {
-            "days": Object {
-              "units": "day",
-            },
-            "hours": Object {
-              "units": "hour",
-            },
-            "minutes": Object {
-              "units": "minute",
-            },
-            "months": Object {
-              "units": "month",
-            },
-            "seconds": Object {
-              "units": "second",
-            },
-            "years": Object {
-              "units": "year",
-            },
-          },
-          "time": Object {
-            "full": Object {
-              "hour": "numeric",
-              "minute": "numeric",
-              "second": "numeric",
-              "timeZoneName": "short",
-            },
-            "long": Object {
-              "hour": "numeric",
-              "minute": "numeric",
-              "second": "numeric",
-              "timeZoneName": "short",
-            },
-            "medium": Object {
-              "hour": "numeric",
-              "minute": "numeric",
-              "second": "numeric",
-            },
-            "short": Object {
-              "hour": "numeric",
-              "minute": "numeric",
-            },
-          },
-        }
-      }
-      locale="en"
-      messages={Object {}}
-      textComponent={Symbol(react.fragment)}
+<body>
+  <div>
+    <div
+      class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
-      <PseudoLocaleWrapper>
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="s"
-          justifyContent="center"
-          responsive={true}
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <span
+          class="euiToolTipAnchor"
         >
           <div
-            className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiText euiText--small"
+            data-test-subj="discoverIntervalDateRange"
           >
-            <EuiFlexItem
-              grow={false}
-            >
-              <div
-                className="euiFlexItem euiFlexItem--flexGrowZero"
-              >
-                <EuiToolTip
-                  content="To change the time, use the global time filter above"
-                  delay="long"
-                  position="top"
-                >
-                  <span
-                    className="euiToolTipAnchor"
-                    onKeyUp={[Function]}
-                    onMouseOut={[Function]}
-                    onMouseOver={[Function]}
-                  >
-                    <EuiText
-                      data-test-subj="discoverIntervalDateRange"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
-                      size="s"
-                    >
-                      <div
-                        className="euiText euiText--small"
-                        data-test-subj="discoverIntervalDateRange"
-                        onBlur={[Function]}
-                        onFocus={[Function]}
-                      >
-                        Aug 28, 2023 @ 20:00:00.406 - Aug 28, 2023 @ 20:00:00.408
-                      </div>
-                    </EuiText>
-                  </span>
-                </EuiToolTip>
-              </div>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <div
-                className="euiFlexItem euiFlexItem--flexGrowZero"
-              >
-                <EuiSelect
-                  aria-label="Time interval"
-                  compressed={true}
-                  data-test-subj="eventAnalytics__EventIntervalSelect"
-                  id="dscResultsIntervalSelector"
-                  onChange={[Function]}
-                  options={
-                    Array [
-                      Object {
-                        "text": "Minute",
-                        "value": "m",
-                      },
-                      Object {
-                        "text": "Hour",
-                        "value": "h",
-                      },
-                      Object {
-                        "text": "Day",
-                        "value": "d",
-                      },
-                      Object {
-                        "text": "Week",
-                        "value": "w",
-                      },
-                      Object {
-                        "text": "Month",
-                        "value": "M",
-                      },
-                      Object {
-                        "text": "Year",
-                        "value": "y",
-                      },
-                    ]
-                  }
-                  value="w"
-                >
-                  <EuiFormControlLayout
-                    compressed={true}
-                    fullWidth={false}
-                    icon={
-                      Object {
-                        "side": "right",
-                        "type": "arrowDown",
-                      }
-                    }
-                    inputId="dscResultsIntervalSelector"
-                    isLoading={false}
-                  >
-                    <div
-                      className="euiFormControlLayout euiFormControlLayout--compressed"
-                    >
-                      <div
-                        className="euiFormControlLayout__childrenWrapper"
-                      >
-                        <EuiValidatableControl>
-                          <select
-                            aria-label="Time interval"
-                            className="euiSelect euiSelect--compressed"
-                            data-test-subj="eventAnalytics__EventIntervalSelect"
-                            id="dscResultsIntervalSelector"
-                            onChange={[Function]}
-                            onMouseUp={[Function]}
-                            value="w"
-                          >
-                            <option
-                              key="0"
-                              value="m"
-                            >
-                              Minute
-                            </option>
-                            <option
-                              key="1"
-                              value="h"
-                            >
-                              Hour
-                            </option>
-                            <option
-                              key="2"
-                              value="d"
-                            >
-                              Day
-                            </option>
-                            <option
-                              key="3"
-                              value="w"
-                            >
-                              Week
-                            </option>
-                            <option
-                              key="4"
-                              value="M"
-                            >
-                              Month
-                            </option>
-                            <option
-                              key="5"
-                              value="y"
-                            >
-                              Year
-                            </option>
-                          </select>
-                        </EuiValidatableControl>
-                        <EuiFormControlLayoutIcons
-                          compressed={true}
-                          icon={
-                            Object {
-                              "side": "right",
-                              "type": "arrowDown",
-                            }
-                          }
-                          isLoading={false}
-                        >
-                          <div
-                            className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                          >
-                            <EuiFormControlLayoutCustomIcon
-                              size="s"
-                              type="arrowDown"
-                            >
-                              <span
-                                className="euiFormControlLayoutCustomIcon"
-                              >
-                                <EuiIcon
-                                  aria-hidden="true"
-                                  className="euiFormControlLayoutCustomIcon__icon"
-                                  size="s"
-                                  type="arrowDown"
-                                >
-                                  <EuiIconBeaker
-                                    aria-hidden={true}
-                                    className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                    focusable="false"
-                                    role="img"
-                                    style={null}
-                                  >
-                                    <svg
-                                      aria-hidden={true}
-                                      className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                      focusable="false"
-                                      height={16}
-                                      role="img"
-                                      style={null}
-                                      viewBox="0 0 16 16"
-                                      width={16}
-                                      xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                      <path
-                                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                      />
-                                    </svg>
-                                  </EuiIconBeaker>
-                                </EuiIcon>
-                              </span>
-                            </EuiFormControlLayoutCustomIcon>
-                          </div>
-                        </EuiFormControlLayoutIcons>
-                      </div>
-                    </div>
-                  </EuiFormControlLayout>
-                </EuiSelect>
-              </div>
-            </EuiFlexItem>
+            Aug 28, 2023 @ 20:00:00.406 - Aug 28, 2023 @ 20:00:00.408
           </div>
-        </EuiFlexGroup>
-      </PseudoLocaleWrapper>
-    </IntlProvider>
-  </I18nProvider>
-</TimechartHeader>
+        </span>
+      </div>
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <div
+          class="euiFormControlLayout euiFormControlLayout--compressed"
+        >
+          <div
+            class="euiFormControlLayout__childrenWrapper"
+          >
+            <select
+              aria-label="Time interval"
+              class="euiSelect euiSelect--compressed"
+              data-test-subj="eventAnalytics__EventIntervalSelect"
+              id="dscResultsIntervalSelector"
+            >
+              <option
+                value="m"
+              >
+                Minute
+              </option>
+              <option
+                value="h"
+              >
+                Hour
+              </option>
+              <option
+                value="d"
+              >
+                Day
+              </option>
+              <option
+                value="w"
+              >
+                Week
+              </option>
+              <option
+                value="M"
+              >
+                Month
+              </option>
+              <option
+                value="y"
+              >
+                Year
+              </option>
+            </select>
+            <div
+              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            >
+              <span
+                class="euiFormControlLayoutCustomIcon"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                  focusable="false"
+                  height="16"
+                  role="img"
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                  />
+                </svg>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
 `;

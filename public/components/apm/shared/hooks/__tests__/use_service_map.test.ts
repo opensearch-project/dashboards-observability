@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useServiceMap } from '../use_service_map';
 
 // Mock the PPLSearchService
@@ -110,12 +110,14 @@ describe('useServiceMap', () => {
 
       mockGetServiceMap.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceMap(defaultParams));
+      const { result } = renderHook(() => useServiceMap(defaultParams));
 
       // Initial loading state
       expect(result.current.isLoading).toBe(true);
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.isLoading).toBe(false);
       expect(result.current.nodes).toHaveLength(2);
@@ -143,9 +145,11 @@ describe('useServiceMap', () => {
 
       mockGetServiceMap.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceMap(defaultParams));
+      const { result } = renderHook(() => useServiceMap(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.nodes).toEqual([]);
       expect(result.current.edges).toEqual([]);
@@ -158,9 +162,11 @@ describe('useServiceMap', () => {
       const mockError = new Error('Network error');
       mockGetServiceMap.mockRejectedValue(mockError);
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceMap(defaultParams));
+      const { result } = renderHook(() => useServiceMap(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toEqual(mockError);
       expect(result.current.nodes).toEqual([]);
@@ -170,9 +176,11 @@ describe('useServiceMap', () => {
     it('should wrap non-Error throws', async () => {
       mockGetServiceMap.mockRejectedValue('string error');
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceMap(defaultParams));
+      const { result } = renderHook(() => useServiceMap(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toBeInstanceOf(Error);
       expect(result.current.error?.message).toBe('Unknown error');
@@ -188,9 +196,11 @@ describe('useServiceMap', () => {
         AggregatedNodes: [],
       });
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceMap(defaultParams));
+      const { result } = renderHook(() => useServiceMap(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockGetServiceMap).toHaveBeenCalledTimes(1);
 
@@ -198,7 +208,9 @@ describe('useServiceMap', () => {
         result.current.refetch();
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockGetServiceMap).toHaveBeenCalledTimes(2);
     });
@@ -213,11 +225,13 @@ describe('useServiceMap', () => {
         AggregatedNodes: [],
       });
 
-      const { waitForNextUpdate, rerender } = renderHook(({ params }) => useServiceMap(params), {
+      const { result, rerender } = renderHook(({ params }) => useServiceMap(params), {
         initialProps: { params: defaultParams },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       rerender({
         params: {
@@ -226,7 +240,9 @@ describe('useServiceMap', () => {
         },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockGetServiceMap).toHaveBeenCalledTimes(2);
     });
@@ -239,17 +255,21 @@ describe('useServiceMap', () => {
         AggregatedNodes: [],
       });
 
-      const { waitForNextUpdate, rerender } = renderHook(({ params }) => useServiceMap(params), {
+      const { result, rerender } = renderHook(({ params }) => useServiceMap(params), {
         initialProps: { params: { ...defaultParams, refreshTrigger: 0 } },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       rerender({
         params: { ...defaultParams, refreshTrigger: 1 },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockGetServiceMap).toHaveBeenCalledTimes(2);
     });

@@ -5,7 +5,7 @@
 
 import { QueryManager } from 'common/query_manager';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
 import { DataSourceManagementPluginSetup } from '../../../../src/plugins/data_source_management/public';
 import { AppPluginStartDependencies } from '../types';
@@ -28,7 +28,8 @@ export const Observability = (
 ) => {
   const { setHeaderActionMenu } = AppMountParametersProp;
   const { dataSource } = DepsStart;
-  ReactDOM.render(
+  const root = createRoot(AppMountParametersProp.element);
+  root.render(
     <App
       CoreStartProp={CoreStartProp}
       DepsStart={DepsStart}
@@ -44,9 +45,8 @@ export const Observability = (
       dataSourceEnabled={!!dataSource}
       savedObjectsMDSClient={savedObjectsMDSClient}
       defaultRoute={defaultRoute}
-    />,
-    AppMountParametersProp.element
+    />
   );
 
-  return () => ReactDOM.unmountComponentAtNode(AppMountParametersProp.element);
+  return () => root.unmount();
 };

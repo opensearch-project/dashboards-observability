@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useSelectedEdgeMetrics } from '../use_selected_edge_metrics';
 import { SelectedEdgeState } from '../../../common/types/service_map_types';
 
@@ -100,12 +100,14 @@ describe('useSelectedEdgeMetrics', () => {
         .mockResolvedValueOnce(mockMetricResponse(50)) // faults
         .mockResolvedValueOnce(mockMetricResponse(25)); // errors
 
-      const { result, waitForNextUpdate } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
+      const { result } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
 
       // Initial loading state
       expect(result.current.isLoading).toBe(true);
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.isLoading).toBe(false);
       expect(result.current.error).toBeNull();
@@ -137,9 +139,11 @@ describe('useSelectedEdgeMetrics', () => {
         .mockResolvedValueOnce(mockDataFrameResponse(30)) // faults
         .mockResolvedValueOnce(mockDataFrameResponse(15)); // errors
 
-      const { result, waitForNextUpdate } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
+      const { result } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.metrics?.requestCount).toBe(500);
       expect(result.current.metrics?.latencyP99).toBe(150);
@@ -162,9 +166,11 @@ describe('useSelectedEdgeMetrics', () => {
         .mockResolvedValueOnce(mockInstantDataResponse(40)) // faults
         .mockResolvedValueOnce(mockInstantDataResponse(20)); // errors
 
-      const { result, waitForNextUpdate } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
+      const { result } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.metrics?.requestCount).toBe(750);
       expect(result.current.metrics?.latencyP99).toBe(200);
@@ -190,9 +196,11 @@ describe('useSelectedEdgeMetrics', () => {
 
       mockExecuteMetricRequest.mockResolvedValue(mockRangeResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
+      const { result } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       // Should get the latest value (150)
       expect(result.current.metrics?.requestCount).toBe(150);
@@ -201,9 +209,11 @@ describe('useSelectedEdgeMetrics', () => {
     it('should handle empty response', async () => {
       mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
 
-      const { result, waitForNextUpdate } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
+      const { result } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.metrics).not.toBeNull();
       expect(result.current.metrics?.requestCount).toBe(0);
@@ -218,9 +228,11 @@ describe('useSelectedEdgeMetrics', () => {
       const mockError = new Error('Prometheus connection failed');
       mockExecuteMetricRequest.mockRejectedValue(mockError);
 
-      const { result, waitForNextUpdate } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
+      const { result } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toEqual(mockError);
       expect(result.current.metrics).toBeNull();
@@ -229,9 +241,11 @@ describe('useSelectedEdgeMetrics', () => {
     it('should wrap non-Error throws', async () => {
       mockExecuteMetricRequest.mockRejectedValue('string error');
 
-      const { result, waitForNextUpdate } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
+      const { result } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toBeInstanceOf(Error);
       expect(result.current.error?.message).toBe('Unknown error');
@@ -240,9 +254,11 @@ describe('useSelectedEdgeMetrics', () => {
     it('should handle null response gracefully', async () => {
       mockExecuteMetricRequest.mockResolvedValue(null);
 
-      const { result, waitForNextUpdate } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
+      const { result } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.metrics).not.toBeNull();
       expect(result.current.metrics?.requestCount).toBe(0);
@@ -251,9 +267,11 @@ describe('useSelectedEdgeMetrics', () => {
     it('should handle undefined response gracefully', async () => {
       mockExecuteMetricRequest.mockResolvedValue(undefined);
 
-      const { result, waitForNextUpdate } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
+      const { result } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.metrics).not.toBeNull();
       expect(result.current.metrics?.requestCount).toBe(0);
@@ -270,9 +288,11 @@ describe('useSelectedEdgeMetrics', () => {
 
       mockExecuteMetricRequest.mockResolvedValue(malformedResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
+      const { result } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.metrics?.requestCount).toBe(0);
     });
@@ -288,9 +308,11 @@ describe('useSelectedEdgeMetrics', () => {
 
       mockExecuteMetricRequest.mockResolvedValue(emptyInstantData);
 
-      const { result, waitForNextUpdate } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
+      const { result } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.metrics?.requestCount).toBe(0);
     });
@@ -306,12 +328,13 @@ describe('useSelectedEdgeMetrics', () => {
 
       mockExecuteMetricRequest.mockResolvedValue(mockMetricResponse(100));
 
-      const { waitForNextUpdate, rerender } = renderHook(
-        ({ params }) => useSelectedEdgeMetrics(params),
-        { initialProps: { params: defaultParams } }
-      );
+      const { result, rerender } = renderHook(({ params }) => useSelectedEdgeMetrics(params), {
+        initialProps: { params: defaultParams },
+      });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const callsAfterInitial = mockExecuteMetricRequest.mock.calls.length;
 
@@ -330,7 +353,9 @@ describe('useSelectedEdgeMetrics', () => {
         },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockExecuteMetricRequest.mock.calls.length).toBeGreaterThan(callsAfterInitial);
     });
@@ -344,12 +369,13 @@ describe('useSelectedEdgeMetrics', () => {
 
       mockExecuteMetricRequest.mockResolvedValue(mockMetricResponse(100));
 
-      const { waitForNextUpdate, rerender } = renderHook(
-        ({ params }) => useSelectedEdgeMetrics(params),
-        { initialProps: { params: defaultParams } }
-      );
+      const { result, rerender } = renderHook(({ params }) => useSelectedEdgeMetrics(params), {
+        initialProps: { params: defaultParams },
+      });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const callsAfterInitial = mockExecuteMetricRequest.mock.calls.length;
 
@@ -379,12 +405,13 @@ describe('useSelectedEdgeMetrics', () => {
 
       mockExecuteMetricRequest.mockResolvedValue(mockMetricResponse(100));
 
-      const { waitForNextUpdate, rerender } = renderHook(
-        ({ params }) => useSelectedEdgeMetrics(params),
-        { initialProps: { params: defaultParams } }
-      );
+      const { result, rerender } = renderHook(({ params }) => useSelectedEdgeMetrics(params), {
+        initialProps: { params: defaultParams },
+      });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const callsAfterInitial = mockExecuteMetricRequest.mock.calls.length;
 
@@ -395,7 +422,9 @@ describe('useSelectedEdgeMetrics', () => {
         },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockExecuteMetricRequest.mock.calls.length).toBeGreaterThan(callsAfterInitial);
     });
@@ -409,12 +438,13 @@ describe('useSelectedEdgeMetrics', () => {
 
       mockExecuteMetricRequest.mockResolvedValue(mockMetricResponse(100));
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
-        ({ params }) => useSelectedEdgeMetrics(params),
-        { initialProps: { params: defaultParams } }
-      );
+      const { result, rerender } = renderHook(({ params }) => useSelectedEdgeMetrics(params), {
+        initialProps: { params: defaultParams },
+      });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.metrics).not.toBeNull();
 

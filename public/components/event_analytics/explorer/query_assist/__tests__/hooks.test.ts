@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { SavedObjectsFindResponsePublic } from '../../../../../../../../src/core/public';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import * as coreServices from '../../../../../../common/utils/core_services';
@@ -26,9 +26,11 @@ describe('useCatIndices', () => {
   it('should return indices', async () => {
     httpMock.get.mockResolvedValueOnce([{ index: 'test1' }, { index: 'test2' }]);
 
-    const { result, waitForNextUpdate } = renderHook(() => useCatIndices());
+    const { result } = renderHook(() => useCatIndices());
     expect(result.current.loading).toBe(true);
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
     expect(result.current.loading).toBe(false);
     expect(result.current.data).toEqual([{ label: 'test1' }, { label: 'test2' }]);
   });
@@ -36,9 +38,11 @@ describe('useCatIndices', () => {
   it('should hide indices starting with dot', async () => {
     httpMock.get.mockResolvedValueOnce([{ index: '.test1' }, { index: 'test2' }]);
 
-    const { result, waitForNextUpdate } = renderHook(() => useCatIndices());
+    const { result } = renderHook(() => useCatIndices());
     expect(result.current.loading).toBe(true);
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
     expect(result.current.loading).toBe(false);
     expect(result.current.data).toEqual([{ label: 'test2' }]);
   });
@@ -46,9 +50,11 @@ describe('useCatIndices', () => {
   it('should handle errors', async () => {
     httpMock.get.mockRejectedValueOnce('API failed');
 
-    const { result, waitForNextUpdate } = renderHook(() => useCatIndices());
+    const { result } = renderHook(() => useCatIndices());
     expect(result.current.loading).toBe(true);
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
     expect(result.current.loading).toBe(false);
     expect(result.current.data).toBe(undefined);
     expect(result.current.error).toEqual('API failed');
@@ -73,9 +79,11 @@ describe('useGetIndexPatterns', () => {
       savedObjects: [{ attributes: { title: 'test1' } }, { attributes: { title: 'test2' } }],
     } as SavedObjectsFindResponsePublic);
 
-    const { result, waitForNextUpdate } = renderHook(() => useGetIndexPatterns());
+    const { result } = renderHook(() => useGetIndexPatterns());
     expect(result.current.loading).toBe(true);
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
     expect(result.current.loading).toBe(false);
     expect(result.current.data).toEqual([{ label: 'test1' }, { label: 'test2' }]);
   });
@@ -83,9 +91,11 @@ describe('useGetIndexPatterns', () => {
   it('should handle errors', async () => {
     savedObjectsClientMock.find.mockRejectedValueOnce('API failed');
 
-    const { result, waitForNextUpdate } = renderHook(() => useGetIndexPatterns());
+    const { result } = renderHook(() => useGetIndexPatterns());
     expect(result.current.loading).toBe(true);
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
     expect(result.current.loading).toBe(false);
     expect(result.current.data).toBe(undefined);
     expect(result.current.error).toEqual('API failed');

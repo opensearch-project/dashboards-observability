@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useTopServicesByFaultRate } from '../use_top_services_by_fault_rate';
 
 // Mock the PromQLSearchService
@@ -77,11 +77,11 @@ describe('useTopServicesByFaultRate', () => {
         },
       });
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useTopServicesByFaultRate(defaultParams)
-      );
+      const { result } = renderHook(() => useTopServicesByFaultRate(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.isLoading).toBe(false);
       expect(result.current.data).toHaveLength(2);
@@ -102,11 +102,11 @@ describe('useTopServicesByFaultRate', () => {
         },
       });
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useTopServicesByFaultRate(defaultParams)
-      );
+      const { result } = renderHook(() => useTopServicesByFaultRate(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data[0].serviceName).toBe('high-fault');
       expect(result.current.data[1].serviceName).toBe('medium-fault');
@@ -125,11 +125,11 @@ describe('useTopServicesByFaultRate', () => {
         },
       });
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useTopServicesByFaultRate(defaultParams)
-      );
+      const { result } = renderHook(() => useTopServicesByFaultRate(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data).toHaveLength(1);
       expect(result.current.data[0].serviceName).toBe('has-faults');
@@ -151,14 +151,16 @@ describe('useTopServicesByFaultRate', () => {
         },
       });
 
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useTopServicesByFaultRate({
           ...defaultParams,
           limit: 3,
         })
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data).toHaveLength(3);
     });
@@ -176,7 +178,7 @@ describe('useTopServicesByFaultRate', () => {
         },
       });
 
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useTopServicesByFaultRate({
           startTime: defaultParams.startTime,
           endTime: defaultParams.endTime,
@@ -184,7 +186,9 @@ describe('useTopServicesByFaultRate', () => {
         })
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data.length).toBeLessThanOrEqual(5);
     });
@@ -203,11 +207,11 @@ describe('useTopServicesByFaultRate', () => {
         },
       });
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useTopServicesByFaultRate(defaultParams)
-      );
+      const { result } = renderHook(() => useTopServicesByFaultRate(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data).toHaveLength(1);
       expect(result.current.data[0].faultRate).toBe(0.25);
@@ -225,11 +229,11 @@ describe('useTopServicesByFaultRate', () => {
         },
       });
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useTopServicesByFaultRate(defaultParams)
-      );
+      const { result } = renderHook(() => useTopServicesByFaultRate(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data[0].serviceName).toBe('my-service');
     });
@@ -240,11 +244,11 @@ describe('useTopServicesByFaultRate', () => {
       const mockError = new Error('Query failed');
       mockExecuteMetricRequest.mockRejectedValue(mockError);
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useTopServicesByFaultRate(defaultParams)
-      );
+      const { result } = renderHook(() => useTopServicesByFaultRate(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toEqual(mockError);
       expect(result.current.data).toEqual([]);
@@ -257,11 +261,11 @@ describe('useTopServicesByFaultRate', () => {
         meta: { instantData: { rows: [] } },
       });
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useTopServicesByFaultRate(defaultParams)
-      );
+      const { result } = renderHook(() => useTopServicesByFaultRate(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(1);
 
@@ -269,7 +273,9 @@ describe('useTopServicesByFaultRate', () => {
         result.current.refetch();
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(2);
     });

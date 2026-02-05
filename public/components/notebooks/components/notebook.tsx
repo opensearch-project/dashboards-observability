@@ -255,8 +255,9 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
               },
             })
             .then((res) => {
-              this.setState({ paragraphs: res.paragraphs });
-              this.parseAllParagraphs();
+              const paragraphs = res.paragraphs;
+              const parsedPara = this.parseParagraphs(paragraphs);
+              this.setState({ paragraphs, parsedPara });
               this.props.setToast('Paragraphs successfully deleted!');
             })
             .catch((err) => {
@@ -394,8 +395,9 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
           uniqueId
       )
       .then((res) => {
-        this.setState({ paragraphs: res.paragraphs });
-        this.parseAllParagraphs();
+        const paragraphs = res.paragraphs;
+        const parsedPara = this.parseParagraphs(paragraphs);
+        this.setState({ paragraphs, parsedPara });
       })
       .catch((err) => {
         this.props.setToast(
@@ -427,10 +429,16 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         const parsedPara = [...this.state.parsedPara];
         parsedPara.splice(index, 0, newPara);
 
-        this.setState({ paragraphs, parsedPara });
-        this.paragraphSelector(index);
-        if (this.state.selectedViewId === 'output_only')
-          this.setState({ selectedViewId: 'view_both' });
+        // Mark the new paragraph as selected and deselect others
+        parsedPara.forEach((para: ParaType, idx: number) => {
+          para.isSelected = idx === index;
+        });
+
+        const newState: any = { paragraphs, parsedPara };
+        if (this.state.selectedViewId === 'output_only') {
+          newState.selectedViewId = 'view_both';
+        }
+        this.setState(newState);
       })
       .catch((err) => {
         this.props.setToast(
@@ -503,8 +511,9 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         body: JSON.stringify(clearParaObj),
       })
       .then((res) => {
-        this.setState({ paragraphs: res.paragraphs });
-        this.parseAllParagraphs();
+        const paragraphs = res.paragraphs;
+        const parsedPara = this.parseParagraphs(paragraphs);
+        this.setState({ paragraphs, parsedPara });
       })
       .catch((err) => {
         this.props.setToast(

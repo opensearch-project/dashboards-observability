@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { usePromQLChartData } from '../use_promql_chart_data';
 
 // Mock the PromQLSearchService
@@ -86,11 +86,13 @@ describe('usePromQLChartData', () => {
 
       mockExecuteMetricRequest.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => usePromQLChartData(defaultParams));
+      const { result } = renderHook(() => usePromQLChartData(defaultParams));
 
       expect(result.current.isLoading).toBe(true);
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.isLoading).toBe(false);
       expect(result.current.series).toHaveLength(1);
@@ -113,9 +115,11 @@ describe('usePromQLChartData', () => {
 
       mockExecuteMetricRequest.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => usePromQLChartData(defaultParams));
+      const { result } = renderHook(() => usePromQLChartData(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.series).toHaveLength(2);
     });
@@ -137,14 +141,16 @@ describe('usePromQLChartData', () => {
 
       mockExecuteMetricRequest.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         usePromQLChartData({
           ...defaultParams,
           labelField: 'remoteService',
         })
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.series[0].name).toBe('cart');
     });
@@ -166,9 +172,11 @@ describe('usePromQLChartData', () => {
 
       mockExecuteMetricRequest.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => usePromQLChartData(defaultParams));
+      const { result } = renderHook(() => usePromQLChartData(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.series).toHaveLength(1);
       expect(result.current.series[0].data).toHaveLength(2);
@@ -193,9 +201,11 @@ describe('usePromQLChartData', () => {
 
       mockExecuteMetricRequest.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => usePromQLChartData(defaultParams));
+      const { result } = renderHook(() => usePromQLChartData(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.series).toHaveLength(1);
       expect(result.current.series[0].name).toBe('frontend');
@@ -218,14 +228,16 @@ describe('usePromQLChartData', () => {
 
       mockExecuteMetricRequest.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         usePromQLChartData({
           ...defaultParams,
           labelField: 'remoteService',
         })
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.series[0].name).toBe('cart');
     });
@@ -244,9 +256,11 @@ describe('usePromQLChartData', () => {
 
       mockExecuteMetricRequest.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => usePromQLChartData(defaultParams));
+      const { result } = renderHook(() => usePromQLChartData(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       // 'service' has higher priority than 'job'
       expect(result.current.series[0].name).toBe('frontend');
@@ -258,9 +272,11 @@ describe('usePromQLChartData', () => {
       const mockError = new Error('PromQL query failed');
       mockExecuteMetricRequest.mockRejectedValue(mockError);
 
-      const { result, waitForNextUpdate } = renderHook(() => usePromQLChartData(defaultParams));
+      const { result } = renderHook(() => usePromQLChartData(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toEqual(mockError);
       expect(result.current.series).toEqual([]);
@@ -271,9 +287,11 @@ describe('usePromQLChartData', () => {
     it('should wrap non-Error throws', async () => {
       mockExecuteMetricRequest.mockRejectedValue('string error');
 
-      const { result, waitForNextUpdate } = renderHook(() => usePromQLChartData(defaultParams));
+      const { result } = renderHook(() => usePromQLChartData(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toBeInstanceOf(Error);
       expect(result.current.error?.message).toBe('Unknown error');
@@ -284,9 +302,11 @@ describe('usePromQLChartData', () => {
     it('should refetch when refetch function is called', async () => {
       mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
 
-      const { result, waitForNextUpdate } = renderHook(() => usePromQLChartData(defaultParams));
+      const { result } = renderHook(() => usePromQLChartData(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(1);
 
@@ -294,7 +314,9 @@ describe('usePromQLChartData', () => {
         result.current.refetch();
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(2);
     });
@@ -304,14 +326,13 @@ describe('usePromQLChartData', () => {
     it('should refetch when promqlQuery changes', async () => {
       mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
 
-      const { waitForNextUpdate, rerender } = renderHook(
-        ({ params }) => usePromQLChartData(params),
-        {
-          initialProps: { params: defaultParams },
-        }
-      );
+      const { result, rerender } = renderHook(({ params }) => usePromQLChartData(params), {
+        initialProps: { params: defaultParams },
+      });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       rerender({
         params: {
@@ -320,7 +341,9 @@ describe('usePromQLChartData', () => {
         },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(2);
     });
@@ -328,20 +351,21 @@ describe('usePromQLChartData', () => {
     it('should refetch when refreshTrigger changes', async () => {
       mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
 
-      const { waitForNextUpdate, rerender } = renderHook(
-        ({ params }) => usePromQLChartData(params),
-        {
-          initialProps: { params: { ...defaultParams, refreshTrigger: 0 } },
-        }
-      );
+      const { result, rerender } = renderHook(({ params }) => usePromQLChartData(params), {
+        initialProps: { params: { ...defaultParams, refreshTrigger: 0 } },
+      });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       rerender({
         params: { ...defaultParams, refreshTrigger: 1 },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(2);
     });
@@ -351,9 +375,11 @@ describe('usePromQLChartData', () => {
     it('should handle null response', async () => {
       mockExecuteMetricRequest.mockResolvedValue(null);
 
-      const { result, waitForNextUpdate } = renderHook(() => usePromQLChartData(defaultParams));
+      const { result } = renderHook(() => usePromQLChartData(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.series).toEqual([]);
       expect(result.current.latestValue).toBeNull();
@@ -368,9 +394,11 @@ describe('usePromQLChartData', () => {
 
       mockExecuteMetricRequest.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => usePromQLChartData(defaultParams));
+      const { result } = renderHook(() => usePromQLChartData(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.series).toEqual([]);
     });
@@ -388,9 +416,11 @@ describe('usePromQLChartData', () => {
 
       mockExecuteMetricRequest.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => usePromQLChartData(defaultParams));
+      const { result } = renderHook(() => usePromQLChartData(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.series[0].data).toHaveLength(1);
       expect(result.current.series[0].data[0].value).toBe(150);
@@ -409,9 +439,11 @@ describe('usePromQLChartData', () => {
 
       mockExecuteMetricRequest.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => usePromQLChartData(defaultParams));
+      const { result } = renderHook(() => usePromQLChartData(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       // Each series should have a color assigned
       expect(result.current.series[0].color).toBeDefined();
@@ -432,9 +464,11 @@ describe('usePromQLChartData', () => {
 
       mockExecuteMetricRequest.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => usePromQLChartData(defaultParams));
+      const { result } = renderHook(() => usePromQLChartData(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       // Data should be sorted by timestamp
       expect(result.current.series[0].data[0].timestamp).toBeLessThan(

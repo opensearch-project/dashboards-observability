@@ -3,20 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
 import { IntegrationHeader } from '../integration_header';
 
 describe('Integration Header Test', () => {
-  configure({ adapter: new Adapter() });
-
   it('Renders integration header as expected', async () => {
-    const wrapper = mount(<IntegrationHeader />);
+    render(<IntegrationHeader />);
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 });

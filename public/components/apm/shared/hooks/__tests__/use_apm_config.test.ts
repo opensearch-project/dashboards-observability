@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useDatasets, usePrometheusDataSources, useCorrelatedLogs } from '../use_apm_config';
 import { coreRefs } from '../../../../../framework/core_refs';
 
@@ -65,10 +65,12 @@ describe('useDatasets', () => {
 
       (coreRefs as any).data = mockDataService;
 
-      const { result, waitForNextUpdate } = renderHook(() => useDatasets());
+      const { result } = renderHook(() => useDatasets());
 
       expect(result.current.loading).toBe(true);
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.loading).toBe(false);
       expect(result.current.tracesDatasets).toHaveLength(1);
@@ -106,9 +108,11 @@ describe('useDatasets', () => {
 
       (coreRefs as any).data = mockDataService;
 
-      const { result, waitForNextUpdate } = renderHook(() => useDatasets());
+      const { result } = renderHook(() => useDatasets());
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.tracesDatasets).toHaveLength(2);
       expect(result.current.allDatasets).toHaveLength(3);
@@ -126,9 +130,11 @@ describe('useDatasets', () => {
 
       (coreRefs as any).data = mockDataService;
 
-      const { result, waitForNextUpdate } = renderHook(() => useDatasets());
+      const { result } = renderHook(() => useDatasets());
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.tracesDatasets[0].label).toBe(mockDisplayName);
       expect(result.current.tracesDatasets[0].value?.displayName).toBe(mockDisplayName);
@@ -145,9 +151,11 @@ describe('useDatasets', () => {
 
       (coreRefs as any).data = mockDataService;
 
-      const { result, waitForNextUpdate } = renderHook(() => useDatasets());
+      const { result } = renderHook(() => useDatasets());
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       // Clear mocks and set new data
       mockDataService.dataViews.getIdsWithTitle.mockClear();
@@ -163,7 +171,9 @@ describe('useDatasets', () => {
         result.current.refresh();
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(mockDataService.dataViews.getIdsWithTitle).toHaveBeenCalledTimes(1);
     });
@@ -176,9 +186,11 @@ describe('useDatasets', () => {
 
       (coreRefs as any).data = mockDataService;
 
-      const { result, waitForNextUpdate } = renderHook(() => useDatasets());
+      const { result } = renderHook(() => useDatasets());
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.loading).toBe(false);
       expect(result.current.error).toEqual(mockError);
@@ -203,9 +215,11 @@ describe('useDatasets', () => {
 
       (coreRefs as any).data = mockDataService;
 
-      const { result, waitForNextUpdate } = renderHook(() => useDatasets());
+      const { result } = renderHook(() => useDatasets());
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.loading).toBe(false);
       expect(result.current.error).toBeUndefined();
@@ -223,9 +237,11 @@ describe('useDatasets', () => {
 
       (coreRefs as any).data = mockDataService;
 
-      const { result, waitForNextUpdate } = renderHook(() => useDatasets());
+      const { result } = renderHook(() => useDatasets());
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.error).toBeInstanceOf(Error);
       expect(result.current.error?.message).toBe('String error message');
@@ -306,10 +322,12 @@ describe('usePrometheusDataSources', () => {
       (coreRefs as any).data = mockDataService;
       (coreRefs as any).savedObjectsClient = mockSavedObjectsClient;
 
-      const { result, waitForNextUpdate } = renderHook(() => usePrometheusDataSources());
+      const { result } = renderHook(() => usePrometheusDataSources());
 
       expect(result.current.loading).toBe(true);
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.loading).toBe(false);
       expect(result.current.data).toHaveLength(1);
@@ -330,9 +348,11 @@ describe('usePrometheusDataSources', () => {
       (coreRefs as any).data = mockDataService;
       (coreRefs as any).savedObjectsClient = mockSavedObjectsClient;
 
-      const { result, waitForNextUpdate } = renderHook(() => usePrometheusDataSources());
+      const { result } = renderHook(() => usePrometheusDataSources());
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.data).toHaveLength(3);
       expect(result.current.data[0].label).toBe('Prometheus 1');
@@ -347,9 +367,11 @@ describe('usePrometheusDataSources', () => {
       (coreRefs as any).data = mockDataService;
       (coreRefs as any).savedObjectsClient = mockSavedObjectsClient;
 
-      const { result, waitForNextUpdate } = renderHook(() => usePrometheusDataSources());
+      const { result } = renderHook(() => usePrometheusDataSources());
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.data).toEqual([]);
       expect(result.current.loading).toBe(false);
@@ -362,9 +384,11 @@ describe('usePrometheusDataSources', () => {
       (coreRefs as any).data = mockDataService;
       (coreRefs as any).savedObjectsClient = mockSavedObjectsClient;
 
-      const { result, waitForNextUpdate } = renderHook(() => usePrometheusDataSources());
+      const { result } = renderHook(() => usePrometheusDataSources());
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.data).toEqual([]);
       expect(result.current.loading).toBe(false);
@@ -380,9 +404,11 @@ describe('usePrometheusDataSources', () => {
       (coreRefs as any).data = mockDataService;
       (coreRefs as any).savedObjectsClient = mockSavedObjectsClient;
 
-      const { result, waitForNextUpdate } = renderHook(() => usePrometheusDataSources());
+      const { result } = renderHook(() => usePrometheusDataSources());
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.loading).toBe(false);
       expect(result.current.error).toEqual(mockError);
@@ -396,9 +422,11 @@ describe('usePrometheusDataSources', () => {
       (coreRefs as any).data = mockDataService;
       (coreRefs as any).savedObjectsClient = mockSavedObjectsClient;
 
-      const { result, waitForNextUpdate } = renderHook(() => usePrometheusDataSources());
+      const { result } = renderHook(() => usePrometheusDataSources());
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.error).toBeInstanceOf(Error);
       expect(result.current.error?.message).toBe('String error');
@@ -499,9 +527,11 @@ describe('useCorrelatedLogs', () => {
       (coreRefs as any).data = mockDataService;
       (coreRefs as any).savedObjectsClient = mockSavedObjectsClient;
 
-      const { result, waitForNextUpdate } = renderHook(() => useCorrelatedLogs('trace-1'));
+      const { result } = renderHook(() => useCorrelatedLogs('trace-1'));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.data).toHaveLength(1);
       expect(result.current.data[0].id).toBe('log-1');
@@ -542,9 +572,11 @@ describe('useCorrelatedLogs', () => {
       (coreRefs as any).data = mockDataService;
       (coreRefs as any).savedObjectsClient = mockSavedObjectsClient;
 
-      const { result, waitForNextUpdate } = renderHook(() => useCorrelatedLogs('trace-1'));
+      const { result } = renderHook(() => useCorrelatedLogs('trace-1'));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.data).toHaveLength(1);
       expect(result.current.data[0].id).toBe('log-1');
@@ -576,9 +608,11 @@ describe('useCorrelatedLogs', () => {
       (coreRefs as any).data = mockDataService;
       (coreRefs as any).savedObjectsClient = mockSavedObjectsClient;
 
-      const { result, waitForNextUpdate } = renderHook(() => useCorrelatedLogs('trace-1'));
+      const { result } = renderHook(() => useCorrelatedLogs('trace-1'));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.data.every((item) => item.id !== 'trace-1')).toBe(true);
     });
@@ -613,9 +647,11 @@ describe('useCorrelatedLogs', () => {
       (coreRefs as any).data = mockDataService;
       (coreRefs as any).savedObjectsClient = mockSavedObjectsClient;
 
-      const { result, waitForNextUpdate } = renderHook(() => useCorrelatedLogs('trace-1'));
+      const { result } = renderHook(() => useCorrelatedLogs('trace-1'));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.data).toHaveLength(1);
       expect(result.current.data[0].id).toBe('log-1');
@@ -635,9 +671,11 @@ describe('useCorrelatedLogs', () => {
       (coreRefs as any).data = mockDataService;
       (coreRefs as any).savedObjectsClient = mockSavedObjectsClient;
 
-      const { result, waitForNextUpdate } = renderHook(() => useCorrelatedLogs('trace-1'));
+      const { result } = renderHook(() => useCorrelatedLogs('trace-1'));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.data).toEqual([]);
       expect(result.current.loading).toBe(false);
@@ -651,9 +689,11 @@ describe('useCorrelatedLogs', () => {
       (coreRefs as any).data = mockDataService;
       (coreRefs as any).savedObjectsClient = mockSavedObjectsClient;
 
-      const { result, waitForNextUpdate } = renderHook(() => useCorrelatedLogs('trace-1'));
+      const { result } = renderHook(() => useCorrelatedLogs('trace-1'));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.loading).toBe(false);
       expect(result.current.error).toEqual(mockError);
@@ -697,9 +737,11 @@ describe('useCorrelatedLogs', () => {
       (coreRefs as any).data = mockDataService;
       (coreRefs as any).savedObjectsClient = mockSavedObjectsClient;
 
-      const { result, waitForNextUpdate } = renderHook(() => useCorrelatedLogs('trace-1'));
+      const { result } = renderHook(() => useCorrelatedLogs('trace-1'));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       // Should only include log-1 from trace-to-logs correlation, not log-2 from APM-Config
       expect(result.current.data).toHaveLength(1);

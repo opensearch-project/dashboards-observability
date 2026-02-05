@@ -4,7 +4,7 @@
  */
 
 import { EuiCallOutProps } from '@elastic/eui';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { EmptyQueryCallOut, PPLGeneratedCallOut, ProhibitedQueryCallOut } from '../callouts';
 
@@ -18,23 +18,29 @@ const renderCallouts = (
     },
     overrideProps
   );
-  const component = render(<Component {...props} />);
-  return { component, props };
+  render(<Component {...props} />);
+  return { props };
 };
 
 describe('Callouts spec', () => {
-  test('ProhibitedQueryCallOut should match snapshot', () => {
-    const { component } = renderCallouts(ProhibitedQueryCallOut);
-    expect(component.container).toMatchSnapshot();
+  test('ProhibitedQueryCallOut should match snapshot', async () => {
+    renderCallouts(ProhibitedQueryCallOut);
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
-  test('EmptyQueryCallOut should match snapshot', () => {
-    const { component } = renderCallouts(EmptyQueryCallOut);
-    expect(component.container).toMatchSnapshot();
+  test('EmptyQueryCallOut should match snapshot', async () => {
+    renderCallouts(EmptyQueryCallOut);
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
-  test('PPLGeneratedCallOut should match snapshot', () => {
-    const { component } = renderCallouts(PPLGeneratedCallOut);
-    expect(component.container).toMatchSnapshot();
+  test('PPLGeneratedCallOut should match snapshot', async () => {
+    renderCallouts(PPLGeneratedCallOut);
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 });
