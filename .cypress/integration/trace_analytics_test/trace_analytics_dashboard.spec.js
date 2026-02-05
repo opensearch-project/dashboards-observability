@@ -127,12 +127,15 @@ describe('Testing dashboard table', () => {
   it('Redirects to traces table with filter', () => {
     cy.get('[data-test-subj="trace-table-mode-selector"]').click();
     cy.get('.euiSelectableListItem__content').contains('Traces').click();
-    cy.get('.euiLink').contains('13').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('.euiLink').contains('13').should('be.visible').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
     cy.contains('13').should('exist');
     cy.contains('client_create_order').should('exist');
 
     cy.get('.euiSideNavItemButton__label').contains('Trace analytics').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
     cy.contains('client_create_order').should('exist');
     cy.get('button[aria-label="Remove filter"]').should('be.visible').first().click();
@@ -168,6 +171,7 @@ describe('Testing plots', () => {
   });
 
   it('Renders plots', () => {
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('text.ytitle[data-unformatted="Error rate (%)"]').should('exist');
     cy.get('text.annotation-text[data-unformatted="Now: 14.81%"]').should('exist');
     cy.get('text.ytitle[data-unformatted="Throughput (n)"]').should('exist');
@@ -207,6 +211,7 @@ describe('Latency by trace group table', () => {
 
   it('Sorts the Latency by trace group table', () => {
     cy.get('span[title*="Trace group name"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('[data-test-subj="dashboard-table-trace-group-name-button"]')
       .eq(0)
       .contains('/**')
@@ -243,6 +248,7 @@ describe('Latency by trace group table', () => {
   it('Verify Search engine on Trace dashboard', () => {
     cy.get('[data-test-subj="search-bar-input-box"]').click().type('client_pay_order');
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get(
       '.euiTableCellContent.euiTableCellContent--alignRight.euiTableCellContent--overflowingContent'
     )
@@ -297,10 +303,10 @@ describe('Testing filters on trace analytics page', { scrollBehavior: false }, (
     cy.get('[data-test-subj="operator-selector-filter-panel"]').click();
     cy.get('[data-test-subj="operator-selector-filter-panel"]').type('exists{enter}');
     cy.get('.euiButton.euiButton--primary.euiButton--fill').contains('Save').click();
-    cy.get('.euiBadge__content').should('exist').click();
+    cy.get('.euiBadge__content').should('exist').first().click();
     cy.get('.euiIcon.euiIcon--medium.euiContextMenu__arrow').click();
     cy.get('[data-test-subj="filter-popover-cancel-button"]').contains('Cancel').click();
-    cy.get('.euiIcon.euiIcon--small.euiIcon--inherit.euiBadge__icon').click();
+    cy.get('.euiIcon.euiIcon--small.euiIcon--inherit.euiBadge__icon').first().click();
   });
 });
 
@@ -383,6 +389,7 @@ describe('Testing switch mode to jaeger', () => {
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
     cy.get('[data-test-subj="trace-groups-service-operation-accordian"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.contains('redis,GetDriver').should('exist');
     cy.contains('14.7').should('exist');
     cy.contains('100%').should('exist');
@@ -395,7 +402,8 @@ describe('Testing switch mode to jaeger', () => {
 
   it('Verifies traces links to traces page', () => {
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('[data-test-subj="dashboard-table-traces-button"]').contains('7').click();
+    cy.get('[data-test-subj="dashboardTable"]').should('be.visible');
+    cy.get('[data-test-subj="dashboard-table-traces-button"]').contains('7').should('be.visible').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
     cy.contains(' (7)').should('exist');
@@ -405,6 +413,7 @@ describe('Testing switch mode to jaeger', () => {
 
   it('Switches to throughput mode and verifies columns and data', () => {
     cy.get("[data-test-subj='throughput-toggle']").click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.contains('frontend,HTTP GET /dispatch').should('exist');
     cy.contains('711.38').should('exist');
     cy.contains('0%').should('exist');

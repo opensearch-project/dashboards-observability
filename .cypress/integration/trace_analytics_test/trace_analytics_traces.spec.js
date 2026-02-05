@@ -338,8 +338,10 @@ describe('Testing switch mode to jaeger', () => {
   it('Checks tree view for specific traceId in Jaeger mode', () => {
     cy.contains('15b0b4004a651c4c').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('[data-test-subj="span-gantt-chart-panel"]').should('be.visible');
 
     cy.get('.euiButtonGroup').contains('Tree view').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get("[data-test-subj='treeExpandAll']").should('exist');
     cy.get("[data-test-subj='treeCollapseAll']").should('exist');
 
