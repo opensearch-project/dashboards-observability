@@ -3,177 +3,179 @@
 exports[`SpanDetailPanel component renders correctly with default props 1`] = `
 <body>
   <div>
-    <div
-      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
-      data-test-subj="span-gantt-chart-panel"
-    >
+    <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+        data-test-subj="span-gantt-chart-panel"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <div
-              class="euiFlexItem"
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                class="euiText euiText--medium"
-              >
-                <span
-                  class="panel-title"
-                >
-                  Spans
-                </span>
-                <span
-                  class="panel-title-count"
-                >
-                   (0)
-                </span>
-              </div>
-            </div>
-            <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
-            >
-              <div
-                class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                class="euiFlexItem"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiText euiText--medium"
                 >
-                  <button
-                    class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
-                    disabled=""
-                    type="button"
+                  <span
+                    class="panel-title"
                   >
-                    <span
-                      class="euiButtonContent euiButton__content"
+                    Spans
+                  </span>
+                  <span
+                    class="panel-title-count"
+                  >
+                     (0)
+                  </span>
+                </div>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <button
+                      class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
+                      disabled=""
+                      type="button"
                     >
                       <span
-                        class="euiButton__text"
+                        class="euiButtonContent euiButton__content"
                       >
-                        Reset zoom
+                        <span
+                          class="euiButton__text"
+                        >
+                          Reset zoom
+                        </span>
                       </span>
-                    </span>
-                  </button>
-                </div>
-                <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
-                >
-                  <fieldset
-                    class="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
+                    </button>
+                  </div>
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
                   >
-                    <legend
-                      class="euiScreenReaderOnly"
+                    <fieldset
+                      class="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
                     >
-                      Select view of spans
-                    </legend>
-                    <div
-                      class="euiButtonGroup__buttons"
-                    >
-                      <label
-                        class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
-                        for="random_html_id"
+                      <legend
+                        class="euiScreenReaderOnly"
                       >
-                        <span
-                          class="euiButtonContent euiButton__content"
+                        Select view of spans
+                      </legend>
+                      <div
+                        class="euiButtonGroup__buttons"
+                      >
+                        <label
+                          class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
+                          for="random_html_id"
                         >
                           <span
-                            class="euiButton__text euiButtonGroupButton__textShift"
-                            data-text="Timeline"
-                            title="Timeline"
+                            class="euiButtonContent euiButton__content"
                           >
-                            <input
-                              checked=""
-                              class="euiScreenReaderOnly"
-                              data-test-subj="timeline"
-                              id="random_html_id"
-                              name="random_html_id"
-                              type="radio"
-                              value=""
-                            />
-                            Timeline
+                            <span
+                              class="euiButton__text euiButtonGroupButton__textShift"
+                              data-text="Timeline"
+                              title="Timeline"
+                            >
+                              <input
+                                checked=""
+                                class="euiScreenReaderOnly"
+                                data-test-subj="timeline"
+                                id="random_html_id"
+                                name="random_html_id"
+                                type="radio"
+                                value=""
+                              />
+                              Timeline
+                            </span>
                           </span>
-                        </span>
-                      </label>
-                      <label
-                        class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
-                        for="random_html_id"
-                      >
-                        <span
-                          class="euiButtonContent euiButton__content"
+                        </label>
+                        <label
+                          class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                          for="random_html_id"
                         >
                           <span
-                            class="euiButton__text euiButtonGroupButton__textShift"
-                            data-text="Span list"
-                            title="Span list"
+                            class="euiButtonContent euiButton__content"
                           >
-                            <input
-                              class="euiScreenReaderOnly"
-                              data-test-subj="span_list"
-                              id="random_html_id"
-                              name="random_html_id"
-                              type="radio"
-                              value=""
-                            />
-                            Span list
+                            <span
+                              class="euiButton__text euiButtonGroupButton__textShift"
+                              data-text="Span list"
+                              title="Span list"
+                            >
+                              <input
+                                class="euiScreenReaderOnly"
+                                data-test-subj="span_list"
+                                id="random_html_id"
+                                name="random_html_id"
+                                type="radio"
+                                value=""
+                              />
+                              Span list
+                            </span>
                           </span>
-                        </span>
-                      </label>
-                      <label
-                        class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
-                        for="random_html_id"
-                      >
-                        <span
-                          class="euiButtonContent euiButton__content"
+                        </label>
+                        <label
+                          class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                          for="random_html_id"
                         >
                           <span
-                            class="euiButton__text euiButtonGroupButton__textShift"
-                            data-text="Tree view"
-                            title="Tree view"
+                            class="euiButtonContent euiButton__content"
                           >
-                            <input
-                              class="euiScreenReaderOnly"
-                              data-test-subj="hierarchy_span_list"
-                              id="random_html_id"
-                              name="random_html_id"
-                              type="radio"
-                              value=""
-                            />
-                            Tree view
+                            <span
+                              class="euiButton__text euiButtonGroupButton__textShift"
+                              data-text="Tree view"
+                              title="Tree view"
+                            >
+                              <input
+                                class="euiScreenReaderOnly"
+                                data-test-subj="hierarchy_span_list"
+                                id="random_html_id"
+                                name="random_html_id"
+                                type="radio"
+                                value=""
+                              />
+                              Tree view
+                            </span>
                           </span>
-                        </span>
-                      </label>
-                    </div>
-                  </fieldset>
+                        </label>
+                      </div>
+                    </fieldset>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        <hr
-          class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
-        />
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
-          <div
-            data-test-subj="mocked-plt"
-            role="button"
-            tabindex="0"
+          <hr
+            class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
           />
-        </div>
-        <div
-          class="euiFlexItem"
-          style="overflow-y: auto; max-height: 500px;"
-        >
           <div
-            data-test-subj="mocked-plt"
-            role="button"
-            tabindex="0"
-          />
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              data-test-subj="mocked-plt"
+              role="button"
+              tabindex="0"
+            />
+          </div>
+          <div
+            class="euiFlexItem"
+            style="overflow-y: auto; max-height: 500px;"
+          >
+            <div
+              data-test-subj="mocked-plt"
+              role="button"
+              tabindex="0"
+            />
+          </div>
         </div>
       </div>
     </div>
