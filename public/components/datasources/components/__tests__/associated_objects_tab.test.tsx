@@ -60,6 +60,7 @@ describe('AssociatedObjectsTab Component', () => {
         setSelectedDatabase={jest.fn()}
       />
     );
+
     expect(wrapper).toMatchSnapshot();
     expect(wrapper.text()).toContain('You have no databases in your data source');
   });
