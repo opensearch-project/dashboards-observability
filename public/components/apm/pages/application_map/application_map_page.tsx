@@ -687,13 +687,13 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
       </EuiPageBody>
 
       {/* Service Details Flyout */}
-      {selectedNode && config?.prometheusDataSource?.id && (
+      {selectedNode && config?.prometheusDataSource?.name && (
         <ServiceDetailsPanel
           node={selectedNode}
           metrics={selectedNodeMetrics}
           isLoading={isGroupNode ? groupMetricsLoading : metricsLoading}
           timeRange={timeRange}
-          prometheusConnectionId={config.prometheusDataSource.id}
+          prometheusConnectionId={config.prometheusDataSource.name}
           onClose={handleCloseDetailsPanel}
           onViewDetails={handleViewServiceDetails}
           refreshTrigger={refreshTrigger}

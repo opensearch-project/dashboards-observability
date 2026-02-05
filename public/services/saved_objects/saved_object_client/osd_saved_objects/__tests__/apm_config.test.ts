@@ -427,7 +427,7 @@ describe('OSDSavedApmConfigClient', () => {
 
         mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
         mockSavedObjectsClient.get.mockResolvedValue({
-          attributes: { title: 'Prometheus Source' },
+          attributes: { connectionId: 'prometheus-source' }, // data-connection uses connectionId, not title
         });
         // Mock dataViews.get to return null (simulating failure/not found)
         mockDataService.dataViews.get.mockResolvedValue(null);
@@ -447,11 +447,177 @@ describe('OSDSavedApmConfigClient', () => {
           name: undefined,
           datasourceId: undefined,
         });
-        // Prometheus still uses savedObjectsClient.get
+        // Prometheus still uses savedObjectsClient.get - name comes from connectionId
+        // meta is undefined when no arn or meta fields present
         expect(result.configs[0].prometheusDataSource).toEqual({
           id: 'prom-1',
-          title: 'Prometheus Source',
+          name: 'prometheus-source',
+          meta: undefined,
         });
+      });
+
+      it('should extract arn from attributes and include in meta', async () => {
+        const mockResponse = {
+          savedObjects: [
+            {
+              id: 'config-1',
+              attributes: {
+                correlationType: 'APM-Config-workspace-1',
+                version: '1.0.0',
+                entities: [{ prometheusDataSource: { id: 'references[0].id' } }],
+              },
+              references: [
+                { name: 'entities[0].dataConnection', type: 'data-connection', id: 'prom-1' },
+              ],
+            },
+          ],
+        };
+
+        mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
+        mockSavedObjectsClient.get.mockResolvedValue({
+          attributes: {
+            connectionId: 'otel_bug_bash',
+            arn: 'sample-arn',
+            type: 'Amazon Managed Prometheus',
+          },
+        });
+
+        const result = await client.getBulkWithResolvedReferences(mockDataService);
+
+        expect(result.configs[0].prometheusDataSource).toEqual({
+          id: 'prom-1',
+          name: 'otel_bug_bash',
+          meta: { arn: 'sample-arn' },
+        });
+      });
+
+      it('should merge arn with existing meta fields', async () => {
+        const mockResponse = {
+          savedObjects: [
+            {
+              id: 'config-1',
+              attributes: {
+                correlationType: 'APM-Config-workspace-1',
+                version: '1.0.0',
+                entities: [{ prometheusDataSource: { id: 'references[0].id' } }],
+              },
+              references: [
+                { name: 'entities[0].dataConnection', type: 'data-connection', id: 'prom-1' },
+              ],
+            },
+          ],
+        };
+
+        mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
+        mockSavedObjectsClient.get.mockResolvedValue({
+          attributes: {
+            connectionId: 'prometheus-prod',
+            arn: 'sample:arn',
+            meta: { customField: 'customValue' },
+          },
+        });
+
+        const result = await client.getBulkWithResolvedReferences(mockDataService);
+
+        expect(result.configs[0].prometheusDataSource).toEqual({
+          id: 'prom-1',
+          name: 'prometheus-prod',
+          meta: {
+            arn: 'sample:arn',
+            customField: 'customValue',
+          },
+        });
+      });
+
+      it('should parse stringified JSON meta from data-connection', async () => {
+        const mockResponse = {
+          savedObjects: [
+            {
+              id: 'config-1',
+              attributes: {
+                correlationType: 'APM-Config-workspace-1',
+                version: '1.0.0',
+                entities: [{ prometheusDataSource: { id: 'references[0].id' } }],
+              },
+              references: [
+                { name: 'entities[0].dataConnection', type: 'data-connection', id: 'prom-1' },
+              ],
+            },
+          ],
+        };
+
+        mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
+        mockSavedObjectsClient.get.mockResolvedValue({
+          attributes: {
+            connectionId: 'my-prom',
+            type: 'Prometheus',
+            meta: JSON.stringify({
+              properties: {
+                'prometheus.uri': 'https://sample-endpoint',
+                'prometheus.auth.type': 'awssigv4',
+                'prometheus.auth.region': 'us-east-1',
+              },
+            }),
+          },
+        });
+
+        const result = await client.getBulkWithResolvedReferences(mockDataService);
+
+        expect(result.configs[0].prometheusDataSource).toEqual({
+          id: 'prom-1',
+          name: 'my-prom',
+          meta: {
+            properties: {
+              'prometheus.uri': 'https://sample-endpoint',
+              'prometheus.auth.type': 'awssigv4',
+              'prometheus.auth.region': 'us-east-1',
+            },
+          },
+        });
+      });
+
+      it('should handle invalid JSON meta string gracefully', async () => {
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+        const mockResponse = {
+          savedObjects: [
+            {
+              id: 'config-1',
+              attributes: {
+                correlationType: 'APM-Config-workspace-1',
+                version: '1.0.0',
+                entities: [{ prometheusDataSource: { id: 'references[0].id' } }],
+              },
+              references: [
+                { name: 'entities[0].dataConnection', type: 'data-connection', id: 'prom-1' },
+              ],
+            },
+          ],
+        };
+
+        mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
+        mockSavedObjectsClient.get.mockResolvedValue({
+          attributes: {
+            connectionId: 'my-prom',
+            meta: 'invalid json {',
+          },
+        });
+
+        const result = await client.getBulkWithResolvedReferences(mockDataService);
+
+        // Invalid JSON is skipped, meta should be undefined
+        expect(result.configs[0].prometheusDataSource).toEqual({
+          id: 'prom-1',
+          name: 'my-prom',
+          meta: undefined,
+        });
+
+        expect(consoleSpy).toHaveBeenCalledWith(
+          '[APM Config] Failed to parse data-connection meta:',
+          expect.any(SyntaxError)
+        );
+
+        consoleSpy.mockRestore();
       });
 
       it('should handle missing references gracefully', async () => {
@@ -502,7 +668,7 @@ describe('OSDSavedApmConfigClient', () => {
         expect(result.configs[0].version).toBe('1.0.0');
       });
 
-      it('should use connectionId for Prometheus title', async () => {
+      it('should use connectionId for Prometheus name', async () => {
         const mockResponse = {
           savedObjects: [
             {
@@ -526,7 +692,7 @@ describe('OSDSavedApmConfigClient', () => {
 
         const result = await client.getBulkWithResolvedReferences(mockDataService);
 
-        expect(result.configs[0].prometheusDataSource?.title).toBe('prometheus-prod');
+        expect(result.configs[0].prometheusDataSource?.name).toBe('prometheus-prod');
       });
 
       it('should resolve entities regardless of their order in array', async () => {
@@ -641,7 +807,8 @@ describe('OSDSavedApmConfigClient', () => {
         });
         expect(result.configs[0].prometheusDataSource).toEqual({
           id: 'prom-1',
-          title: 'prometheus-prod',
+          name: 'prometheus-prod',
+          meta: undefined,
         });
       });
 

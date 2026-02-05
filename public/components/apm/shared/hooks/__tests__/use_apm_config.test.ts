@@ -275,6 +275,8 @@ describe('usePrometheusDataSources', () => {
     mockGetType.mockReturnValue({
       fetch: mockFetch,
     });
+    // Default mock for find - returns empty array for connectionId to saved object ID mapping
+    mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: [] });
     (coreRefs as any).data = undefined;
     (coreRefs as any).savedObjectsClient = undefined;
   });
@@ -318,6 +320,10 @@ describe('usePrometheusDataSources', () => {
       mockFetch.mockResolvedValue({
         children: [{ id: 'prom-1', title: 'Production Prometheus' }],
       });
+      // Mock saved objects to map connectionId -> saved object ID
+      mockSavedObjectsClient.find.mockResolvedValue({
+        savedObjects: [{ id: 'so-prom-1', attributes: { connectionId: 'prom-1' } }],
+      });
 
       (coreRefs as any).data = mockDataService;
       (coreRefs as any).savedObjectsClient = mockSavedObjectsClient;
@@ -332,7 +338,8 @@ describe('usePrometheusDataSources', () => {
       expect(result.current.loading).toBe(false);
       expect(result.current.data).toHaveLength(1);
       expect(result.current.data[0].label).toBe('Production Prometheus');
-      expect(result.current.data[0].value?.id).toBe('prom-1');
+      expect(result.current.data[0].value?.id).toBe('so-prom-1'); // Returns saved object ID
+      expect(result.current.data[0].value?.name).toBe('prom-1'); // Returns connectionId
     });
 
     it('should map all Prometheus connections from fetch result', async () => {
@@ -342,6 +349,14 @@ describe('usePrometheusDataSources', () => {
           { id: 'prom-1', title: 'Prometheus 1' },
           { id: 'prom-2', title: 'Prometheus 2' },
           { id: 'prom-3', title: 'Prometheus 3' },
+        ],
+      });
+      // Mock saved objects to map connectionId -> saved object ID
+      mockSavedObjectsClient.find.mockResolvedValue({
+        savedObjects: [
+          { id: 'so-prom-1', attributes: { connectionId: 'prom-1' } },
+          { id: 'so-prom-2', attributes: { connectionId: 'prom-2' } },
+          { id: 'so-prom-3', attributes: { connectionId: 'prom-3' } },
         ],
       });
 
