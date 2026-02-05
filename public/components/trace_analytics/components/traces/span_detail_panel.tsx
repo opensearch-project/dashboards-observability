@@ -15,7 +15,7 @@ import {
   EuiSmallButton,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import { TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
@@ -69,42 +69,34 @@ export function SpanDetailPanel(props: {
   const [availableWidth, setAvailableWidth] = useState<number>(window.innerWidth);
   const newNavigation = coreRefs?.chrome?.navGroup.getNavGroupEnabled?.();
 
-  const updateAvailableWidth = useCallback(() => {
+  const updateAvailableWidth = () => {
     if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      if (rect && rect.width > 0) {
-        setAvailableWidth(rect.width);
-      }
+      setAvailableWidth(containerRef.current.getBoundingClientRect().width);
     } else {
       setAvailableWidth(window.innerWidth);
     }
-  }, []);
+  };
 
-  const handleFullScreenChange = useCallback(() => {
+  const handleFullScreenChange = () => {
     const isFullscreenActive = !!document.fullscreenElement;
     setIsFullScreen(isFullscreenActive);
-    // Use requestAnimationFrame to ensure DOM has settled after fullscreen change
-    requestAnimationFrame(() => {
-      updateAvailableWidth();
-    });
-  }, [updateAvailableWidth]);
-
-  // Use useLayoutEffect for synchronous DOM measurements after layout
-  useLayoutEffect(() => {
     updateAvailableWidth();
-  }, [updateAvailableWidth]);
+  };
 
   useEffect(() => {
     // Add event listeners for window resize and full-screen toggling
     window.addEventListener('resize', updateAvailableWidth);
     document.addEventListener('fullscreenchange', handleFullScreenChange);
 
+    // Initial update
+    updateAvailableWidth();
+
     return () => {
       // Clean up event listeners
       window.removeEventListener('resize', updateAvailableWidth);
       document.removeEventListener('fullscreenchange', handleFullScreenChange);
     };
-  }, [updateAvailableWidth, handleFullScreenChange]);
+  }, []);
 
   const dynamicLayoutAdjustment = useMemo(() => {
     const adjustment = newNavigation ? 350 : 400; // allows resizing of the window
@@ -419,7 +411,7 @@ export function SpanDetailPanel(props: {
   );
 
   return (
-    <div ref={containerRef}>
+    <>
       <EuiPanel data-test-subj="span-gantt-chart-panel">
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem grow={false}>
@@ -496,6 +488,6 @@ export function SpanDetailPanel(props: {
           dataSourceMDSLabel={props.dataSourceMDSLabel}
         />
       )}
-    </div>
+    </>
   );
 }

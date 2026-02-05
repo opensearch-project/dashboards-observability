@@ -130,12 +130,14 @@ describe('Testing dashboard table', () => {
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('.euiLink').contains('13').should('be.visible').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('.euiDataGrid').should('be.visible');
 
     cy.contains('13').should('exist');
     cy.contains('client_create_order').should('exist');
 
     cy.get('.euiSideNavItemButton__label').contains('Trace analytics').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('[data-test-subj="dashboardTable"]').should('be.visible');
 
     cy.contains('client_create_order').should('exist');
     cy.get('button[aria-label="Remove filter"]').should('be.visible').first().click();
