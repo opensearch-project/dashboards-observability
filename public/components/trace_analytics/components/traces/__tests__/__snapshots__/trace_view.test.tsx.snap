@@ -159,165 +159,163 @@ exports[`Trace view component renders trace view 1`] = `
           <div
             class="euiFlexItem"
           >
-            <div>
+            <div
+              class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+              data-test-subj="span-gantt-chart-panel"
+            >
               <div
-                class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
-                data-test-subj="span-gantt-chart-panel"
+                class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <div
-                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      class="euiFlexItem"
                     >
                       <div
-                        class="euiFlexItem"
+                        class="euiText euiText--medium"
                       >
-                        <div
-                          class="euiText euiText--medium"
+                        <span
+                          class="panel-title"
                         >
-                          <span
-                            class="panel-title"
-                          >
-                            Spans
-                          </span>
-                          <span
-                            class="panel-title-count"
-                          >
-                             (0)
-                          </span>
-                        </div>
+                          Spans
+                        </span>
+                        <span
+                          class="panel-title-count"
+                        >
+                           (0)
+                        </span>
                       </div>
+                    </div>
+                    <div
+                      class="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <div
-                          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
-                          <div
-                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          <button
+                            class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
+                            disabled=""
+                            type="button"
                           >
-                            <button
-                              class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
-                              disabled=""
-                              type="button"
+                            <span
+                              class="euiButtonContent euiButton__content"
                             >
                               <span
-                                class="euiButtonContent euiButton__content"
+                                class="euiButton__text"
+                              >
+                                Reset zoom
+                              </span>
+                            </span>
+                          </button>
+                        </div>
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <fieldset
+                            class="euiButtonGroup euiButtonGroup--small euiButtonGroup--text euiButtonGroup--isDisabled"
+                            disabled=""
+                          >
+                            <legend
+                              class="euiScreenReaderOnly"
+                            >
+                              Select view of spans
+                            </legend>
+                            <div
+                              class="euiButtonGroup__buttons"
+                            >
+                              <button
+                                aria-pressed="true"
+                                class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isDisabled euiButtonGroupButton-isSelected"
+                                data-test-subj="timeline"
+                                disabled=""
+                                id="random_html_id"
+                                type="button"
                               >
                                 <span
-                                  class="euiButton__text"
+                                  class="euiButtonContent euiButton__content"
                                 >
-                                  Reset zoom
+                                  <span
+                                    class="euiButton__text euiButtonGroupButton__textShift"
+                                    data-text="Timeline"
+                                    title="Timeline"
+                                  >
+                                    Timeline
+                                  </span>
                                 </span>
-                              </span>
-                            </button>
-                          </div>
-                          <div
-                            class="euiFlexItem euiFlexItem--flexGrowZero"
-                          >
-                            <fieldset
-                              class="euiButtonGroup euiButtonGroup--small euiButtonGroup--text euiButtonGroup--isDisabled"
-                              disabled=""
-                            >
-                              <legend
-                                class="euiScreenReaderOnly"
+                              </button>
+                              <button
+                                aria-pressed="false"
+                                class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isDisabled"
+                                data-test-subj="span_list"
+                                disabled=""
+                                id="random_html_id"
+                                type="button"
                               >
-                                Select view of spans
-                              </legend>
-                              <div
-                                class="euiButtonGroup__buttons"
+                                <span
+                                  class="euiButtonContent euiButton__content"
+                                >
+                                  <span
+                                    class="euiButton__text euiButtonGroupButton__textShift"
+                                    data-text="Span list"
+                                    title="Span list"
+                                  >
+                                    Span list
+                                  </span>
+                                </span>
+                              </button>
+                              <button
+                                aria-pressed="false"
+                                class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isDisabled"
+                                data-test-subj="hierarchy_span_list"
+                                disabled=""
+                                id="random_html_id"
+                                type="button"
                               >
-                                <button
-                                  aria-pressed="true"
-                                  class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isDisabled euiButtonGroupButton-isSelected"
-                                  data-test-subj="timeline"
-                                  disabled=""
-                                  id="random_html_id"
-                                  type="button"
+                                <span
+                                  class="euiButtonContent euiButton__content"
                                 >
                                   <span
-                                    class="euiButtonContent euiButton__content"
+                                    class="euiButton__text euiButtonGroupButton__textShift"
+                                    data-text="Tree view"
+                                    title="Tree view"
                                   >
-                                    <span
-                                      class="euiButton__text euiButtonGroupButton__textShift"
-                                      data-text="Timeline"
-                                      title="Timeline"
-                                    >
-                                      Timeline
-                                    </span>
+                                    Tree view
                                   </span>
-                                </button>
-                                <button
-                                  aria-pressed="false"
-                                  class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isDisabled"
-                                  data-test-subj="span_list"
-                                  disabled=""
-                                  id="random_html_id"
-                                  type="button"
-                                >
-                                  <span
-                                    class="euiButtonContent euiButton__content"
-                                  >
-                                    <span
-                                      class="euiButton__text euiButtonGroupButton__textShift"
-                                      data-text="Span list"
-                                      title="Span list"
-                                    >
-                                      Span list
-                                    </span>
-                                  </span>
-                                </button>
-                                <button
-                                  aria-pressed="false"
-                                  class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isDisabled"
-                                  data-test-subj="hierarchy_span_list"
-                                  disabled=""
-                                  id="random_html_id"
-                                  type="button"
-                                >
-                                  <span
-                                    class="euiButtonContent euiButton__content"
-                                  >
-                                    <span
-                                      class="euiButton__text euiButtonGroupButton__textShift"
-                                      data-text="Tree view"
-                                      title="Tree view"
-                                    >
-                                      Tree view
-                                    </span>
-                                  </span>
-                                </button>
-                              </div>
-                            </fieldset>
-                          </div>
+                                </span>
+                              </button>
+                            </div>
+                          </fieldset>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div
-                    class="center-loading-div"
+                </div>
+                <div
+                  class="center-loading-div"
+                >
+                  <span
+                    class="euiLoadingChart euiLoadingChart--large"
                   >
                     <span
-                      class="euiLoadingChart euiLoadingChart--large"
-                    >
-                      <span
-                        class="euiLoadingChart__bar"
-                      />
-                      <span
-                        class="euiLoadingChart__bar"
-                      />
-                      <span
-                        class="euiLoadingChart__bar"
-                      />
-                      <span
-                        class="euiLoadingChart__bar"
-                      />
-                    </span>
-                  </div>
+                      class="euiLoadingChart__bar"
+                    />
+                    <span
+                      class="euiLoadingChart__bar"
+                    />
+                    <span
+                      class="euiLoadingChart__bar"
+                    />
+                    <span
+                      class="euiLoadingChart__bar"
+                    />
+                  </span>
                 </div>
               </div>
             </div>

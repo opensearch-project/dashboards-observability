@@ -128,8 +128,9 @@ describe('Testing dashboard table', () => {
     cy.get('[data-test-subj="trace-table-mode-selector"]').click();
     cy.get('.euiSelectableListItem__content').contains('Traces').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('.euiLink').contains('13').should('be.visible').first().click();
+    cy.get('.euiLink').contains('13').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('.euiDataGrid').should('be.visible');
 
     cy.contains('13').should('exist');
     cy.contains('client_create_order').should('exist');

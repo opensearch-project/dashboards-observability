@@ -230,177 +230,175 @@ exports[`Trace Detail Render Flyout component render trace detail 1`] = `
     <hr
       class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
     />
-    <div>
+    <div
+      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+      data-test-subj="span-gantt-chart-panel"
+    >
       <div
-        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
-        data-test-subj="span-gantt-chart-panel"
+        class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
+          class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+              class="euiFlexItem"
             >
               <div
-                class="euiFlexItem"
+                class="euiText euiText--medium"
               >
-                <div
-                  class="euiText euiText--medium"
+                <span
+                  class="panel-title"
                 >
-                  <span
-                    class="panel-title"
-                  >
-                    Spans
-                  </span>
-                  <span
-                    class="panel-title-count"
-                  >
-                     (0)
-                  </span>
-                </div>
+                  Spans
+                </span>
+                <span
+                  class="panel-title-count"
+                >
+                   (0)
+                </span>
               </div>
+            </div>
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  <button
+                    class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
+                    disabled=""
+                    type="button"
                   >
-                    <button
-                      class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
-                      disabled=""
-                      type="button"
+                    <span
+                      class="euiButtonContent euiButton__content"
                     >
                       <span
-                        class="euiButtonContent euiButton__content"
+                        class="euiButton__text"
+                      >
+                        Reset zoom
+                      </span>
+                    </span>
+                  </button>
+                </div>
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <fieldset
+                    class="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
+                  >
+                    <legend
+                      class="euiScreenReaderOnly"
+                    >
+                      Select view of spans
+                    </legend>
+                    <div
+                      class="euiButtonGroup__buttons"
+                    >
+                      <label
+                        class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
+                        for="random_html_id"
                       >
                         <span
-                          class="euiButton__text"
+                          class="euiButtonContent euiButton__content"
                         >
-                          Reset zoom
+                          <span
+                            class="euiButton__text euiButtonGroupButton__textShift"
+                            data-text="Timeline"
+                            title="Timeline"
+                          >
+                            <input
+                              checked=""
+                              class="euiScreenReaderOnly"
+                              data-test-subj="timeline"
+                              id="random_html_id"
+                              name="random_html_id"
+                              type="radio"
+                              value=""
+                            />
+                            Timeline
+                          </span>
                         </span>
-                      </span>
-                    </button>
-                  </div>
-                  <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero"
-                  >
-                    <fieldset
-                      class="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
-                    >
-                      <legend
-                        class="euiScreenReaderOnly"
+                      </label>
+                      <label
+                        class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                        for="random_html_id"
                       >
-                        Select view of spans
-                      </legend>
-                      <div
-                        class="euiButtonGroup__buttons"
+                        <span
+                          class="euiButtonContent euiButton__content"
+                        >
+                          <span
+                            class="euiButton__text euiButtonGroupButton__textShift"
+                            data-text="Span list"
+                            title="Span list"
+                          >
+                            <input
+                              class="euiScreenReaderOnly"
+                              data-test-subj="span_list"
+                              id="random_html_id"
+                              name="random_html_id"
+                              type="radio"
+                              value=""
+                            />
+                            Span list
+                          </span>
+                        </span>
+                      </label>
+                      <label
+                        class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                        for="random_html_id"
                       >
-                        <label
-                          class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
-                          for="random_html_id"
+                        <span
+                          class="euiButtonContent euiButton__content"
                         >
                           <span
-                            class="euiButtonContent euiButton__content"
+                            class="euiButton__text euiButtonGroupButton__textShift"
+                            data-text="Tree view"
+                            title="Tree view"
                           >
-                            <span
-                              class="euiButton__text euiButtonGroupButton__textShift"
-                              data-text="Timeline"
-                              title="Timeline"
-                            >
-                              <input
-                                checked=""
-                                class="euiScreenReaderOnly"
-                                data-test-subj="timeline"
-                                id="random_html_id"
-                                name="random_html_id"
-                                type="radio"
-                                value=""
-                              />
-                              Timeline
-                            </span>
+                            <input
+                              class="euiScreenReaderOnly"
+                              data-test-subj="hierarchy_span_list"
+                              id="random_html_id"
+                              name="random_html_id"
+                              type="radio"
+                              value=""
+                            />
+                            Tree view
                           </span>
-                        </label>
-                        <label
-                          class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
-                          for="random_html_id"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                          >
-                            <span
-                              class="euiButton__text euiButtonGroupButton__textShift"
-                              data-text="Span list"
-                              title="Span list"
-                            >
-                              <input
-                                class="euiScreenReaderOnly"
-                                data-test-subj="span_list"
-                                id="random_html_id"
-                                name="random_html_id"
-                                type="radio"
-                                value=""
-                              />
-                              Span list
-                            </span>
-                          </span>
-                        </label>
-                        <label
-                          class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
-                          for="random_html_id"
-                        >
-                          <span
-                            class="euiButtonContent euiButton__content"
-                          >
-                            <span
-                              class="euiButton__text euiButtonGroupButton__textShift"
-                              data-text="Tree view"
-                              title="Tree view"
-                            >
-                              <input
-                                class="euiScreenReaderOnly"
-                                data-test-subj="hierarchy_span_list"
-                                id="random_html_id"
-                                name="random_html_id"
-                                type="radio"
-                                value=""
-                              />
-                              Tree view
-                            </span>
-                          </span>
-                        </label>
-                      </div>
-                    </fieldset>
-                  </div>
+                        </span>
+                      </label>
+                    </div>
+                  </fieldset>
                 </div>
               </div>
             </div>
           </div>
-          <hr
-            class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+        </div>
+        <hr
+          class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+        />
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            id="explorerPlotComponent"
+            style="width: 100%; height: 100%;"
           />
+        </div>
+        <div
+          class="euiFlexItem"
+          style="overflow-y: auto; max-height: 500px;"
+        >
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            <div
-              id="explorerPlotComponent"
-              style="width: 100%; height: 100%;"
-            />
-          </div>
-          <div
-            class="euiFlexItem"
-            style="overflow-y: auto; max-height: 500px;"
-          >
-            <div
-              id="explorerPlotComponent"
-              style="width: 100%; height: 100%;"
-            />
-          </div>
+            id="explorerPlotComponent"
+            style="width: 100%; height: 100%;"
+          />
         </div>
       </div>
     </div>
