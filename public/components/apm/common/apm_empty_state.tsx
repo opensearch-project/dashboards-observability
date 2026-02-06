@@ -9,11 +9,11 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
-  EuiTabs,
-  EuiTab,
+  EuiButtonGroup,
   EuiImage,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
 } from '@elastic/eui';
 import servicesPreview from './assets/services-preview.jpg';
 import applicationMapPreview from './assets/application-map-preview.jpg';
@@ -64,70 +64,76 @@ export const ApmEmptyState = ({ onGetStartedClick }: ApmEmptyStateProps) => {
   return (
     <EuiFlexGroup direction="column" alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <EuiSpacer size="xxl" />
-        <EuiText textAlign="center">
-          <h1>{i18nTexts.title}</h1>
-        </EuiText>
-
         <EuiSpacer size="l" />
+        <EuiPanel paddingSize="l">
+          <EuiText textAlign="center">
+            <h1>{i18nTexts.title}</h1>
+          </EuiText>
 
-        <EuiFlexGroup justifyContent="center" gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={onGetStartedClick}>
-              {i18nTexts.getStarted}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          <EuiSpacer size="l" />
 
-        <EuiSpacer size="s" />
+          <EuiFlexGroup justifyContent="center" gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiButton fill onClick={onGetStartedClick}>
+                {i18nTexts.getStarted}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiLink href={APM_DOCS_URL} target="_blank" external>
-              {i18nTexts.viewDocs}
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          <EuiSpacer size="m" />
 
-        <EuiSpacer size="xl" />
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiLink href={APM_DOCS_URL} target="_blank" external>
+                {i18nTexts.viewDocs}
+              </EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-        {/* Tabs */}
-        <EuiTabs>
-          {tabs.map((tab) => (
-            <EuiTab
-              key={tab.id}
-              onClick={() => setSelectedTabId(tab.id)}
-              isSelected={tab.id === selectedTabId}
-            >
-              {tab.name}
-            </EuiTab>
-          ))}
-        </EuiTabs>
+          <EuiSpacer size="xxl" />
 
-        <EuiSpacer size="m" />
+          {/* Button Group */}
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiButtonGroup
+                legend="APM features"
+                options={tabs.map((tab) => ({
+                  id: tab.id,
+                  label: tab.name,
+                }))}
+                idSelected={selectedTabId}
+                onChange={(id) => setSelectedTabId(id)}
+                buttonSize="compressed"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-        {/* Tab content */}
-        <EuiText color="subdued" textAlign="center" size="s">
-          <p>{selectedTab.description}</p>
-        </EuiText>
+          <EuiSpacer size="m" />
 
-        <EuiSpacer size="l" />
+          {/* Tab content */}
+          <EuiText color="subdued" textAlign="center" size="s">
+            <p>{selectedTab.description}</p>
+          </EuiText>
 
-        {/* Preview image */}
-        <div
-          style={{
-            border: '1px solid #D3DAE6',
-            borderRadius: '6px',
-            overflow: 'hidden',
-            maxWidth: '900px',
-          }}
-        >
-          <EuiImage
-            src={tabPreviewImages[selectedTabId]}
-            alt={getPreviewImageAlt(selectedTab.name)}
-            style={{ width: '100%', display: 'block' }}
-          />
-        </div>
+          <EuiSpacer size="l" />
+
+          {/* Preview image */}
+          <div
+            style={{
+              border: '1px solid #D3DAE6',
+              borderRadius: '6px',
+              overflow: 'hidden',
+              maxWidth: '900px',
+              lineHeight: 0,
+            }}
+          >
+            <EuiImage
+              src={tabPreviewImages[selectedTabId]}
+              alt={getPreviewImageAlt(selectedTab.name)}
+              style={{ width: '100%', display: 'block' }}
+            />
+          </div>
+        </EuiPanel>
 
         <EuiSpacer size="xxl" />
       </EuiFlexItem>
