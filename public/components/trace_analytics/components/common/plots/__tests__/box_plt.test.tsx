@@ -4,17 +4,13 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import { configure, mount, shallow } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import { BoxPlt } from '../box_plt';
 
 describe('Box plot component', () => {
-  configure({ adapter: new Adapter() });
-
-  it('renders box plot', () => {
+  it('renders box plot', async () => {
     const addFilter = jest.fn();
-    const wrapper = shallow(
+    render(
       <BoxPlt
         plotParams={{
           min: 0,
@@ -22,11 +18,13 @@ describe('Box plot component', () => {
           left: 20,
           mid: 50,
           right: 80,
-          currPercentileFilter:'',
+          currPercentileFilter: '',
           addFilter,
         }}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 });

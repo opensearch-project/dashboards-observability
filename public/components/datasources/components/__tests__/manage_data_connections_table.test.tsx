@@ -3,13 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-import { act } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
 import React from 'react';
 import { ManageDataConnectionsTable } from '../manage/manage_data_connections_table';
 import { showDataConnectionsData } from '../../../../../test/datasources';
-import ReactDOM from 'react-dom';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -23,8 +20,6 @@ jest.mock('../../../../plugin', () => ({
 }));
 
 describe('Manage Data Connections Table test', () => {
-  configure({ adapter: new Adapter() });
-
   it('Renders manage data connections table with data', async () => {
     const http = {
       get: jest.fn().mockResolvedValue(showDataConnectionsData),
@@ -35,13 +30,13 @@ describe('Manage Data Connections Table test', () => {
     const mockChrome = {
       setBreadcrumbs: jest.fn(),
     };
-    const container = document.createElement('div');
-    await act(() => {
-      ReactDOM.render(
-        <ManageDataConnectionsTable http={http} pplService={pplService} chrome={mockChrome} />,
-        container
+    let container: HTMLElement;
+    await act(async () => {
+      const result = render(
+        <ManageDataConnectionsTable http={http} pplService={pplService} chrome={mockChrome} />
       );
+      container = result.container;
     });
-    expect(container).toMatchSnapshot();
+    expect(container!).toMatchSnapshot();
   });
 });

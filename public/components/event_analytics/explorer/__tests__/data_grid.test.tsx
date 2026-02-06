@@ -3,10 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
 import { DataGrid } from '../events_views/data_grid';
 import {
   SELECTED_FIELDS,
@@ -33,8 +31,6 @@ import { coreMock } from '../../../../../../../src/core/public/mocks';
 const coreStartMock = coreMock.createStart();
 
 describe('Datagrid component', () => {
-  configure({ adapter: new Adapter() });
-
   it('Renders data grid component', async () => {
     const explorerFields = {
       [SELECTED_FIELDS]: [],
@@ -59,7 +55,7 @@ describe('Datagrid component', () => {
     };
     const store = configureStore({ reducer: queriesReducer, preloadedState });
 
-    const wrapper = mount(
+    render(
       <Provider store={store}>
         <DataGrid
           http={coreStartMock.http}
@@ -77,10 +73,8 @@ describe('Datagrid component', () => {
       </Provider>
     );
 
-    wrapper.update();
-
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
@@ -108,7 +102,7 @@ describe('Datagrid component', () => {
     };
     const store = configureStore({ reducer: queriesReducer, preloadedState });
 
-    const wrapper = mount(
+    render(
       <Provider store={store}>
         <DataGrid
           http={coreStartMock.http}
@@ -126,10 +120,8 @@ describe('Datagrid component', () => {
       </Provider>
     );
 
-    wrapper.update();
-
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
@@ -157,7 +149,7 @@ describe('Datagrid component', () => {
     };
     const store = configureStore({ reducer: queriesReducer, preloadedState });
 
-    const wrapper = mount(
+    render(
       <Provider store={store}>
         <DataGrid
           http={coreStartMock.http}
@@ -175,10 +167,8 @@ describe('Datagrid component', () => {
       </Provider>
     );
 
-    wrapper.update();
-
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 });

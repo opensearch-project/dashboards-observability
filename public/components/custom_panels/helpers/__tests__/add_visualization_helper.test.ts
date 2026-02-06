@@ -3,14 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 import { addVisualizationPanel, addMultipleVisualizations } from '../add_visualization_helper';
 import { samplePanelVisualizations } from '../../../../../test/panels_constants';
 
 describe('Add Visualization Helper', () => {
-  configure({ adapter: new Adapter() });
-
   it('addVisualizationPanel', async () => {
     const savedVisualizationId = 'test_id';
     const oldVisualizationId = undefined;

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useOperationMetrics } from '../use_operation_metrics';
 
 // Mock the PromQLSearchService
@@ -104,11 +104,13 @@ describe('useOperationMetrics', () => {
           createMockResponse([{ operation: 'GET /api/users', Value: '1000' }])
         ); // requestCount
 
-      const { result, waitForNextUpdate } = renderHook(() => useOperationMetrics(defaultParams));
+      const { result } = renderHook(() => useOperationMetrics(defaultParams));
 
       expect(result.current.isLoading).toBe(true);
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.isLoading).toBe(false);
       expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(7);
@@ -131,9 +133,11 @@ describe('useOperationMetrics', () => {
         ) // p50 in ms (already converted)
         .mockResolvedValue({ data: { result: [] } }); // Rest return empty
 
-      const { result, waitForNextUpdate } = renderHook(() => useOperationMetrics(defaultParams));
+      const { result } = renderHook(() => useOperationMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const metrics = result.current.metrics.get('GET /api/users');
       expect(metrics?.p50Duration).toBe(150); // 150ms (no JS conversion)
@@ -142,9 +146,11 @@ describe('useOperationMetrics', () => {
     it('should initialize metrics to default values when no data returned', async () => {
       mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
 
-      const { result, waitForNextUpdate } = renderHook(() => useOperationMetrics(defaultParams));
+      const { result } = renderHook(() => useOperationMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       // All operations should have default metrics
       expect(result.current.metrics.size).toBe(2);
@@ -163,9 +169,11 @@ describe('useOperationMetrics', () => {
         createMockResponse([{ operation: 'GET /api/users', Value: 'NaN' }])
       );
 
-      const { result, waitForNextUpdate } = renderHook(() => useOperationMetrics(defaultParams));
+      const { result } = renderHook(() => useOperationMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const metrics = result.current.metrics.get('GET /api/users');
       expect(metrics?.p50Duration).toBe(0); // NaN converted to 0
@@ -179,9 +187,11 @@ describe('useOperationMetrics', () => {
         ])
       );
 
-      const { result, waitForNextUpdate } = renderHook(() => useOperationMetrics(defaultParams));
+      const { result } = renderHook(() => useOperationMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.metrics.size).toBe(2);
       expect(result.current.metrics.has('GET /api/users')).toBe(true);
@@ -194,9 +204,11 @@ describe('useOperationMetrics', () => {
       const mockError = new Error('PromQL query failed');
       mockExecuteMetricRequest.mockRejectedValue(mockError);
 
-      const { result, waitForNextUpdate } = renderHook(() => useOperationMetrics(defaultParams));
+      const { result } = renderHook(() => useOperationMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toEqual(mockError);
       expect(result.current.isLoading).toBe(false);
@@ -205,9 +217,11 @@ describe('useOperationMetrics', () => {
     it('should wrap non-Error throws', async () => {
       mockExecuteMetricRequest.mockRejectedValue('string error');
 
-      const { result, waitForNextUpdate } = renderHook(() => useOperationMetrics(defaultParams));
+      const { result } = renderHook(() => useOperationMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toBeInstanceOf(Error);
       expect(result.current.error?.message).toBe('Unknown error');
@@ -218,14 +232,13 @@ describe('useOperationMetrics', () => {
     it('should refetch when operations change', async () => {
       mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
 
-      const { waitForNextUpdate, rerender } = renderHook(
-        ({ params }) => useOperationMetrics(params),
-        {
-          initialProps: { params: defaultParams },
-        }
-      );
+      const { result, rerender } = renderHook(({ params }) => useOperationMetrics(params), {
+        initialProps: { params: defaultParams },
+      });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const initialCallCount = mockExecuteMetricRequest.mock.calls.length;
 
@@ -236,7 +249,9 @@ describe('useOperationMetrics', () => {
         },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockExecuteMetricRequest.mock.calls.length).toBeGreaterThan(initialCallCount);
     });
@@ -244,14 +259,13 @@ describe('useOperationMetrics', () => {
     it('should refetch when refreshTrigger changes', async () => {
       mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
 
-      const { waitForNextUpdate, rerender } = renderHook(
-        ({ params }) => useOperationMetrics(params),
-        {
-          initialProps: { params: { ...defaultParams, refreshTrigger: 0 } },
-        }
-      );
+      const { result, rerender } = renderHook(({ params }) => useOperationMetrics(params), {
+        initialProps: { params: { ...defaultParams, refreshTrigger: 0 } },
+      });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const initialCallCount = mockExecuteMetricRequest.mock.calls.length;
 
@@ -259,7 +273,9 @@ describe('useOperationMetrics', () => {
         params: { ...defaultParams, refreshTrigger: 1 },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockExecuteMetricRequest.mock.calls.length).toBeGreaterThan(initialCallCount);
     });
@@ -269,9 +285,11 @@ describe('useOperationMetrics', () => {
     it('should use actual time range from params', async () => {
       mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
 
-      const { waitForNextUpdate } = renderHook(() => useOperationMetrics(defaultParams));
+      const { result } = renderHook(() => useOperationMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       // Check that queries use the time range from params
       const call = mockExecuteMetricRequest.mock.calls[0][0];

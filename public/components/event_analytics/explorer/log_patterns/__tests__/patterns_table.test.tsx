@@ -5,9 +5,7 @@
 
 import React from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-import { waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { PatternsTable } from '../patterns_table';
 import {
   FINAL_QUERY,
@@ -19,8 +17,6 @@ import {
 } from '../../../../../../common/constants/explorer';
 
 describe('Pattern table component', () => {
-  configure({ adapter: new Adapter() });
-
   it('Renders pattern table', async () => {
     const tableData = [
       {
@@ -40,7 +36,7 @@ describe('Pattern table component', () => {
       [SELECTED_TIMESTAMP]: 'timestamp',
     };
 
-    const wrapper = mount(
+    render(
       <PatternsTable
         isPatternLoading={false}
         onPatternSelection={jest.fn()}
@@ -50,10 +46,8 @@ describe('Pattern table component', () => {
       />
     );
 
-    wrapper.update();
-
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 });

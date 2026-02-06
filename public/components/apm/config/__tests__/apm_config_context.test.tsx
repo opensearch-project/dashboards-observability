@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { ApmConfigProvider, useApmConfig } from '../apm_config_context';
 import { OSDSavedApmConfigClient } from '../../../../services/saved_objects/saved_object_client/osd_saved_objects/apm_config';
 
@@ -39,11 +39,14 @@ describe('ApmConfigContext', () => {
 
   describe('useApmConfig hook', () => {
     it('should throw error when used outside of provider', () => {
-      const { result } = renderHook(() => useApmConfig());
+      // Suppress console.error for this test since we expect an error
+      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-      expect(result.error).toEqual(
-        new Error('useApmConfig must be used within an ApmConfigProvider')
-      );
+      expect(() => {
+        renderHook(() => useApmConfig());
+      }).toThrow('useApmConfig must be used within an ApmConfigProvider');
+
+      spy.mockRestore();
     });
 
     it('should return initial loading state', () => {
@@ -69,9 +72,11 @@ describe('ApmConfigContext', () => {
         total: 1,
       });
 
-      const { result, waitForNextUpdate } = renderHook(() => useApmConfig(), { wrapper });
+      const { result } = renderHook(() => useApmConfig(), { wrapper });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.loading).toBe(false);
       expect(result.current.config).toEqual(mockConfig);
@@ -84,9 +89,11 @@ describe('ApmConfigContext', () => {
         total: 0,
       });
 
-      const { result, waitForNextUpdate } = renderHook(() => useApmConfig(), { wrapper });
+      const { result } = renderHook(() => useApmConfig(), { wrapper });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.loading).toBe(false);
       expect(result.current.config).toBeNull();
@@ -97,9 +104,11 @@ describe('ApmConfigContext', () => {
       const mockError = new Error('Failed to fetch config');
       mockGetBulkWithResolvedReferences.mockRejectedValue(mockError);
 
-      const { result, waitForNextUpdate } = renderHook(() => useApmConfig(), { wrapper });
+      const { result } = renderHook(() => useApmConfig(), { wrapper });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.loading).toBe(false);
       expect(result.current.config).toBeNull();
@@ -109,9 +118,11 @@ describe('ApmConfigContext', () => {
     it('should convert non-Error objects to Error', async () => {
       mockGetBulkWithResolvedReferences.mockRejectedValue('String error');
 
-      const { result, waitForNextUpdate } = renderHook(() => useApmConfig(), { wrapper });
+      const { result } = renderHook(() => useApmConfig(), { wrapper });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(result.current.error).toBeInstanceOf(Error);
       expect(result.current.error?.message).toBe('String error');
@@ -123,9 +134,11 @@ describe('ApmConfigContext', () => {
         total: 0,
       });
 
-      const { result, waitForNextUpdate } = renderHook(() => useApmConfig(), { wrapper });
+      const { result } = renderHook(() => useApmConfig(), { wrapper });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       mockGetBulkWithResolvedReferences.mockClear();
       mockGetBulkWithResolvedReferences.mockResolvedValue({
@@ -137,7 +150,9 @@ describe('ApmConfigContext', () => {
         result.current.refresh();
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(mockGetBulkWithResolvedReferences).toHaveBeenCalledTimes(1);
       expect(result.current.config).toEqual({ objectId: 'new-config' });
@@ -151,9 +166,11 @@ describe('ApmConfigContext', () => {
         total: 0,
       });
 
-      const { waitForNextUpdate } = renderHook(() => useApmConfig(), { wrapper });
+      const { result } = renderHook(() => useApmConfig(), { wrapper });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
 
       expect(mockGetBulkWithResolvedReferences).toHaveBeenCalledWith(mockDataService);
     });

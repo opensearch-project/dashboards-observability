@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import {
   InstallIntegrationFlyout,
@@ -13,10 +12,8 @@ import {
 import { TEST_INTEGRATION_SEARCH_RESULTS } from '../../../../../test/constants';
 
 describe('Installed Integrations Table test', () => {
-  configure({ adapter: new Adapter() });
-
   it('Renders the installed integrations table', async () => {
-    const wrapper = mount(
+    render(
       <InstalledIntegrationsTable
         integrations={TEST_INTEGRATION_SEARCH_RESULTS}
         datasourceName="unknown"
@@ -24,19 +21,23 @@ describe('Installed Integrations Table test', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
   it('Renders the empty installed integrations table', async () => {
-    const wrapper = mount(
+    render(
       <InstalledIntegrationsTable integrations={[]} datasourceType="S3GLUE" datasourceName="test" />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
   it('Renders the installed integrations table flyout', async () => {
-    const wrapper = mount(
+    render(
       <InstallIntegrationFlyout
         closeFlyout={() => {}}
         datasourceType="S3GLUE"
@@ -44,6 +45,8 @@ describe('Installed Integrations Table test', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 });

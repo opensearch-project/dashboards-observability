@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useDependencyMetrics } from '../use_dependency_metrics';
 import { GroupedDependency } from '../../../common/types/service_details_types';
 
@@ -134,11 +134,13 @@ describe('useDependencyMetrics', () => {
           createMockResponse([{ remoteService: 'cart', remoteOperation: 'AddItem', Value: '1000' }])
         ); // requestCount
 
-      const { result, waitForNextUpdate } = renderHook(() => useDependencyMetrics(defaultParams));
+      const { result } = renderHook(() => useDependencyMetrics(defaultParams));
 
       expect(result.current.isLoading).toBe(true);
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.isLoading).toBe(false);
       expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(7);
@@ -164,9 +166,11 @@ describe('useDependencyMetrics', () => {
         ) // p50 in ms (already converted)
         .mockResolvedValue({ data: { result: [] } }); // Rest return empty
 
-      const { result, waitForNextUpdate } = renderHook(() => useDependencyMetrics(defaultParams));
+      const { result } = renderHook(() => useDependencyMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const metrics = result.current.metrics.get('cart:AddItem');
       expect(metrics?.p50Duration).toBe(150); // 150ms (no JS conversion)
@@ -175,9 +179,11 @@ describe('useDependencyMetrics', () => {
     it('should initialize metrics to default values when no data returned', async () => {
       mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
 
-      const { result, waitForNextUpdate } = renderHook(() => useDependencyMetrics(defaultParams));
+      const { result } = renderHook(() => useDependencyMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       // All dependencies should have default metrics
       expect(result.current.metrics.size).toBe(2);
@@ -196,9 +202,11 @@ describe('useDependencyMetrics', () => {
         createMockResponse([{ remoteService: 'cart', remoteOperation: 'AddItem', Value: 'NaN' }])
       );
 
-      const { result, waitForNextUpdate } = renderHook(() => useDependencyMetrics(defaultParams));
+      const { result } = renderHook(() => useDependencyMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const metrics = result.current.metrics.get('cart:AddItem');
       expect(metrics?.p50Duration).toBe(0); // NaN converted to 0
@@ -212,9 +220,11 @@ describe('useDependencyMetrics', () => {
         ])
       );
 
-      const { result, waitForNextUpdate } = renderHook(() => useDependencyMetrics(defaultParams));
+      const { result } = renderHook(() => useDependencyMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.metrics.size).toBe(2);
       expect(result.current.metrics.has('cart:AddItem')).toBe(true);
@@ -231,11 +241,11 @@ describe('useDependencyMetrics', () => {
         dependencies: [createDependency('cart', 'unknown')],
       };
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useDependencyMetrics(paramsWithUnknownOp)
-      );
+      const { result } = renderHook(() => useDependencyMetrics(paramsWithUnknownOp));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       // Response has empty remoteOperation which defaults to 'unknown'
       expect(result.current.metrics.has('cart:unknown')).toBe(true);
@@ -247,9 +257,11 @@ describe('useDependencyMetrics', () => {
       const mockError = new Error('PromQL query failed');
       mockExecuteMetricRequest.mockRejectedValue(mockError);
 
-      const { result, waitForNextUpdate } = renderHook(() => useDependencyMetrics(defaultParams));
+      const { result } = renderHook(() => useDependencyMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toEqual(mockError);
       expect(result.current.isLoading).toBe(false);
@@ -258,9 +270,11 @@ describe('useDependencyMetrics', () => {
     it('should wrap non-Error throws', async () => {
       mockExecuteMetricRequest.mockRejectedValue('string error');
 
-      const { result, waitForNextUpdate } = renderHook(() => useDependencyMetrics(defaultParams));
+      const { result } = renderHook(() => useDependencyMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toBeInstanceOf(Error);
       expect(result.current.error?.message).toBe('Unknown error');
@@ -271,14 +285,13 @@ describe('useDependencyMetrics', () => {
     it('should refetch when dependencies change', async () => {
       mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
 
-      const { waitForNextUpdate, rerender } = renderHook(
-        ({ params }) => useDependencyMetrics(params),
-        {
-          initialProps: { params: defaultParams },
-        }
-      );
+      const { result, rerender } = renderHook(({ params }) => useDependencyMetrics(params), {
+        initialProps: { params: defaultParams },
+      });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const initialCallCount = mockExecuteMetricRequest.mock.calls.length;
 
@@ -289,7 +302,9 @@ describe('useDependencyMetrics', () => {
         },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockExecuteMetricRequest.mock.calls.length).toBeGreaterThan(initialCallCount);
     });
@@ -297,14 +312,13 @@ describe('useDependencyMetrics', () => {
     it('should refetch when refreshTrigger changes', async () => {
       mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
 
-      const { waitForNextUpdate, rerender } = renderHook(
-        ({ params }) => useDependencyMetrics(params),
-        {
-          initialProps: { params: { ...defaultParams, refreshTrigger: 0 } },
-        }
-      );
+      const { result, rerender } = renderHook(({ params }) => useDependencyMetrics(params), {
+        initialProps: { params: { ...defaultParams, refreshTrigger: 0 } },
+      });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const initialCallCount = mockExecuteMetricRequest.mock.calls.length;
 
@@ -312,7 +326,9 @@ describe('useDependencyMetrics', () => {
         params: { ...defaultParams, refreshTrigger: 1 },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockExecuteMetricRequest.mock.calls.length).toBeGreaterThan(initialCallCount);
     });
@@ -322,9 +338,11 @@ describe('useDependencyMetrics', () => {
     it('should use actual time range from params', async () => {
       mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
 
-      const { waitForNextUpdate } = renderHook(() => useDependencyMetrics(defaultParams));
+      const { result } = renderHook(() => useDependencyMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       // Check that queries use the time range from params
       const call = mockExecuteMetricRequest.mock.calls[0][0];
@@ -339,9 +357,11 @@ describe('useDependencyMetrics', () => {
     it('should generate correct key from serviceName and remoteOperation', async () => {
       mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
 
-      const { result, waitForNextUpdate } = renderHook(() => useDependencyMetrics(defaultParams));
+      const { result } = renderHook(() => useDependencyMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       // Keys should be "serviceName:remoteOperation"
       expect(result.current.metrics.has('cart:AddItem')).toBe(true);

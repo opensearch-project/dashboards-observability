@@ -3,22 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, shallow } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { CustomInputModal } from '../custom_input_modal';
 
 describe('Custom Input Model component', () => {
-  configure({ adapter: new Adapter() });
-
-  it('renders custom input modal with single argument', () => {
+  it('renders custom input modal with single argument', async () => {
     const runModal = jest.fn;
     const closeModal = jest.fn();
     const labelTxt = 'test label';
     const titletxt = 'Input test';
     const btn1txt = 'btn test';
     const btn2txt = 'btn test 2';
-    const wrapper = shallow(
+    render(
       <CustomInputModal
         runModal={runModal}
         closeModal={closeModal}
@@ -29,10 +26,12 @@ describe('Custom Input Model component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
-  it('renders custom input modal with multiple arguments', () => {
+  it('renders custom input modal with multiple arguments', async () => {
     const runModal = jest.fn;
     const closeModal = jest.fn();
     const labelTxt = 'test label';
@@ -42,7 +41,7 @@ describe('Custom Input Model component', () => {
     const openPanelName = 'Test Panel';
     const helpText = 'Help Text';
     const optionalArgs = ['option1', 'option2', 'option3'];
-    const wrapper = shallow(
+    render(
       <CustomInputModal
         runModal={runModal}
         closeModal={closeModal}
@@ -56,6 +55,8 @@ describe('Custom Input Model component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 });

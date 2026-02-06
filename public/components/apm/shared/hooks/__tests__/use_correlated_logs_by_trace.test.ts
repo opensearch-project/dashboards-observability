@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useCorrelatedLogsByTrace } from '../use_correlated_logs_by_trace';
 import { CorrelatedLogDataset } from '../use_apm_config';
 
@@ -97,14 +97,14 @@ describe('useCorrelatedLogsByTrace', () => {
 
       mockExecuteQuery.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useCorrelatedLogsByTrace(defaultParams)
-      );
+      const { result } = renderHook(() => useCorrelatedLogsByTrace(defaultParams));
 
       // Initial loading state
       expect(result.current.logResults[0]?.loading).toBe(true);
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.logResults).toHaveLength(1);
       expect(result.current.logResults[0].loading).toBe(false);
@@ -119,14 +119,16 @@ describe('useCorrelatedLogsByTrace', () => {
         .mockResolvedValueOnce({ jsonData: [{ body: 'Log 1' }] })
         .mockResolvedValueOnce({ jsonData: [{ body: 'Log 2' }] });
 
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useCorrelatedLogsByTrace({
           ...defaultParams,
           logDatasets: [createLogDataset('ds-1'), createLogDataset('ds-2')],
         })
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.logResults).toHaveLength(2);
       expect(result.current.logResults[0].logs[0].message).toBe('Log 1');
@@ -146,11 +148,11 @@ describe('useCorrelatedLogsByTrace', () => {
 
       mockExecuteQuery.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useCorrelatedLogsByTrace(defaultParams)
-      );
+      const { result } = renderHook(() => useCorrelatedLogsByTrace(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.logResults[0].logs[0].timestamp).toBe('2024-01-01T00:30:00Z');
       expect(result.current.logResults[0].logs[0].message).toBe('Alternative message field');
@@ -160,11 +162,11 @@ describe('useCorrelatedLogsByTrace', () => {
     it('should handle empty jsonData response', async () => {
       mockExecuteQuery.mockResolvedValue({ jsonData: [] });
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useCorrelatedLogsByTrace(defaultParams)
-      );
+      const { result } = renderHook(() => useCorrelatedLogsByTrace(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.logResults[0].logs).toEqual([]);
     });
@@ -172,11 +174,11 @@ describe('useCorrelatedLogsByTrace', () => {
     it('should handle missing jsonData', async () => {
       mockExecuteQuery.mockResolvedValue({});
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useCorrelatedLogsByTrace(defaultParams)
-      );
+      const { result } = renderHook(() => useCorrelatedLogsByTrace(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.logResults[0].logs).toEqual([]);
     });
@@ -186,9 +188,11 @@ describe('useCorrelatedLogsByTrace', () => {
     it('should build query with traceId IN clause', async () => {
       mockExecuteQuery.mockResolvedValue({ jsonData: [] });
 
-      const { waitForNextUpdate } = renderHook(() => useCorrelatedLogsByTrace(defaultParams));
+      const { result } = renderHook(() => useCorrelatedLogsByTrace(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const executedQuery = mockExecuteQuery.mock.calls[0][0];
       expect(executedQuery).toContain("where `serviceName` = 'frontend'");
@@ -199,9 +203,11 @@ describe('useCorrelatedLogsByTrace', () => {
     it('should build query with timestamp range and buffer', async () => {
       mockExecuteQuery.mockResolvedValue({ jsonData: [] });
 
-      const { waitForNextUpdate } = renderHook(() => useCorrelatedLogsByTrace(defaultParams));
+      const { result } = renderHook(() => useCorrelatedLogsByTrace(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const executedQuery = mockExecuteQuery.mock.calls[0][0];
       // Should include timestamp filter
@@ -212,14 +218,16 @@ describe('useCorrelatedLogsByTrace', () => {
     it('should not include traceId filter when traceIds array is empty', async () => {
       mockExecuteQuery.mockResolvedValue({ jsonData: [] });
 
-      const { waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useCorrelatedLogsByTrace({
           ...defaultParams,
           traceIds: [],
         })
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const executedQuery = mockExecuteQuery.mock.calls[0][0];
       // Should not have traceId IN clause
@@ -237,14 +245,16 @@ describe('useCorrelatedLogsByTrace', () => {
         },
       });
 
-      const { waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useCorrelatedLogsByTrace({
           ...defaultParams,
           logDatasets: [customDataset],
         })
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const executedQuery = mockExecuteQuery.mock.calls[0][0];
       expect(executedQuery).toContain('where `service.name` =');
@@ -263,7 +273,7 @@ describe('useCorrelatedLogsByTrace', () => {
         },
       });
 
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useCorrelatedLogsByTrace({
           ...defaultParams,
           logDatasets: [invalidDataset],
@@ -273,7 +283,12 @@ describe('useCorrelatedLogsByTrace', () => {
       // Schema validation fails synchronously (no await reached), so state updates
       // happen during initial render. Wait for the state to settle.
       try {
-        await waitForNextUpdate({ timeout: 100 });
+        await waitFor(
+          () => {
+            expect(mockAddDanger).toHaveBeenCalled();
+          },
+          { timeout: 100 }
+        );
       } catch {
         // Expected - updates may have already occurred synchronously
       }
@@ -292,7 +307,7 @@ describe('useCorrelatedLogsByTrace', () => {
         },
       });
 
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useCorrelatedLogsByTrace({
           ...defaultParams,
           logDatasets: [invalidDataset],
@@ -302,7 +317,12 @@ describe('useCorrelatedLogsByTrace', () => {
       // Schema validation fails synchronously (no await reached), so state updates
       // happen during initial render. Wait for the state to settle.
       try {
-        await waitForNextUpdate({ timeout: 100 });
+        await waitFor(
+          () => {
+            expect(mockAddDanger).toHaveBeenCalled();
+          },
+          { timeout: 100 }
+        );
       } catch {
         // Expected - updates may have already occurred synchronously
       }
@@ -322,14 +342,16 @@ describe('useCorrelatedLogsByTrace', () => {
 
       mockExecuteQuery.mockResolvedValue({ jsonData: [] });
 
-      const { waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useCorrelatedLogsByTrace({
           ...defaultParams,
           logDatasets: [datasetWithoutTraceId],
         })
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const executedQuery = mockExecuteQuery.mock.calls[0][0];
       // Should default to 'traceId' field
@@ -342,11 +364,11 @@ describe('useCorrelatedLogsByTrace', () => {
       const mockError = new Error('PPL query failed');
       mockExecuteQuery.mockRejectedValue(mockError);
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useCorrelatedLogsByTrace(defaultParams)
-      );
+      const { result } = renderHook(() => useCorrelatedLogsByTrace(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.logResults[0].error).toEqual(mockError);
       expect(result.current.logResults[0].loading).toBe(false);
@@ -355,11 +377,11 @@ describe('useCorrelatedLogsByTrace', () => {
     it('should wrap non-Error throws', async () => {
       mockExecuteQuery.mockRejectedValue('string error');
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useCorrelatedLogsByTrace(defaultParams)
-      );
+      const { result } = renderHook(() => useCorrelatedLogsByTrace(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.logResults[0].error).toBeInstanceOf(Error);
     });
@@ -369,14 +391,16 @@ describe('useCorrelatedLogsByTrace', () => {
         .mockRejectedValueOnce(new Error('First dataset failed'))
         .mockResolvedValueOnce({ jsonData: [{ body: 'Success log' }] });
 
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useCorrelatedLogsByTrace({
           ...defaultParams,
           logDatasets: [createLogDataset('ds-1'), createLogDataset('ds-2')],
         })
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.logResults[0].error).toBeDefined();
       expect(result.current.logResults[1].logs).toHaveLength(1);
@@ -397,14 +421,16 @@ describe('useCorrelatedLogsByTrace', () => {
         },
       });
 
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useCorrelatedLogsByTrace({
           ...defaultParams,
           logDatasets: [dataset],
         })
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.logResults[0].datasetId).toBe('ds-test');
       expect(result.current.logResults[0].displayName).toBe('Test Log Dataset');
@@ -417,9 +443,11 @@ describe('useCorrelatedLogsByTrace', () => {
     it('should apply 5-minute buffer to time range', async () => {
       mockExecuteQuery.mockResolvedValue({ jsonData: [] });
 
-      const { waitForNextUpdate } = renderHook(() => useCorrelatedLogsByTrace(defaultParams));
+      const { result } = renderHook(() => useCorrelatedLogsByTrace(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const executedQuery = mockExecuteQuery.mock.calls[0][0];
       // The minTime should be 5 minutes before the span minTime
@@ -433,14 +461,16 @@ describe('useCorrelatedLogsByTrace', () => {
     it('should not include time filter when spanTimeRange is not provided', async () => {
       mockExecuteQuery.mockResolvedValue({ jsonData: [] });
 
-      const { waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useCorrelatedLogsByTrace({
           ...defaultParams,
           spanTimeRange: undefined,
         })
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const executedQuery = mockExecuteQuery.mock.calls[0][0];
       // Should not have timestamp range filter

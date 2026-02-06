@@ -1,62 +1,43 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Error rate plot component renders error rate plot 1`] = `
-<Fragment>
-  <EuiPanel
-    style={
-      Object {
-        "maxHeight": 560,
-        "minHeight": 308,
-        "minWidth": 433,
-      }
-    }
-  >
-    <EuiFlexGroup
-      gutterSize="xs"
-      justifyContent="spaceBetween"
+<body>
+  <div>
+    <div
+      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+      style="min-width: 433px; min-height: 308px; max-height: 560px;"
     >
-      <PanelTitle
-        title="Trace error rate over time"
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          class="euiText euiText--medium"
+        >
+          <span
+            class="panel-title"
+          >
+            Trace error rate over time
+          </span>
+        </div>
+        <fieldset
+          class="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
+        >
+          <legend
+            class="euiScreenReaderOnly"
+          />
+          <div
+            class="euiButtonGroup__buttons"
+          />
+        </fieldset>
+      </div>
+      <hr
+        class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
       />
-      <EuiButtonGroup
-        buttonSize="s"
-        color="text"
-        onChange={[Function]}
+      <div
+        id="explorerPlotComponent"
+        style="width: 100%;"
       />
-    </EuiFlexGroup>
-    <EuiHorizontalRule
-      margin="m"
-    />
-    <ErrorTrendPlt
-      isPanel={true}
-      items={
-        Object {
-          "fixedInterval": "365d",
-          "items": Array [
-            Object {
-              "hoverlabel": Object {
-                "align": "left",
-              },
-              "hovertemplate": "%{text}<br>Error rate: %{y}<extra></extra>",
-              "marker": Object {
-                "color": "#fad963",
-              },
-              "text": Array [
-                "Dec 19, 2019 16:00:00 - Dec 18, 2020 16:00:00",
-              ],
-              "type": "bar",
-              "x": Array [
-                1576800000000,
-              ],
-              "y": Array [
-                22.22,
-              ],
-            },
-          ],
-        }
-      }
-      onClick={[Function]}
-    />
-  </EuiPanel>
-</Fragment>
+    </div>
+  </div>
+</body>
 `;

@@ -3,20 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { generateServiceUrl } from '../../common/helper_functions';
 import { ServicesTable } from '../services_table';
 
 describe('Services table component', () => {
-  configure({ adapter: new Adapter() });
-
-  it('renders empty services table message', () => {
+  it('renders empty services table message', async () => {
     const addFilter = jest.fn();
     const setRedirect = jest.fn();
     const traceColumnAction = () => location.assign('#/trace_analytics/traces');
-    const wrapper = mount(
+    render(
       <ServicesTable
         items={[]}
         selectedItems={[]}
@@ -29,14 +26,16 @@ describe('Services table component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
-  it('renders empty jaeger services table message', () => {
+  it('renders empty jaeger services table message', async () => {
     const addFilter = jest.fn();
     const setRedirect = jest.fn();
     const traceColumnAction = () => location.assign('#/trace_analytics/traces');
-    const wrapper = mount(
+    render(
       <ServicesTable
         items={[]}
         selectedItems={[]}
@@ -49,10 +48,12 @@ describe('Services table component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
-  it('renders services table', () => {
+  it('renders services table', async () => {
     const tableItems = [
       {
         name: 'database',
@@ -67,7 +68,7 @@ describe('Services table component', () => {
     const addFilter = jest.fn();
     const setRedirect = jest.fn();
     const traceColumnAction = () => location.assign('#/trace_analytics/traces');
-    const wrapper = mount(
+    render(
       <ServicesTable
         items={tableItems}
         selectedItems={[]}
@@ -80,10 +81,12 @@ describe('Services table component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
-  it('renders jaeger services table', () => {
+  it('renders jaeger services table', async () => {
     const tableItems = [
       {
         name: 'database',
@@ -96,7 +99,7 @@ describe('Services table component', () => {
     const addFilter = jest.fn();
     const setRedirect = jest.fn();
     const traceColumnAction = () => location.assign('#/trace_analytics/traces');
-    const wrapper = mount(
+    render(
       <ServicesTable
         items={tableItems}
         selectedItems={[]}
@@ -109,10 +112,12 @@ describe('Services table component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
-  it('redirects to the correct URL when the service link is clicked', () => {
+  it('redirects to the correct URL when the service link is clicked', async () => {
     const mockDataSourceId = 'mock-data-source-id';
     const mockMode = 'data_prepper';
     const tableItems = [
@@ -131,7 +136,7 @@ describe('Services table component', () => {
     delete window.location;
     window.location = { ...originalLocation };
 
-    const wrapper = mount(
+    const { getByTestId } = render(
       <ServicesTable
         items={tableItems}
         selectedItems={[]}
@@ -151,11 +156,15 @@ describe('Services table component', () => {
       />
     );
 
-    // Find and click the service link
-    const serviceLink = wrapper.find('[data-test-subj="service-link"]').first();
-    expect(serviceLink.exists()).toBeTruthy();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
 
-    serviceLink.simulate('click');
+    // Find and click the service link
+    const serviceLink = getByTestId('service-link');
+    expect(serviceLink).toBeInTheDocument();
+
+    fireEvent.click(serviceLink);
 
     const expectedUrl = generateServiceUrl('checkoutservice', mockDataSourceId, mockMode);
     expect(window.location.href).toBe(expectedUrl);

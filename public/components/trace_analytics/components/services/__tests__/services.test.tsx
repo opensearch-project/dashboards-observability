@@ -3,20 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Services } from '..';
 import { coreRefs } from '../../../../../framework/core_refs';
 
 describe('Services component', () => {
-  configure({ adapter: new Adapter() });
   const modes = [
     { id: 'jaeger', title: 'Jaeger' },
     { id: 'data_prepper', title: 'Data Prepper' },
   ];
 
-  it('renders empty services page', () => {
+  it('renders empty services page', async () => {
     const { http, chrome } = coreRefs;
     const setQuery = jest.fn();
     const setFilters = jest.fn();
@@ -35,7 +33,7 @@ describe('Services component', () => {
     const nameColumnAction = (item: any) =>
       location.assign(`#/trace_analytics/services/${encodeURIComponent(item)}`);
     const traceColumnAction = () => location.assign('#/trace_analytics/traces');
-    const wrapper = mount(
+    render(
       <Services
         http={http!}
         chrome={chrome!}
@@ -60,10 +58,12 @@ describe('Services component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
-  it('renders services page', () => {
+  it('renders services page', async () => {
     const { http, chrome } = coreRefs;
     const setQuery = jest.fn();
     const setFilters = jest.fn();
@@ -82,7 +82,7 @@ describe('Services component', () => {
     const nameColumnAction = (item: any) =>
       location.assign(`#/trace_analytics/services/${encodeURIComponent(item)}`);
     const traceColumnAction = () => location.assign('#/trace_analytics/traces');
-    const wrapper = mount(
+    render(
       <Services
         http={http!}
         chrome={chrome!}
@@ -107,10 +107,12 @@ describe('Services component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
-  it('renders jaeger services page', () => {
+  it('renders jaeger services page', async () => {
     const { http, chrome } = coreRefs;
     const setQuery = jest.fn();
     const setFilters = jest.fn();
@@ -129,7 +131,7 @@ describe('Services component', () => {
     const nameColumnAction = (item: any) =>
       location.assign(`#/trace_analytics/services/${encodeURIComponent(item)}`);
     const traceColumnAction = () => location.assign('#/trace_analytics/traces');
-    const wrapper = mount(
+    render(
       <Services
         http={http!}
         chrome={chrome!}
@@ -155,6 +157,8 @@ describe('Services component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 });

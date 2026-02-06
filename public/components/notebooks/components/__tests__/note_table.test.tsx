@@ -5,8 +5,6 @@
 
 import '@testing-library/jest-dom';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
-import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { NoteTable } from '../note_table';
 
@@ -22,8 +20,6 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('<NoteTable /> spec', () => {
-  configure({ adapter: new Adapter() });
-
   const props = {
     loading: false,
     fetchNotebooks: jest.fn(),
@@ -47,12 +43,14 @@ describe('<NoteTable /> spec', () => {
     cleanup(); // Cleanup the rendered component after each test
   });
 
-  it('renders the empty component', () => {
-    const utils = renderNoteTable({ notebooks: [] });
-    expect(utils.container.firstChild).toMatchSnapshot();
+  it('renders the empty component', async () => {
+    renderNoteTable({ notebooks: [] });
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
-  it('renders the component', () => {
+  it('renders the component', async () => {
     const notebooks = Array.from({ length: 5 }, (v, k) => ({
       path: `path-${k}`,
       id: `id-${k}`,
@@ -60,7 +58,9 @@ describe('<NoteTable /> spec', () => {
       dateModified: '2023-01-02 12:00:00',
     }));
     const { getByTestId, getAllByText, ...utils } = renderNoteTable({ notebooks });
-    expect(utils.container.firstChild).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
     fireEvent.click(utils.getByText('Add sample notebooks'));
     fireEvent.click(utils.getAllByLabelText('Select this row')[0]);
     fireEvent.click(getByTestId('deleteSelectedNotebooks'));

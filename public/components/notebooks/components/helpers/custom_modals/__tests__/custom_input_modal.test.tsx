@@ -4,18 +4,14 @@
  */
 
 import { fireEvent, render } from '@testing-library/react';
-import { configure, shallow } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { CustomInputModal } from '../custom_input_modal';
 
 describe('<CustomInputModal /> spec', () => {
-  configure({ adapter: new Adapter() });
-
   it('renders the component', () => {
     const runModal = jest.fn();
     const closeModal = jest.fn();
-    const wrapper = shallow(
+    render(
       <CustomInputModal
         runModal={runModal}
         closeModal={closeModal}
@@ -27,9 +23,9 @@ describe('<CustomInputModal /> spec', () => {
         helpText="help text"
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
 
-    const emptyNameWrapper = shallow(
+    const { container: emptyNameContainer } = render(
       <CustomInputModal
         runModal={runModal}
         closeModal={closeModal}
@@ -41,7 +37,7 @@ describe('<CustomInputModal /> spec', () => {
         helpText="help text"
       />
     );
-    expect(emptyNameWrapper).toMatchSnapshot();
+    expect(emptyNameContainer).toMatchSnapshot();
   });
 
   it('clicks buttons', () => {

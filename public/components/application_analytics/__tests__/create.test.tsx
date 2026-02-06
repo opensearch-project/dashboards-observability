@@ -4,17 +4,14 @@
  */
 
 import React from 'react';
-import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 import { CreateApp } from '../components/create';
+// eslint-disable-next-line jest/no-mocks-import
 import { coreStartMock } from '../../../../test/__mocks__/coreMocks';
 import DSLService from 'public/services/requests/dsl';
 import PPLService from 'public/services/requests/ppl';
 import { render } from '@testing-library/react';
 
 describe('Create Page', () => {
-  configure({ adapter: new Adapter() });
-
   it('renders empty', () => {
     const core = coreStartMock;
     const setQuery = jest.fn();
@@ -42,7 +39,7 @@ describe('Create Page', () => {
       http: jest.fn(),
       fetch: jest.fn(),
     } as unknown) as PPLService;
-    const utils = render(
+    const _utils = render(
       <CreateApp
         http={core.http}
         chrome={core.chrome}
@@ -58,7 +55,7 @@ describe('Create Page', () => {
         setEndTime={setEndTime}
         name=""
         description=""
-        mode='data_prepper'
+        mode="data_prepper"
         setNameWithStorage={setNameWithStorage}
         setDescriptionWithStorage={setDescriptionWithStorage}
         setQueryWithStorage={setQueryWithStorage}
@@ -76,7 +73,7 @@ describe('Create Page', () => {
       />
     );
 
-    expect(utils).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('renders with name and description', () => {
@@ -106,7 +103,7 @@ describe('Create Page', () => {
       http: jest.fn(),
       fetch: jest.fn(),
     } as unknown) as PPLService;
-    const utils = render(
+    const _utils = render(
       <CreateApp
         http={core.http}
         chrome={core.chrome}
@@ -122,7 +119,7 @@ describe('Create Page', () => {
         setEndTime={setEndTime}
         name="Chic Application"
         description="This is my chic application."
-        mode='data_prepper'   
+        mode="data_prepper"
         setNameWithStorage={setNameWithStorage}
         setDescriptionWithStorage={setDescriptionWithStorage}
         setQueryWithStorage={setQueryWithStorage}
@@ -140,7 +137,7 @@ describe('Create Page', () => {
       />
     );
 
-    expect(utils).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('renders with query', () => {
@@ -186,7 +183,7 @@ describe('Create Page', () => {
         setEndTime={setEndTime}
         name=""
         description=""
-        mode='data_prepper'
+        mode="data_prepper"
         setNameWithStorage={setNameWithStorage}
         setDescriptionWithStorage={setDescriptionWithStorage}
         setQueryWithStorage={setQueryWithStorage}
@@ -207,7 +204,7 @@ describe('Create Page', () => {
     utils.getByText('Clear').click();
     utils.getByText('Cancel').click();
 
-    expect(utils).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('can clear query', () => {
@@ -253,7 +250,7 @@ describe('Create Page', () => {
         setEndTime={setEndTime}
         name=""
         description=""
-        mode='data_prepper'
+        mode="data_prepper"
         setNameWithStorage={setNameWithStorage}
         setDescriptionWithStorage={setDescriptionWithStorage}
         setQueryWithStorage={setQueryWithStorage}
@@ -274,7 +271,7 @@ describe('Create Page', () => {
     utils.getByText('Clear').click();
     utils.getByText('Clear').click();
 
-    expect(utils).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('renders with one service selected', () => {
@@ -329,7 +326,7 @@ describe('Create Page', () => {
         setEndTime={setEndTime}
         name=""
         description=""
-        mode='data_prepper'
+        mode="data_prepper"
         setNameWithStorage={setNameWithStorage}
         setDescriptionWithStorage={setDescriptionWithStorage}
         setQueryWithStorage={setQueryWithStorage}
@@ -350,7 +347,7 @@ describe('Create Page', () => {
     utils.getByText('Clear').click();
     utils.getByText('Cancel').click();
 
-    expect(utils).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('clears service selected', () => {
@@ -405,7 +402,7 @@ describe('Create Page', () => {
         setEndTime={setEndTime}
         name=""
         description=""
-        mode='data_prepper'
+        mode="data_prepper"
         setNameWithStorage={setNameWithStorage}
         setDescriptionWithStorage={setDescriptionWithStorage}
         setQueryWithStorage={setQueryWithStorage}
@@ -426,7 +423,7 @@ describe('Create Page', () => {
     utils.getByText('Clear').click();
     utils.getByText('Clear').click();
 
-    expect(utils).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('renders with one trace selected', () => {
@@ -481,7 +478,7 @@ describe('Create Page', () => {
         setEndTime={setEndTime}
         name=""
         description=""
-        mode='data_prepper'
+        mode="data_prepper"
         setNameWithStorage={setNameWithStorage}
         setDescriptionWithStorage={setDescriptionWithStorage}
         setQueryWithStorage={setQueryWithStorage}
@@ -502,7 +499,7 @@ describe('Create Page', () => {
     utils.getByText('Clear').click();
     utils.getByText('Cancel').click();
 
-    expect(utils).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('clears one trace selected', () => {
@@ -557,7 +554,7 @@ describe('Create Page', () => {
         setEndTime={setEndTime}
         name=""
         description=""
-        mode='data_prepper'
+        mode="data_prepper"
         setNameWithStorage={setNameWithStorage}
         setDescriptionWithStorage={setDescriptionWithStorage}
         setQueryWithStorage={setQueryWithStorage}
@@ -578,6 +575,6 @@ describe('Create Page', () => {
     utils.getByText('Clear').click();
     utils.getByText('Clear').click();
 
-    expect(utils).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 });

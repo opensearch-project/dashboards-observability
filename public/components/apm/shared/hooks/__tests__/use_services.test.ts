@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useServices } from '../use_services';
 
 // Mock the PPLSearchService
@@ -78,12 +78,14 @@ describe('useServices', () => {
 
       mockListServices.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => useServices(defaultParams));
+      const { result } = renderHook(() => useServices(defaultParams));
 
       // Initial loading state
       expect(result.current.isLoading).toBe(true);
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.isLoading).toBe(false);
       expect(result.current.data).toHaveLength(2);
@@ -106,9 +108,11 @@ describe('useServices', () => {
 
       mockListServices.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => useServices(defaultParams));
+      const { result } = renderHook(() => useServices(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data[0].serviceName).toBe('legacy-service');
     });
@@ -121,9 +125,11 @@ describe('useServices', () => {
 
       mockListServices.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => useServices(defaultParams));
+      const { result } = renderHook(() => useServices(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data[0].serviceName).toBe('unknown');
       expect(result.current.data[0].environment).toBe('unknown');
@@ -135,9 +141,11 @@ describe('useServices', () => {
       const mockError = new Error('Network error');
       mockListServices.mockRejectedValue(mockError);
 
-      const { result, waitForNextUpdate } = renderHook(() => useServices(defaultParams));
+      const { result } = renderHook(() => useServices(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toEqual(mockError);
       expect(result.current.data).toEqual([]);
@@ -146,9 +154,11 @@ describe('useServices', () => {
     it('should wrap non-Error throws', async () => {
       mockListServices.mockRejectedValue('string error');
 
-      const { result, waitForNextUpdate } = renderHook(() => useServices(defaultParams));
+      const { result } = renderHook(() => useServices(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toBeInstanceOf(Error);
       expect(result.current.error?.message).toBe('Unknown error');
@@ -162,9 +172,11 @@ describe('useServices', () => {
         AvailableGroupByAttributes: {},
       });
 
-      const { result, waitForNextUpdate } = renderHook(() => useServices(defaultParams));
+      const { result } = renderHook(() => useServices(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockListServices).toHaveBeenCalledTimes(1);
 
@@ -172,7 +184,9 @@ describe('useServices', () => {
         result.current.refetch();
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockListServices).toHaveBeenCalledTimes(2);
     });
@@ -185,11 +199,13 @@ describe('useServices', () => {
         AvailableGroupByAttributes: {},
       });
 
-      const { waitForNextUpdate, rerender } = renderHook(({ params }) => useServices(params), {
+      const { result, rerender } = renderHook(({ params }) => useServices(params), {
         initialProps: { params: defaultParams },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       rerender({
         params: {
@@ -198,7 +214,9 @@ describe('useServices', () => {
         },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockListServices).toHaveBeenCalledTimes(2);
     });
@@ -209,17 +227,21 @@ describe('useServices', () => {
         AvailableGroupByAttributes: {},
       });
 
-      const { waitForNextUpdate, rerender } = renderHook(({ params }) => useServices(params), {
+      const { result, rerender } = renderHook(({ params }) => useServices(params), {
         initialProps: { params: { ...defaultParams, refreshTrigger: 0 } },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       rerender({
         params: { ...defaultParams, refreshTrigger: 1 },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockListServices).toHaveBeenCalledTimes(2);
     });
@@ -232,9 +254,11 @@ describe('useServices', () => {
         AvailableGroupByAttributes: {},
       });
 
-      const { waitForNextUpdate } = renderHook(() => useServices(defaultParams));
+      const { result } = renderHook(() => useServices(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const callArgs = mockListServices.mock.calls[0][0];
       expect(callArgs.dataset.id).toBe('dataset-123');
@@ -258,9 +282,11 @@ describe('useServices', () => {
         AvailableGroupByAttributes: {},
       });
 
-      const { waitForNextUpdate } = renderHook(() => useServices(defaultParams));
+      const { result } = renderHook(() => useServices(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const callArgs = mockListServices.mock.calls[0][0];
       expect(callArgs.dataset.dataSource).toBeUndefined();

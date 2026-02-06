@@ -4,15 +4,13 @@
  */
 
 import React from 'react';
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render } from '@testing-library/react';
 import { ServiceConfig } from '../components/config_components/service_config';
+// eslint-disable-next-line jest/no-mocks-import
 import { coreStartMock } from '../../../../test/__mocks__/coreMocks';
 import DSLService from 'public/services/requests/dsl';
 
 describe('Service Config component', () => {
-  configure({ adapter: new Adapter() });
-
   it('renders empty service config', () => {
     const core = coreStartMock;
     const setQuery = jest.fn();
@@ -33,7 +31,7 @@ describe('Service Config component', () => {
       fetchIndices: jest.fn(),
       fetchFields: jest.fn(),
     } as unknown) as DSLService;
-    const wrapper = mount(
+    render(
       <ServiceConfig
         http={core.http}
         chrome={core.chrome}
@@ -46,7 +44,7 @@ describe('Service Config component', () => {
         setStartTime={setStartTime}
         endTime="now"
         setEndTime={setEndTime}
-        mode='data_prepper'
+        mode="data_prepper"
         dslService={dslService}
         selectedServices={[]}
         setSelectedServices={setSelectedServices}
@@ -63,7 +61,7 @@ describe('Service Config component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('renders with one service selected', () => {
@@ -95,7 +93,7 @@ describe('Service Config component', () => {
         disabled: false,
       },
     ];
-    const wrapper = mount(
+    render(
       <ServiceConfig
         http={core.http}
         chrome={core.chrome}
@@ -108,7 +106,7 @@ describe('Service Config component', () => {
         setStartTime={setStartTime}
         endTime="now"
         setEndTime={setEndTime}
-        mode='data_prepper'
+        mode="data_prepper"
         dslService={dslService}
         selectedServices={[]}
         setSelectedServices={setSelectedServices}
@@ -125,6 +123,6 @@ describe('Service Config component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 });
