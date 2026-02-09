@@ -69,7 +69,7 @@ export const setTimeFilter = (setEndTime = false, refresh = true) => {
   const endTime = 'Mar 25, 2021 @ 11:00:00.000';
   cy.get('button.euiButtonEmpty[aria-label="Date quick select"]').click({ force: true });
   cy.get('.euiQuickSelect__applyButton').click({ force: true });
-  cy.get('.euiSuperDatePicker__prettyFormatLink').click();
+  cy.get('.euiSuperDatePicker__prettyFormatLink').click({ force: true });
   cy.get('.euiTab__content').contains('Absolute').click();
   cy.get('input[data-test-subj="superDatePickerAbsoluteDateInput"]')
     .focus()
