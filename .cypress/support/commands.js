@@ -69,16 +69,3 @@ Cypress.Commands.overwrite('request', (originalFn, ...args) => {
 
   return originalFn(Object.assign({}, defaults, options));
 });
-
-// Suppress React 18 related errors that don't affect test functionality
-Cypress.on('uncaught:exception', (err) => {
-  // Suppress getBoundingClientRect errors from React 18 rendering
-  if (err.message.includes('getBoundingClientRect')) {
-    return false;
-  }
-  // Suppress SecurityError from Plotly accessing frames
-  if (err.message.includes('Blocked a restricted frame')) {
-    return false;
-  }
-  return true;
-});

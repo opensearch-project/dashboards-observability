@@ -295,6 +295,7 @@ describe('Testing traces tree view', () => {
     // Waiting time for render to complete
     cy.get("[data-test-subj='treeExpandAll']").click();
     cy.get("[data-test-subj='treeCollapseAll']").click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
     cy.get('[data-test-subj="fullScreenButton"]').click();
     cy.get('.euiButtonEmpty__text').should('contain.text', 'Exit full screen');
@@ -368,6 +369,7 @@ describe('Testing traces Custom source features', () => {
     setTimeFilter();
     cy.get('[data-test-subj="trace-table-mode-selector"]').click();
     cy.get('.euiSelectableListItem__content').contains('All Spans').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
   });
 
   it('Renders the traces custom source all spans as default, clicks trace view redirection ', () => {

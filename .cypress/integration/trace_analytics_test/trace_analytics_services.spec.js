@@ -451,6 +451,7 @@ describe('Testing navigation from Services to Traces', () => {
     cy.get("[data-test-subj='indexPattern-switch-link']").click();
     cy.get("[data-test-subj='data_prepper-mode']").click();
     setTimeFilter();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
   });
 
   it('Clicks on the "Traces" shortcut to redirect', () => {
@@ -497,7 +498,7 @@ describe('Testing switch mode to jaeger', () => {
     setTimeFilter();
     cy.get("[data-test-subj='indexPattern-switch-link']").click();
     cy.get("[data-test-subj='jaeger-mode']").click();
-    //cy.get('.euiButtonEmpty__text').should('contain', 'Jaeger');
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
   });
 
   it('Verifies columns and data', () => {

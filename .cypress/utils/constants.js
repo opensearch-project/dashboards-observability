@@ -187,4 +187,8 @@ Cypress.on('uncaught:exception', (err, runnable, promise) => {
 
 Cypress.on('uncaught:exception', (err, runnable) => {
   if (err.message.includes('ResizeObserver loop')) return false;
+  // Suppress React 18 getBoundingClientRect errors from EUI DataGrid
+  if (err.message.includes('getBoundingClientRect')) return false;
+  // Suppress SecurityError from Plotly accessing frames
+  if (err.message.includes('Blocked a restricted frame')) return false;
 });
