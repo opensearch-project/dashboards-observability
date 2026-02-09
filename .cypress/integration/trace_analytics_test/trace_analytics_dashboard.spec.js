@@ -58,6 +58,20 @@ describe('Dump test data', () => {
             method: 'POST',
           },
           body: response.body,
+        }).then(() => {
+          // Refresh the index to make data immediately available for search
+          cy.request({
+            method: 'POST',
+            url: 'api/console/proxy',
+            headers: {
+              'content-type': 'application/json;charset=UTF-8',
+              'osd-xsrf': true,
+            },
+            qs: {
+              path: `${index}/_refresh`,
+              method: 'POST',
+            },
+          });
         });
       });
     };
@@ -361,6 +375,20 @@ describe('Dump jaeger test data', () => {
             method: 'POST',
           },
           body: response.body,
+        }).then(() => {
+          // Refresh the index to make data immediately available for search
+          cy.request({
+            method: 'POST',
+            url: 'api/console/proxy',
+            headers: {
+              'content-type': 'application/json;charset=UTF-8',
+              'osd-xsrf': true,
+            },
+            qs: {
+              path: `${index}/_refresh`,
+              method: 'POST',
+            },
+          });
         });
       });
     };
