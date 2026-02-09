@@ -379,7 +379,7 @@ describe('Testing traces Custom source features', () => {
     cy.get('.euiDataGridHeaderCell__content').contains('Errors').should('exist');
     cy.get('.euiDataGridHeaderCell__content').contains('Last updated').should('exist');
 
-    cy.get('a.euiLink.euiLink--primary').first().click();
+    cy.get('.euiDataGridRowCell').contains('d5bc99166e521eec173bcb7f9b0d3c43').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('.overview-content').should('contain.text', 'd5bc99166e521eec173bcb7f9b0d3c43');
   });
@@ -397,14 +397,17 @@ describe('Testing traces Custom source features', () => {
     cy.contains('Sort Z-A').click();
 
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('.euiDataGridRowCell').should('exist');
     cy.contains('467.03 ms').should('exist');
 
     cy.get('[data-test-subj="pagination-button-next"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('.euiDataGridRowCell').should('exist');
     cy.contains('399.10 ms').should('exist');
 
     cy.get('[data-test-subj="pagination-button-previous"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('.euiDataGridRowCell').should('exist');
     cy.contains('467.03 ms').should('exist');
   });
 
@@ -420,7 +423,7 @@ describe('Testing traces Custom source features', () => {
     cy.get('.euiDataGridHeaderCell__content').contains('Errors').should('exist');
     cy.get('.euiDataGridHeaderCell__content').contains('Last updated').should('exist');
 
-    cy.get('a.euiLink.euiLink--primary').first().click();
+    cy.get('.euiDataGridRowCell').contains('d5bc99166e521eec173bcb7f9b0d3c43').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('.overview-content').should('contain.text', 'd5bc99166e521eec173bcb7f9b0d3c43');
   });
