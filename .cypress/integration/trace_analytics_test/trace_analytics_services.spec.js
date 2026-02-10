@@ -295,9 +295,13 @@ describe('Testing traces Spans table verify table headers functionality', () => 
         win.sessionStorage.clear();
       },
     });
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get("[data-test-subj='indexPattern-switch-link']").click();
     cy.get("[data-test-subj='data_prepper-mode']").click();
     setTimeFilter();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    // Wait for the services table to be stable
+    cy.get('.euiTableRow', { timeout: 10000 }).should('have.length.greaterThan', 0);
   });
 
   it('Renders the spans table and verify columns headers', () => {
@@ -342,7 +346,10 @@ describe('Testing traces Spans table verify table headers functionality', () => 
   it('Hide all button Spans table', () => {
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
     expandServiceView(1);
-    cy.get('.euiTableRow').should('have.length.lessThan', 2); //Replace wait
+    // Scroll to the data grid element to ensure it's initialized
+    cy.get('[data-test-subj="service-dep-table"]', { timeout: 10000 }).scrollIntoView({ duration: 500 }).should('be.visible');
+    // Wait for the data grid headers to be fully rendered and stable
+    cy.get('.euiDataGridHeaderCell__content', { timeout: 10000 }).should('be.visible');
     cy.get('[data-test-subj = "dataGridColumnSelectorButton"]').click();
     cy.get('.euiPopoverFooter .euiFlexItem.euiFlexItem--flexGrowZero')
       .eq(1)
@@ -494,10 +501,17 @@ describe('Testing switch mode to jaeger', () => {
         win.sessionStorage.clear();
       },
     });
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     setTimeFilter();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get("[data-test-subj='indexPattern-switch-link']").click();
     cy.get("[data-test-subj='jaeger-mode']").click();
-    //cy.get('.euiButtonEmpty__text').should('contain', 'Jaeger');
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    // Wait for the services table to be fully rendered with jaeger data
+    cy.get('.euiTableRow', { timeout: 15000 }).should('have.length.greaterThan', 0);
+    // Scroll to the last table row to ensure all components are initialized
+    cy.get('.euiTableRow').last().scrollIntoView({ duration: 500 });
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
   });
 
   it('Verifies columns and data', () => {
