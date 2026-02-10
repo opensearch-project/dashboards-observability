@@ -413,9 +413,18 @@ describe('Testing traces Spans table and verify columns functionality', () => {
         win.sessionStorage.clear();
       },
     });
-    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    // Wait for button to be visible and interactable before clicking
+    cy.get("[data-test-subj='indexPattern-switch-link']", { timeout: 10000 })
+      .should('be.visible')
+      .scrollIntoView({ duration: 500 })
+      .click();
     cy.get("[data-test-subj='data_prepper-mode']").click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     setTimeFilter();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    // Wait for the services table to be stable
+    cy.get('.euiTableRow', { timeout: 10000 }).should('have.length.greaterThan', 0);
   });
 
   it('Renders the spans table and click on first span to verify details', () => {

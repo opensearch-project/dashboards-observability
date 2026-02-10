@@ -296,10 +296,17 @@ describe('Testing traces tree view', () => {
     cy.get("[data-test-subj='treeExpandAll']").click();
     cy.get("[data-test-subj='treeCollapseAll']").click();
 
+    // Wait for fullscreen button to be visible and scroll to it before clicking
+    cy.get('[data-test-subj="fullScreenButton"]', { timeout: 10000 })
+      .should('be.visible')
+      .scrollIntoView({ duration: 500 });
     cy.get('[data-test-subj="fullScreenButton"]').click();
-    cy.get('.euiButtonEmpty__text').should('contain.text', 'Exit full screen');
+    cy.get('.euiButtonEmpty__text', { timeout: 10000 }).should('contain.text', 'Exit full screen');
+    cy.get('[data-test-subj="fullScreenButton"]', { timeout: 10000 })
+      .should('be.visible')
+      .scrollIntoView({ duration: 500 });
     cy.get('[data-test-subj="fullScreenButton"]').click();
-    cy.get('.euiButtonEmpty__text').should('contain.text', 'Full screen');
+    cy.get('.euiButtonEmpty__text', { timeout: 10000 }).should('contain.text', 'Full screen');
   });
 });
 
