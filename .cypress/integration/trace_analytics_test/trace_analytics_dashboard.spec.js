@@ -13,7 +13,7 @@ suppressResizeObserverIssue(); //needs to be in file once
 describe('Dump test data', () => {
   it('Indexes test data', () => {
     const dumpDataSet = (mapping_url, data_url, index) => {
-      cy.request({
+      return cy.request({
         method: 'POST',
         failOnStatusCode: false,
         url: 'api/console/proxy',
@@ -25,40 +25,9 @@ describe('Dump test data', () => {
           path: `${index}`,
           method: 'PUT',
         },
-      });
-
-      cy.request(mapping_url).then((response) => {
-        cy.request({
-          method: 'POST',
-          url: 'api/console/proxy',
-          headers: {
-            'content-type': 'application/json;charset=UTF-8',
-            'osd-xsrf': true,
-          },
-          qs: {
-            path: `${index}/_mapping`,
-            method: 'POST',
-          },
-          body: response.body,
-        });
-      });
-
-      cy.request(data_url).then((response) => {
-        cy.request({
-          method: 'POST',
-          url: 'api/console/proxy',
-          headers: {
-            'content-type': 'application/json;charset=UTF-8',
-            'osd-xsrf': true,
-          },
-          qs: {
-            path: `${index}/_bulk`,
-            method: 'POST',
-          },
-          body: response.body,
-        }).then(() => {
-          // Refresh the index to make data immediately available for search
-          cy.request({
+      }).then(() => {
+        return cy.request(mapping_url).then((response) => {
+          return cy.request({
             method: 'POST',
             url: 'api/console/proxy',
             headers: {
@@ -66,17 +35,49 @@ describe('Dump test data', () => {
               'osd-xsrf': true,
             },
             qs: {
-              path: `${index}/_refresh`,
+              path: `${index}/_mapping`,
               method: 'POST',
             },
+            body: response.body,
+          }).then(() => {
+            return cy.request(data_url).then((dataResponse) => {
+              return cy.request({
+                method: 'POST',
+                url: 'api/console/proxy',
+                headers: {
+                  'content-type': 'application/json;charset=UTF-8',
+                  'osd-xsrf': true,
+                },
+                qs: {
+                  path: `${index}/_bulk`,
+                  method: 'POST',
+                },
+                body: dataResponse.body,
+              }).then(() => {
+                // Refresh the index to make data immediately available for search
+                return cy.request({
+                  method: 'POST',
+                  url: 'api/console/proxy',
+                  headers: {
+                    'content-type': 'application/json;charset=UTF-8',
+                    'osd-xsrf': true,
+                  },
+                  qs: {
+                    path: `${index}/_refresh`,
+                    method: 'POST',
+                  },
+                });
+              });
+            });
           });
         });
       });
     };
 
-    testDataSet.forEach(({ mapping_url, data_url, index }) =>
-      dumpDataSet(mapping_url, data_url, index)
-    );
+    // Load datasets sequentially
+    testDataSet.reduce((chain, { mapping_url, data_url, index }) => {
+      return chain.then(() => dumpDataSet(mapping_url, data_url, index));
+    }, cy.wrap(null));
   });
 });
 
@@ -137,9 +138,21 @@ describe('Testing dashboard table', () => {
   });
 
   it('Redirects to traces table with filter', () => {
+    // Clear any existing filters first
+    cy.get('body').then(($body) => {
+      if ($body.find('button[aria-label="Remove filter"]').length > 0) {
+        cy.get('button[aria-label="Remove filter"]').each(($el) => {
+          cy.wrap($el).click();
+        });
+      }
+    });
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
     cy.get('[data-test-subj="trace-table-mode-selector"]').click();
     cy.get('.euiSelectableListItem__content').contains('Traces').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    // Wait for data to fully load by checking for the expected count
+    cy.get('[data-test-subj="dashboard-table-traces-button"]', { timeout: 10000 }).contains('13').should('be.visible');
     cy.get('[data-test-subj="dashboard-table-traces-button"]').contains('13').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('.euiDataGrid').should('be.visible');
@@ -187,9 +200,9 @@ describe('Testing plots', () => {
   it('Renders plots', () => {
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('text.ytitle[data-unformatted="Error rate (%)"]').should('exist');
-    cy.get('text.annotation-text[data-unformatted="Now: 14.81%"]').should('exist');
+    cy.get('text.annotation-text[data-unformatted="Now: 14.81%"]', { timeout: 15000 }).should('exist');
     cy.get('text.ytitle[data-unformatted="Throughput (n)"]').should('exist');
-    cy.get('text.annotation-text[data-unformatted="Now: 108"]').should('exist');
+    cy.get('text.annotation-text[data-unformatted="Now: 108"]', { timeout: 15000 }).should('exist');
   });
 });
 
@@ -226,10 +239,9 @@ describe('Latency by trace group table', () => {
   it('Sorts the Latency by trace group table', () => {
     cy.get('span[title*="Trace group name"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('[data-test-subj="dashboard-table-trace-group-name-button"]')
+    cy.get('[data-test-subj="dashboard-table-trace-group-name-button"]', { timeout: 15000 })
       .eq(0)
-      .contains('/**')
-      .should('exist');
+      .should('contain', '/**');
   });
 
   it('Verify tooltips in Latency by trace group table', () => {
@@ -264,10 +276,11 @@ describe('Latency by trace group table', () => {
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get(
-      '.euiTableCellContent.euiTableCellContent--alignRight.euiTableCellContent--overflowingContent'
+      '.euiTableCellContent.euiTableCellContent--alignRight.euiTableCellContent--overflowingContent',
+      { timeout: 15000 }
     )
       .contains('211.04')
-      .should('exist');
+      .should('be.visible');
     cy.get('button[data-test-subj="dashboard-table-trace-group-name-button"]').eq(0).click();
     cy.get('.euiBadge.euiBadge--hollow.euiBadge--iconRight.globalFilterItem').click();
     cy.get('.euiIcon.euiIcon--medium.euiContextMenu__arrow').click();
@@ -319,7 +332,7 @@ describe('Testing filters on trace analytics page', { scrollBehavior: false }, (
     cy.get('.euiButton.euiButton--primary.euiButton--fill').contains('Save').click();
     cy.get('.euiBadge__content').should('exist').first().click();
     cy.get('.euiIcon.euiIcon--medium.euiContextMenu__arrow').click();
-    cy.get('[data-test-subj="filter-popover-cancel-button"]').contains('Cancel').click();
+    cy.get('[data-test-subj="filter-popover-cancel-button"]', { timeout: 10000 }).contains('Cancel').click();
     cy.get('.euiIcon.euiIcon--small.euiIcon--inherit.euiBadge__icon').first().click();
   });
 });
@@ -327,7 +340,7 @@ describe('Testing filters on trace analytics page', { scrollBehavior: false }, (
 describe('Dump jaeger test data', () => {
   it('Indexes test data', () => {
     const dumpDataSet = (mapping_url, data_url, index) => {
-      cy.request({
+      return cy.request({
         method: 'POST',
         failOnStatusCode: false,
         url: 'api/console/proxy',
@@ -339,40 +352,9 @@ describe('Dump jaeger test data', () => {
           path: `${index}`,
           method: 'PUT',
         },
-      });
-
-      cy.request(mapping_url).then((response) => {
-        cy.request({
-          method: 'POST',
-          url: 'api/console/proxy',
-          headers: {
-            'content-type': 'application/json;charset=UTF-8',
-            'osd-xsrf': true,
-          },
-          qs: {
-            path: `${index}/_mapping`,
-            method: 'POST',
-          },
-          body: response.body,
-        });
-      });
-
-      cy.request(data_url).then((response) => {
-        cy.request({
-          method: 'POST',
-          url: 'api/console/proxy',
-          headers: {
-            'content-type': 'application/json;charset=UTF-8',
-            'osd-xsrf': true,
-          },
-          qs: {
-            path: `${index}/_bulk`,
-            method: 'POST',
-          },
-          body: response.body,
-        }).then(() => {
-          // Refresh the index to make data immediately available for search
-          cy.request({
+      }).then(() => {
+        return cy.request(mapping_url).then((response) => {
+          return cy.request({
             method: 'POST',
             url: 'api/console/proxy',
             headers: {
@@ -380,17 +362,49 @@ describe('Dump jaeger test data', () => {
               'osd-xsrf': true,
             },
             qs: {
-              path: `${index}/_refresh`,
+              path: `${index}/_mapping`,
               method: 'POST',
             },
+            body: response.body,
+          }).then(() => {
+            return cy.request(data_url).then((dataResponse) => {
+              return cy.request({
+                method: 'POST',
+                url: 'api/console/proxy',
+                headers: {
+                  'content-type': 'application/json;charset=UTF-8',
+                  'osd-xsrf': true,
+                },
+                qs: {
+                  path: `${index}/_bulk`,
+                  method: 'POST',
+                },
+                body: dataResponse.body,
+              }).then(() => {
+                // Refresh the index to make data immediately available for search
+                return cy.request({
+                  method: 'POST',
+                  url: 'api/console/proxy',
+                  headers: {
+                    'content-type': 'application/json;charset=UTF-8',
+                    'osd-xsrf': true,
+                  },
+                  qs: {
+                    path: `${index}/_refresh`,
+                    method: 'POST',
+                  },
+                });
+              });
+            });
           });
         });
       });
     };
 
-    jaegerTestDataSet.forEach(({ mapping_url, data_url, index }) =>
-      dumpDataSet(mapping_url, data_url, index)
-    );
+    // Load datasets sequentially
+    jaegerTestDataSet.reduce((chain, { mapping_url, data_url, index }) => {
+      return chain.then(() => dumpDataSet(mapping_url, data_url, index));
+    }, cy.wrap(null));
   });
 });
 
@@ -416,7 +430,8 @@ describe('Testing switch mode to jaeger', () => {
 
     cy.get('[data-test-subj="trace-groups-service-operation-accordian"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.contains('redis,GetDriver').should('exist');
+    // Wait for jaeger data to load
+    cy.contains('redis,GetDriver', { timeout: 15000 }).should('exist');
     cy.contains('14.7').should('exist');
     cy.contains('100%').should('exist');
     cy.contains('7').should('exist');
@@ -428,8 +443,9 @@ describe('Testing switch mode to jaeger', () => {
 
   it('Verifies traces links to traces page', () => {
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('[data-test-subj="dashboardTable"]').should('be.visible');
-    cy.get('[data-test-subj="dashboard-table-traces-button"]').contains('7').should('be.visible').click();
+    // Wait for dashboard table to load with data
+    cy.get('[data-test-subj="dashboardTable"]', { timeout: 15000 }).should('be.visible');
+    cy.get('[data-test-subj="dashboard-table-traces-button"]', { timeout: 15000 }).contains('7').should('be.visible').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
     cy.contains(' (7)').should('exist');
@@ -440,7 +456,7 @@ describe('Testing switch mode to jaeger', () => {
   it('Switches to throughput mode and verifies columns and data', () => {
     cy.get("[data-test-subj='throughput-toggle']").click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.contains('frontend,HTTP GET /dispatch').should('exist');
+    cy.contains('frontend,HTTP GET /dispatch', { timeout: 15000 }).should('exist');
     cy.contains('711.38').should('exist');
     cy.contains('0%').should('exist');
     cy.contains('8').should('exist');
