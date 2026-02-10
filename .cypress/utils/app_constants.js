@@ -29,7 +29,9 @@ export const loadAllSampleData = () => {
   );
 
   cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory`);
-  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+  // Wait for page to fully load - first wait for header to exist
+  cy.get('header[data-test-subj="headerGlobalNav"]', { timeout: 60000 }).should('exist');
+  cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 60000 }).should('not.exist');
 
   // Conditionally dismiss the "New Enhanced Discover experience" modal if it appears
   cy.get('body').then(($body) => {
