@@ -15,9 +15,6 @@ import {
   AUTH_SERVICE_SPAN_ID,
   INVALID_URL,
 } from '../../utils/constants';
-import { suppressResizeObserverIssue } from '../../utils/constants';
-
-suppressResizeObserverIssue(); //needs to be in file once
 
 describe('Testing services table empty state', () => {
   beforeEach(() => {

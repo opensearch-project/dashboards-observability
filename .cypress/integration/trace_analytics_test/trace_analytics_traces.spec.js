@@ -85,6 +85,8 @@ describe('Testing trace view', () => {
     cy.get('.euiTableRow').should('have.length.lessThan', 3); //Replaces wait
     cy.get('[data-test-subj="trace-table-mode-selector"]').click();
     cy.get('.euiSelectableListItem__content').contains('Traces').click();
+    // Wait for DataGrid to be fully rendered and ready
+    cy.get('.euiDataGridRowCell--firstColumn').should('exist');
     cy.get('.euiDataGridRowCell--firstColumn').eq(0).click();
   });
 
@@ -381,6 +383,9 @@ describe('Testing traces Custom source features', () => {
     cy.get('.euiDataGridHeaderCell__content').contains('Errors').should('exist');
     cy.get('.euiDataGridHeaderCell__content').contains('Last updated').should('exist');
 
+    // Wait for DataGrid to be fully rendered and ready
+    cy.get('.euiDataGridRowCell').should('have.length.greaterThan', 0);
+
     cy.get('.euiDataGridRowCell').contains('d5bc99166e521eec173bcb7f9b0d3c43').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('.overview-content').should('contain.text', 'd5bc99166e521eec173bcb7f9b0d3c43');
@@ -425,6 +430,8 @@ describe('Testing traces Custom source features', () => {
     cy.get('.euiDataGridHeaderCell__content').contains('Errors').should('exist');
     cy.get('.euiDataGridHeaderCell__content').contains('Last updated').should('exist');
 
+    // Wait for DataGrid to be fully rendered and ready
+    cy.get('.euiDataGridRowCell').should('have.length.greaterThan', 0);
     cy.get('.euiDataGridRowCell').contains('d5bc99166e521eec173bcb7f9b0d3c43').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('.overview-content').should('contain.text', 'd5bc99166e521eec173bcb7f9b0d3c43');

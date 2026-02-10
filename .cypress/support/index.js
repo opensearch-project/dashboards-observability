@@ -74,3 +74,25 @@ Cypress.on('window:before:load', (win) => {
 
   win.ResizeObserver = ResizeObserverPolyfill;
 });
+
+// Global error handler for React 18 rendering errors
+Cypress.on('uncaught:exception', (err, runnable, promise) => {
+  // when the exception originated from an unhandled promise rejection
+  if (promise) {
+    return false;
+  }
+
+  const errorMessage = err.message || err.toString();
+
+  // Suppress ResizeObserver errors
+  if (errorMessage.includes('ResizeObserver loop')) return false;
+
+  // Suppress React 18 getBoundingClientRect errors from EUI DataGrid
+  if (errorMessage.includes('getBoundingClientRect')) return false;
+
+  // Suppress SecurityError from Plotly accessing frames
+  if (errorMessage.includes('Blocked a restricted frame')) return false;
+
+  // Let other errors fail the test
+  return true;
+});

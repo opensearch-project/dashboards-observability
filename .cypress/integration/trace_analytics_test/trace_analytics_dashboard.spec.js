@@ -6,9 +6,6 @@
 /// <reference types="cypress" />
 
 import { testDataSet, setTimeFilter, jaegerTestDataSet } from '../../utils/constants';
-import { suppressResizeObserverIssue } from '../../utils/constants';
-
-suppressResizeObserverIssue(); //needs to be in file once
 
 describe('Dump test data', () => {
   it('Indexes test data', () => {

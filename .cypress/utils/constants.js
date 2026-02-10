@@ -70,25 +70,35 @@ export const setTimeFilter = (setEndTime = false, refresh = true) => {
   cy.get('button.euiButtonEmpty[aria-label="Date quick select"]').click({ force: true });
   cy.get('.euiQuickSelect__applyButton').click({ force: true });
   cy.get('.euiSuperDatePicker__prettyFormatLink').click({ force: true });
+  cy.get('.euiTab__content').contains('Absolute').should('be.visible');
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
   cy.get('.euiTab__content').contains('Absolute').click();
   cy.get('input[data-test-subj="superDatePickerAbsoluteDateInput"]')
+    .should('be.visible')
     .focus()
-    .type('{selectall}' + startTime, { force: true });
+    .clear()
+    .type(startTime, { force: true });
+  cy.get('input[data-test-subj="superDatePickerAbsoluteDateInput"]').should('have.value', startTime);
   if (setEndTime) {
     cy.get(
       'button.euiDatePopoverButton--end[data-test-subj="superDatePickerendDatePopoverButton"]'
     ).click();
     cy.get('.euiTab__content').contains('Absolute').click();
     cy.get('input[data-test-subj="superDatePickerAbsoluteDateInput"]')
+      .should('be.visible')
       .focus()
-      .type('{selectall}' + endTime, { force: true });
+      .clear()
+      .type(endTime, { force: true });
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    // Verify the date was actually entered
+    cy.get('input[data-test-subj="superDatePickerAbsoluteDateInput"]').should('have.value', endTime);
   }
-  if (refresh) cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
-  cy.get('body').then(($body) => {
-    if ($body.find('[data-test-subj="globalLoadingIndicator"]').length > 0) {
-      cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 10000 }).should('not.exist');
-    }
-  });
+  if (refresh) {
+    cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').should('be.visible').should('not.be.disabled');
+    cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+  }
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 };
 
 export const expandServiceView = (rowIndex = 0) => {
@@ -151,7 +161,17 @@ source=opensearch_dashboards_sample_data_flights__ {enter}
 export const suppressResizeObserverIssue = () => {
   // exception is thrown on loading EuiDataGrid in cypress only, ignore for now
   cy.on('uncaught:exception', (err, runnable) => {
-    if (err.message.includes('ResizeObserver loop')) return false;
+    if (err.message && err.message.includes('ResizeObserver loop')) return false;
+    return true;
+  });
+};
+
+export const suppressReact18Errors = () => {
+  // Suppress React 18 rendering errors that don't affect test functionality
+  cy.on('uncaught:exception', (err, runnable) => {
+    if (err.message && err.message.includes('getBoundingClientRect')) return false;
+    if (err.message && err.message.includes('Blocked a restricted frame')) return false;
+    return true;
   });
 };
 
@@ -173,25 +193,3 @@ export const count_table_row = (expected_row_count) => {
     expect(total_row_count).to.equal(expected_row_count);
   });
 };
-
-Cypress.on('uncaught:exception', (err, runnable, promise) => {
-  // when the exception originated from an unhandled promise
-  // rejection, the promise is provided as a third argument
-  // you can turn off failing the test in this case
-  if (promise) {
-    return false;
-  }
-  // we still want to ensure there are no other unexpected
-  // errors, so we let them fail the test
-});
-
-Cypress.on('uncaught:exception', (err, runnable) => {
-  // Suppress ResizeObserver errors
-  if (err.message.includes('ResizeObserver loop')) return false;
-  // Suppress React 18 getBoundingClientRect errors from EUI DataGrid
-  if (err.message && err.message.includes('getBoundingClientRect')) return false;
-  // Suppress SecurityError from Plotly accessing frames
-  if (err.message && err.message.includes('Blocked a restricted frame')) return false;
-  // Let other errors fail the test
-  return true;
-});
