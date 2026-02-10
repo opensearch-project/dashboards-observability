@@ -30,7 +30,6 @@ describe('Dump test data', () => {
       cy.request(mapping_url).then((response) => {
         cy.request({
           method: 'POST',
-          //form: true,
           url: 'api/console/proxy',
           headers: {
             'content-type': 'application/json;charset=UTF-8',
@@ -47,7 +46,6 @@ describe('Dump test data', () => {
       cy.request(data_url).then((response) => {
         cy.request({
           method: 'POST',
-          //form: true,
           url: 'api/console/proxy',
           headers: {
             'content-type': 'application/json;charset=UTF-8',
@@ -58,6 +56,20 @@ describe('Dump test data', () => {
             method: 'POST',
           },
           body: response.body,
+        }).then(() => {
+          // Refresh the index to make data immediately available for search
+          cy.request({
+            method: 'POST',
+            url: 'api/console/proxy',
+            headers: {
+              'content-type': 'application/json;charset=UTF-8',
+              'osd-xsrf': true,
+            },
+            qs: {
+              path: `${index}/_refresh`,
+              method: 'POST',
+            },
+          });
         });
       });
     };
@@ -128,7 +140,7 @@ describe('Testing dashboard table', () => {
     cy.get('[data-test-subj="trace-table-mode-selector"]').click();
     cy.get('.euiSelectableListItem__content').contains('Traces').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('.euiLink').contains('13').click();
+    cy.get('[data-test-subj="dashboard-table-traces-button"]').contains('13').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('.euiDataGrid').should('be.visible');
 
@@ -332,7 +344,6 @@ describe('Dump jaeger test data', () => {
       cy.request(mapping_url).then((response) => {
         cy.request({
           method: 'POST',
-          //form: true,
           url: 'api/console/proxy',
           headers: {
             'content-type': 'application/json;charset=UTF-8',
@@ -349,7 +360,6 @@ describe('Dump jaeger test data', () => {
       cy.request(data_url).then((response) => {
         cy.request({
           method: 'POST',
-          //form: true,
           url: 'api/console/proxy',
           headers: {
             'content-type': 'application/json;charset=UTF-8',
@@ -360,6 +370,20 @@ describe('Dump jaeger test data', () => {
             method: 'POST',
           },
           body: response.body,
+        }).then(() => {
+          // Refresh the index to make data immediately available for search
+          cy.request({
+            method: 'POST',
+            url: 'api/console/proxy',
+            headers: {
+              'content-type': 'application/json;charset=UTF-8',
+              'osd-xsrf': true,
+            },
+            qs: {
+              path: `${index}/_refresh`,
+              method: 'POST',
+            },
+          });
         });
       });
     };
