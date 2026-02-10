@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* eslint-disable cypress/no-unnecessary-waiting */
+
 /// <reference types="cypress" />
 
 import {
@@ -11,6 +13,7 @@ import {
   TRACE_ID,
   SPAN_ID_TREE_VIEW,
   INVALID_URL,
+  REACT18_RENDER_DELAY,
 } from '../../utils/constants';
 
 describe('Testing traces table empty state', () => {
@@ -87,6 +90,7 @@ describe('Testing trace view', () => {
     cy.get('.euiSelectableListItem__content').contains('Traces').click();
     // Wait for DataGrid to be fully rendered and ready
     cy.get('.euiDataGridRowCell--firstColumn').should('exist');
+    cy.wait(500);
     cy.get('.euiDataGridRowCell--firstColumn').eq(0).click();
   });
 
@@ -298,6 +302,7 @@ describe('Testing traces tree view', () => {
     cy.get("[data-test-subj='treeExpandAll']").click();
     cy.get("[data-test-subj='treeCollapseAll']").click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.wait(500);
 
     cy.get('[data-test-subj="fullScreenButton"]').click();
     cy.get('.euiButtonEmpty__text').should('contain.text', 'Exit full screen');
@@ -385,6 +390,7 @@ describe('Testing traces Custom source features', () => {
 
     // Wait for DataGrid to be fully rendered and ready
     cy.get('.euiDataGridRowCell').should('have.length.greaterThan', 0);
+    cy.wait(500);
 
     cy.get('.euiDataGridRowCell').contains('d5bc99166e521eec173bcb7f9b0d3c43').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
@@ -422,6 +428,7 @@ describe('Testing traces Custom source features', () => {
     cy.get('[data-test-subj="trace-table-mode-selector"]').click();
     cy.get('.euiSelectableListItem').contains('Traces').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.wait(500);
 
     cy.get('.euiDataGridHeaderCell__content').contains('Trace Id').should('exist');
     cy.get('.euiDataGridHeaderCell__content').contains('Trace group').should('exist');
@@ -432,6 +439,7 @@ describe('Testing traces Custom source features', () => {
 
     // Wait for DataGrid to be fully rendered and ready
     cy.get('.euiDataGridRowCell').should('have.length.greaterThan', 0);
+    cy.wait(500);
     cy.get('.euiDataGridRowCell').contains('d5bc99166e521eec173bcb7f9b0d3c43').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('.overview-content').should('contain.text', 'd5bc99166e521eec173bcb7f9b0d3c43');

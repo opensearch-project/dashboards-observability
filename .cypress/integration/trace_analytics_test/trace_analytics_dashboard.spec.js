@@ -3,9 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* eslint-disable cypress/no-unnecessary-waiting */
+
 /// <reference types="cypress" />
 
-import { testDataSet, setTimeFilter, jaegerTestDataSet } from '../../utils/constants';
+import {
+  testDataSet,
+  setTimeFilter,
+  jaegerTestDataSet,
+  REACT18_RENDER_DELAY,
+  REACT18_MODE_SWITCH_DELAY,
+} from '../../utils/constants';
 
 describe('Dump test data', () => {
   it('Indexes test data', () => {
@@ -406,18 +414,24 @@ describe('Testing switch mode to jaeger', () => {
     setTimeFilter();
     cy.get("[data-test-subj='indexPattern-switch-link']").click();
     cy.get("[data-test-subj='jaeger-mode']").click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.wait(1000);
     cy.get('[data-test-subj="trace-groups-service-operation-accordian"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
   });
 
   it('Verifies errors mode columns and data', () => {
     cy.get('[data-test-subj="search-bar-input-box"]').should('be.visible').clear();
-    cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').should('be.visible').click();
+    cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').should('be.visible').click({ force: true });
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.wait(1000);
     cy.reload();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.wait(1000);
 
     cy.get('[data-test-subj="trace-groups-service-operation-accordian"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.wait(500);
     cy.contains('redis,GetDriver').should('exist');
     cy.contains('14.7').should('exist');
     cy.contains('100%').should('exist');
@@ -430,6 +444,7 @@ describe('Testing switch mode to jaeger', () => {
 
   it('Verifies traces links to traces page', () => {
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.wait(500);
     cy.get('[data-test-subj="dashboardTable"]').should('be.visible');
     cy.get('[data-test-subj="dashboard-table-traces-button"]').contains('7').should('be.visible').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
@@ -442,6 +457,7 @@ describe('Testing switch mode to jaeger', () => {
   it('Switches to throughput mode and verifies columns and data', () => {
     cy.get("[data-test-subj='throughput-toggle']").click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.wait(1000);
     cy.contains('frontend,HTTP GET /dispatch').should('exist');
     cy.contains('711.38').should('exist');
     cy.contains('0%').should('exist');

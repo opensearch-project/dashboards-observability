@@ -93,16 +93,21 @@ export const setTimeFilter = (setEndTime = false, refresh = true) => {
     // Verify the date was actually entered
     cy.get('input[data-test-subj="superDatePickerAbsoluteDateInput"]').should('have.value', endTime);
   }
+  // Click outside to close the date picker popover before clicking Apply
+  cy.get('body').click(0, 0);
   if (refresh) {
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').should('be.visible').should('not.be.disabled');
-    cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+    // Use force: true because popover may still be animating closed
+    cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click({ force: true });
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
   }
   cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 };
 
 export const expandServiceView = (rowIndex = 0) => {
-  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist'); //Replaces wait
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+  cy.get('[data-test-subj^="service-flyout-action-btntrace_service"]').should('exist');
+  cy.wait(500); // eslint-disable-line cypress/no-unnecessary-waiting
   cy.get('[data-test-subj^="service-flyout-action-btntrace_service"]').eq(rowIndex).click();
   cy.get('.overview-title').should('contain', 'Name');
   cy.get('[data-test-subj="service-view-flyout-action-btn"]').click();
