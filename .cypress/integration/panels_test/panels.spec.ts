@@ -21,7 +21,22 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
 
   before(() => {
     cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`);
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+    // Conditionally dismiss the "New Enhanced Discover experience" modal if it appears
+    cy.get('body').then(($body) => {
+      if ($body.find('.euiModal').length > 0) {
+        cy.get('.euiModal').then(($modal) => {
+          if ($modal.text().indexOf('New Enhanced Discover experience') !== -1) {
+            cy.get('.euiButton').contains('Dismiss').click();
+            cy.get('.euiModal').should('not.exist');
+          }
+        });
+      }
+    });
+
     cy.get('div[data-test-subj="sampleDataSetCardflights"]')
+      .should('be.visible')
       .contains(/(Add|View) data/)
       .trigger('mouseover')
       .click();

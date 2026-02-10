@@ -38,11 +38,28 @@ import {
 describe('Adding sample data and visualization', () => {
   it('Adds sample flights and logs data for event analytics', () => {
     cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`);
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+    // Conditionally dismiss the "New Enhanced Discover experience" modal if it appears
+    cy.get('body').then(($body) => {
+      if ($body.find('.euiModal').length > 0) {
+        cy.get('.euiModal').then(($modal) => {
+          if ($modal.text().indexOf('New Enhanced Discover experience') !== -1) {
+            cy.get('.euiButton').contains('Dismiss').click();
+            cy.get('.euiModal').should('not.exist');
+          }
+        });
+      }
+    });
+
     cy.get('div[data-test-subj="sampleDataSetCardflights"]')
+      .should('be.visible')
       .contains(/(Add|View) data/)
       .click();
     cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`);
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('div[data-test-subj="sampleDataSetCardlogs"]')
+      .should('be.visible')
       .contains(/(Add|View) data/)
       .click();
   });

@@ -29,15 +29,30 @@ export const loadAllSampleData = () => {
   );
 
   cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory`);
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+  // Conditionally dismiss the "New Enhanced Discover experience" modal if it appears
+  cy.get('body').then(($body) => {
+    if ($body.find('.euiModal').length > 0) {
+      cy.get('.euiModal').then(($modal) => {
+        if ($modal.text().indexOf('New Enhanced Discover experience') !== -1) {
+          cy.get('.euiButton').contains('Dismiss').click();
+          cy.get('.euiModal').should('not.exist');
+        }
+      });
+    }
+  });
 
   // Load sample flights data
-  cy.get(`button[data-test-subj="addSampleDataSetflights"]`).click({
-    force: true,
-  });
+  cy.get(`button[data-test-subj="addSampleDataSetflights"]`)
+    .should('be.visible')
+    .scrollIntoView({ duration: 500 })
+    .click();
   // Load sample logs data
-  cy.get(`button[data-test-subj="addSampleDataSetlogs"]`).click({
-    force: true,
-  });
+  cy.get(`button[data-test-subj="addSampleDataSetlogs"]`)
+    .should('be.visible')
+    .scrollIntoView({ duration: 500 })
+    .click();
 
   // Verify that sample data is add by checking toast notification
   cy.contains('Sample flight data installed', { timeout: 60000 });
