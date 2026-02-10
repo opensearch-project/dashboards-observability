@@ -25,17 +25,6 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
     cy.get('header[data-test-subj="headerGlobalNav"]', { timeout: 60000 }).should('exist');
     cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 60000 }).should('not.exist');
 
-    // Dismiss the "New Enhanced Discover experience" modal if it appears
-    // Return the promise to block subsequent commands
-    cy.get('body').then(($body) => {
-      if ($body.find('[data-test-subj="dismissEnhancedDiscoverModal"]').length > 0) {
-        return cy.get('[data-test-subj="dismissEnhancedDiscoverModal"]').click().then(() => {
-          return cy.get('.euiModal', { timeout: 5000 }).should('not.exist');
-        });
-      }
-      return cy.wrap(null);
-    });
-
     cy.get('div[data-test-subj="sampleDataSetCardflights"]')
       .should('be.visible')
       .contains(/(Add|View) data/)

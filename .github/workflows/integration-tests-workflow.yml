@@ -209,7 +209,7 @@ jobs:
       - name: Run OpenSearch Dashboards server
         run: |
           cd OpenSearch-Dashboards
-          nohup yarn start --no-base-path --no-watch | tee dashboard.log &
+          nohup yarn start --no-base-path --no-watch --home.disableExperienceModal=true | tee dashboard.log &
 
       - name: Check If OpenSearch Dashboards Is Ready
         if: ${{ runner.os == 'Linux' }}
