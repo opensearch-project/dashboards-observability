@@ -102,7 +102,10 @@ describe('Testing service view empty state and invalid url', () => {
       },
     });
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    // Wait for page content to be ready and scroll to ensure lazy components are initialized
+    cy.get('h1.overview-content', { timeout: 10000 }).should('be.visible').scrollIntoView({ duration: 500 });
     cy.contains('frontend-client').should('exist');
+    cy.get('h2.euiTitle.euiTitle--medium', { timeout: 10000 }).first().should('be.visible').scrollIntoView({ duration: 500 });
     cy.contains('No matches').should('exist');
 
     // Renders service view invalid url state
@@ -113,8 +116,11 @@ describe('Testing service view empty state and invalid url', () => {
     });
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.contains(`${INVALID_URL}`).should('exist');
-    cy.get('.euiCallOut.euiCallOut--danger')
+    // Scroll to callout to ensure lazy-loaded components are initialized
+    cy.get('.euiCallOut.euiCallOut--danger', { timeout: 10000 })
       .should('exist')
+      .scrollIntoView({ duration: 500 });
+    cy.get('.euiCallOut.euiCallOut--danger')
       .within(() => {
         cy.get('.euiCallOutHeader__title').should(
           'contain.text',
@@ -296,8 +302,13 @@ describe('Testing traces Spans table verify table headers functionality', () => 
       },
     });
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    // Wait for button to be visible and interactable before clicking
+    cy.get("[data-test-subj='indexPattern-switch-link']", { timeout: 10000 })
+      .should('be.visible')
+      .scrollIntoView({ duration: 500 })
+      .click();
     cy.get("[data-test-subj='data_prepper-mode']").click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     setTimeFilter();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     // Wait for the services table to be stable

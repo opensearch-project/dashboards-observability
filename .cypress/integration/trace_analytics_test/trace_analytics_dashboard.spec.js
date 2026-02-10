@@ -176,8 +176,15 @@ describe('Testing plots', () => {
         win.sessionStorage.clear();
       },
     });
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     setTimeFilter();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('[data-test-subj="trace-groups-service-operation-accordian"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    // Wait for plots to start rendering and scroll to them to trigger lazy components
+    cy.get('.js-plotly-plot', { timeout: 15000 }).should('exist');
+    cy.get('.js-plotly-plot').first().scrollIntoView({ duration: 500 });
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
   });
 
   it('Renders service map', () => {
