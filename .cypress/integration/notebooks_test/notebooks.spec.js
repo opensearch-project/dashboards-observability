@@ -54,11 +54,14 @@ describe('Adding sample data and visualization', () => {
     cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 60000 }).should('not.exist');
 
     // Dismiss the "New Enhanced Discover experience" modal if it appears
+    // Return the promise to block subsequent commands
     cy.get('body').then(($body) => {
       if ($body.find('[data-test-subj="dismissEnhancedDiscoverModal"]').length > 0) {
-        cy.get('[data-test-subj="dismissEnhancedDiscoverModal"]').click();
-        cy.get('.euiModal').should('not.exist');
+        return cy.get('[data-test-subj="dismissEnhancedDiscoverModal"]').click().then(() => {
+          return cy.get('.euiModal', { timeout: 5000 }).should('not.exist');
+        });
       }
+      return cy.wrap(null);
     });
 
     cy.get('div[data-test-subj="sampleDataSetCardflights"]')

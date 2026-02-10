@@ -320,11 +320,20 @@ describe('Testing switch mode to jaeger', () => {
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     setTimeFilter();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get("[data-test-subj='indexPattern-switch-link']").click();
-    cy.get("[data-test-subj='jaeger-mode']").click();
+    cy.get("[data-test-subj='indexPattern-switch-link']", { timeout: 10000 })
+      .should('be.visible')
+      .scrollIntoView({ duration: 500 })
+      .click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get("[data-test-subj='jaeger-mode']", { timeout: 10000 })
+      .should('be.visible')
+      .scrollIntoView({ duration: 500 })
+      .click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('input[type="search"]').first().focus().clear();
-    cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+    cy.get('[data-test-subj="superDatePickerApplyTimeButton"]')
+      .scrollIntoView({ duration: 500 })
+      .click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     // In jaeger mode, traces are displayed in a regular table, scroll to it to ensure it's initialized
     cy.get('.euiTable', { timeout: 10000 }).should('exist');
@@ -407,6 +416,7 @@ describe('Testing traces Custom source features', () => {
 
     // Wait for data to load and ensure links are visible
     cy.get('a.euiLink.euiLink--primary', { timeout: 10000 }).should('be.visible');
+    cy.get('a.euiLink.euiLink--primary').first().scrollIntoView({ duration: 500 });
     cy.get('a.euiLink.euiLink--primary').first().click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('.overview-content', { timeout: 10000 }).should('contain.text', 'd5bc99166e521eec173bcb7f9b0d3c43');
@@ -421,11 +431,13 @@ describe('Testing traces Custom source features', () => {
   });
 
   it('Verifies column sorting and pagination works correctly', () => {
-    cy.contains('Duration (ms)').click();
+    cy.contains('Duration (ms)').scrollIntoView({ duration: 500 }).click();
     cy.contains('Sort Z-A').click();
 
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    // Wait for sorted data to load with retry logic
+    // Wait for sorted data to load and scroll to see first row
+    cy.get('[data-test-subj="dataGridRowCell"]', { timeout: 15000 }).should('have.length.greaterThan', 0);
+    cy.get('[data-test-subj="dataGridRowCell"]').first().scrollIntoView({ duration: 500 });
     cy.contains('467.03 ms', { timeout: 15000 }).should('exist');
 
     cy.get('[data-test-subj="pagination-button-next"]').click();
@@ -456,6 +468,7 @@ describe('Testing traces Custom source features', () => {
 
     // Wait for data to load and ensure links are visible
     cy.get('a.euiLink.euiLink--primary', { timeout: 10000 }).should('be.visible');
+    cy.get('a.euiLink.euiLink--primary').first().scrollIntoView({ duration: 500 });
     cy.get('a.euiLink.euiLink--primary').first().click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('.overview-content', { timeout: 10000 }).should('contain.text', 'd5bc99166e521eec173bcb7f9b0d3c43');
