@@ -474,10 +474,13 @@ describe('Testing navigation from Services to Traces', () => {
         win.sessionStorage.clear();
       },
     });
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
     cy.get("[data-test-subj='indexPattern-switch-link']").click();
     cy.get("[data-test-subj='data_prepper-mode']").click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     setTimeFilter();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
   });
 
   it('Clicks on the "Traces" shortcut to redirect', () => {
@@ -529,9 +532,9 @@ describe('Testing switch mode to jaeger', () => {
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     // Wait for the services table to be fully rendered with jaeger data
     cy.get('.euiTableRow', { timeout: 15000 }).should('have.length.greaterThan', 0);
-    // Scroll to the last table row to ensure all components are initialized
-    cy.get('.euiTableRow').last().scrollIntoView({ duration: 500 });
-    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    // Ensure the last row is fully rendered and visible before scrolling
+    cy.get('.euiTableRow').last().should('exist').and('be.visible');
+    cy.scrollTo('bottom', { ensureScrollable: false, duration: 300 });
   });
 
   it('Verifies columns and data', () => {
@@ -549,7 +552,11 @@ describe('Testing switch mode to jaeger', () => {
     cy.get('.euiTableRow').should('have.length.lessThan', 7); //Replaces Wait
     cy.contains('7').should('exist');
     cy.get('[data-test-subj^="service-traces-redirection-btntrace_"]').first().click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.contains(' (7)').should('exist');
-    cy.get("[data-test-subj='filterBadge']").eq(0).contains('process.serviceName: customer');
+    cy.get("[data-test-subj='filterBadge']", { timeout: 15000 })
+      .eq(0)
+      .should('contain', 'process.serviceName')
+      .and('contain', 'customer');
   });
 });
