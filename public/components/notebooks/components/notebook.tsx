@@ -148,8 +148,21 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   };
 
   parseAllParagraphs = () => {
+    const oldParsedPara = this.state.parsedPara;
     const parsedPara = this.parseParagraphs(this.state.paragraphs);
-    this.setState({ parsedPara });
+    // Preserve refs from old paragraphs if they exist
+    if (oldParsedPara && oldParsedPara.length > 0) {
+      parsedPara.forEach((para: ParaType, index: number) => {
+        if (oldParsedPara[index]) {
+          para.paraRef = oldParsedPara[index].paraRef;
+          para.paraDivRef = oldParsedPara[index].paraDivRef;
+        }
+      });
+    }
+    this.setState({ parsedPara }, () => {
+      // Clear running flags after paragraphs are parsed
+      this.clearParagraphRunning();
+    });
   };
 
   // parse paragraphs based on backend
@@ -174,28 +187,42 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
 
   // Assigns Loading, Running & inQueue for paragraphs in current notebook
   showParagraphRunning = (param: number | string) => {
-    const parsedPara = this.state.parsedPara;
-    this.state.parsedPara.map((_: ParaType, index: number) => {
-      if (param === 'queue') {
-        parsedPara[index].inQueue = true;
-        parsedPara[index].isOutputHidden = true;
-      } else if (param === 'loading') {
-        parsedPara[index].isRunning = true;
-        parsedPara[index].isOutputHidden = true;
-      } else if (param === index) {
-        parsedPara[index].isRunning = true;
-        parsedPara[index].isOutputHidden = true;
-      }
+    // Use functional setState to avoid race conditions with sequential async updates
+    this.setState((prevState) => {
+      const parsedPara = prevState.parsedPara.map((para: ParaType, index: number) => {
+        if (param === 'queue') {
+          return { ...para, inQueue: true, isOutputHidden: true };
+        } else if (param === 'loading') {
+          return { ...para, isRunning: true, isOutputHidden: true };
+        } else if (param === index) {
+          return { ...para, isRunning: true, isOutputHidden: true };
+        }
+        return para;
+      });
+      return { parsedPara };
     });
-    this.setState({ parsedPara });
+  };
+
+  // Clears paragraph running flags after operations complete
+  clearParagraphRunning = () => {
+    // Use functional setState to avoid race conditions with sequential async updates
+    this.setState((prevState) => {
+      const parsedPara = prevState.parsedPara.map((para: ParaType) => ({
+        ...para,
+        inQueue: false,
+        isOutputHidden: false,
+        isRunning: false,
+      }));
+      return { parsedPara };
+    });
   };
 
   // Sets a paragraph to selected and deselects all others
   paragraphSelector = (index: number) => {
-    const parsedPara = this.state.parsedPara;
-    this.state.parsedPara.map((_: ParaType, idx: number) => {
-      if (index === idx) parsedPara[idx].isSelected = true;
-      else parsedPara[idx].isSelected = false;
+    // Create new array reference but keep paragraph object references to avoid remounting components
+    const parsedPara = [...this.state.parsedPara];
+    parsedPara.forEach((para: ParaType, idx: number) => {
+      para.isSelected = index === idx;
     });
     this.setState({ parsedPara });
   };
@@ -511,9 +538,29 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         body: JSON.stringify(clearParaObj),
       })
       .then((res) => {
-        const paragraphs = res.paragraphs;
-        const parsedPara = this.parseParagraphs(paragraphs);
-        this.setState({ paragraphs, parsedPara });
+        // Use functional setState to avoid race conditions
+        this.setState(
+          (prevState) => {
+            const paragraphs = res.paragraphs;
+            // Create new paragraph objects for React 18 compatibility
+            const parsedPara = prevState.parsedPara.map((para: ParaType, index: number) => {
+              if (paragraphs[index]) {
+                return {
+                  ...para,
+                  out: [],
+                  typeOut: [],
+                  isOutputStale: false,
+                };
+              }
+              return para;
+            });
+            return { paragraphs, parsedPara };
+          },
+          () => {
+            // Clear flags after state update completes
+            this.clearParagraphRunning();
+          }
+        );
       })
       .catch((err) => {
         this.props.setToast(
@@ -557,16 +604,59 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
           await this.loadQueryResultsFromInput(res, this.state.dataSourceMDSId);
           const checkErrorJSON = JSON.parse(res.output[0].result);
           if (this.checkQueryOutputError(checkErrorJSON)) {
+            // Clear flags even on query error - use functional setState to avoid race conditions
+            this.setState((prevState) => {
+              const parsedPara = prevState.parsedPara.map((p: ParaType, idx: number) => {
+                if (idx === index) {
+                  return {
+                    ...p,
+                    isRunning: false,
+                    isOutputHidden: false,
+                    inQueue: false,
+                  };
+                }
+                return p;
+              });
+              return { parsedPara };
+            });
             return;
           }
         }
-        const paragraphs = this.state.paragraphs;
-        paragraphs[index] = res;
-        const parsedPara = [...this.state.parsedPara];
-        parsedPara[index] = this.parseParagraphs([res])[0];
-        this.setState({ paragraphs, parsedPara });
+        // Use functional setState to avoid race conditions with sequential async updates
+        this.setState((prevState) => {
+          const paragraphs = [...prevState.paragraphs];
+          paragraphs[index] = res;
+          const parsedPara = [...prevState.parsedPara];
+          // Update existing paragraph instead of creating new one to preserve refs
+          const updatedPara = this.parseParagraphs([res])[0];
+          const oldPara = parsedPara[index];
+          parsedPara[index] = {
+            ...updatedPara,
+            paraRef: oldPara.paraRef,
+            paraDivRef: oldPara.paraDivRef,
+            isRunning: false,
+            isOutputHidden: false,
+            inQueue: false,
+          };
+          return { paragraphs, parsedPara };
+        });
       })
       .catch((err) => {
+        // Clear running flags on error - use functional setState to avoid race conditions
+        this.setState((prevState) => {
+          const parsedPara = prevState.parsedPara.map((p: ParaType, idx: number) => {
+            if (idx === index) {
+              return {
+                ...p,
+                isRunning: false,
+                isOutputHidden: false,
+                inQueue: false,
+              };
+            }
+            return p;
+          });
+          return { parsedPara };
+        });
         if (err.body.statusCode === 413)
           this.props.setToast(`Error running paragraph: ${err.body.message}`, 'danger');
         else
@@ -605,7 +695,8 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   // Handles text editor value and syncs with paragraph input
   textValueEditor = (evt: React.ChangeEvent<HTMLTextAreaElement>, index: number) => {
     if (!(evt.key === 'Enter' && evt.shiftKey)) {
-      const parsedPara = this.state.parsedPara;
+      // Create new array reference but keep paragraph object references to avoid remounting components
+      const parsedPara = [...this.state.parsedPara];
       parsedPara[index].inp = evt.target.value;
       this.setState({ parsedPara });
     }
@@ -621,13 +712,15 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   // update view mode, scrolls to paragraph and expands input if scrollToIndex is given
   updateView = (selectedViewId: string, scrollToIndex?: number) => {
     this.configureViewParameter(selectedViewId);
+    // Create new array reference but keep paragraph object references to avoid remounting components
     const parsedPara = [...this.state.parsedPara];
-    this.state.parsedPara.map((para: ParaType, index: number) => {
-      parsedPara[index].isInputExpanded = selectedViewId === 'input_only';
+    parsedPara.forEach((para: ParaType, index: number) => {
+      const shouldExpand =
+        selectedViewId === 'input_only' || (scrollToIndex !== undefined && index === scrollToIndex);
+      para.isInputExpanded = shouldExpand;
     });
 
     if (scrollToIndex !== undefined) {
-      parsedPara[scrollToIndex].isInputExpanded = true;
       this.scrollToPara(scrollToIndex);
     }
     this.setState({ parsedPara, selectedViewId });
@@ -635,7 +728,6 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
   };
 
   loadNotebook = async () => {
-    this.showParagraphRunning('queue');
     const isValid = isValidUUID(this.props.openedNoteId);
     this.setState({
       savedObjectNotebook: isValid,
