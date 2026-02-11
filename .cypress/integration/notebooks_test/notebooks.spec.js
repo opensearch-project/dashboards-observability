@@ -386,7 +386,8 @@ describe('Testing paragraphs', () => {
     cy.get('h3[data-test-subj="notebookTitle"]').contains(TEST_NOTEBOOK).should('exist');
     cy.get('.euiButton__text').contains('Run all paragraphs').click();
 
-    cy.get(`a[href="${SAMPLE_URL}"]`).should('exist');
+    // Wait for all paragraphs to finish running - look for the markdown output
+    cy.get(`a[href="${SAMPLE_URL}"]`, { timeout: 30000 }).should('exist');
   });
 
   it('Adds paragraph to top', () => {
@@ -412,11 +413,24 @@ describe('Testing paragraphs', () => {
 
   it('Moves paragraphs', () => {
     cy.get('h3[data-test-subj="notebookTitle"]').contains(TEST_NOTEBOOK).should('exist');
+
+    // Clear outputs to reduce payload size and prevent POST 413 errors
+    cy.get('.euiButton__text').contains('Clear all outputs').click();
+    cy.get('button[data-test-subj="confirmModalConfirmButton"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 30000 }).should('not.exist');
+
+    // Scroll to top to ensure first paragraph menu button is in view
+    cy.scrollTo('top');
+    cy.get('.euiButtonIcon[aria-label="Open paragraph menu"').eq(0).scrollIntoView({ duration: 500 });
     cy.get('.euiButtonIcon[aria-label="Open paragraph menu"').eq(0).click();
     cy.get('.euiContextMenuItem-isDisabled').should('have.length.gte', 2);
     cy.get('.euiContextMenuItem__text').contains('Move to bottom').click();
 
-    cy.get('.euiText').contains('[5] Visualization').should('exist');
+    // Wait for the loading indicator to disappear after move
+    cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 30000 }).should('not.exist');
+
+    // Verify the paragraph has been renumbered
+    cy.get('.euiText').contains('[5] Visualization', { timeout: 10000 }).should('exist');
   });
 
   it('Duplicates and renames the notebook', () => {

@@ -415,9 +415,11 @@ describe('Testing traces Custom source features', () => {
     cy.get('.euiDataGridHeaderCell__content').contains('Last updated').should('exist');
 
     // Wait for data to load and ensure links are visible
-    cy.get('a.euiLink.euiLink--primary', { timeout: 10000 }).should('be.visible');
+    cy.get('a.euiLink.euiLink--primary', { timeout: 10000 }).should('have.length.greaterThan', 0);
+    // Get the first link's href to ensure it's a valid trace ID link
+    cy.get('a.euiLink.euiLink--primary').first().should('have.attr', 'href').and('include', '#/traces');
     cy.get('a.euiLink.euiLink--primary').first().scrollIntoView({ duration: 500 });
-    cy.get('a.euiLink.euiLink--primary').first().click();
+    cy.get('a.euiLink.euiLink--primary').first().should('be.visible').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('.overview-content', { timeout: 10000 }).should('contain.text', 'd5bc99166e521eec173bcb7f9b0d3c43');
   });
@@ -435,8 +437,10 @@ describe('Testing traces Custom source features', () => {
     cy.contains('Sort Z-A').click();
 
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    // Wait for sorted data to load and scroll to see first row
+    // Wait for sorting to complete and data to refresh
+    cy.get('.euiDataGrid', { timeout: 15000 }).should('be.visible');
     cy.get('[data-test-subj="dataGridRowCell"]', { timeout: 15000 }).should('have.length.greaterThan', 0);
+    // Scroll first row into view to ensure it's visible
     cy.get('[data-test-subj="dataGridRowCell"]').first().scrollIntoView({ duration: 500 });
     cy.contains('467.03 ms', { timeout: 15000 }).should('exist');
 
@@ -467,9 +471,11 @@ describe('Testing traces Custom source features', () => {
     cy.get('.euiDataGridHeaderCell__content').contains('Last updated').should('exist');
 
     // Wait for data to load and ensure links are visible
-    cy.get('a.euiLink.euiLink--primary', { timeout: 10000 }).should('be.visible');
+    cy.get('a.euiLink.euiLink--primary', { timeout: 10000 }).should('have.length.greaterThan', 0);
+    // Get the first link's href to ensure it's a valid trace ID link
+    cy.get('a.euiLink.euiLink--primary').first().should('have.attr', 'href').and('include', '#/traces');
     cy.get('a.euiLink.euiLink--primary').first().scrollIntoView({ duration: 500 });
-    cy.get('a.euiLink.euiLink--primary').first().click();
+    cy.get('a.euiLink.euiLink--primary').first().should('be.visible').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('.overview-content', { timeout: 10000 }).should('contain.text', 'd5bc99166e521eec173bcb7f9b0d3c43');
   });

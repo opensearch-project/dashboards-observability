@@ -419,7 +419,11 @@ describe('Testing traces Spans table and verify columns functionality', () => {
       .should('be.visible')
       .scrollIntoView({ duration: 500 })
       .click();
-    cy.get("[data-test-subj='data_prepper-mode']").click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get("[data-test-subj='data_prepper-mode']", { timeout: 10000 })
+      .should('be.visible')
+      .scrollIntoView({ duration: 500 })
+      .click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     setTimeFilter();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
