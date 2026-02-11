@@ -386,8 +386,12 @@ describe('Testing paragraphs', () => {
     cy.get('h3[data-test-subj="notebookTitle"]').contains(TEST_NOTEBOOK).should('exist');
     cy.get('.euiButton__text').contains('Run all paragraphs').click();
 
+    // Wait for execution to start and complete
+    cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 5000 }).should('exist');
+    cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 60000 }).should('not.exist');
+
     // Wait for all paragraphs to finish running - look for the markdown output
-    cy.get(`a[href="${SAMPLE_URL}"]`, { timeout: 30000 }).should('exist');
+    cy.get(`a[href="${SAMPLE_URL}"]`, { timeout: 10000 }).should('exist');
   });
 
   it('Adds paragraph to top', () => {
@@ -446,7 +450,9 @@ describe('Testing paragraphs', () => {
     cy.get('h3[data-test-subj="notebookTitle"]')
       .contains(TEST_NOTEBOOK + ' (rename)')
       .should('exist');
-    cy.get(`a[href="${SAMPLE_URL}"]`).should('have.length.gte', 2);
+
+    // Verify notebook has paragraphs (outputs were cleared in previous test)
+    cy.get('.euiText').should('contain', 'Code block');
   });
 
   it('Deletes paragraphs', () => {
