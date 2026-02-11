@@ -476,11 +476,17 @@ describe('Testing navigation from Services to Traces', () => {
     });
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
-    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    // Wait for services table to be fully rendered before interacting
+    cy.get('.euiTableRow', { timeout: 15000 }).should('have.length.greaterThan', 0);
+
+    cy.get("[data-test-subj='indexPattern-switch-link']").should('be.visible').click();
     cy.get("[data-test-subj='data_prepper-mode']").click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     setTimeFilter();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+    // Wait for table to reload with data prepper data
+    cy.get('.euiTableRow', { timeout: 15000 }).should('have.length.greaterThan', 0);
   });
 
   it('Clicks on the "Traces" shortcut to redirect', () => {
@@ -546,12 +552,22 @@ describe('Testing switch mode to jaeger', () => {
   });
 
   it('Verifies traces links to traces page with filter applied', () => {
-    cy.get('.euiTableRow').should('have.length.lessThan', 7); //Replaces Wait
+    // Wait for table to have data loaded
+    cy.get('.euiTableRow', { timeout: 15000 }).should('have.length.greaterThan', 0);
+    cy.get('.euiTableRow').should('have.length.lessThan', 7);
+
     cy.contains('7').should('exist');
-    cy.get('[data-test-subj^="service-traces-redirection-btntrace_"]').first().click();
+    cy.get('[data-test-subj^="service-traces-redirection-btntrace_"]').first().should('be.visible').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.contains(' (7)').should('exist');
+
+    // Wait for traces page to load
+    cy.contains(' (7)', { timeout: 15000 }).should('exist');
+
+    // Wait for filter badge to appear and verify content
     cy.get("[data-test-subj='filterBadge']", { timeout: 15000 })
+      .should('have.length.greaterThan', 0);
+
+    cy.get("[data-test-subj='filterBadge']")
       .eq(0)
       .should('contain', 'process.serviceName')
       .and('contain', 'customer');

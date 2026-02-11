@@ -394,8 +394,8 @@ describe('Testing paragraphs', () => {
     cy.get('h3[data-test-subj="notebookTitle"]').contains(TEST_NOTEBOOK).should('exist');
 
     // Ensure button is visible and enabled before clicking
-    cy.get('.euiButton__text').contains('Run all paragraphs').should('be.visible').parent('button').should('not.be.disabled');
-    cy.get('.euiButton__text').contains('Run all paragraphs').click();
+    cy.contains('button', 'Run all paragraphs').should('be.visible').and('not.be.disabled');
+    cy.contains('button', 'Run all paragraphs').click();
 
     // Wait for execution to complete
     cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 60000 }).should('not.exist');
