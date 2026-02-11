@@ -416,12 +416,11 @@ describe('Testing traces Custom source features', () => {
 
     // Wait for data to load and ensure links are visible
     cy.get('a.euiLink.euiLink--primary', { timeout: 10000 }).should('have.length.greaterThan', 0);
-    // Get the first link's href to ensure it's a valid trace ID link
     cy.get('a.euiLink.euiLink--primary').first().should('have.attr', 'href').and('include', '#/traces');
     cy.get('a.euiLink.euiLink--primary').first().scrollIntoView({ duration: 500 });
     cy.get('a.euiLink.euiLink--primary').first().should('be.visible').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('.overview-content', { timeout: 10000 }).should('contain.text', 'd5bc99166e521eec173bcb7f9b0d3c43');
+    cy.get('h1.overview-content', { timeout: 10000 }).should('contain.text', 'd5bc99166e521eec173bcb7f9b0d3c43');
   });
 
   it('Renders all spans column attributes as hidden, shows column when added', () => {
@@ -472,11 +471,10 @@ describe('Testing traces Custom source features', () => {
 
     // Wait for data to load and ensure links are visible
     cy.get('a.euiLink.euiLink--primary', { timeout: 10000 }).should('have.length.greaterThan', 0);
-    // Get the first link's href to ensure it's a valid trace ID link
     cy.get('a.euiLink.euiLink--primary').first().should('have.attr', 'href').and('include', '#/traces');
     cy.get('a.euiLink.euiLink--primary').first().scrollIntoView({ duration: 500 });
     cy.get('a.euiLink.euiLink--primary').first().should('be.visible').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('.overview-content', { timeout: 10000 }).should('contain.text', 'd5bc99166e521eec173bcb7f9b0d3c43');
+    cy.get('h1.overview-content', { timeout: 10000 }).should('contain.text', 'd5bc99166e521eec173bcb7f9b0d3c43');
   });
 });

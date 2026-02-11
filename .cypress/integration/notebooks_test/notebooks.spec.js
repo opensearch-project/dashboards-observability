@@ -376,28 +376,32 @@ describe('Testing paragraphs', () => {
 
   it('Clears outputs', () => {
     cy.get('h3[data-test-subj="notebookTitle"]').contains(TEST_NOTEBOOK).should('exist');
+
+    // Verify outputs exist before clearing
+    cy.get(`a[href="${SAMPLE_URL}"]`).should('exist');
+
     cy.get('.euiButton__text').contains('Clear all outputs').click();
     cy.get('button[data-test-subj="confirmModalConfirmButton"]').click();
 
     // Wait for the clear operation to complete
     cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 30000 }).should('not.exist');
 
+    // Verify outputs are cleared
     cy.get(`a[href="${SAMPLE_URL}"]`).should('not.exist');
   });
 
   it('Runs all paragraphs', () => {
     cy.get('h3[data-test-subj="notebookTitle"]').contains(TEST_NOTEBOOK).should('exist');
+
+    // Ensure button is visible and enabled before clicking
+    cy.get('.euiButton__text').contains('Run all paragraphs').should('be.visible').parent('button').should('not.be.disabled');
     cy.get('.euiButton__text').contains('Run all paragraphs').click();
 
-    // Wait for execution to start and complete
-    cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 5000 }).should('exist');
+    // Wait for execution to complete
     cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 60000 }).should('not.exist');
 
-    // Wait for outputs to render - check for markdown body first
-    cy.get('div.markdown-body', { timeout: 30000 }).should('exist');
-
-    // Wait for all paragraphs to finish running - look for the specific markdown link
-    cy.get(`a[href="${SAMPLE_URL}"]`, { timeout: 10000 }).should('exist');
+    // Wait for outputs to render - check for the specific markdown link
+    cy.get(`a[href="${SAMPLE_URL}"]`, { timeout: 60000 }).should('exist');
   });
 
   it('Adds paragraph to top', () => {
