@@ -47,7 +47,6 @@ import {
   IField,
   SelectedConfigItem,
   Query,
-  VisualizationState,
 } from '../../../../../../../../common/types/explorer';
 import { TabContext, useRenderVisualization } from '../../../../../hooks';
 import { DataConfigItemClickPanel } from '../config_controls/data_config_item_click_panel';
@@ -192,25 +191,31 @@ export const DataConfigPanelItem = ({
   const handleClosePanel = () => {
     const { index, name } = selectedConfigItem;
     if (index > -1) {
-      const selectedObj = configList[name][index] ?? [];
-      const list = { ...configList };
-      if (
-        selectedObj?.aggregation !== 'count' &&
-        (selectedObj?.aggregation === '' || selectedObj?.name === '')
-      ) {
-        list[name].splice(index, 1);
-      }
-      if (isTimeStampSelected) {
-        if (selectedObj?.name !== '') {
-          const updConfig = [...configList[name]];
-          updConfig.splice(index, 1);
-          list[GROUPBY] = [...updConfig];
+      // Use functional state update to avoid stale closure issues with React 18's automatic batching.
+      // When updateList is called immediately before handleClosePanel, React may batch the state
+      // updates, causing configList in the closure to be stale. Using the functional form ensures
+      // we always read the latest state.
+      setConfigList((prevConfigList) => {
+        const selectedObj = prevConfigList[name][index] ?? [];
+        const list = { ...prevConfigList };
+        if (
+          selectedObj?.aggregation !== 'count' &&
+          (selectedObj?.aggregation === '' || selectedObj?.name === '')
+        ) {
+          list[name].splice(index, 1);
         }
-        if (configList.span?.interval === 0 || configList.span?.unit?.length === 0) {
-          delete list[SPAN];
+        if (isTimeStampSelected) {
+          if (selectedObj?.name !== '') {
+            const updConfig = [...prevConfigList[name]];
+            updConfig.splice(index, 1);
+            list[GROUPBY] = [...updConfig];
+          }
+          if (prevConfigList.span?.interval === 0 || prevConfigList.span?.unit?.length === 0) {
+            delete list[SPAN];
+          }
         }
-      }
-      setConfigList(list);
+        return list;
+      });
     }
     setIsTimeStampSelected(false);
     setIsAddConfigClicked(false);
@@ -285,6 +290,12 @@ export const DataConfigPanelItem = ({
   };
 
   const updateChart = useCallback(() => {
+    // Don't proceed if query is empty or invalid
+    if (!query || !query[RAW_QUERY] || isEmpty(query[RAW_QUERY])) {
+      console.error('Cannot update chart: query is empty or invalid', query);
+      return;
+    }
+
     const [newQueryString, nextQueryState] = prepareNextVisState({
       queryState: query,
       visConfig: {
@@ -295,7 +306,7 @@ export const DataConfigPanelItem = ({
     getVisualizations({
       query: nextQueryState[FINAL_QUERY],
       successCallback: (res) => {
-        updateVisUIState({
+        fillVisDataInStore({
           visData: { ...res },
           queryState: nextQueryState,
           visConfMetadata: {
@@ -308,16 +319,7 @@ export const DataConfigPanelItem = ({
       },
       errorCallback: () => {},
     });
-  }, [configList, query, visualizations]);
-
-  const updateVisUIState = ({
-    visData,
-    queryState,
-    visConfMetadata,
-    visMeta,
-  }: VisualizationState) => {
-    fillVisDataInStore({ visData, queryState, visConfMetadata, visMeta });
-  };
+  }, [configList, query, visualizations, handleQueryChange, getVisualizations, fillVisDataInStore]);
 
   const getTimeStampFilteredFields = (options: IField[]) =>
     filter(options, (i: IField) => i.type !== TIMESTAMP);
