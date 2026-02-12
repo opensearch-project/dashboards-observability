@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import forEach from 'lodash/forEach';
 import isEmpty from 'lodash/isEmpty';
 import { useRef, useState } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
@@ -66,7 +67,7 @@ export const useFetchEvents = ({ pplService, requestParams }: IFetchEventsParams
 
     const data: any[] = [];
 
-    _.forEach(pplRes.datarows, (row) => {
+    forEach(pplRes.datarows, (row) => {
       const record: any = {};
 
       for (let i = 0; i < pplRes.schema.length; i++) {
