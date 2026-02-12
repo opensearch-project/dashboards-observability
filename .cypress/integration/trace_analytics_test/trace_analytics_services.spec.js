@@ -102,7 +102,10 @@ describe('Testing service view empty state and invalid url', () => {
       },
     });
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    // Wait for page content to be ready and scroll to ensure lazy components are initialized
+    cy.get('h1.overview-content', { timeout: 10000 }).should('be.visible').scrollIntoView({ duration: 500 });
     cy.contains('frontend-client').should('exist');
+    cy.get('h2.euiTitle.euiTitle--medium', { timeout: 10000 }).first().should('be.visible').scrollIntoView({ duration: 500 });
     cy.contains('No matches').should('exist');
 
     // Renders service view invalid url state
@@ -113,8 +116,11 @@ describe('Testing service view empty state and invalid url', () => {
     });
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.contains(`${INVALID_URL}`).should('exist');
-    cy.get('.euiCallOut.euiCallOut--danger')
+    // Scroll to callout to ensure lazy-loaded components are initialized
+    cy.get('.euiCallOut.euiCallOut--danger', { timeout: 10000 })
       .should('exist')
+      .scrollIntoView({ duration: 500 });
+    cy.get('.euiCallOut.euiCallOut--danger')
       .within(() => {
         cy.get('.euiCallOutHeader__title').should(
           'contain.text',
@@ -295,9 +301,18 @@ describe('Testing traces Spans table verify table headers functionality', () => 
         win.sessionStorage.clear();
       },
     });
-    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    // Wait for button to be visible and interactable before clicking
+    cy.get("[data-test-subj='indexPattern-switch-link']", { timeout: 10000 })
+      .should('be.visible')
+      .scrollIntoView({ duration: 500 })
+      .click();
     cy.get("[data-test-subj='data_prepper-mode']").click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     setTimeFilter();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    // Wait for the services table to be stable
+    cy.get('.euiTableRow', { timeout: 10000 }).should('have.length.greaterThan', 0);
   });
 
   it('Renders the spans table and verify columns headers', () => {
@@ -342,7 +357,10 @@ describe('Testing traces Spans table verify table headers functionality', () => 
   it('Hide all button Spans table', () => {
     cy.get('.euiLink.euiLink--primary').contains('authentication').should('exist');
     expandServiceView(1);
-    cy.get('.euiTableRow').should('have.length.lessThan', 2); //Replace wait
+    // Scroll to the data grid element to ensure it's initialized
+    cy.get('[data-test-subj="service-dep-table"]', { timeout: 10000 }).scrollIntoView({ duration: 500 }).should('be.visible');
+    // Wait for the data grid headers to be fully rendered and stable
+    cy.get('.euiDataGridHeaderCell__content', { timeout: 10000 }).should('be.visible');
     cy.get('[data-test-subj = "dataGridColumnSelectorButton"]').click();
     cy.get('.euiPopoverFooter .euiFlexItem.euiFlexItem--flexGrowZero')
       .eq(1)
@@ -395,9 +413,18 @@ describe('Testing traces Spans table and verify columns functionality', () => {
         win.sessionStorage.clear();
       },
     });
-    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    // Wait for button to be visible and interactable before clicking
+    cy.get("[data-test-subj='indexPattern-switch-link']", { timeout: 10000 })
+      .should('be.visible')
+      .scrollIntoView({ duration: 500 })
+      .click();
     cy.get("[data-test-subj='data_prepper-mode']").click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     setTimeFilter();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    // Wait for the services table to be stable
+    cy.get('.euiTableRow', { timeout: 10000 }).should('have.length.greaterThan', 0);
   });
 
   it('Renders the spans table and click on first span to verify details', () => {
@@ -447,10 +474,19 @@ describe('Testing navigation from Services to Traces', () => {
         win.sessionStorage.clear();
       },
     });
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
-    cy.get("[data-test-subj='indexPattern-switch-link']").click();
+    // Wait for services table to be fully rendered before interacting
+    cy.get('.euiTableRow', { timeout: 15000 }).should('have.length.greaterThan', 0);
+
+    cy.get("[data-test-subj='indexPattern-switch-link']").should('be.visible').click();
     cy.get("[data-test-subj='data_prepper-mode']").click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     setTimeFilter();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+    // Wait for table to reload with data prepper data
+    cy.get('.euiTableRow', { timeout: 15000 }).should('have.length.greaterThan', 0);
   });
 
   it('Clicks on the "Traces" shortcut to redirect', () => {
@@ -494,10 +530,14 @@ describe('Testing switch mode to jaeger', () => {
         win.sessionStorage.clear();
       },
     });
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     setTimeFilter();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get("[data-test-subj='indexPattern-switch-link']").click();
     cy.get("[data-test-subj='jaeger-mode']").click();
-    //cy.get('.euiButtonEmpty__text').should('contain', 'Jaeger');
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    // Wait for the services table to be fully rendered with jaeger data
+    cy.get('.euiTableRow', { timeout: 15000 }).should('have.length.greaterThan', 0);
   });
 
   it('Verifies columns and data', () => {
@@ -512,10 +552,24 @@ describe('Testing switch mode to jaeger', () => {
   });
 
   it('Verifies traces links to traces page with filter applied', () => {
-    cy.get('.euiTableRow').should('have.length.lessThan', 7); //Replaces Wait
+    // Wait for table to have data loaded
+    cy.get('.euiTableRow', { timeout: 15000 }).should('have.length.greaterThan', 0);
+    cy.get('.euiTableRow').should('have.length.lessThan', 7);
+
     cy.contains('7').should('exist');
-    cy.get('[data-test-subj^="service-traces-redirection-btntrace_"]').first().click();
-    cy.contains(' (7)').should('exist');
-    cy.get("[data-test-subj='filterBadge']").eq(0).contains('process.serviceName: customer');
+    cy.get('[data-test-subj^="service-traces-redirection-btntrace_"]').first().should('be.visible').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+    // Wait for traces page to load
+    cy.contains(' (7)', { timeout: 15000 }).should('exist');
+
+    // Wait for filter badge to appear and verify content
+    cy.get("[data-test-subj='filterBadge']", { timeout: 15000 })
+      .should('have.length.greaterThan', 0);
+
+    cy.get("[data-test-subj='filterBadge']")
+      .eq(0)
+      .should('contain', 'process.serviceName')
+      .and('contain', 'customer');
   });
 });

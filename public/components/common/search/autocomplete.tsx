@@ -125,8 +125,24 @@ export const Autocomplete = (props: AutocompleteProps) => {
                 },
                 dslService
               );
-              $('#autocomplete-textarea').blur();
-              $('#autocomplete-textarea').focus();
+              // Blur and refocus to trigger openOnFocus and fetch new suggestions
+              // This is needed for React 18 compatibility - the autocomplete library
+              // responds to native focus events to reopen and fetch new suggestions
+              setTimeout(() => {
+                const textarea = document.getElementById(
+                  'autocomplete-textarea'
+                ) as HTMLTextAreaElement;
+                if (textarea) {
+                  textarea.blur();
+                  // Delay to ensure blur completes before refocusing
+                  setTimeout(() => {
+                    textarea.focus();
+                    // Move cursor to end of text
+                    const length = textarea.value.length;
+                    textarea.setSelectionRange(length, length);
+                  }, 100);
+                }
+              }, 0);
             },
           },
         ];
@@ -163,6 +179,10 @@ export const Autocomplete = (props: AutocompleteProps) => {
             .filter(Boolean)
             .join(' ')}
           {...autocomplete.getPanelProps({})}
+          onMouseDown={(e) => {
+            // Prevent blur when clicking on autocomplete items
+            e.preventDefault();
+          }}
         >
           {autocompleteState.collections.map((collection, index) => {
             const { source, items } = collection;

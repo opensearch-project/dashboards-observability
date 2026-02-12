@@ -383,12 +383,14 @@ export const dateSpanFilterSelector = (state) => state.metrics.dateSpanFilter;
 
 export const refreshSelector = (state) => state.metrics.refresh;
 
+const DEFAULT_METRIC_QUERY = {
+  aggregation: '',
+  attributesGroupBy: [],
+  availableAttributes: [],
+};
+
 export const metricQuerySelector = (id) => (state) =>
-  state.metrics.metricsLayout.find((layout) => layout.id === id)?.query || {
-    aggregation: '',
-    attributesGroupBy: [],
-    availableAttributes: [],
-  };
+  state.metrics.metricsLayout.find((layout) => layout.id === id)?.query || DEFAULT_METRIC_QUERY;
 
 export const selectedDataSourcesSelector = (state) => state.metrics.selectedDataSource;
 
