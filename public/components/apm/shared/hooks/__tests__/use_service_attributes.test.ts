@@ -94,7 +94,7 @@ describe('useServiceAttributes', () => {
       const mockResponse = {
         jsonData: [
           {
-            'service.groupByAttributes': {
+            'sourceNode.groupByAttributes': {
               telemetry: {
                 sdk: {
                   language: 'python',
@@ -131,7 +131,7 @@ describe('useServiceAttributes', () => {
       const mockResponse = {
         jsonData: [
           {
-            'service.groupByAttributes': JSON.stringify({
+            'sourceNode.groupByAttributes': JSON.stringify({
               telemetry: {
                 sdk: {
                   language: 'java',
@@ -159,7 +159,7 @@ describe('useServiceAttributes', () => {
       const mockResponse = {
         jsonData: [
           {
-            'service.groupByAttributes': {
+            'sourceNode.groupByAttributes': {
               language: 'python',
               version: '1.0',
             },
@@ -185,7 +185,7 @@ describe('useServiceAttributes', () => {
       const mockResponse = {
         jsonData: [
           {
-            'service.groupByAttributes': {
+            'sourceNode.groupByAttributes': {
               count: 42,
               enabled: true,
             },
@@ -237,7 +237,7 @@ describe('useServiceAttributes', () => {
       const mockResponse = {
         jsonData: [
           {
-            'service.groupByAttributes': 'invalid json {',
+            'sourceNode.groupByAttributes': 'invalid json {',
           },
         ],
       };

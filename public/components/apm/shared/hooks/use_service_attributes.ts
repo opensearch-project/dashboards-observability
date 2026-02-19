@@ -120,14 +120,17 @@ export const useServiceAttributes = (
         // Extract groupByAttributes from the first row
         const rows = response.jsonData || [];
         if (rows.length > 0) {
-          let groupByAttributes = rows[0]['service.groupByAttributes'] || {};
+          let groupByAttributes = rows[0]['sourceNode.groupByAttributes'] || {};
 
           // Parse JSON string if needed
           if (typeof groupByAttributes === 'string') {
             try {
               groupByAttributes = JSON.parse(groupByAttributes);
             } catch (e) {
-              console.error('[useServiceAttributes] Failed to parse service.groupByAttributes:', e);
+              console.error(
+                '[useServiceAttributes] Failed to parse sourceNode.groupByAttributes:',
+                e
+              );
               groupByAttributes = {};
             }
           }
