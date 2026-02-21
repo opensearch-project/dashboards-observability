@@ -352,42 +352,38 @@ export function transformListServicesResponse(pplResponse: PPLDataFrame): ListSe
   // Group by unique service (serviceName + EnvironmentType combination)
   const serviceMap = new Map<string, any>();
 
-  rows.forEach((row, _index) => {
-    // Handle nested structure from new query format
+  // Helper to add a service to the map from keyAttributes and groupByAttributes
+  const addServiceToMap = (keyAttributes: any, groupByAttributes: any, fallbackName?: string) => {
     // Parse JSON strings if needed
-    let serviceKeyAttributes = row['service.keyAttributes'];
-    if (typeof serviceKeyAttributes === 'string') {
+    let parsedKeyAttributes = keyAttributes;
+    if (typeof parsedKeyAttributes === 'string') {
       try {
-        serviceKeyAttributes = JSON.parse(serviceKeyAttributes);
+        parsedKeyAttributes = JSON.parse(parsedKeyAttributes);
+      } catch (e) {
+        console.error('[DEBUG] transformListServicesResponse: Failed to parse keyAttributes:', e);
+      }
+    }
+
+    let parsedGroupByAttributes = groupByAttributes;
+    if (typeof parsedGroupByAttributes === 'string') {
+      try {
+        parsedGroupByAttributes = JSON.parse(parsedGroupByAttributes);
       } catch (e) {
         console.error(
-          '[DEBUG] transformListServicesResponse: Failed to parse service.keyAttributes:',
+          '[DEBUG] transformListServicesResponse: Failed to parse groupByAttributes:',
           e
         );
       }
     }
 
-    let serviceGroupByAttributes = row['service.groupByAttributes'];
-    if (typeof serviceGroupByAttributes === 'string') {
-      try {
-        serviceGroupByAttributes = JSON.parse(serviceGroupByAttributes);
-      } catch (e) {
-        console.error(
-          '[DEBUG] transformListServicesResponse: Failed to parse service.groupByAttributes:',
-          e
-        );
-      }
-    }
-
-    // Handle both nested keyAttributes format and flat field format
-    const serviceName = serviceKeyAttributes?.name || row['service.name'];
-    const environmentType = serviceKeyAttributes?.environment || row.environment;
+    const serviceName = parsedKeyAttributes?.name || fallbackName;
+    const environmentType = parsedKeyAttributes?.environment;
     const platformType = environmentType
       ? getPlatformTypeFromEnvironment(environmentType)
       : 'Generic';
 
     if (!serviceName || !environmentType) {
-      return; // Skip rows without required fields
+      return;
     }
 
     const key = `${serviceName}::${environmentType}`;
@@ -404,9 +400,25 @@ export function transformListServicesResponse(pplResponse: PPLDataFrame): ListSe
           Name: serviceName,
           Type: 'Service',
         },
-        GroupByAttributes: serviceGroupByAttributes || {},
+        GroupByAttributes: parsedGroupByAttributes || {},
       });
     }
+  };
+
+  rows.forEach((row, _index) => {
+    // Add service from sourceNode
+    addServiceToMap(
+      row['sourceNode.keyAttributes'],
+      row['sourceNode.groupByAttributes'],
+      row['sourceNode.name']
+    );
+
+    // Add service from targetNode (may be null for leaf services)
+    addServiceToMap(
+      row['targetNode.keyAttributes'],
+      row['targetNode.groupByAttributes'],
+      row['targetNode.name']
+    );
   });
 
   // Convert map to array and sort by service name for consistency
@@ -448,34 +460,34 @@ export function transformGetServiceResponse(pplResponse: PPLDataFrame): any {
   const timestamps = rows.map((r) => r.timestamp).filter((ts) => ts !== undefined);
   const { StartTime, EndTime } = extractTimeRange(timestamps);
 
-  // Handle nested structure from new query format
+  // Handle nested structure from query format
   // Parse JSON strings if needed
-  let serviceKeyAttributes = row['service.keyAttributes'];
+  let serviceKeyAttributes = row['sourceNode.keyAttributes'];
   if (typeof serviceKeyAttributes === 'string') {
     try {
       serviceKeyAttributes = JSON.parse(serviceKeyAttributes);
     } catch (e) {
       console.error(
-        '[DEBUG] transformGetServiceResponse: Failed to parse service.keyAttributes:',
+        '[DEBUG] transformGetServiceResponse: Failed to parse sourceNode.keyAttributes:',
         e
       );
     }
   }
 
-  let serviceGroupByAttributes = row['service.groupByAttributes'] || {};
+  let serviceGroupByAttributes = row['sourceNode.groupByAttributes'] || {};
   if (typeof serviceGroupByAttributes === 'string') {
     try {
       serviceGroupByAttributes = JSON.parse(serviceGroupByAttributes);
     } catch (e) {
       console.error(
-        '[DEBUG] transformGetServiceResponse: Failed to parse service.groupByAttributes:',
+        '[DEBUG] transformGetServiceResponse: Failed to parse sourceNode.groupByAttributes:',
         e
       );
     }
   }
 
   // Handle both nested keyAttributes format and flat field format
-  const serviceName = serviceKeyAttributes?.name || row['service.name'];
+  const serviceName = serviceKeyAttributes?.name || row['sourceNode.name'];
   const environmentType = serviceKeyAttributes?.environment || row.environment;
   const serviceType = serviceKeyAttributes?.type || 'Service';
 
@@ -510,7 +522,7 @@ export function transformGetServiceResponse(pplResponse: PPLDataFrame): any {
 
 /**
  * Transforms PPL response for listServiceOperations API
- * Handles new nested data structure with operation.name
+ * Handles unified document structure with sourceOperation.name and targetNode.keyAttributes
  * @param pplResponse Raw PPL data_frame response
  * @returns Formatted operations response
  */
@@ -523,7 +535,7 @@ export function transformListServiceOperationsResponse(pplResponse: PPLDataFrame
   const operationMap = new Map<string, { count: number; dependencies: Set<string> }>();
 
   rows.forEach((row) => {
-    const operationName = row.operation?.name || row['operation.name'];
+    const operationName = row['sourceOperation.name'];
 
     if (operationName && operationName !== 'unknown') {
       // Get or create the operation entry
@@ -535,8 +547,7 @@ export function transformListServiceOperationsResponse(pplResponse: PPLDataFrame
       opData.count += 1;
 
       // Extract remote service name for dependency counting
-      const remoteServiceAttrs =
-        row.operation?.remoteService?.keyAttributes || row['operation.remoteService.keyAttributes'];
+      const remoteServiceAttrs = row['targetNode.keyAttributes'];
       if (remoteServiceAttrs && remoteServiceAttrs.name && remoteServiceAttrs.name !== 'unknown') {
         opData.dependencies.add(remoteServiceAttrs.name);
       }
@@ -564,7 +575,7 @@ export function transformListServiceOperationsResponse(pplResponse: PPLDataFrame
 
 /**
  * Transforms PPL response for listServiceDependencies API
- * Handles new nested data structure with operation.remoteService
+ * Handles unified document structure with targetNode.keyAttributes and sourceOperation/targetOperation
  * @param pplResponse Raw PPL data_frame response
  * @returns Formatted dependencies response
  */
@@ -584,20 +595,13 @@ export function transformListServiceDependenciesResponse(pplResponse: PPLDataFra
   const dependencyMap = new Map<string, DependencyData>();
 
   rows.forEach((row) => {
-    // Handle both nested object and flat field names
-    const dependencyName =
-      row.operation?.remoteService?.keyAttributes?.name ||
-      row['operation.remoteService.keyAttributes']?.name;
+    const dependencyName = row['targetNode.keyAttributes']?.name;
 
-    const dependencyEnv =
-      row.operation?.remoteService?.keyAttributes?.environment ||
-      row['operation.remoteService.keyAttributes']?.environment ||
-      'generic:default';
+    const dependencyEnv = row['targetNode.keyAttributes']?.environment || 'generic:default';
 
-    const serviceOperation = row.operation?.name || row['operation.name'] || 'unknown';
+    const serviceOperation = row['sourceOperation.name'] || 'unknown';
 
-    const remoteOperation =
-      row.operation?.remoteOperationName || row['operation.remoteOperationName'] || 'unknown';
+    const remoteOperation = row['targetOperation.name'] || 'unknown';
 
     if (dependencyName && dependencyName !== 'unknown') {
       // Create composite key for service+operation combination
@@ -670,7 +674,7 @@ function mergeGroupByAttributes(
 
 /**
  * Transforms PPL response for getServiceMap API
- * Handles new nested data structure with service.keyAttributes
+ * Handles unified document structure with sourceNode and targetNode
  * @param pplResponse Raw PPL data_frame response
  * @returns Formatted service map response with Nodes and Edges
  */
@@ -695,35 +699,35 @@ export function transformGetServiceMapResponse(pplResponse: PPLDataFrame): any {
   const allGroupByAttributes: any[] = [];
 
   rows.forEach((row, _index) => {
-    // Extract service information from new nested structure
+    // Extract source node information
     // PPL returns fields with dot notation as string keys
     // Parse JSON strings if needed
-    let serviceKeyAttributes = row['service.keyAttributes'];
+    let serviceKeyAttributes = row['sourceNode.keyAttributes'];
     if (typeof serviceKeyAttributes === 'string') {
       try {
         serviceKeyAttributes = JSON.parse(serviceKeyAttributes);
       } catch (e) {
         console.error(
-          '[DEBUG] transformGetServiceMapResponse: Failed to parse service.keyAttributes:',
+          '[DEBUG] transformGetServiceMapResponse: Failed to parse sourceNode.keyAttributes:',
           e
         );
       }
     }
 
-    let serviceGroupByAttributes = row['service.groupByAttributes'] || {};
+    let serviceGroupByAttributes = row['sourceNode.groupByAttributes'] || {};
     if (typeof serviceGroupByAttributes === 'string') {
       try {
         serviceGroupByAttributes = JSON.parse(serviceGroupByAttributes);
       } catch (e) {
         console.error(
-          '[DEBUG] transformGetServiceMapResponse: Failed to parse service.groupByAttributes:',
+          '[DEBUG] transformGetServiceMapResponse: Failed to parse sourceNode.groupByAttributes:',
           e
         );
       }
     }
 
     // Handle both nested keyAttributes format and flat field format
-    const serviceName = serviceKeyAttributes?.name || row['service.name'];
+    const serviceName = serviceKeyAttributes?.name || row['sourceNode.name'];
     const environmentType = serviceKeyAttributes?.environment || row.environment;
     const platformType = environmentType
       ? getPlatformTypeFromEnvironment(environmentType)
@@ -783,11 +787,11 @@ export function transformGetServiceMapResponse(pplResponse: PPLDataFrame): any {
       }
     }
 
-    // Also add remote service as a node if it exists
-    const remoteServiceKeyAttributes = row['remoteService.keyAttributes'];
+    // Also add target node as a node if it exists (may be null for leaf services)
+    const remoteServiceKeyAttributes = row['targetNode.keyAttributes'];
     const remoteServiceName = remoteServiceKeyAttributes?.name;
     const remoteEnvironment = remoteServiceKeyAttributes?.environment;
-    const remoteServiceGroupByAttributes = row['remoteService.groupByAttributes'] || {};
+    const remoteServiceGroupByAttributes = row['targetNode.groupByAttributes'] || {};
 
     if (remoteServiceName && remoteEnvironment) {
       const depNodeKey = `${remoteServiceName}::${remoteEnvironment}`;
@@ -861,36 +865,36 @@ export function transformGetServiceMapResponse(pplResponse: PPLDataFrame): any {
   const edges = rows
     .map((row, index) => {
       // Parse JSON strings if needed
-      let serviceKeyAttributes = row['service.keyAttributes'];
+      let serviceKeyAttributes = row['sourceNode.keyAttributes'];
       if (typeof serviceKeyAttributes === 'string') {
         try {
           serviceKeyAttributes = JSON.parse(serviceKeyAttributes);
         } catch (e) {
           console.error(
-            '[DEBUG] transformGetServiceMapResponse (edges): Failed to parse service.keyAttributes:',
+            '[DEBUG] transformGetServiceMapResponse (edges): Failed to parse sourceNode.keyAttributes:',
             e
           );
         }
       }
 
-      let remoteServiceKeyAttributes = row['remoteService.keyAttributes'];
+      let remoteServiceKeyAttributes = row['targetNode.keyAttributes'];
       if (typeof remoteServiceKeyAttributes === 'string') {
         try {
           remoteServiceKeyAttributes = JSON.parse(remoteServiceKeyAttributes);
         } catch (e) {
           console.error(
-            '[DEBUG] transformGetServiceMapResponse (edges): Failed to parse remoteService.keyAttributes:',
+            '[DEBUG] transformGetServiceMapResponse (edges): Failed to parse targetNode.keyAttributes:',
             e
           );
         }
       }
 
       // Handle both nested keyAttributes format and flat field format
-      const serviceName = serviceKeyAttributes?.name || row['service.name'];
+      const serviceName = serviceKeyAttributes?.name || row['sourceNode.name'];
       const environmentType = serviceKeyAttributes?.environment || row.environment;
-      const remoteServiceName = remoteServiceKeyAttributes?.name || row['remoteService.name'];
+      const remoteServiceName = remoteServiceKeyAttributes?.name || row['targetNode.name'];
       const remoteEnvironment =
-        remoteServiceKeyAttributes?.environment || row['remoteService.environment'];
+        remoteServiceKeyAttributes?.environment || row['targetNode.environment'];
 
       if (!serviceName || !environmentType || !remoteServiceName || !remoteEnvironment) {
         return null;
@@ -1003,7 +1007,7 @@ export function transformGetServiceDataResponse(
 
 /**
  * Transforms PPL stats aggregation response for listServices API
- * Handles stats query: stats count() by service.keyAttributes.name, service.keyAttributes.environment, service.groupByAttributes
+ * Handles stats query: stats count() by sourceNode.keyAttributes.name, sourceNode.keyAttributes.environment, sourceNode.groupByAttributes
  * @param pplResponse Raw PPL data_frame response from stats aggregation
  * @returns Array of service summaries
  */
@@ -1018,9 +1022,9 @@ export function transformListServicesStatsResponse(pplResponse: PPLDataFrame): a
   const services = rows
     .map((row) => {
       // Stats query groups by these field names
-      const serviceName = row['service.keyAttributes.name'];
-      const environment = row['service.keyAttributes.environment'];
-      const groupByAttributes = row['service.groupByAttributes'] || {};
+      const serviceName = row['sourceNode.keyAttributes.name'];
+      const environment = row['sourceNode.keyAttributes.environment'];
+      const groupByAttributes = row['sourceNode.groupByAttributes'] || {};
 
       if (!serviceName || !environment) {
         return null;
