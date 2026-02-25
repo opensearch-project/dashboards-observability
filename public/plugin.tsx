@@ -349,15 +349,15 @@ export class ObservabilityPlugin
       const timestampUtils = new TimestampUtils(dslService, pplService);
       const { dataSourceManagement } = setupDeps;
 
-      // Get ML Commons RCF service from the start dependencies
       const mlCommonsRCFService = new MLCommonsRCFService(coreStart.http);
 
       return Observability(
         coreStart,
-        { ...depsStart, mlCommonsRCFService } as AppPluginStartDependencies,
+        depsStart,
         params,
         pplService,
         dslService,
+        mlCommonsRCFService,
         savedObjects,
         timestampUtils,
         qm,
@@ -526,7 +526,6 @@ export class ObservabilityPlugin
   public start(core: CoreStart, startDeps: AppPluginStartDependencies): ObservabilityStart {
     const pplService: PPLService = new PPLService(core.http);
     const dslService = new DSLService(core.http);
-    const mlCommonsRCFService = new MLCommonsRCFService(core.http);
 
     coreRefs.core = core;
     coreRefs.http = core.http;
@@ -718,7 +717,6 @@ export class ObservabilityPlugin
       useLoadTablesToCacheHook,
       useLoadTableColumnsToCacheHook,
       useLoadAccelerationsToCacheHook,
-      mlCommonsRCFService,
     };
   }
 

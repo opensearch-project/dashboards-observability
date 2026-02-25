@@ -8,6 +8,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
 import { DataSourceManagementPluginSetup } from '../../../../src/plugins/data_source_management/public';
+import { MLCommonsRCFService } from '../services/requests/ml_commons_rcf';
 import { AppPluginStartDependencies } from '../types';
 import { App } from './app';
 
@@ -17,6 +18,7 @@ export const Observability = (
   AppMountParametersProp: AppMountParameters,
   pplService: any,
   dslService: any,
+  mlCommonsRCFService: MLCommonsRCFService,
   savedObjects: any,
   timestampUtils: any,
   queryManager: QueryManager,
@@ -28,7 +30,6 @@ export const Observability = (
 ) => {
   const { setHeaderActionMenu } = AppMountParametersProp;
   const { dataSource } = DepsStart;
-  const mlCommonsRCFService = (DepsStart as any).mlCommonsRCFService;
   const root = createRoot(AppMountParametersProp.element);
   root.render(
     <App
