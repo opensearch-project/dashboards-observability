@@ -6,6 +6,7 @@
 import { QueryManager } from 'common/query_manager';
 import { History } from 'history';
 import Plotly from 'plotly.js-dist';
+import { MLCommonsRCFService } from 'public/services/requests/ml_commons_rcf';
 import {
   CoreSetup,
   CoreStart,
@@ -100,7 +101,7 @@ export interface EmptyTabParams {
 export interface ILogExplorerProps {
   pplService: PPLService;
   dslService: DSLService;
-  mlCommonsRCFService: any;
+  mlCommonsRCFService: MLCommonsRCFService;
   savedObjects: SavedObjects;
   http: HttpStart;
   history: History;
@@ -120,7 +121,7 @@ export interface ILogExplorerProps {
 export interface IExplorerProps {
   pplService: PPLService;
   dslService: DSLService;
-  mlCommonsRCFService: any;
+  mlCommonsRCFService: MLCommonsRCFService;
   tabId: string;
   savedObjects: SavedObjects;
   timestampUtils: TimestampUtils;
@@ -337,7 +338,7 @@ export interface EventAnalyticsProps {
   parentBreadcrumbs: ChromeBreadcrumb[];
   pplService: any;
   dslService: any;
-  mlCommonsRCFService: any;
+  mlCommonsRCFService: MLCommonsRCFService;
   savedObjects: SavedObjectsStart;
   timestampUtils: TimestampUtils;
   http: HttpStart;

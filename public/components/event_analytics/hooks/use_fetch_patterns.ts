@@ -6,7 +6,7 @@
 import { IField, PatternTableData } from 'common/types/explorer';
 import isUndefined from 'lodash/isUndefined';
 import PPLService from 'public/services/requests/ppl';
-import MLCommonsRCFService from 'public/services/requests/ml_commons_rcf';
+import { MLCommonsRCFService } from 'public/services/requests/ml_commons_rcf';
 import { useRef } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
 import {
@@ -22,13 +22,30 @@ import { reset as resetPatterns, setPatterns } from '../redux/slices/patterns_sl
 import { changeQuery, selectQueries } from '../redux/slices/query_slice';
 import { useFetchEvents } from './use_fetch_events';
 
+const DEFAULT_RCF_PARAMETERS = {
+  number_of_trees: 100,
+  shingle_size: 8,
+  sample_size: 256,
+  output_after: 32,
+  time_decay: 0.0001,
+  anomaly_rate: 0.005,
+  time_field: 'timestamp',
+  category_field: 'category',
+  date_format: 'yyyy-MM-dd HH:mm:ss',
+  time_zone: 'UTC',
+} as const;
+
 interface IFetchPatternsParams {
   pplService: PPLService;
   mlCommonsRCFService: MLCommonsRCFService;
   requestParams: { tabId: string };
 }
 
-export const useFetchPatterns = ({ pplService, mlCommonsRCFService, requestParams }: IFetchPatternsParams) => {
+export const useFetchPatterns = ({
+  pplService,
+  mlCommonsRCFService,
+  requestParams,
+}: IFetchPatternsParams) => {
   const dispatch = useDispatch();
   const { isEventsLoading, fetchEvents } = useFetchEvents({
     pplService,
@@ -70,8 +87,9 @@ export const useFetchPatterns = ({ pplService, mlCommonsRCFService, requestParam
     interval: string
   ) => {
     let timeSeriesQuery = buildPatternsQuery(query, patternField, patternRegex);
-    timeSeriesQuery +=
-      ` | stats count() by span(\`${timestampField}\`, 1${interval || 'm'}) as timestamp, patterns_field`;
+    timeSeriesQuery += ` | stats count() by span(\`${timestampField}\`, 1${
+      interval || 'm'
+    }) as timestamp, patterns_field`;
     return timeSeriesQuery;
   };
 
@@ -94,59 +112,44 @@ export const useFetchPatterns = ({ pplService, mlCommonsRCFService, requestParam
       timestampField,
       interval
     );
-    
+
     // Fetch patterns data for the current query results
     Promise.allSettled([
       fetchEvents({ query: statsQuery }, 'jdbc', (res) => res),
       fetchEvents({ query: timeSeriesQuery }, 'jdbc', (res) => res),
     ])
       .then(async (res) => {
-        const [statsResp, timeSeriesResp] = res as Array<PromiseSettledResult<IPPLEventsDataSource>>;
+        const [statsResp, timeSeriesResp] = res as Array<
+          PromiseSettledResult<IPPLEventsDataSource>
+        >;
         if (statsResp.status === 'rejected') {
           throw statsResp.reason;
         }
 
         let anomaliesResultsAvailable = true;
         const anomaliesMap: { [x: string]: number } = {};
-        
+
         // Phase 2: Perform anomaly detection if time series data is available
         if (timeSeriesResp.status === 'fulfilled') {
           try {
-            // Transform PPL results to ML Commons format
             const timeSeriesData = timeSeriesResp.value.datarows.map((row) => ({
-              timestamp: row[1], // timestamp is the second column in time series query
-              category: row[2],  // patterns_field is the third column
-              value: row[0] || 0, // count is the first column
+              timestamp: row[1],
+              category: row[2],
+              value: row[0] || 0,
             }));
 
             // Skip anomaly detection if no time series data
             if (timeSeriesData.length === 0) {
-              console.warn('No time series data available for anomaly detection');
               anomaliesResultsAvailable = false;
             } else {
-              // Call ML Commons RCF API with correct parameters
               const rcfResponse = await mlCommonsRCFService.predictAnomalies({
                 data: timeSeriesData,
-                parameters: {
-                  number_of_trees: 100,
-                  shingle_size: 8,
-                  sample_size: 256,
-                  output_after: 32,
-                  time_decay: 0.0001,
-                  anomaly_rate: 0.005,
-                  time_field: 'timestamp',
-                  category_field: 'category',
-                  date_format: 'yyyy-MM-dd HH:mm:ss',
-                  time_zone: 'UTC',
-                },
+                parameters: DEFAULT_RCF_PARAMETERS,
               });
 
-              // Process anomaly detection results - count anomalies per pattern
-              // This matches the original PPL AD logic: anomaliesMap[pattern] = count of anomalies
-              if (rcfResponse.data && rcfResponse.data.anomalies && rcfResponse.data.anomalies.length > 0) {
+              if (rcfResponse.data?.anomalies?.length > 0) {
                 rcfResponse.data.anomalies.forEach((anomaly: any) => {
                   if (anomaly.isAnomaly && anomaly.score > 0) {
-                    // Use category as pattern identifier (patterns_field)
                     const pattern = anomaly.category;
                     anomaliesMap[pattern] = (anomaliesMap[pattern] || 0) + 1;
                   }
@@ -154,13 +157,11 @@ export const useFetchPatterns = ({ pplService, mlCommonsRCFService, requestParam
               }
             }
           } catch (rcfError) {
-            console.error('Error in ML Commons RCF anomaly detection:', rcfError);
+            console.error('ML Commons RCF anomaly detection failed:', rcfError);
             anomaliesResultsAvailable = false;
-            // Continue without anomaly detection results
-            // This maintains the same behavior as the original implementation
           }
         } else {
-          console.error('Error fetching time series data for anomaly detection:', timeSeriesResp.reason);
+          console.error('Failed to fetch time series data for anomaly detection');
           anomaliesResultsAvailable = false;
         }
 

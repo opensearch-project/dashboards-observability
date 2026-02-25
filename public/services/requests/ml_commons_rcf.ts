@@ -5,33 +5,19 @@
 
 import { CoreStart } from '../../../../../src/core/public';
 
-/**
- * Time Series Data Point Structure
- */
 interface TimeSeriesDataPoint {
-  timestamp: string;    // ISO 8601 timestamp
-  category?: string;    // Pattern category
-  value: number;        // Aggregated metric value
+  timestamp: string;
+  category?: string;
+  value: number;
 }
 
-/**
- * ML Commons RCF Service
- * Provides client-side interface for anomaly detection operations
- */
-export default class MLCommonsRCFService {
+export class MLCommonsRCFService {
   private http: CoreStart['http'];
 
   constructor(http: CoreStart['http']) {
     this.http = http;
   }
 
-  /**
-   * Perform anomaly detection using ML Commons RCF algorithm
-   * @param params RCF request parameters and data
-   * @param dataSourceMDSId Optional multi-data source identifier
-   * @param errorHandler Optional error handling callback
-   * @returns Promise resolving to anomaly detection results
-   */
   predictAnomalies = async (
     params: {
       data: TimeSeriesDataPoint[];
@@ -52,26 +38,16 @@ export default class MLCommonsRCFService {
     errorHandler?: (error: any) => void
   ) => {
     try {
-      const response = await this.http.post('/api/observability/ml-commons/rcf/predict', {
+      return await this.http.post('/api/observability/ml-commons/rcf/predict', {
         body: JSON.stringify(params),
-        query: {
-          dataSourceMDSId: dataSourceMDSId || '',
-        },
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        query: { dataSourceMDSId: dataSourceMDSId || '' },
+        headers: { 'Content-Type': 'application/json' },
       });
-
-      return response;
     } catch (error) {
       console.error('ML Commons RCF client error:', error);
-      
-      // Call error handler if provided
       if (errorHandler) {
         errorHandler(error);
       }
-      
-      // Re-throw error for upstream handling
       throw error;
     }
   };

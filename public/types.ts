@@ -24,7 +24,7 @@ import {
 } from '../common/types/data_connections';
 import { CatalogCacheManager } from './framework/catalog_cache/cache_manager';
 import { AssistantSetup } from './types';
-import MLCommonsRCFService from './services/requests/ml_commons_rcf';
+import { MLCommonsRCFService } from './services/requests/ml_commons_rcf';
 import {
   ContentManagementPluginSetup,
   ContentManagementPluginStart,
