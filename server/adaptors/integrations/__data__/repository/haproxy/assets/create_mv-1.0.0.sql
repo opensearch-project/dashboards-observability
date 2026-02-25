@@ -1,5 +1,6 @@
 CREATE MATERIALIZED VIEW {table_name}__mview AS
-SELECT
+SELECT * FROM (
+  SELECT
     regexp_extract(
         record,
         "^([\\d\\.]+):(\\d+) \\[(.+)\\] ([\\w\\-]+) ([\\w\\-]+)\\\/([\\w\\-]+) (\\d+)\\\/(\\d+)\\\/(\\d+)\\\/(\\d+)\\\/(\\d+) (\\d+) (\\d+) (.+) (.+) (.+) (\\d+)\\\/(\\d+)\\\/(\\d+)\\\/(\\d+)\\\/(\\d+) (\\d+)\\\/(\\d+) \\{(.*)\\}(?: \\{(.*)\\})? \"(\\w+) (.+) (.+)\"+$",
@@ -141,7 +142,9 @@ SELECT
 		28
 	) AS `http.flavor`,
     'haproxy.access' AS `event.domain`
-FROM {table_name}
+  FROM {table_name}
+) AS subq
+{refresh_range_filter}
 WITH (
     auto_refresh = true,
     refresh_interval = '15 Minute',

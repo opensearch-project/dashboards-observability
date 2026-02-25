@@ -4,14 +4,11 @@
  */
 
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { sampleParsedParagraghs1 } from '../../../../../../test/notebooks_constants';
 import { ParaInput } from '../para_input';
 
 describe('<para_input /> spec', () => {
-  configure({ adapter: new Adapter() });
   const visOptions1 = Array.from({ length: 5 }, (v, k) => ({
     label: `visualization-${k}`,
     key: `key-${k}`,
@@ -34,7 +31,7 @@ describe('<para_input /> spec', () => {
     const setIsOutputStale = jest.fn();
     const setSelectedVisOption = jest.fn();
     const setVisType = jest.fn();
-    const utils = render(
+    const _utils = render(
       <ParaInput
         para={para}
         index={1}
@@ -52,7 +49,7 @@ describe('<para_input /> spec', () => {
         setVisType={setVisType}
       />
     );
-    expect(utils.container.firstChild).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('renders the visualization component', () => {
@@ -64,7 +61,7 @@ describe('<para_input /> spec', () => {
     const setIsOutputStale = jest.fn();
     const setSelectedVisOption = jest.fn();
     const setVisType = jest.fn();
-    const utils = render(
+    const _utils = render(
       <ParaInput
         para={para}
         index={1}
@@ -82,7 +79,7 @@ describe('<para_input /> spec', () => {
         setVisType={setVisType}
       />
     );
-    expect(utils.container.firstChild).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('types in the markdown component', () => {

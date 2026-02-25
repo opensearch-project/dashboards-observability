@@ -4,15 +4,11 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import { configure, mount, shallow } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import { ErrorRatePlt } from '../error_rate_plt';
 
 describe('Error rate plot component', () => {
-  configure({ adapter: new Adapter() });
-
-  it('renders error rate plot', () => {
+  it('renders error rate plot', async () => {
     const setStartTime = jest.fn();
     const setEndTime = jest.fn();
     const items = {
@@ -33,10 +29,10 @@ describe('Error rate plot component', () => {
       ] as Plotly.Data[],
       fixedInterval: '365d',
     };
-    const wrapper = shallow(
-      <ErrorRatePlt items={items} setStartTime={setStartTime} setEndTime={setEndTime} />
-    );
-    
-    expect(wrapper).toMatchSnapshot();
+    render(<ErrorRatePlt items={items} setStartTime={setStartTime} setEndTime={setEndTime} />);
+
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 });

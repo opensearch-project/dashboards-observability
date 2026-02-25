@@ -3,20 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Traces } from '..';
 import { coreRefs } from '../../../../../framework/core_refs';
 
 describe('Traces component', () => {
-  configure({ adapter: new Adapter() });
   const modes = [
     { id: 'jaeger', title: 'Jaeger' },
     { id: 'data_prepper', title: 'Data Prepper' },
   ];
 
-  it('renders empty traces page', () => {
+  it('renders empty traces page', async () => {
     const { http, chrome } = coreRefs;
     const setQuery = jest.fn();
     const setFilters = jest.fn();
@@ -33,7 +31,7 @@ describe('Traces component', () => {
         href: '#/trace_analytics/traces',
       },
     ];
-    const wrapper = mount(
+    render(
       <Traces
         http={http!}
         chrome={chrome!}
@@ -57,10 +55,12 @@ describe('Traces component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
-  it('renders traces page', () => {
+  it('renders traces page', async () => {
     const { http, chrome } = coreRefs;
     const setQuery = jest.fn();
     const setFilters = jest.fn();
@@ -77,7 +77,7 @@ describe('Traces component', () => {
         href: '#/trace_analytics/traces',
       },
     ];
-    const wrapper = mount(
+    render(
       <Traces
         http={http!}
         chrome={chrome!}
@@ -101,10 +101,12 @@ describe('Traces component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
-  it('renders jaeger traces page', () => {
+  it('renders jaeger traces page', async () => {
     const { http, chrome } = coreRefs;
     const setQuery = jest.fn();
     const setFilters = jest.fn();
@@ -121,7 +123,7 @@ describe('Traces component', () => {
         href: '#/trace_analytics/traces',
       },
     ];
-    const wrapper = mount(
+    render(
       <Traces
         http={http!}
         chrome={chrome!}
@@ -146,6 +148,8 @@ describe('Traces component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 });

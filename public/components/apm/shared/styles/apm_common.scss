@@ -1,0 +1,19 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Fix: Remove borders from APM range filter sliders
+.apm-range-filter .euiRangeSlider {
+  border: none;
+}
+
+// APM Legacy Banner - make parent container full width
+.apm-legacy-banner-wrapper {
+  width: 100%;
+}
+
+// Target the parent euiHeaderSectionItem to be full width when containing the banner
+.euiHeaderSectionItem:has(.apm-legacy-banner-wrapper) {
+  width: 100%;
+}

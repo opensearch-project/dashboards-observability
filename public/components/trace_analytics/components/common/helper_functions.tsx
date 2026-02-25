@@ -10,8 +10,6 @@ import { SpacerSize } from '@elastic/eui/src/components/spacer/spacer';
 import { isEmpty, round } from 'lodash';
 import React from 'react';
 import {
-  DATA_PREPPER_INDEX_NAME,
-  DATA_PREPPER_SERVICE_INDEX_NAME,
   DEFAULT_CORRELATED_LOGS_FIELD_MAPPINGS,
   JAEGER_INDEX_NAME,
   JAEGER_SERVICE_INDEX_NAME,
@@ -40,7 +38,7 @@ import { ServiceObject } from './plots/service_map';
 
 const missingJaegerTracesConfigurationMessage = `The indices required for trace analytics (${JAEGER_INDEX_NAME} and ${JAEGER_SERVICE_INDEX_NAME}) do not exist or you do not have permission to access them.`;
 
-const missingCustomDataPrepperTracesConfigurationMessage = `The indices required for trace analytics (${DATA_PREPPER_INDEX_NAME} and ${DATA_PREPPER_SERVICE_INDEX_NAME}) do not exist or you do not have permission to access them. Update the indices for custom source in advanced settings`;
+const missingCustomDataPrepperTracesConfigurationMessage = `The indices required for trace analytics (otel-v1-apm-span-* and otel-v1-apm-service-map*) do not exist or you do not have permission to access them. Update the indices for custom source in advanced settings`;
 
 export function PanelTitle({ title, totalItems }: { title: string; totalItems?: number }) {
   return (

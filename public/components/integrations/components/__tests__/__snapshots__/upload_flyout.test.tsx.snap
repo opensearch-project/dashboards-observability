@@ -1,81 +1,263 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Integration Upload Flyout Renders integration upload flyout as expected 1`] = `
-<EuiFlyout
-  onClose={[Function]}
-  size="s"
+<body
+  class="euiBody-hasOverlayMask euiBody--hasFlyout"
 >
-  <EuiFlyoutHeader>
-    <EuiText
-      size="s"
-    >
-      <h2>
-        Upload Integrations
-      </h2>
-    </EuiText>
-  </EuiFlyoutHeader>
-  <EuiFlyoutBody>
-    <IntegrationUploadPicker
-      isInvalid={true}
-      onFileSelected={[Function]}
-      setIsInvalid={[Function]}
+  <div
+    aria-hidden="true"
+    data-aria-hidden="true"
+  />
+  <div
+    class="euiOverlayMask euiOverlayMask--belowHeader"
+  >
+    <div
+      aria-hidden="true"
+      data-aria-hidden="true"
+      data-focus-guard="true"
+      style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+      tabindex="0"
     />
-  </EuiFlyoutBody>
-  <EuiFlyoutFooter>
-    <EuiFlexGroup
-      justifyContent="spaceBetween"
+    <div
+      data-focus-lock-disabled="false"
     >
-      <EuiFlexItem
-        grow={false}
+      <div
+        class="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
+        role="dialog"
+        tabindex="-1"
       >
-        <EuiSmallButton
-          onClick={[Function]}
+        <button
+          aria-label="Close this dialog"
+          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton euiFlyout__closeButton--inside"
+          data-test-subj="euiFlyoutCloseButton"
+          type="button"
         >
-          Cancel
-        </EuiSmallButton>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiSmallButton
-          disabled={true}
-          fill={true}
-          onClick={[Function]}
+          <svg
+            aria-hidden="true"
+            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+            focusable="false"
+            height="16"
+            role="img"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+            />
+          </svg>
+        </button>
+        <div
+          class="euiFlyoutHeader"
         >
-          Upload
-        </EuiSmallButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiFlyoutFooter>
-</EuiFlyout>
+          <div
+            class="euiText euiText--small"
+          >
+            <h2>
+              Upload Integrations
+            </h2>
+          </div>
+        </div>
+        <div
+          class="euiFlyoutBody"
+        >
+          <div
+            class="euiFlyoutBody__overflow"
+            tabindex="0"
+          >
+            <div
+              class="euiFlyoutBody__overflowContent"
+            >
+              <div
+                class="euiForm"
+              >
+                <div
+                  class="euiFormRow euiFormRow--compressed"
+                  id="random_html_id-row"
+                >
+                  <div
+                    class="euiFormRow__labelWrapper"
+                  >
+                    <label
+                      aria-invalid="false"
+                      class="euiFormLabel euiFormRow__label"
+                      for="random_html_id"
+                    >
+                      Select file
+                    </label>
+                  </div>
+                  <div
+                    class="euiFormRow__fieldWrapper"
+                  >
+                    <div
+                      class="euiFilePicker euiFilePicker--large euiFilePicker--compressed"
+                    >
+                      <div
+                        class="euiFilePicker__wrap"
+                      >
+                        <input
+                          aria-describedby="random_html_id-filePicker__prompt"
+                          class="euiFilePicker__input"
+                          id="random_html_id"
+                          type="file"
+                        />
+                        <div
+                          class="euiFilePicker__prompt"
+                          id="random_html_id-filePicker__prompt"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--large euiIcon-isLoading euiFilePicker__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                            />
+                          </svg>
+                          <div
+                            class="euiFilePicker__promptText"
+                          >
+                            Select or drag and drop integration bundles
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlyoutFooter"
+        >
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <button
+                class="euiButton euiButton--primary euiButton--small"
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButton__content"
+                >
+                  <span
+                    class="euiButton__text"
+                  >
+                    Cancel
+                  </span>
+                </span>
+              </button>
+            </div>
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <button
+                class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
+                disabled=""
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButton__content"
+                >
+                  <span
+                    class="euiButton__text"
+                  >
+                    Upload
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      aria-hidden="true"
+      data-aria-hidden="true"
+      data-focus-guard="true"
+      style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+      tabindex="0"
+    />
+  </div>
+</body>
 `;
 
 exports[`Integration Upload Flyout Renders the clean integration picker as expected 1`] = `
-<EuiForm>
-  <EuiCompressedFormRow
-    describedByIds={Array []}
-    display="rowCompressed"
-    error={
-      Array [
-        "Must be an ndjson bundle of integration templates",
-      ]
-    }
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    isInvalid={false}
-    label="Select file"
-    labelType="label"
-  >
-    <EuiCompressedFilePicker
-      compressed={true}
-      display="large"
-      id="integrationBundlePicker"
-      initialPromptText="Select or drag and drop integration bundles"
-      isInvalid={false}
-      onBlur={[Function]}
-      onChange={[Function]}
-    />
-  </EuiCompressedFormRow>
-</EuiForm>
+<body
+  class=""
+>
+  <div>
+    <div
+      class="euiForm"
+    >
+      <div
+        class="euiFormRow euiFormRow--compressed"
+        id="random_html_id-row"
+      >
+        <div
+          class="euiFormRow__labelWrapper"
+        >
+          <label
+            aria-invalid="false"
+            class="euiFormLabel euiFormRow__label"
+            for="random_html_id"
+          >
+            Select file
+          </label>
+        </div>
+        <div
+          class="euiFormRow__fieldWrapper"
+        >
+          <div
+            class="euiFilePicker euiFilePicker--large euiFilePicker--compressed"
+          >
+            <div
+              class="euiFilePicker__wrap"
+            >
+              <input
+                aria-describedby="random_html_id-filePicker__prompt"
+                class="euiFilePicker__input"
+                id="random_html_id"
+                type="file"
+              />
+              <div
+                class="euiFilePicker__prompt"
+                id="random_html_id-filePicker__prompt"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="euiIcon euiIcon--large euiFilePicker__icon"
+                  focusable="false"
+                  height="16"
+                  role="img"
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m9 10.114 1.85-1.943a.52.52 0 0 1 .77 0c.214.228.214.6 0 .829l-1.95 2.05a1.552 1.552 0 0 1-2.31 0L5.41 9a.617.617 0 0 1 0-.829.52.52 0 0 1 .77 0L8 10.082V1.556C8 1.249 8.224 1 8.5 1s.5.249.5.556v8.558ZM4.18 6a.993.993 0 0 0-.972.804l-1.189 6A.995.995 0 0 0 2.991 14h11.018a1 1 0 0 0 .972-1.196l-1.19-6a.993.993 0 0 0-.97-.804H4.18ZM6 5v1h5V5h1.825c.946 0 1.76.673 1.946 1.608l1.19 6A2 2 0 0 1 14.016 15H2.984a1.992 1.992 0 0 1-1.945-2.392l1.19-6C2.414 5.673 3.229 5 4.174 5H6Z"
+                  />
+                </svg>
+                <div
+                  class="euiFilePicker__promptText"
+                >
+                  Select or drag and drop integration bundles
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
 `;

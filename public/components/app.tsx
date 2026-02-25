@@ -23,8 +23,12 @@ import { Main as NotebooksHome } from './notebooks/components/main';
 import { Home as TraceAnalyticsHome } from './trace_analytics/home';
 import { Home as GettingStartedHome } from './getting_started/home';
 import { Home as OverviewHome } from './overview/home';
-import { Services as ApmServices } from './apm/services';
-import { ApplicationMap as ApmApplicationMap } from './apm/application_map';
+import { Services as ApmServices, ApmServicesProps } from './apm/services';
+import {
+  ApplicationMapPage as ApmApplicationMap,
+  ApplicationMapPageProps as ApmApplicationMapProps,
+} from './apm/pages/application_map';
+import { ApmConfigProvider } from './apm/config/apm_config_context';
 
 interface ObservabilityAppDeps {
   CoreStartProp: CoreStart;
@@ -48,6 +52,19 @@ if (window.Cypress) {
   window.store = store;
 }
 
+// Wrapper components that include ApmConfigProvider
+const ApmServicesWithProvider = (props: ApmServicesProps) => (
+  <ApmConfigProvider dataService={props.DepsStart?.data}>
+    <ApmServices {...props} />
+  </ApmConfigProvider>
+);
+
+const ApmApplicationMapWithProvider = (props: ApmApplicationMapProps) => (
+  <ApmConfigProvider dataService={props.DepsStart?.data}>
+    <ApmApplicationMap {...props} />
+  </ApmConfigProvider>
+);
+
 const pages = {
   applications: ApplicationAnalyticsHome,
   logs: EventAnalytics,
@@ -59,8 +76,8 @@ const pages = {
   dataconnections: DataConnectionsHome,
   gettingStarted: GettingStartedHome,
   overview: OverviewHome,
-  'apm-services': ApmServices,
-  'apm-application-map': ApmApplicationMap,
+  'apm-services': ApmServicesWithProvider,
+  'apm-application-map': ApmApplicationMapWithProvider,
 };
 
 export const App = ({

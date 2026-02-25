@@ -1,855 +1,210 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Mode picker component renders mode picker 1`] = `
-<DataSourcePicker
-  modes={
-    Array [
-      Object {
-        "id": "jaeger",
-        "title": "Jaeger",
-      },
-      Object {
-        "id": "data_prepper",
-        "title": "Data Prepper",
-      },
-    ]
-  }
-  selectedMode="jaeger"
-  setMode={[MockFunction]}
->
-  <EuiPopover
-    anchorClassName="eui-textTruncate"
-    anchorPosition="downCenter"
-    button={
-      <EuiSmallButtonEmpty
-        className="dscIndexPattern__triggerButton"
-        color="text"
-        data-test-subj="indexPattern-switch-link"
-        flush="left"
-        iconSide="right"
-        iconType="arrowDown"
-        onClick={[Function]}
-        title="jaeger"
-      >
-        Jaeger
-      </EuiSmallButtonEmpty>
-    }
-    className="eui-textTruncate"
-    closePopover={[Function]}
-    display="inlineBlock"
-    hasArrow={true}
-    isOpen={false}
-    ownFocus={true}
-    panelPaddingSize="s"
-  >
+<body>
+  <div>
     <div
-      className="euiPopover euiPopover--anchorDownCenter eui-textTruncate"
+      class="euiPopover euiPopover--anchorDownCenter eui-textTruncate"
     >
       <div
-        className="euiPopover__anchor eui-textTruncate"
+        class="euiPopover__anchor eui-textTruncate"
       >
-        <EuiSmallButtonEmpty
-          className="dscIndexPattern__triggerButton"
-          color="text"
+        <button
+          class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
           data-test-subj="indexPattern-switch-link"
-          flush="left"
-          iconSide="right"
-          iconType="arrowDown"
-          onClick={[Function]}
           title="jaeger"
+          type="button"
         >
-          <EuiButtonEmpty
-            className="dscIndexPattern__triggerButton"
-            color="text"
-            data-test-subj="indexPattern-switch-link"
-            flush="left"
-            iconSide="right"
-            iconType="arrowDown"
-            onClick={[Function]}
-            size="s"
-            title="jaeger"
+          <span
+            class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
           >
-            <button
-              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
-              data-test-subj="indexPattern-switch-link"
-              disabled={false}
-              onClick={[Function]}
-              title="jaeger"
-              type="button"
+            <svg
+              aria-hidden="true"
+              class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+              focusable="false"
+              height="16"
+              role="img"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <EuiButtonContent
-                className="euiButtonEmpty__content"
-                iconGap="m"
-                iconSide="right"
-                iconSize="m"
-                iconType="arrowDown"
-                textProps={
-                  Object {
-                    "className": "euiButtonEmpty__text",
-                  }
-                }
-              >
-                <span
-                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
-                >
-                  <EuiIcon
-                    className="euiButtonContent__icon"
-                    color="inherit"
-                    size="m"
-                    type="arrowDown"
-                  >
-                    <EuiIconBeaker
-                      aria-hidden={true}
-                      className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                      focusable="false"
-                      role="img"
-                      style={null}
-                    >
-                      <svg
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                        focusable="false"
-                        height={16}
-                        role="img"
-                        style={null}
-                        viewBox="0 0 16 16"
-                        width={16}
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                        />
-                      </svg>
-                    </EuiIconBeaker>
-                  </EuiIcon>
-                  <span
-                    className="euiButtonEmpty__text"
-                  >
-                    Jaeger
-                  </span>
-                </span>
-              </EuiButtonContent>
-            </button>
-          </EuiButtonEmpty>
-        </EuiSmallButtonEmpty>
+              <path
+                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+              />
+            </svg>
+            <span
+              class="euiButtonEmpty__text"
+            >
+              Jaeger
+            </span>
+          </span>
+        </button>
       </div>
     </div>
-  </EuiPopover>
-</DataSourcePicker>
+  </div>
+</body>
 `;
 
 exports[`Mode picker component renders mode picker 2`] = `
-<DataSourcePicker
-  modes={
-    Array [
-      Object {
-        "id": "jaeger",
-        "title": "Jaeger",
-      },
-      Object {
-        "id": "data_prepper",
-        "title": "Data Prepper",
-      },
-    ]
-  }
-  selectedMode="jaeger"
-  setMode={[MockFunction]}
->
-  <EuiPopover
-    anchorClassName="eui-textTruncate"
-    anchorPosition="downCenter"
-    button={
-      <EuiSmallButtonEmpty
-        className="dscIndexPattern__triggerButton"
-        color="text"
-        data-test-subj="indexPattern-switch-link"
-        flush="left"
-        iconSide="right"
-        iconType="arrowDown"
-        onClick={[Function]}
-        title="jaeger"
-      >
-        Jaeger
-      </EuiSmallButtonEmpty>
-    }
-    className="eui-textTruncate"
-    closePopover={[Function]}
-    display="inlineBlock"
-    hasArrow={true}
-    isOpen={true}
-    ownFocus={true}
-    panelPaddingSize="s"
-  >
+<body>
+  <div>
     <div
-      className="euiPopover euiPopover--anchorDownCenter eui-textTruncate"
+      class="euiPopover euiPopover--anchorDownCenter eui-textTruncate"
     >
       <div
-        className="euiPopover__anchor eui-textTruncate"
+        class="euiPopover__anchor eui-textTruncate"
       >
-        <EuiSmallButtonEmpty
-          className="dscIndexPattern__triggerButton"
-          color="text"
+        <button
+          class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
           data-test-subj="indexPattern-switch-link"
-          flush="left"
-          iconSide="right"
-          iconType="arrowDown"
-          onClick={[Function]}
           title="jaeger"
+          type="button"
         >
-          <EuiButtonEmpty
-            className="dscIndexPattern__triggerButton"
-            color="text"
-            data-test-subj="indexPattern-switch-link"
-            flush="left"
-            iconSide="right"
-            iconType="arrowDown"
-            onClick={[Function]}
-            size="s"
-            title="jaeger"
+          <span
+            class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
           >
-            <button
-              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty--flushLeft dscIndexPattern__triggerButton"
-              data-test-subj="indexPattern-switch-link"
-              disabled={false}
-              onClick={[Function]}
-              title="jaeger"
-              type="button"
+            <svg
+              aria-hidden="true"
+              class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+              focusable="false"
+              height="16"
+              role="img"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <EuiButtonContent
-                className="euiButtonEmpty__content"
-                iconGap="m"
-                iconSide="right"
-                iconSize="m"
-                iconType="arrowDown"
-                textProps={
-                  Object {
-                    "className": "euiButtonEmpty__text",
-                  }
-                }
+              <path
+                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+              />
+            </svg>
+            <span
+              class="euiButtonEmpty__text"
+            >
+              Jaeger
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div
+      data-focus-guard="true"
+      style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+      tabindex="-1"
+    />
+    <div
+      data-focus-lock-disabled="disabled"
+    >
+      <div
+        aria-describedby="random_html_id"
+        aria-live="off"
+        aria-modal="true"
+        class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPopover__panel euiPopover__panel--bottom"
+        data-autofocus="true"
+        role="dialog"
+        style="top: 16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
+        tabindex="0"
+      >
+        <div
+          class="euiPopover__panelArrow euiPopover__panelArrow--bottom"
+          style="left: 10px; top: 0px;"
+        />
+        <p
+          class="euiScreenReaderOnly"
+          id="random_html_id"
+        >
+          You are in a dialog. To close this dialog, hit escape.
+        </p>
+        <div>
+          <div
+            class="popOverContainer"
+          >
+            <div
+              class="euiPopoverTitle"
+            >
+              Choose data schema
+            </div>
+            <div
+              class="euiSelectable"
+              data-test-subj="indexPattern-switcher"
+            >
+              <div
+                class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
               >
-                <span
-                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                <div
+                  class="euiFormControlLayout__childrenWrapper"
                 >
-                  <EuiIcon
-                    className="euiButtonContent__icon"
-                    color="inherit"
-                    size="m"
-                    type="arrowDown"
+                  <input
+                    aria-activedescendant=""
+                    aria-autocomplete="list"
+                    aria-controls="random_html_id"
+                    aria-expanded="true"
+                    aria-haspopup="listbox"
+                    aria-label="Filter options"
+                    aria-owns="random_html_id"
+                    autocomplete="off"
+                    class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
+                    placeholder="Filter options"
+                    role="combobox"
+                    type="search"
+                    value=""
+                  />
+                  <div
+                    class="euiFormControlLayoutIcons"
                   >
-                    <EuiIconBeaker
-                      aria-hidden={true}
-                      className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                      focusable="false"
-                      role="img"
-                      style={null}
+                    <span
+                      class="euiFormControlLayoutCustomIcon"
                     >
                       <svg
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                        aria-hidden="true"
+                        class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                         focusable="false"
-                        height={16}
+                        height="16"
                         role="img"
-                        style={null}
                         viewBox="0 0 16 16"
-                        width={16}
+                        width="16"
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
                           d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
                         />
                       </svg>
-                    </EuiIconBeaker>
-                  </EuiIcon>
-                  <span
-                    className="euiButtonEmpty__text"
-                  >
-                    Jaeger
-                  </span>
-                </span>
-              </EuiButtonContent>
-            </button>
-          </EuiButtonEmpty>
-        </EuiSmallButtonEmpty>
-      </div>
-      <EuiPortal>
-        <Portal
-          containerInfo={
-            <div>
-              <div
-                data-focus-guard="true"
-                style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
-                tabindex="-1"
-              />
-              <div
-                data-focus-lock-disabled="disabled"
-              >
-                <div
-                  aria-describedby="random_html_id"
-                  aria-live="off"
-                  aria-modal="true"
-                  class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPopover__panel euiPopover__panel--bottom"
-                  data-autofocus="true"
-                  role="dialog"
-                  style="top: 16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
-                  tabindex="0"
-                >
-                  <div
-                    class="euiPopover__panelArrow euiPopover__panelArrow--bottom"
-                    style="left: 10px; top: 0px;"
-                  />
-                  <p
-                    class="euiScreenReaderOnly"
-                    id="random_html_id"
-                  >
-                    You are in a dialog. To close this dialog, hit escape.
-                  </p>
-                  <div>
-                    <div
-                      class="popOverContainer"
-                    >
-                      <div
-                        class="euiPopoverTitle"
-                      >
-                        Choose data schema
-                      </div>
-                      <div
-                        class="euiSelectable"
-                        data-test-subj="indexPattern-switcher"
-                      >
-                        <div
-                          class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
-                        >
-                          <div
-                            class="euiFormControlLayout__childrenWrapper"
-                          >
-                            <input
-                              aria-activedescendant=""
-                              aria-autocomplete="list"
-                              aria-controls="random_html_id"
-                              aria-expanded="true"
-                              aria-haspopup="listbox"
-                              aria-label="Filter options"
-                              aria-owns="random_html_id"
-                              autocomplete="off"
-                              class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
-                              placeholder="Filter options"
-                              role="combobox"
-                              type="search"
-                              value=""
-                            />
-                            <div
-                              class="euiFormControlLayoutIcons"
-                            >
-                              <span
-                                class="euiFormControlLayoutCustomIcon"
-                              >
-                                <svg
-                                  aria-hidden="true"
-                                  class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                  focusable="false"
-                                  height="16"
-                                  role="img"
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                  />
-                                </svg>
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div
-                          class="euiSelectableList"
-                        >
-                          <div
-                            style="overflow: visible; width: 0px;"
-                          />
-                          <div
-                            class="resize-triggers"
-                          >
-                            <div
-                              class="expand-trigger"
-                            >
-                              <div
-                                style="width: 1px; height: 1px;"
-                              />
-                            </div>
-                            <div
-                              class="contract-trigger"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    </span>
                   </div>
                 </div>
               </div>
               <div
-                data-focus-guard="true"
-                style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
-                tabindex="-1"
-              />
-            </div>
-          }
-        >
-          <EuiFocusTrap
-            clickOutsideDisables={true}
-            disabled={true}
-            initialFocus={[Function]}
-            noIsolation={true}
-            onClickOutside={[Function]}
-            onEscapeKey={[Function]}
-            returnFocus={false}
-            scrollLock={false}
-          >
-            <ForwardRef
-              enabled={false}
-              initialFocus={[Function]}
-              noIsolation={true}
-              onClickOutside={[Function]}
-              onEscapeKey={[Function]}
-              returnFocus={false}
-              scrollLock={false}
-            >
-              <ForwardRef
-                enabled={false}
-                initialFocus={[Function]}
-                noIsolation={true}
-                onClickOutside={[Function]}
-                onEscapeKey={[Function]}
-                returnFocus={false}
-                scrollLock={false}
-                sideCar={[Function]}
+                class="euiSelectableList"
               >
-                <ForwardRef(FocusLockUI)
-                  as={
-                    Object {
-                      "$$typeof": Symbol(react.forward_ref),
-                      "classNames": Object {
-                        "fullWidth": "width-before-scroll-bar",
-                        "zeroRight": "right-scroll-bar-position",
-                      },
-                      "defaultProps": Object {
-                        "enabled": true,
-                        "inert": false,
-                        "removeScrollBar": true,
-                      },
-                      "render": [Function],
-                    }
-                  }
-                  autoFocus={true}
-                  crossFrame={true}
-                  disabled={true}
-                  lockProps={
-                    Object {
-                      "allowPinchZoom": undefined,
-                      "as": undefined,
-                      "enabled": false,
-                      "inert": undefined,
-                      "shards": undefined,
-                      "sideCar": [Function],
-                      "style": undefined,
-                    }
-                  }
-                  noFocusGuards={false}
-                  persistentFocus={false}
-                  returnFocus={false}
-                  sideCar={[Function]}
+                <div
+                  style="overflow: visible; width: 0px;"
+                />
+                <div
+                  class="resize-triggers"
                 >
                   <div
-                    data-focus-guard={true}
-                    key="guard-first"
-                    style={
-                      Object {
-                        "height": "0px",
-                        "left": "1px",
-                        "overflow": "hidden",
-                        "padding": 0,
-                        "position": "fixed",
-                        "top": "1px",
-                        "width": "1px",
-                      }
-                    }
-                    tabIndex={-1}
-                  />
-                  <ForwardRef
-                    data-focus-lock-disabled="disabled"
-                    enabled={false}
-                    inert={false}
-                    onBlur={[Function]}
-                    onFocus={[Function]}
-                    removeScrollBar={true}
-                    sideCar={[Function]}
+                    class="expand-trigger"
                   >
                     <div
-                      data-focus-lock-disabled="disabled"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
-                      onScrollCapture={[Function]}
-                      onTouchMoveCapture={[Function]}
-                      onWheelCapture={[Function]}
-                    >
-                      <EuiPanel
-                        aria-describedby="random_html_id"
-                        aria-live="off"
-                        aria-modal="true"
-                        className="euiPopover__panel euiPopover__panel--bottom"
-                        hasShadow={false}
-                        paddingSize="s"
-                        panelRef={[Function]}
-                        role="dialog"
-                        style={
-                          Object {
-                            "left": -22,
-                            "top": 16,
-                            "willChange": "transform, opacity",
-                            "zIndex": 2000,
-                          }
-                        }
-                        tabIndex={0}
-                      >
-                        <div
-                          aria-describedby="random_html_id"
-                          aria-live="off"
-                          aria-modal="true"
-                          className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPopover__panel euiPopover__panel--bottom"
-                          role="dialog"
-                          style={
-                            Object {
-                              "left": -22,
-                              "top": 16,
-                              "willChange": "transform, opacity",
-                              "zIndex": 2000,
-                            }
-                          }
-                          tabIndex={0}
-                        >
-                          <div
-                            className="euiPopover__panelArrow euiPopover__panelArrow--bottom"
-                            style={
-                              Object {
-                                "left": 10,
-                                "top": 0,
-                              }
-                            }
-                          />
-                          <EuiScreenReaderOnly>
-                            <p
-                              className="euiScreenReaderOnly"
-                              id="random_html_id"
-                            >
-                              <EuiI18n
-                                default="You are in a dialog. To close this dialog, hit escape."
-                                token="euiPopover.screenReaderAnnouncement"
-                              >
-                                You are in a dialog. To close this dialog, hit escape.
-                              </EuiI18n>
-                            </p>
-                          </EuiScreenReaderOnly>
-                          <EuiMutationObserver
-                            observerOptions={
-                              Object {
-                                "attributes": true,
-                                "characterData": true,
-                                "childList": true,
-                                "subtree": true,
-                              }
-                            }
-                            onMutation={[Function]}
-                          >
-                            <div>
-                              <div
-                                className="popOverContainer"
-                              >
-                                <EuiPopoverTitle>
-                                  <div
-                                    className="euiPopoverTitle"
-                                  >
-                                    Choose data schema
-                                  </div>
-                                </EuiPopoverTitle>
-                                <EuiSelectable
-                                  data-test-subj="indexPattern-switcher"
-                                  isPreFiltered={false}
-                                  onChange={[Function]}
-                                  options={
-                                    Array [
-                                      Object {
-                                        "checked": "on",
-                                        "data-test-subj": "jaeger-mode",
-                                        "key": "jaeger",
-                                        "label": "Jaeger",
-                                        "value": "jaeger",
-                                      },
-                                      Object {
-                                        "checked": undefined,
-                                        "data-test-subj": "data_prepper-mode",
-                                        "key": "data_prepper",
-                                        "label": "Data Prepper",
-                                        "value": "data_prepper",
-                                      },
-                                    ]
-                                  }
-                                  searchProps={
-                                    Object {
-                                      "compressed": true,
-                                    }
-                                  }
-                                  searchable={true}
-                                  singleSelection="always"
-                                >
-                                  <div
-                                    className="euiSelectable"
-                                    data-test-subj="indexPattern-switcher"
-                                    onBlur={[Function]}
-                                    onFocus={[Function]}
-                                    onKeyDown={[Function]}
-                                  >
-                                    <EuiI18n
-                                      default="Filter options"
-                                      token="euiSelectable.placeholderName"
-                                    >
-                                      <EuiSelectableSearch
-                                        aria-activedescendant=""
-                                        aria-label="Filter options"
-                                        compressed={true}
-                                        defaultValue=""
-                                        isPreFiltered={false}
-                                        key="listSearch"
-                                        listId="random_html_id"
-                                        onChange={[Function]}
-                                        options={
-                                          Array [
-                                            Object {
-                                              "checked": "on",
-                                              "data-test-subj": "jaeger-mode",
-                                              "key": "jaeger",
-                                              "label": "Jaeger",
-                                              "value": "jaeger",
-                                            },
-                                            Object {
-                                              "checked": undefined,
-                                              "data-test-subj": "data_prepper-mode",
-                                              "key": "data_prepper",
-                                              "label": "Data Prepper",
-                                              "value": "data_prepper",
-                                            },
-                                          ]
-                                        }
-                                        placeholder="Filter options"
-                                      >
-                                        <EuiFieldSearch
-                                          aria-activedescendant=""
-                                          aria-autocomplete="list"
-                                          aria-controls="random_html_id"
-                                          aria-expanded={true}
-                                          aria-haspopup="listbox"
-                                          aria-label="Filter options"
-                                          aria-owns="random_html_id"
-                                          autoComplete="off"
-                                          className="euiSelectableSearch"
-                                          compressed={true}
-                                          defaultValue=""
-                                          fullWidth={true}
-                                          incremental={true}
-                                          isClearable={true}
-                                          isLoading={false}
-                                          onSearch={[Function]}
-                                          placeholder="Filter options"
-                                          role="combobox"
-                                        >
-                                          <EuiFormControlLayout
-                                            compressed={true}
-                                            fullWidth={true}
-                                            icon="search"
-                                            isLoading={false}
-                                          >
-                                            <div
-                                              className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
-                                            >
-                                              <div
-                                                className="euiFormControlLayout__childrenWrapper"
-                                              >
-                                                <EuiValidatableControl>
-                                                  <input
-                                                    aria-activedescendant=""
-                                                    aria-autocomplete="list"
-                                                    aria-controls="random_html_id"
-                                                    aria-expanded={true}
-                                                    aria-haspopup="listbox"
-                                                    aria-label="Filter options"
-                                                    aria-owns="random_html_id"
-                                                    autoComplete="off"
-                                                    className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
-                                                    defaultValue=""
-                                                    onKeyUp={[Function]}
-                                                    placeholder="Filter options"
-                                                    role="combobox"
-                                                    type="search"
-                                                  />
-                                                </EuiValidatableControl>
-                                                <EuiFormControlLayoutIcons
-                                                  compressed={true}
-                                                  icon="search"
-                                                  isLoading={false}
-                                                >
-                                                  <div
-                                                    className="euiFormControlLayoutIcons"
-                                                  >
-                                                    <EuiFormControlLayoutCustomIcon
-                                                      size="s"
-                                                      type="search"
-                                                    >
-                                                      <span
-                                                        className="euiFormControlLayoutCustomIcon"
-                                                      >
-                                                        <EuiIcon
-                                                          aria-hidden="true"
-                                                          className="euiFormControlLayoutCustomIcon__icon"
-                                                          size="s"
-                                                          type="search"
-                                                        >
-                                                          <EuiIconBeaker
-                                                            aria-hidden={true}
-                                                            className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                                            focusable="false"
-                                                            role="img"
-                                                            style={null}
-                                                          >
-                                                            <svg
-                                                              aria-hidden={true}
-                                                              className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                                              focusable="false"
-                                                              height={16}
-                                                              role="img"
-                                                              style={null}
-                                                              viewBox="0 0 16 16"
-                                                              width={16}
-                                                              xmlns="http://www.w3.org/2000/svg"
-                                                            >
-                                                              <path
-                                                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                              />
-                                                            </svg>
-                                                          </EuiIconBeaker>
-                                                        </EuiIcon>
-                                                      </span>
-                                                    </EuiFormControlLayoutCustomIcon>
-                                                  </div>
-                                                </EuiFormControlLayoutIcons>
-                                              </div>
-                                            </div>
-                                          </EuiFormControlLayout>
-                                        </EuiFieldSearch>
-                                      </EuiSelectableSearch>
-                                    </EuiI18n>
-                                    <EuiI18n
-                                      default="Filter options"
-                                      token="euiSelectable.placeholderName"
-                                    >
-                                      <EuiSelectableList
-                                        aria-label="Filter options"
-                                        key="list"
-                                        listId="random_html_id"
-                                        makeOptionId={[Function]}
-                                        onOptionClick={[Function]}
-                                        options={
-                                          Array [
-                                            Object {
-                                              "checked": "on",
-                                              "data-test-subj": "jaeger-mode",
-                                              "key": "jaeger",
-                                              "label": "Jaeger",
-                                              "value": "jaeger",
-                                            },
-                                            Object {
-                                              "checked": undefined,
-                                              "data-test-subj": "data_prepper-mode",
-                                              "key": "data_prepper",
-                                              "label": "Data Prepper",
-                                              "value": "data_prepper",
-                                            },
-                                          ]
-                                        }
-                                        rowHeight={32}
-                                        searchValue=""
-                                        searchable={true}
-                                        setActiveOptionIndex={[Function]}
-                                        singleSelection="always"
-                                        visibleOptions={
-                                          Array [
-                                            Object {
-                                              "checked": "on",
-                                              "data-test-subj": "jaeger-mode",
-                                              "key": "jaeger",
-                                              "label": "Jaeger",
-                                              "value": "jaeger",
-                                            },
-                                            Object {
-                                              "checked": undefined,
-                                              "data-test-subj": "data_prepper-mode",
-                                              "key": "data_prepper",
-                                              "label": "Data Prepper",
-                                              "value": "data_prepper",
-                                            },
-                                          ]
-                                        }
-                                      >
-                                        <div
-                                          className="euiSelectableList"
-                                        >
-                                          <AutoSizer
-                                            disableHeight={true}
-                                            disableWidth={false}
-                                            onResize={[Function]}
-                                            style={Object {}}
-                                          >
-                                            <div
-                                              style={
-                                                Object {
-                                                  "overflow": "visible",
-                                                  "width": 0,
-                                                }
-                                              }
-                                            />
-                                          </AutoSizer>
-                                        </div>
-                                      </EuiSelectableList>
-                                    </EuiI18n>
-                                  </div>
-                                </EuiSelectable>
-                              </div>
-                            </div>
-                          </EuiMutationObserver>
-                        </div>
-                      </EuiPanel>
-                    </div>
-                  </ForwardRef>
+                      style="width: 1px; height: 1px;"
+                    />
+                  </div>
                   <div
-                    data-focus-guard={true}
-                    style={
-                      Object {
-                        "height": "0px",
-                        "left": "1px",
-                        "overflow": "hidden",
-                        "padding": 0,
-                        "position": "fixed",
-                        "top": "1px",
-                        "width": "1px",
-                      }
-                    }
-                    tabIndex={-1}
+                    class="contract-trigger"
                   />
-                </ForwardRef(FocusLockUI)>
-              </ForwardRef>
-            </ForwardRef>
-          </EuiFocusTrap>
-        </Portal>
-      </EuiPortal>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </EuiPopover>
-</DataSourcePicker>
+    <div
+      data-focus-guard="true"
+      style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+      tabindex="-1"
+    />
+  </div>
+</body>
 `;

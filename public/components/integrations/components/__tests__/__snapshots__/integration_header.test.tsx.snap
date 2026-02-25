@@ -1,296 +1,144 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Integration Header Test Renders integration header as expected 1`] = `
-<IntegrationHeader>
+<body>
   <div>
-    <EuiPageHeader>
+    <div>
       <header
-        className="euiPageHeader euiPageHeader--responsive euiPageHeader--center"
+        class="euiPageHeader euiPageHeader--responsive euiPageHeader--center"
       >
-        <EuiPageHeaderSection>
-          <div
-            className="euiPageHeaderSection"
+        <div
+          class="euiPageHeaderSection"
+        >
+          <h3
+            class="euiTitle euiTitle--large"
+            data-test-subj="integrations-header"
           >
-            <EuiTitle
-              data-test-subj="integrations-header"
-              size="l"
-            >
-              <h3
-                className="euiTitle euiTitle--large"
-                data-test-subj="integrations-header"
-              >
-                Integrations
-              </h3>
-            </EuiTitle>
-          </div>
-        </EuiPageHeaderSection>
-        <EuiPageHeaderSection>
-          <div
-            className="euiPageHeaderSection"
-          >
-            <IntegrationHeaderActionsOldNav
-              onShowUpload={[Function]}
-            >
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="s"
-              >
-                <div
-                  className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
-                >
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    <div
-                      className="euiFlexItem euiFlexItem--flexGrowZero"
-                    >
-                      <EuiLink
-                        external={true}
-                        href="https://github.com/opensearch-project/opensearch-catalog/releases"
-                      >
-                        <a
-                          className="euiLink euiLink--primary"
-                          href="https://github.com/opensearch-project/opensearch-catalog/releases"
-                          rel="noreferrer"
-                        >
-                          View Catalog
-                          <EuiIcon
-                            aria-label="External link"
-                            className="euiLink__externalIcon"
-                            size="s"
-                            type="popout"
-                          >
-                            <EuiIconBeaker
-                              aria-hidden={true}
-                              aria-label="External link"
-                              className="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
-                              focusable="false"
-                              role="img"
-                              style={null}
-                            >
-                              <svg
-                                aria-hidden={true}
-                                aria-label="External link"
-                                className="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
-                                focusable="false"
-                                height={16}
-                                role="img"
-                                style={null}
-                                viewBox="0 0 16 16"
-                                width={16}
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                />
-                              </svg>
-                            </EuiIconBeaker>
-                          </EuiIcon>
-                        </a>
-                      </EuiLink>
-                    </div>
-                  </EuiFlexItem>
-                  <EuiFlexItem
-                    grow={false}
-                  >
-                    <div
-                      className="euiFlexItem euiFlexItem--flexGrowZero"
-                    >
-                      <EuiSmallButton
-                        fill={true}
-                        onClick={[Function]}
-                      >
-                        <EuiButton
-                          fill={true}
-                          onClick={[Function]}
-                          size="s"
-                        >
-                          <EuiButtonDisplay
-                            baseClassName="euiButton"
-                            disabled={false}
-                            element="button"
-                            fill={true}
-                            isDisabled={false}
-                            onClick={[Function]}
-                            size="s"
-                            type="button"
-                          >
-                            <button
-                              className="euiButton euiButton--primary euiButton--small euiButton--fill"
-                              disabled={false}
-                              onClick={[Function]}
-                              style={
-                                Object {
-                                  "minWidth": undefined,
-                                }
-                              }
-                              type="button"
-                            >
-                              <EuiButtonContent
-                                className="euiButton__content"
-                                iconGap="m"
-                                iconSide="left"
-                                textProps={
-                                  Object {
-                                    "className": "euiButton__text",
-                                  }
-                                }
-                              >
-                                <span
-                                  className="euiButtonContent euiButton__content"
-                                >
-                                  <span
-                                    className="euiButton__text"
-                                  >
-                                    Upload Integration
-                                  </span>
-                                </span>
-                              </EuiButtonContent>
-                            </button>
-                          </EuiButtonDisplay>
-                        </EuiButton>
-                      </EuiSmallButton>
-                    </div>
-                  </EuiFlexItem>
-                </div>
-              </EuiFlexGroup>
-            </IntegrationHeaderActionsOldNav>
-          </div>
-        </EuiPageHeaderSection>
-      </header>
-    </EuiPageHeader>
-    <EuiText
-      color="subdued"
-      size="s"
-    >
-      <div
-        className="euiText euiText--small"
-      >
-        <EuiTextColor
-          color="subdued"
-          component="div"
+            Integrations
+          </h3>
+        </div>
+        <div
+          class="euiPageHeaderSection"
         >
           <div
-            className="euiTextColor euiTextColor--subdued"
+            class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
           >
-            View integrations with preconfigured assets immediately within your OpenSearch setup.
-             
-            <EuiLink
-              external={true}
-              href="https://opensearch.org/docs/latest/integrations/index"
-              target="blank"
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <a
-                className="euiLink euiLink--primary"
-                href="https://opensearch.org/docs/latest/integrations/index"
+                class="euiLink euiLink--primary"
+                href="https://github.com/opensearch-project/opensearch-catalog/releases"
                 rel="noreferrer"
-                target="blank"
               >
-                Learn more
-                <EuiIcon
+                View Catalog
+                <svg
+                  aria-hidden="true"
                   aria-label="External link"
-                  className="euiLink__externalIcon"
-                  size="s"
-                  type="popout"
+                  class="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+                  focusable="false"
+                  height="16"
+                  role="img"
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  <EuiIconBeaker
-                    aria-hidden={true}
-                    aria-label="External link"
-                    className="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
-                    focusable="false"
-                    role="img"
-                    style={null}
-                  >
-                    <svg
-                      aria-hidden={true}
-                      aria-label="External link"
-                      className="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
-                      focusable="false"
-                      height={16}
-                      role="img"
-                      style={null}
-                      viewBox="0 0 16 16"
-                      width={16}
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                      />
-                    </svg>
-                  </EuiIconBeaker>
-                </EuiIcon>
+                  <path
+                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                  />
+                </svg>
               </a>
-            </EuiLink>
+            </div>
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <button
+                class="euiButton euiButton--primary euiButton--small euiButton--fill"
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButton__content"
+                >
+                  <span
+                    class="euiButton__text"
+                  >
+                    Upload Integration
+                  </span>
+                </span>
+              </button>
+            </div>
           </div>
-        </EuiTextColor>
+        </div>
+      </header>
+      <div
+        class="euiText euiText--small"
+      >
+        <div
+          class="euiTextColor euiTextColor--subdued"
+        >
+          View integrations with preconfigured assets immediately within your OpenSearch setup.
+           
+          <a
+            class="euiLink euiLink--primary"
+            href="https://opensearch.org/docs/latest/integrations/index"
+            rel="noreferrer"
+            target="blank"
+          >
+            Learn more
+            <svg
+              aria-hidden="true"
+              aria-label="External link"
+              class="euiIcon euiIcon--small euiIcon-isLoading euiLink__externalIcon"
+              focusable="false"
+              height="16"
+              role="img"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+              />
+            </svg>
+          </a>
+        </div>
       </div>
-    </EuiText>
-    <EuiSpacer
-      size="s"
-    >
       <div
-        className="euiSpacer euiSpacer--s"
+        class="euiSpacer euiSpacer--s"
       />
-    </EuiSpacer>
-    <EuiTabs
-      display="default"
-      size="s"
-    >
       <div
-        className="euiTabs euiTabs--small"
+        class="euiTabs euiTabs--small"
         role="tablist"
       >
-        <EuiTab
-          disabled={false}
-          isSelected={true}
-          key="0"
-          onClick={[Function]}
+        <button
+          aria-selected="true"
+          class="euiTab euiTab-isSelected"
+          role="tab"
+          type="button"
         >
-          <button
-            aria-selected={true}
-            className="euiTab euiTab-isSelected"
-            disabled={false}
-            onClick={[Function]}
-            role="tab"
-            type="button"
+          <span
+            class="euiTab__content"
           >
-            <span
-              className="euiTab__content"
-            >
-              Installed
-            </span>
-          </button>
-        </EuiTab>
-        <EuiTab
-          disabled={false}
-          isSelected={false}
-          key="1"
-          onClick={[Function]}
+            Installed
+          </span>
+        </button>
+        <button
+          aria-selected="false"
+          class="euiTab"
+          role="tab"
+          type="button"
         >
-          <button
-            aria-selected={false}
-            className="euiTab"
-            disabled={false}
-            onClick={[Function]}
-            role="tab"
-            type="button"
+          <span
+            class="euiTab__content"
           >
-            <span
-              className="euiTab__content"
-            >
-              Available
-            </span>
-          </button>
-        </EuiTab>
+            Available
+          </span>
+        </button>
       </div>
-    </EuiTabs>
-    <EuiSpacer
-      size="s"
-    >
       <div
-        className="euiSpacer euiSpacer--s"
+        class="euiSpacer euiSpacer--s"
       />
-    </EuiSpacer>
+    </div>
   </div>
-</IntegrationHeader>
+</body>
 `;

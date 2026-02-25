@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
+// eslint-disable-next-line jest/no-mocks-import
 import httpClientMock from '../../../../../test/__mocks__/httpClientMock';
 import PPLService from '../../../../services/requests/ppl';
 import { setOSDHttp, setPPLService } from '../../../../../common/utils';
@@ -19,19 +18,7 @@ import { sampleSavedMetric } from '../../../../../test/metrics_constants';
 
 jest.mock('../../../../services/requests/ppl');
 
-// Mocked http object
-const mockHttpObject = {
-  get: jest.fn().mockResolvedValue({}),
-};
-
-// Mocked coreRefs object with the mocked http
-const mockCoreRefs = {
-  http: mockHttpObject,
-  pplService: new PPLService(mockHttpObject),
-};
-
 describe('Side Bar Component', () => {
-  configure({ adapter: new Adapter() });
   const store = createStore(rootReducer, applyMiddleware(thunk));
   const setSelectedDataSource = jest.fn();
   const setSelectedOTIndex = jest.fn();
@@ -61,7 +48,7 @@ describe('Side Bar Component', () => {
       ],
     });
 
-    const wrapper = mount(
+    render(
       <Provider store={store}>
         <Sidebar
           selectedDataSource={''}
@@ -72,10 +59,8 @@ describe('Side Bar Component', () => {
       </Provider>
     );
 
-    wrapper.update();
-
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 });

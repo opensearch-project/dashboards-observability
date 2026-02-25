@@ -1,4 +1,5 @@
 CREATE MATERIALIZED VIEW {table_name}__live_mview AS
+SELECT * FROM (
   SELECT
     CAST(IFNULL(srcport, 0) AS LONG) AS `aws.vpc.srcport`,
     CAST(IFNULL(pkt_srcaddr, 'Unknown') AS STRING)  AS `aws.vpc.pkt-src-aws-service`,
@@ -28,9 +29,10 @@ CREATE MATERIALIZED VIEW {table_name}__live_mview AS
     CAST(IFNULL(account_id, 'Unknown') AS STRING) AS `aws.vpc.account-id`,
     CAST(IFNULL(sublocation_type, 'Unknown') AS STRING) AS `aws.vpc.sublocation_type`,
     CAST(IFNULL(sublocation_id, 'Unknown') AS STRING) AS `aws.vpc.sublocation_id`
-
   FROM
     {table_name}
+) AS subq
+{refresh_range_filter}
 WITH (
   auto_refresh = true,
   refresh_interval = '15 Minute',

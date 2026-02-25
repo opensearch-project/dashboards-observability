@@ -3,10 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { waitFor } from '@testing-library/dom';
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-import toJson from 'enzyme-to-json';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { CreateAccelerationForm } from '../../../../../../../../../../common/types/data_connections';
 import {
@@ -16,14 +13,12 @@ import {
 import { AddColumnPopOver } from '../add_column_popover';
 
 describe('Column popover components in materialized view', () => {
-  configure({ adapter: new Adapter() });
-
   it('renders column popover components in materialized view with default options', async () => {
     const accelerationFormData = createAccelerationEmptyDataMock;
     const setAccelerationFormData = jest.fn();
     const setIsColumnPopOverOpen = jest.fn();
     const setColumnExpressionValues = jest.fn();
-    const wrapper = mount(
+    render(
       <AddColumnPopOver
         isColumnPopOverOpen={false}
         setIsColumnPopOverOpen={setIsColumnPopOverOpen}
@@ -33,14 +28,9 @@ describe('Column popover components in materialized view', () => {
         setAccelerationFormData={setAccelerationFormData}
       />
     );
-    wrapper.update();
+
     await waitFor(() => {
-      expect(
-        toJson(wrapper, {
-          noKey: false,
-          mode: 'deep',
-        })
-      ).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
@@ -53,7 +43,7 @@ describe('Column popover components in materialized view', () => {
     const setAccelerationFormData = jest.fn();
     const setIsColumnPopOverOpen = jest.fn();
     const setColumnExpressionValues = jest.fn();
-    const wrapper = mount(
+    render(
       <AddColumnPopOver
         isColumnPopOverOpen={false}
         setIsColumnPopOverOpen={setIsColumnPopOverOpen}
@@ -63,14 +53,9 @@ describe('Column popover components in materialized view', () => {
         setAccelerationFormData={setAccelerationFormData}
       />
     );
-    wrapper.update();
+
     await waitFor(() => {
-      expect(
-        toJson(wrapper, {
-          noKey: false,
-          mode: 'deep',
-        })
-      ).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 });

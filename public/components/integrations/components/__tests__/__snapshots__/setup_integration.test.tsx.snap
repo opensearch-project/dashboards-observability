@@ -1,1194 +1,367 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Integration Setup Page Renders integration setup page as expected 1`] = `
-<SetupIntegrationPage
-  integration="sample"
+<body
+  style="padding-bottom: 0px;"
 >
-  <EuiPage>
+  <div>
     <div
-      className="euiPage euiPage--paddingMedium euiPage--grow"
+      class="euiPage euiPage--paddingMedium euiPage--grow"
     >
-      <EuiPageBody>
+      <div
+        class="euiPageBody euiPageBody--borderRadiusNone"
+      >
         <div
-          className="euiPageBody euiPageBody--borderRadiusNone"
+          class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
+          role="main"
         >
-          <SetupIntegrationForm
-            integration="sample"
-            renderType="page"
+          <div
+            class="euiPageContentBody"
           >
-            <EuiPageContent>
-              <EuiPanel
-                className="euiPageContent"
-                paddingSize="l"
-                role="main"
+            <div
+              class="euiForm"
+            >
+              <div
+                class="euiText euiText--small"
+              >
+                <h2>
+                  Set Up Integration
+                </h2>
+              </div>
+              <div
+                class="euiSpacer euiSpacer--s"
+              />
+              <div
+                class="euiSpacer euiSpacer--s"
+              />
+              <div
+                class="euiText euiText--medium"
+              >
+                <h3>
+                  Integration Details
+                </h3>
+              </div>
+              <div
+                class="euiSpacer euiSpacer--s"
+              />
+              <div
+                class="euiFormRow euiFormRow--compressed"
+                id="random_html_id-row"
               >
                 <div
-                  className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
-                  role="main"
+                  class="euiFormRow__labelWrapper"
                 >
-                  <EuiPageContentBody>
-                    <div
-                      className="euiPageContentBody"
-                    >
-                      <SetupIntegrationFormInputs
-                        config={
-                          Object {
-                            "checkpointLocation": "",
-                            "connectionDataSource": "",
-                            "connectionLocation": "",
-                            "connectionTableName": "sample",
-                            "connectionType": "index",
-                            "databaseName": "default",
-                            "displayName": "sample Integration",
-                            "enabledWorkflows": Array [],
-                          }
-                        }
-                        handleSelectedDataSourceChange={[Function]}
-                        integration={
-                          Object {
-                            "assets": Array [],
-                            "components": Array [],
-                            "license": "",
-                            "name": "sample",
-                            "type": "",
-                            "version": "",
-                          }
-                        }
-                        lockConnectionType={false}
-                        setupCallout={
-                          Object {
-                            "show": false,
-                          }
-                        }
-                        updateConfig={[Function]}
-                      >
-                        <EuiForm>
-                          <div
-                            className="euiForm"
-                          >
-                            <EuiText
-                              size="s"
-                            >
-                              <div
-                                className="euiText euiText--small"
-                              >
-                                <h2>
-                                  Set Up Integration
-                                </h2>
-                              </div>
-                            </EuiText>
-                            <EuiSpacer
-                              size="s"
-                            >
-                              <div
-                                className="euiSpacer euiSpacer--s"
-                              />
-                            </EuiSpacer>
-                            <EuiSpacer
-                              size="s"
-                            >
-                              <div
-                                className="euiSpacer euiSpacer--s"
-                              />
-                            </EuiSpacer>
-                            <EuiText>
-                              <div
-                                className="euiText euiText--medium"
-                              >
-                                <h3>
-                                  Integration Details
-                                </h3>
-                              </div>
-                            </EuiText>
-                            <EuiSpacer
-                              size="s"
-                            >
-                              <div
-                                className="euiSpacer euiSpacer--s"
-                              />
-                            </EuiSpacer>
-                            <IntegrationDetailsInputs
-                              config={
-                                Object {
-                                  "checkpointLocation": "",
-                                  "connectionDataSource": "",
-                                  "connectionLocation": "",
-                                  "connectionTableName": "sample",
-                                  "connectionType": "index",
-                                  "databaseName": "default",
-                                  "displayName": "sample Integration",
-                                  "enabledWorkflows": Array [],
-                                }
-                              }
-                              integration={
-                                Object {
-                                  "assets": Array [],
-                                  "components": Array [],
-                                  "license": "",
-                                  "name": "sample",
-                                  "type": "",
-                                  "version": "",
-                                }
-                              }
-                              updateConfig={[Function]}
-                            >
-                              <EuiCompressedFormRow
-                                describedByIds={Array []}
-                                display="rowCompressed"
-                                error={
-                                  Array [
-                                    "Must be at least 1 character.",
-                                  ]
-                                }
-                                fullWidth={false}
-                                hasChildLabel={true}
-                                hasEmptyLabelSpace={false}
-                                isInvalid={false}
-                                label="Display Name"
-                                labelType="label"
-                              >
-                                <div
-                                  className="euiFormRow euiFormRow--compressed"
-                                  id="random_html_id-row"
-                                >
-                                  <div
-                                    className="euiFormRow__labelWrapper"
-                                  >
-                                    <EuiFormLabel
-                                      aria-invalid={false}
-                                      className="euiFormRow__label"
-                                      htmlFor="random_html_id"
-                                      isFocused={false}
-                                      isInvalid={false}
-                                      type="label"
-                                    >
-                                      <label
-                                        aria-invalid={false}
-                                        className="euiFormLabel euiFormRow__label"
-                                        htmlFor="random_html_id"
-                                      >
-                                        Display Name
-                                      </label>
-                                    </EuiFormLabel>
-                                  </div>
-                                  <div
-                                    className="euiFormRow__fieldWrapper"
-                                  >
-                                    <EuiCompressedFieldText
-                                      data-test-subj="new-instance-name"
-                                      id="random_html_id"
-                                      isInvalid={false}
-                                      onBlur={[Function]}
-                                      onChange={[Function]}
-                                      onFocus={[Function]}
-                                      placeholder="sample Integration"
-                                      value="sample Integration"
-                                    >
-                                      <EuiFieldText
-                                        compressed={true}
-                                        data-test-subj="new-instance-name"
-                                        id="random_html_id"
-                                        isInvalid={false}
-                                        onBlur={[Function]}
-                                        onChange={[Function]}
-                                        onFocus={[Function]}
-                                        placeholder="sample Integration"
-                                        value="sample Integration"
-                                      >
-                                        <EuiFormControlLayout
-                                          compressed={true}
-                                          fullWidth={false}
-                                          inputId="random_html_id"
-                                        >
-                                          <div
-                                            className="euiFormControlLayout euiFormControlLayout--compressed"
-                                          >
-                                            <div
-                                              className="euiFormControlLayout__childrenWrapper"
-                                            >
-                                              <EuiValidatableControl
-                                                isInvalid={false}
-                                              >
-                                                <input
-                                                  className="euiFieldText euiFieldText--compressed"
-                                                  data-test-subj="new-instance-name"
-                                                  id="random_html_id"
-                                                  onBlur={[Function]}
-                                                  onChange={[Function]}
-                                                  onFocus={[Function]}
-                                                  placeholder="sample Integration"
-                                                  type="text"
-                                                  value="sample Integration"
-                                                />
-                                              </EuiValidatableControl>
-                                              <EuiFormControlLayoutIcons
-                                                compressed={true}
-                                              />
-                                            </div>
-                                          </div>
-                                        </EuiFormControlLayout>
-                                      </EuiFieldText>
-                                    </EuiCompressedFieldText>
-                                  </div>
-                                </div>
-                              </EuiCompressedFormRow>
-                            </IntegrationDetailsInputs>
-                            <EuiSpacer
-                              size="s"
-                            >
-                              <div
-                                className="euiSpacer euiSpacer--s"
-                              />
-                            </EuiSpacer>
-                            <EuiText>
-                              <div
-                                className="euiText euiText--medium"
-                              >
-                                <h3>
-                                  Integration Connection
-                                </h3>
-                              </div>
-                            </EuiText>
-                            <EuiSpacer
-                              size="s"
-                            >
-                              <div
-                                className="euiSpacer euiSpacer--s"
-                              />
-                            </EuiSpacer>
-                            <IntegrationConnectionInputs
-                              config={
-                                Object {
-                                  "checkpointLocation": "",
-                                  "connectionDataSource": "",
-                                  "connectionLocation": "",
-                                  "connectionTableName": "sample",
-                                  "connectionType": "index",
-                                  "databaseName": "default",
-                                  "displayName": "sample Integration",
-                                  "enabledWorkflows": Array [],
-                                }
-                              }
-                              handleSelectedDataSourceChange={[Function]}
-                              integration={
-                                Object {
-                                  "assets": Array [],
-                                  "components": Array [],
-                                  "license": "",
-                                  "name": "sample",
-                                  "type": "",
-                                  "version": "",
-                                }
-                              }
-                              lockConnectionType={false}
-                              updateConfig={[Function]}
-                            >
-                              <EuiCompressedFormRow
-                                describedByIds={Array []}
-                                display="rowCompressed"
-                                fullWidth={false}
-                                hasChildLabel={true}
-                                hasEmptyLabelSpace={false}
-                                helpText="Select the type of connection to use for queries."
-                                label="Connection Type"
-                                labelType="label"
-                              >
-                                <div
-                                  className="euiFormRow euiFormRow--compressed"
-                                  id="random_html_id-row"
-                                >
-                                  <div
-                                    className="euiFormRow__labelWrapper"
-                                  >
-                                    <EuiFormLabel
-                                      className="euiFormRow__label"
-                                      htmlFor="random_html_id"
-                                      isFocused={false}
-                                      type="label"
-                                    >
-                                      <label
-                                        className="euiFormLabel euiFormRow__label"
-                                        htmlFor="random_html_id"
-                                      >
-                                        Connection Type
-                                      </label>
-                                    </EuiFormLabel>
-                                  </div>
-                                  <div
-                                    className="euiFormRow__fieldWrapper"
-                                  >
-                                    <EuiCompressedSelect
-                                      aria-describedby="random_html_id-help-0"
-                                      disabled={false}
-                                      id="random_html_id"
-                                      onBlur={[Function]}
-                                      onChange={[Function]}
-                                      onFocus={[Function]}
-                                      options={Array []}
-                                      value="index"
-                                    >
-                                      <EuiSelect
-                                        aria-describedby="random_html_id-help-0"
-                                        compressed={true}
-                                        disabled={false}
-                                        id="random_html_id"
-                                        onBlur={[Function]}
-                                        onChange={[Function]}
-                                        onFocus={[Function]}
-                                        options={Array []}
-                                        value="index"
-                                      >
-                                        <EuiFormControlLayout
-                                          compressed={true}
-                                          fullWidth={false}
-                                          icon={
-                                            Object {
-                                              "side": "right",
-                                              "type": "arrowDown",
-                                            }
-                                          }
-                                          inputId="random_html_id"
-                                          isLoading={false}
-                                        >
-                                          <div
-                                            className="euiFormControlLayout euiFormControlLayout--compressed"
-                                          >
-                                            <div
-                                              className="euiFormControlLayout__childrenWrapper"
-                                            >
-                                              <EuiValidatableControl>
-                                                <select
-                                                  aria-describedby="random_html_id-help-0"
-                                                  className="euiSelect euiSelect--compressed"
-                                                  disabled={false}
-                                                  id="random_html_id"
-                                                  onBlur={[Function]}
-                                                  onChange={[Function]}
-                                                  onFocus={[Function]}
-                                                  onMouseUp={[Function]}
-                                                  value="index"
-                                                />
-                                              </EuiValidatableControl>
-                                              <EuiFormControlLayoutIcons
-                                                compressed={true}
-                                                icon={
-                                                  Object {
-                                                    "side": "right",
-                                                    "type": "arrowDown",
-                                                  }
-                                                }
-                                                isLoading={false}
-                                              >
-                                                <div
-                                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                                                >
-                                                  <EuiFormControlLayoutCustomIcon
-                                                    size="s"
-                                                    type="arrowDown"
-                                                  >
-                                                    <span
-                                                      className="euiFormControlLayoutCustomIcon"
-                                                    >
-                                                      <EuiIcon
-                                                        aria-hidden="true"
-                                                        className="euiFormControlLayoutCustomIcon__icon"
-                                                        size="s"
-                                                        type="arrowDown"
-                                                      >
-                                                        <EuiIconBeaker
-                                                          aria-hidden={true}
-                                                          className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                                          focusable="false"
-                                                          role="img"
-                                                          style={null}
-                                                        >
-                                                          <svg
-                                                            aria-hidden={true}
-                                                            className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                                            focusable="false"
-                                                            height={16}
-                                                            role="img"
-                                                            style={null}
-                                                            viewBox="0 0 16 16"
-                                                            width={16}
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                          >
-                                                            <path
-                                                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                            />
-                                                          </svg>
-                                                        </EuiIconBeaker>
-                                                      </EuiIcon>
-                                                    </span>
-                                                  </EuiFormControlLayoutCustomIcon>
-                                                </div>
-                                              </EuiFormControlLayoutIcons>
-                                            </div>
-                                          </div>
-                                        </EuiFormControlLayout>
-                                      </EuiSelect>
-                                    </EuiCompressedSelect>
-                                    <EuiFormHelpText
-                                      className="euiFormRow__text"
-                                      id="random_html_id-help-0"
-                                      key="Select the type of connection to use for queries."
-                                    >
-                                      <div
-                                        className="euiFormHelpText euiFormRow__text"
-                                        id="random_html_id-help-0"
-                                      >
-                                        Select the type of connection to use for queries.
-                                      </div>
-                                    </EuiFormHelpText>
-                                  </div>
-                                </div>
-                              </EuiCompressedFormRow>
-                              <EuiCompressedFormRow
-                                describedByIds={Array []}
-                                display="rowCompressed"
-                                fullWidth={false}
-                                hasChildLabel={true}
-                                hasEmptyLabelSpace={false}
-                                helpText="Select an index to pull the data from."
-                                label="Index"
-                                labelType="label"
-                              >
-                                <div
-                                  className="euiFormRow euiFormRow--compressed"
-                                  id="random_html_id-row"
-                                >
-                                  <div
-                                    className="euiFormRow__labelWrapper"
-                                  >
-                                    <EuiFormLabel
-                                      className="euiFormRow__label"
-                                      htmlFor="random_html_id"
-                                      isFocused={false}
-                                      type="label"
-                                    >
-                                      <label
-                                        className="euiFormLabel euiFormRow__label"
-                                        htmlFor="random_html_id"
-                                      >
-                                        Index
-                                      </label>
-                                    </EuiFormLabel>
-                                  </div>
-                                  <div
-                                    className="euiFormRow__fieldWrapper"
-                                  >
-                                    <EuiCompressedComboBox
-                                      aria-describedby="random_html_id-help-0"
-                                      async={false}
-                                      compressed={true}
-                                      customOptionText="Select {searchValue} as your index"
-                                      data-test-subj="data-source-name"
-                                      fullWidth={false}
-                                      id="random_html_id"
-                                      isClearable={true}
-                                      isDisabled={false}
-                                      isLoading={true}
-                                      onBlur={[Function]}
-                                      onChange={[Function]}
-                                      onCreateOption={[Function]}
-                                      onFocus={[Function]}
-                                      options={Array []}
-                                      selectedOptions={
-                                        Array [
-                                          Object {
-                                            "label": "",
-                                          },
-                                        ]
-                                      }
-                                      singleSelection={
-                                        Object {
-                                          "asPlainText": true,
-                                        }
-                                      }
-                                      sortMatchesBy="none"
-                                    >
-                                      <div
-                                        aria-describedby="random_html_id-help-0"
-                                        aria-expanded={false}
-                                        aria-haspopup="listbox"
-                                        className="euiComboBox euiComboBox--compressed"
-                                        data-test-subj="data-source-name"
-                                        onKeyDown={[Function]}
-                                        role="combobox"
-                                      >
-                                        <EuiComboBoxInput
-                                          autoSizeInputRef={[Function]}
-                                          compressed={true}
-                                          fullWidth={false}
-                                          hasSelectedOptions={true}
-                                          id="random_html_id"
-                                          inputRef={[Function]}
-                                          isDisabled={false}
-                                          isListOpen={false}
-                                          isLoading={true}
-                                          noIcon={false}
-                                          onChange={[Function]}
-                                          onClear={[Function]}
-                                          onClick={[Function]}
-                                          onCloseListClick={[Function]}
-                                          onFocus={[Function]}
-                                          onOpenListClick={[Function]}
-                                          onRemoveOption={[Function]}
-                                          rootId={[Function]}
-                                          searchValue=""
-                                          selectedOptions={
-                                            Array [
-                                              Object {
-                                                "label": "",
-                                              },
-                                            ]
-                                          }
-                                          singleSelection={
-                                            Object {
-                                              "asPlainText": true,
-                                            }
-                                          }
-                                          toggleButtonRef={[Function]}
-                                          updatePosition={[Function]}
-                                          value=""
-                                        >
-                                          <EuiFormControlLayout
-                                            clear={
-                                              Object {
-                                                "data-test-subj": "comboBoxClearButton",
-                                                "onClick": [Function],
-                                              }
-                                            }
-                                            compressed={true}
-                                            fullWidth={false}
-                                            icon={
-                                              Object {
-                                                "aria-label": "Open list of options",
-                                                "data-test-subj": "comboBoxToggleListButton",
-                                                "disabled": false,
-                                                "onClick": [Function],
-                                                "ref": [Function],
-                                                "side": "right",
-                                                "type": "arrowDown",
-                                              }
-                                            }
-                                            isLoading={true}
-                                          >
-                                            <div
-                                              className="euiFormControlLayout euiFormControlLayout--compressed"
-                                            >
-                                              <div
-                                                className="euiFormControlLayout__childrenWrapper"
-                                              >
-                                                <div
-                                                  className="euiComboBox__inputWrap euiComboBox__inputWrap--compressed euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isLoading euiComboBox__inputWrap-isClearable"
-                                                  data-test-subj="comboBoxInput"
-                                                  onClick={[Function]}
-                                                  tabIndex={-1}
-                                                >
-                                                  <EuiComboBoxPill
-                                                    asPlainText={true}
-                                                    color="hollow"
-                                                    key=""
-                                                    option={
-                                                      Object {
-                                                        "label": "",
-                                                      }
-                                                    }
-                                                  >
-                                                    <span
-                                                      className="euiComboBoxPill euiComboBoxPill--plainText"
-                                                    />
-                                                  </EuiComboBoxPill>
-                                                  <AutosizeInput
-                                                    aria-controls=""
-                                                    className="euiComboBox__input"
-                                                    data-test-subj="comboBoxSearchInput"
-                                                    disabled={false}
-                                                    id="random_html_id"
-                                                    injectStyles={true}
-                                                    inputRef={[Function]}
-                                                    minWidth={1}
-                                                    onBlur={[Function]}
-                                                    onChange={[Function]}
-                                                    onFocus={[Function]}
-                                                    role="textbox"
-                                                    style={
-                                                      Object {
-                                                        "fontSize": 14,
-                                                      }
-                                                    }
-                                                    value=""
-                                                  >
-                                                    <div
-                                                      className="euiComboBox__input"
-                                                      style={
-                                                        Object {
-                                                          "display": "inline-block",
-                                                          "fontSize": 14,
-                                                        }
-                                                      }
-                                                    >
-                                                      <input
-                                                        aria-controls=""
-                                                        data-test-subj="comboBoxSearchInput"
-                                                        disabled={false}
-                                                        id="random_html_id"
-                                                        onBlur={[Function]}
-                                                        onChange={[Function]}
-                                                        onFocus={[Function]}
-                                                        role="textbox"
-                                                        style={
-                                                          Object {
-                                                            "boxSizing": "content-box",
-                                                            "width": "2px",
-                                                          }
-                                                        }
-                                                        value=""
-                                                      />
-                                                      <div
-                                                        style={
-                                                          Object {
-                                                            "height": 0,
-                                                            "left": 0,
-                                                            "overflow": "scroll",
-                                                            "position": "absolute",
-                                                            "top": 0,
-                                                            "visibility": "hidden",
-                                                            "whiteSpace": "pre",
-                                                          }
-                                                        }
-                                                      />
-                                                    </div>
-                                                  </AutosizeInput>
-                                                </div>
-                                                <EuiFormControlLayoutIcons
-                                                  clear={
-                                                    Object {
-                                                      "data-test-subj": "comboBoxClearButton",
-                                                      "onClick": [Function],
-                                                    }
-                                                  }
-                                                  compressed={true}
-                                                  icon={
-                                                    Object {
-                                                      "aria-label": "Open list of options",
-                                                      "data-test-subj": "comboBoxToggleListButton",
-                                                      "disabled": false,
-                                                      "onClick": [Function],
-                                                      "ref": [Function],
-                                                      "side": "right",
-                                                      "type": "arrowDown",
-                                                    }
-                                                  }
-                                                  isLoading={true}
-                                                >
-                                                  <div
-                                                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                                                  >
-                                                    <EuiFormControlLayoutClearButton
-                                                      data-test-subj="comboBoxClearButton"
-                                                      onClick={[Function]}
-                                                      size="s"
-                                                    >
-                                                      <EuiI18n
-                                                        default="Clear input"
-                                                        token="euiFormControlLayoutClearButton.label"
-                                                      >
-                                                        <button
-                                                          aria-label="Clear input"
-                                                          className="euiFormControlLayoutClearButton euiFormControlLayoutClearButton--small"
-                                                          data-test-subj="comboBoxClearButton"
-                                                          onClick={[Function]}
-                                                          type="button"
-                                                        >
-                                                          <EuiIcon
-                                                            className="euiFormControlLayoutClearButton__icon"
-                                                            type="cross"
-                                                          >
-                                                            <EuiIconBeaker
-                                                              aria-hidden={true}
-                                                              className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutClearButton__icon"
-                                                              focusable="false"
-                                                              role="img"
-                                                              style={null}
-                                                            >
-                                                              <svg
-                                                                aria-hidden={true}
-                                                                className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutClearButton__icon"
-                                                                focusable="false"
-                                                                height={16}
-                                                                role="img"
-                                                                style={null}
-                                                                viewBox="0 0 16 16"
-                                                                width={16}
-                                                                xmlns="http://www.w3.org/2000/svg"
-                                                              >
-                                                                <path
-                                                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                                />
-                                                              </svg>
-                                                            </EuiIconBeaker>
-                                                          </EuiIcon>
-                                                        </button>
-                                                      </EuiI18n>
-                                                    </EuiFormControlLayoutClearButton>
-                                                    <EuiLoadingSpinner
-                                                      size="m"
-                                                    >
-                                                      <span
-                                                        className="euiLoadingSpinner euiLoadingSpinner--medium"
-                                                      />
-                                                    </EuiLoadingSpinner>
-                                                    <EuiFormControlLayoutCustomIcon
-                                                      aria-label="Open list of options"
-                                                      data-test-subj="comboBoxToggleListButton"
-                                                      disabled={false}
-                                                      iconRef={[Function]}
-                                                      onClick={[Function]}
-                                                      size="s"
-                                                      type="arrowDown"
-                                                    >
-                                                      <button
-                                                        aria-label="Open list of options"
-                                                        className="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-                                                        data-test-subj="comboBoxToggleListButton"
-                                                        disabled={false}
-                                                        onClick={[Function]}
-                                                        type="button"
-                                                      >
-                                                        <EuiIcon
-                                                          aria-hidden="true"
-                                                          className="euiFormControlLayoutCustomIcon__icon"
-                                                          size="s"
-                                                          type="arrowDown"
-                                                        >
-                                                          <EuiIconBeaker
-                                                            aria-hidden={true}
-                                                            className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                                            focusable="false"
-                                                            role="img"
-                                                            style={null}
-                                                          >
-                                                            <svg
-                                                              aria-hidden={true}
-                                                              className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                                              focusable="false"
-                                                              height={16}
-                                                              role="img"
-                                                              style={null}
-                                                              viewBox="0 0 16 16"
-                                                              width={16}
-                                                              xmlns="http://www.w3.org/2000/svg"
-                                                            >
-                                                              <path
-                                                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                              />
-                                                            </svg>
-                                                          </EuiIconBeaker>
-                                                        </EuiIcon>
-                                                      </button>
-                                                    </EuiFormControlLayoutCustomIcon>
-                                                  </div>
-                                                </EuiFormControlLayoutIcons>
-                                              </div>
-                                            </div>
-                                          </EuiFormControlLayout>
-                                        </EuiComboBoxInput>
-                                      </div>
-                                    </EuiCompressedComboBox>
-                                    <EuiFormHelpText
-                                      className="euiFormRow__text"
-                                      id="random_html_id-help-0"
-                                      key="Select an index to pull the data from."
-                                    >
-                                      <div
-                                        className="euiFormHelpText euiFormRow__text"
-                                        id="random_html_id-help-0"
-                                      >
-                                        Select an index to pull the data from.
-                                      </div>
-                                    </EuiFormHelpText>
-                                  </div>
-                                </div>
-                              </EuiCompressedFormRow>
-                            </IntegrationConnectionInputs>
-                          </div>
-                        </EuiForm>
-                      </SetupIntegrationFormInputs>
-                    </div>
-                  </EuiPageContentBody>
+                  <label
+                    aria-invalid="false"
+                    class="euiFormLabel euiFormRow__label"
+                    for="random_html_id"
+                  >
+                    Display Name
+                  </label>
                 </div>
-              </EuiPanel>
-            </EuiPageContent>
-            <EuiBottomBar>
-              <EuiPortal>
-                <Portal
-                  containerInfo={
-                    <div>
-                      <section
-                        aria-label="Page level controls"
-                        class="euiBottomBar euiBottomBar--fixed euiBottomBar--paddingMedium"
+                <div
+                  class="euiFormRow__fieldWrapper"
+                >
+                  <div
+                    class="euiFormControlLayout euiFormControlLayout--compressed"
+                  >
+                    <div
+                      class="euiFormControlLayout__childrenWrapper"
+                    >
+                      <input
+                        class="euiFieldText euiFieldText--compressed"
+                        data-test-subj="new-instance-name"
+                        id="random_html_id"
+                        placeholder="sample Integration"
+                        type="text"
+                        value="sample Integration"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiSpacer euiSpacer--s"
+              />
+              <div
+                class="euiText euiText--medium"
+              >
+                <h3>
+                  Integration Connection
+                </h3>
+              </div>
+              <div
+                class="euiSpacer euiSpacer--s"
+              />
+              <div
+                class="euiFormRow euiFormRow--compressed"
+                id="random_html_id-row"
+              >
+                <div
+                  class="euiFormRow__labelWrapper"
+                >
+                  <label
+                    class="euiFormLabel euiFormRow__label"
+                    for="random_html_id"
+                  >
+                    Connection Type
+                  </label>
+                </div>
+                <div
+                  class="euiFormRow__fieldWrapper"
+                >
+                  <div
+                    class="euiFormControlLayout euiFormControlLayout--compressed"
+                  >
+                    <div
+                      class="euiFormControlLayout__childrenWrapper"
+                    >
+                      <select
+                        aria-describedby="random_html_id-help-0"
+                        class="euiSelect euiSelect--compressed"
+                        id="random_html_id"
+                      />
+                      <div
+                        class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                       >
-                        <h2
-                          class="euiScreenReaderOnly"
+                        <span
+                          class="euiFormControlLayoutCustomIcon"
                         >
-                          Page level controls
-                        </h2>
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                            />
+                          </svg>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="euiFormHelpText euiFormRow__text"
+                    id="random_html_id-help-0"
+                  >
+                    Select the type of connection to use for queries.
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFormRow euiFormRow--compressed"
+                id="random_html_id-row"
+              >
+                <div
+                  class="euiFormRow__labelWrapper"
+                >
+                  <label
+                    class="euiFormLabel euiFormRow__label"
+                    for="random_html_id"
+                  >
+                    Index
+                  </label>
+                </div>
+                <div
+                  class="euiFormRow__fieldWrapper"
+                >
+                  <div
+                    aria-describedby="random_html_id-help-0"
+                    aria-expanded="false"
+                    aria-haspopup="listbox"
+                    class="euiComboBox euiComboBox--compressed"
+                    data-test-subj="data-source-name"
+                    role="combobox"
+                  >
+                    <div
+                      class="euiFormControlLayout euiFormControlLayout--compressed"
+                    >
+                      <div
+                        class="euiFormControlLayout__childrenWrapper"
+                      >
                         <div
-                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          class="euiComboBox__inputWrap euiComboBox__inputWrap--compressed euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isLoading euiComboBox__inputWrap-isClearable"
+                          data-test-subj="comboBoxInput"
+                          tabindex="-1"
                         >
+                          <span
+                            class="euiComboBoxPill euiComboBoxPill--plainText"
+                          />
                           <div
-                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                            class="euiComboBox__input"
+                            style="font-size: 14px; display: inline-block;"
                           >
-                            <button
-                              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small"
-                              type="button"
-                            >
-                              <span
-                                class="euiButtonContent euiButtonEmpty__content"
-                              >
-                                <svg
-                                  aria-hidden="true"
-                                  class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                  focusable="false"
-                                  height="16"
-                                  role="img"
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                  />
-                                </svg>
-                                <span
-                                  class="euiButtonEmpty__text"
-                                >
-                                  Discard
-                                </span>
-                              </span>
-                            </button>
-                          </div>
-                          <div
-                            class="euiFlexItem euiFlexItem--flexGrowZero"
-                          >
-                            <button
-                              class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
-                              data-test-subj="create-instance-button"
-                              disabled=""
-                              type="button"
-                            >
-                              <span
-                                class="euiButtonContent euiButtonContent--iconRight euiButton__content"
-                              >
-                                <svg
-                                  aria-hidden="true"
-                                  class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                  focusable="false"
-                                  height="16"
-                                  role="img"
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                  />
-                                </svg>
-                                <span
-                                  class="euiButton__text"
-                                >
-                                  Add Integration
-                                </span>
-                              </span>
-                            </button>
+                            <input
+                              aria-controls=""
+                              data-test-subj="comboBoxSearchInput"
+                              id="random_html_id"
+                              role="textbox"
+                              style="box-sizing: content-box; width: 2px;"
+                              value=""
+                            />
+                            <div
+                              style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                            />
                           </div>
                         </div>
-                      </section>
-                      <p
-                        aria-live="assertive"
-                        class="euiScreenReaderOnly"
-                      >
-                        There is a new region landmark with page level controls at the end of the document.
-                      </p>
-                    </div>
-                  }
-                >
-                  <EuiI18n
-                    default="Page level controls"
-                    token="euiBottomBar.screenReaderHeading"
-                  >
-                    <section
-                      aria-label="Page level controls"
-                      className="euiBottomBar euiBottomBar--fixed euiBottomBar--paddingMedium"
-                      style={
-                        Object {
-                          "bottom": undefined,
-                          "left": undefined,
-                          "right": undefined,
-                          "top": undefined,
-                        }
-                      }
-                    >
-                      <EuiScreenReaderOnly>
-                        <h2
-                          className="euiScreenReaderOnly"
+                        <div
+                          class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                         >
-                          Page level controls
-                        </h2>
-                      </EuiScreenReaderOnly>
-                      <SetupBottomBar
-                        config={
-                          Object {
-                            "checkpointLocation": "",
-                            "connectionDataSource": "",
-                            "connectionLocation": "",
-                            "connectionTableName": "sample",
-                            "connectionType": "index",
-                            "databaseName": "default",
-                            "displayName": "sample Integration",
-                            "enabledWorkflows": Array [],
-                          }
-                        }
-                        dataSourceMDSId=""
-                        dataSourceMDSLabel=""
-                        integration={
-                          Object {
-                            "assets": Array [],
-                            "components": Array [],
-                            "license": "",
-                            "name": "sample",
-                            "type": "",
-                            "version": "",
-                          }
-                        }
-                        loading={false}
-                        setLoading={[Function]}
-                        setSetupCallout={[Function]}
-                      >
-                        <EuiFlexGroup
-                          justifyContent="flexEnd"
-                        >
-                          <div
-                            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          <button
+                            aria-label="Clear input"
+                            class="euiFormControlLayoutClearButton euiFormControlLayoutClearButton--small"
+                            data-test-subj="comboBoxClearButton"
+                            type="button"
                           >
-                            <EuiFlexItem
-                              grow={false}
+                            <svg
+                              aria-hidden="true"
+                              class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutClearButton__icon"
+                              focusable="false"
+                              height="16"
+                              role="img"
+                              viewBox="0 0 16 16"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
                             >
-                              <div
-                                className="euiFlexItem euiFlexItem--flexGrowZero"
-                              >
-                                <EuiSmallButtonEmpty
-                                  color="text"
-                                  disabled={false}
-                                  iconType="cross"
-                                  onClick={[Function]}
-                                >
-                                  <EuiButtonEmpty
-                                    color="text"
-                                    disabled={false}
-                                    iconType="cross"
-                                    onClick={[Function]}
-                                    size="s"
-                                  >
-                                    <button
-                                      className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small"
-                                      disabled={false}
-                                      onClick={[Function]}
-                                      type="button"
-                                    >
-                                      <EuiButtonContent
-                                        className="euiButtonEmpty__content"
-                                        iconGap="m"
-                                        iconSide="left"
-                                        iconSize="m"
-                                        iconType="cross"
-                                        textProps={
-                                          Object {
-                                            "className": "euiButtonEmpty__text",
-                                          }
-                                        }
-                                      >
-                                        <span
-                                          className="euiButtonContent euiButtonEmpty__content"
-                                        >
-                                          <EuiIcon
-                                            className="euiButtonContent__icon"
-                                            color="inherit"
-                                            size="m"
-                                            type="cross"
-                                          >
-                                            <EuiIconBeaker
-                                              aria-hidden={true}
-                                              className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                              focusable="false"
-                                              role="img"
-                                              style={null}
-                                            >
-                                              <svg
-                                                aria-hidden={true}
-                                                className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                                focusable="false"
-                                                height={16}
-                                                role="img"
-                                                style={null}
-                                                viewBox="0 0 16 16"
-                                                width={16}
-                                                xmlns="http://www.w3.org/2000/svg"
-                                              >
-                                                <path
-                                                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                />
-                                              </svg>
-                                            </EuiIconBeaker>
-                                          </EuiIcon>
-                                          <span
-                                            className="euiButtonEmpty__text"
-                                          >
-                                            Discard
-                                          </span>
-                                        </span>
-                                      </EuiButtonContent>
-                                    </button>
-                                  </EuiButtonEmpty>
-                                </EuiSmallButtonEmpty>
-                              </div>
-                            </EuiFlexItem>
-                            <EuiFlexItem
-                              grow={false}
+                              <path
+                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                              />
+                            </svg>
+                          </button>
+                          <span
+                            class="euiLoadingSpinner euiLoadingSpinner--medium"
+                          />
+                          <button
+                            aria-label="Open list of options"
+                            class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                            data-test-subj="comboBoxToggleListButton"
+                            type="button"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                              focusable="false"
+                              height="16"
+                              role="img"
+                              viewBox="0 0 16 16"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
                             >
-                              <div
-                                className="euiFlexItem euiFlexItem--flexGrowZero"
-                              >
-                                <EuiSmallButton
-                                  data-test-subj="create-instance-button"
-                                  disabled={true}
-                                  fill={true}
-                                  iconSide="right"
-                                  iconType="arrowRight"
-                                  isLoading={false}
-                                  onClick={[Function]}
-                                >
-                                  <EuiButton
-                                    data-test-subj="create-instance-button"
-                                    disabled={true}
-                                    fill={true}
-                                    iconSide="right"
-                                    iconType="arrowRight"
-                                    isLoading={false}
-                                    onClick={[Function]}
-                                    size="s"
-                                  >
-                                    <EuiButtonDisplay
-                                      baseClassName="euiButton"
-                                      data-test-subj="create-instance-button"
-                                      disabled={true}
-                                      element="button"
-                                      fill={true}
-                                      iconSide="right"
-                                      iconType="arrowRight"
-                                      isDisabled={true}
-                                      isLoading={false}
-                                      onClick={[Function]}
-                                      size="s"
-                                      type="button"
-                                    >
-                                      <button
-                                        className="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
-                                        data-test-subj="create-instance-button"
-                                        disabled={true}
-                                        onClick={[Function]}
-                                        style={
-                                          Object {
-                                            "minWidth": undefined,
-                                          }
-                                        }
-                                        type="button"
-                                      >
-                                        <EuiButtonContent
-                                          className="euiButton__content"
-                                          iconGap="m"
-                                          iconSide="right"
-                                          iconType="arrowRight"
-                                          isLoading={false}
-                                          textProps={
-                                            Object {
-                                              "className": "euiButton__text",
-                                            }
-                                          }
-                                        >
-                                          <span
-                                            className="euiButtonContent euiButtonContent--iconRight euiButton__content"
-                                          >
-                                            <EuiIcon
-                                              className="euiButtonContent__icon"
-                                              color="inherit"
-                                              size="m"
-                                              type="arrowRight"
-                                            >
-                                              <EuiIconBeaker
-                                                aria-hidden={true}
-                                                className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                                focusable="false"
-                                                role="img"
-                                                style={null}
-                                              >
-                                                <svg
-                                                  aria-hidden={true}
-                                                  className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                                  focusable="false"
-                                                  height={16}
-                                                  role="img"
-                                                  style={null}
-                                                  viewBox="0 0 16 16"
-                                                  width={16}
-                                                  xmlns="http://www.w3.org/2000/svg"
-                                                >
-                                                  <path
-                                                    d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                  />
-                                                </svg>
-                                              </EuiIconBeaker>
-                                            </EuiIcon>
-                                            <span
-                                              className="euiButton__text"
-                                            >
-                                              Add Integration
-                                            </span>
-                                          </span>
-                                        </EuiButtonContent>
-                                      </button>
-                                    </EuiButtonDisplay>
-                                  </EuiButton>
-                                </EuiSmallButton>
-                              </div>
-                            </EuiFlexItem>
-                          </div>
-                        </EuiFlexGroup>
-                      </SetupBottomBar>
-                    </section>
-                  </EuiI18n>
-                  <EuiScreenReaderOnly>
-                    <p
-                      aria-live="assertive"
-                      className="euiScreenReaderOnly"
-                    >
-                      <EuiI18n
-                        default="There is a new region landmark with page level controls at the end of the document."
-                        token="euiBottomBar.screenReaderAnnouncement"
-                      >
-                        There is a new region landmark with page level controls at the end of the document.
-                      </EuiI18n>
-                    </p>
-                  </EuiScreenReaderOnly>
-                </Portal>
-              </EuiPortal>
-            </EuiBottomBar>
-          </SetupIntegrationForm>
+                              <path
+                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="euiFormHelpText euiFormRow__text"
+                    id="random_html_id-help-0"
+                  >
+                    Select an index to pull the data from.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </EuiPageBody>
+      </div>
     </div>
-  </EuiPage>
-</SetupIntegrationPage>
+  </div>
+  <div>
+    <section
+      aria-label="Page level controls"
+      class="euiBottomBar euiBottomBar--fixed euiBottomBar--paddingMedium"
+    >
+      <h2
+        class="euiScreenReaderOnly"
+      >
+        Page level controls
+      </h2>
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <svg
+                aria-hidden="true"
+                class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                focusable="false"
+                height="16"
+                role="img"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                />
+              </svg>
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Discard
+              </span>
+            </span>
+          </button>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            class="euiButton euiButton--primary euiButton--small euiButton--fill euiButton-isDisabled"
+            data-test-subj="create-instance-button"
+            disabled=""
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonContent--iconRight euiButton__content"
+            >
+              <svg
+                aria-hidden="true"
+                class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                focusable="false"
+                height="16"
+                role="img"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                />
+              </svg>
+              <span
+                class="euiButton__text"
+              >
+                Add Integration
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </section>
+    <p
+      aria-live="assertive"
+      class="euiScreenReaderOnly"
+    >
+      There is a new region landmark with page level controls at the end of the document.
+    </p>
+  </div>
+</body>
 `;

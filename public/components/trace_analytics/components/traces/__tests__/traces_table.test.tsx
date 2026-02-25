@@ -3,18 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { TracesTable } from '../traces_table';
 
 describe('Traces table component', () => {
-  configure({ adapter: new Adapter() });
-
-  it('renders empty traces table message', () => {
+  it('renders empty traces table message', async () => {
     const refresh = jest.fn();
     const getTraceViewUri = (item: any) => `#/trace_analytics/traces/${encodeURIComponent(item)}`;
-    const noIndicesTable = mount(
+    render(
       <TracesTable
         items={[]}
         refresh={refresh}
@@ -24,22 +21,12 @@ describe('Traces table component', () => {
         getTraceViewUri={getTraceViewUri}
       />
     );
-    expect(noIndicesTable).toMatchSnapshot();
-
-    const emptyTable = mount(
-      <TracesTable
-        items={[]}
-        refresh={refresh}
-        jaegerIndicesExist={false}
-        mode="data_prepper"
-        loading={false}
-        getTraceViewUri={getTraceViewUri}
-      />
-    );
-    expect(emptyTable).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
-  it('renders traces table', () => {
+  it('renders traces table', async () => {
     jest.mock('../../../../../../common/constants/trace_analytics', () => ({ TRACES_MAX_NUM: 1 }));
     const tableItems = [
       {
@@ -54,7 +41,7 @@ describe('Traces table component', () => {
     ];
     const getTraceViewUri = (item: any) => `#/trace_analytics/traces/${encodeURIComponent(item)}`;
     const refresh = jest.fn();
-    const wrapper = mount(
+    render(
       <TracesTable
         items={tableItems}
         refresh={refresh}
@@ -64,12 +51,12 @@ describe('Traces table component', () => {
         getTraceViewUri={getTraceViewUri}
       />
     );
-    expect(wrapper).toMatchSnapshot();
-
-    wrapper.find('button[data-test-subj="tableHeaderSortButton"]').at(0).simulate('click');
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
-  it('renders jaeger traces table', () => {
+  it('renders jaeger traces table', async () => {
     jest.mock('../../../../../../common/constants/trace_analytics', () => ({ TRACES_MAX_NUM: 1 }));
     const tableItems = [
       {
@@ -83,7 +70,7 @@ describe('Traces table component', () => {
     ];
     const getTraceViewUri = (item: any) => `#/trace_analytics/traces/${encodeURIComponent(item)}`;
     const refresh = jest.fn();
-    const wrapper = mount(
+    render(
       <TracesTable
         items={tableItems}
         refresh={refresh}
@@ -93,8 +80,8 @@ describe('Traces table component', () => {
         getTraceViewUri={getTraceViewUri}
       />
     );
-    expect(wrapper).toMatchSnapshot();
-
-    wrapper.find('button[data-test-subj="tableHeaderSortButton"]').at(0).simulate('click');
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 });

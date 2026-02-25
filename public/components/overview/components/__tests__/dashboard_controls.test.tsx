@@ -3,16 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
+import { render, waitFor } from '@testing-library/react';
 import { DashboardControls } from '../dashboard_controls';
 import { coreRefs } from '../../../../framework/core_refs';
 import { setObservabilityDashboardsId } from '../utils';
 import { getWorkspaceIdFromUrl } from '../../../../../../../src/core/public/utils';
 import { act } from 'react-dom/test-utils';
-
-configure({ adapter: new Adapter() });
 
 jest.mock('../../../getting_started/components/utils', () => ({
   redirectToDashboards: jest.fn(),
@@ -50,9 +47,11 @@ describe('Dashboard controls - checkDataSource useEffect simplified', () => {
     jest.clearAllMocks();
   });
 
-  it('should render', () => {
-    const wrapper = mount(<DashboardControls />);
-    expect(wrapper).toMatchSnapshot();
+  it('should render', async () => {
+    render(<DashboardControls />);
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
   it('should handle no data sources in a workspace', async () => {
@@ -62,7 +61,7 @@ describe('Dashboard controls - checkDataSource useEffect simplified', () => {
     const mockSetObservabilityDashboardsId = setObservabilityDashboardsId;
 
     await act(async () => {
-      mount(<DashboardControls />);
+      render(<DashboardControls />);
       await new Promise((resolve) => setImmediate(resolve));
     });
 
@@ -76,7 +75,7 @@ describe('Dashboard controls - checkDataSource useEffect simplified', () => {
     const mockSetObservabilityDashboardsId = setObservabilityDashboardsId;
 
     await act(async () => {
-      mount(<DashboardControls />);
+      render(<DashboardControls />);
       await new Promise((resolve) => setImmediate(resolve));
     });
 
@@ -89,7 +88,7 @@ describe('Dashboard controls - checkDataSource useEffect simplified', () => {
     const mockSetObservabilityDashboardsId = setObservabilityDashboardsId;
 
     await act(async () => {
-      mount(<DashboardControls />);
+      render(<DashboardControls />);
       await new Promise((resolve) => setImmediate(resolve));
     });
 

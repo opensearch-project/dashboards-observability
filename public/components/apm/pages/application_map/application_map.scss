@@ -1,0 +1,94 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.apm-application-map {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  &__container {
+    flex: 1;
+    min-height: 400px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+}
+
+// Override for CelestialMap container
+.celestial-map-container {
+  width: 100%;
+  height: 100%;
+}
+
+// Service map graph panel
+.service-map-graph-panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .service-map-breadcrumbs {
+    padding: 8px;
+    border-bottom: 1px solid $euiColorLightShade;
+  }
+
+  .service-map-content {
+    flex: 1;
+    overflow: hidden;
+  }
+}
+
+// Filter sidebar styles
+.service-map-sidebar {
+  height: 100%;
+  overflow-y: auto;
+}
+
+// Service details panel flyout
+.service-details-panel {
+  .health-section {
+    padding: 16px;
+    background-color: $euiColorLightestShade;
+    border-radius: $euiBorderRadius;
+  }
+
+  .metric-chart-panel {
+    margin-bottom: 8px;
+  }
+}
+
+// Health donut center text
+.health-donut-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+// Node health indicators
+.node-health-ok {
+  border-color: $euiColorSuccess;
+}
+
+.node-health-warning {
+  border-color: $euiColorWarning;
+}
+
+.node-health-critical {
+  border-color: $euiColorDanger;
+}
+
+// Hide SLI breach/recovered items from CelestialMap legend
+// Target the breached and recovered label elements by their class name patterns
+[class*='_breached_'],
+[class*='_recovered_'] {
+  display: none !important;
+}
+
+// Also hide their parent li elements in the legend panel
+li:has([class*='_breached_']),
+li:has([class*='_recovered_']) {
+  display: none !important;
+}

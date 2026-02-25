@@ -4,13 +4,12 @@
  */
 
 import { applyMiddleware, createStore } from '@reduxjs/toolkit';
-import { waitFor } from '@testing-library/react';
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
 import { SELECTED_PANELS_OPTIONS } from '../../../../../../test/event_analytics_constants';
+// eslint-disable-next-line jest/no-mocks-import
 import httpClientMock from '../../../../../../test/__mocks__/httpClientMock';
 import { coreRefs } from '../../../../../framework/core_refs';
 import { rootReducer } from '../../../../../framework/redux/reducers';
@@ -18,7 +17,6 @@ import SavedObjects from '../../../../../services/saved_objects/event_analytics/
 import { SavePanel } from '../save_panel';
 
 describe('Saved query table component', () => {
-  configure({ adapter: new Adapter() });
   const store = createStore(rootReducer, applyMiddleware(thunk));
   coreRefs.savedObjectsClient.find = jest.fn(() =>
     Promise.resolve({
@@ -33,7 +31,7 @@ describe('Saved query table component', () => {
     const setMetricLabel = jest.fn();
     const savedObjects = new SavedObjects(httpClientMock);
 
-    const wrapper = mount(
+    render(
       <Provider store={store}>
         <SavePanel
           selectedOptions={SELECTED_PANELS_OPTIONS}
@@ -53,10 +51,8 @@ describe('Saved query table component', () => {
       </Provider>
     );
 
-    wrapper.update();
-
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 });

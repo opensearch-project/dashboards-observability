@@ -68,8 +68,9 @@ export const setTimeFilter = (setEndTime = false, refresh = true) => {
   const startTime = 'Mar 25, 2021 @ 10:00:00.000';
   const endTime = 'Mar 25, 2021 @ 11:00:00.000';
   cy.get('button.euiButtonEmpty[aria-label="Date quick select"]').click({ force: true });
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
   cy.get('.euiQuickSelect__applyButton').click({ force: true });
-  cy.get('.euiSuperDatePicker__prettyFormatLink').click();
+  cy.get('.euiSuperDatePicker__prettyFormatLink').click({ force: true });
   cy.get('.euiTab__content').contains('Absolute').click();
   cy.get('input[data-test-subj="superDatePickerAbsoluteDateInput"]')
     .focus()
@@ -84,11 +85,7 @@ export const setTimeFilter = (setEndTime = false, refresh = true) => {
       .type('{selectall}' + endTime, { force: true });
   }
   if (refresh) cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
-  cy.get('body').then(($body) => {
-    if ($body.find('[data-test-subj="globalLoadingIndicator"]').length > 0) {
-      cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 10000 }).should('not.exist');
-    }
-  });
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 };
 
 export const expandServiceView = (rowIndex = 0) => {

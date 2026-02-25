@@ -3,14 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import PPLService from '../../../../../services/requests/ppl';
 import React from 'react';
 import { VisualizationContainer } from '../visualization_container';
+// eslint-disable-next-line jest/no-mocks-import
 import httpClientMock from '../../../../../../test/__mocks__/httpClientMock';
 import { HttpResponse } from '../../../../../../../../src/core/public';
-import { waitFor } from '@testing-library/react';
 import {
   sampleSavedVisualization,
   samplePPLResponse,
@@ -20,8 +19,6 @@ import { rootReducer } from '../../../../../framework/redux/reducers';
 import { Provider } from 'react-redux';
 
 describe('Visualization Container Component', () => {
-  configure({ adapter: new Adapter() });
-
   it('renders add visualization container', async () => {
     httpClientMock.get = jest.fn(() =>
       Promise.resolve((sampleSavedVisualization as unknown) as HttpResponse)
@@ -31,7 +28,6 @@ describe('Visualization Container Component', () => {
       Promise.resolve((samplePPLResponse as unknown) as HttpResponse)
     );
 
-    // configure({ adapter: new Adapter() });
     const store = createStore(rootReducer);
 
     const editMode = true;
@@ -49,7 +45,7 @@ describe('Visualization Container Component', () => {
       window.location.assign(`#/event_analytics/explorer/${savedVisId}`);
     };
 
-    const wrapper = mount(
+    render(
       <Provider store={store}>
         <VisualizationContainer
           http={httpClientMock}
@@ -69,10 +65,9 @@ describe('Visualization Container Component', () => {
         />
       </Provider>
     );
-    wrapper.update();
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 });

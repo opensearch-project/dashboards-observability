@@ -3,20 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, shallow } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render } from '@testing-library/react';
 import { DeleteModal } from '../../../common/helpers/delete_modal';
 import React from 'react';
 import { getCloneModal, getDeleteModal } from '../modal_containers';
 
 describe('Modal Container component', () => {
-  configure({ adapter: new Adapter() });
-
   it('renders getCloneModal function', () => {
     const onCancel = jest.fn();
     const onConfirm = jest.fn();
-    const wrapper = shallow(getCloneModal(onCancel, onConfirm));
-    expect(wrapper).toMatchSnapshot();
+    render(getCloneModal(onCancel, onConfirm));
+    expect(document.body).toMatchSnapshot();
   });
 
   it('renders getDeleteModal function', () => {
@@ -25,8 +22,8 @@ describe('Modal Container component', () => {
     const title = 'Test Title';
     const message = 'Test Message';
     const confirmMessage = 'Confirm Message';
-    const wrapper = shallow(getDeleteModal(onCancel, onConfirm, title, message, confirmMessage));
-    expect(wrapper).toMatchSnapshot();
+    render(getDeleteModal(onCancel, onConfirm, title, message, confirmMessage));
+    expect(document.body).toMatchSnapshot();
   });
 
   it('renders DeleteModal component', () => {
@@ -34,9 +31,9 @@ describe('Modal Container component', () => {
     const onConfirm = jest.fn();
     const title = 'Test Title';
     const message = 'Test Message';
-    const wrapper = shallow(
+    render(
       <DeleteModal onCancel={onCancel} onConfirm={onConfirm} title={title} message={message} />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 });

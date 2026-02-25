@@ -6,16 +6,18 @@
 import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import {
   AppCategory,
   AppMountParameters,
+  AppNavLinkStatus,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
   SavedObject,
-  UiSettingScope,
 } from '../../../src/core/public';
 import { toMountPoint } from '../../../src/plugins/opensearch_dashboards_react/public/';
 import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/public';
@@ -186,6 +188,9 @@ export class ObservabilityPlugin
   }
   private mdsFlagStatus: boolean = false;
   private apmEnabled: boolean = false;
+  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private apmAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private traceAnalyticsAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   public async setup(
     core: CoreSetup<AppPluginStartDependencies>,
@@ -204,12 +209,14 @@ export class ObservabilityPlugin
     setOverviewPage(page);
     this.mdsFlagStatus = !!setupDeps.dataSource;
 
-    // Read APM enabled setting from GLOBAL scope - only honor if MDS is enabled
-    const apmSettingValue = await core.uiSettings.getUserProvidedWithScope(
-      APM_ENABLED_SETTING,
-      UiSettingScope.GLOBAL
-    );
-    this.apmEnabled = this.mdsFlagStatus && (apmSettingValue ?? true); // default to true if not set
+    // Read APM enabled setting from GLOBAL scope
+    try {
+      const apmSettingValue = core.uiSettings.get(APM_ENABLED_SETTING);
+      this.apmEnabled = apmSettingValue ?? false;
+    } catch (error) {
+      // Handle authentication errors during setup
+      this.apmEnabled = false;
+    }
 
     // redirect legacy notebooks URL to current URL under observability
     if (window.location.pathname.includes('notebooks-dashboards')) {
@@ -341,10 +348,10 @@ export class ObservabilityPlugin
       const savedObjects = new SavedObjects(coreStart.http);
       const timestampUtils = new TimestampUtils(dslService, pplService);
       const { dataSourceManagement } = setupDeps;
-      
+
       // Get ML Commons RCF service from the start dependencies
       const mlCommonsRCFService = new MLCommonsRCFService(coreStart.http);
-      
+
       return Observability(
         coreStart,
         { ...depsStart, mlCommonsRCFService } as AppPluginStartDependencies,
@@ -405,14 +412,18 @@ export class ObservabilityPlugin
         mount: appMountWithStartPage('gettingStarted'),
       });
 
-      if (this.mdsFlagStatus && this.apmEnabled) {
-        // APM Mode - register APM applications with custom category
+      if (this.apmEnabled) {
+        // When UI setting enabled, register BOTH sets of apps
+        // Visibility controlled by explore.discoverTracesEnabled capability in start()
+
+        // APM apps - visible when traces capability enabled
         core.application.register({
           id: observabilityApmServicesID,
           title: observabilityApmServicesTitle,
           category: APPLICATION_MONITORING_CATEGORY,
           order: observabilityApmServicesPluginOrder,
           mount: appMountWithStartPage('apm-services', '/services'),
+          updater$: this.apmAppUpdater$,
         });
 
         core.application.register({
@@ -421,9 +432,29 @@ export class ObservabilityPlugin
           category: APPLICATION_MONITORING_CATEGORY,
           order: observabilityApmApplicationMapPluginOrder,
           mount: appMountWithStartPage('apm-application-map', '/application-map'),
+          updater$: this.apmAppUpdater$,
+        });
+
+        // Trace Analytics apps - visible when traces capability DISABLED (fallback)
+        core.application.register({
+          id: observabilityTracesNewNavID,
+          title: observabilityTracesTitle,
+          order: observabilityTracesPluginOrder,
+          category: DEFAULT_APP_CATEGORIES.investigate,
+          mount: appMountWithStartPage('traces', '/traces'),
+          updater$: this.traceAnalyticsAppUpdater$,
+        });
+
+        core.application.register({
+          id: observabilityServicesNewNavID,
+          title: observabilityServicesTitle,
+          order: observabilityServicesPluginOrder,
+          category: DEFAULT_APP_CATEGORIES.investigate,
+          mount: appMountWithStartPage('traces', '/services'),
+          updater$: this.traceAnalyticsAppUpdater$,
         });
       } else {
-        // Trace Analytics Mode - register trace analytics applications
+        // UI setting disabled, only Trace Analytics is available (current fallback behavior)
         core.application.register({
           id: observabilityTracesNewNavID,
           title: observabilityTracesTitle,
@@ -468,23 +499,16 @@ export class ObservabilityPlugin
       }
     }
 
-    if (!setupDeps.investigationDashboards) {
-      core.application.register({
-        id: observabilityNotebookID,
-        title: observabilityNotebookTitle,
-        category: OBSERVABILITY_APP_CATEGORIES.observability,
-        order: observabilityNotebookPluginOrder,
-        mount: appMountWithStartPage('notebooks'),
-      });
-    }
+    core.application.register({
+      id: observabilityNotebookID,
+      title: observabilityNotebookTitle,
+      category: OBSERVABILITY_APP_CATEGORIES.observability,
+      order: observabilityNotebookPluginOrder,
+      mount: appMountWithStartPage('notebooks'),
+      updater$: this.appUpdater$,
+    });
 
-    registerAllPluginNavGroups(
-      core,
-      setupDeps,
-      this.mdsFlagStatus,
-      this.apmEnabled,
-      APPLICATION_MONITORING_CATEGORY
-    );
+    registerAllPluginNavGroups(core, this.apmEnabled, APPLICATION_MONITORING_CATEGORY);
 
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
       getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,
@@ -512,6 +536,7 @@ export class ObservabilityPlugin
     coreRefs.toasts = core.notifications.toasts;
     coreRefs.chrome = core.chrome;
     coreRefs.dataSources = startDeps.data.dataSources;
+    coreRefs.data = startDeps.data;
     coreRefs.application = core.application;
     coreRefs.dashboard = startDeps.dashboard;
     coreRefs.queryAssistEnabled = this.config.query_assist.enabled;
@@ -521,6 +546,28 @@ export class ObservabilityPlugin
     coreRefs.navigation = startDeps.navigation;
     coreRefs.contentManagement = startDeps.contentManagement;
     coreRefs.workspaces = core.workspaces;
+
+    if (core.application.capabilities.investigation?.enabled) {
+      this.appUpdater$.next(() => ({
+        navLinkStatus: AppNavLinkStatus.hidden,
+      }));
+    }
+
+    // APM vs Trace Analytics visibility controlled by explore.discoverTracesEnabled capability
+    // Only applies when UI setting enabled (both app sets registered)
+    if (this.apmEnabled) {
+      if (core.application.capabilities.explore?.discoverTracesEnabled) {
+        // Traces ENABLED: Show APM, hide Trace Analytics
+        this.traceAnalyticsAppUpdater$.next(() => ({
+          navLinkStatus: AppNavLinkStatus.hidden,
+        }));
+      } else {
+        // Traces DISABLED: Hide APM, show Trace Analytics (fallback)
+        this.apmAppUpdater$.next(() => ({
+          navLinkStatus: AppNavLinkStatus.hidden,
+        }));
+      }
+    }
 
     // redirect trace URL based on new navigation
     if (window.location.pathname.includes(observabilityTracesID)) {

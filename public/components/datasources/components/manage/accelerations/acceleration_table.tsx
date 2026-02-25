@@ -138,7 +138,7 @@ export const AccelerationTable = ({
     }
   }, [accelerationsLoadStatus]);
 
-  const RefreshButton = () => {
+  const RefreshButton = (props: any) => {
     return (
       <EuiSmallButton
         onClick={handleRefresh}
@@ -146,6 +146,7 @@ export const AccelerationTable = ({
           isRefreshing ||
           isCatalogCacheFetching(databasesLoadStatus, tablesLoadStatus, accelerationsLoadStatus)
         }
+        {...props}
       >
         Refresh
       </EuiSmallButton>
