@@ -147,8 +147,8 @@ export const useFetchPatterns = ({
                 parameters: DEFAULT_RCF_PARAMETERS,
               });
 
-              if (rcfResponse.data?.anomalies?.length > 0) {
-                rcfResponse.data.anomalies.forEach((anomaly: any) => {
+              if (rcfResponse.anomalies?.length > 0) {
+                rcfResponse.anomalies.forEach((anomaly) => {
                   if (anomaly.isAnomaly && anomaly.score > 0) {
                     const pattern = anomaly.category;
                     anomaliesMap[pattern] = (anomaliesMap[pattern] || 0) + 1;

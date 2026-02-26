@@ -5,6 +5,72 @@
 
 import { RequestHandlerContext, OpenSearchDashboardsRequest } from '../../../../../src/core/server';
 
+interface TimeSeriesDataPoint {
+  timestamp: string;
+  category?: string;
+  value: number;
+  [key: string]: string | number | undefined;
+}
+
+interface RCFParameters {
+  number_of_trees?: number;
+  shingle_size?: number;
+  sample_size?: number;
+  output_after?: number;
+  time_decay?: number;
+  anomaly_rate?: number;
+  time_field: string;
+  category_field?: string;
+  date_format?: string;
+  time_zone?: string;
+}
+
+interface RCFRequestBody {
+  data: TimeSeriesDataPoint[];
+  parameters: RCFParameters;
+}
+
+interface ColumnMeta {
+  name: string;
+  column_type: string;
+}
+
+interface CellValue {
+  column_type: string;
+  value: string | number;
+}
+
+interface DataFrameRow {
+  values: CellValue[];
+}
+
+interface DataFrame {
+  column_metas: ColumnMeta[];
+  rows: DataFrameRow[];
+}
+
+interface PredictionResult {
+  column_metas?: ColumnMeta[];
+  rows?: DataFrameRow[];
+}
+
+interface CategoryRCFResult {
+  prediction_result?: PredictionResult;
+  originalData: TimeSeriesDataPoint[];
+  category: string;
+  model_id?: string;
+  task_id?: string;
+}
+
+interface MergedRCFResponse {
+  prediction_result?: PredictionResult;
+  originalData?: TimeSeriesDataPoint[];
+  category?: string;
+  model_id?: string;
+  task_id?: string;
+  results?: CategoryRCFResult[];
+}
+
 interface AnomalyResult {
   timestamp: string;
   category: string;
@@ -30,8 +96,7 @@ export class MLCommonsRCFFacet {
     request: OpenSearchDashboardsRequest
   ): Promise<RCFPredictionResult> {
     try {
-      const { data, parameters } = request.body as any;
-      const dataSourceMDSId = (request.query as any).dataSourceMDSId;
+      const { data, parameters } = request.body as RCFRequestBody;
 
       if (!data || data.length === 0) {
         return {
@@ -59,7 +124,7 @@ export class MLCommonsRCFFacet {
         input_data: data,
       };
 
-      const rcfResponse = await this.callMLCommonsRCF(context, rcfRequest, dataSourceMDSId);
+      const rcfResponse = await this.callMLCommonsRCF(context, rcfRequest);
       const anomalies = this.transformRCFResponse(rcfResponse, data);
 
       return {
@@ -79,7 +144,7 @@ export class MLCommonsRCFFacet {
     } catch (error) {
       console.error('ML Commons RCF predictAnomalies error:', error.message);
       return {
-        success: true,
+        success: false,
         data: {
           anomalies: [],
           metadata: {
@@ -94,26 +159,22 @@ export class MLCommonsRCFFacet {
 
   private async callMLCommonsRCF(
     context: RequestHandlerContext,
-    rcfRequest: any,
-    dataSourceMDSId?: string
-  ) {
-    let client;
-
-    if (dataSourceMDSId && (context as any).dataSource) {
-      client = await (context as any).dataSource.opensearch.getClient(dataSourceMDSId);
-    } else {
-      client = context.core.opensearch.client.asCurrentUser;
-    }
+    rcfRequest: { parameters: RCFParameters; input_data: TimeSeriesDataPoint[] }
+  ): Promise<MergedRCFResponse> {
+    const client = context.core.opensearch.client.asCurrentUser;
 
     const { input_data: inputData, parameters } = rcfRequest;
     const categoryField = parameters.category_field;
 
     const categorizedData = this.groupDataByCategory(inputData, categoryField);
-    const allResults: any[] = [];
+    const allResults: CategoryRCFResult[] = [];
 
     for (const [category, categoryData] of Object.entries(categorizedData)) {
       try {
-        const dataFrame = this.convertToDataFrame(categoryData as any[], categoryField);
+        const dataFrame = this.convertToDataFrame(
+          categoryData as TimeSeriesDataPoint[],
+          categoryField
+        );
 
         const categoryRcfRequest = {
           parameters,
@@ -141,12 +202,15 @@ export class MLCommonsRCFFacet {
     return this.mergeRCFResults(allResults);
   }
 
-  private groupDataByCategory(inputData: any[], categoryField?: string): Record<string, any[]> {
+  private groupDataByCategory(
+    inputData: TimeSeriesDataPoint[],
+    categoryField?: string
+  ): Record<string, TimeSeriesDataPoint[]> {
     if (!categoryField) {
       return { default: inputData };
     }
 
-    const grouped: Record<string, any[]> = {};
+    const grouped: Record<string, TimeSeriesDataPoint[]> = {};
     inputData.forEach((item) => {
       const category = item[categoryField] || 'default';
       if (!grouped[category]) {
@@ -158,7 +222,7 @@ export class MLCommonsRCFFacet {
     return grouped;
   }
 
-  private convertToDataFrame(data: any[], categoryField?: string): any {
+  private convertToDataFrame(data: TimeSeriesDataPoint[], categoryField?: string): DataFrame {
     if (!data || data.length === 0) {
       return { column_metas: [], rows: [] };
     }
@@ -193,7 +257,7 @@ export class MLCommonsRCFFacet {
     return { column_metas: columnMetas, rows };
   }
 
-  private mergeRCFResults(results: any[]): any {
+  private mergeRCFResults(results: CategoryRCFResult[]): MergedRCFResponse {
     if (results.length === 0) {
       return { prediction_result: { column_metas: [], rows: [] } };
     }
@@ -211,14 +275,17 @@ export class MLCommonsRCFFacet {
     };
   }
 
-  private transformRCFResponse(rcfResponse: any, originalData: any[]): AnomalyResult[] {
+  private transformRCFResponse(
+    rcfResponse: MergedRCFResponse,
+    originalData: TimeSeriesDataPoint[]
+  ): AnomalyResult[] {
     if (rcfResponse.prediction_result) {
       return this.processRCFPredictionResult(rcfResponse.prediction_result, originalData);
     }
 
     if (rcfResponse.results && Array.isArray(rcfResponse.results)) {
       const anomalies: AnomalyResult[] = [];
-      rcfResponse.results.forEach((categoryResult: any) => {
+      rcfResponse.results.forEach((categoryResult: CategoryRCFResult) => {
         if (categoryResult.prediction_result && categoryResult.originalData) {
           anomalies.push(
             ...this.processRCFPredictionResult(
@@ -234,7 +301,10 @@ export class MLCommonsRCFFacet {
     return [];
   }
 
-  private processRCFPredictionResult(predictionResult: any, inputData: any[]): AnomalyResult[] {
+  private processRCFPredictionResult(
+    predictionResult: PredictionResult,
+    inputData: TimeSeriesDataPoint[]
+  ): AnomalyResult[] {
     const anomalies: AnomalyResult[] = [];
 
     if (!predictionResult.column_metas || !predictionResult.rows) {
@@ -242,11 +312,11 @@ export class MLCommonsRCFFacet {
     }
 
     const outputColumnMap = new Map<string, number>();
-    predictionResult.column_metas.forEach((meta: any, index: number) => {
+    predictionResult.column_metas.forEach((meta: ColumnMeta, index: number) => {
       outputColumnMap.set(meta.name, index);
     });
 
-    predictionResult.rows.forEach((outputRow: any, index: number) => {
+    predictionResult.rows.forEach((outputRow: DataFrameRow, index: number) => {
       if (index >= inputData.length) {
         return;
       }

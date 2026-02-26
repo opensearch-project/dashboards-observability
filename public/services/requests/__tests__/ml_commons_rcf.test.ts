@@ -31,38 +31,11 @@ describe('MLCommonsRCFService', () => {
 
       const result = await service.predictAnomalies(sampleParams);
 
-      expect(mockHttp.post).toHaveBeenCalledWith('/api/observability/ml-commons/rcf/predict', {
+      expect(mockHttp.post).toHaveBeenCalledWith('/api/observability/ml_commons_rcf/predict', {
         body: JSON.stringify(sampleParams),
-        query: { dataSourceMDSId: '' },
         headers: { 'Content-Type': 'application/json' },
       });
       expect(result).toBe(mockResponse);
-    });
-
-    it('should pass dataSourceMDSId in query when provided', async () => {
-      mockHttp.post.mockResolvedValue({});
-
-      await service.predictAnomalies(sampleParams, 'ds-456');
-
-      expect(mockHttp.post).toHaveBeenCalledWith(
-        '/api/observability/ml-commons/rcf/predict',
-        expect.objectContaining({
-          query: { dataSourceMDSId: 'ds-456' },
-        })
-      );
-    });
-
-    it('should default dataSourceMDSId to empty string when undefined', async () => {
-      mockHttp.post.mockResolvedValue({});
-
-      await service.predictAnomalies(sampleParams, undefined);
-
-      expect(mockHttp.post).toHaveBeenCalledWith(
-        '/api/observability/ml-commons/rcf/predict',
-        expect.objectContaining({
-          query: { dataSourceMDSId: '' },
-        })
-      );
     });
 
     it('should throw error and call errorHandler on failure', async () => {
@@ -70,7 +43,7 @@ describe('MLCommonsRCFService', () => {
       mockHttp.post.mockRejectedValue(error);
       const errorHandler = jest.fn();
 
-      await expect(service.predictAnomalies(sampleParams, undefined, errorHandler)).rejects.toThrow(
+      await expect(service.predictAnomalies(sampleParams, errorHandler)).rejects.toThrow(
         'Network error'
       );
 
@@ -88,7 +61,7 @@ describe('MLCommonsRCFService', () => {
       mockHttp.post.mockResolvedValue({ data: { anomalies: [] } });
       const errorHandler = jest.fn();
 
-      await service.predictAnomalies(sampleParams, undefined, errorHandler);
+      await service.predictAnomalies(sampleParams, errorHandler);
 
       expect(errorHandler).not.toHaveBeenCalled();
     });
@@ -115,7 +88,7 @@ describe('MLCommonsRCFService', () => {
 
       mockHttp.post.mockResolvedValue({});
 
-      await service.predictAnomalies(fullParams, 'mds-id');
+      await service.predictAnomalies(fullParams);
 
       const calledBody = JSON.parse(mockHttp.post.mock.calls[0][1].body);
       expect(calledBody.data).toHaveLength(2);

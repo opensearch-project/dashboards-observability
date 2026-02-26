@@ -166,7 +166,7 @@ describe('MLCommonsRCFFacet', () => {
         mockRequest as OpenSearchDashboardsRequest
       );
 
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
       expect(result.data.anomalies).toEqual([]);
       expect(result.data.metadata.error).toBe('Client unavailable');
     });
@@ -210,43 +210,6 @@ describe('MLCommonsRCFFacet', () => {
       expect(calledBody.parameters.time_field).toBe('ts');
       expect(calledBody.parameters.date_format).toBe('epoch_millis');
       expect(calledBody.parameters.time_zone).toBe('US/Eastern');
-    });
-
-    it('should use MDS client when dataSourceMDSId is provided', async () => {
-      const mockMDSClient = {
-        transport: { request: jest.fn() },
-      };
-      mockMDSClient.transport.request.mockResolvedValue({
-        body: {
-          prediction_result: {
-            column_metas: [],
-            rows: [],
-          },
-        },
-      });
-
-      mockContext.dataSource = {
-        opensearch: {
-          getClient: jest.fn().mockResolvedValue(mockMDSClient),
-        },
-      };
-
-      mockRequest = buildRequest(
-        {
-          data: [{ timestamp: '2024-01-01 00:00:00', value: 1 }],
-          parameters: { time_field: 'timestamp' },
-        },
-        { dataSourceMDSId: 'ds-123' }
-      );
-
-      await facet.predictAnomalies(
-        mockContext as RequestHandlerContext,
-        mockRequest as OpenSearchDashboardsRequest
-      );
-
-      expect(mockContext.dataSource.opensearch.getClient).toHaveBeenCalledWith('ds-123');
-      expect(mockMDSClient.transport.request).toHaveBeenCalled();
-      expect(mockTransportRequest).not.toHaveBeenCalled();
     });
   });
 

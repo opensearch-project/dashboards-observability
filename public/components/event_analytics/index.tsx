@@ -18,7 +18,7 @@ export const LogExplorerRouterContext = createContext<{
 } | null>(null);
 
 export const EventAnalytics = ({
-  chrome,
+  chrome: _chrome,
   parentBreadcrumbs,
   pplService,
   dslService,

@@ -23,7 +23,7 @@ export function registerMLCommonsRCFRoute({
 }) {
   router.post(
     {
-      path: '/api/observability/ml-commons/rcf/predict',
+      path: '/api/observability/ml_commons_rcf/predict',
       validate: {
         body: schema.object({
           data: schema.arrayOf(
@@ -46,9 +46,7 @@ export function registerMLCommonsRCFRoute({
             time_zone: schema.maybe(schema.string({ defaultValue: 'UTC' })),
           }),
         }),
-        query: schema.object({
-          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
-        }),
+        query: schema.object({}),
       },
     },
     async (

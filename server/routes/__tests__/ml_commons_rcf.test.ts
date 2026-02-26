@@ -37,7 +37,7 @@ describe('registerMLCommonsRCFRoute', () => {
   it('should register POST route at correct path', () => {
     expect(mockRouter.post).toHaveBeenCalledTimes(1);
     const [routeConfig] = mockRouter.post.mock.calls[0];
-    expect(routeConfig.path).toBe('/api/observability/ml-commons/rcf/predict');
+    expect(routeConfig.path).toBe('/api/observability/ml_commons_rcf/predict');
   });
 
   it('should have body and query validation schema', () => {

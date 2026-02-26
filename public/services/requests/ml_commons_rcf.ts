@@ -11,6 +11,20 @@ interface TimeSeriesDataPoint {
   value: number;
 }
 
+interface AnomalyResult {
+  timestamp: string;
+  category: string;
+  score: number;
+  grade: number;
+  isAnomaly: boolean;
+  actualValue: number;
+}
+
+interface RCFPredictResponse {
+  anomalies: AnomalyResult[];
+  metadata: Record<string, unknown>;
+}
+
 export class MLCommonsRCFService {
   private http: CoreStart['http'];
 
@@ -34,13 +48,11 @@ export class MLCommonsRCFService {
         time_zone?: string;
       };
     },
-    dataSourceMDSId?: string,
-    errorHandler?: (error: any) => void
-  ) => {
+    errorHandler?: (error: unknown) => void
+  ): Promise<RCFPredictResponse> => {
     try {
-      return await this.http.post('/api/observability/ml-commons/rcf/predict', {
+      return await this.http.post<RCFPredictResponse>('/api/observability/ml_commons_rcf/predict', {
         body: JSON.stringify(params),
-        query: { dataSourceMDSId: dataSourceMDSId || '' },
         headers: { 'Content-Type': 'application/json' },
       });
     } catch (error) {
