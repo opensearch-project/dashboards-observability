@@ -123,6 +123,7 @@ import { registerAllPluginNavGroups } from './plugin_helpers/plugin_nav';
 import { setupOverviewPage } from './plugin_helpers/plugin_overview';
 import DSLService from './services/requests/dsl';
 import PPLService from './services/requests/ppl';
+import { MLCommonsRCFService } from './services/requests/ml_commons_rcf';
 import SavedObjects from './services/saved_objects/event_analytics/saved_objects';
 import TimestampUtils from './services/timestamp/timestamp';
 import {
@@ -347,12 +348,16 @@ export class ObservabilityPlugin
       const savedObjects = new SavedObjects(coreStart.http);
       const timestampUtils = new TimestampUtils(dslService, pplService);
       const { dataSourceManagement } = setupDeps;
+
+      const mlCommonsRCFService = new MLCommonsRCFService(coreStart.http);
+
       return Observability(
         coreStart,
-        depsStart as AppPluginStartDependencies,
+        depsStart,
         params,
         pplService,
         dslService,
+        mlCommonsRCFService,
         savedObjects,
         timestampUtils,
         qm,

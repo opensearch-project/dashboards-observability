@@ -11,6 +11,7 @@ import { CoreStart, MountPoint } from '../../../../src/core/public';
 import { DataSourceManagementPluginSetup } from '../../../../src/plugins/data_source_management/public';
 import { observabilityID, observabilityTitle } from '../../common/constants/shared';
 import { store } from '../framework/redux/store';
+import { MLCommonsRCFService } from '../services/requests/ml_commons_rcf';
 import { AppPluginStartDependencies } from '../types';
 import { Home as ApplicationAnalyticsHome } from './application_analytics/home';
 import { MetricsListener } from './common/metrics_listener';
@@ -35,6 +36,7 @@ interface ObservabilityAppDeps {
   DepsStart: AppPluginStartDependencies;
   pplService: any;
   dslService: any;
+  mlCommonsRCFService: MLCommonsRCFService;
   savedObjects: any;
   timestampUtils: any;
   queryManager: QueryManager;
@@ -84,6 +86,7 @@ export const App = ({
   DepsStart,
   pplService,
   dslService,
+  mlCommonsRCFService,
   savedObjects,
   timestampUtils,
   queryManager,
@@ -118,6 +121,7 @@ export const App = ({
             }
             pplService={pplService}
             dslService={dslService}
+            mlCommonsRCFService={mlCommonsRCFService}
             savedObjects={savedObjects}
             timestampUtils={timestampUtils}
             queryManager={queryManager}

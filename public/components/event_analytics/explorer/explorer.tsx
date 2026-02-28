@@ -140,6 +140,7 @@ import { DirectQueryVisualization } from './visualizations/direct_query_vis';
 export const Explorer = ({
   pplService,
   dslService,
+  mlCommonsRCFService,
   tabId,
   savedObjects,
   timestampUtils,
@@ -175,6 +176,7 @@ export const Explorer = ({
   });
   const { getPatterns, setDefaultPatternsField } = useFetchPatterns({
     pplService,
+    mlCommonsRCFService,
     requestParams,
   });
   const [eventsLoading, setEventsLoading] = useState(false);
@@ -1016,6 +1018,7 @@ export const Explorer = ({
         changeVisualizationConfig,
         setToast,
         pplService,
+        mlCommonsRCFService,
         notifications,
         dispatch,
         handleQueryChange,

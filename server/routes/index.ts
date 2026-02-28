@@ -24,6 +24,8 @@ import { registerSqlRoute } from './notebooks/sqlRouter';
 import { registerVizRoute } from './notebooks/vizRouter';
 import { registerPplRoute } from './ppl';
 import { registerQueryAssistRoutes } from './query_assist/routes';
+import { MLCommonsRCFFacet } from '../services/facets/ml_commons_rcf_facet';
+import { registerMLCommonsRCFRoute } from './ml_commons_rcf';
 import { registerTraceAnalyticsDslRouter } from './trace_analytics_dsl_router';
 
 export function setupRoutes({
@@ -65,4 +67,5 @@ export function setupRoutes({
   }
 
   registerGettingStartedRoutes(router);
+  registerMLCommonsRCFRoute({ router, facet: new MLCommonsRCFFacet() });
 }

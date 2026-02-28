@@ -18,10 +18,11 @@ export const LogExplorerRouterContext = createContext<{
 } | null>(null);
 
 export const EventAnalytics = ({
-  chrome,
+  chrome: _chrome,
   parentBreadcrumbs,
   pplService,
   dslService,
+  mlCommonsRCFService,
   savedObjects,
   timestampUtils,
   http,
@@ -83,6 +84,7 @@ export const EventAnalytics = ({
                     savedObjectId={routerProps.match.params.id}
                     pplService={pplService}
                     dslService={dslService}
+                    mlCommonsRCFService={mlCommonsRCFService}
                     savedObjects={savedObjects}
                     timestampUtils={timestampUtils}
                     http={http}
