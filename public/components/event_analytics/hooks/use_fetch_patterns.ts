@@ -6,6 +6,7 @@
 import { IField, PatternTableData } from 'common/types/explorer';
 import isUndefined from 'lodash/isUndefined';
 import PPLService from 'public/services/requests/ppl';
+import { MLCommonsRCFService } from 'public/services/requests/ml_commons_rcf';
 import { useRef } from 'react';
 import { batch, useDispatch, useSelector } from 'react-redux';
 import {
@@ -21,19 +22,37 @@ import { reset as resetPatterns, setPatterns } from '../redux/slices/patterns_sl
 import { changeQuery, selectQueries } from '../redux/slices/query_slice';
 import { useFetchEvents } from './use_fetch_events';
 
+const DEFAULT_RCF_PARAMETERS = {
+  number_of_trees: 100,
+  shingle_size: 8,
+  sample_size: 256,
+  output_after: 32,
+  time_decay: 0.0001,
+  anomaly_rate: 0.005,
+  time_field: 'timestamp',
+  category_field: 'category',
+  date_format: 'yyyy-MM-dd HH:mm:ss',
+  time_zone: 'UTC',
+} as const;
+
 interface IFetchPatternsParams {
   pplService: PPLService;
+  mlCommonsRCFService: MLCommonsRCFService;
   requestParams: { tabId: string };
 }
 
-export const useFetchPatterns = ({ pplService, requestParams }: IFetchPatternsParams) => {
+export const useFetchPatterns = ({
+  pplService,
+  mlCommonsRCFService,
+  requestParams,
+}: IFetchPatternsParams) => {
   const dispatch = useDispatch();
   const { isEventsLoading, fetchEvents } = useFetchEvents({
     pplService,
     requestParams,
   });
   const queries = useSelector(selectQueries);
-  const queriesRef = useRef();
+  const queriesRef = useRef<any>();
   queriesRef.current = queries;
 
   const dispatchOnPatterns = (res: { patternTableData: PatternTableData[] }) => {
@@ -60,60 +79,89 @@ export const useFetchPatterns = ({ pplService, requestParams }: IFetchPatternsPa
     return statsQuery;
   };
 
-  const buildPatternAnomaliesQuery = (
+  const buildPatternTimeSeriesQuery = (
     query: string,
     patternField: string,
     patternRegex: string,
     timestampField: string,
     interval: string
   ) => {
-    let adQuery = buildPatternsQuery(query, patternField, patternRegex);
-    adQuery +=
-      ` | stats count() by span(\`${timestampField}\`, 1${interval || 'm'}) as timestamp, ` +
-      `patterns_field | AD time_field='timestamp' category_field='patterns_field'`;
-    return adQuery;
+    let timeSeriesQuery = buildPatternsQuery(query, patternField, patternRegex);
+    timeSeriesQuery += ` | stats count() by span(\`${timestampField}\`, 1${
+      interval || 'm'
+    }) as timestamp, patterns_field`;
+    return timeSeriesQuery;
   };
 
   const clearPatternCommands = (query: string) => query.replace(PATTERNS_REGEX, '');
 
   const getPatterns = (interval: string, errorHandler?: (error: any) => void, query?: string) => {
     const cur = queriesRef.current;
-    const rawQuery = cur![requestParams.tabId][FINAL_QUERY];
+    if (!cur) return;
+
+    const rawQuery = cur[requestParams.tabId][FINAL_QUERY];
     const searchQuery = isUndefined(query) ? clearPatternCommands(rawQuery) : query;
-    const patternField = cur![requestParams.tabId][SELECTED_PATTERN_FIELD];
-    const timestampField = cur![requestParams.tabId][SELECTED_TIMESTAMP];
-    const patternRegex = cur![requestParams.tabId][PATTERN_REGEX];
+    const patternField = cur[requestParams.tabId][SELECTED_PATTERN_FIELD];
+    const timestampField = cur[requestParams.tabId][SELECTED_TIMESTAMP];
+    const patternRegex = cur[requestParams.tabId][PATTERN_REGEX];
     const statsQuery = buildPatternDataQuery(searchQuery, patternField, patternRegex);
-    const anomaliesQuery = buildPatternAnomaliesQuery(
+    const timeSeriesQuery = buildPatternTimeSeriesQuery(
       searchQuery,
       patternField,
       patternRegex,
       timestampField,
       interval
     );
+
     // Fetch patterns data for the current query results
     Promise.allSettled([
       fetchEvents({ query: statsQuery }, 'jdbc', (res) => res),
-      fetchEvents({ query: anomaliesQuery }, 'jdbc', (res) => res),
+      fetchEvents({ query: timeSeriesQuery }, 'jdbc', (res) => res),
     ])
-      .then((res) => {
-        const [statsResp, anomaliesResp] = res as Array<PromiseSettledResult<IPPLEventsDataSource>>;
+      .then(async (res) => {
+        const [statsResp, timeSeriesResp] = res as Array<
+          PromiseSettledResult<IPPLEventsDataSource>
+        >;
         if (statsResp.status === 'rejected') {
           throw statsResp.reason;
         }
 
         let anomaliesResultsAvailable = true;
         const anomaliesMap: { [x: string]: number } = {};
-        if (anomaliesResp.status === 'fulfilled') {
-          anomaliesResp.value.datarows.forEach((row) => {
-            const pattern = row[2];
-            const score = row[3];
-            if (score > 0) {
-              anomaliesMap[pattern] = (anomaliesMap[pattern] || 0) + 1;
+
+        // Phase 2: Perform anomaly detection if time series data is available
+        if (timeSeriesResp.status === 'fulfilled') {
+          try {
+            const timeSeriesData = timeSeriesResp.value.datarows.map((row) => ({
+              timestamp: row[1],
+              category: row[2],
+              value: row[0] || 0,
+            }));
+
+            // Skip anomaly detection if no time series data
+            if (timeSeriesData.length === 0) {
+              anomaliesResultsAvailable = false;
+            } else {
+              const rcfResponse = await mlCommonsRCFService.predictAnomalies({
+                data: timeSeriesData,
+                parameters: DEFAULT_RCF_PARAMETERS,
+              });
+
+              if (rcfResponse.anomalies?.length > 0) {
+                rcfResponse.anomalies.forEach((anomaly) => {
+                  if (anomaly.isAnomaly && anomaly.score > 0) {
+                    const pattern = anomaly.category;
+                    anomaliesMap[pattern] = (anomaliesMap[pattern] || 0) + 1;
+                  }
+                });
+              }
             }
-          });
+          } catch (rcfError) {
+            console.error('ML Commons RCF anomaly detection failed:', rcfError);
+            anomaliesResultsAvailable = false;
+          }
         } else {
-          console.error('Error fetching anomalies in patterns');
+          console.error('Failed to fetch time series data for anomaly detection');
           anomaliesResultsAvailable = false;
         }
 

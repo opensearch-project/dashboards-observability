@@ -36,13 +36,14 @@ const EventPatterns = ({
   query,
 }: LogPatternProps) => {
   const dispatch = useDispatch();
-  const { tabId, pplService, notifications } = useContext<any>(TabContext);
+  const { tabId, pplService, mlCommonsRCFService, notifications } = useContext<any>(TabContext);
   const patternsData = patterns[tabId];
   const [viewLogPatterns, setViewLogPatterns] = useState(false);
   const [isPatternConfigPopoverOpen, setIsPatternConfigPopoverOpen] = useState(false);
   const [patternRegexInput, setPatternRegexInput] = useState(PPL_DEFAULT_PATTERN_REGEX_FILETER);
   const { isEventsLoading: isPatternLoading, getPatterns } = useFetchPatterns({
     pplService,
+    mlCommonsRCFService,
     requestParams: { tabId },
   });
 
