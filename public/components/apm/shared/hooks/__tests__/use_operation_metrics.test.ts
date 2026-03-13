@@ -59,7 +59,7 @@ describe('useOperationMetrics', () => {
   });
 
   describe('initial state', () => {
-    it('should return empty metrics when no prometheusConnectionId', () => {
+    it('should return empty metrics when no prometheusConnectionId', async () => {
       const { result } = renderHook(() =>
         useOperationMetrics({
           ...defaultParams,
@@ -67,8 +67,10 @@ describe('useOperationMetrics', () => {
         })
       );
 
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
       expect(result.current.metrics.size).toBe(0);
-      expect(result.current.isLoading).toBe(false);
       expect(result.current.error).toBeNull();
     });
 

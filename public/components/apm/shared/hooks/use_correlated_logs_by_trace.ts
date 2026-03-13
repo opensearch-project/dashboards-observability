@@ -55,13 +55,13 @@ export const useCorrelatedLogsByTrace = ({
   const traceIdsKey = traceIds.join(',');
   const logDatasetsKey = logDatasets.map((d) => d.id).join(',');
 
-  // Calculate time range with buffer (5 minutes on each side)
+  // Calculate time range with buffer (5 minutes before span start only)
   const timeRangeWithBuffer = useMemo(() => {
     if (minTimeMs === undefined || maxTimeMs === undefined) return null;
     const bufferMs = CORRELATION_CONSTANTS.TELEMETRY_LAG_BUFFER_MS;
     return {
       minTime: new Date(minTimeMs - bufferMs),
-      maxTime: new Date(maxTimeMs + bufferMs),
+      maxTime: new Date(maxTimeMs),
     };
   }, [minTimeMs, maxTimeMs]);
 

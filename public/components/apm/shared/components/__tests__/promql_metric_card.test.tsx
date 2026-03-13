@@ -25,6 +25,8 @@ jest.mock('echarts', () => ({
 const mockUsePromQLChartData = jest.fn();
 jest.mock('../../hooks/use_promql_chart_data', () => ({
   usePromQLChartData: (params: any) => mockUsePromQLChartData(params),
+  isResolutionExceededError: jest.fn(() => false),
+  RESOLUTION_EXCEEDED_CODE: 'RESOLUTION_EXCEEDED',
 }));
 
 describe('PromQLMetricCard', () => {

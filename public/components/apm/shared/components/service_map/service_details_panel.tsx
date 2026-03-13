@@ -18,6 +18,8 @@ import {
   EuiHorizontalRule,
   EuiPanel,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { HealthDonut } from '@osd/apm-topology';
 import { LanguageIcon } from '../language_icon';
@@ -48,6 +50,8 @@ export interface ServiceDetailsPanelProps {
   prometheusConnectionId: string;
   onClose: () => void;
   onViewDetails: (serviceName: string, environment: string) => void;
+  onShowSpans?: (serviceName: string, environment: string) => void;
+  onShowLogs?: (serviceName: string, environment: string) => void;
   refreshTrigger?: number;
 }
 
@@ -67,6 +71,8 @@ export const ServiceDetailsPanel: React.FC<ServiceDetailsPanelProps> = ({
   prometheusConnectionId,
   onClose,
   onViewDetails,
+  onShowSpans,
+  onShowLogs,
   refreshTrigger,
 }) => {
   // Detect if this is the Application root node (aggregated view)
@@ -181,8 +187,8 @@ label_replace(
       ownFocus={false}
       aria-labelledby="serviceDetailsPanelTitle"
     >
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlyoutHeader hasBorder style={{ paddingRight: 40 }}>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           {!isApplicationNode && (
             <EuiFlexItem grow={false}>
               <LanguageIcon language={language} size="l" />
@@ -198,12 +204,40 @@ label_replace(
           </EuiFlexItem>
           {!isApplicationNode && !isGroupNode && (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                onClick={() => onViewDetails(node.serviceName, node.environment)}
-              >
-                {i18nTexts.detailsPanel.viewDetails}
-              </EuiButtonEmpty>
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                {onShowSpans && (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip content={i18nTexts.actions.viewSpans}>
+                      <EuiButtonIcon
+                        iconType="apmTrace"
+                        aria-label={i18nTexts.actions.viewSpans}
+                        onClick={() => onShowSpans(node.serviceName, node.environment)}
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
+                {onShowLogs && (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip content={i18nTexts.actions.viewLogs}>
+                      <EuiButtonIcon
+                        iconType="discoverApp"
+                        aria-label={i18nTexts.actions.viewLogs}
+                        onClick={() => onShowLogs(node.serviceName, node.environment)}
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="popout"
+                    iconSide="right"
+                    onClick={() => onViewDetails(node.serviceName, node.environment)}
+                  >
+                    {i18nTexts.detailsPanel.viewDetails}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -294,6 +328,7 @@ label_replace(
                   formatValue={formatCount}
                   refreshTrigger={refreshTrigger}
                   color={APM_CONSTANTS.COLORS.THROUGHPUT}
+                  seriesLabel={i18nTexts.detailsPanel.requests}
                 />
               </EuiPanel>
 
@@ -334,6 +369,7 @@ label_replace(
                   formatValue={formatCount}
                   refreshTrigger={refreshTrigger}
                   color={APM_CONSTANTS.COLORS.FAULT}
+                  seriesLabel={i18nTexts.detailsPanel.faults5xx}
                 />
               </EuiPanel>
 
@@ -354,6 +390,7 @@ label_replace(
                   formatValue={formatCount}
                   refreshTrigger={refreshTrigger}
                   color={APM_CONSTANTS.COLORS.WARNING}
+                  seriesLabel={i18nTexts.detailsPanel.errors4xx}
                 />
               </EuiPanel>
             </EuiAccordion>

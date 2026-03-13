@@ -13,6 +13,29 @@ import {
 } from '../../common/types/service_details_types';
 import { CHART_COLORS } from '../../common/constants';
 
+/**
+ * Error code for Prometheus "exceeded maximum resolution" errors.
+ */
+export const RESOLUTION_EXCEEDED_CODE = 'RESOLUTION_EXCEEDED';
+
+/**
+ * Custom error class with a code property for typed error handling.
+ */
+export class PromQLError extends Error {
+  code?: string;
+  constructor(message: string, code?: string) {
+    super(message);
+    this.code = code;
+  }
+}
+
+/**
+ * Type guard to check if an error is a resolution exceeded error.
+ */
+export function isResolutionExceededError(error: Error | null): boolean {
+  return error instanceof PromQLError && error.code === RESOLUTION_EXCEEDED_CODE;
+}
+
 export interface UsePromQLChartDataParams {
   promqlQuery: string;
   timeRange: TimeRange;
@@ -108,7 +131,14 @@ export const usePromQLChartData = (params: UsePromQLChartDataParams): UsePromQLC
         }
       } catch (err) {
         console.error('[usePromQLChartData] Error fetching data:', err);
-        setError(err instanceof Error ? err : new Error('Unknown error'));
+        const message = err instanceof Error ? err.message : String(err);
+        // Detect Prometheus "exceeded maximum resolution" errors
+        if (/exceeded maximum resolution/i.test(message)) {
+          const typedError = new PromQLError(message, RESOLUTION_EXCEEDED_CODE);
+          setError(typedError);
+        } else {
+          setError(err instanceof Error ? err : new Error('Unknown error'));
+        }
         setSeries([]);
         setLatestValue(null);
       } finally {

@@ -23,6 +23,8 @@ import {
   EuiBadge,
   EuiCallOut,
   EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { NotificationsStart } from '../../../../../../src/core/public';
@@ -37,7 +39,14 @@ import { useApmConfig } from './apm_config_context';
 import { navigateToDatasetCorrelations } from '../shared/utils/navigation_utils';
 import { OSDSavedApmConfigClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/apm_config';
 import { ApmArchitectureSvgLight, ApmArchitectureSvgDark } from './apm-architecture-svg';
-import { APM_DOCS_URL } from '../common/constants';
+import {
+  APM_DOCS_URL,
+  APM_TRACES_DOCS_URL,
+  APM_SERVICE_MAP_DOCS_URL,
+  APM_RED_METRICS_DOCS_URL,
+  APM_PIPELINE_DOCS_URL,
+  APM_CORRELATIONS_DOCS_URL,
+} from '../common/constants';
 
 /**
  * Type guard to safely check if an unknown value is an Error
@@ -360,6 +369,12 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
                     defaultMessage: 'Learn more',
                   })}
                 </EuiLink>
+                {' | '}
+                <EuiLink href={APM_PIPELINE_DOCS_URL} target="_blank" external>
+                  {i18n.translate('observability.apm.settings.pipelineDocs', {
+                    defaultMessage: 'Pipeline setup',
+                  })}
+                </EuiLink>
               </p>
             </EuiText>
             <EuiSpacer size="s" />
@@ -424,9 +439,18 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
               label={i18n.translate('observability.apm.settings.tracesLabel', {
                 defaultMessage: 'Traces',
               })}
-              helpText={i18n.translate('observability.apm.settings.tracesHelpText', {
-                defaultMessage: 'Select dataset for Trace data',
-              })}
+              helpText={
+                <>
+                  {i18n.translate('observability.apm.settings.tracesHelpText', {
+                    defaultMessage: 'Select dataset for Trace data.',
+                  })}{' '}
+                  <EuiLink href={APM_TRACES_DOCS_URL} target="_blank" external>
+                    {i18n.translate('observability.apm.settings.tracesLearnMore', {
+                      defaultMessage: 'Learn more',
+                    })}
+                  </EuiLink>
+                </>
+              }
               isInvalid={showErrors && errors.tracesDataset.length > 0}
               error={errors.tracesDataset}
               fullWidth
@@ -489,18 +513,31 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
                     </EuiText>
                   }
                   extraAction={
-                    <EuiButtonEmpty
-                      size="xs"
-                      onClick={() => navigateToDatasetCorrelations(formData.tracesDatasetId)}
-                    >
-                      {correlatedLogs.length === 0
-                        ? i18n.translate('observability.apm.settings.viewCorrelatedLogs', {
-                            defaultMessage: 'View correlated logs',
-                          })
-                        : i18n.translate('observability.apm.settings.updateCorrelatedLogs', {
-                            defaultMessage: 'Update correlated logs',
-                          })}
-                    </EuiButtonEmpty>
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiLink href={APM_CORRELATIONS_DOCS_URL} target="_blank" external>
+                          <EuiText size="xs">
+                            {i18n.translate('observability.apm.settings.correlationsLearnMore', {
+                              defaultMessage: 'Learn more',
+                            })}
+                          </EuiText>
+                        </EuiLink>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          size="xs"
+                          onClick={() => navigateToDatasetCorrelations(formData.tracesDatasetId)}
+                        >
+                          {correlatedLogs.length === 0
+                            ? i18n.translate('observability.apm.settings.viewCorrelatedLogs', {
+                                defaultMessage: 'View correlated logs',
+                              })
+                            : i18n.translate('observability.apm.settings.updateCorrelatedLogs', {
+                                defaultMessage: 'Update correlated logs',
+                              })}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   }
                   initialIsOpen={false}
                   paddingSize="s"
@@ -549,9 +586,18 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
               label={i18n.translate('observability.apm.settings.servicesLabel', {
                 defaultMessage: 'Services',
               })}
-              helpText={i18n.translate('observability.apm.settings.servicesHelpText', {
-                defaultMessage: 'Select dataset/index-pattern for Services Map data',
-              })}
+              helpText={
+                <>
+                  {i18n.translate('observability.apm.settings.servicesHelpText', {
+                    defaultMessage: 'Select dataset/index-pattern for Services Map data.',
+                  })}{' '}
+                  <EuiLink href={APM_SERVICE_MAP_DOCS_URL} target="_blank" external>
+                    {i18n.translate('observability.apm.settings.servicesLearnMore', {
+                      defaultMessage: 'Learn more',
+                    })}
+                  </EuiLink>
+                </>
+              }
               isInvalid={showErrors && errors.serviceMapDataset.length > 0}
               error={errors.serviceMapDataset}
               fullWidth
@@ -600,9 +646,18 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
               label={i18n.translate('observability.apm.settings.redMetricsLabel', {
                 defaultMessage: 'RED Metrics',
               })}
-              helpText={i18n.translate('observability.apm.settings.redMetricsHelpText', {
-                defaultMessage: 'Select a Prometheus data source',
-              })}
+              helpText={
+                <>
+                  {i18n.translate('observability.apm.settings.redMetricsHelpText', {
+                    defaultMessage: 'Select a Prometheus data source.',
+                  })}{' '}
+                  <EuiLink href={APM_RED_METRICS_DOCS_URL} target="_blank" external>
+                    {i18n.translate('observability.apm.settings.redMetricsLearnMore', {
+                      defaultMessage: 'Learn more',
+                    })}
+                  </EuiLink>
+                </>
+              }
               isInvalid={showErrors && errors.prometheusDataSource.length > 0}
               error={errors.prometheusDataSource}
               fullWidth

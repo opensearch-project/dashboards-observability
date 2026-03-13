@@ -177,7 +177,10 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
       const edgeNodes = celestialNodes.filter((n) => selectedEdgeNodeIds.includes(n.id));
       // If filters are also active, combine filter matches with edge nodes
       if (hasActiveFilters) {
-        const filterMatchingNodes = getFilterMatchingNodes();
+        const filterMatchingNodes =
+          navigationState.level === 'groupBy' && navigationState.groupByAttribute
+            ? getFilterMatchingGroupNodes()
+            : getFilterMatchingNodes();
         // Combine filter matches with edge nodes (use Set to avoid duplicates)
         const combinedIds = new Set([
           ...filterMatchingNodes.map((n) => n.id),
@@ -193,7 +196,94 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
       return undefined;
     }
 
+    // Use group-level filtering when at groupBy level
+    if (navigationState.level === 'groupBy' && navigationState.groupByAttribute) {
+      return getFilterMatchingGroupNodes();
+    }
+
     return getFilterMatchingNodes();
+
+    // Helper function to get filter-matching group nodes (aggregate metrics per group)
+    function getFilterMatchingGroupNodes() {
+      const groupByAttribute = navigationState.groupByAttribute!;
+
+      // Group raw nodes by the active groupBy attribute
+      const groups = new Map<string, ServiceMapNode[]>();
+      nodes.forEach((node) => {
+        const attrValue = node.GroupByAttributes?.[groupByAttribute];
+        if (attrValue) {
+          if (!groups.has(attrValue)) {
+            groups.set(attrValue, []);
+          }
+          groups.get(attrValue)!.push(node);
+        }
+      });
+
+      // Filter groups based on aggregate metrics
+      const matchingGroupIds: string[] = [];
+
+      groups.forEach((groupNodes, groupValue) => {
+        // Aggregate metrics for this group
+        let totalRequests = 0;
+        let totalFaults = 0;
+        let totalErrors = 0;
+
+        groupNodes.forEach((node) => {
+          const nodeId = `${node.KeyAttributes.Name}::${node.KeyAttributes.Environment}`;
+          const metrics = metricsMap.get(nodeId);
+          if (metrics) {
+            totalRequests += metrics.totalRequests;
+            totalFaults += metrics.totalFaults;
+            totalErrors += metrics.totalErrors;
+          }
+        });
+
+        let matches = true;
+
+        // Apply fault rate threshold filter on aggregate
+        if (filters.faultRateThresholds.length > 0) {
+          const faultRate = totalRequests > 0 ? (totalFaults / totalRequests) * 100 : 0;
+          const faultMatch = filters.faultRateThresholds.some((threshold) =>
+            matchesErrorRateThreshold(faultRate, threshold)
+          );
+          if (!faultMatch) matches = false;
+        }
+
+        // Apply error rate threshold filter on aggregate
+        if (matches && filters.errorRateThresholds.length > 0) {
+          const errorRate = totalRequests > 0 ? (totalErrors / totalRequests) * 100 : 0;
+          const errorMatch = filters.errorRateThresholds.some((threshold) =>
+            matchesErrorRateThreshold(errorRate, threshold)
+          );
+          if (!errorMatch) matches = false;
+        }
+
+        // Apply environment filter: include group if ANY member matches
+        if (matches && filters.environments.length > 0) {
+          const selectedDisplayNames = new Set(
+            filters.environments.map((env) => getEnvironmentDisplayName(env))
+          );
+          const envMatch = groupNodes.some((node) => {
+            const nodeEnvDisplayName = getEnvironmentDisplayName(node.KeyAttributes.Environment);
+            return selectedDisplayNames.has(nodeEnvDisplayName);
+          });
+          if (!envMatch) matches = false;
+        }
+
+        // Apply search filter: match against group value name
+        if (matches && filters.searchQuery.trim()) {
+          const query = filters.searchQuery.toLowerCase();
+          if (!groupValue.toLowerCase().includes(query)) matches = false;
+        }
+
+        if (matches) {
+          matchingGroupIds.push(`group-${groupValue}`);
+        }
+      });
+
+      const matchingIds = new Set(matchingGroupIds);
+      return celestialNodes.filter((n) => matchingIds.has(n.id));
+    }
 
     // Helper function to get filter-matching nodes
     function getFilterMatchingNodes() {

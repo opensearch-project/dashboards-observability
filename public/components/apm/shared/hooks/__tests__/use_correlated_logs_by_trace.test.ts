@@ -453,9 +453,9 @@ describe('useCorrelatedLogsByTrace', () => {
       // The minTime should be 5 minutes before the span minTime
       // 2024-01-01T00:00:00Z - 5 min = 2023-12-31T23:55:00Z
       expect(executedQuery).toContain('2023-12-31T23:55:00');
-      // The maxTime should be 5 minutes after the span maxTime
-      // 2024-01-01T01:00:00Z + 5 min = 2024-01-01T01:05:00Z
-      expect(executedQuery).toContain('2024-01-01T01:05:00');
+      // The maxTime should be the exact span maxTime (no forward buffer)
+      // to avoid fetching logs that reference spans not yet indexed
+      expect(executedQuery).toContain('2024-01-01T01:00:00');
     });
 
     it('should not include time filter when spanTimeRange is not provided', async () => {

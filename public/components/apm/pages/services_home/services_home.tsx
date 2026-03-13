@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import {
   EuiPage,
   EuiPageBody,
@@ -123,6 +123,10 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
   // Latency percentile selector state
   const [latencyPercentile, setLatencyPercentile] = useState<'p99' | 'p90' | 'p50'>('p99');
+
+  // Track whether user has explicitly interacted with range filters (prevents badge flicker on hydration)
+  const latencyUserModified = useRef(false);
+  const throughputUserModified = useRef(false);
 
   // Set breadcrumbs
   React.useEffect(() => {
@@ -358,6 +362,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   useEffect(() => {
     setLatencyRange([metricRanges.latencyMin, metricRanges.latencyMax]);
     setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]);
+    latencyUserModified.current = false;
+    throughputUserModified.current = false;
   }, [metricRanges]);
 
   // Apply metric filters for display (on top of already filtered items)
@@ -436,22 +442,27 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       });
     }
 
-    // Latency range filter badge (only if modified from default bounds)
+    // Latency range filter badge (only if user explicitly modified)
     const isLatencyModified =
-      latencyRange[0] > metricRanges.latencyMin || latencyRange[1] < metricRanges.latencyMax;
+      latencyUserModified.current &&
+      (latencyRange[0] > metricRanges.latencyMin || latencyRange[1] < metricRanges.latencyMax);
     if (isLatencyModified) {
       badges.push({
         key: 'latency',
         category: i18nTexts.filters.latency,
         values: [`${latencyRange[0].toFixed(0)}-${latencyRange[1].toFixed(0)}ms`],
-        onRemove: () => setLatencyRange([metricRanges.latencyMin, metricRanges.latencyMax]),
+        onRemove: () => {
+          latencyUserModified.current = false;
+          setLatencyRange([metricRanges.latencyMin, metricRanges.latencyMax]);
+        },
       });
     }
 
-    // Throughput range filter badge (only if modified from default bounds)
+    // Throughput range filter badge (only if user explicitly modified)
     const isThroughputModified =
-      throughputRange[0] > metricRanges.throughputMin ||
-      throughputRange[1] < metricRanges.throughputMax;
+      throughputUserModified.current &&
+      (throughputRange[0] > metricRanges.throughputMin ||
+        throughputRange[1] < metricRanges.throughputMax);
     if (isThroughputModified) {
       badges.push({
         key: 'throughput',
@@ -459,8 +470,10 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         values: [
           `${formatThroughput(throughputRange[0])} - ${formatThroughput(throughputRange[1])}`,
         ],
-        onRemove: () =>
-          setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]),
+        onRemove: () => {
+          throughputUserModified.current = false;
+          setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]);
+        },
       });
     }
 
@@ -512,6 +525,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]);
     setSelectedFailureRateThresholds([]);
     setSelectedGroupByAttributes({});
+    latencyUserModified.current = false;
+    throughputUserModified.current = false;
   }, [metricRanges]);
 
   const columns: Array<EuiBasicTableColumn<ServiceTableItem>> = useMemo(
@@ -814,11 +829,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             {activeFilters.length > 0 && (
               <>
                 <EuiSpacer size="s" />
-                <ActiveFilterBadges
-                  filters={activeFilters}
-                  onClearAll={handleClearAllFilters}
-                  disabled={isTableLoading}
-                />
+                <ActiveFilterBadges filters={activeFilters} onClearAll={handleClearAllFilters} />
               </>
             )}
 
@@ -845,7 +856,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                       paddingSize="none"
                       style={{ paddingTop: '8px', paddingRight: '8px' }}
                     >
-                      <EuiPanel style={{ height: '100%' }}>
+                      <EuiPanel style={{ height: '100%', overflowY: 'auto' }}>
                         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                           <EuiFlexItem grow={false}>
                             <strong>{i18nTexts.filters.title}</strong>
@@ -883,7 +894,6 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                               idToSelectedMap={selectedEnvironments}
                               onChange={onEnvironmentChange}
                               compressed
-                              disabled={isTableLoading}
                               data-test-subj="environment-checkboxGroup"
                             />
                           ) : (
@@ -909,11 +919,13 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                           <EuiSpacer size="xs" />
                           <LatencyRangeFilter
                             value={latencyRange}
-                            onChange={setLatencyRange}
+                            onChange={(val) => {
+                              latencyUserModified.current = true;
+                              setLatencyRange(val);
+                            }}
                             min={metricRanges.latencyMin}
                             max={metricRanges.latencyMax}
                             dataTestSubj="latencyRangeFilter"
-                            disabled={isTableLoading}
                           />
                         </EuiAccordion>
 
@@ -933,11 +945,13 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                           <EuiSpacer size="xs" />
                           <ThroughputRangeFilter
                             value={throughputRange}
-                            onChange={setThroughputRange}
+                            onChange={(val) => {
+                              throughputUserModified.current = true;
+                              setThroughputRange(val);
+                            }}
                             min={metricRanges.throughputMin}
                             max={metricRanges.throughputMax}
                             dataTestSubj="throughputRangeFilter"
-                            disabled={isTableLoading}
                           />
                         </EuiAccordion>
 
@@ -959,7 +973,6 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                             selectedThresholds={selectedFailureRateThresholds}
                             onSelectionChange={setSelectedFailureRateThresholds}
                             dataTestSubj="failureRateThresholdFilter"
-                            disabled={isTableLoading}
                             idPrefix="failure-rate"
                           />
                         </EuiAccordion>
@@ -1017,7 +1030,6 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                                           isClearable
                                           fullWidth
                                           compressed
-                                          disabled={isTableLoading}
                                           data-test-subj={`attribute-${attrPath}-search`}
                                         />
 
@@ -1082,7 +1094,6 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                                                 }));
                                               }}
                                               compressed
-                                              disabled={isTableLoading}
                                               data-test-subj={`attribute-${attrPath}-checkboxGroup`}
                                             />
                                             {/* Show more / Show less link */}
@@ -1205,7 +1216,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                           />
                         ) : (
                           <EuiInMemoryTable
-                            items={isTableLoading ? [] : displayedServices}
+                            items={displayedServices}
                             columns={columns}
                             pagination={{
                               initialPageSize: APM_CONSTANTS.DEFAULT_PAGE_SIZE,

@@ -148,7 +148,7 @@ describe('ApmSettingsModal', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Traces')).toBeInTheDocument();
-        expect(screen.getByText('Select dataset for Trace data')).toBeInTheDocument();
+        expect(screen.getByText(/Select dataset for Trace data/)).toBeInTheDocument();
       });
     });
 
@@ -158,7 +158,7 @@ describe('ApmSettingsModal', () => {
       await waitFor(() => {
         expect(screen.getByText('Services')).toBeInTheDocument();
         expect(
-          screen.getByText('Select dataset/index-pattern for Services Map data')
+          screen.getByText(/Select dataset\/index-pattern for Services Map data/)
         ).toBeInTheDocument();
       });
     });
@@ -168,7 +168,7 @@ describe('ApmSettingsModal', () => {
 
       await waitFor(() => {
         expect(screen.getByText('RED Metrics')).toBeInTheDocument();
-        expect(screen.getByText('Select a Prometheus data source')).toBeInTheDocument();
+        expect(screen.getByText(/Select a Prometheus data source/)).toBeInTheDocument();
       });
     });
 

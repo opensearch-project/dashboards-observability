@@ -49,7 +49,7 @@ export const useOperationMetrics = (
   params: UseOperationMetricsParams
 ): UseOperationMetricsResult => {
   const [metrics, setMetrics] = useState<Map<string, OperationMetrics>>(new Map());
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   const promqlService = useMemo(() => {
@@ -63,6 +63,7 @@ export const useOperationMetrics = (
     if (!params.operations || params.operations.length === 0 || !promqlService) {
       // Only update if not already empty to avoid infinite re-renders
       setMetrics((prev) => (prev.size === 0 ? prev : new Map()));
+      setIsLoading(false);
       return;
     }
 

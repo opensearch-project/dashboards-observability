@@ -89,6 +89,38 @@ export function navigateToServiceDetails(
 }
 
 /**
+ * Opens service details page in a new browser tab.
+ * Uses basePath.prepend for workspace-aware URL construction.
+ */
+export function openServiceDetailsInNewTab(
+  serviceName: string,
+  environment?: string,
+  options?: NavigateToServiceDetailsOptions
+): void {
+  const encodedServiceName = encodeURIComponent(serviceName);
+  const encodedEnvironment = encodeURIComponent(environment || 'generic:default');
+
+  const params = new URLSearchParams();
+  if (options?.tab) params.set('tab', options.tab);
+  if (options?.timeRange) {
+    params.set('from', options.timeRange.from);
+    params.set('to', options.timeRange.to);
+  }
+  if (options?.language) params.set('lang', options.language);
+
+  const queryString = params.toString();
+  const hash = `#/service-details/${encodedServiceName}/${encodedEnvironment}${
+    queryString ? `?${queryString}` : ''
+  }`;
+
+  const fullUrl =
+    coreRefs.http?.basePath.prepend(`/app/${observabilityApmServicesID}/${hash}`) ||
+    `/app/${observabilityApmServicesID}/${hash}`;
+
+  window.open(fullUrl, '_blank', 'noopener,noreferrer');
+}
+
+/**
  * Navigates back to services list
  * Uses navigateToApp for workspace-aware navigation
  */

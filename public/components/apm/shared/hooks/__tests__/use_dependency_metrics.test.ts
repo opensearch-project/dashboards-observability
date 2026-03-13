@@ -81,7 +81,7 @@ describe('useDependencyMetrics', () => {
   });
 
   describe('initial state', () => {
-    it('should return empty metrics when no prometheusConnectionId', () => {
+    it('should return empty metrics when no prometheusConnectionId', async () => {
       const { result } = renderHook(() =>
         useDependencyMetrics({
           ...defaultParams,
@@ -89,8 +89,10 @@ describe('useDependencyMetrics', () => {
         })
       );
 
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
       expect(result.current.metrics.size).toBe(0);
-      expect(result.current.isLoading).toBe(false);
       expect(result.current.error).toBeNull();
     });
 

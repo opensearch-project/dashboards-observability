@@ -164,8 +164,10 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   const [latencyPercentile, setLatencyPercentile] = useState<'p99' | 'p90' | 'p50'>('p99');
 
   // Range filter states
-  const [latencyRange, setLatencyRange] = useState<[number, number]>([0, 10000]);
-  const [requestsRange, setRequestsRange] = useState<[number, number]>([0, 100000]);
+  const [latencyRange, setLatencyRange] = useState<[number, number]>([0, 0]);
+  const [requestsRange, setRequestsRange] = useState<[number, number]>([0, 0]);
+  const latencyUserModified = useRef(false);
+  const requestsUserModified = useRef(false);
 
   // Parse time range
   const parsedTimeRange = useMemo(() => {
@@ -343,6 +345,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   // Step 3: Reset slider ranges when bounds change
   // Use functional update to prevent unnecessary re-renders when values haven't changed
   useEffect(() => {
+    latencyUserModified.current = false;
     setLatencyRange((prev) => {
       if (prev[0] === latencyBounds.min && prev[1] === latencyBounds.max) {
         return prev; // Return same reference to avoid re-render
@@ -352,6 +355,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   }, [latencyBounds.min, latencyBounds.max]);
 
   useEffect(() => {
+    requestsUserModified.current = false;
     setRequestsRange((prev) => {
       if (prev[0] === requestsBounds.min && prev[1] === requestsBounds.max) {
         return prev; // Return same reference to avoid re-render
@@ -487,9 +491,10 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
       });
     }
 
-    // Latency range filter badge (only if modified from default bounds)
+    // Latency range filter badge (only if user has interacted and modified from default bounds)
     const isLatencyModified =
-      latencyRange[0] > latencyBounds.min || latencyRange[1] < latencyBounds.max;
+      latencyUserModified.current &&
+      (latencyRange[0] > latencyBounds.min || latencyRange[1] < latencyBounds.max);
     if (isLatencyModified) {
       badges.push({
         key: 'latency',
@@ -497,13 +502,17 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
           defaultMessage: 'Latency',
         }),
         values: [`${latencyRange[0].toFixed(0)}-${latencyRange[1].toFixed(0)}ms`],
-        onRemove: () => setLatencyRange([latencyBounds.min, latencyBounds.max]),
+        onRemove: () => {
+          latencyUserModified.current = false;
+          setLatencyRange([latencyBounds.min, latencyBounds.max]);
+        },
       });
     }
 
-    // Requests range filter badge (only if modified from default bounds)
+    // Requests range filter badge (only if user has interacted and modified from default bounds)
     const isRequestsModified =
-      requestsRange[0] > requestsBounds.min || requestsRange[1] < requestsBounds.max;
+      requestsUserModified.current &&
+      (requestsRange[0] > requestsBounds.min || requestsRange[1] < requestsBounds.max);
     if (isRequestsModified) {
       badges.push({
         key: 'requests',
@@ -511,7 +520,10 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
           defaultMessage: 'Requests',
         }),
         values: [`${requestsRange[0].toFixed(0)}-${requestsRange[1].toFixed(0)}`],
-        onRemove: () => setRequestsRange([requestsBounds.min, requestsBounds.max]),
+        onRemove: () => {
+          requestsUserModified.current = false;
+          setRequestsRange([requestsBounds.min, requestsBounds.max]);
+        },
       });
     }
 
@@ -535,13 +547,20 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     setSelectedRemoteOperations([]);
     setSelectedAvailabilityThresholds([]);
     setSelectedErrorRateThresholds([]);
+    latencyUserModified.current = false;
+    requestsUserModified.current = false;
     setLatencyRange([latencyBounds.min, latencyBounds.max]);
     setRequestsRange([requestsBounds.min, requestsBounds.max]);
   }, [latencyBounds, requestsBounds]);
 
   // Auto-expand the first row (lowest availability) on initial page load
   useEffect(() => {
-    if (hasAutoExpandedRef.current || filteredDependencies.length === 0 || isLoading) {
+    if (
+      hasAutoExpandedRef.current ||
+      filteredDependencies.length === 0 ||
+      isLoading ||
+      dependencyMetrics.size === 0
+    ) {
       return;
     }
 
@@ -555,7 +574,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     const compositeKey = `${lowestAvailItem.serviceName}:${lowestAvailItem.remoteOperation}`;
     setExpandedRows(new Set([compositeKey]));
     hasAutoExpandedRef.current = true;
-  }, [filteredDependencies, isLoading]);
+  }, [filteredDependencies, isLoading, dependencyMetrics]);
 
   // Toggle expand/collapse for a row
   const toggleRowExpand = useCallback((compositeKey: string) => {
@@ -766,6 +785,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
                   prometheusConnectionId={prometheusConnectionId}
                   timeRange={timeRange}
                   height={SERVICE_DETAILS_CONSTANTS.EXPANDED_ROW_CHART_HEIGHT}
+                  seriesLabel="Requests"
                 />
               </EuiFlexItem>
               <EuiFlexItem>
@@ -835,7 +855,6 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
             isClearable
             fullWidth
             compressed
-            disabled={isLoading}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -845,7 +864,6 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
             onChange={(value) => setLatencyPercentile(value as 'p99' | 'p90' | 'p50')}
             compressed
             prepend="Latency"
-            disabled={isLoading}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -854,11 +872,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
       {activeFilters.length > 0 && (
         <>
           <EuiSpacer size="s" />
-          <ActiveFilterBadges
-            filters={activeFilters}
-            onClearAll={handleClearAllFilters}
-            disabled={isLoading}
-          />
+          <ActiveFilterBadges filters={activeFilters} onClearAll={handleClearAllFilters} />
         </>
       )}
 
@@ -899,18 +913,23 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
                 selectedRemoteOperations={selectedRemoteOperations}
                 onRemoteOperationChange={setSelectedRemoteOperations}
                 latencyRange={latencyRange}
-                onLatencyRangeChange={setLatencyRange}
+                onLatencyRangeChange={(val) => {
+                  latencyUserModified.current = true;
+                  setLatencyRange(val);
+                }}
                 latencyMin={latencyBounds.min}
                 latencyMax={latencyBounds.max}
                 requestsRange={requestsRange}
-                onRequestsRangeChange={setRequestsRange}
+                onRequestsRangeChange={(val) => {
+                  requestsUserModified.current = true;
+                  setRequestsRange(val);
+                }}
                 requestsMin={requestsBounds.min}
                 requestsMax={requestsBounds.max}
                 renderMode="embedded"
                 onTogglePanel={() =>
                   togglePanel('dependencies-filter-sidebar', { direction: 'left' })
                 }
-                disabled={isLoading}
               />
             </EuiResizablePanel>
 
@@ -941,7 +960,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
                 ) : (
                   <EuiInMemoryTable
                     key={`dependencies-table-${latencyPercentile}`}
-                    items={isLoading ? [] : filteredDependencies}
+                    items={filteredDependencies}
                     columns={columns}
                     loading={isLoading}
                     sorting={{
