@@ -16,11 +16,10 @@ export const APM_DOCS_URL = 'https://docs.opensearch.org/latest/observing-your-d
 export const APM_TRACES_DOCS_URL =
   'https://docs.opensearch.org/latest/observing-your-data/exploring-observability-data/datasets/#creating-a-traces-dataset';
 export const APM_SERVICE_MAP_DOCS_URL =
-  'https://github.com/opensearch-project/data-prepper/tree/main/data-prepper-plugins/otel-apm-service-map-processor#opentelemetry-apm-service-map-processor';
+  'https://github.com/opensearch-project/data-prepper/tree/main/data-prepper-plugins/otel-apm-service-map-processor';
 export const APM_RED_METRICS_DOCS_URL =
   'https://github.com/opensearch-project/data-prepper/tree/main/data-prepper-plugins/otel-apm-service-map-processor#generated-metrics';
-export const APM_PIPELINE_DOCS_URL =
-  'https://github.com/opensearch-project/data-prepper/tree/main/data-prepper-plugins/otel-apm-service-map-processor';
+export const APM_PIPELINE_DOCS_URL = 'https://observability.opensearch.org/docs/apm/';
 export const APM_CORRELATIONS_DOCS_URL =
   'https://docs.opensearch.org/latest/observing-your-data/exploring-observability-data/correlations/#creating-a-trace-to-logs-correlation';
 

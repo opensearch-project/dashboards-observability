@@ -25,6 +25,7 @@ import {
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { NotificationsStart } from '../../../../../../src/core/public';
@@ -40,7 +41,6 @@ import { navigateToDatasetCorrelations } from '../shared/utils/navigation_utils'
 import { OSDSavedApmConfigClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/apm_config';
 import { ApmArchitectureSvgLight, ApmArchitectureSvgDark } from './apm-architecture-svg';
 import {
-  APM_DOCS_URL,
   APM_TRACES_DOCS_URL,
   APM_SERVICE_MAP_DOCS_URL,
   APM_RED_METRICS_DOCS_URL,
@@ -362,17 +362,11 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
               <p>
                 {i18n.translate('observability.apm.settings.telemetryFlowDescription', {
                   defaultMessage:
-                    'Configure Data Prepper pipelines first to collect and export Traces, Services data, and RED metrics into OpenSearch datasets and into Prometheus.',
+                    'Configure Data Prepper pipelines first to collect and export Traces, Logs and Service map into OpenSearch and RED metrics into Prometheus.',
                 })}{' '}
-                <EuiLink href={APM_DOCS_URL} target="_blank" external>
-                  {i18n.translate('observability.apm.settings.learnMore', {
-                    defaultMessage: 'Learn more',
-                  })}
-                </EuiLink>
-                {' | '}
                 <EuiLink href={APM_PIPELINE_DOCS_URL} target="_blank" external>
                   {i18n.translate('observability.apm.settings.pipelineDocs', {
-                    defaultMessage: 'Pipeline setup',
+                    defaultMessage: 'Sample pipeline setup',
                   })}
                 </EuiLink>
               </p>
@@ -458,7 +452,7 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
               <EuiComboBox
                 compressed
                 placeholder={i18n.translate('observability.apm.settings.tracesPlaceholder', {
-                  defaultMessage: 'Select traces dataset',
+                  defaultMessage: 'Select traces dataset: otel-v1-apm-span-*',
                 })}
                 singleSelection={{ asPlainText: true }}
                 options={tracesDatasets}
@@ -499,30 +493,50 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
                 <EuiAccordion
                   id="correlated-logs-accordion"
                   buttonContent={
-                    <EuiText size="xs">
-                      <strong>
-                        {i18n.translate('observability.apm.settings.correlatedLogsTitle', {
-                          defaultMessage: 'Correlated Logs',
-                        })}
-                      </strong>
+                    <EuiFlexGroup
+                      gutterSize="s"
+                      alignItems="center"
+                      responsive={false}
+                      wrap={false}
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs">
+                          <strong>
+                            {i18n.translate('observability.apm.settings.correlatedLogsTitle', {
+                              defaultMessage: 'Correlated Logs',
+                            })}
+                          </strong>
+                        </EuiText>
+                      </EuiFlexItem>
                       {correlatedLogs.length > 0 && (
-                        <EuiBadge color="hollow" style={{ marginLeft: '8px' }}>
-                          {correlatedLogs.length}
-                        </EuiBadge>
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge color="hollow">{correlatedLogs.length}</EuiBadge>
+                        </EuiFlexItem>
                       )}
-                    </EuiText>
+                      <EuiFlexItem grow={false}>
+                        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
+                        <span onClick={(e) => e.stopPropagation()}>
+                          <EuiToolTip
+                            content={i18n.translate(
+                              'observability.apm.settings.correlationsLearnMore',
+                              { defaultMessage: 'Learn more' }
+                            )}
+                          >
+                            <EuiButtonIcon
+                              href={APM_CORRELATIONS_DOCS_URL}
+                              target="_blank"
+                              iconType="questionInCircle"
+                              aria-label="Learn more about correlated logs"
+                              color="primary"
+                              size="xs"
+                            />
+                          </EuiToolTip>
+                        </span>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   }
                   extraAction={
                     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <EuiLink href={APM_CORRELATIONS_DOCS_URL} target="_blank" external>
-                          <EuiText size="xs">
-                            {i18n.translate('observability.apm.settings.correlationsLearnMore', {
-                              defaultMessage: 'Learn more',
-                            })}
-                          </EuiText>
-                        </EuiLink>
-                      </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiButtonEmpty
                           size="xs"
@@ -605,7 +619,7 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
               <EuiComboBox
                 compressed
                 placeholder={i18n.translate('observability.apm.settings.servicesPlaceholder', {
-                  defaultMessage: 'Select service map dataset',
+                  defaultMessage: 'Select service map index pattern: otel-v2-apm-service-map-*',
                 })}
                 singleSelection={{ asPlainText: true }}
                 options={allDatasets}
@@ -649,7 +663,8 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
               helpText={
                 <>
                   {i18n.translate('observability.apm.settings.redMetricsHelpText', {
-                    defaultMessage: 'Select a Prometheus data source.',
+                    defaultMessage:
+                      'Select a Prometheus data source containing the service RED Metrics.',
                   })}{' '}
                   <EuiLink href={APM_RED_METRICS_DOCS_URL} target="_blank" external>
                     {i18n.translate('observability.apm.settings.redMetricsLearnMore', {
