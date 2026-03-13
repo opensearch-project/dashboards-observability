@@ -11,6 +11,19 @@ import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 export const APM_DOCS_URL = 'https://docs.opensearch.org/latest/observing-your-data/';
 
 /**
+ * APM Documentation URLs for settings modal
+ */
+export const APM_TRACES_DOCS_URL =
+  'https://docs.opensearch.org/latest/observing-your-data/exploring-observability-data/datasets/#creating-a-traces-dataset';
+export const APM_SERVICE_MAP_DOCS_URL =
+  'https://github.com/opensearch-project/data-prepper/tree/main/data-prepper-plugins/otel-apm-service-map-processor';
+export const APM_RED_METRICS_DOCS_URL =
+  'https://github.com/opensearch-project/data-prepper/tree/main/data-prepper-plugins/otel-apm-service-map-processor#generated-metrics';
+export const APM_PIPELINE_DOCS_URL = 'https://observability.opensearch.org/docs/apm/';
+export const APM_CORRELATIONS_DOCS_URL =
+  'https://docs.opensearch.org/latest/observing-your-data/exploring-observability-data/correlations/#creating-a-trace-to-logs-correlation';
+
+/**
  * App ID for Explore application used in navigation
  */
 export const EXPLORE_APP_ID = 'explore';
@@ -29,7 +42,7 @@ export const APM_CONSTANTS = {
 
   // Table pagination
   DEFAULT_PAGE_SIZE: 10,
-  PAGE_SIZE_OPTIONS: [10, 20, 50, 100] as const,
+  PAGE_SIZE_OPTIONS: [10, 25, 50] as const,
 
   // Sparklines
   SPARKLINE_HEIGHT: 20,
@@ -135,6 +148,10 @@ export const SERVICE_DETAILS_CONSTANTS = {
     DEPENDENCIES: 'dependencies',
   } as const,
 
+  // Table pagination
+  DEFAULT_PAGE_SIZE: 10,
+  PAGE_SIZE_OPTIONS: [10, 25, 50] as const,
+
   // URL param keys
   URL_PARAMS: {
     TAB: 'tab',
@@ -200,7 +217,8 @@ export const CORRELATION_CONSTANTS = {
   /**
    * Buffer time in milliseconds for log correlation queries.
    * Used to account for telemetry lag between spans and logs.
-   * 5 minutes on each side of the span time range.
+   * Applied only to the lower bound (before span start) to catch early-arriving
+   * logs whose spans already exist, without fetching logs beyond the latest span.
    */
   TELEMETRY_LAG_BUFFER_MS: 5 * 60 * 1000, // 5 minutes
 } as const;

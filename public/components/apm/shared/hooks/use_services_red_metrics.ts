@@ -71,8 +71,8 @@ export const useServicesRedMetrics = (
   >(new Map());
 
   // Separate loading states
-  const [isLoadingLatency, setIsLoadingLatency] = useState(false);
-  const [isLoadingThroughputFailure, setIsLoadingThroughputFailure] = useState(false);
+  const [isLoadingLatency, setIsLoadingLatency] = useState(true);
+  const [isLoadingThroughputFailure, setIsLoadingThroughputFailure] = useState(true);
 
   // Separate error states
   const [latencyError, setLatencyError] = useState<Error | null>(null);

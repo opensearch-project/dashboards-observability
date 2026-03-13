@@ -419,11 +419,11 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
           // 1. Always filter by serviceName
           pplQuery += ` | where \`${serviceNameField}\` = '${serviceName}'`;
 
-          // 2. Add timestamp filter with buffer if we have span time range (5 minutes on each side)
+          // 2. Add timestamp filter with buffer if we have span time range (5 minutes before span start only)
           if (spanTimeRange) {
             const bufferMs = CORRELATION_CONSTANTS.TELEMETRY_LAG_BUFFER_MS;
             const minTimeStr = new Date(spanTimeRange.minTime.getTime() - bufferMs).toISOString();
-            const maxTimeStr = new Date(spanTimeRange.maxTime.getTime() + bufferMs).toISOString();
+            const maxTimeStr = new Date(spanTimeRange.maxTime.getTime()).toISOString();
             pplQuery += ` | where \`${timestampField}\` >= '${minTimeStr}' AND \`${timestampField}\` <= '${maxTimeStr}'`;
           }
 

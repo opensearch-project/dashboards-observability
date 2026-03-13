@@ -72,6 +72,62 @@ const tableTooltips = {
   }),
 };
 
+// Module-level React.memo component for the dependencies table panel.
+// EuiResizableContainer triggers a rerender for every mouseover action.
+// Memoizing prevents the table from re-rendering and losing pagination state.
+interface DependenciesTablePanelProps {
+  filteredDependencies: GroupedDependency[];
+  columns: Array<EuiBasicTableColumn<GroupedDependency>>;
+  isLoading: boolean;
+  latencyPercentile: string;
+  itemIdToExpandedRowMap: Record<string, React.ReactNode>;
+  noDataMessage: string;
+  noFilteredDataMessage: string;
+  dependenciesCount: number;
+}
+
+const DependenciesTablePanelUI: React.FC<DependenciesTablePanelProps> = ({
+  filteredDependencies,
+  columns,
+  isLoading,
+  latencyPercentile,
+  itemIdToExpandedRowMap,
+  noDataMessage,
+  noFilteredDataMessage,
+  dependenciesCount,
+}) => (
+  <EuiPanel>
+    {!isLoading && filteredDependencies.length === 0 ? (
+      <EuiText color="subdued" textAlign="center">
+        <p>{dependenciesCount === 0 ? noDataMessage : noFilteredDataMessage}</p>
+      </EuiText>
+    ) : (
+      <EuiInMemoryTable
+        key={`dependencies-table-${latencyPercentile}`}
+        items={filteredDependencies}
+        columns={columns}
+        loading={isLoading}
+        sorting={{
+          sort: {
+            field: 'availability',
+            direction: 'asc',
+          },
+        }}
+        pagination={{
+          initialPageSize: SERVICE_DETAILS_CONSTANTS.DEFAULT_PAGE_SIZE,
+          pageSizeOptions: SERVICE_DETAILS_CONSTANTS.PAGE_SIZE_OPTIONS,
+        }}
+        itemId={(item: GroupedDependency) => `${item.serviceName}:${item.remoteOperation}`}
+        isExpandable={true}
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+        tableLayout="fixed"
+      />
+    )}
+  </EuiPanel>
+);
+
+const DependenciesTablePanel = React.memo(DependenciesTablePanelUI);
+
 export interface ServiceDependenciesProps {
   serviceName: string;
   environment?: string;
@@ -150,6 +206,25 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
+  // EuiResizableContainer togglePanel ref — captured inside render-prop, never passed as a prop
+  const togglePanelRef = useRef<((id: string, options: { direction: string }) => void) | null>(
+    null
+  );
+  const handleTogglePanel = useCallback(() => {
+    togglePanelRef.current?.('dependencies-filter-sidebar', { direction: 'left' });
+  }, []);
+
+  // Stabilized callbacks for sidebar to prevent re-renders through EuiResizableContainer
+  const onLatencyRangeChange = useCallback((val: [number, number]) => {
+    latencyUserModified.current = true;
+    setLatencyRange(val);
+  }, []);
+
+  const onRequestsRangeChange = useCallback((val: [number, number]) => {
+    requestsUserModified.current = true;
+    setRequestsRange(val);
+  }, []);
+
   // Threshold filter states (using semantic enum keys)
   const [selectedAvailabilityThresholds, setSelectedAvailabilityThresholds] = useState<
     AvailabilityThreshold[]
@@ -164,8 +239,10 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   const [latencyPercentile, setLatencyPercentile] = useState<'p99' | 'p90' | 'p50'>('p99');
 
   // Range filter states
-  const [latencyRange, setLatencyRange] = useState<[number, number]>([0, 10000]);
-  const [requestsRange, setRequestsRange] = useState<[number, number]>([0, 100000]);
+  const [latencyRange, setLatencyRange] = useState<[number, number]>([0, 0]);
+  const [requestsRange, setRequestsRange] = useState<[number, number]>([0, 0]);
+  const latencyUserModified = useRef(false);
+  const requestsUserModified = useRef(false);
 
   // Parse time range
   const parsedTimeRange = useMemo(() => {
@@ -343,6 +420,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   // Step 3: Reset slider ranges when bounds change
   // Use functional update to prevent unnecessary re-renders when values haven't changed
   useEffect(() => {
+    latencyUserModified.current = false;
     setLatencyRange((prev) => {
       if (prev[0] === latencyBounds.min && prev[1] === latencyBounds.max) {
         return prev; // Return same reference to avoid re-render
@@ -352,6 +430,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   }, [latencyBounds.min, latencyBounds.max]);
 
   useEffect(() => {
+    requestsUserModified.current = false;
     setRequestsRange((prev) => {
       if (prev[0] === requestsBounds.min && prev[1] === requestsBounds.max) {
         return prev; // Return same reference to avoid re-render
@@ -487,9 +566,10 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
       });
     }
 
-    // Latency range filter badge (only if modified from default bounds)
+    // Latency range filter badge (only if user has interacted and modified from default bounds)
     const isLatencyModified =
-      latencyRange[0] > latencyBounds.min || latencyRange[1] < latencyBounds.max;
+      latencyUserModified.current &&
+      (latencyRange[0] > latencyBounds.min || latencyRange[1] < latencyBounds.max);
     if (isLatencyModified) {
       badges.push({
         key: 'latency',
@@ -497,13 +577,17 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
           defaultMessage: 'Latency',
         }),
         values: [`${latencyRange[0].toFixed(0)}-${latencyRange[1].toFixed(0)}ms`],
-        onRemove: () => setLatencyRange([latencyBounds.min, latencyBounds.max]),
+        onRemove: () => {
+          latencyUserModified.current = false;
+          setLatencyRange([latencyBounds.min, latencyBounds.max]);
+        },
       });
     }
 
-    // Requests range filter badge (only if modified from default bounds)
+    // Requests range filter badge (only if user has interacted and modified from default bounds)
     const isRequestsModified =
-      requestsRange[0] > requestsBounds.min || requestsRange[1] < requestsBounds.max;
+      requestsUserModified.current &&
+      (requestsRange[0] > requestsBounds.min || requestsRange[1] < requestsBounds.max);
     if (isRequestsModified) {
       badges.push({
         key: 'requests',
@@ -511,7 +595,10 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
           defaultMessage: 'Requests',
         }),
         values: [`${requestsRange[0].toFixed(0)}-${requestsRange[1].toFixed(0)}`],
-        onRemove: () => setRequestsRange([requestsBounds.min, requestsBounds.max]),
+        onRemove: () => {
+          requestsUserModified.current = false;
+          setRequestsRange([requestsBounds.min, requestsBounds.max]);
+        },
       });
     }
 
@@ -535,13 +622,20 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     setSelectedRemoteOperations([]);
     setSelectedAvailabilityThresholds([]);
     setSelectedErrorRateThresholds([]);
+    latencyUserModified.current = false;
+    requestsUserModified.current = false;
     setLatencyRange([latencyBounds.min, latencyBounds.max]);
     setRequestsRange([requestsBounds.min, requestsBounds.max]);
   }, [latencyBounds, requestsBounds]);
 
   // Auto-expand the first row (lowest availability) on initial page load
   useEffect(() => {
-    if (hasAutoExpandedRef.current || filteredDependencies.length === 0 || isLoading) {
+    if (
+      hasAutoExpandedRef.current ||
+      filteredDependencies.length === 0 ||
+      isLoading ||
+      dependencyMetrics.size === 0
+    ) {
       return;
     }
 
@@ -555,7 +649,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     const compositeKey = `${lowestAvailItem.serviceName}:${lowestAvailItem.remoteOperation}`;
     setExpandedRows(new Set([compositeKey]));
     hasAutoExpandedRef.current = true;
-  }, [filteredDependencies, isLoading]);
+  }, [filteredDependencies, isLoading, dependencyMetrics]);
 
   // Toggle expand/collapse for a row
   const toggleRowExpand = useCallback((compositeKey: string) => {
@@ -766,6 +860,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
                   prometheusConnectionId={prometheusConnectionId}
                   timeRange={timeRange}
                   height={SERVICE_DETAILS_CONSTANTS.EXPANDED_ROW_CHART_HEIGHT}
+                  seriesLabel="Requests"
                 />
               </EuiFlexItem>
               <EuiFlexItem>
@@ -835,7 +930,6 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
             isClearable
             fullWidth
             compressed
-            disabled={isLoading}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -845,7 +939,6 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
             onChange={(value) => setLatencyPercentile(value as 'p99' | 'p90' | 'p50')}
             compressed
             prepend="Latency"
-            disabled={isLoading}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -854,116 +947,93 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
       {activeFilters.length > 0 && (
         <>
           <EuiSpacer size="s" />
-          <ActiveFilterBadges
-            filters={activeFilters}
-            onClearAll={handleClearAllFilters}
-            disabled={isLoading}
-          />
+          <ActiveFilterBadges filters={activeFilters} onClearAll={handleClearAllFilters} />
         </>
       )}
 
       <EuiSpacer size="m" />
 
+      {/* Sidebar + Table layout with resizable panels */}
       <EuiResizableContainer>
-        {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => (
-          <>
-            {/* Filter Sidebar */}
-            <EuiResizablePanel
-              id="dependencies-filter-sidebar"
-              initialSize={15}
-              minSize="10%"
-              mode={['custom', { position: 'top' }]}
-              paddingSize="none"
-              style={{ paddingRight: '8px' }}
-            >
-              <DependencyFilterSidebar
-                availabilityThresholds={(AVAILABILITY_THRESHOLD_OPTIONS as unknown) as string[]}
-                selectedAvailabilityThresholds={
-                  (selectedAvailabilityThresholds as unknown) as string[]
-                }
-                onAvailabilityThresholdsChange={
-                  setSelectedAvailabilityThresholds as (selected: string[]) => void
-                }
-                errorRateThresholds={(ERROR_RATE_THRESHOLD_OPTIONS as unknown) as string[]}
-                selectedErrorRateThresholds={(selectedErrorRateThresholds as unknown) as string[]}
-                onErrorRateThresholdsChange={
-                  setSelectedErrorRateThresholds as (selected: string[]) => void
-                }
-                dependencyNames={dependencyNames}
-                selectedDependencies={selectedDependencies}
-                onDependencyChange={setSelectedDependencies}
-                serviceOperations={serviceOperations}
-                selectedServiceOperations={selectedServiceOperations}
-                onServiceOperationChange={setSelectedServiceOperations}
-                remoteOperations={remoteOperations}
-                selectedRemoteOperations={selectedRemoteOperations}
-                onRemoteOperationChange={setSelectedRemoteOperations}
-                latencyRange={latencyRange}
-                onLatencyRangeChange={setLatencyRange}
-                latencyMin={latencyBounds.min}
-                latencyMax={latencyBounds.max}
-                requestsRange={requestsRange}
-                onRequestsRangeChange={setRequestsRange}
-                requestsMin={requestsBounds.min}
-                requestsMax={requestsBounds.max}
-                renderMode="embedded"
-                onTogglePanel={() =>
-                  togglePanel('dependencies-filter-sidebar', { direction: 'left' })
-                }
-                disabled={isLoading}
-              />
-            </EuiResizablePanel>
+        {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
+          togglePanelRef.current = togglePanel ?? null;
+          return (
+            <>
+              <EuiResizablePanel
+                id="dependencies-filter-sidebar"
+                initialSize={15}
+                minSize="10%"
+                paddingSize="none"
+                mode={['custom', { position: 'top' }]}
+                style={{ paddingTop: '8px', paddingRight: '8px' }}
+              >
+                <DependencyFilterSidebar
+                  availabilityThresholds={(AVAILABILITY_THRESHOLD_OPTIONS as unknown) as string[]}
+                  selectedAvailabilityThresholds={
+                    (selectedAvailabilityThresholds as unknown) as string[]
+                  }
+                  onAvailabilityThresholdsChange={
+                    setSelectedAvailabilityThresholds as (selected: string[]) => void
+                  }
+                  errorRateThresholds={(ERROR_RATE_THRESHOLD_OPTIONS as unknown) as string[]}
+                  selectedErrorRateThresholds={(selectedErrorRateThresholds as unknown) as string[]}
+                  onErrorRateThresholdsChange={
+                    setSelectedErrorRateThresholds as (selected: string[]) => void
+                  }
+                  dependencyNames={dependencyNames}
+                  selectedDependencies={selectedDependencies}
+                  onDependencyChange={setSelectedDependencies}
+                  serviceOperations={serviceOperations}
+                  selectedServiceOperations={selectedServiceOperations}
+                  onServiceOperationChange={setSelectedServiceOperations}
+                  remoteOperations={remoteOperations}
+                  selectedRemoteOperations={selectedRemoteOperations}
+                  onRemoteOperationChange={setSelectedRemoteOperations}
+                  latencyRange={latencyRange}
+                  onLatencyRangeChange={onLatencyRangeChange}
+                  latencyMin={latencyBounds.min}
+                  latencyMax={latencyBounds.max}
+                  requestsRange={requestsRange}
+                  onRequestsRangeChange={onRequestsRangeChange}
+                  requestsMin={requestsBounds.min}
+                  requestsMax={requestsBounds.max}
+                  renderMode="embedded"
+                  onTogglePanel={handleTogglePanel}
+                />
+              </EuiResizablePanel>
 
-            <EuiResizableButton />
+              <EuiResizableButton />
 
-            {/* Dependencies Table */}
-            <EuiResizablePanel
-              id="dependencies-main-content"
-              initialSize={85}
-              minSize="50%"
-              paddingSize="none"
-            >
-              <EuiPanel>
-                {!isLoading && filteredDependencies.length === 0 ? (
-                  <EuiText color="subdued" textAlign="center">
-                    <p>
-                      {dependencies.length === 0
-                        ? i18n.translate('observability.apm.dependencies.noData', {
-                            defaultMessage:
-                              'No dependencies found for this service in the selected time range.',
-                          })
-                        : i18n.translate('observability.apm.dependencies.noFilteredData', {
-                            defaultMessage:
-                              'No dependencies match the current filters. Try adjusting your filter criteria.',
-                          })}
-                    </p>
-                  </EuiText>
-                ) : (
-                  <EuiInMemoryTable
-                    key={`dependencies-table-${latencyPercentile}`}
-                    items={isLoading ? [] : filteredDependencies}
-                    columns={columns}
-                    loading={isLoading}
-                    sorting={{
-                      sort: {
-                        field: 'availability',
-                        direction: 'asc',
-                      },
-                    }}
-                    pagination={{
-                      initialPageSize: SERVICE_DETAILS_CONSTANTS.DEFAULT_PAGE_SIZE,
-                      pageSizeOptions: SERVICE_DETAILS_CONSTANTS.PAGE_SIZE_OPTIONS,
-                    }}
-                    itemId={(item) => `${item.serviceName}:${item.remoteOperation}`}
-                    isExpandable={true}
-                    itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-                    tableLayout="fixed"
-                  />
-                )}
-              </EuiPanel>
-            </EuiResizablePanel>
-          </>
-        )}
+              <EuiResizablePanel
+                initialSize={85}
+                minSize="50%"
+                paddingSize="none"
+                scrollable={false}
+                style={{ padding: '8px 0px 0px 8px' }}
+              >
+                <DependenciesTablePanel
+                  filteredDependencies={filteredDependencies}
+                  columns={columns}
+                  isLoading={isLoading}
+                  latencyPercentile={latencyPercentile}
+                  itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+                  noDataMessage={i18n.translate('observability.apm.dependencies.noData', {
+                    defaultMessage:
+                      'No dependencies found for this service in the selected time range.',
+                  })}
+                  noFilteredDataMessage={i18n.translate(
+                    'observability.apm.dependencies.noFilteredData',
+                    {
+                      defaultMessage:
+                        'No dependencies match the current filters. Try adjusting your filter criteria.',
+                    }
+                  )}
+                  dependenciesCount={dependencies.length}
+                />
+              </EuiResizablePanel>
+            </>
+          );
+        }}
       </EuiResizableContainer>
     </div>
   );

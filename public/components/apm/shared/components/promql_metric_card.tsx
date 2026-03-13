@@ -6,7 +6,8 @@
 import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { EuiLoadingChart, EuiPanel, EuiIcon, EuiToolTip } from '@elastic/eui';
 import * as echarts from 'echarts';
-import { usePromQLChartData } from '../hooks/use_promql_chart_data';
+import { i18n } from '@osd/i18n';
+import { usePromQLChartData, isResolutionExceededError } from '../hooks/use_promql_chart_data';
 import { TimeRange, MetricDataPoint } from '../../common/types/service_details_types';
 import { APM_CONSTANTS, SERVICE_DETAILS_CONSTANTS } from '../../common/constants';
 import './promql_metric_card.scss';
@@ -314,7 +315,24 @@ export const PromQLMetricCard: React.FC<PromQLMetricCardProps> = ({
           {isLoading ? (
             <EuiLoadingChart size="m" mono />
           ) : error ? (
-            <span className="promql-metric-card__value promql-metric-card__value--error">-</span>
+            isResolutionExceededError(error) ? (
+              <EuiToolTip
+                content={i18n.translate(
+                  'observability.apm.promqlMetricCard.resolutionExceededTooltip',
+                  {
+                    defaultMessage:
+                      'Too many data points for the selected time range. Try a shorter time range.',
+                  }
+                )}
+                position="top"
+              >
+                <span className="promql-metric-card__value promql-metric-card__value--error">
+                  - <EuiIcon type="iInCircle" size="s" color="primary" />
+                </span>
+              </EuiToolTip>
+            ) : (
+              <span className="promql-metric-card__value promql-metric-card__value--error">-</span>
+            )
           ) : (
             <div className="promql-metric-card__values-wrapper">
               <div className="promql-metric-card__primary-row">

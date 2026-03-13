@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -13,7 +13,7 @@ import {
   EuiHorizontalRule,
   EuiAccordion,
   EuiSpacer,
-  EuiSuperSelect,
+  EuiComboBox,
   EuiCheckboxGroup,
 } from '@elastic/eui';
 import { FailureRateThresholdFilter, ErrorRateThreshold } from '../filters';
@@ -49,24 +49,17 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
 }) => {
   // Local state for groupBy select - syncs with filter prop but gives us control
   const [localGroupBy, setLocalGroupBy] = useState<string>(filters.groupBy || '');
-  // Ref for guard check (always has latest value, avoids stale closure)
-  const localGroupByRef = useRef<string>(localGroupBy);
 
   // Sync local state when filter prop changes (e.g., from badge removal)
   useEffect(() => {
     setLocalGroupBy(filters.groupBy || '');
-    localGroupByRef.current = filters.groupBy || '';
   }, [filters.groupBy]);
 
-  // Build group by options from available attributes (EuiSuperSelect format)
+  // Build group by options from available attributes (EuiComboBox format)
   const groupByOptions = useMemo(() => {
-    const options = [{ value: '', inputDisplay: i18nTexts.filters.noGrouping }];
-
-    Object.keys(availableGroupByAttributes).forEach((attrPath) => {
-      options.push({ value: attrPath, inputDisplay: attrPath });
-    });
-
-    return options;
+    return Object.keys(availableGroupByAttributes).map((attrPath) => ({
+      label: attrPath,
+    }));
   }, [availableGroupByAttributes]);
 
   // Environment checkbox options - dynamically built from available environments
@@ -86,18 +79,11 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
     return map;
   }, [filters.environments]);
 
-  // Handle group by change (EuiSuperSelect passes value directly, not event)
+  // Handle group by change (EuiComboBox passes selected options array)
   const handleGroupByChange = useCallback(
-    (newValue: string) => {
-      // Guard: Ignore spurious empty onChange when a value is already selected.
-      // Use ref to always get the latest value (avoids stale closure issues).
-      if (newValue === '' && localGroupByRef.current !== '') {
-        return;
-      }
-      // Update ref and state immediately
-      localGroupByRef.current = newValue;
+    (selectedOptions: Array<{ label: string }>) => {
+      const newValue = selectedOptions.length > 0 ? selectedOptions[0].label : '';
       setLocalGroupBy(newValue);
-      // Propagate to parent
       onFiltersChange({
         ...filters,
         groupBy: newValue || null,
@@ -177,13 +163,16 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
         data-test-subj="groupByAccordion"
       >
         <EuiSpacer size="xs" />
-        <EuiSuperSelect
+        <EuiComboBox
+          singleSelection={{ asPlainText: true }}
           options={groupByOptions}
-          valueOfSelected={localGroupBy}
+          selectedOptions={localGroupBy ? [{ label: localGroupBy }] : []}
           onChange={handleGroupByChange}
+          placeholder={i18nTexts.filters.noGrouping}
           compressed
           fullWidth
-          disabled={isLoading}
+          isDisabled={isLoading}
+          isClearable
           data-test-subj="groupBySelect"
         />
       </EuiAccordion>
