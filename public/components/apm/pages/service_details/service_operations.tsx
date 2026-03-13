@@ -98,11 +98,67 @@ interface OperationRow {
   dependencyCount: number;
 }
 
+// Module-level React.memo component for the operations table panel.
+// EuiResizableContainer triggers a rerender for every mouseover action.
+// Memoizing prevents the table from re-rendering and losing pagination state.
+interface OperationsTablePanelProps {
+  filteredOperations: OperationRow[];
+  columns: Array<EuiBasicTableColumn<OperationRow>>;
+  isLoading: boolean;
+  latencyPercentile: string;
+  itemIdToExpandedRowMap: Record<string, React.ReactNode>;
+  noDataMessage: string;
+  noFilteredDataMessage: string;
+  operationsCount: number;
+}
+
+const OperationsTablePanelUI: React.FC<OperationsTablePanelProps> = ({
+  filteredOperations,
+  columns,
+  isLoading,
+  latencyPercentile,
+  itemIdToExpandedRowMap,
+  noDataMessage,
+  noFilteredDataMessage,
+  operationsCount,
+}) => (
+  <EuiPanel>
+    {!isLoading && filteredOperations.length === 0 ? (
+      <EuiText color="subdued" textAlign="center">
+        <p>{operationsCount === 0 ? noDataMessage : noFilteredDataMessage}</p>
+      </EuiText>
+    ) : (
+      <EuiInMemoryTable
+        key={`operations-table-${latencyPercentile}`}
+        items={filteredOperations}
+        columns={columns}
+        loading={isLoading}
+        sorting={{
+          sort: {
+            field: 'availability',
+            direction: 'asc',
+          },
+        }}
+        pagination={{
+          initialPageSize: SERVICE_DETAILS_CONSTANTS.DEFAULT_PAGE_SIZE,
+          pageSizeOptions: SERVICE_DETAILS_CONSTANTS.PAGE_SIZE_OPTIONS,
+        }}
+        itemId="operationName"
+        isExpandable={true}
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+        tableLayout="fixed"
+      />
+    )}
+  </EuiPanel>
+);
+
+const OperationsTablePanel = React.memo(OperationsTablePanelUI);
+
 /**
  * ServiceOperations - Operations tab for service details
  *
  * Layout:
- * - Filter sidebar (left)
+ * - Filter sidebar (left, resizable)
  * - Operations table (right) with expandable rows
  *
  * Table columns:
@@ -161,6 +217,25 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
 
   const closeFlyout = useCallback(() => {
     setFlyoutState({ isOpen: false, operationName: null, initialTab: 'spans' });
+  }, []);
+
+  // EuiResizableContainer togglePanel ref — captured inside render-prop, never passed as a prop
+  const togglePanelRef = useRef<((id: string, options: { direction: string }) => void) | null>(
+    null
+  );
+  const handleTogglePanel = useCallback(() => {
+    togglePanelRef.current?.('operations-filter-sidebar', { direction: 'left' });
+  }, []);
+
+  // Stabilized callbacks for sidebar to prevent re-renders through EuiResizableContainer
+  const onLatencyRangeChange = useCallback((val: [number, number]) => {
+    latencyUserModified.current = true;
+    setLatencyRange(val);
+  }, []);
+
+  const onRequestsRangeChange = useCallback((val: [number, number]) => {
+    requestsUserModified.current = true;
+    setRequestsRange(val);
   }, []);
 
   // Parse time range
@@ -815,107 +890,81 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
 
       <EuiSpacer size="m" />
 
-      {/* Sidebar + Table layout with resizable container */}
+      {/* Sidebar + Table layout with resizable panels */}
       <EuiResizableContainer>
-        {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => (
-          <>
-            {/* Filter Sidebar - Resizable */}
-            <EuiResizablePanel
-              id="operations-filter-sidebar"
-              initialSize={15}
-              minSize="10%"
-              mode={['custom', { position: 'top' }]}
-              paddingSize="none"
-              style={{ paddingRight: '8px' }}
-            >
-              <OperationFilterSidebar
-                availabilityThresholds={(AVAILABILITY_THRESHOLD_OPTIONS as unknown) as string[]}
-                selectedAvailabilityThresholds={
-                  (selectedAvailabilityThresholds as unknown) as string[]
-                }
-                onAvailabilityThresholdsChange={
-                  setSelectedAvailabilityThresholds as (selected: string[]) => void
-                }
-                errorRateThresholds={(ERROR_RATE_THRESHOLD_OPTIONS as unknown) as string[]}
-                selectedErrorRateThresholds={(selectedErrorRateThresholds as unknown) as string[]}
-                onErrorRateThresholdsChange={
-                  setSelectedErrorRateThresholds as (selected: string[]) => void
-                }
-                operationNames={operationNames}
-                selectedOperations={selectedOperations}
-                onOperationChange={setSelectedOperations}
-                latencyRange={latencyRange}
-                onLatencyRangeChange={(val) => {
-                  latencyUserModified.current = true;
-                  setLatencyRange(val);
-                }}
-                latencyMin={latencyBounds.min}
-                latencyMax={latencyBounds.max}
-                requestsRange={requestsRange}
-                onRequestsRangeChange={(val) => {
-                  requestsUserModified.current = true;
-                  setRequestsRange(val);
-                }}
-                requestsMin={requestsBounds.min}
-                requestsMax={requestsBounds.max}
-                renderMode="embedded"
-                onTogglePanel={() =>
-                  togglePanel('operations-filter-sidebar', { direction: 'left' })
-                }
-              />
-            </EuiResizablePanel>
+        {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
+          togglePanelRef.current = togglePanel ?? null;
+          return (
+            <>
+              <EuiResizablePanel
+                id="operations-filter-sidebar"
+                initialSize={15}
+                minSize="10%"
+                paddingSize="none"
+                mode={['custom', { position: 'top' }]}
+                style={{ paddingTop: '8px', paddingRight: '8px' }}
+              >
+                <OperationFilterSidebar
+                  availabilityThresholds={(AVAILABILITY_THRESHOLD_OPTIONS as unknown) as string[]}
+                  selectedAvailabilityThresholds={
+                    (selectedAvailabilityThresholds as unknown) as string[]
+                  }
+                  onAvailabilityThresholdsChange={
+                    setSelectedAvailabilityThresholds as (selected: string[]) => void
+                  }
+                  errorRateThresholds={(ERROR_RATE_THRESHOLD_OPTIONS as unknown) as string[]}
+                  selectedErrorRateThresholds={(selectedErrorRateThresholds as unknown) as string[]}
+                  onErrorRateThresholdsChange={
+                    setSelectedErrorRateThresholds as (selected: string[]) => void
+                  }
+                  operationNames={operationNames}
+                  selectedOperations={selectedOperations}
+                  onOperationChange={setSelectedOperations}
+                  latencyRange={latencyRange}
+                  onLatencyRangeChange={onLatencyRangeChange}
+                  latencyMin={latencyBounds.min}
+                  latencyMax={latencyBounds.max}
+                  requestsRange={requestsRange}
+                  onRequestsRangeChange={onRequestsRangeChange}
+                  requestsMin={requestsBounds.min}
+                  requestsMax={requestsBounds.max}
+                  renderMode="embedded"
+                  onTogglePanel={handleTogglePanel}
+                />
+              </EuiResizablePanel>
 
-            <EuiResizableButton />
+              <EuiResizableButton />
 
-            {/* Operations Table */}
-            <EuiResizablePanel
-              id="operations-main-content"
-              initialSize={85}
-              minSize="50%"
-              paddingSize="none"
-              style={{ paddingLeft: '8px' }}
-            >
-              <EuiPanel>
-                {!isLoading && filteredOperations.length === 0 ? (
-                  <EuiText color="subdued" textAlign="center">
-                    <p>
-                      {operations.length === 0
-                        ? i18n.translate('observability.apm.operations.noData', {
-                            defaultMessage:
-                              'No operations found for this service in the selected time range.',
-                          })
-                        : i18n.translate('observability.apm.operations.noFilteredData', {
-                            defaultMessage:
-                              'No operations match the current filters. Try adjusting your filter criteria.',
-                          })}
-                    </p>
-                  </EuiText>
-                ) : (
-                  <EuiInMemoryTable
-                    key={`operations-table-${latencyPercentile}`}
-                    items={filteredOperations}
-                    columns={columns}
-                    loading={isLoading}
-                    sorting={{
-                      sort: {
-                        field: 'availability',
-                        direction: 'asc',
-                      },
-                    }}
-                    pagination={{
-                      initialPageSize: SERVICE_DETAILS_CONSTANTS.DEFAULT_PAGE_SIZE,
-                      pageSizeOptions: SERVICE_DETAILS_CONSTANTS.PAGE_SIZE_OPTIONS,
-                    }}
-                    itemId="operationName"
-                    isExpandable={true}
-                    itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-                    tableLayout="fixed"
-                  />
-                )}
-              </EuiPanel>
-            </EuiResizablePanel>
-          </>
-        )}
+              <EuiResizablePanel
+                initialSize={85}
+                minSize="50%"
+                paddingSize="none"
+                scrollable={false}
+                style={{ padding: '8px 0px 0px 8px' }}
+              >
+                <OperationsTablePanel
+                  filteredOperations={filteredOperations}
+                  columns={columns}
+                  isLoading={isLoading}
+                  latencyPercentile={latencyPercentile}
+                  itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+                  noDataMessage={i18n.translate('observability.apm.operations.noData', {
+                    defaultMessage:
+                      'No operations found for this service in the selected time range.',
+                  })}
+                  noFilteredDataMessage={i18n.translate(
+                    'observability.apm.operations.noFilteredData',
+                    {
+                      defaultMessage:
+                        'No operations match the current filters. Try adjusting your filter criteria.',
+                    }
+                  )}
+                  operationsCount={operations.length}
+                />
+              </EuiResizablePanel>
+            </>
+          );
+        }}
       </EuiResizableContainer>
 
       {/* Correlations flyout for viewing spans/logs filtered by operation */}
