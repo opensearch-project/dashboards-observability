@@ -6,6 +6,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
 import { getTimeInSeconds } from '../utils/time_utils';
+import { calculateStep, RESOLUTION_LOW } from '../utils/step_utils';
 import { useApmConfig } from '../../config/apm_config_context';
 
 export interface ServiceRedMetrics {
@@ -134,16 +135,20 @@ export const useServicesRedMetrics = (
           * 100
         `.trim();
 
+        const step = calculateStep(startTimeSec, endTimeSec, RESOLUTION_LOW);
+
         const [throughputResp, failureRatioResp] = await Promise.all([
           promqlService.executeMetricRequest({
             query: throughputQuery,
             startTime: startTimeSec,
             endTime: endTimeSec,
+            step,
           }),
           promqlService.executeMetricRequest({
             query: failureRatioQuery,
             startTime: startTimeSec,
             endTime: endTimeSec,
+            step,
           }),
         ]);
 
@@ -199,10 +204,13 @@ export const useServicesRedMetrics = (
           ) * 1000
         `.trim();
 
+        const step = calculateStep(startTimeSec, endTimeSec, RESOLUTION_LOW);
+
         const latencyResp = await promqlService.executeMetricRequest({
           query: latencyQuery,
           startTime: startTimeSec,
           endTime: endTimeSec,
+          step,
         });
 
         const newMap = new Map<string, MetricDataPoint[]>();

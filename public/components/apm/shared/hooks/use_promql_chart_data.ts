@@ -6,6 +6,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
 import { parseTimeRange, getTimeInSeconds } from '../utils/time_utils';
+import { calculateStep, RESOLUTION_MEDIUM } from '../utils/step_utils';
 import {
   TimeRange,
   MetricDataPoint,
@@ -112,10 +113,13 @@ export const usePromQLChartData = (params: UsePromQLChartDataParams): UsePromQLC
       try {
         const { startTime, endTime } = parsedTimeRange;
 
+        const startSec = getTimeInSeconds(startTime);
+        const endSec = getTimeInSeconds(endTime);
         const response = await promqlSearchService.executeMetricRequest({
           query: promqlQuery,
-          startTime: getTimeInSeconds(startTime),
-          endTime: getTimeInSeconds(endTime),
+          startTime: startSec,
+          endTime: endSec,
+          step: calculateStep(startSec, endSec, RESOLUTION_MEDIUM),
         });
 
         // Transform response to chart series

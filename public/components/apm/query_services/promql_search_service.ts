@@ -25,10 +25,9 @@ export class PromQLSearchService {
 
   /**
    * Execute a metric request (range query)
-   * Note: step parameter is calculated automatically by OSD core
    */
   async executeMetricRequest(params: ExecuteMetricRequestParams): Promise<any> {
-    const { query, startTime, endTime } = params;
+    const { query, startTime, endTime, step } = params;
 
     // Build request body matching query enhancements API format
     const requestBody = {
@@ -46,6 +45,7 @@ export class PromQLSearchService {
         from: new Date(startTime * 1000).toISOString(),
         to: new Date(endTime * 1000).toISOString(),
       },
+      ...(step !== undefined && { options: { step } }),
     };
 
     try {
