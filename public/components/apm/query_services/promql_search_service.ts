@@ -4,8 +4,10 @@
  */
 
 import { coreRefs } from '../../../framework/core_refs';
-import { PromQLQueryBuilder } from './query_requests/promql_query_builder';
-import { ExecuteMetricRequestParams } from '../common/types/prometheus_types';
+import {
+  ExecuteMetricRequestParams,
+  ExecuteInstantQueryParams,
+} from '../common/types/prometheus_types';
 
 /**
  * PromQLSearchService - Frontend service for executing PromQL queries
@@ -23,10 +25,9 @@ export class PromQLSearchService {
 
   /**
    * Execute a metric request (range query)
-   * Note: step parameter is calculated automatically by OSD core
    */
   async executeMetricRequest(params: ExecuteMetricRequestParams): Promise<any> {
-    const { query, startTime, endTime } = params;
+    const { query, startTime, endTime, step } = params;
 
     // Build request body matching query enhancements API format
     const requestBody = {
@@ -44,6 +45,7 @@ export class PromQLSearchService {
         from: new Date(startTime * 1000).toISOString(),
         to: new Date(endTime * 1000).toISOString(),
       },
+      ...(step !== undefined && { options: { step } }),
     };
 
     try {
@@ -61,31 +63,38 @@ export class PromQLSearchService {
   }
 
   /**
-   * Build and execute a PromQL query using the query builder
+   * Execute an instant query (point-in-time evaluation)
+   * More efficient than range queries when only a single aggregated value is needed
    */
-  async executeBuiltQuery(params: {
-    metricName: string;
-    filters: Record<string, string>;
-    stat?: string;
-    interval: string;
-    startTime: number;
-    endTime: number;
-  }): Promise<any> {
-    const { metricName, filters, stat, interval, startTime, endTime } = params;
+  async executeInstantQuery(params: ExecuteInstantQueryParams): Promise<any> {
+    const { query, time } = params;
 
-    // Build the PromQL query
-    const query = PromQLQueryBuilder.buildQuery({
-      metricName,
-      filters,
-      stat,
-      interval,
-    });
+    const requestBody = {
+      query: {
+        query,
+        language: 'PROMQL',
+        dataset: {
+          id: this.prometheusConnectionId,
+          type: 'PROMETHEUS',
+          dataSource: { meta: this.prometheusConnectionMeta },
+        },
+        format: 'jdbc',
+      },
+      options: {
+        queryType: 'INSTANT',
+        time: time.toString(), // Unix epoch in seconds
+      },
+    };
 
-    // Execute the query
-    return this.executeMetricRequest({
-      query,
-      startTime,
-      endTime,
-    });
+    try {
+      const response = await coreRefs.http!.post('/api/enhancements/search/promql', {
+        body: JSON.stringify(requestBody),
+      });
+
+      return response.body;
+    } catch (error) {
+      console.error('[PromQLSearchService] Instant query execution failed:', error);
+      throw error;
+    }
   }
 }

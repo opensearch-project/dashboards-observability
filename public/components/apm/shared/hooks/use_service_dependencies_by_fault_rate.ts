@@ -68,7 +68,6 @@ export const useServiceDependenciesByFaultRate = (
 
   const fetchParams = useMemo(
     () => ({
-      startTime: getTimeInSeconds(params.startTime),
       endTime: getTimeInSeconds(params.endTime),
       timeRange: calculateTimeRangeDuration(params.startTime, params.endTime),
       limit: params.limit || 5,
@@ -103,10 +102,9 @@ export const useServiceDependenciesByFaultRate = (
           fetchParams.timeRange
         );
 
-        const response = await promqlSearchService.executeMetricRequest({
+        const response = await promqlSearchService.executeInstantQuery({
           query,
-          startTime: fetchParams.startTime,
-          endTime: fetchParams.endTime,
+          time: fetchParams.endTime,
         });
 
         // Process response - handle data frame format from query enhancements plugin

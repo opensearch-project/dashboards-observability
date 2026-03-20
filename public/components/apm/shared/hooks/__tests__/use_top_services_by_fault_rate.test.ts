@@ -7,10 +7,10 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { useTopServicesByFaultRate } from '../use_top_services_by_fault_rate';
 
 // Mock the PromQLSearchService
-const mockExecuteMetricRequest = jest.fn();
+const mockExecuteInstantQuery = jest.fn();
 jest.mock('../../../query_services/promql_search_service', () => ({
   PromQLSearchService: jest.fn().mockImplementation(() => ({
-    executeMetricRequest: mockExecuteMetricRequest,
+    executeInstantQuery: mockExecuteInstantQuery,
   })),
 }));
 
@@ -67,7 +67,7 @@ describe('useTopServicesByFaultRate', () => {
 
   describe('successful fetch', () => {
     it('should fetch and transform fault rate data', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({
+      mockExecuteInstantQuery.mockResolvedValue({
         meta: {
           instantData: {
             rows: [
@@ -91,7 +91,7 @@ describe('useTopServicesByFaultRate', () => {
     });
 
     it('should sort by fault rate descending', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({
+      mockExecuteInstantQuery.mockResolvedValue({
         meta: {
           instantData: {
             rows: [
@@ -115,7 +115,7 @@ describe('useTopServicesByFaultRate', () => {
     });
 
     it('should filter out zero fault rates', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({
+      mockExecuteInstantQuery.mockResolvedValue({
         meta: {
           instantData: {
             rows: [
@@ -137,7 +137,7 @@ describe('useTopServicesByFaultRate', () => {
     });
 
     it('should respect limit parameter', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({
+      mockExecuteInstantQuery.mockResolvedValue({
         meta: {
           instantData: {
             rows: [
@@ -167,7 +167,7 @@ describe('useTopServicesByFaultRate', () => {
     });
 
     it('should default limit to 5', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({
+      mockExecuteInstantQuery.mockResolvedValue({
         meta: {
           instantData: {
             rows: Array.from({ length: 10 }, (_, i) => ({
@@ -197,7 +197,7 @@ describe('useTopServicesByFaultRate', () => {
 
   describe('Prometheus response formats', () => {
     it('should handle standard Prometheus result format with instant query', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({
+      mockExecuteInstantQuery.mockResolvedValue({
         data: {
           result: [
             {
@@ -219,7 +219,7 @@ describe('useTopServicesByFaultRate', () => {
     });
 
     it('should fallback to service_name when service not present', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({
+      mockExecuteInstantQuery.mockResolvedValue({
         data: {
           result: [
             {
@@ -243,7 +243,7 @@ describe('useTopServicesByFaultRate', () => {
   describe('error handling', () => {
     it('should set error state on fetch failure', async () => {
       const mockError = new Error('Query failed');
-      mockExecuteMetricRequest.mockRejectedValue(mockError);
+      mockExecuteInstantQuery.mockRejectedValue(mockError);
 
       const { result } = renderHook(() => useTopServicesByFaultRate(defaultParams));
 
@@ -258,7 +258,7 @@ describe('useTopServicesByFaultRate', () => {
 
   describe('refetch', () => {
     it('should refetch when refetch is called', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({
+      mockExecuteInstantQuery.mockResolvedValue({
         meta: { instantData: { rows: [] } },
       });
 
@@ -268,7 +268,7 @@ describe('useTopServicesByFaultRate', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(1);
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(1);
 
       act(() => {
         result.current.refetch();
@@ -278,7 +278,7 @@ describe('useTopServicesByFaultRate', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(2);
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(2);
     });
   });
 });

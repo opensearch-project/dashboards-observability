@@ -116,7 +116,7 @@ export const ServiceDetailsPanel: React.FC<ServiceDetailsPanelProps> = ({
 label_replace(
   histogram_quantile(0.99,
     sum by (le) (
-      latency_seconds_seconds_bucket{${groupLabelFilter}}
+      latency_seconds_bucket{${groupLabelFilter}}
     )
   ) * 1000,
   "percentile", "p99", "", ""
@@ -125,7 +125,7 @@ or
 label_replace(
   histogram_quantile(0.90,
     sum by (le) (
-      latency_seconds_seconds_bucket{${groupLabelFilter}}
+      latency_seconds_bucket{${groupLabelFilter}}
     )
   ) * 1000,
   "percentile", "p90", "", ""
@@ -134,7 +134,7 @@ or
 label_replace(
   histogram_quantile(0.50,
     sum by (le) (
-      latency_seconds_seconds_bucket{${groupLabelFilter}}
+      latency_seconds_bucket{${groupLabelFilter}}
     )
   ) * 1000,
   "percentile", "p50", "", ""
@@ -146,7 +146,7 @@ label_replace(
 label_replace(
   histogram_quantile(0.99,
     sum by (le) (
-      latency_seconds_seconds_bucket{environment="${node.environment}",service="${node.serviceName}",namespace="span_derived"}
+      latency_seconds_bucket{environment="${node.environment}",service="${node.serviceName}",namespace="span_derived"}
     )
   ) * 1000,
   "percentile", "p99", "", ""
@@ -155,7 +155,7 @@ or
 label_replace(
   histogram_quantile(0.90,
     sum by (le) (
-      latency_seconds_seconds_bucket{environment="${node.environment}",service="${node.serviceName}",namespace="span_derived"}
+      latency_seconds_bucket{environment="${node.environment}",service="${node.serviceName}",namespace="span_derived"}
     )
   ) * 1000,
   "percentile", "p90", "", ""
@@ -164,7 +164,7 @@ or
 label_replace(
   histogram_quantile(0.50,
     sum by (le) (
-      latency_seconds_seconds_bucket{environment="${node.environment}",service="${node.serviceName}",namespace="span_derived"}
+      latency_seconds_bucket{environment="${node.environment}",service="${node.serviceName}",namespace="span_derived"}
     )
   ) * 1000,
   "percentile", "p50", "", ""

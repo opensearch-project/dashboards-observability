@@ -8,6 +8,7 @@ import { EuiLoadingChart, EuiPanel, EuiIcon, EuiToolTip } from '@elastic/eui';
 import * as echarts from 'echarts';
 import { i18n } from '@osd/i18n';
 import { usePromQLChartData, isResolutionExceededError } from '../hooks/use_promql_chart_data';
+import { RESOLUTION_LOW } from '../utils/step_utils';
 import { TimeRange, MetricDataPoint } from '../../common/types/service_details_types';
 import { APM_CONSTANTS, SERVICE_DETAILS_CONSTANTS } from '../../common/constants';
 import './promql_metric_card.scss';
@@ -77,6 +78,7 @@ export const PromQLMetricCard: React.FC<PromQLMetricCardProps> = ({
     timeRange,
     prometheusConnectionId,
     refreshTrigger,
+    resolution: RESOLUTION_LOW,
   });
 
   // Get chart data from first series

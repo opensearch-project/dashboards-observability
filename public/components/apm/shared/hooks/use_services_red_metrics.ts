@@ -5,7 +5,13 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
+import {
+  getQueryServicesThroughput,
+  getQueryServicesFailureRatio,
+  getQueryServicesLatency,
+} from '../../query_services/query_requests/promql_queries';
 import { getTimeInSeconds } from '../utils/time_utils';
+import { calculateStep, RESOLUTION_LOW } from '../utils/step_utils';
 import { useApmConfig } from '../../config/apm_config_context';
 
 export interface ServiceRedMetrics {
@@ -45,7 +51,7 @@ interface ThroughputFailureMetrics {
  * Hook for batch-fetching RED metrics for multiple services
  *
  * Fetches metrics for all services on current page in 3 batch queries:
- * - Latency: histogram_quantile over latency_seconds_seconds_bucket (dependent on percentile)
+ * - Latency: histogram_quantile over latency_seconds_bucket (dependent on percentile)
  * - Throughput: sum of request gauge
  * - Failure Ratio: (error + fault) / request * 100
  *
@@ -117,33 +123,23 @@ export const useServicesRedMetrics = (
       setThroughputFailureError(null);
 
       try {
-        const throughputQuery = `
-          sum by (service) (
-            request{${serviceFilter},namespace="span_derived"}
-          )
-        `.trim();
+        const throughputQuery = getQueryServicesThroughput(serviceFilter);
+        const failureRatioQuery = getQueryServicesFailureRatio(serviceFilter);
 
-        const failureRatioQuery = `
-          (
-            sum by (service) (error{${serviceFilter},namespace="span_derived"})
-            +
-            sum by (service) (fault{${serviceFilter},namespace="span_derived"})
-          )
-          /
-          sum by (service) (request{${serviceFilter},namespace="span_derived"})
-          * 100
-        `.trim();
+        const step = calculateStep(startTimeSec, endTimeSec, RESOLUTION_LOW);
 
         const [throughputResp, failureRatioResp] = await Promise.all([
           promqlService.executeMetricRequest({
             query: throughputQuery,
             startTime: startTimeSec,
             endTime: endTimeSec,
+            step,
           }),
           promqlService.executeMetricRequest({
             query: failureRatioQuery,
             startTime: startTimeSec,
             endTime: endTimeSec,
+            step,
           }),
         ]);
 
@@ -191,18 +187,15 @@ export const useServicesRedMetrics = (
             ? 0.9
             : 0.99; // default p99
 
-        const latencyQuery = `
-          histogram_quantile(${percentileValue},
-            sum by (service, le) (
-              latency_seconds_seconds_bucket{${serviceFilter},namespace="span_derived"}
-            )
-          ) * 1000
-        `.trim();
+        const latencyQuery = getQueryServicesLatency(serviceFilter, percentileValue);
+
+        const step = calculateStep(startTimeSec, endTimeSec, RESOLUTION_LOW);
 
         const latencyResp = await promqlService.executeMetricRequest({
           query: latencyQuery,
           startTime: startTimeSec,
           endTime: endTimeSec,
+          step,
         });
 
         const newMap = new Map<string, MetricDataPoint[]>();

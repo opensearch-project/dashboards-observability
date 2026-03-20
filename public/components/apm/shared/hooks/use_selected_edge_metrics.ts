@@ -6,6 +6,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
 import { getTimeInSeconds } from '../utils/time_utils';
+import { formatPrometheusDuration } from '../utils/step_utils';
 import { useApmConfig } from '../../config/apm_config_context';
 import { EdgeMetrics, SelectedEdgeState } from '../../common/types/service_map_types';
 import {
@@ -66,9 +67,15 @@ export const useSelectedEdgeMetrics = (
     return new PromQLSearchService(prometheusConnectionId, prometheusConnectionMeta);
   }, [prometheusConnectionId, prometheusConnectionMeta]);
 
-  // Memoize time values to avoid unnecessary re-fetches
-  const startTimeSec = useMemo(() => getTimeInSeconds(params.startTime), [params.startTime]);
+  // Memoize time value to avoid unnecessary re-fetches
   const endTimeSec = useMemo(() => getTimeInSeconds(params.endTime), [params.endTime]);
+
+  // Compute time range for sum_over_time / avg_over_time aggregation
+  const timeRange = useMemo(() => {
+    const durationMs = params.endTime.getTime() - params.startTime.getTime();
+    const durationSec = Math.floor(durationMs / 1000);
+    return formatPrometheusDuration(durationSec);
+  }, [params.startTime, params.endTime]);
 
   useEffect(() => {
     // Clear metrics when no edge is selected
@@ -87,25 +94,26 @@ export const useSelectedEdgeMetrics = (
       try {
         // Execute all 4 queries in parallel
         const [requestsResp, latencyResp, faultsResp, errorsResp] = await Promise.all([
-          promqlService.executeMetricRequest({
-            query: getQueryEdgeRequests(sourceService, sourceEnvironment, targetService),
-            startTime: startTimeSec,
-            endTime: endTimeSec,
+          promqlService.executeInstantQuery({
+            query: getQueryEdgeRequests(sourceService, sourceEnvironment, targetService, timeRange),
+            time: endTimeSec,
           }),
-          promqlService.executeMetricRequest({
-            query: getQueryEdgeLatencyP99(sourceService, sourceEnvironment, targetService),
-            startTime: startTimeSec,
-            endTime: endTimeSec,
+          promqlService.executeInstantQuery({
+            query: getQueryEdgeLatencyP99(
+              sourceService,
+              sourceEnvironment,
+              targetService,
+              timeRange
+            ),
+            time: endTimeSec,
           }),
-          promqlService.executeMetricRequest({
-            query: getQueryEdgeFaults(sourceService, sourceEnvironment, targetService),
-            startTime: startTimeSec,
-            endTime: endTimeSec,
+          promqlService.executeInstantQuery({
+            query: getQueryEdgeFaults(sourceService, sourceEnvironment, targetService, timeRange),
+            time: endTimeSec,
           }),
-          promqlService.executeMetricRequest({
-            query: getQueryEdgeErrors(sourceService, sourceEnvironment, targetService),
-            startTime: startTimeSec,
-            endTime: endTimeSec,
+          promqlService.executeInstantQuery({
+            query: getQueryEdgeErrors(sourceService, sourceEnvironment, targetService, timeRange),
+            time: endTimeSec,
           }),
         ]);
 
@@ -143,8 +151,8 @@ export const useSelectedEdgeMetrics = (
     params.selectedEdge?.sourceEnvironment,
     params.selectedEdge?.targetService,
     promqlService,
-    startTimeSec,
     endTimeSec,
+    timeRange,
   ]);
 
   return { metrics, isLoading, error };

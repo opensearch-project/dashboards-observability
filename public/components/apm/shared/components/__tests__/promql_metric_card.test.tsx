@@ -370,6 +370,7 @@ describe('PromQLMetricCard', () => {
         timeRange: { from: 'now-1h', to: 'now' },
         prometheusConnectionId: 'prometheus-1',
         refreshTrigger: 3,
+        resolution: 101,
       });
     });
 

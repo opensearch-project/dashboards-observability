@@ -67,7 +67,6 @@ export const useTopServicesByFaultRate = (
 
   const fetchParams = useMemo(
     () => ({
-      startTime: getTimeInSeconds(params.startTime),
       endTime: getTimeInSeconds(params.endTime),
       timeRange: calculateTimeRangeDuration(params.startTime, params.endTime),
       limit: params.limit || 5,
@@ -90,10 +89,9 @@ export const useTopServicesByFaultRate = (
       try {
         // Use sum_over_time query for accurate total rate calculation
         const query = getQueryTopServicesByFaultRateAvg(fetchParams.timeRange, fetchParams.limit);
-        const response = await promqlSearchService.executeMetricRequest({
+        const response = await promqlSearchService.executeInstantQuery({
           query,
-          startTime: fetchParams.startTime,
-          endTime: fetchParams.endTime,
+          time: fetchParams.endTime,
         });
 
         // Process response - handle data frame format from query enhancements plugin
