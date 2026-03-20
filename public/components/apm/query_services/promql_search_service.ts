@@ -4,7 +4,6 @@
  */
 
 import { coreRefs } from '../../../framework/core_refs';
-import { PromQLQueryBuilder } from './query_requests/promql_query_builder';
 import { ExecuteMetricRequestParams } from '../common/types/prometheus_types';
 
 /**
@@ -58,34 +57,5 @@ export class PromQLSearchService {
       console.error('[PromQLSearchService] Query execution failed:', error);
       throw error;
     }
-  }
-
-  /**
-   * Build and execute a PromQL query using the query builder
-   */
-  async executeBuiltQuery(params: {
-    metricName: string;
-    filters: Record<string, string>;
-    stat?: string;
-    interval: string;
-    startTime: number;
-    endTime: number;
-  }): Promise<any> {
-    const { metricName, filters, stat, interval, startTime, endTime } = params;
-
-    // Build the PromQL query
-    const query = PromQLQueryBuilder.buildQuery({
-      metricName,
-      filters,
-      stat,
-      interval,
-    });
-
-    // Execute the query
-    return this.executeMetricRequest({
-      query,
-      startTime,
-      endTime,
-    });
   }
 }

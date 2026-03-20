@@ -14,15 +14,7 @@ jest.mock('../../../../framework/core_refs', () => ({
   },
 }));
 
-// Mock PromQLQueryBuilder
-jest.mock('../query_requests/promql_query_builder', () => ({
-  PromQLQueryBuilder: {
-    buildQuery: jest.fn(() => 'rate(error{service="test"}[5m])'),
-  },
-}));
-
 import { coreRefs } from '../../../../framework/core_refs';
-import { PromQLQueryBuilder } from '../query_requests/promql_query_builder';
 
 describe('PromQLSearchService', () => {
   let service: PromQLSearchService;
@@ -204,53 +196,6 @@ describe('PromQLSearchService', () => {
       );
 
       consoleSpy.mockRestore();
-    });
-  });
-
-  describe('executeBuiltQuery', () => {
-    it('should build query using PromQLQueryBuilder and execute', async () => {
-      const mockResponse = { body: { data: { result: [] } } };
-      (coreRefs.http!.post as jest.Mock).mockResolvedValue(mockResponse);
-
-      await service.executeBuiltQuery({
-        metricName: 'error',
-        filters: { service: 'api-gateway' },
-        stat: 'sum',
-        interval: '5m',
-        startTime: 1000,
-        endTime: 2000,
-      });
-
-      expect(PromQLQueryBuilder.buildQuery).toHaveBeenCalledWith({
-        metricName: 'error',
-        filters: { service: 'api-gateway' },
-        stat: 'sum',
-        interval: '5m',
-      });
-      expect(coreRefs.http!.post).toHaveBeenCalled();
-    });
-
-    // Note: step parameter is not part of executeBuiltQuery and is
-    // calculated automatically by OSD core, so we don't test for it here.
-
-    it('should handle missing stat parameter', async () => {
-      const mockResponse = { body: { data: { result: [] } } };
-      (coreRefs.http!.post as jest.Mock).mockResolvedValue(mockResponse);
-
-      await service.executeBuiltQuery({
-        metricName: 'latency',
-        filters: { service: 'test' },
-        interval: '1m',
-        startTime: 1000,
-        endTime: 2000,
-      });
-
-      expect(PromQLQueryBuilder.buildQuery).toHaveBeenCalledWith({
-        metricName: 'latency',
-        filters: { service: 'test' },
-        stat: undefined,
-        interval: '1m',
-      });
     });
   });
 });

@@ -194,7 +194,7 @@ Exports aggregated RED metrics to Prometheus.
 | `request` | Gauge | Total request count |
 | `error` | Gauge | 4xx error count |
 | `fault` | Gauge | 5xx fault count |
-| `latency_seconds_seconds_bucket` | Histogram | Latency distribution |
+| `latency_seconds_bucket` | Histogram | Latency distribution |
 
 **Labels:** `service`, `environment`, `operation`, `remoteService`, `namespace`
 
@@ -268,7 +268,7 @@ RED metrics are stored in Prometheus and queried via PromQL.
 ```
 request{service="frontend",environment="production",operation="GET /api/users"} 15420
 fault{service="frontend",environment="production",operation="GET /api/users"} 23
-latency_seconds_seconds_bucket{service="frontend",environment="production",le="0.01"} 5400
+latency_seconds_bucket{service="frontend",environment="production",le="0.01"} 5400
 ```
 
 ---
@@ -312,7 +312,7 @@ Executes PromQL queries against Prometheus for RED metrics.
 |------------|---------|
 | Service Request Rate | `sum(request{environment="...",service="..."})` |
 | Service Error Rate | `sum(error{...}) / sum(request{...})` |
-| P95 Latency | `histogram_quantile(0.95, latency_seconds_seconds_bucket{...})` |
+| P95 Latency | `histogram_quantile(0.95, latency_seconds_bucket{...})` |
 | Top Operations by Fault | `topk(5, sum by (operation) (fault{...}))` |
 | Top Services by Fault Rate | Aggregate fault rates across services |
 | Top Dependencies by Fault Rate | Aggregate dependency fault rates |

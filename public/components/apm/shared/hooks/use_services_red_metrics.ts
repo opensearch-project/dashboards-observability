@@ -45,7 +45,7 @@ interface ThroughputFailureMetrics {
  * Hook for batch-fetching RED metrics for multiple services
  *
  * Fetches metrics for all services on current page in 3 batch queries:
- * - Latency: histogram_quantile over latency_seconds_seconds_bucket (dependent on percentile)
+ * - Latency: histogram_quantile over latency_seconds_bucket (dependent on percentile)
  * - Throughput: sum of request gauge
  * - Failure Ratio: (error + fault) / request * 100
  *
@@ -194,7 +194,7 @@ export const useServicesRedMetrics = (
         const latencyQuery = `
           histogram_quantile(${percentileValue},
             sum by (service, le) (
-              latency_seconds_seconds_bucket{${serviceFilter},namespace="span_derived"}
+              latency_seconds_bucket{${serviceFilter},namespace="span_derived"}
             )
           ) * 1000
         `.trim();
