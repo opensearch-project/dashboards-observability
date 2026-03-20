@@ -46,6 +46,8 @@ export interface UsePromQLChartDataParams {
   enabled?: boolean;
   /** Label field to extract from Prometheus labels (e.g., 'remoteService', 'operation') */
   labelField?: string;
+  /** Number of data points for the chart resolution (default: RESOLUTION_MEDIUM) */
+  resolution?: number;
 }
 
 export interface UsePromQLChartDataResult {
@@ -78,6 +80,7 @@ export const usePromQLChartData = (params: UsePromQLChartDataParams): UsePromQLC
     refreshTrigger,
     enabled = true,
     labelField,
+    resolution = RESOLUTION_MEDIUM,
   } = params;
 
   const [series, setSeries] = useState<ChartSeriesData[]>([]);
@@ -119,7 +122,7 @@ export const usePromQLChartData = (params: UsePromQLChartDataParams): UsePromQLC
           query: promqlQuery,
           startTime: startSec,
           endTime: endSec,
-          step: calculateStep(startSec, endSec, RESOLUTION_MEDIUM),
+          step: calculateStep(startSec, endSec, resolution),
         });
 
         // Transform response to chart series

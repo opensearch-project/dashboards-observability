@@ -40,6 +40,7 @@ import {
   formatLatency,
 } from '../../common/format_utils';
 import { navigateToServiceDetails } from '../../shared/utils/navigation_utils';
+import { RESOLUTION_LOW } from '../../shared/utils/step_utils';
 
 export interface ServiceOverviewProps {
   serviceName: string;
@@ -348,6 +349,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
               formatValue={formatLatency}
               refreshTrigger={refreshTrigger}
               labelField="remoteService"
+              resolution={RESOLUTION_LOW}
             />
           </EuiPanel>
         </EuiFlexItem>

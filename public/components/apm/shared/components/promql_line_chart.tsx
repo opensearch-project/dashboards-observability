@@ -32,6 +32,8 @@ export interface PromQLLineChartProps {
   color?: string;
   /** Override series name for single-series charts (e.g., to replace empty `{}` labels) */
   seriesLabel?: string;
+  /** Number of data points for the chart resolution (default: RESOLUTION_MEDIUM) */
+  resolution?: number;
 }
 
 /**
@@ -70,6 +72,7 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
   labelField,
   color,
   seriesLabel,
+  resolution,
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.ECharts | null>(null);
@@ -96,6 +99,7 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
     prometheusConnectionId,
     refreshTrigger,
     labelField,
+    resolution,
   });
 
   const isResolutionExceeded = isResolutionExceededError(error);
