@@ -6,6 +6,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
 import { getTimeInSeconds } from '../utils/time_utils';
+import { formatPrometheusDuration } from '../utils/step_utils';
 import { useApmConfig } from '../../config/apm_config_context';
 import { ServiceMapNodeMetrics, MetricDataPoint } from '../../common/types/service_map_types';
 import {
@@ -85,7 +86,7 @@ export const useServiceMapMetrics = (
   const timeRange = useMemo(() => {
     const durationMs = params.endTime.getTime() - params.startTime.getTime();
     const durationSec = Math.floor(durationMs / 1000);
-    return `${durationSec}s`;
+    return formatPrometheusDuration(durationSec);
   }, [params.startTime, params.endTime]);
 
   useEffect(() => {

@@ -35,3 +35,15 @@ export function calculateStep(
   const stepSec = roundedIntervalMs / 1000;
   return Math.max(stepSec, minIntervalSec);
 }
+
+/**
+ * Format seconds as a human-readable Prometheus duration string.
+ * Uses the largest clean unit: 86400 → "1d", 3600 → "1h", 1800 → "30m", 45 → "45s"
+ */
+export function formatPrometheusDuration(seconds: number): string {
+  if (seconds <= 0) return '0s';
+  if (seconds % 86400 === 0) return `${seconds / 86400}d`;
+  if (seconds % 3600 === 0) return `${seconds / 3600}h`;
+  if (seconds % 60 === 0) return `${seconds / 60}m`;
+  return `${seconds}s`;
+}

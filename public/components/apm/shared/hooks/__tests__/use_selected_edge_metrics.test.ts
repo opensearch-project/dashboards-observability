@@ -466,7 +466,7 @@ describe('useSelectedEdgeMetrics', () => {
   });
 
   describe('query parameters', () => {
-    it('should pass correct parameters to query functions', async () => {
+    it('should pass correct parameters including timeRange to query functions', async () => {
       const mockMetricResponse = {
         data: {
           result: [{ metric: {}, value: [1704067200, '100'] }],
@@ -493,12 +493,37 @@ describe('useSelectedEdgeMetrics', () => {
       // Wait for the effect to run
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      // Check that the query includes the correct service parameters
+      // Check that the query includes the correct service parameters and time range aggregation
       expect(mockExecuteInstantQuery).toHaveBeenCalled();
       const queryCall = mockExecuteInstantQuery.mock.calls[0][0];
       expect(queryCall.query).toContain('my-service');
       expect(queryCall.query).toContain('production');
       expect(queryCall.query).toContain('backend');
+      // startTime=2024-01-01T00:00:00Z, endTime=2024-01-01T01:00:00Z => 1h
+      expect(queryCall.query).toContain('sum_over_time');
+      expect(queryCall.query).toContain('1h');
+    });
+
+    it('should use avg_over_time for latency query', async () => {
+      const mockMetricResponse = {
+        data: {
+          result: [{ metric: {}, value: [1704067200, '100'] }],
+        },
+      };
+
+      mockExecuteInstantQuery.mockResolvedValue(mockMetricResponse);
+
+      renderHook(() => useSelectedEdgeMetrics(defaultParams));
+
+      // Wait for the effect to run
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Second call is the latency query
+      expect(mockExecuteInstantQuery.mock.calls.length).toBeGreaterThanOrEqual(2);
+      const latencyCall = mockExecuteInstantQuery.mock.calls[1][0];
+      expect(latencyCall.query).toContain('avg_over_time');
+      expect(latencyCall.query).toContain('histogram_quantile');
+      expect(latencyCall.query).toContain('1h');
     });
   });
 });

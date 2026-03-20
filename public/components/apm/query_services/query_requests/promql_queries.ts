@@ -737,113 +737,86 @@ label_replace(
 `;
 
 // ============================================================================
-// EDGE METRICS QUERIES (for Application Map connections)
-// ============================================================================
-
-/**
- * Get all edge request counts (service->remoteService connections)
- * For application map edge labels
- * @page Application Map — Edge request labels (via useEdgeMetrics hook)
- */
-export const getQueryAllEdgeRequests = (): string => `
-sum by (service, environment, remoteService) (
-  request{namespace="span_derived",remoteService!=""}
-)
-`;
-
-/**
- * Get all edge P95 latency (service->remoteService connections)
- * Returns latency in milliseconds
- * @page Application Map — Edge latency labels (via useEdgeMetrics hook)
- */
-export const getQueryAllEdgeLatency = (): string => `
-histogram_quantile(0.95,
-  sum by (service, environment, remoteService, le) (
-    latency_seconds_bucket{namespace="span_derived",remoteService!=""}
-  )
-) * 1000
-`;
-
-/**
- * Get all edge fault rates (service->remoteService connections)
- * Returns percentage (0-100)
- * @page Application Map — Edge fault rate labels (via useEdgeMetrics hook)
- */
-export const getQueryAllEdgeFaultRate = (): string => `
-(
-  sum by (service, environment, remoteService) (fault{namespace="span_derived",remoteService!=""})
-  /
-  clamp_min(sum by (service, environment, remoteService) (request{namespace="span_derived",remoteService!=""}), 1)
-) * 100
-`;
-
-// ============================================================================
-// SINGLE EDGE METRICS QUERIES (for Edge Popup)
+// EDGE METRICS QUERIES (for Edge Flyout)
 // ============================================================================
 
 /**
  * Get request count for a specific edge (service-to-service connection)
+ * Uses sum_over_time to aggregate over the selected time range
  * @param service - Source service name
  * @param environment - Source environment
  * @param remoteService - Target service name
+ * @param timeRange - Time range string (e.g., "3600s")
  * @page App Map Edge Flyout — Edge requests metric (via useSelectedEdgeMetrics hook)
  */
 export const getQueryEdgeRequests = (
   service: string,
   environment: string,
-  remoteService: string
+  remoteService: string,
+  timeRange: string
 ): string => `
-sum(request{namespace="span_derived",service="${service}",environment="${environment}",remoteService="${remoteService}"})
+sum(sum_over_time(request{namespace="span_derived",service="${service}",environment="${environment}",remoteService="${remoteService}"}[${timeRange}]))
 `;
 
 /**
  * Get P99 latency for a specific edge
+ * Uses avg_over_time to aggregate the histogram quantile over the selected time range
  * Returns latency in milliseconds
  * @param service - Source service name
  * @param environment - Source environment
  * @param remoteService - Target service name
+ * @param timeRange - Time range string (e.g., "3600s")
  * @page App Map Edge Flyout — Edge P99 latency metric (via useSelectedEdgeMetrics hook)
  */
 export const getQueryEdgeLatencyP99 = (
   service: string,
   environment: string,
-  remoteService: string
+  remoteService: string,
+  timeRange: string
 ): string => `
-histogram_quantile(0.99,
-  sum by (le) (
-    latency_seconds_bucket{namespace="span_derived",service="${service}",environment="${environment}",remoteService="${remoteService}"}
-  )
+avg_over_time(
+  histogram_quantile(0.99,
+    sum by (le) (
+      latency_seconds_bucket{namespace="span_derived",service="${service}",environment="${environment}",remoteService="${remoteService}"}
+    )
+  )[${timeRange}:]
 ) * 1000
 `;
 
 /**
  * Get fault count (5xx errors) for a specific edge
+ * Uses sum_over_time to aggregate over the selected time range
  * @param service - Source service name
  * @param environment - Source environment
  * @param remoteService - Target service name
+ * @param timeRange - Time range string (e.g., "3600s")
  * @page App Map Edge Flyout — Edge faults metric (via useSelectedEdgeMetrics hook)
  */
 export const getQueryEdgeFaults = (
   service: string,
   environment: string,
-  remoteService: string
+  remoteService: string,
+  timeRange: string
 ): string => `
-sum(fault{namespace="span_derived",service="${service}",environment="${environment}",remoteService="${remoteService}"})
+sum(sum_over_time(fault{namespace="span_derived",service="${service}",environment="${environment}",remoteService="${remoteService}"}[${timeRange}]))
 `;
 
 /**
  * Get error count (4xx errors) for a specific edge
+ * Uses sum_over_time to aggregate over the selected time range
  * @param service - Source service name
  * @param environment - Source environment
  * @param remoteService - Target service name
+ * @param timeRange - Time range string (e.g., "3600s")
  * @page App Map Edge Flyout — Edge errors metric (via useSelectedEdgeMetrics hook)
  */
 export const getQueryEdgeErrors = (
   service: string,
   environment: string,
-  remoteService: string
+  remoteService: string,
+  timeRange: string
 ): string => `
-sum(error{namespace="span_derived",service="${service}",environment="${environment}",remoteService="${remoteService}"})
+sum(sum_over_time(error{namespace="span_derived",service="${service}",environment="${environment}",remoteService="${remoteService}"}[${timeRange}]))
 `;
 
 // ============================================================================
