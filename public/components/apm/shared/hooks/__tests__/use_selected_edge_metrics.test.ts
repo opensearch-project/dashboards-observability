@@ -504,7 +504,7 @@ describe('useSelectedEdgeMetrics', () => {
       expect(queryCall.query).toContain('1h');
     });
 
-    it('should use avg_over_time for latency query', async () => {
+    it('should use sum_over_time for latency query', async () => {
       const mockMetricResponse = {
         data: {
           result: [{ metric: {}, value: [1704067200, '100'] }],
@@ -521,7 +521,7 @@ describe('useSelectedEdgeMetrics', () => {
       // Second call is the latency query
       expect(mockExecuteInstantQuery.mock.calls.length).toBeGreaterThanOrEqual(2);
       const latencyCall = mockExecuteInstantQuery.mock.calls[1][0];
-      expect(latencyCall.query).toContain('avg_over_time');
+      expect(latencyCall.query).toContain('sum_over_time');
       expect(latencyCall.query).toContain('histogram_quantile');
       expect(latencyCall.query).toContain('1h');
     });

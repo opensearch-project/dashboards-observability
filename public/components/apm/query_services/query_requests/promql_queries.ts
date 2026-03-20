@@ -446,60 +446,42 @@ export const getQueryAllOperationsAvailabilityAvg = (
 `;
 
 /**
- * CONSOLIDATED: Get all operations' P50 latency for a service
- * Returns average P50 latency over the time range in milliseconds
- * @page Service Operations — Operations table P50 column (via useOperationMetrics hook)
+ * CONSOLIDATED: Get all operations' latency percentiles (P50, P90, P99) for a service
+ * Aggregates buckets with sum_over_time first, then computes histogram_quantile once per percentile.
+ * Returns milliseconds. Results are labeled with a "percentile" label (p50, p90, p99).
+ * @page Service Operations — Operations table P50/P90/P99 columns (via useOperationMetrics hook)
  */
-export const getQueryAllOperationsLatencyP50 = (
+export const getQueryAllOperationsLatencyPercentiles = (
   environment: string,
   serviceName: string,
   timeRange: string
 ): string => `
-avg_over_time(
+label_replace(
   histogram_quantile(0.50,
     sum by (operation, le) (
-      latency_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived"}
+      sum_over_time(latency_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived"}[${timeRange}])
     )
-  )[${timeRange}:]
-) * 1000
-`;
-
-/**
- * CONSOLIDATED: Get all operations' P90 latency for a service
- * Returns average P90 latency over the time range in milliseconds
- * @page Service Operations — Operations table P90 column (via useOperationMetrics hook)
- */
-export const getQueryAllOperationsLatencyP90 = (
-  environment: string,
-  serviceName: string,
-  timeRange: string
-): string => `
-avg_over_time(
+  ) * 1000,
+  "percentile", "p50", "", ""
+)
+or
+label_replace(
   histogram_quantile(0.90,
     sum by (operation, le) (
-      latency_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived"}
+      sum_over_time(latency_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived"}[${timeRange}])
     )
-  )[${timeRange}:]
-) * 1000
-`;
-
-/**
- * CONSOLIDATED: Get all operations' P99 latency for a service
- * Returns average P99 latency over the time range in milliseconds
- * @page Service Operations — Operations table P99 column (via useOperationMetrics hook)
- */
-export const getQueryAllOperationsLatencyP99 = (
-  environment: string,
-  serviceName: string,
-  timeRange: string
-): string => `
-avg_over_time(
+  ) * 1000,
+  "percentile", "p90", "", ""
+)
+or
+label_replace(
   histogram_quantile(0.99,
     sum by (operation, le) (
-      latency_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived"}
+      sum_over_time(latency_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived"}[${timeRange}])
     )
-  )[${timeRange}:]
-) * 1000
+  ) * 1000,
+  "percentile", "p99", "", ""
+)
 `;
 
 /**
@@ -613,60 +595,42 @@ export const getQueryAllDependenciesFaultRate = (
 `;
 
 /**
- * CONSOLIDATED: Get all dependencies' p50 latency for a service
- * Returns average P50 latency over the time range in milliseconds
- * @page Service Dependencies — Dependencies table P50 column (via useDependencyMetrics hook)
+ * CONSOLIDATED: Get all dependencies' latency percentiles (P50, P90, P99) for a service
+ * Aggregates buckets with sum_over_time first, then computes histogram_quantile once per percentile.
+ * Returns milliseconds. Results are labeled with a "percentile" label (p50, p90, p99).
+ * @page Service Dependencies — Dependencies table P50/P90/P99 columns (via useDependencyMetrics hook)
  */
-export const getQueryAllDependenciesLatencyP50 = (
+export const getQueryAllDependenciesLatencyPercentiles = (
   environment: string,
   serviceName: string,
   timeRange: string
 ): string => `
-avg_over_time(
+label_replace(
   histogram_quantile(0.50,
     sum by (remoteService, operation, remoteOperation, le) (
-      latency_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""}
+      sum_over_time(latency_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""}[${timeRange}])
     )
-  )[${timeRange}:]
-) * 1000
-`;
-
-/**
- * CONSOLIDATED: Get all dependencies' p90 latency for a service
- * Returns average P90 latency over the time range in milliseconds
- * @page Service Dependencies — Dependencies table P90 column (via useDependencyMetrics hook)
- */
-export const getQueryAllDependenciesLatencyP90 = (
-  environment: string,
-  serviceName: string,
-  timeRange: string
-): string => `
-avg_over_time(
+  ) * 1000,
+  "percentile", "p50", "", ""
+)
+or
+label_replace(
   histogram_quantile(0.90,
     sum by (remoteService, operation, remoteOperation, le) (
-      latency_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""}
+      sum_over_time(latency_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""}[${timeRange}])
     )
-  )[${timeRange}:]
-) * 1000
-`;
-
-/**
- * CONSOLIDATED: Get all dependencies' p99 latency for a service
- * Returns average P99 latency over the time range in milliseconds
- * @page Service Dependencies — Dependencies table P99 column (via useDependencyMetrics hook)
- */
-export const getQueryAllDependenciesLatencyP99 = (
-  environment: string,
-  serviceName: string,
-  timeRange: string
-): string => `
-avg_over_time(
+  ) * 1000,
+  "percentile", "p90", "", ""
+)
+or
+label_replace(
   histogram_quantile(0.99,
     sum by (remoteService, operation, remoteOperation, le) (
-      latency_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""}
+      sum_over_time(latency_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""}[${timeRange}])
     )
-  )[${timeRange}:]
-) * 1000
+  ) * 1000,
+  "percentile", "p99", "", ""
+)
 `;
 
 /**
@@ -808,7 +772,7 @@ sum(sum_over_time(request{namespace="span_derived",service="${service}",environm
 
 /**
  * Get P99 latency for a specific edge
- * Uses avg_over_time to aggregate the histogram quantile over the selected time range
+ * Aggregates buckets with sum_over_time first, then computes histogram_quantile once.
  * Returns latency in milliseconds
  * @param service - Source service name
  * @param environment - Source environment
@@ -822,12 +786,10 @@ export const getQueryEdgeLatencyP99 = (
   remoteService: string,
   timeRange: string
 ): string => `
-avg_over_time(
-  histogram_quantile(0.99,
-    sum by (le) (
-      latency_seconds_bucket{namespace="span_derived",service="${service}",environment="${environment}",remoteService="${remoteService}"}
-    )
-  )[${timeRange}:]
+histogram_quantile(0.99,
+  sum by (le) (
+    sum_over_time(latency_seconds_bucket{namespace="span_derived",service="${service}",environment="${environment}",remoteService="${remoteService}"}[${timeRange}])
+  )
 ) * 1000
 `;
 
