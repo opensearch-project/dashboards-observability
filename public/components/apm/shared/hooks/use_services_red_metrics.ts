@@ -5,6 +5,11 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
+import {
+  getQueryServicesThroughput,
+  getQueryServicesFailureRatio,
+  getQueryServicesLatency,
+} from '../../query_services/query_requests/promql_queries';
 import { getTimeInSeconds } from '../utils/time_utils';
 import { calculateStep, RESOLUTION_LOW } from '../utils/step_utils';
 import { useApmConfig } from '../../config/apm_config_context';
@@ -118,22 +123,8 @@ export const useServicesRedMetrics = (
       setThroughputFailureError(null);
 
       try {
-        const throughputQuery = `
-          sum by (service) (
-            request{${serviceFilter},namespace="span_derived"}
-          )
-        `.trim();
-
-        const failureRatioQuery = `
-          (
-            sum by (service) (error{${serviceFilter},namespace="span_derived"})
-            +
-            sum by (service) (fault{${serviceFilter},namespace="span_derived"})
-          )
-          /
-          sum by (service) (request{${serviceFilter},namespace="span_derived"})
-          * 100
-        `.trim();
+        const throughputQuery = getQueryServicesThroughput(serviceFilter);
+        const failureRatioQuery = getQueryServicesFailureRatio(serviceFilter);
 
         const step = calculateStep(startTimeSec, endTimeSec, RESOLUTION_LOW);
 
@@ -196,13 +187,7 @@ export const useServicesRedMetrics = (
             ? 0.9
             : 0.99; // default p99
 
-        const latencyQuery = `
-          histogram_quantile(${percentileValue},
-            sum by (service, le) (
-              latency_seconds_bucket{${serviceFilter},namespace="span_derived"}
-            )
-          ) * 1000
-        `.trim();
+        const latencyQuery = getQueryServicesLatency(serviceFilter, percentileValue);
 
         const step = calculateStep(startTimeSec, endTimeSec, RESOLUTION_LOW);
 

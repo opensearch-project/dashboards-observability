@@ -20,6 +20,54 @@
  * Note: span_kind label may not be available in all metrics
  */
 
+// ============================================================================
+// SERVICES HOME PAGE QUERIES
+// ============================================================================
+
+/**
+ * Services throughput over time — grouped by service
+ * @param serviceFilter - Service filter regex (e.g., service=~"svc1|svc2")
+ * @page Services Home — Throughput sparkline column
+ */
+export const getQueryServicesThroughput = (serviceFilter: string): string =>
+  `
+sum by (service) (
+  request{${serviceFilter},namespace="span_derived"}
+)
+`.trim();
+
+/**
+ * Services failure ratio over time — (error + fault) / request * 100
+ * @param serviceFilter - Service filter regex (e.g., service=~"svc1|svc2")
+ * @page Services Home — Failure ratio sparkline column
+ */
+export const getQueryServicesFailureRatio = (serviceFilter: string): string =>
+  `
+(
+  sum by (service) (error{${serviceFilter},namespace="span_derived"})
+  +
+  sum by (service) (fault{${serviceFilter},namespace="span_derived"})
+)
+/
+clamp_min(sum by (service) (request{${serviceFilter},namespace="span_derived"}), 1)
+* 100
+`.trim();
+
+/**
+ * Services latency percentile over time — grouped by service
+ * @param serviceFilter - Service filter regex (e.g., service=~"svc1|svc2")
+ * @param percentile - Percentile value (0.5, 0.9, 0.99)
+ * @page Services Home — Latency sparkline column
+ */
+export const getQueryServicesLatency = (serviceFilter: string, percentile: number): string =>
+  `
+histogram_quantile(${percentile},
+  sum by (service, le) (
+    latency_seconds_bucket{${serviceFilter},namespace="span_derived"}
+  )
+) * 1000
+`.trim();
+
 /**
  * Top Operations by Volume (Request Count) - for specific service
  * Returns top K operations by request count for a given service
