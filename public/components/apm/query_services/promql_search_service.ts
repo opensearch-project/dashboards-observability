@@ -82,7 +82,7 @@ export class PromQLSearchService {
       },
       options: {
         queryType: 'INSTANT',
-        time: time.toString(),
+        time: time.toString(), // Unix epoch in seconds
       },
     };
 

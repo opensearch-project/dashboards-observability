@@ -70,10 +70,7 @@ describe('PromQLSearchService', () => {
       expect(result).toEqual(mockResponse.body);
     });
 
-    // Note: step parameter is not part of ExecuteMetricRequestParams and is
-    // calculated automatically by OSD core, so we don't test for it here.
-
-    it('should not include step in request body (calculated by OSD core)', async () => {
+    it('should not include options.step when step not provided', async () => {
       const mockResponse = { body: { data: { result: [] } } };
       (coreRefs.http!.post as jest.Mock).mockResolvedValue(mockResponse);
 
@@ -86,7 +83,24 @@ describe('PromQLSearchService', () => {
       const callArg = (coreRefs.http!.post as jest.Mock).mock.calls[0][1];
       const body = JSON.parse(callArg.body);
 
-      expect(body.step).toBeUndefined();
+      expect(body.options?.step).toBeUndefined();
+    });
+
+    it('should include options.step when step is provided', async () => {
+      const mockResponse = { body: { data: { result: [] } } };
+      (coreRefs.http!.post as jest.Mock).mockResolvedValue(mockResponse);
+
+      await service.executeMetricRequest({
+        query: 'rate(error[5m])',
+        startTime: 1000,
+        endTime: 2000,
+        step: 60,
+      });
+
+      const callArg = (coreRefs.http!.post as jest.Mock).mock.calls[0][1];
+      const body = JSON.parse(callArg.body);
+
+      expect(body.options.step).toBe(60);
     });
 
     it('should format time range correctly', async () => {

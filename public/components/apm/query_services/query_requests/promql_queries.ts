@@ -1007,10 +1007,15 @@ sum(sum_over_time(error{${labelFilter}}[${timeRange}]))
  * Calculates latency percentile aggregated across all services with the specified label filter
  * @param labelFilter - Label filter (e.g., telemetry_sdk_language="cpp",namespace="span_derived")
  * @param percentile - Percentile value (0.50, 0.90, 0.99)
+ * @param timeRange - Time range string (e.g., "3600s")
  * @returns Latency in milliseconds
  * @page Application Map — Group node latency (via useGroupMetrics hook)
  */
-export const getQueryGroupLatencyPercentile = (labelFilter: string, percentile: number): string =>
+export const getQueryGroupLatencyPercentile = (
+  labelFilter: string,
+  percentile: number,
+  timeRange: string
+): string =>
   `
-histogram_quantile(${percentile}, sum by (le) (rate(latency_seconds_bucket{${labelFilter}}[5m]))) * 1000
+histogram_quantile(${percentile}, sum by (le) (sum_over_time(latency_seconds_bucket{${labelFilter}}[${timeRange}]))) * 1000
 `.trim();

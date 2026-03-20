@@ -73,7 +73,7 @@ export const useOperationMetrics = (
         // Calculate time range duration for aggregate queries
         const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
 
-        // Make 5 consolidated queries (latency percentiles combined into 1)
+        // Make 5 consolidated queries
         // Each query returns ALL operations in a single response
         const [
           latencyPercentilesResponse,

@@ -105,9 +105,9 @@ export const useGroupMetrics = (params: UseGroupMetricsParams): UseGroupMetricsR
           faults: getQueryGroupFaults(labelFilter, timeRange),
           errors: getQueryGroupErrors(labelFilter, timeRange),
           // P50, P90, P99 latency aggregated across all services in the group
-          latencyP50: getQueryGroupLatencyPercentile(labelFilter, 0.5),
-          latencyP90: getQueryGroupLatencyPercentile(labelFilter, 0.9),
-          latencyP99: getQueryGroupLatencyPercentile(labelFilter, 0.99),
+          latencyP50: getQueryGroupLatencyPercentile(labelFilter, 0.5, timeRange),
+          latencyP90: getQueryGroupLatencyPercentile(labelFilter, 0.9, timeRange),
+          latencyP99: getQueryGroupLatencyPercentile(labelFilter, 0.99, timeRange),
         };
 
         // Execute all queries in parallel

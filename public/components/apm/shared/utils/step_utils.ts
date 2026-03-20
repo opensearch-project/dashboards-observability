@@ -4,6 +4,8 @@
  */
 
 // Resolution constants matching Prometheus UI conventions
+// See: https://github.com/prometheus/prometheus/blob/main/web/ui/mantine-ui/src/pages/query/MetricsExplorer.tsx
+// RESOLUTION_LOW targets ~100 data points (sparklines), RESOLUTION_MEDIUM targets ~250 (full charts)
 export const RESOLUTION_LOW = 101; // sparklines
 export const RESOLUTION_MEDIUM = 258; // full charts
 const MIN_STEP_INTERVAL = 15; // seconds
