@@ -88,64 +88,57 @@ export const useOperationMetrics = (
           availabilityResponse,
           requestCountResponse,
         ] = await Promise.all([
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryAllOperationsLatencyP50(
               params.environment,
               params.serviceName,
               timeRangeDuration
             ),
-            startTime: Math.floor(params.startTime.getTime() / 1000),
-            endTime: Math.floor(params.endTime.getTime() / 1000),
+            time: Math.floor(params.endTime.getTime() / 1000),
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryAllOperationsLatencyP90(
               params.environment,
               params.serviceName,
               timeRangeDuration
             ),
-            startTime: Math.floor(params.startTime.getTime() / 1000),
-            endTime: Math.floor(params.endTime.getTime() / 1000),
+            time: Math.floor(params.endTime.getTime() / 1000),
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryAllOperationsLatencyP99(
               params.environment,
               params.serviceName,
               timeRangeDuration
             ),
-            startTime: Math.floor(params.startTime.getTime() / 1000),
-            endTime: Math.floor(params.endTime.getTime() / 1000),
+            time: Math.floor(params.endTime.getTime() / 1000),
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryAllOperationsFaultRate(params.environment, params.serviceName),
-            startTime: Math.floor(params.startTime.getTime() / 1000),
-            endTime: Math.floor(params.endTime.getTime() / 1000),
+            time: Math.floor(params.endTime.getTime() / 1000),
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryAllOperationsErrorRateAvg(
               params.environment,
               params.serviceName,
               timeRangeDuration
             ),
-            startTime: Math.floor(params.startTime.getTime() / 1000),
-            endTime: Math.floor(params.endTime.getTime() / 1000),
+            time: Math.floor(params.endTime.getTime() / 1000),
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryAllOperationsAvailabilityAvg(
               params.environment,
               params.serviceName,
               timeRangeDuration
             ),
-            startTime: Math.floor(params.startTime.getTime() / 1000),
-            endTime: Math.floor(params.endTime.getTime() / 1000),
+            time: Math.floor(params.endTime.getTime() / 1000),
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryAllOperationsRequestCountTotal(
               params.environment,
               params.serviceName,
               timeRangeDuration
             ),
-            startTime: Math.floor(params.startTime.getTime() / 1000),
-            endTime: Math.floor(params.endTime.getTime() / 1000),
+            time: Math.floor(params.endTime.getTime() / 1000),
           }),
         ]);
 

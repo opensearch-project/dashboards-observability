@@ -78,8 +78,7 @@ export const useServiceMapMetrics = (
     return `service=~"${serviceNames}"`;
   }, [params.services]);
 
-  // Memoize time values to avoid unnecessary re-fetches
-  const startTimeSec = useMemo(() => getTimeInSeconds(params.startTime), [params.startTime]);
+  // Memoize time value to avoid unnecessary re-fetches
   const endTimeSec = useMemo(() => getTimeInSeconds(params.endTime), [params.endTime]);
 
   // Calculate time range string for sum_over_time queries
@@ -110,20 +109,17 @@ export const useServiceMapMetrics = (
 
         // Execute all queries in parallel
         const [throughputResp, faultsResp, errorsResp] = await Promise.all([
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: queries.throughput,
-            startTime: startTimeSec,
-            endTime: endTimeSec,
+            time: endTimeSec,
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: queries.faults,
-            startTime: startTimeSec,
-            endTime: endTimeSec,
+            time: endTimeSec,
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: queries.errors,
-            startTime: startTimeSec,
-            endTime: endTimeSec,
+            time: endTimeSec,
           }),
         ]);
 
@@ -179,7 +175,7 @@ export const useServiceMapMetrics = (
     // Note: params.services is intentionally omitted to prevent infinite loops.
     // serviceFilter already tracks changes to the services list.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [promqlService, serviceFilter, startTimeSec, endTimeSec, timeRange, refetchTrigger]);
+  }, [promqlService, serviceFilter, endTimeSec, timeRange, refetchTrigger]);
 
   const refetch = useCallback(() => {
     setRefetchTrigger((prev) => prev + 1);

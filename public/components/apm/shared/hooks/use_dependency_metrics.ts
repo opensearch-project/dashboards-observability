@@ -88,64 +88,57 @@ export const useDependencyMetrics = (
           availabilityResponse,
           requestCountResponse,
         ] = await Promise.all([
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryAllDependenciesLatencyP50(
               params.environment,
               params.serviceName,
               timeRangeDuration
             ),
-            startTime: Math.floor(params.startTime.getTime() / 1000),
-            endTime: Math.floor(params.endTime.getTime() / 1000),
+            time: Math.floor(params.endTime.getTime() / 1000),
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryAllDependenciesLatencyP90(
               params.environment,
               params.serviceName,
               timeRangeDuration
             ),
-            startTime: Math.floor(params.startTime.getTime() / 1000),
-            endTime: Math.floor(params.endTime.getTime() / 1000),
+            time: Math.floor(params.endTime.getTime() / 1000),
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryAllDependenciesLatencyP99(
               params.environment,
               params.serviceName,
               timeRangeDuration
             ),
-            startTime: Math.floor(params.startTime.getTime() / 1000),
-            endTime: Math.floor(params.endTime.getTime() / 1000),
+            time: Math.floor(params.endTime.getTime() / 1000),
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryAllDependenciesFaultRate(params.environment, params.serviceName),
-            startTime: Math.floor(params.startTime.getTime() / 1000),
-            endTime: Math.floor(params.endTime.getTime() / 1000),
+            time: Math.floor(params.endTime.getTime() / 1000),
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryAllDependenciesErrorRateAvg(
               params.environment,
               params.serviceName,
               timeRangeDuration
             ),
-            startTime: Math.floor(params.startTime.getTime() / 1000),
-            endTime: Math.floor(params.endTime.getTime() / 1000),
+            time: Math.floor(params.endTime.getTime() / 1000),
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryAllDependenciesAvailabilityAvg(
               params.environment,
               params.serviceName,
               timeRangeDuration
             ),
-            startTime: Math.floor(params.startTime.getTime() / 1000),
-            endTime: Math.floor(params.endTime.getTime() / 1000),
+            time: Math.floor(params.endTime.getTime() / 1000),
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryAllDependenciesRequestCountTotal(
               params.environment,
               params.serviceName,
               timeRangeDuration
             ),
-            startTime: Math.floor(params.startTime.getTime() / 1000),
-            endTime: Math.floor(params.endTime.getTime() / 1000),
+            time: Math.floor(params.endTime.getTime() / 1000),
           }),
         ]);
 

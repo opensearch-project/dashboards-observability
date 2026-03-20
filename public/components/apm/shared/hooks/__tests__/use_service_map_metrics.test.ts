@@ -7,10 +7,10 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { useServiceMapMetrics } from '../use_service_map_metrics';
 
 // Mock the PromQLSearchService
-const mockExecuteMetricRequest = jest.fn();
+const mockExecuteInstantQuery = jest.fn();
 jest.mock('../../../query_services/promql_search_service', () => ({
   PromQLSearchService: jest.fn().mockImplementation(() => ({
-    executeMetricRequest: mockExecuteMetricRequest,
+    executeInstantQuery: mockExecuteInstantQuery,
   })),
 }));
 
@@ -84,7 +84,7 @@ describe('useServiceMapMetrics', () => {
         },
       });
 
-      mockExecuteMetricRequest
+      mockExecuteInstantQuery
         // Throughput
         .mockResolvedValueOnce(mockMetricResponse('api-gateway', 100))
         // Faults
@@ -115,8 +115,8 @@ describe('useServiceMapMetrics', () => {
 
     it('should handle services with no metrics data', async () => {
       // Reset mock to clear any previous setup
-      mockExecuteMetricRequest.mockReset();
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockReset();
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
       const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
 
@@ -139,9 +139,9 @@ describe('useServiceMapMetrics', () => {
 
   describe('error handling', () => {
     it('should set error state on fetch failure', async () => {
-      mockExecuteMetricRequest.mockReset();
+      mockExecuteInstantQuery.mockReset();
       const mockError = new Error('Prometheus connection failed');
-      mockExecuteMetricRequest.mockRejectedValue(mockError);
+      mockExecuteInstantQuery.mockRejectedValue(mockError);
 
       const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
 
@@ -154,8 +154,8 @@ describe('useServiceMapMetrics', () => {
     });
 
     it('should wrap non-Error throws', async () => {
-      mockExecuteMetricRequest.mockReset();
-      mockExecuteMetricRequest.mockRejectedValue('string error');
+      mockExecuteInstantQuery.mockReset();
+      mockExecuteInstantQuery.mockRejectedValue('string error');
 
       const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
 
@@ -170,8 +170,8 @@ describe('useServiceMapMetrics', () => {
 
   describe('refetch', () => {
     it('should refetch metrics when refetch is called', async () => {
-      mockExecuteMetricRequest.mockReset();
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockReset();
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
       const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
 
@@ -179,7 +179,7 @@ describe('useServiceMapMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const initialCallCount = mockExecuteMetricRequest.mock.calls.length;
+      const initialCallCount = mockExecuteInstantQuery.mock.calls.length;
 
       act(() => {
         result.current.refetch();
@@ -189,13 +189,13 @@ describe('useServiceMapMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(mockExecuteMetricRequest.mock.calls.length).toBeGreaterThan(initialCallCount);
+      expect(mockExecuteInstantQuery.mock.calls.length).toBeGreaterThan(initialCallCount);
     });
   });
 
   describe('data frame format handling', () => {
     it('should handle data frame response format', async () => {
-      mockExecuteMetricRequest.mockReset();
+      mockExecuteInstantQuery.mockReset();
       const dataFrameResponse = {
         type: 'data_frame',
         fields: [
@@ -205,7 +205,7 @@ describe('useServiceMapMetrics', () => {
         ],
       };
 
-      mockExecuteMetricRequest.mockResolvedValue(dataFrameResponse);
+      mockExecuteInstantQuery.mockResolvedValue(dataFrameResponse);
 
       const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
 

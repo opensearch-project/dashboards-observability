@@ -8,10 +8,10 @@ import { useSelectedEdgeMetrics } from '../use_selected_edge_metrics';
 import { SelectedEdgeState } from '../../../common/types/service_map_types';
 
 // Mock the PromQLSearchService
-const mockExecuteMetricRequest = jest.fn();
+const mockExecuteInstantQuery = jest.fn();
 jest.mock('../../../query_services/promql_search_service', () => ({
   PromQLSearchService: jest.fn().mockImplementation(() => ({
-    executeMetricRequest: mockExecuteMetricRequest,
+    executeInstantQuery: mockExecuteInstantQuery,
   })),
 }));
 
@@ -95,7 +95,7 @@ describe('useSelectedEdgeMetrics', () => {
         },
       });
 
-      mockExecuteMetricRequest
+      mockExecuteInstantQuery
         .mockResolvedValueOnce(mockMetricResponse(1000)) // requests
         .mockResolvedValueOnce(mockMetricResponse(250)) // latency P99
         .mockResolvedValueOnce(mockMetricResponse(50)) // faults
@@ -134,7 +134,7 @@ describe('useSelectedEdgeMetrics', () => {
         ],
       });
 
-      mockExecuteMetricRequest
+      mockExecuteInstantQuery
         .mockResolvedValueOnce(mockDataFrameResponse(500)) // requests
         .mockResolvedValueOnce(mockDataFrameResponse(150)) // latency P99
         .mockResolvedValueOnce(mockDataFrameResponse(30)) // faults
@@ -161,7 +161,7 @@ describe('useSelectedEdgeMetrics', () => {
         },
       });
 
-      mockExecuteMetricRequest
+      mockExecuteInstantQuery
         .mockResolvedValueOnce(mockInstantDataResponse(750)) // requests
         .mockResolvedValueOnce(mockInstantDataResponse(200)) // latency P99
         .mockResolvedValueOnce(mockInstantDataResponse(40)) // faults
@@ -195,7 +195,7 @@ describe('useSelectedEdgeMetrics', () => {
         },
       };
 
-      mockExecuteMetricRequest.mockResolvedValue(mockRangeResponse);
+      mockExecuteInstantQuery.mockResolvedValue(mockRangeResponse);
 
       const { result } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
 
@@ -208,7 +208,7 @@ describe('useSelectedEdgeMetrics', () => {
     });
 
     it('should handle empty response', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
       const { result } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
 
@@ -227,7 +227,7 @@ describe('useSelectedEdgeMetrics', () => {
   describe('error handling', () => {
     it('should set error state on fetch failure', async () => {
       const mockError = new Error('Prometheus connection failed');
-      mockExecuteMetricRequest.mockRejectedValue(mockError);
+      mockExecuteInstantQuery.mockRejectedValue(mockError);
 
       const { result } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
 
@@ -240,7 +240,7 @@ describe('useSelectedEdgeMetrics', () => {
     });
 
     it('should wrap non-Error throws', async () => {
-      mockExecuteMetricRequest.mockRejectedValue('string error');
+      mockExecuteInstantQuery.mockRejectedValue('string error');
 
       const { result } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
 
@@ -253,7 +253,7 @@ describe('useSelectedEdgeMetrics', () => {
     });
 
     it('should handle null response gracefully', async () => {
-      mockExecuteMetricRequest.mockResolvedValue(null);
+      mockExecuteInstantQuery.mockResolvedValue(null);
 
       const { result } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
 
@@ -266,7 +266,7 @@ describe('useSelectedEdgeMetrics', () => {
     });
 
     it('should handle undefined response gracefully', async () => {
-      mockExecuteMetricRequest.mockResolvedValue(undefined);
+      mockExecuteInstantQuery.mockResolvedValue(undefined);
 
       const { result } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
 
@@ -287,7 +287,7 @@ describe('useSelectedEdgeMetrics', () => {
         ],
       };
 
-      mockExecuteMetricRequest.mockResolvedValue(malformedResponse);
+      mockExecuteInstantQuery.mockResolvedValue(malformedResponse);
 
       const { result } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
 
@@ -307,7 +307,7 @@ describe('useSelectedEdgeMetrics', () => {
         },
       };
 
-      mockExecuteMetricRequest.mockResolvedValue(emptyInstantData);
+      mockExecuteInstantQuery.mockResolvedValue(emptyInstantData);
 
       const { result } = renderHook(() => useSelectedEdgeMetrics(defaultParams));
 
@@ -327,7 +327,7 @@ describe('useSelectedEdgeMetrics', () => {
         },
       });
 
-      mockExecuteMetricRequest.mockResolvedValue(mockMetricResponse(100));
+      mockExecuteInstantQuery.mockResolvedValue(mockMetricResponse(100));
 
       const { result, rerender } = renderHook(({ params }) => useSelectedEdgeMetrics(params), {
         initialProps: { params: defaultParams },
@@ -337,7 +337,7 @@ describe('useSelectedEdgeMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const callsAfterInitial = mockExecuteMetricRequest.mock.calls.length;
+      const callsAfterInitial = mockExecuteInstantQuery.mock.calls.length;
 
       const newSelectedEdge: SelectedEdgeState = {
         edgeId: 'api::prod->db',
@@ -358,7 +358,7 @@ describe('useSelectedEdgeMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(mockExecuteMetricRequest.mock.calls.length).toBeGreaterThan(callsAfterInitial);
+      expect(mockExecuteInstantQuery.mock.calls.length).toBeGreaterThan(callsAfterInitial);
     });
 
     it('should not refetch when only position changes', async () => {
@@ -368,7 +368,7 @@ describe('useSelectedEdgeMetrics', () => {
         },
       });
 
-      mockExecuteMetricRequest.mockResolvedValue(mockMetricResponse(100));
+      mockExecuteInstantQuery.mockResolvedValue(mockMetricResponse(100));
 
       const { result, rerender } = renderHook(({ params }) => useSelectedEdgeMetrics(params), {
         initialProps: { params: defaultParams },
@@ -378,7 +378,7 @@ describe('useSelectedEdgeMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const callsAfterInitial = mockExecuteMetricRequest.mock.calls.length;
+      const callsAfterInitial = mockExecuteInstantQuery.mock.calls.length;
 
       // Only change the position, not the edge identity
       const sameEdgeDifferentPosition: SelectedEdgeState = {
@@ -394,7 +394,7 @@ describe('useSelectedEdgeMetrics', () => {
       });
 
       // Should not trigger a refetch since edgeId, sourceService, etc. are the same
-      expect(mockExecuteMetricRequest.mock.calls.length).toBe(callsAfterInitial);
+      expect(mockExecuteInstantQuery.mock.calls.length).toBe(callsAfterInitial);
     });
 
     it('should refetch when time range changes', async () => {
@@ -404,7 +404,7 @@ describe('useSelectedEdgeMetrics', () => {
         },
       });
 
-      mockExecuteMetricRequest.mockResolvedValue(mockMetricResponse(100));
+      mockExecuteInstantQuery.mockResolvedValue(mockMetricResponse(100));
 
       const { result, rerender } = renderHook(({ params }) => useSelectedEdgeMetrics(params), {
         initialProps: { params: defaultParams },
@@ -414,12 +414,12 @@ describe('useSelectedEdgeMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const callsAfterInitial = mockExecuteMetricRequest.mock.calls.length;
+      const callsAfterInitial = mockExecuteInstantQuery.mock.calls.length;
 
       rerender({
         params: {
           ...defaultParams,
-          startTime: new Date('2024-01-02T00:00:00Z'),
+          endTime: new Date('2024-01-02T12:00:00Z'),
         },
       });
 
@@ -427,7 +427,7 @@ describe('useSelectedEdgeMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(mockExecuteMetricRequest.mock.calls.length).toBeGreaterThan(callsAfterInitial);
+      expect(mockExecuteInstantQuery.mock.calls.length).toBeGreaterThan(callsAfterInitial);
     });
 
     it('should clear metrics when edge is deselected', async () => {
@@ -437,7 +437,7 @@ describe('useSelectedEdgeMetrics', () => {
         },
       });
 
-      mockExecuteMetricRequest.mockResolvedValue(mockMetricResponse(100));
+      mockExecuteInstantQuery.mockResolvedValue(mockMetricResponse(100));
 
       const { result, rerender } = renderHook(({ params }) => useSelectedEdgeMetrics(params), {
         initialProps: { params: defaultParams },
@@ -449,7 +449,7 @@ describe('useSelectedEdgeMetrics', () => {
 
       expect(result.current.metrics).not.toBeNull();
 
-      const callsAfterInitial = mockExecuteMetricRequest.mock.calls.length;
+      const callsAfterInitial = mockExecuteInstantQuery.mock.calls.length;
 
       rerender({
         params: {
@@ -461,7 +461,7 @@ describe('useSelectedEdgeMetrics', () => {
       // Should clear metrics without making new calls
       expect(result.current.metrics).toBeNull();
       expect(result.current.isLoading).toBe(false);
-      expect(mockExecuteMetricRequest.mock.calls.length).toBe(callsAfterInitial);
+      expect(mockExecuteInstantQuery.mock.calls.length).toBe(callsAfterInitial);
     });
   });
 
@@ -473,7 +473,7 @@ describe('useSelectedEdgeMetrics', () => {
         },
       };
 
-      mockExecuteMetricRequest.mockResolvedValue(mockMetricResponse);
+      mockExecuteInstantQuery.mockResolvedValue(mockMetricResponse);
 
       const customEdge: SelectedEdgeState = {
         edgeId: 'my-service::production->backend',
@@ -494,8 +494,8 @@ describe('useSelectedEdgeMetrics', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Check that the query includes the correct service parameters
-      expect(mockExecuteMetricRequest).toHaveBeenCalled();
-      const queryCall = mockExecuteMetricRequest.mock.calls[0][0];
+      expect(mockExecuteInstantQuery).toHaveBeenCalled();
+      const queryCall = mockExecuteInstantQuery.mock.calls[0][0];
       expect(queryCall.query).toContain('my-service');
       expect(queryCall.query).toContain('production');
       expect(queryCall.query).toContain('backend');

@@ -7,10 +7,10 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useGroupMetrics } from '../use_group_metrics';
 
 // Mock the PromQLSearchService
-const mockExecuteMetricRequest = jest.fn();
+const mockExecuteInstantQuery = jest.fn();
 jest.mock('../../../query_services/promql_search_service', () => ({
   PromQLSearchService: jest.fn().mockImplementation(() => ({
-    executeMetricRequest: mockExecuteMetricRequest,
+    executeInstantQuery: mockExecuteInstantQuery,
   })),
 }));
 
@@ -115,7 +115,7 @@ describe('useGroupMetrics', () => {
         },
       });
 
-      mockExecuteMetricRequest
+      mockExecuteInstantQuery
         .mockResolvedValueOnce(mockMetricResponse(1000)) // throughput
         .mockResolvedValueOnce(mockMetricResponse(50)) // faults
         .mockResolvedValueOnce(mockMetricResponse(100)) // errors
@@ -154,7 +154,7 @@ describe('useGroupMetrics', () => {
         ],
       });
 
-      mockExecuteMetricRequest
+      mockExecuteInstantQuery
         .mockResolvedValueOnce(mockDataFrameResponse([1000, 1100])) // throughput
         .mockResolvedValueOnce(mockDataFrameResponse([50, 60])) // faults
         .mockResolvedValueOnce(mockDataFrameResponse([100, 110])) // errors
@@ -182,7 +182,7 @@ describe('useGroupMetrics', () => {
         },
       });
 
-      mockExecuteMetricRequest
+      mockExecuteInstantQuery
         .mockResolvedValueOnce(mockInstantDataResponse(1000)) // throughput
         .mockResolvedValueOnce(mockInstantDataResponse(50)) // faults
         .mockResolvedValueOnce(mockInstantDataResponse(100)) // errors
@@ -212,7 +212,7 @@ describe('useGroupMetrics', () => {
         },
       });
 
-      mockExecuteMetricRequest
+      mockExecuteInstantQuery
         .mockResolvedValueOnce(mockMetricResponse(100)) // throughput (total requests)
         .mockResolvedValueOnce(mockMetricResponse(10)) // faults
         .mockResolvedValueOnce(mockMetricResponse(5)) // errors
@@ -246,7 +246,7 @@ describe('useGroupMetrics', () => {
         },
       });
 
-      mockExecuteMetricRequest
+      mockExecuteInstantQuery
         .mockResolvedValueOnce(mockMetricResponse(0)) // throughput (0 requests)
         .mockResolvedValueOnce(mockMetricResponse(0)) // faults
         .mockResolvedValueOnce(mockMetricResponse(0)) // errors
@@ -265,7 +265,7 @@ describe('useGroupMetrics', () => {
     });
 
     it('should handle empty response', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
       const { result } = renderHook(() => useGroupMetrics(defaultParams));
 
@@ -279,7 +279,7 @@ describe('useGroupMetrics', () => {
     });
 
     it('should convert attribute name to Prometheus label format', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
       renderHook(() =>
         useGroupMetrics({
@@ -292,8 +292,8 @@ describe('useGroupMetrics', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Check that the query includes the converted label name (dots to underscores)
-      expect(mockExecuteMetricRequest).toHaveBeenCalled();
-      const queryCall = mockExecuteMetricRequest.mock.calls[0][0];
+      expect(mockExecuteInstantQuery).toHaveBeenCalled();
+      const queryCall = mockExecuteInstantQuery.mock.calls[0][0];
       expect(queryCall.query).toContain('telemetry_sdk_language');
     });
   });
@@ -301,7 +301,7 @@ describe('useGroupMetrics', () => {
   describe('error handling', () => {
     it('should set error state on fetch failure', async () => {
       const mockError = new Error('Prometheus connection failed');
-      mockExecuteMetricRequest.mockRejectedValue(mockError);
+      mockExecuteInstantQuery.mockRejectedValue(mockError);
 
       const { result } = renderHook(() => useGroupMetrics(defaultParams));
 
@@ -314,7 +314,7 @@ describe('useGroupMetrics', () => {
     });
 
     it('should wrap non-Error throws', async () => {
-      mockExecuteMetricRequest.mockRejectedValue('string error');
+      mockExecuteInstantQuery.mockRejectedValue('string error');
 
       const { result } = renderHook(() => useGroupMetrics(defaultParams));
 
@@ -327,7 +327,7 @@ describe('useGroupMetrics', () => {
     });
 
     it('should handle null response gracefully', async () => {
-      mockExecuteMetricRequest.mockResolvedValue(null);
+      mockExecuteInstantQuery.mockResolvedValue(null);
 
       const { result } = renderHook(() => useGroupMetrics(defaultParams));
 
@@ -348,7 +348,7 @@ describe('useGroupMetrics', () => {
         ],
       };
 
-      mockExecuteMetricRequest.mockResolvedValue(mockResponseWithNaN);
+      mockExecuteInstantQuery.mockResolvedValue(mockResponseWithNaN);
 
       const { result } = renderHook(() => useGroupMetrics(defaultParams));
 
@@ -370,7 +370,7 @@ describe('useGroupMetrics', () => {
         ],
       };
 
-      mockExecuteMetricRequest.mockResolvedValue(mockResponseWithInfinity);
+      mockExecuteInstantQuery.mockResolvedValue(mockResponseWithInfinity);
 
       const { result } = renderHook(() => useGroupMetrics(defaultParams));
 
@@ -386,7 +386,7 @@ describe('useGroupMetrics', () => {
 
   describe('parameter changes', () => {
     it('should refetch when groupByValue changes', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
       const { result, rerender } = renderHook(({ params }) => useGroupMetrics(params), {
         initialProps: { params: defaultParams },
@@ -396,7 +396,7 @@ describe('useGroupMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const callsAfterInitial = mockExecuteMetricRequest.mock.calls.length;
+      const callsAfterInitial = mockExecuteInstantQuery.mock.calls.length;
 
       rerender({
         params: {
@@ -409,11 +409,11 @@ describe('useGroupMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(mockExecuteMetricRequest.mock.calls.length).toBeGreaterThan(callsAfterInitial);
+      expect(mockExecuteInstantQuery.mock.calls.length).toBeGreaterThan(callsAfterInitial);
     });
 
     it('should refetch when groupByAttribute changes', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
       const { result, rerender } = renderHook(({ params }) => useGroupMetrics(params), {
         initialProps: { params: defaultParams },
@@ -423,7 +423,7 @@ describe('useGroupMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const callsAfterInitial = mockExecuteMetricRequest.mock.calls.length;
+      const callsAfterInitial = mockExecuteInstantQuery.mock.calls.length;
 
       rerender({
         params: {
@@ -436,11 +436,11 @@ describe('useGroupMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(mockExecuteMetricRequest.mock.calls.length).toBeGreaterThan(callsAfterInitial);
+      expect(mockExecuteInstantQuery.mock.calls.length).toBeGreaterThan(callsAfterInitial);
     });
 
     it('should refetch when time range changes', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
       const { result, rerender } = renderHook(({ params }) => useGroupMetrics(params), {
         initialProps: { params: defaultParams },
@@ -450,7 +450,7 @@ describe('useGroupMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const callsAfterInitial = mockExecuteMetricRequest.mock.calls.length;
+      const callsAfterInitial = mockExecuteInstantQuery.mock.calls.length;
 
       rerender({
         params: {
@@ -463,11 +463,11 @@ describe('useGroupMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(mockExecuteMetricRequest.mock.calls.length).toBeGreaterThan(callsAfterInitial);
+      expect(mockExecuteInstantQuery.mock.calls.length).toBeGreaterThan(callsAfterInitial);
     });
 
     it('should not fetch when enabled changes from true to false', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
       const { result, rerender } = renderHook(({ params }) => useGroupMetrics(params), {
         initialProps: { params: defaultParams },
@@ -477,7 +477,7 @@ describe('useGroupMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const callsAfterInitial = mockExecuteMetricRequest.mock.calls.length;
+      const callsAfterInitial = mockExecuteInstantQuery.mock.calls.length;
 
       rerender({
         params: {
@@ -488,7 +488,7 @@ describe('useGroupMetrics', () => {
 
       // Should set metrics to null without making new calls
       expect(result.current.metrics).toBeNull();
-      expect(mockExecuteMetricRequest.mock.calls.length).toBe(callsAfterInitial);
+      expect(mockExecuteInstantQuery.mock.calls.length).toBe(callsAfterInitial);
     });
   });
 });

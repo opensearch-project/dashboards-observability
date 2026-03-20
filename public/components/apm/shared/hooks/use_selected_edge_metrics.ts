@@ -66,8 +66,7 @@ export const useSelectedEdgeMetrics = (
     return new PromQLSearchService(prometheusConnectionId, prometheusConnectionMeta);
   }, [prometheusConnectionId, prometheusConnectionMeta]);
 
-  // Memoize time values to avoid unnecessary re-fetches
-  const startTimeSec = useMemo(() => getTimeInSeconds(params.startTime), [params.startTime]);
+  // Memoize time value to avoid unnecessary re-fetches
   const endTimeSec = useMemo(() => getTimeInSeconds(params.endTime), [params.endTime]);
 
   useEffect(() => {
@@ -87,25 +86,21 @@ export const useSelectedEdgeMetrics = (
       try {
         // Execute all 4 queries in parallel
         const [requestsResp, latencyResp, faultsResp, errorsResp] = await Promise.all([
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryEdgeRequests(sourceService, sourceEnvironment, targetService),
-            startTime: startTimeSec,
-            endTime: endTimeSec,
+            time: endTimeSec,
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryEdgeLatencyP99(sourceService, sourceEnvironment, targetService),
-            startTime: startTimeSec,
-            endTime: endTimeSec,
+            time: endTimeSec,
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryEdgeFaults(sourceService, sourceEnvironment, targetService),
-            startTime: startTimeSec,
-            endTime: endTimeSec,
+            time: endTimeSec,
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryEdgeErrors(sourceService, sourceEnvironment, targetService),
-            startTime: startTimeSec,
-            endTime: endTimeSec,
+            time: endTimeSec,
           }),
         ]);
 
@@ -143,7 +138,6 @@ export const useSelectedEdgeMetrics = (
     params.selectedEdge?.sourceEnvironment,
     params.selectedEdge?.targetService,
     promqlService,
-    startTimeSec,
     endTimeSec,
   ]);
 

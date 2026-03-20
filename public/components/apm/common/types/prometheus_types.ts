@@ -53,3 +53,9 @@ export interface ExecuteMetricRequestParams {
   startTime: number;
   endTime: number;
 }
+
+// ExecuteInstantQuery params - for point-in-time evaluation
+export interface ExecuteInstantQueryParams {
+  query: string;
+  time: number; // Unix epoch in seconds
+}

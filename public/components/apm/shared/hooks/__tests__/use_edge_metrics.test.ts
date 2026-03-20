@@ -7,10 +7,10 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { useEdgeMetrics } from '../use_edge_metrics';
 
 // Mock the PromQLSearchService
-const mockExecuteMetricRequest = jest.fn();
+const mockExecuteInstantQuery = jest.fn();
 jest.mock('../../../query_services/promql_search_service', () => ({
   PromQLSearchService: jest.fn().mockImplementation(() => ({
-    executeMetricRequest: mockExecuteMetricRequest,
+    executeInstantQuery: mockExecuteInstantQuery,
   })),
 }));
 
@@ -90,7 +90,7 @@ describe('useEdgeMetrics', () => {
         },
       });
 
-      mockExecuteMetricRequest
+      mockExecuteInstantQuery
         .mockResolvedValueOnce(mockEdgeResponse(100)) // requests
         .mockResolvedValueOnce(mockEdgeResponse(50)) // latency
         .mockResolvedValueOnce(mockEdgeResponse(5)); // fault rate
@@ -136,7 +136,7 @@ describe('useEdgeMetrics', () => {
         ],
       });
 
-      mockExecuteMetricRequest
+      mockExecuteInstantQuery
         .mockResolvedValueOnce(mockDataFrameResponse([100, 200])) // requests
         .mockResolvedValueOnce(mockDataFrameResponse([50, 75])) // latency
         .mockResolvedValueOnce(mockDataFrameResponse([5, 10])); // fault rate
@@ -177,7 +177,7 @@ describe('useEdgeMetrics', () => {
         },
       });
 
-      mockExecuteMetricRequest
+      mockExecuteInstantQuery
         .mockResolvedValueOnce(mockInstantDataResponse(100)) // requests
         .mockResolvedValueOnce(mockInstantDataResponse(25)) // latency
         .mockResolvedValueOnce(mockInstantDataResponse(2)); // fault rate
@@ -209,7 +209,7 @@ describe('useEdgeMetrics', () => {
         },
       };
 
-      mockExecuteMetricRequest.mockResolvedValue(mockRangeResponse);
+      mockExecuteInstantQuery.mockResolvedValue(mockRangeResponse);
 
       const { result } = renderHook(() => useEdgeMetrics(defaultParams));
 
@@ -234,7 +234,7 @@ describe('useEdgeMetrics', () => {
         },
       };
 
-      mockExecuteMetricRequest.mockResolvedValue(mockResponse);
+      mockExecuteInstantQuery.mockResolvedValue(mockResponse);
 
       const { result } = renderHook(() => useEdgeMetrics(defaultParams));
 
@@ -249,7 +249,7 @@ describe('useEdgeMetrics', () => {
     });
 
     it('should handle empty response', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
       const { result } = renderHook(() => useEdgeMetrics(defaultParams));
 
@@ -265,7 +265,7 @@ describe('useEdgeMetrics', () => {
   describe('error handling', () => {
     it('should set error state on fetch failure', async () => {
       const mockError = new Error('Prometheus connection failed');
-      mockExecuteMetricRequest.mockRejectedValue(mockError);
+      mockExecuteInstantQuery.mockRejectedValue(mockError);
 
       const { result } = renderHook(() => useEdgeMetrics(defaultParams));
 
@@ -278,7 +278,7 @@ describe('useEdgeMetrics', () => {
     });
 
     it('should wrap non-Error throws', async () => {
-      mockExecuteMetricRequest.mockRejectedValue('string error');
+      mockExecuteInstantQuery.mockRejectedValue('string error');
 
       const { result } = renderHook(() => useEdgeMetrics(defaultParams));
 
@@ -291,7 +291,7 @@ describe('useEdgeMetrics', () => {
     });
 
     it('should handle null response gracefully', async () => {
-      mockExecuteMetricRequest.mockResolvedValue(null);
+      mockExecuteInstantQuery.mockResolvedValue(null);
 
       const { result } = renderHook(() => useEdgeMetrics(defaultParams));
 
@@ -312,7 +312,7 @@ describe('useEdgeMetrics', () => {
         ],
       };
 
-      mockExecuteMetricRequest.mockResolvedValue(malformedResponse);
+      mockExecuteInstantQuery.mockResolvedValue(malformedResponse);
 
       const { result } = renderHook(() => useEdgeMetrics(defaultParams));
 
@@ -339,7 +339,7 @@ describe('useEdgeMetrics', () => {
         ],
       };
 
-      mockExecuteMetricRequest.mockResolvedValue(responseWithMissingLabels);
+      mockExecuteInstantQuery.mockResolvedValue(responseWithMissingLabels);
 
       const { result } = renderHook(() => useEdgeMetrics(defaultParams));
 
@@ -354,7 +354,7 @@ describe('useEdgeMetrics', () => {
 
   describe('refetch', () => {
     it('should refetch data when refetch is called', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
       const { result } = renderHook(() => useEdgeMetrics(defaultParams));
 
@@ -362,7 +362,7 @@ describe('useEdgeMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const initialCallCount = mockExecuteMetricRequest.mock.calls.length;
+      const initialCallCount = mockExecuteInstantQuery.mock.calls.length;
 
       act(() => {
         result.current.refetch();
@@ -373,13 +373,13 @@ describe('useEdgeMetrics', () => {
       });
 
       // Should have made 3 more calls (requests, latency, fault rate)
-      expect(mockExecuteMetricRequest.mock.calls.length).toBe(initialCallCount + 3);
+      expect(mockExecuteInstantQuery.mock.calls.length).toBe(initialCallCount + 3);
     });
   });
 
   describe('parameter changes', () => {
     it('should refetch when time range changes', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
       const { result, rerender } = renderHook(({ params }) => useEdgeMetrics(params), {
         initialProps: { params: defaultParams },
@@ -389,12 +389,12 @@ describe('useEdgeMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const callsAfterInitial = mockExecuteMetricRequest.mock.calls.length;
+      const callsAfterInitial = mockExecuteInstantQuery.mock.calls.length;
 
       rerender({
         params: {
           ...defaultParams,
-          startTime: new Date('2024-01-02T00:00:00Z'),
+          endTime: new Date('2024-01-02T12:00:00Z'),
         },
       });
 
@@ -402,11 +402,11 @@ describe('useEdgeMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(mockExecuteMetricRequest.mock.calls.length).toBeGreaterThan(callsAfterInitial);
+      expect(mockExecuteInstantQuery.mock.calls.length).toBeGreaterThan(callsAfterInitial);
     });
 
     it('should not fetch when enabled changes from true to false', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
       const { result, rerender } = renderHook(({ params }) => useEdgeMetrics(params), {
         initialProps: { params: defaultParams },
@@ -416,7 +416,7 @@ describe('useEdgeMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const callsAfterInitial = mockExecuteMetricRequest.mock.calls.length;
+      const callsAfterInitial = mockExecuteInstantQuery.mock.calls.length;
 
       rerender({
         params: {
@@ -427,7 +427,7 @@ describe('useEdgeMetrics', () => {
 
       // Should clear the map without making new calls
       expect(result.current.edgeMetricsMap.size).toBe(0);
-      expect(mockExecuteMetricRequest.mock.calls.length).toBe(callsAfterInitial);
+      expect(mockExecuteInstantQuery.mock.calls.length).toBe(callsAfterInitial);
     });
   });
 });

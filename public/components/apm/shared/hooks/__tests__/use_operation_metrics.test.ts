@@ -7,10 +7,10 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useOperationMetrics } from '../use_operation_metrics';
 
 // Mock the PromQLSearchService
-const mockExecuteMetricRequest = jest.fn();
+const mockExecuteInstantQuery = jest.fn();
 jest.mock('../../../query_services/promql_search_service', () => ({
   PromQLSearchService: jest.fn().mockImplementation(() => ({
-    executeMetricRequest: mockExecuteMetricRequest,
+    executeInstantQuery: mockExecuteInstantQuery,
   })),
 }));
 
@@ -91,7 +91,7 @@ describe('useOperationMetrics', () => {
       // Mock 7 parallel responses (one per metric type)
       // Note: PromQL queries now include unit conversions (* 1000 for latency, * 100 for rates)
       // so mock values represent the already-converted values
-      mockExecuteMetricRequest
+      mockExecuteInstantQuery
         .mockResolvedValueOnce(
           createMockResponse([
             { operation: 'GET /api/users', Value: '100' }, // 100ms (already converted in PromQL)
@@ -115,7 +115,7 @@ describe('useOperationMetrics', () => {
       });
 
       expect(result.current.isLoading).toBe(false);
-      expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(7);
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(7);
 
       const metrics = result.current.metrics.get('GET /api/users');
       expect(metrics).toBeDefined();
@@ -129,7 +129,7 @@ describe('useOperationMetrics', () => {
     });
 
     it('should handle traditional Prometheus response format', async () => {
-      mockExecuteMetricRequest
+      mockExecuteInstantQuery
         .mockResolvedValueOnce(
           createTraditionalMockResponse([{ operation: 'GET /api/users', value: '150' }])
         ) // p50 in ms (already converted)
@@ -146,7 +146,7 @@ describe('useOperationMetrics', () => {
     });
 
     it('should initialize metrics to default values when no data returned', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
       const { result } = renderHook(() => useOperationMetrics(defaultParams));
 
@@ -167,7 +167,7 @@ describe('useOperationMetrics', () => {
     });
 
     it('should handle NaN values gracefully', async () => {
-      mockExecuteMetricRequest.mockResolvedValue(
+      mockExecuteInstantQuery.mockResolvedValue(
         createMockResponse([{ operation: 'GET /api/users', Value: 'NaN' }])
       );
 
@@ -182,7 +182,7 @@ describe('useOperationMetrics', () => {
     });
 
     it('should handle multiple operations', async () => {
-      mockExecuteMetricRequest.mockResolvedValue(
+      mockExecuteInstantQuery.mockResolvedValue(
         createMockResponse([
           { operation: 'GET /api/users', Value: '0.1' },
           { operation: 'POST /api/orders', Value: '0.2' },
@@ -204,7 +204,7 @@ describe('useOperationMetrics', () => {
   describe('error handling', () => {
     it('should set error state on fetch failure', async () => {
       const mockError = new Error('PromQL query failed');
-      mockExecuteMetricRequest.mockRejectedValue(mockError);
+      mockExecuteInstantQuery.mockRejectedValue(mockError);
 
       const { result } = renderHook(() => useOperationMetrics(defaultParams));
 
@@ -217,7 +217,7 @@ describe('useOperationMetrics', () => {
     });
 
     it('should wrap non-Error throws', async () => {
-      mockExecuteMetricRequest.mockRejectedValue('string error');
+      mockExecuteInstantQuery.mockRejectedValue('string error');
 
       const { result } = renderHook(() => useOperationMetrics(defaultParams));
 
@@ -232,7 +232,7 @@ describe('useOperationMetrics', () => {
 
   describe('parameter changes', () => {
     it('should refetch when operations change', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
       const { result, rerender } = renderHook(({ params }) => useOperationMetrics(params), {
         initialProps: { params: defaultParams },
@@ -242,7 +242,7 @@ describe('useOperationMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const initialCallCount = mockExecuteMetricRequest.mock.calls.length;
+      const initialCallCount = mockExecuteInstantQuery.mock.calls.length;
 
       rerender({
         params: {
@@ -255,11 +255,11 @@ describe('useOperationMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(mockExecuteMetricRequest.mock.calls.length).toBeGreaterThan(initialCallCount);
+      expect(mockExecuteInstantQuery.mock.calls.length).toBeGreaterThan(initialCallCount);
     });
 
     it('should refetch when refreshTrigger changes', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
       const { result, rerender } = renderHook(({ params }) => useOperationMetrics(params), {
         initialProps: { params: { ...defaultParams, refreshTrigger: 0 } },
@@ -269,7 +269,7 @@ describe('useOperationMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const initialCallCount = mockExecuteMetricRequest.mock.calls.length;
+      const initialCallCount = mockExecuteInstantQuery.mock.calls.length;
 
       rerender({
         params: { ...defaultParams, refreshTrigger: 1 },
@@ -279,13 +279,13 @@ describe('useOperationMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(mockExecuteMetricRequest.mock.calls.length).toBeGreaterThan(initialCallCount);
+      expect(mockExecuteInstantQuery.mock.calls.length).toBeGreaterThan(initialCallCount);
     });
   });
 
   describe('query parameters', () => {
     it('should use actual time range from params', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
       const { result } = renderHook(() => useOperationMetrics(defaultParams));
 
@@ -293,12 +293,10 @@ describe('useOperationMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      // Check that queries use the time range from params
-      const call = mockExecuteMetricRequest.mock.calls[0][0];
-      const expectedStartTime = Math.floor(defaultParams.startTime.getTime() / 1000);
+      // Check that queries use the end time from params (instant queries use time, not startTime/endTime)
+      const call = mockExecuteInstantQuery.mock.calls[0][0];
       const expectedEndTime = Math.floor(defaultParams.endTime.getTime() / 1000);
-      expect(call.startTime).toBe(expectedStartTime);
-      expect(call.endTime).toBe(expectedEndTime);
+      expect(call.time).toBe(expectedEndTime);
     });
   });
 });

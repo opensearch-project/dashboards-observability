@@ -7,10 +7,10 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { useTopDependenciesByFaultRate } from '../use_top_dependencies_by_fault_rate';
 
 // Mock the PromQLSearchService
-const mockExecuteMetricRequest = jest.fn();
+const mockExecuteInstantQuery = jest.fn();
 jest.mock('../../../query_services/promql_search_service', () => ({
   PromQLSearchService: jest.fn().mockImplementation(() => ({
-    executeMetricRequest: mockExecuteMetricRequest,
+    executeInstantQuery: mockExecuteInstantQuery,
   })),
 }));
 
@@ -67,7 +67,7 @@ describe('useTopDependenciesByFaultRate', () => {
 
   describe('successful fetch', () => {
     it('should fetch and transform dependency fault rate data', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({
+      mockExecuteInstantQuery.mockResolvedValue({
         meta: {
           instantData: {
             rows: [
@@ -102,7 +102,7 @@ describe('useTopDependenciesByFaultRate', () => {
     });
 
     it('should sort by fault rate descending', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({
+      mockExecuteInstantQuery.mockResolvedValue({
         meta: {
           instantData: {
             rows: [
@@ -126,7 +126,7 @@ describe('useTopDependenciesByFaultRate', () => {
     });
 
     it('should filter out zero fault rates', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({
+      mockExecuteInstantQuery.mockResolvedValue({
         meta: {
           instantData: {
             rows: [
@@ -148,7 +148,7 @@ describe('useTopDependenciesByFaultRate', () => {
     });
 
     it('should respect limit parameter', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({
+      mockExecuteInstantQuery.mockResolvedValue({
         meta: {
           instantData: {
             rows: Array.from({ length: 10 }, (_, i) => ({
@@ -178,7 +178,7 @@ describe('useTopDependenciesByFaultRate', () => {
 
   describe('Prometheus response formats', () => {
     it('should handle standard Prometheus result format with instant query', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({
+      mockExecuteInstantQuery.mockResolvedValue({
         data: {
           result: [
             {
@@ -205,7 +205,7 @@ describe('useTopDependenciesByFaultRate', () => {
   describe('error handling', () => {
     it('should set error state on fetch failure', async () => {
       const mockError = new Error('Query failed');
-      mockExecuteMetricRequest.mockRejectedValue(mockError);
+      mockExecuteInstantQuery.mockRejectedValue(mockError);
 
       const { result } = renderHook(() => useTopDependenciesByFaultRate(defaultParams));
 
@@ -220,7 +220,7 @@ describe('useTopDependenciesByFaultRate', () => {
 
   describe('refetch', () => {
     it('should refetch when refetch is called', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({
+      mockExecuteInstantQuery.mockResolvedValue({
         meta: { instantData: { rows: [] } },
       });
 
@@ -230,7 +230,7 @@ describe('useTopDependenciesByFaultRate', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(1);
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(1);
 
       act(() => {
         result.current.refetch();
@@ -240,13 +240,13 @@ describe('useTopDependenciesByFaultRate', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(2);
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(2);
     });
   });
 
   describe('parameter changes', () => {
     it('should refetch when time range changes', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({
+      mockExecuteInstantQuery.mockResolvedValue({
         meta: { instantData: { rows: [] } },
       });
 
@@ -272,11 +272,11 @@ describe('useTopDependenciesByFaultRate', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(2);
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(2);
     });
 
     it('should refetch when refreshTrigger changes', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({
+      mockExecuteInstantQuery.mockResolvedValue({
         meta: { instantData: { rows: [] } },
       });
 
@@ -299,7 +299,7 @@ describe('useTopDependenciesByFaultRate', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(2);
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(2);
     });
   });
 });

@@ -64,8 +64,7 @@ export const useEdgeMetrics = (params: UseEdgeMetricsParams): UseEdgeMetricsResu
     return new PromQLSearchService(prometheusConnectionId, prometheusConnectionMeta);
   }, [prometheusConnectionId, prometheusConnectionMeta]);
 
-  // Memoize time values to avoid unnecessary re-fetches
-  const startTimeSec = useMemo(() => getTimeInSeconds(params.startTime), [params.startTime]);
+  // Memoize time value to avoid unnecessary re-fetches
   const endTimeSec = useMemo(() => getTimeInSeconds(params.endTime), [params.endTime]);
 
   useEffect(() => {
@@ -82,20 +81,17 @@ export const useEdgeMetrics = (params: UseEdgeMetricsParams): UseEdgeMetricsResu
       try {
         // Execute all queries in parallel
         const [requestsResp, latencyResp, faultRateResp] = await Promise.all([
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryAllEdgeRequests(),
-            startTime: startTimeSec,
-            endTime: endTimeSec,
+            time: endTimeSec,
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryAllEdgeLatency(),
-            startTime: startTimeSec,
-            endTime: endTimeSec,
+            time: endTimeSec,
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryAllEdgeFaultRate(),
-            startTime: startTimeSec,
-            endTime: endTimeSec,
+            time: endTimeSec,
           }),
         ]);
 
@@ -129,7 +125,7 @@ export const useEdgeMetrics = (params: UseEdgeMetricsParams): UseEdgeMetricsResu
     };
 
     fetchMetrics();
-  }, [params.enabled, promqlService, startTimeSec, endTimeSec, refetchTrigger]);
+  }, [params.enabled, promqlService, endTimeSec, refetchTrigger]);
 
   const refetch = useCallback(() => {
     setRefetchTrigger((prev) => prev + 1);

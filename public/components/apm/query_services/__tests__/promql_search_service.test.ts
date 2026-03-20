@@ -198,4 +198,77 @@ describe('PromQLSearchService', () => {
       consoleSpy.mockRestore();
     });
   });
+
+  describe('executeInstantQuery', () => {
+    it('should send options.queryType INSTANT and options.time', async () => {
+      const mockResponse = {
+        body: {
+          data: {
+            result: [{ metric: { service: 'test' }, value: [1000, '100'] }],
+          },
+        },
+      };
+
+      (coreRefs.http!.post as jest.Mock).mockResolvedValue(mockResponse);
+
+      const result = await service.executeInstantQuery({
+        query: 'sum(request{namespace="span_derived"})',
+        time: 1704153600,
+      });
+
+      const callArg = (coreRefs.http!.post as jest.Mock).mock.calls[0][1];
+      const body = JSON.parse(callArg.body);
+
+      expect(body.options.queryType).toBe('INSTANT');
+      expect(body.options.time).toBe('1704153600');
+      expect(result).toEqual(mockResponse.body);
+    });
+
+    it('should NOT include timeRange in request body', async () => {
+      const mockResponse = { body: { data: { result: [] } } };
+      (coreRefs.http!.post as jest.Mock).mockResolvedValue(mockResponse);
+
+      await service.executeInstantQuery({
+        query: 'sum(request{namespace="span_derived"})',
+        time: 1704153600,
+      });
+
+      const callArg = (coreRefs.http!.post as jest.Mock).mock.calls[0][1];
+      const body = JSON.parse(callArg.body);
+
+      expect(body.timeRange).toBeUndefined();
+    });
+
+    it('should throw on failure', async () => {
+      const mockError = new Error('Instant query failed');
+      (coreRefs.http!.post as jest.Mock).mockRejectedValue(mockError);
+
+      await expect(
+        service.executeInstantQuery({
+          query: 'invalid query',
+          time: 1000,
+        })
+      ).rejects.toThrow('Instant query failed');
+    });
+
+    it('should log error on failure', async () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const mockError = new Error('Query failed');
+      (coreRefs.http!.post as jest.Mock).mockRejectedValue(mockError);
+
+      await expect(
+        service.executeInstantQuery({
+          query: 'test',
+          time: 1000,
+        })
+      ).rejects.toThrow();
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '[PromQLSearchService] Instant query execution failed:',
+        mockError
+      );
+
+      consoleSpy.mockRestore();
+    });
+  });
 });

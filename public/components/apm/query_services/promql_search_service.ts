@@ -4,7 +4,10 @@
  */
 
 import { coreRefs } from '../../../framework/core_refs';
-import { ExecuteMetricRequestParams } from '../common/types/prometheus_types';
+import {
+  ExecuteMetricRequestParams,
+  ExecuteInstantQueryParams,
+} from '../common/types/prometheus_types';
 
 /**
  * PromQLSearchService - Frontend service for executing PromQL queries
@@ -55,6 +58,42 @@ export class PromQLSearchService {
       return response.body;
     } catch (error) {
       console.error('[PromQLSearchService] Query execution failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Execute an instant query (point-in-time evaluation)
+   * More efficient than range queries when only a single aggregated value is needed
+   */
+  async executeInstantQuery(params: ExecuteInstantQueryParams): Promise<any> {
+    const { query, time } = params;
+
+    const requestBody = {
+      query: {
+        query,
+        language: 'PROMQL',
+        dataset: {
+          id: this.prometheusConnectionId,
+          type: 'PROMETHEUS',
+          dataSource: { meta: this.prometheusConnectionMeta },
+        },
+        format: 'jdbc',
+      },
+      options: {
+        queryType: 'INSTANT',
+        time: time.toString(),
+      },
+    };
+
+    try {
+      const response = await coreRefs.http!.post('/api/enhancements/search/promql', {
+        body: JSON.stringify(requestBody),
+      });
+
+      return response.body;
+    } catch (error) {
+      console.error('[PromQLSearchService] Instant query execution failed:', error);
       throw error;
     }
   }
