@@ -28,7 +28,7 @@ export interface PromQLMetricCardProps {
   secondaryValue?: number; // Optional external secondary value (e.g., rate)
   secondaryFormatValue?: (value: number) => string; // Formatter for secondary value
   secondaryLabel?: string; // Label for secondary value (e.g., "rate", "latest")
-  divisor?: number; // Divide values by this number (e.g., windowDuration for req/s)
+  divisor?: number; // When showTotal, avgValue = sum(data_points) / divisor (e.g., time range in seconds for req/s)
 }
 
 /**
@@ -127,12 +127,14 @@ export const PromQLMetricCard: React.FC<PromQLMetricCardProps> = ({
   }, [chartData]);
 
   // Calculate average and latest from chart data (for showTotal mode)
+  // When divisor is provided: avgValue = sum(data_points) / divisor
+  // This supports rate calculation: e.g., total_requests / time_range_seconds = req/s
   const { avgValue, latestFromChart } = useMemo(() => {
     if (chartData.length === 0) return { avgValue: 0, latestFromChart: 0 };
     const sum = chartData.reduce((s, point) => s + point.value, 0);
     const d = divisor && divisor > 0 ? divisor : 1;
-    const avg = sum / chartData.length / d;
-    const latest = chartData[chartData.length - 1].value / d;
+    const avg = sum / d;
+    const latest = chartData[chartData.length - 1].value;
     return { avgValue: avg, latestFromChart: latest };
   }, [chartData, divisor]);
 

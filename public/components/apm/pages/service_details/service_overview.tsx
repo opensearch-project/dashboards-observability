@@ -73,8 +73,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
   serviceMapDataset: _serviceMapDataset,
   refreshTrigger,
 }) => {
-  const { config } = useApmConfig();
-  const windowDuration = config?.windowDuration ?? 60;
+  const { _config } = useApmConfig();
 
   // State for latency percentile selector
   const [latencyPercentile, setLatencyPercentile] = useState<'p99' | 'p90' | 'p50'>('p99');
@@ -85,7 +84,13 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
   const [errorRateTopK, setErrorRateTopK] = useState<number>(3);
   const [availabilityBottomK, setAvailabilityBottomK] = useState<number>(3);
 
-  const chartStepWindow = useChartStepWindow(timeRange);
+  // Metric card uses RESOLUTION_LOW — window must match to avoid gaps/overlaps in sum_over_time
+  const { window: metricCardWindow, timeRangeSeconds } = useChartStepWindow(
+    timeRange,
+    RESOLUTION_LOW
+  );
+  // Line charts use default resolution (RESOLUTION_MEDIUM)
+  const { window: chartStepWindow } = useChartStepWindow(timeRange);
 
   // Flyout state
   const [flyoutOpen, setFlyoutOpen] = useState(false);
@@ -216,19 +221,18 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
               defaultMessage: 'Throughput (req/s)',
             })}
             titleTooltip={i18n.translate('observability.apm.serviceOverview.throughputTooltip', {
-              defaultMessage:
-                'Average requests per second. Normalized using the Window Duration configured in APM Settings.',
+              defaultMessage: 'Average requests per second over the selected time range.',
             })}
             subtitle={i18n.translate('observability.apm.serviceOverview.avg', {
               defaultMessage: 'Avg',
             })}
-            promqlQuery={getQueryServiceRequests(environment, serviceName)}
+            promqlQuery={getQueryServiceRequests(environment, serviceName, metricCardWindow)}
             timeRange={timeRange}
             prometheusConnectionId={prometheusConnectionId}
             formatValue={formatCount}
             refreshTrigger={refreshTrigger}
             showTotal
-            divisor={windowDuration}
+            divisor={timeRangeSeconds}
           />
         </EuiFlexItem>
         <EuiFlexItem>

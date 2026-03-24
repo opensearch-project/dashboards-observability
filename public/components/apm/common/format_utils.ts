@@ -16,6 +16,7 @@ export const formatCount = (value: number | undefined): string => {
   if (value === undefined || isNaN(value) || !isFinite(value)) return '-';
   if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
   if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
+  if (value > 0 && value < 1) return value.toFixed(3);
   return value.toFixed(0);
 };
 
@@ -55,6 +56,6 @@ export const formatThroughput = (value: number | undefined): string => {
   if (value === undefined || isNaN(value) || !isFinite(value)) return '-';
   if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M req/s`;
   if (value >= 1000) return `${(value / 1000).toFixed(1)}K req/s`;
-  if (value > 0 && value < 1) return `${value.toFixed(1)} req/s`;
+  if (value > 0 && value < 1) return `${value.toFixed(3)} req/s`;
   return `${value.toFixed(0)} req/s`;
 };

@@ -165,7 +165,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   expandedRowsRef.current = expandedRows;
   const hasAutoExpandedRef = useRef(false);
 
-  const chartStepWindow = useChartStepWindow(timeRange);
+  const { window: chartStepWindow } = useChartStepWindow(timeRange);
 
   // Helper to parse URL params from hash
   const getUrlParams = () => {

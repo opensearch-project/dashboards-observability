@@ -7,10 +7,11 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
 import {
   getQueryServicesThroughput,
+  getQueryServicesThroughputTotal,
   getQueryServicesFailureRatio,
   getQueryServicesLatency,
 } from '../../query_services/query_requests/promql_queries';
-import { getTimeInSeconds } from '../utils/time_utils';
+import { getTimeInSeconds, calculateTimeRangeDuration } from '../utils/time_utils';
 import { calculateStep, RESOLUTION_LOW } from '../utils/step_utils';
 import { useApmConfig } from '../../config/apm_config_context';
 
@@ -75,6 +76,8 @@ export const useServicesRedMetrics = (
   const [throughputFailureMap, setThroughputFailureMap] = useState<
     Map<string, ThroughputFailureMetrics>
   >(new Map());
+  // Total request counts per service (from sum_over_time instant query)
+  const [totalCountMap, setTotalCountMap] = useState<Map<string, number>>(new Map());
 
   // Separate loading states
   const [isLoadingLatency, setIsLoadingLatency] = useState(true);
@@ -125,10 +128,12 @@ export const useServicesRedMetrics = (
       try {
         const throughputQuery = getQueryServicesThroughput(serviceFilter);
         const failureRatioQuery = getQueryServicesFailureRatio(serviceFilter);
+        const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
+        const totalQuery = getQueryServicesThroughputTotal(serviceFilter, timeRangeDuration);
 
         const step = calculateStep(startTimeSec, endTimeSec, RESOLUTION_LOW);
 
-        const [throughputResp, failureRatioResp] = await Promise.all([
+        const [throughputResp, failureRatioResp, totalResp] = await Promise.all([
           promqlService.executeMetricRequest({
             query: throughputQuery,
             startTime: startTimeSec,
@@ -141,6 +146,11 @@ export const useServicesRedMetrics = (
             endTime: endTimeSec,
             step,
           }),
+          // Instant query for total request count per service
+          promqlService.executeInstantQuery({
+            query: totalQuery,
+            time: endTimeSec,
+          }),
         ]);
 
         const newMap = new Map<string, ThroughputFailureMetrics>();
@@ -151,7 +161,15 @@ export const useServicesRedMetrics = (
           });
         });
 
+        // Extract total counts per service from the instant query
+        const newTotalMap = new Map<string, number>();
+        params.services.forEach(({ serviceName }) => {
+          const data = extractServiceData(totalResp, serviceName);
+          newTotalMap.set(serviceName, data.length > 0 ? data[0].value : 0);
+        });
+
         setThroughputFailureMap(newMap);
+        setTotalCountMap(newTotalMap);
       } catch (err) {
         console.error('[useServicesRedMetrics] Error fetching throughput/failure metrics:', err);
         setThroughputFailureError(err instanceof Error ? err : new Error('Unknown error'));
@@ -245,13 +263,11 @@ export const useServicesRedMetrics = (
         latencyData.length > 0
           ? latencyData.reduce((sum, point) => sum + point.value, 0) / latencyData.length
           : 0;
-      const windowDuration = config?.windowDuration ?? 60;
-      const avgThroughput =
-        throughputData.length > 0
-          ? throughputData.reduce((sum, point) => sum + point.value, 0) /
-            throughputData.length /
-            windowDuration
-          : 0;
+      // Use sum_over_time total / time range for accurate req/s
+      // (plain gauge range query is inflated by Prometheus stale lookback)
+      const timeRangeSeconds = endTimeSec - startTimeSec;
+      const totalRequests = totalCountMap.get(serviceName) || 0;
+      const avgThroughput = timeRangeSeconds > 0 ? totalRequests / timeRangeSeconds : 0;
       const avgFailureRatio =
         failureData.length > 0
           ? failureData.reduce((sum, point) => sum + point.value, 0) / failureData.length
@@ -267,7 +283,7 @@ export const useServicesRedMetrics = (
       });
     });
     return combined;
-  }, [latencyMap, throughputFailureMap]);
+  }, [latencyMap, throughputFailureMap, totalCountMap, startTimeSec, endTimeSec]);
 
   // Combined loading state
   const isLoading = isLoadingLatency || isLoadingThroughputFailure;

@@ -44,6 +44,20 @@ sum by (service) (
 `.trim();
 
 /**
+ * Services total request count over a time range — grouped by service
+ * Uses sum_over_time to count actual TSDB samples (immune to stale lookback inflation).
+ * @param serviceFilter - Service filter regex (e.g., service=~"svc1|svc2")
+ * @param timeRange - Prometheus duration string (e.g., "15m", "1h")
+ * @page Services Home — avgThroughput calculation
+ */
+export const getQueryServicesThroughputTotal = (serviceFilter: string, timeRange: string): string =>
+  `
+sum by (service) (
+  sum_over_time(request{${serviceFilter},remoteService="",namespace="span_derived"}[${timeRange}])
+)
+`.trim();
+
+/**
  * Services failure ratio over time — (error + fault) / request * 100
  * @param serviceFilter - Service filter regex (e.g., service=~"svc1|svc2")
  * @page Services Home — Failure ratio sparkline column
