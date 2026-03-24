@@ -28,6 +28,7 @@ export interface PromQLMetricCardProps {
   secondaryValue?: number; // Optional external secondary value (e.g., rate)
   secondaryFormatValue?: (value: number) => string; // Formatter for secondary value
   secondaryLabel?: string; // Label for secondary value (e.g., "rate", "latest")
+  divisor?: number; // Divide values by this number (e.g., windowDuration for req/s)
 }
 
 /**
@@ -65,6 +66,7 @@ export const PromQLMetricCard: React.FC<PromQLMetricCardProps> = ({
   secondaryValue,
   secondaryFormatValue,
   secondaryLabel,
+  divisor,
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.ECharts | null>(null);
@@ -128,10 +130,11 @@ export const PromQLMetricCard: React.FC<PromQLMetricCardProps> = ({
   const { avgValue, latestFromChart } = useMemo(() => {
     if (chartData.length === 0) return { avgValue: 0, latestFromChart: 0 };
     const sum = chartData.reduce((s, point) => s + point.value, 0);
-    const avg = sum / chartData.length;
-    const latest = chartData[chartData.length - 1].value;
+    const d = divisor && divisor > 0 ? divisor : 1;
+    const avg = sum / chartData.length / d;
+    const latest = chartData[chartData.length - 1].value / d;
     return { avgValue: avg, latestFromChart: latest };
-  }, [chartData]);
+  }, [chartData, divisor]);
 
   // Determine primary value based on showTotal mode
   // When showTotal is true, display average throughput instead of sum

@@ -45,6 +45,7 @@ import {
 import { useOperations } from '../../shared/hooks/use_operations';
 import { useOperationMetrics } from '../../shared/hooks/use_operation_metrics';
 import { parseTimeRange } from '../../shared/utils/time_utils';
+import { useChartStepWindow } from '../../shared/hooks/use_chart_step_window';
 import { OperationFilterSidebar } from '../../shared/components/operation_filter_sidebar';
 import { ActiveFilterBadges, FilterBadge } from '../../shared/components/active_filter_badges';
 import { formatCount, formatLatency } from '../../common/format_utils';
@@ -180,6 +181,8 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
   const expandedRowsRef = useRef<Set<string>>(expandedRows);
   expandedRowsRef.current = expandedRows;
   const hasAutoExpandedRef = useRef(false);
+
+  const chartStepWindow = useChartStepWindow(timeRange);
 
   // Filter sidebar state
   // Sidebar state is now managed by EuiResizableContainer
@@ -793,7 +796,8 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
                 promqlQuery={getQueryOperationRequestsOverTime(
                   environment,
                   serviceName,
-                  operationName
+                  operationName,
+                  chartStepWindow
                 )}
                 prometheusConnectionId={prometheusConnectionId}
                 timeRange={timeRange}
@@ -833,7 +837,7 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
     });
 
     return map;
-  }, [expandedRows, environment, serviceName, timeRange, prometheusConnectionId]);
+  }, [expandedRows, environment, serviceName, timeRange, prometheusConnectionId, chartStepWindow]);
 
   if (error) {
     return (

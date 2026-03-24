@@ -32,14 +32,13 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import moment from 'moment';
 import { coreRefs } from '../../../../framework/core_refs';
 import { useApmConfig } from '../../config/apm_config_context';
 import { useCorrelatedLogs } from '../hooks/use_apm_config';
 import { useServiceAttributes } from '../hooks/use_service_attributes';
 import { PPLSearchService } from '../../query_services/ppl_search_service';
 import { TimeRange } from '../../common/types/service_types';
-import { parseTimeRange } from '../utils/time_utils';
+import { parseTimeRange, formatPPLTimestamp, formatDisplayTimestamp } from '../utils/time_utils';
 import { correlationsFlyoutI18nTexts as i18nTexts } from './service_correlations_flyout_i18n';
 import {
   navigateToExploreTraces,
@@ -422,8 +421,10 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
           // 2. Add timestamp filter with buffer if we have span time range (5 minutes before span start only)
           if (spanTimeRange) {
             const bufferMs = CORRELATION_CONSTANTS.TELEMETRY_LAG_BUFFER_MS;
-            const minTimeStr = new Date(spanTimeRange.minTime.getTime() - bufferMs).toISOString();
-            const maxTimeStr = new Date(spanTimeRange.maxTime.getTime()).toISOString();
+            const minTimeStr = formatPPLTimestamp(
+              new Date(spanTimeRange.minTime.getTime() - bufferMs)
+            );
+            const maxTimeStr = formatPPLTimestamp(new Date(spanTimeRange.maxTime.getTime()));
             pplQuery += ` | where \`${timestampField}\` >= '${minTimeStr}' AND \`${timestampField}\` <= '${maxTimeStr}'`;
           }
 
@@ -524,8 +525,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
       sortable: true,
       render: (time: string) => {
         if (!time) return <EuiText size="xs">-</EuiText>;
-        const dateFormat = uiSettingsService.get('dateFormat') || 'MMM D, YYYY @ HH:mm:ss.SSS';
-        return <EuiText size="xs">{moment(time).format(dateFormat)}</EuiText>;
+        return <EuiText size="xs">{formatDisplayTimestamp(time, uiSettingsService)}</EuiText>;
       },
     },
     {
@@ -612,8 +612,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
       sortable: true,
       render: (time: string) => {
         if (!time) return <EuiText size="xs">-</EuiText>;
-        const dateFormat = uiSettingsService.get('dateFormat') || 'MMM D, YYYY @ HH:mm:ss.SSS';
-        return <EuiText size="xs">{moment(time).format(dateFormat)}</EuiText>;
+        return <EuiText size="xs">{formatDisplayTimestamp(time, uiSettingsService)}</EuiText>;
       },
     },
     {

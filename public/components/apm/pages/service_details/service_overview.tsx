@@ -39,8 +39,10 @@ import {
   formatPercentageValue,
   formatLatency,
 } from '../../common/format_utils';
+import { useApmConfig } from '../../config/apm_config_context';
 import { navigateToServiceDetails } from '../../shared/utils/navigation_utils';
 import { RESOLUTION_LOW } from '../../shared/utils/step_utils';
+import { useChartStepWindow } from '../../shared/hooks/use_chart_step_window';
 
 export interface ServiceOverviewProps {
   serviceName: string;
@@ -71,6 +73,9 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
   serviceMapDataset: _serviceMapDataset,
   refreshTrigger,
 }) => {
+  const { config } = useApmConfig();
+  const windowDuration = config?.windowDuration ?? 60;
+
   // State for latency percentile selector
   const [latencyPercentile, setLatencyPercentile] = useState<'p99' | 'p90' | 'p50'>('p99');
 
@@ -79,6 +84,8 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
   const [faultRateTopK, setFaultRateTopK] = useState<number>(3);
   const [errorRateTopK, setErrorRateTopK] = useState<number>(3);
   const [availabilityBottomK, setAvailabilityBottomK] = useState<number>(3);
+
+  const chartStepWindow = useChartStepWindow(timeRange);
 
   // Flyout state
   const [flyoutOpen, setFlyoutOpen] = useState(false);
@@ -206,11 +213,11 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
         <EuiFlexItem>
           <PromQLMetricCard
             title={i18n.translate('observability.apm.serviceOverview.throughput', {
-              defaultMessage: 'Throughput (req/int)',
+              defaultMessage: 'Throughput (req/s)',
             })}
             titleTooltip={i18n.translate('observability.apm.serviceOverview.throughputTooltip', {
               defaultMessage:
-                'Average request count per interval. Interval is determined by the window_duration option set during Data Prepper ingestion.',
+                'Average requests per second. Normalized using the Window Duration configured in APM Settings.',
             })}
             subtitle={i18n.translate('observability.apm.serviceOverview.avg', {
               defaultMessage: 'Avg',
@@ -221,6 +228,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
             formatValue={formatCount}
             refreshTrigger={refreshTrigger}
             showTotal
+            divisor={windowDuration}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -410,7 +418,12 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
             </EuiFlexGroup>
             <EuiSpacer size="s" />
             <PromQLLineChart
-              promqlQuery={getQueryTopOperationsByVolume(environment, serviceName, requestsTopK)}
+              promqlQuery={getQueryTopOperationsByVolume(
+                environment,
+                serviceName,
+                requestsTopK,
+                chartStepWindow
+              )}
               timeRange={timeRange}
               prometheusConnectionId={prometheusConnectionId}
               formatValue={formatCount}

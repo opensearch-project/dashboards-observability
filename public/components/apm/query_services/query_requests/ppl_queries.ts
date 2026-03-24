@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { formatPPLTimestamp } from '../../shared/utils/time_utils';
+
 /**
  * PPL queries for APM topology data
  *
@@ -20,32 +22,25 @@
  * - nodeConnectionHash — dedup key for topology connections
  * - operationConnectionHash — dedup key for operation-level connections
  *
- * All queries use ISO 8601 timestamps for time filtering.
+ * Timestamps use 'YYYY-MM-DD HH:mm:ss.SSS' format for backward compatibility with all PPL versions.
  */
 
 /**
- * Converts a timestamp to ISO 8601 string format
- * Handles Date objects and ISO strings
- *
- * @param timestamp - Date object or ISO string
- * @returns ISO 8601 formatted string (e.g., "2026-01-19T05:44:00.000Z")
+ * Converts a timestamp to a Date object for formatting
  */
-function convertToISOString(timestamp: string | Date): string {
-  // Handle Date object
+function toDate(timestamp: string | Date): Date {
   if (timestamp instanceof Date) {
-    return timestamp.toISOString();
+    return timestamp;
   }
-
-  // Handle string - validate and normalize to ISO format
   const date = new Date(timestamp);
   if (isNaN(date.getTime())) {
     throw new Error(`Invalid timestamp: ${timestamp}`);
   }
-  return date.toISOString();
+  return date;
 }
 
 /**
- * Builds a time filter clause for PPL queries using ISO 8601 timestamps
+ * Builds a time filter clause for PPL queries using 'YYYY-MM-DD HH:mm:ss.SSS' format
  *
  * @param startTime - Start time as Date object or ISO string
  * @param endTime - End time as Date object or ISO string
@@ -53,9 +48,9 @@ function convertToISOString(timestamp: string | Date): string {
  */
 function buildTimeFilterClause(startTime?: string | Date, endTime?: string | Date): string {
   if (startTime && endTime) {
-    const startISO = convertToISOString(startTime);
-    const endISO = convertToISOString(endTime);
-    return ` | where timestamp >= '${startISO}' and timestamp <= '${endISO}'`;
+    const startStr = formatPPLTimestamp(toDate(startTime));
+    const endStr = formatPPLTimestamp(toDate(endTime));
+    return ` | where timestamp >= '${startStr}' and timestamp <= '${endStr}'`;
   }
   return '';
 }
@@ -72,7 +67,7 @@ function buildTimeFilterClause(startTime?: string | Date, endTime?: string | Dat
  * @example
  * ```
  * source=otel-apm-service-map
- * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
+ * | where timestamp >= '2026-01-19 05:44:00.000' and timestamp <= '2026-01-19 05:49:00.000'
  * | dedup nodeConnectionHash
  * | fields sourceNode.keyAttributes, sourceNode.groupByAttributes, targetNode.keyAttributes, targetNode.groupByAttributes
  * ```
@@ -102,7 +97,7 @@ export function getQueryListServices(
  * @example
  * ```
  * source=otel-apm-service-map
- * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
+ * | where timestamp >= '2026-01-19 05:44:00.000' and timestamp <= '2026-01-19 05:49:00.000'
  * | where sourceNode.keyAttributes.environment = 'generic:default'
  * | where sourceNode.keyAttributes.name = 'frontend'
  * | dedup nodeConnectionHash
@@ -147,7 +142,7 @@ export function getQueryGetService(
  * @example
  * ```
  * source=otel-apm-service-map
- * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
+ * | where timestamp >= '2026-01-19 05:44:00.000' and timestamp <= '2026-01-19 05:49:00.000'
  * | where sourceNode.keyAttributes.environment = 'generic:default'
  * | where sourceNode.keyAttributes.name = 'frontend'
  * | fields sourceNode.keyAttributes, sourceNode.groupByAttributes, timestamp
@@ -185,7 +180,7 @@ export function getQueryServiceAttributes(
  * @example
  * ```
  * source=otel-apm-service-map
- * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
+ * | where timestamp >= '2026-01-19 05:44:00.000' and timestamp <= '2026-01-19 05:49:00.000'
  * | where sourceNode.keyAttributes.environment = 'generic:default'
  * | where sourceNode.keyAttributes.name = 'frontend'
  * | dedup operationConnectionHash
@@ -228,7 +223,7 @@ export function getQueryListServiceOperations(
  * @example
  * ```
  * source=otel-apm-service-map
- * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
+ * | where timestamp >= '2026-01-19 05:44:00.000' and timestamp <= '2026-01-19 05:49:00.000'
  * | where sourceNode.keyAttributes.environment = 'generic:default'
  * | where sourceNode.keyAttributes.name = 'frontend'
  * | dedup operationConnectionHash
@@ -270,7 +265,7 @@ export function getQueryListServiceDependencies(
  * @example
  * ```
  * source=otel-apm-service-map
- * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
+ * | where timestamp >= '2026-01-19 05:44:00.000' and timestamp <= '2026-01-19 05:49:00.000'
  * | dedup nodeConnectionHash
  * | fields sourceNode.keyAttributes, targetNode.keyAttributes, sourceNode.groupByAttributes, targetNode.groupByAttributes
  * ```
@@ -302,7 +297,7 @@ export function getQueryGetServiceMap(
  * @example
  * ```
  * source=otel-apm-service-map
- * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
+ * | where timestamp >= '2026-01-19 05:44:00.000' and timestamp <= '2026-01-19 05:49:00.000'
  * | where sourceNode.keyAttributes.environment = 'generic:default'
  * | where sourceNode.keyAttributes.name = 'frontend'
  * | where sourceOperation.name = 'GET /api/users'

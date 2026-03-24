@@ -129,6 +129,7 @@ describe('OSDSavedApmConfigClient', () => {
               { tracesDataset: { id: 'references[0].id' } },
               { serviceMapDataset: { id: 'references[1].id' } },
               { prometheusDataSource: { id: 'references[2].id' } },
+              { windowDuration: 60 },
             ],
           }),
           expect.any(Object)

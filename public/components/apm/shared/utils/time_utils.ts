@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import moment from 'moment-timezone';
 import dateMath from '@elastic/datemath';
 import { TimeRange, ParsedTimeRange, TimeAxisConfig } from '../../common/types/service_types';
 
@@ -35,6 +36,50 @@ export const parseTimeRange = (timeRange: TimeRange): ParsedTimeRange => {
  */
 export const formatDate = (date: Date): string => {
   return date.toLocaleString();
+};
+
+/**
+ * Format a Date to PPL-compatible timestamp string: 'YYYY-MM-DD HH:mm:ss.SSS'
+ * Uses UTC values for consistent cross-timezone query results.
+ *
+ * Similar to query_enhancements/common/utils.ts:formatDate, but that function
+ * uses local time (getMonth, getHours) whereas PPL timestamp filtering requires
+ * UTC (getUTCMonth, getUTCHours) to match stored data consistently across timezones.
+ */
+export const formatPPLTimestamp = (date: Date): string => {
+  return (
+    date.getUTCFullYear() +
+    '-' +
+    ('0' + (date.getUTCMonth() + 1)).slice(-2) +
+    '-' +
+    ('0' + date.getUTCDate()).slice(-2) +
+    ' ' +
+    ('0' + date.getUTCHours()).slice(-2) +
+    ':' +
+    ('0' + date.getUTCMinutes()).slice(-2) +
+    ':' +
+    ('0' + date.getUTCSeconds()).slice(-2) +
+    '.' +
+    ('00' + date.getUTCMilliseconds()).slice(-3)
+  );
+};
+
+/**
+ * Format a timestamp string for display, respecting the user's configured timezone.
+ * Reads 'dateFormat' and 'dateFormat:tz' from uiSettings, resolving 'Browser'
+ * to the browser's local timezone. This matches how Discover formats timestamps.
+ */
+export const formatDisplayTimestamp = (
+  time: string,
+  uiSettingsService: { get: (key: string) => any }
+): string => {
+  const dateFormat = uiSettingsService.get('dateFormat') || 'MMM D, YYYY @ HH:mm:ss.SSS';
+  let timezone = uiSettingsService.get('dateFormat:tz');
+  if (!timezone || timezone === 'Browser') {
+    timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  }
+  // PPL returns UTC timestamps without 'Z' suffix — parse as UTC first, then convert
+  return moment.utc(time).tz(timezone).format(dateFormat);
 };
 
 // Time interval constants in milliseconds

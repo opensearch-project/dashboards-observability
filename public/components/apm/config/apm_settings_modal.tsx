@@ -26,6 +26,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
+  EuiFieldNumber,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { NotificationsStart } from '../../../../../../src/core/public';
@@ -63,6 +64,13 @@ export interface ApmSettingsModalProps {
   notifications: NotificationsStart;
 }
 
+interface ApmSettingsFormData {
+  tracesDatasetId: string;
+  serviceMapDatasetId: string;
+  prometheusDataSourceId: string;
+  windowDuration: string;
+}
+
 export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
   const { onClose, notifications } = props;
 
@@ -73,10 +81,11 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
   );
 
   // Form state - minimal fields only
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ApmSettingsFormData>({
     tracesDatasetId: '',
     serviceMapDatasetId: '',
     prometheusDataSourceId: '',
+    windowDuration: '60',
   });
 
   const [selectedTracesDataset, setSelectedTracesDataset] = useState([]);
@@ -151,6 +160,7 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
         tracesDatasetId: existingConfig.tracesDataset.id,
         serviceMapDatasetId: existingConfig.serviceMapDataset.id,
         prometheusDataSourceId: existingConfig.prometheusDataSource.id,
+        windowDuration: String(existingConfig.windowDuration ?? 60),
       });
 
       // Set selected options
@@ -290,20 +300,26 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
       const client = OSDSavedApmConfigClient.getInstance();
 
       if (existingConfig?.objectId) {
+        const windowDuration = Math.max(1, parseInt(formData.windowDuration, 10) || 60);
+
         // Update existing config in place (atomic operation)
         await client.update({
           objectId: existingConfig.objectId,
           tracesDatasetId: formData.tracesDatasetId,
           serviceMapDatasetId: formData.serviceMapDatasetId,
           prometheusDataSourceId: formData.prometheusDataSourceId,
+          windowDuration,
         });
       } else {
+        const windowDuration = Math.max(1, parseInt(formData.windowDuration, 10) || 60);
+
         // Create new config only when none exists
         await client.create({
           workspaceId,
           tracesDatasetId: formData.tracesDatasetId,
           serviceMapDatasetId: formData.serviceMapDatasetId,
           prometheusDataSourceId: formData.prometheusDataSourceId,
+          windowDuration,
         });
       }
 
@@ -709,6 +725,33 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
                       }
                     )}
                   />
+                }
+                fullWidth
+              />
+            </EuiFormRow>
+
+            <EuiSpacer size="m" />
+
+            {/* Window Duration */}
+            <EuiFormRow
+              label={i18n.translate('observability.apm.settings.windowDurationLabel', {
+                defaultMessage: 'Window Duration (seconds)',
+              })}
+              helpText={i18n.translate('observability.apm.settings.windowDurationHelpText', {
+                defaultMessage:
+                  'Set to match your APM service map processor window_duration config. For accurate counts, ensure your Prometheus remote write/scrape interval matches this value.',
+              })}
+              fullWidth
+            >
+              <EuiFieldNumber
+                compressed
+                min={1}
+                value={formData.windowDuration}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    windowDuration: e.target.value,
+                  })
                 }
                 fullWidth
               />

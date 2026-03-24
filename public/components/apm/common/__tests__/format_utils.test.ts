@@ -127,29 +127,36 @@ describe('format_utils', () => {
       expect(formatThroughput(-Infinity)).toBe('-');
     });
 
-    it('formats small numbers with req/int suffix', () => {
-      expect(formatThroughput(100)).toBe('100 req/int');
-      expect(formatThroughput(0)).toBe('0 req/int');
-      expect(formatThroughput(999)).toBe('999 req/int');
+    it('formats fractional values with 1 decimal place', () => {
+      expect(formatThroughput(0.33)).toBe('0.3 req/s');
+      expect(formatThroughput(0.5)).toBe('0.5 req/s');
+      expect(formatThroughput(0.05)).toBe('0.1 req/s');
+      expect(formatThroughput(0.99)).toBe('1.0 req/s');
+    });
+
+    it('formats small numbers with req/s suffix', () => {
+      expect(formatThroughput(100)).toBe('100 req/s');
+      expect(formatThroughput(0)).toBe('0 req/s');
+      expect(formatThroughput(999)).toBe('999 req/s');
     });
 
     it('formats thousands with K suffix', () => {
-      expect(formatThroughput(1500)).toBe('1.5K req/int');
-      expect(formatThroughput(1000)).toBe('1.0K req/int');
-      expect(formatThroughput(2500)).toBe('2.5K req/int');
+      expect(formatThroughput(1500)).toBe('1.5K req/s');
+      expect(formatThroughput(1000)).toBe('1.0K req/s');
+      expect(formatThroughput(2500)).toBe('2.5K req/s');
     });
 
     it('formats millions with M suffix', () => {
-      expect(formatThroughput(1500000)).toBe('1.5M req/int');
-      expect(formatThroughput(1000000)).toBe('1.0M req/int');
-      expect(formatThroughput(2500000)).toBe('2.5M req/int');
+      expect(formatThroughput(1500000)).toBe('1.5M req/s');
+      expect(formatThroughput(1000000)).toBe('1.0M req/s');
+      expect(formatThroughput(2500000)).toBe('2.5M req/s');
     });
 
     it('handles edge cases at boundaries', () => {
-      expect(formatThroughput(999)).toBe('999 req/int');
-      expect(formatThroughput(1000)).toBe('1.0K req/int');
-      expect(formatThroughput(999999)).toBe('1000.0K req/int');
-      expect(formatThroughput(1000000)).toBe('1.0M req/int');
+      expect(formatThroughput(999)).toBe('999 req/s');
+      expect(formatThroughput(1000)).toBe('1.0K req/s');
+      expect(formatThroughput(999999)).toBe('1000.0K req/s');
+      expect(formatThroughput(1000000)).toBe('1.0M req/s');
     });
   });
 });

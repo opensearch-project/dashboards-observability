@@ -7,6 +7,8 @@ import {
   getTimeInSeconds,
   parseTimeRange,
   formatDate,
+  formatPPLTimestamp,
+  formatDisplayTimestamp,
   calculateTimeRangeDuration,
   getTimeAxisConfig,
 } from '../time_utils';
@@ -117,6 +119,88 @@ describe('time_utils', () => {
 
       expect(formatDate(date1)).toBe(date1.toLocaleString());
       expect(formatDate(date2)).toBe(date2.toLocaleString());
+    });
+  });
+
+  describe('formatPPLTimestamp', () => {
+    it('should format date as YYYY-MM-DD HH:mm:ss.SSS in UTC', () => {
+      const date = new Date('2026-01-19T05:44:00.000Z');
+      expect(formatPPLTimestamp(date)).toBe('2026-01-19 05:44:00.000');
+    });
+
+    it('should preserve milliseconds', () => {
+      const date = new Date('2024-03-15T12:30:45.123Z');
+      expect(formatPPLTimestamp(date)).toBe('2024-03-15 12:30:45.123');
+    });
+
+    it('should pad single-digit month, day, hour, minute, second', () => {
+      const date = new Date('2024-01-05T03:02:01.007Z');
+      expect(formatPPLTimestamp(date)).toBe('2024-01-05 03:02:01.007');
+    });
+
+    it('should handle midnight', () => {
+      const date = new Date('2024-06-01T00:00:00.000Z');
+      expect(formatPPLTimestamp(date)).toBe('2024-06-01 00:00:00.000');
+    });
+
+    it('should handle end of day', () => {
+      const date = new Date('2024-12-31T23:59:59.999Z');
+      expect(formatPPLTimestamp(date)).toBe('2024-12-31 23:59:59.999');
+    });
+  });
+
+  describe('formatDisplayTimestamp', () => {
+    const mockUiSettings = (dateFormat?: string, tz?: string) => ({
+      get: (key: string) => {
+        if (key === 'dateFormat') return dateFormat || 'MMM D, YYYY @ HH:mm:ss.SSS';
+        if (key === 'dateFormat:tz') return tz || 'Browser';
+        return undefined;
+      },
+    });
+
+    it('should convert UTC timestamp without Z suffix to target timezone', () => {
+      // PPL returns timestamps like '2024-01-15 10:30:00.000' (UTC, no Z)
+      const result = formatDisplayTimestamp(
+        '2024-01-15 10:30:00.000',
+        mockUiSettings(undefined, 'America/New_York')
+      );
+      // UTC 10:30 → EST 05:30
+      expect(result).toContain('05:30:00');
+    });
+
+    it('should convert UTC timestamp with Z suffix to target timezone', () => {
+      const result = formatDisplayTimestamp(
+        '2024-01-15T10:30:00.000Z',
+        mockUiSettings(undefined, 'America/New_York')
+      );
+      // UTC 10:30 → EST 05:30
+      expect(result).toContain('05:30:00');
+    });
+
+    it('should use configured date format', () => {
+      const result = formatDisplayTimestamp(
+        '2024-01-15 10:30:00.000',
+        mockUiSettings('YYYY-MM-DD HH:mm', 'UTC')
+      );
+      expect(result).toBe('2024-01-15 10:30');
+    });
+
+    it('should handle UTC timezone explicitly', () => {
+      const result = formatDisplayTimestamp(
+        '2024-01-15 10:30:00.000',
+        mockUiSettings(undefined, 'UTC')
+      );
+      expect(result).toContain('10:30:00');
+    });
+
+    it('should handle nanosecond-precision timestamps from PPL', () => {
+      // Real PPL output: '2026-03-24 06:03:09.889538336'
+      const result = formatDisplayTimestamp(
+        '2026-03-24 06:03:09.889538336',
+        mockUiSettings('YYYY-MM-DD HH:mm:ss', 'America/Los_Angeles')
+      );
+      // UTC 06:03 → PDT 23:03 (previous day)
+      expect(result).toBe('2026-03-23 23:03:09');
     });
   });
 
