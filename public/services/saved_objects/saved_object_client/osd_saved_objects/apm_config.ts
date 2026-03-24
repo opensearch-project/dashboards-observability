@@ -20,6 +20,7 @@ interface CreateApmConfigParams {
   tracesDatasetId: string;
   serviceMapDatasetId: string;
   prometheusDataSourceId: string;
+  windowDuration?: number;
 }
 
 interface UpdateApmConfigParams extends Partial<Omit<CreateApmConfigParams, 'workspaceId'>> {
@@ -59,11 +60,12 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
   /**
    * Creates entities array with reference placeholders
    */
-  private createEntities() {
+  private createEntities(windowDuration?: number) {
     return [
       { tracesDataset: { id: 'references[0].id' } },
       { serviceMapDataset: { id: 'references[1].id' } },
       { prometheusDataSource: { id: 'references[2].id' } },
+      { windowDuration: windowDuration ?? 60 },
     ];
   }
 
@@ -154,7 +156,7 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
 
   async create(params: CreateApmConfigParams) {
     const references = this.createReferences(params);
-    const entities = this.createEntities();
+    const entities = this.createEntities(params.windowDuration);
     const correlationType = `${APM_CONFIG_PREFIX}${params.workspaceId}`;
     const title = 'apm-config';
 
@@ -206,7 +208,13 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
       prometheusDataSourceId: prometheusId,
     });
 
-    const entities = this.createEntities();
+    // Preserve existing windowDuration if not provided in update
+    const existingWindowDuration =
+      existing.attributes.entities.find((e: ApmConfigEntity) => 'windowDuration' in e)
+        ?.windowDuration ?? 60;
+    const windowDuration = params.windowDuration ?? existingWindowDuration;
+
+    const entities = this.createEntities(windowDuration);
 
     const response = await this.client.update<ApmConfigAttributes>(
       CORRELATIONS_SAVED_OBJECT,
@@ -266,9 +274,16 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
             : null,
         ]);
 
+        // Extract windowDuration from entities (plain value, not a reference)
+        const windowDurationEntity = obj.attributes.entities.find(
+          (e: ApmConfigEntity) => 'windowDuration' in e
+        );
+        const windowDuration = windowDurationEntity?.windowDuration ?? 60;
+
         return {
           ...obj.attributes,
           objectId: this.prependTypeToId(obj.id),
+          windowDuration,
           tracesDataset: tracesRef
             ? {
                 id: tracesRef.id,

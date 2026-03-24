@@ -245,9 +245,12 @@ export const useServicesRedMetrics = (
         latencyData.length > 0
           ? latencyData.reduce((sum, point) => sum + point.value, 0) / latencyData.length
           : 0;
+      const windowDuration = config?.windowDuration ?? 60;
       const avgThroughput =
         throughputData.length > 0
-          ? throughputData.reduce((sum, point) => sum + point.value, 0) / throughputData.length
+          ? throughputData.reduce((sum, point) => sum + point.value, 0) /
+            throughputData.length /
+            windowDuration
           : 0;
       const avgFailureRatio =
         failureData.length > 0
