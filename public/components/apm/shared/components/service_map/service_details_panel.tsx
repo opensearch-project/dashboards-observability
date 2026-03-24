@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -41,6 +41,8 @@ import {
   getQueryApplicationLatency,
 } from '../../../query_services/query_requests/promql_queries';
 import { formatCount, formatLatency } from '../../../common/format_utils';
+import { parseTimeRange, getTimeInSeconds } from '../../utils/time_utils';
+import { calculateStep, formatPrometheusDuration } from '../../utils/step_utils';
 
 export interface ServiceDetailsPanelProps {
   node: SelectedNodeState;
@@ -93,22 +95,34 @@ export const ServiceDetailsPanel: React.FC<ServiceDetailsPanelProps> = ({
   const prometheusLabel = groupByAttribute?.replace(/\./g, '_') || '';
   const groupLabelFilter = `${prometheusLabel}="${groupByValue}",namespace="span_derived"`;
 
+  // Calculate chart step window for sum_over_time aggregation
+  // This ensures chart data points represent per-step totals consistent with the Health donut total
+  const chartStepWindow = useMemo(() => {
+    try {
+      const { startTime, endTime } = parseTimeRange(timeRange);
+      const step = calculateStep(getTimeInSeconds(startTime), getTimeInSeconds(endTime));
+      return formatPrometheusDuration(step);
+    } catch {
+      return undefined;
+    }
+  }, [timeRange]);
+
   // PromQL queries for charts - use application-level, group-level, or service-level based on node type
   const requestsQuery = isGroupNode
     ? `sum(request{${groupLabelFilter}})`
     : isApplicationNode
     ? getQueryApplicationRequests()
-    : getQueryServiceRequests(node.environment, node.serviceName);
+    : getQueryServiceRequests(node.environment, node.serviceName, chartStepWindow);
   const faultsQuery = isGroupNode
     ? `sum(fault{${groupLabelFilter}})`
     : isApplicationNode
     ? getQueryApplicationFaults()
-    : getQueryServiceFaults(node.environment, node.serviceName);
+    : getQueryServiceFaults(node.environment, node.serviceName, chartStepWindow);
   const errorsQuery = isGroupNode
     ? `sum(error{${groupLabelFilter}})`
     : isApplicationNode
     ? getQueryApplicationErrors()
-    : getQueryServiceErrors(node.environment, node.serviceName);
+    : getQueryServiceErrors(node.environment, node.serviceName, chartStepWindow);
 
   // Latency query (P99, P90, P50 combined) - use application-level, group-level, or service-level
   const latencyQuery = isGroupNode

@@ -86,22 +86,28 @@ histogram_quantile(${percentile},
 export const getQueryTopOperationsByVolume = (
   environment: string,
   serviceName: string,
-  limit: number = 5
-): string => `
+  limit: number = 5,
+  window?: string
+): string => {
+  const metric = window
+    ? `sum_over_time(request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}[${window}])`
+    : `request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}`;
+  return `
 topk(${limit},
   sum by (operation) (
-    request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}
+    ${metric}
   )
 )
 or
 label_replace(
-  sum(request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}),
+  sum(${metric}),
   "operation",
   "overall",
   "",
   ""
 )
 `;
+};
 
 /**
  * Top Dependencies by Latency - for specific service
@@ -211,27 +217,42 @@ topk(5,
  * @page Service Overview — Requests metric card
  * @page App Map Node Flyout — Requests chart
  */
-export const getQueryServiceRequests = (environment: string, serviceName: string): string => `
-sum(request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"})
-`;
+export const getQueryServiceRequests = (
+  environment: string,
+  serviceName: string,
+  window?: string
+): string =>
+  window
+    ? `sum(sum_over_time(request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}[${window}]))`
+    : `sum(request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"})`;
 
 /**
  * Service Faults (5xx errors)
  * For metric card display
  * @page App Map Node Flyout — Faults chart
  */
-export const getQueryServiceFaults = (environment: string, serviceName: string): string => `
-sum(fault{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"})
-`;
+export const getQueryServiceFaults = (
+  environment: string,
+  serviceName: string,
+  window?: string
+): string =>
+  window
+    ? `sum(sum_over_time(fault{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}[${window}]))`
+    : `sum(fault{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"})`;
 
 /**
  * Service Errors (4xx errors)
  * For metric card display
  * @page App Map Node Flyout — Errors chart
  */
-export const getQueryServiceErrors = (environment: string, serviceName: string): string => `
-sum(error{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"})
-`;
+export const getQueryServiceErrors = (
+  environment: string,
+  serviceName: string,
+  window?: string
+): string =>
+  window
+    ? `sum(sum_over_time(error{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}[${window}]))`
+    : `sum(error{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"})`;
 
 /**
  * Service Availability (percentage of non-faulty requests)
@@ -499,10 +520,12 @@ label_replace(
 export const getQueryOperationRequestsOverTime = (
   environment: string,
   serviceName: string,
-  operation: string
-): string => `
-sum(request{environment="${environment}",service="${serviceName}",operation="${operation}",remoteService="",namespace="span_derived"})
-`;
+  operation: string,
+  window?: string
+): string =>
+  window
+    ? `sum(sum_over_time(request{environment="${environment}",service="${serviceName}",operation="${operation}",remoteService="",namespace="span_derived"}[${window}]))`
+    : `sum(request{environment="${environment}",service="${serviceName}",operation="${operation}",remoteService="",namespace="span_derived"})`;
 
 /**
  * COMBINED: Operation Faults and Errors Over Time
@@ -849,10 +872,12 @@ export const getQueryDependencyRequestsOverTime = (
   environment: string,
   serviceName: string,
   remoteService: string,
-  remoteOperation: string
-): string => `
-sum(request{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived",remoteService!=""})
-`;
+  remoteOperation: string,
+  window?: string
+): string =>
+  window
+    ? `sum(sum_over_time(request{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived",remoteService!=""}[${window}]))`
+    : `sum(request{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived",remoteService!=""})`;
 
 /**
  * Get faults and errors over time for a specific dependency

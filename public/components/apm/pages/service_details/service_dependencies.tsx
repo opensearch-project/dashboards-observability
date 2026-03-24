@@ -43,7 +43,8 @@ import {
 } from '../../query_services/query_requests/promql_queries';
 import { useDependencies } from '../../shared/hooks/use_dependencies';
 import { useDependencyMetrics } from '../../shared/hooks/use_dependency_metrics';
-import { parseTimeRange } from '../../shared/utils/time_utils';
+import { parseTimeRange, getTimeInSeconds } from '../../shared/utils/time_utils';
+import { calculateStep, formatPrometheusDuration } from '../../shared/utils/step_utils';
 import { DependencyFilterSidebar } from '../../shared/components/dependency_filter_sidebar';
 import { ActiveFilterBadges, FilterBadge } from '../../shared/components/active_filter_badges';
 import { formatCount, formatLatency } from '../../common/format_utils';
@@ -163,6 +164,17 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   const expandedRowsRef = useRef<Set<string>>(expandedRows);
   expandedRowsRef.current = expandedRows;
   const hasAutoExpandedRef = useRef(false);
+
+  // Calculate chart step window for sum_over_time aggregation in count charts
+  const chartStepWindow = useMemo(() => {
+    try {
+      const { startTime, endTime } = parseTimeRange(timeRange);
+      const step = calculateStep(getTimeInSeconds(startTime), getTimeInSeconds(endTime));
+      return formatPrometheusDuration(step);
+    } catch {
+      return undefined;
+    }
+  }, [timeRange]);
 
   // Helper to parse URL params from hash
   const getUrlParams = () => {
@@ -855,7 +867,8 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
                     environment,
                     serviceName,
                     dependency.serviceName,
-                    dependency.remoteOperation
+                    dependency.remoteOperation,
+                    chartStepWindow
                   )}
                   prometheusConnectionId={prometheusConnectionId}
                   timeRange={timeRange}
@@ -898,7 +911,15 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     });
 
     return map;
-  }, [expandedRows, dependencies, environment, serviceName, timeRange, prometheusConnectionId]);
+  }, [
+    expandedRows,
+    dependencies,
+    environment,
+    serviceName,
+    timeRange,
+    prometheusConnectionId,
+    chartStepWindow,
+  ]);
 
   if (error) {
     return (

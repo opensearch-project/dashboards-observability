@@ -40,7 +40,12 @@ import {
   formatLatency,
 } from '../../common/format_utils';
 import { navigateToServiceDetails } from '../../shared/utils/navigation_utils';
-import { RESOLUTION_LOW } from '../../shared/utils/step_utils';
+import {
+  RESOLUTION_LOW,
+  calculateStep,
+  formatPrometheusDuration,
+} from '../../shared/utils/step_utils';
+import { parseTimeRange, getTimeInSeconds } from '../../shared/utils/time_utils';
 
 export interface ServiceOverviewProps {
   serviceName: string;
@@ -79,6 +84,17 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
   const [faultRateTopK, setFaultRateTopK] = useState<number>(3);
   const [errorRateTopK, setErrorRateTopK] = useState<number>(3);
   const [availabilityBottomK, setAvailabilityBottomK] = useState<number>(3);
+
+  // Calculate chart step window for sum_over_time aggregation in count charts
+  const chartStepWindow = useMemo(() => {
+    try {
+      const { startTime, endTime } = parseTimeRange(timeRange);
+      const step = calculateStep(getTimeInSeconds(startTime), getTimeInSeconds(endTime));
+      return formatPrometheusDuration(step);
+    } catch {
+      return undefined;
+    }
+  }, [timeRange]);
 
   // Flyout state
   const [flyoutOpen, setFlyoutOpen] = useState(false);
@@ -410,7 +426,12 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
             </EuiFlexGroup>
             <EuiSpacer size="s" />
             <PromQLLineChart
-              promqlQuery={getQueryTopOperationsByVolume(environment, serviceName, requestsTopK)}
+              promqlQuery={getQueryTopOperationsByVolume(
+                environment,
+                serviceName,
+                requestsTopK,
+                chartStepWindow
+              )}
               timeRange={timeRange}
               prometheusConnectionId={prometheusConnectionId}
               formatValue={formatCount}
