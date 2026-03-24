@@ -13,12 +13,14 @@ import {
   EuiFlexItem,
   EuiText,
   EuiIcon,
-  EuiSpacer,
   EuiLoadingSpinner,
-  EuiHorizontalRule,
+  EuiAccordion,
 } from '@elastic/eui';
+import { HealthDonut, HEALTH_DONUT_COLORS } from '@osd/apm-topology';
 import { EdgeMetrics, SelectedEdgeState } from '../../../common/types/service_map_types';
+import { APPLICATION_MAP_CONSTANTS, APM_CONSTANTS } from '../../../common/constants';
 import { applicationMapI18nTexts as i18nTexts } from '../../../pages/application_map/application_map_i18n';
+import { formatCount, formatLatency as formatLatencyUtil } from '../../../common/format_utils';
 
 export interface EdgeMetricsFlyoutProps {
   /** Selected edge state */
@@ -31,14 +33,20 @@ export interface EdgeMetricsFlyoutProps {
   onClose: () => void;
 }
 
+const colorSwatchStyle = (color: string): React.CSSProperties => ({
+  display: 'inline-block',
+  width: 12,
+  height: 12,
+  borderRadius: 2,
+  backgroundColor: color,
+});
+
 /**
  * Flyout component displaying metrics for a selected service-to-service connection
  *
  * Shows:
  * - Header: "sourceService -> targetService"
- * - Metrics: Requests, P99 Latency, Faults (5xx), Errors (4xx)
- *
- * Can be closed via X button or clicking outside.
+ * - Health accordion: HealthDonut with colored metric labels and P99 Latency
  */
 export const EdgeMetricsFlyout: React.FC<EdgeMetricsFlyoutProps> = ({
   selectedEdge,
@@ -46,9 +54,20 @@ export const EdgeMetricsFlyout: React.FC<EdgeMetricsFlyoutProps> = ({
   isLoading,
   onClose,
 }) => {
+  const requestCount = metrics?.requestCount ?? 0;
+  const faultCount = metrics?.faultCount ?? 0;
+  const errorCount = metrics?.errorCount ?? 0;
+
   return (
-    <EuiFlyout ownFocus={false} onClose={onClose} size="s" aria-labelledby="edgeMetricsFlyoutTitle">
-      <EuiFlyoutHeader hasBorder>
+    <EuiFlyout
+      size="s"
+      type="push"
+      paddingSize="m"
+      ownFocus={false}
+      onClose={onClose}
+      aria-labelledby="edgeMetricsFlyoutTitle"
+    >
+      <EuiFlyoutHeader hasBorder style={{ paddingRight: 40 }}>
         <EuiTitle size="s">
           <h2 id="edgeMetricsFlyoutTitle">
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -67,113 +86,98 @@ export const EdgeMetricsFlyout: React.FC<EdgeMetricsFlyoutProps> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {/* Metrics content */}
         {isLoading ? (
-          <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 100 }}>
+          <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
             <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="m" />
+              <EuiLoadingSpinner size="xl" />
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
-          <div>
-            <EuiText size="s" color="subdued">
-              <h4>{i18nTexts.edgeMetrics.title}</h4>
-            </EuiText>
-            <EuiHorizontalRule margin="s" />
-
-            {/* Requests */}
-            <MetricRow
-              label={i18nTexts.edgeMetrics.requests}
-              value={formatNumber(metrics?.requestCount ?? 0)}
-            />
-            <EuiSpacer size="s" />
-
-            {/* P99 Latency */}
-            <MetricRow
-              label={i18nTexts.edgeMetrics.latency}
-              value={formatLatency(metrics?.latencyP99 ?? 0)}
-            />
-            <EuiSpacer size="s" />
-
-            {/* Faults (5xx) */}
-            <MetricRow
-              label={i18nTexts.edgeMetrics.faults}
-              value={formatNumber(metrics?.faultCount ?? 0)}
-              isError={metrics?.faultCount ? metrics.faultCount > 0 : false}
-            />
-            <EuiSpacer size="s" />
-
-            {/* Errors (4xx) */}
-            <MetricRow
-              label={i18nTexts.edgeMetrics.errors}
-              value={formatNumber(metrics?.errorCount ?? 0)}
-              isWarning={metrics?.errorCount ? metrics.errorCount > 0 : false}
-            />
-          </div>
+          <>
+            {/* Health Section */}
+            <EuiAccordion
+              id="edgeHealthAccordion"
+              buttonContent={
+                <EuiText size="s">
+                  <strong>{i18nTexts.detailsPanel.health}</strong>
+                </EuiText>
+              }
+              initialIsOpen={true}
+              paddingSize="s"
+            >
+              <EuiFlexGroup alignItems="center" gutterSize="m">
+                <EuiFlexItem grow={false}>
+                  <HealthDonut
+                    metrics={{
+                      requests: requestCount,
+                      faults5xx: faultCount,
+                      errors4xx: errorCount,
+                    }}
+                    size={APPLICATION_MAP_CONSTANTS.HEALTH_DONUT_SIZE}
+                    isLegendEnabled={false}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFlexGroup direction="column" gutterSize="xs">
+                    <EuiFlexItem>
+                      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <span style={colorSwatchStyle(HEALTH_DONUT_COLORS.ok2xx)} />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="xs">
+                            <strong>{i18nTexts.detailsPanel.totalRequests}:</strong>{' '}
+                            {metrics ? formatCount(requestCount) : '-'}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <span style={colorSwatchStyle(HEALTH_DONUT_COLORS.error4xx)} />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="xs">
+                            <strong>{i18nTexts.detailsPanel.totalErrors}:</strong>{' '}
+                            {metrics ? formatCount(errorCount) : '-'}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <span style={colorSwatchStyle(HEALTH_DONUT_COLORS.fault5xx)} />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="xs">
+                            <strong>{i18nTexts.detailsPanel.totalFaults}:</strong>{' '}
+                            {metrics ? formatCount(faultCount) : '-'}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <span style={colorSwatchStyle(APM_CONSTANTS.COLORS.LATENCY)} />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="xs">
+                            <strong>{i18nTexts.edgeMetrics.latency}:</strong>{' '}
+                            {metrics ? formatLatencyUtil(metrics.latencyP99) : '-'}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiAccordion>
+          </>
         )}
       </EuiFlyoutBody>
     </EuiFlyout>
   );
 };
-
-/**
- * Single metric row component
- */
-interface MetricRowProps {
-  label: string;
-  value: string;
-  isError?: boolean;
-  isWarning?: boolean;
-}
-
-const MetricRow: React.FC<MetricRowProps> = ({ label, value, isError, isWarning }) => {
-  let valueColor: 'default' | 'danger' | 'warning' = 'default';
-  if (isError) valueColor = 'danger';
-  else if (isWarning) valueColor = 'warning';
-
-  return (
-    <EuiFlexGroup
-      justifyContent="spaceBetween"
-      alignItems="center"
-      gutterSize="s"
-      responsive={false}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiText size="s" color="subdued">
-          {label}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s" color={valueColor}>
-          <strong>{value}</strong>
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-
-/**
- * Format a number with thousands separators
- */
-function formatNumber(num: number): string {
-  if (num >= 1000000) {
-    return `${(num / 1000000).toFixed(1)}M`;
-  }
-  if (num >= 1000) {
-    return `${(num / 1000).toFixed(1)}K`;
-  }
-  return Math.round(num).toLocaleString();
-}
-
-/**
- * Format latency in milliseconds
- */
-function formatLatency(ms: number): string {
-  if (ms === 0 || isNaN(ms) || !isFinite(ms)) {
-    return '-';
-  }
-  if (ms >= 1000) {
-    return `${(ms / 1000).toFixed(2)}s`;
-  }
-  return `${Math.round(ms)}ms`;
-}

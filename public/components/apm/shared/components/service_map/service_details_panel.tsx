@@ -21,7 +21,7 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { HealthDonut } from '@osd/apm-topology';
+import { HealthDonut, HEALTH_DONUT_COLORS } from '@osd/apm-topology';
 import { LanguageIcon } from '../language_icon';
 import { PromQLLineChart } from '../promql_line_chart';
 import { SelectedNodeState, ServiceMapNodeMetrics } from '../../../common/types/service_map_types';
@@ -146,7 +146,7 @@ label_replace(
 label_replace(
   histogram_quantile(0.99,
     sum by (le) (
-      latency_seconds_bucket{environment="${node.environment}",service="${node.serviceName}",namespace="span_derived"}
+      latency_seconds_bucket{environment="${node.environment}",service="${node.serviceName}",remoteService="",namespace="span_derived"}
     )
   ) * 1000,
   "percentile", "p99", "", ""
@@ -155,7 +155,7 @@ or
 label_replace(
   histogram_quantile(0.90,
     sum by (le) (
-      latency_seconds_bucket{environment="${node.environment}",service="${node.serviceName}",namespace="span_derived"}
+      latency_seconds_bucket{environment="${node.environment}",service="${node.serviceName}",remoteService="",namespace="span_derived"}
     )
   ) * 1000,
   "percentile", "p90", "", ""
@@ -164,7 +164,7 @@ or
 label_replace(
   histogram_quantile(0.50,
     sum by (le) (
-      latency_seconds_bucket{environment="${node.environment}",service="${node.serviceName}",namespace="span_derived"}
+      latency_seconds_bucket{environment="${node.environment}",service="${node.serviceName}",remoteService="",namespace="span_derived"}
     )
   ) * 1000,
   "percentile", "p50", "", ""
@@ -278,22 +278,67 @@ label_replace(
                 <EuiFlexItem>
                   <EuiFlexGroup direction="column" gutterSize="xs">
                     <EuiFlexItem>
-                      <EuiText size="xs">
-                        <strong>{i18nTexts.detailsPanel.totalRequests}:</strong>{' '}
-                        {metrics ? formatCount(metrics.totalRequests) : '-'}
-                      </EuiText>
+                      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <span
+                            style={{
+                              display: 'inline-block',
+                              width: 12,
+                              height: 12,
+                              borderRadius: 2,
+                              backgroundColor: HEALTH_DONUT_COLORS.ok2xx,
+                            }}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="xs">
+                            <strong>{i18nTexts.detailsPanel.totalRequests}:</strong>{' '}
+                            {metrics ? formatCount(metrics.totalRequests) : '-'}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      <EuiText size="xs">
-                        <strong>{i18nTexts.detailsPanel.totalErrors}:</strong>{' '}
-                        {metrics ? formatCount(metrics.totalErrors) : '-'}
-                      </EuiText>
+                      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <span
+                            style={{
+                              display: 'inline-block',
+                              width: 12,
+                              height: 12,
+                              borderRadius: 2,
+                              backgroundColor: HEALTH_DONUT_COLORS.error4xx,
+                            }}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="xs">
+                            <strong>{i18nTexts.detailsPanel.totalErrors}:</strong>{' '}
+                            {metrics ? formatCount(metrics.totalErrors) : '-'}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      <EuiText size="xs">
-                        <strong>{i18nTexts.detailsPanel.totalFaults}:</strong>{' '}
-                        {metrics ? formatCount(metrics.totalFaults) : '-'}
-                      </EuiText>
+                      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <span
+                            style={{
+                              display: 'inline-block',
+                              width: 12,
+                              height: 12,
+                              borderRadius: 2,
+                              backgroundColor: HEALTH_DONUT_COLORS.fault5xx,
+                            }}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="xs">
+                            <strong>{i18nTexts.detailsPanel.totalFaults}:</strong>{' '}
+                            {metrics ? formatCount(metrics.totalFaults) : '-'}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
