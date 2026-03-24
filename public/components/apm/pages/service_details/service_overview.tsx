@@ -41,12 +41,8 @@ import {
 } from '../../common/format_utils';
 import { useApmConfig } from '../../config/apm_config_context';
 import { navigateToServiceDetails } from '../../shared/utils/navigation_utils';
-import {
-  RESOLUTION_LOW,
-  calculateStep,
-  formatPrometheusDuration,
-} from '../../shared/utils/step_utils';
-import { parseTimeRange, getTimeInSeconds } from '../../shared/utils/time_utils';
+import { RESOLUTION_LOW } from '../../shared/utils/step_utils';
+import { useChartStepWindow } from '../../shared/hooks/use_chart_step_window';
 
 export interface ServiceOverviewProps {
   serviceName: string;
@@ -89,16 +85,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
   const [errorRateTopK, setErrorRateTopK] = useState<number>(3);
   const [availabilityBottomK, setAvailabilityBottomK] = useState<number>(3);
 
-  // Calculate chart step window for sum_over_time aggregation in count charts
-  const chartStepWindow = useMemo(() => {
-    try {
-      const { startTime, endTime } = parseTimeRange(timeRange);
-      const step = calculateStep(getTimeInSeconds(startTime), getTimeInSeconds(endTime));
-      return formatPrometheusDuration(step);
-    } catch {
-      return undefined;
-    }
-  }, [timeRange]);
+  const chartStepWindow = useChartStepWindow(timeRange);
 
   // Flyout state
   const [flyoutOpen, setFlyoutOpen] = useState(false);

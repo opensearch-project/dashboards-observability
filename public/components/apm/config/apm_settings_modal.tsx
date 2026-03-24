@@ -64,6 +64,13 @@ export interface ApmSettingsModalProps {
   notifications: NotificationsStart;
 }
 
+interface ApmSettingsFormData {
+  tracesDatasetId: string;
+  serviceMapDatasetId: string;
+  prometheusDataSourceId: string;
+  windowDuration: string;
+}
+
 export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
   const { onClose, notifications } = props;
 
@@ -74,7 +81,7 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
   );
 
   // Form state - minimal fields only
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ApmSettingsFormData>({
     tracesDatasetId: '',
     serviceMapDatasetId: '',
     prometheusDataSourceId: '',

@@ -17,8 +17,9 @@ import {
   EuiAccordion,
 } from '@elastic/eui';
 import { HealthDonut, HEALTH_DONUT_COLORS } from '@osd/apm-topology';
+import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { EdgeMetrics, SelectedEdgeState } from '../../../common/types/service_map_types';
-import { APPLICATION_MAP_CONSTANTS, APM_CONSTANTS } from '../../../common/constants';
+import { APPLICATION_MAP_CONSTANTS } from '../../../common/constants';
 import { applicationMapI18nTexts as i18nTexts } from '../../../pages/application_map/application_map_i18n';
 import { formatCount, formatLatency as formatLatencyUtil } from '../../../common/format_utils';
 
@@ -33,7 +34,7 @@ export interface EdgeMetricsFlyoutProps {
   onClose: () => void;
 }
 
-const colorSwatchStyle = (color: string): React.CSSProperties => ({
+export const colorSwatchStyle = (color: string): React.CSSProperties => ({
   display: 'inline-block',
   width: 12,
   height: 12,
@@ -161,7 +162,7 @@ export const EdgeMetricsFlyout: React.FC<EdgeMetricsFlyoutProps> = ({
                     <EuiFlexItem>
                       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                         <EuiFlexItem grow={false}>
-                          <span style={colorSwatchStyle(APM_CONSTANTS.COLORS.LATENCY)} />
+                          <span style={colorSwatchStyle(euiThemeVars.euiColorMediumShade)} />
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <EuiText size="xs">

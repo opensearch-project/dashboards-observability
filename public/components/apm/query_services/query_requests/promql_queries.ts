@@ -876,8 +876,8 @@ export const getQueryDependencyRequestsOverTime = (
   window?: string
 ): string =>
   window
-    ? `sum(sum_over_time(request{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived",remoteService!=""}[${window}]))`
-    : `sum(request{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived",remoteService!=""})`;
+    ? `sum(sum_over_time(request{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived"}[${window}]))`
+    : `sum(request{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived"})`;
 
 /**
  * Get faults and errors over time for a specific dependency
@@ -892,18 +892,18 @@ export const getQueryDependencyFaultsAndErrorsOverTime = (
 ): string => `
 label_replace(
   (
-    sum(fault{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived",remoteService!=""})
+    sum(fault{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived"})
     /
-    clamp_min(sum(request{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived",remoteService!=""}), 1)
+    clamp_min(sum(request{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived"}), 1)
   ) * 100,
   "metric", "Fault Rate (%)", "", ""
 )
 or
 label_replace(
   (
-    sum(error{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived",remoteService!=""})
+    sum(error{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived"})
     /
-    clamp_min(sum(request{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived",remoteService!=""}), 1)
+    clamp_min(sum(request{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived"}), 1)
   ) * 100,
   "metric", "Error Rate (%)", "", ""
 )
@@ -923,7 +923,7 @@ export const getQueryDependencyLatencyPercentilesOverTime = (
 label_replace(
   histogram_quantile(0.50,
     sum by (le) (
-      latency_seconds_bucket{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived",remoteService!=""}
+      latency_seconds_bucket{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived"}
     )
   ) * 1000,
   "metric", "p50", "", ""
@@ -932,7 +932,7 @@ or
 label_replace(
   histogram_quantile(0.90,
     sum by (le) (
-      latency_seconds_bucket{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived",remoteService!=""}
+      latency_seconds_bucket{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived"}
     )
   ) * 1000,
   "metric", "p90", "", ""
@@ -941,7 +941,7 @@ or
 label_replace(
   histogram_quantile(0.99,
     sum by (le) (
-      latency_seconds_bucket{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived",remoteService!=""}
+      latency_seconds_bucket{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived"}
     )
   ) * 1000,
   "metric", "p99", "", ""

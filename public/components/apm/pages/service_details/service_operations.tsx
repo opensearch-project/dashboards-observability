@@ -44,8 +44,8 @@ import {
 } from '../../query_services/query_requests/promql_queries';
 import { useOperations } from '../../shared/hooks/use_operations';
 import { useOperationMetrics } from '../../shared/hooks/use_operation_metrics';
-import { parseTimeRange, getTimeInSeconds } from '../../shared/utils/time_utils';
-import { calculateStep, formatPrometheusDuration } from '../../shared/utils/step_utils';
+import { parseTimeRange } from '../../shared/utils/time_utils';
+import { useChartStepWindow } from '../../shared/hooks/use_chart_step_window';
 import { OperationFilterSidebar } from '../../shared/components/operation_filter_sidebar';
 import { ActiveFilterBadges, FilterBadge } from '../../shared/components/active_filter_badges';
 import { formatCount, formatLatency } from '../../common/format_utils';
@@ -182,16 +182,7 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
   expandedRowsRef.current = expandedRows;
   const hasAutoExpandedRef = useRef(false);
 
-  // Calculate chart step window for sum_over_time aggregation in count charts
-  const chartStepWindow = useMemo(() => {
-    try {
-      const { startTime, endTime } = parseTimeRange(timeRange);
-      const step = calculateStep(getTimeInSeconds(startTime), getTimeInSeconds(endTime));
-      return formatPrometheusDuration(step);
-    } catch {
-      return undefined;
-    }
-  }, [timeRange]);
+  const chartStepWindow = useChartStepWindow(timeRange);
 
   // Filter sidebar state
   // Sidebar state is now managed by EuiResizableContainer

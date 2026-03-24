@@ -40,10 +40,11 @@ export const formatDate = (date: Date): string => {
 
 /**
  * Format a Date to PPL-compatible timestamp string: 'YYYY-MM-DD HH:mm:ss.SSS'
- * Uses UTC values. This format is compatible with both older and newer PPL versions,
- * unlike ISO 8601 ('YYYY-MM-DDTHH:mm:ss.SSSZ') which only works with newer versions.
+ * Uses UTC values for consistent cross-timezone query results.
  *
- * Matches the format used by Discover in query_enhancements/common/utils.ts.
+ * Similar to query_enhancements/common/utils.ts:formatDate, but that function
+ * uses local time (getMonth, getHours) whereas PPL timestamp filtering requires
+ * UTC (getUTCMonth, getUTCHours) to match stored data consistently across timezones.
  */
 export const formatPPLTimestamp = (date: Date): string => {
   return (

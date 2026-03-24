@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -41,8 +41,8 @@ import {
   getQueryApplicationLatency,
 } from '../../../query_services/query_requests/promql_queries';
 import { formatCount, formatLatency } from '../../../common/format_utils';
-import { parseTimeRange, getTimeInSeconds } from '../../utils/time_utils';
-import { calculateStep, formatPrometheusDuration } from '../../utils/step_utils';
+import { useChartStepWindow } from '../../hooks/use_chart_step_window';
+import { colorSwatchStyle } from './edge_metrics_flyout';
 
 export interface ServiceDetailsPanelProps {
   node: SelectedNodeState;
@@ -97,15 +97,7 @@ export const ServiceDetailsPanel: React.FC<ServiceDetailsPanelProps> = ({
 
   // Calculate chart step window for sum_over_time aggregation
   // This ensures chart data points represent per-step totals consistent with the Health donut total
-  const chartStepWindow = useMemo(() => {
-    try {
-      const { startTime, endTime } = parseTimeRange(timeRange);
-      const step = calculateStep(getTimeInSeconds(startTime), getTimeInSeconds(endTime));
-      return formatPrometheusDuration(step);
-    } catch {
-      return undefined;
-    }
-  }, [timeRange]);
+  const chartStepWindow = useChartStepWindow(timeRange);
 
   // PromQL queries for charts - use application-level, group-level, or service-level based on node type
   const requestsQuery = isGroupNode
@@ -294,15 +286,7 @@ label_replace(
                     <EuiFlexItem>
                       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                         <EuiFlexItem grow={false}>
-                          <span
-                            style={{
-                              display: 'inline-block',
-                              width: 12,
-                              height: 12,
-                              borderRadius: 2,
-                              backgroundColor: HEALTH_DONUT_COLORS.ok2xx,
-                            }}
-                          />
+                          <span style={colorSwatchStyle(HEALTH_DONUT_COLORS.ok2xx)} />
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <EuiText size="xs">
@@ -315,15 +299,7 @@ label_replace(
                     <EuiFlexItem>
                       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                         <EuiFlexItem grow={false}>
-                          <span
-                            style={{
-                              display: 'inline-block',
-                              width: 12,
-                              height: 12,
-                              borderRadius: 2,
-                              backgroundColor: HEALTH_DONUT_COLORS.error4xx,
-                            }}
-                          />
+                          <span style={colorSwatchStyle(HEALTH_DONUT_COLORS.error4xx)} />
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <EuiText size="xs">
@@ -336,15 +312,7 @@ label_replace(
                     <EuiFlexItem>
                       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                         <EuiFlexItem grow={false}>
-                          <span
-                            style={{
-                              display: 'inline-block',
-                              width: 12,
-                              height: 12,
-                              borderRadius: 2,
-                              backgroundColor: HEALTH_DONUT_COLORS.fault5xx,
-                            }}
-                          />
+                          <span style={colorSwatchStyle(HEALTH_DONUT_COLORS.fault5xx)} />
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <EuiText size="xs">
