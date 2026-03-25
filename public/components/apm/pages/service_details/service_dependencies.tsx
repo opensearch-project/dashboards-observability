@@ -296,7 +296,6 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
         p50Duration: metrics?.p50Duration,
         p90Duration: metrics?.p90Duration,
         p99Duration: metrics?.p99Duration,
-        faultRate: metrics?.faultRate,
         errorRate: metrics?.errorRate,
         availability: metrics?.availability,
       };

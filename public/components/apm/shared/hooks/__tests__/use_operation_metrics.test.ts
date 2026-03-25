@@ -17,7 +17,6 @@ jest.mock('../../../query_services/promql_search_service', () => ({
 // Mock the promql_queries functions
 jest.mock('../../../query_services/query_requests/promql_queries', () => ({
   getQueryAllOperationsLatencyPercentiles: jest.fn(() => 'mock_latency_percentiles_query'),
-  getQueryAllOperationsFaultRate: jest.fn(() => 'mock_fault_rate_query'),
   getQueryAllOperationsErrorRateAvg: jest.fn(() => 'mock_error_rate_avg_query'),
   getQueryAllOperationsAvailabilityAvg: jest.fn(() => 'mock_availability_avg_query'),
   getQueryAllOperationsRequestCountTotal: jest.fn(() => 'mock_request_count_total_query'),
@@ -78,7 +77,7 @@ describe('useOperationMetrics', () => {
 
   describe('successful fetch', () => {
     it('should fetch and populate metrics for operations (data frame format)', async () => {
-      // Mock 5 parallel responses (latency percentiles combined into 1)
+      // Mock 4 parallel responses (latency percentiles combined into 1)
       // Note: PromQL queries now include unit conversions (* 1000 for latency, * 100 for rates)
       // so mock values represent the already-converted values
       mockExecuteInstantQuery
@@ -89,7 +88,6 @@ describe('useOperationMetrics', () => {
             { operation: 'GET /api/users', Value: '500', percentile: 'p99' },
           ])
         ) // latency percentiles
-        .mockResolvedValueOnce(createMockResponse([{ operation: 'GET /api/users', Value: '5' }])) // faultRate (percentage)
         .mockResolvedValueOnce(createMockResponse([{ operation: 'GET /api/users', Value: '2' }])) // errorRate (percentage)
         .mockResolvedValueOnce(createMockResponse([{ operation: 'GET /api/users', Value: '99' }])) // availability (percentage)
         .mockResolvedValueOnce(
@@ -105,14 +103,13 @@ describe('useOperationMetrics', () => {
       });
 
       expect(result.current.isLoading).toBe(false);
-      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(5);
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(4);
 
       const metrics = result.current.metrics.get('GET /api/users');
       expect(metrics).toBeDefined();
       expect(metrics?.p50Duration).toBe(100); // 100ms (no JS conversion)
       expect(metrics?.p90Duration).toBe(200);
       expect(metrics?.p99Duration).toBe(500);
-      expect(metrics?.faultRate).toBe(5);
       expect(metrics?.errorRate).toBe(2);
       expect(metrics?.availability).toBe(99); // 99% (no JS conversion)
       expect(metrics?.requestCount).toBe(1000);
@@ -168,7 +165,6 @@ describe('useOperationMetrics', () => {
       expect(metrics?.p50Duration).toBe(0);
       expect(metrics?.p90Duration).toBe(0);
       expect(metrics?.p99Duration).toBe(0);
-      expect(metrics?.faultRate).toBe(0);
       expect(metrics?.errorRate).toBe(0);
       expect(metrics?.availability).toBe(0);
       expect(metrics?.requestCount).toBe(0);

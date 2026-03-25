@@ -132,15 +132,16 @@ export const PromQLMetricCard: React.FC<PromQLMetricCardProps> = ({
   const { avgValue, latestFromChart } = useMemo(() => {
     if (chartData.length === 0) return { avgValue: 0, latestFromChart: 0 };
     const sum = chartData.reduce((s, point) => s + point.value, 0);
-    const d = divisor && divisor > 0 ? divisor : 1;
+    const d = divisor && divisor > 0 ? divisor : chartData.length;
     const avg = sum / d;
     const latest = chartData[chartData.length - 1].value;
     return { avgValue: avg, latestFromChart: latest };
   }, [chartData, divisor]);
 
-  // Determine primary value based on showTotal mode
-  // When showTotal is true, display average throughput instead of sum
-  const primaryValue = showTotal ? avgValue : latestValue;
+  // Determine primary value:
+  // - When divisor is provided OR showTotal is true, use avgValue (sum / divisor or sum / count)
+  // - Otherwise, use the latest value from the query
+  const primaryValue = showTotal || divisor ? avgValue : latestValue;
 
   // Format the display value
   const displayValue = useMemo(() => {

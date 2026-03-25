@@ -9,7 +9,6 @@ import { OperationMetrics } from '../../common/types/service_details_types';
 import { calculateTimeRangeDuration } from '../utils/time_utils';
 import {
   getQueryAllOperationsLatencyPercentiles,
-  getQueryAllOperationsFaultRate,
   getQueryAllOperationsErrorRateAvg,
   getQueryAllOperationsAvailabilityAvg,
   getQueryAllOperationsRequestCountTotal,
@@ -37,7 +36,6 @@ export interface UseOperationMetricsResult {
  *
  * Fetches metrics for all operations in parallel:
  * - Latency percentiles (p50, p90, p99) from Prometheus
- * - Fault rate from Prometheus
  * - Error rate from Prometheus
  * - Availability from Prometheus
  *
@@ -73,11 +71,10 @@ export const useOperationMetrics = (
         // Calculate time range duration for aggregate queries
         const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
 
-        // Make 5 consolidated queries
+        // Make 4 consolidated queries
         // Each query returns ALL operations in a single response
         const [
           latencyPercentilesResponse,
-          faultRateResponse,
           errorRateResponse,
           availabilityResponse,
           requestCountResponse,
@@ -88,10 +85,6 @@ export const useOperationMetrics = (
               params.serviceName,
               timeRangeDuration
             ),
-            time: Math.floor(params.endTime.getTime() / 1000),
-          }),
-          promqlService.executeInstantQuery({
-            query: getQueryAllOperationsFaultRate(params.environment, params.serviceName),
             time: Math.floor(params.endTime.getTime() / 1000),
           }),
           promqlService.executeInstantQuery({
@@ -127,7 +120,6 @@ export const useOperationMetrics = (
             p50Duration: 0,
             p90Duration: 0,
             p99Duration: 0,
-            faultRate: 0,
             errorRate: 0,
             availability: 0,
             dependencyCount: 0,
@@ -140,7 +132,6 @@ export const useOperationMetrics = (
         extractPercentilesByOperation(latencyPercentilesResponse, metricsMap);
 
         // Extract other metrics by operation from each response
-        extractMetricsByOperation(faultRateResponse, metricsMap, 'faultRate');
         extractMetricsByOperation(errorRateResponse, metricsMap, 'errorRate');
         extractMetricsByOperation(availabilityResponse, metricsMap, 'availability');
         extractMetricsByOperation(requestCountResponse, metricsMap, 'requestCount');

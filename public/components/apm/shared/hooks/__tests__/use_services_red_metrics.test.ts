@@ -109,9 +109,9 @@ describe('useServicesRedMetrics', () => {
       });
 
       // Should have called executeMetricRequest 3 times (latency, throughput, failure)
-      // and executeInstantQuery 1 time (total count)
+      // and executeInstantQuery 2 times (latency instant + total count)
       expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(3);
-      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(1);
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(2);
 
       // Check that all services have entries in the map
       expect(result.current.metricsMap.has('api-gateway')).toBe(true);

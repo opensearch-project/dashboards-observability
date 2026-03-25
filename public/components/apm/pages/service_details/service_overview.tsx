@@ -223,15 +223,11 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
             titleTooltip={i18n.translate('observability.apm.serviceOverview.throughputTooltip', {
               defaultMessage: 'Average requests per second over the selected time range.',
             })}
-            subtitle={i18n.translate('observability.apm.serviceOverview.avg', {
-              defaultMessage: 'Avg',
-            })}
             promqlQuery={getQueryServiceRequests(environment, serviceName, metricCardWindow)}
             timeRange={timeRange}
             prometheusConnectionId={prometheusConnectionId}
             formatValue={formatCount}
             refreshTrigger={refreshTrigger}
-            showTotal
             divisor={timeRangeSeconds}
           />
         </EuiFlexItem>
