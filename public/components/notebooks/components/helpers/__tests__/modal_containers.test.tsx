@@ -4,8 +4,6 @@
  */
 
 import { fireEvent, render } from '@testing-library/react';
-import { configure, mount, shallow } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import {
   DeleteNotebookModal,
@@ -16,12 +14,10 @@ import {
 } from '../modal_containers';
 
 describe('modal_containers spec', () => {
-  configure({ adapter: new Adapter() });
-
   it('render get custom modal', () => {
     const runModal = jest.fn();
     const closeModal = jest.fn();
-    const wrapper = shallow(
+    render(
       getCustomModal(
         runModal,
         closeModal,
@@ -33,41 +29,39 @@ describe('modal_containers spec', () => {
         'help text'
       )
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('render get clone modal', () => {
     const onCancel = jest.fn();
     const onConfirm = jest.fn();
-    const wrapper = shallow(getCloneModal(onCancel, onConfirm));
-    expect(wrapper).toMatchSnapshot();
+    render(getCloneModal(onCancel, onConfirm));
+    expect(document.body).toMatchSnapshot();
   });
 
   it('render get sample notebooks modal', () => {
     const onCancel = jest.fn();
     const onConfirm = jest.fn();
-    const wrapper = shallow(getSampleNotebooksModal(onCancel, onConfirm));
-    expect(wrapper).toMatchSnapshot();
+    render(getSampleNotebooksModal(onCancel, onConfirm));
+    expect(document.body).toMatchSnapshot();
   });
 
   it('render get delete modal', () => {
     const onCancel = jest.fn();
     const onConfirm = jest.fn();
-    const wrapper = shallow(
-      getDeleteModal(onCancel, onConfirm, 'Delete', 'Delete message', 'Confirm message')
-    );
-    expect(wrapper).toMatchSnapshot();
+    render(getDeleteModal(onCancel, onConfirm, 'Delete', 'Delete message', 'Confirm message'));
+    expect(document.body).toMatchSnapshot();
 
-    const noConfirmMessageWrapper = shallow(
+    const { container: noConfirmMessageContainer } = render(
       getDeleteModal(onCancel, onConfirm, 'Delete', 'Delete message')
     );
-    expect(noConfirmMessageWrapper).toMatchSnapshot();
+    expect(noConfirmMessageContainer).toMatchSnapshot();
   });
 
   it('render delete notebooks modal', () => {
     const onCancel = jest.fn();
     const onConfirm = jest.fn();
-    const wrapper = shallow(
+    render(
       <DeleteNotebookModal
         onConfirm={onConfirm}
         onCancel={onCancel}
@@ -75,7 +69,7 @@ describe('modal_containers spec', () => {
         message="message"
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('checks delete notebooks modal', () => {

@@ -80,12 +80,12 @@ describe('response_processor', () => {
       const pplResponse = {
         jsonData: [
           {
-            'service.keyAttributes': { name: 'api-gateway', environment: 'production' },
-            'service.groupByAttributes': { team: 'platform' },
+            'sourceNode.keyAttributes': { name: 'api-gateway', environment: 'production' },
+            'sourceNode.groupByAttributes': { team: 'platform' },
           },
           {
-            'service.keyAttributes': { name: 'user-service', environment: 'production' },
-            'service.groupByAttributes': { team: 'users' },
+            'sourceNode.keyAttributes': { name: 'user-service', environment: 'production' },
+            'sourceNode.groupByAttributes': { team: 'users' },
           },
         ],
         size: 2,
@@ -99,12 +99,35 @@ describe('response_processor', () => {
       expect(result.AvailableGroupByAttributes).toBeDefined();
     });
 
-    it('should handle flat field format', () => {
+    it('should collect services from both sourceNode and targetNode', () => {
       const pplResponse = {
         jsonData: [
           {
-            'service.name': 'api-gateway',
-            environment: 'production',
+            'sourceNode.keyAttributes': { name: 'api-gateway', environment: 'prod' },
+            'sourceNode.groupByAttributes': { team: 'platform' },
+            'targetNode.keyAttributes': { name: 'user-service', environment: 'prod' },
+            'targetNode.groupByAttributes': { team: 'users' },
+          },
+        ],
+        size: 1,
+      };
+
+      const result = transformListServicesResponse(pplResponse as unknown);
+
+      expect(result.ServiceSummaries).toHaveLength(2);
+      const names = result.ServiceSummaries.map((s: any) => s.KeyAttributes.Name);
+      expect(names).toContain('api-gateway');
+      expect(names).toContain('user-service');
+    });
+
+    it('should handle null targetNode gracefully', () => {
+      const pplResponse = {
+        jsonData: [
+          {
+            'sourceNode.keyAttributes': { name: 'leaf-service', environment: 'prod' },
+            'sourceNode.groupByAttributes': {},
+            'targetNode.keyAttributes': null,
+            'targetNode.groupByAttributes': null,
           },
         ],
         size: 1,
@@ -113,7 +136,7 @@ describe('response_processor', () => {
       const result = transformListServicesResponse(pplResponse as unknown);
 
       expect(result.ServiceSummaries).toHaveLength(1);
-      expect(result.ServiceSummaries[0].KeyAttributes.Name).toBe('api-gateway');
+      expect(result.ServiceSummaries[0].KeyAttributes.Name).toBe('leaf-service');
     });
 
     it('should return empty response for empty data', () => {
@@ -131,8 +154,8 @@ describe('response_processor', () => {
     it('should skip rows without required fields', () => {
       const pplResponse = {
         jsonData: [
-          { 'service.keyAttributes': { name: 'valid-service', environment: 'prod' } },
-          { 'service.keyAttributes': { name: 'missing-env' } }, // Missing environment
+          { 'sourceNode.keyAttributes': { name: 'valid-service', environment: 'prod' } },
+          { 'sourceNode.keyAttributes': { name: 'missing-env' } }, // Missing environment
           { someOtherField: 'value' }, // Missing both
         ],
         size: 3,
@@ -147,8 +170,8 @@ describe('response_processor', () => {
     it('should deduplicate services by key', () => {
       const pplResponse = {
         jsonData: [
-          { 'service.keyAttributes': { name: 'api-gateway', environment: 'prod' } },
-          { 'service.keyAttributes': { name: 'api-gateway', environment: 'prod' } }, // Duplicate
+          { 'sourceNode.keyAttributes': { name: 'api-gateway', environment: 'prod' } },
+          { 'sourceNode.keyAttributes': { name: 'api-gateway', environment: 'prod' } }, // Duplicate
         ],
         size: 2,
       };
@@ -161,8 +184,8 @@ describe('response_processor', () => {
     it('should sort services by name', () => {
       const pplResponse = {
         jsonData: [
-          { 'service.keyAttributes': { name: 'zebra-service', environment: 'prod' } },
-          { 'service.keyAttributes': { name: 'alpha-service', environment: 'prod' } },
+          { 'sourceNode.keyAttributes': { name: 'zebra-service', environment: 'prod' } },
+          { 'sourceNode.keyAttributes': { name: 'alpha-service', environment: 'prod' } },
         ],
         size: 2,
       };
@@ -179,7 +202,7 @@ describe('response_processor', () => {
       const pplResponse = {
         jsonData: [
           {
-            'service.keyAttributes': { name: 'api-gateway', environment: 'production' },
+            'sourceNode.keyAttributes': { name: 'api-gateway', environment: 'production' },
           },
         ],
         size: 1,
@@ -205,7 +228,7 @@ describe('response_processor', () => {
 
     it('should return null Service when missing required fields', () => {
       const pplResponse = {
-        jsonData: [{ 'service.keyAttributes': { name: 'missing-env' } }],
+        jsonData: [{ 'sourceNode.keyAttributes': { name: 'missing-env' } }],
         size: 1,
       };
 
@@ -219,9 +242,9 @@ describe('response_processor', () => {
     it('should transform valid operations data', () => {
       const pplResponse = {
         jsonData: [
-          { 'operation.name': 'GET /users' },
-          { 'operation.name': 'POST /users' },
-          { 'operation.name': 'GET /users' }, // Duplicate should increment count
+          { 'sourceOperation.name': 'GET /users' },
+          { 'sourceOperation.name': 'POST /users' },
+          { 'sourceOperation.name': 'GET /users' }, // Duplicate should increment count
         ],
         size: 3,
       };
@@ -248,7 +271,7 @@ describe('response_processor', () => {
 
     it('should skip rows without operation name', () => {
       const pplResponse = {
-        jsonData: [{ 'operation.name': 'GET /users' }, { someOtherField: 'value' }],
+        jsonData: [{ 'sourceOperation.name': 'GET /users' }, { someOtherField: 'value' }],
         size: 2,
       };
 
@@ -263,9 +286,9 @@ describe('response_processor', () => {
       const pplResponse = {
         jsonData: [
           {
-            'operation.remoteService.keyAttributes': { name: 'database', environment: 'prod' },
-            'operation.name': 'query',
-            'operation.remoteOperationName': 'SELECT',
+            'targetNode.keyAttributes': { name: 'database', environment: 'prod' },
+            'sourceOperation.name': 'query',
+            'targetOperation.name': 'SELECT',
           },
         ],
         size: 1,
@@ -294,8 +317,8 @@ describe('response_processor', () => {
       const pplResponse = {
         jsonData: [
           {
-            'service.keyAttributes': { name: 'api-gateway', environment: 'prod' },
-            'remoteService.keyAttributes': { name: 'user-service', environment: 'prod' },
+            'sourceNode.keyAttributes': { name: 'api-gateway', environment: 'prod' },
+            'targetNode.keyAttributes': { name: 'user-service', environment: 'prod' },
           },
         ],
         size: 1,
@@ -325,8 +348,8 @@ describe('response_processor', () => {
       const pplResponse = {
         jsonData: [
           {
-            'service.keyAttributes': { name: 'api-gateway', environment: 'prod' },
-            'remoteService.keyAttributes': { name: 'user-service', environment: 'prod' },
+            'sourceNode.keyAttributes': { name: 'api-gateway', environment: 'prod' },
+            'targetNode.keyAttributes': { name: 'user-service', environment: 'prod' },
           },
         ],
         size: 1,
@@ -343,12 +366,12 @@ describe('response_processor', () => {
       const pplResponse = {
         jsonData: [
           {
-            'service.keyAttributes': { name: 'api-gateway', environment: 'prod' },
-            'remoteService.keyAttributes': { name: 'user-service', environment: 'prod' },
+            'sourceNode.keyAttributes': { name: 'api-gateway', environment: 'prod' },
+            'targetNode.keyAttributes': { name: 'user-service', environment: 'prod' },
           },
           {
-            'service.keyAttributes': { name: 'api-gateway', environment: 'prod' },
-            'remoteService.keyAttributes': { name: 'order-service', environment: 'prod' },
+            'sourceNode.keyAttributes': { name: 'api-gateway', environment: 'prod' },
+            'targetNode.keyAttributes': { name: 'order-service', environment: 'prod' },
           },
         ],
         size: 2,

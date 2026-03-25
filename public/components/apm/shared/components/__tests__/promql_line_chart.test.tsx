@@ -32,6 +32,8 @@ jest.mock('echarts', () => ({
 const mockUsePromQLChartData = jest.fn();
 jest.mock('../../hooks/use_promql_chart_data', () => ({
   usePromQLChartData: (params: any) => mockUsePromQLChartData(params),
+  isResolutionExceededError: jest.fn(() => false),
+  RESOLUTION_EXCEEDED_CODE: 'RESOLUTION_EXCEEDED',
 }));
 
 // Mock euiThemeVars
@@ -271,6 +273,44 @@ describe('PromQLLineChart', () => {
       expect(mockSetOption).toHaveBeenCalled();
       const setOptionCall = mockSetOption.mock.calls[0][0];
       expect(setOptionCall.legend).toBeUndefined();
+    });
+  });
+
+  describe('seriesLabel prop', () => {
+    it('should override series name when seriesLabel is provided and there is one series', () => {
+      mockUsePromQLChartData.mockReturnValue({
+        series: [
+          { name: '{}', data: [{ timestamp: 1704067200000, value: 100 }], color: '#54b399' },
+        ],
+        isLoading: false,
+        error: null,
+      });
+
+      render(<PromQLLineChart {...defaultProps} seriesLabel="Requests" />);
+
+      expect(mockSetOption).toHaveBeenCalled();
+      const setOptionCall = mockSetOption.mock.calls[0][0];
+      expect(setOptionCall.series[0].name).toBe('Requests');
+    });
+
+    it('should not override series names when there are multiple series', () => {
+      const multiSeries: ChartSeriesData[] = [
+        { name: 'p99', data: [{ timestamp: 1704067200000, value: 100 }], color: '#54b399' },
+        { name: 'p90', data: [{ timestamp: 1704067200000, value: 80 }], color: '#d36086' },
+      ];
+
+      mockUsePromQLChartData.mockReturnValue({
+        series: multiSeries,
+        isLoading: false,
+        error: null,
+      });
+
+      render(<PromQLLineChart {...defaultProps} seriesLabel="Requests" />);
+
+      expect(mockSetOption).toHaveBeenCalled();
+      const setOptionCall = mockSetOption.mock.calls[0][0];
+      expect(setOptionCall.series[0].name).toBe('p99');
+      expect(setOptionCall.series[1].name).toBe('p90');
     });
   });
 

@@ -1,338 +1,43 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Service map scale component renders service map scale plot 1`] = `
-<ServiceMapScale
-  idSelected="latency"
-  ticks={
-    Array [
-      0,
-      50,
-      100,
-      150,
-      200,
-      250,
-    ]
-  }
->
-  <div
-    style={
-      Object {
-        "minHeight": 400,
-        "minWidth": 65,
-      }
-    }
-  >
-    <Plt
-      data={
-        Array [
-          Object {
-            "hoverinfo": "none",
-            "marker": Object {
-              "color": Array [
-                "rgb(218, 214, 227)",
-                "rgb(185, 169, 211)",
-                "rgb(151, 126, 187)",
-                "rgb(117, 86, 158)",
-                "rgb(83, 47, 127)",
-              ],
-            },
-            "orientation": "v",
-            "showlegend": false,
-            "type": "bar",
-            "width": 0.4,
-            "x": Array [
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-            ],
-            "y": Array [
-              50,
-              50,
-              50,
-              50,
-              50,
-              50,
-            ],
-          },
-        ]
-      }
-      height="270px"
-      layout={
-        Object {
-          "height": 270,
-          "margin": Object {
-            "b": 10,
-            "l": 0,
-            "pad": 0,
-            "r": 60,
-            "t": 10,
-          },
-          "paper_bgcolor": "rgba(0, 0, 0, 0)",
-          "plot_bgcolor": "rgba(0, 0, 0, 0)",
-          "width": 77,
-          "xaxis": Object {
-            "fixedrange": true,
-            "range": Array [
-              -0.35,
-              0.35,
-            ],
-            "showgrid": false,
-            "showline": false,
-            "showticklabels": false,
-            "zeroline": false,
-          },
-          "yaxis": Object {
-            "color": "0,0,0",
-            "fixedrange": true,
-            "range": Array [
-              0,
-              250,
-            ],
-            "showgrid": false,
-            "showline": false,
-            "showticklabels": true,
-            "side": "right",
-            "ticksuffix": "",
-            "ticktexts": Array [
-              0,
-              50,
-              100,
-              150,
-              200,
-              250,
-            ],
-            "tickvals": Array [
-              0,
-              50,
-              100,
-              150,
-              200,
-              250,
-            ],
-            "title": Object {
-              "standoff": 15,
-              "text": "Average duration (ms)",
-            },
-            "zeroline": false,
-          },
-        }
-      }
+exports[`Service map scale component renders service map scale 1`] = `
+<body>
+  <div>
+    <div
+      style="min-height: 400px; min-width: 65px;"
     >
-      <PlotlyComponent
-        config={
-          Object {
-            "displayModeBar": false,
-          }
-        }
-        data={
-          Array [
-            Object {
-              "hoverinfo": "none",
-              "marker": Object {
-                "color": Array [
-                  "rgb(218, 214, 227)",
-                  "rgb(185, 169, 211)",
-                  "rgb(151, 126, 187)",
-                  "rgb(117, 86, 158)",
-                  "rgb(83, 47, 127)",
-                ],
-              },
-              "orientation": "v",
-              "showlegend": false,
-              "type": "bar",
-              "width": 0.4,
-              "x": Array [
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-              ],
-              "y": Array [
-                50,
-                50,
-                50,
-                50,
-                50,
-                50,
-              ],
-            },
-          ]
-        }
-        debug={false}
-        divId="explorerPlotComponent"
-        layout={
-          Object {
-            "autosize": true,
-            "barmode": "stack",
-            "height": 270,
-            "hovermode": "closest",
-            "layout": Object {
-              "annotations": Array [
-                Object {
-                  "showarrow": true,
-                  "xanchor": "right",
-                },
-              ],
-            },
-            "legend": Object {
-              "orientation": "h",
-              "traceorder": "normal",
-            },
-            "margin": Object {
-              "b": 10,
-              "l": 0,
-              "pad": 0,
-              "r": 60,
-              "t": 10,
-            },
-            "paper_bgcolor": "rgba(0, 0, 0, 0)",
-            "plot_bgcolor": "rgba(0, 0, 0, 0)",
-            "showlegend": false,
-            "width": 77,
-            "xaxis": Object {
-              "fixedrange": true,
-              "range": Array [
-                -0.35,
-                0.35,
-              ],
-              "showgrid": false,
-              "showline": false,
-              "showticklabels": false,
-              "zeroline": false,
-            },
-            "yaxis": Object {
-              "color": "0,0,0",
-              "fixedrange": true,
-              "range": Array [
-                0,
-                250,
-              ],
-              "showgrid": false,
-              "showline": false,
-              "showticklabels": true,
-              "side": "right",
-              "ticksuffix": "",
-              "ticktexts": Array [
-                0,
-                50,
-                100,
-                150,
-                200,
-                250,
-              ],
-              "tickvals": Array [
-                0,
-                50,
-                100,
-                150,
-                200,
-                250,
-              ],
-              "title": Object {
-                "standoff": 15,
-                "text": "Average duration (ms)",
-              },
-              "zeroline": false,
-            },
-          }
-        }
-        style={
-          Object {
-            "height": "270px",
-            "width": "100%",
-          }
-        }
-        useResizeHandler={true}
+      <div
+        id="explorerPlotComponent"
+        style="width: 100%; height: 270px;"
+      />
+      <div
+        class="euiSpacer euiSpacer--l"
+      />
+      <div
+        class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
         <div
-          id="explorerPlotComponent"
-          style={
-            Object {
-              "height": "270px",
-              "width": "100%",
-            }
-          }
-        />
-      </PlotlyComponent>
-    </Plt>
-    <EuiSpacer>
-      <div
-        className="euiSpacer euiSpacer--l"
-      />
-    </EuiSpacer>
-    <EuiFlexGroup
-      gutterSize="none"
-    >
-      <div
-        className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
-      >
-        <EuiFlexItem
-          grow={false}
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <img
+            alt="unmatched-node-legend"
+            src="file-stub"
+            style="width: 40px; height: 40px;"
+          />
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+          style="margin-right: -30px; margin-left: -10px;"
         >
           <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiText euiText--medium"
+            style="transform: rotate(-90deg); font-size: 14px; color: rgb(128, 128, 128);"
           >
-            <img
-              alt="unmatched-node-legend"
-              src="file-stub"
-              style={
-                Object {
-                  "height": 40,
-                  "width": 40,
-                }
-              }
-            />
+            No match
           </div>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-          style={
-            Object {
-              "marginLeft": -10,
-              "marginRight": -30,
-            }
-          }
-        >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-            style={
-              Object {
-                "marginLeft": -10,
-                "marginRight": -30,
-              }
-            }
-          >
-            <EuiText
-              style={
-                Object {
-                  "color": "#808080",
-                  "fontSize": "14px",
-                  "transform": "rotate(-90deg)",
-                }
-              }
-            >
-              <div
-                className="euiText euiText--medium"
-                style={
-                  Object {
-                    "color": "#808080",
-                    "fontSize": "14px",
-                    "transform": "rotate(-90deg)",
-                  }
-                }
-              >
-                No match
-              </div>
-            </EuiText>
-          </div>
-        </EuiFlexItem>
+        </div>
       </div>
-    </EuiFlexGroup>
+    </div>
   </div>
-</ServiceMapScale>
+</body>
 `;

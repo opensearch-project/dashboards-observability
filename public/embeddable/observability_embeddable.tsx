@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 import { AttributeService } from '../../../../src/plugins/dashboard/public';
 import {
@@ -53,6 +53,7 @@ export class ObservabilityEmbeddable extends Embeddable<
   public readonly type = OBSERVABILITY_EMBEDDABLE;
   private subscription: Subscription;
   private node?: HTMLElement;
+  private root?: Root;
   public savedObjectId?: string;
   private attributes?: VisualizationSavedObjectAttributes;
 
@@ -75,11 +76,12 @@ export class ObservabilityEmbeddable extends Embeddable<
   }
 
   public render(node: HTMLElement) {
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
     this.node = node;
-    ReactDOM.render(<ObservabilityEmbeddableComponent embeddable={this} />, node);
+    this.root = createRoot(node);
+    this.root.render(<ObservabilityEmbeddableComponent embeddable={this} />);
   }
 
   public async reload() {
@@ -111,8 +113,8 @@ export class ObservabilityEmbeddable extends Embeddable<
   public destroy() {
     super.destroy();
     this.subscription.unsubscribe();
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
   }
 }

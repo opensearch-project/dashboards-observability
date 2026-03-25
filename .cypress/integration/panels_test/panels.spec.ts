@@ -21,7 +21,12 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
 
   before(() => {
     cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`);
+    // Wait for page to fully load - first wait for header to exist
+    cy.get('header[data-test-subj="headerGlobalNav"]', { timeout: 60000 }).should('exist');
+    cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 60000 }).should('not.exist');
+
     cy.get('div[data-test-subj="sampleDataSetCardflights"]')
+      .should('be.visible')
       .contains(/(Add|View) data/)
       .trigger('mouseover')
       .click();

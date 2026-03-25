@@ -4,15 +4,11 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import { configure, mount, shallow } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import { ThroughputPlt } from '../throughput_plt';
 
 describe('Throughput plot component', () => {
-  configure({ adapter: new Adapter() });
-
-  it('renders throughput plot', () => {
+  it('renders throughput plot', async () => {
     const setStartTime = jest.fn();
     const setEndTime = jest.fn();
     const items = {
@@ -28,14 +24,14 @@ describe('Throughput plot component', () => {
           hoverlabel: {
             align: 'left',
           },
-          hovertemplate: '%{text}<br>Error rate: %{y}<extra></extra>',
+          hovertemplate: '%{text}<br>Throughput: %{y}<extra></extra>',
         },
       ] as Plotly.Data[],
       fixedInterval: '365d',
     };
-    const wrapper = shallow(
-      <ThroughputPlt items={items} setStartTime={setStartTime} setEndTime={setEndTime} />
-    );
-    expect(wrapper).toMatchSnapshot();
+    render(<ThroughputPlt items={items} setStartTime={setStartTime} setEndTime={setEndTime} />);
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 });

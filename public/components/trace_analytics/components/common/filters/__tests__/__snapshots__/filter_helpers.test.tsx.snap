@@ -1,232 +1,108 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Filter helper functions renders range field filter 1`] = `
-Array [
-  <EuiSpacer
-    size="s"
-  >
+<body>
+  <div>
     <div
-      className="euiSpacer euiSpacer--s"
+      class="euiSpacer euiSpacer--s"
     />
-  </EuiSpacer>,
-  <EuiCompressedFormRow
-    describedByIds={Array []}
-    display="rowCompressed"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    label="Value"
-    labelType="label"
-  >
     <div
-      className="euiFormRow euiFormRow--compressed"
+      class="euiFormRow euiFormRow--compressed"
       id="random_html_id-row"
     >
       <div
-        className="euiFormRow__labelWrapper"
+        class="euiFormRow__labelWrapper"
       >
-        <EuiFormLabel
-          className="euiFormRow__label"
-          htmlFor="random_html_id"
-          isFocused={false}
-          type="label"
+        <label
+          class="euiFormLabel euiFormRow__label"
+          for="random_html_id"
         >
-          <label
-            className="euiFormLabel euiFormRow__label"
-            htmlFor="random_html_id"
-          >
-            Value
-          </label>
-        </EuiFormLabel>
+          Value
+        </label>
       </div>
       <div
-        className="euiFormRow__fieldWrapper"
+        class="euiFormRow__fieldWrapper"
       >
-        <EuiFormControlLayoutDelimited
-          endControl={
-            <input
-              className="euiFieldText"
-              onChange={[Function]}
-              placeholder="End of range"
-              type="string"
-              value="100"
-            />
-          }
+        <div
+          class="euiFormControlLayout euiFormControlLayoutDelimited"
           id="random_html_id"
-          onBlur={[Function]}
-          onFocus={[Function]}
-          startControl={
+        >
+          <div
+            class="euiFormControlLayout__childrenWrapper"
+          >
             <input
-              className="euiFieldText"
-              onChange={[Function]}
+              class="euiFieldText euiFormControlLayoutDelimited__input"
               placeholder="Start of range"
               type="string"
               value="0"
             />
-          }
-        >
-          <EuiFormControlLayout
-            className="euiFormControlLayoutDelimited"
-            id="random_html_id"
-            onBlur={[Function]}
-            onFocus={[Function]}
-          >
             <div
-              className="euiFormControlLayout euiFormControlLayoutDelimited"
-              id="random_html_id"
-              onBlur={[Function]}
-              onFocus={[Function]}
+              class="euiText euiText--small euiFormControlLayoutDelimited__delimeter"
             >
               <div
-                className="euiFormControlLayout__childrenWrapper"
+                class="euiTextColor euiTextColor--subdued"
               >
-                <input
-                  className="euiFieldText euiFormControlLayoutDelimited__input"
-                  onChange={[Function]}
-                  placeholder="Start of range"
-                  type="string"
-                  value="0"
-                />
-                <EuiText
-                  className="euiFormControlLayoutDelimited__delimeter"
-                  color="subdued"
-                  size="s"
-                >
-                  <div
-                    className="euiText euiText--small euiFormControlLayoutDelimited__delimeter"
-                  >
-                    <EuiTextColor
-                      color="subdued"
-                      component="div"
-                    >
-                      <div
-                        className="euiTextColor euiTextColor--subdued"
-                      >
-                        →
-                      </div>
-                    </EuiTextColor>
-                  </div>
-                </EuiText>
-                <input
-                  className="euiFieldText euiFormControlLayoutDelimited__input"
-                  onChange={[Function]}
-                  placeholder="End of range"
-                  type="string"
-                  value="100"
-                />
-                <EuiFormControlLayoutIcons />
+                →
               </div>
             </div>
-          </EuiFormControlLayout>
-        </EuiFormControlLayoutDelimited>
+            <input
+              class="euiFieldText euiFormControlLayoutDelimited__input"
+              placeholder="End of range"
+              type="string"
+              value="100"
+            />
+          </div>
+        </div>
       </div>
     </div>
-  </EuiCompressedFormRow>,
-]
+  </div>
+</body>
 `;
 
 exports[`Filter helper functions renders textfield filter 1`] = `
-Array [
-  <EuiSpacer
-    size="s"
-  >
+<body>
+  <div>
     <div
-      className="euiSpacer euiSpacer--s"
+      class="euiSpacer euiSpacer--s"
     />
-  </EuiSpacer>,
-  <EuiFlexItem
-    grow={true}
-  >
     <div
-      className="euiFlexItem"
+      class="euiFlexItem"
     >
-      <EuiCompressedFormRow
-        describedByIds={Array []}
-        display="rowCompressed"
-        fullWidth={true}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
-        label="Value"
-        labelType="label"
+      <div
+        class="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
+        id="random_html_id-row"
       >
         <div
-          className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
-          id="random_html_id-row"
+          class="euiFormRow__labelWrapper"
+        >
+          <label
+            class="euiFormLabel euiFormRow__label"
+            for="random_html_id"
+          >
+            Value
+          </label>
+        </div>
+        <div
+          class="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiFormRow__labelWrapper"
+            class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
           >
-            <EuiFormLabel
-              className="euiFormRow__label"
-              htmlFor="random_html_id"
-              isFocused={false}
-              type="label"
+            <div
+              class="euiFormControlLayout__childrenWrapper"
             >
-              <label
-                className="euiFormLabel euiFormRow__label"
-                htmlFor="random_html_id"
-              >
-                Value
-              </label>
-            </EuiFormLabel>
-          </div>
-          <div
-            className="euiFormRow__fieldWrapper"
-          >
-            <EuiCompressedFieldText
-              fullWidth={true}
-              id="random_html_id"
-              onBlur={[Function]}
-              onChange={[Function]}
-              onFocus={[Function]}
-              placeholder="Enter a value"
-              value={0}
-            >
-              <EuiFieldText
-                compressed={true}
-                fullWidth={true}
+              <input
+                class="euiFieldText euiFieldText--fullWidth euiFieldText--compressed"
                 id="random_html_id"
-                onBlur={[Function]}
-                onChange={[Function]}
-                onFocus={[Function]}
                 placeholder="Enter a value"
-                value={0}
-              >
-                <EuiFormControlLayout
-                  compressed={true}
-                  fullWidth={true}
-                  inputId="random_html_id"
-                >
-                  <div
-                    className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
-                  >
-                    <div
-                      className="euiFormControlLayout__childrenWrapper"
-                    >
-                      <EuiValidatableControl>
-                        <input
-                          className="euiFieldText euiFieldText--fullWidth euiFieldText--compressed"
-                          id="random_html_id"
-                          onBlur={[Function]}
-                          onChange={[Function]}
-                          onFocus={[Function]}
-                          placeholder="Enter a value"
-                          type="text"
-                          value={0}
-                        />
-                      </EuiValidatableControl>
-                      <EuiFormControlLayoutIcons
-                        compressed={true}
-                      />
-                    </div>
-                  </div>
-                </EuiFormControlLayout>
-              </EuiFieldText>
-            </EuiCompressedFieldText>
+                type="text"
+                value="0"
+              />
+            </div>
           </div>
         </div>
-      </EuiCompressedFormRow>
+      </div>
     </div>
-  </EuiFlexItem>,
-]
+  </div>
+</body>
 `;

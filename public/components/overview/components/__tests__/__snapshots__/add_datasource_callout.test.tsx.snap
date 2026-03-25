@@ -1,179 +1,79 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Add dashboard callout renders add datasource callout 1`] = `
-<AddDataSourceCallout>
-  <EuiPanel
-    hasShadow={true}
-    paddingSize="m"
-  >
+<body>
+  <div>
     <div
-      className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
     >
-      <EuiFlexGroup
-        alignItems="center"
-        direction="column"
-        gutterSize="m"
-        justifyContent="center"
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
       >
         <div
-          className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+          class="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <EuiFlexItem
-            grow={false}
+          <svg
+            aria-hidden="true"
+            class="euiIcon euiIcon--xxLarge euiIcon-isLoading"
+            focusable="false"
+            height="16"
+            role="img"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <div
-              className="euiFlexItem euiFlexItem--flexGrowZero"
-            >
-              <EuiIcon
-                size="xxl"
-                type="database"
-              >
-                <EuiIconBeaker
-                  aria-hidden={true}
-                  className="euiIcon euiIcon--xxLarge euiIcon-isLoading"
-                  focusable="false"
-                  role="img"
-                  style={null}
-                >
-                  <svg
-                    aria-hidden={true}
-                    className="euiIcon euiIcon--xxLarge euiIcon-isLoading"
-                    focusable="false"
-                    height={16}
-                    role="img"
-                    style={null}
-                    viewBox="0 0 16 16"
-                    width={16}
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                    />
-                  </svg>
-                </EuiIconBeaker>
-              </EuiIcon>
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-          >
-            <div
-              className="euiFlexItem euiFlexItem--flexGrowZero"
-            >
-              <EuiTitle
-                size="m"
-              >
-                <h3
-                  className="euiTitle euiTitle--medium"
-                >
-                  No connected data sources
-                </h3>
-              </EuiTitle>
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-            style={
-              Object {
-                "maxWidth": "40%",
-              }
-            }
-          >
-            <div
-              className="euiFlexItem euiFlexItem--flexGrowZero"
-              style={
-                Object {
-                  "maxWidth": "40%",
-                }
-              }
-            >
-              <EuiText
-                textAlign="center"
-              >
-                <div
-                  className="euiText euiText--medium"
-                >
-                  <EuiTextAlign
-                    textAlign="center"
-                  >
-                    <div
-                      className="euiTextAlign euiTextAlign--center"
-                    >
-                      <p
-                        style={
-                          Object {
-                            "margin": 0,
-                          }
-                        }
-                      >
-                        There are no data sources associated to the workspace. Associate data sources or request your administrator to associate data sources for you to get started.
-                      </p>
-                    </div>
-                  </EuiTextAlign>
-                </div>
-              </EuiText>
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-          >
-            <div
-              className="euiFlexItem euiFlexItem--flexGrowZero"
-            >
-              <EuiButton
-                color="primary"
-                fill={true}
-                onClick={[Function]}
-              >
-                <EuiButtonDisplay
-                  baseClassName="euiButton"
-                  color="primary"
-                  disabled={false}
-                  element="button"
-                  fill={true}
-                  isDisabled={false}
-                  onClick={[Function]}
-                  type="button"
-                >
-                  <button
-                    className="euiButton euiButton--primary euiButton--fill"
-                    disabled={false}
-                    onClick={[Function]}
-                    style={
-                      Object {
-                        "minWidth": undefined,
-                      }
-                    }
-                    type="button"
-                  >
-                    <EuiButtonContent
-                      className="euiButton__content"
-                      iconGap="m"
-                      iconSide="left"
-                      textProps={
-                        Object {
-                          "className": "euiButton__text",
-                        }
-                      }
-                    >
-                      <span
-                        className="euiButtonContent euiButton__content"
-                      >
-                        <span
-                          className="euiButton__text"
-                        >
-                          Manage data sources
-                        </span>
-                      </span>
-                    </EuiButtonContent>
-                  </button>
-                </EuiButtonDisplay>
-              </EuiButton>
-            </div>
-          </EuiFlexItem>
+            <path
+              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+            />
+          </svg>
         </div>
-      </EuiFlexGroup>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <h3
+            class="euiTitle euiTitle--medium"
+          >
+            No connected data sources
+          </h3>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+          style="max-width: 40%;"
+        >
+          <div
+            class="euiText euiText--medium"
+          >
+            <div
+              class="euiTextAlign euiTextAlign--center"
+            >
+              <p
+                style="margin: 0px;"
+              >
+                There are no data sources associated to the workspace. Associate data sources or request your administrator to associate data sources for you to get started.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            class="euiButton euiButton--primary euiButton--fill"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButton__content"
+            >
+              <span
+                class="euiButton__text"
+              >
+                Manage data sources
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
     </div>
-  </EuiPanel>
-</AddDataSourceCallout>
+  </div>
+</body>
 `;

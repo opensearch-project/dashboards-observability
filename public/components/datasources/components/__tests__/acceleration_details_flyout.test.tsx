@@ -4,8 +4,7 @@
  */
 
 import React from 'react';
-import { mount, configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor, fireEvent } from '@testing-library/react';
 import { AccelerationDetailsFlyout } from '../manage/accelerations/acceleration_details_flyout';
 import * as coreRefsModule from '../../../../framework/core_refs';
 import { CachedAcceleration } from '../../../../../common/types/data_connections';
@@ -63,15 +62,13 @@ const mockAcceleration: CachedAcceleration = {
   status: 'Updated',
 };
 
-configure({ adapter: new Adapter() });
-
 describe('AccelerationDetailsFlyout Component Tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('fetches acceleration details on mount', async () => {
-    mount(
+    render(
       <AccelerationDetailsFlyout
         index="mockIndex"
         acceleration={mockAcceleration}
@@ -86,7 +83,7 @@ describe('AccelerationDetailsFlyout Component Tests', () => {
   });
 
   it('fetches acceleration details with specific mdsId', async () => {
-    mount(
+    render(
       <AccelerationDetailsFlyout
         index="mockIndex"
         acceleration={mockAcceleration}
@@ -110,51 +107,69 @@ describe('AccelerationDetailsFlyout Component Tests', () => {
   });
 
   it('renders the correct tab content on tab switch', async () => {
-    const wrapper = mount(
+    const { container } = render(
       <AccelerationDetailsFlyout
         index="mockIndex"
         acceleration={mockAcceleration}
         dataSourceName="mockDataSource"
+        resetFlyout={jest.fn()}
       />
     );
-    await new Promise(setImmediate);
-    wrapper.update();
+    await waitFor(() => {
+      expect(container.querySelector('.euiTab')).toBeInTheDocument();
+    });
 
-    const detailsTab = wrapper.find('EuiTab').filterWhere((node) => node.text() === 'Details');
-    detailsTab.simulate('click');
-    await new Promise(setImmediate);
-    wrapper.update();
+    const detailsTab = Array.from(container.querySelectorAll('.euiTab')).find(
+      (tab) => tab.textContent === 'Details'
+    );
+    if (detailsTab) {
+      fireEvent.click(detailsTab);
+    }
+    await waitFor(() => {
+      expect(
+        container.querySelector('[data-test-subj="accelerationDetailsTab"]')
+      ).toBeInTheDocument();
+    });
 
-    expect(wrapper.find('AccelerationDetailsTab').exists()).toBe(true);
-
-    const schemaTab = wrapper.find('EuiTab').filterWhere((node) => node.text() === 'Schema');
-    schemaTab.simulate('click');
-    await new Promise(setImmediate);
-    wrapper.update();
-
-    expect(wrapper.find('AccelerationSchemaTab').exists()).toBe(true);
+    const schemaTab = Array.from(container.querySelectorAll('.euiTab')).find(
+      (tab) => tab.textContent === 'Schema'
+    );
+    if (schemaTab) {
+      fireEvent.click(schemaTab);
+    }
+    await waitFor(() => {
+      expect(
+        container.querySelector('[data-test-subj="accelerationSchemaTab"]')
+      ).toBeInTheDocument();
+    });
   });
 
   it('switches tabs correctly', async () => {
-    const wrapper = mount(
+    const { container } = render(
       <AccelerationDetailsFlyout
         index="mockIndex"
         acceleration={mockAcceleration}
         dataSourceName="mockDataSource"
+        resetFlyout={jest.fn()}
       />
     );
-    await new Promise(setImmediate);
-    wrapper.update();
+    await waitFor(() => {
+      expect(container.querySelector('.euiTab')).toBeInTheDocument();
+    });
 
-    const schemaTabExists = wrapper.find('EuiTab').someWhere((node) => node.text() === 'Schema');
-    expect(schemaTabExists).toBeTruthy();
+    const schemaTab = Array.from(container.querySelectorAll('.euiTab')).find(
+      (tab) => tab.textContent === 'Schema'
+    );
+    expect(schemaTab).toBeTruthy();
 
-    const schemaTab = wrapper.find('EuiTab').filterWhere((node) => node.text() === 'Schema');
-    schemaTab.simulate('click');
-    await new Promise(setImmediate);
-    wrapper.update();
-
-    expect(wrapper.find('AccelerationSchemaTab').exists()).toBe(true);
+    if (schemaTab) {
+      fireEvent.click(schemaTab);
+    }
+    await waitFor(() => {
+      expect(
+        container.querySelector('[data-test-subj="accelerationSchemaTab"]')
+      ).toBeInTheDocument();
+    });
 
     // TODO: SQL DEFINATION TAB CHECK
   });

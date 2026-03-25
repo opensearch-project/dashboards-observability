@@ -6,6 +6,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
 import { getTimeInSeconds } from '../utils/time_utils';
+import { formatPrometheusDuration } from '../utils/step_utils';
 import { useApmConfig } from '../../config/apm_config_context';
 import { ServiceMapNodeMetrics, MetricDataPoint } from '../../common/types/service_map_types';
 import {
@@ -57,29 +58,30 @@ export const useGroupMetrics = (params: UseGroupMetricsParams): UseGroupMetricsR
   const [error, setError] = useState<Error | null>(null);
 
   // Get config values
-  const prometheusConnectionId = config?.prometheusDataSource?.id;
+  // Use .name (connectionId) for PromQL queries, not .id (saved object ID)
+  const prometheusConnectionId = config?.prometheusDataSource?.name;
+  const prometheusConnectionMeta = config?.prometheusDataSource?.meta;
 
   const promqlService = useMemo(() => {
     if (!prometheusConnectionId) {
       return null;
     }
-    return new PromQLSearchService(prometheusConnectionId);
-  }, [prometheusConnectionId]);
+    return new PromQLSearchService(prometheusConnectionId, prometheusConnectionMeta);
+  }, [prometheusConnectionId, prometheusConnectionMeta]);
 
   // Convert attribute name to Prometheus label format (dots to underscores)
   const prometheusLabel = useMemo(() => {
     return params.groupByAttribute.replace(/\./g, '_');
   }, [params.groupByAttribute]);
 
-  // Memoize time values
-  const startTimeSec = useMemo(() => getTimeInSeconds(params.startTime), [params.startTime]);
+  // Memoize time value
   const endTimeSec = useMemo(() => getTimeInSeconds(params.endTime), [params.endTime]);
 
   // Calculate time range string for sum_over_time queries
   const timeRange = useMemo(() => {
     const durationMs = params.endTime.getTime() - params.startTime.getTime();
     const durationSec = Math.floor(durationMs / 1000);
-    return `${durationSec}s`;
+    return formatPrometheusDuration(durationSec);
   }, [params.startTime, params.endTime]);
 
   useEffect(() => {
@@ -103,9 +105,9 @@ export const useGroupMetrics = (params: UseGroupMetricsParams): UseGroupMetricsR
           faults: getQueryGroupFaults(labelFilter, timeRange),
           errors: getQueryGroupErrors(labelFilter, timeRange),
           // P50, P90, P99 latency aggregated across all services in the group
-          latencyP50: getQueryGroupLatencyPercentile(labelFilter, 0.5),
-          latencyP90: getQueryGroupLatencyPercentile(labelFilter, 0.9),
-          latencyP99: getQueryGroupLatencyPercentile(labelFilter, 0.99),
+          latencyP50: getQueryGroupLatencyPercentile(labelFilter, 0.5, timeRange),
+          latencyP90: getQueryGroupLatencyPercentile(labelFilter, 0.9, timeRange),
+          latencyP99: getQueryGroupLatencyPercentile(labelFilter, 0.99, timeRange),
         };
 
         // Execute all queries in parallel
@@ -117,35 +119,29 @@ export const useGroupMetrics = (params: UseGroupMetricsParams): UseGroupMetricsR
           latencyP90Resp,
           latencyP99Resp,
         ] = await Promise.all([
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: queries.throughput,
-            startTime: startTimeSec,
-            endTime: endTimeSec,
+            time: endTimeSec,
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: queries.faults,
-            startTime: startTimeSec,
-            endTime: endTimeSec,
+            time: endTimeSec,
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: queries.errors,
-            startTime: startTimeSec,
-            endTime: endTimeSec,
+            time: endTimeSec,
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: queries.latencyP50,
-            startTime: startTimeSec,
-            endTime: endTimeSec,
+            time: endTimeSec,
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: queries.latencyP90,
-            startTime: startTimeSec,
-            endTime: endTimeSec,
+            time: endTimeSec,
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: queries.latencyP99,
-            startTime: startTimeSec,
-            endTime: endTimeSec,
+            time: endTimeSec,
           }),
         ]);
 
@@ -199,7 +195,6 @@ export const useGroupMetrics = (params: UseGroupMetricsParams): UseGroupMetricsR
     params.groupByValue,
     promqlService,
     prometheusLabel,
-    startTimeSec,
     endTimeSec,
     timeRange,
   ]);

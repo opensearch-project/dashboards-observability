@@ -4,19 +4,15 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import { configure, mount, shallow } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import { Filters } from '../filters';
 
 describe('Filter component', () => {
-  configure({ adapter: new Adapter() });
-
-  it('renders filters', () => {
+  it('renders filters', async () => {
     const setFilters = jest.fn();
-    const wrapper = mount(
-      <Filters page="dashboard" filters={[]} setFilters={setFilters} appConfigs={[]} />
-    );
-    expect(wrapper).toMatchSnapshot();
+    render(<Filters page="dashboard" filters={[]} setFilters={setFilters} appConfigs={[]} />);
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 });

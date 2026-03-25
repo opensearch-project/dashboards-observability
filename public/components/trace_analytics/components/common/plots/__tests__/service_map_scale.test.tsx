@@ -4,16 +4,12 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import { configure, mount, shallow } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import { ServiceMapScale } from '../service_map_scale';
 
 describe('Service map scale component', () => {
-  configure({ adapter: new Adapter() });
-
-  it('renders service map scale plot', () => {
-    const wrapper = mount(
+  it('renders service map scale', async () => {
+    render(
       <ServiceMapScale
         idSelected="latency"
         serviceMap={undefined}
@@ -21,6 +17,8 @@ describe('Service map scale component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 });

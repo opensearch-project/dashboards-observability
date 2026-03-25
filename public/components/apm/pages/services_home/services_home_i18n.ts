@@ -23,7 +23,7 @@ export const servicesI18nTexts = {
       defaultMessage: 'Avg. latency',
     }),
     throughput: i18n.translate('observability.apm.services.table.throughput', {
-      defaultMessage: 'Avg. throughput',
+      defaultMessage: 'Throughput',
     }),
     failureRatio: i18n.translate('observability.apm.services.table.failureRatio', {
       defaultMessage: 'Avg. failure ratio',
@@ -34,11 +34,10 @@ export const servicesI18nTexts = {
   },
   tableTooltips: {
     latency: i18n.translate('observability.apm.services.table.tooltip.latency', {
-      defaultMessage: 'Average response time percentile over the selected time range',
+      defaultMessage: 'Response time percentile over the selected time range',
     }),
     throughput: i18n.translate('observability.apm.services.table.tooltip.throughput', {
-      defaultMessage:
-        'Average request count per interval over the selected time range. Interval is determined by the window_duration option set during Data Prepper ingestion.',
+      defaultMessage: 'Average requests per second over the selected time range',
     }),
     failureRatio: i18n.translate('observability.apm.services.table.tooltip.failureRatio', {
       defaultMessage:

@@ -38,11 +38,18 @@ import {
 describe('Adding sample data and visualization', () => {
   it('Adds sample flights and logs data for event analytics', () => {
     cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`);
+    // Wait for page to fully load - first wait for header to exist
+    cy.get('header[data-test-subj="headerGlobalNav"]', { timeout: 60000 }).should('exist');
+    cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 60000 }).should('not.exist');
+
     cy.get('div[data-test-subj="sampleDataSetCardflights"]')
+      .should('be.visible')
       .contains(/(Add|View) data/)
       .click();
     cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`);
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('div[data-test-subj="sampleDataSetCardlogs"]')
+      .should('be.visible')
       .contains(/(Add|View) data/)
       .click();
   });

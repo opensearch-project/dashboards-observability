@@ -4,15 +4,13 @@
  */
 
 import React from 'react';
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render } from '@testing-library/react';
 import { TraceConfig } from '../components/config_components/trace_config';
+// eslint-disable-next-line jest/no-mocks-import
 import { coreStartMock } from '../../../../test/__mocks__/coreMocks';
 import DSLService from 'public/services/requests/dsl';
 
 describe('Trace Config component', () => {
-  configure({ adapter: new Adapter() });
-
   it('renders empty trace config', () => {
     const core = coreStartMock;
     const setQuery = jest.fn();
@@ -30,7 +28,7 @@ describe('Trace Config component', () => {
       fetchIndices: jest.fn(),
       fetchFields: jest.fn(),
     } as unknown) as DSLService;
-    const wrapper = mount(
+    render(
       <TraceConfig
         http={core.http}
         chrome={core.chrome}
@@ -56,7 +54,7 @@ describe('Trace Config component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('renders with one trace selected', () => {
@@ -85,7 +83,7 @@ describe('Trace Config component', () => {
         disabled: false,
       },
     ];
-    const wrapper = mount(
+    render(
       <TraceConfig
         http={core.http}
         chrome={core.chrome}
@@ -111,6 +109,6 @@ describe('Trace Config component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 });

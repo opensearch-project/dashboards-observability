@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useOperations } from '../use_operations';
 
 // Mock the PPLSearchService
@@ -73,12 +73,14 @@ describe('useOperations', () => {
 
       mockListServiceOperations.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => useOperations(defaultParams));
+      const { result } = renderHook(() => useOperations(defaultParams));
 
       // Initial loading state
       expect(result.current.isLoading).toBe(true);
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.isLoading).toBe(false);
       expect(result.current.data).toHaveLength(2);
@@ -97,9 +99,11 @@ describe('useOperations', () => {
 
       mockListServiceOperations.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => useOperations(defaultParams));
+      const { result } = renderHook(() => useOperations(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data[0].operationName).toBe('unknown');
       expect(result.current.data[0].requestCount).toBe(0);
@@ -112,9 +116,11 @@ describe('useOperations', () => {
 
       mockListServiceOperations.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => useOperations(defaultParams));
+      const { result } = renderHook(() => useOperations(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data).toEqual([]);
     });
@@ -124,9 +130,11 @@ describe('useOperations', () => {
 
       mockListServiceOperations.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => useOperations(defaultParams));
+      const { result } = renderHook(() => useOperations(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data).toEqual([]);
     });
@@ -138,9 +146,11 @@ describe('useOperations', () => {
 
       mockListServiceOperations.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => useOperations(defaultParams));
+      const { result } = renderHook(() => useOperations(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       // Metrics are initialized to default values (populated later by useOperationMetrics)
       expect(result.current.data[0].errorRate).toBe(0);
@@ -158,9 +168,11 @@ describe('useOperations', () => {
       const mockError = new Error('Network error');
       mockListServiceOperations.mockRejectedValue(mockError);
 
-      const { result, waitForNextUpdate } = renderHook(() => useOperations(defaultParams));
+      const { result } = renderHook(() => useOperations(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toEqual(mockError);
       expect(result.current.data).toEqual([]);
@@ -170,9 +182,11 @@ describe('useOperations', () => {
     it('should wrap non-Error throws', async () => {
       mockListServiceOperations.mockRejectedValue('string error');
 
-      const { result, waitForNextUpdate } = renderHook(() => useOperations(defaultParams));
+      const { result } = renderHook(() => useOperations(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toBeInstanceOf(Error);
       expect(result.current.error?.message).toBe('Unknown error');
@@ -185,9 +199,11 @@ describe('useOperations', () => {
         Operations: [],
       });
 
-      const { result, waitForNextUpdate } = renderHook(() => useOperations(defaultParams));
+      const { result } = renderHook(() => useOperations(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockListServiceOperations).toHaveBeenCalledTimes(1);
 
@@ -195,7 +211,9 @@ describe('useOperations', () => {
         result.current.refetch();
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockListServiceOperations).toHaveBeenCalledTimes(2);
     });
@@ -207,11 +225,13 @@ describe('useOperations', () => {
         Operations: [],
       });
 
-      const { waitForNextUpdate, rerender } = renderHook(({ params }) => useOperations(params), {
+      const { result, rerender } = renderHook(({ params }) => useOperations(params), {
         initialProps: { params: defaultParams },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       rerender({
         params: {
@@ -220,7 +240,9 @@ describe('useOperations', () => {
         },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockListServiceOperations).toHaveBeenCalledTimes(2);
     });
@@ -230,11 +252,13 @@ describe('useOperations', () => {
         Operations: [],
       });
 
-      const { waitForNextUpdate, rerender } = renderHook(({ params }) => useOperations(params), {
+      const { result, rerender } = renderHook(({ params }) => useOperations(params), {
         initialProps: { params: defaultParams },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       rerender({
         params: {
@@ -243,7 +267,9 @@ describe('useOperations', () => {
         },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockListServiceOperations).toHaveBeenCalledTimes(2);
     });
@@ -253,17 +279,21 @@ describe('useOperations', () => {
         Operations: [],
       });
 
-      const { waitForNextUpdate, rerender } = renderHook(({ params }) => useOperations(params), {
+      const { result, rerender } = renderHook(({ params }) => useOperations(params), {
         initialProps: { params: { ...defaultParams, refreshTrigger: 0 } },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       rerender({
         params: { ...defaultParams, refreshTrigger: 1 },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockListServiceOperations).toHaveBeenCalledTimes(2);
     });
@@ -275,9 +305,11 @@ describe('useOperations', () => {
         Operations: [],
       });
 
-      const { waitForNextUpdate } = renderHook(() => useOperations(defaultParams));
+      const { result } = renderHook(() => useOperations(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const callArgs = mockListServiceOperations.mock.calls[0][0];
       expect(callArgs.dataset.id).toBe('dataset-123');
@@ -300,9 +332,11 @@ describe('useOperations', () => {
         Operations: [],
       });
 
-      const { waitForNextUpdate } = renderHook(() => useOperations(defaultParams));
+      const { result } = renderHook(() => useOperations(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const callArgs = mockListServiceOperations.mock.calls[0][0];
       expect(callArgs.dataset.dataSource).toBeUndefined();
@@ -313,9 +347,11 @@ describe('useOperations', () => {
         Operations: [],
       });
 
-      const { waitForNextUpdate } = renderHook(() => useOperations(defaultParams));
+      const { result } = renderHook(() => useOperations(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const callArgs = mockListServiceOperations.mock.calls[0][0];
       expect(callArgs.keyAttributes.Name).toBe('frontend');
@@ -327,14 +363,16 @@ describe('useOperations', () => {
         Operations: [],
       });
 
-      const { waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useOperations({
           ...defaultParams,
           environment: undefined,
         })
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const callArgs = mockListServiceOperations.mock.calls[0][0];
       expect(callArgs.keyAttributes.Environment).toBe('unknown');

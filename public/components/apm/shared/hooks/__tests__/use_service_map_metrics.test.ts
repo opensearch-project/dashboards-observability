@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useServiceMapMetrics } from '../use_service_map_metrics';
 
 // Mock the PromQLSearchService
-const mockExecuteMetricRequest = jest.fn();
+const mockExecuteInstantQuery = jest.fn();
 jest.mock('../../../query_services/promql_search_service', () => ({
   PromQLSearchService: jest.fn().mockImplementation(() => ({
-    executeMetricRequest: mockExecuteMetricRequest,
+    executeInstantQuery: mockExecuteInstantQuery,
   })),
 }));
 
@@ -18,6 +18,7 @@ jest.mock('../../../query_services/promql_search_service', () => ({
 const mockConfig = {
   prometheusDataSource: {
     id: 'prometheus-ds-1',
+    name: 'prometheus-ds-1', // ConnectionId for PromQL queries
   },
 };
 
@@ -83,7 +84,7 @@ describe('useServiceMapMetrics', () => {
         },
       });
 
-      mockExecuteMetricRequest
+      mockExecuteInstantQuery
         // Throughput
         .mockResolvedValueOnce(mockMetricResponse('api-gateway', 100))
         // Faults
@@ -91,12 +92,14 @@ describe('useServiceMapMetrics', () => {
         // Errors
         .mockResolvedValueOnce(mockMetricResponse('api-gateway', 10));
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceMapMetrics(defaultParams));
+      const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
 
       // Initial loading state
       expect(result.current.isLoading).toBe(true);
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.isLoading).toBe(false);
       expect(result.current.metricsMap.size).toBe(2);
@@ -112,12 +115,14 @@ describe('useServiceMapMetrics', () => {
 
     it('should handle services with no metrics data', async () => {
       // Reset mock to clear any previous setup
-      mockExecuteMetricRequest.mockReset();
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockReset();
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceMapMetrics(defaultParams));
+      const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.metricsMap.size).toBe(2);
 
@@ -134,25 +139,29 @@ describe('useServiceMapMetrics', () => {
 
   describe('error handling', () => {
     it('should set error state on fetch failure', async () => {
-      mockExecuteMetricRequest.mockReset();
+      mockExecuteInstantQuery.mockReset();
       const mockError = new Error('Prometheus connection failed');
-      mockExecuteMetricRequest.mockRejectedValue(mockError);
+      mockExecuteInstantQuery.mockRejectedValue(mockError);
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceMapMetrics(defaultParams));
+      const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toEqual(mockError);
       expect(result.current.metricsMap.size).toBe(0);
     });
 
     it('should wrap non-Error throws', async () => {
-      mockExecuteMetricRequest.mockReset();
-      mockExecuteMetricRequest.mockRejectedValue('string error');
+      mockExecuteInstantQuery.mockReset();
+      mockExecuteInstantQuery.mockRejectedValue('string error');
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceMapMetrics(defaultParams));
+      const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toBeInstanceOf(Error);
       expect(result.current.error?.message).toBe('Unknown error');
@@ -161,28 +170,32 @@ describe('useServiceMapMetrics', () => {
 
   describe('refetch', () => {
     it('should refetch metrics when refetch is called', async () => {
-      mockExecuteMetricRequest.mockReset();
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockReset();
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceMapMetrics(defaultParams));
+      const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
-      const initialCallCount = mockExecuteMetricRequest.mock.calls.length;
+      const initialCallCount = mockExecuteInstantQuery.mock.calls.length;
 
       act(() => {
         result.current.refetch();
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
-      expect(mockExecuteMetricRequest.mock.calls.length).toBeGreaterThan(initialCallCount);
+      expect(mockExecuteInstantQuery.mock.calls.length).toBeGreaterThan(initialCallCount);
     });
   });
 
   describe('data frame format handling', () => {
     it('should handle data frame response format', async () => {
-      mockExecuteMetricRequest.mockReset();
+      mockExecuteInstantQuery.mockReset();
       const dataFrameResponse = {
         type: 'data_frame',
         fields: [
@@ -192,11 +205,13 @@ describe('useServiceMapMetrics', () => {
         ],
       };
 
-      mockExecuteMetricRequest.mockResolvedValue(dataFrameResponse);
+      mockExecuteInstantQuery.mockResolvedValue(dataFrameResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => useServiceMapMetrics(defaultParams));
+      const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const gatewayMetrics = result.current.metricsMap.get('api-gateway::generic:default');
       expect(gatewayMetrics?.throughput.length).toBeGreaterThan(0);

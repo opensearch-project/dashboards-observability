@@ -18,8 +18,10 @@ import {
   EuiHorizontalRule,
   EuiPanel,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
-import { HealthDonut } from '@osd/apm-topology';
+import { HealthDonut, HEALTH_DONUT_COLORS } from '@osd/apm-topology';
 import { LanguageIcon } from '../language_icon';
 import { PromQLLineChart } from '../promql_line_chart';
 import { SelectedNodeState, ServiceMapNodeMetrics } from '../../../common/types/service_map_types';
@@ -39,6 +41,8 @@ import {
   getQueryApplicationLatency,
 } from '../../../query_services/query_requests/promql_queries';
 import { formatCount, formatLatency } from '../../../common/format_utils';
+import { useChartStepWindow } from '../../hooks/use_chart_step_window';
+import { colorSwatchStyle } from './edge_metrics_flyout';
 
 export interface ServiceDetailsPanelProps {
   node: SelectedNodeState;
@@ -48,6 +52,8 @@ export interface ServiceDetailsPanelProps {
   prometheusConnectionId: string;
   onClose: () => void;
   onViewDetails: (serviceName: string, environment: string) => void;
+  onShowSpans?: (serviceName: string, environment: string) => void;
+  onShowLogs?: (serviceName: string, environment: string) => void;
   refreshTrigger?: number;
 }
 
@@ -67,6 +73,8 @@ export const ServiceDetailsPanel: React.FC<ServiceDetailsPanelProps> = ({
   prometheusConnectionId,
   onClose,
   onViewDetails,
+  onShowSpans,
+  onShowLogs,
   refreshTrigger,
 }) => {
   // Detect if this is the Application root node (aggregated view)
@@ -87,22 +95,26 @@ export const ServiceDetailsPanel: React.FC<ServiceDetailsPanelProps> = ({
   const prometheusLabel = groupByAttribute?.replace(/\./g, '_') || '';
   const groupLabelFilter = `${prometheusLabel}="${groupByValue}",namespace="span_derived"`;
 
+  // Calculate chart step window for sum_over_time aggregation
+  // This ensures chart data points represent per-step totals consistent with the Health donut total
+  const { window: chartStepWindow } = useChartStepWindow(timeRange);
+
   // PromQL queries for charts - use application-level, group-level, or service-level based on node type
   const requestsQuery = isGroupNode
     ? `sum(request{${groupLabelFilter}})`
     : isApplicationNode
     ? getQueryApplicationRequests()
-    : getQueryServiceRequests(node.environment, node.serviceName);
+    : getQueryServiceRequests(node.environment, node.serviceName, chartStepWindow);
   const faultsQuery = isGroupNode
     ? `sum(fault{${groupLabelFilter}})`
     : isApplicationNode
     ? getQueryApplicationFaults()
-    : getQueryServiceFaults(node.environment, node.serviceName);
+    : getQueryServiceFaults(node.environment, node.serviceName, chartStepWindow);
   const errorsQuery = isGroupNode
     ? `sum(error{${groupLabelFilter}})`
     : isApplicationNode
     ? getQueryApplicationErrors()
-    : getQueryServiceErrors(node.environment, node.serviceName);
+    : getQueryServiceErrors(node.environment, node.serviceName, chartStepWindow);
 
   // Latency query (P99, P90, P50 combined) - use application-level, group-level, or service-level
   const latencyQuery = isGroupNode
@@ -110,7 +122,7 @@ export const ServiceDetailsPanel: React.FC<ServiceDetailsPanelProps> = ({
 label_replace(
   histogram_quantile(0.99,
     sum by (le) (
-      latency_seconds_seconds_bucket{${groupLabelFilter}}
+      latency_seconds_bucket{${groupLabelFilter}}
     )
   ) * 1000,
   "percentile", "p99", "", ""
@@ -119,7 +131,7 @@ or
 label_replace(
   histogram_quantile(0.90,
     sum by (le) (
-      latency_seconds_seconds_bucket{${groupLabelFilter}}
+      latency_seconds_bucket{${groupLabelFilter}}
     )
   ) * 1000,
   "percentile", "p90", "", ""
@@ -128,7 +140,7 @@ or
 label_replace(
   histogram_quantile(0.50,
     sum by (le) (
-      latency_seconds_seconds_bucket{${groupLabelFilter}}
+      latency_seconds_bucket{${groupLabelFilter}}
     )
   ) * 1000,
   "percentile", "p50", "", ""
@@ -140,7 +152,7 @@ label_replace(
 label_replace(
   histogram_quantile(0.99,
     sum by (le) (
-      latency_seconds_seconds_bucket{environment="${node.environment}",service="${node.serviceName}",namespace="span_derived"}
+      latency_seconds_bucket{environment="${node.environment}",service="${node.serviceName}",remoteService="",namespace="span_derived"}
     )
   ) * 1000,
   "percentile", "p99", "", ""
@@ -149,7 +161,7 @@ or
 label_replace(
   histogram_quantile(0.90,
     sum by (le) (
-      latency_seconds_seconds_bucket{environment="${node.environment}",service="${node.serviceName}",namespace="span_derived"}
+      latency_seconds_bucket{environment="${node.environment}",service="${node.serviceName}",remoteService="",namespace="span_derived"}
     )
   ) * 1000,
   "percentile", "p90", "", ""
@@ -158,7 +170,7 @@ or
 label_replace(
   histogram_quantile(0.50,
     sum by (le) (
-      latency_seconds_seconds_bucket{environment="${node.environment}",service="${node.serviceName}",namespace="span_derived"}
+      latency_seconds_bucket{environment="${node.environment}",service="${node.serviceName}",remoteService="",namespace="span_derived"}
     )
   ) * 1000,
   "percentile", "p50", "", ""
@@ -181,8 +193,8 @@ label_replace(
       ownFocus={false}
       aria-labelledby="serviceDetailsPanelTitle"
     >
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlyoutHeader hasBorder style={{ paddingRight: 40 }}>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           {!isApplicationNode && (
             <EuiFlexItem grow={false}>
               <LanguageIcon language={language} size="l" />
@@ -198,12 +210,40 @@ label_replace(
           </EuiFlexItem>
           {!isApplicationNode && !isGroupNode && (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                onClick={() => onViewDetails(node.serviceName, node.environment)}
-              >
-                {i18nTexts.detailsPanel.viewDetails}
-              </EuiButtonEmpty>
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                {onShowSpans && (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip content={i18nTexts.actions.viewSpans}>
+                      <EuiButtonIcon
+                        iconType="apmTrace"
+                        aria-label={i18nTexts.actions.viewSpans}
+                        onClick={() => onShowSpans(node.serviceName, node.environment)}
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
+                {onShowLogs && (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip content={i18nTexts.actions.viewLogs}>
+                      <EuiButtonIcon
+                        iconType="discoverApp"
+                        aria-label={i18nTexts.actions.viewLogs}
+                        onClick={() => onShowLogs(node.serviceName, node.environment)}
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="popout"
+                    iconSide="right"
+                    onClick={() => onViewDetails(node.serviceName, node.environment)}
+                  >
+                    {i18nTexts.detailsPanel.viewDetails}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -244,22 +284,43 @@ label_replace(
                 <EuiFlexItem>
                   <EuiFlexGroup direction="column" gutterSize="xs">
                     <EuiFlexItem>
-                      <EuiText size="xs">
-                        <strong>{i18nTexts.detailsPanel.totalRequests}:</strong>{' '}
-                        {metrics ? formatCount(metrics.totalRequests) : '-'}
-                      </EuiText>
+                      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <span style={colorSwatchStyle(HEALTH_DONUT_COLORS.ok2xx)} />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="xs">
+                            <strong>{i18nTexts.detailsPanel.totalRequests}:</strong>{' '}
+                            {metrics ? formatCount(metrics.totalRequests) : '-'}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      <EuiText size="xs">
-                        <strong>{i18nTexts.detailsPanel.totalErrors}:</strong>{' '}
-                        {metrics ? formatCount(metrics.totalErrors) : '-'}
-                      </EuiText>
+                      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <span style={colorSwatchStyle(HEALTH_DONUT_COLORS.error4xx)} />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="xs">
+                            <strong>{i18nTexts.detailsPanel.totalErrors}:</strong>{' '}
+                            {metrics ? formatCount(metrics.totalErrors) : '-'}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      <EuiText size="xs">
-                        <strong>{i18nTexts.detailsPanel.totalFaults}:</strong>{' '}
-                        {metrics ? formatCount(metrics.totalFaults) : '-'}
-                      </EuiText>
+                      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <span style={colorSwatchStyle(HEALTH_DONUT_COLORS.fault5xx)} />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="xs">
+                            <strong>{i18nTexts.detailsPanel.totalFaults}:</strong>{' '}
+                            {metrics ? formatCount(metrics.totalFaults) : '-'}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
@@ -294,6 +355,7 @@ label_replace(
                   formatValue={formatCount}
                   refreshTrigger={refreshTrigger}
                   color={APM_CONSTANTS.COLORS.THROUGHPUT}
+                  seriesLabel={i18nTexts.detailsPanel.requests}
                 />
               </EuiPanel>
 
@@ -334,6 +396,7 @@ label_replace(
                   formatValue={formatCount}
                   refreshTrigger={refreshTrigger}
                   color={APM_CONSTANTS.COLORS.FAULT}
+                  seriesLabel={i18nTexts.detailsPanel.faults5xx}
                 />
               </EuiPanel>
 
@@ -354,6 +417,7 @@ label_replace(
                   formatValue={formatCount}
                   refreshTrigger={refreshTrigger}
                   color={APM_CONSTANTS.COLORS.WARNING}
+                  seriesLabel={i18nTexts.detailsPanel.errors4xx}
                 />
               </EuiPanel>
             </EuiAccordion>

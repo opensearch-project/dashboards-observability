@@ -4,9 +4,7 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit';
-import { waitFor } from '@testing-library/react';
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Provider, useDispatch } from 'react-redux';
 import { applyMiddleware, createStore } from 'redux';
@@ -33,7 +31,6 @@ jest.mock('react-redux', () => ({
 }));
 
 describe('Siderbar component', () => {
-  configure({ adapter: new Adapter() });
   const store = configureStore({
     reducer: jest.fn(),
   });
@@ -53,7 +50,7 @@ describe('Siderbar component', () => {
     const selectedTimestamp = 'timestamp';
     const explorerData = {};
 
-    const wrapper = mount(
+    render(
       <Provider store={store}>
         <Sidebar
           explorerFields={explorerFields}
@@ -73,10 +70,8 @@ describe('Siderbar component', () => {
       </Provider>
     );
 
-    wrapper.update();
-
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
@@ -95,7 +90,7 @@ describe('Siderbar component', () => {
     };
     const astore = createStore(rootReducer, applyMiddleware(thunk));
 
-    const wrapper = mount(
+    render(
       <Provider store={astore}>
         <Sidebar
           explorerFields={explorerFields}
@@ -116,7 +111,7 @@ describe('Siderbar component', () => {
     );
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 });

@@ -8,11 +8,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { act } from '@testing-library/react';
-import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { coreRefs } from '../../../../../public/framework/core_refs';
 import { describePrometheusDataConnection } from '../../../../../test/datasources';
 import { DatasourceDetails } from '../manage/data_connection';
@@ -30,8 +27,6 @@ jest.mock('../../../../../public/framework/core_refs', () => ({
 }));
 
 describe('Data Connection Inactive Page test', () => {
-  configure({ adapter: new Adapter() });
-
   beforeEach(() => {
     // Clear the mock implementation before each test
     (coreRefs.http!.get as jest.Mock).mockClear();
@@ -47,17 +42,15 @@ describe('Data Connection Inactive Page test', () => {
       status: 'DISABLED',
     };
 
-    const container = document.createElement('div');
     (coreRefs.http!.get as jest.Mock).mockResolvedValue(describePrometheusDataConnection);
-    await act(() => {
-      ReactDOM.render(
-        <InactiveDataConnectionCallout
-          datasourceDetails={mockDatasourceDetails}
-          fetchSelectedDatasource={jest.fn()}
-        />,
-        container
-      );
+    render(
+      <InactiveDataConnectionCallout
+        datasourceDetails={mockDatasourceDetails}
+        fetchSelectedDatasource={jest.fn()}
+      />
+    );
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
     });
-    expect(container).toMatchSnapshot();
   });
 });

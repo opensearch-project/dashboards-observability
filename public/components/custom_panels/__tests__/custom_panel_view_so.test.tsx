@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { CustomPanelViewSO } from '../custom_panel_view_so';
 
@@ -43,7 +41,6 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('Panels View SO Component', () => {
-  configure({ adapter: new Adapter() });
   const store = createStore(rootReducer, applyMiddleware(thunk));
 
   const http = httpClientMock;
@@ -106,18 +103,18 @@ describe('Panels View SO Component', () => {
   });
 
   it('renders panel view SO container without visualizations', async () => {
-    const utils = renderPanelView(sampleSavedObjectPanel);
+    const _utils = renderPanelView(sampleSavedObjectPanel);
 
     await waitFor(() => {
-      expect(utils.container.firstChild).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
   it('renders panels view SO container with visualizations', async () => {
-    const utils = renderPanelView(sampleSavedObjectPanelWithVisualization);
+    const _utils = renderPanelView(sampleSavedObjectPanelWithVisualization);
 
     await waitFor(() => {
-      expect(utils.container.firstChild).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
@@ -125,7 +122,7 @@ describe('Panels View SO Component', () => {
     const utils = renderPanelView(sampleSavedObjectPanelWithVisualization);
     fireEvent.click(utils.getByTestId('superDatePickerApplyTimeButton'));
 
-    expect(utils.container.firstChild).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('render panel view so container and duplicate dashboard', async () => {
@@ -172,6 +169,6 @@ describe('Panels View SO Component', () => {
 
     fireEvent.click(utils.getByTestId('panelActionContextMenu'));
     fireEvent.click(utils.getByTestId('reloadPanelContextMenuItem'));
-    expect(utils.container.firstChild).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 });

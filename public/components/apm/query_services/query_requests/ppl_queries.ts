@@ -3,39 +3,44 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { formatPPLTimestamp } from '../../shared/utils/time_utils';
+
 /**
  * PPL queries for APM topology data
  *
- * Data comes from otel-apm-service-map index with event types:
- * - ServiceOperationDetail: Service and operation level details
- * - ServiceConnection: Service-to-service connections for topology
+ * Data comes from otel-apm-service-map index with a unified document structure.
+ * Each document represents a connection between a sourceNode and an optional targetNode,
+ * with optional sourceOperation and targetOperation fields.
  *
- * All queries use ISO 8601 timestamps for time filtering.
+ * Key fields:
+ * - sourceNode.keyAttributes (name, environment, type)
+ * - sourceNode.groupByAttributes (telemetry SDK info, etc.)
+ * - targetNode.keyAttributes (name, environment, type) — null for leaf services
+ * - targetNode.groupByAttributes
+ * - sourceOperation.name — the operation on the source side
+ * - targetOperation.name — the operation on the target side
+ * - nodeConnectionHash — dedup key for topology connections
+ * - operationConnectionHash — dedup key for operation-level connections
+ *
+ * Timestamps use 'YYYY-MM-DD HH:mm:ss.SSS' format for backward compatibility with all PPL versions.
  */
 
 /**
- * Converts a timestamp to ISO 8601 string format
- * Handles Date objects and ISO strings
- *
- * @param timestamp - Date object or ISO string
- * @returns ISO 8601 formatted string (e.g., "2026-01-19T05:44:00.000Z")
+ * Converts a timestamp to a Date object for formatting
  */
-function convertToISOString(timestamp: string | Date): string {
-  // Handle Date object
+function toDate(timestamp: string | Date): Date {
   if (timestamp instanceof Date) {
-    return timestamp.toISOString();
+    return timestamp;
   }
-
-  // Handle string - validate and normalize to ISO format
   const date = new Date(timestamp);
   if (isNaN(date.getTime())) {
     throw new Error(`Invalid timestamp: ${timestamp}`);
   }
-  return date.toISOString();
+  return date;
 }
 
 /**
- * Builds a time filter clause for PPL queries using ISO 8601 timestamps
+ * Builds a time filter clause for PPL queries using 'YYYY-MM-DD HH:mm:ss.SSS' format
  *
  * @param startTime - Start time as Date object or ISO string
  * @param endTime - End time as Date object or ISO string
@@ -43,16 +48,16 @@ function convertToISOString(timestamp: string | Date): string {
  */
 function buildTimeFilterClause(startTime?: string | Date, endTime?: string | Date): string {
   if (startTime && endTime) {
-    const startISO = convertToISOString(startTime);
-    const endISO = convertToISOString(endTime);
-    return ` | where timestamp >= '${startISO}' and timestamp <= '${endISO}'`;
+    const startStr = formatPPLTimestamp(toDate(startTime));
+    const endStr = formatPPLTimestamp(toDate(endTime));
+    return ` | where timestamp >= '${startStr}' and timestamp <= '${endStr}'`;
   }
   return '';
 }
 
 /**
  * Query to list all services in the time range
- * Fetches ServiceOperationDetail events and deduplicates by service identity
+ * Fetches unique connections and extracts services from both source and target nodes
  *
  * @param queryIndex - Index name (default: otel-apm-service-map)
  * @param startTime - Start time for filtering (Date or ISO string)
@@ -62,10 +67,9 @@ function buildTimeFilterClause(startTime?: string | Date, endTime?: string | Dat
  * @example
  * ```
  * source=otel-apm-service-map
- * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
- * | where eventType = 'ServiceOperationDetail'
- * | dedup service.keyAttributes.name, service.keyAttributes.environment
- * | fields service.keyAttributes, service.groupByAttributes
+ * | where timestamp >= '2026-01-19 05:44:00.000' and timestamp <= '2026-01-19 05:49:00.000'
+ * | dedup nodeConnectionHash
+ * | fields sourceNode.keyAttributes, sourceNode.groupByAttributes, targetNode.keyAttributes, targetNode.groupByAttributes
  * ```
  */
 export function getQueryListServices(
@@ -75,9 +79,8 @@ export function getQueryListServices(
 ): string {
   let query = `source=${queryIndex}`;
   query += buildTimeFilterClause(startTime, endTime);
-  query += ` | where eventType = 'ServiceOperationDetail'`;
-  query += ` | dedup service.keyAttributes.name, service.keyAttributes.environment`;
-  query += ` | fields service.keyAttributes, service.groupByAttributes`;
+  query += ` | dedup nodeConnectionHash`;
+  query += ` | fields sourceNode.keyAttributes, sourceNode.groupByAttributes, targetNode.keyAttributes, targetNode.groupByAttributes`;
   return query;
 }
 
@@ -94,12 +97,11 @@ export function getQueryListServices(
  * @example
  * ```
  * source=otel-apm-service-map
- * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
- * | where eventType = 'ServiceOperationDetail'
- * | where service.keyAttributes.environment = 'generic:default'
- * | where service.keyAttributes.name = 'frontend'
- * | dedup hashCode
- * | fields service.keyAttributes, service.groupByAttributes
+ * | where timestamp >= '2026-01-19 05:44:00.000' and timestamp <= '2026-01-19 05:49:00.000'
+ * | where sourceNode.keyAttributes.environment = 'generic:default'
+ * | where sourceNode.keyAttributes.name = 'frontend'
+ * | dedup nodeConnectionHash
+ * | fields sourceNode.keyAttributes, sourceNode.groupByAttributes
  * ```
  */
 export function getQueryGetService(
@@ -111,18 +113,17 @@ export function getQueryGetService(
 ): string {
   let query = `source=${queryIndex}`;
   query += buildTimeFilterClause(startTime, endTime);
-  query += ` | where eventType = 'ServiceOperationDetail'`;
 
   // Filter by service keyAttributes if provided
   if (environment) {
-    query += ` | where service.keyAttributes.environment = '${environment}'`;
+    query += ` | where sourceNode.keyAttributes.environment = '${environment}'`;
   }
   if (serviceName) {
-    query += ` | where service.keyAttributes.name = '${serviceName}'`;
+    query += ` | where sourceNode.keyAttributes.name = '${serviceName}'`;
   }
 
-  query += ` | dedup hashCode`;
-  query += ` | fields service.keyAttributes, service.groupByAttributes`;
+  query += ` | dedup nodeConnectionHash`;
+  query += ` | fields sourceNode.keyAttributes, sourceNode.groupByAttributes`;
   return query;
 }
 
@@ -141,11 +142,10 @@ export function getQueryGetService(
  * @example
  * ```
  * source=otel-apm-service-map
- * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
- * | where eventType = 'ServiceOperationDetail'
- * | where service.keyAttributes.environment = 'generic:default'
- * | where service.keyAttributes.name = 'frontend'
- * | fields service.keyAttributes, service.groupByAttributes, timestamp
+ * | where timestamp >= '2026-01-19 05:44:00.000' and timestamp <= '2026-01-19 05:49:00.000'
+ * | where sourceNode.keyAttributes.environment = 'generic:default'
+ * | where sourceNode.keyAttributes.name = 'frontend'
+ * | fields sourceNode.keyAttributes, sourceNode.groupByAttributes, timestamp
  * | sort - timestamp
  * | head 1
  * ```
@@ -159,10 +159,9 @@ export function getQueryServiceAttributes(
 ): string {
   let query = `source=${queryIndex}`;
   query += buildTimeFilterClause(startTime, endTime);
-  query += ` | where eventType = 'ServiceOperationDetail'`;
-  query += ` | where service.keyAttributes.environment = '${environment}'`;
-  query += ` | where service.keyAttributes.name = '${serviceName}'`;
-  query += ` | fields service.keyAttributes, service.groupByAttributes, timestamp`;
+  query += ` | where sourceNode.keyAttributes.environment = '${environment}'`;
+  query += ` | where sourceNode.keyAttributes.name = '${serviceName}'`;
+  query += ` | fields sourceNode.keyAttributes, sourceNode.groupByAttributes, timestamp`;
   query += ` | sort - timestamp`;
   query += ` | head 1`;
   return query;
@@ -181,12 +180,11 @@ export function getQueryServiceAttributes(
  * @example
  * ```
  * source=otel-apm-service-map
- * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
- * | where eventType = 'ServiceOperationDetail'
- * | where service.keyAttributes.environment = 'generic:default'
- * | where service.keyAttributes.name = 'frontend'
- * | dedup hashCode
- * | fields service.keyAttributes, operation.name, operation.remoteService.keyAttributes, operation.remoteOperationName
+ * | where timestamp >= '2026-01-19 05:44:00.000' and timestamp <= '2026-01-19 05:49:00.000'
+ * | where sourceNode.keyAttributes.environment = 'generic:default'
+ * | where sourceNode.keyAttributes.name = 'frontend'
+ * | dedup operationConnectionHash
+ * | fields sourceNode.keyAttributes, sourceOperation.name, targetNode.keyAttributes, targetOperation.name
  * ```
  */
 export function getQueryListServiceOperations(
@@ -198,18 +196,17 @@ export function getQueryListServiceOperations(
 ): string {
   let query = `source=${queryIndex}`;
   query += buildTimeFilterClause(startTime, endTime);
-  query += ` | where eventType = 'ServiceOperationDetail'`;
 
   // Filter by service keyAttributes if provided
   if (environment) {
-    query += ` | where service.keyAttributes.environment = '${environment}'`;
+    query += ` | where sourceNode.keyAttributes.environment = '${environment}'`;
   }
   if (serviceName) {
-    query += ` | where service.keyAttributes.name = '${serviceName}'`;
+    query += ` | where sourceNode.keyAttributes.name = '${serviceName}'`;
   }
 
-  query += ` | dedup hashCode`;
-  query += ` | fields service.keyAttributes, operation.name, operation.remoteService.keyAttributes, operation.remoteOperationName`;
+  query += ` | dedup operationConnectionHash`;
+  query += ` | fields sourceNode.keyAttributes, sourceOperation.name, targetNode.keyAttributes, targetOperation.name`;
   return query;
 }
 
@@ -226,12 +223,11 @@ export function getQueryListServiceOperations(
  * @example
  * ```
  * source=otel-apm-service-map
- * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
- * | where eventType = 'ServiceOperationDetail'
- * | where service.keyAttributes.environment = 'generic:default'
- * | where service.keyAttributes.name = 'frontend'
- * | dedup hashCode
- * | fields service.keyAttributes, operation.remoteService.keyAttributes, operation.remoteOperationName
+ * | where timestamp >= '2026-01-19 05:44:00.000' and timestamp <= '2026-01-19 05:49:00.000'
+ * | where sourceNode.keyAttributes.environment = 'generic:default'
+ * | where sourceNode.keyAttributes.name = 'frontend'
+ * | dedup operationConnectionHash
+ * | fields sourceNode.keyAttributes, sourceOperation.name, targetNode.keyAttributes, targetOperation.name
  * ```
  */
 export function getQueryListServiceDependencies(
@@ -243,24 +239,23 @@ export function getQueryListServiceDependencies(
 ): string {
   let query = `source=${queryIndex}`;
   query += buildTimeFilterClause(startTime, endTime);
-  query += ` | where eventType = 'ServiceOperationDetail'`;
 
   // Filter by service keyAttributes if provided
   if (environment) {
-    query += ` | where service.keyAttributes.environment = '${environment}'`;
+    query += ` | where sourceNode.keyAttributes.environment = '${environment}'`;
   }
   if (serviceName) {
-    query += ` | where service.keyAttributes.name = '${serviceName}'`;
+    query += ` | where sourceNode.keyAttributes.name = '${serviceName}'`;
   }
 
-  query += ` | dedup hashCode`;
-  query += ` | fields service.keyAttributes, operation.name, operation.remoteService.keyAttributes, operation.remoteOperationName`;
+  query += ` | dedup operationConnectionHash`;
+  query += ` | fields sourceNode.keyAttributes, sourceOperation.name, targetNode.keyAttributes, targetOperation.name`;
   return query;
 }
 
 /**
  * Query to get service map (topology) data
- * Fetches ServiceConnection events showing service-to-service relationships
+ * Fetches unique connections showing service-to-service relationships
  *
  * @param queryIndex - Index name
  * @param startTime - Start time for filtering (Date or ISO string)
@@ -270,10 +265,9 @@ export function getQueryListServiceDependencies(
  * @example
  * ```
  * source=otel-apm-service-map
- * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
- * | where eventType = 'ServiceConnection'
- * | dedup hashCode
- * | fields service.keyAttributes, remoteService.keyAttributes, service.groupByAttributes, remoteService.groupByAttributes
+ * | where timestamp >= '2026-01-19 05:44:00.000' and timestamp <= '2026-01-19 05:49:00.000'
+ * | dedup nodeConnectionHash
+ * | fields sourceNode.keyAttributes, targetNode.keyAttributes, sourceNode.groupByAttributes, targetNode.groupByAttributes
  * ```
  */
 export function getQueryGetServiceMap(
@@ -283,9 +277,8 @@ export function getQueryGetServiceMap(
 ): string {
   let query = `source=${queryIndex}`;
   query += buildTimeFilterClause(startTime, endTime);
-  query += ` | where eventType = 'ServiceConnection'`;
-  query += ` | dedup hashCode`;
-  query += ` | fields service.keyAttributes, remoteService.keyAttributes, service.groupByAttributes, remoteService.groupByAttributes`;
+  query += ` | dedup nodeConnectionHash`;
+  query += ` | fields sourceNode.keyAttributes, targetNode.keyAttributes, sourceNode.groupByAttributes, targetNode.groupByAttributes`;
   return query;
 }
 
@@ -304,12 +297,11 @@ export function getQueryGetServiceMap(
  * @example
  * ```
  * source=otel-apm-service-map
- * | where timestamp >= '2026-01-19T05:44:00.000Z' and timestamp <= '2026-01-19T05:49:00.000Z'
- * | where eventType = 'ServiceOperationDetail'
- * | where service.keyAttributes.environment = 'generic:default'
- * | where service.keyAttributes.name = 'frontend'
- * | where operation.name = 'GET /api/users'
- * | stats distinct_count(operation.remoteService.keyAttributes.name) as dependency_count
+ * | where timestamp >= '2026-01-19 05:44:00.000' and timestamp <= '2026-01-19 05:49:00.000'
+ * | where sourceNode.keyAttributes.environment = 'generic:default'
+ * | where sourceNode.keyAttributes.name = 'frontend'
+ * | where sourceOperation.name = 'GET /api/users'
+ * | stats distinct_count(targetNode.keyAttributes.name) as dependency_count
  * ```
  */
 export function getQueryOperationDependenciesCount(
@@ -322,20 +314,19 @@ export function getQueryOperationDependenciesCount(
 ): string {
   let query = `source=${queryIndex}`;
   query += buildTimeFilterClause(startTime, endTime);
-  query += ` | where eventType = 'ServiceOperationDetail'`;
 
   // Filter by service keyAttributes if provided
   if (environment) {
-    query += ` | where service.keyAttributes.environment = '${environment}'`;
+    query += ` | where sourceNode.keyAttributes.environment = '${environment}'`;
   }
   if (serviceName) {
-    query += ` | where service.keyAttributes.name = '${serviceName}'`;
+    query += ` | where sourceNode.keyAttributes.name = '${serviceName}'`;
   }
   if (operationName) {
-    query += ` | where operation.name = '${operationName}'`;
+    query += ` | where sourceOperation.name = '${operationName}'`;
   }
   // Count distinct remote services (dependencies)
-  query += ` | stats distinct_count(operation.remoteService.keyAttributes.name) as dependency_count`;
+  query += ` | stats distinct_count(targetNode.keyAttributes.name) as dependency_count`;
   return query;
 }
 
@@ -360,10 +351,9 @@ export function getQueryDependencyDownstreamCount(
 ): string {
   let query = `source=${index}`;
   query += buildTimeFilterClause(startTime, endTime);
-  query += ` | where eventType = 'ServiceOperationDetail'`;
-  query += ` | where service.keyAttributes.environment = '${environment}'`;
-  query += ` | where service.keyAttributes.name = '${dependencyServiceName}'`;
+  query += ` | where sourceNode.keyAttributes.environment = '${environment}'`;
+  query += ` | where sourceNode.keyAttributes.name = '${dependencyServiceName}'`;
   // Count distinct downstream services this dependency calls
-  query += ` | stats distinct_count(operation.remoteService.keyAttributes.name) as dependency_count`;
+  query += ` | stats distinct_count(targetNode.keyAttributes.name) as dependency_count`;
   return query;
 }

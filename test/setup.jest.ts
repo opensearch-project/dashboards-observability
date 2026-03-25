@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import '@testing-library/jest-dom/extend-expect';
+import '@testing-library/jest-dom';
 // eslint-disable-next-line jest/no-mocks-import
 import './__mocks__/worker.mock';
 import { configure } from '@testing-library/react';

@@ -3,24 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-
 import {
   hexToRgb,
   lightenColor,
   formatError,
   isValidTraceId,
   rangeNumDocs,
-  getHeaders,
   fillTimeDataWithEmpty,
   redoQuery,
 } from '../utils';
-import { EXPLORER_DATA_GRID_QUERY } from '../../../../../test/event_analytics_constants';
 
 describe('Utils event analytics helper functions', () => {
-  configure({ adapter: new Adapter() });
-
   it('validates hexToRgb function', () => {
     expect(hexToRgb()).toBe('rgba(60,161,199,1)');
     expect(hexToRgb('test', 1, true)).toBe('rgba(96,353,409,1)');

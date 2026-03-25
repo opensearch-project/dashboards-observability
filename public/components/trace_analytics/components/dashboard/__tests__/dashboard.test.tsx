@@ -3,26 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { Dashboard } from '..';
+// eslint-disable-next-line jest/no-mocks-import
 import { coreStartMock } from '../../../../../../test/__mocks__/coreMocks';
 
 describe('Dashboard component', () => {
-  configure({ adapter: new Adapter() });
   const modes = [
     { id: 'jaeger', title: 'Jaeger' },
     { id: 'data_prepper', title: 'Data Prepper' },
   ];
 
-  it('renders empty dashboard', () => {
+  it('renders empty dashboard', async () => {
     const core = coreStartMock;
     const setQuery = jest.fn();
     const setFilters = jest.fn();
     const setStartTime = jest.fn();
     const setEndTime = jest.fn();
-    const wrapper = mount(
+    render(
       <Dashboard
         http={core.http}
         chrome={core.chrome}
@@ -59,16 +58,18 @@ describe('Dashboard component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
-  it('renders empty jaeger dashboard', () => {
+  it('renders empty jaeger dashboard', async () => {
     const core = coreStartMock;
     const setQuery = jest.fn();
     const setFilters = jest.fn();
     const setStartTime = jest.fn();
     const setEndTime = jest.fn();
-    const wrapper = mount(
+    render(
       <Dashboard
         http={core.http}
         chrome={core.chrome}
@@ -106,16 +107,18 @@ describe('Dashboard component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
-  it('renders dashboard', () => {
+  it('renders dashboard', async () => {
     const core = coreStartMock;
     const setQuery = jest.fn();
     const setFilters = jest.fn();
     const setStartTime = jest.fn();
     const setEndTime = jest.fn();
-    const wrapper = mount(
+    render(
       <Dashboard
         http={core.http}
         chrome={core.chrome}
@@ -152,9 +155,13 @@ describe('Dashboard component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
 
-    wrapper.find('button[data-test-subj="dashboard-table-percentile-button-1"]').simulate('click');
-    wrapper.find('button[data-test-subj="dashboard-table-percentile-button-2"]').simulate('click');
+    const button1 = screen.getByTestId('dashboard-table-percentile-button-1');
+    const button2 = screen.getByTestId('dashboard-table-percentile-button-2');
+    fireEvent.click(button1);
+    fireEvent.click(button2);
   });
 });

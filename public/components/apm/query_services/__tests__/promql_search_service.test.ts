@@ -14,15 +14,7 @@ jest.mock('../../../../framework/core_refs', () => ({
   },
 }));
 
-// Mock PromQLQueryBuilder
-jest.mock('../query_requests/promql_query_builder', () => ({
-  PromQLQueryBuilder: {
-    buildQuery: jest.fn(() => 'rate(error{service="test"}[5m])'),
-  },
-}));
-
 import { coreRefs } from '../../../../framework/core_refs';
-import { PromQLQueryBuilder } from '../query_requests/promql_query_builder';
 
 describe('PromQLSearchService', () => {
   let service: PromQLSearchService;
@@ -36,6 +28,17 @@ describe('PromQLSearchService', () => {
   describe('constructor', () => {
     it('should store prometheus connection ID', () => {
       const testService = new PromQLSearchService('test-connection');
+      expect(testService).toBeDefined();
+    });
+
+    it('should store prometheus connection ID and meta', () => {
+      const meta = { prometheusUrl: 'http://prometheus:9090' };
+      const testService = new PromQLSearchService('test-connection', meta);
+      expect(testService).toBeDefined();
+    });
+
+    it('should work with undefined meta', () => {
+      const testService = new PromQLSearchService('test-connection', undefined);
       expect(testService).toBeDefined();
     });
   });
@@ -67,10 +70,7 @@ describe('PromQLSearchService', () => {
       expect(result).toEqual(mockResponse.body);
     });
 
-    // Note: step parameter is not part of ExecuteMetricRequestParams and is
-    // calculated automatically by OSD core, so we don't test for it here.
-
-    it('should not include step in request body (calculated by OSD core)', async () => {
+    it('should not include options.step when step not provided', async () => {
       const mockResponse = { body: { data: { result: [] } } };
       (coreRefs.http!.post as jest.Mock).mockResolvedValue(mockResponse);
 
@@ -83,7 +83,24 @@ describe('PromQLSearchService', () => {
       const callArg = (coreRefs.http!.post as jest.Mock).mock.calls[0][1];
       const body = JSON.parse(callArg.body);
 
-      expect(body.step).toBeUndefined();
+      expect(body.options?.step).toBeUndefined();
+    });
+
+    it('should include options.step when step is provided', async () => {
+      const mockResponse = { body: { data: { result: [] } } };
+      (coreRefs.http!.post as jest.Mock).mockResolvedValue(mockResponse);
+
+      await service.executeMetricRequest({
+        query: 'rate(error[5m])',
+        startTime: 1000,
+        endTime: 2000,
+        step: 60,
+      });
+
+      const callArg = (coreRefs.http!.post as jest.Mock).mock.calls[0][1];
+      const body = JSON.parse(callArg.body);
+
+      expect(body.options.step).toBe(60);
     });
 
     it('should format time range correctly', async () => {
@@ -121,8 +138,44 @@ describe('PromQLSearchService', () => {
 
       expect(body.query.dataset.id).toBe(prometheusConnectionId);
       expect(body.query.dataset.type).toBe('PROMETHEUS');
-      expect(body.query.language).toBe('PromQL');
+      expect(body.query.language).toBe('PROMQL');
       expect(body.query.format).toBe('jdbc');
+    });
+
+    it('should include meta in dataSource when provided', async () => {
+      const meta = { arn: 'sample:arn' };
+      const serviceWithMeta = new PromQLSearchService(prometheusConnectionId, meta);
+      const mockResponse = { body: { data: { result: [] } } };
+      (coreRefs.http!.post as jest.Mock).mockResolvedValue(mockResponse);
+
+      await serviceWithMeta.executeMetricRequest({
+        query: 'rate(error[5m])',
+        startTime: 1000,
+        endTime: 2000,
+      });
+
+      const callArg = (coreRefs.http!.post as jest.Mock).mock.calls[0][1];
+      const body = JSON.parse(callArg.body);
+
+      expect(body.query.dataset.id).toBe(prometheusConnectionId);
+      expect(body.query.dataset.type).toBe('PROMETHEUS');
+      expect(body.query.dataset.dataSource).toEqual({ meta });
+    });
+
+    it('should include dataSource with undefined meta when meta not provided', async () => {
+      const mockResponse = { body: { data: { result: [] } } };
+      (coreRefs.http!.post as jest.Mock).mockResolvedValue(mockResponse);
+
+      await service.executeMetricRequest({
+        query: 'rate(error[5m])',
+        startTime: 1000,
+        endTime: 2000,
+      });
+
+      const callArg = (coreRefs.http!.post as jest.Mock).mock.calls[0][1];
+      const body = JSON.parse(callArg.body);
+
+      expect(body.query.dataset.dataSource).toEqual({ meta: undefined });
     });
 
     it('should throw error on query failure', async () => {
@@ -160,50 +213,76 @@ describe('PromQLSearchService', () => {
     });
   });
 
-  describe('executeBuiltQuery', () => {
-    it('should build query using PromQLQueryBuilder and execute', async () => {
-      const mockResponse = { body: { data: { result: [] } } };
+  describe('executeInstantQuery', () => {
+    it('should send options.queryType INSTANT and options.time', async () => {
+      const mockResponse = {
+        body: {
+          data: {
+            result: [{ metric: { service: 'test' }, value: [1000, '100'] }],
+          },
+        },
+      };
+
       (coreRefs.http!.post as jest.Mock).mockResolvedValue(mockResponse);
 
-      await service.executeBuiltQuery({
-        metricName: 'error',
-        filters: { service: 'api-gateway' },
-        stat: 'sum',
-        interval: '5m',
-        startTime: 1000,
-        endTime: 2000,
+      const result = await service.executeInstantQuery({
+        query: 'sum(request{namespace="span_derived"})',
+        time: 1704153600,
       });
 
-      expect(PromQLQueryBuilder.buildQuery).toHaveBeenCalledWith({
-        metricName: 'error',
-        filters: { service: 'api-gateway' },
-        stat: 'sum',
-        interval: '5m',
-      });
-      expect(coreRefs.http!.post).toHaveBeenCalled();
+      const callArg = (coreRefs.http!.post as jest.Mock).mock.calls[0][1];
+      const body = JSON.parse(callArg.body);
+
+      expect(body.options.queryType).toBe('INSTANT');
+      expect(body.options.time).toBe('1704153600');
+      expect(result).toEqual(mockResponse.body);
     });
 
-    // Note: step parameter is not part of executeBuiltQuery and is
-    // calculated automatically by OSD core, so we don't test for it here.
-
-    it('should handle missing stat parameter', async () => {
+    it('should NOT include timeRange in request body', async () => {
       const mockResponse = { body: { data: { result: [] } } };
       (coreRefs.http!.post as jest.Mock).mockResolvedValue(mockResponse);
 
-      await service.executeBuiltQuery({
-        metricName: 'latency',
-        filters: { service: 'test' },
-        interval: '1m',
-        startTime: 1000,
-        endTime: 2000,
+      await service.executeInstantQuery({
+        query: 'sum(request{namespace="span_derived"})',
+        time: 1704153600,
       });
 
-      expect(PromQLQueryBuilder.buildQuery).toHaveBeenCalledWith({
-        metricName: 'latency',
-        filters: { service: 'test' },
-        stat: undefined,
-        interval: '1m',
-      });
+      const callArg = (coreRefs.http!.post as jest.Mock).mock.calls[0][1];
+      const body = JSON.parse(callArg.body);
+
+      expect(body.timeRange).toBeUndefined();
+    });
+
+    it('should throw on failure', async () => {
+      const mockError = new Error('Instant query failed');
+      (coreRefs.http!.post as jest.Mock).mockRejectedValue(mockError);
+
+      await expect(
+        service.executeInstantQuery({
+          query: 'invalid query',
+          time: 1000,
+        })
+      ).rejects.toThrow('Instant query failed');
+    });
+
+    it('should log error on failure', async () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const mockError = new Error('Query failed');
+      (coreRefs.http!.post as jest.Mock).mockRejectedValue(mockError);
+
+      await expect(
+        service.executeInstantQuery({
+          query: 'test',
+          time: 1000,
+        })
+      ).rejects.toThrow();
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '[PromQLSearchService] Instant query execution failed:',
+        mockError
+      );
+
+      consoleSpy.mockRestore();
     });
   });
 });

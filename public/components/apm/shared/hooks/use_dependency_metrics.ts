@@ -8,10 +8,7 @@ import { PromQLSearchService } from '../../query_services/promql_search_service'
 import { DependencyMetrics, GroupedDependency } from '../../common/types/service_details_types';
 import { calculateTimeRangeDuration } from '../utils/time_utils';
 import {
-  getQueryAllDependenciesLatencyP50,
-  getQueryAllDependenciesLatencyP90,
-  getQueryAllDependenciesLatencyP99,
-  getQueryAllDependenciesFaultRate,
+  getQueryAllDependenciesLatencyPercentiles,
   getQueryAllDependenciesErrorRateAvg,
   getQueryAllDependenciesAvailabilityAvg,
   getQueryAllDependenciesRequestCountTotal,
@@ -24,6 +21,7 @@ export interface UseDependencyMetricsParams {
   startTime: Date;
   endTime: Date;
   prometheusConnectionId: string;
+  prometheusConnectionMeta?: Record<string, unknown>;
   refreshTrigger?: number;
 }
 
@@ -38,7 +36,6 @@ export interface UseDependencyMetricsResult {
  *
  * Fetches metrics for all dependencies in parallel:
  * - Latency percentiles (p50, p90, p99) from Prometheus
- * - Fault rate from Prometheus
  * - Error rate from Prometheus
  * - Availability from Prometheus
  *
@@ -48,20 +45,21 @@ export const useDependencyMetrics = (
   params: UseDependencyMetricsParams
 ): UseDependencyMetricsResult => {
   const [metrics, setMetrics] = useState<Map<string, DependencyMetrics>>(new Map());
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   const promqlService = useMemo(() => {
     if (!params.prometheusConnectionId) {
       return null;
     }
-    return new PromQLSearchService(params.prometheusConnectionId);
-  }, [params.prometheusConnectionId]);
+    return new PromQLSearchService(params.prometheusConnectionId, params.prometheusConnectionMeta);
+  }, [params.prometheusConnectionId, params.prometheusConnectionMeta]);
 
   useEffect(() => {
     if (!params.dependencies || params.dependencies.length === 0 || !promqlService) {
       // Only update if not already empty to avoid infinite re-renders
       setMetrics((prev) => (prev.size === 0 ? prev : new Map()));
+      setIsLoading(false);
       return;
     }
 
@@ -73,77 +71,45 @@ export const useDependencyMetrics = (
         // Calculate time range duration for aggregate queries
         const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
 
-        // Make 7 consolidated queries (one per metric type)
+        // Make 4 consolidated queries
         // Each query returns ALL dependencies in a single response
-        // Request count uses sum_over_time for true total
-        // Error rate and availability use avg_over_time for accurate averages
         const [
-          p50Response,
-          p90Response,
-          p99Response,
-          faultRateResponse,
+          latencyPercentilesResponse,
           errorRateResponse,
           availabilityResponse,
           requestCountResponse,
         ] = await Promise.all([
-          promqlService.executeMetricRequest({
-            query: getQueryAllDependenciesLatencyP50(
+          promqlService.executeInstantQuery({
+            query: getQueryAllDependenciesLatencyPercentiles(
               params.environment,
               params.serviceName,
               timeRangeDuration
             ),
-            startTime: Math.floor(params.startTime.getTime() / 1000),
-            endTime: Math.floor(params.endTime.getTime() / 1000),
+            time: Math.floor(params.endTime.getTime() / 1000),
           }),
-          promqlService.executeMetricRequest({
-            query: getQueryAllDependenciesLatencyP90(
-              params.environment,
-              params.serviceName,
-              timeRangeDuration
-            ),
-            startTime: Math.floor(params.startTime.getTime() / 1000),
-            endTime: Math.floor(params.endTime.getTime() / 1000),
-          }),
-          promqlService.executeMetricRequest({
-            query: getQueryAllDependenciesLatencyP99(
-              params.environment,
-              params.serviceName,
-              timeRangeDuration
-            ),
-            startTime: Math.floor(params.startTime.getTime() / 1000),
-            endTime: Math.floor(params.endTime.getTime() / 1000),
-          }),
-          promqlService.executeMetricRequest({
-            query: getQueryAllDependenciesFaultRate(params.environment, params.serviceName),
-            startTime: Math.floor(params.startTime.getTime() / 1000),
-            endTime: Math.floor(params.endTime.getTime() / 1000),
-          }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryAllDependenciesErrorRateAvg(
               params.environment,
               params.serviceName,
               timeRangeDuration
             ),
-            startTime: Math.floor(params.startTime.getTime() / 1000),
-            endTime: Math.floor(params.endTime.getTime() / 1000),
+            time: Math.floor(params.endTime.getTime() / 1000),
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryAllDependenciesAvailabilityAvg(
               params.environment,
               params.serviceName,
               timeRangeDuration
             ),
-            startTime: Math.floor(params.startTime.getTime() / 1000),
-            endTime: Math.floor(params.endTime.getTime() / 1000),
+            time: Math.floor(params.endTime.getTime() / 1000),
           }),
-          promqlService.executeMetricRequest({
+          promqlService.executeInstantQuery({
             query: getQueryAllDependenciesRequestCountTotal(
               params.environment,
               params.serviceName,
               timeRangeDuration
             ),
-            startTime: Math.floor(params.startTime.getTime() / 1000),
-            endTime: Math.floor(params.endTime.getTime() / 1000),
+            time: Math.floor(params.endTime.getTime() / 1000),
           }),
         ]);
 
@@ -155,19 +121,16 @@ export const useDependencyMetrics = (
             p50Duration: 0,
             p90Duration: 0,
             p99Duration: 0,
-            faultRate: 0,
             errorRate: 0,
             availability: 0,
             requestCount: 0,
           });
         });
 
-        // Extract metrics by dependency from each response
-        // Note: Unit conversions are now done in PromQL queries (latency * 1000, rates * 100)
-        extractMetricsByDependency(p50Response, metricsMap, 'p50Duration');
-        extractMetricsByDependency(p90Response, metricsMap, 'p90Duration');
-        extractMetricsByDependency(p99Response, metricsMap, 'p99Duration');
-        extractMetricsByDependency(faultRateResponse, metricsMap, 'faultRate');
+        // Extract latency percentiles from the combined response
+        extractPercentilesByDependency(latencyPercentilesResponse, metricsMap);
+
+        // Extract other metrics by dependency from each response
         extractMetricsByDependency(errorRateResponse, metricsMap, 'errorRate');
         extractMetricsByDependency(availabilityResponse, metricsMap, 'availability');
         extractMetricsByDependency(requestCountResponse, metricsMap, 'requestCount');
@@ -195,6 +158,70 @@ export const useDependencyMetrics = (
 
   return { metrics, isLoading, error };
 };
+
+const PERCENTILE_FIELD_MAP: Record<string, keyof DependencyMetrics> = {
+  p50: 'p50Duration',
+  p90: 'p90Duration',
+  p99: 'p99Duration',
+};
+
+/**
+ * Extract latency percentiles from a combined PromQL response with "percentile" labels.
+ * Each row/series has a "percentile" label (p50, p90, p99), "remoteService", and "remoteOperation" labels.
+ */
+function extractPercentilesByDependency(
+  response: any,
+  metricsMap: Map<string, DependencyMetrics>
+): void {
+  try {
+    if (response?.meta?.instantData?.rows) {
+      const rows = response.meta.instantData.rows;
+      if (!Array.isArray(rows)) return;
+
+      rows.forEach((row: any) => {
+        const remoteService = row.remoteService;
+        const remoteOperation = row.remoteOperation || 'unknown';
+        const percentile = row.percentile;
+        const field = PERCENTILE_FIELD_MAP[percentile];
+        if (!remoteService || !field) return;
+
+        const key = `${remoteService}:${remoteOperation}`;
+        const rawValue = parseFloat(row.Value);
+        const value = isNaN(rawValue) ? 0 : rawValue;
+        const metrics = metricsMap.get(key);
+        if (metrics) {
+          (metrics as any)[field] = value;
+        }
+      });
+      return;
+    }
+
+    const results = response.body?.data?.result || response?.data?.result || response?.result || [];
+    if (!Array.isArray(results)) return;
+
+    results.forEach((series: any) => {
+      const remoteService = series.metric?.remoteService;
+      const remoteOperation = series.metric?.remoteOperation || 'unknown';
+      const percentile = series.metric?.percentile;
+      const field = PERCENTILE_FIELD_MAP[percentile];
+      if (!remoteService || !field) return;
+
+      const key = `${remoteService}:${remoteOperation}`;
+      const values = series.values || [];
+      if (values.length === 0) return;
+
+      const lastValue = values[values.length - 1];
+      const rawValue = parseFloat(lastValue[1]);
+      const value = isNaN(rawValue) ? 0 : rawValue;
+      const metrics = metricsMap.get(key);
+      if (metrics) {
+        (metrics as any)[field] = value;
+      }
+    });
+  } catch (e) {
+    console.error('[extractPercentilesByDependency] Failed to extract latency percentiles:', e);
+  }
+}
 
 /**
  * Extract metrics from consolidated PromQL response and populate metrics map

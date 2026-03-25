@@ -124,7 +124,8 @@ export const VisualizationContainer = ({
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState(<></>);
 
-  const queryMetaData = useSelector(metricQuerySelector(visualizationId));
+  const selector = useMemo(() => metricQuerySelector(visualizationId), [visualizationId]);
+  const queryMetaData = useSelector(selector);
   const closeModal = () => setIsModalVisible(false);
   const showModal = (modalType: string) => {
     if (modalType === 'catalogModal')

@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, screen, fireEvent } from '@testing-library/react';
 import PPLService from '../../../../../services/requests/ppl';
 import React from 'react';
 import { VisaulizationFlyoutSO } from '../visualization_flyout_so';
@@ -20,7 +19,6 @@ import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
 
 describe('Visualization Flyout Component', () => {
-  configure({ adapter: new Adapter() });
   const store = createStore(rootReducer, applyMiddleware(thunk));
 
   afterEach(() => {
@@ -38,7 +36,7 @@ describe('Visualization Flyout Component', () => {
     const pplService = new PPLService(httpClientMock);
     const isFlyoutReplacement = false;
 
-    const wrapper = mount(
+    render(
       <Provider store={store}>
         <VisaulizationFlyoutSO
           panelId={panelId}
@@ -55,7 +53,7 @@ describe('Visualization Flyout Component', () => {
       </Provider>
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('renders replace visualization Flyout', () => {
@@ -77,7 +75,7 @@ describe('Visualization Flyout Component', () => {
       })
     );
 
-    const wrapper = mount(
+    render(
       <Provider store={store}>
         <VisaulizationFlyoutSO
           panelId={panelId}
@@ -95,8 +93,9 @@ describe('Visualization Flyout Component', () => {
       </Provider>
     );
 
-    wrapper.find('[data-test-subj="addFlyoutButton"]').first().simulate('click');
+    const addButton = screen.getByTestId('addFlyoutButton');
+    fireEvent.click(addButton);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 });

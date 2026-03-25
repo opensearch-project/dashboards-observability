@@ -5,8 +5,6 @@
 
 import { applyMiddleware, createStore } from '@reduxjs/toolkit';
 import { fireEvent, render, waitFor, act, cleanup } from '@testing-library/react';
-import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
@@ -28,7 +26,6 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('Panels Table Component', () => {
-  configure({ adapter: new Adapter() });
   const store = createStore(rootReducer, applyMiddleware(thunk));
   coreRefs.savedObjectsClient.find = jest.fn(() =>
     Promise.resolve({
@@ -75,19 +72,19 @@ describe('Panels Table Component', () => {
   });
 
   it('renders empty dashboard table container', async () => {
-    const utils = renderPanelTable();
+    renderPanelTable();
 
     await waitFor(() => {
-      expect(utils.container.firstChild).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
   it('render dashboard table container with panels', async () => {
     store.dispatch(setPanelList(panelsData.panels));
-    const utils = renderPanelTable();
+    renderPanelTable();
 
     await waitFor(() => {
-      expect(utils.container.firstChild).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
@@ -170,9 +167,9 @@ describe('Panels Table Component', () => {
   });
 
   it('renders empty panel table container2', async () => {
-    const utils = renderPanelTable();
+    renderPanelTable();
     await waitFor(() => {
-      expect(utils.container.firstChild).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 });

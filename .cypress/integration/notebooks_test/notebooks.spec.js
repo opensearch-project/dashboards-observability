@@ -49,7 +49,12 @@ const moveToTestNotebook = () => {
 describe('Adding sample data and visualization', () => {
   it('Adds sample flights data for visualization paragraph', () => {
     cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`);
+    // Wait for page to fully load - first wait for header to exist
+    cy.get('header[data-test-subj="headerGlobalNav"]', { timeout: 60000 }).should('exist');
+    cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 60000 }).should('not.exist');
+
     cy.get('div[data-test-subj="sampleDataSetCardflights"]')
+      .should('be.visible')
       .contains(/(Add|View) data/)
       .click();
   });
@@ -371,17 +376,32 @@ describe('Testing paragraphs', () => {
 
   it('Clears outputs', () => {
     cy.get('h3[data-test-subj="notebookTitle"]').contains(TEST_NOTEBOOK).should('exist');
+
+    // Verify outputs exist before clearing
+    cy.get(`a[href="${SAMPLE_URL}"]`).should('exist');
+
     cy.get('.euiButton__text').contains('Clear all outputs').click();
     cy.get('button[data-test-subj="confirmModalConfirmButton"]').click();
 
+    // Wait for the clear operation to complete
+    cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 30000 }).should('not.exist');
+
+    // Verify outputs are cleared
     cy.get(`a[href="${SAMPLE_URL}"]`).should('not.exist');
   });
 
   it('Runs all paragraphs', () => {
     cy.get('h3[data-test-subj="notebookTitle"]').contains(TEST_NOTEBOOK).should('exist');
-    cy.get('.euiButton__text').contains('Run all paragraphs').click();
 
-    cy.get(`a[href="${SAMPLE_URL}"]`).should('exist');
+    // Ensure button is visible and enabled before clicking
+    cy.contains('button', 'Run all paragraphs').should('be.visible').and('not.be.disabled');
+    cy.contains('button', 'Run all paragraphs').click();
+
+    // Wait for execution to complete
+    cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 60000 }).should('not.exist');
+
+    // Wait for outputs to render - check for the specific markdown link
+    cy.get(`a[href="${SAMPLE_URL}"]`, { timeout: 60000 }).should('exist');
   });
 
   it('Adds paragraph to top', () => {
@@ -407,11 +427,24 @@ describe('Testing paragraphs', () => {
 
   it('Moves paragraphs', () => {
     cy.get('h3[data-test-subj="notebookTitle"]').contains(TEST_NOTEBOOK).should('exist');
+
+    // Clear outputs to reduce payload size and prevent POST 413 errors
+    cy.get('.euiButton__text').contains('Clear all outputs').click();
+    cy.get('button[data-test-subj="confirmModalConfirmButton"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 30000 }).should('not.exist');
+
+    // Scroll to top to ensure first paragraph menu button is in view
+    cy.scrollTo('top');
+    cy.get('.euiButtonIcon[aria-label="Open paragraph menu"').eq(0).scrollIntoView({ duration: 500 });
     cy.get('.euiButtonIcon[aria-label="Open paragraph menu"').eq(0).click();
     cy.get('.euiContextMenuItem-isDisabled').should('have.length.gte', 2);
     cy.get('.euiContextMenuItem__text').contains('Move to bottom').click();
 
-    cy.get('.euiText').contains('[5] Visualization').should('exist');
+    // Wait for the loading indicator to disappear after move
+    cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 30000 }).should('not.exist');
+
+    // Verify the paragraph has been renumbered
+    cy.get('.euiText').contains('[5] Visualization', { timeout: 10000 }).should('exist');
   });
 
   it('Duplicates and renames the notebook', () => {
@@ -427,7 +460,9 @@ describe('Testing paragraphs', () => {
     cy.get('h3[data-test-subj="notebookTitle"]')
       .contains(TEST_NOTEBOOK + ' (rename)')
       .should('exist');
-    cy.get(`a[href="${SAMPLE_URL}"]`).should('have.length.gte', 2);
+
+    // Verify notebook has paragraphs (outputs were cleared in previous test)
+    cy.get('.euiText').should('contain', 'Code block');
   });
 
   it('Deletes paragraphs', () => {

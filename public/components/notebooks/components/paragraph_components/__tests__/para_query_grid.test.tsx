@@ -4,14 +4,10 @@
  */
 
 import { render } from '@testing-library/react';
-import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { QueryDataGridMemo } from '../para_query_grid';
 
 describe('<QueryDataGridMemo /> spec', () => {
-  configure({ adapter: new Adapter() });
-
   it('renders the component', () => {
     const props = {
       rowCount: 5,
@@ -40,7 +36,7 @@ describe('<QueryDataGridMemo /> spec', () => {
         },
       ],
     };
-    const utils = render(<QueryDataGridMemo setVisibleColumns={jest.fn()} {...props} />);
-    expect(utils.container.firstChild).toMatchSnapshot();
+    const _utils = render(<QueryDataGridMemo setVisibleColumns={jest.fn()} {...props} />);
+    expect(document.body).toMatchSnapshot();
   });
 });

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import React, { ComponentProps } from 'react';
 import { Timechart } from '../timechart';
 
@@ -54,8 +54,10 @@ describe('<Timechart /> spec', () => {
     expect(props.onChangeInterval).toBeCalledWith('w');
   });
 
-  it('should match snapshot', () => {
-    const { component } = renderTimechart();
-    expect(component.container).toMatchSnapshot();
+  it('should match snapshot', async () => {
+    renderTimechart();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 });

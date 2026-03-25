@@ -3,23 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { MetricsGrid } from '../metrics_grid';
+// eslint-disable-next-line jest/no-mocks-import
 import { coreStartMock } from '../../../../../test/__mocks__/coreMocks';
-import { sampleMetric, sampleMetricsVisualizations } from '../../../../../test/metrics_constants';
+import { sampleMetricsVisualizations } from '../../../../../test/metrics_constants';
 import { createStore } from '@reduxjs/toolkit';
 import { rootReducer } from '../../../../framework/redux/reducers';
 import { Provider } from 'react-redux';
 import PPLService from '../../../../services/requests/ppl';
+// eslint-disable-next-line jest/no-mocks-import
 import httpClientMock from '../../../../../test/__mocks__/httpClientMock';
 import { coreRefs } from '../../../../framework/core_refs';
 import { of } from 'rxjs';
 
 describe('Metrics Grid Component', () => {
-  configure({ adapter: new Adapter() });
   const store = createStore(rootReducer);
   const core = coreStartMock;
 
@@ -51,7 +50,7 @@ describe('Metrics Grid Component', () => {
     );
     coreRefs.chrome = { getIsNavDrawerLocked$: () => of(false) };
 
-    const wrapper = mount(
+    render(
       <Provider store={store}>
         <MetricsGrid
           chrome={core.chrome}
@@ -68,10 +67,9 @@ describe('Metrics Grid Component', () => {
         />
       </Provider>
     );
-    wrapper.update();
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 });

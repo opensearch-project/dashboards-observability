@@ -3,25 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
+import { render } from '@testing-library/react';
+// eslint-disable-next-line jest/no-mocks-import
 import httpClientMock from '../../../../test/__mocks__/httpClientMock';
-import Adapter from 'enzyme-adapter-react-16';
 import PPLService from 'public/services/requests/ppl';
 
-import {
-  isNameValid,
-  getListItem,
-  fetchAppById,
-  removeTabData,
-  initializeTabData,
-  fetchPanelsVizIdList,
-  calculateAvailability,
-} from '../helpers/utils';
+import { isNameValid, getListItem, calculateAvailability } from '../helpers/utils';
 import { HttpResponse } from '../../../../../../src/core/public/http/types';
 
 describe('Utils application analytics helper functions', () => {
-  configure({ adapter: new Adapter() });
-
   it('validates isNameValid function', () => {
     expect(isNameValid('example', [])).toStrictEqual([]);
     expect(isNameValid('example', ['example'])).toStrictEqual(['Name must be unique.']);
@@ -32,10 +22,11 @@ describe('Utils application analytics helper functions', () => {
   });
 
   it('validates and renders getListItem function', () => {
-    const wrapper = mount(getListItem('example', 'example description'));
-    expect(wrapper).toMatchSnapshot();
+    render(getListItem('example', 'example description'));
+    expect(document.body).toMatchSnapshot();
   });
 
+  // eslint-disable-next-line jest/expect-expect
   it('validates calculateAvailability function', () => {
     const client = httpClientMock;
     client.get = jest.fn(() => {

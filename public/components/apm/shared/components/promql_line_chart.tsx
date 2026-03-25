@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useEffect, useMemo } from 'react';
+import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { EuiIcon, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import * as echarts from 'echarts';
@@ -12,6 +12,7 @@ import { usePromQLChartData } from '../hooks/use_promql_chart_data';
 import { TimeRange, ChartSeriesData } from '../../common/types/service_details_types';
 import { SERVICE_DETAILS_CONSTANTS, CHART_COLORS } from '../../common/constants';
 import { parseTimeRange, getTimeAxisConfig } from '../utils/time_utils';
+import { isResolutionExceededError } from '../hooks/use_promql_chart_data';
 import './promql_line_chart.scss';
 
 export interface PromQLLineChartProps {
@@ -29,6 +30,10 @@ export interface PromQLLineChartProps {
   labelField?: string;
   /** Override color for single-series charts */
   color?: string;
+  /** Override series name for single-series charts (e.g., to replace empty `{}` labels) */
+  seriesLabel?: string;
+  /** Number of data points for the chart resolution (default: RESOLUTION_MEDIUM) */
+  resolution?: number;
 }
 
 /**
@@ -66,9 +71,12 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
   formatTooltipValue,
   labelField,
   color,
+  seriesLabel,
+  resolution,
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.ECharts | null>(null);
+  const [showChart, setShowChart] = useState(false);
 
   // Calculate time axis configuration based on time range
   const timeAxisConfig = useMemo(() => {
@@ -91,7 +99,10 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
     prometheusConnectionId,
     refreshTrigger,
     labelField,
+    resolution,
   });
+
+  const isResolutionExceeded = isResolutionExceededError(error);
 
   // Default value formatter
   const defaultFormatValue = (value: number): string => {
@@ -102,14 +113,22 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
     return value.toFixed(2);
   };
 
+  const chartHeight = title ? height - 24 : height;
+
   // Initialize chart and handle loading/data updates
+  // The chartRef div is always in the DOM to avoid React/ECharts DOM reconciliation conflicts
   useEffect(() => {
-    if (!chartRef.current || error) {
-      // Dispose chart when ref is null (empty state) or on error
+    if (!chartRef.current) {
+      return;
+    }
+
+    // When error or empty: dispose chart and hide
+    if (error || (!isLoading && series.length === 0)) {
       if (chartInstance.current) {
         chartInstance.current.dispose();
         chartInstance.current = null;
       }
+      setShowChart(false);
       return;
     }
 
@@ -120,6 +139,7 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
 
     // Show loading state using ECharts built-in loading
     if (isLoading) {
+      setShowChart(true);
       chartInstance.current.showLoading({
         text: '',
         spinnerRadius: 10,
@@ -134,8 +154,11 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
 
     // Don't set options if no data
     if (series.length === 0) {
+      setShowChart(false);
       return;
     }
+
+    setShowChart(true);
 
     const option: echarts.EChartsOption = {
       grid: {
@@ -266,7 +289,14 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
           },
         },
       },
-      series: series.map((s, index) => createSeriesConfig(s, index, chartType, color)),
+      series: series.map((s, index) =>
+        createSeriesConfig(
+          seriesLabel && series.length === 1 ? { ...s, name: seriesLabel } : s,
+          index,
+          chartType,
+          color
+        )
+      ),
     };
 
     chartInstance.current.setOption(option, true);
@@ -280,7 +310,18 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
     formatTooltipValue,
     timeAxisConfig,
     color,
+    seriesLabel,
   ]);
+
+  // Resize chart after it becomes visible (display: none → block transition)
+  // ECharts needs the container to have dimensions when rendering
+  useEffect(() => {
+    if (showChart && chartInstance.current) {
+      requestAnimationFrame(() => {
+        chartInstance.current?.resize();
+      });
+    }
+  }, [showChart]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -299,28 +340,44 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Render error state
-  if (error) {
-    return (
-      <div className="promql-line-chart" style={{ height }}>
-        {title && <h4 className="promql-line-chart__title">{title}</h4>}
+  // Always render the same DOM structure to avoid React/ECharts DOM reconciliation conflicts
+  return (
+    <div
+      className="promql-line-chart"
+      style={{ height }}
+      data-test-subj={`lineChart-${title?.replace(/\s+/g, '-').toLowerCase() || 'unnamed'}`}
+    >
+      {title && <h4 className="promql-line-chart__title">{title}</h4>}
+      <div
+        ref={chartRef}
+        className="promql-line-chart__chart"
+        style={{ display: showChart ? 'block' : 'none', height: chartHeight }}
+      />
+      {error && (
         <div className="promql-line-chart__error">
-          <EuiIcon type="alert" size="l" color="danger" className="promql-line-chart__error-icon" />
-          <EuiText size="s" className="promql-line-chart__error-message">
-            {i18n.translate('observability.apm.promqlLineChart.errorMessage', {
-              defaultMessage: 'Failed to load chart data',
-            })}
+          <EuiIcon
+            type={isResolutionExceeded ? 'iInCircle' : 'alert'}
+            size="l"
+            color={isResolutionExceeded ? 'primary' : 'danger'}
+            className="promql-line-chart__error-icon"
+          />
+          <EuiText
+            size="s"
+            color={isResolutionExceeded ? 'default' : undefined}
+            className="promql-line-chart__error-message"
+          >
+            {isResolutionExceeded
+              ? i18n.translate('observability.apm.promqlLineChart.resolutionExceededMessage', {
+                  defaultMessage:
+                    'Too many data points for the selected time range. Try selecting a shorter time range.',
+                })
+              : i18n.translate('observability.apm.promqlLineChart.errorMessage', {
+                  defaultMessage: 'Failed to load chart data',
+                })}
           </EuiText>
         </div>
-      </div>
-    );
-  }
-
-  // Render empty state (only when not loading and no data)
-  if (!isLoading && series.length === 0) {
-    return (
-      <div className="promql-line-chart" style={{ height }}>
-        {title && <h4 className="promql-line-chart__title">{title}</h4>}
+      )}
+      {!isLoading && !error && series.length === 0 && (
         <div className="promql-line-chart__empty">
           <EuiIcon
             type="visLine"
@@ -334,22 +391,7 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
             })}
           </EuiText>
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className="promql-line-chart"
-      style={{ height }}
-      data-test-subj={`lineChart-${title?.replace(/\s+/g, '-').toLowerCase() || 'unnamed'}`}
-    >
-      {title && <h4 className="promql-line-chart__title">{title}</h4>}
-      <div
-        ref={chartRef}
-        className="promql-line-chart__chart"
-        style={{ height: title ? height - 24 : height }}
-      />
+      )}
     </div>
   );
 };

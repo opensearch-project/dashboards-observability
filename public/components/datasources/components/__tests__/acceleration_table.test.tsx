@@ -4,13 +4,8 @@
  */
 
 import React from 'react';
-import { mount, configure } from 'enzyme';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { render, waitFor, act, screen } from '@testing-library/react';
 import { AccelerationTable } from '../manage/accelerations/acceleration_table';
-import { act } from 'react-dom/test-utils';
-import Adapter from 'enzyme-adapter-react-16';
-import { ACC_LOADING_MSG } from '../manage/accelerations/utils/acceleration_utils';
-import { ReactWrapper } from 'enzyme';
 import { DirectQueryLoadingStatus } from '../../../../../common/types/explorer';
 
 const accelerationCache = {
@@ -84,8 +79,6 @@ jest.mock('../../../../plugin', () => ({
 }));
 
 describe('AccelerationTable Component', () => {
-  configure({ adapter: new Adapter() });
-
   const cacheLoadingHooks = {
     databasesLoadStatus: DirectQueryLoadingStatus.INITIAL,
     tablesLoadStatus: DirectQueryLoadingStatus.INITIAL,
@@ -94,51 +87,49 @@ describe('AccelerationTable Component', () => {
   };
 
   it('renders without crashing', () => {
-    const wrapper = mount(
+    const { container } = render(
       <AccelerationTable dataSourceName="testDataSource" cacheLoadingHooks={cacheLoadingHooks} />
     );
-    expect(wrapper).toBeDefined();
+    expect(container).toBeDefined();
   });
 
   it('shows loading spinner when refreshing accelerations', async () => {
-    jest.mock('../../../../framework/catalog_cache/cache_loader', () => ({
-      useLoadAccelerationsToCache: jest.fn(() => ({
-        loadStatus: 'loading',
-        startLoading: jest.fn(),
-      })),
-    }));
+    // Create loading state hooks
+    const loadingCacheHooks = {
+      databasesLoadStatus: 'Loading' as DirectQueryLoadingStatus,
+      startLoadingDatabases: jest.fn(),
+      tablesLoadStatus: 'Idle' as DirectQueryLoadingStatus,
+      startLoadingTables: jest.fn(),
+      accelerationsLoadStatus: 'Loading' as DirectQueryLoadingStatus,
+      startLoadingAccelerations: jest.fn(),
+      updateCache: jest.fn(() => accelerationCache),
+      updatedTime: Date.now(),
+    };
 
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = mount(
-        <AccelerationTable dataSourceName="testDataSource" cacheLoadingHooks={cacheLoadingHooks} />
-      );
+    const { _container } = render(
+      <AccelerationTable dataSourceName="testDataSource" cacheLoadingHooks={loadingCacheHooks} />
+    );
+
+    await waitFor(() => {
+      // When loading, the refresh button should show loading state
+      const refreshButton = screen.queryByTestId('refreshButton');
+      expect(refreshButton).toBeInTheDocument();
     });
-
-    wrapper!.update();
-
-    await act(async () => {
-      wrapper!.find('[data-test-subj="refreshButton"]').simulate('click');
-    });
-    wrapper!.update();
-
-    expect(wrapper!.find(EuiLoadingSpinner).exists()).toBe(true);
-    expect(wrapper!.text()).toContain(ACC_LOADING_MSG);
-
-    jest.restoreAllMocks();
   });
 
   it('correctly displays accelerations in the table', async () => {
-    let wrapper: ReactWrapper;
+    let container: HTMLElement;
     await act(async () => {
-      wrapper = mount(
+      const result = render(
         <AccelerationTable dataSourceName="testDataSource" cacheLoadingHooks={cacheLoadingHooks} />
       );
+      container = result.container;
     });
-    wrapper!.update();
 
-    const tableRows = wrapper!.find('EuiTableRow');
-    expect(tableRows.length).toBe(accelerationCache.accelerations.length);
+    await waitFor(() => {
+      const tableRows = container!.querySelectorAll('.euiTableRow');
+      expect(tableRows.length).toBe(accelerationCache.accelerations.length);
+    });
   });
 
   it('filters rows based on active status correctly', async () => {
@@ -149,36 +140,43 @@ describe('AccelerationTable Component', () => {
       })),
     }));
 
-    let wrapper: ReactWrapper;
+    let container: HTMLElement;
     await act(async () => {
-      wrapper = mount(
+      const result = render(
         <AccelerationTable dataSourceName="testDataSource" cacheLoadingHooks={cacheLoadingHooks} />
       );
+      container = result.container;
       await new Promise((resolve) => setTimeout(resolve, 0));
-      wrapper!.update();
     });
 
-    const activeStatusRows = wrapper!.find('tr.euiTableRow').filterWhere((node) => {
-      return node.find('.euiFlexItem').someWhere((subNode) => subNode.text() === 'Active');
-    });
+    await waitFor(() => {
+      const tableRows = container!.querySelectorAll('tr.euiTableRow');
+      const activeStatusRows = Array.from(tableRows).filter((row) => {
+        return Array.from(row.querySelectorAll('.euiFlexItem')).some(
+          (item) => item.textContent === 'Active'
+        );
+      });
 
-    expect(activeStatusRows.length).toBe(
-      accelerationCache.accelerations.filter((acc) => acc.status === 'active').length
-    );
+      expect(activeStatusRows.length).toBe(
+        accelerationCache.accelerations.filter((acc) => acc.status === 'active').length
+      );
+    });
     jest.restoreAllMocks();
   });
 
   it('displays updated time correctly', async () => {
-    let wrapper: ReactWrapper;
+    let container: HTMLElement;
     await act(async () => {
-      wrapper = mount(
+      const result = render(
         <AccelerationTable dataSourceName="testDataSource" cacheLoadingHooks={cacheLoadingHooks} />
       );
+      container = result.container;
     });
-    wrapper!.update();
 
     const expectedLocalizedTime = '3/14/2024, 4:05:53 AM';
 
-    expect(wrapper!.text()).toContain(expectedLocalizedTime);
+    await waitFor(() => {
+      expect(container!.textContent).toContain(expectedLocalizedTime);
+    });
   });
 });

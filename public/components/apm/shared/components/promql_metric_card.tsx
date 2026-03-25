@@ -6,7 +6,9 @@
 import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { EuiLoadingChart, EuiPanel, EuiIcon, EuiToolTip } from '@elastic/eui';
 import * as echarts from 'echarts';
-import { usePromQLChartData } from '../hooks/use_promql_chart_data';
+import { i18n } from '@osd/i18n';
+import { usePromQLChartData, isResolutionExceededError } from '../hooks/use_promql_chart_data';
+import { RESOLUTION_LOW } from '../utils/step_utils';
 import { TimeRange, MetricDataPoint } from '../../common/types/service_details_types';
 import { APM_CONSTANTS, SERVICE_DETAILS_CONSTANTS } from '../../common/constants';
 import './promql_metric_card.scss';
@@ -26,6 +28,7 @@ export interface PromQLMetricCardProps {
   secondaryValue?: number; // Optional external secondary value (e.g., rate)
   secondaryFormatValue?: (value: number) => string; // Formatter for secondary value
   secondaryLabel?: string; // Label for secondary value (e.g., "rate", "latest")
+  divisor?: number; // When showTotal, avgValue = sum(data_points) / divisor (e.g., time range in seconds for req/s)
 }
 
 /**
@@ -63,6 +66,7 @@ export const PromQLMetricCard: React.FC<PromQLMetricCardProps> = ({
   secondaryValue,
   secondaryFormatValue,
   secondaryLabel,
+  divisor,
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.ECharts | null>(null);
@@ -76,6 +80,7 @@ export const PromQLMetricCard: React.FC<PromQLMetricCardProps> = ({
     timeRange,
     prometheusConnectionId,
     refreshTrigger,
+    resolution: RESOLUTION_LOW,
   });
 
   // Get chart data from first series
@@ -122,17 +127,21 @@ export const PromQLMetricCard: React.FC<PromQLMetricCardProps> = ({
   }, [chartData]);
 
   // Calculate average and latest from chart data (for showTotal mode)
+  // When divisor is provided: avgValue = sum(data_points) / divisor
+  // This supports rate calculation: e.g., total_requests / time_range_seconds = req/s
   const { avgValue, latestFromChart } = useMemo(() => {
     if (chartData.length === 0) return { avgValue: 0, latestFromChart: 0 };
     const sum = chartData.reduce((s, point) => s + point.value, 0);
-    const avg = sum / chartData.length;
+    const d = divisor && divisor > 0 ? divisor : chartData.length;
+    const avg = sum / d;
     const latest = chartData[chartData.length - 1].value;
     return { avgValue: avg, latestFromChart: latest };
-  }, [chartData]);
+  }, [chartData, divisor]);
 
-  // Determine primary value based on showTotal mode
-  // When showTotal is true, display average throughput instead of sum
-  const primaryValue = showTotal ? avgValue : latestValue;
+  // Determine primary value:
+  // - When divisor is provided OR showTotal is true, use avgValue (sum / divisor or sum / count)
+  // - Otherwise, use the latest value from the query
+  const primaryValue = showTotal || divisor ? avgValue : latestValue;
 
   // Format the display value
   const displayValue = useMemo(() => {
@@ -314,7 +323,24 @@ export const PromQLMetricCard: React.FC<PromQLMetricCardProps> = ({
           {isLoading ? (
             <EuiLoadingChart size="m" mono />
           ) : error ? (
-            <span className="promql-metric-card__value promql-metric-card__value--error">-</span>
+            isResolutionExceededError(error) ? (
+              <EuiToolTip
+                content={i18n.translate(
+                  'observability.apm.promqlMetricCard.resolutionExceededTooltip',
+                  {
+                    defaultMessage:
+                      'Too many data points for the selected time range. Try a shorter time range.',
+                  }
+                )}
+                position="top"
+              >
+                <span className="promql-metric-card__value promql-metric-card__value--error">
+                  - <EuiIcon type="iInCircle" size="s" color="primary" />
+                </span>
+              </EuiToolTip>
+            ) : (
+              <span className="promql-metric-card__value promql-metric-card__value--error">-</span>
+            )
           ) : (
             <div className="promql-metric-card__values-wrapper">
               <div className="promql-metric-card__primary-row">

@@ -1,353 +1,267 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ServiceMap Component renders service map component 1`] = `
-Array [
-  <div
-    className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
-  >
+<body>
+  <div>
     <div
-      className="euiText euiText--medium"
+      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
     >
-      <span
-        className="panel-title"
-      >
-        Service map
-      </span>
-    </div>
-    <div
-      className="euiSpacer euiSpacer--m"
-    />
-    <fieldset
-      className="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
-      disabled={false}
-    >
-      <legend
-        className="euiScreenReaderOnly"
-      >
-        Select metric for service map display
-      </legend>
       <div
-        className="euiButtonGroup__buttons"
+        class="euiText euiText--medium"
       >
-        <label
-          className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
-          disabled={false}
-          htmlFor="random_html_id"
-          onClick={[Function]}
-          style={
-            Object {
-              "minWidth": undefined,
-            }
-          }
+        <span
+          class="panel-title"
         >
-          <span
-            className="euiButtonContent euiButton__content"
-          >
-            <span
-              className="euiButton__text euiButtonGroupButton__textShift"
-              data-text="Duration"
-              title="Duration"
-            >
-              <input
-                checked={true}
-                className="euiScreenReaderOnly"
-                data-test-subj="latency"
-                disabled={false}
-                id="random_html_id"
-                name="random_html_id"
-                onChange={[Function]}
-                type="radio"
-              />
-              Duration
-            </span>
-          </span>
-        </label>
-        <label
-          className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
-          disabled={false}
-          htmlFor="random_html_id"
-          onClick={[Function]}
-          style={
-            Object {
-              "minWidth": undefined,
-            }
-          }
-        >
-          <span
-            className="euiButtonContent euiButton__content"
-          >
-            <span
-              className="euiButton__text euiButtonGroupButton__textShift"
-              data-text="Errors"
-              title="Errors"
-            >
-              <input
-                checked={false}
-                className="euiScreenReaderOnly"
-                data-test-subj="error_rate"
-                disabled={false}
-                id="random_html_id"
-                name="random_html_id"
-                onChange={[Function]}
-                type="radio"
-              />
-              Errors
-            </span>
-          </span>
-        </label>
-        <label
-          className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
-          disabled={false}
-          htmlFor="random_html_id"
-          onClick={[Function]}
-          style={
-            Object {
-              "minWidth": undefined,
-            }
-          }
-        >
-          <span
-            className="euiButtonContent euiButton__content"
-          >
-            <span
-              className="euiButton__text euiButtonGroupButton__textShift"
-              data-text="Request Rate"
-              title="Request Rate"
-            >
-              <input
-                checked={false}
-                className="euiScreenReaderOnly"
-                data-test-subj="throughput"
-                disabled={false}
-                id="random_html_id"
-                name="random_html_id"
-                onChange={[Function]}
-                type="radio"
-              />
-              Request Rate
-            </span>
-          </span>
-        </label>
+          Service map
+        </span>
       </div>
-    </fieldset>
-    <hr
-      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
-    />
-    <div
-      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-    >
       <div
-        className="euiFlexItem euiFlexItem--flexGrow7"
+        class="euiSpacer euiSpacer--m"
+      />
+      <fieldset
+        class="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
+      >
+        <legend
+          class="euiScreenReaderOnly"
+        >
+          Select metric for service map display
+        </legend>
+        <div
+          class="euiButtonGroup__buttons"
+        >
+          <label
+            class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
+            for="random_html_id"
+          >
+            <span
+              class="euiButtonContent euiButton__content"
+            >
+              <span
+                class="euiButton__text euiButtonGroupButton__textShift"
+                data-text="Duration"
+                title="Duration"
+              >
+                <input
+                  checked=""
+                  class="euiScreenReaderOnly"
+                  data-test-subj="latency"
+                  id="random_html_id"
+                  name="random_html_id"
+                  type="radio"
+                  value=""
+                />
+                Duration
+              </span>
+            </span>
+          </label>
+          <label
+            class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+            for="random_html_id"
+          >
+            <span
+              class="euiButtonContent euiButton__content"
+            >
+              <span
+                class="euiButton__text euiButtonGroupButton__textShift"
+                data-text="Errors"
+                title="Errors"
+              >
+                <input
+                  class="euiScreenReaderOnly"
+                  data-test-subj="error_rate"
+                  id="random_html_id"
+                  name="random_html_id"
+                  type="radio"
+                  value=""
+                />
+                Errors
+              </span>
+            </span>
+          </label>
+          <label
+            class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+            for="random_html_id"
+          >
+            <span
+              class="euiButtonContent euiButton__content"
+            >
+              <span
+                class="euiButton__text euiButtonGroupButton__textShift"
+                data-text="Request Rate"
+                title="Request Rate"
+              >
+                <input
+                  class="euiScreenReaderOnly"
+                  data-test-subj="throughput"
+                  id="random_html_id"
+                  name="random_html_id"
+                  type="radio"
+                  value=""
+                />
+                Request Rate
+              </span>
+            </span>
+          </label>
+        </div>
+      </fieldset>
+      <hr
+        class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+      />
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
         <div
-          className="euiPopover euiPopover--anchorDownLeft"
-          id="service-select-dropdown"
-          onKeyDown={[Function]}
-          onMouseDown={[Function]}
-          onMouseUp={[Function]}
-          onTouchEnd={[Function]}
-          onTouchStart={[Function]}
+          class="euiFlexItem euiFlexItem--flexGrow7"
         >
           <div
-            className="euiPopover__anchor"
+            class="euiPopover euiPopover--anchorDownLeft"
+            id="service-select-dropdown"
           >
-            <span
-              className="euiToolTipAnchor"
-              onKeyUp={[Function]}
-              onMouseOut={[Function]}
-              onMouseOver={[Function]}
+            <div
+              class="euiPopover__anchor"
             >
-              <div
-                className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+              <span
+                class="euiToolTipAnchor"
               >
-                <label
-                  className="euiFormLabel euiFormControlLayout__prepend"
-                >
-                  Focus on
-                </label>
                 <div
-                  className="euiFormControlLayout__childrenWrapper"
+                  class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
                 >
-                  <input
-                    aria-controls="service-select-dropdown"
-                    className="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
-                    disabled={false}
-                    onBlur={[Function]}
-                    onChange={[Function]}
-                    onClick={[Function]}
-                    onFocus={[Function]}
-                    onKeyUp={[Function]}
-                    placeholder="Service name"
-                    type="search"
-                    value=""
-                  />
+                  <label
+                    class="euiFormLabel euiFormControlLayout__prepend"
+                  >
+                    Focus on
+                  </label>
                   <div
-                    className="euiFormControlLayoutIcons"
+                    class="euiFormControlLayout__childrenWrapper"
                   >
-                    <span
-                      className="euiFormControlLayoutCustomIcon"
-                    >
-                      <svg
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                        focusable="false"
-                        height={16}
-                        role="img"
-                        style={null}
-                        viewBox="0 0 16 16"
-                        width={16}
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                        />
-                      </svg>
-                    </span>
-                  </div>
-                </div>
-                <button
-                  aria-label="Clear focus and refresh the service map"
-                  className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
-                  data-test-subj="serviceMapRefreshButton"
-                  disabled={false}
-                  onClick={[Function]}
-                  type="button"
-                >
-                  <svg
-                    aria-hidden={true}
-                    className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                    focusable="false"
-                    height={16}
-                    role="img"
-                    style={null}
-                    viewBox="0 0 16 16"
-                    width={16}
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                    <input
+                      aria-controls="service-select-dropdown"
+                      class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch--inGroup"
+                      placeholder="Service name"
+                      type="search"
+                      value=""
                     />
-                  </svg>
-                </button>
-              </div>
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div
-      className="euiSpacer euiSpacer--l"
-    />
-    <div
-      className="euiFlexGroup euiFlexGroup--directionRow"
-    >
-      <div
-        className="euiFlexItem"
-      >
-        <div
-          style={
-            Object {
-              "position": "relative",
-            }
-          }
-        >
-          <div
-            data-testid="mock-graph"
-          >
-            Mock Graph
-          </div>
-          <div
-            style={
-              Object {
-                "alignItems": "center",
-                "backgroundColor": "transparent",
-                "bottom": 0,
-                "display": "flex",
-                "justifyContent": "center",
-                "left": 0,
-                "position": "absolute",
-                "right": 0,
-                "top": 0,
-                "zIndex": 1000,
-              }
-            }
-          >
-            <span
-              aria-label="Service map is loading"
-              className="euiLoadingSpinner euiLoadingSpinner--xLarge"
-            />
+                    <div
+                      class="euiFormControlLayoutIcons"
+                    >
+                      <span
+                        class="euiFormControlLayoutCustomIcon"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                          focusable="false"
+                          height="16"
+                          role="img"
+                          viewBox="0 0 16 16"
+                          width="16"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                          />
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    aria-label="Clear focus and refresh the service map"
+                    class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiFormControlLayout__append"
+                    data-test-subj="serviceMapRefreshButton"
+                    type="button"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                      focusable="false"
+                      height="16"
+                      role="img"
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </span>
+            </div>
           </div>
         </div>
       </div>
       <div
-        className="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiSpacer euiSpacer--l"
+      />
+      <div
+        class="euiFlexGroup euiFlexGroup--directionRow"
       >
         <div
-          style={
-            Object {
-              "minHeight": 400,
-              "minWidth": 65,
-            }
-          }
+          class="euiFlexItem"
         >
           <div
-            id="explorerPlotComponent"
-            style={
-              Object {
-                "height": "270px",
-                "width": "100%",
-              }
-            }
-          />
-          <div
-            className="euiSpacer euiSpacer--l"
-          />
-          <div
-            className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+            style="position: relative;"
           >
             <div
-              className="euiFlexItem euiFlexItem--flexGrowZero"
+              data-testid="mock-graph"
             >
-              <img
-                alt="unmatched-node-legend"
-                src="file-stub"
-                style={
-                  Object {
-                    "height": 40,
-                    "width": 40,
-                  }
-                }
+              Mock Graph
+            </div>
+            <div
+              style="position: absolute; top: 0px; left: 0px; right: 0px; bottom: 0px; display: flex; align-items: center; justify-content: center; background-color: transparent; z-index: 1000;"
+            >
+              <span
+                aria-label="Service map is loading"
+                class="euiLoadingSpinner euiLoadingSpinner--xLarge"
               />
             </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            style="min-height: 400px; min-width: 65px;"
+          >
             <div
-              className="euiFlexItem euiFlexItem--flexGrowZero"
-              style={
-                Object {
-                  "marginLeft": -10,
-                  "marginRight": -30,
-                }
-              }
+              id="explorerPlotComponent"
+              style="width: 100%; height: 270px;"
+            />
+            <div
+              class="euiSpacer euiSpacer--l"
+            />
+            <div
+              class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                className="euiText euiText--medium"
-                style={
-                  Object {
-                    "color": "#808080",
-                    "fontSize": "14px",
-                    "transform": "rotate(-90deg)",
-                  }
-                }
+                class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                No match
+                <img
+                  alt="unmatched-node-legend"
+                  src="file-stub"
+                  style="width: 40px; height: 40px;"
+                />
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+                style="margin-right: -30px; margin-left: -10px;"
+              >
+                <div
+                  class="euiText euiText--medium"
+                  style="transform: rotate(-90deg); font-size: 14px; color: rgb(128, 128, 128);"
+                >
+                  No match
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>,
-  <div
-    className="euiSpacer euiSpacer--m"
-  />,
-]
+    <div
+      class="euiSpacer euiSpacer--m"
+    />
+  </div>
+</body>
 `;

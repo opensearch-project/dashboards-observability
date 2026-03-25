@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount, shallow } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render } from '@testing-library/react';
 import React from 'react';
 import {
   fieldCapQueryResponse1,
@@ -34,34 +33,32 @@ import {
 } from '../helper_functions';
 
 describe('Trace analytics helper functions', () => {
-  configure({ adapter: new Adapter() });
-
   it('renders panel title', () => {
-    const title = shallow(<PanelTitle title="test" totalItems={10} />);
-    const titleZeroCount = shallow(<PanelTitle title="test" />);
-    expect(title).toMatchSnapshot();
-    expect(titleZeroCount).toMatchSnapshot();
+    const { container: titleContainer } = render(<PanelTitle title="test" totalItems={10} />);
+    const { container: titleZeroCountContainer } = render(<PanelTitle title="test" />);
+    expect(titleContainer).toMatchSnapshot();
+    expect(titleZeroCountContainer).toMatchSnapshot();
   });
 
   it('renders no match and missing configuration messages', () => {
-    const noMatchMessage = shallow(<NoMatchMessage size="s" />);
-    const missingConfigurationMessage = shallow(
+    const { container: noMatchMessageContainer } = render(<NoMatchMessage size="s" />);
+    const { container: missingConfigurationMessageContainer } = render(
       <MissingConfigurationMessage mode="data_prepper" />
     );
-    expect(noMatchMessage).toMatchSnapshot();
-    expect(missingConfigurationMessage).toMatchSnapshot();
+    expect(noMatchMessageContainer).toMatchSnapshot();
+    expect(missingConfigurationMessageContainer).toMatchSnapshot();
   });
 
   it('renders benchmark', () => {
     // @ts-ignore
-    const benchmarkPositive = mount(renderBenchmark(50));
+    const { container: benchmarkPositiveContainer } = render(renderBenchmark(50));
     // @ts-ignore
-    const benchmarkNegative = mount(renderBenchmark(-50));
+    const { container: benchmarkNegativeContainer } = render(renderBenchmark(-50));
     // @ts-ignore
-    const benchmarkZero = mount(renderBenchmark(0));
-    expect(benchmarkPositive).toMatchSnapshot();
-    expect(benchmarkNegative).toMatchSnapshot();
-    expect(benchmarkZero).toMatchSnapshot();
+    const { container: benchmarkZeroContainer } = render(renderBenchmark(0));
+    expect(benchmarkPositiveContainer).toMatchSnapshot();
+    expect(benchmarkNegativeContainer).toMatchSnapshot();
+    expect(benchmarkZeroContainer).toMatchSnapshot();
   });
 
   it('converts nanoseconds and milliseconds', () => {

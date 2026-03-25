@@ -4,15 +4,12 @@
  */
 
 import React from 'react';
-import { mount, configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, fireEvent } from '@testing-library/react';
 import { AssociatedObjectsDetailsFlyout } from '../manage/associated_objects/associated_objects_details_flyout';
 import * as plugin from '../../../../plugin';
 import { act } from '@testing-library/react';
 import { mockAssociatedObjects } from '../../../../../test/datasources';
 import { getAccelerationName } from '../manage/accelerations/utils/acceleration_utils';
-
-configure({ adapter: new Adapter() });
 
 jest.mock('../../../../plugin', () => ({
   getRenderAccelerationDetailsFlyout: jest.fn(() => jest.fn()),
@@ -28,12 +25,16 @@ describe('AssociatedObjectsDetailsFlyout Integration Tests', () => {
   });
 
   it('renders acceleration details correctly and triggers flyout on click', () => {
-    const wrapper = mount(
+    const { container } = render(
       <AssociatedObjectsDetailsFlyout tableDetail={mockTableDetail} datasourceName="flint_s3" />
     );
-    expect(wrapper.find('EuiInMemoryTable').at(0).find('EuiLink').length).toBeGreaterThan(0);
+    const tables = container.querySelectorAll('.euiTable');
+    const links = tables[0]?.querySelectorAll('.euiLink');
+    expect(links.length).toBeGreaterThan(0);
 
-    wrapper.find('EuiInMemoryTable').at(0).find('EuiLink').first().simulate('click');
+    if (links[0]) {
+      fireEvent.click(links[0]);
+    }
     expect(plugin.getRenderAccelerationDetailsFlyout).toHaveBeenCalled();
   });
 
@@ -47,49 +48,47 @@ describe('AssociatedObjectsDetailsFlyout Integration Tests', () => {
       ],
     };
 
-    const wrapper = mount(
+    const { container } = render(
       <AssociatedObjectsDetailsFlyout
         tableDetail={mockDetailNoAccelerations}
         datasourceName="flint_s3"
       />
     );
 
-    expect(wrapper.text()).toContain('You have no accelerations');
-    expect(wrapper.find('EuiInMemoryTable').exists()).toBe(true);
-    expect(wrapper.text()).toContain('column1');
-    expect(wrapper.text()).toContain('column2');
+    expect(container.textContent).toContain('You have no accelerations');
+    expect(container.querySelector('.euiTable')).toBeInTheDocument();
+    expect(container.textContent).toContain('column1');
+    expect(container.textContent).toContain('column2');
   });
 
   it('renders schema table correctly with column data', () => {
-    const wrapper = mount(
+    const { container } = render(
       <AssociatedObjectsDetailsFlyout tableDetail={mockTableDetail} datasourceName="flint_s3" />
     );
 
-    expect(wrapper.find('EuiInMemoryTable').at(1).exists()).toBe(true);
-    expect(wrapper.find('EuiInMemoryTable').at(1).text()).toContain(
-      mockTableDetail.columns[0].fieldName
-    );
+    const tables = container.querySelectorAll('.euiTable');
+    expect(tables[1]).toBeInTheDocument();
+    expect(tables[1].textContent).toContain(mockTableDetail.columns[0].fieldName);
   });
 
   it('triggers details flyout on acceleration link click', async () => {
-    const wrapper = mount(
+    const { container } = render(
       <AssociatedObjectsDetailsFlyout tableDetail={mockTableDetail} datasourceName="flint_s3" />
     );
 
     await act(async () => {
       // Wait a tick for async updates
       await new Promise((resolve) => setTimeout(resolve, 0));
-      wrapper.update();
     });
 
     const accName = getAccelerationName(mockTableDetail.accelerations[0]);
-    const accLink = wrapper
-      .find('EuiLink')
-      .findWhere((node) => node.text() === accName)
-      .first();
-    expect(accLink.exists()).toBe(true);
+    const links = Array.from(container.querySelectorAll('.euiLink'));
+    const accLink = links.find((link) => link.textContent === accName);
+    expect(accLink).toBeTruthy();
 
-    accLink.simulate('click');
+    if (accLink) {
+      fireEvent.click(accLink);
+    }
     expect(plugin.getRenderAccelerationDetailsFlyout).toHaveBeenCalled();
   });
 });

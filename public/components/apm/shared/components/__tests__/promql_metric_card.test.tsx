@@ -25,6 +25,8 @@ jest.mock('echarts', () => ({
 const mockUsePromQLChartData = jest.fn();
 jest.mock('../../hooks/use_promql_chart_data', () => ({
   usePromQLChartData: (params: any) => mockUsePromQLChartData(params),
+  isResolutionExceededError: jest.fn(() => false),
+  RESOLUTION_EXCEEDED_CODE: 'RESOLUTION_EXCEEDED',
 }));
 
 describe('PromQLMetricCard', () => {
@@ -368,6 +370,7 @@ describe('PromQLMetricCard', () => {
         timeRange: { from: 'now-1h', to: 'now' },
         prometheusConnectionId: 'prometheus-1',
         refreshTrigger: 3,
+        resolution: 101,
       });
     });
 

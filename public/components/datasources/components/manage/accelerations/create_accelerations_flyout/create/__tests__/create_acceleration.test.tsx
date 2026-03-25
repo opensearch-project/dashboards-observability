@@ -3,10 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { waitFor } from '@testing-library/dom';
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-import toJson from 'enzyme-to-json';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { coreMock } from '../../../../../../../../../../../src/core/public/mocks';
 import { queryWorkbenchPluginCheck } from '../../../../../../../../../common/constants/shared';
@@ -28,24 +25,16 @@ global.fetch = jest.fn(() =>
 );
 
 describe('Create acceleration flyout components', () => {
-  configure({ adapter: new Adapter() });
-
   it('renders acceleration flyout component with default options', async () => {
     const selectedDatasource = 'my_glue';
     const resetFlyout = jest.fn();
     coreStartMock.http.get = jest.fn().mockResolvedValue(mockDatasourcesQuery);
 
-    const wrapper = mount(
+    render(
       <CreateAcceleration selectedDatasource={selectedDatasource} resetFlyout={resetFlyout} />
     );
-    wrapper.update();
     await waitFor(() => {
-      expect(
-        toJson(wrapper, {
-          noKey: false,
-          mode: 'deep',
-        })
-      ).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 });

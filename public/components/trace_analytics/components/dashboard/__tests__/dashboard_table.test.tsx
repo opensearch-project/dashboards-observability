@@ -3,19 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { DashboardTable } from '../dashboard_table';
 
 describe('Dashboard table component', () => {
-  configure({ adapter: new Adapter() });
-
-  it('renders empty dashboard table message', () => {
+  it('renders empty dashboard table message', async () => {
     const addFilter = jest.fn();
     const addPercentileFilter = jest.fn();
     const setRedirect = jest.fn();
-    const wrapper = mount(
+    render(
       <DashboardTable
         items={[]}
         filters={[]}
@@ -27,10 +24,12 @@ describe('Dashboard table component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
-  it('renders dashboard table', () => {
+  it('renders dashboard table', async () => {
     const tableItems = [
       {
         dashboard_trace_group_name: 'client_create_order',
@@ -44,7 +43,7 @@ describe('Dashboard table component', () => {
     const addFilter = jest.fn();
     const addPercentileFilter = jest.fn();
     const setRedirect = jest.fn();
-    const wrapper = mount(
+    render(
       <DashboardTable
         items={tableItems}
         filters={[
@@ -64,16 +63,22 @@ describe('Dashboard table component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
 
-    wrapper.find('button[data-test-subj="dashboard-table-percentile-button-1"]').simulate('click');
-    wrapper.find('button[data-test-subj="dashboard-table-percentile-button-2"]').simulate('click');
+    const percentileButton1 = screen.getByTestId('dashboard-table-percentile-button-1');
+    const percentileButton2 = screen.getByTestId('dashboard-table-percentile-button-2');
+    fireEvent.click(percentileButton1);
+    fireEvent.click(percentileButton2);
     expect(addPercentileFilter).toBeCalledTimes(2);
-    wrapper
-      .find('button[data-test-subj="dashboard-table-trace-group-name-button"]')
-      .simulate('click');
+
+    const traceGroupButton = screen.getByTestId('dashboard-table-trace-group-name-button');
+    fireEvent.click(traceGroupButton);
     expect(addFilter).toBeCalled();
-    wrapper.find('button[data-test-subj="dashboard-table-traces-button"]').simulate('click');
+
+    const tracesButton = screen.getByTestId('dashboard-table-traces-button');
+    fireEvent.click(tracesButton);
     expect(setRedirect).toBeCalledWith(true);
   });
 });

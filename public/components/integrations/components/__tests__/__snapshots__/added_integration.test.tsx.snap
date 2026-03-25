@@ -1,1163 +1,360 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Added Integration View Test Renders added integration view using dummy data 1`] = `
-<AddedIntegration
-  chrome={
-    Object {
-      "setBreadcrumbs": [MockFunction] {
-        "calls": Array [
-          Array [
-            Array [
-              Object {
-                "href": "#/",
-                "text": "Integrations",
-              },
-              Object {
-                "href": "#/installed",
-                "text": "Installed Integrations",
-              },
-              Object {
-                "href": "#/installed/undefined",
-                "text": "undefined",
-              },
-            ],
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-        ],
-      },
-    }
-  }
-  http={
-    Object {
-      "get": [MockFunction] {
-        "calls": Array [
-          Array [
-            "/api/integrations/store/6b3b8010-015a-11ee-8bf8-9f447e9961b0",
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-        ],
-      },
-    }
-  }
-  integrationInstanceId="6b3b8010-015a-11ee-8bf8-9f447e9961b0"
-  parentBreadcrumbs={Array []}
->
-  <EuiPage>
+<body>
+  <div>
     <div
-      className="euiPage euiPage--paddingMedium euiPage--grow"
+      class="euiPage euiPage--paddingMedium euiPage--grow"
     >
-      <EuiPageBody>
-        <div
-          className="euiPageBody euiPageBody--borderRadiusNone"
+      <div
+        class="euiPageBody euiPageBody--borderRadiusNone"
+      >
+        <header
+          class="euiPageHeader euiPageHeader--responsive euiPageHeader--center"
+          style="justify-content: spaceBetween;"
         >
-          <EuiPageHeader
-            style={
-              Object {
-                "justifyContent": "spaceBetween",
-              }
-            }
-          >
-            <header
-              className="euiPageHeader euiPageHeader--responsive euiPageHeader--center"
-              style={
-                Object {
-                  "justifyContent": "spaceBetween",
-                }
-              }
-            >
-              <EuiPageHeaderSection
-                style={
-                  Object {
-                    "justifyContent": "space-between",
-                    "width": "100%",
-                  }
-                }
-              >
-                <div
-                  className="euiPageHeaderSection"
-                  style={
-                    Object {
-                      "justifyContent": "space-between",
-                      "width": "100%",
-                    }
-                  }
-                >
-                  <EuiPageContentHeaderSection>
-                    <div
-                      className="euiPageContentHeaderSection"
-                    >
-                      <EuiFlexGroup
-                        alignItems="center"
-                        gutterSize="xs"
-                        justifyContent="spaceBetween"
-                      >
-                        <div
-                          className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-                        >
-                          <EuiFlexItem
-                            grow={false}
-                          >
-                            <div
-                              className="euiFlexItem euiFlexItem--flexGrowZero"
-                            >
-                              <EuiFlexGroup
-                                alignItems="center"
-                                gutterSize="xs"
-                              >
-                                <div
-                                  className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
-                                >
-                                  <EuiFlexItem
-                                    grow={false}
-                                  >
-                                    <div
-                                      className="euiFlexItem euiFlexItem--flexGrowZero"
-                                    >
-                                      <EuiText
-                                        data-test-subj="eventHomePageTitle"
-                                        size="s"
-                                      >
-                                        <div
-                                          className="euiText euiText--small"
-                                          data-test-subj="eventHomePageTitle"
-                                        >
-                                          <h1 />
-                                        </div>
-                                      </EuiText>
-                                    </div>
-                                  </EuiFlexItem>
-                                  <EuiFlexItem
-                                    grow={false}
-                                  >
-                                    <div
-                                      className="euiFlexItem euiFlexItem--flexGrowZero"
-                                    >
-                                      <IntegrationHealthBadge>
-                                        <EuiHealth
-                                          color="warning"
-                                        >
-                                          <div
-                                            className="euiHealth euiHealth--textSizeS"
-                                          >
-                                            <EuiFlexGroup
-                                              alignItems="center"
-                                              gutterSize="xs"
-                                              responsive={false}
-                                            >
-                                              <div
-                                                className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
-                                              >
-                                                <EuiFlexItem
-                                                  grow={false}
-                                                >
-                                                  <div
-                                                    className="euiFlexItem euiFlexItem--flexGrowZero"
-                                                  >
-                                                    <EuiIcon
-                                                      color="warning"
-                                                      type="dot"
-                                                    >
-                                                      <EuiIconBeaker
-                                                        aria-hidden={true}
-                                                        className="euiIcon euiIcon--medium euiIcon--warning euiIcon-isLoading"
-                                                        focusable="false"
-                                                        role="img"
-                                                        style={null}
-                                                      >
-                                                        <svg
-                                                          aria-hidden={true}
-                                                          className="euiIcon euiIcon--medium euiIcon--warning euiIcon-isLoading"
-                                                          focusable="false"
-                                                          height={16}
-                                                          role="img"
-                                                          style={null}
-                                                          viewBox="0 0 16 16"
-                                                          width={16}
-                                                          xmlns="http://www.w3.org/2000/svg"
-                                                        >
-                                                          <path
-                                                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                          />
-                                                        </svg>
-                                                      </EuiIconBeaker>
-                                                    </EuiIcon>
-                                                  </div>
-                                                </EuiFlexItem>
-                                                <EuiFlexItem
-                                                  grow={false}
-                                                >
-                                                  <div
-                                                    className="euiFlexItem euiFlexItem--flexGrowZero"
-                                                  >
-                                                    Unknown
-                                                  </div>
-                                                </EuiFlexItem>
-                                              </div>
-                                            </EuiFlexGroup>
-                                          </div>
-                                        </EuiHealth>
-                                      </IntegrationHealthBadge>
-                                    </div>
-                                  </EuiFlexItem>
-                                </div>
-                              </EuiFlexGroup>
-                            </div>
-                          </EuiFlexItem>
-                          <EuiFlexItem
-                            grow={false}
-                          >
-                            <div
-                              className="euiFlexItem euiFlexItem--flexGrowZero"
-                            >
-                              <EuiToolTip
-                                content={
-                                  <FormattedMessage
-                                    defaultMessage="Delete this instance"
-                                    id="integration.deleteButtonTooltip"
-                                    values={Object {}}
-                                  />
-                                }
-                                delay="regular"
-                                position="top"
-                              >
-                                <span
-                                  className="euiToolTipAnchor"
-                                  onKeyUp={[Function]}
-                                  onMouseOut={[Function]}
-                                  onMouseOver={[Function]}
-                                >
-                                  <EuiSmallButtonIcon
-                                    aria-label="Delete"
-                                    color="danger"
-                                    data-test-subj="deleteInstanceButton"
-                                    display="base"
-                                    iconType="trash"
-                                    onBlur={[Function]}
-                                    onClick={[Function]}
-                                    onFocus={[Function]}
-                                  >
-                                    <EuiButtonIcon
-                                      aria-label="Delete"
-                                      color="danger"
-                                      data-test-subj="deleteInstanceButton"
-                                      display="base"
-                                      iconType="trash"
-                                      onBlur={[Function]}
-                                      onClick={[Function]}
-                                      onFocus={[Function]}
-                                      size="s"
-                                    >
-                                      <button
-                                        aria-label="Delete"
-                                        className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--small"
-                                        data-test-subj="deleteInstanceButton"
-                                        disabled={false}
-                                        onBlur={[Function]}
-                                        onClick={[Function]}
-                                        onFocus={[Function]}
-                                        type="button"
-                                      >
-                                        <EuiIcon
-                                          aria-hidden="true"
-                                          className="euiButtonIcon__icon"
-                                          color="inherit"
-                                          size="m"
-                                          type="trash"
-                                        >
-                                          <EuiIconBeaker
-                                            aria-hidden={true}
-                                            className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                                            focusable="false"
-                                            role="img"
-                                            style={null}
-                                          >
-                                            <svg
-                                              aria-hidden={true}
-                                              className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
-                                              focusable="false"
-                                              height={16}
-                                              role="img"
-                                              style={null}
-                                              viewBox="0 0 16 16"
-                                              width={16}
-                                              xmlns="http://www.w3.org/2000/svg"
-                                            >
-                                              <path
-                                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                              />
-                                            </svg>
-                                          </EuiIconBeaker>
-                                        </EuiIcon>
-                                      </button>
-                                    </EuiButtonIcon>
-                                  </EuiSmallButtonIcon>
-                                </span>
-                              </EuiToolTip>
-                            </div>
-                          </EuiFlexItem>
-                        </div>
-                      </EuiFlexGroup>
-                    </div>
-                  </EuiPageContentHeaderSection>
-                </div>
-              </EuiPageHeaderSection>
-            </header>
-          </EuiPageHeader>
-          <EuiPanel>
-            <div
-              className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
-            >
-              <EuiFlexGroup>
-                <div
-                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                >
-                  <EuiFlexItem>
-                    <div
-                      className="euiFlexItem"
-                    >
-                      <EuiText
-                        size="m"
-                      >
-                        <div
-                          className="euiText euiText--medium"
-                        >
-                          <h4>
-                            Template
-                          </h4>
-                        </div>
-                      </EuiText>
-                      <EuiLink
-                        href="#/available/undefined"
-                      >
-                        <a
-                          className="euiLink euiLink--primary"
-                          href="#/available/undefined"
-                          rel="noreferrer"
-                        />
-                      </EuiLink>
-                    </div>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <div
-                      className="euiFlexItem"
-                    >
-                      <EuiText
-                        size="m"
-                      >
-                        <div
-                          className="euiText euiText--medium"
-                        >
-                          <h4>
-                            Date Added
-                          </h4>
-                        </div>
-                      </EuiText>
-                      <EuiText
-                        size="m"
-                      >
-                        <div
-                          className="euiText euiText--medium"
-                        />
-                      </EuiText>
-                    </div>
-                  </EuiFlexItem>
-                </div>
-              </EuiFlexGroup>
-            </div>
-          </EuiPanel>
-          <EuiSpacer
-            size="s"
+          <div
+            class="euiPageHeaderSection"
+            style="width: 100%; justify-content: space-between;"
           >
             <div
-              className="euiSpacer euiSpacer--s"
-            />
-          </EuiSpacer>
-          <EuiPanel>
-            <div
-              className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+              class="euiPageContentHeaderSection"
             >
-              <EuiTitle
-                size="s"
-              >
-                <h3
-                  className="euiTitle euiTitle--small"
-                >
-                  Assets List
-                </h3>
-              </EuiTitle>
-              <EuiSpacer
-                size="s"
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
               >
                 <div
-                  className="euiSpacer euiSpacer--s"
-                />
-              </EuiSpacer>
-              <EuiInMemoryTable
-                columns={
-                  Array [
-                    Object {
-                      "field": "name",
-                      "name": "Name",
-                      "render": [Function],
-                      "sortable": true,
-                      "truncateText": true,
-                    },
-                    Object {
-                      "field": "type",
-                      "name": "Type",
-                      "render": [Function],
-                      "sortable": true,
-                      "truncateText": true,
-                    },
-                  ]
-                }
-                itemId="id"
-                items={Array []}
-                loading={false}
-                pagination={
-                  Object {
-                    "initialPageSize": 10,
-                    "pageSizeOptions": Array [
-                      5,
-                      10,
-                      15,
-                    ],
-                  }
-                }
-                responsive={true}
-                search={
-                  Object {
-                    "box": Object {
-                      "compressed": true,
-                      "incremental": true,
-                    },
-                    "compressed": true,
-                    "filters": Array [
-                      Object {
-                        "field": "assetType",
-                        "multiSelect": false,
-                        "name": "Type",
-                        "options": Array [
-                          Object {
-                            "name": "index-pattern",
-                            "value": "index-pattern",
-                            "view": "index-pattern",
-                          },
-                          Object {
-                            "name": "search",
-                            "value": "search",
-                            "view": "search",
-                          },
-                          Object {
-                            "name": "visualization",
-                            "value": "visualization",
-                            "view": "visualization",
-                          },
-                          Object {
-                            "name": "dashboard",
-                            "value": "dashboard",
-                            "view": "dashboard",
-                          },
-                          Object {
-                            "name": "observability-search",
-                            "value": "observability-search",
-                            "view": "observability-search",
-                          },
-                        ],
-                        "type": "field_value_selection",
-                      },
-                    ],
-                  }
-                }
-                tableLayout="fixed"
-              >
-                <div>
-                  <EuiSearchBar
-                    box={
-                      Object {
-                        "compressed": true,
-                        "incremental": true,
-                      }
-                    }
-                    compressed={true}
-                    filters={
-                      Array [
-                        Object {
-                          "field": "assetType",
-                          "multiSelect": false,
-                          "name": "Type",
-                          "options": Array [
-                            Object {
-                              "name": "index-pattern",
-                              "value": "index-pattern",
-                              "view": "index-pattern",
-                            },
-                            Object {
-                              "name": "search",
-                              "value": "search",
-                              "view": "search",
-                            },
-                            Object {
-                              "name": "visualization",
-                              "value": "visualization",
-                              "view": "visualization",
-                            },
-                            Object {
-                              "name": "dashboard",
-                              "value": "dashboard",
-                              "view": "dashboard",
-                            },
-                            Object {
-                              "name": "observability-search",
-                              "value": "observability-search",
-                              "view": "observability-search",
-                            },
-                          ],
-                          "type": "field_value_selection",
-                        },
-                      ]
-                    }
-                    onChange={[Function]}
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <div
+                    class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
-                    <EuiFlexGroup
-                      alignItems="center"
-                      gutterSize="s"
-                      wrap={true}
+                    <div
+                      class="euiFlexItem euiFlexItem--flexGrowZero"
                     >
                       <div
-                        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+                        class="euiText euiText--small"
+                        data-test-subj="eventHomePageTitle"
                       >
-                        <EuiFlexItem
-                          className="euiSearchBar__searchHolder"
-                          grow={true}
-                        >
-                          <div
-                            className="euiFlexItem euiSearchBar__searchHolder"
-                          >
-                            <EuiSearchBox
-                              compressed={true}
-                              incremental={true}
-                              isInvalid={false}
-                              onSearch={[Function]}
-                              placeholder="Search..."
-                              query=""
-                            >
-                              <EuiFieldSearch
-                                aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
-                                compressed={true}
-                                defaultValue=""
-                                fullWidth={true}
-                                incremental={true}
-                                inputRef={[Function]}
-                                isClearable={true}
-                                isInvalid={false}
-                                isLoading={false}
-                                onSearch={[Function]}
-                                placeholder="Search..."
-                              >
-                                <EuiFormControlLayout
-                                  compressed={true}
-                                  fullWidth={true}
-                                  icon="search"
-                                  isLoading={false}
-                                >
-                                  <div
-                                    className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
-                                  >
-                                    <div
-                                      className="euiFormControlLayout__childrenWrapper"
-                                    >
-                                      <EuiValidatableControl
-                                        isInvalid={false}
-                                      >
-                                        <input
-                                          aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
-                                          className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
-                                          defaultValue=""
-                                          onKeyUp={[Function]}
-                                          placeholder="Search..."
-                                          type="search"
-                                        />
-                                      </EuiValidatableControl>
-                                      <EuiFormControlLayoutIcons
-                                        compressed={true}
-                                        icon="search"
-                                        isLoading={false}
-                                      >
-                                        <div
-                                          className="euiFormControlLayoutIcons"
-                                        >
-                                          <EuiFormControlLayoutCustomIcon
-                                            size="s"
-                                            type="search"
-                                          >
-                                            <span
-                                              className="euiFormControlLayoutCustomIcon"
-                                            >
-                                              <EuiIcon
-                                                aria-hidden="true"
-                                                className="euiFormControlLayoutCustomIcon__icon"
-                                                size="s"
-                                                type="search"
-                                              >
-                                                <EuiIconBeaker
-                                                  aria-hidden={true}
-                                                  className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                                  focusable="false"
-                                                  role="img"
-                                                  style={null}
-                                                >
-                                                  <svg
-                                                    aria-hidden={true}
-                                                    className="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
-                                                    focusable="false"
-                                                    height={16}
-                                                    role="img"
-                                                    style={null}
-                                                    viewBox="0 0 16 16"
-                                                    width={16}
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                  >
-                                                    <path
-                                                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                    />
-                                                  </svg>
-                                                </EuiIconBeaker>
-                                              </EuiIcon>
-                                            </span>
-                                          </EuiFormControlLayoutCustomIcon>
-                                        </div>
-                                      </EuiFormControlLayoutIcons>
-                                    </div>
-                                  </div>
-                                </EuiFormControlLayout>
-                              </EuiFieldSearch>
-                            </EuiSearchBox>
-                          </div>
-                        </EuiFlexItem>
-                        <EuiFlexItem
-                          className="euiSearchBar__filtersHolder"
-                          grow={false}
-                        >
-                          <div
-                            className="euiFlexItem euiFlexItem--flexGrowZero euiSearchBar__filtersHolder"
-                          >
-                            <EuiSearchFilters
-                              compressed={true}
-                              filters={
-                                Array [
-                                  Object {
-                                    "field": "assetType",
-                                    "multiSelect": false,
-                                    "name": "Type",
-                                    "options": Array [
-                                      Object {
-                                        "name": "index-pattern",
-                                        "value": "index-pattern",
-                                        "view": "index-pattern",
-                                      },
-                                      Object {
-                                        "name": "search",
-                                        "value": "search",
-                                        "view": "search",
-                                      },
-                                      Object {
-                                        "name": "visualization",
-                                        "value": "visualization",
-                                        "view": "visualization",
-                                      },
-                                      Object {
-                                        "name": "dashboard",
-                                        "value": "dashboard",
-                                        "view": "dashboard",
-                                      },
-                                      Object {
-                                        "name": "observability-search",
-                                        "value": "observability-search",
-                                        "view": "observability-search",
-                                      },
-                                    ],
-                                    "type": "field_value_selection",
-                                  },
-                                ]
-                              }
-                              onChange={[Function]}
-                              query={
-                                Query {
-                                  "ast": _AST {
-                                    "_clauses": Array [],
-                                    "_indexedClauses": Object {
-                                      "field": Object {},
-                                      "group": Array [],
-                                      "is": Object {},
-                                      "term": Array [],
-                                    },
-                                  },
-                                  "syntax": Object {
-                                    "parse": [Function],
-                                    "print": [Function],
-                                    "printClause": [Function],
-                                  },
-                                  "text": "",
-                                }
-                              }
-                            >
-                              <EuiFilterGroup>
-                                <div
-                                  className="euiFilterGroup"
-                                >
-                                  <FieldValueSelectionFilter
-                                    config={
-                                      Object {
-                                        "compressed": true,
-                                        "field": "assetType",
-                                        "multiSelect": false,
-                                        "name": "Type",
-                                        "options": Array [
-                                          Object {
-                                            "name": "index-pattern",
-                                            "value": "index-pattern",
-                                            "view": "index-pattern",
-                                          },
-                                          Object {
-                                            "name": "search",
-                                            "value": "search",
-                                            "view": "search",
-                                          },
-                                          Object {
-                                            "name": "visualization",
-                                            "value": "visualization",
-                                            "view": "visualization",
-                                          },
-                                          Object {
-                                            "name": "dashboard",
-                                            "value": "dashboard",
-                                            "view": "dashboard",
-                                          },
-                                          Object {
-                                            "name": "observability-search",
-                                            "value": "observability-search",
-                                            "view": "observability-search",
-                                          },
-                                        ],
-                                        "type": "field_value_selection",
-                                      }
-                                    }
-                                    index={0}
-                                    onChange={[Function]}
-                                    query={
-                                      Query {
-                                        "ast": _AST {
-                                          "_clauses": Array [],
-                                          "_indexedClauses": Object {
-                                            "field": Object {},
-                                            "group": Array [],
-                                            "is": Object {},
-                                            "term": Array [],
-                                          },
-                                        },
-                                        "syntax": Object {
-                                          "parse": [Function],
-                                          "print": [Function],
-                                          "printClause": [Function],
-                                        },
-                                        "text": "",
-                                      }
-                                    }
-                                  >
-                                    <EuiPopover
-                                      anchorPosition="downCenter"
-                                      button={
-                                        <EuiFilterButton
-                                          grow={true}
-                                          hasActiveFilters={false}
-                                          iconSide="right"
-                                          iconType="arrowDown"
-                                          onClick={[Function]}
-                                          size="s"
-                                        >
-                                          Type
-                                        </EuiFilterButton>
-                                      }
-                                      closePopover={[Function]}
-                                      display="inlineBlock"
-                                      hasArrow={true}
-                                      id="field_value_selection_0"
-                                      isOpen={false}
-                                      ownFocus={true}
-                                      panelClassName="euiFilterGroup__popoverPanel"
-                                      panelPaddingSize="none"
-                                    >
-                                      <div
-                                        className="euiPopover euiPopover--anchorDownCenter"
-                                        id="field_value_selection_0"
-                                      >
-                                        <div
-                                          className="euiPopover__anchor"
-                                        >
-                                          <EuiFilterButton
-                                            grow={true}
-                                            hasActiveFilters={false}
-                                            iconSide="right"
-                                            iconType="arrowDown"
-                                            onClick={[Function]}
-                                            size="s"
-                                          >
-                                            <EuiButtonEmpty
-                                              className="euiFilterButton euiFilterButton--hasIcon"
-                                              color="text"
-                                              iconSide="right"
-                                              iconType="arrowDown"
-                                              onClick={[Function]}
-                                              size="s"
-                                              textProps={
-                                                Object {
-                                                  "className": "",
-                                                }
-                                              }
-                                              type="button"
-                                            >
-                                              <button
-                                                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiFilterButton euiFilterButton--hasIcon"
-                                                disabled={false}
-                                                onClick={[Function]}
-                                                type="button"
-                                              >
-                                                <EuiButtonContent
-                                                  className="euiButtonEmpty__content"
-                                                  iconGap="m"
-                                                  iconSide="right"
-                                                  iconSize="m"
-                                                  iconType="arrowDown"
-                                                  textProps={
-                                                    Object {
-                                                      "className": "euiButtonEmpty__text",
-                                                    }
-                                                  }
-                                                >
-                                                  <span
-                                                    className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
-                                                  >
-                                                    <EuiIcon
-                                                      className="euiButtonContent__icon"
-                                                      color="inherit"
-                                                      size="m"
-                                                      type="arrowDown"
-                                                    >
-                                                      <EuiIconBeaker
-                                                        aria-hidden={true}
-                                                        className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                                        focusable="false"
-                                                        role="img"
-                                                        style={null}
-                                                      >
-                                                        <svg
-                                                          aria-hidden={true}
-                                                          className="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-                                                          focusable="false"
-                                                          height={16}
-                                                          role="img"
-                                                          style={null}
-                                                          viewBox="0 0 16 16"
-                                                          width={16}
-                                                          xmlns="http://www.w3.org/2000/svg"
-                                                        >
-                                                          <path
-                                                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                                                          />
-                                                        </svg>
-                                                      </EuiIconBeaker>
-                                                    </EuiIcon>
-                                                    <span
-                                                      className="euiButtonEmpty__text"
-                                                    >
-                                                      <span
-                                                        className="euiFilterButton__textShift"
-                                                        data-text="Type"
-                                                        title="Type"
-                                                      >
-                                                        Type
-                                                      </span>
-                                                    </span>
-                                                  </span>
-                                                </EuiButtonContent>
-                                              </button>
-                                            </EuiButtonEmpty>
-                                          </EuiFilterButton>
-                                        </div>
-                                      </div>
-                                    </EuiPopover>
-                                  </FieldValueSelectionFilter>
-                                </div>
-                              </EuiFilterGroup>
-                            </EuiSearchFilters>
-                          </div>
-                        </EuiFlexItem>
-                      </div>
-                    </EuiFlexGroup>
-                  </EuiSearchBar>
-                  <EuiSpacer
-                    size="m"
-                  >
-                    <div
-                      className="euiSpacer euiSpacer--m"
-                    />
-                  </EuiSpacer>
-                  <EuiBasicTable
-                    columns={
-                      Array [
-                        Object {
-                          "field": "name",
-                          "name": "Name",
-                          "render": [Function],
-                          "sortable": true,
-                          "truncateText": true,
-                        },
-                        Object {
-                          "field": "type",
-                          "name": "Type",
-                          "render": [Function],
-                          "sortable": true,
-                          "truncateText": true,
-                        },
-                      ]
-                    }
-                    itemId="id"
-                    items={Array []}
-                    loading={false}
-                    noItemsMessage="No items found"
-                    onChange={[Function]}
-                    pagination={
-                      Object {
-                        "hidePerPageOptions": undefined,
-                        "pageIndex": 0,
-                        "pageSize": 10,
-                        "pageSizeOptions": Array [
-                          5,
-                          10,
-                          15,
-                        ],
-                        "totalItemCount": 0,
-                      }
-                    }
-                    responsive={true}
-                    tableLayout="fixed"
-                  >
-                    <div
-                      className="euiBasicTable"
-                    >
-                      <div>
-                        <EuiTableHeaderMobile>
-                          <div
-                            className="euiTableHeaderMobile"
-                          >
-                            <EuiFlexGroup
-                              alignItems="baseline"
-                              justifyContent="spaceBetween"
-                              responsive={false}
-                            >
-                              <div
-                                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
-                              >
-                                <EuiFlexItem
-                                  grow={false}
-                                >
-                                  <div
-                                    className="euiFlexItem euiFlexItem--flexGrowZero"
-                                  />
-                                </EuiFlexItem>
-                                <EuiFlexItem
-                                  grow={false}
-                                >
-                                  <div
-                                    className="euiFlexItem euiFlexItem--flexGrowZero"
-                                  />
-                                </EuiFlexItem>
-                              </div>
-                            </EuiFlexGroup>
-                          </div>
-                        </EuiTableHeaderMobile>
-                        <EuiTable
-                          id="random_html_id"
-                          responsive={true}
-                          tableLayout="fixed"
-                        >
-                          <table
-                            className="euiTable euiTable--responsive"
-                            id="random_html_id"
-                            tabIndex={-1}
-                          >
-                            <EuiScreenReaderOnly>
-                              <caption
-                                className="euiScreenReaderOnly euiTableCaption"
-                              >
-                                <EuiDelayRender
-                                  delay={500}
-                                />
-                              </caption>
-                            </EuiScreenReaderOnly>
-                            <EuiTableHeader>
-                              <thead>
-                                <tr>
-                                  <EuiTableHeaderCell
-                                    align="left"
-                                    data-test-subj="tableHeaderCell_name_0"
-                                    key="_data_h_name_0"
-                                  >
-                                    <th
-                                      className="euiTableHeaderCell"
-                                      data-test-subj="tableHeaderCell_name_0"
-                                      role="columnheader"
-                                      scope="col"
-                                      style={
-                                        Object {
-                                          "width": undefined,
-                                        }
-                                      }
-                                    >
-                                      <CellContents
-                                        className="euiTableCellContent"
-                                        showSortMsg={false}
-                                      >
-                                        <span
-                                          className="euiTableCellContent"
-                                        >
-                                          <EuiInnerText>
-                                            <EuiI18n
-                                              default="{innerText}; {description}"
-                                              token="euiTableHeaderCell.titleTextWithDesc"
-                                              values={
-                                                Object {
-                                                  "description": undefined,
-                                                  "innerText": "Name",
-                                                }
-                                              }
-                                            >
-                                              <span
-                                                className="euiTableCellContent__text"
-                                                title="Name"
-                                              >
-                                                Name
-                                              </span>
-                                            </EuiI18n>
-                                          </EuiInnerText>
-                                        </span>
-                                      </CellContents>
-                                    </th>
-                                  </EuiTableHeaderCell>
-                                  <EuiTableHeaderCell
-                                    align="left"
-                                    data-test-subj="tableHeaderCell_type_1"
-                                    key="_data_h_type_1"
-                                  >
-                                    <th
-                                      className="euiTableHeaderCell"
-                                      data-test-subj="tableHeaderCell_type_1"
-                                      role="columnheader"
-                                      scope="col"
-                                      style={
-                                        Object {
-                                          "width": undefined,
-                                        }
-                                      }
-                                    >
-                                      <CellContents
-                                        className="euiTableCellContent"
-                                        showSortMsg={false}
-                                      >
-                                        <span
-                                          className="euiTableCellContent"
-                                        >
-                                          <EuiInnerText>
-                                            <EuiI18n
-                                              default="{innerText}; {description}"
-                                              token="euiTableHeaderCell.titleTextWithDesc"
-                                              values={
-                                                Object {
-                                                  "description": undefined,
-                                                  "innerText": "Type",
-                                                }
-                                              }
-                                            >
-                                              <span
-                                                className="euiTableCellContent__text"
-                                                title="Type"
-                                              >
-                                                Type
-                                              </span>
-                                            </EuiI18n>
-                                          </EuiInnerText>
-                                        </span>
-                                      </CellContents>
-                                    </th>
-                                  </EuiTableHeaderCell>
-                                </tr>
-                              </thead>
-                            </EuiTableHeader>
-                            <EuiTableBody>
-                              <tbody>
-                                <EuiTableRow>
-                                  <tr
-                                    className="euiTableRow"
-                                  >
-                                    <EuiTableRowCell
-                                      align="center"
-                                      colSpan={2}
-                                      isMobileFullWidth={true}
-                                    >
-                                      <td
-                                        className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-                                        colSpan={2}
-                                        style={
-                                          Object {
-                                            "width": undefined,
-                                          }
-                                        }
-                                      >
-                                        <div
-                                          className="euiTableCellContent euiTableCellContent--alignCenter"
-                                        >
-                                          <span
-                                            className="euiTableCellContent__text"
-                                          >
-                                            No items found
-                                          </span>
-                                        </div>
-                                      </td>
-                                    </EuiTableRowCell>
-                                  </tr>
-                                </EuiTableRow>
-                              </tbody>
-                            </EuiTableBody>
-                          </table>
-                        </EuiTable>
+                        <h1 />
                       </div>
                     </div>
-                  </EuiBasicTable>
+                    <div
+                      class="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <div
+                        class="euiHealth euiHealth--textSizeS"
+                      >
+                        <div
+                          class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                        >
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="euiIcon euiIcon--medium euiIcon--warning euiIcon-isLoading"
+                              focusable="false"
+                              height="16"
+                              role="img"
+                              viewBox="0 0 16 16"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                              />
+                            </svg>
+                          </div>
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            Unknown
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </EuiInMemoryTable>
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <span
+                    class="euiToolTipAnchor"
+                  >
+                    <button
+                      aria-label="Delete"
+                      class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--small"
+                      data-test-subj="deleteInstanceButton"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                        focusable="false"
+                        height="16"
+                        role="img"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                        />
+                      </svg>
+                    </button>
+                  </span>
+                </div>
+              </div>
             </div>
-          </EuiPanel>
-          <EuiSpacer
-            size="s"
+          </div>
+        </header>
+        <div
+          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+        >
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
           >
             <div
-              className="euiSpacer euiSpacer--s"
-            />
-          </EuiSpacer>
+              class="euiFlexItem"
+            >
+              <div
+                class="euiText euiText--medium"
+              >
+                <h4>
+                  Template
+                </h4>
+              </div>
+              <a
+                class="euiLink euiLink--primary"
+                href="#/available/undefined"
+                rel="noreferrer"
+              />
+            </div>
+            <div
+              class="euiFlexItem"
+            >
+              <div
+                class="euiText euiText--medium"
+              >
+                <h4>
+                  Date Added
+                </h4>
+              </div>
+              <div
+                class="euiText euiText--medium"
+              />
+            </div>
+          </div>
         </div>
-      </EuiPageBody>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <div
+          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+        >
+          <h3
+            class="euiTitle euiTitle--small"
+          >
+            Assets List
+          </h3>
+          <div
+            class="euiSpacer euiSpacer--s"
+          />
+          <div>
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+            >
+              <div
+                class="euiFlexItem euiSearchBar__searchHolder"
+              >
+                <div
+                  class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+                >
+                  <div
+                    class="euiFormControlLayout__childrenWrapper"
+                  >
+                    <input
+                      aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
+                      class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
+                      placeholder="Search..."
+                      type="search"
+                      value=""
+                    />
+                    <div
+                      class="euiFormControlLayoutIcons"
+                    >
+                      <span
+                        class="euiFormControlLayoutCustomIcon"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          class="euiIcon euiIcon--small euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                          focusable="false"
+                          height="16"
+                          role="img"
+                          viewBox="0 0 16 16"
+                          width="16"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                          />
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero euiSearchBar__filtersHolder"
+              >
+                <div
+                  class="euiFilterGroup"
+                >
+                  <div
+                    class="euiPopover euiPopover--anchorDownCenter"
+                    id="field_value_selection_0"
+                  >
+                    <div
+                      class="euiPopover__anchor"
+                    >
+                      <button
+                        class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiFilterButton euiFilterButton--hasIcon"
+                        type="button"
+                      >
+                        <span
+                          class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                            />
+                          </svg>
+                          <span
+                            class="euiButtonEmpty__text"
+                          >
+                            <span
+                              class="euiFilterButton__textShift"
+                              data-text="Type"
+                              title="Type"
+                            >
+                              Type
+                            </span>
+                          </span>
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiSpacer euiSpacer--m"
+            />
+            <div
+              class="euiBasicTable"
+            >
+              <div>
+                <div
+                  class="euiTableHeaderMobile"
+                >
+                  <div
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                  >
+                    <div
+                      class="euiFlexItem euiFlexItem--flexGrowZero"
+                    />
+                    <div
+                      class="euiFlexItem euiFlexItem--flexGrowZero"
+                    />
+                  </div>
+                </div>
+                <table
+                  class="euiTable euiTable--responsive"
+                  id="random_html_id"
+                  tabindex="-1"
+                >
+                  <caption
+                    class="euiScreenReaderOnly euiTableCaption"
+                  />
+                  <thead>
+                    <tr>
+                      <th
+                        class="euiTableHeaderCell"
+                        data-test-subj="tableHeaderCell_name_0"
+                        role="columnheader"
+                        scope="col"
+                      >
+                        <span
+                          class="euiTableCellContent"
+                        >
+                          <span
+                            class="euiTableCellContent__text"
+                            title="Name"
+                          >
+                            Name
+                          </span>
+                        </span>
+                      </th>
+                      <th
+                        class="euiTableHeaderCell"
+                        data-test-subj="tableHeaderCell_type_1"
+                        role="columnheader"
+                        scope="col"
+                      >
+                        <span
+                          class="euiTableCellContent"
+                        >
+                          <span
+                            class="euiTableCellContent__text"
+                            title="Type"
+                          >
+                            Type
+                          </span>
+                        </span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      class="euiTableRow"
+                    >
+                      <td
+                        class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+                        colspan="2"
+                      >
+                        <div
+                          class="euiTableCellContent euiTableCellContent--alignCenter"
+                        >
+                          <span
+                            class="euiTableCellContent__text"
+                          >
+                            No items found
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+      </div>
     </div>
-  </EuiPage>
-</AddedIntegration>
+  </div>
+</body>
 `;

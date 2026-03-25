@@ -1,304 +1,633 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Service view component renders service view 1`] = `
-<Fragment>
-  <EuiPage>
-    <EuiPageBody>
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="s"
+<body>
+  <div>
+    <div
+      class="euiPage euiPage--paddingMedium euiPage--grow"
+    >
+      <div
+        class="euiPageBody euiPageBody--borderRadiusNone"
       >
-        <EuiFlexItem>
-          <EuiText
-            size="s"
-          >
-            <h1
-              className="overview-content"
-            >
-              order
-            </h1>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
-          <EuiSuperDatePicker
-            commonlyUsedRanges={
-              Array [
-                Object {
-                  "end": "now/d",
-                  "label": "Today",
-                  "start": "now/d",
-                },
-                Object {
-                  "end": "now/w",
-                  "label": "This week",
-                  "start": "now/w",
-                },
-                Object {
-                  "end": "now/M",
-                  "label": "This month",
-                  "start": "now/M",
-                },
-                Object {
-                  "end": "now/y",
-                  "label": "This year",
-                  "start": "now/y",
-                },
-                Object {
-                  "end": "now-1d/d",
-                  "label": "Yesterday",
-                  "start": "now-1d/d",
-                },
-                Object {
-                  "end": "now",
-                  "label": "Week to date",
-                  "start": "now/w",
-                },
-                Object {
-                  "end": "now",
-                  "label": "Month to date",
-                  "start": "now/M",
-                },
-                Object {
-                  "end": "now",
-                  "label": "Year to date",
-                  "start": "now/y",
-                },
-              ]
-            }
-            compressed={true}
-            dateFormat=""
-            end="now"
-            isAutoRefreshOnly={false}
-            isDisabled={false}
-            isPaused={true}
-            onTimeChange={[Function]}
-            recentlyUsedRanges={Array []}
-            refreshInterval={0}
-            showUpdateButton={false}
-            start="now-5m"
-            timeFormat="HH:mm"
+          <div
+            class="euiFlexItem"
+          >
+            <div
+              class="euiText euiText--small"
+            >
+              <h1
+                class="overview-content"
+              >
+                order
+              </h1>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiSuperDatePicker__flexWrapper euiSuperDatePicker__flexWrapper--noUpdateButton"
+            >
+              <div
+                class="euiFlexItem"
+              >
+                <div
+                  class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group euiSuperDatePicker"
+                >
+                  <div
+                    class="euiPopover euiPopover--anchorDownLeft"
+                  >
+                    <div
+                      class="euiPopover__anchor euiQuickSelectPopover__anchor"
+                    >
+                      <button
+                        aria-label="Date quick select"
+                        class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
+                        data-test-subj="superDatePickerToggleQuickMenuButton"
+                        type="button"
+                      >
+                        <span
+                          class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--small euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                            />
+                          </svg>
+                          <span
+                            class="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              class="euiIcon euiIcon--medium euiIcon-isLoading"
+                              focusable="false"
+                              height="16"
+                              role="img"
+                              viewBox="0 0 16 16"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                              />
+                            </svg>
+                          </span>
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="euiFormControlLayout__childrenWrapper"
+                  >
+                    <div
+                      class="euiDatePickerRange euiDatePickerRange--inGroup"
+                    >
+                      <button
+                        class="euiSuperDatePicker__prettyFormat euiSuperDatePicker__prettyFormat--compressed"
+                        data-test-subj="superDatePickerShowDatesButton"
+                      >
+                        Last 5 minutes
+                        <span
+                          class="euiSuperDatePicker__prettyFormatLink"
+                        >
+                          Show dates
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    class="euiLink euiLink--primary"
+                    data-test-subj="service-view-traces-redirection-btn"
+                    type="button"
+                  >
+                    <button
+                      class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--small"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                        focusable="false"
+                        height="16"
+                        role="img"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                        />
+                      </svg>
+                    </button>
+                  </button>
+                </span>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <button
+                    class="euiLink euiLink--primary"
+                    data-test-subj="service-view-logs-redirection-btn"
+                    type="button"
+                  >
+                    <button
+                      class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--small"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                        focusable="false"
+                        height="16"
+                        role="img"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                        />
+                      </svg>
+                    </button>
+                  </button>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--m"
+        />
+        <div
+          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+        >
+          <div
+            class="euiText euiText--medium"
+          >
+            <span
+              class="panel-title"
+            >
+              Overview
+            </span>
+          </div>
+          <div>
+            <span
+              class="euiLoadingContent"
+            >
+              <span
+                class="euiLoadingContent__singleLine"
+              >
+                <span
+                  class="euiLoadingContent__singleLineBackground"
+                />
+              </span>
+              <span
+                class="euiLoadingContent__singleLine"
+              >
+                <span
+                  class="euiLoadingContent__singleLineBackground"
+                />
+              </span>
+              <span
+                class="euiLoadingContent__singleLine"
+              >
+                <span
+                  class="euiLoadingContent__singleLineBackground"
+                />
+              </span>
+              <span
+                class="euiLoadingContent__singleLine"
+              >
+                <span
+                  class="euiLoadingContent__singleLineBackground"
+                />
+              </span>
+            </span>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <div
+            class="euiFlexItem"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem"
+              >
+                <div
+                  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+                  style="min-width: 433px; min-height: 308px; max-height: 560px;"
+                >
+                  <div
+                    class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <div
+                      class="euiText euiText--medium"
+                    >
+                      <span
+                        class="panel-title"
+                      >
+                        24hr throughput trend
+                      </span>
+                    </div>
+                    <fieldset
+                      class="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
+                    >
+                      <legend
+                        class="euiScreenReaderOnly"
+                      />
+                      <div
+                        class="euiButtonGroup__buttons"
+                      />
+                    </fieldset>
+                  </div>
+                  <div
+                    class="center-loading-div"
+                  >
+                    <span
+                      class="euiLoadingChart euiLoadingChart--large"
+                    >
+                      <span
+                        class="euiLoadingChart__bar"
+                      />
+                      <span
+                        class="euiLoadingChart__bar"
+                      />
+                      <span
+                        class="euiLoadingChart__bar"
+                      />
+                      <span
+                        class="euiLoadingChart__bar"
+                      />
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFlexItem"
+              >
+                <div
+                  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+                  style="min-width: 433px; min-height: 308px; max-height: 560px;"
+                >
+                  <div
+                    class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <div
+                      class="euiText euiText--medium"
+                    >
+                      <span
+                        class="panel-title"
+                      >
+                        24hr error rate trend
+                      </span>
+                    </div>
+                    <fieldset
+                      class="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
+                    >
+                      <legend
+                        class="euiScreenReaderOnly"
+                      />
+                      <div
+                        class="euiButtonGroup__buttons"
+                      />
+                    </fieldset>
+                  </div>
+                  <div
+                    class="center-loading-div"
+                  >
+                    <span
+                      class="euiLoadingChart euiLoadingChart--large"
+                    >
+                      <span
+                        class="euiLoadingChart__bar"
+                      />
+                      <span
+                        class="euiLoadingChart__bar"
+                      />
+                      <span
+                        class="euiLoadingChart__bar"
+                      />
+                      <span
+                        class="euiLoadingChart__bar"
+                      />
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFlexItem"
+              >
+                <div
+                  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+                  style="min-width: 433px; min-height: 308px; max-height: 560px;"
+                >
+                  <div
+                    class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <div
+                      class="euiText euiText--medium"
+                    >
+                      <span
+                        class="panel-title"
+                      >
+                        24hr latency trend
+                      </span>
+                    </div>
+                  </div>
+                  <div
+                    class="center-loading-div"
+                  >
+                    <span
+                      class="euiLoadingChart euiLoadingChart--large"
+                    >
+                      <span
+                        class="euiLoadingChart__bar"
+                      />
+                      <span
+                        class="euiLoadingChart__bar"
+                      />
+                      <span
+                        class="euiLoadingChart__bar"
+                      />
+                      <span
+                        class="euiLoadingChart__bar"
+                      />
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
+        <div
+          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+        >
+          <div
+            class="euiText euiText--medium"
+          >
+            <span
+              class="panel-title"
+            >
+              Service map
+            </span>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--m"
           />
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            gutterSize="s"
-            justifyContent="center"
+          <fieldset
+            class="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
           >
-            <EuiFlexItem
-              grow={false}
-              onClick={[Function]}
+            <legend
+              class="euiScreenReaderOnly"
             >
-              <EuiToolTip
-                content="View service traces"
-                delay="regular"
-                position="top"
+              Select metric for service map display
+            </legend>
+            <div
+              class="euiButtonGroup__buttons"
+            >
+              <label
+                class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
+                for="random_html_id"
               >
-                <EuiLink
-                  data-test-subj="service-view-traces-redirection-btn"
+                <span
+                  class="euiButtonContent euiButton__content"
                 >
-                  <EuiSmallButtonIcon
-                    display="base"
-                    iconType="apmTrace"
+                  <span
+                    class="euiButton__text euiButtonGroupButton__textShift"
+                    data-text="Duration"
+                    title="Duration"
+                  >
+                    <input
+                      checked=""
+                      class="euiScreenReaderOnly"
+                      data-test-subj="latency"
+                      id="random_html_id"
+                      name="random_html_id"
+                      type="radio"
+                      value=""
+                    />
+                    Duration
+                  </span>
+                </span>
+              </label>
+              <label
+                class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                for="random_html_id"
+              >
+                <span
+                  class="euiButtonContent euiButton__content"
+                >
+                  <span
+                    class="euiButton__text euiButtonGroupButton__textShift"
+                    data-text="Errors"
+                    title="Errors"
+                  >
+                    <input
+                      class="euiScreenReaderOnly"
+                      data-test-subj="error_rate"
+                      id="random_html_id"
+                      name="random_html_id"
+                      type="radio"
+                      value=""
+                    />
+                    Errors
+                  </span>
+                </span>
+              </label>
+              <label
+                class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                for="random_html_id"
+              >
+                <span
+                  class="euiButtonContent euiButton__content"
+                >
+                  <span
+                    class="euiButton__text euiButtonGroupButton__textShift"
+                    data-text="Request Rate"
+                    title="Request Rate"
+                  >
+                    <input
+                      class="euiScreenReaderOnly"
+                      data-test-subj="throughput"
+                      id="random_html_id"
+                      name="random_html_id"
+                      type="radio"
+                      value=""
+                    />
+                    Request Rate
+                  </span>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+          <hr
+            class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+          />
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+          <div
+            class="euiFlexGroup euiFlexGroup--directionRow"
+          >
+            <div
+              class="euiFlexItem"
+            >
+              <div
+                style="position: relative;"
+              >
+                <div
+                  style="position: absolute; top: 0px; left: 0px; right: 0px; bottom: 0px; display: flex; align-items: center; justify-content: center; background-color: transparent; z-index: 1000;"
+                >
+                  <span
+                    aria-label="Service map is loading"
+                    class="euiLoadingSpinner euiLoadingSpinner--xLarge"
                   />
-                </EuiLink>
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-              onClick={[Function]}
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
             >
-              <EuiToolTip
-                content="View service logs"
-                delay="regular"
-                position="top"
-              >
-                <EuiLink
-                  data-test-subj="service-view-logs-redirection-btn"
-                >
-                  <EuiSmallButtonIcon
-                    display="base"
-                    iconType="discoverApp"
-                  />
-                </EuiLink>
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer
-        size="m"
-      />
-      <EuiPanel>
-        <PanelTitle
-          title="Overview"
+              <div
+                style="min-height: 400px; min-width: 65px;"
+              />
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--m"
         />
-        <EuiHorizontalRule
-          margin="m"
+        <div
+          class="euiSpacer euiSpacer--l"
         />
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFlexGroup
-              direction="column"
+        <div
+          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+        >
+          <div
+            class="euiText euiText--medium"
+          >
+            <span
+              class="panel-title"
             >
-              <EuiFlexItem
-                grow={false}
-              >
-                <EuiText
-                  className="overview-title"
-                >
-                  Name
-                </EuiText>
-                <EuiText
-                  className="overview-content"
-                  size="s"
-                >
-                  order
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
-              >
-                <EuiText
-                  className="overview-title"
-                >
-                  Number of connected services
-                </EuiText>
-                <EuiText
-                  className="overview-content"
-                  size="s"
-                >
-                  0
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
-              >
-                <EuiText
-                  className="overview-title"
-                >
-                  Connected services
-                </EuiText>
-                <EuiText
-                  className="overview-content"
-                  size="s"
-                >
-                  -
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup
-              direction="column"
+              Spans
+            </span>
+            <span
+              class="panel-title-count"
             >
-              <EuiFlexItem
-                grow={false}
+               (0)
+            </span>
+          </div>
+          <hr
+            class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+          />
+          <div>
+            <div
+              class="normal-wrapper"
+              style="position: relative; min-height: 100px;"
+            >
+              <div
+                data-focus-guard="true"
+                style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+                tabindex="-1"
+              />
+              <div
+                class="euiDataGrid__focusWrap"
+                data-focus-lock-disabled="disabled"
               >
-                <EuiText
-                  className="overview-title"
-                >
-                  Average duration (ms)
-                </EuiText>
-                <EuiText
-                  className="overview-content"
-                  size="s"
-                >
-                  -
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
+                <div
+                  class="euiDataGrid euiDataGrid--fontSizeSmall euiDataGrid--bordersHorizontal euiDataGrid--headerUnderline euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--paddingSmall euiDataGrid--stickyFooter"
+                  style="width: 100%; height: auto;"
+                />
+              </div>
+              <div
+                data-focus-guard="true"
+                style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+                tabindex="-1"
+              />
+              <div
+                class="grid-loading-overlay"
               >
-                <EuiText
-                  className="overview-title"
-                >
-                  Error rate
-                </EuiText>
-                <EuiText
-                  className="overview-content"
-                  size="s"
-                >
-                  -
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
+                <span
+                  class="euiLoadingSpinner euiLoadingSpinner--xLarge"
+                />
+              </div>
+            </div>
+            <div
+              class="euiSpacer euiSpacer--xl"
+            />
+            <div
+              class="euiEmptyPrompt"
+            >
+              <h2
+                class="euiTitle euiTitle--medium"
               >
-                <EuiText
-                  className="overview-title"
-                >
-                  Request rate
-                </EuiText>
-                <EuiText
-                  className="overview-content"
-                  size="s"
-                >
-                  -
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
+                No matches
+              </h2>
+              <span
+                class="euiTextColor euiTextColor--subdued"
               >
-                <EuiText
-                  className="overview-title"
+                <div
+                  class="euiSpacer euiSpacer--m"
+                />
+                <div
+                  class="euiText euiText--medium"
                 >
-                  Traces
-                </EuiText>
-                <EuiText
-                  className="overview-content"
-                  size="s"
-                >
-                  -
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-      </EuiPanel>
-      <EuiSpacer />
-      <ServiceMetrics
-        dataSourceMDSId={
-          Array [
-            Object {
-              "id": "",
-              "label": "",
-            },
-          ]
-        }
-        mode="data_prepper"
-        serviceName="order"
-        setEndTime={[MockFunction]}
-        setStartTime={[MockFunction]}
-      />
-      <EuiSpacer />
-      <ServiceMap
-        currService="order"
-        filterByCurrService={true}
-        hideSearchBar={true}
-        idSelected="latency"
-        isServicesDataLoading={false}
-        mode="data_prepper"
-        page="serviceView"
-        serviceMap={Object {}}
-        setIdSelected={[Function]}
-      />
-      <EuiSpacer />
-      <EuiPanel>
-        <PanelTitle
-          title="Spans"
-          totalItems={0}
-        />
-        <EuiHorizontalRule
-          margin="m"
-        />
-        <div />
-      </EuiPanel>
-    </EuiPageBody>
-  </EuiPage>
-</Fragment>
+                  <div
+                    class="euiText euiText--small"
+                  >
+                    No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+                  </div>
+                </div>
+              </span>
+            </div>
+            <div
+              class="euiSpacer euiSpacer--xl"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
 `;

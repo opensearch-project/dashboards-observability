@@ -1,150 +1,164 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Trace analytics helper functions renders benchmark 1`] = `
-<EuiText
-  size="s"
-  style={
-    Object {
-      "color": "#c23f25",
-    }
-  }
->
+<div>
   <div
-    className="euiText euiText--small"
-    style={
-      Object {
-        "color": "#c23f25",
-      }
-    }
+    class="euiText euiText--small"
+    style="color: rgb(194, 63, 37);"
   >
     50% ▴
   </div>
-</EuiText>
+</div>
 `;
 
 exports[`Trace analytics helper functions renders benchmark 2`] = `
-<EuiText
-  size="s"
-  style={
-    Object {
-      "color": "#3f7e23",
-    }
-  }
->
+<div>
   <div
-    className="euiText euiText--small"
-    style={
-      Object {
-        "color": "#3f7e23",
-      }
-    }
+    class="euiText euiText--small"
+    style="color: rgb(63, 126, 35);"
   >
     50% ▾
   </div>
-</EuiText>
+</div>
 `;
 
 exports[`Trace analytics helper functions renders benchmark 3`] = `
-<EuiText
-  size="s"
-  style={
-    Object {
-      "color": "#9ea8a9",
-    }
-  }
->
+<div>
   <div
-    className="euiText euiText--small"
-    style={
-      Object {
-        "color": "#9ea8a9",
-      }
-    }
+    class="euiText euiText--small"
+    style="color: rgb(158, 168, 169);"
   >
     0% -
   </div>
-</EuiText>
+</div>
 `;
 
 exports[`Trace analytics helper functions renders no match and missing configuration messages 1`] = `
-<Fragment>
-  <EuiSpacer
-    size="s"
+<div>
+  <div
+    class="euiSpacer euiSpacer--s"
   />
-  <EuiEmptyPrompt
-    body={
-      <EuiText
-        size="s"
+  <div
+    class="euiEmptyPrompt"
+  >
+    <h2
+      class="euiTitle euiTitle--medium"
+    >
+      No matches
+    </h2>
+    <span
+      class="euiTextColor euiTextColor--subdued"
+    >
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
+      <div
+        class="euiText euiText--medium"
       >
-        No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
-      </EuiText>
-    }
-    title={
-      <h2>
-        No matches
-      </h2>
-    }
+        <div
+          class="euiText euiText--small"
+        >
+          No data matches the selected filter. Clear the filter and/or increase the time range to see more results.
+        </div>
+      </div>
+    </span>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--s"
   />
-  <EuiSpacer
-    size="s"
-  />
-</Fragment>
+</div>
 `;
 
 exports[`Trace analytics helper functions renders no match and missing configuration messages 2`] = `
-<Fragment>
-  <EuiEmptyPrompt
-    actions={
-      <EuiSmallButtonEmpty
-        color="primary"
-        iconSide="right"
-        iconType="popout"
-        onClick={[Function]}
+<div>
+  <div
+    class="euiEmptyPrompt"
+  >
+    <h2
+      class="euiTitle euiTitle--medium"
+    >
+      Trace Analytics not set up
+    </h2>
+    <span
+      class="euiTextColor euiTextColor--subdued"
+    >
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
+      <div
+        class="euiText euiText--medium"
       >
-        Learn more
-      </EuiSmallButtonEmpty>
-    }
-    body={
-      <EuiText
-        size="s"
+        <div
+          class="euiText euiText--small"
+        >
+          The indices required for trace analytics (otel-v1-apm-span-* and otel-v1-apm-service-map*) do not exist or you do not have permission to access them. Update the indices for custom source in advanced settings
+        </div>
+      </div>
+    </span>
+    <div
+      class="euiSpacer euiSpacer--l"
+    />
+    <button
+      class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+      type="button"
+    >
+      <span
+        class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
       >
-        The indices required for trace analytics (otel-v1-apm-span-* and otel-v1-apm-service-map*) do not exist or you do not have permission to access them. Update the indices for custom source in advanced settings
-      </EuiText>
-    }
-    title={
-      <h2>
-        Trace Analytics not set up
-      </h2>
-    }
-  />
-</Fragment>
+        <svg
+          aria-hidden="true"
+          class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+          />
+        </svg>
+        <span
+          class="euiButtonEmpty__text"
+        >
+          Learn more
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
 `;
 
 exports[`Trace analytics helper functions renders panel title 1`] = `
-<EuiText
-  size="m"
->
-  <span
-    className="panel-title"
+<div>
+  <div
+    class="euiText euiText--medium"
   >
-    test
-  </span>
-  <span
-    className="panel-title-count"
-  >
-     (10)
-  </span>
-</EuiText>
+    <span
+      class="panel-title"
+    >
+      test
+    </span>
+    <span
+      class="panel-title-count"
+    >
+       (10)
+    </span>
+  </div>
+</div>
 `;
 
 exports[`Trace analytics helper functions renders panel title 2`] = `
-<EuiText
-  size="m"
->
-  <span
-    className="panel-title"
+<div>
+  <div
+    class="euiText euiText--medium"
   >
-    test
-  </span>
-</EuiText>
+    <span
+      class="panel-title"
+    >
+      test
+    </span>
+  </div>
+</div>
 `;

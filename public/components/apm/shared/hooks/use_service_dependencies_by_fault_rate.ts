@@ -55,18 +55,19 @@ export const useServiceDependenciesByFaultRate = (
   const [refetchTrigger, setRefetchTrigger] = useState(0);
 
   // Get config values
-  const prometheusConnectionId = config?.prometheusDataSource?.id;
+  // Use .name (connectionId) for PromQL queries, not .id (saved object ID)
+  const prometheusConnectionId = config?.prometheusDataSource?.name;
+  const prometheusConnectionMeta = config?.prometheusDataSource?.meta;
 
   const promqlSearchService = useMemo(() => {
     if (!prometheusConnectionId) {
       return null;
     }
-    return new PromQLSearchService(prometheusConnectionId);
-  }, [prometheusConnectionId]);
+    return new PromQLSearchService(prometheusConnectionId, prometheusConnectionMeta);
+  }, [prometheusConnectionId, prometheusConnectionMeta]);
 
   const fetchParams = useMemo(
     () => ({
-      startTime: getTimeInSeconds(params.startTime),
       endTime: getTimeInSeconds(params.endTime),
       timeRange: calculateTimeRangeDuration(params.startTime, params.endTime),
       limit: params.limit || 5,
@@ -101,10 +102,9 @@ export const useServiceDependenciesByFaultRate = (
           fetchParams.timeRange
         );
 
-        const response = await promqlSearchService.executeMetricRequest({
+        const response = await promqlSearchService.executeInstantQuery({
           query,
-          startTime: fetchParams.startTime,
-          endTime: fetchParams.endTime,
+          time: fetchParams.endTime,
         });
 
         // Process response - handle data frame format from query enhancements plugin

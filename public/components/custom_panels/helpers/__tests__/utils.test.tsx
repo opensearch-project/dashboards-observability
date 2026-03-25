@@ -4,8 +4,7 @@
  */
 
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render } from '@testing-library/react';
 import moment from 'moment';
 import React from 'react';
 import { PPL_DATE_FORMAT } from '../../../../../common/constants/shared';
@@ -33,8 +32,6 @@ import { convertDateTime } from '../../../common/query_utils';
 import httpClientMock from '../../../../../test/__mocks__/httpClientMock';
 
 describe('Utils helper functions', () => {
-  configure({ adapter: new Adapter() });
-
   it('validates isNameValid function', () => {
     expect(isNameValid('Lorem ipsum dolor sit amet, consectetur adipiscing elit,')).toBe(false);
     expect(isNameValid('Lorem ipsum dolor sit amet, consectetur adipiscin')).toBe(true);
@@ -107,19 +104,19 @@ describe('Utils helper functions', () => {
   });
 
   it('renders displayVisualization function', () => {
-    const wrapper1 = mount(
+    const { container: container1 } = render(
       <div>
         {displayVisualization(sampleSavedVisualization.visualization, samplePPLResponse, 'bar')}
       </div>
     );
-    expect(wrapper1).toMatchSnapshot();
+    expect(container1).toMatchSnapshot();
 
-    const wrapper2 = mount(
+    const { container: container2 } = render(
       <div>{displayVisualization(sampleSavedVisualizationForLine, samplePPLResponse, 'line')}</div>
     );
-    expect(wrapper2).toMatchSnapshot();
+    expect(container2).toMatchSnapshot();
 
-    const wrapper4 = mount(
+    const { container: container4 } = render(
       <div>
         {displayVisualization(
           sampleSavedVisualizationForHorizontalBar,
@@ -128,12 +125,12 @@ describe('Utils helper functions', () => {
         )}
       </div>
     );
-    expect(wrapper4).toMatchSnapshot();
+    expect(container4).toMatchSnapshot();
 
-    const wrapper6 = mount(
+    const { container: container6 } = render(
       <div>{displayVisualization({}, samplePPLEmptyResponse, 'horizontal_bar')}</div>
     );
-    expect(wrapper6).toMatchSnapshot();
+    expect(container6).toMatchSnapshot();
   });
 
   it('validates fetchAggregatedBinCount function', () => {

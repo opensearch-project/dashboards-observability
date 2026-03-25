@@ -1,172 +1,74 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Visualization Container Component renders add visualization container 1`] = `
-<Provider
-  store={
-    Object {
-      "dispatch": [Function],
-      "getState": [Function],
-      "replaceReducer": [Function],
-      "subscribe": [Function],
-      Symbol(Symbol.observable): [Function],
-    }
-  }
->
-  <VisualizationContainer
-    cloneVisualization={[MockFunction]}
-    contextMenuId="visualization"
-    editMode={true}
-    fromTime="now-15m"
-    http={[MockFunction]}
-    onEditClick={[Function]}
-    onRefresh={true}
-    pplFilterValue="where Carrier = \\"OpenSearch-Air\\""
-    pplService={
-      PPLService {
-        "fetch": [Function],
-        "http": [MockFunction],
-      }
-    }
-    removeVisualization={[MockFunction]}
-    savedVisualizationId="oiuccXwBYVazWqOO1e06"
-    showFlyout={[MockFunction]}
-    toTime="now"
-    visualizationId="panel_viz_9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
-  >
-    <EuiPanel
-      className="panel-full-width "
+<body>
+  <div>
+    <div
+      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero panel-full-width "
       data-test-subj="VisualizationPanel"
-      grow={false}
     >
-      <div
-        className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero panel-full-width "
-        data-test-subj="VisualizationPanel"
-      >
-        <div>
-          <EuiFlexGroup
-            justifyContent="spaceBetween"
+      <div>
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <div
+            class="euiFlexItem mouseGrabber"
+            style="width: 35%;"
           >
             <div
-              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+              class="euiText euiText--medium panels-title-text euiText--constrainedWidth"
             >
-              <EuiFlexItem
-                className="mouseGrabber"
-                style={
-                  Object {
-                    "width": "35%",
-                  }
-                }
+              <span
+                class="euiToolTipAnchor"
               >
-                <div
-                  className="euiFlexItem mouseGrabber"
-                  style={
-                    Object {
-                      "width": "35%",
-                    }
-                  }
-                >
-                  <EuiText
-                    className="panels-title-text"
-                    grow={false}
-                  >
-                    <div
-                      className="euiText euiText--medium panels-title-text euiText--constrainedWidth"
-                    >
-                      <EuiToolTip
-                        content=""
-                        delay="long"
-                        position="top"
-                      >
-                        <span
-                          className="euiToolTipAnchor"
-                          onKeyUp={[Function]}
-                          onMouseOut={[Function]}
-                          onMouseOver={[Function]}
-                        >
-                          <h5
-                            data-test-subj="visualizationHeader"
-                            onBlur={[Function]}
-                            onFocus={[Function]}
-                          />
-                        </span>
-                      </EuiToolTip>
-                    </div>
-                  </EuiText>
-                </div>
-              </EuiFlexItem>
-              <EuiFlexItem
-                className="visualization-action-button"
-                grow={false}
-              >
-                <div
-                  className="euiFlexItem euiFlexItem--flexGrowZero visualization-action-button"
-                >
-                  <EuiIcon
-                    data-test-subj="removeVisualizationButton"
-                    onClick={[Function]}
-                    type="crossInACircleFilled"
-                  >
-                    <EuiIconBeaker
-                      aria-hidden={true}
-                      className="euiIcon euiIcon--medium euiIcon-isLoading"
-                      data-test-subj="removeVisualizationButton"
-                      focusable="false"
-                      onClick={[Function]}
-                      role="img"
-                      style={null}
-                    >
-                      <svg
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiIcon-isLoading"
-                        data-test-subj="removeVisualizationButton"
-                        focusable="false"
-                        height={16}
-                        onClick={[Function]}
-                        role="img"
-                        style={null}
-                        viewBox="0 0 16 16"
-                        width={16}
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                        />
-                      </svg>
-                    </EuiIconBeaker>
-                  </EuiIcon>
-                </div>
-              </EuiFlexItem>
+                <h5
+                  data-test-subj="visualizationHeader"
+                />
+              </span>
             </div>
-          </EuiFlexGroup>
-        </div>
-        <div
-          className="visualization-div"
-        >
-          <EuiLoadingChart
-            className="visualization-loading-chart"
-            mono={true}
-            size="xl"
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero visualization-action-button"
           >
-            <span
-              className="euiLoadingChart euiLoadingChart--mono visualization-loading-chart euiLoadingChart--xLarge"
+            <svg
+              aria-hidden="true"
+              class="euiIcon euiIcon--medium euiIcon-isLoading"
+              data-test-subj="removeVisualizationButton"
+              focusable="false"
+              height="16"
+              role="img"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <span
-                className="euiLoadingChart__bar"
+              <path
+                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
               />
-              <span
-                className="euiLoadingChart__bar"
-              />
-              <span
-                className="euiLoadingChart__bar"
-              />
-              <span
-                className="euiLoadingChart__bar"
-              />
-            </span>
-          </EuiLoadingChart>
+            </svg>
+          </div>
         </div>
       </div>
-    </EuiPanel>
-  </VisualizationContainer>
-</Provider>
+      <div
+        class="visualization-div"
+      >
+        <span
+          class="euiLoadingChart euiLoadingChart--mono visualization-loading-chart euiLoadingChart--xLarge"
+        >
+          <span
+            class="euiLoadingChart__bar"
+          />
+          <span
+            class="euiLoadingChart__bar"
+          />
+          <span
+            class="euiLoadingChart__bar"
+          />
+          <span
+            class="euiLoadingChart__bar"
+          />
+        </span>
+      </div>
+    </div>
+  </div>
+</body>
 `;

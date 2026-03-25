@@ -4,16 +4,11 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import { configure, mount, shallow } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-import { ErrorRatePlt } from '../error_rate_plt';
+import { render, waitFor } from '@testing-library/react';
 import { LatencyPlt, LinePlt } from '../latency_trend_plt';
 
 describe('Latency trend plot component', () => {
-  configure({ adapter: new Adapter() });
-
-  it('renders line plot', () => {
+  it('renders line plot with multiple points', async () => {
     const data = [
       {
         x: [1605027600000, 1605027700000],
@@ -27,12 +22,14 @@ describe('Latency trend plot component', () => {
         },
       },
     ] as Plotly.Data[];
-    const wrapper = shallow(<LinePlt data={data} />);
+    render(<LinePlt data={data} />);
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
-  it('renders dash', () => {
+  it('renders line plot with single point', async () => {
     const data = [
       {
         x: [1605027600000],
@@ -46,12 +43,14 @@ describe('Latency trend plot component', () => {
         },
       },
     ] as Plotly.Data[];
-    const wrapper = shallow(<LinePlt data={data} />);
+    render(<LinePlt data={data} />);
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
-  it('renders latency plot', () => {
+  it('renders latency plot', async () => {
     const data = [
       {
         x: [1605027600000],
@@ -71,8 +70,10 @@ describe('Latency trend plot component', () => {
         },
       },
     ] as Plotly.Data[];
-    const wrapper = shallow(<LatencyPlt data={data} />);
+    render(<LatencyPlt data={data} />);
 
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 });

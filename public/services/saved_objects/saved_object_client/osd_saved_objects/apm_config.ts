@@ -20,6 +20,7 @@ interface CreateApmConfigParams {
   tracesDatasetId: string;
   serviceMapDatasetId: string;
   prometheusDataSourceId: string;
+  windowDuration?: number;
 }
 
 interface UpdateApmConfigParams extends Partial<Omit<CreateApmConfigParams, 'workspaceId'>> {
@@ -59,11 +60,12 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
   /**
    * Creates entities array with reference placeholders
    */
-  private createEntities() {
+  private createEntities(windowDuration?: number) {
     return [
       { tracesDataset: { id: 'references[0].id' } },
       { serviceMapDataset: { id: 'references[1].id' } },
       { prometheusDataSource: { id: 'references[2].id' } },
+      { windowDuration: windowDuration ?? 60 },
     ];
   }
 
@@ -93,6 +95,44 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
   }
 
   /**
+   * Build metadata object for Prometheus data source from saved object attributes.
+   * Extracts relevant fields into a metadata object for query requests.
+   */
+  private buildPrometheusMetadata(
+    attributes: Record<string, unknown> | undefined
+  ): Record<string, unknown> | undefined {
+    if (!attributes) return undefined;
+
+    const meta: Record<string, unknown> = {};
+
+    // Include arn if present
+    if (attributes.arn) {
+      meta.arn = attributes.arn;
+    }
+
+    // Merge any existing meta fields (may be object or stringified JSON)
+    if (attributes.meta) {
+      let metaObj: Record<string, unknown> | null = null;
+
+      if (typeof attributes.meta === 'string') {
+        try {
+          metaObj = JSON.parse(attributes.meta);
+        } catch (e) {
+          console.error('[APM Config] Failed to parse data-connection meta:', e);
+        }
+      } else if (typeof attributes.meta === 'object') {
+        metaObj = attributes.meta as Record<string, unknown>;
+      }
+
+      if (metaObj) {
+        Object.assign(meta, metaObj);
+      }
+    }
+
+    return Object.keys(meta).length > 0 ? meta : undefined;
+  }
+
+  /**
    * Builds a map of entityType -> reference from entities array and references
    */
   private buildEntityRefsMap(
@@ -116,7 +156,7 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
 
   async create(params: CreateApmConfigParams) {
     const references = this.createReferences(params);
-    const entities = this.createEntities();
+    const entities = this.createEntities(params.windowDuration);
     const correlationType = `${APM_CONFIG_PREFIX}${params.workspaceId}`;
     const title = 'apm-config';
 
@@ -168,7 +208,13 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
       prometheusDataSourceId: prometheusId,
     });
 
-    const entities = this.createEntities();
+    // Preserve existing windowDuration if not provided in update
+    const existingWindowDuration =
+      existing.attributes.entities.find((e: ApmConfigEntity) => 'windowDuration' in e)
+        ?.windowDuration ?? 60;
+    const windowDuration = params.windowDuration ?? existingWindowDuration;
+
+    const entities = this.createEntities(windowDuration);
 
     const response = await this.client.update<ApmConfigAttributes>(
       CORRELATIONS_SAVED_OBJECT,
@@ -228,9 +274,16 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
             : null,
         ]);
 
+        // Extract windowDuration from entities (plain value, not a reference)
+        const windowDurationEntity = obj.attributes.entities.find(
+          (e: ApmConfigEntity) => 'windowDuration' in e
+        );
+        const windowDuration = windowDurationEntity?.windowDuration ?? 60;
+
         return {
           ...obj.attributes,
           objectId: this.prependTypeToId(obj.id),
+          windowDuration,
           tracesDataset: tracesRef
             ? {
                 id: tracesRef.id,
@@ -251,11 +304,11 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
             : null,
           prometheusDataSource: prometheus
             ? {
-                id: prometheusRef!.id,
-                title:
-                  prometheus.attributes?.title ||
-                  prometheus.attributes?.connectionId ||
-                  prometheusRef!.id,
+                id: prometheusRef!.id, // Saved object ID (for fetching from store)
+                name: prometheus.attributes?.connectionId || prometheusRef!.id, // ConnectionId (for PromQL and display)
+                meta: this.buildPrometheusMetadata(
+                  prometheus.attributes as Record<string, unknown> | undefined
+                ),
               }
             : null,
         };

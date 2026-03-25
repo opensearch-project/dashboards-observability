@@ -16,6 +16,7 @@ export const formatCount = (value: number | undefined): string => {
   if (value === undefined || isNaN(value) || !isFinite(value)) return '-';
   if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
   if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
+  if (value > 0 && value < 1) return value.toFixed(3);
   return value.toFixed(0);
 };
 
@@ -47,13 +48,14 @@ export const formatLatency = (valueMs: number | undefined): string => {
 };
 
 /**
- * Format throughput values with req/int unit (requests per interval).
- * The interval is determined by the window_duration option configured during Data Prepper ingestion.
- * 1500 → 1.5K req/int
+ * Format throughput values with req/s unit (requests per second).
+ * Values are normalized by dividing gauge values by the configured window duration.
+ * 1500 → 1.5K req/s
  */
 export const formatThroughput = (value: number | undefined): string => {
   if (value === undefined || isNaN(value) || !isFinite(value)) return '-';
-  if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M req/int`;
-  if (value >= 1000) return `${(value / 1000).toFixed(1)}K req/int`;
-  return `${value.toFixed(0)} req/int`;
+  if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M req/s`;
+  if (value >= 1000) return `${(value / 1000).toFixed(1)}K req/s`;
+  if (value > 0 && value < 1) return `${value.toFixed(3)} req/s`;
+  return `${value.toFixed(0)} req/s`;
 };

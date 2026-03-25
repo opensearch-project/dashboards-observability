@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { CustomPanelView } from '../custom_panel_view';
 
@@ -31,8 +29,6 @@ import { setPanelList } from '../redux/panel_slice';
 import { coreRefs } from '../../../../public/framework/core_refs';
 
 describe('Panels View Component', () => {
-  configure({ adapter: new Adapter() });
-
   const store = createStore(rootReducer, applyMiddleware(thunk));
 
   const props = {
@@ -91,7 +87,7 @@ describe('Panels View Component', () => {
       window.location.assign(`#/event_analytics/explorer/${savedVisId}`);
     };
 
-    const wrapper = mount(
+    render(
       <Provider store={store}>
         <CustomPanelView
           panelId={panelId}
@@ -113,10 +109,9 @@ describe('Panels View Component', () => {
         />
       </Provider>
     );
-    wrapper.update();
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
@@ -152,7 +147,7 @@ describe('Panels View Component', () => {
       window.location.assign(`#/event_analytics/explorer/${savedVisId}`);
     };
 
-    const wrapper = mount(
+    render(
       <Provider store={store}>
         <CustomPanelView
           panelId={panelId}
@@ -174,10 +169,9 @@ describe('Panels View Component', () => {
         />
       </Provider>
     );
-    wrapper.update();
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
@@ -199,7 +193,9 @@ describe('Panels View Component', () => {
     const panelView = renderPanelView({ http, pplService, dslService });
 
     fireEvent.click(panelView.getByTestId('superDatePickerApplyTimeButton'));
-    expect(panelView.container.firstChild).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
   it('render panel view container and duplicate dashboard', async () => {
@@ -227,6 +223,8 @@ describe('Panels View Component', () => {
 
     fireEvent.click(utils.getByTestId('panelActionContextMenu'));
     fireEvent.click(utils.getByTestId('reloadPanelContextMenuItem'));
-    expect(utils.container.firstChild).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 });

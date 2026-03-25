@@ -29,7 +29,7 @@ import { useServiceMapMetrics } from '../../shared/hooks/use_service_map_metrics
 import { useSelectedEdgeMetrics } from '../../shared/hooks/use_selected_edge_metrics';
 import { useGroupMetrics } from '../../shared/hooks/use_group_metrics';
 import { parseTimeRange } from '../../shared/utils/time_utils';
-import { navigateToServiceDetails } from '../../shared/utils/navigation_utils';
+import { openServiceDetailsInNewTab } from '../../shared/utils/navigation_utils';
 import {
   ServiceMapSidebar,
   ServiceMapGraph,
@@ -53,6 +53,7 @@ import {
 } from '../../common/constants';
 import { applicationMapI18nTexts as i18nTexts } from './application_map_i18n';
 import { LegacyBanner } from '../../shared/components/legacy_banner';
+import { ServiceCorrelationsFlyout } from '../../shared/components/service_correlations_flyout';
 import './application_map.scss';
 import '../../shared/styles/apm_common.scss';
 
@@ -394,7 +395,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
       );
       const language = node?.GroupByAttributes?.['telemetry.sdk.language'];
 
-      navigateToServiceDetails(serviceName, environment, {
+      openServiceDetailsInNewTab(serviceName, environment, {
         timeRange,
         language,
       });
@@ -406,6 +407,44 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
   const handleCloseDetailsPanel = useCallback(() => {
     setSelectedNode(null);
   }, []);
+
+  // Correlations flyout state (for Show Spans / Show Logs from service details panel)
+  const [correlationsFlyout, setCorrelationsFlyout] = useState<{
+    serviceName: string;
+    environment: string;
+    language?: string;
+    initialTab: 'spans' | 'logs';
+  } | null>(null);
+
+  const handleShowSpans = useCallback(
+    (serviceName: string, environment: string) => {
+      const node = nodes.find(
+        (n) => n.KeyAttributes.Name === serviceName && n.KeyAttributes.Environment === environment
+      );
+      setCorrelationsFlyout({
+        serviceName,
+        environment,
+        language: node?.GroupByAttributes?.['telemetry.sdk.language'],
+        initialTab: 'spans',
+      });
+    },
+    [nodes]
+  );
+
+  const handleShowLogs = useCallback(
+    (serviceName: string, environment: string) => {
+      const node = nodes.find(
+        (n) => n.KeyAttributes.Name === serviceName && n.KeyAttributes.Environment === environment
+      );
+      setCorrelationsFlyout({
+        serviceName,
+        environment,
+        language: node?.GroupByAttributes?.['telemetry.sdk.language'],
+        initialTab: 'logs',
+      });
+    },
+    [nodes]
+  );
 
   // Get metrics for selected node
   const selectedNodeMetrics = useMemo(() => {
@@ -687,16 +726,30 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
       </EuiPageBody>
 
       {/* Service Details Flyout */}
-      {selectedNode && config?.prometheusDataSource?.id && (
+      {selectedNode && config?.prometheusDataSource?.name && (
         <ServiceDetailsPanel
           node={selectedNode}
           metrics={selectedNodeMetrics}
           isLoading={isGroupNode ? groupMetricsLoading : metricsLoading}
           timeRange={timeRange}
-          prometheusConnectionId={config.prometheusDataSource.id}
+          prometheusConnectionId={config.prometheusDataSource.name}
           onClose={handleCloseDetailsPanel}
           onViewDetails={handleViewServiceDetails}
+          onShowSpans={handleShowSpans}
+          onShowLogs={handleShowLogs}
           refreshTrigger={refreshTrigger}
+        />
+      )}
+
+      {/* Service Correlations Flyout */}
+      {correlationsFlyout && (
+        <ServiceCorrelationsFlyout
+          serviceName={correlationsFlyout.serviceName}
+          environment={correlationsFlyout.environment}
+          language={correlationsFlyout.language}
+          timeRange={timeRange}
+          initialTab={correlationsFlyout.initialTab}
+          onClose={() => setCorrelationsFlyout(null)}
         />
       )}
 

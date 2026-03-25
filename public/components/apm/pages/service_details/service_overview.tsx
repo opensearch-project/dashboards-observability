@@ -39,7 +39,10 @@ import {
   formatPercentageValue,
   formatLatency,
 } from '../../common/format_utils';
+import { useApmConfig } from '../../config/apm_config_context';
 import { navigateToServiceDetails } from '../../shared/utils/navigation_utils';
+import { RESOLUTION_LOW } from '../../shared/utils/step_utils';
+import { useChartStepWindow } from '../../shared/hooks/use_chart_step_window';
 
 export interface ServiceOverviewProps {
   serviceName: string;
@@ -70,6 +73,8 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
   serviceMapDataset: _serviceMapDataset,
   refreshTrigger,
 }) => {
+  const { _config } = useApmConfig();
+
   // State for latency percentile selector
   const [latencyPercentile, setLatencyPercentile] = useState<'p99' | 'p90' | 'p50'>('p99');
 
@@ -78,6 +83,14 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
   const [faultRateTopK, setFaultRateTopK] = useState<number>(3);
   const [errorRateTopK, setErrorRateTopK] = useState<number>(3);
   const [availabilityBottomK, setAvailabilityBottomK] = useState<number>(3);
+
+  // Metric card uses RESOLUTION_LOW — window must match to avoid gaps/overlaps in sum_over_time
+  const { window: metricCardWindow, timeRangeSeconds } = useChartStepWindow(
+    timeRange,
+    RESOLUTION_LOW
+  );
+  // Line charts use default resolution (RESOLUTION_MEDIUM)
+  const { window: chartStepWindow } = useChartStepWindow(timeRange);
 
   // Flyout state
   const [flyoutOpen, setFlyoutOpen] = useState(false);
@@ -205,21 +218,17 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
         <EuiFlexItem>
           <PromQLMetricCard
             title={i18n.translate('observability.apm.serviceOverview.throughput', {
-              defaultMessage: 'Throughput (req/int)',
+              defaultMessage: 'Throughput (req/s)',
             })}
             titleTooltip={i18n.translate('observability.apm.serviceOverview.throughputTooltip', {
-              defaultMessage:
-                'Average request count per interval. Interval is determined by the window_duration option set during Data Prepper ingestion.',
+              defaultMessage: 'Average requests per second over the selected time range.',
             })}
-            subtitle={i18n.translate('observability.apm.serviceOverview.avg', {
-              defaultMessage: 'Avg',
-            })}
-            promqlQuery={getQueryServiceRequests(environment, serviceName)}
+            promqlQuery={getQueryServiceRequests(environment, serviceName, metricCardWindow)}
             timeRange={timeRange}
             prometheusConnectionId={prometheusConnectionId}
             formatValue={formatCount}
             refreshTrigger={refreshTrigger}
-            showTotal
+            divisor={timeRangeSeconds}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -348,6 +357,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
               formatValue={formatLatency}
               refreshTrigger={refreshTrigger}
               labelField="remoteService"
+              resolution={RESOLUTION_LOW}
             />
           </EuiPanel>
         </EuiFlexItem>
@@ -408,7 +418,12 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
             </EuiFlexGroup>
             <EuiSpacer size="s" />
             <PromQLLineChart
-              promqlQuery={getQueryTopOperationsByVolume(environment, serviceName, requestsTopK)}
+              promqlQuery={getQueryTopOperationsByVolume(
+                environment,
+                serviceName,
+                requestsTopK,
+                chartStepWindow
+              )}
               timeRange={timeRange}
               prometheusConnectionId={prometheusConnectionId}
               formatValue={formatCount}

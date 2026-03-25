@@ -4,16 +4,14 @@
  */
 
 import React from 'react';
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render } from '@testing-library/react';
+// eslint-disable-next-line jest/no-mocks-import
 import httpClientMock from '../../../../test/__mocks__/httpClientMock';
 import { TraceDetailRender } from '../components/flyout_components/trace_detail_render';
 
 describe('Trace Detail Render Flyout component', () => {
-  configure({ adapter: new Adapter() });
-
   it('render trace detail', () => {
-    const wrapper = mount(
+    render(
       <TraceDetailRender
         traceId="mockTrace"
         http={httpClientMock}
@@ -22,6 +20,6 @@ describe('Trace Detail Render Flyout component', () => {
       />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 });

@@ -3,10 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount, shallow } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
 import {
   IntegrationConnectionInputs,
   IntegrationDetailsInputs,
@@ -20,10 +18,8 @@ import {
 } from '../../../../../test/constants';
 
 describe('Integration Setup Inputs', () => {
-  configure({ adapter: new Adapter() });
-
   it('Renders the index form as expected', async () => {
-    const wrapper = shallow(
+    render(
       <SetupIntegrationFormInputs
         config={TEST_INTEGRATION_SETUP_INPUTS}
         updateConfig={() => {}}
@@ -33,12 +29,12 @@ describe('Integration Setup Inputs', () => {
     );
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
   it('Renders the S3 connector form as expected', async () => {
-    const wrapper = shallow(
+    render(
       <SetupIntegrationFormInputs
         config={{ ...TEST_INTEGRATION_SETUP_INPUTS, connectionType: 's3' }}
         updateConfig={() => {}}
@@ -48,12 +44,12 @@ describe('Integration Setup Inputs', () => {
     );
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
   it('Renders the S3 connector form without workflows', async () => {
-    const wrapper = shallow(
+    render(
       <SetupIntegrationFormInputs
         config={{ ...TEST_INTEGRATION_SETUP_INPUTS, connectionType: 's3' }}
         updateConfig={() => {}}
@@ -63,12 +59,12 @@ describe('Integration Setup Inputs', () => {
     );
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
   it('Renders the details inputs', async () => {
-    const wrapper = mount(
+    render(
       <IntegrationDetailsInputs
         config={{ ...TEST_INTEGRATION_SETUP_INPUTS, connectionType: 's3' }}
         updateConfig={() => {}}
@@ -77,12 +73,12 @@ describe('Integration Setup Inputs', () => {
     );
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
   it('Renders the connection inputs', async () => {
-    const wrapper = mount(
+    render(
       <IntegrationConnectionInputs
         config={{ ...TEST_INTEGRATION_SETUP_INPUTS, connectionType: 's3' }}
         updateConfig={() => {}}
@@ -91,12 +87,12 @@ describe('Integration Setup Inputs', () => {
     );
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
   it('Renders the connection inputs with a locked connection type', async () => {
-    const wrapper = mount(
+    render(
       <IntegrationConnectionInputs
         config={{ ...TEST_INTEGRATION_SETUP_INPUTS, connectionType: 's3' }}
         updateConfig={() => {}}
@@ -106,12 +102,12 @@ describe('Integration Setup Inputs', () => {
     );
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
   it('Renders the query inputs', async () => {
-    const wrapper = mount(
+    render(
       <IntegrationQueryInputs
         config={{ ...TEST_INTEGRATION_SETUP_INPUTS, connectionType: 's3' }}
         updateConfig={() => {}}
@@ -120,12 +116,12 @@ describe('Integration Setup Inputs', () => {
     );
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
   it('Renders the workflows inputs', async () => {
-    const wrapper = mount(
+    render(
       <IntegrationWorkflowsInputs
         config={TEST_INTEGRATION_SETUP_INPUTS}
         updateConfig={() => {}}
@@ -134,12 +130,12 @@ describe('Integration Setup Inputs', () => {
     );
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
   it('Renders the workflows inputs with conditional workflows', async () => {
-    const wrapper = mount(
+    render(
       <IntegrationWorkflowsInputs
         config={{ ...TEST_INTEGRATION_SETUP_INPUTS, connectionType: 's3' }}
         updateConfig={() => {}}
@@ -165,7 +161,7 @@ describe('Integration Setup Inputs', () => {
     );
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 });

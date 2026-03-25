@@ -237,7 +237,11 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
 
     const TabToDisplay = tabsMap[tab];
 
-    return <TabToDisplay {...propsForTab} />;
+    return (
+      <div data-test-subj={`acceleration${tab.charAt(0).toUpperCase() + tab.slice(1)}Tab`}>
+        <TabToDisplay {...propsForTab} />
+      </div>
+    );
   };
 
   return (

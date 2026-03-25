@@ -37,6 +37,7 @@ const getExistingEmptyTab = ({ tabIds }: EmptyTabParams) => tabIds[0];
 export const LogExplorer = ({
   pplService,
   dslService,
+  mlCommonsRCFService,
   savedObjects,
   timestampUtils,
   setToast,
@@ -100,6 +101,7 @@ export const LogExplorer = ({
         key={`explorer_${tabIds[0]}`}
         pplService={pplService}
         dslService={dslService}
+        mlCommonsRCFService={mlCommonsRCFService}
         tabId={tabIds[0]}
         savedObjects={savedObjects}
         timestampUtils={timestampUtils}

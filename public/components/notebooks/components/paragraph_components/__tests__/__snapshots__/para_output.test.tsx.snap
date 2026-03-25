@@ -1,105 +1,219 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ParaOutput /> spec renders dashboards visualization outputs 1`] = `
-<div
-  class="euiText euiText--small"
-  style="margin-left: 9px;"
->
-  2020-Jul-21 18:37:44 - 2020-Aug-20 18:37:44
-</div>
+<body>
+  <div>
+    <div
+      class="euiText euiText--small"
+      style="margin-left: 9px;"
+    >
+      2020-Jul-21 18:37:44 - 2020-Aug-20 18:37:44
+    </div>
+  </div>
+</body>
 `;
 
 exports[`<ParaOutput /> spec renders markdown outputs 1`] = `
-<div
-  class="euiText euiText--small wrapAll markdown-output-text"
-  data-test-subj="markdownOutputText"
->
-  <div
-    class="markdown-body "
-  >
-    <h1>
-      Type your input here
-    </h1>
+<body>
+  <div>
+    <div
+      class="euiText euiText--small wrapAll markdown-output-text"
+      data-test-subj="markdownOutputText"
+    >
+      <div
+        class="markdown-body "
+      >
+        <h1>
+          Type your input here
+        </h1>
+      </div>
+    </div>
   </div>
-</div>
+</body>
 `;
 
 exports[`<ParaOutput /> spec renders observability visualization outputs 1`] = `
-<div
-  class="euiText euiText--small"
-  style="margin-left: 9px;"
->
-  2020-Jul-21 18:37:44 - 2020-Aug-20 18:37:44
-</div>
+<body>
+  <div>
+    <div
+      class="euiText euiText--small"
+      style="margin-left: 9px;"
+    >
+      2020-Jul-21 18:37:44 - 2020-Aug-20 18:37:44
+    </div>
+    <div
+      style="height: 300px; width: 100%;"
+    >
+      <div
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero panel-full-width "
+        data-test-subj="VisualizationPanel"
+      >
+        <div>
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem"
+              style="width: 35%;"
+            >
+              <div
+                class="euiText euiText--medium panels-title-text euiText--constrainedWidth"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <h5
+                    data-test-subj="visualizationHeader"
+                  />
+                </span>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero visualization-action-button"
+            >
+              <div
+                class="euiPopover euiPopover--anchorDownLeft"
+              >
+                <div
+                  class="euiPopover__anchor"
+                >
+                  <button
+                    aria-label="actionMenuButton"
+                    class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small"
+                    type="button"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+                      focusable="false"
+                      height="16"
+                      role="img"
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="visualization-div"
+        >
+          <span
+            class="euiLoadingChart euiLoadingChart--mono visualization-loading-chart euiLoadingChart--xLarge"
+          >
+            <span
+              class="euiLoadingChart__bar"
+            />
+            <span
+              class="euiLoadingChart__bar"
+            />
+            <span
+              class="euiLoadingChart__bar"
+            />
+            <span
+              class="euiLoadingChart__bar"
+            />
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
 `;
 
 exports[`<ParaOutput /> spec renders other types of outputs 1`] = `
-<div
-  class="euiText euiText--medium"
->
-  <div
-    class="sc-csCMJt hFpeNP"
-  />
-</div>
+<body>
+  <div>
+    <div
+      class="euiText euiText--medium"
+    >
+      <div
+        class="sc-csCMJt hFpeNP"
+      />
+    </div>
+    <pre />
+    <img
+      alt=""
+      src="data:image/gif;base64,"
+    />
+    <pre />
+    <pre />
+  </div>
+</body>
 `;
 
 exports[`<ParaOutput /> spec renders query outputs 1`] = `
-<div>
-  <div
-    class="euiText euiText--medium wrapAll"
-    data-test-subj="queryOutputText"
-  >
-    <b>
-       select * from opensearch_dashboards_sample_data_flights limit 2
-    </b>
-  </div>
-  <div
-    class="euiSpacer euiSpacer--l"
-  />
-  <div
-    id="queryDataGrid"
-  >
-    <span
-      class="euiLoadingSpinner euiLoadingSpinner--xLarge"
-    />
-    <div
-      class="euiSpacer euiSpacer--l"
-    />
-    <div
-      data-focus-guard="true"
-      style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
-      tabindex="-1"
-    />
-    <div
-      class="euiDataGrid__focusWrap"
-      data-focus-lock-disabled="disabled"
-    >
+<body>
+  <div>
+    <div>
       <div
-        class="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stickyFooter"
+        class="euiText euiText--medium wrapAll"
+        data-test-subj="queryOutputText"
+      >
+        <b>
+           select * from opensearch_dashboards_sample_data_flights limit 2
+        </b>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--l"
       />
+      <div
+        id="queryDataGrid"
+      >
+        <span
+          class="euiLoadingSpinner euiLoadingSpinner--xLarge"
+        />
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
+        <div
+          data-focus-guard="true"
+          style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+          tabindex="-1"
+        />
+        <div
+          class="euiDataGrid__focusWrap"
+          data-focus-lock-disabled="disabled"
+        >
+          <div
+            class="euiDataGrid euiDataGrid--bordersAll euiDataGrid--headerShade euiDataGrid--footerOverline euiDataGrid--rowHoverHighlight euiDataGrid--stickyFooter"
+          />
+        </div>
+        <div
+          data-focus-guard="true"
+          style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+          tabindex="-1"
+        />
+      </div>
     </div>
-    <div
-      data-focus-guard="true"
-      style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
-      tabindex="-1"
-    />
   </div>
-</div>
+</body>
 `;
 
 exports[`<ParaOutput /> spec renders query outputs with error 1`] = `
-<div
-  class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge prismjs language-none"
->
-  <pre
-    class="euiCodeBlock__pre euiCodeBlock__pre--whiteSpacePreWrap"
-    tabindex="-1"
-  >
-    <code
-      class="euiCodeBlock__code"
+<body>
+  <div>
+    <div
+      class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge prismjs language-none"
     >
-      {"error":"Invalid SQL query"}
-    </code>
-  </pre>
-</div>
+      <pre
+        class="euiCodeBlock__pre euiCodeBlock__pre--whiteSpacePreWrap"
+        tabindex="-1"
+      >
+        <code
+          class="euiCodeBlock__code"
+        >
+          {"error":"Invalid SQL query"}
+        </code>
+      </pre>
+    </div>
+  </div>
+</body>
 `;

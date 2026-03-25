@@ -1,64 +1,427 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Modal Container component renders DeleteModal component 1`] = `
-<EuiOverlayMask>
-  <EuiModal
-    initialFocus="[name=input]"
-    onClose={[MockFunction]}
+<body
+  class="euiBody-hasOverlayMask"
+>
+  <div
+    aria-hidden="true"
+    data-aria-hidden="true"
+  />
+  <div
+    aria-hidden="true"
+    class="euiOverlayMask euiOverlayMask--aboveHeader"
+    data-aria-hidden="true"
+  />
+  <div
+    class="euiOverlayMask euiOverlayMask--aboveHeader"
   >
-    <EuiModalHeader>
-      <EuiModalHeaderTitle>
-        Test Title
-      </EuiModalHeaderTitle>
-    </EuiModalHeader>
-    <EuiModalBody>
-      <EuiText>
-        Test Message
-      </EuiText>
-      <EuiText>
-        The action cannot be undone.
-      </EuiText>
-      <EuiSpacer />
-      <EuiForm>
-        <EuiCompressedFormRow
-          describedByIds={Array []}
-          display="rowCompressed"
-          fullWidth={false}
-          hasChildLabel={true}
-          hasEmptyLabelSpace={false}
-          label="To confirm deletion, enter \\"delete\\" in the text field"
-          labelType="label"
+    <div
+      aria-hidden="true"
+      data-aria-hidden="true"
+      data-focus-guard="true"
+      style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+      tabindex="0"
+    />
+    <div
+      data-focus-lock-disabled="false"
+    >
+      <div
+        class="euiModal euiModal--maxWidth-default"
+        tabindex="0"
+      >
+        <button
+          aria-label="Closes this modal window"
+          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
+          type="button"
         >
-          <EuiCompressedFieldText
-            data-test-subj="popoverModal__deleteTextInput"
-            name="input"
-            onChange={[Function]}
-            placeholder="delete"
-            value=""
-          />
-        </EuiCompressedFormRow>
-      </EuiForm>
-    </EuiModalBody>
-    <EuiModalFooter>
-      <EuiSmallButtonEmpty
-        onClick={[MockFunction]}
-      >
-        Cancel
-      </EuiSmallButtonEmpty>
-      <EuiSmallButton
-        color="danger"
-        data-test-subj="popoverModal__deleteButton"
-        disabled={true}
-        fill={true}
-        onClick={[Function]}
-      >
-        Delete
-      </EuiSmallButton>
-    </EuiModalFooter>
-  </EuiModal>
-</EuiOverlayMask>
+          <svg
+            aria-hidden="true"
+            class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
+            focusable="false"
+            height="16"
+            role="img"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M7.293 8 3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8Z"
+            />
+          </svg>
+        </button>
+        <div
+          class="euiModal__flex"
+        >
+          <div
+            class="euiModalHeader"
+          >
+            <div
+              class="euiModalHeader__title"
+            >
+              Test Title
+            </div>
+          </div>
+          <div
+            class="euiModalBody"
+          >
+            <div
+              class="euiModalBody__overflow"
+            >
+              <div
+                class="euiText euiText--medium"
+              >
+                Test Message
+              </div>
+              <div
+                class="euiText euiText--medium"
+              >
+                The action cannot be undone.
+              </div>
+              <div
+                class="euiSpacer euiSpacer--l"
+              />
+              <div
+                class="euiForm"
+              >
+                <div
+                  class="euiFormRow euiFormRow--compressed"
+                  id="random_html_id-row"
+                >
+                  <div
+                    class="euiFormRow__labelWrapper"
+                  >
+                    <label
+                      class="euiFormLabel euiFormRow__label euiFormLabel-isFocused"
+                      for="random_html_id"
+                    >
+                      To confirm deletion, enter "delete" in the text field
+                    </label>
+                  </div>
+                  <div
+                    class="euiFormRow__fieldWrapper"
+                  >
+                    <div
+                      class="euiFormControlLayout euiFormControlLayout--compressed"
+                    >
+                      <div
+                        class="euiFormControlLayout__childrenWrapper"
+                      >
+                        <input
+                          class="euiFieldText euiFieldText--compressed"
+                          data-autofocus="true"
+                          data-test-subj="popoverModal__deleteTextInput"
+                          id="random_html_id"
+                          name="input"
+                          placeholder="delete"
+                          type="text"
+                          value=""
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiModalFooter"
+          >
+            <button
+              class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  Cancel
+                </span>
+              </span>
+            </button>
+            <button
+              class="euiButton euiButton--danger euiButton--small euiButton--fill euiButton-isDisabled"
+              data-test-subj="popoverModal__deleteButton"
+              disabled=""
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButton__content"
+              >
+                <span
+                  class="euiButton__text"
+                >
+                  Delete
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      aria-hidden="true"
+      data-aria-hidden="true"
+      data-focus-guard="true"
+      style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+      tabindex="0"
+    />
+  </div>
+</body>
 `;
 
-exports[`Modal Container component renders getCloneModal function 1`] = `""`;
+exports[`Modal Container component renders getCloneModal function 1`] = `
+<body
+  class="euiBody-hasOverlayMask"
+>
+  <div
+    aria-hidden="true"
+    data-aria-hidden="true"
+  />
+  <div
+    aria-hidden="true"
+    class="euiOverlayMask euiOverlayMask--aboveHeader"
+    data-aria-hidden="true"
+  />
+  <div
+    class="euiOverlayMask euiOverlayMask--aboveHeader"
+  >
+    <div
+      aria-hidden="true"
+      data-aria-hidden="true"
+      data-focus-guard="true"
+      style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+      tabindex="0"
+    />
+    <div
+      data-focus-lock-disabled="false"
+    >
+      <div
+        class="euiModal euiModal--maxWidth-default euiModal--confirmation"
+        tabindex="0"
+      >
+        <button
+          aria-label="Closes this modal window"
+          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+            focusable="false"
+            height="16"
+            role="img"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+            />
+          </svg>
+        </button>
+        <div
+          class="euiModal__flex"
+        >
+          <div
+            class="euiModalHeader"
+          >
+            <div
+              class="euiModalHeader__title"
+              data-test-subj="confirmModalTitleText"
+            >
+              Clone Observability Dashboard
+            </div>
+          </div>
+          <div
+            class="euiModalBody"
+          >
+            <div
+              class="euiModalBody__overflow"
+            >
+              <div
+                class="euiText euiText--medium"
+                data-test-subj="confirmModalBodyText"
+              >
+                <p>
+                  Do you want to clone this Observability Dashboard?
+                </p>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiModalFooter"
+          >
+            <button
+              class="euiButtonEmpty euiButtonEmpty--primary"
+              data-test-subj="confirmModalCancelButton"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  Cancel
+                </span>
+              </span>
+            </button>
+            <button
+              class="euiButton euiButton--primary euiButton--fill"
+              data-test-subj="confirmModalConfirmButton"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButton__content"
+              >
+                <span
+                  class="euiButton__text"
+                >
+                  Yes
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      aria-hidden="true"
+      data-aria-hidden="true"
+      data-focus-guard="true"
+      style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+      tabindex="0"
+    />
+  </div>
+</body>
+`;
 
-exports[`Modal Container component renders getDeleteModal function 1`] = `""`;
+exports[`Modal Container component renders getDeleteModal function 1`] = `
+<body
+  class="euiBody-hasOverlayMask"
+>
+  <div
+    aria-hidden="true"
+    data-aria-hidden="true"
+  />
+  <div
+    aria-hidden="true"
+    class="euiOverlayMask euiOverlayMask--aboveHeader"
+    data-aria-hidden="true"
+  />
+  <div
+    class="euiOverlayMask euiOverlayMask--aboveHeader"
+  >
+    <div
+      aria-hidden="true"
+      data-aria-hidden="true"
+      data-focus-guard="true"
+      style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+      tabindex="0"
+    />
+    <div
+      data-focus-lock-disabled="false"
+    >
+      <div
+        class="euiModal euiModal--maxWidth-default euiModal--confirmation"
+        tabindex="0"
+      >
+        <button
+          aria-label="Closes this modal window"
+          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="euiIcon euiIcon--medium euiIcon--inherit euiButtonIcon__icon"
+            focusable="false"
+            height="16"
+            role="img"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M7.293 8 3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8Z"
+            />
+          </svg>
+        </button>
+        <div
+          class="euiModal__flex"
+        >
+          <div
+            class="euiModalHeader"
+          >
+            <div
+              class="euiModalHeader__title"
+              data-test-subj="confirmModalTitleText"
+            >
+              Test Title
+            </div>
+          </div>
+          <div
+            class="euiModalBody"
+          >
+            <div
+              class="euiModalBody__overflow"
+            >
+              <div
+                class="euiText euiText--medium"
+                data-test-subj="confirmModalBodyText"
+              >
+                <p>
+                  Test Message
+                </p>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiModalFooter"
+          >
+            <button
+              class="euiButtonEmpty euiButtonEmpty--primary"
+              data-test-subj="confirmModalCancelButton"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  Cancel
+                </span>
+              </span>
+            </button>
+            <button
+              class="euiButton euiButton--danger euiButton--fill"
+              data-test-subj="confirmModalConfirmButton"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButton__content"
+              >
+                <span
+                  class="euiButton__text"
+                >
+                  Confirm Message
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      aria-hidden="true"
+      data-aria-hidden="true"
+      data-focus-guard="true"
+      style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+      tabindex="0"
+    />
+  </div>
+</body>
+`;

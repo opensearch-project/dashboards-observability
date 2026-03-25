@@ -3,31 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import sinon from 'sinon';
 import { renderDatePicker, SearchBar } from '../search_bar';
 
 describe('Search bar components', () => {
-  configure({ adapter: new Adapter() });
-
-  it('renders date picker', () => {
+  it('renders date picker', async () => {
     const setStartTime = jest.fn();
     const setEndTime = jest.fn();
-    const wrapper = mount(renderDatePicker('now-5m', setStartTime, 'now', setEndTime));
-    expect(wrapper).toMatchSnapshot();
+    render(renderDatePicker('now-5m', setStartTime, 'now', setEndTime));
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
-  it('renders search bar', () => {
-    const clock = sinon.useFakeTimers();
-
+  it('renders search bar', async () => {
     const refresh = jest.fn();
     const setQuery = jest.fn();
     const setStartTime = jest.fn();
     const setEndTime = jest.fn();
     const setFilters = jest.fn();
-    const wrapper = mount(
+    render(
       <SearchBar
         refresh={refresh}
         page="dashboard"
@@ -44,13 +41,17 @@ describe('Search bar components', () => {
         attributesFilterFields={[]}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
 
-    wrapper
-      .find('input[data-test-subj="search-bar-input-box"]')
-      .simulate('change', { target: { value: 'queryTest' } });
+    // Set up fake timers only for the debounced input test
+    const clock = sinon.useFakeTimers();
+    const searchInput = screen.getByTestId('search-bar-input-box');
+    fireEvent.change(searchInput, { target: { value: 'queryTest' } });
 
     clock.tick(100);
     expect(setQuery).toBeCalledWith('queryTest');
+    clock.restore();
   });
 });

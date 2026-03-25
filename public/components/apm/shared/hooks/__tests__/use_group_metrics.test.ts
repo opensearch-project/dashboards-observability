@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useGroupMetrics } from '../use_group_metrics';
 
 // Mock the PromQLSearchService
-const mockExecuteMetricRequest = jest.fn();
+const mockExecuteInstantQuery = jest.fn();
 jest.mock('../../../query_services/promql_search_service', () => ({
   PromQLSearchService: jest.fn().mockImplementation(() => ({
-    executeMetricRequest: mockExecuteMetricRequest,
+    executeInstantQuery: mockExecuteInstantQuery,
   })),
 }));
 
@@ -18,6 +18,7 @@ jest.mock('../../../query_services/promql_search_service', () => ({
 const mockConfig = {
   prometheusDataSource: {
     id: 'prometheus-ds-1',
+    name: 'prometheus-ds-1', // ConnectionId for PromQL queries
   },
 };
 
@@ -114,7 +115,7 @@ describe('useGroupMetrics', () => {
         },
       });
 
-      mockExecuteMetricRequest
+      mockExecuteInstantQuery
         .mockResolvedValueOnce(mockMetricResponse(1000)) // throughput
         .mockResolvedValueOnce(mockMetricResponse(50)) // faults
         .mockResolvedValueOnce(mockMetricResponse(100)) // errors
@@ -122,12 +123,14 @@ describe('useGroupMetrics', () => {
         .mockResolvedValueOnce(mockMetricResponse(200)) // latency P90
         .mockResolvedValueOnce(mockMetricResponse(500)); // latency P99
 
-      const { result, waitForNextUpdate } = renderHook(() => useGroupMetrics(defaultParams));
+      const { result } = renderHook(() => useGroupMetrics(defaultParams));
 
       // Initial loading state
       expect(result.current.isLoading).toBe(true);
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.isLoading).toBe(false);
       expect(result.current.error).toBeNull();
@@ -151,7 +154,7 @@ describe('useGroupMetrics', () => {
         ],
       });
 
-      mockExecuteMetricRequest
+      mockExecuteInstantQuery
         .mockResolvedValueOnce(mockDataFrameResponse([1000, 1100])) // throughput
         .mockResolvedValueOnce(mockDataFrameResponse([50, 60])) // faults
         .mockResolvedValueOnce(mockDataFrameResponse([100, 110])) // errors
@@ -159,9 +162,11 @@ describe('useGroupMetrics', () => {
         .mockResolvedValueOnce(mockDataFrameResponse([200, 210])) // latency P90
         .mockResolvedValueOnce(mockDataFrameResponse([500, 520])); // latency P99
 
-      const { result, waitForNextUpdate } = renderHook(() => useGroupMetrics(defaultParams));
+      const { result } = renderHook(() => useGroupMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.metrics).not.toBeNull();
       expect(result.current.metrics?.throughput.length).toBe(2);
@@ -177,7 +182,7 @@ describe('useGroupMetrics', () => {
         },
       });
 
-      mockExecuteMetricRequest
+      mockExecuteInstantQuery
         .mockResolvedValueOnce(mockInstantDataResponse(1000)) // throughput
         .mockResolvedValueOnce(mockInstantDataResponse(50)) // faults
         .mockResolvedValueOnce(mockInstantDataResponse(100)) // errors
@@ -185,9 +190,11 @@ describe('useGroupMetrics', () => {
         .mockResolvedValueOnce(mockInstantDataResponse(200)) // latency P90
         .mockResolvedValueOnce(mockInstantDataResponse(500)); // latency P99
 
-      const { result, waitForNextUpdate } = renderHook(() => useGroupMetrics(defaultParams));
+      const { result } = renderHook(() => useGroupMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.metrics).not.toBeNull();
       expect(result.current.metrics?.throughput.length).toBe(1);
@@ -205,7 +212,7 @@ describe('useGroupMetrics', () => {
         },
       });
 
-      mockExecuteMetricRequest
+      mockExecuteInstantQuery
         .mockResolvedValueOnce(mockMetricResponse(100)) // throughput (total requests)
         .mockResolvedValueOnce(mockMetricResponse(10)) // faults
         .mockResolvedValueOnce(mockMetricResponse(5)) // errors
@@ -213,9 +220,11 @@ describe('useGroupMetrics', () => {
         .mockResolvedValueOnce(mockMetricResponse(200)) // latency P90
         .mockResolvedValueOnce(mockMetricResponse(500)); // latency P99
 
-      const { result, waitForNextUpdate } = renderHook(() => useGroupMetrics(defaultParams));
+      const { result } = renderHook(() => useGroupMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       // Failure ratio = (faults + errors) / totalRequests * 100
       // = (10 + 5) / 100 * 100 = 15%
@@ -237,7 +246,7 @@ describe('useGroupMetrics', () => {
         },
       });
 
-      mockExecuteMetricRequest
+      mockExecuteInstantQuery
         .mockResolvedValueOnce(mockMetricResponse(0)) // throughput (0 requests)
         .mockResolvedValueOnce(mockMetricResponse(0)) // faults
         .mockResolvedValueOnce(mockMetricResponse(0)) // errors
@@ -245,20 +254,24 @@ describe('useGroupMetrics', () => {
         .mockResolvedValueOnce(mockMetricResponse(0)) // latency P90
         .mockResolvedValueOnce(mockMetricResponse(0)); // latency P99
 
-      const { result, waitForNextUpdate } = renderHook(() => useGroupMetrics(defaultParams));
+      const { result } = renderHook(() => useGroupMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       // Should be 0, not NaN or Infinity
       expect(result.current.metrics?.avgFailureRatio).toBe(0);
     });
 
     it('should handle empty response', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
-      const { result, waitForNextUpdate } = renderHook(() => useGroupMetrics(defaultParams));
+      const { result } = renderHook(() => useGroupMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.metrics).not.toBeNull();
       expect(result.current.metrics?.throughput).toEqual([]);
@@ -266,7 +279,7 @@ describe('useGroupMetrics', () => {
     });
 
     it('should convert attribute name to Prometheus label format', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
       renderHook(() =>
         useGroupMetrics({
@@ -279,8 +292,8 @@ describe('useGroupMetrics', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Check that the query includes the converted label name (dots to underscores)
-      expect(mockExecuteMetricRequest).toHaveBeenCalled();
-      const queryCall = mockExecuteMetricRequest.mock.calls[0][0];
+      expect(mockExecuteInstantQuery).toHaveBeenCalled();
+      const queryCall = mockExecuteInstantQuery.mock.calls[0][0];
       expect(queryCall.query).toContain('telemetry_sdk_language');
     });
   });
@@ -288,33 +301,39 @@ describe('useGroupMetrics', () => {
   describe('error handling', () => {
     it('should set error state on fetch failure', async () => {
       const mockError = new Error('Prometheus connection failed');
-      mockExecuteMetricRequest.mockRejectedValue(mockError);
+      mockExecuteInstantQuery.mockRejectedValue(mockError);
 
-      const { result, waitForNextUpdate } = renderHook(() => useGroupMetrics(defaultParams));
+      const { result } = renderHook(() => useGroupMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toEqual(mockError);
       expect(result.current.metrics).toBeNull();
     });
 
     it('should wrap non-Error throws', async () => {
-      mockExecuteMetricRequest.mockRejectedValue('string error');
+      mockExecuteInstantQuery.mockRejectedValue('string error');
 
-      const { result, waitForNextUpdate } = renderHook(() => useGroupMetrics(defaultParams));
+      const { result } = renderHook(() => useGroupMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toBeInstanceOf(Error);
       expect(result.current.error?.message).toBe('Unknown error');
     });
 
     it('should handle null response gracefully', async () => {
-      mockExecuteMetricRequest.mockResolvedValue(null);
+      mockExecuteInstantQuery.mockResolvedValue(null);
 
-      const { result, waitForNextUpdate } = renderHook(() => useGroupMetrics(defaultParams));
+      const { result } = renderHook(() => useGroupMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.metrics).not.toBeNull();
       expect(result.current.metrics?.throughput).toEqual([]);
@@ -329,11 +348,13 @@ describe('useGroupMetrics', () => {
         ],
       };
 
-      mockExecuteMetricRequest.mockResolvedValue(mockResponseWithNaN);
+      mockExecuteInstantQuery.mockResolvedValue(mockResponseWithNaN);
 
-      const { result, waitForNextUpdate } = renderHook(() => useGroupMetrics(defaultParams));
+      const { result } = renderHook(() => useGroupMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       // Should filter out NaN and calculate based on valid values
       expect(result.current.metrics).not.toBeNull();
@@ -349,11 +370,13 @@ describe('useGroupMetrics', () => {
         ],
       };
 
-      mockExecuteMetricRequest.mockResolvedValue(mockResponseWithInfinity);
+      mockExecuteInstantQuery.mockResolvedValue(mockResponseWithInfinity);
 
-      const { result, waitForNextUpdate } = renderHook(() => useGroupMetrics(defaultParams));
+      const { result } = renderHook(() => useGroupMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       // Should filter out Infinity and calculate based on valid values
       expect(result.current.metrics).not.toBeNull();
@@ -363,15 +386,17 @@ describe('useGroupMetrics', () => {
 
   describe('parameter changes', () => {
     it('should refetch when groupByValue changes', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
-      const { waitForNextUpdate, rerender } = renderHook(({ params }) => useGroupMetrics(params), {
+      const { result, rerender } = renderHook(({ params }) => useGroupMetrics(params), {
         initialProps: { params: defaultParams },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
-      const callsAfterInitial = mockExecuteMetricRequest.mock.calls.length;
+      const callsAfterInitial = mockExecuteInstantQuery.mock.calls.length;
 
       rerender({
         params: {
@@ -380,21 +405,25 @@ describe('useGroupMetrics', () => {
         },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
-      expect(mockExecuteMetricRequest.mock.calls.length).toBeGreaterThan(callsAfterInitial);
+      expect(mockExecuteInstantQuery.mock.calls.length).toBeGreaterThan(callsAfterInitial);
     });
 
     it('should refetch when groupByAttribute changes', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
-      const { waitForNextUpdate, rerender } = renderHook(({ params }) => useGroupMetrics(params), {
+      const { result, rerender } = renderHook(({ params }) => useGroupMetrics(params), {
         initialProps: { params: defaultParams },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
-      const callsAfterInitial = mockExecuteMetricRequest.mock.calls.length;
+      const callsAfterInitial = mockExecuteInstantQuery.mock.calls.length;
 
       rerender({
         params: {
@@ -403,21 +432,25 @@ describe('useGroupMetrics', () => {
         },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
-      expect(mockExecuteMetricRequest.mock.calls.length).toBeGreaterThan(callsAfterInitial);
+      expect(mockExecuteInstantQuery.mock.calls.length).toBeGreaterThan(callsAfterInitial);
     });
 
     it('should refetch when time range changes', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
-      const { waitForNextUpdate, rerender } = renderHook(({ params }) => useGroupMetrics(params), {
+      const { result, rerender } = renderHook(({ params }) => useGroupMetrics(params), {
         initialProps: { params: defaultParams },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
-      const callsAfterInitial = mockExecuteMetricRequest.mock.calls.length;
+      const callsAfterInitial = mockExecuteInstantQuery.mock.calls.length;
 
       rerender({
         params: {
@@ -426,22 +459,25 @@ describe('useGroupMetrics', () => {
         },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
-      expect(mockExecuteMetricRequest.mock.calls.length).toBeGreaterThan(callsAfterInitial);
+      expect(mockExecuteInstantQuery.mock.calls.length).toBeGreaterThan(callsAfterInitial);
     });
 
     it('should not fetch when enabled changes from true to false', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
-        ({ params }) => useGroupMetrics(params),
-        { initialProps: { params: defaultParams } }
-      );
+      const { result, rerender } = renderHook(({ params }) => useGroupMetrics(params), {
+        initialProps: { params: defaultParams },
+      });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
-      const callsAfterInitial = mockExecuteMetricRequest.mock.calls.length;
+      const callsAfterInitial = mockExecuteInstantQuery.mock.calls.length;
 
       rerender({
         params: {
@@ -452,7 +488,7 @@ describe('useGroupMetrics', () => {
 
       // Should set metrics to null without making new calls
       expect(result.current.metrics).toBeNull();
-      expect(mockExecuteMetricRequest.mock.calls.length).toBe(callsAfterInitial);
+      expect(mockExecuteInstantQuery.mock.calls.length).toBe(callsAfterInitial);
     });
   });
 });

@@ -5,12 +5,20 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
-import { getTimeInSeconds } from '../utils/time_utils';
+import {
+  getQueryServicesThroughput,
+  getQueryServicesThroughputTotal,
+  getQueryServicesFailureRatio,
+  getQueryServicesLatency,
+  getQueryServicesLatencyInstant,
+} from '../../query_services/query_requests/promql_queries';
+import { getTimeInSeconds, calculateTimeRangeDuration } from '../utils/time_utils';
+import { calculateStep, RESOLUTION_LOW } from '../utils/step_utils';
 import { useApmConfig } from '../../config/apm_config_context';
 
 export interface ServiceRedMetrics {
   latency: MetricDataPoint[];
-  avgLatency: number; // Average of all latency data points over the time period
+  avgLatency: number; // True percentile over the full time range (via instant query)
   throughput: MetricDataPoint[];
   avgThroughput: number; // Average of all throughput data points over the time period
   failureRatio: MetricDataPoint[];
@@ -45,7 +53,7 @@ interface ThroughputFailureMetrics {
  * Hook for batch-fetching RED metrics for multiple services
  *
  * Fetches metrics for all services on current page in 3 batch queries:
- * - Latency: histogram_quantile over latency_seconds_seconds_bucket (dependent on percentile)
+ * - Latency: histogram_quantile over latency_seconds_bucket (dependent on percentile)
  * - Throughput: sum of request gauge
  * - Failure Ratio: (error + fault) / request * 100
  *
@@ -69,10 +77,14 @@ export const useServicesRedMetrics = (
   const [throughputFailureMap, setThroughputFailureMap] = useState<
     Map<string, ThroughputFailureMetrics>
   >(new Map());
+  // Total request counts per service (from sum_over_time instant query)
+  const [totalCountMap, setTotalCountMap] = useState<Map<string, number>>(new Map());
+  // Instant latency per service (true percentile over full time range)
+  const [latencyInstantMap, setLatencyInstantMap] = useState<Map<string, number>>(new Map());
 
   // Separate loading states
-  const [isLoadingLatency, setIsLoadingLatency] = useState(false);
-  const [isLoadingThroughputFailure, setIsLoadingThroughputFailure] = useState(false);
+  const [isLoadingLatency, setIsLoadingLatency] = useState(true);
+  const [isLoadingThroughputFailure, setIsLoadingThroughputFailure] = useState(true);
 
   // Separate error states
   const [latencyError, setLatencyError] = useState<Error | null>(null);
@@ -82,14 +94,16 @@ export const useServicesRedMetrics = (
   const [refetchAllTrigger, setRefetchAllTrigger] = useState(0);
 
   // Get config values
-  const prometheusConnectionId = config?.prometheusDataSource?.id;
+  // Use .name (connectionId) for PromQL queries, not .id (saved object ID)
+  const prometheusConnectionId = config?.prometheusDataSource?.name;
+  const prometheusConnectionMeta = config?.prometheusDataSource?.meta;
 
   const promqlService = useMemo(() => {
     if (!prometheusConnectionId) {
       return null;
     }
-    return new PromQLSearchService(prometheusConnectionId);
-  }, [prometheusConnectionId]);
+    return new PromQLSearchService(prometheusConnectionId, prometheusConnectionMeta);
+  }, [prometheusConnectionId, prometheusConnectionMeta]);
 
   // Build service filter (service=~"service1|service2|...")
   const serviceFilter = useMemo(() => {
@@ -115,33 +129,30 @@ export const useServicesRedMetrics = (
       setThroughputFailureError(null);
 
       try {
-        const throughputQuery = `
-          sum by (service) (
-            request{${serviceFilter},namespace="span_derived"}
-          )
-        `.trim();
+        const throughputQuery = getQueryServicesThroughput(serviceFilter);
+        const failureRatioQuery = getQueryServicesFailureRatio(serviceFilter);
+        const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
+        const totalQuery = getQueryServicesThroughputTotal(serviceFilter, timeRangeDuration);
 
-        const failureRatioQuery = `
-          (
-            sum by (service) (error{${serviceFilter},namespace="span_derived"})
-            +
-            sum by (service) (fault{${serviceFilter},namespace="span_derived"})
-          )
-          /
-          sum by (service) (request{${serviceFilter},namespace="span_derived"})
-          * 100
-        `.trim();
+        const step = calculateStep(startTimeSec, endTimeSec, RESOLUTION_LOW);
 
-        const [throughputResp, failureRatioResp] = await Promise.all([
+        const [throughputResp, failureRatioResp, totalResp] = await Promise.all([
           promqlService.executeMetricRequest({
             query: throughputQuery,
             startTime: startTimeSec,
             endTime: endTimeSec,
+            step,
           }),
           promqlService.executeMetricRequest({
             query: failureRatioQuery,
             startTime: startTimeSec,
             endTime: endTimeSec,
+            step,
+          }),
+          // Instant query for total request count per service
+          promqlService.executeInstantQuery({
+            query: totalQuery,
+            time: endTimeSec,
           }),
         ]);
 
@@ -153,7 +164,15 @@ export const useServicesRedMetrics = (
           });
         });
 
+        // Extract total counts per service from the instant query
+        const newTotalMap = new Map<string, number>();
+        params.services.forEach(({ serviceName }) => {
+          const data = extractServiceData(totalResp, serviceName);
+          newTotalMap.set(serviceName, data.length > 0 ? data[0].value : 0);
+        });
+
         setThroughputFailureMap(newMap);
+        setTotalCountMap(newTotalMap);
       } catch (err) {
         console.error('[useServicesRedMetrics] Error fetching throughput/failure metrics:', err);
         setThroughputFailureError(err instanceof Error ? err : new Error('Unknown error'));
@@ -189,26 +208,44 @@ export const useServicesRedMetrics = (
             ? 0.9
             : 0.99; // default p99
 
-        const latencyQuery = `
-          histogram_quantile(${percentileValue},
-            sum by (service, le) (
-              latency_seconds_seconds_bucket{${serviceFilter},namespace="span_derived"}
-            )
-          ) * 1000
-        `.trim();
+        const latencyQuery = getQueryServicesLatency(serviceFilter, percentileValue);
+        const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
+        const latencyInstantQuery = getQueryServicesLatencyInstant(
+          serviceFilter,
+          percentileValue,
+          timeRangeDuration
+        );
 
-        const latencyResp = await promqlService.executeMetricRequest({
-          query: latencyQuery,
-          startTime: startTimeSec,
-          endTime: endTimeSec,
-        });
+        const step = calculateStep(startTimeSec, endTimeSec, RESOLUTION_LOW);
+
+        const [latencyResp, latencyInstantResp] = await Promise.all([
+          promqlService.executeMetricRequest({
+            query: latencyQuery,
+            startTime: startTimeSec,
+            endTime: endTimeSec,
+            step,
+          }),
+          // Instant query for true percentile over the full time range
+          promqlService.executeInstantQuery({
+            query: latencyInstantQuery,
+            time: endTimeSec,
+          }),
+        ]);
 
         const newMap = new Map<string, MetricDataPoint[]>();
         params.services.forEach(({ serviceName }) => {
           newMap.set(serviceName, extractServiceData(latencyResp, serviceName));
         });
 
+        // Extract instant latency values per service
+        const newInstantMap = new Map<string, number>();
+        params.services.forEach(({ serviceName }) => {
+          const data = extractServiceData(latencyInstantResp, serviceName);
+          newInstantMap.set(serviceName, data.length > 0 ? data[0].value : 0);
+        });
+
         setLatencyMap(newMap);
+        setLatencyInstantMap(newInstantMap);
       } catch (err) {
         console.error('[useServicesRedMetrics] Error fetching latency metrics:', err);
         setLatencyError(err instanceof Error ? err : new Error('Unknown error'));
@@ -245,15 +282,13 @@ export const useServicesRedMetrics = (
       const throughputData = throughputFailureMap.get(serviceName)?.throughput || [];
       const failureData = throughputFailureMap.get(serviceName)?.failureRatio || [];
 
-      // Calculate averages over the time period
-      const avgLatency =
-        latencyData.length > 0
-          ? latencyData.reduce((sum, point) => sum + point.value, 0) / latencyData.length
-          : 0;
-      const avgThroughput =
-        throughputData.length > 0
-          ? throughputData.reduce((sum, point) => sum + point.value, 0) / throughputData.length
-          : 0;
+      // Use instant query result for true percentile over full time range
+      const avgLatency = latencyInstantMap.get(serviceName) || 0;
+      // Use sum_over_time total / time range for accurate req/s
+      // (plain gauge range query is inflated by Prometheus stale lookback)
+      const timeRangeSeconds = endTimeSec - startTimeSec;
+      const totalRequests = totalCountMap.get(serviceName) || 0;
+      const avgThroughput = timeRangeSeconds > 0 ? totalRequests / timeRangeSeconds : 0;
       const avgFailureRatio =
         failureData.length > 0
           ? failureData.reduce((sum, point) => sum + point.value, 0) / failureData.length
@@ -269,7 +304,14 @@ export const useServicesRedMetrics = (
       });
     });
     return combined;
-  }, [latencyMap, throughputFailureMap]);
+  }, [
+    latencyMap,
+    latencyInstantMap,
+    throughputFailureMap,
+    totalCountMap,
+    startTimeSec,
+    endTimeSec,
+  ]);
 
   // Combined loading state
   const isLoading = isLoadingLatency || isLoadingThroughputFailure;

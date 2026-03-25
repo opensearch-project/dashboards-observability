@@ -1,1358 +1,402 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Log Config component renders empty log config 1`] = `
-<LogConfig
-  appConfigs={Array []}
-  chrome={
-    Object {
-      "addApplicationClass": [MockFunction],
-      "docTitle": Object {
-        "change": [MockFunction],
-        "reset": [MockFunction],
-      },
-      "getApplicationClasses$": [MockFunction],
-      "getBadge$": [MockFunction],
-      "getBreadcrumbs$": [MockFunction],
-      "getBreadcrumbsEnricher$": [MockFunction],
-      "getCustomNavLink$": [MockFunction],
-      "getGlobalBanner$": [MockFunction],
-      "getHeaderComponent": [MockFunction],
-      "getHeaderVariant$": [MockFunction],
-      "getHelpExtension$": [MockFunction],
-      "getIsNavDrawerLocked$": [MockFunction],
-      "getIsVisible$": [MockFunction],
-      "globalSearch": Object {
-        "getAllSearchCommands": [MockFunction],
-        "getAllSearchCommands$": [MockFunction],
-        "registerSearchCommand": [MockFunction],
-        "unregisterSearchCommand": [MockFunction],
-      },
-      "logos": Object {
-        "AnimatedMark": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_spinner_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_spinner_on_light.svg",
-        },
-        "Application": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-        },
-        "CenterMark": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-        },
-        "Mark": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_mark_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_mark_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_mark_on_light.svg",
-        },
-        "OpenSearch": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_on_light.svg",
-        },
-        "colorScheme": "light",
-      },
-      "navControls": Object {
-        "getCenter$": [MockFunction],
-        "getLeft$": [MockFunction],
-        "getLeftBottom$": [MockFunction],
-        "getPrimaryHeaderRight$": [MockFunction],
-        "getRight$": [MockFunction],
-        "registerCenter": [MockFunction],
-        "registerLeft": [MockFunction],
-        "registerLeftBottom": [MockFunction],
-        "registerPrimaryHeaderRight": [MockFunction],
-        "registerRight": [MockFunction],
-      },
-      "navGroup": Object {
-        "getCurrentNavGroup$": [MockFunction],
-        "getNavGroupEnabled": [MockFunction],
-        "getNavGroupsMap$": [MockFunction],
-        "setCurrentNavGroup": [MockFunction],
-      },
-      "navLinks": Object {
-        "enableForcedAppSwitcherNavigation": [MockFunction],
-        "get": [MockFunction],
-        "getAll": [MockFunction],
-        "getForceAppSwitcherNavigation$": [MockFunction],
-        "getNavLinks$": [MockFunction],
-        "has": [MockFunction],
-        "showOnly": [MockFunction],
-        "update": [MockFunction],
-      },
-      "recentlyAccessed": Object {
-        "add": [MockFunction],
-        "get": [MockFunction],
-        "get$": [MockFunction],
-      },
-      "removeApplicationClass": [MockFunction],
-      "setAppTitle": [MockFunction],
-      "setBadge": [MockFunction],
-      "setBreadcrumbs": [MockFunction],
-      "setBreadcrumbsEnricher": [MockFunction],
-      "setCustomNavLink": [MockFunction],
-      "setGlobalBanner": [MockFunction],
-      "setHeaderVariant": [MockFunction],
-      "setHelpExtension": [MockFunction],
-      "setHelpSupportUrl": [MockFunction],
-      "setIsVisible": [MockFunction],
-      "useUpdatedHeader": false,
-    }
-  }
-  description=""
-  dslService={
-    Object {
-      "fetch": [MockFunction],
-      "fetchFields": [MockFunction],
-      "fetchIndices": [MockFunction],
-      "http": [MockFunction],
-    }
-  }
-  editMode={false}
-  endTime="now"
-  filters={Array []}
-  http={[MockFunction]}
-  indicesExist={true}
-  name=""
-  parentBreadcrumb={
-    Object {
-      "href": "test#/",
-      "text": "test",
-    }
-  }
-  query=""
-  setAppConfigs={[MockFunction]}
-  setDescriptionWithStorage={[MockFunction]}
-  setEndTime={[MockFunction]}
-  setEndTimeWithStorage={[MockFunction]}
-  setFilters={[MockFunction]}
-  setFiltersWithStorage={[MockFunction]}
-  setIsFlyoutVisible={[MockFunction]}
-  setNameWithStorage={[MockFunction]}
-  setQuery={[MockFunction]}
-  setQueryWithStorage={[MockFunction]}
-  setStartTime={[MockFunction]}
-  setStartTimeWithStorage={[MockFunction]}
-  startTime="now-5m"
->
+<body>
   <div>
-    <EuiAccordion
-      arrowDisplay="left"
-      buttonContent={
-        <React.Fragment>
-          <EuiText
-            size="s"
-          >
-            <h3>
-              Log source
-            </h3>
-          </EuiText>
-          <EuiSpacer
-            size="s"
-          />
-          <EuiText
-            color="subdued"
-            size="s"
-          >
-            Configure your application base query
-          </EuiText>
-        </React.Fragment>
-      }
-      data-test-subj="logSourceAccordion"
-      extraAction={
-        <EuiButton
-          data-test-subj="clearLogSourceButton"
-          disabled={true}
-          onClick={[Function]}
-          size="s"
-        >
-          Clear
-        </EuiButton>
-      }
-      id="logSource"
-      initialIsOpen={false}
-      isLoading={false}
-      isLoadingMessage={false}
-      onToggle={[Function]}
-      paddingSize="l"
-    >
+    <div>
       <div
-        className="euiAccordion"
+        class="euiAccordion"
         data-test-subj="logSourceAccordion"
-        onToggle={[Function]}
       >
         <div
-          className="euiAccordion__triggerWrapper"
+          class="euiAccordion__triggerWrapper"
         >
           <button
             aria-controls="logSource"
-            aria-expanded={false}
-            className="euiAccordion__button"
+            aria-expanded="false"
+            class="euiAccordion__button"
             id="random_html_id"
-            onClick={[Function]}
             type="button"
           >
             <span
-              className="euiAccordion__iconWrapper"
+              class="euiAccordion__iconWrapper"
             >
-              <EuiIcon
-                className="euiAccordion__icon"
-                size="m"
-                type="arrowRight"
+              <svg
+                aria-hidden="true"
+                class="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon"
+                focusable="false"
+                height="16"
+                role="img"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                <EuiIconBeaker
-                  aria-hidden={true}
-                  className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon"
-                  focusable="false"
-                  role="img"
-                  style={null}
-                >
-                  <svg
-                    aria-hidden={true}
-                    className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon"
-                    focusable="false"
-                    height={16}
-                    role="img"
-                    style={null}
-                    viewBox="0 0 16 16"
-                    width={16}
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-                    />
-                  </svg>
-                </EuiIconBeaker>
-              </EuiIcon>
+                <path
+                  d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+                />
+              </svg>
             </span>
             <span
-              className="euiIEFlexWrapFix"
+              class="euiIEFlexWrapFix"
             >
-              <EuiText
-                size="s"
+              <div
+                class="euiText euiText--small"
+              >
+                <h3>
+                  Log source
+                </h3>
+              </div>
+              <div
+                class="euiSpacer euiSpacer--s"
+              />
+              <div
+                class="euiText euiText--small"
               >
                 <div
-                  className="euiText euiText--small"
+                  class="euiTextColor euiTextColor--subdued"
                 >
-                  <h3>
-                    Log source
-                  </h3>
+                  Configure your application base query
                 </div>
-              </EuiText>
-              <EuiSpacer
-                size="s"
-              >
-                <div
-                  className="euiSpacer euiSpacer--s"
-                />
-              </EuiSpacer>
-              <EuiText
-                color="subdued"
-                size="s"
-              >
-                <div
-                  className="euiText euiText--small"
-                >
-                  <EuiTextColor
-                    color="subdued"
-                    component="div"
-                  >
-                    <div
-                      className="euiTextColor euiTextColor--subdued"
-                    >
-                      Configure your application base query
-                    </div>
-                  </EuiTextColor>
-                </div>
-              </EuiText>
+              </div>
             </span>
           </button>
           <div
-            className="euiAccordion__optionalAction"
+            class="euiAccordion__optionalAction"
           >
-            <EuiButton
+            <button
+              class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
               data-test-subj="clearLogSourceButton"
-              disabled={true}
-              onClick={[Function]}
-              size="s"
+              disabled=""
+              type="button"
             >
-              <EuiButtonDisplay
-                baseClassName="euiButton"
-                data-test-subj="clearLogSourceButton"
-                disabled={true}
-                element="button"
-                isDisabled={true}
-                onClick={[Function]}
-                size="s"
-                type="button"
+              <span
+                class="euiButtonContent euiButton__content"
               >
-                <button
-                  className="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
-                  data-test-subj="clearLogSourceButton"
-                  disabled={true}
-                  onClick={[Function]}
-                  style={
-                    Object {
-                      "minWidth": undefined,
-                    }
-                  }
-                  type="button"
+                <span
+                  class="euiButton__text"
                 >
-                  <EuiButtonContent
-                    className="euiButton__content"
-                    iconGap="m"
-                    iconSide="left"
-                    textProps={
-                      Object {
-                        "className": "euiButton__text",
-                      }
-                    }
-                  >
-                    <span
-                      className="euiButtonContent euiButton__content"
-                    >
-                      <span
-                        className="euiButton__text"
-                      >
-                        Clear
-                      </span>
-                    </span>
-                  </EuiButtonContent>
-                </button>
-              </EuiButtonDisplay>
-            </EuiButton>
+                  Clear
+                </span>
+              </span>
+            </button>
           </div>
         </div>
         <div
           aria-labelledby="random_html_id"
-          className="euiAccordion__childWrapper"
+          class="euiAccordion__childWrapper"
           id="logSource"
           role="region"
-          tabIndex={-1}
+          tabindex="-1"
         >
-          <EuiResizeObserver
-            onResize={[Function]}
-          >
-            <div>
+          <div>
+            <div
+              class="euiAccordion__padding--l"
+            >
               <div
-                className="euiAccordion__padding--l"
+                class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionColumn euiFlexGroup--responsive"
               >
-                <EuiFlexGroup
-                  direction="column"
-                  gutterSize="s"
+                <div
+                  class="euiFlexItem"
                 >
                   <div
-                    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                    class="euiCallOut euiCallOut--primary euiCallOut--small"
+                    id="baseQueryCallout"
                   >
-                    <EuiFlexItem>
+                    <div
+                      class="euiText euiText--extraSmall"
+                    >
                       <div
-                        className="euiFlexItem"
+                        class="euiTextColor euiTextColor--default"
                       >
-                        <EuiCallOut
-                          iconType="iInCircle"
-                          id="baseQueryCallout"
-                          size="s"
-                        >
-                          <div
-                            className="euiCallOut euiCallOut--primary euiCallOut--small"
-                            id="baseQueryCallout"
-                          >
-                            <EuiText
-                              color="default"
-                              size="xs"
-                            >
-                              <div
-                                className="euiText euiText--extraSmall"
-                              >
-                                <EuiTextColor
-                                  color="default"
-                                  component="div"
-                                >
-                                  <div
-                                    className="euiTextColor euiTextColor--default"
-                                  >
-                                    You can't change the base query after the application is created.
-                                  </div>
-                                </EuiTextColor>
-                              </div>
-                            </EuiText>
-                          </div>
-                        </EuiCallOut>
+                        You can't change the base query after the application is created.
                       </div>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <div
-                        className="euiFlexItem"
-                      >
-                        <EuiCompressedFormRow
-                          describedByIds={Array []}
-                          display="rowCompressed"
-                          fullWidth={false}
-                          hasChildLabel={true}
-                          hasEmptyLabelSpace={false}
-                          helpText="The default logs view in the application will be filtered by this query."
-                          label="Base Query"
-                          labelType="label"
-                        >
-                          <div
-                            className="euiFormRow euiFormRow--compressed"
-                            id="random_html_id-row"
-                          >
-                            <div
-                              className="euiFormRow__labelWrapper"
-                            >
-                              <EuiFormLabel
-                                className="euiFormRow__label"
-                                htmlFor="random_html_id"
-                                isFocused={false}
-                                type="label"
-                              >
-                                <label
-                                  className="euiFormLabel euiFormRow__label"
-                                  htmlFor="random_html_id"
-                                >
-                                  Base Query
-                                </label>
-                              </EuiFormLabel>
-                            </div>
-                            <div
-                              className="euiFormRow__fieldWrapper"
-                            >
-                              <EuiFlexItem
-                                aria-describedby="random_html_id-help-0"
-                                className="query-area"
-                                grow={false}
-                                id="random_html_id"
-                                key="query-bar"
-                                onBlur={[Function]}
-                                onFocus={[Function]}
-                              >
-                                <div
-                                  aria-describedby="random_html_id-help-0"
-                                  className="euiFlexItem euiFlexItem--flexGrowZero query-area"
-                                  id="random_html_id"
-                                  onBlur={[Function]}
-                                  onFocus={[Function]}
-                                >
-                                  <Autocomplete
-                                    baseQuery=""
-                                    dslService={
-                                      Object {
-                                        "fetch": [MockFunction],
-                                        "fetchFields": [MockFunction],
-                                        "fetchIndices": [MockFunction],
-                                        "http": [MockFunction],
-                                      }
-                                    }
-                                    getSuggestions={[Function]}
-                                    handleQueryChange={[Function]}
-                                    handleQuerySearch={[Function]}
-                                    isDisabled={false}
-                                    key="autocomplete-bar"
-                                    onItemSelect={[Function]}
-                                    possibleCommands={
-                                      Array [
-                                        Object {
-                                          "label": "dedup",
-                                        },
-                                        Object {
-                                          "label": "eval",
-                                        },
-                                        Object {
-                                          "label": "fields",
-                                        },
-                                        Object {
-                                          "label": "parse",
-                                        },
-                                        Object {
-                                          "label": "rename",
-                                        },
-                                        Object {
-                                          "label": "sort",
-                                        },
-                                        Object {
-                                          "label": "where",
-                                        },
-                                      ]
-                                    }
-                                    query=""
-                                    tabId="application-analytics-tab"
-                                    tempQuery=""
-                                  >
-                                    <div
-                                      aria-expanded={false}
-                                      aria-haspopup="listbox"
-                                      aria-labelledby="autocomplete-0-label"
-                                      className="aa-Autocomplete"
-                                      id="autocomplete-root"
-                                      role="combobox"
-                                    >
-                                      <EuiCompressedTextArea
-                                        aria-autocomplete="both"
-                                        aria-labelledby="autocomplete-0-label"
-                                        autoCapitalize="off"
-                                        autoComplete="off"
-                                        autoCorrect="off"
-                                        autoFocus={false}
-                                        data-test-subj="searchAutocompleteTextArea"
-                                        disabled={false}
-                                        enterKeyHint="search"
-                                        id="autocomplete-textarea"
-                                        maxLength={16384}
-                                        onBlur={[Function]}
-                                        onChange={[Function]}
-                                        onClick={[Function]}
-                                        onFocus={[Function]}
-                                        onKeyDown={[Function]}
-                                        placeholder="Enter query"
-                                        spellCheck="false"
-                                        style={
-                                          Object {
-                                            "height": "18px",
-                                            "marginTop": "0px",
-                                            "padding": "8px",
-                                          }
-                                        }
-                                        type="search"
-                                        value=""
-                                      >
-                                        <EuiTextArea
-                                          aria-autocomplete="both"
-                                          aria-labelledby="autocomplete-0-label"
-                                          autoCapitalize="off"
-                                          autoComplete="off"
-                                          autoCorrect="off"
-                                          autoFocus={false}
-                                          compressed={true}
-                                          data-test-subj="searchAutocompleteTextArea"
-                                          disabled={false}
-                                          enterKeyHint="search"
-                                          id="autocomplete-textarea"
-                                          maxLength={16384}
-                                          onBlur={[Function]}
-                                          onChange={[Function]}
-                                          onClick={[Function]}
-                                          onFocus={[Function]}
-                                          onKeyDown={[Function]}
-                                          placeholder="Enter query"
-                                          spellCheck="false"
-                                          style={
-                                            Object {
-                                              "height": "18px",
-                                              "marginTop": "0px",
-                                              "padding": "8px",
-                                            }
-                                          }
-                                          type="search"
-                                          value=""
-                                        >
-                                          <EuiValidatableControl>
-                                            <textarea
-                                              aria-autocomplete="both"
-                                              aria-labelledby="autocomplete-0-label"
-                                              autoCapitalize="off"
-                                              autoComplete="off"
-                                              autoCorrect="off"
-                                              autoFocus={false}
-                                              className="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
-                                              data-test-subj="searchAutocompleteTextArea"
-                                              disabled={false}
-                                              enterKeyHint="search"
-                                              id="autocomplete-textarea"
-                                              maxLength={16384}
-                                              onBlur={[Function]}
-                                              onChange={[Function]}
-                                              onClick={[Function]}
-                                              onFocus={[Function]}
-                                              onKeyDown={[Function]}
-                                              placeholder="Enter query"
-                                              rows={3}
-                                              spellCheck="false"
-                                              style={
-                                                Object {
-                                                  "height": "18px",
-                                                  "marginTop": "0px",
-                                                  "padding": "8px",
-                                                }
-                                              }
-                                              type="search"
-                                              value=""
-                                            />
-                                          </EuiValidatableControl>
-                                        </EuiTextArea>
-                                      </EuiCompressedTextArea>
-                                    </div>
-                                  </Autocomplete>
-                                  <EuiBadge
-                                    className="ppl-link ppl-link-light"
-                                    color="hollow"
-                                    onClick={[Function]}
-                                    onClickAriaLabel="pplLinkShowFlyout"
-                                  >
-                                    <EuiInnerText>
-                                      <button
-                                        aria-label="pplLinkShowFlyout"
-                                        className="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft ppl-link ppl-link-light"
-                                        disabled={false}
-                                        onClick={[Function]}
-                                        title="PPL"
-                                      >
-                                        <span
-                                          className="euiBadge__content"
-                                        >
-                                          <span
-                                            className="euiBadge__text"
-                                          >
-                                            PPL
-                                          </span>
-                                        </span>
-                                      </button>
-                                    </EuiInnerText>
-                                  </EuiBadge>
-                                </div>
-                              </EuiFlexItem>
-                              <EuiFormHelpText
-                                className="euiFormRow__text"
-                                id="random_html_id-help-0"
-                                key="The default logs view in the application will be filtered by this query."
-                              >
-                                <div
-                                  className="euiFormHelpText euiFormRow__text"
-                                  id="random_html_id-help-0"
-                                >
-                                  The default logs view in the application will be filtered by this query.
-                                </div>
-                              </EuiFormHelpText>
-                            </div>
-                          </div>
-                        </EuiCompressedFormRow>
-                      </div>
-                    </EuiFlexItem>
+                    </div>
                   </div>
-                </EuiFlexGroup>
+                </div>
+                <div
+                  class="euiFlexItem"
+                >
+                  <div
+                    class="euiFormRow euiFormRow--compressed"
+                    id="random_html_id-row"
+                  >
+                    <div
+                      class="euiFormRow__labelWrapper"
+                    >
+                      <label
+                        class="euiFormLabel euiFormRow__label"
+                        for="random_html_id"
+                      >
+                        Base Query
+                      </label>
+                    </div>
+                    <div
+                      class="euiFormRow__fieldWrapper"
+                    >
+                      <div
+                        aria-describedby="random_html_id-help-0"
+                        class="euiFlexItem euiFlexItem--flexGrowZero query-area"
+                        id="random_html_id"
+                      >
+                        <div
+                          aria-expanded="false"
+                          aria-haspopup="listbox"
+                          aria-labelledby="autocomplete-0-label"
+                          class="aa-Autocomplete"
+                          id="autocomplete-root"
+                          role="combobox"
+                        >
+                          <textarea
+                            aria-autocomplete="both"
+                            aria-labelledby="autocomplete-0-label"
+                            autocapitalize="off"
+                            autocomplete="off"
+                            autocorrect="off"
+                            class="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
+                            data-test-subj="searchAutocompleteTextArea"
+                            enterkeyhint="search"
+                            id="autocomplete-textarea"
+                            maxlength="16384"
+                            placeholder="Enter query"
+                            rows="3"
+                            spellcheck="false"
+                            style="margin-top: 0px; height: 18px; padding: 8px;"
+                            type="search"
+                          />
+                        </div>
+                        <button
+                          aria-label="pplLinkShowFlyout"
+                          class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft ppl-link ppl-link-light"
+                          title="PPL"
+                        >
+                          <span
+                            class="euiBadge__content"
+                          >
+                            <span
+                              class="euiBadge__text"
+                            >
+                              PPL
+                            </span>
+                          </span>
+                        </button>
+                      </div>
+                      <div
+                        class="euiFormHelpText euiFormRow__text"
+                        id="random_html_id-help-0"
+                      >
+                        The default logs view in the application will be filtered by this query.
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </EuiResizeObserver>
+          </div>
         </div>
       </div>
-    </EuiAccordion>
+    </div>
   </div>
-</LogConfig>
+</body>
 `;
 
 exports[`Log Config component renders with query 1`] = `
-<LogConfig
-  appConfigs={Array []}
-  chrome={
-    Object {
-      "addApplicationClass": [MockFunction],
-      "docTitle": Object {
-        "change": [MockFunction],
-        "reset": [MockFunction],
-      },
-      "getApplicationClasses$": [MockFunction],
-      "getBadge$": [MockFunction],
-      "getBreadcrumbs$": [MockFunction],
-      "getBreadcrumbsEnricher$": [MockFunction],
-      "getCustomNavLink$": [MockFunction],
-      "getGlobalBanner$": [MockFunction],
-      "getHeaderComponent": [MockFunction],
-      "getHeaderVariant$": [MockFunction],
-      "getHelpExtension$": [MockFunction],
-      "getIsNavDrawerLocked$": [MockFunction],
-      "getIsVisible$": [MockFunction],
-      "globalSearch": Object {
-        "getAllSearchCommands": [MockFunction],
-        "getAllSearchCommands$": [MockFunction],
-        "registerSearchCommand": [MockFunction],
-        "unregisterSearchCommand": [MockFunction],
-      },
-      "logos": Object {
-        "AnimatedMark": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_spinner_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_spinner_on_light.svg",
-        },
-        "Application": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-        },
-        "CenterMark": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-        },
-        "Mark": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_mark_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_mark_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_mark_on_light.svg",
-        },
-        "OpenSearch": Object {
-          "dark": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_on_dark.svg",
-          },
-          "light": Object {
-            "type": "default",
-            "url": "/ui/logos/opensearch_on_light.svg",
-          },
-          "type": "default",
-          "url": "/ui/logos/opensearch_on_light.svg",
-        },
-        "colorScheme": "light",
-      },
-      "navControls": Object {
-        "getCenter$": [MockFunction],
-        "getLeft$": [MockFunction],
-        "getLeftBottom$": [MockFunction],
-        "getPrimaryHeaderRight$": [MockFunction],
-        "getRight$": [MockFunction],
-        "registerCenter": [MockFunction],
-        "registerLeft": [MockFunction],
-        "registerLeftBottom": [MockFunction],
-        "registerPrimaryHeaderRight": [MockFunction],
-        "registerRight": [MockFunction],
-      },
-      "navGroup": Object {
-        "getCurrentNavGroup$": [MockFunction],
-        "getNavGroupEnabled": [MockFunction],
-        "getNavGroupsMap$": [MockFunction],
-        "setCurrentNavGroup": [MockFunction],
-      },
-      "navLinks": Object {
-        "enableForcedAppSwitcherNavigation": [MockFunction],
-        "get": [MockFunction],
-        "getAll": [MockFunction],
-        "getForceAppSwitcherNavigation$": [MockFunction],
-        "getNavLinks$": [MockFunction],
-        "has": [MockFunction],
-        "showOnly": [MockFunction],
-        "update": [MockFunction],
-      },
-      "recentlyAccessed": Object {
-        "add": [MockFunction],
-        "get": [MockFunction],
-        "get$": [MockFunction],
-      },
-      "removeApplicationClass": [MockFunction],
-      "setAppTitle": [MockFunction],
-      "setBadge": [MockFunction],
-      "setBreadcrumbs": [MockFunction],
-      "setBreadcrumbsEnricher": [MockFunction],
-      "setCustomNavLink": [MockFunction],
-      "setGlobalBanner": [MockFunction],
-      "setHeaderVariant": [MockFunction],
-      "setHelpExtension": [MockFunction],
-      "setHelpSupportUrl": [MockFunction],
-      "setIsVisible": [MockFunction],
-      "useUpdatedHeader": false,
-    }
-  }
-  description=""
-  dslService={
-    Object {
-      "fetch": [MockFunction],
-      "fetchFields": [MockFunction],
-      "fetchIndices": [MockFunction],
-      "http": [MockFunction],
-    }
-  }
-  editMode={false}
-  endTime="now"
-  filters={Array []}
-  http={[MockFunction]}
-  indicesExist={true}
-  name=""
-  parentBreadcrumb={
-    Object {
-      "href": "test#/",
-      "text": "test",
-    }
-  }
-  query="source = openserach_dashboard_sample_logs"
-  setAppConfigs={[MockFunction]}
-  setDescriptionWithStorage={[MockFunction]}
-  setEndTime={[MockFunction]}
-  setEndTimeWithStorage={[MockFunction]}
-  setFilters={[MockFunction]}
-  setFiltersWithStorage={[MockFunction]}
-  setIsFlyoutVisible={[MockFunction]}
-  setNameWithStorage={[MockFunction]}
-  setQuery={[MockFunction]}
-  setQueryWithStorage={[MockFunction]}
-  setStartTime={[MockFunction]}
-  setStartTimeWithStorage={[MockFunction]}
-  startTime="now-5m"
->
+<body>
   <div>
-    <EuiAccordion
-      arrowDisplay="left"
-      buttonContent={
-        <React.Fragment>
-          <EuiText
-            size="s"
-          >
-            <h3>
-              Log source
-            </h3>
-          </EuiText>
-          <EuiSpacer
-            size="s"
-          />
-          <EuiText
-            color="subdued"
-            size="s"
-          >
-            Configure your application base query
-          </EuiText>
-        </React.Fragment>
-      }
-      data-test-subj="logSourceAccordion"
-      extraAction={
-        <EuiButton
-          data-test-subj="clearLogSourceButton"
-          disabled={true}
-          onClick={[Function]}
-          size="s"
-        >
-          Clear
-        </EuiButton>
-      }
-      id="logSource"
-      initialIsOpen={false}
-      isLoading={false}
-      isLoadingMessage={false}
-      onToggle={[Function]}
-      paddingSize="l"
-    >
+    <div>
       <div
-        className="euiAccordion"
+        class="euiAccordion"
         data-test-subj="logSourceAccordion"
-        onToggle={[Function]}
       >
         <div
-          className="euiAccordion__triggerWrapper"
+          class="euiAccordion__triggerWrapper"
         >
           <button
             aria-controls="logSource"
-            aria-expanded={false}
-            className="euiAccordion__button"
+            aria-expanded="false"
+            class="euiAccordion__button"
             id="random_html_id"
-            onClick={[Function]}
             type="button"
           >
             <span
-              className="euiAccordion__iconWrapper"
+              class="euiAccordion__iconWrapper"
             >
-              <EuiIcon
-                className="euiAccordion__icon"
-                size="m"
-                type="arrowRight"
+              <svg
+                aria-hidden="true"
+                class="euiIcon euiIcon--medium euiAccordion__icon"
+                focusable="false"
+                height="16"
+                role="img"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                <EuiIconArrowRight
-                  aria-hidden={true}
-                  className="euiIcon euiIcon--medium euiAccordion__icon"
-                  focusable="false"
-                  role="img"
-                  style={null}
-                >
-                  <svg
-                    aria-hidden={true}
-                    className="euiIcon euiIcon--medium euiAccordion__icon"
-                    focusable="false"
-                    height={16}
-                    role="img"
-                    style={null}
-                    viewBox="0 0 16 16"
-                    width={16}
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="m5.157 13.069 4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771Z"
-                      fillRule="nonzero"
-                    />
-                  </svg>
-                </EuiIconArrowRight>
-              </EuiIcon>
+                <path
+                  d="m5.157 13.069 4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771Z"
+                  fill-rule="nonzero"
+                />
+              </svg>
             </span>
             <span
-              className="euiIEFlexWrapFix"
+              class="euiIEFlexWrapFix"
             >
-              <EuiText
-                size="s"
+              <div
+                class="euiText euiText--small"
+              >
+                <h3>
+                  Log source
+                </h3>
+              </div>
+              <div
+                class="euiSpacer euiSpacer--s"
+              />
+              <div
+                class="euiText euiText--small"
               >
                 <div
-                  className="euiText euiText--small"
+                  class="euiTextColor euiTextColor--subdued"
                 >
-                  <h3>
-                    Log source
-                  </h3>
+                  Configure your application base query
                 </div>
-              </EuiText>
-              <EuiSpacer
-                size="s"
-              >
-                <div
-                  className="euiSpacer euiSpacer--s"
-                />
-              </EuiSpacer>
-              <EuiText
-                color="subdued"
-                size="s"
-              >
-                <div
-                  className="euiText euiText--small"
-                >
-                  <EuiTextColor
-                    color="subdued"
-                    component="div"
-                  >
-                    <div
-                      className="euiTextColor euiTextColor--subdued"
-                    >
-                      Configure your application base query
-                    </div>
-                  </EuiTextColor>
-                </div>
-              </EuiText>
+              </div>
             </span>
           </button>
           <div
-            className="euiAccordion__optionalAction"
+            class="euiAccordion__optionalAction"
           >
-            <EuiButton
+            <button
+              class="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
               data-test-subj="clearLogSourceButton"
-              disabled={true}
-              onClick={[Function]}
-              size="s"
+              disabled=""
+              type="button"
             >
-              <EuiButtonDisplay
-                baseClassName="euiButton"
-                data-test-subj="clearLogSourceButton"
-                disabled={true}
-                element="button"
-                isDisabled={true}
-                onClick={[Function]}
-                size="s"
-                type="button"
+              <span
+                class="euiButtonContent euiButton__content"
               >
-                <button
-                  className="euiButton euiButton--primary euiButton--small euiButton-isDisabled"
-                  data-test-subj="clearLogSourceButton"
-                  disabled={true}
-                  onClick={[Function]}
-                  style={
-                    Object {
-                      "minWidth": undefined,
-                    }
-                  }
-                  type="button"
+                <span
+                  class="euiButton__text"
                 >
-                  <EuiButtonContent
-                    className="euiButton__content"
-                    iconGap="m"
-                    iconSide="left"
-                    textProps={
-                      Object {
-                        "className": "euiButton__text",
-                      }
-                    }
-                  >
-                    <span
-                      className="euiButtonContent euiButton__content"
-                    >
-                      <span
-                        className="euiButton__text"
-                      >
-                        Clear
-                      </span>
-                    </span>
-                  </EuiButtonContent>
-                </button>
-              </EuiButtonDisplay>
-            </EuiButton>
+                  Clear
+                </span>
+              </span>
+            </button>
           </div>
         </div>
         <div
           aria-labelledby="random_html_id"
-          className="euiAccordion__childWrapper"
+          class="euiAccordion__childWrapper"
           id="logSource"
           role="region"
-          tabIndex={-1}
+          tabindex="-1"
         >
-          <EuiResizeObserver
-            onResize={[Function]}
-          >
-            <div>
+          <div>
+            <div
+              class="euiAccordion__padding--l"
+            >
               <div
-                className="euiAccordion__padding--l"
+                class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionColumn euiFlexGroup--responsive"
               >
-                <EuiFlexGroup
-                  direction="column"
-                  gutterSize="s"
+                <div
+                  class="euiFlexItem"
                 >
                   <div
-                    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                    class="euiCallOut euiCallOut--primary euiCallOut--small"
+                    id="baseQueryCallout"
                   >
-                    <EuiFlexItem>
+                    <div
+                      class="euiText euiText--extraSmall"
+                    >
                       <div
-                        className="euiFlexItem"
+                        class="euiTextColor euiTextColor--default"
                       >
-                        <EuiCallOut
-                          iconType="iInCircle"
-                          id="baseQueryCallout"
-                          size="s"
-                        >
-                          <div
-                            className="euiCallOut euiCallOut--primary euiCallOut--small"
-                            id="baseQueryCallout"
-                          >
-                            <EuiText
-                              color="default"
-                              size="xs"
-                            >
-                              <div
-                                className="euiText euiText--extraSmall"
-                              >
-                                <EuiTextColor
-                                  color="default"
-                                  component="div"
-                                >
-                                  <div
-                                    className="euiTextColor euiTextColor--default"
-                                  >
-                                    You can't change the base query after the application is created.
-                                  </div>
-                                </EuiTextColor>
-                              </div>
-                            </EuiText>
-                          </div>
-                        </EuiCallOut>
+                        You can't change the base query after the application is created.
                       </div>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <div
-                        className="euiFlexItem"
-                      >
-                        <EuiCompressedFormRow
-                          describedByIds={Array []}
-                          display="rowCompressed"
-                          fullWidth={false}
-                          hasChildLabel={true}
-                          hasEmptyLabelSpace={false}
-                          helpText="The default logs view in the application will be filtered by this query."
-                          label="Base Query"
-                          labelType="label"
-                        >
-                          <div
-                            className="euiFormRow euiFormRow--compressed"
-                            id="random_html_id-row"
-                          >
-                            <div
-                              className="euiFormRow__labelWrapper"
-                            >
-                              <EuiFormLabel
-                                className="euiFormRow__label"
-                                htmlFor="random_html_id"
-                                isFocused={false}
-                                type="label"
-                              >
-                                <label
-                                  className="euiFormLabel euiFormRow__label"
-                                  htmlFor="random_html_id"
-                                >
-                                  Base Query
-                                </label>
-                              </EuiFormLabel>
-                            </div>
-                            <div
-                              className="euiFormRow__fieldWrapper"
-                            >
-                              <EuiFlexItem
-                                aria-describedby="random_html_id-help-0"
-                                className="query-area"
-                                grow={false}
-                                id="random_html_id"
-                                key="query-bar"
-                                onBlur={[Function]}
-                                onFocus={[Function]}
-                              >
-                                <div
-                                  aria-describedby="random_html_id-help-0"
-                                  className="euiFlexItem euiFlexItem--flexGrowZero query-area"
-                                  id="random_html_id"
-                                  onBlur={[Function]}
-                                  onFocus={[Function]}
-                                >
-                                  <Autocomplete
-                                    baseQuery=""
-                                    dslService={
-                                      Object {
-                                        "fetch": [MockFunction],
-                                        "fetchFields": [MockFunction],
-                                        "fetchIndices": [MockFunction],
-                                        "http": [MockFunction],
-                                      }
-                                    }
-                                    getSuggestions={[Function]}
-                                    handleQueryChange={[Function]}
-                                    handleQuerySearch={[Function]}
-                                    isDisabled={false}
-                                    key="autocomplete-bar"
-                                    onItemSelect={[Function]}
-                                    possibleCommands={
-                                      Array [
-                                        Object {
-                                          "label": "dedup",
-                                        },
-                                        Object {
-                                          "label": "eval",
-                                        },
-                                        Object {
-                                          "label": "fields",
-                                        },
-                                        Object {
-                                          "label": "parse",
-                                        },
-                                        Object {
-                                          "label": "rename",
-                                        },
-                                        Object {
-                                          "label": "sort",
-                                        },
-                                        Object {
-                                          "label": "where",
-                                        },
-                                      ]
-                                    }
-                                    query="source = openserach_dashboard_sample_logs"
-                                    tabId="application-analytics-tab"
-                                    tempQuery=""
-                                  >
-                                    <div
-                                      aria-expanded={false}
-                                      aria-haspopup="listbox"
-                                      aria-labelledby="autocomplete-1-label"
-                                      className="aa-Autocomplete"
-                                      id="autocomplete-root"
-                                      role="combobox"
-                                    >
-                                      <EuiCompressedTextArea
-                                        aria-autocomplete="both"
-                                        aria-labelledby="autocomplete-1-label"
-                                        autoCapitalize="off"
-                                        autoComplete="off"
-                                        autoCorrect="off"
-                                        autoFocus={false}
-                                        data-test-subj="searchAutocompleteTextArea"
-                                        disabled={false}
-                                        enterKeyHint="search"
-                                        id="autocomplete-textarea"
-                                        maxLength={16384}
-                                        onBlur={[Function]}
-                                        onChange={[Function]}
-                                        onClick={[Function]}
-                                        onFocus={[Function]}
-                                        onKeyDown={[Function]}
-                                        placeholder="Enter query"
-                                        spellCheck="false"
-                                        style={
-                                          Object {
-                                            "height": "18px",
-                                            "marginTop": "0px",
-                                            "padding": "8px",
-                                          }
-                                        }
-                                        type="search"
-                                        value="source = openserach_dashboard_sample_logs"
-                                      >
-                                        <EuiTextArea
-                                          aria-autocomplete="both"
-                                          aria-labelledby="autocomplete-1-label"
-                                          autoCapitalize="off"
-                                          autoComplete="off"
-                                          autoCorrect="off"
-                                          autoFocus={false}
-                                          compressed={true}
-                                          data-test-subj="searchAutocompleteTextArea"
-                                          disabled={false}
-                                          enterKeyHint="search"
-                                          id="autocomplete-textarea"
-                                          maxLength={16384}
-                                          onBlur={[Function]}
-                                          onChange={[Function]}
-                                          onClick={[Function]}
-                                          onFocus={[Function]}
-                                          onKeyDown={[Function]}
-                                          placeholder="Enter query"
-                                          spellCheck="false"
-                                          style={
-                                            Object {
-                                              "height": "18px",
-                                              "marginTop": "0px",
-                                              "padding": "8px",
-                                            }
-                                          }
-                                          type="search"
-                                          value="source = openserach_dashboard_sample_logs"
-                                        >
-                                          <EuiValidatableControl>
-                                            <textarea
-                                              aria-autocomplete="both"
-                                              aria-labelledby="autocomplete-1-label"
-                                              autoCapitalize="off"
-                                              autoComplete="off"
-                                              autoCorrect="off"
-                                              autoFocus={false}
-                                              className="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
-                                              data-test-subj="searchAutocompleteTextArea"
-                                              disabled={false}
-                                              enterKeyHint="search"
-                                              id="autocomplete-textarea"
-                                              maxLength={16384}
-                                              onBlur={[Function]}
-                                              onChange={[Function]}
-                                              onClick={[Function]}
-                                              onFocus={[Function]}
-                                              onKeyDown={[Function]}
-                                              placeholder="Enter query"
-                                              rows={3}
-                                              spellCheck="false"
-                                              style={
-                                                Object {
-                                                  "height": "18px",
-                                                  "marginTop": "0px",
-                                                  "padding": "8px",
-                                                }
-                                              }
-                                              type="search"
-                                              value="source = openserach_dashboard_sample_logs"
-                                            />
-                                          </EuiValidatableControl>
-                                        </EuiTextArea>
-                                      </EuiCompressedTextArea>
-                                    </div>
-                                  </Autocomplete>
-                                  <EuiBadge
-                                    className="ppl-link ppl-link-light"
-                                    color="hollow"
-                                    onClick={[Function]}
-                                    onClickAriaLabel="pplLinkShowFlyout"
-                                  >
-                                    <EuiInnerText>
-                                      <button
-                                        aria-label="pplLinkShowFlyout"
-                                        className="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft ppl-link ppl-link-light"
-                                        disabled={false}
-                                        onClick={[Function]}
-                                        title="PPL"
-                                      >
-                                        <span
-                                          className="euiBadge__content"
-                                        >
-                                          <span
-                                            className="euiBadge__text"
-                                          >
-                                            PPL
-                                          </span>
-                                        </span>
-                                      </button>
-                                    </EuiInnerText>
-                                  </EuiBadge>
-                                </div>
-                              </EuiFlexItem>
-                              <EuiFormHelpText
-                                className="euiFormRow__text"
-                                id="random_html_id-help-0"
-                                key="The default logs view in the application will be filtered by this query."
-                              >
-                                <div
-                                  className="euiFormHelpText euiFormRow__text"
-                                  id="random_html_id-help-0"
-                                >
-                                  The default logs view in the application will be filtered by this query.
-                                </div>
-                              </EuiFormHelpText>
-                            </div>
-                          </div>
-                        </EuiCompressedFormRow>
-                      </div>
-                    </EuiFlexItem>
+                    </div>
                   </div>
-                </EuiFlexGroup>
+                </div>
+                <div
+                  class="euiFlexItem"
+                >
+                  <div
+                    class="euiFormRow euiFormRow--compressed"
+                    id="random_html_id-row"
+                  >
+                    <div
+                      class="euiFormRow__labelWrapper"
+                    >
+                      <label
+                        class="euiFormLabel euiFormRow__label"
+                        for="random_html_id"
+                      >
+                        Base Query
+                      </label>
+                    </div>
+                    <div
+                      class="euiFormRow__fieldWrapper"
+                    >
+                      <div
+                        aria-describedby="random_html_id-help-0"
+                        class="euiFlexItem euiFlexItem--flexGrowZero query-area"
+                        id="random_html_id"
+                      >
+                        <div
+                          aria-expanded="false"
+                          aria-haspopup="listbox"
+                          aria-labelledby="autocomplete-1-label"
+                          class="aa-Autocomplete"
+                          id="autocomplete-root"
+                          role="combobox"
+                        >
+                          <textarea
+                            aria-autocomplete="both"
+                            aria-labelledby="autocomplete-1-label"
+                            autocapitalize="off"
+                            autocomplete="off"
+                            autocorrect="off"
+                            class="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
+                            data-test-subj="searchAutocompleteTextArea"
+                            enterkeyhint="search"
+                            id="autocomplete-textarea"
+                            maxlength="16384"
+                            placeholder="Enter query"
+                            rows="3"
+                            spellcheck="false"
+                            style="margin-top: 0px; height: 18px; padding: 8px;"
+                            type="search"
+                          >
+                            source = openserach_dashboard_sample_logs
+                          </textarea>
+                        </div>
+                        <button
+                          aria-label="pplLinkShowFlyout"
+                          class="euiBadge euiBadge-isClickable euiBadge--hollow euiBadge--iconLeft ppl-link ppl-link-light"
+                          title="PPL"
+                        >
+                          <span
+                            class="euiBadge__content"
+                          >
+                            <span
+                              class="euiBadge__text"
+                            >
+                              PPL
+                            </span>
+                          </span>
+                        </button>
+                      </div>
+                      <div
+                        class="euiFormHelpText euiFormRow__text"
+                        id="random_html_id-help-0"
+                      >
+                        The default logs view in the application will be filtered by this query.
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </EuiResizeObserver>
+          </div>
         </div>
       </div>
-    </EuiAccordion>
+    </div>
   </div>
-</LogConfig>
+</body>
 `;

@@ -33,9 +33,12 @@ const renderQueryAssistInput = (
       selectedIndex: [{ label: 'selected-test-index' }],
       nlqInput: 'test-input',
       setNlqInput: jest.fn(),
+      lastFocusedInput: 'nlq_input',
+      setLastFocusedInput: jest.fn(),
       callOut: null,
       setCallOut: jest.fn(),
       handleTimePickerChange: jest.fn(),
+      runChanges: jest.fn(),
     },
     overrideProps
   );

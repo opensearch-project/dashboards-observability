@@ -3,20 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { ServiceBreakdownPanel } from '../service_breakdown_panel';
 
 describe('Service breakdown panel component', () => {
-  configure({ adapter: new Adapter() });
-
-  it('renders empty service breakdown panel', () => {
-    const wrapper = mount(<ServiceBreakdownPanel data={[]} />);
-    expect(wrapper).toMatchSnapshot();
+  it('renders empty service breakdown panel', async () => {
+    render(<ServiceBreakdownPanel data={[]} />);
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 
-  it('renders service breakdown panel', () => {
+  it('renders service breakdown panel', async () => {
     const data = [
       {
         values: [100],
@@ -27,7 +26,9 @@ describe('Service breakdown panel component', () => {
         hovertemplate: '%{label}<br>%{value:.2f}%<extra></extra>',
       },
     ] as Plotly.Data[];
-    const wrapper = mount(<ServiceBreakdownPanel data={data} />);
-    expect(wrapper).toMatchSnapshot();
+    render(<ServiceBreakdownPanel data={data} />);
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 });

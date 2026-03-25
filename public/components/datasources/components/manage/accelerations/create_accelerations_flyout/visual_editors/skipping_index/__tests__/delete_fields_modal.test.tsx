@@ -3,10 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { waitFor } from '@testing-library/dom';
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-import toJson from 'enzyme-to-json';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { CreateAccelerationForm } from '../../../../../../../../../../common/types/data_connections';
 import {
@@ -16,27 +13,20 @@ import {
 import { DeleteFieldsModal } from '../delete_fields_modal';
 
 describe('Delete fields modal in skipping index', () => {
-  configure({ adapter: new Adapter() });
-
   it('renders delete fields modal in skipping index with default options', async () => {
     const accelerationFormData = createAccelerationEmptyDataMock;
     const setAccelerationFormData = jest.fn();
     const setIsDeleteModalVisible = jest.fn();
-    const wrapper = mount(
+    render(
       <DeleteFieldsModal
         setIsDeleteModalVisible={setIsDeleteModalVisible}
         accelerationFormData={accelerationFormData}
         setAccelerationFormData={setAccelerationFormData}
       />
     );
-    wrapper.update();
+
     await waitFor(() => {
-      expect(
-        toJson(wrapper, {
-          noKey: false,
-          mode: 'deep',
-        })
-      ).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
@@ -48,21 +38,16 @@ describe('Delete fields modal in skipping index', () => {
     };
     const setAccelerationFormData = jest.fn();
     const setIsDeleteModalVisible = jest.fn();
-    const wrapper = mount(
+    render(
       <DeleteFieldsModal
         setIsDeleteModalVisible={setIsDeleteModalVisible}
         accelerationFormData={accelerationFormData}
         setAccelerationFormData={setAccelerationFormData}
       />
     );
-    wrapper.update();
+
     await waitFor(() => {
-      expect(
-        toJson(wrapper, {
-          noKey: false,
-          mode: 'deep',
-        })
-      ).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 });

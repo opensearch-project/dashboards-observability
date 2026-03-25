@@ -39,6 +39,7 @@ export interface ApmConfigEntity {
   tracesDataset?: { id: string };
   serviceMapDataset?: { id: string };
   prometheusDataSource?: { id: string };
+  windowDuration?: number; // Data Prepper window_duration in seconds
 }
 
 export interface ApmConfigAttributes extends SavedObjectAttributes {
@@ -65,7 +66,9 @@ export interface ResolvedApmConfig extends Omit<ApmConfigAttributes, 'entities'>
     datasourceTitle?: string;
   } | null;
   prometheusDataSource: {
-    id: string;
-    title: string;
+    id: string; // Saved object ID (for fetching from store)
+    name: string; // ConnectionId (for PromQL dataset.id and display)
+    meta?: Record<string, unknown>;
   } | null;
+  windowDuration: number; // Data Prepper window_duration in seconds (default 60)
 }

@@ -296,10 +296,17 @@ describe('Testing traces tree view', () => {
     cy.get("[data-test-subj='treeExpandAll']").click();
     cy.get("[data-test-subj='treeCollapseAll']").click();
 
+    // Wait for fullscreen button to be visible and scroll to it before clicking
+    cy.get('[data-test-subj="fullScreenButton"]', { timeout: 10000 })
+      .should('be.visible')
+      .scrollIntoView({ duration: 500 });
     cy.get('[data-test-subj="fullScreenButton"]').click();
-    cy.get('.euiButtonEmpty__text').should('contain.text', 'Exit full screen');
+    cy.get('.euiButtonEmpty__text', { timeout: 10000 }).should('contain.text', 'Exit full screen');
+    cy.get('[data-test-subj="fullScreenButton"]', { timeout: 10000 })
+      .should('be.visible')
+      .scrollIntoView({ duration: 500 });
     cy.get('[data-test-subj="fullScreenButton"]').click();
-    cy.get('.euiButtonEmpty__text').should('contain.text', 'Full screen');
+    cy.get('.euiButtonEmpty__text', { timeout: 10000 }).should('contain.text', 'Full screen');
   });
 });
 
@@ -310,11 +317,27 @@ describe('Testing switch mode to jaeger', () => {
         win.sessionStorage.clear();
       },
     });
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     setTimeFilter();
-    cy.get("[data-test-subj='indexPattern-switch-link']").click();
-    cy.get("[data-test-subj='jaeger-mode']").click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get("[data-test-subj='indexPattern-switch-link']", { timeout: 10000 })
+      .should('be.visible')
+      .scrollIntoView({ duration: 500 })
+      .click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get("[data-test-subj='jaeger-mode']", { timeout: 10000 })
+      .should('be.visible')
+      .scrollIntoView({ duration: 500 })
+      .click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('input[type="search"]').first().focus().clear();
-    cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+    cy.get('[data-test-subj="superDatePickerApplyTimeButton"]')
+      .scrollIntoView({ duration: 500 })
+      .click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    // In jaeger mode, traces are displayed in a regular table, scroll to it to ensure it's initialized
+    cy.get('.euiTable', { timeout: 10000 }).should('exist');
+    cy.get('.euiTableRow').first().scrollIntoView({ duration: 500 });
   });
 
   it('Verifies columns and data', () => {
@@ -338,8 +361,10 @@ describe('Testing switch mode to jaeger', () => {
   it('Checks tree view for specific traceId in Jaeger mode', () => {
     cy.contains('15b0b4004a651c4c').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('[data-test-subj="span-gantt-chart-panel"]').should('be.visible');
 
     cy.get('.euiButtonGroup').contains('Tree view').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get("[data-test-subj='treeExpandAll']").should('exist');
     cy.get("[data-test-subj='treeCollapseAll']").should('exist');
 
@@ -363,9 +388,21 @@ describe('Testing traces Custom source features', () => {
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get("[data-test-subj='indexPattern-switch-link']").click();
     cy.get("[data-test-subj='data_prepper-mode']").click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     setTimeFilter();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('[data-test-subj="trace-table-mode-selector"]').click();
     cy.get('.euiSelectableListItem__content').contains('All Spans').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    // Wait for data grid to exist and be fully rendered with data
+    cy.get('.euiDataGrid', { timeout: 15000 }).should('be.visible');
+    // Wait for header cells to be fully rendered (indicates grid is initialized)
+    cy.get('.euiDataGridHeaderCell__content', { timeout: 10000 }).should('have.length.greaterThan', 0);
+    // Wait for data rows to exist
+    cy.get('.euiDataGridRowCell', { timeout: 10000 }).should('have.length.greaterThan', 0);
+    // Scroll to first row to trigger any lazy-loaded components
+    cy.get('[data-test-subj="dataGridRowCell"]').first().scrollIntoView({ duration: 500 });
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
   });
 
   it('Renders the traces custom source all spans as default, clicks trace view redirection ', () => {
@@ -377,9 +414,13 @@ describe('Testing traces Custom source features', () => {
     cy.get('.euiDataGridHeaderCell__content').contains('Errors').should('exist');
     cy.get('.euiDataGridHeaderCell__content').contains('Last updated').should('exist');
 
-    cy.get('a.euiLink.euiLink--primary').first().click();
+    // Wait for data to load and ensure links are visible
+    cy.get('a.euiLink.euiLink--primary', { timeout: 10000 }).should('have.length.greaterThan', 0);
+    cy.get('a.euiLink.euiLink--primary').first().should('have.attr', 'href').and('include', '#/traces');
+    cy.get('a.euiLink.euiLink--primary').first().scrollIntoView({ duration: 500 });
+    cy.get('a.euiLink.euiLink--primary').first().should('be.visible').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('.overview-content').should('contain.text', 'd5bc99166e521eec173bcb7f9b0d3c43');
+    cy.get('h1.overview-content', { timeout: 10000 }).should('contain.text', 'd5bc99166e521eec173bcb7f9b0d3c43');
   });
 
   it('Renders all spans column attributes as hidden, shows column when added', () => {
@@ -391,24 +432,34 @@ describe('Testing traces Custom source features', () => {
   });
 
   it('Verifies column sorting and pagination works correctly', () => {
-    cy.contains('Duration (ms)').click();
+    cy.contains('Duration (ms)').scrollIntoView({ duration: 500 }).click();
     cy.contains('Sort Z-A').click();
 
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.contains('467.03 ms').should('exist');
+    // Wait for sorting to complete and data to refresh
+    cy.get('.euiDataGrid', { timeout: 15000 }).should('be.visible');
+    cy.get('[data-test-subj="dataGridRowCell"]', { timeout: 15000 }).should('have.length.greaterThan', 0);
+    // Scroll first row into view to ensure it's visible
+    cy.get('[data-test-subj="dataGridRowCell"]').first().scrollIntoView({ duration: 500 });
+    cy.contains('467.03 ms', { timeout: 15000 }).should('exist');
 
     cy.get('[data-test-subj="pagination-button-next"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.contains('399.10 ms').should('exist');
+    cy.contains('399.10 ms', { timeout: 10000 }).should('exist');
 
     cy.get('[data-test-subj="pagination-button-previous"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.contains('467.03 ms').should('exist');
+    cy.contains('467.03 ms', { timeout: 10000 }).should('exist');
   });
 
   it('Renders the traces custom source traces, clicks trace view redirection', () => {
     cy.get('[data-test-subj="trace-table-mode-selector"]').click();
     cy.get('.euiSelectableListItem').contains('Traces').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+    // Wait for data grid to reload with traces data - use row cells instead of rows
+    cy.get('[data-test-subj="dataGridRowCell"]', { timeout: 15000 }).should('have.length.greaterThan', 0);
+    cy.get('[data-test-subj="dataGridRowCell"]').first().scrollIntoView({ duration: 500 });
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
     cy.get('.euiDataGridHeaderCell__content').contains('Trace Id').should('exist');
@@ -418,8 +469,12 @@ describe('Testing traces Custom source features', () => {
     cy.get('.euiDataGridHeaderCell__content').contains('Errors').should('exist');
     cy.get('.euiDataGridHeaderCell__content').contains('Last updated').should('exist');
 
-    cy.get('a.euiLink.euiLink--primary').first().click();
+    // Wait for data to load and ensure links are visible
+    cy.get('a.euiLink.euiLink--primary', { timeout: 10000 }).should('have.length.greaterThan', 0);
+    cy.get('a.euiLink.euiLink--primary').first().should('have.attr', 'href').and('include', '#/traces');
+    cy.get('a.euiLink.euiLink--primary').first().scrollIntoView({ duration: 500 });
+    cy.get('a.euiLink.euiLink--primary').first().should('be.visible').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('.overview-content').should('contain.text', 'd5bc99166e521eec173bcb7f9b0d3c43');
+    cy.get('h1.overview-content', { timeout: 10000 }).should('contain.text', 'd5bc99166e521eec173bcb7f9b0d3c43');
   });
 });

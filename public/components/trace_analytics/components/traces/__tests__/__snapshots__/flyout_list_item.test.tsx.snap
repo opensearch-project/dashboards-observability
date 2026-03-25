@@ -1,48 +1,55 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<FlyoutListItem /> spec renders the component 1`] = `
-<div>
-  <dl
-    class="euiDescriptionList euiDescriptionList--column euiDescriptionList--center euiDescriptionList--compressed"
-    data-test-subj="Span IDDescriptionList"
-  >
-    <dt
-      class="euiDescriptionList__title"
-    >
-      <div
-        class="euiText euiText--small"
-        style="word-break: break-all; word-wrap: break-word;"
+<body>
+  <div>
+    <div>
+      <dl
+        class="euiDescriptionList euiDescriptionList--column euiDescriptionList--center euiDescriptionList--compressed"
+        data-test-subj="Span IDDescriptionList"
       >
-        <div
-          class="euiTextColor euiTextColor--subdued"
-        >
-          Span ID
-        </div>
-      </div>
-    </dt>
-    <dd
-      class="euiDescriptionList__description"
-    >
-      <div
-        class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
-      >
-        <div
-          class="euiFlexItem"
+        <dt
+          class="euiDescriptionList__title"
         >
           <div
             class="euiText euiText--small"
-            style="word-break: break-all; word-wrap: break-word; white-space: pre-line;"
+            style="word-break: break-all; word-wrap: break-word;"
           >
-            <b>
-              test-span-id
-            </b>
+            <div
+              class="euiTextColor euiTextColor--subdued"
+            >
+              Span ID
+            </div>
           </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        />
-      </div>
-    </dd>
-  </dl>
-</div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+        >
+          <div
+            class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem"
+            >
+              <div
+                class="euiText euiText--small"
+                style="word-break: break-all; word-wrap: break-word; white-space: pre-line;"
+              >
+                <b>
+                  test-span-id
+                </b>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            />
+          </div>
+        </dd>
+      </dl>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--s"
+    />
+  </div>
+</body>
 `;

@@ -3,14 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useServicesRedMetrics } from '../use_services_red_metrics';
 
 // Mock the PromQLSearchService
 const mockExecuteMetricRequest = jest.fn();
+const mockExecuteInstantQuery = jest.fn();
 jest.mock('../../../query_services/promql_search_service', () => ({
   PromQLSearchService: jest.fn().mockImplementation(() => ({
     executeMetricRequest: mockExecuteMetricRequest,
+    executeInstantQuery: mockExecuteInstantQuery,
   })),
 }));
 
@@ -18,6 +20,7 @@ jest.mock('../../../query_services/promql_search_service', () => ({
 const mockConfig = {
   prometheusDataSource: {
     id: 'prometheus-ds-123',
+    name: 'prometheus-ds-123', // ConnectionId for PromQL queries
   },
 };
 
@@ -40,6 +43,8 @@ describe('useServicesRedMetrics', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useApmConfig as jest.Mock).mockReturnValue({ config: mockConfig });
+    // Default: instant query returns empty result
+    mockExecuteInstantQuery.mockResolvedValue({ type: 'data_frame', fields: [] });
   });
 
   describe('initial state', () => {
@@ -97,12 +102,16 @@ describe('useServicesRedMetrics', () => {
           ],
         });
 
-      const { result, waitForNextUpdate } = renderHook(() => useServicesRedMetrics(defaultParams));
+      const { result } = renderHook(() => useServicesRedMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       // Should have called executeMetricRequest 3 times (latency, throughput, failure)
+      // and executeInstantQuery 2 times (latency instant + total count)
       expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(3);
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(2);
 
       // Check that all services have entries in the map
       expect(result.current.metricsMap.has('api-gateway')).toBe(true);
@@ -115,9 +124,11 @@ describe('useServicesRedMetrics', () => {
         fields: [],
       });
 
-      const { waitForNextUpdate } = renderHook(() => useServicesRedMetrics(defaultParams));
+      const { result } = renderHook(() => useServicesRedMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       // Check that the query includes the service filter
       const callArgs = mockExecuteMetricRequest.mock.calls[0][0];
@@ -129,10 +140,13 @@ describe('useServicesRedMetrics', () => {
     it('should set error state on fetch failure', async () => {
       const mockError = new Error('Prometheus query failed');
       mockExecuteMetricRequest.mockRejectedValue(mockError);
+      mockExecuteInstantQuery.mockRejectedValue(mockError);
 
-      const { result, waitForNextUpdate } = renderHook(() => useServicesRedMetrics(defaultParams));
+      const { result } = renderHook(() => useServicesRedMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toEqual(mockError);
       expect(result.current.metricsMap.size).toBe(0);
@@ -146,9 +160,11 @@ describe('useServicesRedMetrics', () => {
         fields: [],
       });
 
-      const { result, waitForNextUpdate } = renderHook(() => useServicesRedMetrics(defaultParams));
+      const { result } = renderHook(() => useServicesRedMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const initialCallCount = mockExecuteMetricRequest.mock.calls.length;
 
@@ -156,7 +172,9 @@ describe('useServicesRedMetrics', () => {
         result.current.refetch();
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(mockExecuteMetricRequest.mock.calls.length).toBeGreaterThan(initialCallCount);
     });
@@ -169,9 +187,11 @@ describe('useServicesRedMetrics', () => {
         fields: [],
       });
 
-      const { waitForNextUpdate } = renderHook(() => useServicesRedMetrics(defaultParams));
+      const { result } = renderHook(() => useServicesRedMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const callArgs = mockExecuteMetricRequest.mock.calls[0][0];
       expect(callArgs.startTime).toBe(Math.floor(defaultParams.startTime.getTime() / 1000));
@@ -195,9 +215,11 @@ describe('useServicesRedMetrics', () => {
         },
       });
 
-      const { result, waitForNextUpdate } = renderHook(() => useServicesRedMetrics(defaultParams));
+      const { result } = renderHook(() => useServicesRedMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       const apiGatewayMetrics = result.current.metricsMap.get('api-gateway');
       expect(apiGatewayMetrics).toBeDefined();
@@ -215,9 +237,11 @@ describe('useServicesRedMetrics', () => {
         },
       });
 
-      const { result, waitForNextUpdate } = renderHook(() => useServicesRedMetrics(defaultParams));
+      const { result } = renderHook(() => useServicesRedMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.metricsMap.has('api-gateway')).toBe(true);
     });
@@ -231,9 +255,11 @@ describe('useServicesRedMetrics', () => {
         },
       });
 
-      const { result, waitForNextUpdate } = renderHook(() => useServicesRedMetrics(defaultParams));
+      const { result } = renderHook(() => useServicesRedMetrics(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.metricsMap.has('api-gateway')).toBe(true);
     });

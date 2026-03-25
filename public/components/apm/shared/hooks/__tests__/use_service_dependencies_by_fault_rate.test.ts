@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useServiceDependenciesByFaultRate } from '../use_service_dependencies_by_fault_rate';
 
 // Mock the PromQLSearchService
-const mockExecuteMetricRequest = jest.fn();
+const mockExecuteInstantQuery = jest.fn();
 jest.mock('../../../query_services/promql_search_service', () => ({
   PromQLSearchService: jest.fn().mockImplementation(() => ({
-    executeMetricRequest: mockExecuteMetricRequest,
+    executeInstantQuery: mockExecuteInstantQuery,
   })),
 }));
 
@@ -29,6 +29,7 @@ jest.mock('../../utils/time_utils', () => ({
 const mockConfig = {
   prometheusDataSource: {
     id: 'prometheus-1',
+    name: 'prometheus-1', // ConnectionId for PromQL queries
   },
 };
 
@@ -100,15 +101,15 @@ describe('useServiceDependenciesByFaultRate', () => {
         },
       };
 
-      mockExecuteMetricRequest.mockResolvedValue(mockResponse);
+      mockExecuteInstantQuery.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useServiceDependenciesByFaultRate(defaultParams)
-      );
+      const { result } = renderHook(() => useServiceDependenciesByFaultRate(defaultParams));
 
       expect(result.current.isLoading).toBe(true);
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.isLoading).toBe(false);
       expect(result.current.data).toHaveLength(3);
@@ -132,13 +133,13 @@ describe('useServiceDependenciesByFaultRate', () => {
         },
       };
 
-      mockExecuteMetricRequest.mockResolvedValue(mockResponse);
+      mockExecuteInstantQuery.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useServiceDependenciesByFaultRate(defaultParams)
-      );
+      const { result } = renderHook(() => useServiceDependenciesByFaultRate(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data).toHaveLength(1);
       expect(result.current.data[0].remoteService).toBe('cart');
@@ -159,16 +160,18 @@ describe('useServiceDependenciesByFaultRate', () => {
         },
       };
 
-      mockExecuteMetricRequest.mockResolvedValue(mockResponse);
+      mockExecuteInstantQuery.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useServiceDependenciesByFaultRate({
           ...defaultParams,
           limit: 3,
         })
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data).toHaveLength(3);
     });
@@ -185,16 +188,18 @@ describe('useServiceDependenciesByFaultRate', () => {
         },
       };
 
-      mockExecuteMetricRequest.mockResolvedValue(mockResponse);
+      mockExecuteInstantQuery.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useServiceDependenciesByFaultRate({
           ...defaultParams,
           limit: undefined,
         })
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data).toHaveLength(5);
     });
@@ -217,13 +222,13 @@ describe('useServiceDependenciesByFaultRate', () => {
         },
       };
 
-      mockExecuteMetricRequest.mockResolvedValue(mockResponse);
+      mockExecuteInstantQuery.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useServiceDependenciesByFaultRate(defaultParams)
-      );
+      const { result } = renderHook(() => useServiceDependenciesByFaultRate(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data).toHaveLength(2);
       expect(result.current.data[0].remoteService).toBe('cart');
@@ -242,13 +247,13 @@ describe('useServiceDependenciesByFaultRate', () => {
         },
       };
 
-      mockExecuteMetricRequest.mockResolvedValue(mockResponse);
+      mockExecuteInstantQuery.mockResolvedValue(mockResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useServiceDependenciesByFaultRate(defaultParams)
-      );
+      const { result } = renderHook(() => useServiceDependenciesByFaultRate(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data[0].remoteService).toBe('unknown');
     });
@@ -257,13 +262,13 @@ describe('useServiceDependenciesByFaultRate', () => {
   describe('error handling', () => {
     it('should set error state on fetch failure', async () => {
       const mockError = new Error('PromQL query failed');
-      mockExecuteMetricRequest.mockRejectedValue(mockError);
+      mockExecuteInstantQuery.mockRejectedValue(mockError);
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useServiceDependenciesByFaultRate(defaultParams)
-      );
+      const { result } = renderHook(() => useServiceDependenciesByFaultRate(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toEqual(mockError);
       expect(result.current.data).toEqual([]);
@@ -271,13 +276,13 @@ describe('useServiceDependenciesByFaultRate', () => {
     });
 
     it('should wrap non-Error throws', async () => {
-      mockExecuteMetricRequest.mockRejectedValue('string error');
+      mockExecuteInstantQuery.mockRejectedValue('string error');
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useServiceDependenciesByFaultRate(defaultParams)
-      );
+      const { result } = renderHook(() => useServiceDependenciesByFaultRate(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.error).toBeInstanceOf(Error);
       expect(result.current.error?.message).toBe('Unknown error');
@@ -286,42 +291,46 @@ describe('useServiceDependenciesByFaultRate', () => {
 
   describe('refetch', () => {
     it('should refetch data when refetch is called', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({
+      mockExecuteInstantQuery.mockResolvedValue({
         meta: { instantData: { rows: [] } },
       });
 
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useServiceDependenciesByFaultRate(defaultParams)
-      );
+      const { result } = renderHook(() => useServiceDependenciesByFaultRate(defaultParams));
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
-      expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(1);
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(1);
 
       act(() => {
         result.current.refetch();
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
-      expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(2);
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(2);
     });
   });
 
   describe('parameter changes', () => {
     it('should refetch when serviceName changes', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({
+      mockExecuteInstantQuery.mockResolvedValue({
         meta: { instantData: { rows: [] } },
       });
 
-      const { waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         ({ params }) => useServiceDependenciesByFaultRate(params),
         {
           initialProps: { params: defaultParams },
         }
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       rerender({
         params: {
@@ -330,32 +339,38 @@ describe('useServiceDependenciesByFaultRate', () => {
         },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
-      expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(2);
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(2);
     });
 
     it('should refetch when refreshTrigger changes', async () => {
-      mockExecuteMetricRequest.mockResolvedValue({
+      mockExecuteInstantQuery.mockResolvedValue({
         meta: { instantData: { rows: [] } },
       });
 
-      const { waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         ({ params }) => useServiceDependenciesByFaultRate(params),
         {
           initialProps: { params: { ...defaultParams, refreshTrigger: 0 } },
         }
       );
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       rerender({
         params: { ...defaultParams, refreshTrigger: 1 },
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
-      expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(2);
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(2);
     });
   });
 });

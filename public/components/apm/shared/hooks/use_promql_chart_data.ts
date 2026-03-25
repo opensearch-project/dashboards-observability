@@ -6,6 +6,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
 import { parseTimeRange, getTimeInSeconds } from '../utils/time_utils';
+import { calculateStep, RESOLUTION_MEDIUM } from '../utils/step_utils';
 import {
   TimeRange,
   MetricDataPoint,
@@ -13,14 +14,40 @@ import {
 } from '../../common/types/service_details_types';
 import { CHART_COLORS } from '../../common/constants';
 
+/**
+ * Error code for Prometheus "exceeded maximum resolution" errors.
+ */
+export const RESOLUTION_EXCEEDED_CODE = 'RESOLUTION_EXCEEDED';
+
+/**
+ * Custom error class with a code property for typed error handling.
+ */
+export class PromQLError extends Error {
+  code?: string;
+  constructor(message: string, code?: string) {
+    super(message);
+    this.code = code;
+  }
+}
+
+/**
+ * Type guard to check if an error is a resolution exceeded error.
+ */
+export function isResolutionExceededError(error: Error | null): boolean {
+  return error instanceof PromQLError && error.code === RESOLUTION_EXCEEDED_CODE;
+}
+
 export interface UsePromQLChartDataParams {
   promqlQuery: string;
   timeRange: TimeRange;
   prometheusConnectionId: string;
+  prometheusConnectionMeta?: Record<string, unknown>;
   refreshTrigger?: number;
   enabled?: boolean;
   /** Label field to extract from Prometheus labels (e.g., 'remoteService', 'operation') */
   labelField?: string;
+  /** Number of data points for the chart resolution (default: RESOLUTION_MEDIUM) */
+  resolution?: number;
 }
 
 export interface UsePromQLChartDataResult {
@@ -49,9 +76,11 @@ export const usePromQLChartData = (params: UsePromQLChartDataParams): UsePromQLC
     promqlQuery,
     timeRange,
     prometheusConnectionId,
+    prometheusConnectionMeta,
     refreshTrigger,
     enabled = true,
     labelField,
+    resolution = RESOLUTION_MEDIUM,
   } = params;
 
   const [series, setSeries] = useState<ChartSeriesData[]>([]);
@@ -62,8 +91,8 @@ export const usePromQLChartData = (params: UsePromQLChartDataParams): UsePromQLC
 
   // Create PromQL search service
   const promqlSearchService = useMemo(() => {
-    return new PromQLSearchService(prometheusConnectionId);
-  }, [prometheusConnectionId]);
+    return new PromQLSearchService(prometheusConnectionId, prometheusConnectionMeta);
+  }, [prometheusConnectionId, prometheusConnectionMeta]);
 
   // Parse time range
   const parsedTimeRange = useMemo(() => {
@@ -87,10 +116,13 @@ export const usePromQLChartData = (params: UsePromQLChartDataParams): UsePromQLC
       try {
         const { startTime, endTime } = parsedTimeRange;
 
+        const startSec = getTimeInSeconds(startTime);
+        const endSec = getTimeInSeconds(endTime);
         const response = await promqlSearchService.executeMetricRequest({
           query: promqlQuery,
-          startTime: getTimeInSeconds(startTime),
-          endTime: getTimeInSeconds(endTime),
+          startTime: startSec,
+          endTime: endSec,
+          step: calculateStep(startSec, endSec, resolution),
         });
 
         // Transform response to chart series
@@ -106,7 +138,14 @@ export const usePromQLChartData = (params: UsePromQLChartDataParams): UsePromQLC
         }
       } catch (err) {
         console.error('[usePromQLChartData] Error fetching data:', err);
-        setError(err instanceof Error ? err : new Error('Unknown error'));
+        const message = err instanceof Error ? err.message : String(err);
+        // Detect Prometheus "exceeded maximum resolution" errors
+        if (/exceeded maximum resolution/i.test(message)) {
+          const typedError = new PromQLError(message, RESOLUTION_EXCEEDED_CODE);
+          setError(typedError);
+        } else {
+          setError(err instanceof Error ? err : new Error('Unknown error'));
+        }
         setSeries([]);
         setLatestValue(null);
       } finally {

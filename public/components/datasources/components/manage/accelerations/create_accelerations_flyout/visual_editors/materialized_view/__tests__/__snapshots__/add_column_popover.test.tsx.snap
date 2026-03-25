@@ -1,88 +1,90 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Column popover components in materialized view renders column popover components in materialized view with default options 1`] = `
-<div
-  className="euiPopover euiPopover--anchorDownCenter"
->
-  <div
-    className="euiPopover__anchor"
-  >
-    <button
-      aria-label="add column"
-      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
-      disabled={false}
-      onClick={[Function]}
-      type="button"
+<body>
+  <div>
+    <div
+      class="euiPopover euiPopover--anchorDownCenter"
     >
-      <span
-        className="euiButtonContent euiButtonEmpty__content"
+      <div
+        class="euiPopover__anchor"
       >
-        <svg
-          aria-hidden={true}
-          className="euiIcon euiIcon--small euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
-          focusable="false"
-          height={16}
-          role="img"
-          style={null}
-          viewBox="0 0 16 16"
-          width={16}
-          xmlns="http://www.w3.org/2000/svg"
+        <button
+          aria-label="add column"
+          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+          type="button"
         >
-          <path
-            d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
-          />
-        </svg>
-        <span
-          className="euiButtonEmpty__text"
-        >
-          Add Column
-        </span>
-      </span>
-    </button>
+          <span
+            class="euiButtonContent euiButtonEmpty__content"
+          >
+            <svg
+              aria-hidden="true"
+              class="euiIcon euiIcon--small euiIcon--inherit euiIcon-isLoading euiButtonContent__icon"
+              focusable="false"
+              height="16"
+              role="img"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+              />
+            </svg>
+            <span
+              class="euiButtonEmpty__text"
+            >
+              Add Column
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
   </div>
-</div>
+</body>
 `;
 
 exports[`Column popover components in materialized view renders column popover components in materialized view with different options 1`] = `
-<div
-  className="euiPopover euiPopover--anchorDownCenter"
->
-  <div
-    className="euiPopover__anchor"
-  >
-    <button
-      aria-label="add column"
-      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
-      disabled={false}
-      onClick={[Function]}
-      type="button"
+<body>
+  <div>
+    <div
+      class="euiPopover euiPopover--anchorDownCenter"
     >
-      <span
-        className="euiButtonContent euiButtonEmpty__content"
+      <div
+        class="euiPopover__anchor"
       >
-        <svg
-          aria-hidden={true}
-          className="euiIcon euiIcon--small euiIcon--inherit euiButtonContent__icon"
-          focusable="false"
-          height={16}
-          role="img"
-          style={null}
-          viewBox="0 0 16 16"
-          width={16}
-          xmlns="http://www.w3.org/2000/svg"
+        <button
+          aria-label="add column"
+          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+          type="button"
         >
-          <path
-            d="M8 7h3.5a.5.5 0 1 1 0 1H8v3.5a.5.5 0 1 1-1 0V8H3.5a.5.5 0 0 1 0-1H7V3.5a.5.5 0 0 1 1 0V7Zm-.5-7C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0Zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882Z"
-            fillRule="evenodd"
-          />
-        </svg>
-        <span
-          className="euiButtonEmpty__text"
-        >
-          Add Column
-        </span>
-      </span>
-    </button>
+          <span
+            class="euiButtonContent euiButtonEmpty__content"
+          >
+            <svg
+              aria-hidden="true"
+              class="euiIcon euiIcon--small euiIcon--inherit euiButtonContent__icon"
+              focusable="false"
+              height="16"
+              role="img"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M8 7h3.5a.5.5 0 1 1 0 1H8v3.5a.5.5 0 1 1-1 0V8H3.5a.5.5 0 0 1 0-1H7V3.5a.5.5 0 0 1 1 0V7Zm-.5-7C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0Zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882Z"
+                fill-rule="evenodd"
+              />
+            </svg>
+            <span
+              class="euiButtonEmpty__text"
+            >
+              Add Column
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
   </div>
-</div>
+</body>
 `;

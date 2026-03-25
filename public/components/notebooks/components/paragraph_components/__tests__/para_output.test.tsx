@@ -4,8 +4,6 @@
  */
 
 import { render } from '@testing-library/react';
-import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { legacy_createStore as createStore } from 'redux';
@@ -23,14 +21,13 @@ import PPLService from '../../../../../services/requests/ppl';
 import { ParaOutput } from '../para_output';
 
 describe('<ParaOutput /> spec', () => {
-  configure({ adapter: new Adapter() });
   const store = createStore(rootReducer);
 
   it('renders markdown outputs', () => {
     const para = sampleParsedParagraghs1[0];
     para.isSelected = true;
     const setVisInput = jest.fn();
-    const utils = render(
+    const _utils = render(
       <ParaOutput
         key={para.uniqueId}
         para={para}
@@ -39,14 +36,14 @@ describe('<ParaOutput /> spec', () => {
         DashboardContainerByValueRenderer={jest.fn()}
       />
     );
-    expect(utils.container.firstChild).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('renders query outputs', () => {
     const para = sampleParsedParagraghs1[3];
     para.isSelected = true;
     const setVisInput = jest.fn();
-    const utils = render(
+    const _utils = render(
       <ParaOutput
         key={para.uniqueId}
         para={para}
@@ -55,7 +52,7 @@ describe('<ParaOutput /> spec', () => {
         DashboardContainerByValueRenderer={jest.fn()}
       />
     );
-    expect(utils.container.firstChild).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('renders query outputs with error', () => {
@@ -63,7 +60,7 @@ describe('<ParaOutput /> spec', () => {
     para.out = ['{"error":"Invalid SQL query"}'];
     para.isSelected = true;
     const setVisInput = jest.fn();
-    const utils = render(
+    const _utils = render(
       <ParaOutput
         key={para.uniqueId}
         para={para}
@@ -72,7 +69,7 @@ describe('<ParaOutput /> spec', () => {
         DashboardContainerByValueRenderer={jest.fn()}
       />
     );
-    expect(utils.container.firstChild).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('renders dashboards visualization outputs', () => {
@@ -93,7 +90,7 @@ describe('<ParaOutput /> spec', () => {
       />
     );
     expect(utils.container.textContent).toMatch('2020-Jul-21 18:37:44 - 2020-Aug-20 18:37:44');
-    expect(utils.container.firstChild).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('renders observability visualization outputs', () => {
@@ -117,7 +114,7 @@ describe('<ParaOutput /> spec', () => {
       </Provider>
     );
     expect(utils.container.textContent).toMatch('2020-Jul-21 18:37:44 - 2020-Aug-20 18:37:44');
-    expect(utils.container.firstChild).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 
   it('renders other types of outputs', () => {
@@ -126,7 +123,7 @@ describe('<ParaOutput /> spec', () => {
     para.typeOut = ['HTML', 'TABLE', 'IMG', 'UNKNOWN', undefined];
     para.out = ['', '', '', '', ''];
     const setVisInput = jest.fn();
-    const utils = render(
+    const _utils = render(
       <ParaOutput
         key={para.uniqueId}
         para={para}
@@ -135,6 +132,6 @@ describe('<ParaOutput /> spec', () => {
         DashboardContainerByValueRenderer={jest.fn()}
       />
     );
-    expect(utils.container.firstChild).toMatchSnapshot();
+    expect(document.body).toMatchSnapshot();
   });
 });

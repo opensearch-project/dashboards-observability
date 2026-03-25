@@ -4,20 +4,16 @@
  */
 
 import React from 'react';
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-import { waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { PatternsHeader } from '../patterns_header';
 import { sampleLogPatternData } from '../../../../../../common/constants/explorer';
 
 describe('Patterns header component', () => {
-  configure({ adapter: new Adapter() });
-
   it('Renders header of log patterns', async () => {
     const patternRegexInput = '[a-zA-Zd]';
     const patternsData = { patternTableData: [{ ...sampleLogPatternData }] };
 
-    const wrapper = mount(
+    render(
       <PatternsHeader
         patternsData={patternsData}
         patternRegexInput={patternRegexInput}
@@ -28,10 +24,8 @@ describe('Patterns header component', () => {
       />
     );
 
-    wrapper.update();
-
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 });

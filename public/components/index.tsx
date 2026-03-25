@@ -5,9 +5,10 @@
 
 import { QueryManager } from 'common/query_manager';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
 import { DataSourceManagementPluginSetup } from '../../../../src/plugins/data_source_management/public';
+import { MLCommonsRCFService } from '../services/requests/ml_commons_rcf';
 import { AppPluginStartDependencies } from '../types';
 import { App } from './app';
 
@@ -17,6 +18,7 @@ export const Observability = (
   AppMountParametersProp: AppMountParameters,
   pplService: any,
   dslService: any,
+  mlCommonsRCFService: MLCommonsRCFService,
   savedObjects: any,
   timestampUtils: any,
   queryManager: QueryManager,
@@ -28,12 +30,14 @@ export const Observability = (
 ) => {
   const { setHeaderActionMenu } = AppMountParametersProp;
   const { dataSource } = DepsStart;
-  ReactDOM.render(
+  const root = createRoot(AppMountParametersProp.element);
+  root.render(
     <App
       CoreStartProp={CoreStartProp}
       DepsStart={DepsStart}
       pplService={pplService}
       dslService={dslService}
+      mlCommonsRCFService={mlCommonsRCFService}
       savedObjects={savedObjects}
       timestampUtils={timestampUtils}
       queryManager={queryManager}
@@ -44,9 +48,8 @@ export const Observability = (
       dataSourceEnabled={!!dataSource}
       savedObjectsMDSClient={savedObjectsMDSClient}
       defaultRoute={defaultRoute}
-    />,
-    AppMountParametersProp.element
+    />
   );
 
-  return () => ReactDOM.unmountComponentAtNode(AppMountParametersProp.element);
+  return () => root.unmount();
 };

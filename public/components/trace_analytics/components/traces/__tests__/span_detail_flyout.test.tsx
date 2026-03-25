@@ -4,11 +4,8 @@
  */
 
 import { waitFor } from '@testing-library/react';
-import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render } from '@testing-library/react';
 import React from 'react';
-import ReactDOM from 'react-dom';
-import { act } from 'react-dom/test-utils';
 import { HttpResponse } from '../../../../../../../../src/core/public';
 import { TEST_SPAN_RESPONSE } from '../../../../../../test/constants';
 // eslint-disable-next-line jest/no-mocks-import
@@ -16,15 +13,13 @@ import httpClientMock from '../../../../../../test/__mocks__/httpClientMock';
 import { SpanDetailFlyout, flattenObject } from '../span_detail_flyout';
 
 describe('<SpanDetailFlyout /> spec', () => {
-  configure({ adapter: new Adapter() });
-
   it('renders the empty component', async () => {
     httpClientMock.post = jest.fn(() =>
       Promise.resolve(({ hits: { hits: [], total: { value: 0 } } } as unknown) as HttpResponse)
     );
     const closeFlyout = jest.fn();
     const addSpanFilter = jest.fn();
-    const utils = await mount(
+    render(
       <SpanDetailFlyout
         http={httpClientMock}
         spanId="test"
@@ -34,9 +29,8 @@ describe('<SpanDetailFlyout /> spec', () => {
         mode="data_prepper"
       />
     );
-    utils.update();
     await waitFor(() => {
-      expect(utils).toMatchSnapshot();
+      expect(document.body).toMatchSnapshot();
     });
   });
 
@@ -44,23 +38,23 @@ describe('<SpanDetailFlyout /> spec', () => {
     httpClientMock.post = jest.fn(() =>
       Promise.resolve((TEST_SPAN_RESPONSE as unknown) as HttpResponse)
     );
-    const container = document.createElement('div');
     const closeFlyout = jest.fn();
     const addSpanFilter = jest.fn();
-    await act(() => {
-      ReactDOM.render(
-        <SpanDetailFlyout
-          http={httpClientMock}
-          spanId="test"
-          isFlyoutVisible={true}
-          closeFlyout={closeFlyout}
-          addSpanFilter={addSpanFilter}
-          mode="data_prepper"
-        />,
-        container
-      );
+
+    render(
+      <SpanDetailFlyout
+        http={httpClientMock}
+        spanId="test"
+        isFlyoutVisible={true}
+        closeFlyout={closeFlyout}
+        addSpanFilter={addSpanFilter}
+        mode="data_prepper"
+      />
+    );
+
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
     });
-    expect(container).toMatchSnapshot();
   });
 });
 

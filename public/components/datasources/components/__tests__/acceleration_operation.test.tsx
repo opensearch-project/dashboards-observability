@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useAccelerationOperation } from '../manage/accelerations/acceleration_operation';
 import * as useDirectQueryModule from '../../../../framework/datasources/direct_query_hook';
 import * as useToastModule from '../../../common/toast';

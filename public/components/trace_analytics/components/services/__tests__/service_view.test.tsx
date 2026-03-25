@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { configure, shallow } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { ServiceView } from '..';
 
@@ -27,8 +26,6 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('Service view component', () => {
-  configure({ adapter: new Adapter() });
-
   const { coreStartMock } = jest.requireMock('../../../../../../test/__mocks__/coreMocks');
 
   const defaultProps = {
@@ -50,8 +47,10 @@ describe('Service view component', () => {
     dataSourceMDSId: [{ id: '', label: '' }],
   };
 
-  it('renders service view', () => {
-    const wrapper = shallow(<ServiceView {...defaultProps} />);
-    expect(wrapper).toMatchSnapshot();
+  it('renders service view', async () => {
+    render(<ServiceView {...defaultProps} />);
+    await waitFor(() => {
+      expect(document.body).toMatchSnapshot();
+    });
   });
 });

@@ -54,7 +54,6 @@ const getQueryOutputData = (queryObject: any) => {
 };
 
 const OutputBody = ({
-  key,
   typeOut,
   val,
   para,
@@ -62,7 +61,6 @@ const OutputBody = ({
   setVisInput,
   DashboardContainerByValueRenderer,
 }: {
-  key: string;
   typeOut: string;
   val: string;
   para: ParaType;
@@ -83,18 +81,17 @@ const OutputBody = ({
         const inputQuery = para.inp.substring(4, para.inp.length);
         const queryObject = JSON.parse(val);
         if (queryObject.hasOwnProperty('error')) {
-          return <EuiCodeBlock key={key}>{val}</EuiCodeBlock>;
+          return <EuiCodeBlock>{val}</EuiCodeBlock>;
         } else {
           const columns = createQueryColumns(queryObject.schema);
           const data = getQueryOutputData(queryObject);
           return (
             <div>
-              <EuiText key={'query-input-key'} className="wrapAll" data-test-subj="queryOutputText">
+              <EuiText className="wrapAll" data-test-subj="queryOutputText">
                 <b>{inputQuery}</b>
               </EuiText>
               <EuiSpacer />
               <QueryDataGridMemo
-                key={key}
                 rowCount={queryObject.datarows.length}
                 queryColumns={columns}
                 dataValues={data}
@@ -105,7 +102,6 @@ const OutputBody = ({
       case 'MARKDOWN':
         return (
           <EuiText
-            key={key}
             className="wrapAll markdown-output-text"
             data-test-subj="markdownOutputText"
             size="s"
@@ -123,11 +119,7 @@ const OutputBody = ({
             <EuiText size="s" style={{ marginLeft: 9 }}>
               {`${from} - ${to}`}
             </EuiText>
-            <DashboardContainerByValueRenderer
-              key={key}
-              input={visInput}
-              onInputUpdated={setVisInput}
-            />
+            <DashboardContainerByValueRenderer input={visInput} onInputUpdated={setVisInput} />
           </>
         );
       case 'OBSERVABILITY_VISUALIZATION':
@@ -162,17 +154,17 @@ const OutputBody = ({
         );
       case 'HTML':
         return (
-          <EuiText key={key}>
+          <EuiText>
             {/* eslint-disable-next-line react/jsx-pascal-case */}
             <Media.HTML data={val} />
           </EuiText>
         );
       case 'TABLE':
-        return <pre key={key}>{val}</pre>;
+        return <pre>{val}</pre>;
       case 'IMG':
-        return <img alt="" src={'data:image/gif;base64,' + val} key={key} />;
+        return <img alt="" src={'data:image/gif;base64,' + val} />;
       default:
-        return <pre key={key}>{val}</pre>;
+        return <pre>{val}</pre>;
     }
   } else {
     console.log('output not supported', typeOut);
@@ -205,7 +197,7 @@ export const ParaOutput = (props: {
         {para.typeOut.map((typeOut: string, tIdx: number) => {
           return (
             <OutputBody
-              key={para.uniqueId + '_paraOutputBody'}
+              key={para.uniqueId + '_paraOutputBody_' + tIdx}
               typeOut={typeOut}
               val={para.out[tIdx]}
               para={para}

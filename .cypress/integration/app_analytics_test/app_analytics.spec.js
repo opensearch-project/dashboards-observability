@@ -50,41 +50,97 @@ describe('Creating application', () => {
     cy.get('[data-test-subj="createPageTitle"').should('contain', 'Create application');
     cy.get('[data-test-subj="logSourceAccordion"]').trigger('mouseover').click();
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').click();
-    cy.get('.aa-List').find('.aa-Item').should('have.length', 1);
+
+    // Wait for autocomplete list to appear and load suggestions
+    cy.get('.aa-List', { timeout: 10000 }).should('be.visible');
+    cy.get('.aa-List').find('.aa-Item', { timeout: 10000 }).should('have.length', 1);
     cy.get('.aa-Item').contains('source').should('exist');
+
     cy.focused().type('{enter}');
-    cy.get('.aa-List').find('.aa-Item').should('have.length', 1);
-    cy.get('.aa-Item').contains('=').should('exist');
+
+    // Wait for textarea to update after selection
+    cy.get('[data-test-subj="searchAutocompleteTextArea"]', { timeout: 10000 }).should('contain', 'source ');
+
+    // Wait for autocomplete to update with next suggestion (should reopen automatically after blur/focus)
+    cy.get('.aa-List', { timeout: 10000 }).should('be.visible');
+    cy.get('.aa-List').find('.aa-Item', { timeout: 10000 }).should('have.length', 1);
+    cy.get('.aa-Item', { timeout: 10000 }).contains('=').should('exist');
+
     cy.focused().type('{enter}');
+
+    // Wait for textarea to update after selection
+    cy.get('[data-test-subj="searchAutocompleteTextArea"]', { timeout: 10000 }).should('contain', 'source = ');
+
+    // Type to filter indices
     cy.focused().type('opensearch');
-    cy.get('[data-test-subj="searchAutocompleteTextArea"]').click();
-    cy.get('.aa-Item').contains('opensearch_dashboards_sample_data_flights').click();
-    cy.focused().clear();
-    cy.get('.aa-List').find('.aa-Item').should('have.length', 1);
-    cy.focused().type('{enter}');
-    cy.get('[data-test-subj="searchAutocompleteTextArea"]').should('contain', 'source ');
-    cy.focused().type('{enter}');
-    cy.get('[data-test-subj="searchAutocompleteTextArea"]').should('contain', 'source = ');
-    cy.focused().type('opensearch');
-    cy.get('[data-test-subj="searchAutocompleteTextArea"]').click();
-    cy.get('.aa-Item').contains('opensearch_dashboards_sample_data_flights').click();
-    cy.get('[data-test-subj="searchAutocompleteTextArea"]').should(
+
+    // Wait for autocomplete to show index suggestions
+    cy.get('.aa-Item', { timeout: 10000 }).contains('opensearch_dashboards_sample_data_flights').should('be.visible').click();
+
+    // Wait for selection to complete and verify textarea was updated
+    cy.get('[data-test-subj="searchAutocompleteTextArea"]', { timeout: 10000 }).should(
       'contain',
       'source = opensearch_dashboards_sample_data_flights '
     );
+
+    cy.focused().clear();
+
+    // Wait for autocomplete to reset and show initial suggestion
+    cy.get('.aa-List', { timeout: 10000 }).should('be.visible');
+    cy.get('.aa-List').find('.aa-Item', { timeout: 10000 }).should('have.length', 1);
+
+    cy.focused().type('{enter}');
+
+    // Wait for textarea to update
+    cy.get('[data-test-subj="searchAutocompleteTextArea"]', { timeout: 10000 }).should('contain', 'source ');
+
+    // Wait for autocomplete to reopen with next suggestion
+    cy.get('.aa-List', { timeout: 10000 }).should('be.visible');
+    cy.get('.aa-Item', { timeout: 10000 }).contains('=').should('be.visible');
+
+    cy.focused().type('{enter}');
+
+    // Wait for textarea to update
+    cy.get('[data-test-subj="searchAutocompleteTextArea"]', { timeout: 10000 }).should('contain', 'source = ');
+
+    cy.focused().type('opensearch');
+
+    // Wait for autocomplete to show index suggestions
+    cy.get('.aa-Item', { timeout: 10000 }).contains('opensearch_dashboards_sample_data_flights').should('be.visible').click();
+
+    // Wait for selection to complete and textarea to update
+    cy.get('[data-test-subj="searchAutocompleteTextArea"]', { timeout: 10000 }).should(
+      'contain',
+      'source = opensearch_dashboards_sample_data_flights '
+    );
+
+    // Click to manually trigger autocomplete (in case blur/focus cycle hasn't completed in CI)
+    cy.get('[data-test-subj="searchAutocompleteTextArea"]').click();
+
+    // Wait for autocomplete to open with next suggestions
+    cy.get('.aa-List', { timeout: 10000 }).should('be.visible');
+    cy.get('.aa-Item', { timeout: 10000 }).should('have.length.greaterThan', 0);
+
     cy.focused().type('{downArrow}');
     cy.focused().type('{enter}');
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').should(
       'contain',
       'source = opensearch_dashboards_sample_data_flights, '
     );
+
     cy.focused().type('opensearch');
-    cy.get('[data-test-subj="searchAutocompleteTextArea"]').click();
-    cy.get('.aa-Item').contains('opensearch_dashboards_sample_data_logs').click();
-    cy.get('[data-test-subj="searchAutocompleteTextArea"]').should(
+
+    // Wait for autocomplete to show index suggestions
+    cy.get('.aa-Item', { timeout: 10000 }).contains('opensearch_dashboards_sample_data_logs').should('be.visible').click();
+
+    // Wait for selection to complete
+    cy.get('[data-test-subj="searchAutocompleteTextArea"]', { timeout: 10000 }).should(
       'contain',
       'source = opensearch_dashboards_sample_data_flights,opensearch_dashboards_sample_data_logs '
     );
+
+    // Verify autocomplete is closed after final selection
+    cy.get('.aa-List').should('not.exist');
   });
 
   it('Creates an application and redirects to application', () => {
@@ -369,9 +425,13 @@ describe('Viewing application', () => {
 
   it('Saves visualization #1 to panel', () => {
     cy.get('[data-test-subj="app-analytics-panelTab"]').click();
+
+    // Wait for panel to load
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
     cy.get('[data-test-subj="addVisualizationButton"]').first().click();
     cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
-    cy.get('[id="explorerPlotComponent"]').should('exist');
+    cy.get('[id="explorerPlotComponent"]', { timeout: 30000 }).should('exist');
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').click();
     cy.get('.aa-List').find('.aa-Item').should('have.length', 11);
     cy.get('[data-test-subj="searchAutocompleteTextArea"]').focus();

@@ -15,7 +15,7 @@ import {
 import { I18nProvider } from '@osd/i18n/react';
 import max from 'lodash/max';
 import React, { useEffect, useState } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { useSelector } from 'react-redux';
 import semver from 'semver';
 import { MountPoint } from '../../../../../../src/core/public';
@@ -298,8 +298,9 @@ const MetricsExportPopOver = () => {
   };
 
   const mountableToastElement = (node: React.ReactNode): MountPoint => (element: HTMLElement) => {
-    render(<I18nProvider>{node}</I18nProvider>, element);
-    return () => unmountComponentAtNode(element);
+    const root = createRoot(element);
+    root.render(<I18nProvider>{node}</I18nProvider>);
+    return () => root.unmount();
   };
 
   const appFor = (objectType) => {

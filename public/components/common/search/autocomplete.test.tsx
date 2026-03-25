@@ -4,8 +4,6 @@
  */
 
 import { fireEvent, render } from '@testing-library/react';
-import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
 import DSLService from 'public/services/requests/dsl';
 import React from 'react';
 import { Autocomplete } from './autocomplete';
@@ -16,8 +14,6 @@ import {
   statsCommands,
 } from '../../../../common/constants/autocomplete';
 import { act } from 'react-dom/test-utils';
-
-configure({ adapter: new Adapter() });
 
 describe('renders autocomplete', function () {
   const query = '';
@@ -231,7 +227,7 @@ describe('autocomplete logic', function () {
     expect(suggestion).toStrictEqual(expected);
   });
 
-  it('suggests data after where str_field = ', async () => {
+  it('suggests data after where str_field =', async () => {
     const input = 'source = test_index | where str_field = ';
     const expected = [
       {
@@ -302,7 +298,7 @@ describe('autocomplete logic', function () {
     expect(suggestion).toStrictEqual(expected);
   });
 
-  it('suggests data after where bool_field = ', async () => {
+  it('suggests data after where bool_field =', async () => {
     const input = 'source = test_index | where bool_field = ';
     const expected = [
       {
@@ -665,7 +661,7 @@ describe('autocomplete logic', function () {
     expect(suggestion).toStrictEqual(expected);
   });
 
-  it('suggests fields after fields str_field, ', async () => {
+  it('suggests fields after fields str_field,', async () => {
     const input = 'source = test_index | fields str_field , ';
     const expected = [
       {
