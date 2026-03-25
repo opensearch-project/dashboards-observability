@@ -162,7 +162,6 @@ export interface OperationMetrics {
   p50Duration: number;
   p90Duration: number;
   p99Duration: number;
-  faultRate: number;
   errorRate: number;
   availability: number;
   dependencyCount: number;
@@ -176,7 +175,6 @@ export interface DependencyMetrics {
   p50Duration: number;
   p90Duration: number;
   p99Duration: number;
-  faultRate: number;
   errorRate: number;
   availability: number;
   requestCount: number;

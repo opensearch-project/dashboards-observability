@@ -44,6 +44,20 @@ sum by (service) (
 `.trim();
 
 /**
+ * Services total request count over a time range — grouped by service
+ * Uses sum_over_time to count actual TSDB samples (immune to stale lookback inflation).
+ * @param serviceFilter - Service filter regex (e.g., service=~"svc1|svc2")
+ * @param timeRange - Prometheus duration string (e.g., "15m", "1h")
+ * @page Services Home — avgThroughput calculation
+ */
+export const getQueryServicesThroughputTotal = (serviceFilter: string, timeRange: string): string =>
+  `
+sum by (service) (
+  sum_over_time(request{${serviceFilter},remoteService="",namespace="span_derived"}[${timeRange}])
+)
+`.trim();
+
+/**
  * Services failure ratio over time — (error + fault) / request * 100
  * @param serviceFilter - Service filter regex (e.g., service=~"svc1|svc2")
  * @page Services Home — Failure ratio sparkline column
@@ -74,6 +88,23 @@ histogram_quantile(${percentile},
   )
 ) * 1000
 `.trim();
+
+/**
+ * Service Latency Percentile (Instant) — true percentile over full time range
+ * Uses sum_over_time to aggregate histogram buckets before computing histogram_quantile.
+ * Returns milliseconds.
+ * @page Services Home — Latency column single value
+ */
+export const getQueryServicesLatencyInstant = (
+  serviceFilter: string,
+  percentile: number,
+  timeRange: string
+): string =>
+  `histogram_quantile(${percentile},
+  sum by (service, le) (
+    sum_over_time(latency_seconds_bucket{${serviceFilter},remoteService="",namespace="span_derived"}[${timeRange}])
+  )
+) * 1000`.trim();
 
 /**
  * Top Operations by Volume (Request Count) - for specific service
@@ -409,22 +440,6 @@ label_replace(
 // ============================================================================
 
 /**
- * CONSOLIDATED: Get all operations' fault rates for a service
- * Returns percentage (0-100)
- * @page Service Operations — Operations table fault rate column (via useOperationMetrics hook)
- */
-export const getQueryAllOperationsFaultRate = (
-  environment: string,
-  serviceName: string
-): string => `
-(
-  sum by (operation) (fault{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"})
-  /
-  clamp_min(sum by (operation) (request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}), 1)
-) * 100
-`;
-
-/**
  * CONSOLIDATED: Get all operations' total request counts over time range
  * Uses sum_over_time for true total count
  * @page Service Operations — Operations table request count column (via useOperationMetrics hook)
@@ -607,22 +622,6 @@ label_replace(
 // ============================================================================
 // DEPENDENCY QUERIES (for Dependencies Tab)
 // ============================================================================
-
-/**
- * CONSOLIDATED: Get all dependencies' fault rates for a service
- * Returns percentage (0-100)
- * @page Service Dependencies — Dependencies table fault rate column (via useDependencyMetrics hook)
- */
-export const getQueryAllDependenciesFaultRate = (
-  environment: string,
-  serviceName: string
-): string => `
-(
-  sum by (remoteService, operation, remoteOperation) (fault{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""})
-  /
-  clamp_min(sum by (remoteService, operation, remoteOperation) (request{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""}), 1)
-) * 100
-`;
 
 /**
  * CONSOLIDATED: Get all dependencies' latency percentiles (P50, P90, P99) for a service

@@ -772,9 +772,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         field: 'latency' as any,
         name: (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem
-              grow={false}
-            >{`Avg. Latency (${latencyPercentile.toUpperCase()})`}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{`Latency (${latencyPercentile.toUpperCase()})`}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip content={i18nTexts.tableTooltips.latency}>
                 <EuiIcon type="questionInCircle" size="s" color="subdued" />

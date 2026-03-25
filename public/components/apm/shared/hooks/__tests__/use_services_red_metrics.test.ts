@@ -8,9 +8,11 @@ import { useServicesRedMetrics } from '../use_services_red_metrics';
 
 // Mock the PromQLSearchService
 const mockExecuteMetricRequest = jest.fn();
+const mockExecuteInstantQuery = jest.fn();
 jest.mock('../../../query_services/promql_search_service', () => ({
   PromQLSearchService: jest.fn().mockImplementation(() => ({
     executeMetricRequest: mockExecuteMetricRequest,
+    executeInstantQuery: mockExecuteInstantQuery,
   })),
 }));
 
@@ -41,6 +43,8 @@ describe('useServicesRedMetrics', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useApmConfig as jest.Mock).mockReturnValue({ config: mockConfig });
+    // Default: instant query returns empty result
+    mockExecuteInstantQuery.mockResolvedValue({ type: 'data_frame', fields: [] });
   });
 
   describe('initial state', () => {
@@ -105,7 +109,9 @@ describe('useServicesRedMetrics', () => {
       });
 
       // Should have called executeMetricRequest 3 times (latency, throughput, failure)
+      // and executeInstantQuery 2 times (latency instant + total count)
       expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(3);
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(2);
 
       // Check that all services have entries in the map
       expect(result.current.metricsMap.has('api-gateway')).toBe(true);
@@ -134,6 +140,7 @@ describe('useServicesRedMetrics', () => {
     it('should set error state on fetch failure', async () => {
       const mockError = new Error('Prometheus query failed');
       mockExecuteMetricRequest.mockRejectedValue(mockError);
+      mockExecuteInstantQuery.mockRejectedValue(mockError);
 
       const { result } = renderHook(() => useServicesRedMetrics(defaultParams));
 
