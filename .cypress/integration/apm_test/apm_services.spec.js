@@ -207,6 +207,64 @@ describe('APM Services Page', () => {
       // Set time range
       setAPMTimeRange(startTime, endTime);
 
+      // Debug: Check what Prometheus actually has
+      cy.log('=== DEBUG: Checking Prometheus metrics ===');
+
+      cy.request({
+        method: 'GET',
+        url: `${prometheusConfig.url}/api/v1/query`,
+        qs: { query: 'fault{remoteService=""}' },
+      }).then((resp) => {
+        const count = resp.body.data.result.length;
+        cy.log(`✓ Prometheus has ${count} fault metric series with remoteService=""`);
+
+        if (count > 0) {
+          const sample = resp.body.data.result[0];
+          cy.log('Sample fault metric labels:', JSON.stringify(sample.metric));
+          cy.log('Sample fault value:', JSON.stringify(sample.value));
+
+          // Print to Node console for CI visibility
+          cy.task('log', `Prometheus fault metrics count: ${count}`);
+          cy.task('log', `Sample: ${JSON.stringify(sample)}`);
+        } else {
+          cy.task('log', '⚠️  WARNING: No fault metrics with remoteService="" found in Prometheus!');
+        }
+
+        // Fail fast if no metrics
+        expect(count, 'Should have fault metrics in Prometheus').to.be.greaterThan(0);
+      });
+
+      cy.request({
+        method: 'GET',
+        url: `${prometheusConfig.url}/api/v1/query`,
+        qs: { query: 'request{remoteService=""}' },
+      }).then((resp) => {
+        const count = resp.body.data.result.length;
+        cy.log(`✓ Prometheus has ${count} request metric series with remoteService=""`);
+        cy.task('log', `Prometheus request metrics count: ${count}`);
+        expect(count, 'Should have request metrics in Prometheus').to.be.greaterThan(0);
+      });
+
+      // Debug: Check OSD's Prometheus query API
+      cy.log('=== DEBUG: Testing OSD Prometheus query API ===');
+      cy.request({
+        method: 'GET',
+        url: '/api/directquery/dataconnections/query',
+        qs: {
+          dataSourceMDSId: 'prom_integ_test',
+          query: 'sum(fault{remoteService="",namespace="span_derived"}) by (service)',
+        },
+        failOnStatusCode: false,
+      }).then((resp) => {
+        cy.log(`OSD query status: ${resp.status}`);
+        cy.task('log', `OSD Prometheus query status: ${resp.status}`);
+        cy.task('log', `OSD query response: ${JSON.stringify(resp.body)}`);
+
+        if (resp.status !== 200) {
+          cy.task('log', `⚠️  ERROR: OSD Prometheus query failed with status ${resp.status}`);
+        }
+      });
+
       // Verify page loaded successfully with service data
       // Look for specific services from the test data
       cy.wait(60000);
