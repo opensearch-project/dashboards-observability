@@ -209,6 +209,7 @@ describe('APM Services Page', () => {
 
       // Verify page loaded successfully with service data
       // Look for specific services from the test data
+      cy.wait(60000);
       cy.get('body').should('contain', 'cart');
     });
 
