@@ -32,6 +32,7 @@ jobs:
             notebooks_test,
             panels_test,
             trace_analytics_test,
+            apm_test,
           ]
         include:
           - os: ubuntu-latest
@@ -206,10 +207,78 @@ jobs:
           cd OpenSearch-Dashboards
           node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers=10 --verbose
 
+      - name: Start APM Metrics Server and Prometheus
+        if: matrix.testgroups == 'apm_test'
+        run: |
+          cd OpenSearch-Dashboards/plugins/dashboards-observability
+
+          # Start metrics server in background
+          echo "Starting APM metrics server on port 8080..."
+          node .cypress/utils/metrics_server.js > /tmp/metrics-server.log 2>&1 &
+          METRICS_SERVER_PID=$!
+          echo "Metrics server PID: $METRICS_SERVER_PID"
+
+          # Wait for metrics server to be ready
+          echo "Waiting for metrics server to start..."
+          for i in {1..15}; do
+            if curl -s http://localhost:8080/metrics > /dev/null 2>&1; then
+              echo "Metrics server is ready!"
+              break
+            fi
+            echo "Attempt $i: Metrics server not ready yet..."
+            sleep 1
+          done
+
+          cd ../../..
+
+          # Download and extract Prometheus
+          PROM_VERSION="3.8.1"
+          curl -sL https://github.com/prometheus/prometheus/releases/download/v${PROM_VERSION}/prometheus-${PROM_VERSION}.linux-amd64.tar.gz | tar xzf -
+
+          # Start Prometheus (it will scrape the metrics server)
+          echo "Starting Prometheus..."
+          ./prometheus-${PROM_VERSION}.linux-amd64/prometheus \
+            --config.file=./OpenSearch-Dashboards/plugins/dashboards-observability/.cypress/fixtures/prometheus/prometheus.yml \
+            --storage.tsdb.path=/tmp/prometheus-data \
+            --web.listen-address=:9090 \
+            --web.enable-lifecycle \
+            --web.enable-admin-api &
+
+          # Wait for Prometheus to be ready
+          echo "Waiting for Prometheus to start..."
+          for i in {1..30}; do
+            if curl -s http://localhost:9090/-/healthy > /dev/null 2>&1; then
+              echo "Prometheus is ready!"
+              break
+            fi
+            echo "Attempt $i: Prometheus not ready yet..."
+            sleep 2
+          done
+
+          # Verify Prometheus is scraping metrics
+          echo "Verifying Prometheus has scraped metrics..."
+          sleep 10  # Wait for first scrape
+          METRIC_COUNT=$(curl -s http://localhost:9090/api/v1/query?query=request | jq '.data.result | length')
+          echo "Prometheus has scraped $METRIC_COUNT metric series"
+        shell: bash
+
       - name: Run OpenSearch Dashboards server
         run: |
           cd OpenSearch-Dashboards
-          nohup yarn start --no-base-path --no-watch --home.disableExperienceModal=true | tee dashboard.log &
+          if [ "${{ matrix.testgroups }}" = "apm_test" ]; then
+            # APM tests require workspace, query enhancements, and dataset management features
+            nohup yarn start --no-base-path --no-watch \
+              --home.disableExperienceModal=true \
+              --uiSettings.overrides["query:enhancements:enabled"]=true \
+              --data_source.enabled=true \
+              --workspace.enabled=true \
+              --explore.enabled=true \
+              --explore.discoverTraces.enabled=true \
+              --datasetManagement.enabled=true | tee dashboard.log &
+          else
+            # Other tests use minimal configuration
+            nohup yarn start --no-base-path --no-watch --home.disableExperienceModal=true | tee dashboard.log &
+          fi
 
       - name: Check If OpenSearch Dashboards Is Ready
         if: ${{ runner.os == 'Linux' }}
@@ -240,6 +309,8 @@ jobs:
         run: |
           cd ./OpenSearch-Dashboards/plugins/dashboards-observability
           yarn cypress:run --headless --spec '.cypress/integration/${{ matrix.testgroups }}/*'
+        env:
+          PROMETHEUS_CONNECTION_URL: ${{ matrix.testgroups == 'apm_test' && 'http://localhost:9090' || '' }}
 
       - name: Capture failure screenshots
         uses: actions/upload-artifact@v4
