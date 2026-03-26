@@ -32,6 +32,90 @@ const addCommand = (name, fn) => {
 };
 
 /**
+ * Creates or gets a data source for the local OpenSearch cluster
+ * @param {string} dataSourceName - Name for the data source
+ * @param {string} endpoint - Optional endpoint URL
+ */
+addCommand('createOrGetLocalDataSource', (dataSourceName, endpoint) => {
+  const baseUrl = endpoint || Cypress.config('baseUrl') || '';
+  const opensearchUrl = Cypress.env('opensearch') || 'localhost:9200';
+  const datasourceUrl = `http://${opensearchUrl}`;
+
+  // First, try to find existing data source
+  cy.request({
+    method: 'GET',
+    url: `${baseUrl}/api/saved_objects/_find`,
+    headers: {
+      'osd-xsrf': true,
+    },
+    qs: {
+      per_page: 100,
+      type: 'data-source',
+      search: dataSourceName,
+      search_fields: 'title',
+    },
+  }).then((resp) => {
+    const savedObjects = (resp.body && resp.body.saved_objects) || [];
+    const dataSource = savedObjects.find(
+      (obj) => obj.attributes && obj.attributes.title === dataSourceName
+    );
+
+    if (dataSource) {
+      cy.log(`Found existing data source: ${dataSourceName} (ID: ${dataSource.id})`);
+      cy.wrap(dataSource.id).as('DATASOURCE_ID');
+    } else {
+      // Create the data source using the proper OSD pattern
+      cy.log(`Creating data source: ${dataSourceName}`);
+
+      // Step 1: Fetch data source metadata
+      cy.request({
+        method: 'POST',
+        url: `${baseUrl}/internal/data-source-management/fetchDataSourceMetaData`,
+        headers: {
+          'osd-xsrf': true,
+        },
+        body: {
+          dataSourceAttr: {
+            endpoint: datasourceUrl,
+            auth: {
+              type: 'no_auth',
+            },
+          },
+        },
+      }).then((metadataResp) => {
+        expect(metadataResp.status).to.be.oneOf([200, 201]);
+        const datasourceMetaData = metadataResp.body;
+
+        // Step 2: Create data source with metadata
+        cy.request({
+          method: 'POST',
+          url: `${baseUrl}/api/saved_objects/data-source`,
+          headers: {
+            'osd-xsrf': true,
+          },
+          body: {
+            attributes: {
+              title: dataSourceName,
+              description: '',
+              endpoint: datasourceUrl,
+              auth: {
+                type: 'no_auth',
+              },
+              ...datasourceMetaData,
+            },
+          },
+          failOnStatusCode: false,
+        }).then((createResp) => {
+          expect(createResp.status).to.be.oneOf([200, 201]);
+          cy.log(`Created data source: ${dataSourceName} (ID: ${createResp.body.id})`);
+          cy.wrap(createResp.body.id).as('DATASOURCE_ID');
+        });
+      });
+    }
+  });
+});
+
+/**
  * Gets a data source ID by name
  * @param {string} dataSourceName - Name of the data source
  * @param {string} endpoint - Optional endpoint URL

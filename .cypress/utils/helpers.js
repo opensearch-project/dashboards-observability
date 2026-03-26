@@ -20,7 +20,8 @@ export const createObservabilityWorkspace = (
   workspaceName,
   features = ['use-case-observability']
 ) => {
-  cy.osd.getDataSourceId(datasourceName);
+  // Create or get the data source (handles case where it doesn't exist yet)
+  cy.osd.createOrGetLocalDataSource(datasourceName);
 
   cy.get('@DATASOURCE_ID').then((datasourceId) => {
     cy.osd.createWorkspaceWithDataSourceId(
@@ -50,7 +51,8 @@ export const createObservabilityDataset = (
   datasetId,
   config
 ) => {
-  cy.osd.getDataSourceId(datasourceName);
+  // Create or get the data source (handles case where it doesn't exist yet)
+  cy.osd.createOrGetLocalDataSource(datasourceName);
 
   cy.get('@DATASOURCE_ID').then((datasourceId) => {
     cy.get(`@${workspaceName}:WORKSPACE_ID`).then((workspaceId) => {
@@ -127,12 +129,14 @@ export const getPrometheusConnectionId = (connectionName) => {
  * @param {string} workspaceId - The workspace ID
  * @param {string} workspaceName - The workspace name
  * @param {string} dataConnectionId - The Prometheus connection saved object ID
+ * @param {string} datasourceId - The OpenSearch data source ID to preserve
  * @param {string[]} features - Array of features for the workspace
  */
 export const addPrometheusToWorkspace = (
   workspaceId,
   workspaceName,
   dataConnectionId,
+  datasourceId,
   features = ['use-case-observability']
 ) => {
   return cy
@@ -146,13 +150,20 @@ export const addPrometheusToWorkspace = (
           features: features,
         },
         settings: {
+          dataSources: [datasourceId],
           dataConnections: [dataConnectionId],
+          permissions: {
+            library_write: { users: ['%me%'] },
+            write: { users: ['%me%'] },
+          },
         },
       },
     })
     .then((resp) => {
       if (!resp || !resp.body || !resp.body.success) {
-        throw new Error(`Failed to add Prometheus connection to workspace: ${JSON.stringify(resp)}`);
+        throw new Error(
+          `Failed to add Prometheus connection to workspace: ${JSON.stringify(resp)}`
+        );
       }
       cy.log(`Added Prometheus connection to workspace ${workspaceName}`);
     });
@@ -189,7 +200,9 @@ export const setupAPMTestEnvironment = (config) => {
   // Step 3: Get Prometheus connection ID and add to workspace
   getPrometheusConnectionId(prometheusConnectionName).then((dcId) => {
     cy.get(`@${workspaceName}:WORKSPACE_ID`).then((wsId) => {
-      addPrometheusToWorkspace(wsId, workspaceName, dcId);
+      cy.get('@DATASOURCE_ID').then((dsId) => {
+        addPrometheusToWorkspace(wsId, workspaceName, dcId, dsId);
+      });
     });
   });
 
