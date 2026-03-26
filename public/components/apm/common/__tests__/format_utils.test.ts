@@ -127,11 +127,11 @@ describe('format_utils', () => {
       expect(formatThroughput(-Infinity)).toBe('-');
     });
 
-    it('formats fractional values with 1 decimal place', () => {
-      expect(formatThroughput(0.33)).toBe('0.3 req/s');
-      expect(formatThroughput(0.5)).toBe('0.5 req/s');
-      expect(formatThroughput(0.05)).toBe('0.1 req/s');
-      expect(formatThroughput(0.99)).toBe('1.0 req/s');
+    it('formats fractional values with 3 decimal places', () => {
+      expect(formatThroughput(0.33)).toBe('0.330 req/s');
+      expect(formatThroughput(0.5)).toBe('0.500 req/s');
+      expect(formatThroughput(0.05)).toBe('0.050 req/s');
+      expect(formatThroughput(0.99)).toBe('0.990 req/s');
     });
 
     it('formats small numbers with req/s suffix', () => {

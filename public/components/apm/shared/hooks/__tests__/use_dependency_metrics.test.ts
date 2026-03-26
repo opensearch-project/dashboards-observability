@@ -18,7 +18,6 @@ jest.mock('../../../query_services/promql_search_service', () => ({
 // Mock the promql_queries functions
 jest.mock('../../../query_services/query_requests/promql_queries', () => ({
   getQueryAllDependenciesLatencyPercentiles: jest.fn(() => 'mock_latency_percentiles_query'),
-  getQueryAllDependenciesFaultRate: jest.fn(() => 'mock_fault_rate_query'),
   getQueryAllDependenciesErrorRateAvg: jest.fn(() => 'mock_error_rate_avg_query'),
   getQueryAllDependenciesAvailabilityAvg: jest.fn(() => 'mock_availability_avg_query'),
   getQueryAllDependenciesRequestCountTotal: jest.fn(() => 'mock_request_count_total_query'),
@@ -101,7 +100,7 @@ describe('useDependencyMetrics', () => {
 
   describe('successful fetch', () => {
     it('should fetch and populate metrics for dependencies (data frame format)', async () => {
-      // Mock 5 parallel responses (latency percentiles combined into 1)
+      // Mock 4 parallel responses (latency percentiles combined into 1)
       // Note: PromQL queries now include unit conversions (* 1000 for latency, * 100 for rates)
       // so mock values represent the already-converted values
       mockExecuteInstantQuery
@@ -112,9 +111,6 @@ describe('useDependencyMetrics', () => {
             { remoteService: 'cart', remoteOperation: 'AddItem', Value: '500', percentile: 'p99' },
           ])
         ) // latency percentiles
-        .mockResolvedValueOnce(
-          createMockResponse([{ remoteService: 'cart', remoteOperation: 'AddItem', Value: '5' }])
-        ) // faultRate (percentage)
         .mockResolvedValueOnce(
           createMockResponse([{ remoteService: 'cart', remoteOperation: 'AddItem', Value: '2' }])
         ) // errorRate (percentage)
@@ -134,7 +130,7 @@ describe('useDependencyMetrics', () => {
       });
 
       expect(result.current.isLoading).toBe(false);
-      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(5);
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(4);
 
       // Key is "serviceName:remoteOperation"
       const metrics = result.current.metrics.get('cart:AddItem');
@@ -142,7 +138,6 @@ describe('useDependencyMetrics', () => {
       expect(metrics?.p50Duration).toBe(100); // 100ms (no JS conversion)
       expect(metrics?.p90Duration).toBe(200);
       expect(metrics?.p99Duration).toBe(500);
-      expect(metrics?.faultRate).toBe(5);
       expect(metrics?.errorRate).toBe(2);
       expect(metrics?.availability).toBe(99); // 99% (no JS conversion)
       expect(metrics?.requestCount).toBe(1000);
@@ -198,7 +193,6 @@ describe('useDependencyMetrics', () => {
       expect(metrics?.p50Duration).toBe(0);
       expect(metrics?.p90Duration).toBe(0);
       expect(metrics?.p99Duration).toBe(0);
-      expect(metrics?.faultRate).toBe(0);
       expect(metrics?.errorRate).toBe(0);
       expect(metrics?.availability).toBe(0);
       expect(metrics?.requestCount).toBe(0);

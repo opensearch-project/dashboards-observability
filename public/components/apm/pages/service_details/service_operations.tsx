@@ -182,7 +182,7 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
   expandedRowsRef.current = expandedRows;
   const hasAutoExpandedRef = useRef(false);
 
-  const chartStepWindow = useChartStepWindow(timeRange);
+  const { window: chartStepWindow } = useChartStepWindow(timeRange);
 
   // Filter sidebar state
   // Sidebar state is now managed by EuiResizableContainer

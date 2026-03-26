@@ -9,7 +9,6 @@ import { DependencyMetrics, GroupedDependency } from '../../common/types/service
 import { calculateTimeRangeDuration } from '../utils/time_utils';
 import {
   getQueryAllDependenciesLatencyPercentiles,
-  getQueryAllDependenciesFaultRate,
   getQueryAllDependenciesErrorRateAvg,
   getQueryAllDependenciesAvailabilityAvg,
   getQueryAllDependenciesRequestCountTotal,
@@ -37,7 +36,6 @@ export interface UseDependencyMetricsResult {
  *
  * Fetches metrics for all dependencies in parallel:
  * - Latency percentiles (p50, p90, p99) from Prometheus
- * - Fault rate from Prometheus
  * - Error rate from Prometheus
  * - Availability from Prometheus
  *
@@ -73,11 +71,10 @@ export const useDependencyMetrics = (
         // Calculate time range duration for aggregate queries
         const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
 
-        // Make 5 consolidated queries
+        // Make 4 consolidated queries
         // Each query returns ALL dependencies in a single response
         const [
           latencyPercentilesResponse,
-          faultRateResponse,
           errorRateResponse,
           availabilityResponse,
           requestCountResponse,
@@ -88,10 +85,6 @@ export const useDependencyMetrics = (
               params.serviceName,
               timeRangeDuration
             ),
-            time: Math.floor(params.endTime.getTime() / 1000),
-          }),
-          promqlService.executeInstantQuery({
-            query: getQueryAllDependenciesFaultRate(params.environment, params.serviceName),
             time: Math.floor(params.endTime.getTime() / 1000),
           }),
           promqlService.executeInstantQuery({
@@ -128,7 +121,6 @@ export const useDependencyMetrics = (
             p50Duration: 0,
             p90Duration: 0,
             p99Duration: 0,
-            faultRate: 0,
             errorRate: 0,
             availability: 0,
             requestCount: 0,
@@ -139,7 +131,6 @@ export const useDependencyMetrics = (
         extractPercentilesByDependency(latencyPercentilesResponse, metricsMap);
 
         // Extract other metrics by dependency from each response
-        extractMetricsByDependency(faultRateResponse, metricsMap, 'faultRate');
         extractMetricsByDependency(errorRateResponse, metricsMap, 'errorRate');
         extractMetricsByDependency(availabilityResponse, metricsMap, 'availability');
         extractMetricsByDependency(requestCountResponse, metricsMap, 'requestCount');

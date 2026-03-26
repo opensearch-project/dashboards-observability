@@ -97,7 +97,7 @@ export const ServiceDetailsPanel: React.FC<ServiceDetailsPanelProps> = ({
 
   // Calculate chart step window for sum_over_time aggregation
   // This ensures chart data points represent per-step totals consistent with the Health donut total
-  const chartStepWindow = useChartStepWindow(timeRange);
+  const { window: chartStepWindow } = useChartStepWindow(timeRange);
 
   // PromQL queries for charts - use application-level, group-level, or service-level based on node type
   const requestsQuery = isGroupNode

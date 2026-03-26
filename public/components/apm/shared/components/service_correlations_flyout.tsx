@@ -410,6 +410,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
           const datasetConfig = {
             id: dataset.id,
             title: dataset.title,
+            dataSource: dataset.dataSourceId ? { id: dataset.dataSourceId } : undefined,
           };
 
           // Build PPL query with traceId correlation and fallback
