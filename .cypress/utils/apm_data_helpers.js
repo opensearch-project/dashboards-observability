@@ -171,58 +171,68 @@ export const waitForPrometheusMetrics = (prometheusUrl, maxAttempts = 15, retryD
     ];
 
     const checkMetrics = () => {
-      // Check all metrics in parallel
-      const requests = queries.map((q) =>
-        cy.request({
-          method: 'GET',
-          url: `${prometheusUrl}/api/v1/query`,
-          qs: { query: q.query },
-          failOnStatusCode: false,
-          timeout: 10000,
-        })
-      );
+      attempts++;
 
-      return Cypress.Promise.all(requests).then((responses) => {
-        attempts++;
+      // Check all queries sequentially and collect results
+      const allResults = [];
 
-        // Check if all metrics have data
-        const results = responses.map((resp, idx) => {
-          const hasData =
-            resp.status === 200 &&
-            resp.body &&
-            resp.body.data &&
-            resp.body.data.result &&
-            resp.body.data.result.length > 0;
+      // Recursive function to check queries one by one
+      const checkQuery = (index) => {
+        if (index >= queries.length) {
+          // All queries checked, evaluate results
+          const allMetricsReady = allResults.every((r) => r.hasData);
 
-          const count = hasData ? resp.body.data.result.length : 0;
-          return { name: queries[idx].name, hasData, count };
-        });
+          if (allMetricsReady) {
+            const summary = allResults.map((r) => `${r.name}: ${r.count} series`).join(', ');
+            cy.log(`✓ All Prometheus metrics ready (${summary})`);
+            return cy.wrap(true);
+          } else if (attempts < maxAttempts) {
+            const missing = allResults.filter((r) => !r.hasData).map((r) => r.name);
+            cy.log(
+              `Waiting for Prometheus metrics (attempt ${attempts}/${maxAttempts}). Missing: ${missing.join(', ')}`
+            );
 
-        const allMetricsReady = results.every((r) => r.hasData);
-
-        if (allMetricsReady) {
-          const summary = results.map((r) => `${r.name}: ${r.count} series`).join(', ');
-          cy.log(`✓ All Prometheus metrics ready (${summary})`);
-          return true;
-        } else if (attempts < maxAttempts) {
-          const missing = results.filter((r) => !r.hasData).map((r) => r.name);
-          cy.log(
-            `Waiting for Prometheus metrics (attempt ${attempts}/${maxAttempts}). Missing: ${missing.join(', ')}`
-          );
-
-          // Use promise-based retry instead of cy.wait()
-          return cy.then(() => {
-            return new Cypress.Promise((resolve) => {
-              setTimeout(() => resolve(checkMetrics()), retryDelay);
+            // Use promise-based retry
+            return cy.then(() => {
+              return new Cypress.Promise((resolve) => {
+                setTimeout(() => resolve(checkMetrics()), retryDelay);
+              });
             });
-          });
-        } else {
-          const missing = results.filter((r) => !r.hasData).map((r) => r.name);
-          throw new Error(
-            `Prometheus metrics not ready after ${maxAttempts} attempts. Missing: ${missing.join(', ')}`
-          );
+          } else {
+            const missing = allResults.filter((r) => !r.hasData).map((r) => r.name);
+            throw new Error(
+              `Prometheus metrics not ready after ${maxAttempts} attempts. Missing: ${missing.join(', ')}`
+            );
+          }
         }
-      });
+
+        // Check current query
+        const q = queries[index];
+        return cy
+          .request({
+            method: 'GET',
+            url: `${prometheusUrl}/api/v1/query`,
+            qs: { query: q.query },
+            failOnStatusCode: false,
+            timeout: 10000,
+          })
+          .then((resp) => {
+            const hasData =
+              resp.status === 200 &&
+              resp.body &&
+              resp.body.data &&
+              resp.body.data.result &&
+              resp.body.data.result.length > 0;
+
+            const count = hasData ? resp.body.data.result.length : 0;
+            allResults.push({ name: q.name, hasData, count });
+
+            // Check next query
+            return checkQuery(index + 1);
+          });
+      };
+
+      return checkQuery(0);
     };
 
     return checkMetrics();
