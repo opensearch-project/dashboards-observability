@@ -156,51 +156,95 @@ export const uploadAPMDataToOpenSearch = () => {
 
 /**
  * Wait for Prometheus to have scraped metrics from the metrics server
+ * Verifies that all required metric types (request, fault, error) are available
  * Note: Prometheus must be running and configured to scrape localhost:8080
  */
-export const waitForPrometheusMetrics = (prometheusUrl, maxAttempts = 10, retryDelay = 3000) => {
+export const waitForPrometheusMetrics = (prometheusUrl, maxAttempts = 15, retryDelay = 4000) => {
   cy.wrap(null).then(() => {
     let attempts = 0;
 
+    // Queries to verify all critical metrics are available
+    const queries = [
+      { name: 'request', query: 'request{remoteService=""}' },
+      { name: 'fault', query: 'fault{remoteService=""}' },
+      { name: 'error', query: 'error' },
+    ];
+
     const checkMetrics = () => {
-      return cy
-        .request({
+      // Check all metrics in parallel
+      const requests = queries.map((q) =>
+        cy.request({
           method: 'GET',
           url: `${prometheusUrl}/api/v1/query`,
-          qs: { query: 'request' },
+          qs: { query: q.query },
           failOnStatusCode: false,
           timeout: 10000,
         })
-        .then((resp) => {
-          attempts++;
+      );
 
-          if (
+      return Cypress.Promise.all(requests).then((responses) => {
+        attempts++;
+
+        // Check if all metrics have data
+        const results = responses.map((resp, idx) => {
+          const hasData =
             resp.status === 200 &&
             resp.body &&
             resp.body.data &&
             resp.body.data.result &&
-            resp.body.data.result.length > 0
-          ) {
-            cy.log(`Prometheus has scraped ${resp.body.data.result.length} metric series`);
-            return true;
-          } else if (attempts < maxAttempts) {
-            cy.log(
-              `Waiting for Prometheus to scrape metrics (attempt ${attempts}/${maxAttempts})...`
-            );
-            // Use promise-based retry instead of cy.wait()
-            return cy.then(() => {
-              return new Cypress.Promise((resolve) => {
-                setTimeout(() => resolve(checkMetrics()), retryDelay);
-              });
-            });
-          } else {
-            cy.log('Warning: Prometheus may not have scraped metrics yet, proceeding anyway');
-            return false;
-          }
+            resp.body.data.result.length > 0;
+
+          const count = hasData ? resp.body.data.result.length : 0;
+          return { name: queries[idx].name, hasData, count };
         });
+
+        const allMetricsReady = results.every((r) => r.hasData);
+
+        if (allMetricsReady) {
+          const summary = results.map((r) => `${r.name}: ${r.count} series`).join(', ');
+          cy.log(`✓ All Prometheus metrics ready (${summary})`);
+          return true;
+        } else if (attempts < maxAttempts) {
+          const missing = results.filter((r) => !r.hasData).map((r) => r.name);
+          cy.log(
+            `Waiting for Prometheus metrics (attempt ${attempts}/${maxAttempts}). Missing: ${missing.join(', ')}`
+          );
+
+          // Use promise-based retry instead of cy.wait()
+          return cy.then(() => {
+            return new Cypress.Promise((resolve) => {
+              setTimeout(() => resolve(checkMetrics()), retryDelay);
+            });
+          });
+        } else {
+          const missing = results.filter((r) => !r.hasData).map((r) => r.name);
+          throw new Error(
+            `Prometheus metrics not ready after ${maxAttempts} attempts. Missing: ${missing.join(', ')}`
+          );
+        }
+      });
     };
 
     return checkMetrics();
+  });
+};
+
+/**
+ * Quick check that Prometheus still has metrics before loading page
+ * This is a fast sanity check, not a full wait like waitForPrometheusMetrics
+ */
+export const verifyPrometheusReady = (prometheusUrl) => {
+  return cy.request({
+    method: 'GET',
+    url: `${prometheusUrl}/api/v1/query`,
+    qs: { query: 'fault{remoteService=""}' },
+    timeout: 5000,
+  }).then((resp) => {
+    const count = resp.body && resp.body.data && resp.body.data.result
+      ? resp.body.data.result.length
+      : 0;
+    cy.log(`Prometheus check: ${count} fault metric series available`);
+    expect(count).to.be.greaterThan(0);
   });
 };
 

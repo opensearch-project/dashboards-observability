@@ -6,7 +6,7 @@
 /// <reference types="cypress" />
 
 import { PROMETHEUS_CLUSTER } from '../../utils/constants';
-import { uploadAPMDataToOpenSearch, waitForPrometheusMetrics, getAPMTestTimeRange } from '../../utils/apm_data_helpers';
+import { uploadAPMDataToOpenSearch, waitForPrometheusMetrics, verifyPrometheusReady, getAPMTestTimeRange } from '../../utils/apm_data_helpers';
 import { setupAPMTestEnvironment, cleanupObservabilityWorkspace } from '../../utils/helpers';
 import { getRandomizedWorkspaceName, getRandomizedDatasetId, formatDateForPicker } from '../../utils/shared';
 
@@ -37,29 +37,42 @@ const setAPMTimeRange = (startDate, endDate) => {
   });
 
   // Find and click the date picker button
-  cy.get('[data-test-subj="superDatePickerstartDatePopoverButton"]', opts)
+  cy.getElementsByTestIds(
+    ['superDatePickerstartDatePopoverButton', 'superDatePickerShowDatesButton'],
+    opts
+  )
     .should('be.visible')
-    .click(opts);
+    .invoke('attr', 'data-test-subj')
+    .then((testId) => {
+      cy.getElementByTestId(testId, opts).should('be.visible').click(opts);
+    });
+
+  // Ensure date selection dialog is open
+  cy.whenTestIdNotFound('superDatePickerAbsoluteTab', () => {
+    cy.getElementByTestId('superDatePickerstartDatePopoverButton', opts)
+      .should('be.visible')
+      .click(opts);
+  });
 
   // Set start date
-  cy.get('[data-test-subj="superDatePickerAbsoluteTab"]', opts).first(opts).click(opts);
-  cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]', opts)
+  cy.getElementByTestId('superDatePickerAbsoluteTab', opts).first(opts).click(opts);
+  cy.getElementByTestId('superDatePickerAbsoluteDateInput', opts)
     .first(opts)
     .click(opts)
     .clear(opts)
     .type(startDate, { ...opts, delay: 0 });
 
   // Set end date
-  cy.get('[data-test-subj="superDatePickerendDatePopoverButton"]', opts).last(opts).click(opts);
-  cy.get('[data-test-subj="superDatePickerAbsoluteTab"]', opts).last(opts).click(opts);
-  cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]', opts)
+  cy.getElementByTestId('superDatePickerendDatePopoverButton', opts).last(opts).click(opts);
+  cy.getElementByTestId('superDatePickerAbsoluteTab', opts).last(opts).click(opts);
+  cy.getElementByTestId('superDatePickerAbsoluteDateInput', opts)
     .last(opts)
     .click(opts)
     .clear(opts)
     .type(endDate, { ...opts, delay: 0 });
 
   // Close popup
-  cy.get('[data-test-subj="superDatePickerendDatePopoverButton"]', opts).click(opts);
+  cy.getElementByTestId('superDatePickerendDatePopoverButton', opts).click(opts);
 
   // Click Apply button
   cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').should('be.visible').click();
@@ -131,6 +144,9 @@ describe('APM Services Page', () => {
 
   describe('APM Configuration and Display', () => {
     beforeEach(() => {
+      // Verify Prometheus still has metrics before loading the page
+      verifyPrometheusReady(prometheusConfig.url);
+
       // Navigate to APM Services page in the workspace
       cy.visit(`/w/${workspaceId}/app/observability-apm-services`, {
         onBeforeLoad: (win) => {
