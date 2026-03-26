@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 5s   # Fast scraping for test data
+  evaluation_interval: 5s
+
+# Scrape APM test metrics from the metrics server
+scrape_configs:
+  - job_name: "apm_test_data"
+    static_configs:
+      - targets: ["localhost:8080"]
+    scrape_interval: 5s
+    scrape_timeout: 4s

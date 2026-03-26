@@ -19,6 +19,13 @@ module.exports = defineConfig({
     opensearch: 'localhost:9200',
     opensearchDashboards: 'localhost:5601',
     security_enabled: false,
+    PROMETHEUS: {
+      name: 'prom_integ_test',
+      url: process.env.PROMETHEUS_CONNECTION_URL || 'http://localhost:9090',
+    },
+    DATASOURCE_MANAGEMENT_ENABLED: true,
+    CYPRESS_RUNTIME_ENV: 'osd',
+    dataSourceTitle: 'default',
   },
   'cypress-watch-and-reload': {
     watch: ['common/**', 'public/**', 'server/**'],
