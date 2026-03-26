@@ -31,14 +31,31 @@ function getTimeOffset() {
 }
 
 /**
- * Convert label array to Prometheus label string
+ * Convert label array to Prometheus text format metric line
  * Example: [["__name__", "request"], ["service", "cart"]]
- *       -> '__name__="request",service="cart"'
+ *       -> 'request{service="cart"}'
  */
-function formatLabels(labelPairs) {
-  return labelPairs
+function formatMetricLine(labelPairs, timestamp, value) {
+  // Extract metric name from __name__ label
+  const nameLabel = labelPairs.find(([key]) => key === '__name__');
+  if (!nameLabel) {
+    console.error('Missing __name__ label in metric:', labelPairs);
+    return null;
+  }
+  const metricName = nameLabel[1];
+
+  // Format remaining labels (excluding __name__)
+  const otherLabels = labelPairs
+    .filter(([key]) => key !== '__name__')
     .map(([name, value]) => `${name}="${value}"`)
     .join(',');
+
+  // Build metric line: metric_name{labels} value timestamp
+  if (otherLabels.length > 0) {
+    return `${metricName}{${otherLabels}} ${value} ${timestamp}`;
+  } else {
+    return `${metricName} ${value} ${timestamp}`;
+  }
 }
 
 /**
@@ -66,12 +83,13 @@ function generateMetrics() {
 
       // Each series is [[labels], [[timestamp, value], ...]]
       seriesList.forEach(([labelPairs, samples]) => {
-        const labelStr = formatLabels(labelPairs);
-
         // Add each sample with adjusted timestamp
         samples.forEach(([timestamp, value]) => {
           const adjustedTimestamp = (timestamp + timeOffset) * 1000; // Convert to milliseconds
-          lines.push(`{${labelStr}} ${value} ${adjustedTimestamp}`);
+          const line = formatMetricLine(labelPairs, adjustedTimestamp, value);
+          if (line) {
+            lines.push(line);
+          }
         });
       });
     } catch (error) {

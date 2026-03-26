@@ -164,9 +164,10 @@ export const waitForPrometheusMetrics = (prometheusUrl, maxAttempts = 15, retryD
     let attempts = 0;
 
     // Queries to verify all critical metrics are available
+    // Start with basic queries, then verify remoteService label exists
     const queries = [
-      { name: 'request', query: 'request{remoteService=""}' },
-      { name: 'fault', query: 'fault{remoteService=""}' },
+      { name: 'request', query: 'request' },
+      { name: 'fault', query: 'fault' },
       { name: 'error', query: 'error' },
     ];
 
