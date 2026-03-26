@@ -70,6 +70,9 @@ export const uploadAPMDataToOpenSearch = () => {
       .then(() => {
         // Step 2: Load and apply mapping
         return cy.readFile(`.cypress/utils/${mappingFile}`).then((mapping) => {
+          // Extract the mappings content - the file has {"mappings": {...}} but _mapping endpoint needs just the content
+          const mappingBody = mapping.mappings || mapping;
+
           return cy.request({
             method: 'POST',
             url: 'api/console/proxy',
@@ -81,7 +84,7 @@ export const uploadAPMDataToOpenSearch = () => {
               path: `${index}/_mapping`,
               method: 'POST',
             },
-            body: mapping,
+            body: mappingBody,
           });
         });
       })
