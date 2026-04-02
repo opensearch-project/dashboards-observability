@@ -207,12 +207,49 @@ describe('APM Services Page', () => {
       // Set time range
       setAPMTimeRange(startTime, endTime);
 
+      // Debug: Check Prometheus metrics and actual UI queries
+      cy.log('=== DEBUG: Checking Prometheus metrics and queries ===');
+      cy.task('log', `Test time range: ${startTime} to ${endTime}`);
+
+      // Check fault metrics with remoteService=""
       cy.request({
         method: 'GET',
         url: `${prometheusConfig.url}/api/v1/query`,
-        qs: { query: 'request{remoteService=""}' },
+        qs: { query: 'fault{remoteService=""}' },
       }).then((resp) => {
-        cy.log('Prometheus request metrics:', JSON.stringify(resp.body.data.result.slice(0, 3)));
+        const count = resp.body.data.result.length;
+        cy.task('log', `✓ Prometheus has ${count} fault metrics with remoteService=""`);
+
+        if (count > 0) {
+          const sample = resp.body.data.result[0];
+          cy.task('log', `Sample fault metric: ${JSON.stringify(sample)}`);
+
+          // Check if values are non-zero
+          const nonZeroCount = resp.body.data.result.filter(m => parseFloat(m.value[1]) > 0).length;
+          cy.task('log', `Non-zero fault metrics: ${nonZeroCount} out of ${count}`);
+        } else {
+          cy.task('log', '⚠️  WARNING: No fault metrics with remoteService="" found!');
+        }
+      });
+
+      // Test the actual UI query for fault rate
+      cy.request({
+        method: 'GET',
+        url: `${prometheusConfig.url}/api/v1/query`,
+        qs: {
+          query: '(sum by (service) (error{remoteService="",namespace="span_derived"}) + sum by (service) (fault{remoteService="",namespace="span_derived"})) / clamp_min(sum by (service) (request{remoteService="",namespace="span_derived"}), 1) * 100'
+        },
+        failOnStatusCode: false,
+      }).then((resp) => {
+        cy.task('log', `Fault rate query status: ${resp.status}`);
+        if (resp.status === 200 && resp.body.data) {
+          cy.task('log', `Fault rate query results: ${resp.body.data.result.length} services`);
+          resp.body.data.result.slice(0, 3).forEach(r => {
+            cy.task('log', `  - ${r.metric.service}: ${r.value[1]}% fault rate`);
+          });
+        } else {
+          cy.task('log', `⚠️  Fault rate query failed or returned no data`);
+        }
       });
 
       // Verify page loaded successfully with service data
