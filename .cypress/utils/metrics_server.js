@@ -80,14 +80,16 @@ function generateMetrics() {
 
       // Each series is [[labels], [[timestamp, value], ...]]
       seriesList.forEach(([labelPairs, samples]) => {
-        // Add each sample with adjusted timestamp
-        samples.forEach(([timestamp, value]) => {
+        // Only output the LATEST sample for each series
+        // Prometheus expects one current value per scrape, not historical time series
+        if (samples.length > 0) {
+          const [timestamp, value] = samples[samples.length - 1]; // Get last sample
           const adjustedTimestamp = (timestamp + TIME_OFFSET) * 1000; // Convert to milliseconds
           const line = formatMetricLine(labelPairs, adjustedTimestamp, value);
           if (line) {
             lines.push(line);
           }
-        });
+        }
       });
     } catch (error) {
       console.error(`Error loading ${filename}:`, error.message);
