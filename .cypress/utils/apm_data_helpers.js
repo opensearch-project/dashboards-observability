@@ -28,7 +28,11 @@ const adjustTimestampToNow = (isoString, baseTime, currentTime) => {
  */
 export const uploadAPMDataToOpenSearch = () => {
   const BASE_TIMESTAMP = 1770252300; // Base time from the data (Feb 5, 2026 00:45:00 UTC)
+  const MAX_TIMESTAMP = 1770253200; // Maximum timestamp (15 minutes after base)
   const currentTime = getCurrentUnixTime();
+
+  // Use MAX_TIMESTAMP as reference so latest data appears as "now" (matching metrics_server.js)
+  const baseTime = MAX_TIMESTAMP;
 
   const apmDataSets = [
     {
@@ -98,7 +102,7 @@ export const uploadAPMDataToOpenSearch = () => {
           documents.forEach((doc) => {
             timestampFields.forEach((field) => {
               if (doc[field]) {
-                doc[field] = adjustTimestampToNow(doc[field], BASE_TIMESTAMP, currentTime);
+                doc[field] = adjustTimestampToNow(doc[field], baseTime, currentTime);
               }
             });
           });
@@ -265,12 +269,14 @@ export const verifyPrometheusReady = (prometheusUrl) => {
  */
 export const getAPMTestTimeRange = () => {
   const BASE_TIMESTAMP = 1770252300; // Base time from the data (Feb 5, 2026 00:45:00 UTC)
+  const MAX_TIMESTAMP = 1770253200; // Maximum timestamp (15 minutes after base)
   const currentTime = getCurrentUnixTime();
-  const timeOffset = currentTime - BASE_TIMESTAMP;
+  const timeOffset = currentTime - MAX_TIMESTAMP;
 
   // Data spans approximately 15 minutes, use 24 hour buffer for range queries
-  const startTime = new Date((BASE_TIMESTAMP + timeOffset - 86400) * 1000); // 1 day before
-  const endTime = new Date((BASE_TIMESTAMP + timeOffset + 86400) * 1000); // 1 day after
+  // Center the range around MAX_TIMESTAMP (latest data) so it appears as "now"
+  const startTime = new Date((MAX_TIMESTAMP + timeOffset - 86400) * 1000); // 1 day before
+  const endTime = new Date((MAX_TIMESTAMP + timeOffset + 86400) * 1000); // 1 day after
 
   return {
     start: startTime,

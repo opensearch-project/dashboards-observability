@@ -204,8 +204,47 @@ describe('APM Services Page', () => {
       cy.get('.euiModal').should('not.exist');
       cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
+      // Intercept all network requests to capture what the UI actually calls
+      cy.intercept('**/api/**').as('apiCall');
+      cy.intercept('POST', '**/observability/**').as('observabilityCall');
+      cy.intercept('**/prometheus/**').as('prometheusCall');
+
       // Set time range
       setAPMTimeRange(startTime, endTime);
+
+      // Wait for loading to complete after time range change
+      cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 10000 }).should('not.exist');
+
+      // Capture and log all API calls made by the UI
+      cy.get('@apiCall.all').then((interceptions) => {
+        cy.task('log', `=== UI Made ${interceptions.length} API Calls ===`);
+        interceptions.forEach((interception, index) => {
+          const url = interception.request.url;
+          const method = interception.request.method;
+          const status = interception.response && interception.response.statusCode
+            ? interception.response.statusCode
+            : 'pending';
+
+          // Log all calls but focus on those that might be related to our widgets
+          if (url.includes('prometheus') ||
+              url.includes('query') ||
+              url.includes('observability') ||
+              url.includes('ppl') ||
+              url.includes('dataconnections')) {
+            cy.task('log', `\n[${index + 1}] ${method} ${url}`);
+            cy.task('log', `    Status: ${status}`);
+
+            if (interception.request.body) {
+              cy.task('log', `    Request Body: ${JSON.stringify(interception.request.body).substring(0, 500)}`);
+            }
+
+            if (interception.response && interception.response.body) {
+              const respBody = JSON.stringify(interception.response.body);
+              cy.task('log', `    Response: ${respBody.substring(0, 500)}`);
+            }
+          }
+        });
+      });
 
       // Debug: Check Prometheus metrics and actual UI queries
       cy.log('=== DEBUG: Checking Prometheus metrics and queries ===');
