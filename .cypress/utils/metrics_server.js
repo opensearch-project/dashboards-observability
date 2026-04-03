@@ -23,12 +23,10 @@ const METRICS_DIR = path.join(__dirname, 'apm_data', 'metrics');
 const BASE_TIMESTAMP = 1770252300;
 
 /**
- * Calculate time offset to adjust timestamps to current time
+ * Calculate time offset ONCE when server starts
+ * This ensures consistent timestamps across all scrapes, avoiding out-of-order errors
  */
-function getTimeOffset() {
-  const currentTime = Math.floor(Date.now() / 1000);
-  return currentTime - BASE_TIMESTAMP;
-}
+const TIME_OFFSET = Math.floor(Date.now() / 1000) - BASE_TIMESTAMP;
 
 /**
  * Convert label array to Prometheus text format metric line
@@ -62,7 +60,6 @@ function formatMetricLine(labelPairs, timestamp, value) {
  * Load all metric files and convert to Prometheus text format
  */
 function generateMetrics() {
-  const timeOffset = getTimeOffset();
   const lines = [];
 
   const metricFiles = [
@@ -85,7 +82,7 @@ function generateMetrics() {
       seriesList.forEach(([labelPairs, samples]) => {
         // Add each sample with adjusted timestamp
         samples.forEach(([timestamp, value]) => {
-          const adjustedTimestamp = (timestamp + timeOffset) * 1000; // Convert to milliseconds
+          const adjustedTimestamp = (timestamp + TIME_OFFSET) * 1000; // Convert to milliseconds
           const line = formatMetricLine(labelPairs, adjustedTimestamp, value);
           if (line) {
             lines.push(line);
@@ -130,7 +127,7 @@ server.listen(PORT, () => {
   console.log('='.repeat(60));
   console.log(`Listening on: http://localhost:${PORT}/metrics`);
   console.log(`Metrics directory: ${METRICS_DIR}`);
-  console.log(`Time offset: ${getTimeOffset()} seconds from base timestamp`);
+  console.log(`Time offset: ${TIME_OFFSET} seconds from base timestamp`);
   console.log('');
   console.log('Configure Prometheus to scrape this endpoint:');
   console.log('  scrape_configs:');
