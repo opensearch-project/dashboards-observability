@@ -212,6 +212,21 @@ jobs:
         run: |
           cd OpenSearch-Dashboards/plugins/dashboards-observability
 
+          # Download and extract Prometheus tools
+          echo "Downloading Prometheus..."
+          cd ../../..
+          PROM_VERSION="3.8.1"
+          curl -sL https://github.com/prometheus/prometheus/releases/download/v${PROM_VERSION}/prometheus-${PROM_VERSION}.linux-amd64.tar.gz | tar xzf -
+
+          # Add Prometheus tools to PATH
+          export PATH="$(pwd)/prometheus-${PROM_VERSION}.linux-amd64:$PATH"
+
+          # Verify tools are available
+          prometheus --version
+          promtool --version
+
+          cd OpenSearch-Dashboards/plugins/dashboards-observability
+
           # Start metrics server in background
           echo "Starting APM metrics server on port 8080..."
           node .cypress/utils/metrics_server.js > /tmp/metrics-server.log 2>&1 &
@@ -229,25 +244,35 @@ jobs:
             sleep 1
           done
 
-          cd ../../..
+          # Generate backfill data with current timestamps
+          echo "Generating Prometheus backfill data..."
+          node .cypress/utils/backfill_prometheus.js
 
-          # Download and extract Prometheus
-          PROM_VERSION="3.8.1"
-          curl -sL https://github.com/prometheus/prometheus/releases/download/v${PROM_VERSION}/prometheus-${PROM_VERSION}.linux-amd64.tar.gz | tar xzf -
+          # Create TSDB blocks from backfill data
+          echo "Creating Prometheus TSDB blocks..."
+          promtool tsdb create-blocks-from openmetrics \
+            .cypress/fixtures/prometheus/backfill-data.txt \
+            /tmp/prometheus-apm-data
 
-          # Start Prometheus (it will scrape the metrics server)
-          echo "Starting Prometheus..."
-          ./prometheus-${PROM_VERSION}.linux-amd64/prometheus \
-            --config.file=./OpenSearch-Dashboards/plugins/dashboards-observability/.cypress/fixtures/prometheus/prometheus.yml \
-            --storage.tsdb.path=/tmp/prometheus-data \
+          BLOCK_COUNT=$(ls -1 /tmp/prometheus-apm-data | wc -l)
+          echo "Created $BLOCK_COUNT TSDB blocks with historical data"
+
+          # Start Prometheus with pre-loaded data
+          echo "Starting Prometheus with backfilled data..."
+          prometheus \
+            --config.file=./.cypress/fixtures/prometheus/prometheus.yml \
+            --storage.tsdb.path=/tmp/prometheus-apm-data \
             --web.listen-address=:9090 \
             --web.enable-lifecycle \
-            --web.enable-admin-api &
+            --web.enable-admin-api > /tmp/prometheus.log 2>&1 &
+
+          PROMETHEUS_PID=$!
+          echo "Prometheus PID: $PROMETHEUS_PID"
 
           # Wait for Prometheus to be ready
           echo "Waiting for Prometheus to start..."
           for i in {1..30}; do
-            if curl -s http://localhost:9090/-/healthy > /dev/null 2>&1; then
+            if curl -s http://localhost:9090/-/ready > /dev/null 2>&1; then
               echo "Prometheus is ready!"
               break
             fi
@@ -255,11 +280,20 @@ jobs:
             sleep 2
           done
 
-          # Verify Prometheus is scraping metrics
-          echo "Verifying Prometheus has scraped metrics..."
-          sleep 10  # Wait for first scrape
-          METRIC_COUNT=$(curl -s http://localhost:9090/api/v1/query?query=request | jq '.data.result | length')
-          echo "Prometheus has scraped $METRIC_COUNT metric series"
+          # Verify sum_over_time queries work (this requires historical data)
+          echo "Verifying sum_over_time queries work..."
+          sleep 5
+          QUERY='sum_over_time(fault{remoteService=""}[15m])'
+          RESPONSE=$(curl -s "http://localhost:9090/api/v1/query" --data-urlencode "query=$QUERY")
+          RESULT_COUNT=$(echo "$RESPONSE" | jq '.data.result | length')
+          echo "sum_over_time query returned $RESULT_COUNT results"
+
+          if [ "$RESULT_COUNT" -eq "0" ]; then
+            echo "Warning: sum_over_time returned no results. Waiting for fresh scrapes..."
+            sleep 10
+          else
+            echo "✓ Historical data is queryable"
+          fi
         shell: bash
 
       - name: Run OpenSearch Dashboards server
