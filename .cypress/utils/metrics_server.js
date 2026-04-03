@@ -22,11 +22,16 @@ const METRICS_DIR = path.join(__dirname, 'apm_data', 'metrics');
 // Base timestamp in the sample data (Feb 5, 2026 00:45:00 UTC)
 const BASE_TIMESTAMP = 1770252300;
 
+// Maximum timestamp in the data (approximately 15 minutes after base)
+// We adjust based on this so the latest samples appear as "now"
+const MAX_TIMESTAMP = 1770253200;
+
 /**
  * Calculate time offset ONCE when server starts
  * This ensures consistent timestamps across all scrapes, avoiding out-of-order errors
+ * We adjust based on the MAX timestamp so the latest data appears current
  */
-const TIME_OFFSET = Math.floor(Date.now() / 1000) - BASE_TIMESTAMP;
+const TIME_OFFSET = Math.floor(Date.now() / 1000) - MAX_TIMESTAMP;
 
 /**
  * Convert label array to Prometheus text format metric line
