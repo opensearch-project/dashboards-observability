@@ -268,9 +268,9 @@ export const getAPMTestTimeRange = () => {
   const currentTime = getCurrentUnixTime();
   const timeOffset = currentTime - BASE_TIMESTAMP;
 
-  // Data spans approximately 15 minutes, add buffer
-  const startTime = new Date((BASE_TIMESTAMP + timeOffset - 3600) * 1000); // 1 hour before
-  const endTime = new Date((BASE_TIMESTAMP + timeOffset + 3600) * 1000); // 1 hour after
+  // Data spans approximately 15 minutes, use 24 hour buffer for range queries
+  const startTime = new Date((BASE_TIMESTAMP + timeOffset - 86400) * 1000); // 1 day before
+  const endTime = new Date((BASE_TIMESTAMP + timeOffset + 86400) * 1000); // 1 day after
 
   return {
     start: startTime,
