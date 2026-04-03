@@ -227,12 +227,40 @@ describe('APM Services Page', () => {
           // Check if values are non-zero
           const nonZeroCount = resp.body.data.result.filter(m => parseFloat(m.value[1]) > 0).length;
           cy.task('log', `Non-zero fault metrics: ${nonZeroCount} out of ${count}`);
+
+          // Log specific services with non-zero fault values
+          const nonZeroServices = resp.body.data.result
+            .filter(m => parseFloat(m.value[1]) > 0)
+            .map(m => `${m.metric.service}: ${m.value[1]}`);
+          cy.task('log', `Services with non-zero faults: ${nonZeroServices.join(', ')}`);
+
+          // Check specific key services
+          ['checkout', 'frontend-proxy', 'frontend', 'cart'].forEach(svc => {
+            const svcMetrics = resp.body.data.result.filter(m => m.metric.service === svc);
+            const nonZeroSvc = svcMetrics.filter(m => parseFloat(m.value[1]) > 0).length;
+            cy.task('log', `  ${svc}: ${svcMetrics.length} total metrics, ${nonZeroSvc} with non-zero values`);
+          });
         } else {
           cy.task('log', '⚠️  WARNING: No fault metrics with remoteService="" found!');
         }
       });
 
-      // Test the actual UI query for fault rate
+      // Check request metrics with remoteService=""
+      cy.request({
+        method: 'GET',
+        url: `${prometheusConfig.url}/api/v1/query`,
+        qs: { query: 'request{remoteService=""}' },
+      }).then((resp) => {
+        const count = resp.body.data.result.length;
+        cy.task('log', `✓ Prometheus has ${count} request metrics with remoteService=""`);
+
+        if (count > 0) {
+          const sample = resp.body.data.result[0];
+          cy.task('log', `Sample request value: ${sample.value[1]}`);
+        }
+      });
+
+      // Test the actual UI query for fault rate (instant query)
       cy.request({
         method: 'GET',
         url: `${prometheusConfig.url}/api/v1/query`,
@@ -241,14 +269,56 @@ describe('APM Services Page', () => {
         },
         failOnStatusCode: false,
       }).then((resp) => {
-        cy.task('log', `Fault rate query status: ${resp.status}`);
+        cy.task('log', `Fault rate query (instant) status: ${resp.status}`);
         if (resp.status === 200 && resp.body.data) {
           cy.task('log', `Fault rate query results: ${resp.body.data.result.length} services`);
-          resp.body.data.result.slice(0, 3).forEach(r => {
+          resp.body.data.result.forEach(r => {
             cy.task('log', `  - ${r.metric.service}: ${r.value[1]}% fault rate`);
           });
         } else {
           cy.task('log', `⚠️  Fault rate query failed or returned no data`);
+        }
+      });
+
+      // Test the UI's actual query with sum_over_time (24h lookback)
+      cy.request({
+        method: 'GET',
+        url: `${prometheusConfig.url}/api/v1/query`,
+        qs: {
+          query: 'topk(5, (sum by (environment, service) (sum_over_time(fault{remoteService="",namespace="span_derived"}[24h])) / clamp_min(sum by (environment, service) (sum_over_time(request{remoteService="",namespace="span_derived"}[24h])), 1)) * 100)'
+        },
+        failOnStatusCode: false,
+      }).then((resp) => {
+        cy.task('log', `=== UI Query with sum_over_time[24h] ===`);
+        cy.task('log', `Status: ${resp.status}`);
+        if (resp.status === 200 && resp.body.data) {
+          cy.task('log', `Results: ${resp.body.data.result.length} services`);
+          resp.body.data.result.forEach(r => {
+            cy.task('log', `  - ${r.metric.service} (${r.metric.environment}): ${r.value[1]}% fault rate`);
+          });
+
+          if (resp.body.data.result.length === 0) {
+            cy.task('log', '⚠️  WARNING: sum_over_time query returned ZERO results!');
+
+            // Debug: Check raw sum_over_time values
+            cy.request({
+              method: 'GET',
+              url: `${prometheusConfig.url}/api/v1/query`,
+              qs: { query: 'sum_over_time(fault{remoteService="",namespace="span_derived",service="checkout"}[24h])' }
+            }).then((debugResp) => {
+              cy.task('log', `Debug - checkout fault sum_over_time[24h]: ${JSON.stringify(debugResp.body.data.result)}`);
+            });
+
+            cy.request({
+              method: 'GET',
+              url: `${prometheusConfig.url}/api/v1/query`,
+              qs: { query: 'sum_over_time(request{remoteService="",namespace="span_derived",service="checkout"}[24h])' }
+            }).then((debugResp) => {
+              cy.task('log', `Debug - checkout request sum_over_time[24h]: ${JSON.stringify(debugResp.body.data.result)}`);
+            });
+          }
+        } else {
+          cy.task('log', `⚠️  sum_over_time query failed: ${JSON.stringify(resp.body)}`);
         }
       });
 
