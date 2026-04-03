@@ -204,10 +204,9 @@ describe('APM Services Page', () => {
       cy.get('.euiModal').should('not.exist');
       cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
-      // Intercept all network requests to capture what the UI actually calls
-      cy.intercept('**/api/**').as('apiCall');
-      cy.intercept('POST', '**/observability/**').as('observabilityCall');
-      cy.intercept('**/prometheus/**').as('prometheusCall');
+      // Intercept the PromQL endpoint specifically (this is what fault rate widgets use)
+      cy.intercept('POST', '**/api/enhancements/search/promql').as('promqlCall');
+      cy.intercept('POST', '**/api/enhancements/search/ppl').as('pplCall');
 
       // Set time range
       setAPMTimeRange(startTime, endTime);
@@ -215,35 +214,35 @@ describe('APM Services Page', () => {
       // Wait for loading to complete after time range change
       cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 10000 }).should('not.exist');
 
-      // Capture and log all API calls made by the UI
-      cy.get('@apiCall.all').then((interceptions) => {
-        cy.task('log', `=== UI Made ${interceptions.length} API Calls ===`);
-        interceptions.forEach((interception, index) => {
-          const url = interception.request.url;
-          const method = interception.request.method;
-          const status = interception.response && interception.response.statusCode
-            ? interception.response.statusCode
-            : 'pending';
+      // Capture and log PromQL calls (fault rate widgets)
+      cy.get('@promqlCall.all').then((interceptions) => {
+        cy.task('log', `\n=== PromQL API Calls (Fault Rate Widgets) ===`);
+        cy.task('log', `Total PromQL calls: ${interceptions.length}`);
 
-          // Log all calls but focus on those that might be related to our widgets
-          if (url.includes('prometheus') ||
-              url.includes('query') ||
-              url.includes('observability') ||
-              url.includes('ppl') ||
-              url.includes('dataconnections')) {
-            cy.task('log', `\n[${index + 1}] ${method} ${url}`);
-            cy.task('log', `    Status: ${status}`);
+        if (interceptions.length === 0) {
+          cy.task('log', '⚠️  WARNING: UI made ZERO calls to /api/enhancements/search/promql');
+          cy.task('log', '⚠️  This means the fault rate widgets never attempted to load data!');
+        } else {
+          interceptions.forEach((interception, index) => {
+            cy.task('log', `\n[PromQL ${index + 1}] ${interception.request.method} ${interception.request.url}`);
+            cy.task('log', `    Status: ${interception.response ? interception.response.statusCode : 'pending'}`);
 
             if (interception.request.body) {
-              cy.task('log', `    Request Body: ${JSON.stringify(interception.request.body).substring(0, 500)}`);
+              cy.task('log', `    Request Body: ${JSON.stringify(interception.request.body, null, 2)}`);
             }
 
             if (interception.response && interception.response.body) {
               const respBody = JSON.stringify(interception.response.body);
-              cy.task('log', `    Response: ${respBody.substring(0, 500)}`);
+              cy.task('log', `    Response (first 1000 chars): ${respBody.substring(0, 1000)}`);
             }
-          }
-        });
+          });
+        }
+      });
+
+      // Also log PPL calls for comparison
+      cy.get('@pplCall.all').then((interceptions) => {
+        cy.task('log', `\n=== PPL API Calls (Service Map) ===`);
+        cy.task('log', `Total PPL calls: ${interceptions.length}`);
       });
 
       // Debug: Check Prometheus metrics and actual UI queries
