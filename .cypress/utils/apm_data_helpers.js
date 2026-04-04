@@ -40,11 +40,11 @@ export const uploadAPMDataToOpenSearch = () => {
     const offsetFilePath = './.cypress/fixtures/prometheus/backfill-time-offset.json';
     const offsetData = JSON.parse(fs.readFileSync(offsetFilePath, 'utf-8'));
     currentTime = offsetData.backfillTime;
-    cy.log(`Using backfill time: ${currentTime} (offset: ${offsetData.timeOffset})`);
+    console.log(`[APM Data] Using backfill time: ${currentTime} (offset: ${offsetData.timeOffset})`);
   } catch (error) {
     // No backfill file, use current time
     currentTime = getCurrentUnixTime();
-    cy.log('No backfill offset file, using current time for OpenSearch data');
+    console.log('[APM Data] No backfill offset file, using current time for OpenSearch data');
   }
 
   const apmDataSets = [
@@ -349,7 +349,7 @@ export const getAPMTestTimeRange = () => {
     const startTime = new Date((dataEndTime - 86400) * 1000); // 1 day before data end
     const endTime = new Date((dataEndTime + 86400) * 1000); // 1 day after data end
 
-    cy.log(`Using backfill timestamps: ${startTime.toISOString()} to ${endTime.toISOString()}`);
+    console.log(`[Time Range] Using backfill timestamps: ${startTime.toISOString()} to ${endTime.toISOString()}`);
 
     return {
       start: startTime,
@@ -357,7 +357,7 @@ export const getAPMTestTimeRange = () => {
     };
   } catch (error) {
     // Backfill file doesn't exist, fall back to dynamic calculation (local development)
-    cy.log('No backfill offset file found, using dynamic time calculation');
+    console.log('[Time Range] No backfill offset file found, using dynamic time calculation');
 
     const BASE_TIMESTAMP = 1770252300; // Base time from the data (Feb 5, 2026 00:45:00 UTC)
     const MAX_TIMESTAMP = 1770253200; // Maximum timestamp (15 minutes after base)
