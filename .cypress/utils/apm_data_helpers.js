@@ -285,10 +285,25 @@ export const waitForPrometheusMetrics = (prometheusUrl, useBackfill = true) => {
 };
 
 /**
- * Quick check that Prometheus still has metrics before loading page
- * This is a fast sanity check, not a full wait like waitForPrometheusMetrics
+ * Quick check that Prometheus is ready
+ * For backfill mode: Just checks Prometheus health (instant metrics may not exist yet)
+ * For non-backfill: Verifies instant metrics exist
  */
-export const verifyPrometheusReady = (prometheusUrl) => {
+export const verifyPrometheusReady = (prometheusUrl, useBackfill = true) => {
+  if (useBackfill) {
+    // With backfill, just verify Prometheus is healthy
+    // Don't require instant metrics since we're using pre-loaded TSDB data
+    return cy.request({
+      method: 'GET',
+      url: `${prometheusUrl}/-/ready`,
+      timeout: 5000,
+    }).then((resp) => {
+      expect(resp.status).to.equal(200);
+      cy.log('✓ Prometheus is healthy (backfill mode)');
+    });
+  }
+
+  // Non-backfill mode: verify instant metrics exist
   return cy.request({
     method: 'GET',
     url: `${prometheusUrl}/api/v1/query`,

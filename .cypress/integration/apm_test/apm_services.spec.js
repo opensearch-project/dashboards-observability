@@ -144,8 +144,8 @@ describe('APM Services Page', () => {
 
   describe('APM Configuration and Display', () => {
     beforeEach(() => {
-      // Verify Prometheus still has metrics before loading the page
-      verifyPrometheusReady(prometheusConfig.url);
+      // Verify Prometheus is healthy before loading the page (backfill mode)
+      verifyPrometheusReady(prometheusConfig.url, true); // true = use backfill mode
 
       // Navigate to APM Services page in the workspace
       cy.visit(`/w/${workspaceId}/app/observability-apm-services`, {
