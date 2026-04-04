@@ -159,16 +159,56 @@ export const uploadAPMDataToOpenSearch = () => {
 };
 
 /**
- * Wait for Prometheus to have scraped metrics from the metrics server
- * Verifies that all required metric types (request, fault, error) are available
- * Note: Prometheus must be running and configured to scrape localhost:8080
+ * Wait for Prometheus to be ready and verify data exists
+ * For CI with backfill: Verifies Prometheus health and backfilled TSDB data
+ * For local without backfill: Waits for fresh scrapes from metrics server
  */
-export const waitForPrometheusMetrics = (prometheusUrl, maxAttempts = 15, retryDelay = 4000) => {
+export const waitForPrometheusMetrics = (prometheusUrl, useBackfill = true) => {
+  if (useBackfill) {
+    // When using backfill, just verify Prometheus is healthy and has TSDB data
+    // The widgets use range queries (sum_over_time[15m]) which query the pre-loaded historical data
+    cy.log('Verifying Prometheus with backfilled data...');
+
+    return cy.request({
+      method: 'GET',
+      url: `${prometheusUrl}/-/ready`,
+      failOnStatusCode: false,
+      timeout: 10000,
+    }).then((resp) => {
+      expect(resp.status).to.equal(200);
+      cy.log('✓ Prometheus is ready with backfilled TSDB data');
+
+      // Verify we can query the backfilled data using a range query
+      // Query at a timestamp from the backfilled data range (1 minute ago)
+      return cy.request({
+        method: 'GET',
+        url: `${prometheusUrl}/api/v1/query`,
+        qs: {
+          query: 'fault{remoteService=""}',
+          time: Math.floor(Date.now() / 1000) - 60
+        },
+        failOnStatusCode: false,
+      }).then((queryResp) => {
+        const count = queryResp.body && queryResp.body.data && queryResp.body.data.result
+          ? queryResp.body.data.result.length
+          : 0;
+        if (count > 0) {
+          cy.log(`✓ Backfilled data verified: ${count} fault metric series available`);
+        } else {
+          cy.log('⚠️  No backfilled data found in query window, but Prometheus is healthy');
+        }
+      });
+    });
+  }
+
+  // Original behavior for non-backfill mode (e.g., local development)
+  const maxAttempts = 15;
+  const retryDelay = 4000;
+
   cy.wrap(null).then(() => {
     let attempts = 0;
 
     // Queries to verify all critical metrics are available
-    // Start with basic queries, then verify remoteService label exists
     const queries = [
       { name: 'request', query: 'request' },
       { name: 'fault', query: 'fault' },

@@ -97,9 +97,9 @@ describe('APM Services Page', () => {
     // Upload raw data to OpenSearch indices
     uploadAPMDataToOpenSearch();
 
-    // Wait for Prometheus to scrape metrics
-    cy.log(`Waiting for Prometheus at ${prometheusConfig.url} to scrape metrics`);
-    waitForPrometheusMetrics(prometheusConfig.url);
+    // Wait for Prometheus to be ready (using backfilled TSDB data in CI)
+    cy.log(`Verifying Prometheus at ${prometheusConfig.url} is ready`);
+    waitForPrometheusMetrics(prometheusConfig.url, true); // true = use backfill mode
 
     // Setup APM test environment with workspace, datasets, and Prometheus
     setupAPMTestEnvironment({
