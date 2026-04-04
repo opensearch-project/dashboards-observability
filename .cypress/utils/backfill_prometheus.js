@@ -200,6 +200,20 @@ async function backfillMetrics() {
   fs.writeFileSync(openMetricsFile, openMetricsLines.join('\n'));
   console.log(`✓ Wrote OpenMetrics format data to: ${openMetricsFile}`);
   console.log(`  (${openMetricsLines.length} lines)`);
+
+  // Save the time offset so tests can use the exact same timestamps
+  const offsetFile = path.join(fixturesDir, 'backfill-time-offset.json');
+  const offsetData = {
+    timeOffset: TIME_OFFSET,
+    baseTimestamp: BASE_TIMESTAMP,
+    maxTimestamp: MAX_TIMESTAMP,
+    backfillTime: Math.floor(Date.now() / 1000),
+    dataStartTime: BASE_TIMESTAMP + TIME_OFFSET,
+    dataEndTime: MAX_TIMESTAMP + TIME_OFFSET,
+  };
+  fs.writeFileSync(offsetFile, JSON.stringify(offsetData, null, 2));
+  console.log(`✓ Saved time offset data to: ${offsetFile}`);
+
   console.log('');
   console.log('To import this into Prometheus:');
   console.log(`  promtool tsdb create-blocks-from openmetrics ${openMetricsFile} /tmp/prometheus-test-data`);

@@ -25,14 +25,27 @@ const adjustTimestampToNow = (isoString, baseTime, currentTime) => {
 
 /**
  * Upload APM data to OpenSearch indices
+ * Uses the same time offset as backfill if available
  */
 export const uploadAPMDataToOpenSearch = () => {
   const BASE_TIMESTAMP = 1770252300; // Base time from the data (Feb 5, 2026 00:45:00 UTC)
   const MAX_TIMESTAMP = 1770253200; // Maximum timestamp (15 minutes after base)
-  const currentTime = getCurrentUnixTime();
 
-  // Use MAX_TIMESTAMP as reference so latest data appears as "now" (matching metrics_server.js)
-  const baseTime = MAX_TIMESTAMP;
+  let currentTime;
+  let baseTime = MAX_TIMESTAMP;
+
+  // Try to use the same time offset as backfill
+  try {
+    const fs = require('fs');
+    const offsetFilePath = './.cypress/fixtures/prometheus/backfill-time-offset.json';
+    const offsetData = JSON.parse(fs.readFileSync(offsetFilePath, 'utf-8'));
+    currentTime = offsetData.backfillTime;
+    cy.log(`Using backfill time: ${currentTime} (offset: ${offsetData.timeOffset})`);
+  } catch (error) {
+    // No backfill file, use current time
+    currentTime = getCurrentUnixTime();
+    cy.log('No backfill offset file, using current time for OpenSearch data');
+  }
 
   const apmDataSets = [
     {
@@ -320,21 +333,44 @@ export const verifyPrometheusReady = (prometheusUrl, useBackfill = true) => {
 
 /**
  * Get the adjusted time range for tests
- * Returns start and end times adjusted to current time
+ * When backfill data exists, uses the exact timestamps from backfill
+ * Otherwise falls back to calculating based on current time
  */
 export const getAPMTestTimeRange = () => {
-  const BASE_TIMESTAMP = 1770252300; // Base time from the data (Feb 5, 2026 00:45:00 UTC)
-  const MAX_TIMESTAMP = 1770253200; // Maximum timestamp (15 minutes after base)
-  const currentTime = getCurrentUnixTime();
-  const timeOffset = currentTime - MAX_TIMESTAMP;
+  // Try to read the backfill offset file (created during CI backfill process)
+  const offsetFilePath = './.cypress/fixtures/prometheus/backfill-time-offset.json';
 
-  // Data spans approximately 15 minutes, use 24 hour buffer for range queries
-  // Center the range around MAX_TIMESTAMP (latest data) so it appears as "now"
-  const startTime = new Date((MAX_TIMESTAMP + timeOffset - 86400) * 1000); // 1 day before
-  const endTime = new Date((MAX_TIMESTAMP + timeOffset + 86400) * 1000); // 1 day after
+  try {
+    const fs = require('fs');
+    const offsetData = JSON.parse(fs.readFileSync(offsetFilePath, 'utf-8'));
 
-  return {
-    start: startTime,
-    end: endTime,
-  };
+    // Use the exact timestamps from when backfill ran
+    const dataEndTime = offsetData.dataEndTime; // This is MAX_TIMESTAMP + timeOffset from backfill
+    const startTime = new Date((dataEndTime - 86400) * 1000); // 1 day before data end
+    const endTime = new Date((dataEndTime + 86400) * 1000); // 1 day after data end
+
+    cy.log(`Using backfill timestamps: ${startTime.toISOString()} to ${endTime.toISOString()}`);
+
+    return {
+      start: startTime,
+      end: endTime,
+    };
+  } catch (error) {
+    // Backfill file doesn't exist, fall back to dynamic calculation (local development)
+    cy.log('No backfill offset file found, using dynamic time calculation');
+
+    const BASE_TIMESTAMP = 1770252300; // Base time from the data (Feb 5, 2026 00:45:00 UTC)
+    const MAX_TIMESTAMP = 1770253200; // Maximum timestamp (15 minutes after base)
+    const currentTime = getCurrentUnixTime();
+    const timeOffset = currentTime - MAX_TIMESTAMP;
+
+    // Data spans approximately 15 minutes, use 24 hour buffer for range queries
+    const startTime = new Date((MAX_TIMESTAMP + timeOffset - 86400) * 1000); // 1 day before
+    const endTime = new Date((MAX_TIMESTAMP + timeOffset + 86400) * 1000); // 1 day after
+
+    return {
+      start: startTime,
+      end: endTime,
+    };
+  }
 };
