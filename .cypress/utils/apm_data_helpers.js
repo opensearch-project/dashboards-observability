@@ -25,27 +25,15 @@ const adjustTimestampToNow = (isoString, baseTime, currentTime) => {
 
 /**
  * Upload APM data to OpenSearch indices
- * Uses the same time offset as backfill if available
+ * Uses current time for timestamp adjustments
  */
 export const uploadAPMDataToOpenSearch = () => {
   const BASE_TIMESTAMP = 1770252300; // Base time from the data (Feb 5, 2026 00:45:00 UTC)
   const MAX_TIMESTAMP = 1770253200; // Maximum timestamp (15 minutes after base)
   const baseTime = MAX_TIMESTAMP;
+  const currentTime = getCurrentUnixTime();
 
-  // Try to read backfill offset file to use same time offset
-  // Path is relative to Cypress working directory (OSD root in CI)
-  return cy.readFile('plugins/dashboards-observability/.cypress/fixtures/prometheus/backfill-time-offset.json', { log: false }).then(
-    (offsetData) => {
-      // Use backfill time
-      const currentTime = offsetData.backfillTime;
-      return uploadDataWithTime(currentTime, baseTime);
-    },
-    (error) => {
-      // No backfill file, use current time
-      const currentTime = getCurrentUnixTime();
-      return uploadDataWithTime(currentTime, baseTime);
-    }
-  );
+  return uploadDataWithTime(currentTime, baseTime);
 };
 
 /**
@@ -179,48 +167,10 @@ const uploadDataWithTime = (currentTime, baseTime) => {
 
 /**
  * Wait for Prometheus to be ready and verify data exists
- * For CI with backfill: Verifies Prometheus health and backfilled TSDB data
- * For local without backfill: Waits for fresh scrapes from metrics server
+ * Waits for fresh scrapes from metrics server
  */
-export const waitForPrometheusMetrics = (prometheusUrl, useBackfill = true) => {
-  if (useBackfill) {
-    // When using backfill, just verify Prometheus is healthy and has TSDB data
-    // The widgets use range queries (sum_over_time[15m]) which query the pre-loaded historical data
-    cy.log('Verifying Prometheus with backfilled data...');
-
-    return cy.request({
-      method: 'GET',
-      url: `${prometheusUrl}/-/ready`,
-      failOnStatusCode: false,
-      timeout: 10000,
-    }).then((resp) => {
-      expect(resp.status).to.equal(200);
-      cy.log('✓ Prometheus is ready with backfilled TSDB data');
-
-      // Verify we can query the backfilled data using a range query
-      // Query at a timestamp from the backfilled data range (1 minute ago)
-      return cy.request({
-        method: 'GET',
-        url: `${prometheusUrl}/api/v1/query`,
-        qs: {
-          query: 'fault{remoteService=""}',
-          time: Math.floor(Date.now() / 1000) - 60
-        },
-        failOnStatusCode: false,
-      }).then((queryResp) => {
-        const count = queryResp.body && queryResp.body.data && queryResp.body.data.result
-          ? queryResp.body.data.result.length
-          : 0;
-        if (count > 0) {
-          cy.log(`✓ Backfilled data verified: ${count} fault metric series available`);
-        } else {
-          cy.log('⚠️  No backfilled data found in query window, but Prometheus is healthy');
-        }
-      });
-    });
-  }
-
-  // Original behavior for non-backfill mode (e.g., local development)
+export const waitForPrometheusMetrics = (prometheusUrl) => {
+  // Wait for Prometheus to accumulate metric scrapes from the metrics server
   const maxAttempts = 15;
   const retryDelay = 4000;
 
@@ -304,25 +254,10 @@ export const waitForPrometheusMetrics = (prometheusUrl, useBackfill = true) => {
 };
 
 /**
- * Quick check that Prometheus is ready
- * For backfill mode: Just checks Prometheus health (instant metrics may not exist yet)
- * For non-backfill: Verifies instant metrics exist
+ * Quick check that Prometheus is ready and has metrics
  */
-export const verifyPrometheusReady = (prometheusUrl, useBackfill = true) => {
-  if (useBackfill) {
-    // With backfill, just verify Prometheus is healthy
-    // Don't require instant metrics since we're using pre-loaded TSDB data
-    return cy.request({
-      method: 'GET',
-      url: `${prometheusUrl}/-/ready`,
-      timeout: 5000,
-    }).then((resp) => {
-      expect(resp.status).to.equal(200);
-      cy.log('✓ Prometheus is healthy (backfill mode)');
-    });
-  }
-
-  // Non-backfill mode: verify instant metrics exist
+export const verifyPrometheusReady = (prometheusUrl) => {
+  // Verify Prometheus has metrics available
   return cy.request({
     method: 'GET',
     url: `${prometheusUrl}/api/v1/query`,
@@ -339,39 +274,21 @@ export const verifyPrometheusReady = (prometheusUrl, useBackfill = true) => {
 
 /**
  * Get the adjusted time range for tests
- * When backfill data exists, uses the exact timestamps from backfill
- * Otherwise falls back to calculating based on current time
+ * Uses current time with a 2-minute window for querying recent scrapes
+ * (Prometheus scrapes every 10 seconds, after 2 min wait we have ~12 scrapes)
  * Returns a Cypress command that resolves to {start, end}
  */
 export const getAPMTestTimeRange = () => {
-  const BASE_TIMESTAMP = 1770252300; // Base time from the data (Feb 5, 2026 00:45:00 UTC)
-  const MAX_TIMESTAMP = 1770253200; // Maximum timestamp (15 minutes after base)
+  // Return current time with 2-minute window
+  // This ensures queries hit the recently scraped data
+  return cy.wrap(null).then(() => {
+    const now = new Date();
+    const startTime = new Date(now.getTime() - (2 * 60 * 1000)); // 2 minutes ago
+    const endTime = new Date(now.getTime() + (30 * 1000)); // 30 seconds in future
 
-  // Try to read backfill offset file using Cypress
-  // Path is relative to Cypress working directory (OSD root in CI)
-  return cy.readFile('plugins/dashboards-observability/.cypress/fixtures/prometheus/backfill-time-offset.json').then(
-    (offsetData) => {
-      // Successfully read backfill offset file
-      const dataEndTime = offsetData.dataEndTime; // This is MAX_TIMESTAMP + timeOffset from backfill
-      const startTime = new Date((dataEndTime - 86400) * 1000); // 1 day before data end
-      const endTime = new Date((dataEndTime + 86400) * 1000); // 1 day after data end
-
-      return {
-        start: startTime,
-        end: endTime,
-      };
-    },
-    (error) => {
-      // File doesn't exist, fall back to dynamic calculation (local development)
-      const currentTime = getCurrentUnixTime();
-      const timeOffset = currentTime - MAX_TIMESTAMP;
-      const startTime = new Date((MAX_TIMESTAMP + timeOffset - 86400) * 1000); // 1 day before
-      const endTime = new Date((MAX_TIMESTAMP + timeOffset + 86400) * 1000); // 1 day after
-
-      return {
-        start: startTime,
-        end: endTime,
-      };
-    }
-  );
+    return {
+      start: startTime,
+      end: endTime,
+    };
+  });
 };

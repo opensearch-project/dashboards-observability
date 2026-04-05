@@ -212,18 +212,17 @@ jobs:
         run: |
           cd OpenSearch-Dashboards/plugins/dashboards-observability
 
-          # Download and extract Prometheus tools
+          # Download and extract Prometheus
           echo "Downloading Prometheus..."
           cd ../../..
           PROM_VERSION="3.8.1"
           curl -sL https://github.com/prometheus/prometheus/releases/download/v${PROM_VERSION}/prometheus-${PROM_VERSION}.linux-amd64.tar.gz | tar xzf -
 
-          # Add Prometheus tools to PATH
+          # Add Prometheus to PATH
           export PATH="$(pwd)/prometheus-${PROM_VERSION}.linux-amd64:$PATH"
 
-          # Verify tools are available
+          # Verify Prometheus is available
           prometheus --version
-          promtool --version
 
           cd OpenSearch-Dashboards/plugins/dashboards-observability
 
@@ -244,21 +243,8 @@ jobs:
             sleep 1
           done
 
-          # Generate backfill data with current timestamps
-          echo "Generating Prometheus backfill data..."
-          node .cypress/utils/backfill_prometheus.js
-
-          # Create TSDB blocks from backfill data
-          echo "Creating Prometheus TSDB blocks..."
-          promtool tsdb create-blocks-from openmetrics \
-            .cypress/fixtures/prometheus/backfill-data.txt \
-            /tmp/prometheus-apm-data
-
-          BLOCK_COUNT=$(ls -1 /tmp/prometheus-apm-data | wc -l)
-          echo "Created $BLOCK_COUNT TSDB blocks with historical data"
-
-          # Start Prometheus with pre-loaded data
-          echo "Starting Prometheus with backfilled data..."
+          # Start Prometheus (will scrape metrics server every 10 seconds)
+          echo "Starting Prometheus..."
           prometheus \
             --config.file=./.cypress/fixtures/prometheus/prometheus.yml \
             --storage.tsdb.path=/tmp/prometheus-apm-data \
@@ -280,19 +266,22 @@ jobs:
             sleep 2
           done
 
-          # Verify sum_over_time queries work (this requires historical data)
-          echo "Verifying sum_over_time queries work..."
-          sleep 5
-          QUERY='sum_over_time(fault{remoteService=""}[15m])'
+          # Wait 2 minutes for Prometheus to accumulate scrapes
+          # This allows sum_over_time[2m] queries to work
+          echo "Waiting 2 minutes for Prometheus to accumulate metric scrapes..."
+          sleep 120
+
+          # Verify metrics are available
+          echo "Verifying metrics are available..."
+          QUERY='fault{remoteService=""}'
           RESPONSE=$(curl -s "http://localhost:9090/api/v1/query" --data-urlencode "query=$QUERY")
           RESULT_COUNT=$(echo "$RESPONSE" | jq '.data.result | length')
-          echo "sum_over_time query returned $RESULT_COUNT results"
+          echo "Instant query returned $RESULT_COUNT fault metric series"
 
           if [ "$RESULT_COUNT" -eq "0" ]; then
-            echo "Warning: sum_over_time returned no results. Waiting for fresh scrapes..."
-            sleep 10
+            echo "⚠️  Warning: No fault metrics found after waiting"
           else
-            echo "✓ Historical data is queryable"
+            echo "✓ Metrics are available for testing"
           fi
         shell: bash
 

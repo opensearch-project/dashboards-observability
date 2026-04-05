@@ -96,7 +96,7 @@ describe('APM Services Page', () => {
     // Chain all async operations with return to ensure proper sequencing
     return getAPMTestTimeRange()
       .then((timeRange) => {
-        // Calculate time range (must be done inside before() hook to access backfill offset file)
+        // Calculate time range for current time window
         startTime = formatDateForPicker(timeRange.start);
         endTime = formatDateForPicker(timeRange.end);
       })
@@ -105,8 +105,8 @@ describe('APM Services Page', () => {
         return uploadAPMDataToOpenSearch();
       })
       .then(() => {
-        // Wait for Prometheus to be ready (using backfilled TSDB data in CI)
-        return waitForPrometheusMetrics(prometheusConfig.url, true); // true = use backfill mode
+        // Wait for Prometheus to be ready with scraped metrics
+        return waitForPrometheusMetrics(prometheusConfig.url);
       })
       .then(() => {
         // Setup APM test environment with workspace, datasets, and Prometheus
@@ -153,8 +153,8 @@ describe('APM Services Page', () => {
 
   describe('APM Configuration and Display', () => {
     beforeEach(() => {
-      // Verify Prometheus is healthy before loading the page (backfill mode)
-      verifyPrometheusReady(prometheusConfig.url, true); // true = use backfill mode
+      // Verify Prometheus is healthy before loading the page
+      verifyPrometheusReady(prometheusConfig.url);
 
       // Navigate to APM Services page in the workspace
       cy.visit(`/w/${workspaceId}/app/observability-apm-services`, {
