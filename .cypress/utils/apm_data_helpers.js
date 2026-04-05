@@ -38,13 +38,11 @@ export const uploadAPMDataToOpenSearch = () => {
     (offsetData) => {
       // Use backfill time
       const currentTime = offsetData.backfillTime;
-      cy.task('log', `[APM Data] Using backfill time: ${currentTime} (offset: ${offsetData.timeOffset})`);
       return uploadDataWithTime(currentTime, baseTime);
     },
     (error) => {
       // No backfill file, use current time
       const currentTime = getCurrentUnixTime();
-      cy.task('log', '[APM Data] No backfill offset file, using current time for OpenSearch data');
       return uploadDataWithTime(currentTime, baseTime);
     }
   );
@@ -351,39 +349,29 @@ export const getAPMTestTimeRange = () => {
 
   // Try to read backfill offset file using Cypress
   // Path is relative to Cypress working directory (OSD root in CI)
-  return cy.task('log', '[Time Range] Attempting to read backfill offset file')
-    .then(() => {
-      return cy.readFile('plugins/dashboards-observability/.cypress/fixtures/prometheus/backfill-time-offset.json').then(
-        (offsetData) => {
-          // Successfully read backfill offset file
-          cy.task('log', `[Time Range] Found backfill offset file, using backfill timestamps`);
+  return cy.readFile('plugins/dashboards-observability/.cypress/fixtures/prometheus/backfill-time-offset.json').then(
+    (offsetData) => {
+      // Successfully read backfill offset file
+      const dataEndTime = offsetData.dataEndTime; // This is MAX_TIMESTAMP + timeOffset from backfill
+      const startTime = new Date((dataEndTime - 86400) * 1000); // 1 day before data end
+      const endTime = new Date((dataEndTime + 86400) * 1000); // 1 day after data end
 
-          const dataEndTime = offsetData.dataEndTime; // This is MAX_TIMESTAMP + timeOffset from backfill
-          const startTime = new Date((dataEndTime - 86400) * 1000); // 1 day before data end
-          const endTime = new Date((dataEndTime + 86400) * 1000); // 1 day after data end
+      return {
+        start: startTime,
+        end: endTime,
+      };
+    },
+    (error) => {
+      // File doesn't exist, fall back to dynamic calculation (local development)
+      const currentTime = getCurrentUnixTime();
+      const timeOffset = currentTime - MAX_TIMESTAMP;
+      const startTime = new Date((MAX_TIMESTAMP + timeOffset - 86400) * 1000); // 1 day before
+      const endTime = new Date((MAX_TIMESTAMP + timeOffset + 86400) * 1000); // 1 day after
 
-          cy.task('log', `[Time Range] Backfill data range: ${new Date(offsetData.dataStartTime * 1000).toISOString()} to ${new Date(offsetData.dataEndTime * 1000).toISOString()}`);
-          cy.task('log', `[Time Range] Test query range: ${startTime.toISOString()} to ${endTime.toISOString()}`);
-
-          return {
-            start: startTime,
-            end: endTime,
-          };
-        },
-        (error) => {
-          // File doesn't exist, fall back to dynamic calculation (local development)
-          cy.task('log', '[Time Range] No backfill offset file found, using dynamic time calculation');
-
-          const currentTime = getCurrentUnixTime();
-          const timeOffset = currentTime - MAX_TIMESTAMP;
-          const startTime = new Date((MAX_TIMESTAMP + timeOffset - 86400) * 1000); // 1 day before
-          const endTime = new Date((MAX_TIMESTAMP + timeOffset + 86400) * 1000); // 1 day after
-
-          return {
-            start: startTime,
-            end: endTime,
-          };
-        }
-      );
-    });
+      return {
+        start: startTime,
+        end: endTime,
+      };
+    }
+  );
 };

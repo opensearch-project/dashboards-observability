@@ -93,54 +93,58 @@ describe('APM Services Page', () => {
       );
     }
 
-    // Calculate time range (must be done inside before() hook to access backfill offset file)
-    const timeRange = getAPMTestTimeRange();
-    startTime = formatDateForPicker(timeRange.start);
-    endTime = formatDateForPicker(timeRange.end);
-    cy.log(`Test time range: ${timeRange.start.toISOString()} to ${timeRange.end.toISOString()}`);
-
-    // Upload raw data to OpenSearch indices
-    uploadAPMDataToOpenSearch();
-
-    // Wait for Prometheus to be ready (using backfilled TSDB data in CI)
-    cy.log(`Verifying Prometheus at ${prometheusConfig.url} is ready`);
-    waitForPrometheusMetrics(prometheusConfig.url, true); // true = use backfill mode
-
-    // Setup APM test environment with workspace, datasets, and Prometheus
-    setupAPMTestEnvironment({
-      datasourceName: APM_RESOURCES.DATASOURCE_NAME,
-      workspaceName: workspaceName,
-      prometheusConnectionName: APM_RESOURCES.DATA_CONNECTION_NAME,
-      prometheusUrl: prometheusConfig.url,
-      datasets: {
-        trace: {
-          id: traceDatasetId,
-          config: {
-            title: APM_RESOURCES.TRACE_INDEX_PATTERN,
-            signalType: 'traces',
-            timestamp: APM_RESOURCES.TRACE_TIME_FIELD,
+    // Chain all async operations with return to ensure proper sequencing
+    return getAPMTestTimeRange()
+      .then((timeRange) => {
+        // Calculate time range (must be done inside before() hook to access backfill offset file)
+        startTime = formatDateForPicker(timeRange.start);
+        endTime = formatDateForPicker(timeRange.end);
+      })
+      .then(() => {
+        // Upload raw data to OpenSearch indices
+        return uploadAPMDataToOpenSearch();
+      })
+      .then(() => {
+        // Wait for Prometheus to be ready (using backfilled TSDB data in CI)
+        return waitForPrometheusMetrics(prometheusConfig.url, true); // true = use backfill mode
+      })
+      .then(() => {
+        // Setup APM test environment with workspace, datasets, and Prometheus
+        return setupAPMTestEnvironment({
+          datasourceName: APM_RESOURCES.DATASOURCE_NAME,
+          workspaceName: workspaceName,
+          prometheusConnectionName: APM_RESOURCES.DATA_CONNECTION_NAME,
+          prometheusUrl: prometheusConfig.url,
+          datasets: {
+            trace: {
+              id: traceDatasetId,
+              config: {
+                title: APM_RESOURCES.TRACE_INDEX_PATTERN,
+                signalType: 'traces',
+                timestamp: APM_RESOURCES.TRACE_TIME_FIELD,
+              },
+            },
+            service: {
+              id: serviceDatasetId,
+              config: {
+                title: APM_RESOURCES.SERVICE_INDEX_PATTERN,
+                signalType: 'logs',
+                timestamp: APM_RESOURCES.SERVICE_TIME_FIELD,
+              },
+            },
+            log: {
+              id: logDatasetId,
+              config: {
+                title: APM_RESOURCES.LOG_INDEX_PATTERN,
+                signalType: 'logs',
+                timestamp: APM_RESOURCES.LOG_TIME_FIELD,
+              },
+            },
           },
-        },
-        service: {
-          id: serviceDatasetId,
-          config: {
-            title: APM_RESOURCES.SERVICE_INDEX_PATTERN,
-            signalType: 'logs',
-            timestamp: APM_RESOURCES.SERVICE_TIME_FIELD,
-          },
-        },
-        log: {
-          id: logDatasetId,
-          config: {
-            title: APM_RESOURCES.LOG_INDEX_PATTERN,
-            signalType: 'logs',
-            timestamp: APM_RESOURCES.LOG_TIME_FIELD,
-          },
-        },
-      },
-    }).then((wsId) => {
-      workspaceId = wsId;
-    });
+        }).then((wsId) => {
+          workspaceId = wsId;
+        });
+      });
   });
 
   after(() => {
