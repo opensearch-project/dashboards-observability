@@ -81,11 +81,10 @@ const setAPMTimeRange = (startDate, endDate) => {
 
 describe('APM Services Page', () => {
   const prometheusConfig = PROMETHEUS_CLUSTER;
-  const timeRange = getAPMTestTimeRange();
-  const startTime = formatDateForPicker(timeRange.start);
-  const endTime = formatDateForPicker(timeRange.end);
 
   let workspaceId;
+  let startTime;
+  let endTime;
 
   before(() => {
     if (!prometheusConfig.url) {
@@ -93,6 +92,12 @@ describe('APM Services Page', () => {
         'APM tests require Prometheus. Set PROMETHEUS_CONNECTION_URL environment variable.'
       );
     }
+
+    // Calculate time range (must be done inside before() hook to access backfill offset file)
+    const timeRange = getAPMTestTimeRange();
+    startTime = formatDateForPicker(timeRange.start);
+    endTime = formatDateForPicker(timeRange.end);
+    cy.log(`Test time range: ${timeRange.start.toISOString()} to ${timeRange.end.toISOString()}`);
 
     // Upload raw data to OpenSearch indices
     uploadAPMDataToOpenSearch();
