@@ -266,10 +266,10 @@ jobs:
             sleep 2
           done
 
-          # Wait 2 minutes for Prometheus to accumulate scrapes
-          # This allows sum_over_time[2m] queries to work
-          echo "Waiting 2 minutes for Prometheus to accumulate metric scrapes..."
-          sleep 120
+          # Wait 3 minutes for Prometheus to accumulate scrapes
+          # This ensures sum_over_time queries have enough data in the lookback window
+          echo "Waiting 3 minutes for Prometheus to accumulate metric scrapes..."
+          sleep 180
 
           # Verify metrics are available
           echo "Verifying metrics are available..."

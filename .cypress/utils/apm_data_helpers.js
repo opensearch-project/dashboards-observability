@@ -280,11 +280,12 @@ export const verifyPrometheusReady = (prometheusUrl) => {
  */
 export const getAPMTestTimeRange = () => {
   // Return current time with 2-minute window
-  // This ensures queries hit the recently scraped data
+  // End time needs significant future buffer because instant queries execute
+  // at the end of the range, and there's delay between setting picker and queries running
   return cy.wrap(null).then(() => {
     const now = new Date();
-    const startTime = new Date(now.getTime() - (2 * 60 * 1000)); // 2 minutes ago
-    const endTime = new Date(now.getTime() + (30 * 1000)); // 30 seconds in future
+    const startTime = new Date(now.getTime() - (3 * 60 * 1000)); // 3 minutes ago
+    const endTime = new Date(now.getTime() + (2 * 60 * 1000)); // 2 minutes in future
 
     return {
       start: startTime,
