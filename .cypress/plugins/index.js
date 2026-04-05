@@ -17,7 +17,6 @@
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
 
-
 /**
  * @type {Cypress.PluginConfig}
  */
@@ -25,6 +24,14 @@ module.exports = (on, config) => {
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
   require('cypress-watch-and-reload/plugins')(config)
+
+  // Register custom task for logging to Node console (visible in CI)
+  on('task', {
+    log(message) {
+      console.log(message);
+      return null;
+    }
+  });
 
   return config
 }

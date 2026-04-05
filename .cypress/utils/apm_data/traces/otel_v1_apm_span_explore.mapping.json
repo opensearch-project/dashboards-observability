@@ -1,0 +1,58 @@
+{
+  "mappings": {
+    "properties": {
+      "traceId": { "type": "keyword" },
+      "spanId": { "type": "keyword" },
+      "parentSpanId": { "type": "keyword" },
+      "droppedLinksCount": { "type": "integer" },
+      "instrumentationScope": {
+        "properties": {
+          "name": { "type": "keyword" },
+          "droppedAttributesCount": { "type": "integer" },
+          "version": { "type": "keyword" }
+        }
+      },
+      "resource": {
+        "properties": {
+          "attributes": {
+            "properties": {
+              "telemetry.sdk.language": { "type": "keyword" },
+              "service.version": { "type": "keyword" },
+              "service.name": { "type": "keyword" },
+              "telemetry.sdk.version": { "type": "keyword" },
+              "host.name": { "type": "keyword" },
+              "os.type": { "type": "keyword" },
+              "service.namespace": { "type": "keyword" },
+              "telemetry.sdk.name": { "type": "keyword" },
+              "container.id": { "type": "keyword" },
+              "service.instance.id": { "type": "keyword" }
+            }
+          },
+          "droppedAttributesCount": { "type": "integer" },
+          "schemaUrl": { "type": "keyword" }
+        }
+      },
+      "kind": { "type": "keyword" },
+      "droppedEventsCount": { "type": "integer" },
+      "flags": { "type": "integer" },
+      "schemaUrl": { "type": "keyword" },
+      "traceState": { "type": "keyword" },
+      "name": { "type": "text", "fields": { "keyword": { "type": "keyword" } } },
+      "startTime": { "type": "date" },
+      "endTime": { "type": "date" },
+      "durationInNanos": { "type": "long" },
+      "attributes": { "type": "object", "enabled": true },
+      "events": { "type": "nested" },
+      "links": { "type": "nested" },
+      "status": {
+        "properties": {
+          "message": { "type": "text" },
+          "code": { "type": "integer" }
+        }
+      },
+      "serviceName": { "type": "keyword" },
+      "traceGroup": { "type": "keyword" },
+      "droppedAttributesCount": { "type": "integer" }
+    }
+  }
+}

@@ -7,6 +7,9 @@
 export const BACKEND_BASE_PATH = Cypress.env('opensearch');
 export const FONTEND_BASE_PATH = Cypress.env('opensearchDashboards');
 
+// Prometheus constants
+export const PROMETHEUS_CLUSTER = Cypress.env('PROMETHEUS') || {};
+
 //Datasources API Constants
 export const DATASOURCES_API_PREFIX = '/app/datasources';
 export const DATASOURCES_PATH = {
