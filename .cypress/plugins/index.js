@@ -25,13 +25,5 @@ module.exports = (on, config) => {
   // `config` is the resolved Cypress config
   require('cypress-watch-and-reload/plugins')(config)
 
-  // Register custom task for logging to Node console (visible in CI)
-  on('task', {
-    log(message) {
-      console.log(message);
-      return null;
-    }
-  });
-
   return config
 }

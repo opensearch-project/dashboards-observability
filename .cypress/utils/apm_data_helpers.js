@@ -274,18 +274,14 @@ export const verifyPrometheusReady = (prometheusUrl) => {
 
 /**
  * Get the adjusted time range for tests
- * Uses current time with a 2-minute window for querying recent scrapes
- * (Prometheus scrapes every 10 seconds, after 2 min wait we have ~12 scrapes)
+ * Uses current time with a 1-day window before and after
  * Returns a Cypress command that resolves to {start, end}
  */
 export const getAPMTestTimeRange = () => {
-  // Return current time with 2-minute window
-  // End time needs significant future buffer because instant queries execute
-  // at the end of the range, and there's delay between setting picker and queries running
   return cy.wrap(null).then(() => {
     const now = new Date();
-    const startTime = new Date(now.getTime() - (3 * 60 * 1000)); // 3 minutes ago
-    const endTime = new Date(now.getTime() + (2 * 60 * 1000)); // 2 minutes in future
+    const startTime = new Date(now.getTime() - (24 * 60 * 60 * 1000)); // 1 day ago
+    const endTime = new Date(now.getTime() + (24 * 60 * 60 * 1000)); // 1 day in future
 
     return {
       start: startTime,

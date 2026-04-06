@@ -36,9 +36,12 @@ const TIME_OFFSET = Math.floor(Date.now() / 1000) - MAX_TIMESTAMP;
 /**
  * Convert label array to Prometheus text format metric line
  * Example: [["__name__", "request"], ["service", "cart"]]
- *       -> 'request{service="cart"}'
+ *       -> 'request{service="cart"} 1'
+ *
+ * Note: We omit timestamps to let Prometheus assign the scrape time.
+ * This is the standard format for scraped metrics.
  */
-function formatMetricLine(labelPairs, timestamp, value) {
+function formatMetricLine(labelPairs, value) {
   // Extract metric name from __name__ label
   const nameLabel = labelPairs.find(([key]) => key === '__name__');
   if (!nameLabel) {
@@ -53,11 +56,11 @@ function formatMetricLine(labelPairs, timestamp, value) {
     .map(([name, value]) => `${name}="${value}"`)
     .join(',');
 
-  // Build metric line: metric_name{labels} value timestamp
+  // Build metric line: metric_name{labels} value (no timestamp)
   if (otherLabels.length > 0) {
-    return `${metricName}{${otherLabels}} ${value} ${timestamp}`;
+    return `${metricName}{${otherLabels}} ${value}`;
   } else {
-    return `${metricName} ${value} ${timestamp}`;
+    return `${metricName} ${value}`;
   }
 }
 
@@ -89,8 +92,8 @@ function generateMetrics() {
         // Prometheus expects one current value per scrape, not historical time series
         if (samples.length > 0) {
           const [timestamp, value] = samples[samples.length - 1]; // Get last sample
-          const adjustedTimestamp = (timestamp + TIME_OFFSET) * 1000; // Convert to milliseconds
-          const line = formatMetricLine(labelPairs, adjustedTimestamp, value);
+          // Omit timestamp - let Prometheus assign scrape time
+          const line = formatMetricLine(labelPairs, value);
           if (line) {
             lines.push(line);
           }
