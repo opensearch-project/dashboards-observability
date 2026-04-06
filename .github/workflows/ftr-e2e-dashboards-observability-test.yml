@@ -5,8 +5,6 @@ on: [pull_request, push]
 env:
   PLUGIN_NAME: dashboards-observability
   OPENSEARCH_DASHBOARDS_VERSION: 'main'
-  OPENSEARCH_VERSION: '3.6.0'
-  OPENSEARCH_PLUGIN_VERSION: '3.6.0.0-SNAPSHOT'
 
 jobs:
   tests:
@@ -31,6 +29,27 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: '21'
+
+      - name: Checkout OpenSearch Dashboards
+        uses: actions/checkout@v4
+        with:
+          repository: opensearch-project/Opensearch-Dashboards
+          ref: ${{ env.OPENSEARCH_DASHBOARDS_VERSION }}
+          path: OpenSearch-Dashboards
+
+      - name: Get OpenSearch and plugin versions from package.json
+        id: versions
+        run: |
+          VERSION=$(node -p "require('./OpenSearch-Dashboards/package.json').version")
+          echo "OPENSEARCH_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "OPENSEARCH_PLUGIN_VERSION=${VERSION}.0-SNAPSHOT" >> $GITHUB_ENV
+          echo "OpenSearch version: $VERSION"
+          echo "Plugin version: ${VERSION}.0-SNAPSHOT"
+
+      - name: Checkout dashboards observability
+        uses: actions/checkout@v4
+        with:
+          path: OpenSearch-Dashboards/plugins/dashboards-observability
 
       - name: Get latest Job Scheduler snapshot version
         id: job-scheduler-snapshot
@@ -106,18 +125,6 @@ jobs:
       - name: Run OpenSearch
         run: /bin/bash -c "./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch &"
         shell: bash
-
-      - name: Checkout OpenSearch Dashboards
-        uses: actions/checkout@v4
-        with:
-          repository: opensearch-project/Opensearch-Dashboards
-          ref: ${{ env.OPENSEARCH_DASHBOARDS_VERSION }}
-          path: OpenSearch-Dashboards
-
-      - name: Checkout dashboards observability
-        uses: actions/checkout@v4
-        with:
-          path: OpenSearch-Dashboards/plugins/dashboards-observability
 
       - name: Get node and yarn versions
         working-directory: ${{ env.WORKING_DIR }}
