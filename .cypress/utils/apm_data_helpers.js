@@ -17,10 +17,12 @@ const getCurrentUnixTime = () => Math.floor(Date.now() / 1000);
  */
 const adjustTimestampToNow = (isoString, baseTime, currentTime) => {
   const originalDate = new Date(isoString);
-  const originalUnix = Math.floor(originalDate.getTime() / 1000);
-  const offset = currentTime - baseTime;
-  const newUnix = originalUnix + offset;
-  return new Date(newUnix * 1000).toISOString();
+  const originalMs = originalDate.getTime();
+  const baseTimeMs = baseTime * 1000;
+  const currentTimeMs = currentTime * 1000;
+  const offset = currentTimeMs - baseTimeMs;
+  const newMs = originalMs + offset;
+  return new Date(newMs).toISOString();
 };
 
 /**
@@ -63,7 +65,7 @@ const uploadDataWithTime = (currentTime, baseTime) => {
   ];
 
   const dumpDataSet = (index, mappingFile, dataFile, timestampFields) => {
-    // Step 1: Create index
+    // Step 1: Delete index if it exists
     return cy
       .request({
         method: 'POST',
@@ -75,11 +77,27 @@ const uploadDataWithTime = (currentTime, baseTime) => {
         },
         qs: {
           path: `${index}`,
-          method: 'PUT',
+          method: 'DELETE',
         },
       })
       .then(() => {
-        // Step 2: Load and apply mapping
+        // Step 2: Create index with updated mapping
+        return cy.request({
+          method: 'POST',
+          failOnStatusCode: false,
+          url: 'api/console/proxy',
+          headers: {
+            'content-type': 'application/json;charset=UTF-8',
+            'osd-xsrf': true,
+          },
+          qs: {
+            path: `${index}`,
+            method: 'PUT',
+          },
+        });
+      })
+      .then(() => {
+        // Step 3: Load and apply mapping
         return cy.readFile(`.cypress/utils/${mappingFile}`).then((mapping) => {
           // Extract the mappings content - the file has {"mappings": {...}} but _mapping endpoint needs just the content
           const mappingBody = mapping.mappings || mapping;
@@ -100,7 +118,7 @@ const uploadDataWithTime = (currentTime, baseTime) => {
         });
       })
       .then(() => {
-        // Step 3: Load data and adjust timestamps
+        // Step 4: Load data and adjust timestamps
         return cy.readFile(`.cypress/utils/${dataFile}`, 'utf-8').then((fileContent) => {
           const lines = fileContent.trim().split('\n');
           const documents = lines.map((line) => JSON.parse(line));
@@ -123,7 +141,7 @@ const uploadDataWithTime = (currentTime, baseTime) => {
           // Convert to NDJSON format
           const ndjson = bulkBody.map((item) => JSON.stringify(item)).join('\n') + '\n';
 
-          // Step 4: Bulk upload
+          // Step 5: Bulk upload
           return cy.request({
             method: 'POST',
             url: 'api/console/proxy',
@@ -140,7 +158,7 @@ const uploadDataWithTime = (currentTime, baseTime) => {
         });
       })
       .then(() => {
-        // Step 5: Refresh index to make data immediately searchable
+        // Step 6: Refresh index to make data immediately searchable
         return cy.request({
           method: 'POST',
           url: 'api/console/proxy',
