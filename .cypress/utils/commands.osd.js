@@ -7,17 +7,7 @@
  * OSD-specific Cypress commands for workspace and dataset management
  */
 
-// Default fields for dataset creation (minimal set)
-const defaultFieldsForDatasetCreation = [
-  {
-    name: '_source',
-    type: '_source',
-    esTypes: ['_source'],
-    searchable: false,
-    aggregatable: false,
-    readFromDocValues: false,
-  },
-];
+import { ADMIN_AUTH } from '../support/constants';
 
 // Initialize osd namespace
 if (!cy.osd) {
@@ -39,7 +29,22 @@ const addCommand = (name, fn) => {
 addCommand('createOrGetLocalDataSource', (dataSourceName, endpoint) => {
   const baseUrl = endpoint || Cypress.config('baseUrl') || '';
   const opensearchUrl = Cypress.env('opensearch') || 'localhost:9200';
-  const datasourceUrl = `http://${opensearchUrl}`;
+  // Check if opensearchUrl already has a protocol
+  const datasourceUrl = opensearchUrl.match(/^https?:\/\//)
+    ? opensearchUrl
+    : `http://${opensearchUrl}`;
+
+  // Use credentials if security is enabled
+  const securityEnabled = Cypress.env('security_enabled');
+  const authConfig = securityEnabled
+    ? {
+        type: 'username_password',
+        credentials: {
+          username: ADMIN_AUTH.username,
+          password: ADMIN_AUTH.password,
+        },
+      }
+    : { type: 'no_auth' };
 
   // First, try to find existing data source
   cy.request({
@@ -77,9 +82,7 @@ addCommand('createOrGetLocalDataSource', (dataSourceName, endpoint) => {
         body: {
           dataSourceAttr: {
             endpoint: datasourceUrl,
-            auth: {
-              type: 'no_auth',
-            },
+            auth: authConfig,
           },
         },
       }).then((metadataResp) => {
@@ -98,9 +101,7 @@ addCommand('createOrGetLocalDataSource', (dataSourceName, endpoint) => {
               title: dataSourceName,
               description: '',
               endpoint: datasourceUrl,
-              auth: {
-                type: 'no_auth',
-              },
+              auth: authConfig,
               ...datasourceMetaData,
             },
           },
@@ -172,16 +173,19 @@ addCommand(
   'createDatasetByEndpoint',
   (datasetId, workspaceId, datasourceId, options, aliasName, endpoint) => {
     const baseUrl = endpoint || Cypress.config('baseUrl') || '';
-    const fields = options.fields || defaultFieldsForDatasetCreation;
 
     // Build attributes object conditionally
     const attributes = {
       title: options.title,
       displayName: options.displayName || '',
       signalType: options.signalType || 'logs',
-      fields: fields,
       schemaMappings: options.schemaMappings || '{}',
     };
+
+    // Only include fields if explicitly provided, otherwise let OSD auto-discover
+    if (options.fields) {
+      attributes.fields = options.fields;
+    }
 
     // Only include timeFieldName if timestamp is provided
     if (options.timestamp) {
