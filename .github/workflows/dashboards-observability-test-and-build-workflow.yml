@@ -5,7 +5,6 @@ on: [pull_request, push]
 env:
   PLUGIN_NAME: dashboards-observability
   OPENSEARCH_DASHBOARDS_VERSION: 'main'
-  OPENSEARCH_PLUGIN_VERSION: '3.5.0.0'
 
 jobs:
   Get-CI-Image-Tag:
@@ -37,6 +36,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: OpenSearch-Dashboards/plugins/dashboards-observability
+
+      - name: Get plugin version from opensearch_dashboards.json
+        shell: bash
+        run: |
+          cd OpenSearch-Dashboards/plugins/dashboards-observability
+          PLUGIN_VERSION=$(node -p "require('./opensearch_dashboards.json').version")
+          echo "OPENSEARCH_PLUGIN_VERSION=$PLUGIN_VERSION" >> $GITHUB_ENV
+          echo "Plugin version: $PLUGIN_VERSION"
 
       - name: Plugin Bootstrap
         uses: nick-fields/retry@v2
@@ -121,6 +128,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: OpenSearch-Dashboards/plugins/dashboards-observability
+
+      - name: Get plugin version from opensearch_dashboards.json
+        shell: bash
+        run: |
+          cd OpenSearch-Dashboards/plugins/dashboards-observability
+          PLUGIN_VERSION=$(node -p "require('./opensearch_dashboards.json').version")
+          echo "OPENSEARCH_PLUGIN_VERSION=$PLUGIN_VERSION" >> $GITHUB_ENV
+          echo "Plugin version: $PLUGIN_VERSION"
 
       - name: Plugin Bootstrap
         uses: nick-fields/retry@v2
