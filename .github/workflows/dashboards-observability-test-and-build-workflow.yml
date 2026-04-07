@@ -38,6 +38,7 @@ jobs:
           path: OpenSearch-Dashboards/plugins/dashboards-observability
 
       - name: Get plugin version from opensearch_dashboards.json
+        shell: bash
         run: |
           cd OpenSearch-Dashboards/plugins/dashboards-observability
           PLUGIN_VERSION=$(node -p "require('./opensearch_dashboards.json').version")
@@ -129,6 +130,7 @@ jobs:
           path: OpenSearch-Dashboards/plugins/dashboards-observability
 
       - name: Get plugin version from opensearch_dashboards.json
+        shell: bash
         run: |
           cd OpenSearch-Dashboards/plugins/dashboards-observability
           PLUGIN_VERSION=$(node -p "require('./opensearch_dashboards.json').version")
