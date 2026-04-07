@@ -1,0 +1,90 @@
+{
+  "settings": {
+    "index": {
+      "mapping": {
+        "total_fields": {
+          "limit": 10000
+        }
+      }
+    }
+  },
+  "mappings": {
+    "date_detection": false,
+    "dynamic_templates": [
+      {
+        "strings_as_keyword": {
+          "match_mapping_type": "string",
+          "match": "*.groupByAttributes.*",
+          "mapping": {
+            "type": "keyword"
+          }
+        }
+      },
+      {
+        "operation_attributes_strings": {
+          "match_mapping_type": "string",
+          "match": "*.attributes.*",
+          "mapping": {
+            "type": "keyword"
+          }
+        }
+      }
+    ],
+    "properties": {
+      "sourceNode": {
+        "properties": {
+          "type": { "type": "keyword" },
+          "keyAttributes": {
+            "properties": {
+              "environment": { "type": "keyword" },
+              "name": { "type": "keyword" }
+            }
+          },
+          "groupByAttributes": {
+            "type": "object",
+            "dynamic": true
+          }
+        }
+      },
+      "targetNode": {
+        "properties": {
+          "type": { "type": "keyword" },
+          "keyAttributes": {
+            "properties": {
+              "environment": { "type": "keyword" },
+              "name": { "type": "keyword" }
+            }
+          },
+          "groupByAttributes": {
+            "type": "object",
+            "dynamic": true
+          }
+        }
+      },
+      "sourceOperation": {
+        "properties": {
+          "name": { "type": "keyword" },
+          "attributes": {
+            "type": "object",
+            "dynamic": true
+          }
+        }
+      },
+      "targetOperation": {
+        "properties": {
+          "name": { "type": "keyword" },
+          "attributes": {
+            "type": "object",
+            "dynamic": true
+          }
+        }
+      },
+      "nodeConnectionHash": { "type": "keyword" },
+      "operationConnectionHash": { "type": "keyword" },
+      "timestamp": {
+        "type": "date",
+        "format": "strict_date_optional_time||epoch_millis"
+      }
+    }
+  }
+}

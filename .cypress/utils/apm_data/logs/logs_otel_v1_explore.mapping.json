@@ -1,0 +1,46 @@
+{
+  "mappings": {
+    "properties": {
+      "traceId": { "type": "keyword" },
+      "spanId": { "type": "keyword" },
+      "instrumentationScope": {
+        "properties": {
+          "name": { "type": "keyword" },
+          "droppedAttributesCount": { "type": "integer" }
+        }
+      },
+      "resource": {
+        "properties": {
+          "attributes": {
+            "properties": {
+              "telemetry.sdk.language": { "type": "keyword" },
+              "service.version": { "type": "keyword" },
+              "service.name": { "type": "keyword" },
+              "telemetry.sdk.version": { "type": "keyword" },
+              "host.name": { "type": "keyword" },
+              "os.type": { "type": "keyword" },
+              "service.namespace": { "type": "keyword" },
+              "telemetry.sdk.name": { "type": "keyword" },
+              "container.id": { "type": "keyword" },
+              "service.instance.id": { "type": "keyword" }
+            }
+          },
+          "droppedAttributesCount": { "type": "integer" },
+          "schemaUrl": { "type": "keyword" }
+        }
+      },
+      "flags": { "type": "integer" },
+      "severityNumber": { "type": "integer" },
+      "severityText": { "type": "keyword" },
+      "body": { "type": "text" },
+      "attributes": {
+        "type": "object",
+        "enabled": true
+      },
+      "time": { "type": "date" },
+      "observedTimestamp": { "type": "date" },
+      "droppedAttributesCount": { "type": "integer" },
+      "schemaUrl": { "type": "keyword" }
+    }
+  }
+}

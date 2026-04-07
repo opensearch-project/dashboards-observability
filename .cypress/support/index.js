@@ -26,6 +26,9 @@ import './commands';
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 
+// Import OSD commands for workspace/dataset management (used by APM tests)
+import '../utils/commands.osd';
+
 // Switch the base URL of OpenSearch when security enabled in the cluster
 if (Cypress.env('security_enabled')) {
   Cypress.env('opensearch', 'https://localhost:9200');
