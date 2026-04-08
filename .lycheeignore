@@ -1,3 +1,5 @@
 opensearch-dashboards
 kubernetes.default.svc.cluster.local
 observability.playground.opensearch.org
+http://frontend-proxy:8080
+https://www.jaegertracing.io/
