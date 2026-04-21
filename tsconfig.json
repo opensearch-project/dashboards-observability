@@ -5,6 +5,7 @@
     "jsx": "react",
     "allowJs": true,
     "baseUrl": ".",
+    "rootDir": ".",
     "target": "esnext",
     "module": "commonjs",
     "outDir": "./target",
