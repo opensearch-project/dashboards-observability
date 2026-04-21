@@ -50,6 +50,9 @@ import {
   observabilityNotebookID,
   observabilityNotebookPluginOrder,
   observabilityNotebookTitle,
+  observabilityAlertingID,
+  observabilityAlertingPluginOrder,
+  observabilityAlertingTitle,
   observabilityOverviewID,
   observabilityOverviewPluginOrder,
   observabilityOverviewTitle,
@@ -213,7 +216,7 @@ export class ObservabilityPlugin
     try {
       const apmSettingValue = core.uiSettings.get(APM_ENABLED_SETTING);
       this.apmEnabled = apmSettingValue ?? false;
-    } catch (error) {
+    } catch (_error) {
       // Handle authentication errors during setup
       this.apmEnabled = false;
     }
@@ -506,6 +509,14 @@ export class ObservabilityPlugin
       order: observabilityNotebookPluginOrder,
       mount: appMountWithStartPage('notebooks'),
       updater$: this.appUpdater$,
+    });
+
+    core.application.register({
+      id: observabilityAlertingID,
+      title: observabilityAlertingTitle,
+      category: OBSERVABILITY_APP_CATEGORIES.observability,
+      order: observabilityAlertingPluginOrder,
+      mount: appMountWithStartPage('alerting'),
     });
 
     registerAllPluginNavGroups(core, this.apmEnabled, APPLICATION_MONITORING_CATEGORY);

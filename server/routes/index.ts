@@ -27,6 +27,14 @@ import { registerQueryAssistRoutes } from './query_assist/routes';
 import { MLCommonsRCFFacet } from '../services/facets/ml_commons_rcf_facet';
 import { registerMLCommonsRCFRoute } from './ml_commons_rcf';
 import { registerTraceAnalyticsDslRouter } from './trace_analytics_dsl_router';
+import { registerAlertingRoutes } from './alerting';
+import {
+  InMemoryDatasourceService,
+  MultiBackendAlertService,
+  HttpOpenSearchBackend,
+  DirectQueryPrometheusBackend,
+} from '../services/alerting';
+import { PrometheusMetadataService } from '../services/alerting/prometheus_metadata_service';
 
 export function setupRoutes({
   router,
@@ -68,4 +76,29 @@ export function setupRoutes({
 
   registerGettingStartedRoutes(router);
   registerMLCommonsRCFRoute({ router, facet: new MLCommonsRCFFacet() });
+
+  // Alerting routes — OSD scoped client handles auth automatically
+  const alertingDatasourceService = new InMemoryDatasourceService(logger);
+  const alertingAlertService = new MultiBackendAlertService(alertingDatasourceService, logger);
+
+  const osBackend = new HttpOpenSearchBackend(logger);
+  alertingAlertService.registerOpenSearch(osBackend);
+
+  const promBackend = new DirectQueryPrometheusBackend(logger);
+  alertingAlertService.registerPrometheus(promBackend);
+  alertingDatasourceService.setPrometheusBackend(promBackend);
+
+  const metadataService = new PrometheusMetadataService(
+    promBackend,
+    alertingDatasourceService,
+    logger
+  );
+
+  registerAlertingRoutes(
+    router,
+    alertingDatasourceService,
+    alertingAlertService,
+    logger,
+    metadataService
+  );
 }

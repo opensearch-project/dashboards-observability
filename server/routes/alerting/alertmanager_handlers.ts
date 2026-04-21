@@ -1,0 +1,247 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
+ * Alertmanager route handlers for the OSD plugin.
+ * Each handler takes a PrometheusBackend and returns { status, body }.
+ */
+import yaml from 'js-yaml';
+import { AlertingOSClient, AlertmanagerSilence, PrometheusBackend } from '../../services/alerting';
+import { toHandlerResult } from './route_utils';
+import type { HandlerResult } from './route_utils';
+
+// ============================================================================
+// Alertmanager API v2 Handlers
+// ============================================================================
+
+export async function handleGetAlertmanagerAlerts(
+  promBackend: PrometheusBackend,
+  client: AlertingOSClient
+): Promise<HandlerResult> {
+  try {
+    if (!promBackend.getAlertmanagerAlerts) {
+      return { status: 501, body: { error: 'Alertmanager not configured' } };
+    }
+    const alerts = await promBackend.getAlertmanagerAlerts(client);
+    return { status: 200, body: { alerts } };
+  } catch (e: unknown) {
+    return toHandlerResult(e);
+  }
+}
+
+export async function handleGetAlertmanagerSilences(
+  promBackend: PrometheusBackend,
+  client: AlertingOSClient
+): Promise<HandlerResult> {
+  try {
+    if (!promBackend.getSilences) {
+      return { status: 501, body: { error: 'Alertmanager not configured' } };
+    }
+    const silences = await promBackend.getSilences(client);
+    return { status: 200, body: { silences } };
+  } catch (e: unknown) {
+    return toHandlerResult(e);
+  }
+}
+
+export async function handleCreateAlertmanagerSilence(
+  promBackend: PrometheusBackend,
+  client: AlertingOSClient,
+  body: AlertmanagerSilence
+): Promise<HandlerResult> {
+  try {
+    if (!promBackend.createSilence) {
+      return { status: 501, body: { error: 'Alertmanager not configured' } };
+    }
+    const silenceId = await promBackend.createSilence(client, body);
+    return { status: 200, body: { silenceID: silenceId } };
+  } catch (e: unknown) {
+    return toHandlerResult(e);
+  }
+}
+
+export async function handleDeleteAlertmanagerSilence(
+  promBackend: PrometheusBackend,
+  client: AlertingOSClient,
+  id: string
+): Promise<HandlerResult> {
+  try {
+    if (!promBackend.deleteSilence) {
+      return { status: 501, body: { error: 'Alertmanager not configured' } };
+    }
+    const ok = await promBackend.deleteSilence(client, id);
+    return { status: 200, body: { success: ok } };
+  } catch (e: unknown) {
+    return toHandlerResult(e);
+  }
+}
+
+export async function handleGetAlertmanagerStatus(
+  promBackend: PrometheusBackend,
+  client: AlertingOSClient
+): Promise<HandlerResult> {
+  try {
+    if (!promBackend.getAlertmanagerStatus) {
+      return { status: 501, body: { error: 'Alertmanager not configured' } };
+    }
+    const status = await promBackend.getAlertmanagerStatus(client);
+    return { status: 200, body: status };
+  } catch (e: unknown) {
+    return toHandlerResult(e);
+  }
+}
+
+export async function handleGetAlertmanagerReceivers(
+  promBackend: PrometheusBackend,
+  client: AlertingOSClient
+): Promise<HandlerResult> {
+  try {
+    if (!promBackend.getAlertmanagerReceivers) {
+      return { status: 501, body: { error: 'Alertmanager receivers not available' } };
+    }
+    const receivers = await promBackend.getAlertmanagerReceivers(client);
+    return { status: 200, body: { receivers } };
+  } catch (e: unknown) {
+    return toHandlerResult(e);
+  }
+}
+
+export async function handleGetAlertmanagerAlertGroups(
+  promBackend: PrometheusBackend,
+  client: AlertingOSClient
+): Promise<HandlerResult> {
+  try {
+    if (!promBackend.getAlertmanagerAlertGroups) {
+      return { status: 501, body: { error: 'Alertmanager alert groups not available' } };
+    }
+    const groups = await promBackend.getAlertmanagerAlertGroups(client);
+    return { status: 200, body: { groups } };
+  } catch (e: unknown) {
+    return toHandlerResult(e);
+  }
+}
+
+// ============================================================================
+// Alertmanager Config (parsed YAML)
+// ============================================================================
+
+/**
+ * Extract integration types from a receiver's *_configs keys.
+ * Shared config parsing helper. Receiver objects come from user YAML, so
+ * the inner config shapes are dynamic — keep them as Record<string, unknown>.
+ */
+export function extractReceiverIntegrations(
+  receiver: Record<string, unknown>
+): Array<{ type: string; summary: string }> {
+  const integrations: Array<{ type: string; summary: string }> = [];
+  const configKeys = [
+    'webhook_configs',
+    'slack_configs',
+    'email_configs',
+    'pagerduty_configs',
+    'opsgenie_configs',
+    'victorops_configs',
+    'pushover_configs',
+    'wechat_configs',
+    'sns_configs',
+    'telegram_configs',
+    'msteams_configs',
+    'webex_configs',
+  ];
+  for (const key of configKeys) {
+    const entries = receiver[key];
+    if (Array.isArray(entries)) {
+      for (const raw of entries) {
+        const cfg = (raw as Record<string, unknown>) || {};
+        const typeName = key.replace('_configs', '');
+        const pick = (k: string): string | undefined => {
+          const v = cfg[k];
+          return typeof v === 'string' ? v : undefined;
+        };
+        let summary = '';
+        if (typeName === 'webhook') summary = pick('url') || pick('url_file') || 'webhook';
+        else if (typeName === 'slack') summary = pick('channel') || 'slack';
+        else if (typeName === 'email') summary = pick('to') || 'email';
+        else if (typeName === 'pagerduty')
+          summary = pick('service_key') || pick('api_url') || 'pagerduty';
+        else summary = pick('url') || pick('api_url') || typeName;
+        integrations.push({ type: typeName, summary: String(summary) });
+      }
+    }
+  }
+  if (integrations.length === 0) {
+    integrations.push({ type: 'none', summary: 'No integrations' });
+  }
+  return integrations;
+}
+
+/**
+ * Fetch Alertmanager status, parse the YAML config, and return structured data.
+ */
+export async function handleGetAlertmanagerConfig(
+  promBackend: PrometheusBackend,
+  client: AlertingOSClient
+): Promise<HandlerResult> {
+  try {
+    if (!promBackend.getAlertmanagerStatus) {
+      return { status: 200, body: { available: false, error: 'Alertmanager not configured' } };
+    }
+    const status = await promBackend.getAlertmanagerStatus(client);
+    const rawYaml = status.config?.original || '';
+
+    let parsedConfig: Record<string, unknown> | undefined;
+    let configParseError: string | undefined;
+
+    if (rawYaml) {
+      try {
+        const parsed = yaml.load(rawYaml) as Record<string, unknown> | null;
+        if (parsed && typeof parsed === 'object') {
+          const rawReceivers = Array.isArray(parsed.receivers) ? parsed.receivers : [];
+          const receivers = rawReceivers.map((raw) => {
+            const r = (raw as Record<string, unknown>) || {};
+            return {
+              name: typeof r.name === 'string' ? r.name : '',
+              integrations: extractReceiverIntegrations(r),
+            };
+          });
+
+          parsedConfig = {
+            global: parsed.global || {},
+            route: parsed.route || null,
+            receivers,
+            inhibitRules: parsed.inhibit_rules || [],
+          };
+        }
+      } catch (yamlErr: unknown) {
+        configParseError = `Failed to parse YAML: ${String(yamlErr)}`;
+      }
+    }
+
+    return {
+      status: 200,
+      body: {
+        available: true,
+        cluster: {
+          status: status.cluster?.status || 'unknown',
+          peers: status.cluster?.peers || [],
+          peerCount: (status.cluster?.peers || []).length,
+        },
+        uptime: status.uptime,
+        versionInfo: status.versionInfo || {},
+        config: parsedConfig,
+        configParseError,
+        raw: rawYaml,
+      },
+    };
+  } catch (e: unknown) {
+    return {
+      status: 200,
+      body: {
+        available: false,
+        error: e instanceof Error ? e.message : 'Failed to fetch Alertmanager config',
+      },
+    };
+  }
+}

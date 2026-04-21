@@ -16,6 +16,7 @@ import {
   observabilityMetricsID,
   observabilityNotebookID,
   observabilityOverviewID,
+  observabilityAlertingID,
 } from '../../common/constants/shared';
 import {
   observabilityApmServicesID,
@@ -77,6 +78,15 @@ export function registerAllPluginNavGroups(
       category: DEFAULT_APP_CATEGORIES.investigate,
       showInAllNavGroup: true,
       order: 200,
+    },
+  ]);
+
+  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+    {
+      id: observabilityAlertingID,
+      category: undefined,
+      showInAllNavGroup: true,
+      order: 30,
     },
   ]);
 
