@@ -9,6 +9,7 @@
  */
 import React, { useState, useMemo } from 'react';
 import {
+  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -143,6 +144,32 @@ function collectAlertLabelValues(alerts: UnifiedAlert[], key: string): string[] 
   }
   return Array.from(set).sort();
 }
+
+// ============================================================================
+// Memoized Table — keeps EuiInMemoryTable pagination state stable under the
+// ancestor `EuiResizableContainer`, which re-renders on every mouse move.
+// Without this wrap, the mid-click re-render cascade causes Chrome to drop
+// the `click` event between mousedown and mouseup. Mirrors the pattern in
+// public/components/apm/pages/services_home/services_home.tsx.
+// ============================================================================
+
+interface AlertsTableProps {
+  items: UnifiedAlert[];
+  columns: Array<EuiBasicTableColumn<UnifiedAlert>>;
+  loading: boolean;
+  message: React.ReactNode;
+}
+
+const AlertsTable = React.memo(({ items, columns, loading, message }: AlertsTableProps) => (
+  <EuiInMemoryTable
+    items={items}
+    columns={columns}
+    loading={loading}
+    pagination={{ initialPageSize: 20, pageSizeOptions: [10, 20, 50, 100] }}
+    sorting={{ sort: { field: 'startTime', direction: 'desc' } }}
+    message={message}
+  />
+));
 
 // ============================================================================
 // Main Dashboard Component
@@ -319,124 +346,128 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     />
   );
 
-  // Table columns
-  const columns = [
-    {
-      field: 'severity',
-      name: 'Sev',
-      width: '60px',
-      sortable: (a: UnifiedAlert) => SEVERITY_SORT_ORDER[a.severity] ?? 5,
-      render: (s: string) => (
-        <EuiToolTip content={s}>
-          <span
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: '50%',
-              background: SEVERITY_COLORS[s],
-              display: 'inline-block',
-            }}
-          />
-        </EuiToolTip>
-      ),
-    },
-    {
-      field: 'name',
-      name: 'Alert',
-      sortable: true,
-      truncateText: true,
-      render: (name: string, alert: UnifiedAlert) => (
-        <EuiButtonEmpty
-          size="xs"
-          flush="left"
-          onClick={() => onViewDetail(alert)}
-          style={{ fontWeight: 500 }}
-        >
-          {name}
-        </EuiButtonEmpty>
-      ),
-    },
-    {
-      field: 'state',
-      name: 'State',
-      width: '140px',
-      sortable: true,
-      render: (state: string) => (
-        <EuiHealth color={STATE_HEALTH[state] || 'subdued'}>{state}</EuiHealth>
-      ),
-    },
-    {
-      field: 'datasourceType',
-      name: 'Source',
-      width: '130px',
-      render: (t: string) => {
-        const displayName =
-          t === 'opensearch' ? 'OpenSearch' : t === 'prometheus' ? 'Prometheus' : t;
-        return <EuiText size="xs">{displayName}</EuiText>;
-      },
-    },
-    {
-      field: 'message',
-      name: 'Message',
-      truncateText: true,
-      render: (msg: string) => (
-        <EuiText size="xs" color="subdued">
-          {msg || '—'}
-        </EuiText>
-      ),
-    },
-    {
-      field: 'startTime',
-      name: 'Started',
-      width: '120px',
-      sortable: true,
-      render: (ts: string) => {
-        if (!ts) return <EuiText size="xs">---</EuiText>;
-        const abs = new Date(ts).toLocaleString();
-        return (
-          <EuiToolTip content={abs}>
-            <span style={{ fontSize: 12 }}>{formatDuration(ts)} ago</span>
+  // Table columns — memoized so `AlertsTable`'s React.memo shallow-compare
+  // doesn't invalidate on every parent re-render.
+  const columns = useMemo<Array<EuiBasicTableColumn<UnifiedAlert>>>(
+    () => [
+      {
+        field: 'severity',
+        name: 'Sev',
+        width: '60px',
+        sortable: (a: UnifiedAlert) => SEVERITY_SORT_ORDER[a.severity] ?? 5,
+        render: (s: string) => (
+          <EuiToolTip content={s}>
+            <span
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                background: SEVERITY_COLORS[s],
+                display: 'inline-block',
+              }}
+            />
           </EuiToolTip>
-        );
+        ),
       },
-    },
-    {
-      field: 'startTime',
-      name: 'Duration',
-      width: '90px',
-      render: (ts: string) => <EuiText size="xs">{ts ? formatDuration(ts) : '—'}</EuiText>,
-    },
-    {
-      name: 'Actions',
-      width: '150px',
-      render: (alert: UnifiedAlert) => (
-        <EuiFlexGroup gutterSize="xs" responsive={false} wrap={false} alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content="View details">
-              <EuiButtonIcon
-                iconType="inspect"
-                aria-label="View"
-                size="s"
-                onClick={() => onViewDetail(alert)}
-              />
+      {
+        field: 'name',
+        name: 'Alert',
+        sortable: true,
+        truncateText: true,
+        render: (name: string, alert: UnifiedAlert) => (
+          <EuiButtonEmpty
+            size="xs"
+            flush="left"
+            onClick={() => onViewDetail(alert)}
+            style={{ fontWeight: 500 }}
+          >
+            {name}
+          </EuiButtonEmpty>
+        ),
+      },
+      {
+        field: 'state',
+        name: 'State',
+        width: '140px',
+        sortable: true,
+        render: (state: string) => (
+          <EuiHealth color={STATE_HEALTH[state] || 'subdued'}>{state}</EuiHealth>
+        ),
+      },
+      {
+        field: 'datasourceType',
+        name: 'Source',
+        width: '130px',
+        render: (t: string) => {
+          const displayName =
+            t === 'opensearch' ? 'OpenSearch' : t === 'prometheus' ? 'Prometheus' : t;
+          return <EuiText size="xs">{displayName}</EuiText>;
+        },
+      },
+      {
+        field: 'message',
+        name: 'Message',
+        truncateText: true,
+        render: (msg: string) => (
+          <EuiText size="xs" color="subdued">
+            {msg || '—'}
+          </EuiText>
+        ),
+      },
+      {
+        field: 'startTime',
+        name: 'Started',
+        width: '120px',
+        sortable: true,
+        render: (ts: string) => {
+          if (!ts) return <EuiText size="xs">---</EuiText>;
+          const abs = new Date(ts).toLocaleString();
+          return (
+            <EuiToolTip content={abs}>
+              <span style={{ fontSize: 12 }}>{formatDuration(ts)} ago</span>
             </EuiToolTip>
-          </EuiFlexItem>
-          {alert.state === 'active' && alert.datasourceType !== 'prometheus' && (
+          );
+        },
+      },
+      {
+        field: 'startTime',
+        name: 'Duration',
+        width: '90px',
+        render: (ts: string) => <EuiText size="xs">{ts ? formatDuration(ts) : '—'}</EuiText>,
+      },
+      {
+        name: 'Actions',
+        width: '150px',
+        render: (alert: UnifiedAlert) => (
+          <EuiFlexGroup gutterSize="xs" responsive={false} wrap={false} alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="check"
-                size="xs"
-                color="primary"
-                onClick={() => onAcknowledge(alert.id)}
-              >
-                Ack
-              </EuiButtonEmpty>
+              <EuiToolTip content="View details">
+                <EuiButtonIcon
+                  iconType="inspect"
+                  aria-label="View"
+                  size="s"
+                  onClick={() => onViewDetail(alert)}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      ),
-    },
-  ];
+            {alert.state === 'active' && alert.datasourceType !== 'prometheus' && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="check"
+                  size="xs"
+                  color="primary"
+                  onClick={() => onAcknowledge(alert.id)}
+                >
+                  Ack
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        ),
+      },
+    ],
+    [onAcknowledge, onViewDetail]
+  );
 
   const emptyState = !loading && alerts.length === 0;
 
@@ -700,15 +731,10 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                     )}
                   </EuiText>
                   <EuiSpacer size="s" />
-                  <EuiInMemoryTable
+                  <AlertsTable
                     items={filteredAlerts}
                     columns={columns}
                     loading={loading}
-                    pagination={{
-                      initialPageSize: 20,
-                      pageSizeOptions: [10, 20, 50, 100],
-                    }}
-                    sorting={{ sort: { field: 'startTime', direction: 'desc' } }}
                     message={
                       searchQuery ||
                       activeFilterCount > 0 ||
