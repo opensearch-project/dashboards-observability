@@ -28,7 +28,6 @@ import {
   EuiBasicTable,
   EuiAccordion,
   EuiToolTip,
-  EuiConfirmModal,
   EuiCodeBlock,
   EuiIcon,
   EuiLoadingContent,
@@ -42,6 +41,7 @@ import {
   OSMonitorInput,
 } from '../../../common/types/alerting';
 import { AlarmsApiClient } from './services/alarms_client';
+import { DeleteModal } from '../common/helpers/delete_modal';
 
 import { SEVERITY_COLORS, STATE_COLORS, STATUS_COLORS, HEALTH_COLORS } from './shared_constants';
 
@@ -693,23 +693,16 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
 
       {/* Delete confirmation */}
       {showDeleteConfirm && (
-        <EuiConfirmModal
+        <DeleteModal
           title={`Delete "${monitor.name}"?`}
+          message="This will remove the monitor from the current view."
           onCancel={() => setShowDeleteConfirm(false)}
           onConfirm={() => {
             onDelete(monitor.id);
             setShowDeleteConfirm(false);
             onClose();
           }}
-          cancelButtonText="Cancel"
-          confirmButtonText="Delete"
-          buttonColor="danger"
-        >
-          <p>
-            This will remove the monitor from the current view. This action cannot be undone within
-            this session.
-          </p>
-        </EuiConfirmModal>
+        />
       )}
     </>
   );

@@ -22,7 +22,6 @@ import {
   EuiPopover,
   EuiCheckboxGroup,
   EuiEmptyPrompt,
-  EuiConfirmModal,
   EuiText,
   EuiPanel,
   EuiButtonIcon,
@@ -41,6 +40,7 @@ import {
 import { serializeMonitors } from '../../../common/services/alerting/serializer';
 import { MonitorDetailFlyout } from './monitor_detail_flyout';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
+import { DeleteModal } from '../common/helpers/delete_modal';
 import { SEVERITY_COLORS, STATUS_COLORS, HEALTH_COLORS, TYPE_LABELS } from './shared_constants';
 
 // ============================================================================
@@ -1426,19 +1426,14 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
 
               {/* Delete confirmation modal */}
               {showDeleteConfirm && (
-                <EuiConfirmModal
+                <DeleteModal
                   title={`Delete ${selectedIds.size} monitor${selectedIds.size > 1 ? 's' : ''}?`}
+                  message={`This will remove the selected monitor${
+                    selectedIds.size > 1 ? 's' : ''
+                  } from the current view.`}
                   onCancel={() => setShowDeleteConfirm(false)}
                   onConfirm={handleBulkDelete}
-                  cancelButtonText="Cancel"
-                  confirmButtonText="Delete"
-                  buttonColor="danger"
-                >
-                  <p>
-                    This will remove the selected monitor{selectedIds.size > 1 ? 's' : ''} from the
-                    current view. This action cannot be undone within this session.
-                  </p>
-                </EuiConfirmModal>
+                />
               )}
 
               {/* Monitor detail flyout */}

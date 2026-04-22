@@ -8,7 +8,8 @@
  * Prometheus datasources are decomposed into selectable workspaces.
  */
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiSpacer, EuiTab, EuiTabs, EuiCallOut, EuiGlobalToastList } from '@elastic/eui';
+import { EuiSpacer, EuiTab, EuiTabs, EuiCallOut } from '@elastic/eui';
+import { useToast } from '../common/toast';
 import {
   Datasource,
   DatasourceWarning,
@@ -77,17 +78,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
     'logs' | 'prometheus' | 'metrics' | null
   >(null);
   const [selectedAlert, setSelectedAlert] = useState<UnifiedAlert | null>(null);
-  const [toasts, setToasts] = useState<
-    Array<{ id: string; title: string; color: string; text?: string }>
-  >([]);
-
-  const addToast = (
-    title: string,
-    color: 'success' | 'danger' | 'warning' = 'success',
-    text?: string
-  ) => {
-    setToasts((prev) => [...prev, { id: String(Date.now()), title, color, text }]);
-  };
+  const { setToast: addToast } = useToast();
 
   const visibleRules = rules.filter((r) => !deletedRuleIds.has(r.id));
 
@@ -840,12 +831,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
           }}
         />
       )}
-      <EuiGlobalToastList
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- EuiGlobalToastList toast type mismatch
-        toasts={toasts as any}
-        dismissToast={(t: { id: string }) => setToasts((prev) => prev.filter((p) => p.id !== t.id))}
-        toastLifeTimeMs={4000}
-      />
     </div>
   );
 };
