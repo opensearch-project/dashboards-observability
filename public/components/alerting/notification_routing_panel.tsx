@@ -9,13 +9,14 @@
  * OpenSearch Direct Query API proxy) and displays the route tree, receivers,
  * and inhibit rules.
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiBadge,
   EuiButtonIcon,
   EuiCallOut,
+  EuiCompressedSelect,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,6 +28,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { Datasource } from '../../../common/types/alerting';
 import { AlarmsApiClient } from './services/alarms_client';
 
 // ---------------------------------------------------------------------------
@@ -148,11 +150,34 @@ const INTEGRATION_COLORS: Record<string, string> = {
 
 export interface NotificationRoutingPanelProps {
   apiClient: AlarmsApiClient;
+  datasources: Datasource[];
 }
 
 export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> = ({
   apiClient,
+  datasources,
 }) => {
+  // Alertmanager is reached through a single Prometheus datasource at a time —
+  // only parent Prom entries are candidates (workspace-derived entries share
+  // the same Alertmanager endpoint as their parent).
+  const promDatasources = useMemo(
+    () => datasources.filter((d) => d.type === 'prometheus' && !d.parentDatasourceId),
+    [datasources]
+  );
+  // Key selection off `directQueryName` (or `name`) rather than `id`, because
+  // `id` is regenerated on every server-side datasource rediscovery cycle.
+  const datasourceKey = useCallback((d: Datasource): string => d.directQueryName || d.name, []);
+  const [selectedDsId, setSelectedDsId] = useState<string | undefined>(undefined);
+
+  // Default to the first Prom datasource once loaded; preserve user choice across reloads.
+  useEffect(() => {
+    if (promDatasources.length === 0) return;
+    const stillValid = promDatasources.some((d) => datasourceKey(d) === selectedDsId);
+    if (!selectedDsId || !stillValid) {
+      setSelectedDsId(datasourceKey(promDatasources[0]));
+    }
+  }, [promDatasources, selectedDsId, datasourceKey]);
+
   const [config, setConfig] = useState<AlertmanagerConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -161,7 +186,7 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
     setLoading(true);
     setError(null);
     try {
-      const res = await apiClient.getAlertmanagerConfig();
+      const res = await apiClient.getAlertmanagerConfig(selectedDsId);
       // The API client types route/inhibitRules as `unknown` because it's
       // handed back raw from Alertmanager; narrow to our local shape here.
       setConfig((res as unknown) as AlertmanagerConfig);
@@ -169,11 +194,28 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
       setError(e instanceof Error ? e.message : 'Failed to fetch Alertmanager config');
     }
     setLoading(false);
-  }, [apiClient]);
+  }, [apiClient, selectedDsId]);
 
   useEffect(() => {
     fetchConfig();
   }, [fetchConfig]);
+
+  // Compact Prometheus datasource selector. Always rendered when a Prom DS
+  // is available so the user can see which source the Alertmanager config is
+  // coming from; disabled when there's only one (nothing to switch to).
+  const datasourceSelector =
+    promDatasources.length > 0 && selectedDsId ? (
+      <EuiCompressedSelect
+        prepend="Source"
+        options={promDatasources.map((d) => ({ value: datasourceKey(d), text: d.name }))}
+        value={selectedDsId}
+        onChange={(e) => setSelectedDsId(e.target.value)}
+        disabled={promDatasources.length === 1}
+        aria-label="Prometheus datasource"
+        data-test-subj="alertManager-routing-datasourceSelect"
+        style={{ minWidth: 220 }}
+      />
+    ) : null;
 
   if (loading) {
     return (
@@ -187,32 +229,54 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
 
   if (error) {
     return (
-      <EuiCallOut title="Error loading Alertmanager config" color="danger" iconType="alert">
-        {error}
-      </EuiCallOut>
+      <div style={{ padding: '0 16px' }}>
+        {datasourceSelector && (
+          <>
+            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+              <EuiFlexItem grow={false}>{datasourceSelector}</EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+          </>
+        )}
+        <EuiCallOut title="Error loading Alertmanager config" color="danger" iconType="alert">
+          {error}
+        </EuiCallOut>
+      </div>
     );
   }
 
   if (!config?.available) {
     return (
-      <EuiEmptyPrompt
-        iconType="bell"
-        title={<h2>Alertmanager Not Available</h2>}
-        body={
-          <p>
-            No Alertmanager is connected. Ensure your Prometheus datasource in the OpenSearch SQL
-            plugin has <code>alertmanager.uri</code> configured in its properties.
-          </p>
-        }
-      />
+      <div style={{ padding: '0 16px' }}>
+        {datasourceSelector && (
+          <>
+            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+              <EuiFlexItem grow={false}>{datasourceSelector}</EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+          </>
+        )}
+        <EuiEmptyPrompt
+          iconType="bell"
+          title={<h2>Alertmanager Not Available</h2>}
+          body={
+            <p>
+              No Alertmanager is connected. Ensure your Prometheus datasource in the OpenSearch SQL
+              plugin has <code>alertmanager.uri</code> configured in its properties.
+            </p>
+          }
+        />
+      </div>
     );
   }
 
   if (config.configParseError) {
     return (
-      <EuiCallOut title="Failed to parse Alertmanager config" color="warning" iconType="alert">
-        <p>{config.configParseError}</p>
-      </EuiCallOut>
+      <div style={{ padding: '0 16px' }}>
+        <EuiCallOut title="Failed to parse Alertmanager config" color="warning" iconType="alert">
+          <p>{config.configParseError}</p>
+        </EuiCallOut>
+      </div>
     );
   }
 
@@ -353,7 +417,7 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
   ];
 
   return (
-    <div>
+    <div style={{ padding: '0 16px' }}>
       {/* Read-only explanation banner (UX audit M6 + S-m8) */}
       <EuiCallOut title="Read-only view" color="primary" iconType="iInCircle" size="s">
         <p>
@@ -387,6 +451,7 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow />
+          {datasourceSelector && <EuiFlexItem grow={false}>{datasourceSelector}</EuiFlexItem>}
           <EuiFlexItem grow={false}>
             <EuiToolTip content="Refresh">
               <EuiButtonIcon iconType="refresh" aria-label="Refresh" onClick={fetchConfig} />
