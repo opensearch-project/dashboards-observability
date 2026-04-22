@@ -7,7 +7,7 @@
  * Enhanced Monitors Table — search, filter, sort, column customization,
  * saved searches, bulk delete, and JSON export.
  */
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiInMemoryTable,
   EuiHealth,
@@ -378,6 +378,35 @@ function useResizableColumns(
 }
 
 // ============================================================================
+// Memoized Table — keeps EuiInMemoryTable pagination state stable under the
+// ancestor `EuiResizableContainer`, which re-renders on every mouse move.
+// Without this wrap, the mid-click re-render cascade causes Chrome to drop
+// the `click` event between mousedown and mouseup. Mirrors the pattern in
+// public/components/apm/pages/services_home/services_home.tsx.
+// ============================================================================
+
+interface MonitorsEuiTableProps {
+  items: UnifiedRule[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- EuiInMemoryTable column type is complex
+  columns: any[];
+  loading: boolean;
+  rowProps: (item: UnifiedRule) => React.HTMLAttributes<HTMLTableRowElement>;
+}
+
+const MonitorsEuiTable = React.memo(
+  ({ items, columns, loading, rowProps }: MonitorsEuiTableProps) => (
+    <EuiInMemoryTable
+      items={items}
+      columns={columns}
+      loading={loading}
+      pagination={{ initialPageSize: 20, pageSizeOptions: [10, 20, 50] }}
+      sorting={{ sort: { field: 'name', direction: 'asc' } }}
+      rowProps={rowProps}
+    />
+  )
+);
+
+// ============================================================================
 // Main Component
 // ============================================================================
 
@@ -410,6 +439,13 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   const [saveSearchName, setSaveSearchName] = useState('');
   const searchRef = useRef<HTMLDivElement>(null);
   const tableWrapperRef = useRef<HTMLDivElement>(null);
+
+  const rowProps = useCallback(
+    (item: UnifiedRule) => ({
+      style: selectedIds.has(item.id) ? { backgroundColor: '#F0F5FF' } : undefined,
+    }),
+    [selectedIds]
+  );
 
   const dsNameMap = useMemo(() => new Map(datasources.map((d) => [d.id, d.name])), [datasources]);
 
@@ -753,8 +789,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   }, [visibleColumns, selectedIds, filtered, dsNameMap, columnWidths]);
 
   // Attach DOM-based resize handles to table header cells
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- RefObject<HTMLDivElement | null> vs RefObject<HTMLDivElement>
-  useResizableColumns(tableWrapperRef as any, columnWidths, setColumnWidths, visibleColumns);
+  useResizableColumns(tableWrapperRef, columnWidths, setColumnWidths, visibleColumns);
 
   // Unique values for filter dropdowns
   const uniqueStatuses = useMemo(() => collectUniqueValues(rules, (r) => r.status), [rules]);
@@ -1379,20 +1414,11 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                       }
                     />
                   ) : (
-                    <EuiInMemoryTable
+                    <MonitorsEuiTable
                       items={filtered}
                       columns={tableColumns}
                       loading={loading}
-                      pagination={{
-                        initialPageSize: 20,
-                        pageSizeOptions: [10, 20, 50],
-                      }}
-                      sorting={{ sort: { field: 'name', direction: 'asc' } }}
-                      rowProps={(item: UnifiedRule) => ({
-                        style: selectedIds.has(item.id)
-                          ? { backgroundColor: '#F0F5FF' }
-                          : undefined,
-                      })}
+                      rowProps={rowProps}
                     />
                   )}
                 </div>
