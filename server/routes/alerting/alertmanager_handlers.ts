@@ -8,7 +8,11 @@
  * Each handler takes a PrometheusBackend and returns { status, body }.
  */
 import yaml from 'js-yaml';
-import { AlertingOSClient, AlertmanagerSilence, PrometheusBackend } from '../../services/alerting';
+import type {
+  AlertingOSClient,
+  AlertmanagerSilence,
+  PrometheusBackend,
+} from '../../../common/types/alerting';
 import { toHandlerResult } from './route_utils';
 import type { HandlerResult } from './route_utils';
 

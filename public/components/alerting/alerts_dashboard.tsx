@@ -25,7 +25,7 @@ import {
   EuiButtonEmpty,
   EuiResizableContainer,
 } from '@elastic/eui';
-import { UnifiedAlert, Datasource } from '../../../server/services/alerting';
+import { UnifiedAlert, Datasource } from '../../../common/types/alerting';
 import { filterAlerts } from '../../../common/services/alerting/filter';
 import {
   SeverityDonut,

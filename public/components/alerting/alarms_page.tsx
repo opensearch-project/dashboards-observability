@@ -14,7 +14,7 @@ import {
   DatasourceWarning,
   UnifiedAlert,
   UnifiedRule,
-} from '../../../server/services/alerting';
+} from '../../../common/types/alerting';
 import { MonitorsTable } from './monitors_table';
 import { CreateMonitor, MonitorFormState } from './create_monitor';
 import { AlertsDashboard } from './alerts_dashboard';
@@ -246,8 +246,14 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
   const handleDeleteRules = async (ids: string[]) => {
     const failed: string[] = [];
     for (const id of ids) {
+      const rule = rules.find((r) => r.id === id);
+      if (!rule) {
+        failed.push(id);
+        addToast('Failed to delete monitor', 'danger', `Monitor ${id} not found in cache`);
+        continue;
+      }
       try {
-        await apiClient.deleteMonitor(id);
+        await apiClient.deleteMonitor(id, rule.datasourceId);
       } catch (e: unknown) {
         failed.push(id);
         addToast('Failed to delete monitor', 'danger', e instanceof Error ? e.message : String(e));
@@ -277,7 +283,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
       createdBy: 'current-user',
     };
     try {
-      await apiClient.createMonitor(clone);
+      await apiClient.createMonitor(clone, clone.datasourceId);
       addToast('Monitor cloned');
       setRules((prev) => [clone, ...prev]);
     } catch (e: unknown) {
@@ -286,8 +292,13 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
   };
 
   const handleImportMonitors = async (configs: Array<Record<string, unknown>>) => {
+    const dsId = selectedDsIds[0];
+    if (!dsId) {
+      addToast('Select a datasource before importing monitors', 'warning');
+      return;
+    }
     try {
-      await apiClient.importMonitors(configs);
+      await apiClient.importMonitors(configs, dsId);
       addToast('Monitors imported successfully');
       fetchRules(selectedDsIds, rulesPage, rulesPageSize);
     } catch (e: unknown) {
@@ -374,7 +385,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
 
       return {
         id: `new-${Date.now()}-${index}`,
-        datasourceId: formState.datasourceId || selectedDsIds[0] || 'ds-1',
+        datasourceId: formState.datasourceId || selectedDsIds[0],
         datasourceType: 'opensearch',
         name: formState.name,
         enabled: formState.enabled,
@@ -417,10 +428,21 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
     }
   };
 
+  const resolveDatasourceId = (formState: MonitorFormState): string | null => {
+    const dsId = formState.datasourceId || selectedDsIds[0];
+    if (!dsId) {
+      addToast('Select a datasource before creating a monitor', 'warning');
+      return null;
+    }
+    return dsId;
+  };
+
   const handleCreateMonitor = async (formState: MonitorFormState) => {
+    const dsId = resolveDatasourceId(formState);
+    if (!dsId) return;
     const newRule = formStateToRule(formState);
     try {
-      await apiClient.createMonitor(formState);
+      await apiClient.createMonitor(formState, dsId);
       addToast('Monitor created successfully');
       setRules((prev) => [newRule, ...prev]);
       setRulesTotal((prev) => prev + 1);
@@ -433,8 +455,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
   const handleBatchCreateMonitors = async (forms: MonitorFormState[]) => {
     const succeededRules: UnifiedRule[] = [];
     for (let i = 0; i < forms.length; i++) {
+      const dsId = resolveDatasourceId(forms[i]);
+      if (!dsId) continue;
       try {
-        await apiClient.createMonitor(forms[i]);
+        await apiClient.createMonitor(forms[i], dsId);
         succeededRules.push(formStateToRule(forms[i], i));
       } catch (e: unknown) {
         addToast('Failed to create monitor', 'danger', e instanceof Error ? e.message : String(e));
@@ -555,7 +579,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
       : 'medium') as 'critical' | 'high' | 'medium' | 'low' | 'info';
     const newRule: UnifiedRule = {
       id: `new-logs-${Date.now()}`,
-      datasourceId: selectedDsIds[0] || 'ds-1',
+      datasourceId: selectedDsIds[0],
       datasourceType: 'opensearch',
       name: logsForm.monitorName,
       enabled: true,
@@ -592,8 +616,13 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- raw field is empty for new monitors
       raw: {} as any,
     };
+    const dsId = selectedDsIds[0];
+    if (!dsId) {
+      addToast('Select a datasource before creating a monitor', 'warning');
+      return;
+    }
     try {
-      await apiClient.createMonitor(transformLogsFormToPayload(logsForm), selectedDsIds[0]);
+      await apiClient.createMonitor(transformLogsFormToPayload(logsForm), dsId);
       addToast('Logs monitor created successfully');
       setRules((prev) => [newRule, ...prev]);
       setRulesTotal((prev) => prev + 1);

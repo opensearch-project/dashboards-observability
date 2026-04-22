@@ -40,7 +40,7 @@ import {
   UnifiedAlertSeverity,
   OSMonitor,
   OSMonitorInput,
-} from '../../../server/services/alerting';
+} from '../../../common/types/alerting';
 import { AlarmsApiClient } from './services/alarms_client';
 
 import { SEVERITY_COLORS, STATE_COLORS, STATUS_COLORS, HEALTH_COLORS } from './shared_constants';

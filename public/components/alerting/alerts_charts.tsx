@@ -22,7 +22,7 @@ import {
   UnifiedAlert,
   UnifiedAlertSeverity,
   UnifiedAlertState,
-} from '../../../server/services/alerting';
+} from '../../../common/types/alerting';
 
 // ============================================================================
 // Color maps

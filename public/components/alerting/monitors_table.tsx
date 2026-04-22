@@ -37,7 +37,7 @@ import {
   MonitorStatus,
   MonitorHealthStatus,
   Datasource,
-} from '../../../server/services/alerting';
+} from '../../../common/types/alerting';
 import { serializeMonitors } from '../../../common/services/alerting/serializer';
 import { MonitorDetailFlyout } from './monitor_detail_flyout';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
@@ -99,7 +99,7 @@ interface MonitorsTableProps {
   rules: UnifiedRule[];
   datasources: Datasource[];
   loading: boolean;
-  apiClient: import('../services/alarms_client').AlarmsApiClient;
+  apiClient: import('./services/alarms_client').AlarmsApiClient;
   onDelete: (ids: string[]) => void;
   onClone?: (monitor: UnifiedRule) => void;
   onImport?: (configs: unknown[]) => void;

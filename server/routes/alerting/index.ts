@@ -8,13 +8,13 @@
  */
 import { schema } from '@osd/config-schema';
 import { IRouter, RequestHandlerContext, SavedObject } from '../../../../../src/core/server';
-import {
+import type {
   AlertingOSClient,
   Datasource,
   DatasourceService,
-  MultiBackendAlertService,
   Logger,
-} from '../../services/alerting';
+} from '../../../common/types/alerting';
+import { MultiBackendAlertService } from '../../services/alerting';
 
 /**
  * Shape of the OSD request-handler context we rely on. `dataSource` is

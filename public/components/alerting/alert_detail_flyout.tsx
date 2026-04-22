@@ -30,7 +30,7 @@ import {
   EuiToolTip,
   EuiLink,
 } from '@elastic/eui';
-import { UnifiedAlert, Datasource } from '../../../server/services/alerting';
+import { UnifiedAlert, Datasource } from '../../../common/types/alerting';
 import { AlarmsApiClient } from './services/alarms_client';
 import { SEVERITY_COLORS, STATE_COLORS } from './shared_constants';
 
