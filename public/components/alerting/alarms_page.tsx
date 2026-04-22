@@ -13,8 +13,9 @@ import { useToast } from '../common/toast';
 import {
   Datasource,
   DatasourceWarning,
-  UnifiedAlert,
+  UnifiedAlertSummary,
   UnifiedRule,
+  UnifiedRuleSummary,
 } from '../../../common/types/alerting';
 import { MonitorsTable } from './monitors_table';
 import { CreateMonitor, MonitorFormState } from './create_monitor';
@@ -28,6 +29,10 @@ import { CreateMetricsMonitor, MetricsMonitorFormState } from './create_metrics_
 import { AlarmsApiClient, HttpClient } from './services/alarms_client';
 import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
 import { observabilityID, observabilityTitle } from '../../../common/constants/shared';
+import {
+  transformLogsFormToPayload,
+  transformMetricsFormToPayload,
+} from '../../../common/services/alerting/form_transforms';
 
 // Re-export for components that import from this file
 export { AlarmsApiClient, HttpClient };
@@ -61,13 +66,14 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
   const [error, setError] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<Array<{ datasourceName: string; error: string }>>([]);
 
-  // Paginated data
-  const [alerts, setAlerts] = useState<UnifiedAlert[]>([]);
+  // Paginated data — list endpoints return summary shapes.
+  // Detail flyouts re-fetch the full UnifiedAlert / UnifiedRule on demand.
+  const [alerts, setAlerts] = useState<UnifiedAlertSummary[]>([]);
   const [alertsTotal, setAlertsTotal] = useState(0);
   const [alertsPage, setAlertsPage] = useState(1);
   const [alertsPageSize] = useState(DEFAULT_PAGE_SIZE);
 
-  const [rules, setRules] = useState<UnifiedRule[]>([]);
+  const [rules, setRules] = useState<UnifiedRuleSummary[]>([]);
   const [rulesTotal, setRulesTotal] = useState(-1); // -1 = not yet loaded
   const [rulesPage, setRulesPage] = useState(1);
   const [rulesPageSize] = useState(DEFAULT_PAGE_SIZE);
@@ -77,7 +83,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
   const [createMonitorType, setCreateMonitorType] = useState<
     'logs' | 'prometheus' | 'metrics' | null
   >(null);
-  const [selectedAlert, setSelectedAlert] = useState<UnifiedAlert | null>(null);
+  const [selectedAlert, setSelectedAlert] = useState<UnifiedAlertSummary | null>(null);
   const { setToast: addToast } = useToast();
 
   const visibleRules = rules.filter((r) => !deletedRuleIds.has(r.id));
@@ -264,8 +270,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
     }
   };
 
-  const handleCloneRule = async (monitor: UnifiedRule) => {
-    const clone: UnifiedRule = {
+  const handleCloneRule = async (monitor: UnifiedRuleSummary) => {
+    const clone: UnifiedRuleSummary = {
       ...monitor,
       id: `clone-${Date.now()}`,
       name: `${monitor.name} (Copy)`,
@@ -311,7 +317,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
       }
       return {
         id: `new-${Date.now()}-${index}`,
-        datasourceId: formState.datasourceId || selectedDsIds[0] || 'ds-2',
+        datasourceId: formState.datasourceId || selectedDsIds[0],
         datasourceType: 'prometheus',
         name: formState.name,
         enabled: formState.enabled,
@@ -428,12 +434,16 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
     return dsId;
   };
 
+  // TODO(alert-manager): this path posts the raw form state instead of an
+  // OS Monitor / Prometheus rule payload. The logs/metrics create flows
+  // already transform via transformLogsFormToPayload/transformMetricsFormToPayload;
+  // generic CreateMonitor should too. Casting here preserves current behavior.
   const handleCreateMonitor = async (formState: MonitorFormState) => {
     const dsId = resolveDatasourceId(formState);
     if (!dsId) return;
     const newRule = formStateToRule(formState);
     try {
-      await apiClient.createMonitor(formState, dsId);
+      await apiClient.createMonitor((formState as unknown) as Record<string, unknown>, dsId);
       addToast('Monitor created successfully');
       setRules((prev) => [newRule, ...prev]);
       setRulesTotal((prev) => prev + 1);
@@ -449,7 +459,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
       const dsId = resolveDatasourceId(forms[i]);
       if (!dsId) continue;
       try {
-        await apiClient.createMonitor(forms[i], dsId);
+        await apiClient.createMonitor((forms[i] as unknown) as Record<string, unknown>, dsId);
         succeededRules.push(formStateToRule(forms[i], i));
       } catch (e: unknown) {
         addToast('Failed to create monitor', 'danger', e instanceof Error ? e.message : String(e));
@@ -462,104 +472,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
     }
     // Don't close flyout — AI wizard shows its own summary step and "Done" button
   };
-
-  // ---- Form-to-API transformation helpers ----
-
-  const mapUnit = (unit: string): string => {
-    const lower = unit.toLowerCase().replace(/\(s\)$/, '');
-    if (lower === 'minute') return 'MINUTES';
-    if (lower === 'hour') return 'HOURS';
-    if (lower === 'day') return 'DAYS';
-    return 'MINUTES';
-  };
-
-  const mapSeverity = (severity: string): '1' | '2' | '3' | '4' | '5' => {
-    const map: Record<string, '1' | '2' | '3' | '4' | '5'> = {
-      critical: '1',
-      high: '2',
-      medium: '3',
-      low: '4',
-      info: '5',
-    };
-    return map[severity] || '3';
-  };
-
-  const buildConditionScript = (trigger: {
-    conditionOperator: string;
-    conditionValue: number;
-  }): string => {
-    const opMap: Record<string, string> = {
-      is_greater_than: '>',
-      is_less_than: '<',
-      is_equal_to: '==',
-      is_greater_equal: '>=',
-      is_less_equal: '<=',
-      is_not_equal: '!=',
-    };
-    const op = opMap[trigger.conditionOperator] || '>';
-    return `ctx.results[0].hits.total.value ${op} ${trigger.conditionValue}`;
-  };
-
-  const parseQuery = (query: string): Record<string, unknown> => {
-    try {
-      return JSON.parse(query);
-    } catch {
-      return { query_string: { query } };
-    }
-  };
-
-  const transformLogsFormToPayload = (form: LogsMonitorFormState): Record<string, unknown> => ({
-    type: 'monitor',
-    name: form.monitorName,
-    enabled: true,
-    schedule: {
-      period: { interval: form.runEveryValue, unit: mapUnit(form.runEveryUnit) },
-    },
-    inputs: [
-      {
-        search: {
-          indices: [form.selectedDatasource],
-          query: { size: 0, query: parseQuery(form.query) },
-        },
-      },
-    ],
-    triggers: form.triggers.map((t) => ({
-      name: t.name,
-      severity: mapSeverity(t.severityLevel),
-      condition: {
-        script: { source: buildConditionScript(t), lang: 'painless' },
-      },
-      actions: t.actions.map((a) => ({
-        name: a.name,
-        destination_id: a.notificationChannel,
-        message_template: { source: a.message || '' },
-        subject_template: { source: a.subject || '' },
-        throttle_enabled: t.suppressEnabled,
-        throttle: t.suppressEnabled
-          ? { value: t.suppressExpiry, unit: mapUnit(t.suppressExpiryUnit) }
-          : undefined,
-      })),
-    })),
-  });
-
-  const transformMetricsFormToPayload = (
-    form: MetricsMonitorFormState
-  ): Record<string, unknown> => ({
-    name: form.monitorName,
-    rules: [
-      {
-        alert: form.monitorName,
-        expr: `${form.query} ${form.operator} ${form.thresholdValue}`,
-        for: form.forDuration,
-        labels: Object.fromEntries(
-          form.labels.filter((l) => l.key && l.value).map((l) => [l.key, l.value])
-        ),
-        annotations: Object.fromEntries(
-          form.annotations.filter((a) => a.key && a.value).map((a) => [a.key, a.value])
-        ),
-      },
-    ],
-  });
 
   const handleCreateLogsMonitor = async (logsForm: LogsMonitorFormState) => {
     const now = new Date().toISOString();
@@ -642,7 +554,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
     }
     const newRule: UnifiedRule = {
       id: `new-metrics-${Date.now()}`,
-      datasourceId: metricsForm.datasourceId || selectedDsIds[0] || 'ds-2',
+      datasourceId: metricsForm.datasourceId || selectedDsIds[0],
       datasourceType: 'prometheus',
       name: metricsForm.monitorName,
       enabled: true,

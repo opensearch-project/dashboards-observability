@@ -30,7 +30,7 @@ import {
   EuiToolTip,
   EuiLink,
 } from '@elastic/eui';
-import { UnifiedAlert, Datasource } from '../../../common/types/alerting';
+import { UnifiedAlert, UnifiedAlertSummary, Datasource } from '../../../common/types/alerting';
 import { AlarmsApiClient } from './services/alarms_client';
 import { SEVERITY_COLORS, STATE_COLORS } from './shared_constants';
 
@@ -47,7 +47,7 @@ const INTERNAL_LABEL_KEYS = new Set([
 ]);
 
 export interface AlertDetailFlyoutProps {
-  alert: UnifiedAlert;
+  alert: UnifiedAlertSummary;
   datasources: Datasource[];
   apiClient: AlarmsApiClient;
   onClose: () => void;
@@ -61,7 +61,7 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
   onClose,
   onAcknowledge,
 }) => {
-  const [detailData, setDetailData] = useState<typeof alert | null>(null);
+  const [detailData, setDetailData] = useState<UnifiedAlert | null>(null);
 
   // Fetch full detail (with raw data) from the API when flyout opens
   useEffect(() => {
@@ -334,7 +334,7 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
           paddingSize="m"
         >
           <EuiCodeBlock language="json" fontSize="s" paddingSize="m" isCopyable>
-            {JSON.stringify(alertData.raw ?? alert, null, 2)}
+            {JSON.stringify(detailData?.raw ?? alert, null, 2)}
           </EuiCodeBlock>
         </EuiAccordion>
 
@@ -460,7 +460,7 @@ function getAlertDuration(startTime: string): string {
   return `${days}d ${hours % 24}h`;
 }
 
-function getAlertAiAnalysis(alert: UnifiedAlert): string {
+function getAlertAiAnalysis(alert: UnifiedAlertSummary): string {
   const analyses: Record<string, string> = {
     HighCpuUsage:
       'This host (i-0abc123) has sustained CPU usage above 80% for the past 5 minutes, currently at 92.3%. The spike correlates with increased request traffic. Consider scaling horizontally or investigating the workload causing the spike. Historical data shows this host has been consistently hot for 2 days.',
@@ -496,7 +496,7 @@ interface SuggestedAction {
   url?: string;
 }
 
-function getSuggestedActions(alert: UnifiedAlert): SuggestedAction[] {
+function getSuggestedActions(alert: UnifiedAlertSummary): SuggestedAction[] {
   const actions: SuggestedAction[] = [];
 
   if (alert.state === 'active') {

@@ -12,6 +12,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiBasicTable,
+  EuiBasicTableColumn,
   EuiBadge,
   EuiButtonIcon,
   EuiCallOut,
@@ -161,7 +162,9 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
     setError(null);
     try {
       const res = await apiClient.getAlertmanagerConfig();
-      setConfig(res);
+      // The API client types route/inhibitRules as `unknown` because it's
+      // handed back raw from Alertmanager; narrow to our local shape here.
+      setConfig((res as unknown) as AlertmanagerConfig);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Failed to fetch Alertmanager config');
     }
@@ -290,7 +293,7 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
   // Receivers table
   // -----------------------------------------------------------------------
 
-  const receiverColumns = [
+  const receiverColumns: Array<EuiBasicTableColumn<ReceiverInfo>> = [
     { field: 'name', name: 'Receiver', sortable: true },
     {
       field: 'integrations',

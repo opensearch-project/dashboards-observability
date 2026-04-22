@@ -25,7 +25,7 @@ import {
   EuiButtonEmpty,
   EuiResizableContainer,
 } from '@elastic/eui';
-import { UnifiedAlert, Datasource } from '../../../common/types/alerting';
+import { UnifiedAlertSummary, Datasource } from '../../../common/types/alerting';
 import { filterAlerts } from '../../../common/services/alerting/filter';
 import {
   SeverityDonut,
@@ -117,8 +117,8 @@ const emptyAlertFilters = (): AlertFilterState => ({
 });
 
 function collectAlertUniqueValues(
-  alerts: UnifiedAlert[],
-  field: (a: UnifiedAlert) => string
+  alerts: UnifiedAlertSummary[],
+  field: (a: UnifiedAlertSummary) => string
 ): string[] {
   const set = new Set<string>();
   for (const a of alerts) {
@@ -128,7 +128,7 @@ function collectAlertUniqueValues(
   return Array.from(set).sort();
 }
 
-function collectAlertLabelKeys(alerts: UnifiedAlert[]): string[] {
+function collectAlertLabelKeys(alerts: UnifiedAlertSummary[]): string[] {
   const keys = new Set<string>();
   for (const a of alerts) {
     for (const k of Object.keys(a.labels)) keys.add(k);
@@ -136,7 +136,7 @@ function collectAlertLabelKeys(alerts: UnifiedAlert[]): string[] {
   return Array.from(keys).sort();
 }
 
-function collectAlertLabelValues(alerts: UnifiedAlert[], key: string): string[] {
+function collectAlertLabelValues(alerts: UnifiedAlertSummary[], key: string): string[] {
   const set = new Set<string>();
   for (const a of alerts) {
     const v = a.labels[key];
@@ -154,8 +154,8 @@ function collectAlertLabelValues(alerts: UnifiedAlert[], key: string): string[] 
 // ============================================================================
 
 interface AlertsTableProps {
-  items: UnifiedAlert[];
-  columns: Array<EuiBasicTableColumn<UnifiedAlert>>;
+  items: UnifiedAlertSummary[];
+  columns: Array<EuiBasicTableColumn<UnifiedAlertSummary>>;
   loading: boolean;
   message: React.ReactNode;
 }
@@ -176,10 +176,10 @@ const AlertsTable = React.memo(({ items, columns, loading, message }: AlertsTabl
 // ============================================================================
 
 export interface AlertsDashboardProps {
-  alerts: UnifiedAlert[];
+  alerts: UnifiedAlertSummary[];
   datasources: Datasource[];
   loading: boolean;
-  onViewDetail: (alert: UnifiedAlert) => void;
+  onViewDetail: (alert: UnifiedAlertSummary) => void;
   onAcknowledge: (alertId: string) => void;
   /** Currently selected datasource IDs */
   selectedDsIds: string[];
@@ -348,13 +348,13 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
 
   // Table columns — memoized so `AlertsTable`'s React.memo shallow-compare
   // doesn't invalidate on every parent re-render.
-  const columns = useMemo<Array<EuiBasicTableColumn<UnifiedAlert>>>(
+  const columns = useMemo<Array<EuiBasicTableColumn<UnifiedAlertSummary>>>(
     () => [
       {
         field: 'severity',
         name: 'Sev',
         width: '60px',
-        sortable: (a: UnifiedAlert) => SEVERITY_SORT_ORDER[a.severity] ?? 5,
+        sortable: (a: UnifiedAlertSummary) => SEVERITY_SORT_ORDER[a.severity] ?? 5,
         render: (s: string) => (
           <EuiToolTip content={s}>
             <span
@@ -374,7 +374,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         name: 'Alert',
         sortable: true,
         truncateText: true,
-        render: (name: string, alert: UnifiedAlert) => (
+        render: (name: string, alert: UnifiedAlertSummary) => (
           <EuiButtonEmpty
             size="xs"
             flush="left"
@@ -438,7 +438,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
       {
         name: 'Actions',
         width: '150px',
-        render: (alert: UnifiedAlert) => (
+        render: (alert: UnifiedAlertSummary) => (
           <EuiFlexGroup gutterSize="xs" responsive={false} wrap={false} alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiToolTip content="View details">

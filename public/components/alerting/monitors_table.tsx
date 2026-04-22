@@ -30,7 +30,7 @@ import {
   EuiListGroupItem,
 } from '@elastic/eui';
 import {
-  UnifiedRule,
+  UnifiedRuleSummary,
   UnifiedAlertSeverity,
   MonitorType,
   MonitorStatus,
@@ -96,13 +96,13 @@ const emptyFilters = (): FilterState => ({
 });
 
 interface MonitorsTableProps {
-  rules: UnifiedRule[];
+  rules: UnifiedRuleSummary[];
   datasources: Datasource[];
   loading: boolean;
   apiClient: import('./services/alarms_client').AlarmsApiClient;
   onDelete: (ids: string[]) => void;
-  onClone?: (monitor: UnifiedRule) => void;
-  onImport?: (configs: unknown[]) => void;
+  onClone?: (monitor: UnifiedRuleSummary) => void;
+  onImport?: (configs: Array<Record<string, unknown>>) => void;
   onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics' | 'slo') => void;
   /** Currently selected datasource IDs */
   selectedDsIds: string[];
@@ -114,7 +114,7 @@ interface MonitorsTableProps {
 // Suggestion Engine
 // ============================================================================
 
-function buildSuggestions(rules: UnifiedRule[]): string[] {
+function buildSuggestions(rules: UnifiedRuleSummary[]): string[] {
   const set = new Set<string>();
   for (const r of rules) {
     set.add(r.name);
@@ -129,7 +129,7 @@ function buildSuggestions(rules: UnifiedRule[]): string[] {
   return Array.from(set).sort();
 }
 
-function matchesSearch(rule: UnifiedRule, query: string): boolean {
+function matchesSearch(rule: UnifiedRuleSummary, query: string): boolean {
   if (!query) return true;
   const q = query.toLowerCase();
   const terms = q.split(/\s+/).filter(Boolean);
@@ -153,7 +153,7 @@ function matchesSearch(rule: UnifiedRule, query: string): boolean {
   });
 }
 
-function matchesFilters(rule: UnifiedRule, filters: FilterState): boolean {
+function matchesFilters(rule: UnifiedRuleSummary, filters: FilterState): boolean {
   if (filters.status.length > 0 && !filters.status.includes(rule.status)) return false;
   if (filters.severity.length > 0 && !filters.severity.includes(rule.severity)) return false;
   if (filters.monitorType.length > 0 && !filters.monitorType.includes(rule.monitorType))
@@ -179,7 +179,7 @@ function matchesFilters(rule: UnifiedRule, filters: FilterState): boolean {
 // All unique label keys from rules
 // ============================================================================
 
-function collectLabelKeys(rules: UnifiedRule[]): string[] {
+function collectLabelKeys(rules: UnifiedRuleSummary[]): string[] {
   const keys = new Set<string>();
   for (const r of rules) {
     for (const k of Object.keys(r.labels)) keys.add(k);
@@ -188,8 +188,8 @@ function collectLabelKeys(rules: UnifiedRule[]): string[] {
 }
 
 function collectUniqueValues(
-  rules: UnifiedRule[],
-  field: (r: UnifiedRule) => string | string[]
+  rules: UnifiedRuleSummary[],
+  field: (r: UnifiedRuleSummary) => string | string[]
 ): string[] {
   const set = new Set<string>();
   for (const r of rules) {
@@ -200,7 +200,7 @@ function collectUniqueValues(
   return Array.from(set).sort();
 }
 
-function collectLabelValues(rules: UnifiedRule[], key: string): string[] {
+function collectLabelValues(rules: UnifiedRuleSummary[], key: string): string[] {
   const set = new Set<string>();
   for (const r of rules) {
     const v = r.labels[key];
@@ -386,11 +386,11 @@ function useResizableColumns(
 // ============================================================================
 
 interface MonitorsEuiTableProps {
-  items: UnifiedRule[];
+  items: UnifiedRuleSummary[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- EuiInMemoryTable column type is complex
   columns: any[];
   loading: boolean;
-  rowProps: (item: UnifiedRule) => React.HTMLAttributes<HTMLTableRowElement>;
+  rowProps: (item: UnifiedRuleSummary) => React.HTMLAttributes<HTMLTableRowElement>;
 }
 
 const MonitorsEuiTable = React.memo(
@@ -433,7 +433,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({ ...DEFAULT_WIDTHS });
-  const [selectedMonitor, setSelectedMonitor] = useState<UnifiedRule | null>(null);
+  const [selectedMonitor, setSelectedMonitor] = useState<UnifiedRuleSummary | null>(null);
   const [showCreatePopover, setShowCreatePopover] = useState(false);
   const [showSaveSearchInput, setShowSaveSearchInput] = useState(false);
   const [saveSearchName, setSaveSearchName] = useState('');
@@ -441,7 +441,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   const tableWrapperRef = useRef<HTMLDivElement>(null);
 
   const rowProps = useCallback(
-    (item: UnifiedRule) => ({
+    (item: UnifiedRuleSummary) => ({
       style: selectedIds.has(item.id) ? { backgroundColor: '#F0F5FF' } : undefined,
     }),
     [selectedIds]
@@ -560,7 +560,8 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
         try {
           const data = JSON.parse(ev.target?.result as string);
           const configs = Array.isArray(data) ? data : data.monitors;
-          if (onImport && Array.isArray(configs)) onImport(configs);
+          if (onImport && Array.isArray(configs))
+            onImport(configs as Array<Record<string, unknown>>);
         } catch (_err) {
           alert('Invalid JSON file');
         }
@@ -594,7 +595,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
           />
         ),
         width: '32px',
-        render: (_: unknown, item: UnifiedRule) => (
+        render: (_: unknown, item: UnifiedRuleSummary) => (
           <input
             type="checkbox"
             checked={selectedIds.has(item.id)}
@@ -613,7 +614,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
           sortable: true,
           truncateText: true,
           width: w('name'),
-          render: (name: string, item: UnifiedRule) => (
+          render: (name: string, item: UnifiedRuleSummary) => (
             <span
               role="button"
               tabIndex={0}
@@ -701,7 +702,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
         cols.push({
           field: 'datasourceId',
           name: 'Datasource',
-          sortable: (r: UnifiedRule) =>
+          sortable: (r: UnifiedRuleSummary) =>
             (dsNameMap.get(r.datasourceId) || r.datasourceId).toLowerCase(),
           width: w('datasource'),
           render: (id: string) => dsNameMap.get(id) || id,

@@ -9,6 +9,7 @@
  * API reference: https://opensearch.org/docs/latest/observing-your-data/alerting/api/
  */
 import {
+  AlertingOSClient,
   Logger,
   OpenSearchBackend,
   OSMonitor,
@@ -36,7 +37,7 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
   // Monitors
   // =========================================================================
 
-  async getMonitors(client: any): Promise<OSMonitor[]> {
+  async getMonitors(client: AlertingOSClient): Promise<OSMonitor[]> {
     const PAGE_SIZE = 100;
     const monitors: OSMonitor[] = [];
     let searchAfter: unknown[] | undefined;
@@ -72,7 +73,7 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
     return monitors;
   }
 
-  async getMonitor(client: any, monitorId: string): Promise<OSMonitor | null> {
+  async getMonitor(client: AlertingOSClient, monitorId: string): Promise<OSMonitor | null> {
     try {
       const resp = await this.req<OSGetMonitorResponse>(
         client,
@@ -86,7 +87,10 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
     }
   }
 
-  async createMonitor(client: any, monitor: Omit<OSMonitor, 'id'>): Promise<OSMonitor> {
+  async createMonitor(
+    client: AlertingOSClient,
+    monitor: Omit<OSMonitor, 'id'>
+  ): Promise<OSMonitor> {
     const resp = await this.req<OSCreateMonitorResponse>(
       client,
       'POST',
@@ -100,7 +104,7 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
   }
 
   async updateMonitor(
-    client: any,
+    client: AlertingOSClient,
     monitorId: string,
     input: Partial<OSMonitor>
   ): Promise<OSMonitor | null> {
@@ -136,7 +140,7 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
     }
   }
 
-  async deleteMonitor(client: any, monitorId: string): Promise<boolean> {
+  async deleteMonitor(client: AlertingOSClient, monitorId: string): Promise<boolean> {
     try {
       await this.req(client, 'DELETE', `/_plugins/_alerting/monitors/${monitorId}`);
       return true;

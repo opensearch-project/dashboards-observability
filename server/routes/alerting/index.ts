@@ -11,10 +11,11 @@ import { IRouter, RequestHandlerContext, SavedObject } from '../../../../../src/
 import type {
   AlertingOSClient,
   Datasource,
-  DatasourceService,
   Logger,
+  OSMonitor,
 } from '../../../common/types/alerting';
 import { MultiBackendAlertService } from '../../services/alerting';
+import type { InMemoryDatasourceService } from '../../services/alerting/datasource_service';
 
 /**
  * Shape of the OSD request-handler context we rely on. `dataSource` is
@@ -38,6 +39,7 @@ interface DataConnectionSOAttributes {
   connectionId?: string;
   type?: string;
 }
+
 import {
   handleListDatasources,
   handleGetDatasource,
@@ -68,9 +70,25 @@ import {
 import type { PrometheusMetadataService } from '../../services/alerting/prometheus_metadata_service';
 import { handleGetAlertmanagerConfig } from './alertmanager_handlers';
 
+/**
+ * Adapt handler-result body ({ error: '...' } or arbitrary data) to OSD's
+ * ResponseError shape ({ message, attributes }). `error` → `message`, and the
+ * remaining fields become `attributes`.
+ */
+function toErrorBody(
+  body: Record<string, unknown>
+): { message: string; attributes?: Record<string, unknown> } {
+  const { error, message, ...rest } = body as { error?: unknown; message?: unknown };
+  const text =
+    typeof error === 'string' ? error : typeof message === 'string' ? message : 'An error occurred';
+  return Object.keys(rest).length > 0
+    ? { message: text, attributes: rest as Record<string, unknown> }
+    : { message: text };
+}
+
 export function registerAlertingRoutes(
   router: IRouter,
-  datasourceService: DatasourceService,
+  datasourceService: InMemoryDatasourceService,
   alertService: MultiBackendAlertService,
   logger?: Logger,
   metadataService?: PrometheusMetadataService
@@ -199,7 +217,7 @@ export function registerAlertingRoutes(
       const result = await handleGetDatasource(datasourceService, req.params.id);
       return result.status === 200
         ? res.ok({ body: result.body })
-        : res.notFound({ body: result.body });
+        : res.notFound({ body: toErrorBody(result.body) });
     }
   );
 
@@ -244,7 +262,7 @@ export function registerAlertingRoutes(
       );
       return result.status === 200
         ? res.ok({ body: result.body })
-        : res.notFound({ body: result.body });
+        : res.notFound({ body: toErrorBody(result.body) });
     }
   );
 
@@ -257,7 +275,7 @@ export function registerAlertingRoutes(
       const result = await handleDeleteDatasource(datasourceService, req.params.id);
       return result.status === 200
         ? res.ok({ body: result.body })
-        : res.notFound({ body: result.body });
+        : res.notFound({ body: toErrorBody(result.body) });
     }
   );
 
@@ -341,7 +359,7 @@ export function registerAlertingRoutes(
       );
       return result.status === 200
         ? res.ok({ body: result.body })
-        : res.badRequest({ body: result.body });
+        : res.badRequest({ body: toErrorBody(result.body) });
     }
   );
 
@@ -359,7 +377,7 @@ export function registerAlertingRoutes(
       );
       return result.status === 200
         ? res.ok({ body: result.body })
-        : res.notFound({ body: result.body });
+        : res.notFound({ body: toErrorBody(result.body) });
     }
   );
 
@@ -446,7 +464,8 @@ export function registerAlertingRoutes(
         alertService,
         await getAlertingClient(ctx, req.params.dsId),
         req.params.dsId,
-        req.body
+        // OSD schema validates loosely; narrow to the typed domain shape
+        (req.body as unknown) as Omit<OSMonitor, 'id'>
       );
       return res.ok({ body: result.body });
     }
@@ -466,11 +485,12 @@ export function registerAlertingRoutes(
         await getAlertingClient(ctx, req.params.dsId),
         req.params.dsId,
         req.params.monitorId,
-        req.body
+        // OSD schema validates loosely; narrow to the typed domain shape
+        (req.body as unknown) as Partial<OSMonitor>
       );
       return result.status === 200
         ? res.ok({ body: result.body })
-        : res.notFound({ body: result.body });
+        : res.notFound({ body: toErrorBody(result.body) });
     }
   );
 
@@ -490,9 +510,9 @@ export function registerAlertingRoutes(
         );
         return result.status === 200
           ? res.ok({ body: result.body })
-          : res.notFound({ body: result.body });
+          : res.notFound({ body: toErrorBody(result.body) });
       } catch (_e) {
-        return res.badRequest({ body: { error: `Invalid datasource: ${req.params.dsId}` } });
+        return res.badRequest({ body: { message: `Invalid datasource: ${req.params.dsId}` } });
       }
     }
   );
@@ -510,7 +530,7 @@ export function registerAlertingRoutes(
       );
       return result.status === 200
         ? res.ok({ body: result.body })
-        : res.badRequest({ body: result.body });
+        : res.badRequest({ body: toErrorBody(result.body) });
     }
   );
 
@@ -548,7 +568,7 @@ export function registerAlertingRoutes(
       );
       return result.status === 200
         ? res.ok({ body: result.body })
-        : res.badRequest({ body: result.body });
+        : res.badRequest({ body: toErrorBody(result.body) });
     }
   );
 
@@ -565,7 +585,7 @@ export function registerAlertingRoutes(
       );
       return result.status === 200
         ? res.ok({ body: result.body })
-        : res.badRequest({ body: result.body });
+        : res.badRequest({ body: toErrorBody(result.body) });
     }
   );
 
@@ -586,7 +606,7 @@ export function registerAlertingRoutes(
       );
       return result.status === 200
         ? res.ok({ body: result.body })
-        : res.notFound({ body: result.body });
+        : res.notFound({ body: toErrorBody(result.body) });
     }
   );
 
@@ -606,7 +626,7 @@ export function registerAlertingRoutes(
       );
       return result.status === 200
         ? res.ok({ body: result.body })
-        : res.notFound({ body: result.body });
+        : res.notFound({ body: toErrorBody(result.body) });
     }
   );
 

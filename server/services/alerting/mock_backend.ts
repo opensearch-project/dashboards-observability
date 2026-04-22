@@ -5,9 +5,13 @@
 
 /**
  * Mock backends — simulate real OpenSearch Alerting and Prometheus API responses.
+ *
+ * The mock is datasource-agnostic: it maintains a single in-memory dataset and
+ * ignores the `client` argument. Tests that need to simulate multiple
+ * datasources should run against the real backend.
  */
 import {
-  Datasource,
+  AlertingOSClient,
   Logger,
   OpenSearchBackend,
   OSMonitor,
@@ -18,14 +22,19 @@ import {
 let idCounter = 100;
 const nextId = () => `mock-${++idCounter}`;
 
+// Key used for the single-bucket in-memory storage. The mock used to partition
+// by datasource id; now it's flat, but we keep a constant key so the existing
+// seeding path (`seed(dsId)`) keeps working unchanged.
+const MOCK_KEY = '__mock__';
+
 // ============================================================================
 // Mock OpenSearch Alerting Backend
 // ============================================================================
 
 export class MockOpenSearchBackend implements OpenSearchBackend {
   readonly type = 'opensearch' as const;
-  private monitors: Map<string, Map<string, OSMonitor>> = new Map(); // dsId -> monitorId -> monitor
-  private alerts: Map<string, OSAlert[]> = new Map(); // dsId -> alerts
+  private monitors: Map<string, Map<string, OSMonitor>> = new Map(); // bucket -> monitorId -> monitor
+  private alerts: Map<string, OSAlert[]> = new Map();
   private destinations: Map<string, Map<string, OSDestination>> = new Map();
   private readonly logger: Logger;
 
@@ -35,41 +44,45 @@ export class MockOpenSearchBackend implements OpenSearchBackend {
 
   // --- Monitors ---
 
-  async getMonitors(ds: Datasource): Promise<OSMonitor[]> {
-    return Array.from(this.monitors.get(ds.id)?.values() ?? []);
+  async getMonitors(_client: AlertingOSClient): Promise<OSMonitor[]> {
+    return Array.from(this.monitors.get(MOCK_KEY)?.values() ?? []);
   }
 
-  async getMonitor(ds: Datasource, monitorId: string): Promise<OSMonitor | null> {
-    return this.monitors.get(ds.id)?.get(monitorId) ?? null;
+  async getMonitor(_client: AlertingOSClient, monitorId: string): Promise<OSMonitor | null> {
+    return this.monitors.get(MOCK_KEY)?.get(monitorId) ?? null;
   }
 
-  async createMonitor(ds: Datasource, input: Omit<OSMonitor, 'id'>): Promise<OSMonitor> {
+  async createMonitor(_client: AlertingOSClient, input: Omit<OSMonitor, 'id'>): Promise<OSMonitor> {
     const id = nextId();
     const monitor: OSMonitor = { ...input, id };
-    if (!this.monitors.has(ds.id)) this.monitors.set(ds.id, new Map());
-    this.monitors.get(ds.id)!.set(id, monitor);
-    this.logger.info(`[OS Mock] Created monitor ${id} for ${ds.id}`);
+    if (!this.monitors.has(MOCK_KEY)) this.monitors.set(MOCK_KEY, new Map());
+    this.monitors.get(MOCK_KEY)!.set(id, monitor);
+    this.logger.info(`[OS Mock] Created monitor ${id}`);
     return monitor;
   }
 
   async updateMonitor(
-    ds: Datasource,
+    _client: AlertingOSClient,
     monitorId: string,
     input: Partial<OSMonitor>
   ): Promise<OSMonitor | null> {
-    const m = this.monitors.get(ds.id)?.get(monitorId);
+    const m = this.monitors.get(MOCK_KEY)?.get(monitorId);
     if (!m) return null;
     Object.assign(m, input, { last_update_time: Date.now() });
     return m;
   }
 
-  async deleteMonitor(ds: Datasource, monitorId: string): Promise<boolean> {
-    return this.monitors.get(ds.id)?.delete(monitorId) ?? false;
+  async deleteMonitor(_client: AlertingOSClient, monitorId: string): Promise<boolean> {
+    return this.monitors.get(MOCK_KEY)?.delete(monitorId) ?? false;
   }
 
-  async runMonitor(ds: Datasource, monitorId: string, _dryRun?: boolean): Promise<unknown> {
+  async runMonitor(
+    _client: AlertingOSClient,
+    monitorId: string,
+    _dryRun?: boolean
+  ): Promise<unknown> {
     // Return a realistic execution result based on monitor type
-    const monitor = this.monitors.get(ds.id)?.get(monitorId);
+    const monitor = this.monitors.get(MOCK_KEY)?.get(monitorId);
     if (monitor) {
       const input = monitor.inputs[0];
       if (input && 'uri' in input) {
@@ -120,7 +133,7 @@ export class MockOpenSearchBackend implements OpenSearchBackend {
   }
 
   async searchQuery(
-    _ds: Datasource,
+    _client: AlertingOSClient,
     _indices: string[],
     _body: Record<string, unknown>
   ): Promise<unknown> {
@@ -148,13 +161,17 @@ export class MockOpenSearchBackend implements OpenSearchBackend {
 
   // --- Alerts ---
 
-  async getAlerts(ds: Datasource): Promise<{ alerts: OSAlert[]; totalAlerts: number }> {
-    const alerts = this.alerts.get(ds.id) ?? [];
+  async getAlerts(_client: AlertingOSClient): Promise<{ alerts: OSAlert[]; totalAlerts: number }> {
+    const alerts = this.alerts.get(MOCK_KEY) ?? [];
     return { alerts, totalAlerts: alerts.length };
   }
 
-  async acknowledgeAlerts(ds: Datasource, _monitorId: string, alertIds: string[]): Promise<any> {
-    const alerts = this.alerts.get(ds.id) ?? [];
+  async acknowledgeAlerts(
+    _client: AlertingOSClient,
+    _monitorId: string,
+    alertIds: string[]
+  ): Promise<unknown> {
+    const alerts = this.alerts.get(MOCK_KEY) ?? [];
     for (const a of alerts) {
       if (alertIds.includes(a.id)) {
         a.state = 'ACKNOWLEDGED';
@@ -166,23 +183,23 @@ export class MockOpenSearchBackend implements OpenSearchBackend {
 
   // --- Destinations ---
 
-  async getDestinations(ds: Datasource): Promise<OSDestination[]> {
-    return Array.from(this.destinations.get(ds.id)?.values() ?? []);
+  async getDestinations(_client: AlertingOSClient): Promise<OSDestination[]> {
+    return Array.from(this.destinations.get(MOCK_KEY)?.values() ?? []);
   }
 
   async createDestination(
-    ds: Datasource,
+    _client: AlertingOSClient,
     input: Omit<OSDestination, 'id'>
   ): Promise<OSDestination> {
     const id = nextId();
     const dest: OSDestination = { ...input, id };
-    if (!this.destinations.has(ds.id)) this.destinations.set(ds.id, new Map());
-    this.destinations.get(ds.id)!.set(id, dest);
+    if (!this.destinations.has(MOCK_KEY)) this.destinations.set(MOCK_KEY, new Map());
+    this.destinations.get(MOCK_KEY)!.set(id, dest);
     return dest;
   }
 
-  async deleteDestination(ds: Datasource, destId: string): Promise<boolean> {
-    return this.destinations.get(ds.id)?.delete(destId) ?? false;
+  async deleteDestination(_client: AlertingOSClient, destId: string): Promise<boolean> {
+    return this.destinations.get(MOCK_KEY)?.delete(destId) ?? false;
   }
 
   // --- Seeding ---

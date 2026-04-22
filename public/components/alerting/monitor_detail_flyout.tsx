@@ -26,6 +26,7 @@ import {
   EuiPanel,
   EuiDescriptionList,
   EuiBasicTable,
+  EuiBasicTableColumn,
   EuiAccordion,
   EuiToolTip,
   EuiCodeBlock,
@@ -35,10 +36,13 @@ import {
 } from '@elastic/eui';
 import { EchartsRender } from './echarts_render';
 import {
-  UnifiedRule,
-  UnifiedAlertSeverity,
+  AlertHistoryEntry,
+  NotificationRouting,
   OSMonitor,
   OSMonitorInput,
+  UnifiedAlertSeverity,
+  UnifiedRule,
+  UnifiedRuleSummary,
 } from '../../../common/types/alerting';
 import { AlarmsApiClient } from './services/alarms_client';
 import { DeleteModal } from '../common/helpers/delete_modal';
@@ -176,11 +180,11 @@ const ConditionPreviewGraph: React.FC<{
 // ============================================================================
 
 export interface MonitorDetailFlyoutProps {
-  monitor: UnifiedRule;
+  monitor: UnifiedRuleSummary;
   apiClient: AlarmsApiClient;
   onClose: () => void;
   onDelete: (id: string) => void;
-  onClone: (monitor: UnifiedRule) => void;
+  onClone: (monitor: UnifiedRuleSummary) => void;
 }
 
 // ============================================================================
@@ -220,16 +224,17 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
     };
   }, [monitor.datasourceId, monitor.id, apiClient]);
 
-  // Use detail data when available, fall back to summary props
-  const full = detail || monitor;
-  const alertHistory = full.alertHistory ?? [];
-  const conditionPreviewData = full.conditionPreviewData ?? [];
-  const notificationRouting = full.notificationRouting ?? [];
-  const suppressionRules = full.suppressionRules ?? [];
-  const description = full.description ?? '';
-  const aiSummary = full.aiSummary ?? '';
-  const evaluationInterval = full.evaluationInterval ?? '—';
-  const pendingPeriod = full.pendingPeriod ?? '—';
+  // Use detail data when available, fall back to summary props.
+  // `detail` has the full shape; `monitor` is only a summary, so
+  // detail-only fields are empty until the fetch resolves.
+  const alertHistory = detail?.alertHistory ?? [];
+  const conditionPreviewData = detail?.conditionPreviewData ?? [];
+  const notificationRouting = detail?.notificationRouting ?? [];
+  const suppressionRules = detail?.suppressionRules ?? [];
+  const description = detail?.description ?? '';
+  const aiSummary = detail?.aiSummary ?? '';
+  const evaluationInterval = detail?.evaluationInterval ?? monitor.evaluationInterval ?? '—';
+  const pendingPeriod = detail?.pendingPeriod ?? monitor.pendingPeriod ?? '—';
 
   const isJson = (s: string) => {
     try {
@@ -246,12 +251,12 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
 
   // Detect monitor kind from raw data for type-specific rendering
   const monitorKind = monitor.labels?.monitor_kind as string | undefined;
-  const rawMonitor = (full as UnifiedRule).raw as OSMonitor | undefined;
+  const rawMonitor = detail?.raw as OSMonitor | undefined;
   const rawInput: OSMonitorInput | undefined =
     rawMonitor && 'inputs' in rawMonitor ? rawMonitor.inputs?.[0] : undefined;
 
   // Alert history columns
-  const historyColumns = [
+  const historyColumns: Array<EuiBasicTableColumn<AlertHistoryEntry>> = [
     {
       field: 'timestamp',
       name: 'Time',
@@ -268,7 +273,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   ];
 
   // Notification routing columns
-  const routingColumns = [
+  const routingColumns: Array<EuiBasicTableColumn<NotificationRouting>> = [
     { field: 'channel', name: 'Channel', width: '100px' },
     { field: 'destination', name: 'Destination' },
     {
@@ -492,11 +497,11 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                   listItems={[
                     { title: 'Evaluation Interval', description: evaluationInterval },
                     { title: 'Pending Period', description: pendingPeriod },
-                    ...(monitor.firingPeriod
-                      ? [{ title: 'Firing Period', description: monitor.firingPeriod }]
+                    ...(detail?.firingPeriod
+                      ? [{ title: 'Firing Period', description: detail.firingPeriod }]
                       : []),
-                    ...(monitor.lookbackPeriod
-                      ? [{ title: 'Lookback Period', description: monitor.lookbackPeriod }]
+                    ...(detail?.lookbackPeriod
+                      ? [{ title: 'Lookback Period', description: detail.lookbackPeriod }]
                       : []),
                     ...(monitor.threshold
                       ? [
