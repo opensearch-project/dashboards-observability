@@ -12,8 +12,8 @@
  *  - Request deduplication for concurrent calls
  *  - Full CRUD: monitors, alert actions
  */
-import { Datasource } from '../../../../server/services/alerting';
 import type {
+  Datasource,
   DatasourceWarning,
   PrometheusMetricMetadata,
   UnifiedAlertSummary,
@@ -21,7 +21,7 @@ import type {
   UnifiedAlert,
   UnifiedRule,
   OSMonitor,
-} from '../../../../common/types/alerting/types';
+} from '../../../../common/types/alerting';
 
 // ---------------------------------------------------------------------------
 // HttpClient interface — implemented by OSD's http service adapter or fetch()
@@ -254,32 +254,32 @@ export class AlarmsApiClient {
 
   async createMonitor(
     data: Partial<OSMonitor> | Record<string, unknown>,
-    dsId = 'ds-1'
+    dsId: string
   ): Promise<MonitorResponse> {
     return this.httpPost<MonitorResponse>(this.paths.monitors(dsId), data);
   }
   async updateMonitor(
     id: string,
     data: Partial<OSMonitor> | Record<string, unknown>,
-    dsId = 'ds-1'
+    dsId: string
   ): Promise<MonitorResponse> {
     return this.httpPut<MonitorResponse>(
       `${this.paths.monitors(dsId)}/${encodeURIComponent(id)}`,
       data
     );
   }
-  async deleteMonitor(id: string, dsId = 'ds-1'): Promise<MonitorDeleteResponse> {
+  async deleteMonitor(id: string, dsId: string): Promise<MonitorDeleteResponse> {
     return this.httpDelete<MonitorDeleteResponse>(
       `${this.paths.monitors(dsId)}/${encodeURIComponent(id)}`
     );
   }
   async importMonitors(
     json: Array<Record<string, unknown>>,
-    dsId = 'ds-1'
+    dsId: string
   ): Promise<MonitorImportResponse> {
     return this.httpPost<MonitorImportResponse>(`${this.paths.monitors(dsId)}/import`, json);
   }
-  async exportMonitors(dsId = 'ds-1'): Promise<MonitorExportResponse> {
+  async exportMonitors(dsId: string): Promise<MonitorExportResponse> {
     return this.httpGet<MonitorExportResponse>(`${this.paths.monitors(dsId)}/export`);
   }
 

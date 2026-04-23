@@ -348,31 +348,48 @@ export interface PromRuleGroup {
 // Service interfaces
 // ============================================================================
 
-/** OpenSearch Alerting backend */
+/** OpenSearch Alerting backend.
+ *
+ * Implementations talk to the cluster through the caller-provided scoped
+ * `AlertingOSClient` (resolved via OSD's multi-data-source client factory).
+ * The datasource identity is already baked into that client, so the methods
+ * take the client directly rather than a `Datasource`.
+ */
 export interface OpenSearchBackend {
   readonly type: 'opensearch';
 
   // Monitors
-  getMonitors(ds: Datasource): Promise<OSMonitor[]>;
-  getMonitor(ds: Datasource, monitorId: string): Promise<OSMonitor | null>;
-  createMonitor(ds: Datasource, monitor: Omit<OSMonitor, 'id'>): Promise<OSMonitor>;
+  getMonitors(client: AlertingOSClient): Promise<OSMonitor[]>;
+  getMonitor(client: AlertingOSClient, monitorId: string): Promise<OSMonitor | null>;
+  createMonitor(client: AlertingOSClient, monitor: Omit<OSMonitor, 'id'>): Promise<OSMonitor>;
   updateMonitor(
-    ds: Datasource,
+    client: AlertingOSClient,
     monitorId: string,
     monitor: Partial<OSMonitor>
   ): Promise<OSMonitor | null>;
-  deleteMonitor(ds: Datasource, monitorId: string): Promise<boolean>;
-  runMonitor(ds: Datasource, monitorId: string, dryRun?: boolean): Promise<unknown>;
-  searchQuery(ds: Datasource, indices: string[], body: Record<string, unknown>): Promise<unknown>;
+  deleteMonitor(client: AlertingOSClient, monitorId: string): Promise<boolean>;
+  runMonitor(client: AlertingOSClient, monitorId: string, dryRun?: boolean): Promise<unknown>;
+  searchQuery(
+    client: AlertingOSClient,
+    indices: string[],
+    body: Record<string, unknown>
+  ): Promise<unknown>;
 
   // Alerts
-  getAlerts(ds: Datasource): Promise<{ alerts: OSAlert[]; totalAlerts: number }>;
-  acknowledgeAlerts(ds: Datasource, monitorId: string, alertIds: string[]): Promise<unknown>;
+  getAlerts(client: AlertingOSClient): Promise<{ alerts: OSAlert[]; totalAlerts: number }>;
+  acknowledgeAlerts(
+    client: AlertingOSClient,
+    monitorId: string,
+    alertIds: string[]
+  ): Promise<unknown>;
 
   // Destinations
-  getDestinations(ds: Datasource): Promise<OSDestination[]>;
-  createDestination(ds: Datasource, dest: Omit<OSDestination, 'id'>): Promise<OSDestination>;
-  deleteDestination(ds: Datasource, destId: string): Promise<boolean>;
+  getDestinations(client: AlertingOSClient): Promise<OSDestination[]>;
+  createDestination(
+    client: AlertingOSClient,
+    dest: Omit<OSDestination, 'id'>
+  ): Promise<OSDestination>;
+  deleteDestination(client: AlertingOSClient, destId: string): Promise<boolean>;
 }
 
 // ============================================================================

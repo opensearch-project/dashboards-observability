@@ -5,16 +5,15 @@
 
 import React, { useMemo } from 'react';
 import { HashRouter, Route } from 'react-router-dom';
-import { CoreStart } from '../../../../../src/core/public';
+import { coreRefs } from '../../framework/core_refs';
 import { AlarmsPage } from './alarms_page';
 import { AlarmsApiClient } from './services/alarms_client';
 
-interface AlertingHomeProps {
-  CoreStartProp: CoreStart;
-}
+export const AlertingHome = () => {
+  const http = coreRefs.http;
+  const apiClient = useMemo(() => (http ? new AlarmsApiClient(http) : null), [http]);
 
-export const AlertingHome = ({ CoreStartProp }: AlertingHomeProps) => {
-  const apiClient = useMemo(() => new AlarmsApiClient(CoreStartProp.http), [CoreStartProp.http]);
+  if (!apiClient) return null;
 
   return (
     <HashRouter>

@@ -27,7 +27,7 @@ import {
   EuiBadge,
   EuiToolTip,
 } from '@elastic/eui';
-import { Datasource } from '../../../server/services/alerting';
+import { Datasource } from '../../../common/types/alerting';
 
 // ============================================================================
 // Types

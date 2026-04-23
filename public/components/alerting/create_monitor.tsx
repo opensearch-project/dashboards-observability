@@ -36,7 +36,7 @@ import {
 } from '@elastic/eui';
 import { PromQLEditor, validatePromQL } from './promql_editor';
 import { MetricBrowser } from './metric_browser';
-import { Datasource, UnifiedAlertSeverity } from '../../../server/services/alerting';
+import { Datasource, UnifiedAlertSeverity } from '../../../common/types/alerting';
 import {
   validateMonitorForm,
   MonitorFormState as ValidatorFormState,

@@ -7,13 +7,13 @@
  * Route handlers — pure functions that work with any HTTP framework.
  * Exposes backend-native API shapes + unified views.
  */
-import {
+import type {
   AlertingOSClient,
   DatasourceService,
   Datasource,
-  MultiBackendAlertService,
   OSMonitor,
-} from '../../services/alerting';
+} from '../../../common/types/alerting';
+import { MultiBackendAlertService } from '../../services/alerting';
 import { toHandlerResult } from './route_utils';
 import type { HandlerResult } from './route_utils';
 

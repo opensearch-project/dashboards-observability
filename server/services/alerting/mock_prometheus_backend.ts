@@ -489,24 +489,3 @@ function inferMetricType(name: string): PrometheusMetricMetadata['type'] {
   if (name.includes('duration') || name.includes('latency')) return 'histogram';
   return 'gauge'; // default assumption for unknown metrics
 }
-
-// ============================================================================
-// Helpers
-// ============================================================================
-/** Infer Prometheus metric type from name suffix heuristics. */
-function inferMetricType(name: string): PrometheusMetricMetadata['type'] {
-  if (name.endsWith('_total') || name.endsWith('_count')) return 'counter';
-  if (name.endsWith('_bucket')) return 'histogram';
-  if (name.endsWith('_sum')) return 'counter'; // histogram/summary sub-metric
-  if (
-    name.endsWith('_bytes') ||
-    name.endsWith('_seconds') ||
-    name.endsWith('_ratio') ||
-    name.endsWith('_percent') ||
-    name.endsWith('_info') ||
-    name === 'up'
-  )
-    return 'gauge';
-  if (name.includes('duration') || name.includes('latency')) return 'histogram';
-  return 'gauge'; // default assumption for unknown metrics
-}

@@ -7,6 +7,7 @@
  * Datasource service — manages alert datasource configurations
  */
 import {
+  AlertingOSClient,
   Datasource,
   DatasourceService,
   PrometheusBackend,
@@ -55,7 +56,10 @@ export class InMemoryDatasourceService implements DatasourceService {
     return existed;
   }
 
-  async testConnection(client: any, id: string): Promise<{ success: boolean; message: string }> {
+  async testConnection(
+    client: AlertingOSClient,
+    id: string
+  ): Promise<{ success: boolean; message: string }> {
     const datasource = this.datasources.get(id);
     if (!datasource) {
       return { success: false, message: 'Datasource not found' };
@@ -90,7 +94,7 @@ export class InMemoryDatasourceService implements DatasourceService {
     }
   }
 
-  async listWorkspaces(client: any, dsId: string): Promise<Datasource[]> {
+  async listWorkspaces(client: AlertingOSClient, dsId: string): Promise<Datasource[]> {
     const ds = this.datasources.get(dsId);
     if (!ds || ds.type !== 'prometheus' || !this.promBackend) return [];
 

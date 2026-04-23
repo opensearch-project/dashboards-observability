@@ -15,14 +15,15 @@
  *  - AlertsByGroup: generic label-based grouping mini-chart
  */
 import React, { useMemo } from 'react';
+import type { EChartsOption } from 'echarts';
 import { EuiText } from '@elastic/eui';
 import { EchartsRender } from './echarts_render';
 import { escapeHtml, countBy } from './shared_constants';
 import {
-  UnifiedAlert,
+  UnifiedAlertSummary,
   UnifiedAlertSeverity,
   UnifiedAlertState,
-} from '../../../server/services/alerting';
+} from '../../../common/types/alerting';
 
 // ============================================================================
 // Color maps
@@ -68,7 +69,7 @@ const STATE_ORDER: UnifiedAlertState[] = [
 // SeverityDonut
 // ============================================================================
 
-export const SeverityDonut: React.FC<{ alerts: UnifiedAlert[] }> = ({ alerts }) => {
+export const SeverityDonut: React.FC<{ alerts: UnifiedAlertSummary[] }> = ({ alerts }) => {
   const spec = useMemo(() => {
     const counts = countBy(alerts, (a) => a.severity);
     const total = alerts.length;
@@ -132,7 +133,7 @@ export const SeverityDonut: React.FC<{ alerts: UnifiedAlert[] }> = ({ alerts }) 
 // AlertTimeline — stacked bar chart by time buckets
 // ============================================================================
 
-export const AlertTimeline: React.FC<{ alerts: UnifiedAlert[] }> = ({ alerts }) => {
+export const AlertTimeline: React.FC<{ alerts: UnifiedAlertSummary[] }> = ({ alerts }) => {
   const spec = useMemo(() => {
     if (alerts.length === 0) return null;
 
@@ -202,7 +203,7 @@ export const AlertTimeline: React.FC<{ alerts: UnifiedAlert[] }> = ({ alerts }) 
         name: s.key,
         type: 'bar' as const,
         stack: 'severity',
-        data: buckets.map((b) => (b as Record<string, number>)[s.key]),
+        data: buckets.map((b) => ((b as unknown) as Record<string, number>)[s.key]),
         itemStyle: { color: s.color },
         barMaxWidth: 32,
       })),
@@ -223,7 +224,7 @@ export const AlertTimeline: React.FC<{ alerts: UnifiedAlert[] }> = ({ alerts }) 
 // StateBreakdown — horizontal stacked bar
 // ============================================================================
 
-export const StateBreakdown: React.FC<{ alerts: UnifiedAlert[] }> = ({ alerts }) => {
+export const StateBreakdown: React.FC<{ alerts: UnifiedAlertSummary[] }> = ({ alerts }) => {
   const spec = useMemo(() => {
     const counts = countBy(alerts, (a) => a.state);
     const presentStates = STATE_ORDER.filter((s) => (counts[s] || 0) > 0);
@@ -261,8 +262,8 @@ export const StateBreakdown: React.FC<{ alerts: UnifiedAlert[] }> = ({ alerts })
 // AlertsByDatasource — horizontal bar chart
 // ============================================================================
 
-export const AlertsByDatasource: React.FC<{ alerts: UnifiedAlert[] }> = ({ alerts }) => {
-  const spec = useMemo(() => {
+export const AlertsByDatasource: React.FC<{ alerts: UnifiedAlertSummary[] }> = ({ alerts }) => {
+  const spec = useMemo<{ option: EChartsOption; rowCount: number } | null>(() => {
     const groups = countBy(alerts, (a) => a.datasourceType || 'unknown');
     const sorted = Object.entries(groups)
       .sort((a, b) => b[1] - a[1])
@@ -274,13 +275,14 @@ export const AlertsByDatasource: React.FC<{ alerts: UnifiedAlert[] }> = ({ alert
       )
       .reverse();
     const values = [...sorted].map(([, count]) => count).reverse();
-    return {
+    const option: EChartsOption = {
       tooltip: {
         trigger: 'axis' as const,
         axisPointer: { type: 'shadow' as const },
-        formatter: (
-          params: { name: string; value: number } | Array<{ name: string; value: number }>
-        ) => {
+        formatter: (rawParams: unknown) => {
+          const params = rawParams as
+            | { name: string; value: number }
+            | Array<{ name: string; value: number }>;
           const p = Array.isArray(params) ? params[0] : params;
           return `<b>${escapeHtml(p.name)}</b>: ${p.value}`;
         },
@@ -315,6 +317,7 @@ export const AlertsByDatasource: React.FC<{ alerts: UnifiedAlert[] }> = ({ alert
         },
       ],
     };
+    return { option, rowCount: names.length };
   }, [alerts]);
 
   if (!spec)
@@ -324,16 +327,15 @@ export const AlertsByDatasource: React.FC<{ alerts: UnifiedAlert[] }> = ({ alert
       </EuiText>
     );
 
-  const barCount = spec.yAxis.data.length;
-  return <EchartsRender spec={spec} height={Math.max(80, barCount * 28 + 16)} />;
+  return <EchartsRender spec={spec.option} height={Math.max(80, spec.rowCount * 28 + 16)} />;
 };
 
 // ============================================================================
 // AlertsByMonitor — horizontal bar chart
 // ============================================================================
 
-export const AlertsByMonitor: React.FC<{ alerts: UnifiedAlert[] }> = ({ alerts }) => {
-  const spec = useMemo(() => {
+export const AlertsByMonitor: React.FC<{ alerts: UnifiedAlertSummary[] }> = ({ alerts }) => {
+  const spec = useMemo<{ option: EChartsOption; rowCount: number } | null>(() => {
     const groups = countBy(alerts, (a) => {
       const dashIdx = a.name.indexOf(' \u2014 ');
       return dashIdx > 0 ? a.name.substring(0, dashIdx) : a.name;
@@ -344,13 +346,14 @@ export const AlertsByMonitor: React.FC<{ alerts: UnifiedAlert[] }> = ({ alerts }
     if (sorted.length === 0) return null;
     const names = [...sorted].map(([name]) => name).reverse();
     const values = [...sorted].map(([, count]) => count).reverse();
-    return {
+    const option: EChartsOption = {
       tooltip: {
         trigger: 'axis' as const,
         axisPointer: { type: 'shadow' as const },
-        formatter: (
-          params: { name: string; value: number } | Array<{ name: string; value: number }>
-        ) => {
+        formatter: (rawParams: unknown) => {
+          const params = rawParams as
+            | { name: string; value: number }
+            | Array<{ name: string; value: number }>;
           const p = Array.isArray(params) ? params[0] : params;
           return `<b>${escapeHtml(p.name)}</b>: ${p.value}`;
         },
@@ -385,6 +388,7 @@ export const AlertsByMonitor: React.FC<{ alerts: UnifiedAlert[] }> = ({ alerts }
         },
       ],
     };
+    return { option, rowCount: names.length };
   }, [alerts]);
 
   if (!spec)
@@ -394,15 +398,14 @@ export const AlertsByMonitor: React.FC<{ alerts: UnifiedAlert[] }> = ({ alerts }
       </EuiText>
     );
 
-  const barCount = spec.yAxis.data.length;
-  return <EchartsRender spec={spec} height={Math.max(80, barCount * 28 + 16)} />;
+  return <EchartsRender spec={spec.option} height={Math.max(80, spec.rowCount * 28 + 16)} />;
 };
 
 // ============================================================================
 // AlertsByGroup — generic label-based grouping
 // ============================================================================
 
-export const AlertsByGroup: React.FC<{ alerts: UnifiedAlert[]; groupKey: string }> = ({
+export const AlertsByGroup: React.FC<{ alerts: UnifiedAlertSummary[]; groupKey: string }> = ({
   alerts,
   groupKey,
 }) => {
