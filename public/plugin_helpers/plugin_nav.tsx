@@ -23,7 +23,74 @@ import {
 } from '../../common/constants/apm';
 import { AppPluginStartDependencies } from '../types';
 
-export function registerAllPluginNavGroups(
+function registerIconSideNavGroups(
+  core: CoreSetup<AppPluginStartDependencies>,
+  apmEnabled: boolean
+) {
+  // Notebooks → Tools category
+  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+    {
+      id: observabilityNotebookID,
+      category: DEFAULT_APP_CATEGORIES.observabilityTools,
+      order: 400,
+      euiIconType: 'notebookApp',
+    },
+  ]);
+  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS[`security-analytics`], [
+    {
+      id: observabilityNotebookID,
+      category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
+      order: 400,
+    },
+  ]);
+  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+    {
+      id: observabilityNotebookID,
+      category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
+      order: 400,
+    },
+  ]);
+
+  if (apmEnabled) {
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+      {
+        id: observabilityApmServicesID,
+        category: DEFAULT_APP_CATEGORIES.applicationPerformance,
+        showInAllNavGroup: true,
+        order: 200,
+        euiIconType: 'navServiceMap',
+      },
+      {
+        id: observabilityApmApplicationMapID,
+        title: 'Topology Map',
+        category: undefined,
+        showInAllNavGroup: true,
+        order: 400,
+        euiIconType: 'graphApp',
+        startCluster: true,
+      },
+    ]);
+  } else {
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+      {
+        id: 'observability-services-nav',
+        category: DEFAULT_APP_CATEGORIES.traceAnalytics,
+        showInAllNavGroup: true,
+        order: 100,
+        euiIconType: 'navServiceMap',
+      },
+      {
+        id: 'observability-traces-nav',
+        category: DEFAULT_APP_CATEGORIES.traceAnalytics,
+        showInAllNavGroup: true,
+        order: 200,
+        euiIconType: 'apmApp',
+      },
+    ]);
+  }
+}
+
+function registerDefaultNavGroups(
   core: CoreSetup<AppPluginStartDependencies>,
   apmEnabled: boolean,
   applicationMonitoringCategory: AppCategory
@@ -103,8 +170,6 @@ export function registerAllPluginNavGroups(
   ]);
 
   if (apmEnabled) {
-    // APM Mode - register nav links for both APM and Trace Analytics apps
-    // Visibility controlled by explore.discoverTracesEnabled capability in start()
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
       {
         id: observabilityApmServicesID,
@@ -132,7 +197,6 @@ export function registerAllPluginNavGroups(
       },
     ]);
   } else {
-    // Trace Analytics Mode - UI setting disabled
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
       {
         id: 'observability-traces-nav',
@@ -147,5 +211,17 @@ export function registerAllPluginNavGroups(
         order: 100,
       },
     ]);
+  }
+}
+
+export function registerAllPluginNavGroups(
+  core: CoreSetup<AppPluginStartDependencies>,
+  apmEnabled: boolean,
+  applicationMonitoringCategory: AppCategory
+) {
+  if (core.chrome.getIsIconSideNavEnabled()) {
+    registerIconSideNavGroups(core, apmEnabled);
+  } else {
+    registerDefaultNavGroups(core, apmEnabled, applicationMonitoringCategory);
   }
 }
