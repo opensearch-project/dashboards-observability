@@ -4,7 +4,7 @@
  */
 
 import { coreMock } from '../../../../src/core/public/mocks';
-import { DEFAULT_APP_CATEGORIES, DEFAULT_NAV_GROUPS } from '../../../../src/core/public';
+import { DEFAULT_APP_CATEGORIES, DEFAULT_NAV_GROUPS } from '../../../../src/core/utils';
 import { registerAllPluginNavGroups } from './plugin_nav';
 
 describe('registerAllPluginNavGroups', () => {
@@ -18,6 +18,9 @@ describe('registerAllPluginNavGroups', () => {
   beforeEach(() => {
     coreSetup = coreMock.createSetup();
     coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
+    if (!coreSetup.chrome.getIsIconSideNavEnabled) {
+      coreSetup.chrome.getIsIconSideNavEnabled = jest.fn();
+    }
   });
 
   it('should call registerIconSideNavGroups when icon side nav is enabled', () => {
