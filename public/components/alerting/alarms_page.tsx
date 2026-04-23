@@ -8,7 +8,8 @@
  * Prometheus datasources are decomposed into selectable workspaces.
  */
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiSpacer, EuiTab, EuiTabs, EuiCallOut } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiTab, EuiTabs, EuiCallOut } from '@elastic/eui';
+import { toMountPoint } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 import { useToast } from '../common/toast';
 import {
   Datasource,
@@ -27,8 +28,13 @@ import { CreateLogsMonitor, LogsMonitorFormState } from './create_logs_monitor';
 import { CreateMetricsMonitor, MetricsMonitorFormState } from './create_metrics_monitor';
 // Phase 2: import SloListing from './slo_listing';
 import { AlarmsApiClient, HttpClient } from './services/alarms_client';
+import { coreRefs } from '../../framework/core_refs';
 import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
 import { observabilityID, observabilityTitle } from '../../../common/constants/shared';
+import {
+  ALERT_MANAGER_MAX_DATASOURCES_SETTING,
+  ALERT_MANAGER_SELECTED_DS_STORAGE_KEY,
+} from '../../../common/constants/alerting_settings';
 import {
   transformLogsFormToPayload,
   transformMetricsFormToPayload,
@@ -43,6 +49,70 @@ export { AlarmsApiClient, HttpClient };
 
 interface AlarmsPageProps {
   apiClient: AlarmsApiClient;
+  /** Datasource names/ids to pre-select on first mount (from uiSettings). */
+  defaultDatasources: string[];
+  /** Cap on concurrently selected datasources (from uiSettings). */
+  maxDatasources: number;
+}
+
+// Persist selection by datasource NAME. The alerting plugin reassigns `ds-N`
+// ids to Prometheus datasources on every discovery pass, so caching by id
+// goes stale on every server restart. Names are stable across restarts and
+// match how the Routing tab's source selector resolves its stored choice.
+function loadPersistedSelection(): string[] {
+  try {
+    const raw = window.localStorage.getItem(ALERT_MANAGER_SELECTED_DS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((v): v is string => typeof v === 'string');
+  } catch (_e) {
+    return [];
+  }
+}
+
+function persistSelection(names: string[]) {
+  try {
+    window.localStorage.setItem(ALERT_MANAGER_SELECTED_DS_STORAGE_KEY, JSON.stringify(names));
+  } catch (_e) {
+    // localStorage can be unavailable (private mode / quota). Not fatal.
+  }
+}
+
+// Resolve an array of user-supplied tokens (names or ids) against the loaded
+// datasource list, returning the matched datasource ids in input order, with
+// duplicates removed. Unknown tokens are dropped silently — the setting
+// accepts free strings, so typos shouldn't block the page.
+//
+// Matching is case-insensitive and probes every stable handle we expose
+// on a Datasource: id (ds-N, churns across discovery passes — accepted
+// for in-session compatibility but not reliable across restarts), name,
+// directQueryName (stable SQL-plugin connection name for Prom), and
+// mdsId (stable saved-object id for MDS OpenSearch datasources).
+function resolveDatasourceTokens(tokens: string[], datasources: Datasource[]): string[] {
+  const lookup = new Map<string, string>();
+  const add = (key: string | undefined, id: string) => {
+    if (!key) return;
+    const k = key.toLowerCase();
+    if (!lookup.has(k)) lookup.set(k, id);
+  };
+  for (const d of datasources) {
+    add(d.id, d.id);
+    add(d.name, d.id);
+    add(d.directQueryName, d.id);
+    add(d.mdsId, d.id);
+  }
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const t of tokens) {
+    if (typeof t !== 'string') continue;
+    const id = lookup.get(t.trim().toLowerCase());
+    if (id && !seen.has(id)) {
+      seen.add(id);
+      out.push(id);
+    }
+  }
+  return out;
 }
 
 type TabId = 'alerts' | 'rules' | 'routing';
@@ -58,7 +128,11 @@ const TAB_LABELS: Record<TabId, string> = {
 // page-size controls (10/20/50/100 rows per page) over this full dataset.
 const DEFAULT_PAGE_SIZE = 1000;
 
-export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
+export const AlarmsPage: React.FC<AlarmsPageProps> = ({
+  apiClient,
+  defaultDatasources,
+  maxDatasources,
+}) => {
   const [activeTab, setActiveTab] = useState<TabId>('alerts');
   const [datasources, setDatasources] = useState<Datasource[]>([]);
   const [selectedDsIds, setSelectedDsIds] = useState<string[]>([]);
@@ -88,6 +162,40 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
 
   const visibleRules = rules.filter((r) => !deletedRuleIds.has(r.id));
 
+  // Fires when a user tries to select past `maxDatasources`. Pops a warning
+  // toast with an in-toast link to the Advanced Settings entry so they can
+  // raise the cap without hunting through Management. Uses the core toasts
+  // API directly (not the shared `useToast` wrapper) because the wrapper
+  // only accepts plain strings — we need a React body to render the link.
+  //
+  // Uses `window.location.assign('/app/settings#...')` instead of
+  // `navigateToApp('management', ...)` because Advanced Settings doesn't
+  // support SPA redirection in a workspace context — the workspace path
+  // prefix strips the hash and lands on a broken URL. See the same
+  // workaround in trace_analytics helper_functions.tsx (line 70).
+  const handleDatasourceCapReached = useCallback(() => {
+    const toasts = coreRefs.toasts;
+    const http = coreRefs.http;
+    if (!toasts) return;
+    // Advanced Settings renders each row with DOM id `${setting.name}-group`
+    // (src/plugins/advanced_settings/.../field.tsx) and its scroll-to-hash
+    // handler calls getElementById(hash) — so the hash must include the
+    // `-group` suffix to scroll / highlight the target row.
+    const settingsHref = `${
+      http?.basePath.get() ?? ''
+    }/app/settings#${ALERT_MANAGER_MAX_DATASOURCES_SETTING}-group`;
+    toasts.addWarning({
+      title: `Maximum ${maxDatasources} datasources can be selected`,
+      text: toMountPoint(
+        <>
+          Adjust the <strong>Alert Manager maximum selected datasources</strong> setting in Advanced
+          Settings to raise this cap.{' '}
+          <EuiLink onClick={() => window.location.assign(settingsHref)}>Open setting</EuiLink>
+        </>
+      ),
+    });
+  }, [maxDatasources]);
+
   // ---- Breadcrumbs ----
 
   useEffect(() => {
@@ -102,22 +210,56 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
   useEffect(() => {
     (async () => {
       try {
-        const ds = await apiClient.listDatasources();
-        setDatasources(ds || []);
+        const ds = (await apiClient.listDatasources()) || [];
+        setDatasources(ds);
 
-        // Select only the FIRST datasource by default. Additional datasources
-        // start unchecked; user can toggle them on. On subsequent list updates
-        // (e.g., a new datasource appears), preserve the current selection.
+        // Selection priority:
+        //   1. Previously-persisted names from localStorage (user's last
+        //      explicit choice — wins over the admin default so refresh
+        //      doesn't stomp their selection).
+        //   2. `observability:alertManagerSelectedDatasources` setting
+        //      (names / ids / directQueryName / mdsId). Also used as a
+        //      fallthrough when localStorage exists but none of its entries
+        //      resolve — e.g., the user's cached datasources were deleted.
+        //   3. First discovered datasource (original behavior).
+        // Always clamp to the current `maxDatasources` — so if the admin
+        // lowers the cap after the user stored 5 names, we drop the overflow.
         setSelectedDsIds((prev) => {
-          if (prev.length > 0) return prev;
-          const first = (ds || [])[0]?.id;
+          if (prev.length > 0) return prev.slice(0, maxDatasources);
+
+          const persistedNames = loadPersistedSelection();
+          if (persistedNames.length > 0) {
+            const resolved = resolveDatasourceTokens(persistedNames, ds);
+            if (resolved.length > 0) return resolved.slice(0, maxDatasources);
+            // All cached entries were stale (datasources removed). Fall
+            // through to the admin-curated setting below rather than
+            // jumping straight to "first datasource" — the setting is a
+            // better backup than an arbitrary pick.
+          }
+
+          if (defaultDatasources.length > 0) {
+            const resolved = resolveDatasourceTokens(defaultDatasources, ds);
+            if (resolved.length > 0) return resolved.slice(0, maxDatasources);
+          }
+
+          const first = ds[0]?.id;
           return first ? [first] : [];
         });
       } catch (e: unknown) {
         console.error('Failed to load datasources', e);
       }
     })();
-  }, [apiClient]);
+  }, [apiClient, defaultDatasources, maxDatasources]);
+
+  // Persist the selection (by name) whenever it changes and we know the
+  // datasource list. Names survive server restarts; ids don't.
+  useEffect(() => {
+    if (datasources.length === 0) return;
+    const names = selectedDsIds
+      .map((id) => datasources.find((d) => d.id === id)?.name)
+      .filter((n): n is string => typeof n === 'string');
+    persistSelection(names);
+  }, [selectedDsIds, datasources]);
 
   // ---- Fetch data when datasource selection or page changes ----
 
@@ -623,6 +765,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
             onAcknowledge={handleAcknowledgeAlert}
             selectedDsIds={selectedDsIds}
             onDatasourceChange={handleDatasourceChange}
+            maxDatasources={maxDatasources}
+            onDatasourceCapReached={handleDatasourceCapReached}
           />
         </>
       );
@@ -649,6 +793,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
           }} */
           selectedDsIds={selectedDsIds}
           onDatasourceChange={handleDatasourceChange}
+          maxDatasources={maxDatasources}
+          onDatasourceCapReached={handleDatasourceCapReached}
         />
       );
     }

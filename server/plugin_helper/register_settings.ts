@@ -22,6 +22,13 @@ import {
   TRACE_SERVICE_MAP_MAX_EDGES,
 } from '../../common/constants/trace_analytics';
 import { APM_ENABLED_SETTING } from '../../common/constants/apm';
+import {
+  ALERT_MANAGER_DEFAULT_DATASOURCES_SETTING,
+  ALERT_MANAGER_ENABLED_SETTING,
+  ALERT_MANAGER_MAX_DATASOURCES_DEFAULT,
+  ALERT_MANAGER_MAX_DATASOURCES_LIMIT,
+  ALERT_MANAGER_MAX_DATASOURCES_SETTING,
+} from '../../common/constants/alerting_settings';
 
 export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSetup) => {
   uiSettings.register({
@@ -155,6 +162,61 @@ export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSet
       schema: schema.boolean(),
       requiresPageReload: true,
       scope: UiSettingScope.GLOBAL,
+    },
+  });
+
+  // Alert Manager Feature Toggle (Experimental)
+  uiSettings.register({
+    [ALERT_MANAGER_ENABLED_SETTING]: {
+      name: i18n.translate('observability.alertManagerEnabled.name', {
+        defaultMessage: 'Enable Alert Manager',
+      }),
+      value: false,
+      category: ['Observability'],
+      description: i18n.translate('observability.alertManagerEnabled.description', {
+        defaultMessage:
+          '<em>[Experimental]</em> Enable the Alert Manager feature. When enabled, the Alert Manager app appears in the Observability navigation with Alerts, Rules, and Routing tabs backed by OpenSearch Alerting and Prometheus/Alertmanager.',
+      }),
+      schema: schema.boolean(),
+      requiresPageReload: true,
+      scope: UiSettingScope.GLOBAL,
+    },
+  });
+
+  uiSettings.register({
+    [ALERT_MANAGER_DEFAULT_DATASOURCES_SETTING]: {
+      name: i18n.translate('observability.alertManagerSelectedDatasources.name', {
+        defaultMessage: 'Alert Manager selected datasources',
+      }),
+      value: [],
+      category: ['Observability'],
+      description: i18n.translate('observability.alertManagerSelectedDatasources.description', {
+        defaultMessage:
+          'Datasources pre-selected when the Alert Manager page first loads. Each entry can be a datasource name (recommended — stable across restarts) or id. Leave empty to default to the first discovered datasource. Entries beyond the maximum are ignored; unknown entries are skipped. Also used as a fallback when a previously cached selection no longer resolves.',
+      }),
+      schema: schema.arrayOf(schema.string()),
+      // Read once at mount in home.tsx; changes only take effect on a fresh
+      // AlertingHome render, so surface OSD's "reload page" prompt.
+      requiresPageReload: true,
+    },
+  });
+
+  uiSettings.register({
+    [ALERT_MANAGER_MAX_DATASOURCES_SETTING]: {
+      name: i18n.translate('observability.alertManagerMaxDatasources.name', {
+        defaultMessage: 'Alert Manager maximum selected datasources',
+      }),
+      value: ALERT_MANAGER_MAX_DATASOURCES_DEFAULT,
+      category: ['Observability'],
+      description: i18n.translate('observability.alertManagerMaxDatasources.description', {
+        defaultMessage:
+          'Maximum number of datasources that can be selected at once on the Alert Manager page. Raising this increases fan-out query cost.',
+      }),
+      schema: schema.number({
+        min: 1,
+        max: ALERT_MANAGER_MAX_DATASOURCES_LIMIT,
+      }),
+      requiresPageReload: true,
     },
   });
 };

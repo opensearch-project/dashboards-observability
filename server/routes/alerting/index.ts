@@ -112,14 +112,10 @@ export function registerAlertingRoutes(
 
     inflight = (async () => {
       try {
-        // Clear existing and re-seed local cluster
+        // Clear everything; we'll rebuild the list from scratch below.
         for (const ds of existing) {
           await datasourceService.delete(ds.id);
         }
-
-        datasourceService.seed([
-          { name: 'Local Cluster', type: 'opensearch' as const, url: 'local', enabled: true },
-        ]);
 
         // Discover OSD-registered data sources + direct-query data connections.
         // - `data-source` = MDS OpenSearch clusters (attribute.endpoint is a URL).
@@ -133,19 +129,47 @@ export function registerAlertingRoutes(
         ]);
 
         const localPatterns = /localhost|127\.0\.0\.1|0\.0\.0\.0|::1|opensearch:9200|opensearch-cluster-master|opensearch-master/i;
-        const osDiscovered = (osResult.saved_objects || [])
-          .filter((so: SavedObject<DataSourceSOAttributes>) => {
-            const endpoint = so.attributes?.endpoint || '';
-            // Skip data sources pointing to the local cluster
-            return !localPatterns.test(endpoint);
-          })
-          .map((so: SavedObject<DataSourceSOAttributes>) => ({
-            name: so.attributes.title || so.id,
-            type: 'opensearch' as const,
-            url: so.id,
-            enabled: true,
-            mdsId: so.id,
-          }));
+        // Partition OS data-source saved objects into "points at local cluster"
+        // vs "remote". If the user has created an MDS entry that targets the
+        // local cluster, we want THEIR name/entry to surface in the UI instead
+        // of the hardcoded "Local Cluster" seed — avoids showing two rows for
+        // the same physical cluster.
+        const osSavedObjects = osResult.saved_objects || [];
+        const osLocal = osSavedObjects.filter((so) =>
+          localPatterns.test(so.attributes?.endpoint || '')
+        );
+        const osRemote = osSavedObjects.filter(
+          (so) => !localPatterns.test(so.attributes?.endpoint || '')
+        );
+
+        // Seed a representation for the local cluster:
+        //   - If the user registered one or more MDS data sources pointing at
+        //     the local cluster, surface all of them with their user-given
+        //     names (drop the hardcoded "Local Cluster").
+        //   - Otherwise, seed the default "Local Cluster" entry.
+        if (osLocal.length > 0) {
+          datasourceService.seed(
+            osLocal.map((so: SavedObject<DataSourceSOAttributes>) => ({
+              name: so.attributes.title || so.id,
+              type: 'opensearch' as const,
+              url: so.id,
+              enabled: true,
+              mdsId: so.id,
+            }))
+          );
+        } else {
+          datasourceService.seed([
+            { name: 'Local Cluster', type: 'opensearch' as const, url: 'local', enabled: true },
+          ]);
+        }
+
+        const osDiscovered = osRemote.map((so: SavedObject<DataSourceSOAttributes>) => ({
+          name: so.attributes.title || so.id,
+          type: 'opensearch' as const,
+          url: so.id,
+          enabled: true,
+          mdsId: so.id,
+        }));
 
         const promDiscovered = (dcResult.saved_objects || [])
           .filter((so: SavedObject<DataConnectionSOAttributes>) => {

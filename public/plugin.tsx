@@ -77,6 +77,7 @@ import {
   observabilityApmApplicationMapTitle,
   observabilityApmApplicationMapPluginOrder,
 } from '../common/constants/apm';
+import { ALERT_MANAGER_ENABLED_SETTING } from '../common/constants/alerting_settings';
 import { QueryManager } from '../common/query_manager';
 import {
   RenderAccelerationDetailsFlyoutParams,
@@ -191,6 +192,7 @@ export class ObservabilityPlugin
   }
   private mdsFlagStatus: boolean = false;
   private apmEnabled: boolean = false;
+  private alertManagerEnabled: boolean = false;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private apmAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private traceAnalyticsAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
@@ -219,6 +221,14 @@ export class ObservabilityPlugin
     } catch (_error) {
       // Handle authentication errors during setup
       this.apmEnabled = false;
+    }
+
+    // Read Alert Manager (experimental) enabled setting from GLOBAL scope
+    try {
+      const alertManagerSettingValue = core.uiSettings.get(ALERT_MANAGER_ENABLED_SETTING);
+      this.alertManagerEnabled = alertManagerSettingValue ?? false;
+    } catch (_error) {
+      this.alertManagerEnabled = false;
     }
 
     // redirect legacy notebooks URL to current URL under observability
@@ -511,15 +521,22 @@ export class ObservabilityPlugin
       updater$: this.appUpdater$,
     });
 
-    core.application.register({
-      id: observabilityAlertingID,
-      title: observabilityAlertingTitle,
-      category: OBSERVABILITY_APP_CATEGORIES.observability,
-      order: observabilityAlertingPluginOrder,
-      mount: appMountWithStartPage('alerting'),
-    });
+    if (this.alertManagerEnabled) {
+      core.application.register({
+        id: observabilityAlertingID,
+        title: observabilityAlertingTitle,
+        category: OBSERVABILITY_APP_CATEGORIES.observability,
+        order: observabilityAlertingPluginOrder,
+        mount: appMountWithStartPage('alerting'),
+      });
+    }
 
-    registerAllPluginNavGroups(core, this.apmEnabled, APPLICATION_MONITORING_CATEGORY);
+    registerAllPluginNavGroups(
+      core,
+      this.apmEnabled,
+      APPLICATION_MONITORING_CATEGORY,
+      this.alertManagerEnabled
+    );
 
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
       getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,

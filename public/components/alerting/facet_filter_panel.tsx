@@ -50,6 +50,12 @@ export interface FacetGroupConfig {
    * just two filters). Applied AFTER search filter, BEFORE maxVisible slice.
    */
   checkedFirst?: boolean;
+  /**
+   * Fires when the user attempts to add an option while `maxSelected` is already reached.
+   * When provided, the inline "Maximum N ..." helper text is suppressed — the consumer
+   * is expected to surface the feedback another way (e.g., a toast with a link to settings).
+   */
+  onCapReached?: () => void;
 }
 
 export interface FacetFilterGroupProps extends FacetGroupConfig {
@@ -75,6 +81,7 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
   maxVisible,
   maxSelected,
   checkedFirst,
+  onCapReached,
   isCollapsed,
   onToggleCollapse,
 }) => {
@@ -168,7 +175,10 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
             const displayLabel = displayMap?.[opt] || opt;
             const checkboxId = `${id}-${opt}`;
             // Checked items always remain interactive so the user can uncheck to free a slot.
-            const isDisabled = capReached && !isActive;
+            // When a consumer provided `onCapReached`, the option stays enabled (clickable)
+            // and the click fires the callback instead of mutating selection — this lets
+            // the consumer surface the cap feedback as a toast rather than greyed-out rows.
+            const isDisabled = capReached && !isActive && !onCapReached;
 
             const labelContent = (
               <span
@@ -204,8 +214,15 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
                     isDisabled ? `${displayLabel} (maximum datasources reached)` : undefined
                   }
                   onChange={() => {
-                    if (isActive) onChange(selected.filter((s) => s !== opt));
-                    else onChange([...selected, opt]);
+                    if (isActive) {
+                      onChange(selected.filter((s) => s !== opt));
+                      return;
+                    }
+                    if (capReached && onCapReached) {
+                      onCapReached();
+                      return;
+                    }
+                    onChange([...selected, opt]);
                   }}
                   compressed
                 />
@@ -222,7 +239,7 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
               Showing {cappedOptions.length} of {options.length}
             </EuiText>
           )}
-          {capReached && (
+          {capReached && !onCapReached && (
             <EuiText
               size="xs"
               color="subdued"

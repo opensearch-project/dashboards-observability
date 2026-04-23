@@ -108,6 +108,10 @@ interface MonitorsTableProps {
   selectedDsIds: string[];
   /** Callback when datasource selection changes */
   onDatasourceChange: (ids: string[]) => void;
+  /** Cap on concurrently selected datasources (from uiSettings). */
+  maxDatasources: number;
+  /** Callback fired when user tries to exceed `maxDatasources`. */
+  onDatasourceCapReached: () => void;
 }
 
 // ============================================================================
@@ -421,6 +425,8 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   onCreateMonitor,
   selectedDsIds,
   onDatasourceChange,
+  maxDatasources,
+  onDatasourceCapReached,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<FilterState>(emptyFilters());
@@ -959,7 +965,8 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                     )}
                     searchable
                     maxVisible={10}
-                    maxSelected={5}
+                    maxSelected={maxDatasources}
+                    onCapReached={onDatasourceCapReached}
                     searchAriaLabel="Search datasources"
                     checkedFirst
                     isCollapsed={isFacetCollapsed('datasource')}

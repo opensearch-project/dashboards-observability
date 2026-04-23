@@ -185,6 +185,10 @@ export interface AlertsDashboardProps {
   selectedDsIds: string[];
   /** Callback when datasource selection changes */
   onDatasourceChange: (ids: string[]) => void;
+  /** Cap on concurrently selected datasources (from uiSettings). */
+  maxDatasources: number;
+  /** Callback fired when user tries to exceed `maxDatasources`. */
+  onDatasourceCapReached: () => void;
 }
 
 export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
@@ -195,6 +199,8 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   onAcknowledge,
   selectedDsIds,
   onDatasourceChange,
+  maxDatasources,
+  onDatasourceCapReached,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [severityFilter, setSeverityFilter] = useState('all');
@@ -533,7 +539,8 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   )}
                   searchable
                   maxVisible={10}
-                  maxSelected={5}
+                  maxSelected={maxDatasources}
+                  onCapReached={onDatasourceCapReached}
                   searchAriaLabel="Search datasources"
                   checkedFirst
                   isCollapsed={isFacetCollapsed('datasource')}

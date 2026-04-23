@@ -27,7 +27,8 @@ import { AppPluginStartDependencies } from '../types';
 export function registerAllPluginNavGroups(
   core: CoreSetup<AppPluginStartDependencies>,
   apmEnabled: boolean,
-  applicationMonitoringCategory: AppCategory
+  applicationMonitoringCategory: AppCategory,
+  alertManagerEnabled: boolean = false
 ) {
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
     {
@@ -81,14 +82,16 @@ export function registerAllPluginNavGroups(
     },
   ]);
 
-  core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
-    {
-      id: observabilityAlertingID,
-      category: undefined,
-      showInAllNavGroup: true,
-      order: 30,
-    },
-  ]);
+  if (alertManagerEnabled) {
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+      {
+        id: observabilityAlertingID,
+        category: undefined,
+        showInAllNavGroup: true,
+        order: 30,
+      },
+    ]);
+  }
 
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
     {
