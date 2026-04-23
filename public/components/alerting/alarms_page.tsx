@@ -653,7 +653,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({ apiClient }) => {
       );
     }
     if (activeTab === 'routing') {
-      return <NotificationRoutingPanel apiClient={apiClient} />;
+      return <NotificationRoutingPanel apiClient={apiClient} datasources={datasources} />;
     }
     return null;
   };

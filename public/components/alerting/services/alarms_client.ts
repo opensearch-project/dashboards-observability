@@ -285,8 +285,11 @@ export class AlarmsApiClient {
 
   // ---- Alertmanager config ------------------------------------------------
 
-  async getAlertmanagerConfig(): Promise<AlertmanagerConfigResponse> {
-    return this.httpGet<AlertmanagerConfigResponse>(this.paths.alertmanagerConfig);
+  async getAlertmanagerConfig(dsId?: string): Promise<AlertmanagerConfigResponse> {
+    return this.httpGet<AlertmanagerConfigResponse>(
+      this.paths.alertmanagerConfig,
+      dsId ? { dsId } : undefined
+    );
   }
 
   // ---- Prometheus Metadata ------------------------------------------------

@@ -635,24 +635,40 @@ export function registerAlertingRoutes(
   // ===========================================================================
 
   router.get(
-    { path: '/api/alerting/alertmanager/config', validate: {} },
-    async (ctx, _req, res) => {
+    {
+      path: '/api/alerting/alertmanager/config',
+      validate: { query: schema.object({ dsId: schema.maybe(schema.string()) }) },
+    },
+    async (ctx, req, res) => {
       const promBackend = alertService.getPrometheusBackend?.();
       if (!promBackend) {
         return res.ok({ body: { available: false, error: 'Alertmanager not configured' } });
       }
       // Alertmanager is a global endpoint reached through any configured Prometheus
-      // datasource. Pick the first discovered Prom datasource and set it as the
-      // backend's default — the backend uses it to build
-      // /_plugins/_directquery/_resources/{name}/alertmanager/api/v2/status.
+      // datasource. If the caller supplied `dsId`, use that Prom datasource;
+      // otherwise fall back to the first discovered Prom connection. The backend
+      // uses it to build /_plugins/_directquery/_resources/{name}/alertmanager/api/v2/status.
       await discoverOsdDatasources(ctx);
       const all = await datasourceService.list();
-      const promDs = all.find((d) => d.type === 'prometheus' && d.directQueryName);
+      const promCandidates = all.filter((d) => d.type === 'prometheus' && d.directQueryName);
+      // Datasource IDs churn across discovery cycles (in-memory, re-seeded each
+      // discovery pass). Match by `directQueryName` / `name` as a stable fallback
+      // so a selector value the client captured earlier still resolves.
+      const promDs = req.query.dsId
+        ? promCandidates.find(
+            (d) =>
+              d.id === req.query.dsId ||
+              d.directQueryName === req.query.dsId ||
+              d.name === req.query.dsId
+          )
+        : promCandidates[0];
       if (!promDs) {
         return res.ok({
           body: {
             available: false,
-            error: 'No Prometheus datasource configured. Add a Prometheus direct-query connection.',
+            error: req.query.dsId
+              ? `Prometheus datasource "${req.query.dsId}" not found.`
+              : 'No Prometheus datasource configured. Add a Prometheus direct-query connection.',
           },
         });
       }
