@@ -200,6 +200,20 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
     fetchConfig();
   }, [fetchConfig]);
 
+  // Disambiguate duplicate names by appending the id — two Prom connections
+  // can share a `name` across MDS clusters, and the dropdown would otherwise
+  // show indistinguishable entries.
+  const selectorOptions = useMemo(() => {
+    const nameCounts = promDatasources.reduce<Record<string, number>>((acc, d) => {
+      acc[d.name] = (acc[d.name] || 0) + 1;
+      return acc;
+    }, {});
+    return promDatasources.map((d) => ({
+      value: datasourceKey(d),
+      text: nameCounts[d.name] > 1 ? `${d.name} (${d.id})` : d.name,
+    }));
+  }, [promDatasources, datasourceKey]);
+
   // Compact Prometheus datasource selector. Always rendered when a Prom DS
   // is available so the user can see which source the Alertmanager config is
   // coming from; disabled when there's only one (nothing to switch to).
@@ -207,7 +221,7 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
     promDatasources.length > 0 && selectedDsId ? (
       <EuiCompressedSelect
         prepend="Source"
-        options={promDatasources.map((d) => ({ value: datasourceKey(d), text: d.name }))}
+        options={selectorOptions}
         value={selectedDsId}
         onChange={(e) => setSelectedDsId(e.target.value)}
         disabled={promDatasources.length === 1}
@@ -219,11 +233,21 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
 
   if (loading) {
     return (
-      <EuiFlexGroup justifyContent="center" style={{ padding: 40 }}>
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="xl" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <div style={{ padding: '0 16px' }}>
+        {datasourceSelector && (
+          <>
+            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+              <EuiFlexItem grow={false}>{datasourceSelector}</EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+          </>
+        )}
+        <EuiFlexGroup justifyContent="center" style={{ padding: 40 }}>
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
     );
   }
 
