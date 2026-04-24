@@ -48,13 +48,11 @@
     "@types/js-yaml": "^4.0.5",
     "@types/mime": "^3.0.1",
     "@types/react-plotly.js": "^2.6.3",
-    "@types/react-test-renderer": "^18.0.0",
     "@types/sanitize-filename": "^1.6.3",
     "antlr4ts-cli": "^0.5.0-alpha.4",
     "cypress-multi-reporters": "^1.6.4",
     "cypress-parallel": "^0.15.0",
     "cypress-watch-and-reload": "^1.10.6",
-    "eslint": "^6.8.0",
     "husky": "^8.0.3",
     "jest-dom": "^4.0.0",
     "lint-staged": "^15.2.10"
@@ -74,12 +72,9 @@
     "semver": "^7.5.2",
     "braces": "^3.0.3",
     "ws": "^8.18.0",
-    "**/eslint/cross-spawn": "^7.0.5",
     "nanoid": "3.3.8",
     "serialize-javascript": "^7.0.3",
-    "@babel/runtime": "^7.26.10",
-    "**/eslint/ajv": "^6.14.0",
-    "**/table/ajv": "^6.14.0"
+    "@babel/runtime": "^7.26.10"
   },
   "eslintIgnore": [
     "common/query_manager/antlr/output/*",
