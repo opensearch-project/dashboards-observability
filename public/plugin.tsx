@@ -77,7 +77,6 @@ import {
   observabilityApmApplicationMapTitle,
   observabilityApmApplicationMapPluginOrder,
 } from '../common/constants/apm';
-import { ALERT_MANAGER_ENABLED_SETTING } from '../common/constants/alerting_settings';
 import { QueryManager } from '../common/query_manager';
 import {
   RenderAccelerationDetailsFlyoutParams,
@@ -144,6 +143,9 @@ interface PublicConfig {
   summarize: {
     enabled: boolean;
   };
+  alertManager: {
+    enabled: boolean;
+  };
 }
 
 export const [
@@ -192,7 +194,6 @@ export class ObservabilityPlugin
   }
   private mdsFlagStatus: boolean = false;
   private apmEnabled: boolean = false;
-  private alertManagerEnabled: boolean = false;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private apmAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private traceAnalyticsAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
@@ -221,14 +222,6 @@ export class ObservabilityPlugin
     } catch (_error) {
       // Handle authentication errors during setup
       this.apmEnabled = false;
-    }
-
-    // Read Alert Manager (experimental) enabled setting from GLOBAL scope
-    try {
-      const alertManagerSettingValue = core.uiSettings.get(ALERT_MANAGER_ENABLED_SETTING);
-      this.alertManagerEnabled = alertManagerSettingValue ?? false;
-    } catch (_error) {
-      this.alertManagerEnabled = false;
     }
 
     // redirect legacy notebooks URL to current URL under observability
@@ -521,7 +514,7 @@ export class ObservabilityPlugin
       updater$: this.appUpdater$,
     });
 
-    if (this.alertManagerEnabled) {
+    if (this.config.alertManager?.enabled) {
       core.application.register({
         id: observabilityAlertingID,
         title: observabilityAlertingTitle,
@@ -535,7 +528,7 @@ export class ObservabilityPlugin
       core,
       this.apmEnabled,
       APPLICATION_MONITORING_CATEGORY,
-      this.alertManagerEnabled
+      !!this.config.alertManager?.enabled
     );
 
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({

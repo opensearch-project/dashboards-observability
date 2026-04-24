@@ -4,7 +4,6 @@
  */
 
 import {
-  ALERT_MANAGER_ENABLED_SETTING,
   ALERT_MANAGER_DEFAULT_DATASOURCES_SETTING,
   ALERT_MANAGER_MAX_DATASOURCES_SETTING,
   ALERT_MANAGER_MAX_DATASOURCES_LIMIT,
@@ -14,7 +13,6 @@ import {
 
 describe('alerting_settings constants', () => {
   it('exports expected setting keys', () => {
-    expect(ALERT_MANAGER_ENABLED_SETTING).toBe('observability:alertManagerEnabled');
     expect(ALERT_MANAGER_DEFAULT_DATASOURCES_SETTING).toBe(
       'observability:alertManagerSelectedDatasources'
     );

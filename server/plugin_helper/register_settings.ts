@@ -24,13 +24,15 @@ import {
 import { APM_ENABLED_SETTING } from '../../common/constants/apm';
 import {
   ALERT_MANAGER_DEFAULT_DATASOURCES_SETTING,
-  ALERT_MANAGER_ENABLED_SETTING,
   ALERT_MANAGER_MAX_DATASOURCES_DEFAULT,
   ALERT_MANAGER_MAX_DATASOURCES_LIMIT,
   ALERT_MANAGER_MAX_DATASOURCES_SETTING,
 } from '../../common/constants/alerting_settings';
 
-export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSetup) => {
+export const registerObservabilityUISettings = (
+  uiSettings: UiSettingsServiceSetup,
+  alertManagerEnabled: boolean = false
+) => {
   uiSettings.register({
     [TRACE_CUSTOM_SPAN_INDEX_SETTING]: {
       name: i18n.translate('observability.traceAnalyticsCustomSpanIndices.name', {
@@ -165,23 +167,12 @@ export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSet
     },
   });
 
-  // Alert Manager Feature Toggle (Experimental)
-  uiSettings.register({
-    [ALERT_MANAGER_ENABLED_SETTING]: {
-      name: i18n.translate('observability.alertManagerEnabled.name', {
-        defaultMessage: 'Enable Alert Manager',
-      }),
-      value: false,
-      category: ['Observability'],
-      description: i18n.translate('observability.alertManagerEnabled.description', {
-        defaultMessage:
-          '<em>[Experimental]</em> Enable the Alert Manager feature. When enabled, the Alert Manager app appears in the Observability navigation with Alerts, Rules, and Routing tabs backed by OpenSearch Alerting and Prometheus/Alertmanager.',
-      }),
-      schema: schema.boolean(),
-      requiresPageReload: true,
-      scope: UiSettingScope.GLOBAL,
-    },
-  });
+  // Alert Manager datasource settings — only registered when the feature is
+  // enabled in opensearch_dashboards.yml (observability.alertManager.enabled).
+  // The on/off toggle itself is a yml flag, not a uiSetting.
+  if (!alertManagerEnabled) {
+    return;
+  }
 
   uiSettings.register({
     [ALERT_MANAGER_DEFAULT_DATASOURCES_SETTING]: {

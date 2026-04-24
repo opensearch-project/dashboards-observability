@@ -21,6 +21,9 @@ const observabilityConfig = {
     summarize: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
+    alertManager: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
   }),
 };
 
@@ -31,5 +34,6 @@ export const config: PluginConfigDescriptor<ObservabilityConfig> = {
   exposeToBrowser: {
     query_assist: true,
     summarize: true,
+    alertManager: true,
   },
 };

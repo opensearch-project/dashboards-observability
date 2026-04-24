@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { HashRouter, Route } from 'react-router-dom';
 import { coreRefs } from '../../framework/core_refs';
 import {
@@ -18,6 +18,22 @@ import { AlarmsApiClient } from './services/alarms_client';
 export const AlertingHome = () => {
   const http = coreRefs.http;
   const apiClient = useMemo(() => (http ? new AlarmsApiClient(http) : null), [http]);
+
+  // Show a "Beta" badge in the top chrome bar while the Alert Manager app is
+  // mounted; clear it on unmount so it doesn't leak into other apps.
+  useEffect(() => {
+    const chrome = coreRefs.chrome;
+    if (!chrome?.setBadge) return undefined;
+    chrome.setBadge({
+      text: 'Beta',
+      tooltip:
+        'Alert Manager is in beta. Features may change and some functionality is still evolving.',
+      iconType: 'beaker',
+    });
+    return () => {
+      chrome.setBadge?.(undefined);
+    };
+  }, []);
 
   const { defaultDatasources, maxDatasources } = useMemo(() => {
     const uiSettings = coreRefs.core?.uiSettings;

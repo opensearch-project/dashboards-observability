@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// UI Setting keys for the Alert Manager feature.
-export const ALERT_MANAGER_ENABLED_SETTING = 'observability:alertManagerEnabled';
+// UI Setting keys for the Alert Manager feature. The on/off toggle itself is
+// an opensearch_dashboards.yml flag (`observability.alertManager.enabled`),
+// not a uiSetting — the two below are only registered when that flag is on.
 export const ALERT_MANAGER_DEFAULT_DATASOURCES_SETTING =
   'observability:alertManagerSelectedDatasources';
 export const ALERT_MANAGER_MAX_DATASOURCES_SETTING = 'observability:alertManagerMaxDatasources';
