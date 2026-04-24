@@ -14,6 +14,12 @@ import { contentManagementPluginMocks } from '../../../src/plugins/content_manag
 import { BehaviorSubject } from 'rxjs';
 import { AppNavLinkStatus } from '../../../src/core/public';
 
+function ensureIconSideNavMock(coreSetup: ReturnType<typeof coreMock.createSetup>) {
+  if (!coreSetup.chrome.getIsIconSideNavEnabled) {
+    coreSetup.chrome.getIsIconSideNavEnabled = jest.fn().mockReturnValue(false);
+  }
+}
+
 describe('#setup', () => {
   it('should hide notebook entry when capabilities.investigation is enabled', async () => {
     const initializerContextMock = coreMock.createPluginInitializerContext();
@@ -26,6 +32,7 @@ describe('#setup', () => {
       },
     });
     const coreSetupContract = coreMock.createSetup();
+    ensureIconSideNavMock(coreSetupContract);
     let updater$ = new BehaviorSubject<() => {}>(() => ({}));
     const coreSetup = {
       ...coreSetupContract,
@@ -92,6 +99,7 @@ describe('#setup notebook hiding with investigation plugin', () => {
       summarize: { enabled: false },
     });
     const coreSetupContract = coreMock.createSetup();
+    ensureIconSideNavMock(coreSetupContract);
     let updater$ = new BehaviorSubject<() => {}>(() => ({}));
     const coreSetup = {
       ...coreSetupContract,
@@ -147,6 +155,7 @@ describe('#setup with APM enabled', () => {
   it('should register both APM applications when MDS and APM are enabled', async () => {
     const intializerContextMock = coreMock.createPluginInitializerContext();
     const coreSetup = coreMock.createSetup();
+    ensureIconSideNavMock(coreSetup);
     const observabilityPlugin = new ObservabilityPlugin(intializerContextMock);
 
     coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
@@ -180,6 +189,7 @@ describe('#setup with APM enabled', () => {
   it('should register trace analytics when APM setting disabled', async () => {
     const intializerContextMock = coreMock.createPluginInitializerContext();
     const coreSetup = coreMock.createSetup();
+    ensureIconSideNavMock(coreSetup);
     const observabilityPlugin = new ObservabilityPlugin(intializerContextMock);
 
     coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
@@ -203,6 +213,7 @@ describe('#setup with APM enabled', () => {
   it('should register both APM and Trace Analytics apps when APM setting enabled (visibility controlled by capability in start)', async () => {
     const intializerContextMock = coreMock.createPluginInitializerContext();
     const coreSetup = coreMock.createSetup();
+    ensureIconSideNavMock(coreSetup);
     const observabilityPlugin = new ObservabilityPlugin(intializerContextMock);
 
     coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
@@ -234,6 +245,7 @@ describe('#setup with APM enabled', () => {
       summarize: { enabled: false },
     });
     const coreSetup = coreMock.createSetup();
+    ensureIconSideNavMock(coreSetup);
     let apmUpdater$ = new BehaviorSubject<() => {}>(() => ({}));
     coreSetup.application.register = jest.fn((args) => {
       if (args.id === 'observability-apm-services' && args.updater$) {
@@ -289,6 +301,7 @@ describe('#setup with APM enabled', () => {
       summarize: { enabled: false },
     });
     const coreSetup = coreMock.createSetup();
+    ensureIconSideNavMock(coreSetup);
     let traceAnalyticsUpdater$ = new BehaviorSubject<() => {}>(() => ({}));
     coreSetup.application.register = jest.fn((args) => {
       if (args.id === 'observability-traces-nav' && args.updater$) {

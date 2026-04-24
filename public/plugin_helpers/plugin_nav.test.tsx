@@ -171,7 +171,11 @@ describe('registerAllPluginNavGroups', () => {
     expect(tracesCall).toBeDefined();
 
     const traceAnalyticsCall = observabilityCalls.find((call: any) =>
-      call[1].some((link: any) => link.category === DEFAULT_APP_CATEGORIES.traceAnalytics)
+      call[1].some(
+        (link: any) =>
+          DEFAULT_APP_CATEGORIES.traceAnalytics &&
+          link.category === DEFAULT_APP_CATEGORIES.traceAnalytics
+      )
     );
     expect(traceAnalyticsCall).toBeUndefined();
   });
