@@ -278,3 +278,49 @@ describe('#setup with APM enabled', () => {
     });
   });
 });
+
+describe('#setup with Alert Manager feature gate', () => {
+  it('should register alerting app when alertManagerEnabled is true', async () => {
+    const initializerContextMock = coreMock.createPluginInitializerContext();
+    const coreSetup = coreMock.createSetup();
+    const observabilityPlugin = new ObservabilityPlugin(initializerContextMock);
+
+    coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
+    coreSetup.uiSettings.get = jest.fn().mockReturnValue(true);
+
+    await observabilityPlugin.setup(coreSetup, ({
+      embeddable: embeddablePluginMock.createSetupContract(),
+      visualizations: visualizationsPluginMock.createSetupContract(),
+      data: dataPluginMock.createSetupContract(),
+      uiActions: uiActionsPluginMock.createSetupContract(),
+      contentManagement: contentManagementPluginMocks.createSetupContract(),
+      dashboard: { registerDashboardProvider: jest.fn() },
+    } as unknown) as SetupDependencies);
+
+    const registerCalls = (coreSetup.application.register as jest.Mock).mock.calls;
+    const alertingApp = registerCalls.find((call) => call[0].id === 'observability-alerting');
+    expect(alertingApp).toBeDefined();
+  });
+
+  it('should NOT register alerting app when alertManagerEnabled is false', async () => {
+    const initializerContextMock = coreMock.createPluginInitializerContext();
+    const coreSetup = coreMock.createSetup();
+    const observabilityPlugin = new ObservabilityPlugin(initializerContextMock);
+
+    coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
+    coreSetup.uiSettings.get = jest.fn().mockReturnValue(false);
+
+    await observabilityPlugin.setup(coreSetup, ({
+      embeddable: embeddablePluginMock.createSetupContract(),
+      visualizations: visualizationsPluginMock.createSetupContract(),
+      data: dataPluginMock.createSetupContract(),
+      uiActions: uiActionsPluginMock.createSetupContract(),
+      contentManagement: contentManagementPluginMocks.createSetupContract(),
+      dashboard: { registerDashboardProvider: jest.fn() },
+    } as unknown) as SetupDependencies);
+
+    const registerCalls = (coreSetup.application.register as jest.Mock).mock.calls;
+    const alertingApp = registerCalls.find((call) => call[0].id === 'observability-alerting');
+    expect(alertingApp).toBeUndefined();
+  });
+});
