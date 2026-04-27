@@ -4,6 +4,7 @@
  */
 
 import { schema } from '@osd/config-schema';
+import { first } from 'rxjs/operators';
 import {
   CoreSetup,
   CoreStart,
@@ -239,7 +240,15 @@ export class ObservabilityPlugin
     }));
 
     assistantDashboards?.registerMessageParser(PPLParsers);
-    registerObservabilityUISettings(core.uiSettings);
+
+    const observabilityConfig = await this.initializerContext.config
+      .create<{ alertManager: { enabled: boolean } }>()
+      .pipe(first())
+      .toPromise();
+    registerObservabilityUISettings(
+      core.uiSettings,
+      observabilityConfig.alertManager?.enabled ?? false
+    );
 
     core.uiSettings.register({
       'observability:defaultDashboard': {

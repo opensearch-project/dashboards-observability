@@ -16,6 +16,7 @@ import {
   observabilityMetricsID,
   observabilityNotebookID,
   observabilityOverviewID,
+  observabilityAlertingID,
 } from '../../common/constants/shared';
 import {
   observabilityApmServicesID,
@@ -93,7 +94,8 @@ function registerIconSideNavGroups(
 function registerDefaultNavGroups(
   core: CoreSetup<AppPluginStartDependencies>,
   apmEnabled: boolean,
-  applicationMonitoringCategory: AppCategory
+  applicationMonitoringCategory: AppCategory,
+  alertManagerEnabled: boolean = false
 ) {
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
     {
@@ -146,6 +148,17 @@ function registerDefaultNavGroups(
       order: 200,
     },
   ]);
+
+  if (alertManagerEnabled) {
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+      {
+        id: observabilityAlertingID,
+        category: undefined,
+        showInAllNavGroup: true,
+        order: 30,
+      },
+    ]);
+  }
 
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
     {

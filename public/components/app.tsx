@@ -11,7 +11,11 @@ import { CoreStart, MountPoint } from '../../../../src/core/public';
 import { DataSourceManagementPluginSetup } from '../../../../src/plugins/data_source_management/public';
 import { observabilityID, observabilityTitle } from '../../common/constants/shared';
 import { store } from '../framework/redux/store';
+import PPLService from '../services/requests/ppl';
+import DSLService from '../services/requests/dsl';
 import { MLCommonsRCFService } from '../services/requests/ml_commons_rcf';
+import SavedObjects from '../services/saved_objects/event_analytics/saved_objects';
+import TimestampUtils from '../services/timestamp/timestamp';
 import { AppPluginStartDependencies } from '../types';
 import { Home as ApplicationAnalyticsHome } from './application_analytics/home';
 import { MetricsListener } from './common/metrics_listener';
@@ -24,6 +28,7 @@ import { Main as NotebooksHome } from './notebooks/components/main';
 import { Home as TraceAnalyticsHome } from './trace_analytics/home';
 import { Home as GettingStartedHome } from './getting_started/home';
 import { Home as OverviewHome } from './overview/home';
+import { AlertingHome } from './alerting/home';
 import { Services as ApmServices, ApmServicesProps } from './apm/services';
 import {
   ApplicationMapPage as ApmApplicationMap,
@@ -34,11 +39,11 @@ import { ApmConfigProvider } from './apm/config/apm_config_context';
 interface ObservabilityAppDeps {
   CoreStartProp: CoreStart;
   DepsStart: AppPluginStartDependencies;
-  pplService: any;
-  dslService: any;
+  pplService: PPLService;
+  dslService: DSLService;
   mlCommonsRCFService: MLCommonsRCFService;
-  savedObjects: any;
-  timestampUtils: any;
+  savedObjects: SavedObjects;
+  timestampUtils: TimestampUtils;
   queryManager: QueryManager;
   startPage: string;
   dataSourceEnabled: boolean;
@@ -77,6 +82,7 @@ const pages = {
   dataconnections: DataConnectionsHome,
   gettingStarted: GettingStartedHome,
   overview: OverviewHome,
+  alerting: AlertingHome,
   'apm-services': ApmServicesWithProvider,
   'apm-application-map': ApmApplicationMapWithProvider,
 };
