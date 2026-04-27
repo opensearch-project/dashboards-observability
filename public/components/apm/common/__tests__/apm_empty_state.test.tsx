@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ApmEmptyState } from '../apm_empty_state';
 
 // Mock the image imports
@@ -55,16 +56,16 @@ describe('ApmEmptyState', () => {
   it('should render all tabs', () => {
     render(<ApmEmptyState onGetStartedClick={mockOnGetStartedClick} />);
 
-    expect(screen.getByRole('tab', { name: 'Services' })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Application Map' })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Correlate traces and logs' })).toBeInTheDocument();
+    expect(screen.getByText('Services')).toBeInTheDocument();
+    expect(screen.getByText('Application Map')).toBeInTheDocument();
+    expect(screen.getByText('Correlate traces and logs')).toBeInTheDocument();
   });
 
   it('should show Services tab as selected by default', () => {
     render(<ApmEmptyState onGetStartedClick={mockOnGetStartedClick} />);
 
-    const servicesTab = screen.getByRole('tab', { name: 'Services' });
-    expect(servicesTab).toHaveAttribute('aria-selected', 'true');
+    const servicesButton = screen.getByTestId('services');
+    expect(servicesButton).toBeChecked();
   });
 
   it('should show Services description by default', () => {
@@ -75,24 +76,27 @@ describe('ApmEmptyState', () => {
     ).toBeInTheDocument();
   });
 
-  it('should switch tab and description when clicking another tab', () => {
+  it('should switch tab and description when clicking another tab', async () => {
+    const user = userEvent.setup();
     render(<ApmEmptyState onGetStartedClick={mockOnGetStartedClick} />);
 
-    const applicationMapTab = screen.getByRole('tab', { name: 'Application Map' });
-    fireEvent.click(applicationMapTab);
+    const applicationMapButton = screen.getByTestId('application-map');
+    await user.click(applicationMapButton);
 
-    expect(applicationMapTab).toHaveAttribute('aria-selected', 'true');
+    expect(applicationMapButton).toBeChecked();
     expect(screen.getByText(/Visualize service dependencies and topology/)).toBeInTheDocument();
   });
 
-  it('should update preview image alt text when switching tabs', () => {
+  it('should update preview image alt text when switching tabs', async () => {
+    const user = userEvent.setup();
     render(<ApmEmptyState onGetStartedClick={mockOnGetStartedClick} />);
 
     // Default is Services
     expect(screen.getByAltText('Services preview')).toBeInTheDocument();
 
-    // Click Application Map tab
-    fireEvent.click(screen.getByRole('tab', { name: 'Application Map' }));
+    // Click Application Map button
+    const applicationMapButton = screen.getByTestId('application-map');
+    await user.click(applicationMapButton);
     expect(screen.getByAltText('Application Map preview')).toBeInTheDocument();
   });
 
