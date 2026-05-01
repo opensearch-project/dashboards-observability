@@ -82,6 +82,13 @@ export const removeBackTick = (entry: any) => {
  * @param configList visualization configurations from config panel UI.
  * @returns intermediate visualization mapping data
  */
+const caseInsensitiveLookup = (obj: Record<string, any>, key: string): any => {
+  if (key in obj) return obj[key];
+  const lowerKey = key.toLowerCase();
+  const match = Object.keys(obj).find((k) => k.toLowerCase() === lowerKey);
+  return match ? obj[match] : undefined;
+};
+
 export const preprocessJsonData = (
   jdbcFieldValueMapList: any[],
   { dimensions, series, breakdowns, span }: Partial<ConfigList>
@@ -105,7 +112,9 @@ export const preprocessJsonData = (
           ...dimensions,
         ]
           .map((dimension) => {
-            return backtickRemovedEntry[removeBacktick(dimension.name)] ?? '';
+            return (
+              caseInsensitiveLookup(backtickRemovedEntry, removeBacktick(dimension.name)) ?? ''
+            );
           })
           .join(',');
         const concatedBreakdownLabel = breakdowns

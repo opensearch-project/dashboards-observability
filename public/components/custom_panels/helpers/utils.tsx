@@ -103,7 +103,7 @@ const updateQuerySpanInterval = (
   resolution: string = 'h'
 ) => {
   return query.replace(
-    new RegExp(`span\\(\\s*${timestampField}\\s*,(.*?)\\)`),
+    new RegExp(`span\\(\\s*${timestampField}\\s*,(.*?)\\)`, 'i'),
     `span(${timestampField},${span}${resolution})`
   );
 };
