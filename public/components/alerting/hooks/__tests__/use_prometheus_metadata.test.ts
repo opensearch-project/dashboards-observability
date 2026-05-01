@@ -4,20 +4,38 @@
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react';
+
+// Post-Phase-4: the hook instantiates `AlertingPromResourcesService` internally
+// via `useMemo(() => new AlertingPromResourcesService(datasourceId), [datasourceId])`
+// and calls list/get methods on it. We mock the constructor so each test can
+// reconfigure its resolved values per-case.
+const mockListMetricNames = jest.fn();
+const mockListLabelNames = jest.fn();
+const mockListLabelValues = jest.fn();
+const mockGetMetricMetadata = jest.fn();
+
+jest.mock('../../query_services/alerting_prom_resources_service', () => ({
+  AlertingPromResourcesService: jest.fn().mockImplementation(() => ({
+    listMetricNames: mockListMetricNames,
+    listLabelNames: mockListLabelNames,
+    listLabelValues: mockListLabelValues,
+    getMetricMetadata: mockGetMetricMetadata,
+  })),
+}));
+
 import { usePrometheusMetadata } from '../use_prometheus_metadata';
 
-const mockApiClient = {
-  getMetricNames: jest.fn(),
-  getLabelNames: jest.fn(),
-  getLabelValues: jest.fn(),
-  getMetricMetadata: jest.fn(),
-};
-
-const baseOpts = { datasourceId: 'ds-1', apiClient: mockApiClient };
+const baseOpts = { datasourceId: 'ds-1' };
 
 beforeEach(() => {
   jest.useFakeTimers();
-  mockApiClient.getMetricMetadata.mockResolvedValue({ metadata: [] });
+  mockListMetricNames.mockReset();
+  mockListLabelNames.mockReset();
+  mockListLabelValues.mockReset();
+  mockGetMetricMetadata.mockReset();
+  // Default: metric metadata fetch resolves with an empty list so the
+  // on-mount effect doesn't leave pending work in tests that don't care.
+  mockGetMetricMetadata.mockResolvedValue({ metadata: [] });
 });
 
 afterEach(() => {
@@ -34,7 +52,7 @@ describe('usePrometheusMetadata', () => {
   });
 
   it('searchMetrics fetches after debounce and populates options', async () => {
-    mockApiClient.getMetricNames.mockResolvedValueOnce({ metrics: ['up', 'node_cpu'] });
+    mockListMetricNames.mockResolvedValueOnce({ metrics: ['up', 'node_cpu'] });
     const { result } = renderHook(() => usePrometheusMetadata(baseOpts));
 
     act(() => result.current.searchMetrics('up'));
@@ -58,7 +76,7 @@ describe('usePrometheusMetadata', () => {
   });
 
   it('searchMetrics sets error on fetch failure', async () => {
-    mockApiClient.getMetricNames.mockRejectedValueOnce(new Error('fail'));
+    mockListMetricNames.mockRejectedValueOnce(new Error('fail'));
     const { result } = renderHook(() => usePrometheusMetadata(baseOpts));
 
     act(() => result.current.searchMetrics('up'));
@@ -70,7 +88,7 @@ describe('usePrometheusMetadata', () => {
   });
 
   it('auto-fetches label names when selectedMetric changes', async () => {
-    mockApiClient.getLabelNames.mockResolvedValueOnce({ labels: ['job', 'instance'] });
+    mockListLabelNames.mockResolvedValueOnce({ labels: ['job', 'instance'] });
     const { result } = renderHook(() =>
       usePrometheusMetadata({ ...baseOpts, selectedMetric: 'up' })
     );
@@ -78,14 +96,16 @@ describe('usePrometheusMetadata', () => {
     await waitFor(() => {
       expect(result.current.labelNames).toEqual(['job', 'instance']);
     });
-    expect(mockApiClient.getLabelNames).toHaveBeenCalledWith('ds-1', 'up');
+    expect(mockListLabelNames).toHaveBeenCalledWith('up');
   });
 
   it('fetchLabelValues populates values for a label', async () => {
-    mockApiClient.getLabelValues.mockResolvedValueOnce({ values: ['api', 'web'] });
+    mockListLabelValues.mockResolvedValueOnce({ values: ['api', 'web'] });
     const { result } = renderHook(() => usePrometheusMetadata(baseOpts));
 
-    act(() => result.current.fetchLabelValues('job'));
+    act(() => {
+      result.current.fetchLabelValues('job');
+    });
 
     await waitFor(() => {
       expect(result.current.labelValues.job).toEqual([{ label: 'api' }, { label: 'web' }]);
@@ -94,7 +114,8 @@ describe('usePrometheusMetadata', () => {
 
   it('fetches metric metadata on mount', async () => {
     const meta = [{ metric: 'up', type: 'gauge', help: 'Up' }];
-    mockApiClient.getMetricMetadata.mockResolvedValueOnce({ metadata: meta });
+    mockGetMetricMetadata.mockReset();
+    mockGetMetricMetadata.mockResolvedValueOnce({ metadata: meta });
     const { result } = renderHook(() => usePrometheusMetadata(baseOpts));
 
     await waitFor(() => {
