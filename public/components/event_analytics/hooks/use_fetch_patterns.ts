@@ -188,23 +188,60 @@ export const useFetchPatterns = ({
     errorHandler?: (error: any) => void
   ) => {
     if (!patternField && index) {
+      // Fetch field types from describe to identify text-only fields
+      const textOnlyFields: Set<string> = new Set();
+      try {
+        await fetchEvents(
+          { query: `describe ${index}` },
+          'jdbc',
+          (descRes: any) => {
+            const colIdx = descRes?.schema?.findIndex((s: IField) => s.name === 'COLUMN_NAME');
+            const typeIdx = descRes?.schema?.findIndex((s: IField) => s.name === 'TYPE_NAME');
+            if (colIdx >= 0 && typeIdx >= 0) {
+              descRes?.datarows?.forEach((row: any[]) => {
+                const typeName = typeof row[typeIdx] === 'string' ? row[typeIdx].toLowerCase() : '';
+                if (typeName === 'text') textOnlyFields.add(row[colIdx]);
+              });
+            }
+          },
+          () => {} // ignore describe errors
+        );
+      } catch {
+        // ignore - proceed without type filtering
+      }
+
       const query = `source = ${index} | head 1`;
       await fetchEvents(
         { query },
         'jdbc',
         async (res: any) => {
-          // Create array of only string type fields
-          const textFields = res.schema.filter((field: IField) => field.type === 'string');
+          // Create array of only string type fields, excluding text-only fields
+          const stringFields = res.schema.filter(
+            (field: IField) => field.type === 'string' && !textOnlyFields.has(field.name)
+          );
           // Loop through array and find field with longest value
           let defaultPatternField = '';
           let maxLength = 0;
-          textFields.forEach((field: IField) => {
-            const curLength = res.jsonData[0][field.name].length;
+          stringFields.forEach((field: IField) => {
+            const value = res.jsonData?.[0]?.[field.name];
+            const curLength = typeof value === 'string' ? value.length : 0;
             if (curLength > maxLength) {
               maxLength = curLength;
               defaultPatternField = field.name;
             }
           });
+          // Fall back to all string fields if no keyword fields found
+          if (!defaultPatternField) {
+            const allStringFields = res.schema.filter((field: IField) => field.type === 'string');
+            allStringFields.forEach((field: IField) => {
+              const value = res.jsonData?.[0]?.[field.name];
+              const curLength = typeof value === 'string' ? value.length : 0;
+              if (curLength > maxLength) {
+                maxLength = curLength;
+                defaultPatternField = field.name;
+              }
+            });
+          }
           patternField = defaultPatternField;
         },
         errorHandler
