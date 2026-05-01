@@ -3,11 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/**
+ * Post-Phase-3/5 handler tests. The 6 datasource-CRUD handlers
+ * (`handleListDatasources`, `handleGet/Create/Update/Delete/TestDatasource`)
+ * are no longer exercised — datasource discovery moved to the client via
+ * `useDatasources` and direct saved-object queries. The handlers may still
+ * be present as dead exports in `handlers.ts`; they are no longer wired by
+ * `registerAlertingRoutes` and no longer have test coverage here.
+ *
+ * Surviving handlers: monitor CRUD, alerts, unified views, and detail
+ * views. Those are what this file covers.
+ */
+
 import {
-  handleListDatasources,
-  handleGetDatasource,
-  handleCreateDatasource,
-  handleDeleteDatasource,
   handleGetOSMonitors,
   handleCreateOSMonitor,
   handleDeleteOSMonitor,
@@ -15,16 +23,6 @@ import {
   handleGetAlertDetail,
   handleGetRuleDetail,
 } from '../handlers';
-
-const mockDsSvc = {
-  list: jest.fn(),
-  get: jest.fn(),
-  create: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
-  testConnection: jest.fn(),
-  seed: jest.fn(),
-};
 
 const mockAlertSvc = {
   getOSMonitors: jest.fn(),
@@ -45,48 +43,6 @@ const mockAlertSvc = {
 const mockClient = {} as never;
 
 describe('handlers', () => {
-  // ---- Datasource handlers ----
-  it('handleListDatasources returns sanitized datasources', async () => {
-    mockDsSvc.list.mockResolvedValueOnce([{ id: 'ds-1', name: 'a', auth: { user: 'x' } }]);
-    const result = await handleListDatasources(mockDsSvc as never);
-    expect(result.status).toBe(200);
-    expect(result.body.datasources[0]).not.toHaveProperty('auth');
-  });
-
-  it('handleGetDatasource returns 404 when not found', async () => {
-    mockDsSvc.get.mockResolvedValueOnce(null);
-    const result = await handleGetDatasource(mockDsSvc as never, 'nope');
-    expect(result.status).toBe(404);
-  });
-
-  it('handleCreateDatasource validates required fields', async () => {
-    const result = await handleCreateDatasource(mockDsSvc as never, {
-      name: '',
-      type: '' as never,
-      url: '',
-      enabled: true,
-    });
-    expect(result.status).toBe(400);
-    expect(result.body.error).toMatch(/required/);
-  });
-
-  it('handleCreateDatasource rejects invalid type', async () => {
-    const result = await handleCreateDatasource(mockDsSvc as never, {
-      name: 'x',
-      type: 'mysql' as never,
-      url: 'http://x',
-      enabled: true,
-    });
-    expect(result.status).toBe(400);
-    expect(result.body.error).toMatch(/opensearch or prometheus/);
-  });
-
-  it('handleDeleteDatasource returns 404 when not found', async () => {
-    mockDsSvc.delete.mockResolvedValueOnce(false);
-    const result = await handleDeleteDatasource(mockDsSvc as never, 'nope');
-    expect(result.status).toBe(404);
-  });
-
   // ---- Monitor handlers ----
   it('handleGetOSMonitors returns monitors', async () => {
     mockAlertSvc.getOSMonitors.mockResolvedValueOnce([{ id: 'mon-1' }]);

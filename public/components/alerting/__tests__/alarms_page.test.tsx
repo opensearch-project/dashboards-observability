@@ -40,20 +40,23 @@ jest.mock('../create_logs_monitor', () => ({ CreateLogsMonitor: () => null }));
 jest.mock('../create_metrics_monitor', () => ({ CreateMetricsMonitor: () => null }));
 jest.mock('../alert_detail_flyout', () => ({ AlertDetailFlyout: () => null }));
 
-import { AlarmsApiClient } from '../services/alarms_client';
 import { AlarmsPage } from '../alarms_page';
+import type { Datasource } from '../../../../common/types/alerting';
 
-const makeApiClient = () =>
-  (({
-    listDatasources: jest.fn().mockResolvedValue([]),
-    listAlertsPaginated: jest.fn().mockResolvedValue({ results: [], total: 0 }),
-    listRulesPaginated: jest.fn().mockResolvedValue({ results: [], total: 0 }),
-  } as unknown) as AlarmsApiClient);
+// Post-Phase 4: AlarmsPage no longer takes an apiClient prop. Data comes in
+// via props (datasources, datasourcesLoading, defaultDatasources,
+// maxDatasources); the page's children consume hooks internally.
+const defaultProps = {
+  datasources: [] as Datasource[],
+  datasourcesLoading: false,
+  defaultDatasources: [] as string[],
+  maxDatasources: 5,
+};
 
 describe('AlarmsPage', () => {
   it('renders tabs and defaults to Alerts tab', async () => {
     await act(async () => {
-      render(<AlarmsPage apiClient={makeApiClient()} defaultDatasources={[]} maxDatasources={5} />);
+      render(<AlarmsPage {...defaultProps} />);
     });
     expect(screen.getByTestId('alerts-dashboard')).toBeInTheDocument();
     expect(screen.getByTestId('alertManager-tabs-alerts')).toBeInTheDocument();
@@ -63,7 +66,7 @@ describe('AlarmsPage', () => {
 
   it('switches to Rules tab on click', async () => {
     await act(async () => {
-      render(<AlarmsPage apiClient={makeApiClient()} defaultDatasources={[]} maxDatasources={5} />);
+      render(<AlarmsPage {...defaultProps} />);
     });
     fireEvent.click(screen.getByTestId('alertManager-tabs-rules'));
     expect(screen.getByTestId('monitors-table')).toBeInTheDocument();

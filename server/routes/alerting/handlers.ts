@@ -6,106 +6,15 @@
 /**
  * Route handlers — pure functions that work with any HTTP framework.
  * Exposes backend-native API shapes + unified views.
+ *
+ * Post-Phase-3: datasource CRUD handlers and their helpers were removed —
+ * datasource discovery + mutation moved to the client via saved-object
+ * services (`useDatasources`, `SavedObjectDatasourceService`).
  */
-import type {
-  AlertingOSClient,
-  DatasourceService,
-  Datasource,
-  OSMonitor,
-} from '../../../common/types/alerting';
+import type { AlertingOSClient, OSMonitor } from '../../../common/types/alerting';
 import { MultiBackendAlertService } from '../../services/alerting';
 import { toHandlerResult } from './route_utils';
 import type { HandlerResult } from './route_utils';
-
-/** Strip auth credentials from a datasource before returning to the client. */
-function sanitizeDatasource(ds: Datasource): Omit<Datasource, 'auth' | 'tls'> {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- destructuring to omit
-  const { auth, tls, ...safe } = ds;
-  return safe;
-}
-
-// ============================================================================
-// Datasource Handlers
-// ============================================================================
-
-export async function handleListDatasources(svc: DatasourceService): Promise<HandlerResult> {
-  try {
-    const datasources = await svc.list();
-    return { status: 200, body: { datasources: datasources.map(sanitizeDatasource) } };
-  } catch (e: unknown) {
-    return toHandlerResult(e);
-  }
-}
-
-export async function handleGetDatasource(
-  svc: DatasourceService,
-  id: string
-): Promise<HandlerResult> {
-  try {
-    const ds = await svc.get(id);
-    if (!ds) return { status: 404, body: { error: 'Datasource not found' } };
-    return { status: 200, body: sanitizeDatasource(ds) };
-  } catch (e: unknown) {
-    return toHandlerResult(e);
-  }
-}
-
-export async function handleCreateDatasource(
-  svc: DatasourceService,
-  input: Omit<Datasource, 'id'>
-): Promise<HandlerResult> {
-  if (!input.name || !input.type || !input.url) {
-    return { status: 400, body: { error: 'name, type, and url are required' } };
-  }
-  if (input.type !== 'opensearch' && input.type !== 'prometheus') {
-    return { status: 400, body: { error: 'type must be opensearch or prometheus' } };
-  }
-  try {
-    return { status: 201, body: sanitizeDatasource(await svc.create(input)) };
-  } catch (e: unknown) {
-    return toHandlerResult(e);
-  }
-}
-
-export async function handleUpdateDatasource(
-  svc: DatasourceService,
-  id: string,
-  input: Partial<Datasource>
-): Promise<HandlerResult> {
-  try {
-    const ds = await svc.update(id, input);
-    if (!ds) return { status: 404, body: { error: 'Datasource not found' } };
-    return { status: 200, body: sanitizeDatasource(ds) };
-  } catch (e: unknown) {
-    return toHandlerResult(e);
-  }
-}
-
-export async function handleDeleteDatasource(
-  svc: DatasourceService,
-  id: string
-): Promise<HandlerResult> {
-  try {
-    const ok = await svc.delete(id);
-    if (!ok) return { status: 404, body: { error: 'Datasource not found' } };
-    return { status: 200, body: { deleted: true } };
-  } catch (e: unknown) {
-    return toHandlerResult(e);
-  }
-}
-
-export async function handleTestDatasource(
-  svc: DatasourceService,
-  client: AlertingOSClient,
-  id: string
-): Promise<HandlerResult> {
-  try {
-    const r = await svc.testConnection(client, id);
-    return { status: r.success ? 200 : 400, body: r };
-  } catch (e: unknown) {
-    return toHandlerResult(e);
-  }
-}
 
 // ============================================================================
 // OpenSearch Monitor Handlers

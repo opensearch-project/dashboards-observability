@@ -29,22 +29,25 @@ import { registerMLCommonsRCFRoute } from './ml_commons_rcf';
 import { registerTraceAnalyticsDslRouter } from './trace_analytics_dsl_router';
 import { registerAlertingRoutes } from './alerting';
 import {
-  InMemoryDatasourceService,
-  MultiBackendAlertService,
   HttpOpenSearchBackend,
+  MultiBackendAlertService,
+  MonitorMutationService,
   DirectQueryPrometheusBackend,
+  PrometheusMetadataService,
+  SavedObjectDatasourceService,
 } from '../services/alerting';
-import { PrometheusMetadataService } from '../services/alerting/prometheus_metadata_service';
 
 export function setupRoutes({
   router,
   client,
   dataSourceEnabled,
+  alertManagerEnabled,
   logger,
 }: {
   router: IRouter;
   client: ILegacyClusterClient;
   dataSourceEnabled: boolean;
+  alertManagerEnabled: boolean;
   logger: Logger;
 }) {
   PanelsRouter(router);
@@ -77,28 +80,34 @@ export function setupRoutes({
   registerGettingStartedRoutes(router);
   registerMLCommonsRCFRoute({ router, facet: new MLCommonsRCFFacet() });
 
-  // Alerting routes — OSD scoped client handles auth automatically
-  const alertingDatasourceService = new InMemoryDatasourceService(logger);
-  const alertingAlertService = new MultiBackendAlertService(alertingDatasourceService, logger);
+  // Alerting routes — gated by `observability.alertManager.enabled`
+  // (mirrors the existing `dataSourceEnabled` plumbing pattern). When the
+  // flag is off the routes are never registered, so curl returns 404 for
+  // both mutations and the AM config endpoint.
+  if (alertManagerEnabled) {
+    // Construct a placeholder adapter that will be swapped per-request by the
+    // route layer via `service.setDatasourceService(...)`. The placeholder is
+    // fine because no method is invoked at registration time — every code
+    // path that reads `this.datasourceService` flows through a request handler
+    // which will have swapped in a live adapter first.
+    const bootstrapDatasources = new SavedObjectDatasourceService(
+      // Cast is safe: the bootstrap adapter is never read (see note above).
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (null as unknown) as any,
+      logger
+    );
 
-  const osBackend = new HttpOpenSearchBackend(logger);
-  alertingAlertService.registerOpenSearch(osBackend);
+    const osBackend = new HttpOpenSearchBackend(logger);
+    const promBackend = new DirectQueryPrometheusBackend(logger);
 
-  const promBackend = new DirectQueryPrometheusBackend(logger);
-  alertingAlertService.registerPrometheus(promBackend);
-  alertingDatasourceService.setPrometheusBackend(promBackend);
+    const alertSvc = new MultiBackendAlertService(bootstrapDatasources, logger);
+    alertSvc.registerOpenSearch(osBackend);
+    alertSvc.registerPrometheus(promBackend);
 
-  const metadataService = new PrometheusMetadataService(
-    promBackend,
-    alertingDatasourceService,
-    logger
-  );
+    const metadataSvc = new PrometheusMetadataService(promBackend, bootstrapDatasources, logger);
 
-  registerAlertingRoutes(
-    router,
-    alertingDatasourceService,
-    alertingAlertService,
-    logger,
-    metadataService
-  );
+    const mutationSvc = new MonitorMutationService(logger);
+
+    registerAlertingRoutes(router, alertSvc, mutationSvc, promBackend, logger, metadataSvc);
+  }
 }

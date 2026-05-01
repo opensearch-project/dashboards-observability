@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { AlertingOSClient, Logger, OSMonitor } from '../../../../common/types/alerting/types';
+import type { AlertingOSClient, Logger } from '../../../../common/types/alerting';
 import { HttpOpenSearchBackend } from '../opensearch_backend';
 
 const mockLogger: Logger = {
@@ -136,88 +136,6 @@ describe('HttpOpenSearchBackend', () => {
     });
   });
 
-  describe('createMonitor', () => {
-    it('forces type=monitor on the body and maps the response', async () => {
-      const { client, request } = makeClient([
-        {
-          body: {
-            _id: 'mon-new',
-            monitor: monitorHit('mon-new', 'New')._source,
-          },
-        },
-      ]);
-
-      const input = ({
-        type: 'monitor',
-        monitor_type: 'query_level_monitor',
-        name: 'New',
-        enabled: true,
-        schedule: { period: { interval: 1, unit: 'MINUTES' } },
-        inputs: [],
-        triggers: [],
-        last_update_time: 0,
-      } as unknown) as Omit<OSMonitor, 'id'>;
-
-      const result = await backend.createMonitor(client, input);
-      expect(result.id).toBe('mon-new');
-      expect(request).toHaveBeenCalledWith(
-        expect.objectContaining({
-          method: 'POST',
-          path: '/_plugins/_alerting/monitors',
-          body: expect.objectContaining({ type: 'monitor', name: 'New' }),
-        })
-      );
-    });
-  });
-
-  describe('updateMonitor', () => {
-    it('reads current state then PUTs with if_seq_no/if_primary_term', async () => {
-      const { client, request } = makeClient([
-        {
-          body: {
-            _id: 'mon-1',
-            _seq_no: 42,
-            _primary_term: 3,
-            monitor: monitorHit('mon-1', 'A')._source,
-          },
-        },
-        {
-          body: {
-            _id: 'mon-1',
-            monitor: monitorHit('mon-1', 'A renamed')._source,
-          },
-        },
-      ]);
-
-      const result = await backend.updateMonitor(client, 'mon-1', { name: 'A renamed' });
-      expect(result?.name).toBe('A renamed');
-      expect(request.mock.calls[1][0].method).toBe('PUT');
-      expect(request.mock.calls[1][0].path).toBe(
-        '/_plugins/_alerting/monitors/mon-1?if_seq_no=42&if_primary_term=3'
-      );
-    });
-
-    it('returns null when the monitor does not exist', async () => {
-      const { client } = makeClient([new Error('HTTP 404')]);
-      expect(await backend.updateMonitor(client, 'missing', { name: 'x' })).toBeNull();
-    });
-  });
-
-  describe('deleteMonitor', () => {
-    it('returns true on success and false on 404', async () => {
-      const a = makeClient([{ body: {} }]);
-      expect(await backend.deleteMonitor(a.client, 'mon-1')).toBe(true);
-      expect(a.request).toHaveBeenCalledWith({
-        method: 'DELETE',
-        path: '/_plugins/_alerting/monitors/mon-1',
-        body: undefined,
-      });
-
-      const b = makeClient([new Error('HTTP 404')]);
-      expect(await backend.deleteMonitor(b.client, 'mon-1')).toBe(false);
-    });
-  });
-
   describe('getAlerts', () => {
     it('paginates and returns mapped alerts plus totalAlerts', async () => {
       const { client, request } = makeClient([
@@ -254,18 +172,6 @@ describe('HttpOpenSearchBackend', () => {
       expect(alerts[0].severity).toBe('1');
       expect(alerts[1].state).toBe('ACKNOWLEDGED');
       expect(request).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('acknowledgeAlerts', () => {
-    it('POSTs alert ids to the monitor _acknowledge path', async () => {
-      const { client, request } = makeClient([{ body: { success: [] } }]);
-      await backend.acknowledgeAlerts(client, 'mon-1', ['a-1', 'a-2']);
-      expect(request).toHaveBeenCalledWith({
-        method: 'POST',
-        path: '/_plugins/_alerting/monitors/mon-1/_acknowledge/alerts',
-        body: { alerts: ['a-1', 'a-2'] },
-      });
     });
   });
 

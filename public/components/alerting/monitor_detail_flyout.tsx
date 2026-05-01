@@ -30,7 +30,6 @@ import {
   EuiAccordion,
   EuiToolTip,
   EuiCodeBlock,
-  EuiIcon,
   EuiLoadingContent,
   EuiStat,
 } from '@elastic/eui';
@@ -44,10 +43,16 @@ import {
   UnifiedRule,
   UnifiedRuleSummary,
 } from '../../../common/types/alerting';
-import { AlarmsApiClient } from './services/alarms_client';
+import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { DeleteModal } from '../common/helpers/delete_modal';
 
-import { SEVERITY_COLORS, STATE_COLORS, STATUS_COLORS, HEALTH_COLORS } from './shared_constants';
+import {
+  SEVERITY_COLORS,
+  STATE_COLORS,
+  STATUS_COLORS,
+  HEALTH_COLORS,
+  escapeHtml,
+} from './shared_constants';
 
 // ============================================================================
 // Condition humanizer — translates Painless scripts into readable text
@@ -127,7 +132,9 @@ const ConditionPreviewGraph: React.FC<{
         trigger: 'axis',
         formatter: (params: unknown) => {
           const p = (params as Array<{ axisValue: string; value: number }>)[0];
-          return `${p.axisValue}<br/>${p.value.toFixed(2)}`;
+          // Escape user-derived strings before building tooltip HTML — ECharts
+          // renders the formatter's return value verbatim as HTML.
+          return `${escapeHtml(String(p.axisValue))}<br/>${escapeHtml(p.value.toFixed(2))}`;
         },
       },
       xAxis: {
@@ -181,7 +188,6 @@ const ConditionPreviewGraph: React.FC<{
 
 export interface MonitorDetailFlyoutProps {
   monitor: UnifiedRuleSummary;
-  apiClient: AlarmsApiClient;
   onClose: () => void;
   onDelete: (id: string) => void;
   onClone: (monitor: UnifiedRuleSummary) => void;
@@ -193,11 +199,11 @@ export interface MonitorDetailFlyoutProps {
 
 export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   monitor,
-  apiClient,
   onClose,
   onDelete,
   onClone,
 }) => {
+  const osService = useMemo(() => new AlertingOpenSearchService(), []);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [detail, setDetail] = useState<UnifiedRule | null>(null);
   const [detailLoading, setDetailLoading] = useState(true);
@@ -208,7 +214,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
     setDetailLoading(true);
     const dsId = monitor.datasourceId;
     const ruleId = monitor.id;
-    apiClient
+    osService
       .getRuleDetail(dsId, ruleId)
       .then((data: UnifiedRule) => {
         if (!cancelled && data) setDetail(data);
@@ -222,7 +228,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [monitor.datasourceId, monitor.id, apiClient]);
+  }, [monitor.datasourceId, monitor.id, osService]);
 
   // Use detail data when available, fall back to summary props.
   // `detail` has the full shape; `monitor` is only a summary, so
@@ -232,7 +238,6 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   const notificationRouting = detail?.notificationRouting ?? [];
   const suppressionRules = detail?.suppressionRules ?? [];
   const description = detail?.description ?? '';
-  const aiSummary = detail?.aiSummary ?? '';
   const evaluationInterval = detail?.evaluationInterval ?? monitor.evaluationInterval ?? '—';
   const pendingPeriod = detail?.pendingPeriod ?? monitor.pendingPeriod ?? '—';
 
@@ -355,40 +360,6 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
               <EuiText size="s">
                 <p>{description}</p>
               </EuiText>
-              <EuiSpacer size="m" />
-
-              {/* AI Summary */}
-              <EuiAccordion
-                id={`aiSummary-${monitor.id}`}
-                buttonContent={
-                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="compute" />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <strong>AI Summary</strong>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="hollow">Beta</EuiBadge>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                }
-                initialIsOpen={true}
-                paddingSize="m"
-              >
-                <EuiPanel color="subdued" paddingSize="m">
-                  {aiSummary ? (
-                    <EuiText size="s">
-                      <p>{aiSummary}</p>
-                    </EuiText>
-                  ) : (
-                    <EuiText size="s" color="subdued">
-                      Not configured
-                    </EuiText>
-                  )}
-                </EuiPanel>
-              </EuiAccordion>
-
               <EuiSpacer size="m" />
 
               {/* Query Definition — type-aware rendering */}

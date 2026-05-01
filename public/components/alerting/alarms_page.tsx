@@ -7,13 +7,12 @@
  * Alert Manager UI — single-datasource selection with server-side pagination.
  * Prometheus datasources are decomposed into selectable workspaces.
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { EuiLink, EuiSpacer, EuiTab, EuiTabs, EuiCallOut } from '@elastic/eui';
 import { toMountPoint } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 import { useToast } from '../common/toast';
 import {
   Datasource,
-  DatasourceWarning,
   UnifiedAlertSummary,
   UnifiedRule,
   UnifiedRuleSummary,
@@ -27,7 +26,8 @@ import { NotificationRoutingPanel } from './notification_routing_panel';
 import { CreateLogsMonitor, LogsMonitorFormState } from './create_logs_monitor';
 import { CreateMetricsMonitor, MetricsMonitorFormState } from './create_metrics_monitor';
 // Phase 2: import SloListing from './slo_listing';
-import { AlarmsApiClient, HttpClient } from './services/alarms_client';
+import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
+import { useMonitorMutations } from './hooks/use_monitor_mutations';
 import { coreRefs } from '../../framework/core_refs';
 import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
 import { observabilityID, observabilityTitle } from '../../../common/constants/shared';
@@ -40,15 +40,15 @@ import {
   transformMetricsFormToPayload,
 } from '../../../common/services/alerting/form_transforms';
 
-// Re-export for components that import from this file
-export { AlarmsApiClient, HttpClient };
-
 // ============================================================================
 // Main Page Component
 // ============================================================================
 
 interface AlarmsPageProps {
-  apiClient: AlarmsApiClient;
+  /** Datasources sourced from saved-object types (data-source + data-connection). */
+  datasources: Datasource[];
+  /** True while the initial datasource discovery is pending. */
+  datasourcesLoading: boolean;
   /** Datasource names/ids to pre-select on first mount (from uiSettings). */
   defaultDatasources: string[];
   /** Cap on concurrently selected datasources (from uiSettings). */
@@ -129,12 +129,14 @@ const TAB_LABELS: Record<TabId, string> = {
 const DEFAULT_PAGE_SIZE = 1000;
 
 export const AlarmsPage: React.FC<AlarmsPageProps> = ({
-  apiClient,
+  datasources,
+  datasourcesLoading,
   defaultDatasources,
   maxDatasources,
 }) => {
+  const osService = useMemo(() => new AlertingOpenSearchService(), []);
+  const mutations = useMonitorMutations();
   const [activeTab, setActiveTab] = useState<TabId>('alerts');
-  const [datasources, setDatasources] = useState<Datasource[]>([]);
   const [selectedDsIds, setSelectedDsIds] = useState<string[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -205,51 +207,47 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     );
   }, [activeTab]);
 
-  // ---- Load datasources on mount ----
-
+  // ---- Resolve initial selection once datasources are available ----
+  //
+  // Datasources now come from the `useDatasources` hook (parent `home.tsx`),
+  // which reads them from the `data-source` + `data-connection` saved-object
+  // types. This effect runs the selection-priority logic as soon as the hook
+  // reports a non-loading state — initial selection must still honor the
+  // same priority order as before:
+  //   1. Previously-persisted names from localStorage (user's last
+  //      explicit choice — wins over the admin default so refresh
+  //      doesn't stomp their selection).
+  //   2. `observability:alertManagerSelectedDatasources` setting
+  //      (names / ids / directQueryName / mdsId). Also used as a
+  //      fallthrough when localStorage exists but none of its entries
+  //      resolve — e.g., the user's cached datasources were deleted.
+  //   3. First discovered datasource (original behavior).
+  // Always clamp to the current `maxDatasources` — so if the admin
+  // lowers the cap after the user stored 5 names, we drop the overflow.
   useEffect(() => {
-    (async () => {
-      try {
-        const ds = (await apiClient.listDatasources()) || [];
-        setDatasources(ds);
+    if (datasourcesLoading) return;
+    setSelectedDsIds((prev) => {
+      if (prev.length > 0) return prev.slice(0, maxDatasources);
 
-        // Selection priority:
-        //   1. Previously-persisted names from localStorage (user's last
-        //      explicit choice — wins over the admin default so refresh
-        //      doesn't stomp their selection).
-        //   2. `observability:alertManagerSelectedDatasources` setting
-        //      (names / ids / directQueryName / mdsId). Also used as a
-        //      fallthrough when localStorage exists but none of its entries
-        //      resolve — e.g., the user's cached datasources were deleted.
-        //   3. First discovered datasource (original behavior).
-        // Always clamp to the current `maxDatasources` — so if the admin
-        // lowers the cap after the user stored 5 names, we drop the overflow.
-        setSelectedDsIds((prev) => {
-          if (prev.length > 0) return prev.slice(0, maxDatasources);
-
-          const persistedNames = loadPersistedSelection();
-          if (persistedNames.length > 0) {
-            const resolved = resolveDatasourceTokens(persistedNames, ds);
-            if (resolved.length > 0) return resolved.slice(0, maxDatasources);
-            // All cached entries were stale (datasources removed). Fall
-            // through to the admin-curated setting below rather than
-            // jumping straight to "first datasource" — the setting is a
-            // better backup than an arbitrary pick.
-          }
-
-          if (defaultDatasources.length > 0) {
-            const resolved = resolveDatasourceTokens(defaultDatasources, ds);
-            if (resolved.length > 0) return resolved.slice(0, maxDatasources);
-          }
-
-          const first = ds[0]?.id;
-          return first ? [first] : [];
-        });
-      } catch (e: unknown) {
-        console.error('Failed to load datasources', e);
+      const persistedNames = loadPersistedSelection();
+      if (persistedNames.length > 0) {
+        const resolved = resolveDatasourceTokens(persistedNames, datasources);
+        if (resolved.length > 0) return resolved.slice(0, maxDatasources);
+        // All cached entries were stale (datasources removed). Fall
+        // through to the admin-curated setting below rather than
+        // jumping straight to "first datasource" — the setting is a
+        // better backup than an arbitrary pick.
       }
-    })();
-  }, [apiClient, defaultDatasources, maxDatasources]);
+
+      if (defaultDatasources.length > 0) {
+        const resolved = resolveDatasourceTokens(defaultDatasources, datasources);
+        if (resolved.length > 0) return resolved.slice(0, maxDatasources);
+      }
+
+      const first = datasources[0]?.id;
+      return first ? [first] : [];
+    });
+  }, [datasources, datasourcesLoading, defaultDatasources, maxDatasources]);
 
   // Persist the selection (by name) whenever it changes and we know the
   // datasource list. Names survive server restarts; ids don't.
@@ -264,7 +262,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // ---- Fetch data when datasource selection or page changes ----
 
   const fetchAlerts = useCallback(
-    async (dsIds: string[], page: number, pageSize: number) => {
+    async (dsIds: string[], _page: number, _pageSize: number) => {
       if (dsIds.length === 0) {
         setAlerts([]);
         setAlertsTotal(0);
@@ -274,14 +272,17 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       setError(null);
       setWarnings([]);
       try {
-        const res = await apiClient.listAlertsPaginated(dsIds, page, pageSize);
+        const res = await osService.listAlerts({ dsIds });
         setAlerts(res.results || []);
-        setAlertsTotal(res.total || 0);
-        if (res.warnings && res.warnings.length > 0) {
+        setAlertsTotal((res.results || []).length);
+        // Convert per-datasource failure entries from the progressive response
+        // into the UI's warning shape.
+        const failedStatuses = (res.datasourceStatus || []).filter((s) => s.status === 'error');
+        if (failedStatuses.length > 0) {
           setWarnings(
-            res.warnings.map((w: DatasourceWarning) => ({
-              datasourceName: w.datasourceName,
-              error: w.error,
+            failedStatuses.map((s) => ({
+              datasourceName: s.datasourceName,
+              error: s.error || 'Unknown error',
             }))
           );
         }
@@ -291,11 +292,11 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         setDataLoading(false);
       }
     },
-    [apiClient]
+    [osService]
   );
 
   const fetchRules = useCallback(
-    async (dsIds: string[], page: number, pageSize: number) => {
+    async (dsIds: string[], _page: number, _pageSize: number) => {
       if (dsIds.length === 0) {
         setRules([]);
         setRulesTotal(0);
@@ -305,14 +306,15 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       setError(null);
       setWarnings([]);
       try {
-        const res = await apiClient.listRulesPaginated(dsIds, page, pageSize);
+        const res = await osService.listRules({ dsIds });
         setRules(res.results || []);
-        setRulesTotal(res.total || 0);
-        if (res.warnings && res.warnings.length > 0) {
+        setRulesTotal((res.results || []).length);
+        const failedStatuses = (res.datasourceStatus || []).filter((s) => s.status === 'error');
+        if (failedStatuses.length > 0) {
           setWarnings(
-            res.warnings.map((w: DatasourceWarning) => ({
-              datasourceName: w.datasourceName,
-              error: w.error,
+            failedStatuses.map((s) => ({
+              datasourceName: s.datasourceName,
+              error: s.error || 'Unknown error',
             }))
           );
         }
@@ -322,7 +324,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         setDataLoading(false);
       }
     },
-    [apiClient]
+    [osService]
   );
 
   // Fetch when selection or pagination changes
@@ -362,7 +364,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   const handleAcknowledgeAlert = async (alertId: string) => {
     const alert = alerts.find((a) => a.id === alertId);
     try {
-      await apiClient.acknowledgeAlert(alertId, alert?.datasourceId, alert?.labels?.monitor_id);
+      await mutations.acknowledgeAlert(alertId, alert?.datasourceId, alert?.labels?.monitor_id);
       addToast('Alert acknowledged');
       setAlerts((prev) =>
         prev.map((a) =>
@@ -392,7 +394,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         continue;
       }
       try {
-        await apiClient.deleteMonitor(id, rule.datasourceId);
+        await mutations.deleteMonitor(id, rule.datasourceId);
       } catch (e: unknown) {
         failed.push(id);
         addToast('Failed to delete monitor', 'danger', e instanceof Error ? e.message : String(e));
@@ -422,7 +424,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       createdBy: 'current-user',
     };
     try {
-      await apiClient.createMonitor(clone, clone.datasourceId);
+      await mutations.createMonitor(
+        (clone as unknown) as Record<string, unknown>,
+        clone.datasourceId
+      );
       addToast('Monitor cloned');
       setRules((prev) => [clone, ...prev]);
     } catch (e: unknown) {
@@ -437,7 +442,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       return;
     }
     try {
-      await apiClient.importMonitors(configs, dsId);
+      await mutations.importMonitors({ monitors: configs }, dsId);
       addToast('Monitors imported successfully');
       fetchRules(selectedDsIds, rulesPage, rulesPageSize);
     } catch (e: unknown) {
@@ -585,7 +590,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     if (!dsId) return;
     const newRule = formStateToRule(formState);
     try {
-      await apiClient.createMonitor((formState as unknown) as Record<string, unknown>, dsId);
+      await mutations.createMonitor((formState as unknown) as Record<string, unknown>, dsId);
       addToast('Monitor created successfully');
       setRules((prev) => [newRule, ...prev]);
       setRulesTotal((prev) => prev + 1);
@@ -601,7 +606,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       const dsId = resolveDatasourceId(forms[i]);
       if (!dsId) continue;
       try {
-        await apiClient.createMonitor((forms[i] as unknown) as Record<string, unknown>, dsId);
+        await mutations.createMonitor((forms[i] as unknown) as Record<string, unknown>, dsId);
         succeededRules.push(formStateToRule(forms[i], i));
       } catch (e: unknown) {
         addToast('Failed to create monitor', 'danger', e instanceof Error ? e.message : String(e));
@@ -667,7 +672,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       return;
     }
     try {
-      await apiClient.createMonitor(transformLogsFormToPayload(logsForm), dsId);
+      await mutations.createMonitor(transformLogsFormToPayload(logsForm), dsId);
       addToast('Logs monitor created successfully');
       setRules((prev) => [newRule, ...prev]);
       setRulesTotal((prev) => prev + 1);
@@ -728,7 +733,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       raw: {} as any,
     };
     try {
-      await apiClient.createMonitor(
+      await mutations.createMonitor(
         transformMetricsFormToPayload(metricsForm),
         metricsForm.datasourceId
       );
@@ -777,7 +782,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           rules={visibleRules}
           datasources={datasources}
           loading={dataLoading}
-          apiClient={apiClient}
           onDelete={handleDeleteRules}
           onClone={handleCloneRule}
           onImport={handleImportMonitors}
@@ -799,7 +803,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       );
     }
     if (activeTab === 'routing') {
-      return <NotificationRoutingPanel apiClient={apiClient} datasources={datasources} />;
+      return <NotificationRoutingPanel datasources={datasources} />;
     }
     return null;
   };
@@ -882,7 +886,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         <AlertDetailFlyout
           alert={selectedAlert}
           datasources={datasources}
-          apiClient={apiClient}
           onClose={() => setSelectedAlert(null)}
           onAcknowledge={(id) => {
             handleAcknowledgeAlert(id);

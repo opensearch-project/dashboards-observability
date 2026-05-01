@@ -15,10 +15,10 @@
  *  - All options formatted as `{ label: string }[]` for EuiComboBox
  *  - Max 50 options displayed (truncated from server's 200)
  */
-import { useReducer, useEffect, useRef, useCallback } from 'react';
+import { useReducer, useEffect, useMemo, useRef, useCallback } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import type { AlarmsApiClient } from '../services/alarms_client';
-import type { PrometheusMetricMetadata } from '../../../../common/types/alerting/types';
+import { AlertingPromResourcesService } from '../query_services/alerting_prom_resources_service';
+import type { PrometheusMetricMetadata } from '../../../../common/types/alerting';
 
 // ============================================================================
 // Public interface
@@ -26,10 +26,6 @@ import type { PrometheusMetricMetadata } from '../../../../common/types/alerting
 
 export interface UsePrometheusMetadataOptions {
   datasourceId: string;
-  apiClient: Pick<
-    AlarmsApiClient,
-    'getMetricNames' | 'getLabelNames' | 'getLabelValues' | 'getMetricMetadata'
-  >;
   selectedMetric?: string;
 }
 
@@ -151,7 +147,8 @@ function toOptions(strings: string[]): EuiComboBoxOptionOption[] {
 export function usePrometheusMetadata(
   options: UsePrometheusMetadataOptions
 ): UsePrometheusMetadataReturn {
-  const { datasourceId, apiClient, selectedMetric } = options;
+  const { datasourceId, selectedMetric } = options;
+  const service = useMemo(() => new AlertingPromResourcesService(datasourceId), [datasourceId]);
   const [state, dispatch] = useReducer(metadataReducer, initialState);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -174,14 +171,14 @@ export function usePrometheusMetadata(
       dispatch({ type: 'METRICS_LOADING' });
       debounceRef.current = setTimeout(async () => {
         try {
-          const res = await apiClient.getMetricNames(datasourceId, query);
+          const res = await service.listMetricNames(query);
           dispatch({ type: 'METRICS_LOADED', options: toOptions(res.metrics) });
         } catch {
           dispatch({ type: 'METRICS_ERROR' });
         }
       }, DEBOUNCE_MS);
     },
-    [apiClient, datasourceId]
+    [service]
   );
 
   // ------------------------------------------------------------------
@@ -205,7 +202,7 @@ export function usePrometheusMetadata(
     let cancelled = false;
     (async () => {
       try {
-        const res = await apiClient.getLabelNames(datasourceId, selectedMetric);
+        const res = await service.listLabelNames(selectedMetric);
         if (!cancelled) {
           dispatch({ type: 'LABELS_LOADED', names: res.labels });
         }
@@ -217,7 +214,7 @@ export function usePrometheusMetadata(
     return () => {
       cancelled = true;
     };
-  }, [selectedMetric, apiClient, datasourceId]);
+  }, [selectedMetric, service]);
 
   // ------------------------------------------------------------------
   // Fetch metric metadata once on mount
@@ -227,7 +224,7 @@ export function usePrometheusMetadata(
     let cancelled = false;
     (async () => {
       try {
-        const res = await apiClient.getMetricMetadata(datasourceId);
+        const res = await service.getMetricMetadata();
         if (!cancelled) {
           dispatch({ type: 'METADATA_LOADED', metadata: res.metadata });
         }
@@ -238,7 +235,7 @@ export function usePrometheusMetadata(
     return () => {
       cancelled = true;
     };
-  }, [apiClient, datasourceId]);
+  }, [service]);
 
   // ------------------------------------------------------------------
   // fetchLabelValues — fetch values for a specific label, filtered by metric
@@ -256,7 +253,7 @@ export function usePrometheusMetadata(
 
       (async () => {
         try {
-          const res = await apiClient.getLabelValues(datasourceId, labelName, selector);
+          const res = await service.listLabelValues(labelName, selector);
           dispatch({
             type: 'LABEL_VALUES_LOADED',
             labelName,
@@ -267,7 +264,7 @@ export function usePrometheusMetadata(
         }
       })();
     },
-    [apiClient, datasourceId, selectedMetric]
+    [service, selectedMetric]
   );
 
   // ------------------------------------------------------------------

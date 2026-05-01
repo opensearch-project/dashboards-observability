@@ -4,7 +4,7 @@
  */
 
 import { DirectQueryPrometheusBackend } from '../directquery_prometheus_backend';
-import type { Datasource, Logger } from '../../../../common/types/alerting/types';
+import type { Datasource, Logger } from '../../../../common/types/alerting';
 
 const mockLogger: Logger = { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() };
 

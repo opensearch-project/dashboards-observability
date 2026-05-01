@@ -10,7 +10,7 @@
  */
 
 import type { PrometheusMetadataService } from '../../services/alerting/prometheus_metadata_service';
-import type { Logger } from '../../../common/types/alerting/types';
+import type { Logger } from '../../../common/types/alerting';
 import type { HandlerResult } from './route_utils';
 
 const MAX_RESULTS = 200;

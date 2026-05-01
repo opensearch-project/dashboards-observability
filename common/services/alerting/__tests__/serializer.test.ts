@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { UnifiedRule, UnifiedRuleSummary } from '../../../types/alerting/types';
+import type { UnifiedRule, UnifiedRuleSummary } from '../../../types/alerting';
 import {
   deserializeMonitor,
   MonitorConfig,

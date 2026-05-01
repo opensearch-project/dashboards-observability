@@ -10,7 +10,7 @@ import type {
   Logger,
   PrometheusMetadataProvider,
   PrometheusMetricMetadata,
-} from '../../../../common/types/alerting/types';
+} from '../../../../common/types/alerting';
 import { PrometheusMetadataService } from '../prometheus_metadata_service';
 
 const mockLogger: Logger = {

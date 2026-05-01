@@ -26,7 +26,7 @@ import {
   OSRawAction,
   OSDestinationRaw,
   OSDestinationsApiResponse,
-} from '../../../common/types/alerting/types';
+} from '../../../common/types/alerting';
 
 export class HttpOpenSearchBackend implements OpenSearchBackend {
   readonly type = 'opensearch' as const;
@@ -150,7 +150,11 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
     }
   }
 
-  async runMonitor(client: any, monitorId: string, dryRun?: boolean): Promise<unknown> {
+  async runMonitor(
+    client: AlertingOSClient,
+    monitorId: string,
+    dryRun?: boolean
+  ): Promise<unknown> {
     const resp = await this.req<unknown>(
       client,
       'POST',
@@ -163,7 +167,7 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
   }
 
   async searchQuery(
-    client: any,
+    client: AlertingOSClient,
     indices: string[],
     body: Record<string, unknown>
   ): Promise<unknown> {
@@ -176,7 +180,7 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
   // Alerts
   // =========================================================================
 
-  async getAlerts(client: any): Promise<{ alerts: OSAlert[]; totalAlerts: number }> {
+  async getAlerts(client: AlertingOSClient): Promise<{ alerts: OSAlert[]; totalAlerts: number }> {
     const PAGE_SIZE = 100;
     const allAlerts: OSAlert[] = [];
     let startIndex = 0;
@@ -200,7 +204,11 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
     return { alerts: allAlerts, totalAlerts };
   }
 
-  async acknowledgeAlerts(client: any, monitorId: string, alertIds: string[]): Promise<unknown> {
+  async acknowledgeAlerts(
+    client: AlertingOSClient,
+    monitorId: string,
+    alertIds: string[]
+  ): Promise<unknown> {
     const resp = await this.req<unknown>(
       client,
       'POST',
@@ -214,7 +222,7 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
   // Destinations
   // =========================================================================
 
-  async getDestinations(client: any): Promise<OSDestination[]> {
+  async getDestinations(client: AlertingOSClient): Promise<OSDestination[]> {
     const resp = await this.req<OSDestinationsApiResponse>(
       client,
       'GET',
@@ -223,7 +231,10 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
     return (resp.body.destinations ?? []).map((d: OSDestinationRaw) => this.mapDestination(d));
   }
 
-  async createDestination(client: any, dest: Omit<OSDestination, 'id'>): Promise<OSDestination> {
+  async createDestination(
+    client: AlertingOSClient,
+    dest: Omit<OSDestination, 'id'>
+  ): Promise<OSDestination> {
     const resp = await this.req<{ _id: string; destination: OSDestinationRaw }>(
       client,
       'POST',
@@ -233,7 +244,7 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
     return this.mapDestination({ id: resp.body._id, ...resp.body.destination });
   }
 
-  async deleteDestination(client: any, destId: string): Promise<boolean> {
+  async deleteDestination(client: AlertingOSClient, destId: string): Promise<boolean> {
     try {
       await this.req(client, 'DELETE', `/_plugins/_alerting/destinations/${destId}`);
       return true;
@@ -248,7 +259,7 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
   // =========================================================================
 
   private async req<T = unknown>(
-    client: any,
+    client: AlertingOSClient,
     method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     path: string,
     body?: unknown

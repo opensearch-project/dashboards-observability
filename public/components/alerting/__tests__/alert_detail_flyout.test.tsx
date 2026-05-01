@@ -22,8 +22,19 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   unobserve: jest.fn(),
 }));
 
+// Post-Phase 4: AlertDetailFlyout instantiates AlertingOpenSearchService
+// internally via `useMemo(() => new AlertingOpenSearchService(), [])` and
+// calls `getAlertDetail(dsId, alertId)` on mount. Mock the class so the
+// constructor returns a stubbed instance with `getAlertDetail` resolving to
+// `null` — the flyout falls back to the alert summary in that case, which
+// is exactly what these render tests exercise.
+jest.mock('../query_services/alerting_opensearch_service', () => ({
+  AlertingOpenSearchService: jest.fn().mockImplementation(() => ({
+    getAlertDetail: jest.fn().mockResolvedValue(null),
+  })),
+}));
+
 import { AlertDetailFlyout } from '../alert_detail_flyout';
-import type { AlarmsApiClient } from '../services/alarms_client';
 import type { Datasource, UnifiedAlertSummary } from '../../../../common/types/alerting';
 
 const baseAlert: UnifiedAlertSummary = {
@@ -50,19 +61,12 @@ const datasources: Datasource[] = [
   },
 ];
 
-function makeApiClient(): AlarmsApiClient {
-  return ({
-    getAlertDetail: jest.fn().mockResolvedValue(null),
-  } as unknown) as AlarmsApiClient;
-}
-
 describe('AlertDetailFlyout', () => {
   it('smoke renders with the alert name, severity, and datasource label', () => {
     const { getByText, getAllByText } = render(
       <AlertDetailFlyout
         alert={baseAlert}
         datasources={datasources}
-        apiClient={makeApiClient()}
         onClose={jest.fn()}
         onAcknowledge={jest.fn()}
       />
@@ -79,7 +83,6 @@ describe('AlertDetailFlyout', () => {
       <AlertDetailFlyout
         alert={baseAlert}
         datasources={datasources}
-        apiClient={makeApiClient()}
         onClose={onClose}
         onAcknowledge={jest.fn()}
       />
@@ -94,7 +97,6 @@ describe('AlertDetailFlyout', () => {
       <AlertDetailFlyout
         alert={baseAlert}
         datasources={datasources}
-        apiClient={makeApiClient()}
         onClose={jest.fn()}
         onAcknowledge={onAcknowledge}
       />
@@ -110,7 +112,6 @@ describe('AlertDetailFlyout', () => {
       <AlertDetailFlyout
         alert={promAlert}
         datasources={datasources}
-        apiClient={makeApiClient()}
         onClose={jest.fn()}
         onAcknowledge={onAcknowledge}
       />

@@ -29,7 +29,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { Datasource } from '../../../common/types/alerting';
-import { AlarmsApiClient } from './services/alarms_client';
+import { AlertmanagerAdminService } from './query_services/alertmanager_admin_service';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -149,14 +149,13 @@ const INTEGRATION_COLORS: Record<string, string> = {
 // ---------------------------------------------------------------------------
 
 export interface NotificationRoutingPanelProps {
-  apiClient: AlarmsApiClient;
   datasources: Datasource[];
 }
 
 export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> = ({
-  apiClient,
   datasources,
 }) => {
+  const adminService = useMemo(() => new AlertmanagerAdminService(), []);
   // Alertmanager is reached through a single Prometheus datasource at a time —
   // only parent Prom entries are candidates (workspace-derived entries share
   // the same Alertmanager endpoint as their parent).
@@ -186,7 +185,7 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
     setLoading(true);
     setError(null);
     try {
-      const res = await apiClient.getAlertmanagerConfig(selectedDsId);
+      const res = await adminService.getConfig(selectedDsId);
       // The API client types route/inhibitRules as `unknown` because it's
       // handed back raw from Alertmanager; narrow to our local shape here.
       setConfig((res as unknown) as AlertmanagerConfig);
@@ -194,7 +193,7 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
       setError(e instanceof Error ? e.message : 'Failed to fetch Alertmanager config');
     }
     setLoading(false);
-  }, [apiClient, selectedDsId]);
+  }, [adminService, selectedDsId]);
 
   useEffect(() => {
     fetchConfig();

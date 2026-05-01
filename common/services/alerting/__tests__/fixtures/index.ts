@@ -13,7 +13,7 @@ import type {
   AlertHistoryEntry,
   NotificationRouting,
   SuppressionRule,
-} from '../../../../types/alerting/types';
+} from '../../../../types/alerting';
 
 /** Shared labels — dedup across Prom fixtures. `_workspace` scopes to a workspace. */
 export const sampleAlertLabels = {

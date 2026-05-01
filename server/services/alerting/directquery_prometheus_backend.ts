@@ -46,21 +46,7 @@ import {
   PromAlertsApiResponse,
   DatasourceDefinition,
   PromTimeSeriesPoint,
-} from '../../../common/types/alerting/types';
-
-/**
- * @deprecated Kept as an exported type for compatibility with callers that
- * previously constructed with a DirectQueryConfig. The backend now relies on
- * the OSD scoped client for auth and TLS, so only the logger is used.
- */
-export interface DirectQueryConfig {
-  /** @deprecated No longer used — auth is supplied by OSD scoped client. */
-  opensearchUrl?: string;
-  /** @deprecated No longer used — auth is supplied by OSD scoped client. */
-  auth?: { username: string; password: string };
-  /** @deprecated No longer used — TLS is handled by OSD scoped client. */
-  rejectUnauthorized?: boolean;
-}
+} from '../../../common/types/alerting';
 
 export class DirectQueryPrometheusBackend implements PrometheusBackend, PrometheusMetadataProvider {
   readonly type = 'prometheus' as const;
@@ -286,31 +272,15 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
   // Alertmanager — via direct query resource APIs
   // =========================================================================
 
-  // Alertmanager methods use the first available Prometheus datasource since
-  // they are global (not per-datasource). A `_defaultDs` is resolved lazily
-  // from whatever datasource was last used in getRuleGroups/getAlerts, or
-  // the caller can set it via setDefaultDatasource().
+  // Alertmanager methods are global (not per-datasource). The caller must
+  // supply the Prometheus datasource that owns the Alertmanager endpoint.
 
-  private _defaultDs?: Datasource;
-
-  setDefaultDatasource(ds: Datasource): void {
-    this._defaultDs = ds;
-  }
-
-  private requireDefaultDs(): Datasource {
-    if (!this._defaultDs) {
-      throw new Error('No default Prometheus datasource set for alertmanager operations');
-    }
-    return this._defaultDs;
-  }
-
-  async getAlertmanagerAlerts(client: AlertingOSClient): Promise<AlertmanagerAlert[]> {
+  async getAlertmanagerAlerts(
+    client: AlertingOSClient,
+    ds: Datasource
+  ): Promise<AlertmanagerAlert[]> {
     try {
-      const data = await this.get<AlertmanagerAlert[]>(
-        client,
-        this.requireDefaultDs(),
-        '/alertmanager/api/v2/alerts'
-      );
+      const data = await this.get<AlertmanagerAlert[]>(client, ds, '/alertmanager/api/v2/alerts');
       return Array.isArray(data) ? data : [];
     } catch (err) {
       this.logger.warn(`Failed to get alertmanager alerts via direct query: ${err}`);
@@ -318,11 +288,14 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     }
   }
 
-  async getAlertmanagerAlertGroups(client: AlertingOSClient): Promise<AlertmanagerAlertGroup[]> {
+  async getAlertmanagerAlertGroups(
+    client: AlertingOSClient,
+    ds: Datasource
+  ): Promise<AlertmanagerAlertGroup[]> {
     try {
       const data = await this.get<AlertmanagerAlertGroup[]>(
         client,
-        this.requireDefaultDs(),
+        ds,
         '/alertmanager/api/v2/alerts/groups'
       );
       return Array.isArray(data) ? data : [];
@@ -332,11 +305,14 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     }
   }
 
-  async getAlertmanagerReceivers(client: AlertingOSClient): Promise<AlertmanagerReceiver[]> {
+  async getAlertmanagerReceivers(
+    client: AlertingOSClient,
+    ds: Datasource
+  ): Promise<AlertmanagerReceiver[]> {
     try {
       const data = await this.get<AlertmanagerReceiver[]>(
         client,
-        this.requireDefaultDs(),
+        ds,
         '/alertmanager/api/v2/receivers'
       );
       return Array.isArray(data) ? data : [];
@@ -346,11 +322,11 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     }
   }
 
-  async getSilences(client: AlertingOSClient): Promise<AlertmanagerSilence[]> {
+  async getSilences(client: AlertingOSClient, ds: Datasource): Promise<AlertmanagerSilence[]> {
     try {
       const data = await this.get<AlertmanagerSilence[]>(
         client,
-        this.requireDefaultDs(),
+        ds,
         '/alertmanager/api/v2/silences'
       );
       return Array.isArray(data) ? data : [];
@@ -360,10 +336,14 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     }
   }
 
-  async createSilence(client: AlertingOSClient, silence: AlertmanagerSilence): Promise<string> {
+  async createSilence(
+    client: AlertingOSClient,
+    ds: Datasource,
+    silence: AlertmanagerSilence
+  ): Promise<string> {
     const data = await this.post<string | { silenceID?: string; silenceId?: string }>(
       client,
-      this.requireDefaultDs(),
+      ds,
       '/alertmanager/api/v2/silences',
       silence
     );
@@ -371,11 +351,15 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     return data?.silenceID || data?.silenceId || '';
   }
 
-  async deleteSilence(client: AlertingOSClient, silenceId: string): Promise<boolean> {
+  async deleteSilence(
+    client: AlertingOSClient,
+    ds: Datasource,
+    silenceId: string
+  ): Promise<boolean> {
     try {
       await this.del<unknown>(
         client,
-        this.requireDefaultDs(),
+        ds,
         `/alertmanager/api/v2/silence/${encodeURIComponent(silenceId)}`
       );
       return true;
@@ -384,13 +368,12 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     }
   }
 
-  async getAlertmanagerStatus(client: AlertingOSClient): Promise<AlertmanagerStatus> {
+  async getAlertmanagerStatus(
+    client: AlertingOSClient,
+    ds: Datasource
+  ): Promise<AlertmanagerStatus> {
     // Routes through DirectQuery: /_plugins/_directquery/_resources/{dsName}/alertmanager/api/v2/status
-    return this.get<AlertmanagerStatus>(
-      client,
-      this.requireDefaultDs(),
-      '/alertmanager/api/v2/status'
-    );
+    return this.get<AlertmanagerStatus>(client, ds, '/alertmanager/api/v2/status');
   }
 
   // =========================================================================

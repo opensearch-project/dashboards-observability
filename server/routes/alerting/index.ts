@@ -5,17 +5,30 @@
 
 /**
  * OSD route adapter — wires framework-agnostic handlers to OSD's IRouter.
+ *
+ * Phase 5 state:
+ *   - 14 inline routes (reads: unified/alerts, unified/rules, OS monitor reads,
+ *     OS alert reads, Prom rules, Prom alerts, rule/alert detail, AM config,
+ *     4 Prom metadata).
+ *   - 4 mutation routes moved to `./mutations/` (registered via
+ *     `registerAlertingMutationRoutes` below).
+ *   - Datasource CRUD routes deleted in Phase 3 (client reads from
+ *     `data-source` / `data-connection` saved-object types directly).
+ *   - `InMemoryDatasourceService` deleted; MDS client routing and Prometheus
+ *     datasource lookup happen via `resolveOpenSearchDatasource` /
+ *     `resolvePrometheusDatasource` saved-object helpers below.
+ *   - Feature-flag gated at the call site (`setupRoutes` in
+ *     `server/routes/index.ts`) via `if (alertManagerEnabled)`.
  */
 import { schema } from '@osd/config-schema';
 import { IRouter, RequestHandlerContext, SavedObject } from '../../../../../src/core/server';
-import type {
-  AlertingOSClient,
-  Datasource,
-  Logger,
-  OSMonitor,
-} from '../../../common/types/alerting';
+import type { AlertingOSClient, Datasource, Logger } from '../../../common/types/alerting';
 import { MultiBackendAlertService } from '../../services/alerting';
-import type { InMemoryDatasourceService } from '../../services/alerting/datasource_service';
+import { DirectQueryPrometheusBackend } from '../../services/alerting/directquery_prometheus_backend';
+import { MonitorMutationService } from '../../services/alerting/monitor_mutation_service';
+import { SavedObjectDatasourceService } from '../../services/alerting/saved_object_datasource_service';
+import { registerAlertingMutationRoutes } from './mutations';
+import { toErrorBody } from './route_utils';
 
 /**
  * Shape of the OSD request-handler context we rely on. `dataSource` is
@@ -41,19 +54,9 @@ interface DataConnectionSOAttributes {
 }
 
 import {
-  handleListDatasources,
-  handleGetDatasource,
-  handleCreateDatasource,
-  handleUpdateDatasource,
-  handleDeleteDatasource,
-  handleTestDatasource,
   handleGetOSMonitors,
   handleGetOSMonitor,
-  handleCreateOSMonitor,
-  handleUpdateOSMonitor,
-  handleDeleteOSMonitor,
   handleGetOSAlerts,
-  handleAcknowledgeOSAlerts,
   handleGetPromRuleGroups,
   handleGetPromAlerts,
   handleGetUnifiedAlerts,
@@ -67,140 +70,97 @@ import {
   handleGetLabelValues,
   handleGetMetricMetadata,
 } from './metadata_handlers';
-import type { PrometheusMetadataService } from '../../services/alerting/prometheus_metadata_service';
+import { PrometheusMetadataService } from '../../services/alerting/prometheus_metadata_service';
 import { handleGetAlertmanagerConfig } from './alertmanager_handlers';
-
-/**
- * Adapt handler-result body ({ error: '...' } or arbitrary data) to OSD's
- * ResponseError shape ({ message, attributes }). `error` → `message`, and the
- * remaining fields become `attributes`.
- */
-function toErrorBody(
-  body: Record<string, unknown>
-): { message: string; attributes?: Record<string, unknown> } {
-  const { error, message, ...rest } = body as { error?: unknown; message?: unknown };
-  const text =
-    typeof error === 'string' ? error : typeof message === 'string' ? message : 'An error occurred';
-  return Object.keys(rest).length > 0
-    ? { message: text, attributes: rest as Record<string, unknown> }
-    : { message: text };
-}
 
 export function registerAlertingRoutes(
   router: IRouter,
-  datasourceService: InMemoryDatasourceService,
   alertService: MultiBackendAlertService,
+  mutationSvc: MonitorMutationService,
+  promBackend: DirectQueryPrometheusBackend,
   logger?: Logger,
   metadataService?: PrometheusMetadataService
 ) {
   /**
-   * Discover OSD-registered data sources and rebuild the datasource list.
-   * Gated by a 30-second TTL to avoid wiping/re-seeding on every request.
-   * Concurrent calls within TTL share the same in-flight promise.
+   * Resolve an OpenSearch datasource from the `data-source` saved-object type.
+   * Returns `null` for an unknown id. If `requestedDsId` is undefined, returns
+   * a synthetic "Local Cluster" descriptor (matches the pre-refactor default
+   * seed behaviour in `InMemoryDatasourceService`).
    */
-  let lastDiscoveryTs = 0;
-  const DISCOVERY_TTL_MS = 30_000;
-  let inflight: Promise<void> | null = null;
+  async function resolveOpenSearchDatasource(
+    ctx: AlertingHandlerContext,
+    requestedDsId?: string
+  ): Promise<Datasource | null> {
+    if (!requestedDsId) {
+      return {
+        id: 'local-cluster',
+        name: 'Local Cluster',
+        type: 'opensearch',
+        url: 'local',
+        enabled: true,
+      };
+    }
+    const soClient = ctx.core.savedObjects.client;
+    try {
+      const so = await soClient.get<DataSourceSOAttributes>('data-source', requestedDsId);
+      return {
+        id: so.id,
+        name: so.attributes.title || so.id,
+        type: 'opensearch',
+        url: so.attributes.endpoint || '',
+        enabled: true,
+        mdsId: so.id,
+      };
+    } catch {
+      return null;
+    }
+  }
 
-  async function discoverOsdDatasources(ctx: AlertingHandlerContext) {
-    const existing = await datasourceService.list();
-    if (Date.now() - lastDiscoveryTs < DISCOVERY_TTL_MS && existing.length > 0) return;
-    if (inflight) {
-      await inflight;
-      return;
+  /**
+   * Resolve a Prometheus datasource from the `data-connection` saved-object
+   * type. If `requestedDsId` matches a saved-object id OR a `connectionId`
+   * attribute, returns that one; otherwise returns the first registered Prom
+   * connection, or `null` if none exist.
+   */
+  async function resolvePrometheusDatasource(
+    ctx: AlertingHandlerContext,
+    requestedDsId?: string
+  ): Promise<Datasource | null> {
+    const soClient = ctx.core.savedObjects.client;
+    let dcResult;
+    try {
+      dcResult = await soClient.find<DataConnectionSOAttributes>({
+        type: 'data-connection',
+        perPage: 100,
+      });
+    } catch {
+      return null;
     }
 
-    inflight = (async () => {
-      try {
-        // Clear everything; we'll rebuild the list from scratch below.
-        for (const ds of existing) {
-          await datasourceService.delete(ds.id);
-        }
-
-        // Discover OSD-registered data sources + direct-query data connections.
-        // - `data-source` = MDS OpenSearch clusters (attribute.endpoint is a URL).
-        // - `data-connection` = direct-query connections (Prometheus, CloudWatch, etc);
-        //   attribute.connectionId is the SQL-plugin connection name used for
-        //   /_plugins/_directquery/_resources/{connectionId}/... routing.
-        const soClient = ctx.core.savedObjects.client;
-        const [osResult, dcResult] = await Promise.all([
-          soClient.find<DataSourceSOAttributes>({ type: 'data-source', perPage: 100 }),
-          soClient.find<DataConnectionSOAttributes>({ type: 'data-connection', perPage: 100 }),
-        ]);
-
-        const localPatterns = /localhost|127\.0\.0\.1|0\.0\.0\.0|::1|opensearch:9200|opensearch-cluster-master|opensearch-master/i;
-        // Partition OS data-source saved objects into "points at local cluster"
-        // vs "remote". If the user has created an MDS entry that targets the
-        // local cluster, we want THEIR name/entry to surface in the UI instead
-        // of the hardcoded "Local Cluster" seed — avoids showing two rows for
-        // the same physical cluster.
-        const osSavedObjects = osResult.saved_objects || [];
-        const osLocal = osSavedObjects.filter((so) =>
-          localPatterns.test(so.attributes?.endpoint || '')
-        );
-        const osRemote = osSavedObjects.filter(
-          (so) => !localPatterns.test(so.attributes?.endpoint || '')
-        );
-
-        // Seed a representation for the local cluster:
-        //   - If the user registered one or more MDS data sources pointing at
-        //     the local cluster, surface all of them with their user-given
-        //     names (drop the hardcoded "Local Cluster").
-        //   - Otherwise, seed the default "Local Cluster" entry.
-        if (osLocal.length > 0) {
-          datasourceService.seed(
-            osLocal.map((so: SavedObject<DataSourceSOAttributes>) => ({
-              name: so.attributes.title || so.id,
-              type: 'opensearch' as const,
-              url: so.id,
-              enabled: true,
-              mdsId: so.id,
-            }))
-          );
-        } else {
-          datasourceService.seed([
-            { name: 'Local Cluster', type: 'opensearch' as const, url: 'local', enabled: true },
-          ]);
-        }
-
-        const osDiscovered = osRemote.map((so: SavedObject<DataSourceSOAttributes>) => ({
-          name: so.attributes.title || so.id,
-          type: 'opensearch' as const,
-          url: so.id,
-          enabled: true,
-          mdsId: so.id,
-        }));
-
-        const promDiscovered = (dcResult.saved_objects || [])
-          .filter((so: SavedObject<DataConnectionSOAttributes>) => {
-            const t = so.attributes?.type;
-            return t === 'Prometheus' || t === 'Amazon Managed Prometheus';
-          })
-          .map((so: SavedObject<DataConnectionSOAttributes>) => ({
-            name: so.attributes.connectionId || so.id,
-            type: 'prometheus' as const,
-            url: so.id,
-            enabled: true,
-            // SQL-plugin connection name used by DirectQueryPrometheusBackend
-            // to route requests through /_plugins/_directquery/_resources/<name>/...
-            directQueryName: so.attributes.connectionId,
-          }));
-
-        const discovered = [...osDiscovered, ...promDiscovered];
-        if (discovered.length > 0) {
-          datasourceService.seed(discovered);
-          logger?.info(
-            `alerting: Discovered ${osDiscovered.length} OpenSearch data source(s), ${promDiscovered.length} Prometheus connection(s)`
-          );
-        }
-        lastDiscoveryTs = Date.now();
-      } catch (e) {
-        logger?.debug(`alerting: Could not discover OSD data sources: ${e}`);
-      } finally {
-        inflight = null;
+    const promConnections = (dcResult.saved_objects || []).filter(
+      (so: SavedObject<DataConnectionSOAttributes>) => {
+        const t = so.attributes?.type;
+        return t === 'Prometheus' || t === 'Amazon Managed Prometheus';
       }
-    })();
-    await inflight;
+    );
+
+    const toDs = (so: SavedObject<DataConnectionSOAttributes>): Datasource => ({
+      id: so.id,
+      name: so.attributes.connectionId || so.id,
+      type: 'prometheus' as const,
+      url: so.id,
+      enabled: true,
+      directQueryName: so.attributes.connectionId,
+    });
+
+    if (requestedDsId) {
+      const match = promConnections.find(
+        (so: SavedObject<DataConnectionSOAttributes>) =>
+          so.id === requestedDsId || so.attributes?.connectionId === requestedDsId
+      );
+      return match ? toDs(match) : null;
+    }
+    return promConnections.length > 0 ? toDs(promConnections[0]) : null;
   }
 
   /**
@@ -217,7 +177,7 @@ export function registerAlertingRoutes(
       throw new Error(`Unsupported workspace-scoped datasource ID: ${dsId}`);
     }
     if (dsId && ctx.dataSource) {
-      const ds = await datasourceService.get(dsId);
+      const ds = await resolveOpenSearchDatasource(ctx, dsId);
       if (ds?.mdsId) {
         return await ctx.dataSource.opensearch.getClient(ds.mdsId);
       }
@@ -225,97 +185,28 @@ export function registerAlertingRoutes(
     return ctx.core.opensearch.client.asCurrentUser;
   }
 
-  // Datasource routes
-  router.get({ path: '/api/alerting/datasources', validate: {} }, async (ctx, _req, res) => {
-    await discoverOsdDatasources(ctx);
-    const result = await handleListDatasources(datasourceService);
-    return res.ok({ body: result.body });
-  });
-
-  router.get(
-    {
-      path: '/api/alerting/datasources/{id}',
-      validate: { params: schema.object({ id: schema.string() }) },
-    },
-    async (ctx, req, res) => {
-      const result = await handleGetDatasource(datasourceService, req.params.id);
-      return result.status === 200
-        ? res.ok({ body: result.body })
-        : res.notFound({ body: toErrorBody(result.body) });
+  /**
+   * Bind a per-request `SavedObjectDatasourceService` to the shared alert
+   * service + metadata service. Must be called at the start of every route
+   * handler that invokes methods on either service (they internally call
+   * `this.datasourceService.get(...)` / `list()`). The services otherwise
+   * share a bootstrap adapter from `setupRoutes` that has no saved-objects
+   * client.
+   */
+  function bindRequestDatasources(ctx: AlertingHandlerContext): SavedObjectDatasourceService {
+    const ds = new SavedObjectDatasourceService(ctx.core.savedObjects.client, logger);
+    alertService.setDatasourceService(ds);
+    if (metadataService) {
+      metadataService.setDatasourceService(ds);
     }
-  );
+    return ds;
+  }
 
-  router.post(
-    {
-      path: '/api/alerting/datasources',
-      validate: {
-        body: schema.object({
-          name: schema.string({ minLength: 1, maxLength: 255 }),
-          type: schema.oneOf([schema.literal('opensearch'), schema.literal('prometheus')]),
-          url: schema.uri({ scheme: ['http', 'https'] }),
-          enabled: schema.maybe(schema.boolean()),
-        }),
-      },
-    },
-    async (ctx, req, res) => {
-      const result = await handleCreateDatasource(
-        datasourceService,
-        req.body as Omit<Datasource, 'id'>
-      );
-      return res.ok({ body: result.body });
-    }
-  );
-
-  router.put(
-    {
-      path: '/api/alerting/datasources/{id}',
-      validate: {
-        params: schema.object({ id: schema.string() }),
-        body: schema.object({
-          name: schema.maybe(schema.string()),
-          url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
-          enabled: schema.maybe(schema.boolean()),
-        }),
-      },
-    },
-    async (ctx, req, res) => {
-      const result = await handleUpdateDatasource(
-        datasourceService,
-        req.params.id,
-        req.body as Partial<Datasource>
-      );
-      return result.status === 200
-        ? res.ok({ body: result.body })
-        : res.notFound({ body: toErrorBody(result.body) });
-    }
-  );
-
-  router.delete(
-    {
-      path: '/api/alerting/datasources/{id}',
-      validate: { params: schema.object({ id: schema.string() }) },
-    },
-    async (ctx, req, res) => {
-      const result = await handleDeleteDatasource(datasourceService, req.params.id);
-      return result.status === 200
-        ? res.ok({ body: result.body })
-        : res.notFound({ body: toErrorBody(result.body) });
-    }
-  );
-
-  router.post(
-    {
-      path: '/api/alerting/datasources/{id}/test',
-      validate: { params: schema.object({ id: schema.string() }) },
-    },
-    async (ctx, req, res) => {
-      const result = await handleTestDatasource(
-        datasourceService,
-        await getAlertingClient(ctx, req.params.id),
-        req.params.id
-      );
-      return res.ok({ body: result.body });
-    }
+  // Mutation routes (create/update/delete monitor + acknowledge alert) live
+  // in `./mutations/` — register them via the dedicated registrar so the split
+  // stays clean.
+  registerAlertingMutationRoutes(router, mutationSvc, (ctx, dsId) =>
+    getAlertingClient(ctx as AlertingHandlerContext, dsId)
   );
 
   // Unified view routes
@@ -331,6 +222,7 @@ export function registerAlertingRoutes(
       },
     },
     async (ctx, req, res) => {
+      bindRequestDatasources(ctx as AlertingHandlerContext);
       const result = await handleGetUnifiedAlerts(
         alertService,
         async (dsId: string) => getAlertingClient(ctx, dsId),
@@ -356,6 +248,7 @@ export function registerAlertingRoutes(
       },
     },
     async (ctx, req, res) => {
+      bindRequestDatasources(ctx as AlertingHandlerContext);
       const result = await handleGetUnifiedRules(
         alertService,
         async (dsId: string) => getAlertingClient(ctx, dsId),
@@ -376,6 +269,7 @@ export function registerAlertingRoutes(
       validate: { params: schema.object({ dsId: schema.string() }) },
     },
     async (ctx, req, res) => {
+      bindRequestDatasources(ctx as AlertingHandlerContext);
       const result = await handleGetOSMonitors(
         alertService,
         await getAlertingClient(ctx, req.params.dsId),
@@ -393,6 +287,7 @@ export function registerAlertingRoutes(
       validate: { params: schema.object({ dsId: schema.string(), monitorId: schema.string() }) },
     },
     async (ctx, req, res) => {
+      bindRequestDatasources(ctx as AlertingHandlerContext);
       const result = await handleGetOSMonitor(
         alertService,
         await getAlertingClient(ctx, req.params.dsId),
@@ -404,142 +299,9 @@ export function registerAlertingRoutes(
         : res.notFound({ body: toErrorBody(result.body) });
     }
   );
-
-  // ---------------------------------------------------------------------------
-  // Monitor body schema — structured to accept all monitor types while
-  // rejecting unknown top-level keys and enforcing string types on critical
-  // fields (script sources, index names).
-  // ---------------------------------------------------------------------------
-
-  const scriptSchema = schema.object(
-    { source: schema.string(), lang: schema.maybe(schema.string()) },
-    { unknowns: 'ignore' }
-  );
-
-  const triggerSchema = schema.object(
-    {
-      id: schema.maybe(schema.string()),
-      name: schema.maybe(schema.string()),
-      severity: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
-      condition: schema.maybe(schema.object({ script: scriptSchema }, { unknowns: 'ignore' })),
-      actions: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'ignore' }))),
-      // Type-specific trigger wrappers (OS returns different keys per monitor_type)
-      query_level_trigger: schema.maybe(schema.object({}, { unknowns: 'ignore' })),
-      bucket_level_trigger: schema.maybe(schema.object({}, { unknowns: 'ignore' })),
-      doc_level_trigger: schema.maybe(schema.object({}, { unknowns: 'ignore' })),
-    },
-    { unknowns: 'ignore' }
-  );
-
-  const inputSchema = schema.object(
-    {
-      search: schema.maybe(
-        schema.object(
-          {
-            indices: schema.maybe(schema.arrayOf(schema.string())),
-            query: schema.maybe(schema.any()),
-          },
-          { unknowns: 'ignore' }
-        )
-      ),
-      uri: schema.maybe(schema.object({}, { unknowns: 'ignore' })),
-      doc_level_input: schema.maybe(
-        schema.object(
-          {
-            description: schema.maybe(schema.string()),
-            indices: schema.maybe(schema.arrayOf(schema.string())),
-            queries: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'ignore' }))),
-          },
-          { unknowns: 'ignore' }
-        )
-      ),
-    },
-    { unknowns: 'ignore' }
-  );
-
-  const scheduleSchema = schema.object(
-    {
-      period: schema.maybe(
-        schema.object({ interval: schema.number(), unit: schema.string() }, { unknowns: 'ignore' })
-      ),
-      cron: schema.maybe(schema.object({}, { unknowns: 'ignore' })),
-    },
-    { unknowns: 'ignore' }
-  );
-
-  const monitorBodySchema = schema.object({
-    name: schema.string(),
-    type: schema.maybe(schema.string()),
-    monitor_type: schema.maybe(schema.string()),
-    enabled: schema.maybe(schema.boolean()),
-    schedule: schema.maybe(scheduleSchema),
-    inputs: schema.maybe(schema.arrayOf(inputSchema)),
-    triggers: schema.maybe(schema.arrayOf(triggerSchema)),
-    schema_version: schema.maybe(schema.number()),
-  });
-
-  router.post(
-    {
-      path: '/api/alerting/opensearch/{dsId}/monitors',
-      validate: { params: schema.object({ dsId: schema.string() }), body: monitorBodySchema },
-    },
-    async (ctx, req, res) => {
-      const result = await handleCreateOSMonitor(
-        alertService,
-        await getAlertingClient(ctx, req.params.dsId),
-        req.params.dsId,
-        // OSD schema validates loosely; narrow to the typed domain shape
-        (req.body as unknown) as Omit<OSMonitor, 'id'>
-      );
-      return res.ok({ body: result.body });
-    }
-  );
-
-  router.put(
-    {
-      path: '/api/alerting/opensearch/{dsId}/monitors/{monitorId}',
-      validate: {
-        params: schema.object({ dsId: schema.string(), monitorId: schema.string() }),
-        body: monitorBodySchema,
-      },
-    },
-    async (ctx, req, res) => {
-      const result = await handleUpdateOSMonitor(
-        alertService,
-        await getAlertingClient(ctx, req.params.dsId),
-        req.params.dsId,
-        req.params.monitorId,
-        // OSD schema validates loosely; narrow to the typed domain shape
-        (req.body as unknown) as Partial<OSMonitor>
-      );
-      return result.status === 200
-        ? res.ok({ body: result.body })
-        : res.notFound({ body: toErrorBody(result.body) });
-    }
-  );
-
-  router.delete(
-    {
-      path: '/api/alerting/opensearch/{dsId}/monitors/{monitorId}',
-      validate: { params: schema.object({ dsId: schema.string(), monitorId: schema.string() }) },
-    },
-    async (ctx, req, res) => {
-      try {
-        const client = await getAlertingClient(ctx, req.params.dsId);
-        const result = await handleDeleteOSMonitor(
-          alertService,
-          client,
-          req.params.dsId,
-          req.params.monitorId
-        );
-        return result.status === 200
-          ? res.ok({ body: result.body })
-          : res.notFound({ body: toErrorBody(result.body) });
-      } catch (_e) {
-        return res.badRequest({ body: { message: `Invalid datasource: ${req.params.dsId}` } });
-      }
-    }
-  );
+  // OS monitor mutations (POST create, PUT update, DELETE delete) moved to
+  // `./mutations/` — registered via `registerAlertingMutationRoutes` at the
+  // top of this function.
 
   router.get(
     {
@@ -547,6 +309,7 @@ export function registerAlertingRoutes(
       validate: { params: schema.object({ dsId: schema.string() }) },
     },
     async (ctx, req, res) => {
+      bindRequestDatasources(ctx as AlertingHandlerContext);
       const result = await handleGetOSAlerts(
         alertService,
         await getAlertingClient(ctx, req.params.dsId),
@@ -558,25 +321,7 @@ export function registerAlertingRoutes(
     }
   );
 
-  router.post(
-    {
-      path: '/api/alerting/opensearch/{dsId}/monitors/{monitorId}/acknowledge',
-      validate: {
-        params: schema.object({ dsId: schema.string(), monitorId: schema.string() }),
-        body: schema.object({ alerts: schema.arrayOf(schema.string(), { maxSize: 1000 }) }),
-      },
-    },
-    async (ctx, req, res) => {
-      const result = await handleAcknowledgeOSAlerts(
-        alertService,
-        await getAlertingClient(ctx, req.params.dsId),
-        req.params.dsId,
-        req.params.monitorId,
-        req.body
-      );
-      return res.ok({ body: result.body });
-    }
-  );
+  // POST /monitors/{monitorId}/acknowledge moved to `./mutations/`.
 
   // Prometheus routes
   router.get(
@@ -585,6 +330,7 @@ export function registerAlertingRoutes(
       validate: { params: schema.object({ dsId: schema.string() }) },
     },
     async (ctx, req, res) => {
+      bindRequestDatasources(ctx as AlertingHandlerContext);
       const result = await handleGetPromRuleGroups(
         alertService,
         await getAlertingClient(ctx, req.params.dsId),
@@ -602,6 +348,7 @@ export function registerAlertingRoutes(
       validate: { params: schema.object({ dsId: schema.string() }) },
     },
     async (ctx, req, res) => {
+      bindRequestDatasources(ctx as AlertingHandlerContext);
       const result = await handleGetPromAlerts(
         alertService,
         await getAlertingClient(ctx, req.params.dsId),
@@ -622,6 +369,7 @@ export function registerAlertingRoutes(
       },
     },
     async (ctx, req, res) => {
+      bindRequestDatasources(ctx as AlertingHandlerContext);
       const result = await handleGetRuleDetail(
         alertService,
         await getAlertingClient(ctx, req.params.dsId),
@@ -642,6 +390,7 @@ export function registerAlertingRoutes(
       },
     },
     async (ctx, req, res) => {
+      bindRequestDatasources(ctx as AlertingHandlerContext);
       const result = await handleGetAlertDetail(
         alertService,
         await getAlertingClient(ctx, req.params.dsId),
@@ -664,28 +413,14 @@ export function registerAlertingRoutes(
       validate: { query: schema.object({ dsId: schema.maybe(schema.string()) }) },
     },
     async (ctx, req, res) => {
-      const promBackend = alertService.getPrometheusBackend?.();
-      if (!promBackend) {
-        return res.ok({ body: { available: false, error: 'Alertmanager not configured' } });
-      }
-      // Alertmanager is a global endpoint reached through any configured Prometheus
-      // datasource. If the caller supplied `dsId`, use that Prom datasource;
-      // otherwise fall back to the first discovered Prom connection. The backend
-      // uses it to build /_plugins/_directquery/_resources/{name}/alertmanager/api/v2/status.
-      await discoverOsdDatasources(ctx);
-      const all = await datasourceService.list();
-      const promCandidates = all.filter((d) => d.type === 'prometheus' && d.directQueryName);
-      // Datasource IDs churn across discovery cycles (in-memory, re-seeded each
-      // discovery pass). Match by `directQueryName` / `name` as a stable fallback
-      // so a selector value the client captured earlier still resolves.
-      const promDs = req.query.dsId
-        ? promCandidates.find(
-            (d) =>
-              d.id === req.query.dsId ||
-              d.directQueryName === req.query.dsId ||
-              d.name === req.query.dsId
-          )
-        : promCandidates[0];
+      bindRequestDatasources(ctx as AlertingHandlerContext);
+      // Alertmanager is reached through a Prometheus datasource. Use the
+      // saved-object-backed resolver — saved-object IDs are stable across
+      // server restarts (addresses Comments 8 + 11).
+      const promDs = await resolvePrometheusDatasource(
+        ctx as AlertingHandlerContext,
+        req.query.dsId
+      );
       if (!promDs) {
         return res.ok({
           body: {
@@ -696,8 +431,11 @@ export function registerAlertingRoutes(
           },
         });
       }
-      promBackend.setDefaultDatasource?.(promDs);
-      const result = await handleGetAlertmanagerConfig(promBackend, await getAlertingClient(ctx));
+      const result = await handleGetAlertmanagerConfig(
+        promBackend,
+        await getAlertingClient(ctx as AlertingHandlerContext),
+        promDs
+      );
       return res.ok({ body: result.body });
     }
   );
@@ -716,6 +454,7 @@ export function registerAlertingRoutes(
         },
       },
       async (ctx, req, res) => {
+        bindRequestDatasources(ctx as AlertingHandlerContext);
         const result = await handleGetMetricNames(
           metadataService,
           await getAlertingClient(ctx, req.params.dsId),
@@ -736,6 +475,7 @@ export function registerAlertingRoutes(
         },
       },
       async (ctx, req, res) => {
+        bindRequestDatasources(ctx as AlertingHandlerContext);
         const result = await handleGetLabelNames(
           metadataService,
           await getAlertingClient(ctx, req.params.dsId),
@@ -756,6 +496,7 @@ export function registerAlertingRoutes(
         },
       },
       async (ctx, req, res) => {
+        bindRequestDatasources(ctx as AlertingHandlerContext);
         const result = await handleGetLabelValues(
           metadataService,
           await getAlertingClient(ctx, req.params.dsId),
@@ -776,6 +517,7 @@ export function registerAlertingRoutes(
         },
       },
       async (ctx, req, res) => {
+        bindRequestDatasources(ctx as AlertingHandlerContext);
         const result = await handleGetMetricMetadata(
           metadataService,
           await getAlertingClient(ctx, req.params.dsId),

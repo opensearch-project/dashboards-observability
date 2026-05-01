@@ -91,6 +91,16 @@ export function registerAllPluginNavGroups(
         order: 30,
       },
     ]);
+    // Also register in the global "all" nav group so the icon side nav picks
+    // up the alerting app across workspaces — matches the pattern used by
+    // `observabilityNotebookID` and `observabilityIntegrationsID` above.
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+      {
+        id: observabilityAlertingID,
+        category: undefined,
+        order: 30,
+      },
+    ]);
   }
 
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [

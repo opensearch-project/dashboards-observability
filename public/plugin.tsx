@@ -520,6 +520,7 @@ export class ObservabilityPlugin
         title: observabilityAlertingTitle,
         category: OBSERVABILITY_APP_CATEGORIES.observability,
         order: observabilityAlertingPluginOrder,
+        euiIconType: 'beaker',
         mount: appMountWithStartPage('alerting'),
       });
     }

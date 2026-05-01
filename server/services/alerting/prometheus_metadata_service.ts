@@ -23,7 +23,7 @@ import type {
   Logger,
   PrometheusMetadataProvider,
   PrometheusMetricMetadata,
-} from '../../../common/types/alerting/types';
+} from '../../../common/types/alerting';
 
 // TTL values in milliseconds
 const TTL_METRIC_NAMES = 5 * 60_000; // 5 minutes
@@ -43,9 +43,17 @@ export class PrometheusMetadataService {
 
   constructor(
     private readonly provider: PrometheusMetadataProvider,
-    private readonly datasourceService: DatasourceService,
+    private datasourceService: DatasourceService,
     private readonly logger: Logger
   ) {}
+
+  /**
+   * Swap the datasource service for this request. See
+   * `MultiBackendAlertService.setDatasourceService` for rationale.
+   */
+  setDatasourceService(datasourceService: DatasourceService): void {
+    this.datasourceService = datasourceService;
+  }
 
   // --------------------------------------------------------------------------
   // Public API

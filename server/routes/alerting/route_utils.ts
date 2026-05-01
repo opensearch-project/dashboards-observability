@@ -4,7 +4,7 @@
  */
 
 import { isAlertManagerError, errorToStatus } from '../../services/alerting';
-import type { Logger } from '../../../common/types/alerting/types';
+import type { Logger } from '../../../common/types/alerting';
 
 export interface HandlerResult {
   status: number;
@@ -41,4 +41,20 @@ export function toHandlerResult(e: unknown, logger?: Logger): HandlerResult {
     return { status: 400, body: { error: msg } };
   }
   return { status: 500, body: { error: 'An internal error occurred' } };
+}
+
+/**
+ * Adapt handler-result body ({ error: '...' } or arbitrary data) to OSD's
+ * ResponseError shape ({ message, attributes }). `error` → `message`, and the
+ * remaining fields become `attributes`.
+ */
+export function toErrorBody(
+  body: Record<string, unknown>
+): { message: string; attributes?: Record<string, unknown> } {
+  const { error, message, ...rest } = body as { error?: unknown; message?: unknown };
+  const text =
+    typeof error === 'string' ? error : typeof message === 'string' ? message : 'An error occurred';
+  return Object.keys(rest).length > 0
+    ? { message: text, attributes: rest as Record<string, unknown> }
+    : { message: text };
 }

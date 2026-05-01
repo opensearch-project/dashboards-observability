@@ -79,7 +79,7 @@ export const observabilityNotebookTitle = 'Notebooks';
 export const observabilityNotebookPluginOrder = 5094;
 
 export const observabilityAlertingID = 'observability-alerting';
-export const observabilityAlertingTitle = 'Alert manager {beta}';
+export const observabilityAlertingTitle = 'Alert manager';
 export const observabilityAlertingPluginOrder = 5096;
 
 export const observabilityPanelsID = 'observability-dashboards';

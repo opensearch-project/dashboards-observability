@@ -3,4 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './types';
+export * from './opensearch_types';
+export * from './prometheus_types';
+export * from './unified_types';

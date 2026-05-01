@@ -27,13 +27,7 @@ import {
 } from '@elastic/eui';
 import { UnifiedAlertSummary, Datasource } from '../../../common/types/alerting';
 import { filterAlerts } from '../../../common/services/alerting/filter';
-import {
-  SeverityDonut,
-  AlertTimeline,
-  StateBreakdown,
-  AlertsByDatasource,
-  AlertsByMonitor,
-} from './alerts_charts';
+import { AlertTimeline } from './alerts_charts';
 import { AlertsSummaryCards } from './alerts_summary_cards';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
 import { countBy } from './shared_constants';
@@ -665,48 +659,6 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                       </EuiTitle>
                       <EuiSpacer size="s" />
                       <AlertTimeline alerts={filteredAlerts} />
-                    </EuiPanel>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={1}>
-                    <EuiPanel paddingSize="m" hasBorder>
-                      <EuiTitle size="xxs">
-                        <h4>By Severity</h4>
-                      </EuiTitle>
-                      <EuiSpacer size="s" />
-                      <SeverityDonut alerts={filteredAlerts} />
-                    </EuiPanel>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                <EuiSpacer size="m" />
-
-                {/* ---- State + Service Row ---- */}
-                <EuiFlexGroup gutterSize="m" responsive={true}>
-                  <EuiFlexItem>
-                    <EuiPanel paddingSize="m" hasBorder>
-                      <EuiTitle size="xxs">
-                        <h4>By State</h4>
-                      </EuiTitle>
-                      <EuiSpacer size="s" />
-                      <StateBreakdown alerts={filteredAlerts} />
-                    </EuiPanel>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiPanel paddingSize="m" hasBorder>
-                      <EuiTitle size="xxs">
-                        <h4>By Source</h4>
-                      </EuiTitle>
-                      <EuiSpacer size="s" />
-                      <AlertsByDatasource alerts={filteredAlerts} />
-                    </EuiPanel>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiPanel paddingSize="m" hasBorder>
-                      <EuiTitle size="xxs">
-                        <h4>By Monitor</h4>
-                      </EuiTitle>
-                      <EuiSpacer size="s" />
-                      <AlertsByMonitor alerts={filteredAlerts} />
                     </EuiPanel>
                   </EuiFlexItem>
                 </EuiFlexGroup>

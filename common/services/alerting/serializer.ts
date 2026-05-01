@@ -6,7 +6,7 @@
 /**
  * Monitor serialization for JSON export/import.
  */
-import { UnifiedRuleSummary, UnifiedRule, NotificationRouting } from '../../types/alerting/types';
+import { UnifiedRuleSummary, UnifiedRule, NotificationRouting } from '../../types/alerting';
 import { parseDuration } from './validators';
 
 /** Safely extract a string-to-string map, enforcing max count and string values. */

@@ -6,7 +6,7 @@
 /**
  * Core validation utilities for monitor forms and duration strings.
  */
-import { UnifiedAlertSeverity } from '../../types/alerting/types';
+import { UnifiedAlertSeverity } from '../../types/alerting';
 
 // ============================================================================
 // Duration Parsing

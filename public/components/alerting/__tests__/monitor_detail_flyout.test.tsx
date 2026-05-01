@@ -20,6 +20,18 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   unobserve: jest.fn(),
 }));
 
+// Post-Phase 4: MonitorDetailFlyout instantiates AlertingOpenSearchService
+// internally via `useMemo(() => new AlertingOpenSearchService(), [])` and
+// calls `getRuleDetail(dsId, ruleId)` on mount. Mock the class so the
+// constructor returns a stubbed instance with `getRuleDetail` resolving to
+// `null` — the flyout falls back to the monitor summary in that case,
+// which is what these render tests exercise.
+jest.mock('../query_services/alerting_opensearch_service', () => ({
+  AlertingOpenSearchService: jest.fn().mockImplementation(() => ({
+    getRuleDetail: jest.fn().mockResolvedValue(null),
+  })),
+}));
+
 import { MonitorDetailFlyout } from '../monitor_detail_flyout';
 import type { UnifiedRuleSummary } from '../../../../common/types/alerting';
 
@@ -45,17 +57,11 @@ const mockMonitor: UnifiedRuleSummary = {
   pendingPeriod: '5m',
 };
 
-const mockApiClient = {
-  getRuleDetail: jest.fn().mockResolvedValue(null),
-  rawHttp: { get: jest.fn(), post: jest.fn(), put: jest.fn(), delete: jest.fn() },
-};
-
 describe('MonitorDetailFlyout', () => {
   it('renders flyout with monitor name', () => {
     const { getByText } = render(
       <MonitorDetailFlyout
         monitor={mockMonitor}
-        apiClient={mockApiClient as never}
         onClose={jest.fn()}
         onDelete={jest.fn()}
         onClone={jest.fn()}
@@ -69,7 +75,6 @@ describe('MonitorDetailFlyout', () => {
     const { getByLabelText } = render(
       <MonitorDetailFlyout
         monitor={mockMonitor}
-        apiClient={mockApiClient as never}
         onClose={onClose}
         onDelete={jest.fn()}
         onClone={jest.fn()}

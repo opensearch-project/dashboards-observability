@@ -11,6 +11,7 @@ import yaml from 'js-yaml';
 import type {
   AlertingOSClient,
   AlertmanagerSilence,
+  Datasource,
   PrometheusBackend,
 } from '../../../common/types/alerting';
 import { toHandlerResult } from './route_utils';
@@ -22,13 +23,14 @@ import type { HandlerResult } from './route_utils';
 
 export async function handleGetAlertmanagerAlerts(
   promBackend: PrometheusBackend,
-  client: AlertingOSClient
+  client: AlertingOSClient,
+  ds: Datasource
 ): Promise<HandlerResult> {
   try {
     if (!promBackend.getAlertmanagerAlerts) {
       return { status: 501, body: { error: 'Alertmanager not configured' } };
     }
-    const alerts = await promBackend.getAlertmanagerAlerts(client);
+    const alerts = await promBackend.getAlertmanagerAlerts(client, ds);
     return { status: 200, body: { alerts } };
   } catch (e: unknown) {
     return toHandlerResult(e);
@@ -37,13 +39,14 @@ export async function handleGetAlertmanagerAlerts(
 
 export async function handleGetAlertmanagerSilences(
   promBackend: PrometheusBackend,
-  client: AlertingOSClient
+  client: AlertingOSClient,
+  ds: Datasource
 ): Promise<HandlerResult> {
   try {
     if (!promBackend.getSilences) {
       return { status: 501, body: { error: 'Alertmanager not configured' } };
     }
-    const silences = await promBackend.getSilences(client);
+    const silences = await promBackend.getSilences(client, ds);
     return { status: 200, body: { silences } };
   } catch (e: unknown) {
     return toHandlerResult(e);
@@ -53,13 +56,14 @@ export async function handleGetAlertmanagerSilences(
 export async function handleCreateAlertmanagerSilence(
   promBackend: PrometheusBackend,
   client: AlertingOSClient,
+  ds: Datasource,
   body: AlertmanagerSilence
 ): Promise<HandlerResult> {
   try {
     if (!promBackend.createSilence) {
       return { status: 501, body: { error: 'Alertmanager not configured' } };
     }
-    const silenceId = await promBackend.createSilence(client, body);
+    const silenceId = await promBackend.createSilence(client, ds, body);
     return { status: 200, body: { silenceID: silenceId } };
   } catch (e: unknown) {
     return toHandlerResult(e);
@@ -69,13 +73,14 @@ export async function handleCreateAlertmanagerSilence(
 export async function handleDeleteAlertmanagerSilence(
   promBackend: PrometheusBackend,
   client: AlertingOSClient,
+  ds: Datasource,
   id: string
 ): Promise<HandlerResult> {
   try {
     if (!promBackend.deleteSilence) {
       return { status: 501, body: { error: 'Alertmanager not configured' } };
     }
-    const ok = await promBackend.deleteSilence(client, id);
+    const ok = await promBackend.deleteSilence(client, ds, id);
     return { status: 200, body: { success: ok } };
   } catch (e: unknown) {
     return toHandlerResult(e);
@@ -84,13 +89,14 @@ export async function handleDeleteAlertmanagerSilence(
 
 export async function handleGetAlertmanagerStatus(
   promBackend: PrometheusBackend,
-  client: AlertingOSClient
+  client: AlertingOSClient,
+  ds: Datasource
 ): Promise<HandlerResult> {
   try {
     if (!promBackend.getAlertmanagerStatus) {
       return { status: 501, body: { error: 'Alertmanager not configured' } };
     }
-    const status = await promBackend.getAlertmanagerStatus(client);
+    const status = await promBackend.getAlertmanagerStatus(client, ds);
     return { status: 200, body: status };
   } catch (e: unknown) {
     return toHandlerResult(e);
@@ -99,13 +105,14 @@ export async function handleGetAlertmanagerStatus(
 
 export async function handleGetAlertmanagerReceivers(
   promBackend: PrometheusBackend,
-  client: AlertingOSClient
+  client: AlertingOSClient,
+  ds: Datasource
 ): Promise<HandlerResult> {
   try {
     if (!promBackend.getAlertmanagerReceivers) {
       return { status: 501, body: { error: 'Alertmanager receivers not available' } };
     }
-    const receivers = await promBackend.getAlertmanagerReceivers(client);
+    const receivers = await promBackend.getAlertmanagerReceivers(client, ds);
     return { status: 200, body: { receivers } };
   } catch (e: unknown) {
     return toHandlerResult(e);
@@ -114,13 +121,14 @@ export async function handleGetAlertmanagerReceivers(
 
 export async function handleGetAlertmanagerAlertGroups(
   promBackend: PrometheusBackend,
-  client: AlertingOSClient
+  client: AlertingOSClient,
+  ds: Datasource
 ): Promise<HandlerResult> {
   try {
     if (!promBackend.getAlertmanagerAlertGroups) {
       return { status: 501, body: { error: 'Alertmanager alert groups not available' } };
     }
-    const groups = await promBackend.getAlertmanagerAlertGroups(client);
+    const groups = await promBackend.getAlertmanagerAlertGroups(client, ds);
     return { status: 200, body: { groups } };
   } catch (e: unknown) {
     return toHandlerResult(e);
@@ -186,13 +194,14 @@ export function extractReceiverIntegrations(
  */
 export async function handleGetAlertmanagerConfig(
   promBackend: PrometheusBackend,
-  client: AlertingOSClient
+  client: AlertingOSClient,
+  ds: Datasource
 ): Promise<HandlerResult> {
   try {
     if (!promBackend.getAlertmanagerStatus) {
       return { status: 200, body: { available: false, error: 'Alertmanager not configured' } };
     }
-    const status = await promBackend.getAlertmanagerStatus(client);
+    const status = await promBackend.getAlertmanagerStatus(client, ds);
     const rawYaml = status.config?.original || '';
 
     let parsedConfig: Record<string, unknown> | undefined;
@@ -200,6 +209,7 @@ export async function handleGetAlertmanagerConfig(
 
     if (rawYaml) {
       try {
+        // js-yaml v4: yaml.load() defaults to safe DEFAULT_SCHEMA (no code execution).
         const parsed = yaml.load(rawYaml) as Record<string, unknown> | null;
         if (parsed && typeof parsed === 'object') {
           const rawReceivers = Array.isArray(parsed.receivers) ? parsed.receivers : [];

@@ -7,7 +7,7 @@
  * Alert Detail Flyout — drill-down view for a single alert
  * showing full context, labels, annotations, and actions.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -31,7 +31,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { UnifiedAlert, UnifiedAlertSummary, Datasource } from '../../../common/types/alerting';
-import { AlarmsApiClient } from './services/alarms_client';
+import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { SEVERITY_COLORS, STATE_COLORS } from './shared_constants';
 
 /** Internal label keys filtered from the Labels accordion display. */
@@ -49,7 +49,6 @@ const INTERNAL_LABEL_KEYS = new Set([
 export interface AlertDetailFlyoutProps {
   alert: UnifiedAlertSummary;
   datasources: Datasource[];
-  apiClient: AlarmsApiClient;
   onClose: () => void;
   onAcknowledge: (alertId: string) => void;
 }
@@ -57,16 +56,16 @@ export interface AlertDetailFlyoutProps {
 export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
   alert,
   datasources,
-  apiClient,
   onClose,
   onAcknowledge,
 }) => {
+  const osService = useMemo(() => new AlertingOpenSearchService(), []);
   const [detailData, setDetailData] = useState<UnifiedAlert | null>(null);
 
   // Fetch full detail (with raw data) from the API when flyout opens
   useEffect(() => {
     let cancelled = false;
-    apiClient
+    osService
       .getAlertDetail(alert.datasourceId, alert.id)
       .then((data: UnifiedAlert) => {
         if (!cancelled && data) setDetailData(data);
@@ -77,7 +76,7 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [alert.datasourceId, alert.id, apiClient]);
+  }, [alert.datasourceId, alert.id, osService]);
 
   // Merge detail data over summary — detail has `raw` and potentially richer labels
   const alertData = detailData ? { ...alert, ...detailData } : alert;

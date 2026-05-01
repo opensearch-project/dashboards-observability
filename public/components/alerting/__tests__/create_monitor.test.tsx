@@ -27,8 +27,8 @@ jest.mock('../monitor_form_components', () => ({
   ),
 }));
 
-jest.mock('../ai_monitor_wizard', () => ({
-  AiMonitorWizard: () => <div />,
+jest.mock('../monitor_template_wizard', () => ({
+  MonitorTemplateWizard: () => <div />,
 }));
 
 import { CreateMonitor } from '../create_monitor';

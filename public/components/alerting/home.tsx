@@ -13,11 +13,10 @@ import {
   ALERT_MANAGER_MAX_DATASOURCES_SETTING,
 } from '../../../common/constants/alerting_settings';
 import { AlarmsPage } from './alarms_page';
-import { AlarmsApiClient } from './services/alarms_client';
+import { useDatasources } from './hooks/use_datasources';
 
 export const AlertingHome = () => {
-  const http = coreRefs.http;
-  const apiClient = useMemo(() => (http ? new AlarmsApiClient(http) : null), [http]);
+  const { datasources, isLoading: datasourcesLoading } = useDatasources();
 
   // Show a "Beta" badge in the top chrome bar while the Alert Manager app is
   // mounted; clear it on unmount so it doesn't leak into other apps.
@@ -37,7 +36,7 @@ export const AlertingHome = () => {
 
   const { defaultDatasources, maxDatasources } = useMemo(() => {
     const uiSettings = coreRefs.core?.uiSettings;
-    const rawDefaults = uiSettings?.get(ALERT_MANAGER_DEFAULT_DATASOURCES_SETTING, []);
+    const rawDefaults = uiSettings?.get<unknown[]>(ALERT_MANAGER_DEFAULT_DATASOURCES_SETTING, []);
     const defaults = Array.isArray(rawDefaults)
       ? rawDefaults.filter((v): v is string => typeof v === 'string' && v.trim().length > 0)
       : [];
@@ -55,14 +54,13 @@ export const AlertingHome = () => {
     return { defaultDatasources: defaults, maxDatasources: clamped };
   }, []);
 
-  if (!apiClient) return null;
-
   return (
     <HashRouter>
       <Route
         render={() => (
           <AlarmsPage
-            apiClient={apiClient}
+            datasources={datasources}
+            datasourcesLoading={datasourcesLoading}
             defaultDatasources={defaultDatasources}
             maxDatasources={maxDatasources}
           />
