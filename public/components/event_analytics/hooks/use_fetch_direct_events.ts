@@ -5,6 +5,7 @@
 
 import { useState, useRef } from 'react';
 import { batch } from 'react-redux';
+import forEach from 'lodash/forEach';
 import isEmpty from 'lodash/isEmpty';
 import { useDispatch, useSelector } from 'react-redux';
 import { IField } from 'common/types/explorer';
@@ -63,7 +64,7 @@ export const useFetchDirectEvents = ({ pplService, requestParams }: IFetchEvents
 
     const data: any[] = [];
 
-    _.forEach(pplRes.datarows, (row) => {
+    forEach(pplRes.datarows, (row) => {
       const record: any = {};
 
       for (let i = 0; i < pplRes.schema.length; i++) {
