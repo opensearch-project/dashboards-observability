@@ -6,7 +6,7 @@
 /**
  * Route-registration smoke tests for `registerAlertingRoutes`.
  *
- * Post-Phase-3 + Phase-5 state the registrar wires:
+ * Post-Phase-5 + concurrency-fix state the registrar wires:
  *   - 4 mutation routes (delegated to `registerAlertingMutationRoutes` —
  *     still observable on the mock router because the delegate uses the
  *     same router instance):
@@ -15,10 +15,14 @@
  *       PUT    /api/alerting/opensearch/{dsId}/monitors/{monitorId}
  *       DELETE /api/alerting/opensearch/{dsId}/monitors/{monitorId}
  *   - 9 read routes + 1 Alertmanager admin route registered inline (10 GETs)
- *   - 4 Prometheus metadata routes inside `if (metadataService)` (4 GETs)
+ *   - 4 Prometheus metadata routes inside `if (enableMetadataRoutes)` (4 GETs)
  *
  * Datasource CRUD routes were deleted in Phase 3 — these tests also assert
  * none of them sneak back in.
+ *
+ * The stateful alerting services are no longer passed in as pre-built
+ * singletons; they're constructed per-request inside the registrar, so the
+ * tests only mock the stateless dependencies (backends, mutation service).
  */
 
 import { registerAlertingRoutes } from '../index';
@@ -36,13 +40,9 @@ const mockRouter = {
 
 const mockLogger = { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() };
 
-// Minimal stubs for the service parameters — registerAlertingRoutes holds
-// references but only invokes methods during request handling, not at
-// registration time, so empty objects are safe at the registration seam.
-const mockAlertService = {} as never;
-const mockMutationSvc = {} as never;
+const mockOsBackend = {} as never;
 const mockPromBackend = {} as never;
-const mockMetadataService = {} as never;
+const mockMutationSvc = {} as never;
 
 describe('registerAlertingRoutes', () => {
   beforeEach(() => {
@@ -52,15 +52,14 @@ describe('registerAlertingRoutes', () => {
     mockRouter.delete.mockClear();
   });
 
-  it('registers all runtime routes when metadata service is provided (14 GET + 4 mutations = 18)', () => {
-    registerAlertingRoutes(
-      mockRouter as never,
-      mockAlertService,
-      mockMutationSvc,
-      mockPromBackend,
-      mockLogger,
-      mockMetadataService
-    );
+  it('registers all runtime routes when metadata routes are enabled (14 GET + 4 mutations = 18)', () => {
+    registerAlertingRoutes(mockRouter as never, {
+      osBackend: mockOsBackend,
+      promBackend: mockPromBackend,
+      mutationSvc: mockMutationSvc,
+      logger: mockLogger,
+      enableMetadataRoutes: true,
+    });
     const total =
       mockRouter.get.mock.calls.length +
       mockRouter.post.mock.calls.length +
@@ -71,14 +70,14 @@ describe('registerAlertingRoutes', () => {
     expect(mockRouter.get.mock.calls.length).toBe(14);
   });
 
-  it('skips the 4 metadata GET routes when no metadata service is provided (10 GET + 4 mutations = 14)', () => {
-    registerAlertingRoutes(
-      mockRouter as never,
-      mockAlertService,
-      mockMutationSvc,
-      mockPromBackend,
-      mockLogger
-    );
+  it('skips the 4 metadata GET routes when enableMetadataRoutes is false (10 GET + 4 mutations = 14)', () => {
+    registerAlertingRoutes(mockRouter as never, {
+      osBackend: mockOsBackend,
+      promBackend: mockPromBackend,
+      mutationSvc: mockMutationSvc,
+      logger: mockLogger,
+      enableMetadataRoutes: false,
+    });
     const total =
       mockRouter.get.mock.calls.length +
       mockRouter.post.mock.calls.length +
@@ -89,13 +88,13 @@ describe('registerAlertingRoutes', () => {
   });
 
   it('registers the 4 surviving mutation paths', () => {
-    registerAlertingRoutes(
-      mockRouter as never,
-      mockAlertService,
-      mockMutationSvc,
-      mockPromBackend,
-      mockLogger
-    );
+    registerAlertingRoutes(mockRouter as never, {
+      osBackend: mockOsBackend,
+      promBackend: mockPromBackend,
+      mutationSvc: mockMutationSvc,
+      logger: mockLogger,
+      enableMetadataRoutes: false,
+    });
     const postPaths = mockRouter.post.mock.calls.map(([c]: [RouteConfig]) => c.path);
     const putPaths = mockRouter.put.mock.calls.map(([c]: [RouteConfig]) => c.path);
     const deletePaths = mockRouter.delete.mock.calls.map(([c]: [RouteConfig]) => c.path);
@@ -107,26 +106,25 @@ describe('registerAlertingRoutes', () => {
   });
 
   it('registers the Alertmanager admin route', () => {
-    registerAlertingRoutes(
-      mockRouter as never,
-      mockAlertService,
-      mockMutationSvc,
-      mockPromBackend,
-      mockLogger
-    );
+    registerAlertingRoutes(mockRouter as never, {
+      osBackend: mockOsBackend,
+      promBackend: mockPromBackend,
+      mutationSvc: mockMutationSvc,
+      logger: mockLogger,
+      enableMetadataRoutes: false,
+    });
     const getPaths = mockRouter.get.mock.calls.map(([c]: [RouteConfig]) => c.path);
     expect(getPaths).toContain('/api/alerting/alertmanager/config');
   });
 
   it('does NOT register deleted datasource CRUD routes', () => {
-    registerAlertingRoutes(
-      mockRouter as never,
-      mockAlertService,
-      mockMutationSvc,
-      mockPromBackend,
-      mockLogger,
-      mockMetadataService
-    );
+    registerAlertingRoutes(mockRouter as never, {
+      osBackend: mockOsBackend,
+      promBackend: mockPromBackend,
+      mutationSvc: mockMutationSvc,
+      logger: mockLogger,
+      enableMetadataRoutes: true,
+    });
     const allPaths = [
       ...mockRouter.get.mock.calls.map(([c]: [RouteConfig]) => c.path),
       ...mockRouter.post.mock.calls.map(([c]: [RouteConfig]) => c.path),

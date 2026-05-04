@@ -23,6 +23,7 @@ import { IRouter, RequestHandlerContext } from '../../../../../../src/core/serve
 import type { AlertingOSClient, OSMonitor } from '../../../../common/types/alerting';
 import { MonitorMutationService } from '../../../services/alerting/monitor_mutation_service';
 import { toErrorBody } from '../route_utils';
+import { alertingIdSchema } from '../schema_helpers';
 import {
   handleCreateOSMonitor,
   handleUpdateOSMonitor,
@@ -124,7 +125,7 @@ export function registerAlertingMutationRoutes(
   router.post(
     {
       path: '/api/alerting/opensearch/{dsId}/monitors',
-      validate: { params: schema.object({ dsId: schema.string() }), body: monitorBodySchema },
+      validate: { params: schema.object({ dsId: alertingIdSchema }), body: monitorBodySchema },
     },
     async (ctx, req, res) => {
       const result = await handleCreateOSMonitor(
@@ -133,7 +134,11 @@ export function registerAlertingMutationRoutes(
         // OSD schema validates loosely; narrow to the typed domain shape
         (req.body as unknown) as Omit<OSMonitor, 'id'>
       );
-      return res.ok({ body: result.body });
+      // Create success is 201; anything else is an error classified by
+      // `toHandlerResult`. Previously this unconditionally called res.ok,
+      // masking failures as HTTP 200 with an error body.
+      if (result.status === 201) return res.ok({ body: result.body });
+      return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
     }
   );
 
@@ -142,7 +147,7 @@ export function registerAlertingMutationRoutes(
     {
       path: '/api/alerting/opensearch/{dsId}/monitors/{monitorId}',
       validate: {
-        params: schema.object({ dsId: schema.string(), monitorId: schema.string() }),
+        params: schema.object({ dsId: alertingIdSchema, monitorId: alertingIdSchema }),
         body: monitorBodySchema,
       },
     },
@@ -154,9 +159,12 @@ export function registerAlertingMutationRoutes(
         // OSD schema validates loosely; narrow to the typed domain shape
         (req.body as unknown) as Partial<OSMonitor>
       );
-      return result.status === 200
-        ? res.ok({ body: result.body })
-        : res.notFound({ body: toErrorBody(result.body) });
+      if (result.status === 200) return res.ok({ body: result.body });
+      if (result.status === 404) return res.notFound({ body: toErrorBody(result.body) });
+      if (result.status === 409) {
+        return res.conflict({ body: toErrorBody(result.body) });
+      }
+      return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
     }
   );
 
@@ -164,15 +172,15 @@ export function registerAlertingMutationRoutes(
   router.delete(
     {
       path: '/api/alerting/opensearch/{dsId}/monitors/{monitorId}',
-      validate: { params: schema.object({ dsId: schema.string(), monitorId: schema.string() }) },
+      validate: { params: schema.object({ dsId: alertingIdSchema, monitorId: alertingIdSchema }) },
     },
     async (ctx, req, res) => {
       try {
         const client = await getClient(ctx, req.params.dsId);
         const result = await handleDeleteOSMonitor(mutationSvc, client, req.params.monitorId);
-        return result.status === 200
-          ? res.ok({ body: result.body })
-          : res.notFound({ body: toErrorBody(result.body) });
+        if (result.status === 200) return res.ok({ body: result.body });
+        if (result.status === 404) return res.notFound({ body: toErrorBody(result.body) });
+        return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
       } catch (_e) {
         return res.badRequest({ body: { message: `Invalid datasource: ${req.params.dsId}` } });
       }
@@ -184,7 +192,7 @@ export function registerAlertingMutationRoutes(
     {
       path: '/api/alerting/opensearch/{dsId}/monitors/{monitorId}/acknowledge',
       validate: {
-        params: schema.object({ dsId: schema.string(), monitorId: schema.string() }),
+        params: schema.object({ dsId: alertingIdSchema, monitorId: alertingIdSchema }),
         body: schema.object({ alerts: schema.arrayOf(schema.string(), { maxSize: 1000 }) }),
       },
     },
@@ -195,7 +203,8 @@ export function registerAlertingMutationRoutes(
         req.params.monitorId,
         req.body
       );
-      return res.ok({ body: result.body });
+      if (result.status === 200) return res.ok({ body: result.body });
+      return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
     }
   );
 }

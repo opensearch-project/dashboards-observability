@@ -122,4 +122,35 @@ describe('usePrometheusMetadata', () => {
       expect(result.current.metricMetadata).toEqual(meta);
     });
   });
+
+  it('does not instantiate the service or fire any fetches when datasourceId is empty', async () => {
+    const { AlertingPromResourcesService } = jest.requireMock(
+      '../../query_services/alerting_prom_resources_service'
+    ) as { AlertingPromResourcesService: jest.Mock };
+    AlertingPromResourcesService.mockClear();
+
+    const { result } = renderHook(() =>
+      usePrometheusMetadata({ datasourceId: '', selectedMetric: 'up' })
+    );
+
+    // Service never constructed.
+    expect(AlertingPromResourcesService).not.toHaveBeenCalled();
+    // No underlying methods invoked.
+    expect(mockGetMetricMetadata).not.toHaveBeenCalled();
+    expect(mockListLabelNames).not.toHaveBeenCalled();
+
+    // Interactions are no-ops while idle.
+    act(() => {
+      result.current.searchMetrics('up');
+      result.current.fetchLabelValues('job');
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(500);
+    });
+    expect(mockListMetricNames).not.toHaveBeenCalled();
+    expect(mockListLabelValues).not.toHaveBeenCalled();
+    expect(result.current.metricOptions).toEqual([]);
+    expect(result.current.labelNames).toEqual([]);
+    expect(result.current.error).toBe(false);
+  });
 });

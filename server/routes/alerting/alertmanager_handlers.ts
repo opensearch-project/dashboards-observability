@@ -12,8 +12,10 @@ import type {
   AlertingOSClient,
   AlertmanagerSilence,
   Datasource,
+  Logger,
   PrometheusBackend,
 } from '../../../common/types/alerting';
+import { isStatusCode } from '../../services/alerting';
 import { toHandlerResult } from './route_utils';
 import type { HandlerResult } from './route_utils';
 
@@ -195,11 +197,15 @@ export function extractReceiverIntegrations(
 export async function handleGetAlertmanagerConfig(
   promBackend: PrometheusBackend,
   client: AlertingOSClient,
-  ds: Datasource
+  ds: Datasource,
+  logger?: Logger
 ): Promise<HandlerResult> {
   try {
     if (!promBackend.getAlertmanagerStatus) {
-      return { status: 200, body: { available: false, error: 'Alertmanager not configured' } };
+      return {
+        status: 200,
+        body: { available: false, error: 'Alertmanager not configured' },
+      };
     }
     const status = await promBackend.getAlertmanagerStatus(client, ds);
     const rawYaml = status.config?.original || '';
@@ -250,12 +256,22 @@ export async function handleGetAlertmanagerConfig(
       },
     };
   } catch (e: unknown) {
+    // Log the full upstream error server-side; never reflect its `message`
+    // to the browser (may contain cluster URLs / stack fragments / index names).
+    if (logger) logger.error(e instanceof Error ? e.message : String(e));
+
+    // Preserve upstream auth failures as real HTTP 401/403 so the UI can
+    // distinguish "unauthorized" from "not configured". Everything else
+    // becomes a 500 with a generic message.
+    if (isStatusCode(e, 401)) {
+      return { status: 401, body: { available: false, error: 'Unauthorized' } };
+    }
+    if (isStatusCode(e, 403)) {
+      return { status: 403, body: { available: false, error: 'Forbidden' } };
+    }
     return {
-      status: 200,
-      body: {
-        available: false,
-        error: e instanceof Error ? e.message : 'Failed to fetch Alertmanager config',
-      },
+      status: 500,
+      body: { available: false, error: 'Failed to fetch Alertmanager config' },
     };
   }
 }

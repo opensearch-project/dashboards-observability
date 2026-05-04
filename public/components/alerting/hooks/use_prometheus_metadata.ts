@@ -148,7 +148,12 @@ export function usePrometheusMetadata(
   options: UsePrometheusMetadataOptions
 ): UsePrometheusMetadataReturn {
   const { datasourceId, selectedMetric } = options;
-  const service = useMemo(() => new AlertingPromResourcesService(datasourceId), [datasourceId]);
+  // Don't instantiate the service when no datasource is selected — the
+  // constructor now rejects empty strings. Effects short-circuit on `!service`.
+  const service = useMemo(
+    () => (datasourceId ? new AlertingPromResourcesService(datasourceId) : null),
+    [datasourceId]
+  );
   const [state, dispatch] = useReducer(metadataReducer, initialState);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -162,6 +167,7 @@ export function usePrometheusMetadata(
   const searchMetrics = useCallback(
     (query: string) => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (!service) return;
 
       if (query.length < MIN_SEARCH_CHARS) {
         dispatch({ type: 'METRICS_LOADED', options: [] });
@@ -194,7 +200,7 @@ export function usePrometheusMetadata(
       return;
     }
 
-    if (!selectedMetric) return;
+    if (!selectedMetric || !service) return;
 
     dispatch({ type: 'LABELS_LOADING' });
     dispatch({ type: 'CLEAR_LABEL_VALUES' });
@@ -221,6 +227,7 @@ export function usePrometheusMetadata(
   // ------------------------------------------------------------------
 
   useEffect(() => {
+    if (!service) return;
     let cancelled = false;
     (async () => {
       try {
@@ -229,7 +236,7 @@ export function usePrometheusMetadata(
           dispatch({ type: 'METADATA_LOADED', metadata: res.metadata });
         }
       } catch {
-        // Non-critical — metadata is used for type badges only
+        // Non-critical — metadata is used for type badges only.
       }
     })();
     return () => {
@@ -243,7 +250,7 @@ export function usePrometheusMetadata(
 
   const fetchLabelValues = useCallback(
     (labelName: string) => {
-      if (!labelName) return;
+      if (!labelName || !service) return;
 
       dispatch({ type: 'LABEL_VALUES_LOADING', labelName });
       const selector =

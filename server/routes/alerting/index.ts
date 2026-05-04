@@ -6,29 +6,29 @@
 /**
  * OSD route adapter — wires framework-agnostic handlers to OSD's IRouter.
  *
- * Phase 5 state:
- *   - 14 inline routes (reads: unified/alerts, unified/rules, OS monitor reads,
- *     OS alert reads, Prom rules, Prom alerts, rule/alert detail, AM config,
- *     4 Prom metadata).
- *   - 4 mutation routes moved to `./mutations/` (registered via
- *     `registerAlertingMutationRoutes` below).
- *   - Datasource CRUD routes deleted in Phase 3 (client reads from
- *     `data-source` / `data-connection` saved-object types directly).
- *   - `InMemoryDatasourceService` deleted; MDS client routing and Prometheus
- *     datasource lookup happen via `resolveOpenSearchDatasource` /
- *     `resolvePrometheusDatasource` saved-object helpers below.
- *   - Feature-flag gated at the call site (`setupRoutes` in
- *     `server/routes/index.ts`) via `if (alertManagerEnabled)`.
+ * Concurrency model: stateless backends (`HttpOpenSearchBackend`,
+ * `DirectQueryPrometheusBackend`, `MonitorMutationService`) are constructed
+ * once by `setupRoutes` and passed in. Stateful services that hold a
+ * `SavedObjectDatasourceService` — namely `MultiBackendAlertService` and
+ * `PrometheusMetadataService` — are constructed **per request** inside
+ * `buildRequestServices(ctx)` so they carry only the scoped SavedObjects
+ * client for that request. No singleton is ever mutated mid-request; no
+ * per-tenant data can leak between concurrent callers.
  */
 import { schema } from '@osd/config-schema';
 import { IRouter, RequestHandlerContext, SavedObject } from '../../../../../src/core/server';
 import type { AlertingOSClient, Datasource, Logger } from '../../../common/types/alerting';
-import { MultiBackendAlertService } from '../../services/alerting';
+import {
+  HttpOpenSearchBackend,
+  MultiBackendAlertService,
+  PrometheusMetadataService,
+  SavedObjectDatasourceService,
+} from '../../services/alerting';
 import { DirectQueryPrometheusBackend } from '../../services/alerting/directquery_prometheus_backend';
 import { MonitorMutationService } from '../../services/alerting/monitor_mutation_service';
-import { SavedObjectDatasourceService } from '../../services/alerting/saved_object_datasource_service';
 import { registerAlertingMutationRoutes } from './mutations';
 import { toErrorBody } from './route_utils';
+import { alertingIdSchema, prometheusLabelNameSchema } from './schema_helpers';
 
 /**
  * Shape of the OSD request-handler context we rely on. `dataSource` is
@@ -70,17 +70,23 @@ import {
   handleGetLabelValues,
   handleGetMetricMetadata,
 } from './metadata_handlers';
-import { PrometheusMetadataService } from '../../services/alerting/prometheus_metadata_service';
 import { handleGetAlertmanagerConfig } from './alertmanager_handlers';
 
-export function registerAlertingRoutes(
-  router: IRouter,
-  alertService: MultiBackendAlertService,
-  mutationSvc: MonitorMutationService,
-  promBackend: DirectQueryPrometheusBackend,
-  logger?: Logger,
-  metadataService?: PrometheusMetadataService
-) {
+export interface AlertingRoutesDeps {
+  osBackend: HttpOpenSearchBackend;
+  promBackend: DirectQueryPrometheusBackend;
+  mutationSvc: MonitorMutationService;
+  logger: Logger;
+  /**
+   * Register the 4 Prometheus metadata routes in addition to the core set.
+   * Defaults to true; tests can toggle to cover the reduced registration
+   * surface.
+   */
+  enableMetadataRoutes?: boolean;
+}
+
+export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps) {
+  const { osBackend, promBackend, mutationSvc, logger, enableMetadataRoutes = true } = deps;
   /**
    * Resolve an OpenSearch datasource from the `data-source` saved-object type.
    * Returns `null` for an unknown id. If `requestedDsId` is undefined, returns
@@ -186,20 +192,46 @@ export function registerAlertingRoutes(
   }
 
   /**
-   * Bind a per-request `SavedObjectDatasourceService` to the shared alert
-   * service + metadata service. Must be called at the start of every route
-   * handler that invokes methods on either service (they internally call
-   * `this.datasourceService.get(...)` / `list()`). The services otherwise
-   * share a bootstrap adapter from `setupRoutes` that has no saved-objects
-   * client.
+   * Construct the per-request stateful alerting services bound to this
+   * request's scoped SavedObjects client. Replaces the pre-Phase-5 mutable
+   * `setDatasourceService` singleton pattern, which leaked SavedObjects
+   * clients across concurrent requests at every `await` boundary.
+   *
+   * Call at the top of every handler; the returned `alertService` /
+   * `metadataService` instances are short-lived and die when the handler
+   * returns.
    */
-  function bindRequestDatasources(ctx: AlertingHandlerContext): SavedObjectDatasourceService {
-    const ds = new SavedObjectDatasourceService(ctx.core.savedObjects.client, logger);
-    alertService.setDatasourceService(ds);
-    if (metadataService) {
-      metadataService.setDatasourceService(ds);
-    }
-    return ds;
+  function buildRequestServices(
+    ctx: AlertingHandlerContext
+  ): {
+    alertService: MultiBackendAlertService;
+    metadataService: PrometheusMetadataService;
+    datasourceService: SavedObjectDatasourceService;
+  } {
+    const datasourceService = new SavedObjectDatasourceService(
+      ctx.core.savedObjects.client,
+      logger
+    );
+    const alertService = new MultiBackendAlertService(datasourceService, logger);
+    alertService.registerOpenSearch(osBackend);
+    alertService.registerPrometheus(promBackend);
+    const metadataService = new PrometheusMetadataService(promBackend, datasourceService, logger);
+    return { alertService, metadataService, datasourceService };
+  }
+
+  /**
+   * Map a framework-agnostic `HandlerResult` to the right OSD response. The
+   * happy path (or explicit `okStatus`, e.g. 201 for create) emits `res.ok`
+   * with the raw body; anything else routes through `toErrorBody` so the
+   * wire shape stays consistent, and the original status carries through via
+   * `res.customError`. Replaces per-route ternaries that used to flatten
+   * everything to `res.badRequest` / `res.notFound`, which defeated the
+   * status-preserving work in `toHandlerResult`.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function sendResult(res: any, result: { status: number; body: any }, okStatus: number = 200) {
+    if (result.status === okStatus) return res.ok({ body: result.body });
+    return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
   }
 
   // Mutation routes (create/update/delete monitor + acknowledge alert) live
@@ -222,7 +254,7 @@ export function registerAlertingRoutes(
       },
     },
     async (ctx, req, res) => {
-      bindRequestDatasources(ctx as AlertingHandlerContext);
+      const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
       const result = await handleGetUnifiedAlerts(
         alertService,
         async (dsId: string) => getAlertingClient(ctx, dsId),
@@ -248,7 +280,7 @@ export function registerAlertingRoutes(
       },
     },
     async (ctx, req, res) => {
-      bindRequestDatasources(ctx as AlertingHandlerContext);
+      const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
       const result = await handleGetUnifiedRules(
         alertService,
         async (dsId: string) => getAlertingClient(ctx, dsId),
@@ -266,37 +298,35 @@ export function registerAlertingRoutes(
   router.get(
     {
       path: '/api/alerting/opensearch/{dsId}/monitors',
-      validate: { params: schema.object({ dsId: schema.string() }) },
+      validate: { params: schema.object({ dsId: alertingIdSchema }) },
     },
     async (ctx, req, res) => {
-      bindRequestDatasources(ctx as AlertingHandlerContext);
+      const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
       const result = await handleGetOSMonitors(
         alertService,
         await getAlertingClient(ctx, req.params.dsId),
         req.params.dsId
       );
-      return result.status === 200
-        ? res.ok({ body: result.body })
-        : res.badRequest({ body: toErrorBody(result.body) });
+      return sendResult(res, result);
     }
   );
 
   router.get(
     {
       path: '/api/alerting/opensearch/{dsId}/monitors/{monitorId}',
-      validate: { params: schema.object({ dsId: schema.string(), monitorId: schema.string() }) },
+      validate: {
+        params: schema.object({ dsId: alertingIdSchema, monitorId: alertingIdSchema }),
+      },
     },
     async (ctx, req, res) => {
-      bindRequestDatasources(ctx as AlertingHandlerContext);
+      const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
       const result = await handleGetOSMonitor(
         alertService,
         await getAlertingClient(ctx, req.params.dsId),
         req.params.dsId,
         req.params.monitorId
       );
-      return result.status === 200
-        ? res.ok({ body: result.body })
-        : res.notFound({ body: toErrorBody(result.body) });
+      return sendResult(res, result);
     }
   );
   // OS monitor mutations (POST create, PUT update, DELETE delete) moved to
@@ -306,18 +336,16 @@ export function registerAlertingRoutes(
   router.get(
     {
       path: '/api/alerting/opensearch/{dsId}/alerts',
-      validate: { params: schema.object({ dsId: schema.string() }) },
+      validate: { params: schema.object({ dsId: alertingIdSchema }) },
     },
     async (ctx, req, res) => {
-      bindRequestDatasources(ctx as AlertingHandlerContext);
+      const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
       const result = await handleGetOSAlerts(
         alertService,
         await getAlertingClient(ctx, req.params.dsId),
         req.params.dsId
       );
-      return result.status === 200
-        ? res.ok({ body: result.body })
-        : res.badRequest({ body: toErrorBody(result.body) });
+      return sendResult(res, result);
     }
   );
 
@@ -327,36 +355,32 @@ export function registerAlertingRoutes(
   router.get(
     {
       path: '/api/alerting/prometheus/{dsId}/rules',
-      validate: { params: schema.object({ dsId: schema.string() }) },
+      validate: { params: schema.object({ dsId: alertingIdSchema }) },
     },
     async (ctx, req, res) => {
-      bindRequestDatasources(ctx as AlertingHandlerContext);
+      const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
       const result = await handleGetPromRuleGroups(
         alertService,
         await getAlertingClient(ctx, req.params.dsId),
         req.params.dsId
       );
-      return result.status === 200
-        ? res.ok({ body: result.body })
-        : res.badRequest({ body: toErrorBody(result.body) });
+      return sendResult(res, result);
     }
   );
 
   router.get(
     {
       path: '/api/alerting/prometheus/{dsId}/alerts',
-      validate: { params: schema.object({ dsId: schema.string() }) },
+      validate: { params: schema.object({ dsId: alertingIdSchema }) },
     },
     async (ctx, req, res) => {
-      bindRequestDatasources(ctx as AlertingHandlerContext);
+      const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
       const result = await handleGetPromAlerts(
         alertService,
         await getAlertingClient(ctx, req.params.dsId),
         req.params.dsId
       );
-      return result.status === 200
-        ? res.ok({ body: result.body })
-        : res.badRequest({ body: toErrorBody(result.body) });
+      return sendResult(res, result);
     }
   );
 
@@ -365,20 +389,18 @@ export function registerAlertingRoutes(
     {
       path: '/api/alerting/rules/{dsId}/{ruleId}',
       validate: {
-        params: schema.object({ dsId: schema.string(), ruleId: schema.string() }),
+        params: schema.object({ dsId: alertingIdSchema, ruleId: alertingIdSchema }),
       },
     },
     async (ctx, req, res) => {
-      bindRequestDatasources(ctx as AlertingHandlerContext);
+      const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
       const result = await handleGetRuleDetail(
         alertService,
         await getAlertingClient(ctx, req.params.dsId),
         req.params.dsId,
         req.params.ruleId
       );
-      return result.status === 200
-        ? res.ok({ body: result.body })
-        : res.notFound({ body: toErrorBody(result.body) });
+      return sendResult(res, result);
     }
   );
 
@@ -386,20 +408,18 @@ export function registerAlertingRoutes(
     {
       path: '/api/alerting/alerts/{dsId}/{alertId}',
       validate: {
-        params: schema.object({ dsId: schema.string(), alertId: schema.string() }),
+        params: schema.object({ dsId: alertingIdSchema, alertId: alertingIdSchema }),
       },
     },
     async (ctx, req, res) => {
-      bindRequestDatasources(ctx as AlertingHandlerContext);
+      const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
       const result = await handleGetAlertDetail(
         alertService,
         await getAlertingClient(ctx, req.params.dsId),
         req.params.dsId,
         req.params.alertId
       );
-      return result.status === 200
-        ? res.ok({ body: result.body })
-        : res.notFound({ body: toErrorBody(result.body) });
+      return sendResult(res, result);
     }
   );
 
@@ -410,13 +430,14 @@ export function registerAlertingRoutes(
   router.get(
     {
       path: '/api/alerting/alertmanager/config',
-      validate: { query: schema.object({ dsId: schema.maybe(schema.string()) }) },
+      validate: { query: schema.object({ dsId: schema.maybe(alertingIdSchema) }) },
     },
     async (ctx, req, res) => {
-      bindRequestDatasources(ctx as AlertingHandlerContext);
       // Alertmanager is reached through a Prometheus datasource. Use the
       // saved-object-backed resolver — saved-object IDs are stable across
-      // server restarts (addresses Comments 8 + 11).
+      // server restarts (addresses Comments 8 + 11). This route doesn't need
+      // a MultiBackendAlertService because it talks directly to promBackend,
+      // so we skip the buildRequestServices allocation.
       const promDs = await resolvePrometheusDatasource(
         ctx as AlertingHandlerContext,
         req.query.dsId
@@ -434,9 +455,24 @@ export function registerAlertingRoutes(
       const result = await handleGetAlertmanagerConfig(
         promBackend,
         await getAlertingClient(ctx as AlertingHandlerContext),
-        promDs
+        promDs,
+        logger
       );
-      return res.ok({ body: result.body });
+      // This route intentionally returns a domain envelope
+      // `{ available, code, ... }` on BOTH success and error paths — the UI
+      // treats `code` as the discriminator and `available` as the boolean.
+      // Do NOT funnel error bodies through `toErrorBody` here; that would
+      // collapse the envelope into OSD's `{ message, attributes }` shape and
+      // break the UI's consumer. Do preserve the upstream HTTP status code
+      // so auth failures show as 401/403 rather than masked as 200.
+      if (result.status === 200) return res.ok({ body: result.body });
+      if (result.status === 401) {
+        return res.unauthorized({ body: result.body });
+      }
+      if (result.status === 403) {
+        return res.forbidden({ body: result.body });
+      }
+      return res.customError({ statusCode: result.status, body: result.body });
     }
   );
 
@@ -444,17 +480,17 @@ export function registerAlertingRoutes(
   // Prometheus Metadata Routes
   // ===========================================================================
 
-  if (metadataService) {
+  if (enableMetadataRoutes) {
     router.get(
       {
         path: '/api/alerting/prometheus/{dsId}/metadata/metrics',
         validate: {
-          params: schema.object({ dsId: schema.string() }),
+          params: schema.object({ dsId: alertingIdSchema }),
           query: schema.object({ search: schema.maybe(schema.string()) }),
         },
       },
       async (ctx, req, res) => {
-        bindRequestDatasources(ctx as AlertingHandlerContext);
+        const { metadataService } = buildRequestServices(ctx as AlertingHandlerContext);
         const result = await handleGetMetricNames(
           metadataService,
           await getAlertingClient(ctx, req.params.dsId),
@@ -470,12 +506,12 @@ export function registerAlertingRoutes(
       {
         path: '/api/alerting/prometheus/{dsId}/metadata/labels',
         validate: {
-          params: schema.object({ dsId: schema.string() }),
+          params: schema.object({ dsId: alertingIdSchema }),
           query: schema.object({ metric: schema.maybe(schema.string()) }),
         },
       },
       async (ctx, req, res) => {
-        bindRequestDatasources(ctx as AlertingHandlerContext);
+        const { metadataService } = buildRequestServices(ctx as AlertingHandlerContext);
         const result = await handleGetLabelNames(
           metadataService,
           await getAlertingClient(ctx, req.params.dsId),
@@ -491,12 +527,12 @@ export function registerAlertingRoutes(
       {
         path: '/api/alerting/prometheus/{dsId}/metadata/label-values/{label}',
         validate: {
-          params: schema.object({ dsId: schema.string(), label: schema.string() }),
+          params: schema.object({ dsId: alertingIdSchema, label: prometheusLabelNameSchema }),
           query: schema.object({ selector: schema.maybe(schema.string()) }),
         },
       },
       async (ctx, req, res) => {
-        bindRequestDatasources(ctx as AlertingHandlerContext);
+        const { metadataService } = buildRequestServices(ctx as AlertingHandlerContext);
         const result = await handleGetLabelValues(
           metadataService,
           await getAlertingClient(ctx, req.params.dsId),
@@ -513,11 +549,11 @@ export function registerAlertingRoutes(
       {
         path: '/api/alerting/prometheus/{dsId}/metadata/metric-metadata',
         validate: {
-          params: schema.object({ dsId: schema.string() }),
+          params: schema.object({ dsId: alertingIdSchema }),
         },
       },
       async (ctx, req, res) => {
-        bindRequestDatasources(ctx as AlertingHandlerContext);
+        const { metadataService } = buildRequestServices(ctx as AlertingHandlerContext);
         const result = await handleGetMetricMetadata(
           metadataService,
           await getAlertingClient(ctx, req.params.dsId),

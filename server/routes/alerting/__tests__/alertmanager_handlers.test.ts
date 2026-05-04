@@ -121,19 +121,49 @@ inhibit_rules: []
     expect(result.body.configParseError).toMatch(/Failed to parse YAML/);
   });
 
-  it('returns available:false when backend cannot provide Alertmanager status', async () => {
+  it('returns available:false at HTTP 200 when backend cannot provide Alertmanager status', async () => {
     const backend = ({} as unknown) as PrometheusBackend;
     const result = await handleGetAlertmanagerConfig(backend, mockClient, mockDs);
     expect(result.status).toBe(200);
-    expect(result.body).toEqual({ available: false, error: 'Alertmanager not configured' });
+    expect(result.body).toEqual({
+      available: false,
+      error: 'Alertmanager not configured',
+    });
   });
 
-  it('returns available:false with message when upstream throws', async () => {
+  it('maps upstream 401 to HTTP 401 with a safe message', async () => {
+    const err = Object.assign(new Error('auth header missing in upstream'), { statusCode: 401 });
     const backend = makeBackend({
-      getAlertmanagerStatus: jest.fn().mockRejectedValue(new Error('connection refused')),
+      getAlertmanagerStatus: jest.fn().mockRejectedValue(err),
     });
     const result = await handleGetAlertmanagerConfig(backend, mockClient, mockDs);
-    expect(result.status).toBe(200);
-    expect(result.body).toEqual({ available: false, error: 'connection refused' });
+    expect(result.status).toBe(401);
+    expect(result.body).toEqual({ available: false, error: 'Unauthorized' });
+    // The original "auth header missing in upstream" must NOT appear in the response.
+    expect(JSON.stringify(result.body)).not.toContain('auth header missing');
+  });
+
+  it('maps upstream 403 to HTTP 403', async () => {
+    const err = Object.assign(new Error('forbidden'), { statusCode: 403 });
+    const backend = makeBackend({
+      getAlertmanagerStatus: jest.fn().mockRejectedValue(err),
+    });
+    const result = await handleGetAlertmanagerConfig(backend, mockClient, mockDs);
+    expect(result.status).toBe(403);
+    expect(result.body).toEqual({ available: false, error: 'Forbidden' });
+  });
+
+  it('maps a generic upstream failure to HTTP 500 with a sanitized message', async () => {
+    const backend = makeBackend({
+      getAlertmanagerStatus: jest
+        .fn()
+        .mockRejectedValue(new Error('connect ECONNREFUSED 10.0.0.42:9093')),
+    });
+    const result = await handleGetAlertmanagerConfig(backend, mockClient, mockDs);
+    expect(result.status).toBe(500);
+    expect(result.body.available).toBe(false);
+    expect(result.body.error).toBe('Failed to fetch Alertmanager config');
+    // The IP address from the thrown error must not appear in the response.
+    expect(JSON.stringify(result.body)).not.toContain('10.0.0.42');
   });
 });

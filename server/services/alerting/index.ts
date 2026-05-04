@@ -31,11 +31,19 @@ export { DirectQueryPrometheusBackend } from './directquery_prometheus_backend';
 export { PrometheusMetadataService } from './prometheus_metadata_service';
 export { SavedObjectDatasourceService } from './saved_object_datasource_service';
 
-export type { AlertManagerError, NotFoundError, ValidationError, InternalError } from './errors';
+export type {
+  AlertManagerError,
+  NotFoundError,
+  ValidationError,
+  InternalError,
+  ConflictError,
+} from './errors';
 export {
   createNotFoundError,
   createValidationError,
   createInternalError,
+  createConflictError,
   isAlertManagerError,
+  isStatusCode,
   errorToStatus,
 } from './errors';

@@ -158,4 +158,27 @@ describe('MultiBackendAlertService — routing & list', () => {
     const response = await svc.getUnifiedAlerts(resolver);
     expect(response.totalDatasources).toBe(1);
   });
+
+  /**
+   * Compile-time regression guard: `setDatasourceService` must not exist on
+   * the type. Re-adding it would resurrect the cross-tenant SavedObjects-
+   * client leak (request-scoped handlers previously mutated a shared singleton
+   * setter at every `await` boundary). The `@ts-expect-error` fires at tsc
+   * time if the setter comes back.
+   */
+  it('has no setDatasourceService setter', () => {
+    const dsSvc = {
+      list: jest.fn(async () => []),
+      get: jest.fn(async () => null),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      testConnection: jest.fn(),
+      seed: jest.fn(),
+    };
+    const instance = new MultiBackendAlertService(dsSvc, mockLogger);
+    // @ts-expect-error setDatasourceService was intentionally removed
+    const setter = instance.setDatasourceService;
+    expect(setter).toBeUndefined();
+  });
 });

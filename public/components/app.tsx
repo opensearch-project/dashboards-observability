@@ -28,7 +28,11 @@ import { Main as NotebooksHome } from './notebooks/components/main';
 import { Home as TraceAnalyticsHome } from './trace_analytics/home';
 import { Home as GettingStartedHome } from './getting_started/home';
 import { Home as OverviewHome } from './overview/home';
-import { AlertingHome } from './alerting/home';
+// `AlertingHome` is imported from `home_lazy.tsx` (not `home.tsx`) so the
+// alerting bundle is code-split from the main observability chunk. The lazy
+// wrapper owns its own Suspense boundary, so consumers here need no extra
+// setup.
+import { AlertingHome } from './alerting/home_lazy';
 import { Services as ApmServices, ApmServicesProps } from './apm/services';
 import {
   ApplicationMapPage as ApmApplicationMap,

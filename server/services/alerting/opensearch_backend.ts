@@ -27,6 +27,7 @@ import {
   OSDestinationRaw,
   OSDestinationsApiResponse,
 } from '../../../common/types/alerting';
+import { createConflictError, createInternalError, isStatusCode } from './errors';
 
 export class HttpOpenSearchBackend implements OpenSearchBackend {
   readonly type = 'opensearch' as const;
@@ -78,7 +79,7 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
       const resp = await this.req<OSGetMonitorResponse>(
         client,
         'GET',
-        `/_plugins/_alerting/monitors/${monitorId}`
+        `/_plugins/_alerting/monitors/${encodeURIComponent(monitorId)}`
       );
       return this.mapMonitor(resp.body._id, resp.body.monitor);
     } catch (err) {
@@ -108,27 +109,43 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
     monitorId: string,
     input: Partial<OSMonitor>
   ): Promise<OSMonitor | null> {
-    // Fetch the current monitor with version info for optimistic concurrency
-    let seqNo: number | undefined;
-    let primaryTerm: number | undefined;
+    const encodedMonitorId = encodeURIComponent(monitorId);
+
+    // Fetch the current monitor with version info for optimistic concurrency.
+    // Splitting the GET and PUT lets us distinguish a missing monitor (return
+    // null) from a conflict on write (throw typed conflict).
+    let getResp: { body: OSGetMonitorResponse };
     try {
-      const getResp = await this.req<OSGetMonitorResponse>(
+      getResp = await this.req<OSGetMonitorResponse>(
         client,
         'GET',
-        `/_plugins/_alerting/monitors/${monitorId}`
+        `/_plugins/_alerting/monitors/${encodedMonitorId}`
       );
-      seqNo = getResp.body._seq_no;
-      primaryTerm = getResp.body._primary_term;
-      const current = this.mapMonitor(getResp.body._id, getResp.body.monitor);
-      const { id: _id, ...currentFields } = current;
-      const merged = { ...currentFields, ...input, last_update_time: Date.now() };
+    } catch (err) {
+      if (this.is404(err)) return null;
+      throw err;
+    }
 
-      // Use if_seq_no/if_primary_term for optimistic concurrency control
-      let putPath = `/_plugins/_alerting/monitors/${monitorId}`;
-      if (seqNo !== undefined && primaryTerm !== undefined) {
-        putPath += `?if_seq_no=${seqNo}&if_primary_term=${primaryTerm}`;
-      }
+    const seqNo = getResp.body._seq_no;
+    const primaryTerm = getResp.body._primary_term;
+    // Optimistic concurrency control requires both values. If either is
+    // missing, fail hard rather than silently downgrade to a non-CAS write —
+    // that would allow concurrent writers to clobber each other.
+    if (seqNo === undefined || primaryTerm === undefined) {
+      throw createInternalError(
+        'OpenSearch Alerting GET monitor response missing _seq_no or _primary_term; refusing non-CAS update'
+      );
+    }
 
+    const current = this.mapMonitor(getResp.body._id, getResp.body.monitor);
+    const { id: _id, ...currentFields } = current;
+    const merged = { ...currentFields, ...input, last_update_time: Date.now() };
+
+    const putPath =
+      `/_plugins/_alerting/monitors/${encodedMonitorId}` +
+      `?if_seq_no=${seqNo}&if_primary_term=${primaryTerm}`;
+
+    try {
       const resp = await this.req<OSCreateMonitorResponse>(client, 'PUT', putPath, {
         ...merged,
         type: 'monitor',
@@ -136,13 +153,23 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
       return this.mapMonitor(resp.body._id, resp.body.monitor);
     } catch (err) {
       if (this.is404(err)) return null;
+      if (isStatusCode(err, 409)) {
+        throw createConflictError(
+          `Monitor ${monitorId} was modified by another writer; re-fetch and retry`,
+          monitorId
+        );
+      }
       throw err;
     }
   }
 
   async deleteMonitor(client: AlertingOSClient, monitorId: string): Promise<boolean> {
     try {
-      await this.req(client, 'DELETE', `/_plugins/_alerting/monitors/${monitorId}`);
+      await this.req(
+        client,
+        'DELETE',
+        `/_plugins/_alerting/monitors/${encodeURIComponent(monitorId)}`
+      );
       return true;
     } catch (err) {
       if (this.is404(err)) return false;
@@ -158,7 +185,7 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
     const resp = await this.req<unknown>(
       client,
       'POST',
-      `/_plugins/_alerting/monitors/${monitorId}/_execute`,
+      `/_plugins/_alerting/monitors/${encodeURIComponent(monitorId)}/_execute`,
       {
         dryrun: dryRun ?? false,
       }
@@ -212,7 +239,7 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
     const resp = await this.req<unknown>(
       client,
       'POST',
-      `/_plugins/_alerting/monitors/${monitorId}/_acknowledge/alerts`,
+      `/_plugins/_alerting/monitors/${encodeURIComponent(monitorId)}/_acknowledge/alerts`,
       { alerts: alertIds }
     );
     return resp.body;
@@ -246,7 +273,11 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
 
   async deleteDestination(client: AlertingOSClient, destId: string): Promise<boolean> {
     try {
-      await this.req(client, 'DELETE', `/_plugins/_alerting/destinations/${destId}`);
+      await this.req(
+        client,
+        'DELETE',
+        `/_plugins/_alerting/destinations/${encodeURIComponent(destId)}`
+      );
       return true;
     } catch (err) {
       if (this.is404(err)) return false;
@@ -355,6 +386,6 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
   }
 
   private is404(err: unknown): boolean {
-    return String(err).includes('HTTP 404');
+    return isStatusCode(err, 404);
   }
 }
