@@ -125,14 +125,18 @@ describe('HttpOpenSearchBackend', () => {
       });
     });
 
-    it('returns null when the monitor is missing (HTTP 404)', async () => {
-      const { client } = makeClient([new Error('HTTP 404 not found')]);
+    it('returns null when the monitor is missing (statusCode 404)', async () => {
+      const err = Object.assign(new Error('index_not_found_exception'), { statusCode: 404 });
+      const { client } = makeClient([err]);
       expect(await backend.getMonitor(client, 'missing')).toBeNull();
     });
 
     it('rethrows non-404 errors', async () => {
-      const { client } = makeClient([new Error('HTTP 500 server error')]);
-      await expect(backend.getMonitor(client, 'mon-1')).rejects.toThrow('HTTP 500');
+      const err = Object.assign(new Error('server error'), { statusCode: 500 });
+      const { client } = makeClient([err]);
+      await expect(backend.getMonitor(client, 'mon-1')).rejects.toMatchObject({
+        statusCode: 500,
+      });
     });
   });
 

@@ -12,6 +12,10 @@
 
 import type { AlertingOSClient, Logger, OSMonitor } from '../../../../common/types/alerting';
 import { MonitorMutationService } from '../monitor_mutation_service';
+import { isAlertManagerError } from '../errors';
+
+const err = (message: string, statusCode: number): Error =>
+  Object.assign(new Error(message), { statusCode });
 
 const mockLogger: Logger = {
   info: jest.fn(),
@@ -109,14 +113,52 @@ describe('MonitorMutationService', () => {
       );
     });
 
-    it('returns null when the monitor does not exist', async () => {
-      const { client } = makeClient([new Error('HTTP 404')]);
+    it('returns null when the monitor does not exist (404 on GET)', async () => {
+      const { client } = makeClient([err('not_found_exception', 404)]);
       expect(await svc.updateMonitor(client, 'missing', { name: 'x' })).toBeNull();
     });
 
-    it('rethrows non-404 errors', async () => {
-      const { client } = makeClient([new Error('HTTP 500 server error')]);
-      await expect(svc.updateMonitor(client, 'mon-1', { name: 'x' })).rejects.toThrow('HTTP 500');
+    it('rethrows non-404 errors on the GET', async () => {
+      const { client } = makeClient([err('server error', 500)]);
+      await expect(svc.updateMonitor(client, 'mon-1', { name: 'x' })).rejects.toMatchObject({
+        statusCode: 500,
+      });
+    });
+
+    it('throws a typed internal error when seq_no/primary_term are missing', async () => {
+      // GET succeeds but the response lacks _seq_no and _primary_term — we
+      // must refuse to downgrade to a non-CAS PUT.
+      const { client } = makeClient([{ body: monitorSource('mon-1', 'A') }]);
+      let thrown: unknown;
+      try {
+        await svc.updateMonitor(client, 'mon-1', { name: 'x' });
+      } catch (e) {
+        thrown = e;
+      }
+      expect(isAlertManagerError(thrown)).toBe(true);
+      expect((thrown as { kind: string }).kind).toBe('internal');
+    });
+
+    it('throws a typed conflict error on 409 from the PUT', async () => {
+      const { client } = makeClient([
+        {
+          body: {
+            ...monitorSource('mon-1', 'A'),
+            _seq_no: 1,
+            _primary_term: 1,
+          },
+        },
+        err('version_conflict_engine_exception', 409),
+      ]);
+      let thrown: unknown;
+      try {
+        await svc.updateMonitor(client, 'mon-1', { name: 'x' });
+      } catch (e) {
+        thrown = e;
+      }
+      expect(isAlertManagerError(thrown)).toBe(true);
+      expect((thrown as { kind: string }).kind).toBe('conflict');
+      expect((thrown as { resourceId?: string }).resourceId).toBe('mon-1');
     });
   });
 
@@ -130,13 +172,15 @@ describe('MonitorMutationService', () => {
         body: undefined,
       });
 
-      const b = makeClient([new Error('HTTP 404')]);
+      const b = makeClient([err('not_found', 404)]);
       expect(await svc.deleteMonitor(b.client, 'mon-1')).toBe(false);
     });
 
     it('rethrows non-404 errors', async () => {
-      const { client } = makeClient([new Error('HTTP 500')]);
-      await expect(svc.deleteMonitor(client, 'mon-1')).rejects.toThrow('HTTP 500');
+      const { client } = makeClient([err('server error', 500)]);
+      await expect(svc.deleteMonitor(client, 'mon-1')).rejects.toMatchObject({
+        statusCode: 500,
+      });
     });
   });
 

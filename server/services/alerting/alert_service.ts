@@ -57,18 +57,10 @@ export class MultiBackendAlertService {
   private osBackend?: OpenSearchBackend;
   private promBackend?: PrometheusBackend;
 
-  constructor(private datasourceService: DatasourceService, private readonly logger: Logger) {}
-
-  /**
-   * Swap the datasource service for this request. Used by the OSD route layer
-   * to inject a per-request `SavedObjectDatasourceService` bound to the
-   * request's saved-objects client. The service is otherwise shared across
-   * requests, so this must be called BEFORE invoking any service method that
-   * reads from `this.datasourceService`.
-   */
-  setDatasourceService(datasourceService: DatasourceService): void {
-    this.datasourceService = datasourceService;
-  }
+  constructor(
+    private readonly datasourceService: DatasourceService,
+    private readonly logger: Logger
+  ) {}
 
   registerOpenSearch(backend: OpenSearchBackend): void {
     this.osBackend = backend;

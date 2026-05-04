@@ -12,10 +12,20 @@ import type {
   AlertingOSClient,
   AlertmanagerSilence,
   Datasource,
+  Logger,
   PrometheusBackend,
 } from '../../../common/types/alerting';
+import { isStatusCode } from '../../services/alerting';
 import { toHandlerResult } from './route_utils';
 import type { HandlerResult } from './route_utils';
+
+/**
+ * Discriminates the body shape of the Alertmanager config route so the UI
+ * can distinguish "not configured" from "unauthorized" from a real upstream
+ * failure. Before, every failure was reflected as `{ available: false }`
+ * with HTTP 200, which masked authz denials as config state.
+ */
+type AlertmanagerConfigCode = 'ok' | 'not_configured' | 'unauthorized' | 'upstream_error';
 
 // ============================================================================
 // Alertmanager API v2 Handlers
@@ -195,11 +205,24 @@ export function extractReceiverIntegrations(
 export async function handleGetAlertmanagerConfig(
   promBackend: PrometheusBackend,
   client: AlertingOSClient,
-  ds: Datasource
+  ds: Datasource,
+  logger?: Logger
 ): Promise<HandlerResult> {
+  const codeNotConfigured: AlertmanagerConfigCode = 'not_configured';
+  const codeUnauthorized: AlertmanagerConfigCode = 'unauthorized';
+  const codeUpstreamError: AlertmanagerConfigCode = 'upstream_error';
+  const codeOk: AlertmanagerConfigCode = 'ok';
+
   try {
     if (!promBackend.getAlertmanagerStatus) {
-      return { status: 200, body: { available: false, error: 'Alertmanager not configured' } };
+      return {
+        status: 200,
+        body: {
+          available: false,
+          code: codeNotConfigured,
+          error: 'Alertmanager not configured',
+        },
+      };
     }
     const status = await promBackend.getAlertmanagerStatus(client, ds);
     const rawYaml = status.config?.original || '';
@@ -237,6 +260,7 @@ export async function handleGetAlertmanagerConfig(
       status: 200,
       body: {
         available: true,
+        code: codeOk,
         cluster: {
           status: status.cluster?.status || 'unknown',
           peers: status.cluster?.peers || [],
@@ -250,11 +274,28 @@ export async function handleGetAlertmanagerConfig(
       },
     };
   } catch (e: unknown) {
+    // Log the full upstream error server-side; never reflect its `message`
+    // to the browser (may contain cluster URLs / stack fragments / index names).
+    if (logger) logger.error(e instanceof Error ? e.message : String(e));
+
+    if (isStatusCode(e, 401) || isStatusCode(e, 403)) {
+      const upstreamStatus = isStatusCode(e, 401) ? 401 : 403;
+      return {
+        status: upstreamStatus,
+        body: {
+          available: false,
+          code: codeUnauthorized,
+          error: upstreamStatus === 401 ? 'Unauthorized' : 'Forbidden',
+        },
+      };
+    }
+
     return {
-      status: 200,
+      status: 500,
       body: {
         available: false,
-        error: e instanceof Error ? e.message : 'Failed to fetch Alertmanager config',
+        code: codeUpstreamError,
+        error: 'Failed to fetch Alertmanager config',
       },
     };
   }

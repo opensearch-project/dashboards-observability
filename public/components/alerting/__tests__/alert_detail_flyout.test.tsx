@@ -123,4 +123,64 @@ describe('AlertDetailFlyout', () => {
     fireEvent.click(getByText('Acknowledge'));
     expect(onAcknowledge).not.toHaveBeenCalled();
   });
+
+  describe('runbook URL sanitization', () => {
+    it('does not render the runbook as a link when the URL uses a javascript: protocol', () => {
+      const alertWithBadUrl: UnifiedAlertSummary = {
+        ...baseAlert,
+        annotations: {
+          ...baseAlert.annotations,
+          // eslint-disable-next-line no-script-url
+          runbook_url: 'javascript:alert(document.cookie)',
+        },
+      };
+      const { getByText } = render(
+        <AlertDetailFlyout
+          alert={alertWithBadUrl}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      const runbookTitle = getByText('Check related runbook');
+      expect(runbookTitle.closest('a')).toBeNull();
+    });
+
+    it('renders the runbook as an external link with rel="noopener noreferrer" for an https URL', () => {
+      const alertWithGoodUrl: UnifiedAlertSummary = {
+        ...baseAlert,
+        annotations: {
+          ...baseAlert.annotations,
+          runbook_url: 'https://runbooks.example.com/high-error-rate',
+        },
+      };
+      const { getByText } = render(
+        <AlertDetailFlyout
+          alert={alertWithGoodUrl}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      const runbookTitle = getByText('Check related runbook');
+      const anchor = runbookTitle.closest('a');
+      expect(anchor).not.toBeNull();
+      expect(anchor?.getAttribute('href')).toBe('https://runbooks.example.com/high-error-rate');
+      expect(anchor?.getAttribute('rel')).toBe('noopener noreferrer');
+      expect(anchor?.getAttribute('target')).toBe('_blank');
+    });
+
+    it('does not render the runbook as a link when no URL is configured', () => {
+      const { getByText } = render(
+        <AlertDetailFlyout
+          alert={baseAlert}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      const runbookTitle = getByText('Check related runbook');
+      expect(runbookTitle.closest('a')).toBeNull();
+    });
+  });
 });

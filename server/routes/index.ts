@@ -30,11 +30,8 @@ import { registerTraceAnalyticsDslRouter } from './trace_analytics_dsl_router';
 import { registerAlertingRoutes } from './alerting';
 import {
   HttpOpenSearchBackend,
-  MultiBackendAlertService,
   MonitorMutationService,
   DirectQueryPrometheusBackend,
-  PrometheusMetadataService,
-  SavedObjectDatasourceService,
 } from '../services/alerting';
 
 export function setupRoutes({
@@ -85,29 +82,21 @@ export function setupRoutes({
   // flag is off the routes are never registered, so curl returns 404 for
   // both mutations and the AM config endpoint.
   if (alertManagerEnabled) {
-    // Construct a placeholder adapter that will be swapped per-request by the
-    // route layer via `service.setDatasourceService(...)`. The placeholder is
-    // fine because no method is invoked at registration time — every code
-    // path that reads `this.datasourceService` flows through a request handler
-    // which will have swapped in a live adapter first.
-    const bootstrapDatasources = new SavedObjectDatasourceService(
-      // Cast is safe: the bootstrap adapter is never read (see note above).
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (null as unknown) as any,
-      logger
-    );
-
+    // Only construct the genuinely stateless deps at server start. The
+    // per-request `MultiBackendAlertService` and `PrometheusMetadataService`
+    // instances — both of which hold a `SavedObjectDatasourceService` — are
+    // built inside each route handler so the per-request scoped SavedObjects
+    // client never bleeds across concurrent requests.
     const osBackend = new HttpOpenSearchBackend(logger);
     const promBackend = new DirectQueryPrometheusBackend(logger);
-
-    const alertSvc = new MultiBackendAlertService(bootstrapDatasources, logger);
-    alertSvc.registerOpenSearch(osBackend);
-    alertSvc.registerPrometheus(promBackend);
-
-    const metadataSvc = new PrometheusMetadataService(promBackend, bootstrapDatasources, logger);
-
     const mutationSvc = new MonitorMutationService(logger);
 
-    registerAlertingRoutes(router, alertSvc, mutationSvc, promBackend, logger, metadataSvc);
+    registerAlertingRoutes(router, {
+      osBackend,
+      promBackend,
+      mutationSvc,
+      logger,
+      enableMetadataRoutes: true,
+    });
   }
 }

@@ -32,7 +32,7 @@ import {
 } from '@elastic/eui';
 import { UnifiedAlert, UnifiedAlertSummary, Datasource } from '../../../common/types/alerting';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
-import { SEVERITY_COLORS, STATE_COLORS } from './shared_constants';
+import { SEVERITY_COLORS, STATE_COLORS, sanitizeExternalUrl } from './shared_constants';
 
 /** Internal label keys filtered from the Labels accordion display. */
 const INTERNAL_LABEL_KEYS = new Set([
@@ -383,7 +383,7 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
                   </EuiFlexItem>
                   <EuiFlexItem>
                     {hasUrl ? (
-                      <EuiLink href={action.url} target="_blank">
+                      <EuiLink href={action.url} target="_blank" rel="noopener noreferrer">
                         <EuiText size="s">
                           <strong>{action.title}</strong>
                         </EuiText>
@@ -509,14 +509,14 @@ function getSuggestedActions(alert: UnifiedAlertSummary): SuggestedAction[] {
   }
 
   if (alert.severity === 'critical' || alert.severity === 'high') {
-    const runbookUrl = alert.annotations?.runbook_url;
+    const safeRunbookUrl = sanitizeExternalUrl(alert.annotations?.runbook_url);
     actions.push({
       title: 'Check related runbook',
-      description: runbookUrl || 'No runbook URL configured \u2014 consider adding one.',
+      description: safeRunbookUrl || 'No runbook URL configured \u2014 consider adding one.',
       icon: 'document',
       color: 'warning',
-      actionType: runbookUrl ? 'link' : 'manual',
-      url: runbookUrl || undefined,
+      actionType: safeRunbookUrl ? 'link' : 'manual',
+      url: safeRunbookUrl,
     });
   }
 

@@ -28,8 +28,16 @@ import { Main as NotebooksHome } from './notebooks/components/main';
 import { Home as TraceAnalyticsHome } from './trace_analytics/home';
 import { Home as GettingStartedHome } from './getting_started/home';
 import { Home as OverviewHome } from './overview/home';
-import { AlertingHome } from './alerting/home';
 import { Services as ApmServices, ApmServicesProps } from './apm/services';
+
+// Lazy-load AlertingHome so the Alert Manager bundle is only fetched when the
+// feature flag is on and the user actually navigates to that app. The app
+// registration itself is gated on `config.alertManager.enabled` in `plugin.tsx`,
+// but an eager import still pulls the alerting code into the main observability
+// chunk for every user. React.lazy defers that fetch.
+const AlertingHome = React.lazy(() =>
+  import('./alerting/home').then((module) => ({ default: module.AlertingHome }))
+);
 import {
   ApplicationMapPage as ApmApplicationMap,
   ApplicationMapPageProps as ApmApplicationMapProps,
@@ -116,31 +124,33 @@ export const App = ({
     <Provider store={store}>
       <I18nProvider>
         <MetricsListener http={http}>
-          <ModuleComponent
-            http={http}
-            chrome={chrome}
-            notifications={notifications}
-            CoreStartProp={CoreStartProp}
-            DepsStart={DepsStart}
-            DashboardContainerByValueRenderer={
-              DepsStart.dashboard.DashboardContainerByValueRenderer
-            }
-            pplService={pplService}
-            dslService={dslService}
-            mlCommonsRCFService={mlCommonsRCFService}
-            savedObjects={savedObjects}
-            timestampUtils={timestampUtils}
-            queryManager={queryManager}
-            parentBreadcrumb={parentBreadcrumb}
-            parentBreadcrumbs={[parentBreadcrumb]}
-            setBreadcrumbs={chrome.setBreadcrumbs}
-            dataSourcePluggables={dataSourcePluggables}
-            dataSourceManagement={dataSourceManagement}
-            dataSourceEnabled={dataSourceEnabled}
-            setActionMenu={setActionMenu}
-            savedObjectsMDSClient={savedObjectsMDSClient}
-            defaultRoute={defaultRoute}
-          />
+          <React.Suspense fallback={<div />}>
+            <ModuleComponent
+              http={http}
+              chrome={chrome}
+              notifications={notifications}
+              CoreStartProp={CoreStartProp}
+              DepsStart={DepsStart}
+              DashboardContainerByValueRenderer={
+                DepsStart.dashboard.DashboardContainerByValueRenderer
+              }
+              pplService={pplService}
+              dslService={dslService}
+              mlCommonsRCFService={mlCommonsRCFService}
+              savedObjects={savedObjects}
+              timestampUtils={timestampUtils}
+              queryManager={queryManager}
+              parentBreadcrumb={parentBreadcrumb}
+              parentBreadcrumbs={[parentBreadcrumb]}
+              setBreadcrumbs={chrome.setBreadcrumbs}
+              dataSourcePluggables={dataSourcePluggables}
+              dataSourceManagement={dataSourceManagement}
+              dataSourceEnabled={dataSourceEnabled}
+              setActionMenu={setActionMenu}
+              savedObjectsMDSClient={savedObjectsMDSClient}
+              defaultRoute={defaultRoute}
+            />
+          </React.Suspense>
         </MetricsListener>
       </I18nProvider>
     </Provider>

@@ -18,7 +18,11 @@ import { coreRefs } from '../../../framework/core_refs';
 import type { PrometheusMetricMetadata } from '../../../../common/types/alerting';
 
 export class AlertingPromResourcesService {
-  constructor(private readonly datasourceId: string) {}
+  constructor(private readonly datasourceId: string) {
+    if (!datasourceId || typeof datasourceId !== 'string') {
+      throw new Error('datasourceId is required for AlertingPromResourcesService');
+    }
+  }
 
   private requireHttp() {
     const http = coreRefs.http;

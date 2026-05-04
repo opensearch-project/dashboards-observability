@@ -27,6 +27,7 @@ import {
   OSDestinationRaw,
   OSDestinationsApiResponse,
 } from '../../../common/types/alerting';
+import { isStatusCode } from './errors';
 
 export class HttpOpenSearchBackend implements OpenSearchBackend {
   readonly type = 'opensearch' as const;
@@ -355,6 +356,6 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
   }
 
   private is404(err: unknown): boolean {
-    return String(err).includes('HTTP 404');
+    return isStatusCode(err, 404);
   }
 }

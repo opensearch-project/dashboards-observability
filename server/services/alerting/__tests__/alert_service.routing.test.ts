@@ -158,4 +158,63 @@ describe('MultiBackendAlertService — routing & list', () => {
     const response = await svc.getUnifiedAlerts(resolver);
     expect(response.totalDatasources).toBe(1);
   });
+
+  // ---- concurrency isolation ----
+  /**
+   * Guards against the regressed "shared singleton + setDatasourceService"
+   * pattern that leaked SavedObjects clients across concurrent requests.
+   * The service no longer exposes a setter — the datasourceService is set
+   * exclusively via the constructor, so two concurrently-constructed
+   * instances cannot see each other's datasources even when their handlers
+   * yield at the same `await` boundary.
+   */
+  it('separate instances cannot observe each other’s datasources under concurrent awaits', async () => {
+    const dsA: Datasource = { id: 'ds-a', name: 'A', type: 'opensearch', url: '', enabled: true };
+    const dsB: Datasource = { id: 'ds-b', name: 'B', type: 'opensearch', url: '', enabled: true };
+
+    const makeDsSvc = (list: Datasource[]) => ({
+      list: jest.fn(async () => list),
+      get: jest.fn(async (id: string) => list.find((d) => d.id === id) ?? null),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      testConnection: jest.fn(),
+      seed: jest.fn(),
+    });
+
+    const osBackend = {
+      getMonitors: jest.fn(async () => []),
+      getMonitor: jest.fn(),
+      createMonitor: jest.fn(),
+      updateMonitor: jest.fn(),
+      deleteMonitor: jest.fn(),
+      getAlerts: jest.fn(async () => ({ alerts: [], totalAlerts: 0 })),
+      acknowledgeAlerts: jest.fn(),
+      getDestinations: jest.fn(async () => []),
+      searchQuery: jest.fn(),
+    };
+
+    const dsSvcA = makeDsSvc([dsA]);
+    const dsSvcB = makeDsSvc([dsB]);
+
+    const svcA = new MultiBackendAlertService(dsSvcA, mockLogger);
+    svcA.registerOpenSearch(osBackend as never);
+    const svcB = new MultiBackendAlertService(dsSvcB, mockLogger);
+    svcB.registerOpenSearch(osBackend as never);
+
+    // Interleave: kick off A, then B; each resolves against its own ds list.
+    const resolver = jest.fn(async () => ({} as never));
+    const [respA, respB] = await Promise.all([
+      svcA.getUnifiedAlerts(resolver),
+      svcB.getUnifiedAlerts(resolver),
+    ]);
+
+    expect(respA.totalDatasources).toBe(1);
+    expect(respB.totalDatasources).toBe(1);
+    expect(dsSvcA.list).toHaveBeenCalled();
+    expect(dsSvcB.list).toHaveBeenCalled();
+    // Request A must never have reached into request B's datasource service.
+    await expect(dsSvcA.list.mock.results[0].value).resolves.toEqual([dsA]);
+    await expect(dsSvcB.list.mock.results[0].value).resolves.toEqual([dsB]);
+  });
 });

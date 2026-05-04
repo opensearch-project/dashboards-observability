@@ -249,6 +249,25 @@ export function escapeHtml(str: string): string {
     .replace(/'/g, '&#39;');
 }
 
+/**
+ * Validate an externally sourced URL (e.g. a runbook URL pulled from an alert
+ * annotation) before using it in an `href`. Allows only `http:` and `https:`.
+ * Returns `undefined` when the input is missing, unparseable, or uses a
+ * disallowed protocol — blocks `javascript:`, `data:`, `file:`, etc.
+ */
+export function sanitizeExternalUrl(url: string | undefined): string | undefined {
+  if (!url || typeof url !== 'string') return undefined;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      return parsed.href;
+    }
+    return undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 // ============================================================================
 // Collection utilities
 // ============================================================================

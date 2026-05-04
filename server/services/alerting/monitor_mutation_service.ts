@@ -33,6 +33,7 @@ import {
   OSRawTrigger,
   OSRawAction,
 } from '../../../common/types/alerting';
+import { createConflictError, createInternalError, isStatusCode } from './errors';
 
 export class MonitorMutationService {
   constructor(private readonly logger: Logger) {}
@@ -66,34 +67,54 @@ export class MonitorMutationService {
     monitorId: string,
     input: Partial<OSMonitor>
   ): Promise<OSMonitor | null> {
-    // Fetch the current monitor with version info for optimistic concurrency
-    let seqNo: number | undefined;
-    let primaryTerm: number | undefined;
+    // Fetch the current monitor with version info for optimistic concurrency.
+    // Splitting the GET and PUT lets us distinguish a missing monitor (return
+    // null) from a conflict on write (throw typed conflict).
+    let getResp: { body: OSGetMonitorResponse };
     try {
-      const getResp = await this.req<OSGetMonitorResponse>(
+      getResp = await this.req<OSGetMonitorResponse>(
         client,
         'GET',
         `/_plugins/_alerting/monitors/${monitorId}`
       );
-      seqNo = getResp.body._seq_no;
-      primaryTerm = getResp.body._primary_term;
-      const current = this.mapMonitor(getResp.body._id, getResp.body.monitor);
-      const { id: _id, ...currentFields } = current;
-      const merged = { ...currentFields, ...input, last_update_time: Date.now() };
+    } catch (err) {
+      if (isStatusCode(err, 404)) return null;
+      throw err;
+    }
 
-      // Use if_seq_no/if_primary_term for optimistic concurrency control
-      let putPath = `/_plugins/_alerting/monitors/${monitorId}`;
-      if (seqNo !== undefined && primaryTerm !== undefined) {
-        putPath += `?if_seq_no=${seqNo}&if_primary_term=${primaryTerm}`;
-      }
+    const seqNo = getResp.body._seq_no;
+    const primaryTerm = getResp.body._primary_term;
+    // Optimistic concurrency control requires both values. If either is
+    // missing, fail hard rather than silently downgrade to a non-CAS write —
+    // that would allow concurrent writers to clobber each other.
+    if (seqNo === undefined || primaryTerm === undefined) {
+      throw createInternalError(
+        'OpenSearch Alerting GET monitor response missing _seq_no or _primary_term; refusing non-CAS update'
+      );
+    }
 
+    const current = this.mapMonitor(getResp.body._id, getResp.body.monitor);
+    const { id: _id, ...currentFields } = current;
+    const merged = { ...currentFields, ...input, last_update_time: Date.now() };
+
+    const putPath =
+      `/_plugins/_alerting/monitors/${monitorId}` +
+      `?if_seq_no=${seqNo}&if_primary_term=${primaryTerm}`;
+
+    try {
       const resp = await this.req<OSCreateMonitorResponse>(client, 'PUT', putPath, {
         ...merged,
         type: 'monitor',
       });
       return this.mapMonitor(resp.body._id, resp.body.monitor);
     } catch (err) {
-      if (this.is404(err)) return null;
+      if (isStatusCode(err, 404)) return null;
+      if (isStatusCode(err, 409)) {
+        throw createConflictError(
+          `Monitor ${monitorId} was modified by another writer; re-fetch and retry`,
+          monitorId
+        );
+      }
       throw err;
     }
   }
@@ -107,7 +128,7 @@ export class MonitorMutationService {
       await this.req(client, 'DELETE', `/_plugins/_alerting/monitors/${monitorId}`);
       return true;
     } catch (err) {
-      if (this.is404(err)) return false;
+      if (isStatusCode(err, 404)) return false;
       throw err;
     }
   }
@@ -202,9 +223,5 @@ export class MonitorMutationService {
         throttle: a.throttle as OSTrigger['actions'][0]['throttle'],
       })),
     };
-  }
-
-  private is404(err: unknown): boolean {
-    return String(err).includes('HTTP 404');
   }
 }

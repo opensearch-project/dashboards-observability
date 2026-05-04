@@ -154,9 +154,12 @@ export function registerAlertingMutationRoutes(
         // OSD schema validates loosely; narrow to the typed domain shape
         (req.body as unknown) as Partial<OSMonitor>
       );
-      return result.status === 200
-        ? res.ok({ body: result.body })
-        : res.notFound({ body: toErrorBody(result.body) });
+      if (result.status === 200) return res.ok({ body: result.body });
+      if (result.status === 404) return res.notFound({ body: toErrorBody(result.body) });
+      if (result.status === 409) {
+        return res.conflict({ body: toErrorBody(result.body) });
+      }
+      return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
     }
   );
 
@@ -170,9 +173,9 @@ export function registerAlertingMutationRoutes(
       try {
         const client = await getClient(ctx, req.params.dsId);
         const result = await handleDeleteOSMonitor(mutationSvc, client, req.params.monitorId);
-        return result.status === 200
-          ? res.ok({ body: result.body })
-          : res.notFound({ body: toErrorBody(result.body) });
+        if (result.status === 200) return res.ok({ body: result.body });
+        if (result.status === 404) return res.notFound({ body: toErrorBody(result.body) });
+        return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
       } catch (_e) {
         return res.badRequest({ body: { message: `Invalid datasource: ${req.params.dsId}` } });
       }

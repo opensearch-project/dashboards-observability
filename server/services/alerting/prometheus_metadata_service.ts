@@ -16,6 +16,14 @@
  *
  * All methods resolve the Datasource from DatasourceService, then delegate to the provider.
  * On error: logs warning, returns empty array, never throws.
+ *
+ * Lifetime: instances are **per-request** (constructed inside the route
+ * handler against a per-request scoped SavedObjects client). That intentionally
+ * dies with the request to avoid cross-tenant cache leaks — the previous
+ * shared-singleton design served cached data primed by another principal
+ * without a permission check. A per-request cache still helps within a
+ * single handler when multiple methods fetch the same resource, and keeps
+ * the API shape intact.
  */
 
 import type {
@@ -43,17 +51,9 @@ export class PrometheusMetadataService {
 
   constructor(
     private readonly provider: PrometheusMetadataProvider,
-    private datasourceService: DatasourceService,
+    private readonly datasourceService: DatasourceService,
     private readonly logger: Logger
   ) {}
-
-  /**
-   * Swap the datasource service for this request. See
-   * `MultiBackendAlertService.setDatasourceService` for rationale.
-   */
-  setDatasourceService(datasourceService: DatasourceService): void {
-    this.datasourceService = datasourceService;
-  }
 
   // --------------------------------------------------------------------------
   // Public API
