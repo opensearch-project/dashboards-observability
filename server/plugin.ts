@@ -4,6 +4,7 @@
  */
 
 import { schema } from '@osd/config-schema';
+import { first } from 'rxjs/operators';
 import {
   CoreSetup,
   CoreStart,
@@ -219,11 +220,22 @@ export class ObservabilityPlugin
     core.savedObjects.registerType(integrationInstanceType);
     core.savedObjects.registerType(integrationTemplateType);
 
+    // Hoisted above `setupRoutes` so the alerting-route gate (mirrors the
+    // existing `dataSourceEnabled` pattern) can read the flag at registration
+    // time. Keep the same fetch downstream consumers depend on — UI settings
+    // registration below reuses `observabilityConfig.alertManager?.enabled`.
+    const observabilityConfig = await this.initializerContext.config
+      .create<{ alertManager: { enabled: boolean } }>()
+      .pipe(first())
+      .toPromise();
+    const alertManagerEnabled = observabilityConfig.alertManager?.enabled ?? false;
+
     // Register server side APIs
     setupRoutes({
       router,
       client: openSearchObservabilityClient,
       dataSourceEnabled,
+      alertManagerEnabled,
       logger: this.logger,
     });
 
@@ -239,7 +251,8 @@ export class ObservabilityPlugin
     }));
 
     assistantDashboards?.registerMessageParser(PPLParsers);
-    registerObservabilityUISettings(core.uiSettings);
+
+    registerObservabilityUISettings(core.uiSettings, alertManagerEnabled);
 
     core.uiSettings.register({
       'observability:defaultDashboard': {

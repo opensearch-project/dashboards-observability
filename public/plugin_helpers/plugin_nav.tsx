@@ -16,6 +16,7 @@ import {
   observabilityMetricsID,
   observabilityNotebookID,
   observabilityOverviewID,
+  observabilityAlertingID,
 } from '../../common/constants/shared';
 import {
   observabilityApmServicesID,
@@ -93,7 +94,8 @@ function registerIconSideNavGroups(
 function registerDefaultNavGroups(
   core: CoreSetup<AppPluginStartDependencies>,
   apmEnabled: boolean,
-  applicationMonitoringCategory: AppCategory
+  applicationMonitoringCategory: AppCategory,
+  alertManagerEnabled: boolean = false
 ) {
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
     {
@@ -146,6 +148,27 @@ function registerDefaultNavGroups(
       order: 200,
     },
   ]);
+
+  if (alertManagerEnabled) {
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+      {
+        id: observabilityAlertingID,
+        category: undefined,
+        showInAllNavGroup: true,
+        order: 30,
+      },
+    ]);
+    // Also register in the global "all" nav group so the icon side nav picks
+    // up the alerting app across workspaces — matches the pattern used by
+    // `observabilityNotebookID` and `observabilityIntegrationsID` above.
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+      {
+        id: observabilityAlertingID,
+        category: undefined,
+        order: 30,
+      },
+    ]);
+  }
 
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
     {

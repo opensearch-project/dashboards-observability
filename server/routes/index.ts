@@ -27,16 +27,24 @@ import { registerQueryAssistRoutes } from './query_assist/routes';
 import { MLCommonsRCFFacet } from '../services/facets/ml_commons_rcf_facet';
 import { registerMLCommonsRCFRoute } from './ml_commons_rcf';
 import { registerTraceAnalyticsDslRouter } from './trace_analytics_dsl_router';
+import { registerAlertingRoutes } from './alerting';
+import {
+  HttpOpenSearchBackend,
+  MonitorMutationService,
+  DirectQueryPrometheusBackend,
+} from '../services/alerting';
 
 export function setupRoutes({
   router,
   client,
   dataSourceEnabled,
+  alertManagerEnabled,
   logger,
 }: {
   router: IRouter;
   client: ILegacyClusterClient;
   dataSourceEnabled: boolean;
+  alertManagerEnabled: boolean;
   logger: Logger;
 }) {
   PanelsRouter(router);
@@ -68,4 +76,28 @@ export function setupRoutes({
 
   registerGettingStartedRoutes(router);
   registerMLCommonsRCFRoute({ router, facet: new MLCommonsRCFFacet() });
+
+  // Alerting routes — gated by `observability.alertManager.enabled`
+  // (mirrors the existing `dataSourceEnabled` plumbing pattern). When the
+  // flag is off the routes are never registered, so curl returns 404 for
+  // both mutations and the AM config endpoint.
+  if (alertManagerEnabled) {
+    // Only construct the genuinely stateless deps at server start. The
+    // per-request `MultiBackendAlertService` and `PrometheusMetadataService`
+    // instances — both of which hold a `SavedObjectDatasourceService` — are
+    // built inside each route handler so the per-request scoped SavedObjects
+    // client never bleeds across concurrent requests.
+    const osBackend = new HttpOpenSearchBackend(logger);
+    const promBackend = new DirectQueryPrometheusBackend(logger);
+    // MonitorMutationService delegates to HttpOpenSearchBackend — shared
+    // stateless backend + thin write-path wrapper.
+    const mutationSvc = new MonitorMutationService(osBackend, logger);
+
+    registerAlertingRoutes(router, {
+      osBackend,
+      promBackend,
+      mutationSvc,
+      logger,
+    });
+  }
 }

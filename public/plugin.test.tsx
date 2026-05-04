@@ -350,3 +350,57 @@ describe('#setup with APM enabled', () => {
     });
   });
 });
+
+describe('#setup with Alert Manager feature gate', () => {
+  it('should register alerting app when alertManager.enabled yml flag is true', async () => {
+    const initializerContextMock = coreMock.createPluginInitializerContext();
+    initializerContextMock.config.get = jest.fn().mockReturnValue({
+      query_assist: { enabled: false },
+      summarize: { enabled: false },
+      alertManager: { enabled: true },
+    });
+    const coreSetup = coreMock.createSetup();
+    const observabilityPlugin = new ObservabilityPlugin(initializerContextMock);
+
+    coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
+
+    await observabilityPlugin.setup(coreSetup, ({
+      embeddable: embeddablePluginMock.createSetupContract(),
+      visualizations: visualizationsPluginMock.createSetupContract(),
+      data: dataPluginMock.createSetupContract(),
+      uiActions: uiActionsPluginMock.createSetupContract(),
+      contentManagement: contentManagementPluginMocks.createSetupContract(),
+      dashboard: { registerDashboardProvider: jest.fn() },
+    } as unknown) as SetupDependencies);
+
+    const registerCalls = (coreSetup.application.register as jest.Mock).mock.calls;
+    const alertingApp = registerCalls.find((call) => call[0].id === 'observability-alerting');
+    expect(alertingApp).toBeDefined();
+  });
+
+  it('should NOT register alerting app when alertManager.enabled yml flag is false', async () => {
+    const initializerContextMock = coreMock.createPluginInitializerContext();
+    initializerContextMock.config.get = jest.fn().mockReturnValue({
+      query_assist: { enabled: false },
+      summarize: { enabled: false },
+      alertManager: { enabled: false },
+    });
+    const coreSetup = coreMock.createSetup();
+    const observabilityPlugin = new ObservabilityPlugin(initializerContextMock);
+
+    coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
+
+    await observabilityPlugin.setup(coreSetup, ({
+      embeddable: embeddablePluginMock.createSetupContract(),
+      visualizations: visualizationsPluginMock.createSetupContract(),
+      data: dataPluginMock.createSetupContract(),
+      uiActions: uiActionsPluginMock.createSetupContract(),
+      contentManagement: contentManagementPluginMocks.createSetupContract(),
+      dashboard: { registerDashboardProvider: jest.fn() },
+    } as unknown) as SetupDependencies);
+
+    const registerCalls = (coreSetup.application.register as jest.Mock).mock.calls;
+    const alertingApp = registerCalls.find((call) => call[0].id === 'observability-alerting');
+    expect(alertingApp).toBeUndefined();
+  });
+});
