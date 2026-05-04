@@ -106,7 +106,7 @@ export const PPL_PATTERNS_DOCUMENTATION_URL =
 export const UI_DATE_FORMAT = 'MM/DD/YYYY hh:mm A';
 export const PPL_DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSSSSS';
 export const OTEL_DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
-export const SPAN_REGEX = /span/;
+export const SPAN_REGEX = /span/i;
 
 export const PROMQL_METRIC_SUBTYPE = 'promqlmetric';
 export const OTEL_METRIC_SUBTYPE = 'openTelemetryMetric';
