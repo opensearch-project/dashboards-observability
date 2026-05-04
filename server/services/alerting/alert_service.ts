@@ -64,7 +64,9 @@ export class MultiBackendAlertService {
 
   registerOpenSearch(backend: OpenSearchBackend): void {
     this.osBackend = backend;
-    this.logger.info('Registered OpenSearch alerting backend');
+    // `debug` (not `info`): this service is constructed per-request, so
+    // registration fires on every request. Keep out of default log output.
+    this.logger.debug('Registered OpenSearch alerting backend');
   }
 
   /** Access the Prometheus backend (e.g. for Alertmanager config route). */
@@ -74,7 +76,8 @@ export class MultiBackendAlertService {
 
   registerPrometheus(backend: PrometheusBackend): void {
     this.promBackend = backend;
-    this.logger.info('Registered Prometheus alerting backend');
+    // `debug` (not `info`): see registerOpenSearch.
+    this.logger.debug('Registered Prometheus alerting backend');
   }
 
   // =========================================================================

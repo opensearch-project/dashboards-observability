@@ -224,6 +224,21 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     return { alertService, metadataService, datasourceService };
   }
 
+  /**
+   * Map a framework-agnostic `HandlerResult` to the right OSD response. The
+   * happy path (or explicit `okStatus`, e.g. 201 for create) emits `res.ok`
+   * with the raw body; anything else routes through `toErrorBody` so the
+   * wire shape stays consistent, and the original status carries through via
+   * `res.customError`. Replaces per-route ternaries that used to flatten
+   * everything to `res.badRequest` / `res.notFound`, which defeated the
+   * status-preserving work in `toHandlerResult`.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function sendResult(res: any, result: { status: number; body: any }, okStatus: number = 200) {
+    if (result.status === okStatus) return res.ok({ body: result.body });
+    return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
+  }
+
   // Mutation routes (create/update/delete monitor + acknowledge alert) live
   // in `./mutations/` — register them via the dedicated registrar so the split
   // stays clean.
@@ -297,9 +312,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
         await getAlertingClient(ctx, req.params.dsId),
         req.params.dsId
       );
-      return result.status === 200
-        ? res.ok({ body: result.body })
-        : res.badRequest({ body: toErrorBody(result.body) });
+      return sendResult(res, result);
     }
   );
 
@@ -316,9 +329,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
         req.params.dsId,
         req.params.monitorId
       );
-      return result.status === 200
-        ? res.ok({ body: result.body })
-        : res.notFound({ body: toErrorBody(result.body) });
+      return sendResult(res, result);
     }
   );
   // OS monitor mutations (POST create, PUT update, DELETE delete) moved to
@@ -337,9 +348,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
         await getAlertingClient(ctx, req.params.dsId),
         req.params.dsId
       );
-      return result.status === 200
-        ? res.ok({ body: result.body })
-        : res.badRequest({ body: toErrorBody(result.body) });
+      return sendResult(res, result);
     }
   );
 
@@ -358,9 +367,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
         await getAlertingClient(ctx, req.params.dsId),
         req.params.dsId
       );
-      return result.status === 200
-        ? res.ok({ body: result.body })
-        : res.badRequest({ body: toErrorBody(result.body) });
+      return sendResult(res, result);
     }
   );
 
@@ -376,9 +383,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
         await getAlertingClient(ctx, req.params.dsId),
         req.params.dsId
       );
-      return result.status === 200
-        ? res.ok({ body: result.body })
-        : res.badRequest({ body: toErrorBody(result.body) });
+      return sendResult(res, result);
     }
   );
 
@@ -398,9 +403,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
         req.params.dsId,
         req.params.ruleId
       );
-      return result.status === 200
-        ? res.ok({ body: result.body })
-        : res.notFound({ body: toErrorBody(result.body) });
+      return sendResult(res, result);
     }
   );
 
@@ -419,9 +422,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
         req.params.dsId,
         req.params.alertId
       );
-      return result.status === 200
-        ? res.ok({ body: result.body })
-        : res.notFound({ body: toErrorBody(result.body) });
+      return sendResult(res, result);
     }
   );
 
@@ -461,6 +462,13 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
         promDs,
         logger
       );
+      // This route intentionally returns a domain envelope
+      // `{ available, code, ... }` on BOTH success and error paths — the UI
+      // treats `code` as the discriminator and `available` as the boolean.
+      // Do NOT funnel error bodies through `toErrorBody` here; that would
+      // collapse the envelope into OSD's `{ message, attributes }` shape and
+      // break the UI's consumer. Do preserve the upstream HTTP status code
+      // so auth failures show as 401/403 rather than masked as 200.
       if (result.status === 200) return res.ok({ body: result.body });
       if (result.status === 401) {
         return res.unauthorized({ body: result.body });

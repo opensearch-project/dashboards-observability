@@ -182,5 +182,32 @@ describe('AlertDetailFlyout', () => {
       const runbookTitle = getByText('Check related runbook');
       expect(runbookTitle.closest('a')).toBeNull();
     });
+
+    it('strips embedded basic-auth credentials from the runbook URL', () => {
+      const alertWithCreds: UnifiedAlertSummary = {
+        ...baseAlert,
+        annotations: {
+          ...baseAlert.annotations,
+          runbook_url: 'https://alice:s3cret@runbooks.example.com/page',
+        },
+      };
+      const { getByText, container } = render(
+        <AlertDetailFlyout
+          alert={alertWithCreds}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      const runbookTitle = getByText('Check related runbook');
+      const anchor = runbookTitle.closest('a');
+      expect(anchor).not.toBeNull();
+      // Credentials must not appear in href or visible text anywhere.
+      const href = anchor?.getAttribute('href') ?? '';
+      expect(href).toBe('https://runbooks.example.com/page');
+      expect(href).not.toMatch(/alice/);
+      expect(href).not.toMatch(/s3cret/);
+      expect(container.textContent ?? '').not.toMatch(/s3cret/);
+    });
   });
 });

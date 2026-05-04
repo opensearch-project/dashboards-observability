@@ -6,7 +6,7 @@
 /**
  * Caching wrapper for Prometheus metadata discovery APIs.
  *
- * Implements stale-while-revalidate:
+ * Implements stale-while-revalidate on top of an in-memory `Map`:
  *  - Serves cached data immediately if available (even if stale)
  *  - Triggers a background refresh when cache entry is past TTL
  *  - On first request (cache miss), waits for the result
@@ -17,13 +17,20 @@
  * All methods resolve the Datasource from DatasourceService, then delegate to the provider.
  * On error: logs warning, returns empty array, never throws.
  *
- * Lifetime: instances are **per-request** (constructed inside the route
- * handler against a per-request scoped SavedObjects client). That intentionally
- * dies with the request to avoid cross-tenant cache leaks — the previous
- * shared-singleton design served cached data primed by another principal
- * without a permission check. A per-request cache still helps within a
- * single handler when multiple methods fetch the same resource, and keeps
- * the API shape intact.
+ * Lifetime & caveats: instances are **per-request** (constructed inside the
+ * route handler against a per-request scoped SavedObjects client). That's
+ * intentional — the prior shared-singleton design served cached data primed
+ * by another principal without a permission check, leaking across tenants.
+ *
+ * The trade-off is that the SWR branch is unreachable in normal production
+ * traffic: each request starts with an empty `this.cache`, so `cachedFetch`
+ * always takes the miss path. The cache only helps within a single handler
+ * when the same `(dsId, args)` is fetched twice. The SWR code remains in
+ * place for two reasons: (1) the unit tests still exercise it, and (2) it's
+ * ready to re-enable once a cross-tenant-safe shared cache is introduced
+ * (keyed on principal, e.g. `(workspace_id, dsId, args)`), which is a
+ * follow-up. If you're reading this because metadata autocomplete feels
+ * slow, that follow-up is where to start.
  */
 
 import type {

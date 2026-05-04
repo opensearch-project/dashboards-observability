@@ -253,16 +253,22 @@ export function escapeHtml(str: string): string {
  * Validate an externally sourced URL (e.g. a runbook URL pulled from an alert
  * annotation) before using it in an `href`. Allows only `http:` and `https:`.
  * Returns `undefined` when the input is missing, unparseable, or uses a
- * disallowed protocol — blocks `javascript:`, `data:`, `file:`, etc.
+ * disallowed protocol — blocks `javascript:`, `data:`, `file:`, etc. Strips
+ * embedded credentials (`http://user:pass@host/...`) before returning so they
+ * never surface in the rendered link or description text.
  */
 export function sanitizeExternalUrl(url: string | undefined): string | undefined {
   if (!url || typeof url !== 'string') return undefined;
   try {
     const parsed = new URL(url);
-    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
-      return parsed.href;
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return undefined;
     }
-    return undefined;
+    // An annotation author could embed basic-auth creds (intentionally or by
+    // mistake). We must not render those in the UI.
+    parsed.username = '';
+    parsed.password = '';
+    return parsed.toString();
   } catch {
     return undefined;
   }

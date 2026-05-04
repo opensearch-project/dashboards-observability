@@ -133,7 +133,11 @@ export function registerAlertingMutationRoutes(
         // OSD schema validates loosely; narrow to the typed domain shape
         (req.body as unknown) as Omit<OSMonitor, 'id'>
       );
-      return res.ok({ body: result.body });
+      // Create success is 201; anything else is an error classified by
+      // `toHandlerResult`. Previously this unconditionally called res.ok,
+      // masking failures as HTTP 200 with an error body.
+      if (result.status === 201) return res.ok({ body: result.body });
+      return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
     }
   );
 
@@ -198,7 +202,8 @@ export function registerAlertingMutationRoutes(
         req.params.monitorId,
         req.body
       );
-      return res.ok({ body: result.body });
+      if (result.status === 200) return res.ok({ body: result.body });
+      return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
     }
   );
 }
