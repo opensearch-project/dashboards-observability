@@ -235,11 +235,8 @@ export function usePrometheusMetadata(
         if (!cancelled) {
           dispatch({ type: 'METADATA_LOADED', metadata: res.metadata });
         }
-      } catch (err) {
-        // Non-critical — metadata is used for type badges only. Log so the
-        // failure is visible in console instead of silently swallowed.
-
-        console.warn('Prometheus metric metadata fetch failed:', err);
+      } catch {
+        // Non-critical — metadata is used for type badges only.
       }
     })();
     return () => {

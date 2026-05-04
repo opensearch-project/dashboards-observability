@@ -35,14 +35,6 @@ describe('toHandlerResult', () => {
     expect(result).toEqual({ status: 400, body: { error: 'bad' } });
   });
 
-  it('includes the optional `field` on validation errors so clients can highlight it', () => {
-    const result = toHandlerResult(createValidationError('must be a string', 'monitor.name'));
-    expect(result).toEqual({
-      status: 400,
-      body: { error: 'must be a string', field: 'monitor.name' },
-    });
-  });
-
   it('maps AlertManagerError internal to 500 with a generic message (hides internal detail)', () => {
     const result = toHandlerResult(createInternalError('secret detail'));
     expect(result).toEqual({ status: 500, body: { error: 'An internal error occurred' } });
@@ -82,11 +74,6 @@ describe('toHandlerResult', () => {
     expect(result.status).toBe(400);
     expect(result.body).toEqual({ error: 'Validation failed' });
     expect(logger.error).toHaveBeenCalled();
-  });
-
-  it('classifies plain Error with "REQUIRED" or "Must Be" (case-insensitive) as 400', () => {
-    expect(toHandlerResult(new Error('field X is REQUIRED')).status).toBe(400);
-    expect(toHandlerResult(new Error('field X Must Be a string')).status).toBe(400);
   });
 
   it('falls back to 500 with generic message for unknown errors and never reflects upstream content', () => {

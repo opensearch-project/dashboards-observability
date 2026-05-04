@@ -71,30 +71,17 @@ export function isAlertManagerError(value: unknown): value is AlertManagerError 
 
 /**
  * Type-guard a thrown value against a specific numeric statusCode. Replaces
- * brittle `String(err).includes('HTTP 404')` patterns with a structural check.
- *
- * Probes three places where upstream plugins commonly surface the real HTTP
- * status code:
- *   1. `err.statusCode`       — opensearch-js `ResponseError` (top-level).
- *   2. `err.meta.statusCode`  — alternate surface on some wrapped errors.
- *   3. `err.body.status`      — DirectQuery / SQL plugin sometimes wraps the
- *                               upstream status inside its own response body.
- *
- * Each check is cheap; falling through all three lets the `is404` and
- * `isStatusCode(e, 401)` call sites keep working even when the originating
- * plugin rewraps the upstream error.
+ * brittle `String(err).includes('HTTP 404')` patterns with a structural check
+ * that works against opensearch-js `ResponseError` (`statusCode` is a getter
+ * that reads `meta.body.status ?? meta.statusCode`) and any other shape
+ * carrying a `statusCode` field.
  */
 export function isStatusCode(value: unknown, statusCode: number): boolean {
-  if (typeof value !== 'object' || value === null) return false;
-  const v = value as {
-    statusCode?: unknown;
-    meta?: { statusCode?: unknown };
-    body?: { status?: unknown };
-  };
-  if (v.statusCode === statusCode) return true;
-  if (v.meta?.statusCode === statusCode) return true;
-  if (v.body?.status === statusCode) return true;
-  return false;
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    (value as { statusCode?: unknown }).statusCode === statusCode
+  );
 }
 
 /**

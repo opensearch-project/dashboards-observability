@@ -19,14 +19,6 @@ import { isStatusCode } from '../../services/alerting';
 import { toHandlerResult } from './route_utils';
 import type { HandlerResult } from './route_utils';
 
-/**
- * Discriminates the body shape of the Alertmanager config route so the UI
- * can distinguish "not configured" from "unauthorized" from a real upstream
- * failure. Before, every failure was reflected as `{ available: false }`
- * with HTTP 200, which masked authz denials as config state.
- */
-type AlertmanagerConfigCode = 'ok' | 'not_configured' | 'unauthorized' | 'upstream_error';
-
 // ============================================================================
 // Alertmanager API v2 Handlers
 // ============================================================================
@@ -208,20 +200,11 @@ export async function handleGetAlertmanagerConfig(
   ds: Datasource,
   logger?: Logger
 ): Promise<HandlerResult> {
-  const codeNotConfigured: AlertmanagerConfigCode = 'not_configured';
-  const codeUnauthorized: AlertmanagerConfigCode = 'unauthorized';
-  const codeUpstreamError: AlertmanagerConfigCode = 'upstream_error';
-  const codeOk: AlertmanagerConfigCode = 'ok';
-
   try {
     if (!promBackend.getAlertmanagerStatus) {
       return {
         status: 200,
-        body: {
-          available: false,
-          code: codeNotConfigured,
-          error: 'Alertmanager not configured',
-        },
+        body: { available: false, error: 'Alertmanager not configured' },
       };
     }
     const status = await promBackend.getAlertmanagerStatus(client, ds);
@@ -260,7 +243,6 @@ export async function handleGetAlertmanagerConfig(
       status: 200,
       body: {
         available: true,
-        code: codeOk,
         cluster: {
           status: status.cluster?.status || 'unknown',
           peers: status.cluster?.peers || [],
@@ -278,25 +260,18 @@ export async function handleGetAlertmanagerConfig(
     // to the browser (may contain cluster URLs / stack fragments / index names).
     if (logger) logger.error(e instanceof Error ? e.message : String(e));
 
-    if (isStatusCode(e, 401) || isStatusCode(e, 403)) {
-      const upstreamStatus = isStatusCode(e, 401) ? 401 : 403;
-      return {
-        status: upstreamStatus,
-        body: {
-          available: false,
-          code: codeUnauthorized,
-          error: upstreamStatus === 401 ? 'Unauthorized' : 'Forbidden',
-        },
-      };
+    // Preserve upstream auth failures as real HTTP 401/403 so the UI can
+    // distinguish "unauthorized" from "not configured". Everything else
+    // becomes a 500 with a generic message.
+    if (isStatusCode(e, 401)) {
+      return { status: 401, body: { available: false, error: 'Unauthorized' } };
     }
-
+    if (isStatusCode(e, 403)) {
+      return { status: 403, body: { available: false, error: 'Forbidden' } };
+    }
     return {
       status: 500,
-      body: {
-        available: false,
-        code: codeUpstreamError,
-        error: 'Failed to fetch Alertmanager config',
-      },
+      body: { available: false, error: 'Failed to fetch Alertmanager config' },
     };
   }
 }

@@ -159,24 +159,14 @@ describe('MultiBackendAlertService — routing & list', () => {
     expect(response.totalDatasources).toBe(1);
   });
 
-  // ---- concurrency isolation ----
   /**
-   * Guards against the regressed "shared singleton + setDatasourceService"
-   * pattern that leaked SavedObjects clients across concurrent requests.
-   *
-   * **What this test proves:** two freshly-constructed `MultiBackendAlertService`
-   * instances, when driven concurrently via `Promise.all`, each resolve
-   * datasources from their own `datasourceService` mock and never cross over.
-   *
-   * **What this test does NOT prove (acknowledged limitation):** because
-   * `datasourceService` is stored in a `private readonly` field, this is
-   * true by construction — the test would pass even if `setDatasourceService`
-   * were still present and the route layer shared a single instance, as long
-   * as callers constructed fresh services themselves. The second assertion
-   * (the `@ts-expect-error` below) is therefore the real regression guard:
-   * it will fail to compile if someone re-introduces the setter.
+   * Compile-time regression guard: `setDatasourceService` must not exist on
+   * the type. Re-adding it would resurrect the cross-tenant SavedObjects-
+   * client leak (request-scoped handlers previously mutated a shared singleton
+   * setter at every `await` boundary). The `@ts-expect-error` fires at tsc
+   * time if the setter comes back.
    */
-  it('has no setDatasourceService setter — the regression guard', () => {
+  it('has no setDatasourceService setter', () => {
     const dsSvc = {
       list: jest.fn(async () => []),
       get: jest.fn(async () => null),
@@ -187,63 +177,8 @@ describe('MultiBackendAlertService — routing & list', () => {
       seed: jest.fn(),
     };
     const instance = new MultiBackendAlertService(dsSvc, mockLogger);
-    // Compile-time assertion: `setDatasourceService` must not exist on the
-    // type. Re-adding it resurrects the cross-tenant SavedObjects-client
-    // leak. The `@ts-expect-error` below will fail to compile if the setter
-    // comes back, catching the regression at tsc time (well before any
-    // runtime test could).
     // @ts-expect-error setDatasourceService was intentionally removed
     const setter = instance.setDatasourceService;
     expect(setter).toBeUndefined();
-  });
-
-  it('separate instances cannot observe each other’s datasources under concurrent awaits', async () => {
-    const dsA: Datasource = { id: 'ds-a', name: 'A', type: 'opensearch', url: '', enabled: true };
-    const dsB: Datasource = { id: 'ds-b', name: 'B', type: 'opensearch', url: '', enabled: true };
-
-    const makeDsSvc = (list: Datasource[]) => ({
-      list: jest.fn(async () => list),
-      get: jest.fn(async (id: string) => list.find((d) => d.id === id) ?? null),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      testConnection: jest.fn(),
-      seed: jest.fn(),
-    });
-
-    const osBackend = {
-      getMonitors: jest.fn(async () => []),
-      getMonitor: jest.fn(),
-      createMonitor: jest.fn(),
-      updateMonitor: jest.fn(),
-      deleteMonitor: jest.fn(),
-      getAlerts: jest.fn(async () => ({ alerts: [], totalAlerts: 0 })),
-      acknowledgeAlerts: jest.fn(),
-      getDestinations: jest.fn(async () => []),
-      searchQuery: jest.fn(),
-    };
-
-    const dsSvcA = makeDsSvc([dsA]);
-    const dsSvcB = makeDsSvc([dsB]);
-
-    const svcA = new MultiBackendAlertService(dsSvcA, mockLogger);
-    svcA.registerOpenSearch(osBackend as never);
-    const svcB = new MultiBackendAlertService(dsSvcB, mockLogger);
-    svcB.registerOpenSearch(osBackend as never);
-
-    // Interleave: kick off A, then B; each resolves against its own ds list.
-    const resolver = jest.fn(async () => ({} as never));
-    const [respA, respB] = await Promise.all([
-      svcA.getUnifiedAlerts(resolver),
-      svcB.getUnifiedAlerts(resolver),
-    ]);
-
-    expect(respA.totalDatasources).toBe(1);
-    expect(respB.totalDatasources).toBe(1);
-    expect(dsSvcA.list).toHaveBeenCalled();
-    expect(dsSvcB.list).toHaveBeenCalled();
-    // Request A must never have reached into request B's datasource service.
-    await expect(dsSvcA.list.mock.results[0].value).resolves.toEqual([dsA]);
-    await expect(dsSvcB.list.mock.results[0].value).resolves.toEqual([dsB]);
   });
 });

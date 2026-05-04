@@ -96,7 +96,6 @@ export function setupRoutes({
       promBackend,
       mutationSvc,
       logger,
-      enableMetadataRoutes: true,
     });
   }
 }

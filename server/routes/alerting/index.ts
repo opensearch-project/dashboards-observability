@@ -75,7 +75,7 @@ export interface AlertingRoutesDeps {
   osBackend: HttpOpenSearchBackend;
   promBackend: DirectQueryPrometheusBackend;
   mutationSvc: MonitorMutationService;
-  logger?: Logger;
+  logger: Logger;
   /**
    * Register the 4 Prometheus metadata routes in addition to the core set.
    * Defaults to true; tests can toggle to cover the reduced registration
@@ -85,13 +85,7 @@ export interface AlertingRoutesDeps {
 }
 
 export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps) {
-  const { osBackend, promBackend, mutationSvc, enableMetadataRoutes = true } = deps;
-  const logger: Logger = deps.logger ?? {
-    info: () => undefined,
-    warn: () => undefined,
-    error: () => undefined,
-    debug: () => undefined,
-  };
+  const { osBackend, promBackend, mutationSvc, logger, enableMetadataRoutes = true } = deps;
   /**
    * Resolve an OpenSearch datasource from the `data-source` saved-object type.
    * Returns `null` for an unknown id. If `requestedDsId` is undefined, returns
@@ -449,7 +443,6 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
         return res.ok({
           body: {
             available: false,
-            code: 'not_configured',
             error: req.query.dsId
               ? `Prometheus datasource "${req.query.dsId}" not found.`
               : 'No Prometheus datasource configured. Add a Prometheus direct-query connection.',
