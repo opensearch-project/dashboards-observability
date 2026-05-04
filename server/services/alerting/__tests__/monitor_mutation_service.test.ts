@@ -4,14 +4,16 @@
  */
 
 /**
- * Tests for `MonitorMutationService` — the service that absorbed the 4
- * OS-Alerting write paths from `HttpOpenSearchBackend` in Phase 5. REST
- * behaviour is identical to the prior backend so these assertions mirror
- * what `opensearch_backend.test.ts` used to cover for mutations.
+ * Tests for `MonitorMutationService` — a thin delegate over
+ * `HttpOpenSearchBackend`. These tests exercise the public write-path
+ * surface by constructing a real `HttpOpenSearchBackend` (no mock) so we
+ * verify end-to-end that delegation preserves behaviour. REST contract
+ * coverage is shared with `opensearch_backend.test.ts`.
  */
 
 import type { AlertingOSClient, Logger, OSMonitor } from '../../../../common/types/alerting';
 import { MonitorMutationService } from '../monitor_mutation_service';
+import { HttpOpenSearchBackend } from '../opensearch_backend';
 import { isAlertManagerError } from '../errors';
 
 const err = (message: string, statusCode: number): Error =>
@@ -63,7 +65,8 @@ const monitorSource = (id: string, name: string) => ({
 });
 
 describe('MonitorMutationService', () => {
-  const svc = new MonitorMutationService(mockLogger);
+  const backend = new HttpOpenSearchBackend(mockLogger);
+  const svc = new MonitorMutationService(backend, mockLogger);
 
   describe('createMonitor', () => {
     it('forces type=monitor on the body and maps the response', async () => {

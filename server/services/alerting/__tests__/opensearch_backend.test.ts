@@ -131,6 +131,27 @@ describe('HttpOpenSearchBackend', () => {
       expect(await backend.getMonitor(client, 'missing')).toBeNull();
     });
 
+    it('URL-encodes the monitorId before interpolating into the path', async () => {
+      // Defense-in-depth: route-layer `alertingIdSchema` already restricts
+      // the character set, but if the schema is bypassed (e.g., direct
+      // service call from another plugin), the transport must still escape
+      // URL-unsafe characters so nothing crosses path boundaries.
+      const { client, request } = makeClient([
+        {
+          body: {
+            _id: 'foo',
+            monitor: monitorHit('foo', 'A')._source,
+          },
+        },
+      ]);
+      await backend.getMonitor(client, 'foo/bar');
+      expect(request).toHaveBeenCalledWith({
+        method: 'GET',
+        path: '/_plugins/_alerting/monitors/foo%2Fbar',
+        body: undefined,
+      });
+    });
+
     it('rethrows non-404 errors', async () => {
       const err = Object.assign(new Error('server error'), { statusCode: 500 });
       const { client } = makeClient([err]);

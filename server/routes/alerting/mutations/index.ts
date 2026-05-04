@@ -23,6 +23,7 @@ import { IRouter, RequestHandlerContext } from '../../../../../../src/core/serve
 import type { AlertingOSClient, OSMonitor } from '../../../../common/types/alerting';
 import { MonitorMutationService } from '../../../services/alerting/monitor_mutation_service';
 import { toErrorBody } from '../route_utils';
+import { alertingIdSchema } from '../schema_helpers';
 import {
   handleCreateOSMonitor,
   handleUpdateOSMonitor,
@@ -124,7 +125,7 @@ export function registerAlertingMutationRoutes(
   router.post(
     {
       path: '/api/alerting/opensearch/{dsId}/monitors',
-      validate: { params: schema.object({ dsId: schema.string() }), body: monitorBodySchema },
+      validate: { params: schema.object({ dsId: alertingIdSchema }), body: monitorBodySchema },
     },
     async (ctx, req, res) => {
       const result = await handleCreateOSMonitor(
@@ -146,7 +147,7 @@ export function registerAlertingMutationRoutes(
     {
       path: '/api/alerting/opensearch/{dsId}/monitors/{monitorId}',
       validate: {
-        params: schema.object({ dsId: schema.string(), monitorId: schema.string() }),
+        params: schema.object({ dsId: alertingIdSchema, monitorId: alertingIdSchema }),
         body: monitorBodySchema,
       },
     },
@@ -171,7 +172,7 @@ export function registerAlertingMutationRoutes(
   router.delete(
     {
       path: '/api/alerting/opensearch/{dsId}/monitors/{monitorId}',
-      validate: { params: schema.object({ dsId: schema.string(), monitorId: schema.string() }) },
+      validate: { params: schema.object({ dsId: alertingIdSchema, monitorId: alertingIdSchema }) },
     },
     async (ctx, req, res) => {
       try {
@@ -191,7 +192,7 @@ export function registerAlertingMutationRoutes(
     {
       path: '/api/alerting/opensearch/{dsId}/monitors/{monitorId}/acknowledge',
       validate: {
-        params: schema.object({ dsId: schema.string(), monitorId: schema.string() }),
+        params: schema.object({ dsId: alertingIdSchema, monitorId: alertingIdSchema }),
         body: schema.object({ alerts: schema.arrayOf(schema.string(), { maxSize: 1000 }) }),
       },
     },

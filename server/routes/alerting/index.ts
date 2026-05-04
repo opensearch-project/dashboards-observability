@@ -28,6 +28,7 @@ import { DirectQueryPrometheusBackend } from '../../services/alerting/directquer
 import { MonitorMutationService } from '../../services/alerting/monitor_mutation_service';
 import { registerAlertingMutationRoutes } from './mutations';
 import { toErrorBody } from './route_utils';
+import { alertingIdSchema, prometheusLabelNameSchema } from './schema_helpers';
 
 /**
  * Shape of the OSD request-handler context we rely on. `dataSource` is
@@ -297,7 +298,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
   router.get(
     {
       path: '/api/alerting/opensearch/{dsId}/monitors',
-      validate: { params: schema.object({ dsId: schema.string() }) },
+      validate: { params: schema.object({ dsId: alertingIdSchema }) },
     },
     async (ctx, req, res) => {
       const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
@@ -313,7 +314,9 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
   router.get(
     {
       path: '/api/alerting/opensearch/{dsId}/monitors/{monitorId}',
-      validate: { params: schema.object({ dsId: schema.string(), monitorId: schema.string() }) },
+      validate: {
+        params: schema.object({ dsId: alertingIdSchema, monitorId: alertingIdSchema }),
+      },
     },
     async (ctx, req, res) => {
       const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
@@ -333,7 +336,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
   router.get(
     {
       path: '/api/alerting/opensearch/{dsId}/alerts',
-      validate: { params: schema.object({ dsId: schema.string() }) },
+      validate: { params: schema.object({ dsId: alertingIdSchema }) },
     },
     async (ctx, req, res) => {
       const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
@@ -352,7 +355,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
   router.get(
     {
       path: '/api/alerting/prometheus/{dsId}/rules',
-      validate: { params: schema.object({ dsId: schema.string() }) },
+      validate: { params: schema.object({ dsId: alertingIdSchema }) },
     },
     async (ctx, req, res) => {
       const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
@@ -368,7 +371,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
   router.get(
     {
       path: '/api/alerting/prometheus/{dsId}/alerts',
-      validate: { params: schema.object({ dsId: schema.string() }) },
+      validate: { params: schema.object({ dsId: alertingIdSchema }) },
     },
     async (ctx, req, res) => {
       const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
@@ -386,7 +389,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     {
       path: '/api/alerting/rules/{dsId}/{ruleId}',
       validate: {
-        params: schema.object({ dsId: schema.string(), ruleId: schema.string() }),
+        params: schema.object({ dsId: alertingIdSchema, ruleId: alertingIdSchema }),
       },
     },
     async (ctx, req, res) => {
@@ -405,7 +408,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     {
       path: '/api/alerting/alerts/{dsId}/{alertId}',
       validate: {
-        params: schema.object({ dsId: schema.string(), alertId: schema.string() }),
+        params: schema.object({ dsId: alertingIdSchema, alertId: alertingIdSchema }),
       },
     },
     async (ctx, req, res) => {
@@ -427,7 +430,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
   router.get(
     {
       path: '/api/alerting/alertmanager/config',
-      validate: { query: schema.object({ dsId: schema.maybe(schema.string()) }) },
+      validate: { query: schema.object({ dsId: schema.maybe(alertingIdSchema) }) },
     },
     async (ctx, req, res) => {
       // Alertmanager is reached through a Prometheus datasource. Use the
@@ -482,7 +485,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
       {
         path: '/api/alerting/prometheus/{dsId}/metadata/metrics',
         validate: {
-          params: schema.object({ dsId: schema.string() }),
+          params: schema.object({ dsId: alertingIdSchema }),
           query: schema.object({ search: schema.maybe(schema.string()) }),
         },
       },
@@ -503,7 +506,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
       {
         path: '/api/alerting/prometheus/{dsId}/metadata/labels',
         validate: {
-          params: schema.object({ dsId: schema.string() }),
+          params: schema.object({ dsId: alertingIdSchema }),
           query: schema.object({ metric: schema.maybe(schema.string()) }),
         },
       },
@@ -524,7 +527,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
       {
         path: '/api/alerting/prometheus/{dsId}/metadata/label-values/{label}',
         validate: {
-          params: schema.object({ dsId: schema.string(), label: schema.string() }),
+          params: schema.object({ dsId: alertingIdSchema, label: prometheusLabelNameSchema }),
           query: schema.object({ selector: schema.maybe(schema.string()) }),
         },
       },
@@ -546,7 +549,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
       {
         path: '/api/alerting/prometheus/{dsId}/metadata/metric-metadata',
         validate: {
-          params: schema.object({ dsId: schema.string() }),
+          params: schema.object({ dsId: alertingIdSchema }),
         },
       },
       async (ctx, req, res) => {

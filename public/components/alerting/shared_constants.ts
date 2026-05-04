@@ -239,6 +239,28 @@ export function formatLatency(seconds: number): string {
 /**
  * Escape HTML special characters to prevent XSS in ECharts tooltip formatters
  * and other contexts where user-supplied strings are rendered as HTML.
+ *
+ * **Required in ECharts tooltip `formatter` callbacks** whenever the returned
+ * HTML string interpolates any of:
+ *   - series `name` values
+ *   - x-axis / category labels
+ *   - datapoint `name` fields
+ *   - any string that originated from the backend (alert names, label values,
+ *     annotation text, datasource names).
+ *
+ * Currently safe (code-generated strings only, no interpolation needed):
+ *   - `alerts_charts.tsx` — tooltip uses default formatter; axis labels are
+ *     time strings from `new Date(...).toLocaleTimeString()`.
+ *   - `create_metrics_monitor.tsx`, `create_logs_monitor_constants.ts` — all
+ *     tooltip data is mock preview data, thresholds are numbers.
+ *
+ * Used by:
+ *   - `monitor_detail_flyout.tsx` — formatter interpolates `axisValue` (a
+ *     timestamp) and `value` (numeric), both escaped as defense-in-depth.
+ *
+ * If you add a custom `formatter` that includes user-sourced strings, wrap
+ * each interpolation with `escapeHtml` — e.g. `${escapeHtml(name)}` — since
+ * ECharts renders the return value as raw HTML.
  */
 export function escapeHtml(str: string): string {
   return str

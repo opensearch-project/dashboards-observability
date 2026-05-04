@@ -89,7 +89,9 @@ export function setupRoutes({
     // client never bleeds across concurrent requests.
     const osBackend = new HttpOpenSearchBackend(logger);
     const promBackend = new DirectQueryPrometheusBackend(logger);
-    const mutationSvc = new MonitorMutationService(logger);
+    // MonitorMutationService delegates to HttpOpenSearchBackend — shared
+    // stateless backend + thin write-path wrapper.
+    const mutationSvc = new MonitorMutationService(osBackend, logger);
 
     registerAlertingRoutes(router, {
       osBackend,
