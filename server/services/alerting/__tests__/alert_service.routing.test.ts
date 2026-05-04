@@ -163,11 +163,40 @@ describe('MultiBackendAlertService — routing & list', () => {
   /**
    * Guards against the regressed "shared singleton + setDatasourceService"
    * pattern that leaked SavedObjects clients across concurrent requests.
-   * The service no longer exposes a setter — the datasourceService is set
-   * exclusively via the constructor, so two concurrently-constructed
-   * instances cannot see each other's datasources even when their handlers
-   * yield at the same `await` boundary.
+   *
+   * **What this test proves:** two freshly-constructed `MultiBackendAlertService`
+   * instances, when driven concurrently via `Promise.all`, each resolve
+   * datasources from their own `datasourceService` mock and never cross over.
+   *
+   * **What this test does NOT prove (acknowledged limitation):** because
+   * `datasourceService` is stored in a `private readonly` field, this is
+   * true by construction — the test would pass even if `setDatasourceService`
+   * were still present and the route layer shared a single instance, as long
+   * as callers constructed fresh services themselves. The second assertion
+   * (the `@ts-expect-error` below) is therefore the real regression guard:
+   * it will fail to compile if someone re-introduces the setter.
    */
+  it('has no setDatasourceService setter — the regression guard', () => {
+    const dsSvc = {
+      list: jest.fn(async () => []),
+      get: jest.fn(async () => null),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      testConnection: jest.fn(),
+      seed: jest.fn(),
+    };
+    const instance = new MultiBackendAlertService(dsSvc, mockLogger);
+    // Compile-time assertion: `setDatasourceService` must not exist on the
+    // type. Re-adding it resurrects the cross-tenant SavedObjects-client
+    // leak. The `@ts-expect-error` below will fail to compile if the setter
+    // comes back, catching the regression at tsc time (well before any
+    // runtime test could).
+    // @ts-expect-error setDatasourceService was intentionally removed
+    const setter = instance.setDatasourceService;
+    expect(setter).toBeUndefined();
+  });
+
   it('separate instances cannot observe each other’s datasources under concurrent awaits', async () => {
     const dsA: Datasource = { id: 'ds-a', name: 'A', type: 'opensearch', url: '', enabled: true };
     const dsB: Datasource = { id: 'ds-b', name: 'B', type: 'opensearch', url: '', enabled: true };

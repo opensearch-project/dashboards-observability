@@ -29,6 +29,11 @@ import { Home as TraceAnalyticsHome } from './trace_analytics/home';
 import { Home as GettingStartedHome } from './getting_started/home';
 import { Home as OverviewHome } from './overview/home';
 import { Services as ApmServices, ApmServicesProps } from './apm/services';
+import {
+  ApplicationMapPage as ApmApplicationMap,
+  ApplicationMapPageProps as ApmApplicationMapProps,
+} from './apm/pages/application_map';
+import { ApmConfigProvider } from './apm/config/apm_config_context';
 
 // Lazy-load AlertingHome so the Alert Manager bundle is only fetched when the
 // feature flag is on and the user actually navigates to that app. The app
@@ -38,11 +43,6 @@ import { Services as ApmServices, ApmServicesProps } from './apm/services';
 const AlertingHome = React.lazy(() =>
   import('./alerting/home').then((module) => ({ default: module.AlertingHome }))
 );
-import {
-  ApplicationMapPage as ApmApplicationMap,
-  ApplicationMapPageProps as ApmApplicationMapProps,
-} from './apm/pages/application_map';
-import { ApmConfigProvider } from './apm/config/apm_config_context';
 
 interface ObservabilityAppDeps {
   CoreStartProp: CoreStart;

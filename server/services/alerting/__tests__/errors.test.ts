@@ -56,6 +56,14 @@ describe('errors', () => {
       expect(isStatusCode(Object.assign(new Error('boom'), { statusCode: 409 }), 409)).toBe(true);
     });
 
+    it('falls back to meta.statusCode', () => {
+      expect(isStatusCode({ meta: { statusCode: 403 } }, 403)).toBe(true);
+    });
+
+    it('falls back to body.status (DirectQuery-wrapped upstream error)', () => {
+      expect(isStatusCode({ body: { status: 401 } }, 401)).toBe(true);
+    });
+
     it('returns false for non-matching or missing statusCode', () => {
       expect(isStatusCode({ statusCode: 500 }, 404)).toBe(false);
       expect(isStatusCode(new Error('HTTP 404 not found'), 404)).toBe(false);

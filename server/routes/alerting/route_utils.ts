@@ -24,8 +24,13 @@ export interface HandlerResult {
 export function toHandlerResult(e: unknown, logger?: Logger): HandlerResult {
   if (isAlertManagerError(e)) {
     if (logger) logger.error(e.message);
-    const body =
-      e.kind === 'internal' ? { error: 'An internal error occurred' } : { error: e.message };
+    if (e.kind === 'internal') {
+      return { status: 500, body: { error: 'An internal error occurred' } };
+    }
+    // Typed errors carry intentionally-UI-safe messages. Surface the optional
+    // `field` on validation errors so clients can do per-field highlights.
+    const body: Record<string, unknown> = { error: e.message };
+    if (e.kind === 'validation' && e.field) body.field = e.field;
     return { status: errorToStatus(e), body };
   }
   // Guard against null/undefined being thrown — String(null) → "null" is unhelpful
@@ -35,13 +40,14 @@ export function toHandlerResult(e: unknown, logger?: Logger): HandlerResult {
   }
   const msg = e instanceof Error ? e.message : String(e);
   if (logger) logger.error(msg);
-  if (msg.toLowerCase().includes('not found')) {
+  const lowerMsg = msg.toLowerCase();
+  if (lowerMsg.includes('not found')) {
     return { status: 404, body: { error: 'Resource not found' } };
   }
   if (
-    msg.toLowerCase().includes('validation') ||
-    msg.includes('required') ||
-    msg.includes('must be')
+    lowerMsg.includes('validation') ||
+    lowerMsg.includes('required') ||
+    lowerMsg.includes('must be')
   ) {
     return { status: 400, body: { error: 'Validation failed' } };
   }
