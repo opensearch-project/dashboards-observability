@@ -50,6 +50,7 @@ import { GenerateReportLoadingModal } from './helpers/custom_modals/reporting_lo
 import { defaultParagraphParser } from './helpers/default_parser';
 import { DeleteNotebookModal, getCustomModal, getDeleteModal } from './helpers/modal_containers';
 import { isValidUUID } from './helpers/notebooks_parser';
+import { ParagraphErrorBoundary } from './helpers/paragraph_error_boundary';
 import {
   contextMenuCreateReportDefinition,
   contextMenuViewReports,
@@ -877,7 +878,24 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     });
   }
 
+  // EuiDataGridCell (bundled in osd-ui-shared-deps) has a ResizeObserver
+  // callback that reads cellRef.current.getBoundingClientRect() without a null
+  // guard. When React unmounts the cell (e.g., on "Clear all outputs" or
+  // reloading a notebook with a data grid) the queued observer fires on a
+  // nulled ref and throws. We can't patch the library bundle from here, so we
+  // filter this exact error at the window level while the Notebook is mounted.
+  windowErrorHandler = (event: ErrorEvent) => {
+    if (
+      event.error instanceof TypeError &&
+      event.error.message?.includes("reading 'getBoundingClientRect'")
+    ) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  };
+
   componentDidMount() {
+    window.addEventListener('error', this.windowErrorHandler);
     this.setBreadcrumbs('');
     this.loadNotebook();
     this.checkIfReportingPluginIsInstalled();
@@ -891,6 +909,10 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
     } else if (view === 'input_only') {
       this.setState({ selectedViewId: 'input_only' });
     }
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('error', this.windowErrorHandler);
   }
 
   render() {
@@ -1309,40 +1331,42 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
                     key={`para_div_${para.uniqueId}`}
                     style={panelStyles}
                   >
-                    <Paragraphs
-                      ref={this.state.parsedPara[index].paraRef}
-                      pplService={this.props.pplService}
-                      para={para}
-                      setPara={(pr: ParaType) => this.setPara(pr, index)}
-                      dateModified={this.state.paragraphs[index]?.dateModified}
-                      index={index}
-                      paraCount={this.state.parsedPara.length}
-                      paragraphSelector={this.paragraphSelector}
-                      textValueEditor={this.textValueEditor}
-                      handleKeyPress={this.handleKeyPress}
-                      addPara={this.addPara}
-                      DashboardContainerByValueRenderer={
-                        this.props.DashboardContainerByValueRenderer
-                      }
-                      deleteVizualization={this.deleteVizualization}
-                      http={this.props.http}
-                      selectedViewId={this.state.selectedViewId}
-                      setSelectedViewId={this.updateView}
-                      deletePara={this.showDeleteParaModal}
-                      runPara={this.updateRunParagraph}
-                      clonePara={this.cloneParaButton}
-                      movePara={this.movePara}
-                      showQueryParagraphError={this.state.showQueryParagraphError}
-                      queryParagraphErrorMessage={this.state.queryParagraphErrorMessage}
-                      dataSourceManagement={this.props.dataSourceManagement}
-                      setActionMenu={this.props.setActionMenu}
-                      notifications={this.props.notifications}
-                      dataSourceEnabled={this.state.dataSourceMDSEnabled}
-                      savedObjectsMDSClient={this.props.savedObjectsMDSClient}
-                      handleSelectedDataSourceChange={this.handleSelectedDataSourceChange}
-                      paradataSourceMDSId={this.state.parsedPara[index].dataSourceMDSId}
-                      dataSourceMDSLabel={this.state.parsedPara[index].dataSourceMDSLabel}
-                    />
+                    <ParagraphErrorBoundary>
+                      <Paragraphs
+                        ref={this.state.parsedPara[index].paraRef}
+                        pplService={this.props.pplService}
+                        para={para}
+                        setPara={(pr: ParaType) => this.setPara(pr, index)}
+                        dateModified={this.state.paragraphs[index]?.dateModified}
+                        index={index}
+                        paraCount={this.state.parsedPara.length}
+                        paragraphSelector={this.paragraphSelector}
+                        textValueEditor={this.textValueEditor}
+                        handleKeyPress={this.handleKeyPress}
+                        addPara={this.addPara}
+                        DashboardContainerByValueRenderer={
+                          this.props.DashboardContainerByValueRenderer
+                        }
+                        deleteVizualization={this.deleteVizualization}
+                        http={this.props.http}
+                        selectedViewId={this.state.selectedViewId}
+                        setSelectedViewId={this.updateView}
+                        deletePara={this.showDeleteParaModal}
+                        runPara={this.updateRunParagraph}
+                        clonePara={this.cloneParaButton}
+                        movePara={this.movePara}
+                        showQueryParagraphError={this.state.showQueryParagraphError}
+                        queryParagraphErrorMessage={this.state.queryParagraphErrorMessage}
+                        dataSourceManagement={this.props.dataSourceManagement}
+                        setActionMenu={this.props.setActionMenu}
+                        notifications={this.props.notifications}
+                        dataSourceEnabled={this.state.dataSourceMDSEnabled}
+                        savedObjectsMDSClient={this.props.savedObjectsMDSClient}
+                        handleSelectedDataSourceChange={this.handleSelectedDataSourceChange}
+                        paradataSourceMDSId={this.state.parsedPara[index].dataSourceMDSId}
+                        dataSourceMDSLabel={this.state.parsedPara[index].dataSourceMDSLabel}
+                      />
+                    </ParagraphErrorBoundary>
                   </div>
                 ))}
                 {this.state.selectedViewId !== 'output_only' && this.state.savedObjectNotebook && (
