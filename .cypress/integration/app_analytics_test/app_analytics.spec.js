@@ -377,18 +377,29 @@ describe('Viewing application', () => {
   it('Opens trace detail flyout when Trace Id is clicked', () => {
     cy.get('[data-test-subj="app-analytics-traceTab"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('[title="03f9c770db5ee2f1caac0afc36db49ba"]').click();
-    cy.get('[data-test-subj="traceDetailFlyoutTitle"]').should('be.visible');
+    // Wait for the traces table to finish loading so the EuiLink onClick handler is attached.
+    cy.get('[data-test-subj="trace-link"]', { timeout: timeoutDelay })
+      .contains('03f9c770db5ee2f1caac0afc36db49ba')
+      .should('be.visible')
+      .click();
+    cy.get('[data-test-subj="traceDetailFlyoutTitle"]', { timeout: timeoutDelay }).should(
+      'be.visible'
+    );
     cy.get('[data-test-subj="traceDetailFlyout"]').within(($flyout) => {
       cy.get('[data-test-subj="LatencyDescriptionList"]').should('contain', '225.00');
     });
     cy.get('[data-test-subj="euiFlyoutCloseButton"]').click();
     cy.get('[data-test-subj="traceDetailFlyout"]').should('not.exist');
     cy.get('[data-test-subj="superDatePickerShowDatesButton"]').click(); //added to replace wait
-    cy.get('[title="03f9c770db5ee2f1caac0afc36db49ba"]').click();
-    cy.get('.panel-title-count').contains('(11)').should('exist');
+    cy.get('[data-test-subj="trace-link"]', { timeout: timeoutDelay })
+      .contains('03f9c770db5ee2f1caac0afc36db49ba')
+      .should('be.visible')
+      .click();
+    cy.get('.panel-title-count', { timeout: timeoutDelay }).contains('(11)').should('exist');
     cy.get('[data-text="Span list"]').click();
-    cy.get('[data-test-subj="dataGridRowCell"]').contains('d67c5bb617ba9203').should('exist');
+    cy.get('[data-test-subj="dataGridRowCell"]', { timeout: timeoutDelay })
+      .contains('d67c5bb617ba9203')
+      .should('exist');
     cy.get('[data-test-subj="dataGridRowCell"]').contains('d67c5bb617ba9203').click();
     cy.get('[data-test-subj="spanDetailFlyout"]').should('be.visible');
     cy.get('[data-test-subj="euiFlyoutCloseButton"]').click();
@@ -398,10 +409,18 @@ describe('Viewing application', () => {
   it('Opens span detail flyout when Span ID is clicked', () => {
     cy.get('[data-test-subj="app-analytics-traceTab"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('input[type="search"]').click().type(`5ff3516909562c60`);
+    // Wait for the spans table to render before filtering so the debounced query
+    // update triggers a refetch against a mounted grid.
+    cy.get('[data-test-subj="dataGridRowCell"]', { timeout: timeoutDelay }).should('exist');
+    cy.get('[data-test-subj="search-bar-input-box"]').click().type(`5ff3516909562c60`);
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('[data-test-subj="dataGridRowCell"]').contains('5ff3516909562c60').click();
-    cy.get('[data-test-subj="spanDetailFlyout"]').should('be.visible');
+    // The query update is debounced (~50ms) and then triggers an async span fetch,
+    // so the target row is not present immediately — retry with an extended timeout.
+    cy.get('[data-test-subj="dataGridRowCell"]', { timeout: timeoutDelay })
+      .contains('5ff3516909562c60')
+      .should('be.visible')
+      .click();
+    cy.get('[data-test-subj="spanDetailFlyout"]', { timeout: timeoutDelay }).should('be.visible');
     cy.get('[data-test-subj="spanDetailFlyout"]').within(($flyout) => {
       cy.get('[data-test-subj="OperationDescriptionList"]').should('contain', 'HTTP GET');
     });
