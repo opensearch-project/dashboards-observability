@@ -252,63 +252,76 @@ export const VisualizationContainer = ({
   };
 
   const loadVisaulization = async () => {
-    const visualization = await fetchVisualization();
-    setVisualizationMetaData(visualization);
+    try {
+      const visualization = await fetchVisualization();
+      setVisualizationMetaData(visualization);
 
-    if (!visualization && !savedVisualizationId) return;
+      if (!visualization && !savedVisualizationId) {
+        setIsLoading(false);
+        return;
+      }
 
-    if (visualization.metricType === OTEL_METRIC_SUBTYPE)
-      await renderOpenTelemetryVisualization({
-        visualization,
-        startTime: fromTime,
-        endTime: toTime,
-        setVisualizationTitle,
-        setVisualizationType,
-        setVisualizationData,
-        setVisualizationMetaData,
-        setIsLoading,
-        setIsError,
-        setToast,
-        dataSourceMDSId,
-      });
-    else if (visualization.metricType === PROMQL_METRIC_SUBTYPE)
-      renderCatalogVisualization({
-        visualization,
-        pplService,
-        catalogSource: visualizationId,
-        startTime: fromTime,
-        endTime: toTime,
-        span,
-        resolution,
-        filterQuery: pplFilterValue,
-        setVisualizationTitle,
-        setVisualizationType,
-        setVisualizationData,
-        setVisualizationMetaData,
-        setIsLoading,
-        setIsError,
-        queryMetaData,
-        dataSourceMDSId,
-      });
-    else
-      await renderSavedVisualization({
-        visualization,
-        http,
-        pplService,
-        savedVisualizationId,
-        startTime: fromTime,
-        endTime: toTime,
-        filterQuery: pplFilterValue,
-        span,
-        resolution,
-        setVisualizationTitle,
-        setVisualizationType,
-        setVisualizationData,
-        setVisualizationMetaData,
-        setIsLoading,
-        setIsError,
-        dataSourceMDSId,
-      });
+      if (isEmpty(visualization)) {
+        setIsLoading(false);
+        return;
+      }
+
+      if (visualization.metricType === OTEL_METRIC_SUBTYPE)
+        await renderOpenTelemetryVisualization({
+          visualization,
+          startTime: fromTime,
+          endTime: toTime,
+          setVisualizationTitle,
+          setVisualizationType,
+          setVisualizationData,
+          setVisualizationMetaData,
+          setIsLoading,
+          setIsError,
+          setToast,
+          dataSourceMDSId,
+        });
+      else if (visualization.metricType === PROMQL_METRIC_SUBTYPE)
+        await renderCatalogVisualization({
+          visualization,
+          pplService,
+          catalogSource: visualizationId,
+          startTime: fromTime,
+          endTime: toTime,
+          span,
+          resolution,
+          filterQuery: pplFilterValue,
+          setVisualizationTitle,
+          setVisualizationType,
+          setVisualizationData,
+          setVisualizationMetaData,
+          setIsLoading,
+          setIsError,
+          queryMetaData,
+          dataSourceMDSId,
+        });
+      else
+        await renderSavedVisualization({
+          visualization,
+          http,
+          pplService,
+          savedVisualizationId,
+          startTime: fromTime,
+          endTime: toTime,
+          filterQuery: pplFilterValue,
+          span,
+          resolution,
+          setVisualizationTitle,
+          setVisualizationType,
+          setVisualizationData,
+          setVisualizationMetaData,
+          setIsLoading,
+          setIsError,
+          dataSourceMDSId,
+        });
+    } catch (error) {
+      setIsError({ errorMessage: error?.message ?? 'Failed to load visualization' });
+      setIsLoading(false);
+    }
   };
 
   const memoisedVisualizationBox = useMemo(

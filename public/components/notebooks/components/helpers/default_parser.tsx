@@ -19,7 +19,7 @@ const parseOutput = (paraObject: any) => {
       outputType,
       outputData: result,
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       outputType: [],
       outputData: [],
@@ -44,36 +44,35 @@ const parseInputType = (paraObject: any) => {
 // Get the visualization by type of paragraph
 // Param: Default Backend Paragraph
 const parseVisualization = (paraObject: any) => {
-  try {
-    if (paraObject.input.inputType.includes('VISUALIZATION')) {
-      const vizContent = paraObject.input.inputText;
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - 30);
-      let visStartTime = startDate.toISOString();
-      let visEndTime = new Date().toISOString();
-      let visSavedObjId = '';
-      if (vizContent !== '') {
-        const { panels, timeRange } = JSON.parse(vizContent);
-        visStartTime = timeRange.from;
-        visEndTime = timeRange.to;
-        visSavedObjId = panels['1'].explicitInput.savedObjectId;
-      }
-      return {
-        isViz: true,
-        VizObject: vizContent,
-        visStartTime,
-        visEndTime,
-        visSavedObjId,
-      };
-    } else {
-      return {
-        isViz: false,
-        VizObject: '',
-      };
-    }
-  } catch (error) {
-    throw new Error('Parsing Input Issue ' + error);
+  if (!paraObject.input.inputType.includes('VISUALIZATION')) {
+    return {
+      isViz: false,
+      VizObject: '',
+    };
   }
+  const vizContent = paraObject.input.inputText;
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - 30);
+  let visStartTime = startDate.toISOString();
+  let visEndTime = new Date().toISOString();
+  let visSavedObjId = '';
+  if (vizContent !== '') {
+    try {
+      const { panels, timeRange } = JSON.parse(vizContent);
+      visStartTime = timeRange?.from ?? visStartTime;
+      visEndTime = timeRange?.to ?? visEndTime;
+      visSavedObjId = panels?.['1']?.explicitInput?.savedObjectId ?? '';
+    } catch (error) {
+      console.error('Failed to parse visualization paragraph content', error);
+    }
+  }
+  return {
+    isViz: true,
+    VizObject: vizContent,
+    visStartTime,
+    visEndTime,
+    visSavedObjId,
+  };
 };
 
 // Placeholder for default parser

@@ -63,6 +63,10 @@ const panelStyles: CSS.Properties = {
   marginTop: '10px',
 };
 
+interface QueryErrorResult {
+  error?: { reason?: string };
+}
+
 /*
  * "Notebook" component is used to display an open notebook
  *
@@ -175,7 +179,7 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
         para.paraDivRef = React.createRef<HTMLDivElement>();
       });
       return parsedPara;
-    } catch (err) {
+    } catch (_err) {
       this.props.setToast(
         'Error parsing paragraphs, please make sure you have the correct permission.',
         'danger'
@@ -602,7 +606,12 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       .then(async (res) => {
         if (res.output[0]?.outputType === 'QUERY') {
           await this.loadQueryResultsFromInput(res, this.state.dataSourceMDSId);
-          const checkErrorJSON = JSON.parse(res.output[0].result);
+          let checkErrorJSON: QueryErrorResult = {};
+          try {
+            checkErrorJSON = JSON.parse(res.output[0].result) as QueryErrorResult;
+          } catch {
+            checkErrorJSON = {};
+          }
           if (this.checkQueryOutputError(checkErrorJSON)) {
             // Clear flags even on query error - use functional setState to avoid race conditions
             this.setState((prevState) => {
@@ -667,12 +676,12 @@ export class Notebook extends Component<NotebookProps, NotebookState> {
       });
   };
 
-  checkQueryOutputError = (checkErrorJSON: JSON) => {
+  checkQueryOutputError = (checkErrorJSON: QueryErrorResult) => {
     // if query output has error output
-    if (checkErrorJSON.hasOwnProperty('error')) {
+    if (checkErrorJSON.error) {
       this.setState({
         showQueryParagraphError: true,
-        queryParagraphErrorMessage: checkErrorJSON.error.reason,
+        queryParagraphErrorMessage: checkErrorJSON.error.reason ?? '',
       });
       return true;
     }

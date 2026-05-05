@@ -240,7 +240,13 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
 
   useEffect(() => {
     if (para.isVizualisation) {
-      if (para.visSavedObjId !== '') setVisInput(JSON.parse(para.vizObjectInput));
+      if (para.visSavedObjId !== '' && para.vizObjectInput) {
+        try {
+          setVisInput(JSON.parse(para.vizObjectInput));
+        } catch (e) {
+          console.error('Failed to parse visualization paragraph input', e);
+        }
+      }
       fetchVisualizations();
     }
   }, [dataSourceMDSId]);

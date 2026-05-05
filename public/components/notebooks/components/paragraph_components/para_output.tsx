@@ -19,6 +19,12 @@ import { VisualizationContainer } from '../../../../components/custom_panels/pan
 import PPLService from '../../../../services/requests/ppl';
 import { QueryDataGridMemo } from './para_query_grid';
 
+interface QueryOutput {
+  schema?: Array<{ name: string; type: string }>;
+  datarows?: unknown[][];
+  error?: unknown;
+}
+
 const createQueryColumns = (jsonColumns: any[]) => {
   let index = 0;
   const datagridColumns = [];
@@ -79,26 +85,28 @@ const OutputBody = ({
     switch (typeOut) {
       case 'QUERY':
         const inputQuery = para.inp.substring(4, para.inp.length);
-        const queryObject = JSON.parse(val);
-        if (queryObject.hasOwnProperty('error')) {
+        let queryObject: QueryOutput;
+        try {
+          queryObject = JSON.parse(val) as QueryOutput;
+        } catch {
           return <EuiCodeBlock>{val}</EuiCodeBlock>;
-        } else {
-          const columns = createQueryColumns(queryObject.schema);
-          const data = getQueryOutputData(queryObject);
-          return (
-            <div>
-              <EuiText className="wrapAll" data-test-subj="queryOutputText">
-                <b>{inputQuery}</b>
-              </EuiText>
-              <EuiSpacer />
-              <QueryDataGridMemo
-                rowCount={queryObject.datarows.length}
-                queryColumns={columns}
-                dataValues={data}
-              />
-            </div>
-          );
         }
+        if (queryObject.error || !queryObject.schema || !queryObject.datarows) {
+          return <EuiCodeBlock>{val}</EuiCodeBlock>;
+        }
+        return (
+          <div>
+            <EuiText className="wrapAll" data-test-subj="queryOutputText">
+              <b>{inputQuery}</b>
+            </EuiText>
+            <EuiSpacer />
+            <QueryDataGridMemo
+              rowCount={queryObject.datarows.length}
+              queryColumns={createQueryColumns(queryObject.schema)}
+              dataValues={getQueryOutputData(queryObject)}
+            />
+          </div>
+        );
       case 'MARKDOWN':
         return (
           <EuiText
@@ -112,8 +120,8 @@ const OutputBody = ({
       case 'VISUALIZATION':
         let from = moment(visInput?.timeRange?.from).format(dateFormat);
         let to = moment(visInput?.timeRange?.to).format(dateFormat);
-        from = from === 'Invalid date' ? visInput.timeRange.from : from;
-        to = to === 'Invalid date' ? visInput.timeRange.to : to;
+        from = from === 'Invalid date' ? visInput?.timeRange?.from ?? '' : from;
+        to = to === 'Invalid date' ? visInput?.timeRange?.to ?? '' : to;
         return (
           <>
             <EuiText size="s" style={{ marginLeft: 9 }}>
@@ -125,8 +133,8 @@ const OutputBody = ({
       case 'OBSERVABILITY_VISUALIZATION':
         let fromObs = moment(visInput?.timeRange?.from).format(dateFormat);
         let toObs = moment(visInput?.timeRange?.to).format(dateFormat);
-        fromObs = fromObs === 'Invalid date' ? visInput.timeRange.from : fromObs;
-        toObs = toObs === 'Invalid date' ? visInput.timeRange.to : toObs;
+        fromObs = fromObs === 'Invalid date' ? visInput?.timeRange?.from ?? '' : fromObs;
+        toObs = toObs === 'Invalid date' ? visInput?.timeRange?.to ?? '' : toObs;
         const onEditClick = (savedVisualizationId: string) => {
           window.location.assign(`observability-logs#/explorer/${savedVisualizationId}`);
         };
