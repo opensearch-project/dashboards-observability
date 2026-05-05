@@ -198,7 +198,7 @@ OpenSearch Dashboards Notebooks enable data-driven, interactive data analytics a
    1. A Backend Adaptor provides an interface to connect external notebook backends
    2. An external notebook backend service is connected through a HTTP endpoint
    3. Once a backend service is connected all the interpreters, environments and data sources provided by the service are automatically extended in notebooks
-   4. Uses [Hapi Wreck](https://hapi.dev/module/wreck/) to connect a backend service with a HTTP endpoint
+   4. Uses [Hapi Wreck](https://github.com/hapijs/wreck) to connect a backend service with a HTTP endpoint
    5. Example Adaptor: **Zeppelin Backend Server**
       - Open source, provided by [Apache Zeppelin](http://zeppelin.apache.org/)
       - Provides all communication to and from a notebook & supports 25+ interpreters
