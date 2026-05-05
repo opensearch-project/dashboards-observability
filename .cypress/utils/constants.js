@@ -152,9 +152,6 @@ export const suppressResizeObserverIssue = () => {
   // exception is thrown on loading EuiDataGrid in cypress only, ignore for now
   cy.on('uncaught:exception', (err, runnable) => {
     if (err.message.includes('ResizeObserver loop')) return false;
-    // EUI/OUI internals occasionally read getBoundingClientRect on a detached
-    // ref during flyout/popover teardown in Cypress. Not a real test failure.
-    if (err.message.includes("reading 'getBoundingClientRect'")) return false;
   });
 };
 
@@ -190,5 +187,4 @@ Cypress.on('uncaught:exception', (err, runnable, promise) => {
 
 Cypress.on('uncaught:exception', (err, runnable) => {
   if (err.message.includes('ResizeObserver loop')) return false;
-  if (err.message.includes("reading 'getBoundingClientRect'")) return false;
 });

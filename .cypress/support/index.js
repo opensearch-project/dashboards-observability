@@ -34,6 +34,16 @@ if (Cypress.env('security_enabled')) {
   Cypress.env('opensearch', 'https://localhost:9200');
 }
 
+// Globally swallow benign uncaught exceptions that originate from EUI/OUI
+// internals (osd-ui-shared-deps) during flyout/popover/page teardown in Cypress.
+// Registered here so the handler is active during `before`/`beforeEach` hooks,
+// before any spec-level `cy.on` has a chance to run.
+Cypress.on('uncaught:exception', (err) => {
+  if (!err || !err.message) return;
+  if (err.message.includes('getBoundingClientRect')) return false;
+  if (err.message.includes('ResizeObserver loop')) return false;
+});
+
 // Fix for ResizeObserver crash in Electron
 // https://github.com/cypress-io/cypress/issues/27415#issuecomment-2169155274
 Cypress.on('window:before:load', (win) => {
