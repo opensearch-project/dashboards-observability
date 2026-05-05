@@ -230,7 +230,7 @@ export const useFetchPatterns = ({
               defaultPatternField = field.name;
             }
           });
-          // Fall back to all string fields if no keyword fields found
+          // Fall back to including text fields if no non-text string fields were found
           if (!defaultPatternField) {
             const allStringFields = res.schema.filter((field: IField) => field.type === 'string');
             allStringFields.forEach((field: IField) => {
