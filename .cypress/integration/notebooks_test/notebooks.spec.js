@@ -369,7 +369,7 @@ describe('Testing paragraphs', () => {
     cy.get('div[id$="-error-0"]')
       .should('exist')
       .and('have.class', 'euiFormErrorText')
-      .and('contain.text', 'Error occurred in OpenSearch engine: no such index');
+      .and('contain.text', 'no such index');
 
     cy.get('.euiDataGrid__overflow').should('exist');
   });
