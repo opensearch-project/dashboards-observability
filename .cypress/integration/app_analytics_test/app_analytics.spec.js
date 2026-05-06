@@ -376,16 +376,16 @@ describe('Viewing application', () => {
 
   it('Opens trace detail flyout when Trace Id is clicked', () => {
     const traceId = '03f9c770db5ee2f1caac0afc36db49ba';
-    // The trace table rebuilds its column config (and therefore the EuiLink
-    // onClick handler) via useMemo whenever `items` changes. A Cypress .click()
-    // that lands during that rebuild hits a stale React handler and the flyout
-    // never opens — use native DOM clicks to hit the live handler.
+    // The trace table rebuilds its column config via useMemo on every items
+    // change. Clicks that land mid-rebuild hit a stale handler, so use
+    // { force: true } to skip Cypress's actionability retry (which was
+    // detaching the element reference) and click the EuiLink ancestor
+    // directly rather than the inner EuiText.
     cy.get('[data-test-subj="app-analytics-traceTab"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('[data-test-subj="trace-link"]', { timeout: timeoutDelay })
-      .contains(traceId)
+    cy.get(`[data-test-subj="trace-link"]:has([title="${traceId}"])`, { timeout: timeoutDelay })
       .should('be.visible')
-      .then(($el) => $el[0].click());
+      .click({ force: true });
     cy.get('[data-test-subj="traceDetailFlyoutTitle"]', { timeout: timeoutDelay }).should(
       'be.visible'
     );
@@ -395,10 +395,9 @@ describe('Viewing application', () => {
     cy.get('[data-test-subj="euiFlyoutCloseButton"]').click();
     cy.get('[data-test-subj="traceDetailFlyout"]').should('not.exist');
     cy.get('[data-test-subj="superDatePickerShowDatesButton"]').click(); //added to replace wait
-    cy.get('[data-test-subj="trace-link"]', { timeout: timeoutDelay })
-      .contains(traceId)
+    cy.get(`[data-test-subj="trace-link"]:has([title="${traceId}"])`, { timeout: timeoutDelay })
       .should('be.visible')
-      .then(($el) => $el[0].click());
+      .click({ force: true });
     cy.get('.panel-title-count', { timeout: timeoutDelay }).contains('(11)').should('exist');
     cy.get('[data-text="Span list"]').click();
     cy.get('[data-test-subj="dataGridRowCell"]', { timeout: timeoutDelay })
@@ -406,7 +405,7 @@ describe('Viewing application', () => {
       .should('exist');
     cy.get('[data-test-subj="dataGridRowCell"]')
       .contains('d67c5bb617ba9203')
-      .then(($el) => $el[0].click());
+      .click({ force: true });
     cy.get('[data-test-subj="spanDetailFlyout"]').should('be.visible');
     cy.get('[data-test-subj="euiFlyoutCloseButton"]').click();
     cy.get('[data-test-subj="spanDetailFlyout"]').should('not.exist');
