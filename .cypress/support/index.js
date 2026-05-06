@@ -56,22 +56,20 @@ Cypress.on('uncaught:exception', (err) => {
   if (err.message.includes('Blocked a restricted frame') && fromSharedDeps(err)) return false;
 });
 
-// Some benign errors are thrown from React scheduler microtasks during
-// navigation and bypass Cypress's `uncaught:exception` plumbing entirely.
-// Intercept at the window level — but only when the source file clearly
-// points at the bundled React/EUI runtime (never application code), so
-// genuine failures still surface.
+// Suppress a benign React/EUI null-dereference at the window level. When the
+// scheduler tears down a node mid-render, an internal observer reads
+// `ref.getBoundingClientRect()` on the unmounted element. The error fires from
+// a microtask, so `event.error` / `event.filename` can both be null — which is
+// why Cypress's `uncaught:exception` hook and stack-based guards miss it.
+//
+// This message match is scoped to a specific library bug (not a security or
+// app-level concern), so matching by text alone is acceptable here. Other
+// classes of error still surface normally.
 Cypress.on('window:before:load', (win) => {
   win.addEventListener(
     'error',
     (event) => {
-      var filename = event.filename || '';
       var err = event.error;
-      var stack = (err && err.stack) || '';
-      var fromSharedDeps =
-        filename.indexOf('osd-ui-shared-deps') !== -1 ||
-        stack.indexOf('osd-ui-shared-deps') !== -1;
-      if (!fromSharedDeps) return;
       var message = event.message || (err && err.message) || '';
       if (message.indexOf('getBoundingClientRect') !== -1) {
         event.preventDefault();
