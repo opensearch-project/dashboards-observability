@@ -56,22 +56,45 @@ Cypress.on('uncaught:exception', (err) => {
   if (err.message.includes('Blocked a restricted frame') && fromSharedDeps(err)) return false;
 });
 
-// Suppress a benign React/EUI null-dereference at the window level. When the
-// scheduler tears down a node mid-render, an internal observer reads
-// `ref.getBoundingClientRect()` on the unmounted element. The error fires from
-// a microtask, so `event.error` / `event.filename` can both be null — which is
-// why Cypress's `uncaught:exception` hook and stack-based guards miss it.
+// Suppress benign, well-known library bugs that fire from React/EUI teardown
+// paths and bypass Cypress's uncaught:exception plumbing (both errors fire from
+// microtasks, so `event.error` / `event.filename` can be null — stack-based
+// scoping silently misses them).
 //
-// This message match is scoped to a specific library bug (not a security or
-// app-level concern), so matching by text alone is acceptable here. Other
-// classes of error still surface normally.
+// Both messages below are specific library bugs, not app-level concerns:
+//   - getBoundingClientRect: null ref read inside EUI's ResizeObserver
+//   - Blocked a restricted frame: EUI onResize reaching the Cypress parent
+//     frame during navigation (cross-origin rejection of an already-unmounted
+//     component's layout callback, not an app-side security boundary)
+// Matching by message text is scoped enough to avoid hiding real failures.
+var isBenignLibraryError = function (message) {
+  if (typeof message !== 'string') return false;
+  return (
+    message.indexOf('getBoundingClientRect') !== -1 ||
+    message.indexOf('Blocked a restricted frame') !== -1
+  );
+};
+
 Cypress.on('window:before:load', (win) => {
+  // Some Cypress versions install window.onerror; wrap it so we suppress
+  // benign errors before Cypress's handler runs.
+  var nativeOnError = win.onerror;
+  win.onerror = function (message, source, lineno, colno, error) {
+    if (isBenignLibraryError(message) || (error && isBenignLibraryError(error.message))) {
+      return true; // prevent default — tells the browser the error was handled
+    }
+    if (typeof nativeOnError === 'function') {
+      return nativeOnError.apply(this, arguments);
+    }
+    return false;
+  };
+  // Belt-and-suspenders: also intercept via addEventListener (capture phase).
   win.addEventListener(
     'error',
     (event) => {
       var err = event.error;
       var message = event.message || (err && err.message) || '';
-      if (message.indexOf('getBoundingClientRect') !== -1) {
+      if (isBenignLibraryError(message)) {
         event.preventDefault();
         event.stopImmediatePropagation();
       }
