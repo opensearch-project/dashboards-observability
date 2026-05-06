@@ -42,6 +42,10 @@ Cypress.on('uncaught:exception', (err) => {
   if (!err || !err.message) return;
   if (err.message.includes('getBoundingClientRect')) return false;
   if (err.message.includes('ResizeObserver loop')) return false;
+  // React scheduler occasionally reaches into the Cypress parent frame after
+  // a page transition, which the browser rejects as a cross-origin violation.
+  // Not a real test failure — the offending render has already been unmounted.
+  if (err.message.includes('Blocked a restricted frame')) return false;
 });
 
 // Fix for ResizeObserver crash in Electron
