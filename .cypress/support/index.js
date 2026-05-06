@@ -38,14 +38,42 @@ if (Cypress.env('security_enabled')) {
 // internals (osd-ui-shared-deps) during flyout/popover/page teardown in Cypress.
 // Registered here so the handler is active during `before`/`beforeEach` hooks,
 // before any spec-level `cy.on` has a chance to run.
+//
+// NOTE: these suppressions are scoped by both message AND stack origin — we
+// only swallow errors that come from the bundled React/EUI runtime, not from
+// application code. This prevents masking real issues in the code under test.
+const fromSharedDeps = (err) =>
+  typeof err.stack === 'string' && err.stack.includes('osd-ui-shared-deps');
+
 Cypress.on('uncaught:exception', (err) => {
   if (!err || !err.message) return;
-  if (err.message.includes('getBoundingClientRect')) return false;
   if (err.message.includes('ResizeObserver loop')) return false;
+  if (err.message.includes('getBoundingClientRect') && fromSharedDeps(err)) return false;
   // React scheduler occasionally reaches into the Cypress parent frame after
   // a page transition, which the browser rejects as a cross-origin violation.
-  // Not a real test failure — the offending render has already been unmounted.
-  if (err.message.includes('Blocked a restricted frame')) return false;
+  // Only swallow when the stack points at the React/EUI runtime — never when
+  // the app itself legitimately trips a cross-origin boundary.
+  if (err.message.includes('Blocked a restricted frame') && fromSharedDeps(err)) return false;
+});
+
+// Some benign errors are thrown from React scheduler microtasks during
+// navigation and bypass Cypress's `uncaught:exception` plumbing entirely.
+// Intercept at the window level — but only when the stack clearly points
+// at the bundled React/EUI runtime, never application code — so genuine
+// failures still surface.
+Cypress.on('window:before:load', (win) => {
+  win.addEventListener(
+    'error',
+    (event) => {
+      var err = event.error;
+      if (!err || !err.stack || err.stack.indexOf('osd-ui-shared-deps') === -1) return;
+      if (err.message && err.message.indexOf('getBoundingClientRect') !== -1) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    },
+    true
+  );
 });
 
 // Fix for ResizeObserver crash in Electron

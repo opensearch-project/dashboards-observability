@@ -441,11 +441,13 @@ describe('Viewing application', () => {
           initialCount
         );
       });
-    // Native DOM click bypasses Cypress's actionability retry, which was
-    // losing the reference when EuiDataGrid re-rendered mid-click.
+    // force: true skips the actionability retry (which was losing the element
+    // reference when EuiDataGrid re-rendered mid-click) but still runs through
+    // Cypress's click pipeline — visibility is already asserted by the length
+    // check above.
     cy.get('[data-test-subj="dataGridRowCell"]')
       .contains('5ff3516909562c60')
-      .then(($el) => $el[0].click());
+      .click({ force: true });
     cy.get('[data-test-subj="spanDetailFlyout"]', { timeout: timeoutDelay }).should('be.visible');
     cy.get('[data-test-subj="spanDetailFlyout"]').within(($flyout) => {
       cy.get('[data-test-subj="OperationDescriptionList"]').should('contain', 'HTTP GET');
