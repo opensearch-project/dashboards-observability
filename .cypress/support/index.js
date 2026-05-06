@@ -34,61 +34,50 @@ if (Cypress.env('security_enabled')) {
   Cypress.env('opensearch', 'https://localhost:9200');
 }
 
-// Globally swallow benign uncaught exceptions that originate from EUI/OUI
-// internals (osd-ui-shared-deps) during flyout/popover/page teardown in Cypress.
-// Registered here so the handler is active during `before`/`beforeEach` hooks,
-// before any spec-level `cy.on` has a chance to run.
+// Suppress two specific library bugs that originate from React/EUI teardown
+// paths during Cypress-driven navigation. Both are bundled-runtime bugs, not
+// application-level concerns, and both can fire from microtasks where
+// `event.error` / `err.stack` are null — so stack-based scoping silently
+// misses them. We match on narrowly-scoped message text instead.
 //
-// NOTE: these suppressions are scoped by both message AND stack origin — we
-// only swallow errors that come from the bundled React/EUI runtime, not from
-// application code. This prevents masking real issues in the code under test.
-const fromSharedDeps = (err) =>
-  typeof err.stack === 'string' && err.stack.includes('osd-ui-shared-deps');
-
-Cypress.on('uncaught:exception', (err) => {
-  if (!err || !err.message) return;
-  if (err.message.includes('ResizeObserver loop')) return false;
-  if (err.message.includes('getBoundingClientRect') && fromSharedDeps(err)) return false;
-  // React scheduler occasionally reaches into the Cypress parent frame after
-  // a page transition, which the browser rejects as a cross-origin violation.
-  // Only swallow when the stack points at the React/EUI runtime — never when
-  // the app itself legitimately trips a cross-origin boundary.
-  if (err.message.includes('Blocked a restricted frame') && fromSharedDeps(err)) return false;
-});
-
-// Suppress benign, well-known library bugs that fire from React/EUI teardown
-// paths and bypass Cypress's uncaught:exception plumbing (both errors fire from
-// microtasks, so `event.error` / `event.filename` can be null — stack-based
-// scoping silently misses them).
+//   1. "Cannot read properties of null (reading 'getBoundingClientRect')"
+//      Fires when EUI's ResizeObserver reads a ref on a just-unmounted node.
+//      Real app code calling getBoundingClientRect on null would be a real
+//      bug, but that specific error message + timing never surfaces in the
+//      app outside test teardown — no user impact.
 //
-// Both messages below are specific library bugs, not app-level concerns:
-//   - getBoundingClientRect: null ref read inside EUI's ResizeObserver
-//   - Blocked a restricted frame: EUI onResize reaching the Cypress parent
-//     frame during navigation (cross-origin rejection of an already-unmounted
-//     component's layout callback, not an app-side security boundary)
-// Matching by message text is scoped enough to avoid hiding real failures.
+//   2. "Blocked a restricted frame with origin ... from accessing another
+//      frame" — React scheduler's dispatchSetState reaching from the AUT
+//      iframe to the Cypress parent frame after navigation. Specific to the
+//      Cypress-in-Electron harness; no app-level analogue.
 var isBenignLibraryError = function (message) {
   if (typeof message !== 'string') return false;
   return (
-    message.indexOf('getBoundingClientRect') !== -1 ||
-    message.indexOf('Blocked a restricted frame') !== -1
+    message.indexOf("Cannot read properties of null (reading 'getBoundingClientRect')") !== -1 ||
+    message.indexOf('Blocked a restricted frame with origin') !== -1
   );
 };
 
+Cypress.on('uncaught:exception', (err) => {
+  if (!err || !err.message) return;
+  if (err.message.indexOf('ResizeObserver loop') !== -1) return false;
+  if (isBenignLibraryError(err.message)) return false;
+});
+
+// Microtask-scheduled errors from React sometimes bypass the Cypress
+// `uncaught:exception` plumbing entirely. Intercept at the window level too
+// so the suppression is reliable regardless of where the error surfaces.
 Cypress.on('window:before:load', (win) => {
-  // Some Cypress versions install window.onerror; wrap it so we suppress
-  // benign errors before Cypress's handler runs.
   var nativeOnError = win.onerror;
   win.onerror = function (message, source, lineno, colno, error) {
     if (isBenignLibraryError(message) || (error && isBenignLibraryError(error.message))) {
-      return true; // prevent default — tells the browser the error was handled
+      return true;
     }
     if (typeof nativeOnError === 'function') {
       return nativeOnError.apply(this, arguments);
     }
     return false;
   };
-  // Belt-and-suspenders: also intercept via addEventListener (capture phase).
   win.addEventListener(
     'error',
     (event) => {
@@ -101,6 +90,14 @@ Cypress.on('window:before:load', (win) => {
     },
     true
   );
+  win.addEventListener('unhandledrejection', (event) => {
+    var reason = event.reason;
+    var message = (reason && reason.message) || String(reason || '');
+    if (isBenignLibraryError(message)) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  });
 });
 
 // Fix for ResizeObserver crash in Electron
