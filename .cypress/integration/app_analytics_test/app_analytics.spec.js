@@ -407,25 +407,26 @@ describe('Viewing application', () => {
   });
 
   it('Opens span detail flyout when Span ID is clicked', () => {
-    // Intercept span/DSL queries so we can wait for the filtered refetch to
-    // settle before clicking — typing in the search bar triggers a debounced
-    // query update that re-renders the grid and detaches the clicked element.
-    cy.intercept('POST', '**/api/observability/trace_analytics/query').as('dslQuery');
     cy.get('[data-test-subj="app-analytics-traceTab"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('[data-test-subj="dataGridRowCell"]', { timeout: timeoutDelay }).should('exist');
-    cy.get('[data-test-subj="search-bar-input-box"]').click().type(`5ff3516909562c60`);
-    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    // Wait for the post-filter span fetch to complete so the grid has stopped
-    // re-rendering, then assert on row count before clicking.
-    cy.wait('@dslQuery', { timeout: timeoutDelay });
+    // Capture the unfiltered row count so we can assert the filter actually
+    // narrowed the grid (and therefore the async span fetch has settled)
+    // before attempting to click a cell.
     cy.get('[data-test-subj="dataGridRowCell"]', { timeout: timeoutDelay })
-      .filter(`:contains("5ff3516909562c60")`)
-      .should('have.length.greaterThan', 0);
-    // Re-query fresh right before clicking to avoid acting on a detached node.
+      .its('length')
+      .then((initialCount) => {
+        cy.get('[data-test-subj="search-bar-input-box"]').click().type(`5ff3516909562c60`);
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+        cy.get('[data-test-subj="dataGridRowCell"]', { timeout: timeoutDelay }).should(
+          'have.length.lessThan',
+          initialCount
+        );
+      });
+    // Native DOM click bypasses Cypress's actionability retry, which was
+    // losing the reference when EuiDataGrid re-rendered mid-click.
     cy.get('[data-test-subj="dataGridRowCell"]')
       .contains('5ff3516909562c60')
-      .click({ force: true });
+      .then(($el) => $el[0].click());
     cy.get('[data-test-subj="spanDetailFlyout"]', { timeout: timeoutDelay }).should('be.visible');
     cy.get('[data-test-subj="spanDetailFlyout"]').within(($flyout) => {
       cy.get('[data-test-subj="OperationDescriptionList"]').should('contain', 'HTTP GET');
