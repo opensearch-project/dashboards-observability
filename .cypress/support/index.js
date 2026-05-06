@@ -48,6 +48,43 @@ Cypress.on('uncaught:exception', (err) => {
   if (err.message.includes('Blocked a restricted frame')) return false;
 });
 
+// Swallow benign async errors at the window level before they reach Cypress's
+// uncaught:exception plumbing. In Cypress 13 + Electron, errors thrown from
+// microtasks during navigation/teardown sometimes bypass the Cypress.on handler
+// entirely, so stopping propagation here is more reliable.
+const BENIGN_ERROR_PATTERNS = [
+  'getBoundingClientRect',
+  'ResizeObserver loop',
+  'Blocked a restricted frame',
+];
+const isBenignError = (message) =>
+  typeof message === 'string' && BENIGN_ERROR_PATTERNS.some((p) => message.includes(p));
+
+Cypress.on('window:before:load', (win) => {
+  win.addEventListener(
+    'error',
+    (event) => {
+      var errorMessage = event.error && event.error.message;
+      if (isBenignError(event.message) || isBenignError(errorMessage)) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    },
+    true
+  );
+  win.addEventListener(
+    'unhandledrejection',
+    (event) => {
+      var reasonMessage = event.reason && event.reason.message;
+      if (isBenignError(reasonMessage) || isBenignError(String(event.reason))) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    },
+    true
+  );
+});
+
 // Fix for ResizeObserver crash in Electron
 // https://github.com/cypress-io/cypress/issues/27415#issuecomment-2169155274
 Cypress.on('window:before:load', (win) => {
