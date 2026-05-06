@@ -58,16 +58,22 @@ Cypress.on('uncaught:exception', (err) => {
 
 // Some benign errors are thrown from React scheduler microtasks during
 // navigation and bypass Cypress's `uncaught:exception` plumbing entirely.
-// Intercept at the window level — but only when the stack clearly points
-// at the bundled React/EUI runtime, never application code — so genuine
-// failures still surface.
+// Intercept at the window level — but only when the source file clearly
+// points at the bundled React/EUI runtime (never application code), so
+// genuine failures still surface.
 Cypress.on('window:before:load', (win) => {
   win.addEventListener(
     'error',
     (event) => {
+      var filename = event.filename || '';
       var err = event.error;
-      if (!err || !err.stack || err.stack.indexOf('osd-ui-shared-deps') === -1) return;
-      if (err.message && err.message.indexOf('getBoundingClientRect') !== -1) {
+      var stack = (err && err.stack) || '';
+      var fromSharedDeps =
+        filename.indexOf('osd-ui-shared-deps') !== -1 ||
+        stack.indexOf('osd-ui-shared-deps') !== -1;
+      if (!fromSharedDeps) return;
+      var message = event.message || (err && err.message) || '';
+      if (message.indexOf('getBoundingClientRect') !== -1) {
         event.preventDefault();
         event.stopImmediatePropagation();
       }
