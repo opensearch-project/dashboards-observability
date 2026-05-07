@@ -119,7 +119,11 @@ Cypress.on('window:before:load', (win) => {
   }
 });
 
-// Fix for ResizeObserver crash in Electron
+// ResizeObserver polyfill — debounces callbacks via RAF to avoid the
+// "ResizeObserver loop completed with undelivered notifications" crash in
+// Electron, while respecting disconnect() so a queued callback can't fire
+// against a torn-down component (the source of the getBoundingClientRect
+// null-ref error we've been seeing).
 // https://github.com/cypress-io/cypress/issues/27415#issuecomment-2169155274
 Cypress.on('window:before:load', (win) => {
   const RealResizeObserver = win.ResizeObserver;
@@ -130,10 +134,12 @@ Cypress.on('window:before:load', (win) => {
   class ResizeObserverPolyfill {
     constructor(callback) {
       this.callback = callback;
+      this.disconnected = false;
       this.observer = new RealResizeObserver(this.check.bind(this));
     }
 
     observe(element) {
+      this.disconnected = false;
       this.observer.observe(element);
     }
 
@@ -142,19 +148,31 @@ Cypress.on('window:before:load', (win) => {
     }
 
     disconnect() {
+      this.disconnected = true;
+      // drop any pending callback so we don't fire after teardown
+      queue = queue.filter((x) => x.instance !== this);
       this.observer.disconnect();
     }
 
     check(entries) {
+      if (this.disconnected) return;
       queue = queue.filter((x) => x.cb !== this.callback);
-      queue.push({ cb: this.callback, args: entries });
+      queue.push({ instance: this, cb: this.callback, args: entries });
 
       if (!queueFlushTimeout) {
         queueFlushTimeout = requestAnimationFrame(() => {
           queueFlushTimeout = undefined;
           const q = queue;
           queue = [];
-          q.forEach(({ cb, args }) => cb(args));
+          q.forEach(({ instance, cb, args }) => {
+            if (instance.disconnected) return;
+            try {
+              cb(args);
+            } catch (e) {
+              if (e && isBenignLibraryError(e.message)) return;
+              throw e;
+            }
+          });
         }, 0);
       }
     }

@@ -376,32 +376,11 @@ describe('Viewing application', () => {
 
   it('Opens trace detail flyout when Trace Id is clicked', () => {
     const traceId = '03f9c770db5ee2f1caac0afc36db49ba';
-    // The trace table rebuilds its column config via useMemo whenever `items`
-    // changes, so the EuiLink's React onClick handler can be detached between
-    // element lookup and click dispatch. Retry the click until the flyout
-    // actually opens — a single click can fire against a stale handler.
-    const MAX_CLICK_ATTEMPTS = 5;
-    const clickTraceLinkUntilFlyoutOpens = (attempt = 1) => {
-      cy.get('body').then(($body) => {
-        if ($body.find('[data-test-subj="traceDetailFlyoutTitle"]').length > 0) return;
-        if (attempt > MAX_CLICK_ATTEMPTS) return; // fall through to the assertion below
-        cy.get(`[data-test-subj="trace-link"]:has([title="${traceId}"])`, {
-          timeout: timeoutDelay,
-        })
-          .should('be.visible')
-          .click({ force: true });
-        cy.wait(500);
-        cy.get('body').then(($retryBody) => {
-          if ($retryBody.find('[data-test-subj="traceDetailFlyoutTitle"]').length === 0) {
-            clickTraceLinkUntilFlyoutOpens(attempt + 1);
-          }
-        });
-      });
-    };
-
     cy.get('[data-test-subj="app-analytics-traceTab"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    clickTraceLinkUntilFlyoutOpens();
+    cy.get(`[data-test-subj="trace-link"]:has([title="${traceId}"])`, { timeout: timeoutDelay })
+      .should('be.visible')
+      .click({ force: true });
     cy.get('[data-test-subj="traceDetailFlyoutTitle"]', { timeout: timeoutDelay }).should(
       'be.visible'
     );
@@ -410,8 +389,12 @@ describe('Viewing application', () => {
     });
     cy.get('[data-test-subj="euiFlyoutCloseButton"]').click();
     cy.get('[data-test-subj="traceDetailFlyout"]').should('not.exist');
-    cy.get('[data-test-subj="superDatePickerShowDatesButton"]').click(); //added to replace wait
-    clickTraceLinkUntilFlyoutOpens();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('[data-test-subj="superDatePickerShowDatesButton"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get(`[data-test-subj="trace-link"]:has([title="${traceId}"])`, { timeout: timeoutDelay })
+      .should('be.visible')
+      .click({ force: true });
     cy.get('.panel-title-count', { timeout: timeoutDelay }).contains('(11)').should('exist');
     cy.get('[data-text="Span list"]').click();
     cy.get('[data-test-subj="dataGridRowCell"]', { timeout: timeoutDelay })
