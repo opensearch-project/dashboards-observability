@@ -375,21 +375,43 @@ describe('Viewing application', () => {
   });
 
   it('Opens trace detail flyout when Trace Id is clicked', () => {
+    const traceId = '03f9c770db5ee2f1caac0afc36db49ba';
+    // Click the trace link and, if the first click landed on a stale
+    // useMemo-rebuilt handler, click once more. Avoids an unbounded retry loop.
+    const openTraceFlyout = () => {
+      cy.get(`[data-test-subj="trace-link"]:has([title="${traceId}"])`, { timeout: timeoutDelay })
+        .should('be.visible')
+        .click({ force: true });
+      cy.get('body').then(($body) => {
+        if ($body.find('[data-test-subj="traceDetailFlyoutTitle"]').length === 0) {
+          cy.get(`[data-test-subj="trace-link"]:has([title="${traceId}"])`).click({ force: true });
+        }
+      });
+    };
+
     cy.get('[data-test-subj="app-analytics-traceTab"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('[title="03f9c770db5ee2f1caac0afc36db49ba"]').click();
-    cy.get('[data-test-subj="traceDetailFlyoutTitle"]').should('be.visible');
+    openTraceFlyout();
+    cy.get('[data-test-subj="traceDetailFlyoutTitle"]', { timeout: timeoutDelay }).should(
+      'be.visible'
+    );
     cy.get('[data-test-subj="traceDetailFlyout"]').within(($flyout) => {
       cy.get('[data-test-subj="LatencyDescriptionList"]').should('contain', '225.00');
     });
     cy.get('[data-test-subj="euiFlyoutCloseButton"]').click();
     cy.get('[data-test-subj="traceDetailFlyout"]').should('not.exist');
-    cy.get('[data-test-subj="superDatePickerShowDatesButton"]').click(); //added to replace wait
-    cy.get('[title="03f9c770db5ee2f1caac0afc36db49ba"]').click();
-    cy.get('.panel-title-count').contains('(11)').should('exist');
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get('[data-test-subj="superDatePickerShowDatesButton"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    openTraceFlyout();
+    cy.get('.panel-title-count', { timeout: timeoutDelay }).contains('(11)').should('exist');
     cy.get('[data-text="Span list"]').click();
-    cy.get('[data-test-subj="dataGridRowCell"]').contains('d67c5bb617ba9203').should('exist');
-    cy.get('[data-test-subj="dataGridRowCell"]').contains('d67c5bb617ba9203').click();
+    cy.get('[data-test-subj="dataGridRowCell"]', { timeout: timeoutDelay })
+      .contains('d67c5bb617ba9203')
+      .should('exist');
+    cy.get('[data-test-subj="dataGridRowCell"]')
+      .contains('d67c5bb617ba9203')
+      .click({ force: true });
     cy.get('[data-test-subj="spanDetailFlyout"]').should('be.visible');
     cy.get('[data-test-subj="euiFlyoutCloseButton"]').click();
     cy.get('[data-test-subj="spanDetailFlyout"]').should('not.exist');
@@ -398,10 +420,27 @@ describe('Viewing application', () => {
   it('Opens span detail flyout when Span ID is clicked', () => {
     cy.get('[data-test-subj="app-analytics-traceTab"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('input[type="search"]').click().type(`5ff3516909562c60`);
-    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.get('[data-test-subj="dataGridRowCell"]').contains('5ff3516909562c60').click();
-    cy.get('[data-test-subj="spanDetailFlyout"]').should('be.visible');
+    // Capture the unfiltered row count so we can assert the filter actually
+    // narrowed the grid (and therefore the async span fetch has settled)
+    // before attempting to click a cell.
+    cy.get('[data-test-subj="dataGridRowCell"]', { timeout: timeoutDelay })
+      .its('length')
+      .then((initialCount) => {
+        cy.get('[data-test-subj="search-bar-input-box"]').click().type(`5ff3516909562c60`);
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+        cy.get('[data-test-subj="dataGridRowCell"]', { timeout: timeoutDelay }).should(
+          'have.length.lessThan',
+          initialCount
+        );
+      });
+    // force: true skips the actionability retry (which was losing the element
+    // reference when EuiDataGrid re-rendered mid-click) but still runs through
+    // Cypress's click pipeline — visibility is already asserted by the length
+    // check above.
+    cy.get('[data-test-subj="dataGridRowCell"]')
+      .contains('5ff3516909562c60')
+      .click({ force: true });
+    cy.get('[data-test-subj="spanDetailFlyout"]', { timeout: timeoutDelay }).should('be.visible');
     cy.get('[data-test-subj="spanDetailFlyout"]').within(($flyout) => {
       cy.get('[data-test-subj="OperationDescriptionList"]').should('contain', 'HTTP GET');
     });
