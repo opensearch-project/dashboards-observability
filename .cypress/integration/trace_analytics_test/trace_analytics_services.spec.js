@@ -220,10 +220,13 @@ describe('Testing Service map', () => {
   it('Render Service map', () => {
     cy.get('.euiText.euiText--medium .panel-title').contains('Service map');
     cy.get('[data-test-subj="latency"]').should('exist');
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('.ytitle').contains('Average duration (ms)');
     cy.get('[data-text = "Errors"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.contains('60%');
     cy.get('[data-text = "Duration"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.contains('100');
     cy.get('.euiFormLabel.euiFormControlLayout__prepend').contains('Focus on').should('exist');
   });
@@ -252,9 +255,12 @@ describe('Testing Service map', () => {
     cy.get('.vis-network canvas').should('exist');
 
     // ensure rendering is complete before node click, replace wait
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('[data-text="Errors"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.contains('60%');
     cy.get('[data-text="Duration"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.contains('Average duration (ms)');
     cy.get("[data-test-subj='tableHeaderCell_average_latency_1']").click();
 
@@ -267,12 +273,15 @@ describe('Testing Service map', () => {
   it('Tests focus functionality in Service map', () => {
     cy.get('.euiText.euiText--medium .panel-title').contains('Service map');
     cy.get('[data-test-subj="latency"]').should('exist');
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('.ytitle').contains('Average duration (ms)');
 
     // Test metric selection functionality
     cy.get('[data-text="Errors"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.contains('60%');
     cy.get('[data-text="Duration"]').click();
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.contains('100');
 
     // Focus on "order" by selecting the first option
