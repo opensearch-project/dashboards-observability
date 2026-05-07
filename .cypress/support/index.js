@@ -98,6 +98,25 @@ Cypress.on('window:before:load', (win) => {
       event.stopImmediatePropagation();
     }
   });
+
+  // Root-cause mitigation: the benign errors above fire from requestAnimationFrame
+  // callbacks (EUI's ResizeObserver) and dispatched React state updates, which in
+  // Cypress 13 can bypass both window.onerror and Cypress.on('uncaught:exception').
+  // Wrap RAF so the callback itself swallows these specific errors before they
+  // ever become uncaught — any other error still propagates normally.
+  var nativeRaf = win.requestAnimationFrame;
+  if (typeof nativeRaf === 'function') {
+    win.requestAnimationFrame = function (callback) {
+      return nativeRaf.call(win, function wrapped() {
+        try {
+          return callback.apply(this, arguments);
+        } catch (e) {
+          if (e && isBenignLibraryError(e.message)) return undefined;
+          throw e;
+        }
+      });
+    };
+  }
 });
 
 // Fix for ResizeObserver crash in Electron
