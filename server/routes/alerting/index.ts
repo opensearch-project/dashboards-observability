@@ -18,6 +18,7 @@
 import { schema } from '@osd/config-schema';
 import { IRouter, RequestHandlerContext, SavedObject } from '../../../../../src/core/server';
 import type { AlertingOSClient, Datasource, Logger } from '../../../common/types/alerting';
+import { isLocalEndpoint } from '../../../common/utils/local_endpoint';
 import {
   HttpOpenSearchBackend,
   MultiBackendAlertService,
@@ -173,6 +174,13 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
    * Get the right OpenSearch client for a datasource.
    * MDS data sources use context.dataSource.opensearch.getClient(id).
    * Local cluster uses context.core.opensearch.client.asCurrentUser.
+   *
+   * A `data-source` saved object whose endpoint matches the local-cluster
+   * heuristic is routed through the primary client instead of the MDS
+   * scoped client. The stored hostname (e.g. the docker-compose service
+   * name `opensearch`) may not resolve from the OSD process, and the UI
+   * already collapses these entries onto the "Local Cluster" row — the
+   * server now matches that behaviour so monitors remain reachable.
    */
   async function getAlertingClient(
     ctx: AlertingHandlerContext,
@@ -184,7 +192,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     }
     if (dsId && ctx.dataSource) {
       const ds = await resolveOpenSearchDatasource(ctx, dsId);
-      if (ds?.mdsId) {
+      if (ds?.mdsId && !isLocalEndpoint(ds.url)) {
         return await ctx.dataSource.opensearch.getClient(ds.mdsId);
       }
     }
