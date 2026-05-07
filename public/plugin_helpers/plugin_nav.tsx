@@ -45,7 +45,7 @@ function registerIconSideNavGroups(
         id: observabilityAlertingID,
         category: DEFAULT_APP_CATEGORIES.observabilityTools,
         showInAllNavGroup: true,
-        order: 500,
+        order: 150,
         euiIconType: 'beaker',
       },
     ]);
@@ -53,7 +53,7 @@ function registerIconSideNavGroups(
       {
         id: observabilityAlertingID,
         category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
-        order: 500,
+        order: 150,
       },
     ]);
   }
