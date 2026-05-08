@@ -5,7 +5,10 @@
 
 jest.mock('../../../../../common/query_manager', () => ({}));
 jest.mock('../../../../services/requests/ppl', () => ({}));
-jest.mock('../../../../services/saved_objects/saved_object_client/saved_objects_actions', () => ({}));
+jest.mock(
+  '../../../../services/saved_objects/saved_object_client/saved_objects_actions',
+  () => ({})
+);
 jest.mock('../../../../services/saved_objects/saved_object_client/types', () => ({}));
 jest.mock('../../../visualizations/visualization', () => ({}));
 jest.mock('../../../../components/visualizations/charts/helpers', () => ({}));
@@ -14,7 +17,10 @@ jest.mock('../../../common/query_utils', () => ({
   updateCatalogVisualizationQuery: jest.fn(),
 }));
 jest.mock('../../../event_analytics/utils', () => ({ getDefaultVisConfig: jest.fn() }));
-jest.mock('../../../../../common/utils', () => ({ getOSDHttp: jest.fn(), removeBacktick: jest.fn() }));
+jest.mock('../../../../../common/utils', () => ({
+  getOSDHttp: jest.fn(),
+  removeBacktick: jest.fn(),
+}));
 
 import { updateQuerySpanInterval } from '../utils';
 
