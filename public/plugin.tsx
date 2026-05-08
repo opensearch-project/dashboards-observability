@@ -50,6 +50,9 @@ import {
   observabilityNotebookID,
   observabilityNotebookPluginOrder,
   observabilityNotebookTitle,
+  observabilityAlertingID,
+  observabilityAlertingPluginOrder,
+  observabilityAlertingTitle,
   observabilityOverviewID,
   observabilityOverviewPluginOrder,
   observabilityOverviewTitle,
@@ -140,6 +143,9 @@ interface PublicConfig {
   summarize: {
     enabled: boolean;
   };
+  alertManager: {
+    enabled: boolean;
+  };
 }
 
 export const [
@@ -213,7 +219,7 @@ export class ObservabilityPlugin
     try {
       const apmSettingValue = core.uiSettings.get(APM_ENABLED_SETTING);
       this.apmEnabled = apmSettingValue ?? false;
-    } catch (error) {
+    } catch (_error) {
       // Handle authentication errors during setup
       this.apmEnabled = false;
     }
@@ -508,7 +514,23 @@ export class ObservabilityPlugin
       updater$: this.appUpdater$,
     });
 
-    registerAllPluginNavGroups(core, this.apmEnabled, APPLICATION_MONITORING_CATEGORY);
+    if (this.config.alertManager?.enabled) {
+      core.application.register({
+        id: observabilityAlertingID,
+        title: observabilityAlertingTitle,
+        category: OBSERVABILITY_APP_CATEGORIES.observability,
+        order: observabilityAlertingPluginOrder,
+        euiIconType: 'beaker',
+        mount: appMountWithStartPage('alerting'),
+      });
+    }
+
+    registerAllPluginNavGroups(
+      core,
+      this.apmEnabled,
+      APPLICATION_MONITORING_CATEGORY,
+      !!this.config.alertManager?.enabled
+    );
 
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
       getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,

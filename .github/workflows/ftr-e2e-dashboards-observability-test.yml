@@ -145,6 +145,7 @@ jobs:
           cat << 'EOT' > ./config/opensearch_dashboards.yml
           server.host: "0.0.0.0"
           home.disableWelcomeScreen: true
+          home.disableExperienceModal: true
           EOT
         working-directory: OpenSearch-Dashboards
 
