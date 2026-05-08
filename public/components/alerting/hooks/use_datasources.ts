@@ -27,6 +27,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { SavedObject } from '../../../../../../src/core/public';
 import { coreRefs } from '../../../framework/core_refs';
 import type { Datasource } from '../../../../common/types/alerting';
+import { isLocalEndpoint } from '../../../../common/utils/local_endpoint';
 
 // Attribute shapes for the two saved-object types we consume.
 // These mirror the server-side types in server/routes/alerting/types.ts so
@@ -43,8 +44,6 @@ interface DataConnectionSOAttributes {
   meta?: Record<string, unknown>;
 }
 
-const LOCAL_ENDPOINT_PATTERN = /localhost|127\.0\.0\.1|0\.0\.0\.0|::1|opensearch:9200|opensearch-cluster-master|opensearch-master/i;
-
 /**
  * Map both saved-object types into the unified `Datasource` shape that
  * Alert Manager UI code already consumes. Mirrors server-side mapping in
@@ -59,12 +58,8 @@ export function mapSavedObjectsToDatasources(
   // local cluster, surface their entry (with their chosen title) instead
   // of the hardcoded "Local Cluster" placeholder — avoids showing two rows
   // for the same physical cluster.
-  const osLocal = osSavedObjects.filter((so) =>
-    LOCAL_ENDPOINT_PATTERN.test(so.attributes?.endpoint || '')
-  );
-  const osRemote = osSavedObjects.filter(
-    (so) => !LOCAL_ENDPOINT_PATTERN.test(so.attributes?.endpoint || '')
-  );
+  const osLocal = osSavedObjects.filter((so) => isLocalEndpoint(so.attributes?.endpoint));
+  const osRemote = osSavedObjects.filter((so) => !isLocalEndpoint(so.attributes?.endpoint));
 
   const localRows: Datasource[] =
     osLocal.length > 0
