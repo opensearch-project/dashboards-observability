@@ -96,14 +96,14 @@ export const mergeLayoutAndVisualizations = (
  * Updates the span command interval
  * Returns -> source = opensearch_dashboards_sample_data_logs | stats avg(bytes) by span(timestamp,1M)
  */
-const updateQuerySpanInterval = (
+export const updateQuerySpanInterval = (
   query: string,
   timestampField: string,
   span: number | string = '1',
   resolution: string = 'h'
 ) => {
   return query.replace(
-    new RegExp(`span\\(\\s*${timestampField}\\s*,(.*?)\\)`),
+    new RegExp(`span\\(\\s*${timestampField}\\s*,(.*?)\\)`, 'i'),
     `span(${timestampField},${span}${resolution})`
   );
 };
