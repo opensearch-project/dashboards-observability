@@ -371,7 +371,7 @@ export const Home = (props: HomeProps) => {
         return res;
       })
       .catch((err: any) => {
-        setToast('Error occured while deleting application', 'danger');
+        setToast('Error occurred while deleting application', 'danger');
         console.error(err);
       });
   };
