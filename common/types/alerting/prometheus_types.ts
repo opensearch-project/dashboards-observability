@@ -252,11 +252,22 @@ export interface PrometheusBackend {
    * calling, so alternate backends can omit it and degrade cleanly to the
    * legacy `getAlerts` path.
    *
+   * Parameters:
+   *   - `endIsNow`: the caller (service layer) indicates whether the
+   *                 request's `endTime` was date-math relative to `now`
+   *                 (e.g. `'now'`, `'now-5m'`). When `true` AND the matrix
+   *                 is empty, the backend falls back to `/api/v1/alerts`
+   *                 (current-active only) and sets `fallback`. When `false`
+   *                 the empty matrix is treated as a legitimate "no alerts
+   *                 fired in this past window" result. Passing this
+   *                 explicitly avoids ambiguity with wall-clock-based
+   *                 heuristics.
+   *
    * Returns:
    *   - `alerts`:   unified alert summaries, one per firing-run episode
    *                 (runs of `value === 1` in the ALERTS matrix).
    *   - `fallback`: set to `'prometheus-alerts-current-only'` when the
-   *                 matrix was empty AND the range included `now`, causing
+   *                 matrix was empty AND `endIsNow === true`, causing
    *                 the backend to fall back to legacy `/api/v1/alerts`.
    *   - `error`:    transport / parse error; `alerts` is empty in this case.
    */
@@ -265,7 +276,8 @@ export interface PrometheusBackend {
     ds: Datasource,
     startEpochSec: number,
     endEpochSec: number,
-    stepSec: number
+    stepSec: number,
+    endIsNow: boolean
   ): Promise<{
     alerts: UnifiedAlertSummary[];
     fallback?: 'prometheus-alerts-current-only';

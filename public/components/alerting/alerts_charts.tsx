@@ -52,9 +52,10 @@ const TARGET_BUCKET_MS = 5 * 60 * 1000;
 const MIN_BUCKETS = 12;
 const MAX_BUCKETS = 24;
 
-/** Clamp `value` to `[min, max]`. Standard util; kept local to avoid a */
-/** lodash import for a two-line helper. */
-function clamp(min: number, max: number, value: number): number {
+/** Clamp `value` to `[min, max]`. Matches lodash's `(value, min, max)`
+ *  argument order so callers don't have to think twice. Kept local to
+ *  avoid a lodash import for a two-line helper. */
+function clamp(value: number, min: number, max: number): number {
   if (value < min) return min;
   if (value > max) return max;
   return value;
@@ -100,9 +101,9 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
     // produce transient oddities on first mount.
     const rangeMs = Math.max(1, endMs - startMs);
 
-    // bucketCount = clamp(12, 24, ceil(rangeMs / targetBucketMs))
+    // bucketCount = clamp(ceil(rangeMs / targetBucketMs), 12, 24)
     const rawBucketCount = Math.ceil(rangeMs / TARGET_BUCKET_MS);
-    const bucketCount = clamp(MIN_BUCKETS, MAX_BUCKETS, rawBucketCount);
+    const bucketCount = clamp(rawBucketCount, MIN_BUCKETS, MAX_BUCKETS);
     const bucketDuration = rangeMs / bucketCount;
 
     const buckets: Array<{

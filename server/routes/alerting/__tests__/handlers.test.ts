@@ -75,11 +75,18 @@ describe('handlers', () => {
       maxResults: '10',
     });
     expect(result.status).toBe(200);
-    expect(mockAlertSvc.getUnifiedAlerts).toHaveBeenCalledWith(resolver, {
-      dsIds: ['a', 'b'],
-      timeoutMs: undefined,
-      maxResults: 10,
-    });
+    // Use `objectContaining` because the handler always forwards the new
+    // `startTime`/`endTime` keys (as `undefined` when absent). An exact
+    // deep-equal would pass today by Jest's loose-undefined semantics but
+    // becomes misleading if that behavior changes.
+    expect(mockAlertSvc.getUnifiedAlerts).toHaveBeenCalledWith(
+      resolver,
+      expect.objectContaining({
+        dsIds: ['a', 'b'],
+        timeoutMs: undefined,
+        maxResults: 10,
+      })
+    );
   });
 
   it('handleGetAlertDetail returns 404 when not found', async () => {

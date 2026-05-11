@@ -238,7 +238,14 @@ describe('DirectQueryPrometheusBackend', () => {
           },
         ])
       );
-      const result = await backend.getHistoricalAlerts(mockClient as never, ds, 100, 400, 60);
+      const result = await backend.getHistoricalAlerts(
+        mockClient as never,
+        ds,
+        100,
+        400,
+        60,
+        /* endIsNow */ false
+      );
       expect(result.alerts).toHaveLength(1);
       expect(result.alerts[0].name).toBe('X');
       expect(result.alerts[0].state).toBe('resolved');
@@ -265,7 +272,14 @@ describe('DirectQueryPrometheusBackend', () => {
           },
         ])
       );
-      const result = await backend.getHistoricalAlerts(mockClient as never, ds, 100, 460, 60);
+      const result = await backend.getHistoricalAlerts(
+        mockClient as never,
+        ds,
+        100,
+        460,
+        60,
+        /* endIsNow */ false
+      );
       expect(result.alerts).toHaveLength(2);
     });
 
@@ -282,7 +296,32 @@ describe('DirectQueryPrometheusBackend', () => {
           },
         ])
       );
-      const result = await backend.getHistoricalAlerts(mockClient as never, ds, 100, 220, 60);
+      // Live-alerts fetch (Option A: always runs when endIsNow=true). This
+      // particular live alert matches the historical episode above — the
+      // dedupe on rule-identity hash should suppress it so only one row
+      // comes back.
+      mockClient.transport.request.mockResolvedValueOnce({
+        body: {
+          data: {
+            alerts: [
+              {
+                labels: { alertname: 'Z' },
+                state: 'firing',
+                annotations: {},
+                activeAt: '2024-01-15T12:00:00Z',
+              },
+            ],
+          },
+        },
+      });
+      const result = await backend.getHistoricalAlerts(
+        mockClient as never,
+        ds,
+        100,
+        220,
+        60,
+        /* endIsNow */ true
+      );
       expect(result.alerts).toHaveLength(1);
       expect(result.alerts[0].state).toBe('active');
       // endMs clamps to windowEnd (220s → 220_000ms)
@@ -302,49 +341,196 @@ describe('DirectQueryPrometheusBackend', () => {
           },
         ])
       );
-      const result = await backend.getHistoricalAlerts(mockClient as never, ds, 100, 300, 60);
+      const result = await backend.getHistoricalAlerts(
+        mockClient as never,
+        ds,
+        100,
+        300,
+        60,
+        /* endIsNow */ false
+      );
       expect(result.alerts).toHaveLength(1);
       expect(result.alerts[0].annotations.truncatedStart).toBe('true');
       expect(result.alerts[0].startTime).toBe(new Date(100_000).toISOString());
     });
 
-    it('flapping: separate pending + firing series ⇒ two episodes, not merged', async () => {
+    it('first sample mid-window (not at left edge) ⇒ startTime uses the sample, no truncatedStart', async () => {
+      // Regression guard for the "every alert starts at windowStart" bug.
+      // A rule added recently emits its first ALERTS sample well inside the
+      // window — that first sample is STILL at index 0 of the returned
+      // matrix (Prometheus only returns samples that exist), but the sample
+      // timestamp is far from windowStart, so we must NOT clamp.
+      //
+      // Window 100..1000, step 60 → tolerance 90s. The first (and only
+      // firing) sample is at 700s — 600s after windowStart, well outside
+      // the 90s tolerance. Expect `startTime = 700_000` and no truncation.
       mockClient.transport.request.mockResolvedValueOnce(
         matrix([
           {
-            metric: { alertname: 'Flap', alertstate: 'pending' },
+            metric: { alertname: 'Recent' },
             points: [
-              [100, '1'],
+              [700, '1'],
+              [760, '1'],
+              [820, '0'],
+            ],
+          },
+        ])
+      );
+      const result = await backend.getHistoricalAlerts(
+        mockClient as never,
+        ds,
+        100,
+        1000,
+        60,
+        /* endIsNow */ false
+      );
+      expect(result.alerts).toHaveLength(1);
+      expect(result.alerts[0].startTime).toBe(new Date(700_000).toISOString());
+      expect(result.alerts[0].annotations.truncatedStart).toBeUndefined();
+    });
+
+    it('last firing sample far from window end ⇒ state resolved, lastUpdated uses the sample', async () => {
+      // Regression guard for the "always clamp endMs to windowEnd" bug.
+      // If the final firing sample is more than ~1.5 steps before
+      // windowEnd, the alert resolved mid-window (the series just ends
+      // because the rule stopped firing). Report the actual resolution
+      // time and mark `resolved`.
+      //
+      // Window 100..1000, step 60 → tolerance 90s. Last firing sample at
+      // 300s — 700s before windowEnd, well outside tolerance.
+      mockClient.transport.request.mockResolvedValueOnce(
+        matrix([
+          {
+            metric: { alertname: 'ResolvedMid' },
+            points: [
+              [200, '1'],
+              [260, '1'],
+              [300, '1'],
+            ],
+          },
+        ])
+      );
+      const result = await backend.getHistoricalAlerts(
+        mockClient as never,
+        ds,
+        100,
+        1000,
+        60,
+        /* endIsNow */ false
+      );
+      expect(result.alerts).toHaveLength(1);
+      expect(result.alerts[0].state).toBe('resolved');
+      expect(result.alerts[0].lastUpdated).toBe(new Date(300_000).toISOString());
+    });
+
+    it('labels produce distinct ids for same alertname across different services', async () => {
+      // Regression guard for the duplicate-id bug: two series with the
+      // same alertname + alertstate but different `service_name` labels
+      // must produce distinct UnifiedAlertSummary ids. Pre-fix, both
+      // would collide on `${dsId}-${name}-${instance}-${alertstate}-${startMs}`
+      // because `instance` is empty on these series.
+      mockClient.transport.request.mockResolvedValueOnce(
+        matrix([
+          {
+            metric: { alertname: 'ServiceError', service_name: 'cart', alertstate: 'firing' },
+            points: [
               [160, '1'],
               [220, '0'],
             ],
           },
           {
-            metric: { alertname: 'Flap', alertstate: 'firing' },
+            metric: {
+              alertname: 'ServiceError',
+              service_name: 'checkout',
+              alertstate: 'firing',
+            },
             points: [
-              [220, '1'],
-              [280, '1'],
-              [340, '0'],
+              [160, '1'],
+              [220, '0'],
             ],
           },
         ])
       );
-      const result = await backend.getHistoricalAlerts(mockClient as never, ds, 100, 400, 60);
+      const result = await backend.getHistoricalAlerts(
+        mockClient as never,
+        ds,
+        100,
+        400,
+        60,
+        /* endIsNow */ false
+      );
       expect(result.alerts).toHaveLength(2);
-      const states = result.alerts.map((a) => a.labels.alertstate);
-      expect(states).toContain('pending');
-      expect(states).toContain('firing');
+      expect(result.alerts[0].id).not.toBe(result.alerts[1].id);
     });
 
-    it('empty matrix + range fully past ⇒ { alerts: [], no fallback }', async () => {
+    it('matrix query is scoped to alertstate="firing" (pending filtered upstream)', async () => {
+      // We filter `alertstate="firing"` at the PromQL level so Cortex
+      // never returns `alertstate="pending"` series in the first place.
+      // This keeps row counts step-independent (pending samples are more
+      // likely to be caught at fine step, missed at coarse step). The
+      // test asserts the exact PromQL sent on the wire.
       mockClient.transport.request.mockResolvedValueOnce(matrix([]));
-      // Pin now to Jan 2024 so endEpochSec=1000 is clearly in the past.
+      await backend.getHistoricalAlerts(
+        mockClient as never,
+        ds,
+        100,
+        400,
+        60,
+        /* endIsNow */ false
+      );
+      const calls = mockClient.transport.request.mock.calls as Array<
+        [{ body?: { query?: string } }]
+      >;
+      expect(calls[0][0].body?.query).toBe('ALERTS{alertstate="firing"}');
+    });
+
+    it('live alerts in pending state are suppressed in the merge', async () => {
+      // Belt-and-suspenders: even if a Prometheus variant does return
+      // pending alerts from `/api/v1/alerts`, we drop them during the
+      // live-side merge so they don't reintroduce the flicker we just
+      // removed upstream.
+      mockClient.transport.request.mockResolvedValueOnce(matrix([]));
+      mockClient.transport.request.mockResolvedValueOnce({
+        body: {
+          data: {
+            alerts: [
+              {
+                labels: { alertname: 'Firing', service: 'a' },
+                state: 'firing',
+                annotations: {},
+                activeAt: '2024-01-15T12:00:00Z',
+              },
+              {
+                labels: { alertname: 'Pending', service: 'b' },
+                state: 'pending',
+                annotations: {},
+                activeAt: '2024-01-15T12:00:00Z',
+              },
+            ],
+          },
+        },
+      });
+      const result = await backend.getHistoricalAlerts(
+        mockClient as never,
+        ds,
+        100,
+        500,
+        60,
+        /* endIsNow */ true
+      );
+      expect(result.alerts).toHaveLength(1);
+      expect(result.alerts[0].name).toBe('Firing');
+    });
+
+    it('empty matrix + endIsNow=false ⇒ { alerts: [], no fallback }', async () => {
+      mockClient.transport.request.mockResolvedValueOnce(matrix([]));
       const result = await backend.getHistoricalAlerts(
         mockClient as never,
         ds,
         /* startEpochSec */ 100,
         /* endEpochSec   */ 1000,
-        60
+        60,
+        /* endIsNow */ false
       );
       expect(result.alerts).toEqual([]);
       expect(result.fallback).toBeUndefined();
@@ -353,11 +539,11 @@ describe('DirectQueryPrometheusBackend', () => {
       expect(mockClient.transport.request).toHaveBeenCalledTimes(1);
     });
 
-    it('empty matrix + range includes now ⇒ falls back to legacy /api/v1/alerts', async () => {
-      const nowSec = Math.floor(Date.now() / 1000);
-      // First call: empty matrix
+    it('empty matrix + endIsNow=true ⇒ surfaces live alerts with fallback flag', async () => {
+      // Option A: matrix empty (retention gap) → we still run the live
+      // /api/v1/alerts fetch in parallel and surface whatever it returns.
+      // `fallback` flags the coverage gap so the UI can banner it.
       mockClient.transport.request.mockResolvedValueOnce(matrix([]));
-      // Second call: legacy /api/v1/alerts returns a single current-active alert
       mockClient.transport.request.mockResolvedValueOnce({
         body: {
           data: {
@@ -375,18 +561,181 @@ describe('DirectQueryPrometheusBackend', () => {
       const result = await backend.getHistoricalAlerts(
         mockClient as never,
         ds,
-        nowSec - 3600,
-        nowSec,
-        60
+        100,
+        500,
+        60,
+        /* endIsNow */ true
       );
       expect(result.fallback).toBe('prometheus-alerts-current-only');
       expect(result.alerts).toHaveLength(1);
       expect(result.alerts[0].name).toBe('Live');
     });
 
-    it('queryRangeMatrix throws ⇒ { alerts: [], error }', async () => {
+    it('live alerts merged with historical episodes; active episodes dedupe the live duplicate', async () => {
+      // Window 100..400, step 60. One episode still firing at the right
+      // edge (Active) and one that resolved mid-window (Resolved). Live
+      // endpoint returns the same Active alert (which must dedupe) plus
+      // a NEW Emerging alert not seen in the matrix (which must appear).
+      mockClient.transport.request.mockResolvedValueOnce(
+        matrix([
+          {
+            metric: { alertname: 'Active', service: 'cart', alertstate: 'firing' },
+            points: [
+              [220, '1'],
+              [280, '1'],
+              [340, '1'],
+              [400, '1'],
+            ],
+          },
+          {
+            metric: { alertname: 'Resolved', service: 'ad', alertstate: 'firing' },
+            points: [
+              [160, '1'],
+              [220, '1'],
+              [280, '0'],
+            ],
+          },
+        ])
+      );
+      mockClient.transport.request.mockResolvedValueOnce({
+        body: {
+          data: {
+            alerts: [
+              {
+                // Same rule identity as the Active historical episode —
+                // stripping alertstate, labels match. Expect dedupe.
+                labels: { alertname: 'Active', service: 'cart' },
+                state: 'firing',
+                annotations: {},
+                activeAt: '2024-01-15T12:00:00Z',
+              },
+              {
+                // No matching historical episode — expect this to show up.
+                labels: { alertname: 'Emerging', service: 'checkout' },
+                state: 'firing',
+                annotations: {},
+                activeAt: '2024-01-15T12:00:00Z',
+              },
+            ],
+          },
+        },
+      });
+      const result = await backend.getHistoricalAlerts(
+        mockClient as never,
+        ds,
+        100,
+        400,
+        60,
+        /* endIsNow */ true
+      );
+      // 2 historical + 1 live (the dup'd "Active" was suppressed by dedupe).
+      expect(result.alerts).toHaveLength(3);
+      const names = result.alerts.map((a) => a.name).sort();
+      expect(names).toEqual(['Active', 'Emerging', 'Resolved']);
+      // Because the matrix had data, no fallback banner.
+      expect(result.fallback).toBeUndefined();
+    });
+
+    it('resolved historical episode does NOT dedupe a re-firing live alert', async () => {
+      // Rule fired and resolved mid-window, then fired again. Live
+      // /api/v1/alerts surfaces the current firing; the historical
+      // resolved episode must NOT suppress it (dedupe only fires on
+      // episodes flagged `stillActiveAtRangeEnd`).
+      mockClient.transport.request.mockResolvedValueOnce(
+        matrix([
+          {
+            metric: { alertname: 'Flap', service: 'x', alertstate: 'firing' },
+            points: [
+              [160, '1'],
+              [220, '1'],
+              [280, '0'], // resolved mid-window
+            ],
+          },
+        ])
+      );
+      mockClient.transport.request.mockResolvedValueOnce({
+        body: {
+          data: {
+            alerts: [
+              {
+                labels: { alertname: 'Flap', service: 'x' },
+                state: 'firing',
+                annotations: {},
+                activeAt: '2024-01-15T12:00:00Z',
+              },
+            ],
+          },
+        },
+      });
+      const result = await backend.getHistoricalAlerts(
+        mockClient as never,
+        ds,
+        100,
+        500,
+        60,
+        /* endIsNow */ true
+      );
+      expect(result.alerts).toHaveLength(2);
+      const states = result.alerts.map((a) => a.state);
+      expect(states).toContain('resolved');
+      expect(states).toContain('active');
+    });
+
+    it('endIsNow=false ⇒ live /api/v1/alerts NOT called', async () => {
+      // Past-only window: the live endpoint has nothing to offer, so
+      // we should make exactly one request (the matrix) and no fallback.
+      mockClient.transport.request.mockResolvedValueOnce(
+        matrix([
+          {
+            metric: { alertname: 'Past' },
+            points: [
+              [160, '1'],
+              [220, '0'],
+            ],
+          },
+        ])
+      );
+      const result = await backend.getHistoricalAlerts(
+        mockClient as never,
+        ds,
+        100,
+        500,
+        60,
+        /* endIsNow */ false
+      );
+      expect(result.alerts).toHaveLength(1);
+      expect(mockClient.transport.request).toHaveBeenCalledTimes(1);
+      expect(result.fallback).toBeUndefined();
+    });
+
+    it('empty matrix + endIsNow=true + live /api/v1/alerts fails ⇒ { alerts: [], error }', async () => {
+      // Matrix is empty AND live fetch rejects + rule-extraction fallback
+      // also rejects. Nothing to surface; propagate the live-side error.
+      mockClient.transport.request.mockResolvedValueOnce(matrix([]));
+      mockClient.transport.request.mockRejectedValueOnce(new Error('upstream unauthorized'));
+      mockClient.transport.request.mockRejectedValueOnce(new Error('upstream unauthorized'));
+      const result = await backend.getHistoricalAlerts(
+        mockClient as never,
+        ds,
+        100,
+        500,
+        60,
+        /* endIsNow */ true
+      );
+      expect(result.alerts).toEqual([]);
+      expect(result.error).toBeDefined();
+    });
+
+    it('queryRangeMatrix throws + no live fallback ⇒ { alerts: [], error }', async () => {
       mockClient.transport.request.mockRejectedValueOnce(new Error('workspace offline'));
-      const result = await backend.getHistoricalAlerts(mockClient as never, ds, 100, 200, 60);
+      const result = await backend.getHistoricalAlerts(
+        mockClient as never,
+        ds,
+        100,
+        200,
+        60,
+        /* endIsNow */ false
+      );
       expect(result.alerts).toEqual([]);
       expect(result.error).toContain('workspace offline');
     });

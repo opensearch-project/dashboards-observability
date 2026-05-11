@@ -347,7 +347,6 @@ export interface PromAlertEpisode {
  */
 export function promEpisodeToUnified(ep: PromAlertEpisode, dsId: string): UnifiedAlertSummary {
   const name = ep.labels.alertname || 'Unknown';
-  const instance = ep.labels.instance || '';
   // Plan override: historical episodes without `labels.severity` fall back
   // to `'medium'` rather than `'info'` (the live-alert default). When
   // severity IS present, defer to the existing `promSeverityFromLabels`
@@ -362,7 +361,14 @@ export function promEpisodeToUnified(ep: PromAlertEpisode, dsId: string): Unifie
   }
 
   return {
-    id: `${dsId}-${name}-${instance}-${ep.startMs}`,
+    // Include a stable hash of the full label map so two episodes of the
+    // same rule with distinct labels — e.g. `service_name=cart` vs
+    // `service_name=recommendation`, or `alertstate=firing` vs
+    // `alertstate=pending` — produce distinct ids. Using just alertname +
+    // instance + alertstate collides on rules that don't emit `instance`
+    // but split along other labels (`job`, `service`, `container_id`, …),
+    // which is typical for OTel-instrumented Prometheus rules.
+    id: `${dsId}-${name}-${hashLabels(ep.labels)}-${ep.startMs}`,
     datasourceId: dsId,
     datasourceType: 'prometheus',
     name,
@@ -373,6 +379,64 @@ export function promEpisodeToUnified(ep: PromAlertEpisode, dsId: string): Unifie
     labels: ep.labels,
     annotations,
   };
+}
+
+/**
+ * Stable 32-bit FNV-1a hash of a label map, rendered as 8 lower-case hex
+ * chars. Sorted so key order doesn't change the hash, and the
+ * `${key}\x00${value}\x01` separators are bytes that can't appear in
+ * Prometheus label names / values so `{a: "b", c: "d"}` and
+ * `{ab: "", cd: ""}` can't collide.
+ *
+ * Not cryptographic — we need a cheap deterministic discriminator for the
+ * client-side `UnifiedAlertSummary.id` field, nothing more.
+ */
+/* eslint-disable no-bitwise -- FNV-1a is defined in terms of 32-bit XOR and
+   shift operations; the whole function is bitwise by design. */
+function hashLabels(labels: Record<string, string>): string {
+  const entries = Object.entries(labels).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+  let hash = 0x811c9dc5; // FNV-1a 32-bit offset basis
+  for (const [k, v] of entries) {
+    const segment = `${k}\x00${v}\x01`;
+    for (let i = 0; i < segment.length; i++) {
+      hash ^= segment.charCodeAt(i) & 0xff;
+      // FNV-1a prime multiplication expressed as shifts — keeps the result
+      // in 32-bit range without depending on BigInt. Matches the canonical
+      // implementation (prime = 16777619 = (1<<24) + (1<<8) + (1<<7) + (1<<4) + (1<<1) + 1).
+      hash = (hash + ((hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24))) >>> 0;
+    }
+  }
+  return hash.toString(16).padStart(8, '0');
+}
+/* eslint-enable no-bitwise */
+
+/**
+ * Labels that identify the transport shape of a Prometheus alert sample
+ * rather than the rule itself. Strip these before hashing so the hash
+ * matches between the two places alerts come from:
+ *   - `ALERTS{}` matrix series carry `__name__="ALERTS"` and an
+ *     `alertstate` label set by Prometheus to `"firing"` or `"pending"`.
+ *   - `/api/v1/alerts` responses carry neither of those; the rule
+ *     identity is what's left (`alertname` + user-defined labels).
+ *
+ * Without stripping these, the dedupe set built from matrix episodes
+ * would never match a live alert and we'd double-report every active
+ * alert.
+ */
+const RULE_IDENTITY_STRIP_LABELS = new Set(['__name__', 'alertstate']);
+
+/**
+ * Hash of the labels that identify a Prometheus rule instance — the full
+ * label set minus transport metadata (see `RULE_IDENTITY_STRIP_LABELS`).
+ * Used as a dedupe key when merging historical episodes with live
+ * `/api/v1/alerts` results.
+ */
+export function hashRuleIdentity(labels: Record<string, string>): string {
+  const filtered: Record<string, string> = {};
+  for (const [k, v] of Object.entries(labels)) {
+    if (!RULE_IDENTITY_STRIP_LABELS.has(k)) filtered[k] = v;
+  }
+  return hashLabels(filtered);
 }
 
 /**

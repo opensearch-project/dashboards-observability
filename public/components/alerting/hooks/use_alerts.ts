@@ -16,7 +16,7 @@
  * to the transport, which appends them to the request query object. Changing
  * either value triggers a refetch through the effect dependencies below.
  */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ProgressiveResponse, UnifiedAlertSummary } from '../../../../common/types/alerting';
 import { AlertingOpenSearchService } from '../query_services/alerting_opensearch_service';
 
@@ -49,6 +49,17 @@ export function useAlerts({
   const [localRefresh, setLocalRefresh] = useState(0);
   const refetch = useCallback(() => setLocalRefresh((t) => t + 1), []);
 
+  // Monotonic request id — guards against stale responses overwriting newer
+  // ones when the user changes the picker faster than the network responds.
+  // Each effect run captures its request id at dispatch; when the response
+  // resolves we check the ref, and only commit state if no later request has
+  // started in the meantime. Closure-scoped `cancelled` flags alone do not
+  // prevent this because the older effect's `cancelled = true` happens
+  // during cleanup (before the new effect body), which is fine for the
+  // common case but fails if the older request resolves after the newer
+  // one has already committed its result.
+  const lastRequestIdRef = useRef(0);
+
   const dsIdsKey = dsIds.join(',');
 
   useEffect(() => {
@@ -56,22 +67,21 @@ export function useAlerts({
       setData(null);
       return;
     }
-    let cancelled = false;
+    const requestId = ++lastRequestIdRef.current;
     setIsLoading(true);
     setError(null);
     (async () => {
       try {
         const res = await service.listAlerts({ dsIds, startTime, endTime });
-        if (!cancelled) setData(res);
+        if (requestId !== lastRequestIdRef.current) return;
+        setData(res);
       } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e : new Error(String(e)));
+        if (requestId !== lastRequestIdRef.current) return;
+        setError(e instanceof Error ? e : new Error(String(e)));
       } finally {
-        if (!cancelled) setIsLoading(false);
+        if (requestId === lastRequestIdRef.current) setIsLoading(false);
       }
     })();
-    return () => {
-      cancelled = true;
-    };
     // `dsIds` is a new array reference each render; `dsIdsKey` is its stable
     // projection. `startTime`/`endTime` are primitive strings — safe to list
     // directly (equivalent to a stable-string key for a single value).

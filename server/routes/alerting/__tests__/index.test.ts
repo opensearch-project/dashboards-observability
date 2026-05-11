@@ -216,5 +216,44 @@ describe('registerAlertingRoutes', () => {
       const query = (route.validate as { query: { validate: (v: unknown) => unknown } }).query;
       expect(() => query.validate({})).not.toThrow();
     });
+
+    it.each([
+      '/api/alerting/unified/alerts',
+      '/api/alerting/opensearch/{dsId}/alerts',
+      '/api/alerting/prometheus/{dsId}/alerts',
+    ])('%s rejects one-sided ranges (startTime without endTime)', (path: string) => {
+      register();
+      const route = findRoute(path);
+      const query = (route.validate as { query: { validate: (v: unknown) => unknown } }).query;
+      expect(() => query.validate({ startTime: 'now-1h' })).toThrow(
+        /startTime and endTime must be supplied together/
+      );
+    });
+
+    it.each([
+      '/api/alerting/unified/alerts',
+      '/api/alerting/opensearch/{dsId}/alerts',
+      '/api/alerting/prometheus/{dsId}/alerts',
+    ])('%s rejects one-sided ranges (endTime without startTime)', (path: string) => {
+      register();
+      const route = findRoute(path);
+      const query = (route.validate as { query: { validate: (v: unknown) => unknown } }).query;
+      expect(() => query.validate({ endTime: 'now' })).toThrow(
+        /startTime and endTime must be supplied together/
+      );
+    });
+
+    it.each([
+      '/api/alerting/unified/alerts',
+      '/api/alerting/opensearch/{dsId}/alerts',
+      '/api/alerting/prometheus/{dsId}/alerts',
+    ])('%s rejects inverted ranges (endTime before startTime)', (path: string) => {
+      register();
+      const route = findRoute(path);
+      const query = (route.validate as { query: { validate: (v: unknown) => unknown } }).query;
+      expect(() => query.validate({ startTime: 'now', endTime: 'now-1h' })).toThrow(
+        /endTime must be on or after startTime/
+      );
+    });
   });
 });

@@ -18,9 +18,10 @@
 import {
   AlertingOSClient,
   Datasource,
-  DatasourceService,
+  DatasourceFetchFallback,
   DatasourceFetchResult,
   DatasourceFetchStatus,
+  DatasourceService,
   DatasourceWarning,
   Logger,
   OpenSearchBackend,
@@ -59,10 +60,17 @@ const DEFAULT_MAX_RESULTS = 5_000;
  * `parseDateMathMs` once on the incoming `startTime`/`endTime` date-math
  * strings. Threaded through `fetchAlertsRaw` so each backend gets a
  * numeric window instead of re-parsing date-math at every hop.
+ *
+ * `endIsNow` records whether the original `endTime` string was relative
+ * to `now` (e.g. `"now"`, `"now-5m"`). Backends use this signal to decide
+ * whether an empty historical response should fall back to current-only
+ * data; a past-only range should not. Kept on the resolved object so we
+ * don't pass two values around.
  */
 interface ResolvedRange {
   startMs: number;
   endMs: number;
+  endIsNow: boolean;
 }
 
 /**
@@ -74,17 +82,22 @@ interface ResolvedRange {
 interface FetchAlertsRawResult {
   alerts: UnifiedAlertSummary[];
   truncated?: boolean;
-  fallback?: string;
+  fallback?: DatasourceFetchFallback;
   error?: string;
 }
 
 /**
  * Parse `startTime`/`endTime` date-math strings from a fetch options object
- * into a numeric `{ startMs, endMs }` pair. Returns `undefined` when either
- * side is missing so callers can use the legacy "no range" path via a
- * simple nullish check. Throws if either string is present but unparseable
- * — route-layer `validateDateMath` validators should already have rejected
- * that case with a 400, so a throw here is a genuine bug.
+ * into a numeric `{ startMs, endMs, endIsNow }` triple. Returns `undefined`
+ * when either side is missing so callers can use the legacy "no range"
+ * path via a simple nullish check. Throws if either string is present but
+ * unparseable — route-layer `validateDateMath` validators should already
+ * have rejected that case with a 400, so a throw here is a genuine bug.
+ *
+ * `endIsNow` is true when `endTime` is a `now`-relative date-math
+ * expression (`"now"`, `"now-5m"`, `"now/d"`); the Prometheus historical
+ * path uses this to decide whether an empty matrix should fall back to
+ * the current-only API. Absolute timestamps resolve to `endIsNow: false`.
  */
 function resolveRangeMsFromOptions(options?: {
   startTime?: string;
@@ -94,6 +107,7 @@ function resolveRangeMsFromOptions(options?: {
   return {
     startMs: parseDateMathMs(options.startTime, /* isEndTime */ false),
     endMs: parseDateMathMs(options.endTime, /* isEndTime */ true),
+    endIsNow: /\bnow\b/.test(options.endTime),
   };
 }
 
@@ -208,9 +222,17 @@ export class MultiBackendAlertService {
     // historical-reconstruction path emits unified episodes. Per-backend
     // consumers therefore still see current-active alerts; historical
     // reconstruction is only surfaced through `getUnifiedAlerts`.
-    _options?: { startTime?: string; endTime?: string }
+    options?: { startTime?: string; endTime?: string }
   ): Promise<PromAlert[]> {
     const ds = await this.requireDatasource(dsId, 'prometheus');
+    if (options?.startTime || options?.endTime) {
+      // Callers that specifically want a filtered view must go through the
+      // unified endpoint; leaving this as a silent discard hides client
+      // bugs (e.g. a UI assuming the per-backend route respects range).
+      this.logger.debug(
+        `getPromAlerts: ignoring startTime/endTime on per-backend route (ds=${dsId}); use /api/alerting/unified/alerts for historical range support`
+      );
+    }
     return this.promBackend!.getAlerts(client, ds);
   }
 
@@ -501,7 +523,7 @@ export class MultiBackendAlertService {
       status: DatasourceFetchStatus,
       data: UnifiedAlertSummary[],
       error?: string,
-      extra?: { truncated?: boolean; fallback?: string }
+      extra?: { truncated?: boolean; fallback?: DatasourceFetchFallback }
     ): DatasourceFetchResult<UnifiedAlertSummary> => ({
       datasourceId: ds.id,
       datasourceName: ds.name,
@@ -629,7 +651,8 @@ export class MultiBackendAlertService {
             ds,
             startSec,
             endSec,
-            step
+            step,
+            range.endIsNow
           );
           return {
             alerts: historical.alerts,

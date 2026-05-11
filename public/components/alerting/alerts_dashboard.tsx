@@ -26,7 +26,11 @@ import {
   EuiResizableContainer,
   EuiCallOut,
 } from '@elastic/eui';
-import { UnifiedAlertSummary, Datasource } from '../../../common/types/alerting';
+import {
+  DatasourceFetchFallback,
+  UnifiedAlertSummary,
+  Datasource,
+} from '../../../common/types/alerting';
 import { filterAlerts } from '../../../common/services/alerting/filter';
 import { AlertTimeline } from './alerts_charts';
 import { AlertsSummaryCards } from './alerts_summary_cards';
@@ -200,7 +204,7 @@ export interface AlertsDashboardProps {
    * fallbacks (e.g. Prometheus empty-matrix → legacy /alerts active-only).
    * Rendered as a callout above the timeline.
    */
-  fallbackHints?: Array<{ datasourceName: string; fallback: string }>;
+  fallbackHints?: Array<{ datasourceName: string; fallback: DatasourceFetchFallback }>;
 }
 
 export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({

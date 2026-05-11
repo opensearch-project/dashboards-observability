@@ -106,6 +106,13 @@ export function computeStep(
  * Returns `true` for any string `@elastic/datemath` can parse (both as a
  * start AND as an end — we check both since some expressions are only
  * valid in one rounding mode).
+ *
+ * Known leniency: `@elastic/datemath` falls through to `moment()` for
+ * non-date-math strings, which accepts partial ISO forms (`'2024'`,
+ * `'2024-06'`, `'Jan 15'`, etc). This matches the permissiveness of the
+ * OpenSearch query DSL and `EuiSuperDatePicker`, so we do not tighten it
+ * here — the UI surfaces malformed-input errors through `parseDateMath*`
+ * on the handler side.
  */
 export function validateDateMath(expr: string): boolean {
   if (typeof expr !== 'string' || expr.length === 0) return false;
@@ -116,4 +123,44 @@ export function validateDateMath(expr: string): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * Cross-field validator for a route query schema carrying optional
+ * `startTime`/`endTime` date-math strings. Called from the `validate`
+ * option on `schema.object(...)` — returns a string to reject, `undefined`
+ * to accept. Enforces two invariants beyond per-field `validateDateMath`:
+ *
+ *   1. Both fields are supplied together or neither. One-sided ranges are
+ *      ambiguous — the backend would silently treat the missing side as
+ *      "open", which is usually not what the client meant.
+ *   2. When both are supplied and resolvable, `endTime` is not strictly
+ *      before `startTime`. An inverted range passes the post-fetch filter
+ *      as "zero matches" rather than a client error, which is a footgun
+ *      when debugging an empty dashboard.
+ *
+ * Malformed inputs are already rejected by the per-field validator; a
+ * resolve failure here is treated as a no-op (let the per-field error
+ * propagate with its own message).
+ */
+export function validateTimeRangeQuery(query: {
+  startTime?: string;
+  endTime?: string;
+}): string | undefined {
+  const hasStart = typeof query.startTime === 'string' && query.startTime.length > 0;
+  const hasEnd = typeof query.endTime === 'string' && query.endTime.length > 0;
+  if (hasStart !== hasEnd) {
+    return 'startTime and endTime must be supplied together';
+  }
+  if (!hasStart || !hasEnd) return undefined;
+  try {
+    const startMs = parseDateMathMs(query.startTime as string, false);
+    const endMs = parseDateMathMs(query.endTime as string, true);
+    if (endMs < startMs) {
+      return 'endTime must be on or after startTime';
+    }
+  } catch {
+    // Per-field validator owns the malformed-input message; stay silent here.
+  }
+  return undefined;
 }

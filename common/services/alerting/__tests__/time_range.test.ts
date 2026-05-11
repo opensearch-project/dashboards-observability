@@ -31,6 +31,7 @@ import {
   dateMathToDSLString,
   computeStep,
   validateDateMath,
+  validateTimeRangeQuery,
 } from '../time_range';
 
 describe('time_range helpers', () => {
@@ -39,7 +40,7 @@ describe('time_range helpers', () => {
   const FIXED_NOW_MS = 1705320000000;
 
   beforeEach(() => {
-    jest.useFakeTimers('modern' as never);
+    jest.useFakeTimers();
     jest.setSystemTime(new Date(FIXED_NOW_MS));
   });
 
@@ -179,6 +180,44 @@ describe('time_range helpers', () => {
       // Route-layer validators may get garbage; guard explicitly.
       expect(validateDateMath((null as unknown) as string)).toBe(false);
       expect(validateDateMath((123 as unknown) as string)).toBe(false);
+    });
+  });
+
+  // =========================================================================
+  // validateTimeRangeQuery — cross-field rules (one-sided + inverted)
+  // =========================================================================
+
+  describe('validateTimeRangeQuery', () => {
+    it('accepts both absent (legacy no-range path)', () => {
+      expect(validateTimeRangeQuery({})).toBeUndefined();
+    });
+
+    it('accepts both present and well-ordered', () => {
+      expect(validateTimeRangeQuery({ startTime: 'now-1h', endTime: 'now' })).toBeUndefined();
+    });
+
+    it('rejects startTime without endTime', () => {
+      expect(validateTimeRangeQuery({ startTime: 'now-1h' })).toMatch(/supplied together/);
+    });
+
+    it('rejects endTime without startTime', () => {
+      expect(validateTimeRangeQuery({ endTime: 'now' })).toMatch(/supplied together/);
+    });
+
+    it('rejects inverted ranges', () => {
+      expect(validateTimeRangeQuery({ startTime: 'now', endTime: 'now-1h' })).toMatch(
+        /on or after/
+      );
+    });
+
+    it('allows equal bounds (zero-length window)', () => {
+      expect(validateTimeRangeQuery({ startTime: 'now', endTime: 'now' })).toBeUndefined();
+    });
+
+    it('silently accepts malformed input (per-field validator handles it)', () => {
+      // Malformed inputs are rejected upstream by `validateDateMath`; the
+      // cross-field validator stays silent on them so we don't double-report.
+      expect(validateTimeRangeQuery({ startTime: 'gibberish', endTime: 'now' })).toBeUndefined();
     });
   });
 });

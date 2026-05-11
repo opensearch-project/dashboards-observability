@@ -18,7 +18,7 @@
 import { schema } from '@osd/config-schema';
 import { IRouter, RequestHandlerContext, SavedObject } from '../../../../../src/core/server';
 import type { AlertingOSClient, Datasource, Logger } from '../../../common/types/alerting';
-import { validateDateMath } from '../../../common/services/alerting';
+import { validateDateMath, validateTimeRangeQuery } from '../../../common/services/alerting';
 import {
   HttpOpenSearchBackend,
   MultiBackendAlertService,
@@ -256,6 +256,16 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     ),
   };
 
+  /**
+   * Cross-field validator options for any `schema.object(...)` that carries
+   * the `timeRangeQuery` pair. Rejects one-sided ranges and inverted ranges
+   * (`endTime < startTime`) with a 400 before the handler sees them. See
+   * `validateTimeRangeQuery` for the exact rules and rationale.
+   */
+  const timeRangeObjectOptions = {
+    validate: (value: { startTime?: string; endTime?: string }) => validateTimeRangeQuery(value),
+  };
+
   // Mutation routes (create/update/delete monitor + acknowledge alert) live
   // in `./mutations/` — register them via the dedicated registrar so the split
   // stays clean.
@@ -268,12 +278,15 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     {
       path: '/api/alerting/unified/alerts',
       validate: {
-        query: schema.object({
-          dsIds: schema.maybe(schema.string()),
-          timeout: schema.maybe(schema.string()),
-          maxResults: schema.maybe(schema.string()),
-          ...timeRangeQuery,
-        }),
+        query: schema.object(
+          {
+            dsIds: schema.maybe(schema.string()),
+            timeout: schema.maybe(schema.string()),
+            maxResults: schema.maybe(schema.string()),
+            ...timeRangeQuery,
+          },
+          timeRangeObjectOptions
+        ),
       },
     },
     async (ctx, req, res) => {
@@ -363,7 +376,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
       path: '/api/alerting/opensearch/{dsId}/alerts',
       validate: {
         params: schema.object({ dsId: alertingIdSchema }),
-        query: schema.object(timeRangeQuery),
+        query: schema.object(timeRangeQuery, timeRangeObjectOptions),
       },
     },
     async (ctx, req, res) => {
@@ -411,7 +424,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
         // `/api/alerting/unified/alerts` via `MultiBackendAlertService.fetchAlertsRaw`.
         // A future revision that reshapes this endpoint to return unified
         // summaries can start honoring the range without a schema change.
-        query: schema.object(timeRangeQuery),
+        query: schema.object(timeRangeQuery, timeRangeObjectOptions),
       },
     },
     async (ctx, req, res) => {

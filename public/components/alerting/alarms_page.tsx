@@ -110,9 +110,9 @@ function persistSelection(names: string[]) {
 // ---- Time-range persistence ----
 //
 // Keyed in sessionStorage (not localStorage) so each tab keeps its own
-// picked range — mirrors APM's precedent. Falls back to the locked
-// locked default (`now-24h` → `now`) when the key is absent or the
-// underlying storage throws (SSR, private mode, quota exceeded).
+// picked range — mirrors APM's precedent. Falls back to the default
+// (`now-24h` → `now`) when the key is absent or the underlying storage
+// throws (SSR, private mode, quota exceeded).
 const ALERT_MANAGER_START_TIME_KEY = 'AlertManagerStartTime';
 const ALERT_MANAGER_END_TIME_KEY = 'AlertManagerEndTime';
 const DEFAULT_START_TIME = 'now-24h';
@@ -227,20 +227,42 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // `parseDateMathMs` so we never ship hard-coded epoch numbers.
   //
   // We emit `console.warn` (not `.error`) because the failure is recoverable
-  // and self-healing — the next successful `onTimeChange` will persist a
-  // good value and silence the warning.
+  // and self-healing — the effect below resets state and sessionStorage to
+  // the defaults so the hook (which forwards the raw date-math strings to
+  // the backend) stops sending garbage that the route-layer validator
+  // would reject with a 400.
   //
-  // `startTime`/`endTime` still go to the hook (which forwards the raw
-  // date-math strings to the backend) — only the resolved numbers feed
-  // the chart.
-  const [startMs, endMs] = useMemo(() => {
+  // `refreshToken` is in the deps so that clicking Refresh while the range
+  // is relative-to-`now` (e.g. `now-24h` → `now`) re-resolves `now` to the
+  // current wall clock. Without it the chart window would stay pinned to
+  // the mount-time snapshot even though the hook refetches new data, which
+  // would misalign bars at the right edge of the chart.
+  const [startMs, endMs, rangeParseFailed] = useMemo(() => {
     try {
-      return [parseDateMathMs(startTime, false), parseDateMathMs(endTime, true)];
+      return [parseDateMathMs(startTime, false), parseDateMathMs(endTime, true), false];
     } catch (e) {
       console.warn('[AlertManager] failed to parse time range, falling back to defaults', e);
-      return [parseDateMathMs(DEFAULT_START_TIME, false), parseDateMathMs(DEFAULT_END_TIME, true)];
+      return [
+        parseDateMathMs(DEFAULT_START_TIME, false),
+        parseDateMathMs(DEFAULT_END_TIME, true),
+        true,
+      ];
     }
-  }, [startTime, endTime]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startTime, endTime, refreshToken]);
+
+  // When parse failed (corrupted sessionStorage, manual DevTools edit),
+  // heal the stored values back to defaults. Without this, `startTime` /
+  // `endTime` keep leaking garbage into `useAlerts` → the backend route,
+  // which rejects it with a 400 and surfaces as `alertsError`. Resetting
+  // state + persistence both (a) stops the 400 loop and (b) means the
+  // next render sees a clean, good range.
+  useEffect(() => {
+    if (!rangeParseFailed) return;
+    setStartTime(DEFAULT_START_TIME);
+    setEndTime(DEFAULT_END_TIME);
+    persistTimeRange(DEFAULT_START_TIME, DEFAULT_END_TIME);
+  }, [rangeParseFailed]);
 
   // ---- Alerts data (migrated off inline fetchAlerts onto useAlerts) ----
   const { data: alertsData, isLoading: alertsLoading, error: alertsError } = useAlerts({
@@ -264,7 +286,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     }));
   }, [alertsData]);
   // Backend hints surfaced through the dashboard banner props.
-  const alertsTruncated = (alertsData?.datasourceStatus || []).some((s) => s.truncated) ?? false;
+  const alertsTruncated = (alertsData?.datasourceStatus || []).some((s) => s.truncated);
   const alertsFallbackHints = useMemo(
     () =>
       (alertsData?.datasourceStatus || [])
@@ -935,11 +957,25 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
               start={startTime}
               end={endTime}
               onTimeChange={({ start, end }) => {
+                if (start === startTime && end === endTime) return;
                 setStartTime(start);
                 setEndTime(end);
                 persistTimeRange(start, end);
               }}
-              onRefresh={() => setRefreshToken((t) => t + 1)}
+              // EuiSuperDatePicker.onRefresh delivers the picker's resolved
+              // `{ start, end }` along with the interval. Sync them back
+              // into component state so the refetch uses the picker's
+              // current snapshot rather than the potentially-stale
+              // `startTime`/`endTime` captured on mount. Persist so the
+              // next page load matches what the user just saw.
+              onRefresh={({ start, end }) => {
+                if (start !== startTime || end !== endTime) {
+                  setStartTime(start);
+                  setEndTime(end);
+                  persistTimeRange(start, end);
+                }
+                setRefreshToken((t) => t + 1);
+              }}
               data-test-subj="alertManager-datePicker"
             />
           </EuiFlexItem>

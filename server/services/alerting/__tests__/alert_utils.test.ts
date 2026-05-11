@@ -89,7 +89,7 @@ describe('promEpisodeToUnified', () => {
     expect(u.annotations.truncatedStart).toBeUndefined();
   });
 
-  it('id incorporates datasource, alertname, instance, and startMs', () => {
+  it('id incorporates datasource, alertname, label-hash, and startMs', () => {
     const u = promEpisodeToUnified(
       {
         labels: { alertname: 'X', instance: 'host-1' },
@@ -98,9 +98,60 @@ describe('promEpisodeToUnified', () => {
       },
       'ds-prom'
     );
+    // Human-readable parts stay in the id for log-grep-ability.
     expect(u.id).toContain('ds-prom');
     expect(u.id).toContain('X');
-    expect(u.id).toContain('host-1');
     expect(u.id).toContain('12345');
+    // The label set (`instance: host-1` among them) is rolled into an
+    // 8-char hex hash, not emitted verbatim — otherwise we can't
+    // disambiguate rules with no `instance` label but different
+    // `service_name` / `job` / etc.
+    expect(u.id).toMatch(/ds-prom-X-[0-9a-f]{8}-12345/);
+  });
+
+  it('differing labels ⇒ different ids (same alertname)', () => {
+    const a = promEpisodeToUnified(
+      {
+        labels: { alertname: 'ServiceError', service_name: 'cart' },
+        startMs: 1000,
+        endMs: 2000,
+      },
+      'ds-prom'
+    );
+    const b = promEpisodeToUnified(
+      {
+        labels: { alertname: 'ServiceError', service_name: 'checkout' },
+        startMs: 1000,
+        endMs: 2000,
+      },
+      'ds-prom'
+    );
+    expect(a.id).not.toBe(b.id);
+  });
+
+  it('same labels ⇒ deterministic id (hash is stable)', () => {
+    // Two separate calls with the same inputs must produce the same id —
+    // otherwise the UI's React key would churn and tables would flash.
+    const u1 = promEpisodeToUnified(
+      { labels: { alertname: 'X', severity: 'info' }, startMs: 0, endMs: 1 },
+      'ds-prom'
+    );
+    const u2 = promEpisodeToUnified(
+      { labels: { alertname: 'X', severity: 'info' }, startMs: 0, endMs: 1 },
+      'ds-prom'
+    );
+    expect(u1.id).toBe(u2.id);
+  });
+
+  it('label-hash is insensitive to key insertion order', () => {
+    const u1 = promEpisodeToUnified(
+      { labels: { alertname: 'X', severity: 'info', job: 'a' }, startMs: 0, endMs: 1 },
+      'ds-prom'
+    );
+    const u2 = promEpisodeToUnified(
+      { labels: { job: 'a', severity: 'info', alertname: 'X' }, startMs: 0, endMs: 1 },
+      'ds-prom'
+    );
+    expect(u1.id).toBe(u2.id);
   });
 });

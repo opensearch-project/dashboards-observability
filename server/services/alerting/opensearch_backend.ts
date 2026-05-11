@@ -218,6 +218,12 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
      * filter (as of 2.x), so we post-fetch and then paginate-stop once the
      * filtered collection reaches this limit. The UI surfaces `truncated`
      * as an `EuiCallOut` prompting the user to narrow the range.
+     *
+     * Scope: this cap is PER-DATASOURCE. The unified service aggregates
+     * results across N datasources and forwards any `truncated: true` to
+     * the UI, but does not sum alert counts — so the unified view can show
+     * up to `N * FILTER_CAP` rows with no `truncated` flag if no single
+     * datasource individually exceeds the cap.
      */
     const FILTER_CAP = 1000;
     const hasRange = options?.startMs !== undefined && options?.endMs !== undefined;
@@ -243,13 +249,19 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
 
       if (hasRange) {
         for (const a of pageAlerts) {
-          // Active alerts have no end_time — treat as "still ongoing" (now).
+          // Active alerts have no end_time — treat as "still ongoing through
+          // the window end". Using `windowEnd` (the range resolved ONCE at
+          // the service entry) rather than a fresh `Date.now()` keeps the
+          // filter deterministic across multi-page scans: a pagination pass
+          // that spans several seconds won't let `now` drift past each
+          // page's comparisons and change which alerts the filter accepts.
+          //
           // This gives us a standard interval-overlap predicate:
           //   alert.start_time <= windowEnd  AND  effectiveEnd >= windowStart
           // which INCLUDES alerts that started before the window and are
           // still active, and EXCLUDES alerts that resolved before the
           // window opened or started after it closed.
-          const effectiveEnd = a.end_time ?? Date.now();
+          const effectiveEnd = a.end_time ?? windowEnd;
           if (a.start_time <= windowEnd && effectiveEnd >= windowStart) {
             allAlerts.push(a);
             if (allAlerts.length >= FILTER_CAP) {
@@ -265,12 +277,15 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
 
       if (pageAlerts.length < PAGE_SIZE) break;
       if (!hasRange && allAlerts.length >= totalAlerts) break;
-      // When filtering: the `pageAlerts.length < PAGE_SIZE` check above
-      // catches most cases, but if `totalAlerts` is an exact multiple of
-      // PAGE_SIZE (e.g. 100 / 200 / 1000) the last page returns PAGE_SIZE
-      // and we'd otherwise make one more empty request. Break early on
-      // the next start index being past the server-reported total.
-      if (hasRange && startIndex + PAGE_SIZE >= totalAlerts) break;
+      // We intentionally do NOT early-exit on `startIndex + PAGE_SIZE >=
+      // totalAlerts` when filtering — `totalAlerts` is the server's raw
+      // index count, not the filtered count. If the upstream total is
+      // stale (a common thing during heavy ingest) or differs from the
+      // actual number of alerts we'd see paginating, cutting the loop
+      // based on it can terminate BEFORE we've seen the real last page,
+      // dropping matches silently. `pageAlerts.length < PAGE_SIZE` is the
+      // authoritative end-of-stream signal; worst case we make one extra
+      // empty request on an exact PAGE_SIZE multiple, which is cheap.
       startIndex += PAGE_SIZE;
     }
 

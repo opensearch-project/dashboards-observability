@@ -15,6 +15,18 @@
 import type { OSAlert, OSMonitor } from './opensearch_types';
 import type { PromAlert, PromAlertingRule } from './prometheus_types';
 
+/**
+ * Known fallback reasons a backend may surface through
+ * `DatasourceFetchResult.fallback`. String-literal union (not `string`) so
+ * the UI can exhaustively switch on the value and a new reason requires a
+ * type-level declaration.
+ *
+ * Today's only member: Prometheus historical reconstruction returned an
+ * empty matrix on a `now`-relative range, and the backend fell back to
+ * `/api/v1/alerts` (current-active only).
+ */
+export type DatasourceFetchFallback = 'prometheus-alerts-current-only';
+
 // ============================================================================
 // OSD scoped client — structural shape of the subset we use
 // ============================================================================
@@ -251,7 +263,7 @@ export interface DatasourceFetchResult<T> {
    * to the legacy `/api/v1/alerts` (active-only) endpoint. UI renders a
    * per-datasource banner explaining the coverage limit.
    */
-  fallback?: string;
+  fallback?: DatasourceFetchFallback;
 }
 
 export interface ProgressiveResponse<T> {

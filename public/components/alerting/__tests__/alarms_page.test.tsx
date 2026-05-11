@@ -249,9 +249,12 @@ describe('AlarmsPage', () => {
     );
   });
 
-  it('does not crash when sessionStorage contains a malformed date-math expression; falls back to defaults', async () => {
+  it('does not crash when sessionStorage contains a malformed date-math expression; heals to defaults', async () => {
     // Corrupted value — parseDateMathMs would throw on this. The guarded
-    // useMemo should catch, warn, and substitute the default range.
+    // useMemo catches and substitutes the default range, AND an effect
+    // heals the component state + sessionStorage back to defaults so the
+    // hook stops forwarding garbage to the backend (which would otherwise
+    // reject it with a 400 on every refetch).
     window.sessionStorage.setItem('AlertManagerStartTime', 'totally-broken-expr');
     window.sessionStorage.setItem('AlertManagerEndTime', 'also-broken');
 
@@ -265,15 +268,24 @@ describe('AlarmsPage', () => {
     expect(screen.getByTestId('alerts-dashboard')).toBeInTheDocument();
 
     // The dashboard received numeric (valid) startMs/endMs derived from
-    // the fallback defaults, even though the corrupted strings are still
-    // what the hook sees (they only feed the backend as date-math;
-    // backend-side `validateDateMath` will reject them with a 400).
+    // the fallback defaults.
     const lastDashboard = mockDashboard.mock.calls[mockDashboard.mock.calls.length - 1][0];
     expect(typeof lastDashboard.startMs).toBe('number');
     expect(typeof lastDashboard.endMs).toBe('number');
     expect(Number.isFinite(lastDashboard.startMs)).toBe(true);
     expect(Number.isFinite(lastDashboard.endMs)).toBe(true);
     expect(lastDashboard.endMs).toBeGreaterThan(lastDashboard.startMs);
+
+    // Healing: the hook's most recent call should see the default
+    // strings, not the corrupted ones. Without this, the backend route
+    // would keep rejecting the request with a 400.
+    const lastHookCall = mockUseAlerts.mock.calls[mockUseAlerts.mock.calls.length - 1][0];
+    expect(lastHookCall.startTime).toBe('now-24h');
+    expect(lastHookCall.endTime).toBe('now');
+
+    // sessionStorage has also been healed so a reload starts clean.
+    expect(window.sessionStorage.getItem('AlertManagerStartTime')).toBe('now-24h');
+    expect(window.sessionStorage.getItem('AlertManagerEndTime')).toBe('now');
 
     // A recoverable warn surfaced. `@elastic/datemath` delegates to moment,
     // which can emit its own deprecation warning first for truly garbage
