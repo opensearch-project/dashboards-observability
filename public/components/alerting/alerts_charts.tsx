@@ -7,7 +7,10 @@
  * Alerts Charts — ECharts visualizations for the Alerts dashboard.
  *
  * Currently exposes:
- *  - AlertTimeline: stacked bar chart of alerts over 24h time buckets
+ *  - AlertTimeline: stacked bar chart of alerts over a variable-range time
+ *    window. The parent owns range resolution (date-math → epoch ms) and
+ *    passes pre-resolved `startMs` / `endMs` props so this component never
+ *    re-resolves date-math on every render.
  *
  * Other breakdown panels (SeverityDonut, StateBreakdown, AlertsByDatasource,
  * AlertsByMonitor) were removed in a UI cleanup pass — the facet filter panel
@@ -35,13 +38,73 @@ const SEVERITY_COLORS: Record<string, string> = {
 // AlertTimeline — stacked bar chart by time buckets
 // ============================================================================
 
-export const AlertTimeline: React.FC<{ alerts: UnifiedAlertSummary[] }> = ({ alerts }) => {
+/** Common range thresholds (ms). */
+const ONE_HOUR_MS = 60 * 60 * 1000;
+const ONE_DAY_MS = 24 * ONE_HOUR_MS;
+const SEVEN_DAYS_MS = 7 * ONE_DAY_MS;
+
+/** Target bucket width — 5 minutes. With a 1h range, this yields exactly 12 */
+/** buckets (ceil(60m / 5m) = 12), matching the fixed bucketCount used before. */
+const TARGET_BUCKET_MS = 5 * 60 * 1000;
+
+/** Minimum / maximum bucket counts. Within this clamp the X-axis stays */
+/** readable across ranges from 5 minutes up to 30 days. */
+const MIN_BUCKETS = 12;
+const MAX_BUCKETS = 24;
+
+/** Clamp `value` to `[min, max]`. Standard util; kept local to avoid a */
+/** lodash import for a two-line helper. */
+function clamp(min: number, max: number, value: number): number {
+  if (value < min) return min;
+  if (value > max) return max;
+  return value;
+}
+
+/** Zero-pad to two digits. */
+function pad2(n: number): string {
+  return n < 10 ? `0${n}` : String(n);
+}
+
+/**
+ * Format a bucket-start timestamp based on the overall range length:
+ *  - `HH:mm` for ranges ≤ 24h
+ *  - `MM-DD HH:mm` for ranges ≤ 7d
+ *  - `MM-DD` otherwise
+ */
+function formatBucketLabel(ts: number, rangeMs: number): string {
+  const d = new Date(ts);
+  const hh = pad2(d.getHours());
+  const mm = pad2(d.getMinutes());
+  const mo = pad2(d.getMonth() + 1);
+  const da = pad2(d.getDate());
+  if (rangeMs <= ONE_DAY_MS) return `${hh}:${mm}`;
+  if (rangeMs <= SEVEN_DAYS_MS) return `${mo}-${da} ${hh}:${mm}`;
+  return `${mo}-${da}`;
+}
+
+export interface AlertTimelineProps {
+  alerts: UnifiedAlertSummary[];
+  /** Range start in epoch ms (resolved by the parent). */
+  startMs: number;
+  /** Range end in epoch ms (resolved by the parent). */
+  endMs: number;
+}
+
+export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, endMs }) => {
   const spec = useMemo(() => {
     if (alerts.length === 0) return null;
 
-    const now = Date.now();
-    const bucketCount = 12;
-    const bucketDuration = (24 * 60 * 60 * 1000) / bucketCount;
+    // Defend against inverted or zero-length ranges — pick a minimum 1ms
+    // window so division below doesn't blow up. In practice the parent
+    // should never send this, but the picker+sessionStorage cycle can
+    // produce transient oddities on first mount.
+    const rangeMs = Math.max(1, endMs - startMs);
+
+    // bucketCount = clamp(12, 24, ceil(rangeMs / targetBucketMs))
+    const rawBucketCount = Math.ceil(rangeMs / TARGET_BUCKET_MS);
+    const bucketCount = clamp(MIN_BUCKETS, MAX_BUCKETS, rawBucketCount);
+    const bucketDuration = rangeMs / bucketCount;
+
     const buckets: Array<{
       label: string;
       critical: number;
@@ -52,12 +115,9 @@ export const AlertTimeline: React.FC<{ alerts: UnifiedAlertSummary[] }> = ({ ale
     }> = [];
 
     for (let i = 0; i < bucketCount; i++) {
-      const bucketStart = now - (bucketCount - i) * bucketDuration;
+      const bucketStart = startMs + i * bucketDuration;
       const bucketEnd = bucketStart + bucketDuration;
-      const label = new Date(bucketStart).toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
+      const label = formatBucketLabel(bucketStart, rangeMs);
       const inBucket = alerts.filter((a) => {
         const t = new Date(a.startTime).getTime();
         return t >= bucketStart && t < bucketEnd;
@@ -110,7 +170,7 @@ export const AlertTimeline: React.FC<{ alerts: UnifiedAlertSummary[] }> = ({ ale
         barMaxWidth: 32,
       })),
     };
-  }, [alerts]);
+  }, [alerts, startMs, endMs]);
 
   if (alerts.length === 0)
     return (

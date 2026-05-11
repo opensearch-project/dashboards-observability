@@ -191,12 +191,128 @@ describe('HttpOpenSearchBackend', () => {
         },
       ]);
 
-      const { alerts, totalAlerts } = await backend.getAlerts(client);
+      const { alerts, totalAlerts, truncated } = await backend.getAlerts(client);
       expect(totalAlerts).toBe(2);
+      expect(truncated).toBe(false);
       expect(alerts.map((a) => a.id)).toEqual(['a-1', 'a-2']);
       expect(alerts[0].severity).toBe('1');
       expect(alerts[1].state).toBe('ACKNOWLEDGED');
       expect(request).toHaveBeenCalledTimes(1);
+    });
+
+    // ---- range-based filter + cap ----
+
+    const mkAlert = (id: string, start: number, end: number | null) => ({
+      id,
+      monitor_id: 'mon-1',
+      monitor_name: 'A',
+      trigger_id: 't-1',
+      trigger_name: 'trig',
+      state: end === null ? 'ACTIVE' : 'COMPLETED',
+      severity: 3,
+      start_time: start,
+      end_time: end,
+      last_notification_time: end ?? start,
+    });
+
+    const WINDOW_START = 1_000_000;
+    const WINDOW_END = 2_000_000;
+
+    it('no range ⇒ behavior identical to today (truncated false, no filtering)', async () => {
+      const { client } = makeClient([
+        {
+          body: {
+            totalAlerts: 2,
+            alerts: [mkAlert('a-1', 500, 600), mkAlert('a-2', 3_000_000, null)],
+          },
+        },
+      ]);
+      const result = await backend.getAlerts(client);
+      // Neither would overlap [1M, 2M] if filtered, but no filter ⇒ both returned
+      expect(result.alerts).toHaveLength(2);
+      expect(result.truncated).toBe(false);
+      expect(result.totalAlerts).toBe(2);
+    });
+
+    it('zero overlap ⇒ empty alerts, truncated:false', async () => {
+      const { client } = makeClient([
+        {
+          body: {
+            totalAlerts: 2,
+            alerts: [mkAlert('a-before', 0, 100), mkAlert('a-after', 5_000_000, 6_000_000)],
+          },
+        },
+      ]);
+      const result = await backend.getAlerts(client, {
+        startMs: WINDOW_START,
+        endMs: WINDOW_END,
+      });
+      expect(result.alerts).toEqual([]);
+      expect(result.totalAlerts).toBe(0);
+      expect(result.truncated).toBe(false);
+    });
+
+    it('interval-overlap predicate: all overlap cases', async () => {
+      const activeBefore = mkAlert('active-before', 500, null); // INCLUDED
+      const resolvedBefore = mkAlert('resolved-before', 0, 500); // EXCLUDED
+      const resolvedInside = mkAlert('resolved-inside', 1_200_000, 1_800_000); // INCLUDED
+      const spansStart = mkAlert('spans-start', 500, 1_500_000); // INCLUDED
+      const spansEndResolved = mkAlert('spans-end-r', 1_500_000, 2_500_000); // INCLUDED
+      const spansEndActive = mkAlert('spans-end-a', 1_500_000, null); // INCLUDED
+      const entirelyAfter = mkAlert('after', 3_000_000, 4_000_000); // EXCLUDED
+
+      const { client } = makeClient([
+        {
+          body: {
+            totalAlerts: 7,
+            alerts: [
+              activeBefore,
+              resolvedBefore,
+              resolvedInside,
+              spansStart,
+              spansEndResolved,
+              spansEndActive,
+              entirelyAfter,
+            ],
+          },
+        },
+      ]);
+      const result = await backend.getAlerts(client, {
+        startMs: WINDOW_START,
+        endMs: WINDOW_END,
+      });
+      const ids = result.alerts.map((a) => a.id).sort();
+      expect(ids).toEqual(
+        ['active-before', 'resolved-inside', 'spans-start', 'spans-end-r', 'spans-end-a'].sort()
+      );
+      expect(result.truncated).toBe(false);
+      expect(result.totalAlerts).toBe(5);
+    });
+
+    it('caps at 1000 overlapping alerts and sets truncated:true', async () => {
+      // Construct 1001 alerts, all overlapping the window. The helper
+      // returns up to PAGE_SIZE (100) per call; we need 11 pages to yield
+      // >1000 alerts, but the cap should stop pagination somewhere in the
+      // 11th page (we only verify cap + truncated flag, not exact call count).
+      const makePage = (from: number) =>
+        Array.from({ length: 100 }, (_, i) => mkAlert(`a-${from + i}`, 1_200_000, 1_800_000));
+      const lastPage = Array.from({ length: 1 }, (_, i) =>
+        mkAlert(`a-${1000 + i}`, 1_200_000, 1_800_000)
+      );
+      const responses: Array<{ body: unknown }> = [];
+      for (let p = 0; p < 10; p++) {
+        responses.push({ body: { totalAlerts: 1001, alerts: makePage(p * 100) } });
+      }
+      responses.push({ body: { totalAlerts: 1001, alerts: lastPage } });
+
+      const { client } = makeClient(responses);
+      const result = await backend.getAlerts(client, {
+        startMs: WINDOW_START,
+        endMs: WINDOW_END,
+      });
+      expect(result.alerts).toHaveLength(1000);
+      expect(result.truncated).toBe(true);
+      expect(result.totalAlerts).toBe(1000);
     });
   });
 

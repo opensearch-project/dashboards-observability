@@ -207,11 +207,27 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
   // Alerts
   // =========================================================================
 
-  async getAlerts(client: AlertingOSClient): Promise<{ alerts: OSAlert[]; totalAlerts: number }> {
+  async getAlerts(
+    client: AlertingOSClient,
+    options?: { startMs?: number; endMs?: number }
+  ): Promise<{ alerts: OSAlert[]; totalAlerts: number; truncated: boolean }> {
     const PAGE_SIZE = 100;
+    /**
+     * Cap applied only when a time window is supplied. OpenSearch Alerting's
+     * `GET monitors/alerts` endpoint has no documented server-side time
+     * filter (as of 2.x), so we post-fetch and then paginate-stop once the
+     * filtered collection reaches this limit. The UI surfaces `truncated`
+     * as an `EuiCallOut` prompting the user to narrow the range.
+     */
+    const FILTER_CAP = 1000;
+    const hasRange = options?.startMs !== undefined && options?.endMs !== undefined;
+    const windowStart = options?.startMs ?? 0;
+    const windowEnd = options?.endMs ?? Number.POSITIVE_INFINITY;
+
     const allAlerts: OSAlert[] = [];
     let startIndex = 0;
     let totalAlerts = 0;
+    let truncated = false;
 
     // Paginate through all alerts
     while (true) {
@@ -221,14 +237,52 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
         `/_plugins/_alerting/monitors/alerts?size=${PAGE_SIZE}&startIndex=${startIndex}`
       );
       totalAlerts = resp.body.totalAlerts ?? 0;
-      const alerts: OSAlert[] = (resp.body.alerts ?? []).map((a: OSAlertRaw) => this.mapAlert(a));
-      allAlerts.push(...alerts);
+      const pageAlerts: OSAlert[] = (resp.body.alerts ?? []).map((a: OSAlertRaw) =>
+        this.mapAlert(a)
+      );
 
-      if (alerts.length < PAGE_SIZE || allAlerts.length >= totalAlerts) break;
+      if (hasRange) {
+        for (const a of pageAlerts) {
+          // Active alerts have no end_time — treat as "still ongoing" (now).
+          // This gives us a standard interval-overlap predicate:
+          //   alert.start_time <= windowEnd  AND  effectiveEnd >= windowStart
+          // which INCLUDES alerts that started before the window and are
+          // still active, and EXCLUDES alerts that resolved before the
+          // window opened or started after it closed.
+          const effectiveEnd = a.end_time ?? Date.now();
+          if (a.start_time <= windowEnd && effectiveEnd >= windowStart) {
+            allAlerts.push(a);
+            if (allAlerts.length >= FILTER_CAP) {
+              truncated = true;
+              break;
+            }
+          }
+        }
+        if (truncated) break;
+      } else {
+        allAlerts.push(...pageAlerts);
+      }
+
+      if (pageAlerts.length < PAGE_SIZE) break;
+      if (!hasRange && allAlerts.length >= totalAlerts) break;
+      // When filtering: the `pageAlerts.length < PAGE_SIZE` check above
+      // catches most cases, but if `totalAlerts` is an exact multiple of
+      // PAGE_SIZE (e.g. 100 / 200 / 1000) the last page returns PAGE_SIZE
+      // and we'd otherwise make one more empty request. Break early on
+      // the next start index being past the server-reported total.
+      if (hasRange && startIndex + PAGE_SIZE >= totalAlerts) break;
       startIndex += PAGE_SIZE;
     }
 
-    return { alerts: allAlerts, totalAlerts };
+    // When filtering, `totalAlerts` on the return object reflects the
+    // filtered-and-capped count (what the caller actually received); the
+    // raw index total is no longer a useful number for a post-filtered
+    // payload and would confuse UI consumers.
+    return {
+      alerts: allAlerts,
+      totalAlerts: hasRange ? allAlerts.length : totalAlerts,
+      truncated,
+    };
   }
 
   async acknowledgeAlerts(

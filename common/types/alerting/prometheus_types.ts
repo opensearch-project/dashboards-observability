@@ -14,6 +14,7 @@
  */
 
 import type { AlertingOSClient, Datasource } from './unified_types';
+import type { UnifiedAlertSummary } from './unified_types';
 
 // ============================================================================
 // Prometheus Workspace
@@ -242,6 +243,34 @@ export interface PrometheusBackend {
     query: string,
     time?: number
   ): Promise<PromTimeSeriesPoint[]>;
+
+  /**
+   * Reconstruct historical alert episodes from the `ALERTS` metric's range
+   * matrix. Optional on the interface because only backends that can route
+   * PromQL range queries (today: `DirectQueryPrometheusBackend`) support it.
+   * `MultiBackendAlertService.fetchAlertsRaw` checks for the method before
+   * calling, so alternate backends can omit it and degrade cleanly to the
+   * legacy `getAlerts` path.
+   *
+   * Returns:
+   *   - `alerts`:   unified alert summaries, one per firing-run episode
+   *                 (runs of `value === 1` in the ALERTS matrix).
+   *   - `fallback`: set to `'prometheus-alerts-current-only'` when the
+   *                 matrix was empty AND the range included `now`, causing
+   *                 the backend to fall back to legacy `/api/v1/alerts`.
+   *   - `error`:    transport / parse error; `alerts` is empty in this case.
+   */
+  getHistoricalAlerts?(
+    client: AlertingOSClient,
+    ds: Datasource,
+    startEpochSec: number,
+    endEpochSec: number,
+    stepSec: number
+  ): Promise<{
+    alerts: UnifiedAlertSummary[];
+    fallback?: 'prometheus-alerts-current-only';
+    error?: string;
+  }>;
 
   // ---- Alertmanager operations (optional — only available when alertmanagerUrl is set) ----
   // Alertmanager is a global endpoint reached through any Prometheus datasource,

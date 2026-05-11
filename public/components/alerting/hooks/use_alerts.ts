@@ -11,6 +11,10 @@
  * status). The server does not implement page/pageSize pagination on the
  * unified endpoint; consumers that need pagination should slice
  * `data.results` client-side.
+ *
+ * Time range (`startTime`/`endTime`) is forwarded as-is (date-math strings)
+ * to the transport, which appends them to the request query object. Changing
+ * either value triggers a refetch through the effect dependencies below.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ProgressiveResponse, UnifiedAlertSummary } from '../../../../common/types/alerting';
@@ -18,6 +22,10 @@ import { AlertingOpenSearchService } from '../query_services/alerting_opensearch
 
 export interface UseAlertsParams {
   dsIds: string[];
+  /** Date-math string (e.g. "now-1h"). */
+  startTime?: string;
+  /** Date-math string (e.g. "now"). */
+  endTime?: string;
   refreshToken?: unknown;
 }
 
@@ -28,7 +36,12 @@ export interface UseAlertsResult {
   refetch: () => void;
 }
 
-export function useAlerts({ dsIds, refreshToken }: UseAlertsParams): UseAlertsResult {
+export function useAlerts({
+  dsIds,
+  startTime,
+  endTime,
+  refreshToken,
+}: UseAlertsParams): UseAlertsResult {
   const service = useMemo(() => new AlertingOpenSearchService(), []);
   const [data, setData] = useState<ProgressiveResponse<UnifiedAlertSummary> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,7 +61,7 @@ export function useAlerts({ dsIds, refreshToken }: UseAlertsParams): UseAlertsRe
     setError(null);
     (async () => {
       try {
-        const res = await service.listAlerts({ dsIds });
+        const res = await service.listAlerts({ dsIds, startTime, endTime });
         if (!cancelled) setData(res);
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e : new Error(String(e)));
@@ -59,9 +72,11 @@ export function useAlerts({ dsIds, refreshToken }: UseAlertsParams): UseAlertsRe
     return () => {
       cancelled = true;
     };
-    // `dsIds` is a new array reference each render; `dsIdsKey` is its stable projection.
+    // `dsIds` is a new array reference each render; `dsIdsKey` is its stable
+    // projection. `startTime`/`endTime` are primitive strings — safe to list
+    // directly (equivalent to a stable-string key for a single value).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [service, dsIdsKey, refreshToken, localRefresh]);
+  }, [service, dsIdsKey, startTime, endTime, refreshToken, localRefresh]);
 
   return { data, isLoading, error, refetch };
 }

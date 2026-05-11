@@ -46,7 +46,25 @@ import {
   PromAlertsApiResponse,
   DatasourceDefinition,
   PromTimeSeriesPoint,
+  UnifiedAlertSummary,
 } from '../../../common/types/alerting';
+import { promAlertToUnified, promEpisodeToUnified } from './alert_utils';
+import type { PromAlertEpisode } from './alert_utils';
+
+/**
+ * One series from a Prometheus range-query matrix result — the shape
+ * returned by `queryRangeMatrix`. Retains label metadata per series so
+ * downstream `getHistoricalAlerts` can partition firing runs by alert
+ * identity (`alertname`, `instance`, `alertstate`, etc).
+ *
+ * `queryRange` (the existing single-series API) flattens to
+ * `PromTimeSeriesPoint[]` and drops labels, so it can't be reused for
+ * the multi-series episode-reconstruction path.
+ */
+export interface PromSeriesMatrix {
+  metric: Record<string, string>;
+  values: PromTimeSeriesPoint[];
+}
 
 export class DirectQueryPrometheusBackend implements PrometheusBackend, PrometheusMetadataProvider {
   readonly type = 'prometheus' as const;
@@ -586,6 +604,217 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     } catch (err) {
       this.logger.warn(`Failed to execute DirectQuery range query: ${err}`);
       return [];
+    }
+  }
+
+  /**
+   * Multi-series variant of `queryRange`. Targets the same DirectQuery
+   * endpoint but preserves the per-series `metric` label map AND all
+   * values from every series — `queryRange`'s `parseRangeQueryResponse`
+   * flattens to the first series only, so it can't be reused for the
+   * `ALERTS{}` matrix where each active alert emits its own series.
+   *
+   * Private (tests reach it via the public `getHistoricalAlerts` method).
+   * Kept separate from `queryRange` because that method swallows errors to
+   * `[]` and collapses series — behavior that's fine for chart previews but
+   * would silently hide a bad range query here.
+   */
+  async queryRangeMatrix(
+    client: AlertingOSClient,
+    ds: Datasource,
+    query: string,
+    startSec: number,
+    endSec: number,
+    stepSec: number
+  ): Promise<PromSeriesMatrix[]> {
+    const dqName = this.resolveDqName(ds);
+    const path = `/_plugins/_directquery/_query/${encodeURIComponent(dqName)}`;
+
+    this.logger.debug(`DirectQuery range matrix query: ${query.substring(0, 80)}...`);
+
+    const resp = await client.transport.request({
+      method: 'POST',
+      path,
+      body: {
+        datasource: dqName,
+        query,
+        language: 'PROMQL',
+        options: {
+          queryType: 'range',
+          start: startSec.toString(),
+          end: endSec.toString(),
+          step: stepSec.toString(),
+        },
+      },
+    });
+
+    const promResult = this.extractPrometheusResult(resp.body as Record<string, unknown>);
+    if (!promResult) return [];
+
+    const rawSeries = (promResult.result ?? []) as Array<{
+      metric?: Record<string, string>;
+      values?: unknown[][];
+    }>;
+
+    const series: PromSeriesMatrix[] = [];
+    for (const s of rawSeries) {
+      const metric = s.metric || {};
+      const values: PromTimeSeriesPoint[] = [];
+      const rawValues = s.values || [];
+      for (const pair of rawValues) {
+        if (Array.isArray(pair) && pair.length >= 2) {
+          const ts = Number(pair[0]);
+          const numVal = parseFloat(String(pair[1]));
+          if (!isNaN(ts) && !isNaN(numVal)) {
+            values.push({ timestamp: ts * 1000, value: numVal });
+          }
+        }
+      }
+      series.push({ metric, values });
+    }
+
+    return series;
+  }
+
+  /**
+   * Reconstruct historical Prometheus alert episodes by range-querying the
+   * `ALERTS` metric and scanning each returned series for contiguous runs
+   * of `value === 1` samples ("firing" or "pending" depending on the
+   * `alertstate` label on the series).
+   *
+   * Algorithm:
+   *   1. `queryRangeMatrix('ALERTS', start, end, step)` — one series per
+   *      unique `(alertname, alertstate, ...labels)` tuple.
+   *   2. For each series, scan `values` left-to-right:
+   *      - Enter a "firing run" on the first `value === 1` sample.
+   *      - Close the run (emit an episode) on the first `value !== 1`
+   *        sample OR at the end of the series.
+   *      - `truncatedStart` = run started at the first sample in the
+   *        matrix (i.e. already firing at the window's left edge).
+   *      - `stillActiveAtRangeEnd` = run reached the last sample in the
+   *        matrix (i.e. still firing at the window's right edge).
+   *   3. Map each episode to `UnifiedAlertSummary` via `promEpisodeToUnified`.
+   *
+   * Flapping: Prometheus emits separate `ALERTS` series for
+   * `alertstate="pending"` and `alertstate="firing"` on the same rule. We
+   * do NOT merge across `alertstate` — a rule that pended and then fired
+   * produces two episodes, which is the semantically correct representation
+   * (the operator wants to see the pending→firing transition, not just
+   * "it was active during this window").
+   *
+   * Fallback: when the matrix is empty AND the range includes `now` (end
+   * timestamp within 5s of the current wall clock), the caller is likely
+   * looking at a Prometheus that doesn't retain history (e.g. a fresh
+   * instance, or one with short retention). We fall back to the legacy
+   * `/api/v1/alerts` endpoint for current-active alerts and flag the
+   * response with `fallback: 'prometheus-alerts-current-only'` so the UI
+   * can render a banner explaining the coverage gap.
+   *
+   * Errors from `queryRangeMatrix` (permission denied, parse failures,
+   * workspace routing errors) are caught and returned as
+   * `{ alerts: [], error }` so a failing Prometheus datasource doesn't
+   * take down the unified view for other datasources.
+   */
+  async getHistoricalAlerts(
+    client: AlertingOSClient,
+    ds: Datasource,
+    startEpochSec: number,
+    endEpochSec: number,
+    stepSec: number
+  ): Promise<{
+    alerts: UnifiedAlertSummary[];
+    fallback?: 'prometheus-alerts-current-only';
+    error?: string;
+  }> {
+    let series: PromSeriesMatrix[];
+    try {
+      series = await this.queryRangeMatrix(
+        client,
+        ds,
+        'ALERTS',
+        startEpochSec,
+        endEpochSec,
+        stepSec
+      );
+    } catch (err) {
+      return { alerts: [], error: String(err) };
+    }
+
+    const windowStartMs = startEpochSec * 1000;
+    const windowEndMs = endEpochSec * 1000;
+    const episodes: PromAlertEpisode[] = [];
+
+    for (const s of series) {
+      const values = s.values;
+      if (values.length === 0) continue;
+
+      let runStart: number | null = null;
+      let lastSampleTsInRun: number | null = null;
+      let startedAtFirstSample = false;
+
+      const closeRun = (endTsMs: number, stillActive: boolean) => {
+        if (runStart === null) return;
+        episodes.push({
+          labels: { ...s.metric },
+          startMs: runStart,
+          endMs: endTsMs,
+          truncatedStart: startedAtFirstSample ? true : undefined,
+          stillActiveAtRangeEnd: stillActive ? true : undefined,
+        });
+        runStart = null;
+        lastSampleTsInRun = null;
+        startedAtFirstSample = false;
+      };
+
+      for (let i = 0; i < values.length; i++) {
+        const point = values[i];
+        const isFiring = point.value === 1;
+        if (isFiring) {
+          if (runStart === null) {
+            runStart = point.timestamp;
+            // Clamp episode start to window start if the series was already
+            // firing at the left edge — plan calls this `truncatedStart`.
+            startedAtFirstSample = i === 0;
+            if (startedAtFirstSample) {
+              runStart = windowStartMs;
+            }
+          }
+          lastSampleTsInRun = point.timestamp;
+        } else if (runStart !== null) {
+          closeRun(lastSampleTsInRun ?? runStart, false);
+        }
+      }
+      // End of series — close any run that's still open.
+      if (runStart !== null) {
+        const stillActive = lastSampleTsInRun === values[values.length - 1].timestamp;
+        closeRun(stillActive ? windowEndMs : lastSampleTsInRun ?? runStart, stillActive);
+      }
+    }
+
+    if (episodes.length > 0) {
+      return {
+        alerts: episodes.map((ep) => promEpisodeToUnified(ep, ds.id)),
+      };
+    }
+
+    // Fallback decision: matrix empty ⇒ either the range is fully in the
+    // past (legitimate empty — no alerts fired) or the range includes `now`
+    // (Prometheus may not retain that history — use legacy active-only API
+    // as a best-effort fallback).
+    const nowEpochSec = Math.floor(Date.now() / 1000);
+    const rangeIncludesNow = endEpochSec >= nowEpochSec - 5;
+    if (!rangeIncludesNow) {
+      return { alerts: [] };
+    }
+
+    try {
+      const legacy = await this.getAlerts(client, ds);
+      return {
+        alerts: legacy.map((a) => promAlertToUnified(a, ds.id)),
+        fallback: 'prometheus-alerts-current-only',
+      };
+    } catch (err) {
+      return { alerts: [], error: String(err) };
     }
   }
 

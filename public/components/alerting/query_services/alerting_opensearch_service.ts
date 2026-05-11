@@ -25,6 +25,10 @@ export interface ListAlertsParams {
   timeout?: number;
   /** Optional cap on the total number of results returned across all datasources. */
   maxResults?: number;
+  /** Date-math string (e.g. "now-1h"). */
+  startTime?: string;
+  /** Date-math string (e.g. "now"). */
+  endTime?: string;
 }
 
 export interface ListRulesParams {
@@ -44,6 +48,11 @@ export class AlertingOpenSearchService {
     const q: Record<string, string> = { dsIds: params.dsIds.join(',') };
     if (params.timeout !== undefined) q.timeout = String(params.timeout);
     if (params.maxResults !== undefined) q.maxResults = String(params.maxResults);
+    // Time-range fields are defined on ListAlertsParams only. Check via
+    // `in` operator rather than type narrowing because ListRulesParams
+    // (the other arm of the union) intentionally does not carry them.
+    if ('startTime' in params && params.startTime !== undefined) q.startTime = params.startTime;
+    if ('endTime' in params && params.endTime !== undefined) q.endTime = params.endTime;
     return q;
   }
 

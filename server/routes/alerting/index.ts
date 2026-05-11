@@ -18,6 +18,7 @@
 import { schema } from '@osd/config-schema';
 import { IRouter, RequestHandlerContext, SavedObject } from '../../../../../src/core/server';
 import type { AlertingOSClient, Datasource, Logger } from '../../../common/types/alerting';
+import { validateDateMath } from '../../../common/services/alerting';
 import {
   HttpOpenSearchBackend,
   MultiBackendAlertService,
@@ -234,6 +235,27 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
   }
 
+  /**
+   * Shared partial merged into the query schemas of all three alerts routes
+   * (`/api/alerting/unified/alerts`, `/api/alerting/opensearch/{dsId}/alerts`,
+   * `/api/alerting/prometheus/{dsId}/alerts`). Both fields are optional; when
+   * omitted, the handler falls through to legacy "no range" behavior on the
+   * downstream service. Values are validated by `validateDateMath` so
+   * malformed input is rejected with a 400 before it reaches the handler.
+   */
+  const timeRangeQuery = {
+    startTime: schema.maybe(
+      schema.string({
+        validate: (v: string) => (validateDateMath(v) ? undefined : `invalid date-math: ${v}`),
+      })
+    ),
+    endTime: schema.maybe(
+      schema.string({
+        validate: (v: string) => (validateDateMath(v) ? undefined : `invalid date-math: ${v}`),
+      })
+    ),
+  };
+
   // Mutation routes (create/update/delete monitor + acknowledge alert) live
   // in `./mutations/` — register them via the dedicated registrar so the split
   // stays clean.
@@ -250,6 +272,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
           dsIds: schema.maybe(schema.string()),
           timeout: schema.maybe(schema.string()),
           maxResults: schema.maybe(schema.string()),
+          ...timeRangeQuery,
         }),
       },
     },
@@ -262,6 +285,8 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
           dsIds: req.query.dsIds,
           timeout: req.query.timeout,
           maxResults: req.query.maxResults,
+          startTime: req.query.startTime,
+          endTime: req.query.endTime,
         }
       );
       return res.ok({ body: result.body });
@@ -336,14 +361,18 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
   router.get(
     {
       path: '/api/alerting/opensearch/{dsId}/alerts',
-      validate: { params: schema.object({ dsId: alertingIdSchema }) },
+      validate: {
+        params: schema.object({ dsId: alertingIdSchema }),
+        query: schema.object(timeRangeQuery),
+      },
     },
     async (ctx, req, res) => {
       const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
       const result = await handleGetOSAlerts(
         alertService,
         await getAlertingClient(ctx, req.params.dsId),
-        req.params.dsId
+        req.params.dsId,
+        { startTime: req.query.startTime, endTime: req.query.endTime }
       );
       return sendResult(res, result);
     }
@@ -371,14 +400,27 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
   router.get(
     {
       path: '/api/alerting/prometheus/{dsId}/alerts',
-      validate: { params: schema.object({ dsId: alertingIdSchema }) },
+      validate: {
+        params: schema.object({ dsId: alertingIdSchema }),
+        // NOTE: `timeRangeQuery` is validated here for forward-compatibility
+        // and schema-shape uniformity with the other two alerts routes, but
+        // it is a **no-op** on this endpoint. This route returns the raw
+        // `PromAlert[]` shape (current-active alerts only); historical
+        // episode reconstruction emits `UnifiedAlertSummary[]` (a different
+        // shape) and is surfaced exclusively through
+        // `/api/alerting/unified/alerts` via `MultiBackendAlertService.fetchAlertsRaw`.
+        // A future revision that reshapes this endpoint to return unified
+        // summaries can start honoring the range without a schema change.
+        query: schema.object(timeRangeQuery),
+      },
     },
     async (ctx, req, res) => {
       const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
       const result = await handleGetPromAlerts(
         alertService,
         await getAlertingClient(ctx, req.params.dsId),
-        req.params.dsId
+        req.params.dsId,
+        { startTime: req.query.startTime, endTime: req.query.endTime }
       );
       return sendResult(res, result);
     }
