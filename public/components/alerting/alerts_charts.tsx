@@ -115,14 +115,21 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
       info: number;
     }> = [];
 
+    // Clamp each alert's effective start to the window start so alerts that
+    // began before the window but are still-firing / resolved inside it get
+    // credited to the first bucket. Matches the OS backend's interval-overlap
+    // filter (opensearch_backend.ts) — otherwise the summary cards show "1
+    // alert" while the timeline shows zero bars for the same data. Also a
+    // perf win: parse each startTime once instead of per-bucket.
+    const alertBucketStart = alerts.map((a) => Math.max(startMs, new Date(a.startTime).getTime()));
+
     for (let i = 0; i < bucketCount; i++) {
       const bucketStart = startMs + i * bucketDuration;
       const bucketEnd = bucketStart + bucketDuration;
       const label = formatBucketLabel(bucketStart, rangeMs);
-      const inBucket = alerts.filter((a) => {
-        const t = new Date(a.startTime).getTime();
-        return t >= bucketStart && t < bucketEnd;
-      });
+      const inBucket = alerts.filter(
+        (_, idx) => alertBucketStart[idx] >= bucketStart && alertBucketStart[idx] < bucketEnd
+      );
       buckets.push({
         label,
         critical: inBucket.filter((a) => a.severity === 'critical').length,

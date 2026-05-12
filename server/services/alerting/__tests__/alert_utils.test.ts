@@ -64,6 +64,22 @@ describe('promEpisodeToUnified', () => {
     expect(u.severity).toBe('medium');
   });
 
+  it('empty-string severity ⇒ fallback "medium" (treated same as missing)', () => {
+    // Empty-string severity labels turn up on Prometheus recording rules;
+    // they should sort with the historical-episode fallback rather than
+    // slipping through to `promSeverityFromLabels` (which would return
+    // `'info'`, sinking the episode below real alerts).
+    const u = promEpisodeToUnified(
+      {
+        labels: { alertname: 'EmptySev', severity: '' },
+        startMs: START,
+        endMs: END,
+      },
+      'ds-prom'
+    );
+    expect(u.severity).toBe('medium');
+  });
+
   it('truncatedStart flag emits annotations.truncatedStart = "true"', () => {
     const u = promEpisodeToUnified(
       {

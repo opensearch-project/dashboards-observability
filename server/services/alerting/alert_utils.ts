@@ -347,12 +347,13 @@ export interface PromAlertEpisode {
  */
 export function promEpisodeToUnified(ep: PromAlertEpisode, dsId: string): UnifiedAlertSummary {
   const name = ep.labels.alertname || 'Unknown';
-  // Plan override: historical episodes without `labels.severity` fall back
-  // to `'medium'` rather than `'info'` (the live-alert default). When
-  // severity IS present, defer to the existing `promSeverityFromLabels`
-  // mapping so `warning`/`page`/etc aliases stay consistent with live alerts.
-  const finalSeverity =
-    ep.labels.severity === undefined ? 'medium' : promSeverityFromLabels(ep.labels);
+  // Historical episodes with no `labels.severity` (missing key OR empty
+  // value) fall back to `'medium'` rather than `'info'` (the live-alert
+  // default). When severity IS a non-empty string, defer to
+  // `promSeverityFromLabels` so `warning` / `page` aliases stay consistent
+  // with live alerts — an unrecognized non-empty severity still falls
+  // through to `'info'` there, matching live-alert behavior.
+  const finalSeverity = ep.labels.severity ? promSeverityFromLabels(ep.labels) : 'medium';
   const state: UnifiedAlertState = ep.stillActiveAtRangeEnd ? 'active' : 'resolved';
 
   const annotations: Record<string, string> = {};

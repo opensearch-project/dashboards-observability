@@ -70,7 +70,7 @@ export function dateMathToDSLString(expr: string): string {
  * Derive the Prometheus `query_range` step (seconds) for the given window.
  *
  * Formula:
- *   `clamp(max(floor((end - start) / 500), evalIntervalSec ?? 15), 15, 300)`
+ *   `clamp(floor((end - start) / 500), 15, 300)`
  *
  * Bounds rationale:
  *   - 15s floor: Prometheus default scrape interval; a finer step wastes
@@ -79,23 +79,14 @@ export function dateMathToDSLString(expr: string): string {
  *     payload + plot-render cost predictable on 30d+ ranges.
  *   - 500-point denominator: approximately fills a `AlertTimeline` chart at
  *     typical bucket-counts (12..24) with a few sub-pixels of dither.
- *   - `evalIntervalSec` preference: when the rule's evaluation interval is
- *     known, never ask Prometheus for a finer step than the source rule is
- *     evaluated at — finer would return stale repeats.
  */
-export function computeStep(
-  startEpochSec: number,
-  endEpochSec: number,
-  evalIntervalSec?: number
-): number {
+export function computeStep(startEpochSec: number, endEpochSec: number): number {
   const span = Math.max(0, endEpochSec - startEpochSec);
   const pointBased = Math.floor(span / 500);
-  const eval_ = evalIntervalSec ?? 15;
-  const preferred = Math.max(pointBased, eval_);
   // clamp to [15, 300]
-  if (preferred < 15) return 15;
-  if (preferred > 300) return 300;
-  return preferred;
+  if (pointBased < 15) return 15;
+  if (pointBased > 300) return 300;
+  return pointBased;
 }
 
 /**

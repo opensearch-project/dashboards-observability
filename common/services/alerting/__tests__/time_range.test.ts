@@ -111,7 +111,7 @@ describe('time_range helpers', () => {
     });
 
     it('1h window ⇒ 15s (exactly the floor)', () => {
-      // span = 3600s, 3600/500 = 7.2 → 7 → max(7, 15) = 15.
+      // span = 3600s, 3600/500 = 7.2 → 7 → clamped to 15.
       const start = 0;
       const end = 60 * 60;
       expect(computeStep(start, end)).toBe(15);
@@ -134,21 +134,6 @@ describe('time_range helpers', () => {
       const start = 0;
       const end = 30 * 24 * 3600;
       expect(computeStep(start, end)).toBe(300);
-    });
-
-    it('prefers evalInterval when it exceeds point-based step', () => {
-      // 1h window, evalInterval 60 ⇒ max(7, 60) = 60.
-      expect(computeStep(0, 3600, 60)).toBe(60);
-    });
-
-    it('evalInterval still subject to the 300s ceiling', () => {
-      // Absurd 10min eval interval on a 1h window ⇒ capped at 300.
-      expect(computeStep(0, 3600, 600)).toBe(300);
-    });
-
-    it('evalInterval still subject to the 15s floor', () => {
-      // 5m window with a 1s eval ⇒ floor is 15.
-      expect(computeStep(0, 300, 1)).toBe(15);
     });
 
     it('zero-length window ⇒ 15s floor (no divide-by-zero)', () => {

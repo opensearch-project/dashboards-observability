@@ -146,7 +146,7 @@ describe('alerts_charts', () => {
     expect(longOpt.xAxis.data).toHaveLength(24);
   });
 
-  it('AlertTimeline: alerts falling outside the window are excluded from all buckets', () => {
+  it('AlertTimeline: post-window alerts are excluded from all buckets', () => {
     const start = END - HOUR_MS;
     const alerts = [
       // In-window — counted.
@@ -155,13 +155,7 @@ describe('alerts_charts', () => {
         severity: 'critical',
         startTime: new Date(END - 30 * 60 * 1000).toISOString(),
       }),
-      // Before window — dropped.
-      makeAlert({
-        id: '2',
-        severity: 'critical',
-        startTime: new Date(END - 2 * HOUR_MS).toISOString(),
-      }),
-      // After window — dropped (alert.startTime >= bucketEnd of the last bucket).
+      // After window — dropped (clamped startTime still >= endMs, so no bucket matches).
       makeAlert({
         id: '3',
         severity: 'critical',
@@ -175,6 +169,36 @@ describe('alerts_charts', () => {
     };
     const critical = option.series.find((s) => s.name === 'critical');
     expect(critical).toBeDefined();
+    const total = (critical!.data as number[]).reduce((a, b) => a + b, 0);
+    expect(total).toBe(1);
+  });
+
+  it('AlertTimeline: pre-window alerts are credited to the first bucket (matches backend overlap)', () => {
+    // The OS backend's interval-overlap filter returns alerts that started
+    // before the picked window but are still firing / resolved inside it.
+    // The chart must count those too, otherwise the summary-cards counts and
+    // timeline bars disagree. We clamp startTime to the window start so the
+    // alert lands in bucket 0.
+    const start = END - HOUR_MS;
+    const alerts = [
+      // Started 2h before the window — backend returned it as overlapping,
+      // chart should credit it to the first bucket.
+      makeAlert({
+        id: 'pre',
+        severity: 'critical',
+        startTime: new Date(END - 2 * HOUR_MS).toISOString(),
+      }),
+    ];
+    render(<AlertTimeline alerts={alerts} startMs={start} endMs={END} />);
+
+    const option = mockSetOption.mock.calls[0][0] as {
+      series: Array<{ name: string; data: number[] }>;
+    };
+    const critical = option.series.find((s) => s.name === 'critical');
+    expect(critical).toBeDefined();
+    // First bucket holds the clamped pre-window alert.
+    expect(critical!.data[0]).toBe(1);
+    // Total across all buckets is still 1 — no double-counting.
     const total = (critical!.data as number[]).reduce((a, b) => a + b, 0);
     expect(total).toBe(1);
   });
