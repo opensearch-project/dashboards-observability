@@ -11,7 +11,7 @@
  * reconcile, aggregate, adoption, and probe-sli endpoints land in later PRs.
  */
 
-import type { Logger } from '../../../common/types/alerting';
+import type { Logger } from '../../../../../src/core/server';
 import {
   SloDeployContext,
   SloNotFoundError,

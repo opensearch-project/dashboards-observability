@@ -252,6 +252,24 @@ const previewBody = schema.object({
 });
 
 // ============================================================================
+// Acting user
+// ============================================================================
+
+/**
+ * FIXME(pr-2): extract the acting user from the request (OpenSearch
+ * security plugin exposes it via `req.auth`, or the `securitytenant` /
+ * `Authorization` headers when the plugin is disabled). PR 1 stamps a
+ * sentinel so audit rows can be re-attributed once the resolver lands —
+ * every mutation's createdBy / updatedBy comes through here.
+ */
+const SLO_ACTING_USER_PLACEHOLDER = 'osd-user';
+function resolveActingUser(_req: {
+  headers?: Record<string, string | string[] | undefined>;
+}): string {
+  return SLO_ACTING_USER_PLACEHOLDER;
+}
+
+// ============================================================================
 // Deploy context + status context builders
 // ============================================================================
 
@@ -308,6 +326,16 @@ async function buildDeployContext(
     ruler: rulerClient,
     client,
     datasource: ds as Datasource,
+    // FIXME(pr-2): this is the single site where PR 1 hard-codes the
+    // deploy-context workspace id. PR 2 will resolve the real workspace
+    // from OSD's request scope (`core.workspace.resolveRequest(req)`) and
+    // may refuse the write when the workspace isn't resolvable. The
+    // service layer already threads the value through `sloRulerNamespaceFor`
+    // so the AMP invariant ("every rule group for workspace W writes to
+    // `slo-generated-<W>`") holds regardless of how this value was
+    // obtained; PR 1 ships the plumbing, PR 2 ships the resolver. See the
+    // cross-workspace integration test for the invariant's service-layer
+    // contract (`common/slo/__tests__/slo_workspace_isolation.integration.test.ts`).
     workspaceId: 'default',
   };
 }
@@ -346,6 +374,9 @@ function buildStatusContext(
   const datasourceService = new SavedObjectDatasourceService(ctx.core.savedObjects.client, logger);
   return {
     client,
+    // FIXME(pr-2): same as `buildDeployContext` — workspace id is hard-
+    // coded to 'default' in PR 1 and will be resolved from request scope
+    // in PR 2. Listing/status paths are read-only today; safe placeholder.
     workspaceId: 'default',
     resolveDatasource: async (datasourceId: string) => {
       const ds = await datasourceService.get(datasourceId);
@@ -458,7 +489,13 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         },
       });
     }
-    const result = await handleCreateSLO(sloService, req.body, 'osd-user', logger, built.deploy);
+    const result = await handleCreateSLO(
+      sloService,
+      req.body,
+      resolveActingUser(req),
+      logger,
+      built.deploy
+    );
     if (result.status === 201) return res.ok({ body: result.body });
     return res.customError({
       statusCode: result.status,
@@ -547,7 +584,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         sloService,
         req.params.id,
         req.body,
-        'osd-user',
+        resolveActingUser(req),
         logger,
         built.deploy
       );
@@ -625,7 +662,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       const result = await handleEnableSLO(
         sloService,
         req.params.id,
-        'osd-user',
+        resolveActingUser(req),
         logger,
         built.deploy
       );
@@ -664,7 +701,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       const result = await handleDisableSLO(
         sloService,
         req.params.id,
-        'osd-user',
+        resolveActingUser(req),
         logger,
         built.deploy
       );

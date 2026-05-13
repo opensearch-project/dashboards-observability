@@ -300,6 +300,12 @@ export class ObservabilityPlugin
     // Mirrors the alertManager.enabled pattern. When disabled we skip SO
     // type registration, route registration, and service construction —
     // the plugin acts as if SLOs don't exist.
+    //
+    // Toggling this value in the yml requires an OSD restart to take
+    // effect. The value is captured once here at plugin setup so route
+    // closures and SO-type registrations can key off it; moving the check
+    // per-request would re-register OSD apps and SO types after boot,
+    // which is not supported.
     const sloEnabled = observabilityConfig.slo?.enabled ?? false;
     const ruleDedupEnabled = observabilityConfig.slo?.ruleDedup?.enabled ?? true;
 
@@ -413,28 +419,25 @@ export class ObservabilityPlugin
 
     // Upgrade SLO storage from the in-memory bootstrap store to the
     // saved-object-backed store once the internal repository is available.
-    // Falls back to the in-memory store if repository creation fails — the
-    // route handlers stay functional, just non-durable.
+    //
+    // Fail-loud on repository-creation failure rather than falling back to
+    // the in-memory store. A durable feature silently becoming volatile is
+    // a data-loss class of failure — an SLO created against the fallback
+    // store vanishes on the next plugin restart, and the user has no way
+    // to tell. Raise and let OSD surface the init failure; the operator
+    // can disable `observability.slo.enabled` in the yml to unblock boot.
     if (this.sloService) {
-      try {
-        const repository = core.savedObjects.createInternalRepository([
-          'slo-definition',
-          SLO_RULE_REF_SO_TYPE,
-        ]);
-        const soStore = new SavedObjectSloStore(repository);
-        this.sloService.setStore(soStore);
-        const refStore = new SloRuleRefStore(
-          (repository as unknown) as import('../../../src/core/server').SavedObjectsClientContract
-        );
-        this.sloService.setRuleRefStore(refStore);
-        this.logger.info('Observability: SLO storage upgraded to SavedObjects');
-      } catch (err: unknown) {
-        this.logger.warn(
-          `Observability: Failed to create SavedObjectSloStore, using in-memory fallback: ${
-            err instanceof Error ? err.message : String(err)
-          }`
-        );
-      }
+      const repository = core.savedObjects.createInternalRepository([
+        'slo-definition',
+        SLO_RULE_REF_SO_TYPE,
+      ]);
+      const soStore = new SavedObjectSloStore(repository);
+      this.sloService.setStore(soStore);
+      const refStore = new SloRuleRefStore(
+        (repository as unknown) as import('../../../src/core/server').SavedObjectsClientContract
+      );
+      this.sloService.setRuleRefStore(refStore);
+      this.logger.info('Observability: SLO storage upgraded to SavedObjects');
     }
 
     return {};

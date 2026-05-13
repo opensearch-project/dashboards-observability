@@ -27,7 +27,12 @@ export interface SlosPageProps {
   chrome: ChromeStart;
   notifications: NotificationsStart;
   parentBreadcrumb: { text: string; href: string };
-  [key: string]: unknown;
+  /**
+   * Trace Analytics DepsStart bag spread through by the ApmConfigProvider
+   * wrapper in `app.tsx`. Shape matches the ApmServicesProps / ApmApplicationMapProps
+   * contract — declare only the field we actually use.
+   */
+  DepsStart?: { data?: unknown };
 }
 
 export const SlosPage: React.FC<SlosPageProps> = ({

@@ -242,11 +242,43 @@ export interface SloStatusAggregationContext {
 }
 
 /**
+ * Workspace ids accepted by `sloRulerNamespaceFor`. The value lands in a URL
+ * path segment that Cortex uses to key rule groups; allowing arbitrary text
+ * opens path traversal, ambiguous `%`-encoded segments, and unicode-
+ * normalization surprises. Mirrors the OSD saved-object id shape.
+ *
+ * In PR 1 the route layer always passes `'default'`, so this pattern is
+ * unreachable as a validation failure today; PR 2 will wire real workspace
+ * ids from request scope, and this check catches any caller that forgets
+ * to normalize.
+ */
+const WORKSPACE_ID_RE = /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,62}$/;
+
+/**
  * Compose the per-workspace ruler namespace. Hyphen separator (not slash) so
  * the whole thing stays a single `{namespace}` path segment when routed
  * through `/_plugins/_directquery/_resources/{dqName}/api/v1/rules/{namespace}`.
+ *
+ * Throws when `workspaceId` fails the shape check — the ruler path is
+ * workspace-scoped and a bad segment leaks into every subsequent ruler
+ * call until the caller is fixed.
  */
 export function sloRulerNamespaceFor(workspaceId: string): string {
+  // Defend against `undefined` / `null` / empty — regex `.test()`
+  // auto-stringifies `undefined` to "undefined" (which matches), so the
+  // type-narrow check happens explicitly before the shape check.
+  if (typeof workspaceId !== 'string' || workspaceId.length === 0) {
+    throw new Error(
+      `sloRulerNamespaceFor: workspaceId must be a non-empty string, got: ${String(workspaceId)}`
+    );
+  }
+  if (!WORKSPACE_ID_RE.test(workspaceId)) {
+    throw new Error(
+      `sloRulerNamespaceFor: workspaceId must match /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,62}$/, got: ${JSON.stringify(
+        workspaceId
+      )}`
+    );
+  }
   return `${SLO_RULER_NAMESPACE}-${workspaceId}`;
 }
 
@@ -510,7 +542,14 @@ export class SloService {
     }
 
     const now = new Date().toISOString();
-    const namespace = deploy ? sloRulerNamespaceFor(deploy.workspaceId) : SLO_RULER_NAMESPACE;
+    // When `deploy` is absent, the ruler is never called — `namespace` is
+    // only written into the persisted provisioning record for traceability.
+    // Use the 'default' workspace's namespace so a later deploy (via a
+    // subsequent request that *does* carry a deploy context) keys against
+    // the same segment.
+    const namespace = deploy
+      ? sloRulerNamespaceFor(deploy.workspaceId)
+      : sloRulerNamespaceFor('default');
     // Build the document with minimal status so we can generate rules from it,
     // then fill in the provisioning record with the resulting names.
     const doc: SloDocument = {
@@ -599,21 +638,30 @@ export class SloService {
 
     // Step 1: refcount bookkeeping + recording-group upserts. Track what we
     // touched so rollback can undo it.
+    //
+    // Rollback contract for recording groups (matches the drop-path in
+    // `updateDedup`): NEVER delete a recording group synchronously, even
+    // when our decrement says `droppedToZero === true`. Between our decrement
+    // returning and our delete landing on the ruler, another create can
+    // bump the refcount back from 0→1 and re-upsert the same group —
+    // byte-equal, so it looks like a no-op, but our delete races that
+    // upsert and can orphan the other SLO's recording rules. The
+    // reconciler's grace-period sweep (PR-5) owns recording-group cleanup,
+    // and this call site leaves ref=0 entries behind for it to pick up.
+    //
+    // Alert groups are per-SLO and can't collide; we still delete those
+    // synchronously on rollback.
     const incrementedFps: string[] = [];
-    const createdRecordingGroups: string[] = [];
     const rollback = async (): Promise<void> => {
       for (const fp of incrementedFps) {
         if (this.refStore) {
           try {
-            const r = await this.refStore.decrementRef({
+            await this.refStore.decrementRef({
               workspaceId: deploy.workspaceId,
               datasourceId: deploy.datasource.id,
               fingerprint: fp,
               fingerprintVersion: FINGERPRINT_VERSION,
             });
-            if (r.droppedToZero && createdRecordingGroups.includes(fp)) {
-              await this.safeRollback(deploy, namespace, dedupRecordingGroupName(fp));
-            }
           } catch (err) {
             this.logger.warn(
               `SloService: rollback decrementRef failed for fingerprint=${fp}: ${
@@ -621,9 +669,10 @@ export class SloService {
               }`
             );
           }
-        } else if (createdRecordingGroups.includes(fp)) {
-          await this.safeRollback(deploy, namespace, dedupRecordingGroupName(fp));
         }
+        // Intentionally NOT deleting the recording group here — deferred to
+        // the reconciler grace-period sweep (see the rollback-contract
+        // comment above).
       }
       await this.safeRollback(deploy, namespace, alertGroupName);
     };
@@ -664,7 +713,6 @@ export class SloService {
               namespace,
               recGroup
             );
-            createdRecordingGroups.push(fp);
           } catch (err) {
             await rollback();
             throw err;
@@ -774,7 +822,7 @@ export class SloService {
       ? sloRulerNamespaceFor(deploy.workspaceId)
       : existing.status.provisioning.backend === 'prometheus'
       ? existing.status.provisioning.rulerNamespace
-      : SLO_RULER_NAMESPACE;
+      : sloRulerNamespaceFor('default');
 
     const updated: SloDocument = {
       id: existing.id,
@@ -854,22 +902,25 @@ export class SloService {
     const alertGroupName = dedupAlertGroupName(merged.name, deploy.workspaceId, existing.id);
 
     // Bookkeeping for rollback.
+    //
+    // As in `createDedup`, we never delete a recording group synchronously
+    // on rollback, even when the refcount drops to zero. A concurrent
+    // create can bump the ref from 0→1 and re-upsert the same (byte-equal)
+    // group between our decrement returning and our delete landing — the
+    // delete would then race the peer's re-upsert. The reconciler's
+    // grace-period sweep (PR-5) owns zero-ref recording-group cleanup.
     const incrementedFps: string[] = [];
-    const createdRecordingGroups: string[] = [];
 
     const rollback = async (): Promise<void> => {
       for (const fp of incrementedFps) {
         if (this.refStore) {
           try {
-            const r = await this.refStore.decrementRef({
+            await this.refStore.decrementRef({
               workspaceId: deploy.workspaceId,
               datasourceId: deploy.datasource.id,
               fingerprint: fp,
               fingerprintVersion: FINGERPRINT_VERSION,
             });
-            if (r.droppedToZero && createdRecordingGroups.includes(fp)) {
-              await this.safeRollback(deploy, namespace, dedupRecordingGroupName(fp));
-            }
           } catch (err) {
             this.logger.warn(
               `SloService: update rollback decrementRef failed for fingerprint=${fp}: ${
@@ -877,8 +928,6 @@ export class SloService {
               }`
             );
           }
-        } else if (createdRecordingGroups.includes(fp)) {
-          await this.safeRollback(deploy, namespace, dedupRecordingGroupName(fp));
         }
       }
     };
@@ -920,7 +969,6 @@ export class SloService {
               namespace,
               recGroup
             );
-            createdRecordingGroups.push(fp);
           } catch (err) {
             await rollback();
             throw err;
@@ -1043,7 +1091,11 @@ export class SloService {
         throw new SloRulerTeardownRequiredError(id, existing.spec.datasourceId);
       }
       if (provisioning.backend === 'prometheus' && provisioning.alertGroupName) {
-        const namespace = provisioning.rulerNamespace || SLO_RULER_NAMESPACE;
+        // `rulerNamespace` is always stamped at create/update time by
+        // `sloRulerNamespaceFor`, so the `||` branch is defensive for
+        // legacy SOs that predate the stamp. Falls back to the deploy
+        // context's workspace.
+        const namespace = provisioning.rulerNamespace || sloRulerNamespaceFor(deploy.workspaceId);
         await deploy.ruler.deleteRuleGroup(
           deploy.client,
           deploy.datasource,
@@ -1418,6 +1470,11 @@ export class SloService {
 
     const now = new Date().toISOString();
     const id = input.id ?? 'slo-preview-00000000-0000-0000-0000-000000000000';
+    // Preview is a dry-run — no ruler write happens. Render the namespace
+    // the SLO *would* land in so the emitted YAML labels match what deploy
+    // produces. The spec's workspaceId may not be stamped yet for brand-
+    // new drafts; default to 'default' in that case.
+    const previewWorkspaceId = spec.workspaceId ?? 'default';
     const doc: SloDocument = {
       id,
       spec,
@@ -1429,7 +1486,7 @@ export class SloService {
         updatedBy: 'preview',
         provisioning: {
           backend: 'prometheus',
-          rulerNamespace: SLO_RULER_NAMESPACE,
+          rulerNamespace: sloRulerNamespaceFor(previewWorkspaceId),
           recordingFingerprints: {},
           alertGroupName: '',
         },
@@ -1752,22 +1809,63 @@ function inferUnit(doc: SloDocument): 'ratio' | 'seconds' | 'count' {
 }
 
 /**
+ * Known keys of SloSpec. The set is the allow-list `normalizeSpec` applies to
+ * strip unknown attributes before persistence — the route-level config-schema
+ * is lenient (`unknowns: 'allow'`) to stay forgiving of older clients sending
+ * fields we don't care about, but the service layer must not round-trip
+ * arbitrary JSON into saved-object attributes.
+ */
+const SLO_SPEC_KEYS: ReadonlyArray<keyof SloSpec> = [
+  'datasourceId',
+  'workspaceId',
+  'name',
+  'description',
+  'enabled',
+  'mode',
+  'service',
+  'owner',
+  'tier',
+  'canonicalKind',
+  'sli',
+  'objectives',
+  'budgetWarningThresholds',
+  'window',
+  'alerting',
+  'alarms',
+  'exclusionWindows',
+  'labels',
+  'annotations',
+];
+
+/**
  * Normalize an incoming SloSpec into its canonical persisted shape.
  *
  * Rules:
+ *   - Strip any top-level keys not in `SLO_SPEC_KEYS`. The schema-at-the-
+ *     boundary is `unknowns: 'allow'` so a well-meaning older client doesn't
+ *     hard-reject, but the service persists a curated surface. This also
+ *     closes off `__proto__` / arbitrary SO-attribute injection even though
+ *     the saved-objects client already filters via `projectAttributes`.
  *   - Each objective's `target` is clamped to 6 significant digits
- *     (`target ∈ [0.5, 0.99999]`, clamped pre-rule-gen). Done here —
- *     not in the validator — because validators must stay pure.
+ *     (`target ∈ [0.5, 0.99999]`, clamped pre-rule-gen). Done here — not
+ *     in the validator — because validators must stay pure.
  *
  * Pure; safe to call more than once (idempotent on an already-clamped spec).
  */
 function normalizeSpec<T extends Partial<SloSpec>>(spec: T): T {
-  if (!Array.isArray(spec.objectives)) return spec;
-  const clamped = spec.objectives.map((obj) => {
-    if (typeof obj.target !== 'number' || !Number.isFinite(obj.target)) return obj;
-    return { ...obj, target: Math.round(obj.target * 1e6) / 1e6 };
-  });
-  return { ...spec, objectives: clamped };
+  const picked: Partial<SloSpec> = {};
+  for (const key of SLO_SPEC_KEYS) {
+    if (key in (spec as object)) {
+      (picked as Record<string, unknown>)[key] = (spec as Record<string, unknown>)[key];
+    }
+  }
+  if (Array.isArray(picked.objectives)) {
+    picked.objectives = picked.objectives.map((obj) => {
+      if (typeof obj.target !== 'number' || !Number.isFinite(obj.target)) return obj;
+      return { ...obj, target: Math.round(obj.target * 1e6) / 1e6 };
+    });
+  }
+  return picked as T;
 }
 
 /**
@@ -1923,29 +2021,15 @@ function buildAlertGroupWithProvenance(
 }
 
 /**
- * RFC 4122 v4 UUID — crypto-safe if `crypto.randomUUID()` is available
- * (Node 14.17+ / modern browsers), falls back to Math.random otherwise.
+ * RFC 4122 v4 UUID. Node 22 ships `crypto.randomUUID` globally and modern
+ * browsers do too; the node-`crypto` import is the jsdom-compatible fallback
+ * for jest. Path exercised in tests — not dead code on our minimum runtimes.
  */
 function generateUuidV4(): string {
-  const g = (globalThis as unknown) as {
-    crypto?: { randomUUID?: () => string };
-  };
+  const g = globalThis as { crypto?: { randomUUID?: () => string } };
   if (typeof g.crypto?.randomUUID === 'function') return g.crypto.randomUUID();
-  const hex = '0123456789abcdef';
-  let out = '';
-  /* eslint-disable no-bitwise */
-  for (let i = 0; i < 36; i++) {
-    if (i === 8 || i === 13 || i === 18 || i === 23) {
-      out += '-';
-    } else if (i === 14) {
-      out += '4';
-    } else if (i === 19) {
-      // RFC 4122 variant bits: %10xx — clamp to 8..11.
-      out += hex[Math.floor(Math.random() * 4) | 0 | 8];
-    } else {
-      out += hex[Math.floor(Math.random() * 16)];
-    }
-  }
-  /* eslint-enable no-bitwise */
-  return out;
+  // Node runtime (jest + jsdom): pull from the node `crypto` module directly.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const nodeCrypto = require('crypto');
+  return nodeCrypto.randomUUID();
 }

@@ -178,3 +178,119 @@ describe('validateSloId', () => {
     expect(validateSloId('ab')).not.toBeNull();
   });
 });
+
+// Custom-expr PromQL defensive checks (reviewer #2). The character set
+// closes the classes most likely to confuse downstream parsers; the real
+// PromQL parse happens at Cortex when the rule group is upserted.
+describe('validateSloSpec — custom PromQL defensive checks', () => {
+  function customSpec(expr: {
+    mode: 'events';
+    goodQuery: string;
+    totalQuery: string;
+  }): Partial<SloSpec> {
+    return minimalSpec({
+      sli: {
+        type: 'single',
+        definition: {
+          backend: 'prometheus',
+          type: 'custom',
+          calcMethod: 'events',
+          customExpr: expr,
+        },
+        dimensions: [],
+      },
+    });
+  }
+
+  it('accepts balanced custom PromQL', () => {
+    const result = validateSloSpec(
+      customSpec({
+        mode: 'events',
+        goodQuery: 'sum(rate(http_requests_total{code!~"5.."}[5m]))',
+        totalQuery: 'sum(rate(http_requests_total[5m]))',
+      })
+    );
+    expect(result.errors['spec.sli.definition.customExpr.goodQuery']).toBeUndefined();
+    expect(result.errors['spec.sli.definition.customExpr.totalQuery']).toBeUndefined();
+  });
+
+  it('rejects unbalanced parentheses', () => {
+    const result = validateSloSpec(
+      customSpec({
+        mode: 'events',
+        goodQuery: 'sum(rate(http_requests_total[5m])',
+        totalQuery: 'sum(rate(http_requests_total[5m]))',
+      })
+    );
+    expect(result.errors['spec.sli.definition.customExpr.goodQuery']).toMatch(/parentheses/);
+  });
+
+  it('rejects unbalanced braces', () => {
+    const result = validateSloSpec(
+      customSpec({
+        mode: 'events',
+        goodQuery: 'sum(rate(http{code="5")',
+        totalQuery: 'sum(rate(http[5m]))',
+      })
+    );
+    expect(result.errors['spec.sli.definition.customExpr.goodQuery']).toMatch(/braces|parentheses/);
+  });
+
+  it('rejects unbalanced brackets', () => {
+    const result = validateSloSpec(
+      customSpec({
+        mode: 'events',
+        goodQuery: 'sum(rate(http_requests_total[5m))',
+        totalQuery: 'sum(rate(http_requests_total[5m]))',
+      })
+    );
+    expect(result.errors['spec.sli.definition.customExpr.goodQuery']).toMatch(
+      /brackets|parentheses/
+    );
+  });
+
+  it('rejects trailing backslash', () => {
+    const result = validateSloSpec(
+      customSpec({
+        mode: 'events',
+        goodQuery: 'sum(rate(http_requests_total[5m])) \\',
+        totalQuery: 'sum(rate(http_requests_total[5m]))',
+      })
+    );
+    expect(result.errors['spec.sli.definition.customExpr.goodQuery']).toMatch(/backslash/);
+  });
+
+  it('rejects control characters', () => {
+    const result = validateSloSpec(
+      customSpec({
+        mode: 'events',
+        goodQuery: 'sum( rate(http_requests_total[5m]))',
+        totalQuery: 'sum(rate(http_requests_total[5m]))',
+      })
+    );
+    expect(result.errors['spec.sli.definition.customExpr.goodQuery']).toMatch(/control/);
+  });
+
+  it('ignores delimiters inside string literals', () => {
+    const result = validateSloSpec(
+      customSpec({
+        mode: 'events',
+        goodQuery: 'count({status=~"(5\\d{2}"})',
+        totalQuery: 'count({status!=""})',
+      })
+    );
+    expect(result.errors['spec.sli.definition.customExpr.goodQuery']).toBeUndefined();
+    expect(result.errors['spec.sli.definition.customExpr.totalQuery']).toBeUndefined();
+  });
+
+  it('rejects expressions over the size cap', () => {
+    const result = validateSloSpec(
+      customSpec({
+        mode: 'events',
+        goodQuery: 'a'.repeat(9000),
+        totalQuery: 'b',
+      })
+    );
+    expect(result.errors['spec.sli.definition.customExpr.goodQuery']).toMatch(/8192/);
+  });
+});

@@ -42,6 +42,26 @@ export interface SloRulerErrorEnvelope {
 }
 
 /**
+ * Best-effort extractor for the server-side error message so toasts don't
+ * collapse an opaque `"Not Found"` when the OSD http error envelope carries
+ * a richer `body.message`. Falls back to `err.message` when the envelope
+ * is absent. Symmetric with how the wizard surfaces ruler diagnostics via
+ * `extractRulerErrorEnvelope` — extends the same unwrap to generic errors.
+ */
+export function extractServerMessage(err: unknown): string {
+  if (err && typeof err === 'object') {
+    const body = (err as { body?: unknown }).body;
+    if (body && typeof body === 'object') {
+      const msg = (body as { message?: unknown }).message;
+      if (typeof msg === 'string' && msg.length > 0) return msg;
+    }
+    const msg = (err as { message?: unknown }).message;
+    if (typeof msg === 'string' && msg.length > 0) return msg;
+  }
+  return String(err);
+}
+
+/**
  * Extracts the ruler envelope from an OSD http error, if one is present.
  * OSD wraps `res.customError({ body: { message, attributes } })` into an
  * `IHttpFetchError` whose `.body` is `{ message, attributes }`.

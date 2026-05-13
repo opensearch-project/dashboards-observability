@@ -418,7 +418,7 @@ describe('SloService dedup — delete (W3.8)', () => {
 });
 
 describe('SloService dedup — rollback on SO save failure (W3.8)', () => {
-  it('create: SO save failure rolls back refs + recording group we just wrote', async () => {
+  it('create: SO save failure decrements refs + deletes the alert group; recording group deferred to reconciler', async () => {
     const { ruler, refStore, deploy } = makeHarness();
     const store: ISloStore = {
       get: async () => null,
@@ -434,10 +434,18 @@ describe('SloService dedup — rollback on SO save failure (W3.8)', () => {
     const spec = validSpec();
     await expect(svc.create({ spec }, 'alice', deploy)).rejects.toThrow(/SO write failed/);
     const fp = computeSliFingerprint(spec.datasourceId, spec.sli, spec.objectives[0])!;
+    // Ref decrements back to 0 — the reconciler's grace-period sweep will
+    // eventually pick the ref=0 entry up and drop the shared recording
+    // group. We deliberately do NOT delete the recording group here:
+    // between our decrement returning and a delete landing, a peer create
+    // can bump the ref back to 1 and re-upsert the same byte-equal group.
+    // Deleting then would race the peer's upsert and orphan its SLO.
     expect(refStore.refcount('ws-001', spec.datasourceId, fp)).toBe(0);
-    // Rollback should delete both the recording group (since ref dropped back
-    // to 0 and we created it this call) and the alert group.
     const recGroup = dedupRecordingGroupName(fp);
-    expect(ruler.deletes.some((d) => d.groupName === recGroup)).toBe(true);
+    expect(ruler.deletes.some((d) => d.groupName === recGroup)).toBe(false);
+    // Alert groups are per-SLO and safe to delete synchronously — no
+    // collision surface with other callers.
+    expect(ruler.deletes.length).toBeGreaterThan(0);
+    expect(ruler.deletes.every((d) => d.groupName !== recGroup)).toBe(true);
   });
 });

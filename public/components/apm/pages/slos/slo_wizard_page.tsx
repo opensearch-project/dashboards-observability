@@ -9,8 +9,9 @@
  * and exclusion windows lands in later PRs.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { i18n } from '@osd/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -27,7 +28,7 @@ import {
 import type { ChromeStart, NotificationsStart } from '../../../../../../../src/core/public';
 import type { SloCreateInput, SloSpec } from '../../../../../common/slo/slo_types';
 import { DEFAULT_MWMBR_TIERS } from '../../../../../common/slo/slo_promql_generator';
-import { SloApiClient, extractRulerErrorEnvelope } from './slo_api_client';
+import { SloApiClient, extractRulerErrorEnvelope, extractServerMessage } from './slo_api_client';
 
 export interface SloWizardPageProps {
   apiClient: SloApiClient;
@@ -35,6 +36,64 @@ export interface SloWizardPageProps {
   notifications: NotificationsStart;
   parentBreadcrumb: { text: string; href: string };
 }
+
+const I18N = {
+  breadcrumbSlos: i18n.translate('observability.slo.wizard.breadcrumbSlos', {
+    defaultMessage: 'SLOs',
+  }),
+  breadcrumbCreate: i18n.translate('observability.slo.wizard.breadcrumbCreate', {
+    defaultMessage: 'Create',
+  }),
+  labelName: i18n.translate('observability.slo.wizard.labelName', {
+    defaultMessage: 'Name',
+  }),
+  labelService: i18n.translate('observability.slo.wizard.labelService', {
+    defaultMessage: 'Service',
+  }),
+  labelTeam: i18n.translate('observability.slo.wizard.labelTeam', {
+    defaultMessage: 'Owner team',
+  }),
+  labelDatasource: i18n.translate('observability.slo.wizard.labelDatasource', {
+    defaultMessage: 'Datasource ID',
+  }),
+  helpDatasource: i18n.translate('observability.slo.wizard.helpDatasource', {
+    defaultMessage: 'The registered Prometheus / AMP DirectQuery connection.',
+  }),
+  labelMetric: i18n.translate('observability.slo.wizard.labelMetric', {
+    defaultMessage: 'Metric',
+  }),
+  helpMetric: i18n.translate('observability.slo.wizard.helpMetric', {
+    defaultMessage: 'Prometheus counter metric used to compute availability.',
+  }),
+  labelTarget: i18n.translate('observability.slo.wizard.labelTarget', {
+    defaultMessage: 'Target (%)',
+  }),
+  helpTarget: i18n.translate('observability.slo.wizard.helpTarget', {
+    defaultMessage: 'Between 50 and 99.999.',
+  }),
+  labelDescription: i18n.translate('observability.slo.wizard.labelDescription', {
+    defaultMessage: 'Description',
+  }),
+  cancel: i18n.translate('observability.slo.wizard.cancel', {
+    defaultMessage: 'Cancel',
+  }),
+  create: i18n.translate('observability.slo.wizard.create', {
+    defaultMessage: 'Create',
+  }),
+  toastCreated: (name: string) =>
+    i18n.translate('observability.slo.wizard.toastCreated', {
+      defaultMessage: 'Created SLO "{name}"',
+      values: { name },
+    }),
+  toastRulerRejected: (code: string) =>
+    i18n.translate('observability.slo.wizard.toastRulerRejected', {
+      defaultMessage: 'Ruler rejected the rule group ({code})',
+      values: { code },
+    }),
+  toastCreateFailed: i18n.translate('observability.slo.wizard.toastCreateFailed', {
+    defaultMessage: 'Failed to create SLO',
+  }),
+};
 
 interface FormState {
   name: string;
@@ -98,17 +157,19 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
   apiClient,
   chrome,
   notifications,
+  parentBreadcrumb,
 }) => {
   const history = useHistory();
   const [form, setForm] = useState<FormState>(INITIAL);
   const [submitting, setSubmitting] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     chrome.setBreadcrumbs([
-      { text: 'SLOs', href: '#/slos' },
-      { text: 'Create', href: '#/slos/create' },
+      parentBreadcrumb,
+      { text: I18N.breadcrumbSlos, href: '#/slos' },
+      { text: I18N.breadcrumbCreate, href: '#/slos/create' },
     ]);
-  }, [chrome]);
+  }, [chrome, parentBreadcrumb]);
 
   const onField = <K extends keyof FormState>(k: K) => (v: FormState[K]) => {
     setForm((prev) => ({ ...prev, [k]: v }));
@@ -119,7 +180,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
     try {
       const input: SloCreateInput = { spec: buildSpec(form) };
       const doc = await apiClient.create(input);
-      notifications.toasts.addSuccess(`Created SLO "${doc.spec.name}"`);
+      notifications.toasts.addSuccess(I18N.toastCreated(doc.spec.name));
       // Redirect to the detail page so the user sees the spec they authored
       // and so a new SLO on page 2 of a paginated listing doesn't "disappear".
       history.push(`/slos/${doc.id}`);
@@ -127,11 +188,14 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
       const ruler = extractRulerErrorEnvelope(err);
       if (ruler) {
         notifications.toasts.addDanger({
-          title: `Ruler rejected the rule group (${ruler.code})`,
+          title: I18N.toastRulerRejected(ruler.code),
           text: ruler.rawBody || ruler.error,
         });
       } else {
-        notifications.toasts.addError(err as Error, { title: 'Failed to create SLO' });
+        notifications.toasts.addDanger({
+          title: I18N.toastCreateFailed,
+          text: extractServerMessage(err),
+        });
       }
     } finally {
       setSubmitting(false);
@@ -152,7 +216,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
       <EuiPageBody>
         <EuiPageContent>
           <EuiForm component="form">
-            <EuiFormRow label="Name" fullWidth>
+            <EuiFormRow label={I18N.labelName} fullWidth>
               <EuiFieldText
                 value={form.name}
                 onChange={(e) => onField('name')(e.target.value)}
@@ -160,7 +224,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
                 fullWidth
               />
             </EuiFormRow>
-            <EuiFormRow label="Service" fullWidth>
+            <EuiFormRow label={I18N.labelService} fullWidth>
               <EuiFieldText
                 value={form.service}
                 onChange={(e) => onField('service')(e.target.value)}
@@ -168,7 +232,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
                 fullWidth
               />
             </EuiFormRow>
-            <EuiFormRow label="Owner team" fullWidth>
+            <EuiFormRow label={I18N.labelTeam} fullWidth>
               <EuiFieldText
                 value={form.team}
                 onChange={(e) => onField('team')(e.target.value)}
@@ -176,11 +240,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
                 fullWidth
               />
             </EuiFormRow>
-            <EuiFormRow
-              label="Datasource ID"
-              helpText="The registered Prometheus / AMP DirectQuery connection."
-              fullWidth
-            >
+            <EuiFormRow label={I18N.labelDatasource} helpText={I18N.helpDatasource} fullWidth>
               <EuiFieldText
                 value={form.datasourceId}
                 onChange={(e) => onField('datasourceId')(e.target.value)}
@@ -188,11 +248,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
                 fullWidth
               />
             </EuiFormRow>
-            <EuiFormRow
-              label="Metric"
-              helpText="Prometheus counter metric used to compute availability."
-              fullWidth
-            >
+            <EuiFormRow label={I18N.labelMetric} helpText={I18N.helpMetric} fullWidth>
               <EuiFieldText
                 value={form.metric}
                 onChange={(e) => onField('metric')(e.target.value)}
@@ -200,7 +256,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
                 fullWidth
               />
             </EuiFormRow>
-            <EuiFormRow label="Target (%)" helpText="Between 50 and 99.999." fullWidth>
+            <EuiFormRow label={I18N.labelTarget} helpText={I18N.helpTarget} fullWidth>
               <EuiFieldNumber
                 value={form.target}
                 onChange={(e) => onField('target')(Number(e.target.value))}
@@ -211,7 +267,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
                 fullWidth
               />
             </EuiFormRow>
-            <EuiFormRow label="Description" fullWidth>
+            <EuiFormRow label={I18N.labelDescription} fullWidth>
               <EuiTextArea
                 value={form.description}
                 onChange={(e) => onField('description')(e.target.value)}
@@ -220,7 +276,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
               />
             </EuiFormRow>
             <EuiSpacer />
-            <EuiButtonEmpty onClick={() => history.push('/slos')}>Cancel</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={() => history.push('/slos')}>{I18N.cancel}</EuiButtonEmpty>
             <EuiButton
               fill
               isDisabled={!valid || submitting}
@@ -228,7 +284,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
               onClick={onSubmit}
               data-test-subj="sloWizardSubmit"
             >
-              Create
+              {I18N.create}
             </EuiButton>
           </EuiForm>
         </EuiPageContent>

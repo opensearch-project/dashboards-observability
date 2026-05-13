@@ -30,7 +30,18 @@ const uniqueSuffix = () => Math.random().toString(36).slice(2, 8);
 const prefix = WORKSPACE_ID ? `/w/${WORKSPACE_ID}` : '';
 const sloApp = `${prefix}/app/observability-apm-slo`;
 
+// FIXME(pr-5): wire this spec into the CI pipeline once the observability-
+// stack dev cluster ships as a CI prereq. Today it's operator-run only:
+// CI doesn't have a Prometheus-backed DirectQuery datasource available.
+// The `sloEnabled` env gate below lets anyone drop it in a CI run that
+// doesn't have the stack up without failing the whole suite.
+const SLO_ENABLED = Cypress.env('sloEnabled') !== false;
+
 describe('SLO — CRUD smoke (PR 1)', () => {
+  before(function () {
+    if (!SLO_ENABLED) this.skip();
+  });
+
   it('creates, lists, and deletes an SLO through the wizard', () => {
     const name = `Smoke SLO ${uniqueSuffix()}`;
     const service = `smoke-svc-${uniqueSuffix()}`;
