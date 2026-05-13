@@ -448,7 +448,7 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
           shows the current routing tree for all Prometheus datasources.
         </p>
       </EuiCallOut>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
 
       {/* Cluster status bar */}
       <EuiPanel paddingSize="s" hasBorder>
@@ -483,7 +483,7 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
         </EuiFlexGroup>
       </EuiPanel>
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
 
       {/* Route tree */}
       <EuiTitle size="xs">
@@ -498,7 +498,7 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
         </EuiText>
       )}
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
 
       {/* Receivers */}
       <EuiTitle size="xs">
@@ -513,7 +513,7 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
         </EuiText>
       )}
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
 
       {/* Inhibit rules */}
       <EuiTitle size="xs">

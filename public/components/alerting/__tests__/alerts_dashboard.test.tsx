@@ -55,12 +55,25 @@ const baseProps = {
   onDatasourceChange: jest.fn(),
   maxDatasources: 5,
   onDatasourceCapReached: jest.fn(),
+  rulesTotal: 1,
+  defaultDatasources: [],
+  onGoToRules: jest.fn(),
 };
 
 describe('AlertsDashboard', () => {
-  it('renders empty state when no alerts', () => {
+  it('renders "no alerts in range" empty state when rules exist but no alerts', () => {
     const { getByText } = render(<AlertsDashboard {...baseProps} />);
-    expect(getByText('No Active Alerts')).toBeInTheDocument();
+    expect(getByText('No alerts in the selected time range')).toBeInTheDocument();
+  });
+
+  it('renders "no datasource" empty state when selection is empty', () => {
+    const { getByText } = render(<AlertsDashboard {...baseProps} selectedDsIds={[]} />);
+    expect(getByText('No datasource selected')).toBeInTheDocument();
+  });
+
+  it('renders "no rules" empty state when rulesTotal is 0', () => {
+    const { getByText } = render(<AlertsDashboard {...baseProps} rulesTotal={0} />);
+    expect(getByText('No rules have been created')).toBeInTheDocument();
   });
 
   it('renders alert table when alerts provided', () => {

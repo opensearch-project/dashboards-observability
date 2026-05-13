@@ -66,6 +66,8 @@ export interface MonitorsFiltersPanelProps {
   isFacetCollapsed: (id: string) => boolean;
   toggleFacetCollapse: (id: string) => void;
 
+  onToggleOpen: () => void;
+
   savedSearches: SavedSearch[];
   setSavedSearches: React.Dispatch<React.SetStateAction<SavedSearch[]>>;
   loadSavedSearch: (ss: SavedSearch) => void;
@@ -100,6 +102,7 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
   facetCounts,
   isFacetCollapsed,
   toggleFacetCollapse,
+  onToggleOpen,
   savedSearches,
   setSavedSearches,
   loadSavedSearch,
@@ -138,34 +141,28 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
   );
 
   return (
-    <EuiPanel
-      paddingSize="s"
-      hasBorder
-      style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
-    >
-      <div style={{ flex: 1, overflow: 'auto' }}>
-        <EuiFlexGroup
-          gutterSize="xs"
-          alignItems="center"
-          responsive={false}
-          justifyContent="spaceBetween"
-        >
-          <EuiFlexItem>
-            <EuiText size="xs">
-              <strong>Filters</strong>
-            </EuiText>
-          </EuiFlexItem>
-          {activeFilterCount > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="xs" onClick={clearAllFilters} flush="right">
-                Clear ({activeFilterCount})
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-
-        {/* Datasource filter — searchable, max 10 visible, max 5 selected */}
+    <EuiPanel className="altFiltersInner" data-test-subj="monitorsFiltersPanel">
+      <EuiFlexGroup
+        gutterSize="xs"
+        alignItems="center"
+        responsive={false}
+        justifyContent="spaceBetween"
+      >
+        <EuiFlexItem>
+          <EuiText size="xs">
+            <strong>Filters</strong>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="menuLeft"
+            onClick={onToggleOpen}
+            aria-label="Collapse filters"
+            data-test-subj="monitorsFiltersPanelToggle"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <div className="altFiltersBody">
         <FacetFilterGroup
           id="datasource"
           label="Datasource"
@@ -178,6 +175,7 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
               .map((l) => datasourceEntries.find((e) => e.label === l)?.id)
               .filter(Boolean) as string[];
             onDatasourceChange(ids);
+            if (ids.length === 0) clearAllFilters();
           }}
           counts={Object.fromEntries(
             datasourceEntries.map((e) => [
@@ -186,7 +184,8 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
             ])
           )}
           searchable
-          maxVisible={10}
+          showCounts={false}
+          initialVisible={5}
           maxSelected={maxDatasources}
           onCapReached={onDatasourceCapReached}
           searchAriaLabel="Search datasources"

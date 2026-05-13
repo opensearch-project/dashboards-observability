@@ -128,6 +128,22 @@ const TAB_LABELS: Record<TabId, string> = {
 // page-size controls (10/20/50/100 rows per page) over this full dataset.
 const DEFAULT_PAGE_SIZE = 1000;
 
+// The OpenSearch Alerting plugin creates the `.opendistro-alerting-config`
+// index lazily, on first monitor/destination creation. Until then, list calls
+// return a 404 `alerting_exception` / `IndexNotFoundException`. That's the same
+// signal our "No rules have been created" empty state already conveys, so we
+// suppress the warning banner for this specific case — the user is about to
+// see the CTA to create their first rule, which will auto-create the index.
+const isAlertingConfigMissingError = (err: string | undefined): boolean => {
+  if (!err) return false;
+  return (
+    err.includes('.opendistro-alerting-config') &&
+    (err.includes('index_not_found') ||
+      err.includes('IndexNotFoundException') ||
+      err.includes('alerting_exception'))
+  );
+};
+
 export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   datasources,
   datasourcesLoading,
@@ -203,7 +219,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   useEffect(() => {
     setNavBreadCrumbs(
       [{ text: observabilityTitle, href: `${observabilityID}#/` }],
-      [{ text: 'Alert Manager' }, { text: TAB_LABELS[activeTab] }]
+      [{ text: 'Alerts' }, { text: TAB_LABELS[activeTab] }]
     );
   }, [activeTab]);
 
@@ -277,7 +293,9 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         setAlertsTotal((res.results || []).length);
         // Convert per-datasource failure entries from the progressive response
         // into the UI's warning shape.
-        const failedStatuses = (res.datasourceStatus || []).filter((s) => s.status === 'error');
+        const failedStatuses = (res.datasourceStatus || [])
+          .filter((s) => s.status === 'error')
+          .filter((s) => !isAlertingConfigMissingError(s.error));
         if (failedStatuses.length > 0) {
           setWarnings(
             failedStatuses.map((s) => ({
@@ -309,7 +327,9 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         const res = await osService.listRules({ dsIds });
         setRules(res.results || []);
         setRulesTotal((res.results || []).length);
-        const failedStatuses = (res.datasourceStatus || []).filter((s) => s.status === 'error');
+        const failedStatuses = (res.datasourceStatus || [])
+          .filter((s) => s.status === 'error')
+          .filter((s) => !isAlertingConfigMissingError(s.error));
         if (failedStatuses.length > 0) {
           setWarnings(
             failedStatuses.map((s) => ({
@@ -772,6 +792,12 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             onDatasourceChange={handleDatasourceChange}
             maxDatasources={maxDatasources}
             onDatasourceCapReached={handleDatasourceCapReached}
+            rulesTotal={rulesTotal}
+            defaultDatasources={resolveDatasourceTokens(defaultDatasources, datasources).slice(
+              0,
+              maxDatasources
+            )}
+            onGoToRules={() => setActiveTab('rules')}
           />
         </>
       );

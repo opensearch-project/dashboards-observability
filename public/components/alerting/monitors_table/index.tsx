@@ -41,6 +41,7 @@ import { SavedSearch } from './monitors_table_helpers';
 import { DEFAULT_WIDTHS, useResizableColumns } from './resizable_columns';
 import { MonitorsFiltersPanel } from './monitors_filters_panel';
 import { MonitorsMainPanel } from './monitors_main_panel';
+import '../alerting.scss';
 
 interface MonitorsTableProps {
   rules: UnifiedRuleSummary[];
@@ -334,18 +335,17 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   const { toggleFacetCollapse, isCollapsed: isFacetCollapsed } = useFacetCollapse();
 
   return (
-    <EuiResizableContainer style={{ flex: 1, minHeight: 0 }}>
-      {(EuiResizablePanel, EuiResizableButton) => {
+    <EuiResizableContainer className="altResizableContainer">
+      {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
         return (
           <>
             <EuiResizablePanel
               id="filters-panel"
-              initialSize={20}
-              minSize="200px"
-              mode={['collapsible', { position: 'top' }]}
-              onToggleCollapsed={() => {}}
+              initialSize={15}
+              minSize="10%"
+              mode={['custom', { position: 'top' }]}
               paddingSize="none"
-              style={{ overflow: 'auto', paddingRight: '4px' }}
+              className="altFiltersPanel"
             >
               <MonitorsFiltersPanel
                 rules={rules}
@@ -370,6 +370,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 facetCounts={facetCounts}
                 isFacetCollapsed={isFacetCollapsed}
                 toggleFacetCollapse={toggleFacetCollapse}
+                onToggleOpen={() => togglePanel?.('filters-panel', { direction: 'left' })}
                 savedSearches={savedSearches}
                 setSavedSearches={setSavedSearches}
                 loadSavedSearch={loadSavedSearch}
@@ -386,11 +387,10 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
             <EuiResizableButton />
 
             <EuiResizablePanel
-              initialSize={80}
+              initialSize={85}
               minSize="400px"
-              mode="main"
               paddingSize="none"
-              style={{ paddingLeft: '4px', overflow: 'auto' }}
+              className="altContentPanel"
             >
               <MonitorsMainPanel
                 rules={rules}

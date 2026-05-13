@@ -31,6 +31,7 @@ import { AlertTimeline } from './alerts_charts';
 import { AlertsSummaryCards } from './alerts_summary_cards';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
 import { countBy } from './shared_constants';
+import './alerting.scss';
 
 // ============================================================================
 // Color maps (used by table columns and filter panel)
@@ -183,6 +184,15 @@ export interface AlertsDashboardProps {
   maxDatasources: number;
   /** Callback fired when user tries to exceed `maxDatasources`. */
   onDatasourceCapReached: () => void;
+  /**
+   * Total number of rules across the selected datasources. `-1` means rules have
+   * not yet been fetched; `0` means none exist. Drives the "no rules" empty state.
+   */
+  rulesTotal: number;
+  /** Default datasource ids from advanced settings; shown in the "no datasource" empty state. */
+  defaultDatasources: string[];
+  /** Switch to the Rules tab (used by the "No rules" empty state CTA). */
+  onGoToRules: () => void;
 }
 
 export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
@@ -195,6 +205,9 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   onDatasourceChange,
   maxDatasources,
   onDatasourceCapReached,
+  rulesTotal,
+  defaultDatasources,
+  onGoToRules,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [severityFilter, setSeverityFilter] = useState('all');
@@ -306,11 +319,14 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     severityFilter !== 'all' ||
     stateFilter !== 'all';
 
-  const clearAllFilters = () => {
+  // Clearing the datasource filter must also clear dependent facets because
+  // severity/state/backend/label options are derived from the currently
+  // selected datasources' alerts — leaving stale selections would filter
+  // against values that no longer exist in the visible dataset.
+  const clearDependentFilters = () => {
     setFilters(emptyAlertFilters());
     setSeverityFilter('all');
     setStateFilter('all');
-    setSearchQuery('');
   };
 
   const updateFilter = <K extends keyof AlertFilterState>(key: K, value: AlertFilterState[K]) => {
@@ -469,49 +485,55 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     [onAcknowledge, onViewDetail]
   );
 
-  const emptyState = !loading && alerts.length === 0;
+  // Chart-area empty state mode. Cascade:
+  //   'no-ds'    — user hasn't selected any datasource
+  //   'no-rules' — DS selected, but no rules exist across them
+  //   'no-alerts' — rules exist, but none fired in the current time range
+  //   null — render the timeline
+  const emptyMode: 'no-ds' | 'no-rules' | 'no-alerts' | null = !loading
+    ? selectedDsIds.length === 0
+      ? 'no-ds'
+      : rulesTotal === 0
+      ? 'no-rules'
+      : alerts.length === 0
+      ? 'no-alerts'
+      : null
+    : null;
 
   return (
-    <EuiResizableContainer style={{ flex: 1, minHeight: 0 }}>
-      {(EuiResizablePanel, EuiResizableButton) => (
+    <EuiResizableContainer className="altResizableContainer">
+      {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => (
         <>
           <EuiResizablePanel
             id="alerts-filters-panel"
             initialSize={15}
-            minSize="180px"
-            mode={['collapsible', { position: 'top' }]}
-            onToggleCollapsed={() => {}}
+            minSize="10%"
+            mode={['custom', { position: 'top' }]}
             paddingSize="none"
-            style={{ overflow: 'auto', paddingRight: '4px' }}
+            className="altFiltersPanel"
           >
-            <EuiPanel
-              paddingSize="s"
-              hasBorder
-              style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
-            >
-              <div style={{ flex: 1, overflow: 'auto' }}>
-                <EuiFlexGroup
-                  gutterSize="xs"
-                  alignItems="center"
-                  responsive={false}
-                  justifyContent="spaceBetween"
-                >
-                  <EuiFlexItem>
-                    <EuiText size="xs">
-                      <strong>Filters</strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                  {activeFilterCount > 0 && (
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty size="xs" onClick={clearAllFilters} flush="right">
-                        Clear ({activeFilterCount})
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
-
-                {/* Datasource filter — searchable, max 10 visible, max 5 selected */}
+            <EuiPanel className="altFiltersInner">
+              <EuiFlexGroup
+                gutterSize="xs"
+                alignItems="center"
+                responsive={false}
+                justifyContent="spaceBetween"
+              >
+                <EuiFlexItem>
+                  <EuiText size="xs">
+                    <strong>Filters</strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType="menuLeft"
+                    onClick={() => togglePanel?.('alerts-filters-panel', { direction: 'left' })}
+                    aria-label="Collapse filters"
+                    data-test-subj="alertsFiltersPanelToggle"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <div className="altFiltersBody">
                 <FacetFilterGroup
                   id="datasource"
                   label="Datasource"
@@ -524,6 +546,10 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                       .map((l) => datasourceEntries.find((e) => e.label === l)?.id)
                       .filter(Boolean) as string[];
                     onDatasourceChange(ids);
+                    // Clearing datasource invalidates the other facet options
+                    // (severity/state/backend/labels are derived from the
+                    // selected datasources' alerts), so wipe dependent filters.
+                    if (ids.length === 0) clearDependentFilters();
                   }}
                   counts={countBy(
                     datasourceEntries.filter(
@@ -532,7 +558,8 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                     (e) => e.label
                   )}
                   searchable
-                  maxVisible={10}
+                  showCounts={false}
+                  initialVisible={5}
                   maxSelected={maxDatasources}
                   onCapReached={onDatasourceCapReached}
                   searchAriaLabel="Search datasources"
@@ -597,18 +624,10 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
           <EuiResizablePanel
             initialSize={85}
             minSize="400px"
-            mode="main"
             paddingSize="none"
-            style={{ paddingLeft: '4px', overflow: 'auto' }}
+            className="altContentPanel"
           >
-            {emptyState ? (
-              <EuiEmptyPrompt
-                title={<h2>No Active Alerts</h2>}
-                body={<p>All systems operating normally.</p>}
-                iconType="checkInCircleFilled"
-                iconColor="success"
-              />
-            ) : (
+            {
               <>
                 {/* ---- Summary Stat Cards (extracted component) ---- */}
                 <AlertsSummaryCards
@@ -648,22 +667,74 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   }}
                 />
 
-                <EuiSpacer size="m" />
+                <EuiSpacer size="s" />
 
                 {/* ---- Visualization Row ---- */}
-                <EuiFlexGroup gutterSize="m" responsive={true}>
-                  <EuiFlexItem grow={3}>
-                    <EuiPanel paddingSize="m" hasBorder>
-                      <EuiTitle size="xxs">
-                        <h4>Alert Timeline (24h)</h4>
-                      </EuiTitle>
-                      <EuiSpacer size="s" />
-                      <AlertTimeline alerts={filteredAlerts} />
+                <EuiFlexGroup gutterSize="m" responsive={true} className="altVizRow">
+                  <EuiFlexItem grow={3} className="altVizItem">
+                    <EuiPanel paddingSize="m" hasBorder className="altVizPanel">
+                      {emptyMode === 'no-ds' ? (
+                        <EuiEmptyPrompt
+                          iconType="database"
+                          title={<h4>No datasource selected</h4>}
+                          body={
+                            <p>
+                              Select a datasource from the filter panel on the left to view alerts.
+                            </p>
+                          }
+                          actions={
+                            defaultDatasources.length > 0 ? (
+                              <EuiButtonEmpty
+                                size="s"
+                                onClick={() => onDatasourceChange(defaultDatasources)}
+                                data-test-subj="alertsEmptyResetDefaults"
+                              >
+                                Reset to default datasources
+                              </EuiButtonEmpty>
+                            ) : undefined
+                          }
+                        />
+                      ) : emptyMode === 'no-rules' ? (
+                        <EuiEmptyPrompt
+                          iconType="bell"
+                          title={<h4>No rules have been created</h4>}
+                          body={
+                            <p>
+                              The selected datasource has no alerting rules configured. Create one
+                              to start receiving alerts.
+                            </p>
+                          }
+                          actions={
+                            <EuiButtonEmpty
+                              size="s"
+                              onClick={onGoToRules}
+                              data-test-subj="alertsEmptyGoToRules"
+                            >
+                              Go to Rules
+                            </EuiButtonEmpty>
+                          }
+                        />
+                      ) : emptyMode === 'no-alerts' ? (
+                        <EuiEmptyPrompt
+                          iconType="checkInCircleFilled"
+                          iconColor="success"
+                          title={<h4>No alerts in the selected time range</h4>}
+                          body={<p>Try expanding the time range to see more history.</p>}
+                        />
+                      ) : (
+                        <>
+                          <EuiTitle size="xxs">
+                            <h4>Alert Timeline (24h)</h4>
+                          </EuiTitle>
+                          <EuiSpacer size="s" />
+                          <AlertTimeline alerts={filteredAlerts} />
+                        </>
+                      )}
                     </EuiPanel>
                   </EuiFlexItem>
                 </EuiFlexGroup>
 
-                <EuiSpacer size="l" />
+                <EuiSpacer size="s" />
 
                 {/* ---- Search + Table ---- */}
                 <EuiPanel paddingSize="m" hasBorder>
@@ -705,7 +776,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   />
                 </EuiPanel>
               </>
-            )}
+            }
           </EuiResizablePanel>
         </>
       )}

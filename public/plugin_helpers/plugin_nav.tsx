@@ -43,9 +43,9 @@ function registerIconSideNavGroups(
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
       {
         id: observabilityAlertingID,
-        category: DEFAULT_APP_CATEGORIES.observabilityTools,
+        category: undefined,
         showInAllNavGroup: true,
-        order: 150,
+        order: 50,
         euiIconType: 'beaker',
       },
     ]);

@@ -10,7 +10,7 @@
  * Renders a collapsible section with checkboxes for each option,
  * including count badges and optional color indicators.
  */
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,6 +20,7 @@ import {
   EuiCheckbox,
   EuiHealth,
   EuiFieldSearch,
+  EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -38,10 +39,15 @@ export interface FacetGroupConfig {
   colorMap?: Record<string, string>;
   /** Enables a case-insensitive search input above the options list. */
   searchable?: boolean;
+  /** Hide the `(count)` badge next to each option. Defaults to true. */
+  showCounts?: boolean;
   /** Override the aria-label for the search input (defaults to `Search ${label}`). */
   searchAriaLabel?: string;
-  /** Cap on number of option rows rendered after filtering. */
-  maxVisible?: number;
+  /**
+   * Number of option rows rendered before a "+N more" / "Show less" toggle appears.
+   * Remaining rows stay available — the user expands inline.
+   */
+  initialVisible?: number;
   /** Hard cap on selection: unchecked options are disabled once reached. Checked options remain interactive. */
   maxSelected?: number;
   /**
@@ -64,6 +70,68 @@ export interface FacetFilterGroupProps extends FacetGroupConfig {
 }
 
 // ============================================================================
+// TruncatedLabel — ellipsis + tooltip only when content overflows
+// ============================================================================
+//
+// Uses a `ResizeObserver` to track the underlying span's `scrollWidth` vs
+// `clientWidth`. When the parent panel is wide enough to fit the full label,
+// no `title` is rendered. When the label is truncated (via CSS
+// `text-overflow: ellipsis`), we attach a native `title` attribute so
+// hovering shows the full value. Re-evaluates on resize.
+const TruncatedLabel: React.FC<{ text: string }> = ({ text }) => {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [isTruncated, setIsTruncated] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const measure = () => setIsTruncated(el.scrollWidth > el.clientWidth);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [text]);
+
+  const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number } | null>(null);
+
+  // Custom instant-hover tooltip. `EuiToolTip` is unreliable when the anchor
+  // is nested inside an EuiCheckbox `<label>` (the label intercepts events
+  // and bubbles them to the paired input), and the browser's native `title`
+  // has a ~500ms non-configurable delay. `position: fixed` escapes the
+  // surrounding `overflow: hidden` clipping on the filter panel rows.
+  const onEnter = () => {
+    if (!isTruncated || !ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    setTooltipPos({ top: rect.top - 28, left: rect.left });
+  };
+  const onLeave = () => setTooltipPos(null);
+
+  return (
+    <span className="altTruncatedLabelWrap" onMouseEnter={onEnter} onMouseLeave={onLeave}>
+      <span
+        ref={ref}
+        className="altTruncatedLabel"
+        style={{
+          fontSize: '12px',
+          lineHeight: '18px',
+        }}
+      >
+        {text}
+      </span>
+      {tooltipPos && (
+        <span
+          className="altTruncatedLabelTooltip"
+          role="tooltip"
+          style={{ top: tooltipPos.top, left: tooltipPos.left }}
+        >
+          {text}
+        </span>
+      )}
+    </span>
+  );
+};
+
+// ============================================================================
 // FacetFilterGroup — a single collapsible facet section
 // ============================================================================
 
@@ -77,8 +145,9 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
   displayMap,
   colorMap,
   searchable,
+  showCounts = true,
   searchAriaLabel,
-  maxVisible,
+  initialVisible,
   maxSelected,
   checkedFirst,
   onCapReached,
@@ -87,6 +156,7 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
 }) => {
   const activeCount = selected.length;
   const [searchTerm, setSearchTerm] = useState('');
+  const [showAll, setShowAll] = useState(false);
 
   // Apply case-insensitive search filter against the display label.
   const filteredOptions = useMemo(() => {
@@ -109,14 +179,16 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
     return [...checked, ...unchecked];
   }, [filteredOptions, selected, checkedFirst]);
 
-  // Cap the rendered rows. Footer uses cappedCount + total.
+  // Cap the rendered rows unless the user has toggled "Show more".
   const cappedOptions =
-    typeof maxVisible === 'number' ? partitionedOptions.slice(0, maxVisible) : partitionedOptions;
+    typeof initialVisible === 'number' && !showAll
+      ? partitionedOptions.slice(0, initialVisible)
+      : partitionedOptions;
 
-  // Hide the "Showing N of X" footer when total fits in the cap AND there's no active search.
-  const showFooter =
-    typeof maxVisible === 'number' &&
-    (options.length > maxVisible || (searchable && searchTerm.trim().length > 0));
+  // "+N more" toggle visibility — only when total exceeds the initial cap.
+  const hasOverflow =
+    typeof initialVisible === 'number' && partitionedOptions.length > initialVisible;
+  const remainingCount = hasOverflow ? partitionedOptions.length - (initialVisible as number) : 0;
 
   // Selection cap: once reached, unchecked options are disabled. Checked stay interactive.
   const capReached = typeof maxSelected === 'number' && selected.length >= maxSelected;
@@ -150,6 +222,20 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
         {activeCount > 0 && (
           <EuiFlexItem grow={false}>
             <EuiBadge color="primary">{activeCount}</EuiBadge>
+          </EuiFlexItem>
+        )}
+        {activeCount > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              color="primary"
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation();
+                onChange([]);
+              }}
+              data-test-subj={`facetGroup-${id}-clear`}
+            >
+              <EuiText size="xs">Clear</EuiText>
+            </EuiLink>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -189,22 +275,33 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
                   width: '100%',
                   justifyContent: 'space-between',
                   opacity: isDisabled ? 0.5 : 1,
+                  minWidth: 0,
                 }}
               >
-                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1 }}>
+                <span
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    flex: 1,
+                    minWidth: 0,
+                  }}
+                >
                   {colorMap && (
                     <EuiHealth color={colorMap[opt] || 'subdued'} style={{ marginRight: 0 }} />
                   )}
-                  <span style={{ fontSize: '12px', lineHeight: '18px' }}>{displayLabel}</span>
+                  <TruncatedLabel text={displayLabel} />
                 </span>
-                <span style={{ fontSize: '12px', lineHeight: '18px', color: '#69707D' }}>
-                  ({count})
-                </span>
+                {showCounts && (
+                  <span style={{ fontSize: '12px', lineHeight: '18px', color: '#69707D' }}>
+                    ({count})
+                  </span>
+                )}
               </span>
             );
 
             return (
-              <div key={opt} style={{ marginBottom: 2 }}>
+              <div key={opt} className="altFacetCheckboxRow">
                 <EuiCheckbox
                   id={checkboxId}
                   label={labelContent}
@@ -229,15 +326,15 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
               </div>
             );
           })}
-          {showFooter && (
-            <EuiText
-              size="xs"
-              color="subdued"
+          {hasOverflow && (
+            <EuiLink
+              onClick={() => setShowAll((v) => !v)}
+              color="primary"
+              data-test-subj={`facetGroup-${id}-showMore`}
               style={{ marginTop: 4 }}
-              data-test-subj={`facetGroup-${id}-footer`}
             >
-              Showing {cappedOptions.length} of {options.length}
-            </EuiText>
+              <EuiText size="xs">{showAll ? 'Show less' : `+${remainingCount} more`}</EuiText>
+            </EuiLink>
           )}
           {capReached && !onCapReached && (
             <EuiText
