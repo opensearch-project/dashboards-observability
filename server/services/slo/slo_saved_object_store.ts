@@ -12,6 +12,7 @@
  */
 
 import type { SavedObjectsClientContract } from '../../../../../src/core/server';
+import type { Logger } from '../../../common/types/alerting';
 import type { ISloStore, SloDocument } from '../../../common/slo/slo_types';
 
 const SO_TYPE = 'slo-definition';
@@ -94,7 +95,10 @@ function fromAttributes(obj: SavedObjectEnvelope): SloDocument {
 }
 
 export class SavedObjectSloStore implements ISloStore {
-  constructor(private readonly client: SavedObjectsClientContract) {}
+  constructor(
+    private readonly client: SavedObjectsClientContract,
+    private readonly logger?: Logger
+  ) {}
 
   async get(id: string): Promise<SloDocument | null> {
     try {
@@ -128,8 +132,14 @@ export class SavedObjectSloStore implements ISloStore {
       for (const obj of response.saved_objects as SavedObjectEnvelope[]) {
         try {
           results.push(fromAttributes(obj));
-        } catch {
-          // Skip malformed docs rather than failing the whole listing.
+        } catch (err) {
+          // Skip malformed docs rather than failing the whole listing — but
+          // log so a corrupted SO doesn't vanish from the UI without trace.
+          this.logger?.warn(
+            `SavedObjectSloStore.list: skipping malformed slo-definition ${obj.id}: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
         }
       }
       if (response.saved_objects.length === 0 || results.length >= response.total) break;

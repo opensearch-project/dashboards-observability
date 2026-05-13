@@ -208,8 +208,8 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
     form.team.trim().length > 0 &&
     form.datasourceId.trim().length > 0 &&
     form.metric.trim().length > 0 &&
-    form.target > 50 &&
-    form.target < 100;
+    form.target >= 50 &&
+    form.target <= 99.999;
 
   return (
     <EuiPage>

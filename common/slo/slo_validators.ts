@@ -49,9 +49,10 @@ function validateCustomPromQL(expr: string): string | null {
   }
   // Strip string literals before counting delimiters so a matcher like
   // `{status!~"5[0-9](}"}` isn't flagged as unbalanced. PromQL string
-  // literals use double or single quotes; we don't try to parse escapes
-  // inside — we just strip the quoted span.
-  const stripped = expr.replace(/"[^"]*"|'[^']*'/g, '');
+  // literals use double or single quotes; the regex consumes `\\` (escaped
+  // backslash) and `\"` / `\'` (escaped quote) inside the span so a
+  // legitimate matcher like `"a\"b"` isn't truncated mid-literal.
+  const stripped = expr.replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g, '');
   let parens = 0;
   let braces = 0;
   let brackets = 0;

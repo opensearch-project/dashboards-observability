@@ -529,6 +529,17 @@ export class SloService {
     if (input.id) {
       const slugErr = validateSloId(input.id);
       if (slugErr) throw new SloValidationError({ id: slugErr });
+      // Reject collisions with an existing SLO. The store's `save` is an
+      // upsert (saved-objects `overwrite: true`), so without this check a
+      // POST with a hand-supplied slug silently clobbers a prior SLO and
+      // leaks its alert group on the ruler. Generated UUIDs (`input.id`
+      // unset) collide only via cosmic ray; skip the round-trip there.
+      const existing = await this.store.get(input.id);
+      if (existing) {
+        throw new SloValidationError({
+          id: `An SLO with id "${input.id}" already exists`,
+        });
+      }
     }
 
     // Name uniqueness within the datasource (workspace scoping is handled by
@@ -816,13 +827,19 @@ export class SloService {
       return this.updateDedup(existing, merged, updatedBy, deploy);
     }
 
-    // If the caller provides a deploy context, derive the namespace from the
-    // workspace; otherwise preserve whatever namespace the existing SO carries.
-    const namespace = deploy
-      ? sloRulerNamespaceFor(deploy.workspaceId)
-      : existing.status.provisioning.backend === 'prometheus'
-      ? existing.status.provisioning.rulerNamespace
-      : sloRulerNamespaceFor('default');
+    // Prefer the persisted namespace — `workspaceId` is immutable-after-create,
+    // so the namespace we wrote at create time is authoritative even when a
+    // later request arrives under a different deploy context (e.g. PR 2's
+    // resolver picks up a different scope). Fall back to the deploy
+    // context's workspace only when nothing was persisted (legacy SOs that
+    // pre-date the stamp), and to 'default' when we have neither.
+    const namespace =
+      existing.status.provisioning.backend === 'prometheus' &&
+      existing.status.provisioning.rulerNamespace
+        ? existing.status.provisioning.rulerNamespace
+        : deploy
+        ? sloRulerNamespaceFor(deploy.workspaceId)
+        : sloRulerNamespaceFor('default');
 
     const updated: SloDocument = {
       id: existing.id,
@@ -888,7 +905,13 @@ export class SloService {
     deploy: SloDeployContext
   ): Promise<SloDocument> {
     const now = new Date().toISOString();
-    const namespace = sloRulerNamespaceFor(deploy.workspaceId);
+    // Prefer the persisted namespace — see `update()`'s rationale. Falls back
+    // to the deploy context only for legacy SOs that pre-date the stamp.
+    const namespace =
+      existing.status.provisioning.backend === 'prometheus' &&
+      existing.status.provisioning.rulerNamespace
+        ? existing.status.provisioning.rulerNamespace
+        : sloRulerNamespaceFor(deploy.workspaceId);
     const newFingerprints = this.computeObjectiveFingerprints(merged);
     const oldFingerprints =
       existing.status.provisioning.backend === 'prometheus'
