@@ -15,3 +15,4 @@ common/query_manager/antlr/output
 # SLO audit evidence (screenshots, handoff notes) — kept locally, not shipped
 slo-bugbash-evidence/
 .slo-audit-*/
+slo-*.png

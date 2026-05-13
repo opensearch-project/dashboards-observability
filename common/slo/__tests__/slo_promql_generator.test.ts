@@ -67,6 +67,7 @@ function baseSlo(overrides: Partial<SloDocument['spec']> = {}): SloDocument {
         backend: 'prometheus',
         alertGroupName: 'slo:api_availability_abcd1234',
         rulerNamespace: 'slo-generated',
+        recordingFingerprints: {},
       },
     },
   };

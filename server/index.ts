@@ -25,6 +25,10 @@ const observabilityConfig = {
       enabled: schema.boolean({ defaultValue: false }),
     }),
     slo: schema.object({
+      // Top-level SLO feature gate. Ships dark — operators opt in via
+      // `observability.slo.enabled: true` in `opensearch_dashboards.yml`.
+      // Mirrors the `alertManager.enabled` pattern.
+      enabled: schema.boolean({ defaultValue: false }),
       ruleDedup: schema.object({
         enabled: schema.boolean({ defaultValue: true }),
       }),
@@ -40,5 +44,6 @@ export const config: PluginConfigDescriptor<ObservabilityConfig> = {
     query_assist: true,
     summarize: true,
     alertManager: true,
+    slo: true,
   },
 };

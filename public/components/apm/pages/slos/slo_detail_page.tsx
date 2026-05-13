@@ -14,6 +14,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import {
   EuiButton,
   EuiCodeBlock,
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -21,7 +22,6 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
-  EuiPageHeader,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -49,13 +49,6 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    chrome.setBreadcrumbs([
-      { text: 'SLOs', href: '#/slos' },
-      { text: id, href: `#/slos/${id}` },
-    ]);
-  }, [chrome, id]);
-
-  useEffect(() => {
     (async () => {
       try {
         const d = await apiClient.get(id);
@@ -68,48 +61,66 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
     })();
   }, [apiClient, id, notifications]);
 
+  // Breadcrumb tracks the resolved SLO name once the fetch lands — falls back
+  // to the raw id during the loading window.
+  useEffect(() => {
+    chrome.setBreadcrumbs([
+      { text: 'SLOs', href: '#/slos' },
+      { text: doc?.spec.name ?? id, href: `#/slos/${id}` },
+    ]);
+  }, [chrome, id, doc]);
+
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPageHeader>
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <EuiPageContent>
+          {/* The SLO name already renders in the OSD chrome h1 via the
+              breadcrumb; repeating it here would make the page carry two
+              identical headings. Surface the health status + back-to-listing
+              on the same row instead. */}
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiTitle size="l">
-                <h1>{doc?.spec.name ?? id}</h1>
-              </EuiTitle>
               {doc ? (
-                <>
-                  <EuiSpacer size="xs" />
-                  <EuiHealth color={getSloHealthColor(doc.liveStatus.state)}>
-                    {getSloHealthLabel(doc.liveStatus.state)}
-                  </EuiHealth>
-                </>
+                <EuiHealth color={getSloHealthColor(doc.liveStatus.state)}>
+                  {getSloHealthLabel(doc.liveStatus.state)}
+                </EuiHealth>
               ) : null}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton onClick={() => history.push('/slos')}>Back to listing</EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPageHeader>
-        <EuiPageContent>
+          <EuiSpacer />
           {loading ? (
             <EuiLoadingContent lines={4} />
           ) : doc ? (
             <>
-              <EuiText size="s">
-                <p>
-                  <strong>Service:</strong> {doc.spec.service}
-                  <br />
-                  <strong>Owner team:</strong> {doc.spec.owner.teams.join(', ')}
-                  <br />
-                  <strong>Datasource:</strong> {doc.spec.datasourceId}
-                </p>
-              </EuiText>
-              <EuiSpacer />
+              <EuiDescriptionList
+                type="column"
+                compressed
+                listItems={[
+                  { title: 'Service', description: doc.spec.service },
+                  { title: 'Owner team', description: doc.spec.owner.teams.join(', ') },
+                  { title: 'Datasource', description: doc.spec.datasourceId },
+                  {
+                    title: 'Target',
+                    description: `${(doc.spec.objectives[0]?.target * 100).toFixed(2)}%`,
+                  },
+                  {
+                    title: 'Window',
+                    description:
+                      doc.spec.window.type === 'rolling'
+                        ? `${doc.spec.window.duration} rolling`
+                        : `${doc.spec.window.period} calendar`,
+                  },
+                ]}
+              />
+              <EuiSpacer size="l" />
               <EuiTitle size="xs">
-                <h2>Spec</h2>
+                <h3>Spec</h3>
               </EuiTitle>
-              <EuiCodeBlock language="json" fontSize="s" isCopyable>
+              <EuiSpacer size="s" />
+              <EuiCodeBlock language="json" fontSize="s" paddingSize="m" isCopyable>
                 {JSON.stringify(doc.spec, null, 2)}
               </EuiCodeBlock>
             </>

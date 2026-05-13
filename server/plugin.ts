@@ -283,9 +283,6 @@ export class ObservabilityPlugin
         },
       },
     };
-    core.savedObjects.registerType(sloDefinitionType);
-    core.savedObjects.registerType(sloRuleRefType);
-
     // Hoisted above `setupRoutes` so the alerting-route gate (mirrors the
     // existing `dataSourceEnabled` pattern) can read the flag at registration
     // time. Keep the same fetch downstream consumers depend on — UI settings
@@ -293,12 +290,23 @@ export class ObservabilityPlugin
     const observabilityConfig = await this.initializerContext.config
       .create<{
         alertManager: { enabled: boolean };
-        slo?: { ruleDedup?: { enabled: boolean } };
+        slo?: { enabled?: boolean; ruleDedup?: { enabled: boolean } };
       }>()
       .pipe(first())
       .toPromise();
     const alertManagerEnabled = observabilityConfig.alertManager?.enabled ?? false;
+    // Feature-flag: SLO surfaces ship dark by default. Opt in via
+    // `observability.slo.enabled: true` in `opensearch_dashboards.yml`.
+    // Mirrors the alertManager.enabled pattern. When disabled we skip SO
+    // type registration, route registration, and service construction —
+    // the plugin acts as if SLOs don't exist.
+    const sloEnabled = observabilityConfig.slo?.enabled ?? false;
     const ruleDedupEnabled = observabilityConfig.slo?.ruleDedup?.enabled ?? true;
+
+    if (sloEnabled) {
+      core.savedObjects.registerType(sloDefinitionType);
+      core.savedObjects.registerType(sloRuleRefType);
+    }
 
     // Register server side APIs
     setupRoutes({
@@ -309,35 +317,37 @@ export class ObservabilityPlugin
       logger: this.logger,
     });
 
-    // SLO service + routes. Starts on `InMemorySloStore` so it's available
-    // during setup; `start()` swaps it out for the saved-object-backed
-    // store once the internal repository is available. The ruler client is
-    // a transport abstraction — today it writes per-group via the
-    // DirectQuery plugin; a future Amazon-Managed-Prometheus transport will
-    // write whole namespaces atomically. Callers pass the namespace
-    // (`sloRulerNamespaceFor(workspaceId)`) explicitly so the AMP invariant
-    // "every rule group for workspace W lives in `slo-generated-<W>`"
-    // holds regardless of transport.
-    const sloLogger = {
-      info: (msg: string) => this.logger.info(msg),
-      warn: (msg: string) => this.logger.warn(msg),
-      error: (msg: string) => this.logger.error(msg),
-      debug: (msg: string) => this.logger.debug(msg),
-    };
-    const initialStore: ISloStore = new InMemorySloStore();
-    const sloService = new SloService(sloLogger, initialStore);
-    sloService.setDedupEnabled(ruleDedupEnabled);
-    sloService.setPluginVersion(this.initializerContext.env.packageInfo.version);
-    this.sloService = sloService;
+    if (sloEnabled) {
+      // SLO service + routes. Starts on `InMemorySloStore` so it's available
+      // during setup; `start()` swaps it out for the saved-object-backed
+      // store once the internal repository is available. The ruler client is
+      // a transport abstraction — today it writes per-group via the
+      // DirectQuery plugin; a future Amazon-Managed-Prometheus transport will
+      // write whole namespaces atomically. Callers pass the namespace
+      // (`sloRulerNamespaceFor(workspaceId)`) explicitly so the AMP invariant
+      // "every rule group for workspace W lives in `slo-generated-<W>`"
+      // holds regardless of transport.
+      const sloLogger = {
+        info: (msg: string) => this.logger.info(msg),
+        warn: (msg: string) => this.logger.warn(msg),
+        error: (msg: string) => this.logger.error(msg),
+        debug: (msg: string) => this.logger.debug(msg),
+      };
+      const initialStore: ISloStore = new InMemorySloStore();
+      const sloService = new SloService(sloLogger, initialStore);
+      sloService.setDedupEnabled(ruleDedupEnabled);
+      sloService.setPluginVersion(this.initializerContext.env.packageInfo.version);
+      this.sloService = sloService;
 
-    const rulerClient = new DirectQueryRulerClient(this.logger);
-    registerSloRoutes({
-      router,
-      sloService,
-      logger: this.logger,
-      rulerClient,
-      ruleDedupEnabled,
-    });
+      const rulerClient = new DirectQueryRulerClient(this.logger);
+      registerSloRoutes({
+        router,
+        sloService,
+        logger: this.logger,
+        rulerClient,
+        ruleDedupEnabled,
+      });
+    }
 
     core.savedObjects.registerType(getVisualizationSavedObject(dataSourceEnabled));
     core.savedObjects.registerType(getSearchSavedObject(dataSourceEnabled));
@@ -378,20 +388,22 @@ export class ObservabilityPlugin
       },
     });
 
-    core.uiSettings.register({
-      'observability.slo.ruleDedup.enabled': {
-        name: 'SLO recording-rule dedup',
-        value: true,
-        description:
-          'When enabled, SLO recording rules are shared across SLOs with equivalent ' +
-          'SLI shapes via a workspace-scoped fingerprint registry. ' +
-          'Saves evaluation cost on the ruler when many SLOs share a backend query.',
-        schema: schema.boolean(),
-        scope: core.workspace.isWorkspaceEnabled()
-          ? UiSettingScope.WORKSPACE
-          : UiSettingScope.GLOBAL,
-      },
-    });
+    if (sloEnabled) {
+      core.uiSettings.register({
+        'observability.slo.ruleDedup.enabled': {
+          name: 'SLO recording-rule dedup',
+          value: true,
+          description:
+            'When enabled, SLO recording rules are shared across SLOs with equivalent ' +
+            'SLI shapes via a workspace-scoped fingerprint registry. ' +
+            'Saves evaluation cost on the ruler when many SLOs share a backend query.',
+          schema: schema.boolean(),
+          scope: core.workspace.isWorkspaceEnabled()
+            ? UiSettingScope.WORKSPACE
+            : UiSettingScope.GLOBAL,
+        },
+      });
+    }
 
     return {};
   }

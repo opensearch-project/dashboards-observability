@@ -21,10 +21,8 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
-  EuiPageHeader,
   EuiSpacer,
   EuiTextArea,
-  EuiTitle,
 } from '@elastic/eui';
 import type { ChromeStart, NotificationsStart } from '../../../../../../../src/core/public';
 import type { SloCreateInput, SloSpec } from '../../../../../common/slo/slo_types';
@@ -122,7 +120,9 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
       const input: SloCreateInput = { spec: buildSpec(form) };
       const doc = await apiClient.create(input);
       notifications.toasts.addSuccess(`Created SLO "${doc.spec.name}"`);
-      history.push('/slos');
+      // Redirect to the detail page so the user sees the spec they authored
+      // and so a new SLO on page 2 of a paginated listing doesn't "disappear".
+      history.push(`/slos/${doc.id}`);
     } catch (err) {
       const ruler = extractRulerErrorEnvelope(err);
       if (ruler) {
@@ -150,11 +150,6 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPageHeader>
-          <EuiTitle size="l">
-            <h1>Create SLO</h1>
-          </EuiTitle>
-        </EuiPageHeader>
         <EuiPageContent>
           <EuiForm component="form">
             <EuiFormRow label="Name" fullWidth>

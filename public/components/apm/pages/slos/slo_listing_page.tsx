@@ -13,31 +13,28 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import {
   EuiBasicTable,
+  EuiBasicTableColumn,
   EuiButton,
   EuiConfirmModal,
   EuiEmptyPrompt,
   EuiHealth,
-  EuiLink,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
-  EuiPageHeader,
-  EuiPageHeaderSection,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import type {
   ChromeStart,
   HttpStart,
   NotificationsStart,
 } from '../../../../../../../src/core/public';
-import { formatPct } from '../../../../../common/slo/format';
+import { formatPct, SLO_PRECISION, TABULAR_NUMS_STYLE } from '../../../../../common/slo/format';
 import { getSloHealthColor, getSloHealthLabel } from '../../../../../common/slo/state';
 import type { SloSummary } from '../../../../../common/slo/slo_types';
 import { SloApiClient } from './slo_api_client';
@@ -57,6 +54,9 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
 }) => {
   const history = useHistory();
   const [rows, setRows] = useState<SloSummary[]>([]);
+  const [total, setTotal] = useState(0);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
   const [loading, setLoading] = useState(true);
   const [pendingDelete, setPendingDelete] = useState<SloSummary | null>(null);
 
@@ -67,20 +67,26 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await apiClient.list();
-      // The server returns paginated `{ items, total, ... }` — support both
-      // shapes (the in-flight listing projection on the server may return a
-      // bare summary array until pagination lands).
-      const items = Array.isArray(((res as unknown) as { items?: unknown }).items)
-        ? ((res as unknown) as { items: SloSummary[] }).items
-        : ((res as unknown) as SloSummary[]);
-      setRows(items ?? []);
+      // Server pages are 1-indexed; EUI's `pageIndex` is 0-indexed.
+      const res = await apiClient.list({ page: pageIndex + 1, pageSize });
+      const raw = res as unknown;
+      if (Array.isArray((raw as { results?: unknown }).results)) {
+        const envelope = raw as { results: SloSummary[]; total: number };
+        setRows(envelope.results);
+        setTotal(envelope.total);
+      } else if (Array.isArray(raw)) {
+        setRows(raw as SloSummary[]);
+        setTotal((raw as SloSummary[]).length);
+      } else {
+        setRows([]);
+        setTotal(0);
+      }
     } catch (err) {
       notifications.toasts.addError(err as Error, { title: 'Failed to load SLOs' });
     } finally {
       setLoading(false);
     }
-  }, [apiClient, notifications]);
+  }, [apiClient, notifications, pageIndex, pageSize]);
 
   useEffect(() => {
     refresh();
@@ -98,14 +104,22 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
     }
   }, [apiClient, pendingDelete, notifications, refresh]);
 
-  const columns = [
+  const columns: Array<EuiBasicTableColumn<SloSummary>> = [
     {
       field: 'name',
       name: 'Name',
       render: (_v: string, slo: SloSummary) => (
-        <EuiLink onClick={() => history.push(`/slos/${slo.id}`)} data-test-subj="sloRowName">
+        // Use react-router's `Link` (renders a real `<a href="#/slos/...">`)
+        // so middle-click / cmd-click open in a new tab. EUI's own `EuiLink`
+        // forbids `href` + `onClick` together, and a plain anchor wouldn't
+        // pick up the primary-link style. The `euiLink` class matches.
+        <Link
+          to={`/slos/${slo.id}`}
+          className="euiLink euiLink--primary"
+          data-test-subj="sloRowName"
+        >
           {slo.name}
-        </EuiLink>
+        </Link>
       ),
     },
     { field: 'service', name: 'Service' },
@@ -121,7 +135,10 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
     {
       field: 'worstTarget',
       name: 'Target',
-      render: (v: number) => formatPct(v, { decimals: 2 }),
+      align: 'right' as const,
+      render: (v: number) => (
+        <span style={TABULAR_NUMS_STYLE}>{formatPct(v, { decimals: SLO_PRECISION.target })}</span>
+      ),
     },
     {
       name: 'Actions',
@@ -142,33 +159,26 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <EuiTitle size="l">
-              <h1>Service level objectives</h1>
-            </EuiTitle>
-          </EuiPageHeaderSection>
-          <EuiPageHeaderSection>
-            <EuiButton
-              fill
-              iconType="plusInCircle"
-              onClick={() => history.push('/slos/create')}
-              data-test-subj="sloCreateBtn"
-            >
-              Create SLO
-            </EuiButton>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
         <EuiPageContent>
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>
-              <EuiText size="s">
-                {rows.length} SLO{rows.length === 1 ? '' : 's'}
+              <EuiText size="s" color="subdued">
+                {total} SLO{total === 1 ? '' : 's'}
               </EuiText>
             </EuiPageContentHeaderSection>
+            <EuiPageContentHeaderSection>
+              <EuiButton
+                fill
+                iconType="plusInCircle"
+                onClick={() => history.push('/slos/create')}
+                data-test-subj="sloCreateBtn"
+              >
+                Create SLO
+              </EuiButton>
+            </EuiPageContentHeaderSection>
           </EuiPageContentHeader>
-          <EuiSpacer />
-          {!loading && rows.length === 0 ? (
+          <EuiSpacer size="s" />
+          {!loading && total === 0 ? (
             <EuiEmptyPrompt
               iconType="visGauge"
               title={<h2>No SLOs yet</h2>}
@@ -194,6 +204,17 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
               columns={columns}
               loading={loading}
               rowProps={(row) => ({ 'data-test-subj': `sloRow-${row.id}` })}
+              pagination={{
+                pageIndex,
+                pageSize,
+                totalItemCount: total,
+                pageSizeOptions: [10, 20, 50, 100],
+              }}
+              onChange={({ page }: { page?: { index: number; size: number } }) => {
+                if (!page) return;
+                setPageIndex(page.index);
+                setPageSize(page.size);
+              }}
             />
           )}
         </EuiPageContent>
