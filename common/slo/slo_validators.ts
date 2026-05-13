@@ -1,0 +1,398 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
+ * SloSpec validation. Returns an errors map (field path → message) and a
+ * warnings map for non-blocking advisories. Applied server-side at the API
+ * boundary and client-side in the wizard.
+ */
+
+import type { BurnRateConfig, SloSpec, Objective } from './slo_types';
+import { parseDurationToMs, RECORDING_WINDOWS } from './slo_promql_generator';
+
+const METRIC_NAME_RE = /^[a-zA-Z_:][a-zA-Z0-9_:]*$/;
+const LABEL_NAME_RE = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+const UNSAFE_LABEL_VALUE_RE = /["\\\n{}()]/;
+const SLUG_ID_RE = /^[a-z][a-z0-9-]{2,62}$/;
+
+/**
+ * Cardinality guardrail (design §10.3): UUID-shaped label values explode
+ * per-series metric storage. Rejected on create/update; users should tag
+ * workloads with stable labels (service, env, route) instead.
+ */
+const UUID_LABEL_VALUE_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Annotation payload cap (design §10.3). Keeps saved-object size bounded. */
+const ANNOTATIONS_BYTE_CAP = 4096;
+
+/** Reserved keys in `spec.labels` — reject these so we don't clobber emitted labels. */
+const RESERVED_LABEL_KEYS = new Set([
+  'slo_id',
+  'slo_name',
+  'slo_objective',
+  'slo_service',
+  'slo_owner_team',
+  'slo_owner_teams',
+  'slo_tier',
+  'slo_severity',
+  'slo_alarm_type',
+  'slo_window',
+  'slo_burn_rate_multiplier',
+  'slo_window_approximated',
+  'slo_budget_threshold',
+]);
+
+export interface SloValidationResult {
+  errors: Record<string, string>;
+  warnings: Record<string, string>;
+}
+
+/** Validate a user-supplied slug ID. Server generates UUIDs otherwise. */
+export function validateSloId(id: string): string | null {
+  if (!SLUG_ID_RE.test(id)) {
+    return `Invalid SLO id. Must match /^[a-z][a-z0-9-]{2,62}$/`;
+  }
+  return null;
+}
+
+/** Validate an SloSpec (create or full update). */
+export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
+  const errors: Record<string, string> = {};
+  const warnings: Record<string, string> = {};
+
+  if (!input.name || !input.name.trim()) {
+    errors['spec.name'] = 'SLO name is required';
+  } else if (input.name.length > 128) {
+    errors['spec.name'] = 'SLO name must be 128 characters or fewer';
+  }
+
+  if (!input.datasourceId) {
+    errors['spec.datasourceId'] = 'Datasource is required';
+  }
+
+  if (input.enabled === undefined) errors['spec.enabled'] = 'enabled is required';
+  if (input.mode && input.mode !== 'active' && input.mode !== 'shadow') {
+    errors['spec.mode'] = `mode must be 'active' or 'shadow'`;
+  }
+
+  if (!input.service) errors['spec.service'] = 'Service is required';
+
+  if (!input.owner || !Array.isArray(input.owner.teams) || input.owner.teams.length === 0) {
+    errors['spec.owner.teams'] = 'At least one team is required';
+  }
+
+  // --- SLI ---
+  if (!input.sli) {
+    errors['spec.sli'] = 'SLI configuration is required';
+  } else if (input.sli.type === 'single') {
+    const { dimensions, definition } = input.sli;
+    if (!definition) {
+      errors['spec.sli.definition'] = 'SLI definition is required';
+    } else if (definition.backend === 'prometheus') {
+      const prom = definition;
+      if (prom.type === 'availability') {
+        if (!prom.metric) errors['spec.sli.definition.metric'] = 'Metric name is required';
+        else if (!METRIC_NAME_RE.test(prom.metric))
+          errors['spec.sli.definition.metric'] = 'Invalid Prometheus metric name';
+        if (prom.goodEventsFilter && /[{}()\n\\]/.test(prom.goodEventsFilter)) {
+          errors['spec.sli.definition.goodEventsFilter'] =
+            'Good events filter must not contain braces, parentheses, backslashes, or newlines';
+        }
+      } else if (prom.type === 'latency_threshold') {
+        if (!prom.metric) errors['spec.sli.definition.metric'] = 'Histogram metric is required';
+        else if (!METRIC_NAME_RE.test(prom.metric))
+          errors['spec.sli.definition.metric'] = 'Invalid Prometheus metric name';
+        if (
+          prom.latencyThresholdUnit &&
+          prom.latencyThresholdUnit !== 'seconds' &&
+          prom.latencyThresholdUnit !== 'milliseconds'
+        ) {
+          errors[
+            'spec.sli.definition.latencyThresholdUnit'
+          ] = `latencyThresholdUnit must be 'seconds' or 'milliseconds'`;
+        }
+      } else if (prom.type === 'custom') {
+        if (!prom.customExpr) {
+          errors['spec.sli.definition.customExpr'] = 'customExpr is required for custom SLIs';
+        } else if (prom.customExpr.mode === 'events') {
+          if (!prom.customExpr.goodQuery)
+            errors['spec.sli.definition.customExpr.goodQuery'] = 'goodQuery is required';
+          if (!prom.customExpr.totalQuery)
+            errors['spec.sli.definition.customExpr.totalQuery'] = 'totalQuery is required';
+        } else if (prom.customExpr.mode === 'raw') {
+          if (!prom.customExpr.errorRatioQuery)
+            errors['spec.sli.definition.customExpr.errorRatioQuery'] =
+              'errorRatioQuery is required';
+        }
+      }
+    } else if (definition.backend === 'opensearch') {
+      errors['spec.sli.definition.backend'] = 'OpenSearch SLI backend is not supported in P0';
+    }
+
+    // Dimensions — required for non-custom single SLIs.
+    const isCustom = definition?.backend === 'prometheus' && definition.type === 'custom';
+    if (!isCustom) {
+      if (!Array.isArray(dimensions) || dimensions.length === 0) {
+        errors['spec.sli.dimensions'] = 'At least one dimension is required';
+      } else {
+        for (let i = 0; i < dimensions.length; i++) {
+          const d = dimensions[i];
+          if (!d.name || !LABEL_NAME_RE.test(d.name))
+            errors[`spec.sli.dimensions[${i}].name`] = 'Invalid Prometheus label name';
+          if (!d.value) errors[`spec.sli.dimensions[${i}].value`] = 'Dimension value is required';
+          else if (UNSAFE_LABEL_VALUE_RE.test(d.value))
+            errors[`spec.sli.dimensions[${i}].value`] =
+              'Label value must not contain double quotes, backslashes, newlines, or braces';
+        }
+      }
+    }
+  } else if (input.sli.type === 'composite') {
+    errors['spec.sli.type'] = 'Composite SLOs are reserved for P2';
+  }
+
+  // --- Objectives ---
+  if (!Array.isArray(input.objectives) || input.objectives.length === 0) {
+    errors['spec.objectives'] = 'At least one objective is required';
+  } else {
+    const seenNames = new Set<string>();
+    for (let i = 0; i < input.objectives.length; i++) {
+      const objResult = validateObjective(input.objectives[i], i, input);
+      Object.assign(errors, objResult.errors);
+      Object.assign(warnings, objResult.warnings);
+      const n = input.objectives[i].name;
+      if (n) {
+        if (seenNames.has(n))
+          errors[`spec.objectives[${i}].name`] = `Duplicate objective name "${n}"`;
+        seenNames.add(n);
+      }
+    }
+  }
+
+  // --- Window ---
+  if (!input.window) {
+    errors['spec.window'] = 'Window is required';
+  } else if (input.window.type === 'rolling') {
+    const ms = parseDurationToMs(input.window.duration);
+    if (!input.window.duration || ms === 0) {
+      errors['spec.window.duration'] = 'Window duration is required';
+    } else if (ms < parseDurationToMs('1d')) {
+      errors['spec.window.duration'] = 'Minimum window duration is 1 day';
+    } else if (ms > parseDurationToMs('30d')) {
+      errors['spec.window.duration'] = 'Maximum window duration is 30 days';
+    } else if (ms > parseDurationToMs('3d')) {
+      warnings['spec.window.duration'] =
+        `Windows greater than 3d use the 3d recording rule as an approximation in P0. ` +
+        `Attainment alerts will carry slo_window_approximated="true".`;
+    }
+  } else if (input.window.type === 'calendar') {
+    errors['spec.window.type'] = 'Calendar windows are reserved for P1';
+  }
+
+  // --- Alerting ---
+  if (!input.alerting) {
+    errors['spec.alerting'] = 'Alerting strategy is required';
+  } else if (input.alerting.strategy === 'mwmbr') {
+    if (!Array.isArray(input.alerting.burnRates) || input.alerting.burnRates.length === 0) {
+      warnings['spec.alerting.burnRates'] =
+        'No burn-rate tiers configured — no MWMBR alerts will be generated';
+    } else {
+      const firstObjTarget = input.objectives?.[0]?.target;
+      const errorBudget = firstObjTarget !== undefined ? 1 - firstObjTarget : undefined;
+      for (let i = 0; i < input.alerting.burnRates.length; i++) {
+        const br = validateBurnRate(input.alerting.burnRates[i], i, errorBudget);
+        Object.assign(errors, br.errors);
+        Object.assign(warnings, br.warnings);
+      }
+    }
+  } else {
+    errors['spec.alerting.strategy'] = 'Only mwmbr alerting is supported in P0';
+  }
+
+  // --- Alarms ---
+  if (!input.alarms) {
+    errors['spec.alarms'] = 'Alarm configuration is required';
+  } else {
+    if (
+      input.alarms.noData?.enabled &&
+      (!input.alarms.noData.forDuration || parseDurationToMs(input.alarms.noData.forDuration) === 0)
+    ) {
+      errors['spec.alarms.noData.forDuration'] =
+        'noData.forDuration is required when noData is enabled';
+    }
+  }
+
+  // --- Budget warnings ---
+  if (input.budgetWarningThresholds === undefined) {
+    errors['spec.budgetWarningThresholds'] = 'budgetWarningThresholds must be an array';
+  } else if (Array.isArray(input.budgetWarningThresholds)) {
+    for (let i = 0; i < input.budgetWarningThresholds.length; i++) {
+      const bw = input.budgetWarningThresholds[i];
+      if (bw.threshold === undefined || bw.threshold < 0.01 || bw.threshold > 0.99) {
+        errors[`spec.budgetWarningThresholds[${i}].threshold`] =
+          'threshold must be between 0.01 and 0.99';
+      }
+      if (!bw.severity || !bw.severity.trim()) {
+        errors[`spec.budgetWarningThresholds[${i}].severity`] = 'severity is required';
+      }
+    }
+  }
+
+  // --- Labels / annotations ---
+  if (input.labels) {
+    for (const [k, v] of Object.entries(input.labels)) {
+      if (!LABEL_NAME_RE.test(k)) {
+        errors[`spec.labels["${k}"]`] = 'Label key must match [a-zA-Z_][a-zA-Z0-9_]*';
+      }
+      if (RESERVED_LABEL_KEYS.has(`slo_label_${k}`) || RESERVED_LABEL_KEYS.has(k)) {
+        errors[`spec.labels["${k}"]`] = `"${k}" collides with a reserved slo_* label`;
+      }
+      const values = Array.isArray(v) ? v : [v];
+      for (const val of values) {
+        if (typeof val !== 'string') {
+          errors[`spec.labels["${k}"]`] = 'Label values must be strings';
+        } else if (val.length > 256) {
+          errors[`spec.labels["${k}"]`] = 'Label values must be 256 characters or fewer';
+        } else if (UNSAFE_LABEL_VALUE_RE.test(val)) {
+          errors[`spec.labels["${k}"]`] =
+            'Label value must not contain double quotes, backslashes, newlines, or braces';
+        } else if (UUID_LABEL_VALUE_RE.test(val)) {
+          errors[`spec.labels["${k}"]`] = 'Label values must not be UUIDs (cardinality guardrail)';
+        }
+      }
+    }
+  }
+
+  // --- Annotations (size cap only; not propagated to rules) ---
+  if (input.annotations !== undefined && input.annotations !== null) {
+    // JSON.stringify gives a deterministic byte count that tracks the on-disk
+    // saved-object size. Design §10.3 pins this to 4 KiB.
+    if (JSON.stringify(input.annotations).length > ANNOTATIONS_BYTE_CAP) {
+      errors['spec.annotations'] = `Annotations exceed ${ANNOTATIONS_BYTE_CAP}-byte size cap`;
+    }
+  }
+
+  // --- Exclusion windows (shape check only; enforcement deferred) ---
+  if (input.exclusionWindows && input.exclusionWindows.length > 10) {
+    errors['spec.exclusionWindows'] = 'Maximum 10 exclusion windows allowed';
+  }
+
+  return { errors, warnings };
+}
+
+export function isSloSpecValid(input: Partial<SloSpec>): boolean {
+  return Object.keys(validateSloSpec(input).errors).length === 0;
+}
+
+// ============================================================================
+// Objective
+// ============================================================================
+
+function validateObjective(
+  obj: Partial<Objective>,
+  i: number,
+  spec: Partial<SloSpec>
+): SloValidationResult {
+  const prefix = `spec.objectives[${i}]`;
+  const errors: Record<string, string> = {};
+  const warnings: Record<string, string> = {};
+
+  if (!obj.name || !obj.name.trim()) {
+    errors[`${prefix}.name`] = 'Objective name is required';
+  } else if (!/^[a-z0-9][a-z0-9-]*$/i.test(obj.name)) {
+    errors[`${prefix}.name`] = 'Objective name must be alphanumeric + hyphens';
+  } else if (obj.name.length > 64) {
+    errors[`${prefix}.name`] = 'Objective name must be 64 characters or fewer';
+  }
+
+  if (obj.target === undefined || obj.target === null) {
+    errors[`${prefix}.target`] = 'Target is required';
+  } else if (obj.target < 0.5 || obj.target > 0.99999) {
+    errors[`${prefix}.target`] = 'Target must be between 0.5 and 0.99999';
+  }
+
+  // Latency bound required for latency_threshold SLIs.
+  const sli = spec.sli;
+  if (
+    sli?.type === 'single' &&
+    sli.definition?.backend === 'prometheus' &&
+    sli.definition.type === 'latency_threshold'
+  ) {
+    if (obj.latencyThreshold === undefined || obj.latencyThreshold <= 0) {
+      errors[`${prefix}.latencyThreshold`] = 'Latency threshold is required and must be > 0';
+    } else if (
+      sli.definition.latencyThresholdUnit !== 'milliseconds' &&
+      obj.latencyThreshold >= 60
+    ) {
+      warnings[`${prefix}.latencyThreshold`] =
+        `Latency threshold is in seconds. A value of ${obj.latencyThreshold} looks high — ` +
+        `did you mean ${obj.latencyThreshold} ms?`;
+    }
+  }
+
+  return { errors, warnings };
+}
+
+// ============================================================================
+// Burn-rate tier
+// ============================================================================
+
+function validateBurnRate(
+  tier: BurnRateConfig,
+  i: number,
+  errorBudget: number | undefined
+): SloValidationResult {
+  const prefix = `spec.alerting.burnRates[${i}]`;
+  const errors: Record<string, string> = {};
+  const warnings: Record<string, string> = {};
+
+  const shortMs = parseDurationToMs(tier.shortWindow);
+  const longMs = parseDurationToMs(tier.longWindow);
+  if (!tier.shortWindow || shortMs === 0)
+    errors[`${prefix}.shortWindow`] = 'Short window is required';
+  if (!tier.longWindow || longMs === 0) errors[`${prefix}.longWindow`] = 'Long window is required';
+  if (shortMs > 0 && longMs > 0 && shortMs >= longMs)
+    errors[`${prefix}.shortWindow`] = 'Short window must be shorter than long window';
+
+  if (
+    tier.shortWindow &&
+    shortMs > 0 &&
+    !(RECORDING_WINDOWS as readonly string[]).includes(tier.shortWindow)
+  )
+    warnings[`${prefix}.shortWindow`] =
+      `shortWindow "${tier.shortWindow}" does not match a recording rule window ` +
+      `(${RECORDING_WINDOWS.join(', ')}). The alert will reference a non-existent recording rule.`;
+  if (
+    tier.longWindow &&
+    longMs > 0 &&
+    !(RECORDING_WINDOWS as readonly string[]).includes(tier.longWindow)
+  )
+    warnings[`${prefix}.longWindow`] =
+      `longWindow "${tier.longWindow}" does not match a recording rule window ` +
+      `(${RECORDING_WINDOWS.join(', ')}). The alert will reference a non-existent recording rule.`;
+
+  if (!tier.burnRateMultiplier || tier.burnRateMultiplier <= 0) {
+    errors[`${prefix}.burnRateMultiplier`] = 'Burn rate multiplier must be > 0';
+  } else if (tier.burnRateMultiplier > 1000) {
+    errors[`${prefix}.burnRateMultiplier`] = 'Burn rate multiplier must be ≤ 1000';
+  }
+
+  if (
+    tier.burnRateMultiplier &&
+    errorBudget !== undefined &&
+    errorBudget > 0 &&
+    tier.burnRateMultiplier * errorBudget > 1.0
+  ) {
+    warnings[`${prefix}.burnRateMultiplier`] =
+      `Burn rate ${tier.burnRateMultiplier}x with the current target produces a threshold > 1.0. ` +
+      `Since the error ratio is bounded to [0, 1], this alert will never fire.`;
+  }
+
+  if (!tier.severity || !tier.severity.trim())
+    errors[`${prefix}.severity`] = 'severity is required';
+  if (!tier.forDuration || parseDurationToMs(tier.forDuration) === 0)
+    errors[`${prefix}.forDuration`] = 'forDuration is required';
+
+  return { errors, warnings };
+}

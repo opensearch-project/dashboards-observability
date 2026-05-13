@@ -76,6 +76,9 @@ import {
   observabilityApmApplicationMapID,
   observabilityApmApplicationMapTitle,
   observabilityApmApplicationMapPluginOrder,
+  observabilityApmSloID,
+  observabilityApmSloTitle,
+  observabilityApmSloPluginOrder,
 } from '../common/constants/apm';
 import { QueryManager } from '../common/query_manager';
 import {
@@ -438,6 +441,15 @@ export class ObservabilityPlugin
           category: APPLICATION_MONITORING_CATEGORY,
           order: observabilityApmApplicationMapPluginOrder,
           mount: appMountWithStartPage('apm-application-map', '/application-map'),
+          updater$: this.apmAppUpdater$,
+        });
+
+        core.application.register({
+          id: observabilityApmSloID,
+          title: observabilityApmSloTitle,
+          category: APPLICATION_MONITORING_CATEGORY,
+          order: observabilityApmSloPluginOrder,
+          mount: appMountWithStartPage('apm-slo', '/slos'),
           updater$: this.apmAppUpdater$,
         });
 

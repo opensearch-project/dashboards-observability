@@ -21,6 +21,7 @@ import {
 import {
   observabilityApmServicesID,
   observabilityApmApplicationMapID,
+  observabilityApmSloID,
 } from '../../common/constants/apm';
 import { AppPluginStartDependencies } from '../types';
 
@@ -89,6 +90,13 @@ function registerIconSideNavGroups(
         order: 400,
         euiIconType: 'graphApp',
         startCluster: true,
+      },
+      {
+        id: observabilityApmSloID,
+        category: DEFAULT_APP_CATEGORIES.applicationPerformance,
+        showInAllNavGroup: true,
+        order: 500,
+        euiIconType: 'visGauge',
       },
     ]);
   } else {

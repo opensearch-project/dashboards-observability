@@ -7,3 +7,11 @@ coverage/
 .cypress/downloads
 common/query_manager/antlr/output
 .eslintcache
+
+# Local tool caches
+.claude/
+.playwright-mcp/
+
+# SLO audit evidence (screenshots, handoff notes) — kept locally, not shipped
+slo-bugbash-evidence/
+.slo-audit-*/

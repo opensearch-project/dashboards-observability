@@ -20,3 +20,8 @@ export const observabilityApmApplicationMapPluginOrder = 5101;
 export const observabilityApmApplicationConfigID = 'observability-apm-application-config';
 export const observabilityApmApplicationConfigTitle = 'Configuration';
 export const observabilityApmApplicationConfigPluginOrder = 5102;
+
+// APM application IDs - Service Level Objectives (PR 1)
+export const observabilityApmSloID = 'observability-apm-slo';
+export const observabilityApmSloTitle = 'SLOs';
+export const observabilityApmSloPluginOrder = 5103;

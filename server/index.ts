@@ -24,6 +24,11 @@ const observabilityConfig = {
     alertManager: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
+    slo: schema.object({
+      ruleDedup: schema.object({
+        enabled: schema.boolean({ defaultValue: true }),
+      }),
+    }),
   }),
 };
 

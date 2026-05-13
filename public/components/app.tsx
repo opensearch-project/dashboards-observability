@@ -39,6 +39,7 @@ import {
   ApplicationMapPageProps as ApmApplicationMapProps,
 } from './apm/pages/application_map';
 import { ApmConfigProvider } from './apm/config/apm_config_context';
+import { SlosPage, SlosPageProps } from './apm/pages/slos';
 
 interface ObservabilityAppDeps {
   CoreStartProp: CoreStart;
@@ -75,6 +76,12 @@ const ApmApplicationMapWithProvider = (props: ApmApplicationMapProps) => (
   </ApmConfigProvider>
 );
 
+const SlosPageWithProvider = (props: SlosPageProps) => (
+  <ApmConfigProvider dataService={props.DepsStart?.data}>
+    <SlosPage {...props} />
+  </ApmConfigProvider>
+);
+
 const pages = {
   applications: ApplicationAnalyticsHome,
   logs: EventAnalytics,
@@ -89,6 +96,7 @@ const pages = {
   alerting: AlertingHome,
   'apm-services': ApmServicesWithProvider,
   'apm-application-map': ApmApplicationMapWithProvider,
+  'apm-slo': SlosPageWithProvider,
 };
 
 export const App = ({
