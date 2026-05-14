@@ -47,21 +47,25 @@ describe('useAlerts', () => {
   it('forwards dsIds alone when no range is set', async () => {
     renderHook(() => useAlerts({ dsIds: ['ds-1'] }));
     await waitFor(() => expect(mockListAlerts).toHaveBeenCalledTimes(1));
-    expect(mockListAlerts).toHaveBeenCalledWith({
-      dsIds: ['ds-1'],
-      startTime: undefined,
-      endTime: undefined,
-    });
+    expect(mockListAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dsIds: ['ds-1'],
+        startTime: undefined,
+        endTime: undefined,
+      })
+    );
   });
 
   it('forwards startTime and endTime to the service', async () => {
     renderHook(() => useAlerts({ dsIds: ['ds-1'], startTime: 'now-1h', endTime: 'now' }));
     await waitFor(() => expect(mockListAlerts).toHaveBeenCalledTimes(1));
-    expect(mockListAlerts).toHaveBeenCalledWith({
-      dsIds: ['ds-1'],
-      startTime: 'now-1h',
-      endTime: 'now',
-    });
+    expect(mockListAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dsIds: ['ds-1'],
+        startTime: 'now-1h',
+        endTime: 'now',
+      })
+    );
   });
 
   it('refetches when startTime changes', async () => {
@@ -74,11 +78,29 @@ describe('useAlerts', () => {
 
     rerender({ startTime: 'now-24h' });
     await waitFor(() => expect(mockListAlerts).toHaveBeenCalledTimes(2));
-    expect(mockListAlerts).toHaveBeenLastCalledWith({
-      dsIds: ['ds-1'],
-      startTime: 'now-24h',
-      endTime: 'now',
+    expect(mockListAlerts).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        dsIds: ['ds-1'],
+        startTime: 'now-24h',
+        endTime: 'now',
+      })
+    );
+  });
+
+  it('passes an AbortSignal to the service that is triggered on unmount', async () => {
+    let capturedSignal: AbortSignal | undefined;
+    mockListAlerts.mockImplementation(({ signal }: { signal?: AbortSignal }) => {
+      capturedSignal = signal;
+      return Promise.resolve(emptyProgressive);
     });
+    const { unmount } = renderHook(() =>
+      useAlerts({ dsIds: ['ds-1'], startTime: 'now-1h', endTime: 'now' })
+    );
+    await waitFor(() => expect(mockListAlerts).toHaveBeenCalledTimes(1));
+    expect(capturedSignal).toBeInstanceOf(AbortSignal);
+    expect(capturedSignal?.aborted).toBe(false);
+    unmount();
+    expect(capturedSignal?.aborted).toBe(true);
   });
 
   it('refetches when endTime changes', async () => {

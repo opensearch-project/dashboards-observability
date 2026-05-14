@@ -226,6 +226,13 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
      * datasource individually exceeds the cap.
      */
     const FILTER_CAP = 1000;
+    // Hard ceiling on rows we'll page through, regardless of `FILTER_CAP`.
+    // Without this, a cluster with 100k+ alerts where almost none fall
+    // inside the window forces us to issue 1000+ sequential requests before
+    // the post-filter cap can stop us. 10k rows = at most 100 pages of 100
+    // — bounded worst-case latency, and any genuinely-larger backlog should
+    // already be hitting `FILTER_CAP` (which assumes the filter matches).
+    const SCAN_CAP = 10_000;
     const hasRange = options?.startMs !== undefined && options?.endMs !== undefined;
     const windowStart = options?.startMs ?? 0;
     const windowEnd = options?.endMs ?? Number.POSITIVE_INFINITY;
@@ -287,6 +294,10 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
       // authoritative end-of-stream signal; worst case we make one extra
       // empty request on an exact PAGE_SIZE multiple, which is cheap.
       startIndex += PAGE_SIZE;
+      if (startIndex >= SCAN_CAP) {
+        truncated = true;
+        break;
+      }
     }
 
     // When filtering, `totalAlerts` on the return object reflects the

@@ -18,9 +18,11 @@
  * cluttering the dashboard.
  */
 import React, { useMemo } from 'react';
+import moment from 'moment-timezone';
 import { EuiText } from '@elastic/eui';
 import { EchartsRender } from './echarts_render';
 import { UnifiedAlertSummary } from '../../../common/types/alerting';
+import { uiSettingsService } from '../../../common/utils';
 
 // ============================================================================
 // Color map (kept for AlertTimeline severity bars)
@@ -61,9 +63,17 @@ function clamp(value: number, min: number, max: number): number {
   return value;
 }
 
-/** Zero-pad to two digits. */
-function pad2(n: number): string {
-  return n < 10 ? `0${n}` : String(n);
+/**
+ * Resolve the timezone the user configured via `dateFormat:tz`. Mirrors the
+ * resolution APM does in `formatDisplayTimestamp` so Discover, APM, and the
+ * Alerts dashboard all render the same instant the same way for a given user.
+ */
+function resolveDisplayTz(): string {
+  const tz = uiSettingsService.get('dateFormat:tz');
+  if (!tz || tz === 'Browser') {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  }
+  return tz;
 }
 
 /**
@@ -71,16 +81,15 @@ function pad2(n: number): string {
  *  - `HH:mm` for ranges ≤ 24h
  *  - `MM-DD HH:mm` for ranges ≤ 7d
  *  - `MM-DD` otherwise
+ *
+ * Honors `dateFormat:tz` so users in different timezones don't see different
+ * labels for the same bucket — matches Discover / Dashboards / APM.
  */
-function formatBucketLabel(ts: number, rangeMs: number): string {
-  const d = new Date(ts);
-  const hh = pad2(d.getHours());
-  const mm = pad2(d.getMinutes());
-  const mo = pad2(d.getMonth() + 1);
-  const da = pad2(d.getDate());
-  if (rangeMs <= ONE_DAY_MS) return `${hh}:${mm}`;
-  if (rangeMs <= SEVEN_DAYS_MS) return `${mo}-${da} ${hh}:${mm}`;
-  return `${mo}-${da}`;
+function formatBucketLabel(ts: number, rangeMs: number, tz: string): string {
+  const m = moment.tz(ts, tz);
+  if (rangeMs <= ONE_DAY_MS) return m.format('HH:mm');
+  if (rangeMs <= SEVEN_DAYS_MS) return m.format('MM-DD HH:mm');
+  return m.format('MM-DD');
 }
 
 export interface AlertTimelineProps {
@@ -123,10 +132,12 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
     // perf win: parse each startTime once instead of per-bucket.
     const alertBucketStart = alerts.map((a) => Math.max(startMs, new Date(a.startTime).getTime()));
 
+    const tz = resolveDisplayTz();
+
     for (let i = 0; i < bucketCount; i++) {
       const bucketStart = startMs + i * bucketDuration;
       const bucketEnd = bucketStart + bucketDuration;
-      const label = formatBucketLabel(bucketStart, rangeMs);
+      const label = formatBucketLabel(bucketStart, rangeMs, tz);
       const inBucket = alerts.filter(
         (_, idx) => alertBucketStart[idx] >= bucketStart && alertBucketStart[idx] < bucketEnd
       );

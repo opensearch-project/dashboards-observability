@@ -51,16 +51,6 @@ import {
 import { hashRuleIdentity, promAlertToUnified, promEpisodeToUnified } from './alert_utils';
 import type { PromAlertEpisode } from './alert_utils';
 
-/**
- * One series from a Prometheus range-query matrix result — the shape
- * returned by `queryRangeMatrix`. Retains label metadata per series so
- * downstream `getHistoricalAlerts` can partition firing runs by alert
- * identity (`alertname`, `instance`, `alertstate`, etc).
- *
- * `queryRange` (the existing single-series API) flattens to
- * `PromTimeSeriesPoint[]` and drops labels, so it can't be reused for
- * the multi-series episode-reconstruction path.
- */
 export interface PromSeriesMatrix {
   metric: Record<string, string>;
   values: PromTimeSeriesPoint[];
@@ -607,18 +597,9 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     }
   }
 
-  /**
-   * Multi-series variant of `queryRange`. Targets the same DirectQuery
-   * endpoint but preserves the per-series `metric` label map AND all
-   * values from every series — `queryRange`'s `parseRangeQueryResponse`
-   * flattens to the first series only, so it can't be reused for the
-   * `ALERTS{}` matrix where each active alert emits its own series.
-   *
-   * Private (tests reach it via the public `getHistoricalAlerts` method).
-   * Kept separate from `queryRange` because that method swallows errors to
-   * `[]` and collapses series — behavior that's fine for chart previews but
-   * would silently hide a bad range query here.
-   */
+  // Multi-series variant of `queryRange`. Kept separate because `queryRange`
+  // flattens to a single series and swallows errors to `[]` — behavior that
+  // would silently hide a bad query in the episode-reconstruction path.
   async queryRangeMatrix(
     client: AlertingOSClient,
     ds: Datasource,
@@ -693,60 +674,11 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     return series;
   }
 
-  /**
-   * Assemble the unified alert list for a Prometheus datasource over a
-   * window. Two sources are queried in parallel:
-   *
-   *   1. `queryRangeMatrix('ALERTS', start, end, step)` — historical
-   *      firing-run reconstruction from the `ALERTS{}` time series.
-   *   2. `getAlerts` (i.e. `/api/v1/alerts`) — currently-firing / pending
-   *      alerts right now.
-   *
-   * We run BOTH unconditionally and merge (Option A). This makes the UI
-   * behave consistently regardless of window size vs Prometheus retention:
-   *
-   *   - Window entirely within retention ⇒ matrix covers everything; live
-   *     alerts deduplicate against their matching historical episodes so
-   *     there's no double-count.
-   *   - Window larger than retention ⇒ matrix returns an empty or partial
-   *     result, but live alerts still surface.
-   *   - Window fully in the past ⇒ `endIsNow=false` skips the live fetch
-   *     and we return just historical episodes.
-   *
-   * Dedupe rule: a live alert from `/api/v1/alerts` is SUPPRESSED if an
-   * episode in the matrix result already represents the same rule AND is
-   * still firing at the window's right edge (`stillActiveAtRangeEnd`).
-   * "Same rule" is determined by the rule-label hash
-   * (`hashRuleIdentity`) — i.e. labels stripped of transport metadata
-   * (`__name__`, `alertstate`) which differ between the two sources.
-   *
-   * Episode reconstruction algorithm:
-   *   1. `queryRangeMatrix('ALERTS', start, end, step)` — one series per
-   *      unique `(alertname, alertstate, ...labels)` tuple.
-   *   2. For each series, scan `values` left-to-right:
-   *      - Enter a "firing run" on the first `value === 1` sample.
-   *      - Close the run (emit an episode) on the first `value !== 1`
-   *        sample OR at the end of the series.
-   *      - `truncatedStart` = the first sample is at index 0 AND within
-   *        1.5× step of the window start (so we conclude the alert was
-   *        already firing before the window opened).
-   *      - `stillActiveAtRangeEnd` = the last sample is within 1.5× step
-   *        of window end (so the series didn't resolve before we stopped
-   *        looking).
-   *   3. Map each episode to `UnifiedAlertSummary` via `promEpisodeToUnified`.
-   *
-   * Flapping: Prometheus emits separate `ALERTS` series for
-   * `alertstate="pending"` and `alertstate="firing"` on the same rule. We
-   * do NOT merge across `alertstate` on the historical side — a rule that
-   * pended and then fired produces two episodes, which is the semantically
-   * correct representation. The live-alert dedupe step only cancels the
-   * live entry when there's ALSO a `stillActiveAtRangeEnd` episode, so
-   * the historical pending/firing split is preserved.
-   *
-   * Error isolation: errors from either query are captured and returned
-   * alongside whatever the other query produced. A `queryRangeMatrix`
-   * failure does NOT hide currently-firing alerts, and vice versa.
-   */
+  // Unified alert list for a Prometheus datasource over a window. Merges
+  // historical episodes reconstructed from `ALERTS{}` matrix samples with
+  // currently-firing alerts from `/api/v1/alerts`. See the PR description
+  // for the full algorithm; the inline notes below cover only the
+  // non-obvious invariants (edge tolerance, dedupe key, error isolation).
   async getHistoricalAlerts(
     client: AlertingOSClient,
     ds: Datasource,
@@ -759,20 +691,12 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     fallback?: 'prometheus-alerts-current-only';
     error?: string;
   }> {
-    // Fire both requests in parallel. When `endIsNow=false` the live
-    // endpoint is irrelevant (window is fully past), so skip it to save
-    // the RPC. Use `Promise.allSettled`-style tracking — we want a live
-    // failure NOT to hide a successful matrix result, and vice versa.
-    // Filter `alertstate="firing"` at the PromQL level — the pending state
-    // is a transient grace-period signal (rule's `for:` hasn't elapsed
-    // yet) and its row counts flap with the query step: a fine step on a
-    // 12h window catches pending samples that a coarse step on a 2d
-    // window misses, leading to "12h shows 53, 2d shows 29" discrepancies
-    // that surprise operators. Filtering upstream keeps the row count
-    // step-independent AND cuts wire/memory cost vs filtering after parse.
-    // Live `/api/v1/alerts` already excludes pending on most Prom versions
-    // (it's a `firing`-or-`inactive` endpoint), so this aligns the two
-    // sources.
+    // Filter `alertstate="firing"` at the PromQL level. Pending samples
+    // flap with the query step (fine step on a short window catches them,
+    // coarse step on a long window misses them), so leaving them in
+    // produces row counts that change just from picker changes. Live
+    // `/api/v1/alerts` is already firing-or-inactive on most Prom versions,
+    // so this aligns the two sources.
     const matrixPromise = this.queryRangeMatrix(
       client,
       ds,
@@ -794,9 +718,9 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     try {
       series = await matrixPromise;
     } catch (err) {
-      // Matrix failed — still try to surface live alerts when the window
-      // ends at now, so a transient Cortex error doesn't blank the UI for
-      // whatever is firing RIGHT NOW.
+      // Matrix failed — still surface live alerts when window ends at now,
+      // so a transient Cortex error doesn't blank the UI for what's firing
+      // RIGHT NOW.
       const live = await liveSettled;
       if (!live.ok || live.alerts.length === 0) {
         return { alerts: [], error: String(err) };
@@ -811,13 +735,10 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     const windowStartMs = startEpochSec * 1000;
     const windowEndMs = endEpochSec * 1000;
     const stepMs = stepSec * 1000;
-    // Edge tolerance: if the first sample of a run is within 1.5 steps of
-    // the window's left edge, we conclude the alert was already firing at
-    // that edge and mark `truncatedStart`. Symmetric at the right edge.
-    // Without this tolerance we'd either over-clamp (every alert looks
-    // like it spans the whole window because its first matrix sample is
-    // at index 0) or under-clamp (a genuinely pre-window alert gets
-    // reported as starting at its first sample inside the window).
+    // 1.5× step tolerance for "this run was already firing at the edge".
+    // Tighter than 1× over-clamps (every series looks pre-window because
+    // its first sample is at index 0); looser than 2× under-clamps
+    // (genuine pre-window alerts get reported as starting inside).
     const edgeToleranceMs = Math.round(stepMs * 1.5);
     const episodes: PromAlertEpisode[] = [];
 
@@ -868,11 +789,9 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
 
     const historicalAlerts = episodes.map((ep) => promEpisodeToUnified(ep, ds.id));
 
-    // Build the dedupe set: the rule-identity hash of every episode that's
-    // still active at the window's right edge. A live alert whose hash
-    // matches one of these is already represented by an active historical
-    // episode — suppress it to avoid the double-count we saw in the UI
-    // (same rule appearing once from the matrix and once from /alerts).
+    // Dedupe live alerts against historical episodes still active at the
+    // window's right edge — keyed by rule-identity hash (labels minus
+    // `__name__`/`alertstate`, which differ between the two sources).
     const activeEpisodeHashes = new Set<string>();
     for (const ep of episodes) {
       if (ep.stillActiveAtRangeEnd) {
@@ -886,19 +805,16 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
 
     const liveAdditions: UnifiedAlertSummary[] = [];
     for (const la of liveAlerts) {
-      // Skip pending alerts from the live endpoint for the same reason we
-      // filtered pending out of the matrix query above — we want row
-      // counts that don't flap with transient grace-period state.
+      // Skip pending — same step-flapping reason as the matrix filter.
       if (la.state === 'pending') continue;
       if (!activeEpisodeHashes.has(hashRuleIdentity(la.labels))) {
         liveAdditions.push(promAlertToUnified(la, ds.id));
       }
     }
 
-    // When the matrix itself was empty BUT live alerts exist, flag the
-    // response so the UI can explain that coverage was limited to "now".
-    // With data from the matrix we skip the banner — the user is seeing
-    // a legitimate historical view.
+    // Flag the "current alerts only" banner when the matrix returned
+    // nothing but live alerts exist — tells the UI that coverage is
+    // limited to "now" rather than the picked window.
     const fallback =
       historicalAlerts.length === 0 && liveAdditions.length > 0
         ? ('prometheus-alerts-current-only' as const)
@@ -907,10 +823,8 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     return {
       alerts: [...historicalAlerts, ...liveAdditions],
       ...(fallback ? { fallback } : {}),
-      // Only surface the live-side error when it would otherwise be the
-      // ONLY signal the user gets. If historical data landed successfully,
-      // a secondary live failure is just "no currently-firing data beyond
-      // what's in the matrix" — not worth flashing a per-datasource error.
+      // Only surface the live-side error when it's the only signal the
+      // user gets — otherwise it's noise on top of a successful matrix.
       ...(liveError && historicalAlerts.length === 0 && liveAdditions.length === 0
         ? { error: liveError }
         : {}),

@@ -68,20 +68,38 @@ export function useAlerts({
       return;
     }
     const requestId = ++lastRequestIdRef.current;
+    // Abort the in-flight request when the effect re-runs (deps change) or
+    // the component unmounts. The historical-reconstruction path can be
+    // expensive; without this the backend keeps doing work for an already-
+    // abandoned request even though the monotonic `requestId` would prevent
+    // its result from being committed to state.
+    const controller = new AbortController();
     setIsLoading(true);
     setError(null);
     (async () => {
       try {
-        const res = await service.listAlerts({ dsIds, startTime, endTime });
+        const res = await service.listAlerts({
+          dsIds,
+          startTime,
+          endTime,
+          signal: controller.signal,
+        });
         if (requestId !== lastRequestIdRef.current) return;
         setData(res);
       } catch (e) {
         if (requestId !== lastRequestIdRef.current) return;
+        // Aborts surface as DOMException("AbortError") — they're expected
+        // bookkeeping, not a user-facing failure. Skip the error commit so
+        // the UI doesn't flash a callout when the user just changed pickers.
+        if (e instanceof DOMException && e.name === 'AbortError') return;
         setError(e instanceof Error ? e : new Error(String(e)));
       } finally {
         if (requestId === lastRequestIdRef.current) setIsLoading(false);
       }
     })();
+    return () => {
+      controller.abort();
+    };
     // `dsIds` is a new array reference each render; `dsIdsKey` is its stable
     // projection. `startTime`/`endTime` are primitive strings — safe to list
     // directly (equivalent to a stable-string key for a single value).

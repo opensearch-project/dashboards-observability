@@ -202,11 +202,13 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   const mutations = useMonitorMutations();
   const [activeTab, setActiveTab] = useState<TabId>('alerts');
   const [selectedDsIds, setSelectedDsIds] = useState<string[]>([]);
-  // `dataLoading` / `error` / `warnings` only drive the Rules flow now —
+  // `dataLoading` / `error` / `rulesWarnings` only drive the Rules flow now —
   // the Alerts path reads loading/error/warnings from `useAlerts` below.
   const [dataLoading, setDataLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [warnings, setWarnings] = useState<Array<{ datasourceName: string; error: string }>>([]);
+  const [rulesWarnings, setRulesWarnings] = useState<
+    Array<{ datasourceName: string; error: string }>
+  >([]);
 
   // ---- Time-range state ----
   //
@@ -272,12 +274,50 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     refreshToken,
   });
 
+  // Optimistic ack overrides — keyed by alertId. The hook owns the alerts
+  // array (single source of truth), so we layer the user's pending acks
+  // on top in render rather than mutating the hook's data. Cleared per-id
+  // once a refetch confirms the ack landed (or the id disappears from the
+  // list, e.g. retention drop). Without this, clicking Acknowledge feels
+  // unresponsive because the Prometheus historical-reconstruction refetch
+  // can take seconds before the row state visibly flips.
+  const [ackOverrides, setAckOverrides] = useState<
+    Record<string, { state: 'acknowledged'; lastUpdated: string }>
+  >({});
+
   // Public-facing projections. Kept in the same shape the rest of this
   // component consumed before the migration so the downstream code didn't
   // have to change. Behaviorally identical to the old `alerts`/`alertsTotal`
   // state but now driven by the hook.
-  const alerts: UnifiedAlertSummary[] = alertsData?.results || [];
+  const rawAlerts: UnifiedAlertSummary[] = useMemo(() => alertsData?.results || [], [alertsData]);
+  const alerts: UnifiedAlertSummary[] = useMemo(() => {
+    if (Object.keys(ackOverrides).length === 0) return rawAlerts;
+    return rawAlerts.map((a) => {
+      const ov = ackOverrides[a.id];
+      return ov ? { ...a, state: ov.state, lastUpdated: ov.lastUpdated } : a;
+    });
+  }, [rawAlerts, ackOverrides]);
   const alertsTotal = alerts.length;
+
+  // Drop overrides whose target alert is now acknowledged on the server
+  // (or has fallen out of the result set entirely). Runs after every hook
+  // refetch — keeps the override map from leaking memory across many acks.
+  useEffect(() => {
+    setAckOverrides((prev) => {
+      if (Object.keys(prev).length === 0) return prev;
+      let changed = false;
+      const next = { ...prev };
+      const byId = new Map(rawAlerts.map((a) => [a.id, a]));
+      for (const id of Object.keys(prev)) {
+        const live = byId.get(id);
+        if (!live || live.state === 'acknowledged') {
+          delete next[id];
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [rawAlerts]);
   const alertsWarnings = useMemo(() => {
     const failed = (alertsData?.datasourceStatus || []).filter((s) => s.status === 'error');
     return failed.map((s) => ({
@@ -428,14 +468,14 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       }
       setDataLoading(true);
       setError(null);
-      setWarnings([]);
+      setRulesWarnings([]);
       try {
         const res = await osService.listRules({ dsIds });
         setRules(res.results || []);
         setRulesTotal((res.results || []).length);
         const failedStatuses = (res.datasourceStatus || []).filter((s) => s.status === 'error');
         if (failedStatuses.length > 0) {
-          setWarnings(
+          setRulesWarnings(
             failedStatuses.map((s) => ({
               datasourceName: s.datasourceName,
               error: s.error || 'Unknown error',
@@ -478,16 +518,18 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     try {
       await mutations.acknowledgeAlert(alertId, alert?.datasourceId, alert?.labels?.monitor_id);
       addToast('Alert acknowledged');
-      // `alerts` is now owned by `useAlerts` — we can't splice state locally.
-      // Bump the refresh token so the hook refetches; the new response will
-      // carry the updated `state`. Feels slightly slower than the old
-      // optimistic update but keeps the alerts list a single source of truth
-      // (the backend), which avoids drift if the ack fails partway through.
+      // Layer an optimistic override so the row flips to "acknowledged"
+      // immediately. The override is dropped once the refetch's response
+      // either confirms the ack or removes the row.
+      const lastUpdated = new Date().toISOString();
+      setAckOverrides((prev) => ({ ...prev, [alertId]: { state: 'acknowledged', lastUpdated } }));
+      // Bump the refresh token so the hook refetches and the override can
+      // be reconciled / cleared once the backend agrees.
       setRefreshToken((t) => t + 1);
       // Update the flyout's selected alert inline so it stays open with fresh state
       setSelectedAlert((prev) =>
         prev && prev.id === alertId
-          ? { ...prev, state: 'acknowledged' as const, lastUpdated: new Date().toISOString() }
+          ? { ...prev, state: 'acknowledged' as const, lastUpdated }
           : prev
       );
     } catch (e: unknown) {
@@ -1011,12 +1053,12 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       )}
 
       {(() => {
-        // Merge Rules-path `warnings` with the hook-driven `alertsWarnings`
+        // Merge Rules-path `rulesWarnings` with the hook-driven `alertsWarnings`
         // so we render a single callout regardless of which tab is active.
         // Keyed by datasource name to dedupe when both paths report the
         // same backend (possible if the user flips tabs rapidly while
         // a slow datasource is still timing out on both flows).
-        const combined = activeTab === 'alerts' ? alertsWarnings : warnings;
+        const combined = activeTab === 'alerts' ? alertsWarnings : rulesWarnings;
         if (combined.length === 0) return null;
         return (
           <EuiCallOut

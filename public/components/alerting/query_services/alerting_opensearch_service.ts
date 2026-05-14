@@ -29,12 +29,15 @@ export interface ListAlertsParams {
   startTime?: string;
   /** Date-math string (e.g. "now"). */
   endTime?: string;
+  /** Optional AbortSignal — when triggered, cancels the in-flight HTTP request. */
+  signal?: AbortSignal;
 }
 
 export interface ListRulesParams {
   dsIds: string[];
   timeout?: number;
   maxResults?: number;
+  signal?: AbortSignal;
 }
 
 export class AlertingOpenSearchService {
@@ -63,6 +66,7 @@ export class AlertingOpenSearchService {
   async listAlerts(params: ListAlertsParams): Promise<ProgressiveResponse<UnifiedAlertSummary>> {
     return (await this.requireHttp().get('/api/alerting/unified/alerts', {
       query: this.buildQuery(params),
+      signal: params.signal,
     })) as ProgressiveResponse<UnifiedAlertSummary>;
   }
 
@@ -73,6 +77,7 @@ export class AlertingOpenSearchService {
   async listRules(params: ListRulesParams): Promise<ProgressiveResponse<UnifiedRuleSummary>> {
     return (await this.requireHttp().get('/api/alerting/unified/rules', {
       query: this.buildQuery(params),
+      signal: params.signal,
     })) as ProgressiveResponse<UnifiedRuleSummary>;
   }
 
