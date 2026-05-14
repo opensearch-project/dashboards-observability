@@ -38,13 +38,11 @@ import {
 } from '../../../common/types/alerting';
 import { MonitorsTable } from './monitors_table';
 import { CreateMonitor, MonitorFormState } from './create_monitor';
+import { EditMonitor } from './create_monitor/edit_monitor';
 import { AlertsDashboard } from './alerts_dashboard';
 import { AlertDetailFlyout } from './alert_detail_flyout';
 import { NotificationRoutingPanel } from './notification_routing_panel';
-// Phase 2: import { SuppressionRulesPanel } from './suppression_rules_panel';
-import { CreateLogsMonitor, LogsMonitorFormState } from './create_logs_monitor';
 import { CreateMetricsMonitor, MetricsMonitorFormState } from './create_metrics_monitor';
-// Phase 2: import SloListing from './slo_listing';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { useAlerts } from './hooks/use_alerts';
 import { useMonitorMutations } from './hooks/use_monitor_mutations';
@@ -56,11 +54,12 @@ import {
   ALERT_MANAGER_SELECTED_DS_STORAGE_KEY,
 } from '../../../common/constants/alerting_settings';
 import {
-  transformLogsFormToPayload,
   transformMetricsFormToPayload,
+  transformPplFormToPayload,
 } from '../../../common/services/alerting/form_transforms';
 import { parseDateMathMs } from '../../../common/services/alerting/time_range';
 import './alerting.scss';
+import type { OpenSearchFormState } from './create_monitor/create_monitor_types';
 
 // ============================================================================
 // Main Page Component
@@ -365,9 +364,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
 
   const [deletedRuleIds, setDeletedRuleIds] = useState<Set<string>>(new Set());
   const [showCreateMonitor, setShowCreateMonitor] = useState(false);
-  const [createMonitorType, setCreateMonitorType] = useState<
-    'logs' | 'prometheus' | 'metrics' | null
-  >(null);
+  const [createMonitorType, setCreateMonitorType] = useState<'metrics' | null>(null);
+  const [editTarget, setEditTarget] = useState<{ dsId: string; ruleId: string } | null>(null);
   const [selectedAlert, setSelectedAlert] = useState<UnifiedAlertSummary | null>(null);
   const { setToast: addToast } = useToast();
 
@@ -740,7 +738,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         lastModified: now,
         notificationDestinations: [],
         description: annotationsObj.description || '',
-        aiSummary: 'Newly created monitor. No historical data available yet.',
         evaluationInterval: formState.evaluationInterval,
         pendingPeriod: formState.pendingPeriod,
         firingPeriod: formState.firingPeriod,
@@ -765,7 +762,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         .filter(Boolean);
       const monitorType =
         formState.monitorType === 'ppl_monitor'
-          ? ('metric' as const)
+          ? ('ppl' as const)
           : formState.monitorType === 'bucket_level_monitor'
           ? ('infrastructure' as const)
           : formState.monitorType === 'doc_level_monitor'
@@ -810,7 +807,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         description: isPPL
           ? `OpenSearch PPL monitor${indices.length > 0 ? ` on ${indices.join(', ')}` : ''}`
           : `OpenSearch ${formState.monitorType} on ${indices.join(', ')}`,
-        aiSummary: 'Newly created OpenSearch monitor. No historical data available yet.',
         evaluationInterval: isPPL
           ? formState.evaluationInterval
           : `${formState.schedule.interval} ${formState.schedule.unit.toLowerCase()}`,
@@ -846,28 +842,69 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     return dsId;
   };
 
-  // TODO(alert-manager): this path posts the raw form state instead of an
-  // OS Monitor / Prometheus rule payload. The logs/metrics create flows
-  // already transform via transformLogsFormToPayload/transformMetricsFormToPayload;
-  // generic CreateMonitor should too. Casting here preserves current behavior.
+  // For PPL monitors, transform the form state into the canonical alerting
+  // wire payload before sending to the backend. Other OS monitor types and
+  // Prometheus rules pass the raw form state through (PR 2 will add Prom
+  // transforms; the legacy DSL OS monitor types are unused on this path).
+  const buildPayload = (form: MonitorFormState): Record<string, unknown> => {
+    if (form.datasourceType === 'opensearch' && form.monitorType === 'ppl_monitor') {
+      const os = form as OpenSearchFormState;
+      return transformPplFormToPayload({
+        name: os.name,
+        enabled: os.enabled,
+        query: os.query,
+        schedule: os.schedule,
+        pplTriggers: os.pplTriggers,
+      });
+    }
+    return (form as unknown) as Record<string, unknown>;
+  };
+
   const handleCreateMonitor = async (formState: MonitorFormState) => {
     const dsId = resolveDatasourceId(formState);
     if (!dsId) return;
     const newRule = formStateToRule(formState);
     try {
-      await mutations.createMonitor((formState as unknown) as Record<string, unknown>, dsId);
+      await mutations.createMonitor(buildPayload(formState), dsId);
       addToast(
         i18n.translate('observability.alerting.alarmsPage.toast.monitorCreated', {
           defaultMessage: 'Monitor created successfully',
         })
       );
+      setShowCreateMonitor(false);
+      // Refetch rules so the new monitor (with backend-assigned id /
+      // last_update_time) shows up in the list. Optimistic insert is kept
+      // for the UI to feel instant; the refetch reconciles.
       setRules((prev) => [newRule, ...prev]);
       setRulesTotal((prev) => prev + 1);
-      setShowCreateMonitor(false);
+      fetchRules(selectedDsIds, rulesPage, rulesPageSize);
     } catch (e: unknown) {
       addToast(
         i18n.translate('observability.alerting.alarmsPage.toast.createMonitorFailed', {
           defaultMessage: 'Failed to create monitor',
+        }),
+        'danger',
+        e instanceof Error ? e.message : String(e)
+      );
+    }
+  };
+
+  const handleEditMonitor = async (formState: MonitorFormState, ruleId: string) => {
+    const dsId = resolveDatasourceId(formState);
+    if (!dsId) return;
+    try {
+      await mutations.updateMonitor(ruleId, buildPayload(formState), dsId);
+      addToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.monitorUpdated', {
+          defaultMessage: 'Monitor updated successfully',
+        })
+      );
+      setEditTarget(null);
+      fetchRules(selectedDsIds, rulesPage, rulesPageSize);
+    } catch (e: unknown) {
+      addToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.updateMonitorFailed', {
+          defaultMessage: 'Failed to update monitor',
         }),
         'danger',
         e instanceof Error ? e.message : String(e)
@@ -881,7 +918,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       const dsId = resolveDatasourceId(forms[i]);
       if (!dsId) continue;
       try {
-        await mutations.createMonitor((forms[i] as unknown) as Record<string, unknown>, dsId);
+        await mutations.createMonitor(buildPayload(forms[i]), dsId);
         succeededRules.push(formStateToRule(forms[i], i));
       } catch (e: unknown) {
         addToast(
@@ -904,83 +941,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       setRulesTotal((prev) => prev + succeededRules.length);
     }
     // Don't close flyout — AI wizard shows its own summary step and "Done" button
-  };
-
-  const handleCreateLogsMonitor = async (logsForm: LogsMonitorFormState) => {
-    const now = new Date().toISOString();
-    const allActions = logsForm.triggers.flatMap((t) => t.actions);
-    const rawSev = logsForm.triggers[0]?.severityLevel || 'medium';
-    const logsSeverity = (['critical', 'high', 'medium', 'low', 'info'].includes(rawSev)
-      ? rawSev
-      : 'medium') as 'critical' | 'high' | 'medium' | 'low' | 'info';
-    const newRule: UnifiedRule = {
-      id: `new-logs-${Date.now()}`,
-      datasourceId: selectedDsIds[0],
-      datasourceType: 'opensearch',
-      name: logsForm.monitorName,
-      enabled: true,
-      severity: logsSeverity,
-      query:
-        logsForm.monitorType === 'cluster_metrics' ? logsForm.clusterMetricsApi : logsForm.query,
-      condition: logsForm.triggers
-        .map((t) => `${t.conditionOperator} ${t.conditionValue}`)
-        .join(', '),
-      labels: {},
-      annotations: { description: logsForm.description },
-      monitorType: 'log',
-      status: 'active',
-      healthStatus: 'healthy',
-      createdBy: 'current-user',
-      createdAt: now,
-      lastModified: now,
-      notificationDestinations: allActions.map((a) => a.name),
-      description: logsForm.description,
-      aiSummary: 'Newly created logs monitor.',
-      evaluationInterval: `${logsForm.runEveryValue} ${logsForm.runEveryUnit}`,
-      pendingPeriod: '5 minutes',
-      threshold: logsForm.triggers[0]
-        ? {
-            operator: logsForm.triggers[0].conditionOperator,
-            value: logsForm.triggers[0].conditionValue,
-            unit: '',
-          }
-        : undefined,
-      alertHistory: [],
-      conditionPreviewData: [],
-      notificationRouting: [],
-      suppressionRules: [],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- raw field is empty for new monitors
-      raw: {} as any,
-    };
-    const dsId = selectedDsIds[0];
-    if (!dsId) {
-      addToast(
-        i18n.translate('observability.alerting.alarmsPage.toast.selectDatasourceForCreate', {
-          defaultMessage: 'Select a datasource before creating a monitor',
-        }),
-        'warning'
-      );
-      return;
-    }
-    try {
-      await mutations.createMonitor(transformLogsFormToPayload(logsForm), dsId);
-      addToast(
-        i18n.translate('observability.alerting.alarmsPage.toast.logsMonitorCreated', {
-          defaultMessage: 'Logs monitor created successfully',
-        })
-      );
-      setRules((prev) => [newRule, ...prev]);
-      setRulesTotal((prev) => prev + 1);
-      setCreateMonitorType(null);
-    } catch (e: unknown) {
-      addToast(
-        i18n.translate('observability.alerting.alarmsPage.toast.createLogsMonitorFailed', {
-          defaultMessage: 'Failed to create logs monitor',
-        }),
-        'danger',
-        e instanceof Error ? e.message : String(e)
-      );
-    }
   };
 
   const handleCreateMetricsMonitor = async (metricsForm: MetricsMonitorFormState) => {
@@ -1017,7 +977,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       lastModified: now,
       notificationDestinations: metricsForm.actions.map((a) => a.name),
       description: metricsForm.description,
-      aiSummary: 'Newly created metrics monitor.',
       evaluationInterval: metricsForm.evalInterval,
       pendingPeriod: metricsForm.pendingPeriod,
       firingPeriod: metricsForm.firingPeriod,
@@ -1123,16 +1082,16 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           loading={dataLoading}
           onDelete={handleDeleteRules}
           onClone={handleCloneRule}
-          // TODO(alert-manager): Restore Create Monitor button once creation flow is ready
-          /* onCreateMonitor={(type) => {
+          onEdit={(monitor) => setEditTarget({ dsId: monitor.datasourceId, ruleId: monitor.id })}
+          onCreateMonitor={(type) => {
             if (type === 'logs') {
-              setShowCreateMonitor(false);
-              setCreateMonitorType('logs');
+              setCreateMonitorType(null);
+              setShowCreateMonitor(true);
             } else if (type === 'metrics') {
               setShowCreateMonitor(false);
               setCreateMonitorType('metrics');
             }
-          }} */
+          }}
           selectedDsIds={selectedDsIds}
           onDatasourceChange={handleDatasourceChange}
           maxDatasources={maxDatasources}
@@ -1238,10 +1197,14 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           selectedDsIds={selectedDsIds}
         />
       )}
-      {createMonitorType === 'logs' && (
-        <CreateLogsMonitor
-          onCancel={() => setCreateMonitorType(null)}
-          onSave={handleCreateLogsMonitor}
+      {editTarget && (
+        <EditMonitor
+          dsId={editTarget.dsId}
+          ruleId={editTarget.ruleId}
+          onCancel={() => setEditTarget(null)}
+          onSave={handleEditMonitor}
+          datasources={datasources}
+          selectedDsIds={selectedDsIds}
         />
       )}
       {createMonitorType === 'metrics' && (

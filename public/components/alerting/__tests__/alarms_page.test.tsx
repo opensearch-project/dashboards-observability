@@ -49,8 +49,7 @@ jest.mock('../notification_routing_panel', () => ({
   NotificationRoutingPanel: () => <div data-test-subj="routing-panel" />,
 }));
 jest.mock('../create_monitor', () => ({ CreateMonitor: () => null }));
-jest.mock('../create_logs_monitor', () => ({ CreateLogsMonitor: () => null }));
-jest.mock('../create_metrics_monitor', () => ({ CreateMetricsMonitor: () => null }));
+jest.mock('../create_monitor/edit_monitor', () => ({ EditMonitor: () => null }));
 jest.mock('../alert_detail_flyout', () => ({ AlertDetailFlyout: () => null }));
 
 import { AlarmsPage } from '../alarms_page';

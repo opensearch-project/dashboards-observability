@@ -161,3 +161,114 @@ export function validateMonitorForm(form: MonitorFormState): ValidationResult {
 
   return { valid: Object.keys(errors).length === 0, errors };
 }
+
+// ============================================================================
+// PPL Monitor Form Validation
+// ============================================================================
+
+// Mirror the alerting plugin's cluster-setting defaults
+// (`plugins.alerting.ppl_monitor_max_query_length`,
+// `plugins.alerting.ppl_query_results_max_datarows`,
+// `plugins.alerting.notification_subject_source_max_length`,
+// `plugins.alerting.notification_message_source_max_length`).
+// The server is authoritative; these caps just prevent obvious round-trips.
+export const PPL_QUERY_MAX_LENGTH = 2000;
+export const PPL_NUM_RESULTS_MIN = 1;
+export const PPL_NUM_RESULTS_MAX = 10000;
+export const PPL_NOTIFICATION_SUBJECT_MAX = 1000;
+export const PPL_NOTIFICATION_MESSAGE_MAX = 5000;
+
+const PPL_NUM_RESULTS_OPERATORS = new Set(['>', '>=', '<', '<=', '==', '!=']);
+/** Backend rejects custom conditions that don't start with `where`. */
+export const PPL_CUSTOM_CONDITION_REGEX = /^\s*where\s+.+/i;
+
+interface PplActionShape {
+  destinationId: string;
+  subject: string;
+  message: string;
+}
+
+interface PplTriggerShape {
+  name: string;
+  type: 'number_of_results' | 'custom';
+  numResultsCondition: string;
+  numResultsValue: number;
+  customCondition: string;
+  actions: PplActionShape[];
+}
+
+export interface PplFormShape {
+  name: string;
+  query: string;
+  pplTriggers: PplTriggerShape[];
+}
+
+export function validatePplForm(form: PplFormShape): ValidationResult {
+  const errors: Record<string, string> = {};
+
+  if (!form.name || !form.name.trim()) {
+    errors.name = 'Name is required';
+  } else if (form.name.length > 256) {
+    errors.name = 'Name must be 256 characters or fewer';
+  } else if (CONTROL_CHAR_RE.test(form.name)) {
+    errors.name = 'Name must not contain control characters';
+  }
+
+  if (!form.query || !form.query.trim()) {
+    errors.query = 'PPL query is required';
+  } else if (form.query.length > PPL_QUERY_MAX_LENGTH) {
+    errors.query = `PPL query must be ≤ ${PPL_QUERY_MAX_LENGTH} characters`;
+  }
+
+  if (form.pplTriggers.length === 0) {
+    errors.pplTriggers = 'At least one trigger is required';
+  }
+
+  form.pplTriggers.forEach((t, i) => {
+    const prefix = `pplTriggers[${i}]`;
+    if (!t.name || !t.name.trim()) {
+      errors[`${prefix}.name`] = 'Trigger name is required';
+    }
+
+    if (t.type === 'number_of_results') {
+      if (!PPL_NUM_RESULTS_OPERATORS.has(t.numResultsCondition)) {
+        errors[`${prefix}.numResultsCondition`] = 'Pick a valid comparison operator';
+      }
+      if (
+        !Number.isFinite(t.numResultsValue) ||
+        !Number.isInteger(t.numResultsValue) ||
+        t.numResultsValue < PPL_NUM_RESULTS_MIN ||
+        t.numResultsValue > PPL_NUM_RESULTS_MAX
+      ) {
+        errors[
+          `${prefix}.numResultsValue`
+        ] = `Threshold must be an integer between ${PPL_NUM_RESULTS_MIN} and ${PPL_NUM_RESULTS_MAX}`;
+      }
+    } else if (t.type === 'custom') {
+      if (!t.customCondition || !PPL_CUSTOM_CONDITION_REGEX.test(t.customCondition)) {
+        errors[`${prefix}.customCondition`] = 'Custom condition must start with `where`';
+      }
+    }
+
+    t.actions.forEach((a, j) => {
+      const aPrefix = `${prefix}.actions[${j}]`;
+      if (!a.destinationId) {
+        errors[`${aPrefix}.destinationId`] = 'Destination is required';
+      }
+      if (a.subject && a.subject.length > PPL_NOTIFICATION_SUBJECT_MAX) {
+        errors[
+          `${aPrefix}.subject`
+        ] = `Subject must be ≤ ${PPL_NOTIFICATION_SUBJECT_MAX} characters`;
+      }
+      if (!a.message || a.message.length === 0) {
+        errors[`${aPrefix}.message`] = 'Message is required';
+      } else if (a.message.length > PPL_NOTIFICATION_MESSAGE_MAX) {
+        errors[
+          `${aPrefix}.message`
+        ] = `Message must be ≤ ${PPL_NOTIFICATION_MESSAGE_MAX} characters`;
+      }
+    });
+  });
+
+  return { valid: Object.keys(errors).length === 0, errors };
+}

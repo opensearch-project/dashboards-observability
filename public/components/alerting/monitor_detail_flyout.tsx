@@ -214,6 +214,12 @@ export interface MonitorDetailFlyoutProps {
   onClose: () => void;
   onDelete: (id: string) => void;
   onClone: (monitor: UnifiedRuleSummary) => void;
+  /**
+   * Optional Edit handler. When omitted, the Edit button is hidden — keeps
+   * the flyout usable in contexts (e.g. AI wizard summary) that don't host
+   * an edit flyout.
+   */
+  onEdit?: (monitor: UnifiedRuleSummary) => void;
 }
 
 // ============================================================================
@@ -225,6 +231,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   onClose,
   onDelete,
   onClone,
+  onEdit,
 }) => {
   const osService = useMemo(() => new AlertingOpenSearchService(), []);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -388,18 +395,35 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
           {/* Quick actions */}
           <EuiFlexGroup gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate('observability.alerting.monitorDetailFlyout.editTooltip', {
-                  defaultMessage: 'Editing not yet available',
-                })}
-              >
-                <EuiButtonEmpty size="s" iconType="pencil" isDisabled>
+              {onEdit ? (
+                <EuiButtonEmpty
+                  size="s"
+                  iconType="pencil"
+                  onClick={() => onEdit(monitor)}
+                  data-test-subj="alertManager-monitorDetailEdit"
+                >
                   <FormattedMessage
                     id="observability.alerting.monitorDetailFlyout.editButton"
                     defaultMessage="Edit"
                   />
                 </EuiButtonEmpty>
-              </EuiToolTip>
+              ) : (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'observability.alerting.monitorDetailFlyout.editTooltip',
+                    {
+                      defaultMessage: 'Editing not yet available',
+                    }
+                  )}
+                >
+                  <EuiButtonEmpty size="s" iconType="pencil" isDisabled>
+                    <FormattedMessage
+                      id="observability.alerting.monitorDetailFlyout.editButton"
+                      defaultMessage="Edit"
+                    />
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty size="s" iconType="copy" onClick={() => onClone(monitor)}>

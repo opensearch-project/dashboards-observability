@@ -87,6 +87,7 @@ export const TYPE_LABELS: Record<string, string> = {
   infrastructure: 'Infrastructure',
   cluster_metrics: 'Cluster Metrics',
   synthetics: 'Synthetics',
+  ppl: 'PPL',
 };
 
 // ============================================================================
@@ -251,8 +252,8 @@ export function formatLatency(seconds: number): string {
  * Currently safe (code-generated strings only, no interpolation needed):
  *   - `alerts_charts.tsx` — tooltip uses default formatter; axis labels are
  *     time strings from `new Date(...).toLocaleTimeString()`.
- *   - `create_metrics_monitor.tsx`, `create_logs_monitor_constants.ts` — all
- *     tooltip data is mock preview data, thresholds are numbers.
+ *   - `create_metrics_monitor.tsx` — all tooltip data is mock preview data,
+ *     thresholds are numbers.
  *
  * Used by:
  *   - `monitor_detail_flyout.tsx` — formatter interpolates `axisValue` (a

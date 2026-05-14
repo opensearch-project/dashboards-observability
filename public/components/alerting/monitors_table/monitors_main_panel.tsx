@@ -75,6 +75,7 @@ export interface MonitorsMainPanelProps {
   setSelectedMonitor: React.Dispatch<React.SetStateAction<UnifiedRuleSummary | null>>;
   onDelete: (ids: string[]) => void;
   onClone?: (monitor: UnifiedRuleSummary) => void;
+  onEdit?: (monitor: UnifiedRuleSummary) => void;
 }
 
 export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
@@ -106,6 +107,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
   setSelectedMonitor,
   onDelete,
   onClone,
+  onEdit,
 }) => {
   return (
     <>
@@ -400,6 +402,14 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
             if (onClone) onClone(monitor);
             setSelectedMonitor(null);
           }}
+          onEdit={
+            onEdit
+              ? (monitor) => {
+                  onEdit(monitor);
+                  setSelectedMonitor(null);
+                }
+              : undefined
+          }
         />
       )}
     </>

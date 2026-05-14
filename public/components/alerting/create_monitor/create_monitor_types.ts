@@ -55,6 +55,33 @@ export interface PrometheusFormState extends BaseMonitorForm {
   annotations: AnnotationEntry[];
 }
 
+/** Severity ordinal mapped to the alerting plugin's `1`–`5` codes. */
+export type PplTriggerSeverity = '1' | '2' | '3' | '4' | '5';
+export type PplNumResultsOperator = '>' | '>=' | '<' | '<=' | '==' | '!=';
+export type PplTriggerType = 'number_of_results' | 'custom';
+
+export interface PplActionForm {
+  id: string;
+  name: string;
+  /** Empty when nothing has been selected; validators reject save in that state. */
+  destinationId: string;
+  subject: string;
+  message: string;
+}
+
+/** Form-state shape for one PPL trigger. Multiple per monitor are allowed. */
+export interface PplTriggerForm {
+  id: string;
+  name: string;
+  severity: PplTriggerSeverity;
+  type: PplTriggerType;
+  numResultsCondition: PplNumResultsOperator;
+  numResultsValue: number;
+  /** Required when `type === 'custom'`; must start with `where ...`. */
+  customCondition: string;
+  actions: PplActionForm[];
+}
+
 /** OpenSearch-specific form state */
 export interface OpenSearchFormState extends BaseMonitorForm {
   datasourceType: 'opensearch';
@@ -66,7 +93,9 @@ export interface OpenSearchFormState extends BaseMonitorForm {
     | 'cluster_metrics_monitor';
   indices: string;
   query: string;
-  // PPL monitor trigger fields (Prometheus-like)
+  /** Triggers for `monitorType === 'ppl_monitor'`. */
+  pplTriggers: PplTriggerForm[];
+  /** Legacy single-threshold fields used by the DSL branches; unused for PPL. */
   threshold: ThresholdCondition;
   evaluationInterval: string;
   pendingPeriod: string;
@@ -110,6 +139,17 @@ export const DEFAULT_PROM_FORM: PrometheusFormState = {
   enabled: true,
 };
 
+export const createDefaultPplTrigger = (): PplTriggerForm => ({
+  id: `ppl-trigger-${Date.now()}`,
+  name: 'trigger-1',
+  severity: '3',
+  type: 'number_of_results',
+  numResultsCondition: '>',
+  numResultsValue: 1,
+  customCondition: 'where ',
+  actions: [],
+});
+
 export const DEFAULT_OS_FORM: OpenSearchFormState = {
   name: '',
   datasourceId: '',
@@ -117,7 +157,7 @@ export const DEFAULT_OS_FORM: OpenSearchFormState = {
   monitorType: 'ppl_monitor',
   indices: '',
   query: 'source = logs-* | where @timestamp > NOW() - INTERVAL 5 MINUTE | stats count() as cnt',
-  // PPL trigger defaults (Prometheus-like)
+  pplTriggers: [createDefaultPplTrigger()],
   threshold: { operator: '>', value: 100, unit: '', forDuration: '5m' },
   evaluationInterval: '1m',
   pendingPeriod: '5m',

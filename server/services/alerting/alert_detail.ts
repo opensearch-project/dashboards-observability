@@ -92,13 +92,14 @@ export async function getOSRuleDetail(
     // Alert history fetch is best-effort
   }
 
-  // Build notification routing from trigger actions + destinations
+  // Build notification routing from trigger actions + destinations.
   const notificationRouting: NotificationRouting[] = [];
   try {
     const destinations = await osBackend.getDestinations(client);
     const destMap = new Map(destinations.map((d) => [d.id, d]));
     for (const trigger of monitor.triggers) {
-      for (const action of trigger.actions) {
+      const actions = 'ppl_trigger' in trigger ? trigger.ppl_trigger.actions : trigger.actions;
+      for (const action of actions) {
         const dest = destMap.get(action.destination_id);
         notificationRouting.push({
           channel: dest?.type || 'unknown',
@@ -118,7 +119,9 @@ export async function getOSRuleDetail(
   const kind = detectMonitorKind(monitor);
   const input = monitor.inputs[0];
   let descriptionFallback: string;
-  if (kind === 'cluster_metrics' && input && 'uri' in input) {
+  if (kind === 'ppl' && input && 'ppl_input' in input) {
+    descriptionFallback = `PPL monitor: ${input.ppl_input.query}`;
+  } else if (kind === 'cluster_metrics' && input && 'uri' in input) {
     descriptionFallback = `Cluster metrics monitor: ${input.uri.api_type} (${input.uri.path})`;
   } else if (kind === 'doc' && input && 'doc_level_input' in input) {
     const docIndices = input.doc_level_input.indices?.join(', ') || 'unknown indices';
@@ -133,7 +136,11 @@ export async function getOSRuleDetail(
       queryIndices || 'unknown indices'
     }`;
   }
-  const description = trigger?.actions?.[0]?.message_template?.source || descriptionFallback;
+  const firstActionMessage =
+    trigger && 'ppl_trigger' in trigger
+      ? trigger.ppl_trigger.actions?.[0]?.message_template?.source
+      : trigger?.actions?.[0]?.message_template?.source;
+  const description = firstActionMessage || descriptionFallback;
 
   // Fetch condition preview: run the monitor's query as a date_histogram to build a time-series
   let conditionPreviewData: Array<{ timestamp: number; value: number }> = [];
@@ -155,8 +162,6 @@ export async function getOSRuleDetail(
   return {
     ...summary,
     description,
-    // AI summary not available from OS alerting API — empty triggers flyout fallback
-    aiSummary: '',
     firingPeriod: undefined,
     lookbackPeriod: undefined,
     alertHistory,
@@ -203,8 +208,6 @@ export async function getPromRuleDetail(
       return {
         ...summary,
         description,
-        // AI summary not available from Prometheus API — empty triggers flyout fallback
-        aiSummary: '',
         firingPeriod: undefined,
         lookbackPeriod: undefined,
         alertHistory,

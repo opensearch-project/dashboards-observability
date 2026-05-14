@@ -41,6 +41,35 @@ export interface OSTrigger {
   actions: OSAction[];
 }
 
+export type OSPPLQueryLanguage = 'ppl' | 'sql';
+
+export interface OSPPLInput {
+  ppl_input: {
+    query: string;
+    query_language: OSPPLQueryLanguage;
+  };
+}
+
+export type OSPPLNumResultsOperator = '>' | '>=' | '<' | '<=' | '==' | '!=';
+export type OSPPLConditionType = 'number_of_results' | 'custom';
+
+/** Inner body of a `ppl_trigger`. The wire envelope is {@link OSPPLTrigger}. */
+export interface OSPPLTriggerBody {
+  id?: string;
+  name: string;
+  severity: '1' | '2' | '3' | '4' | '5';
+  actions: OSAction[];
+  type: OSPPLConditionType;
+  num_results_condition?: OSPPLNumResultsOperator;
+  num_results_value?: number;
+  custom_condition?: string;
+}
+
+/** Wire-shape PPL trigger as it appears in monitor payloads. */
+export interface OSPPLTrigger {
+  ppl_trigger: OSPPLTriggerBody;
+}
+
 export type OSMonitorInput =
   | { search: { indices: string[]; query: Record<string, unknown> } }
   | {
@@ -52,17 +81,25 @@ export type OSMonitorInput =
         indices: string[];
         queries: Array<{ id: string; name: string; query: string; tags: string[] }>;
       };
-    };
+    }
+  | OSPPLInput;
+
+export type OSMonitorType =
+  | 'query_level_monitor'
+  | 'bucket_level_monitor'
+  | 'doc_level_monitor'
+  | 'ppl_monitor';
 
 export interface OSMonitor {
   id: string;
   type: 'monitor';
-  monitor_type: 'query_level_monitor' | 'bucket_level_monitor' | 'doc_level_monitor';
+  monitor_type: OSMonitorType;
   name: string;
   enabled: boolean;
   schedule: OSSchedule;
   inputs: OSMonitorInput[];
-  triggers: OSTrigger[];
+  /** Wrapped `OSPPLTrigger` for `ppl_monitor`; flat `OSTrigger` otherwise. */
+  triggers: Array<OSTrigger | OSPPLTrigger>;
   last_update_time: number;
   schema_version?: number;
 }
@@ -127,6 +164,19 @@ export interface OSRawTrigger {
   query_level_trigger?: Record<string, unknown>;
   bucket_level_trigger?: Record<string, unknown>;
   doc_level_trigger?: Record<string, unknown>;
+  ppl_trigger?: OSRawPPLTrigger;
+}
+
+/** Permissive read-side shape — the mapper fills defaults for missing fields. */
+export interface OSRawPPLTrigger {
+  id?: string;
+  name?: string;
+  severity?: string | number;
+  actions?: OSRawAction[];
+  type?: string;
+  num_results_condition?: string;
+  num_results_value?: number;
+  custom_condition?: string;
 }
 
 export interface OSRawAction {

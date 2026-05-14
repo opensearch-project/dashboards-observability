@@ -43,7 +43,9 @@ interface MonitorsTableProps {
   loading: boolean;
   onDelete: (ids: string[]) => void;
   onClone?: (monitor: UnifiedRuleSummary) => void;
-  onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics') => void;
+  onEdit?: (monitor: UnifiedRuleSummary) => void;
+  onImport?: (configs: Array<Record<string, unknown>>) => void;
+  onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics' | 'slo') => void;
   /** Currently selected datasource IDs */
   selectedDsIds: string[];
   /** Callback when datasource selection changes */
@@ -64,6 +66,8 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   loading,
   onDelete,
   onClone,
+  onEdit,
+  onImport,
   onCreateMonitor,
   selectedDsIds,
   onDatasourceChange,
@@ -365,6 +369,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 setSelectedMonitor={setSelectedMonitor}
                 onDelete={onDelete}
                 onClone={onClone}
+                onEdit={onEdit}
               />
             </EuiResizablePanel>
           </>

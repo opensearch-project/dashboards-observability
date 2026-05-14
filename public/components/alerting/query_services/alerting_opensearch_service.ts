@@ -94,4 +94,22 @@ export class AlertingOpenSearchService {
       `/api/alerting/rules/${encodeURIComponent(dsId)}/${encodeURIComponent(ruleId)}`
     )) as UnifiedRule;
   }
+
+  /**
+   * List notification destinations for a datasource. Used by the create/edit
+   * flyout to populate the action destination picker. Returns a thin
+   * summary — id, name, and type are all the picker needs.
+   */
+  async listDestinations(dsId: string): Promise<DestinationSummary[]> {
+    const resp = (await this.requireHttp().get(
+      `/api/alerting/opensearch/${encodeURIComponent(dsId)}/destinations`
+    )) as { destinations: DestinationSummary[] };
+    return resp.destinations || [];
+  }
+}
+
+export interface DestinationSummary {
+  id: string;
+  name: string;
+  type: string;
 }

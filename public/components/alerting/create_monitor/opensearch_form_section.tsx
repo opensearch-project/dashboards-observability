@@ -16,7 +16,6 @@ import React from 'react';
 import {
   EuiAccordion,
   EuiBadge,
-  EuiCallOut,
   EuiFieldNumber,
   EuiFieldText,
   EuiFlexGroup,
@@ -36,12 +35,11 @@ import {
   CLUSTER_METRICS_API_OPTIONS,
   DURATION_OPTIONS,
   INTERVAL_OPTIONS,
-  OPERATOR_OPTIONS,
   OpenSearchFormState,
   OS_MONITOR_TYPE_OPTIONS,
   OS_SCHEDULE_UNIT_OPTIONS,
-  ThresholdCondition,
 } from './create_monitor_types';
+import { PplTriggersSection } from './sections/ppl_triggers';
 
 // ============================================================================
 // OpenSearch Form Section
@@ -75,13 +73,6 @@ export const OpenSearchFormSection: React.FC<{
         onUpdate('query', nowPPL ? defaultPPL : defaultDSL);
       }
     }
-  };
-
-  const updateThreshold = <K extends keyof ThresholdCondition>(
-    key: K,
-    value: ThresholdCondition[K]
-  ) => {
-    onUpdate('threshold', { ...form.threshold, [key]: value });
   };
 
   return (
@@ -368,123 +359,17 @@ export const OpenSearchFormSection: React.FC<{
 
       <EuiSpacer size="m" />
 
-      {/* Trigger — PPL uses Prometheus-like threshold + labels/annotations; DSL uses Painless */}
+      {/* Trigger — PPL renders a multi-trigger list; DSL falls back to Painless */}
       {isPPL ? (
         <>
-          {/* Threshold Condition */}
+          {/* PPL trigger list — multi-trigger editor with destination picker per action */}
           <EuiPanel paddingSize="m" color="subdued">
-            <EuiTitle size="xs">
-              <h3>
-                {i18n.translate(
-                  'observability.alerting.opensearchFormSection.alertConditionTitle',
-                  { defaultMessage: 'Alert Condition' }
-                )}
-              </h3>
-            </EuiTitle>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate(
-                'observability.alerting.opensearchFormSection.alertConditionDescription',
-                { defaultMessage: 'Define when this monitor should fire an alert' }
-              )}
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="s" wrap>
-              <EuiFlexItem style={{ minWidth: 160 }}>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'observability.alerting.opensearchFormSection.operatorLabel',
-                    { defaultMessage: 'Operator' }
-                  )}
-                  display="rowCompressed"
-                >
-                  <EuiSelect
-                    options={OPERATOR_OPTIONS}
-                    value={form.threshold.operator}
-                    onChange={(e) =>
-                      updateThreshold('operator', e.target.value as ThresholdCondition['operator'])
-                    }
-                    compressed
-                    aria-label={i18n.translate(
-                      'observability.alerting.opensearchFormSection.thresholdOperatorAriaLabel',
-                      { defaultMessage: 'Threshold operator' }
-                    )}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem style={{ minWidth: 100 }}>
-                <EuiFormRow
-                  label={i18n.translate('observability.alerting.opensearchFormSection.valueLabel', {
-                    defaultMessage: 'Value',
-                  })}
-                  display="rowCompressed"
-                >
-                  <EuiFieldNumber
-                    value={form.threshold.value}
-                    onChange={(e) => updateThreshold('value', parseFloat(e.target.value) || 0)}
-                    compressed
-                    aria-label={i18n.translate(
-                      'observability.alerting.opensearchFormSection.thresholdValueAriaLabel',
-                      { defaultMessage: 'Threshold value' }
-                    )}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem style={{ minWidth: 60 }}>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'observability.alerting.opensearchFormSection.thresholdUnitLabel',
-                    { defaultMessage: 'Unit' }
-                  )}
-                  display="rowCompressed"
-                >
-                  <EuiFieldText
-                    value={form.threshold.unit}
-                    onChange={(e) => updateThreshold('unit', e.target.value)}
-                    placeholder=""
-                    compressed
-                    aria-label={i18n.translate(
-                      'observability.alerting.opensearchFormSection.thresholdUnitAriaLabel',
-                      { defaultMessage: 'Threshold unit' }
-                    )}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem style={{ minWidth: 160 }}>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'observability.alerting.opensearchFormSection.forDurationLabel',
-                    { defaultMessage: 'For Duration' }
-                  )}
-                  display="rowCompressed"
-                >
-                  <EuiSelect
-                    options={DURATION_OPTIONS}
-                    value={form.threshold.forDuration}
-                    onChange={(e) => updateThreshold('forDuration', e.target.value)}
-                    compressed
-                    aria-label={i18n.translate(
-                      'observability.alerting.opensearchFormSection.forDurationAriaLabel',
-                      { defaultMessage: 'For duration' }
-                    )}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-            <EuiCallOut size="s" color="primary" iconType="iInCircle">
-              <EuiText size="xs">
-                <FormattedMessage
-                  id="observability.alerting.opensearchFormSection.alertFiresMessage"
-                  defaultMessage="Alert fires when query result {operator} {value}{unit} for {forDuration}"
-                  values={{
-                    operator: form.threshold.operator,
-                    value: form.threshold.value,
-                    unit: form.threshold.unit,
-                    forDuration: form.threshold.forDuration,
-                  }}
-                />
-              </EuiText>
-            </EuiCallOut>
+            <PplTriggersSection
+              dsId={form.datasourceId}
+              triggers={form.pplTriggers}
+              onChange={(next) => onUpdate('pplTriggers', next)}
+              hasSubmitted={hasSubmitted}
+            />
           </EuiPanel>
 
           <EuiSpacer size="m" />
@@ -620,6 +505,7 @@ export const OpenSearchFormSection: React.FC<{
             </EuiAccordion>
           </EuiPanel>
         </>
+
       ) : (
         <>
           {/* DSL Trigger */}
@@ -677,96 +563,151 @@ export const OpenSearchFormSection: React.FC<{
               />
             </EuiFormRow>
           </EuiPanel>
+
+          <EuiSpacer size="m" />
+
+          {/* DSL Action (optional) */}
+          <EuiPanel paddingSize="m" color="subdued">
+            <EuiAccordion
+              id="os-action"
+              buttonContent={
+                <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <strong>Action</strong>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow">Optional</EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+              initialIsOpen={false}
+              paddingSize="none"
+            >
+              <EuiSpacer size="s" />
+              <EuiFormRow label="Action Name">
+                <EuiFieldText
+                  placeholder="Notify Slack"
+                  value={form.actionName}
+                  onChange={(e) => onUpdate('actionName', e.target.value)}
+                  aria-label="Action name"
+                />
+              </EuiFormRow>
+              <EuiSpacer size="s" />
+              <EuiFormRow label="Destination ID">
+                <EuiFieldText
+                  placeholder="Destination ID"
+                  value={form.actionDestination}
+                  onChange={(e) => onUpdate('actionDestination', e.target.value)}
+                  aria-label="Destination ID"
+                />
+              </EuiFormRow>
+              <EuiSpacer size="s" />
+              <EuiFormRow label="Message Template">
+                <EuiTextArea
+                  placeholder="Alert: {{ctx.monitor.name}} triggered"
+                  value={form.actionMessage}
+                  onChange={(e) => onUpdate('actionMessage', e.target.value)}
+                  rows={3}
+                  aria-label="Message template"
+                />
+              </EuiFormRow>
+            </EuiAccordion>
+          </EuiPanel>
         </>
       )}
 
-      <EuiSpacer size="m" />
+      {!isPPL && (
+        <>
+          <EuiSpacer size="m" />
 
-      {/* Action (optional) */}
-      <EuiPanel paddingSize="m" color="subdued">
-        <EuiAccordion
-          id="os-action"
-          buttonContent={
-            <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <strong>
-                  {i18n.translate('observability.alerting.opensearchFormSection.actionTitle', {
-                    defaultMessage: 'Action',
-                  })}
-                </strong>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">
-                  {i18n.translate(
-                    'observability.alerting.opensearchFormSection.actionOptionalBadge',
-                    { defaultMessage: 'Optional' }
+          {/* DSL Action (optional) — PPL handles per-trigger destinations inline */}
+          <EuiPanel paddingSize="m" color="subdued">
+            <EuiAccordion
+              id="os-action"
+              buttonContent={
+                <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <strong>
+                      {i18n.translate('observability.alerting.opensearchFormSection.actionTitle', {
+                        defaultMessage: 'Action',
+                      })}
+                    </strong>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow">
+                      {i18n.translate(
+                        'observability.alerting.opensearchFormSection.actionOptionalBadge',
+                        { defaultMessage: 'Optional' }
+                      )}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+              initialIsOpen={false}
+              paddingSize="none"
+            >
+              <EuiSpacer size="s" />
+              <EuiFormRow
+                label={i18n.translate(
+                  'observability.alerting.opensearchFormSection.actionNameLabel',
+                  { defaultMessage: 'Action Name' }
+                )}
+              >
+                <EuiFieldText
+                  placeholder={i18n.translate(
+                    'observability.alerting.opensearchFormSection.actionNamePlaceholder',
+                    { defaultMessage: 'Notify Slack' }
                   )}
-                </EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-          initialIsOpen={false}
-          paddingSize="none"
-        >
-          <EuiSpacer size="s" />
-          <EuiFormRow
-            label={i18n.translate('observability.alerting.opensearchFormSection.actionNameLabel', {
-              defaultMessage: 'Action Name',
-            })}
-          >
-            <EuiFieldText
-              placeholder={i18n.translate(
-                'observability.alerting.opensearchFormSection.actionNamePlaceholder',
-                { defaultMessage: 'Notify Slack' }
-              )}
-              value={form.actionName}
-              onChange={(e) => onUpdate('actionName', e.target.value)}
-              aria-label={i18n.translate(
-                'observability.alerting.opensearchFormSection.actionNameAriaLabel',
-                { defaultMessage: 'Action name' }
-              )}
-            />
-          </EuiFormRow>
-          <EuiSpacer size="s" />
-          <EuiFormRow
-            label={i18n.translate(
-              'observability.alerting.opensearchFormSection.destinationIdLabel',
-              { defaultMessage: 'Destination ID' }
-            )}
-          >
-            <EuiFieldText
-              placeholder={i18n.translate(
-                'observability.alerting.opensearchFormSection.destinationIdPlaceholder',
-                { defaultMessage: 'Destination ID' }
-              )}
-              value={form.actionDestination}
-              onChange={(e) => onUpdate('actionDestination', e.target.value)}
-              aria-label={i18n.translate(
-                'observability.alerting.opensearchFormSection.destinationIdAriaLabel',
-                { defaultMessage: 'Destination ID' }
-              )}
-            />
-          </EuiFormRow>
-          <EuiSpacer size="s" />
-          <EuiFormRow
-            label={i18n.translate(
-              'observability.alerting.opensearchFormSection.messageTemplateLabel',
-              { defaultMessage: 'Message Template' }
-            )}
-          >
-            <EuiTextArea
-              placeholder="Alert: {{ctx.monitor.name}} triggered"
-              value={form.actionMessage}
-              onChange={(e) => onUpdate('actionMessage', e.target.value)}
-              rows={3}
-              aria-label={i18n.translate(
-                'observability.alerting.opensearchFormSection.messageTemplateAriaLabel',
-                { defaultMessage: 'Message template' }
-              )}
-            />
-          </EuiFormRow>
-        </EuiAccordion>
-      </EuiPanel>
+                  value={form.actionName}
+                  onChange={(e) => onUpdate('actionName', e.target.value)}
+                  aria-label={i18n.translate(
+                    'observability.alerting.opensearchFormSection.actionNameAriaLabel',
+                    { defaultMessage: 'Action name' }
+                  )}
+                />
+              </EuiFormRow>
+              <EuiSpacer size="s" />
+              <EuiFormRow
+                label={i18n.translate(
+                  'observability.alerting.opensearchFormSection.destinationIdLabel',
+                  { defaultMessage: 'Destination ID' }
+                )}
+              >
+                <EuiFieldText
+                  placeholder={i18n.translate(
+                    'observability.alerting.opensearchFormSection.destinationIdPlaceholder',
+                    { defaultMessage: 'Destination ID' }
+                  )}
+                  value={form.actionDestination}
+                  onChange={(e) => onUpdate('actionDestination', e.target.value)}
+                  aria-label={i18n.translate(
+                    'observability.alerting.opensearchFormSection.destinationIdAriaLabel',
+                    { defaultMessage: 'Destination ID' }
+                  )}
+                />
+              </EuiFormRow>
+              <EuiSpacer size="s" />
+              <EuiFormRow
+                label={i18n.translate(
+                  'observability.alerting.opensearchFormSection.messageTemplateLabel',
+                  { defaultMessage: 'Message Template' }
+                )}
+              >
+                <EuiTextArea
+                  placeholder="Alert: {{ctx.monitor.name}} triggered"
+                  value={form.actionMessage}
+                  onChange={(e) => onUpdate('actionMessage', e.target.value)}
+                  rows={3}
+                  aria-label={i18n.translate(
+                    'observability.alerting.opensearchFormSection.messageTemplateAriaLabel',
+                    { defaultMessage: 'Message template' }
+                  )}
+                />
+              </EuiFormRow>
+            </EuiAccordion>
+          </EuiPanel>
+        </>
+      )}
     </>
   );
 };

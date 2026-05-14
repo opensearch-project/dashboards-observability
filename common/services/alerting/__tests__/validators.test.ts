@@ -6,7 +6,13 @@
 import {
   parseDuration,
   formatDuration,
+  PPL_NOTIFICATION_MESSAGE_MAX,
+  PPL_NOTIFICATION_SUBJECT_MAX,
+  PPL_NUM_RESULTS_MAX,
+  PPL_QUERY_MAX_LENGTH,
+  PplFormShape,
   validateMonitorForm,
+  validatePplForm,
   MonitorFormState,
 } from '../validators';
 
@@ -87,5 +93,122 @@ describe('validateMonitorForm', () => {
       ],
     });
     expect(result.errors['labels[1].key']).toMatch(/Duplicate/);
+  });
+});
+
+// ============================================================================
+// PPL form validation
+// ============================================================================
+
+const validPplForm = (): PplFormShape => ({
+  name: 'test-monitor',
+  query: 'source = logs-* | stats count() as cnt',
+  pplTriggers: [
+    {
+      name: 'trigger-1',
+      type: 'number_of_results',
+      numResultsCondition: '>',
+      numResultsValue: 5,
+      customCondition: 'where ',
+      actions: [],
+    },
+  ],
+});
+
+describe('validatePplForm', () => {
+  it('accepts a minimal valid form', () => {
+    const result = validatePplForm(validPplForm());
+    expect(result.valid).toBe(true);
+    expect(result.errors).toEqual({});
+  });
+
+  it('rejects empty name', () => {
+    const f = validPplForm();
+    f.name = '';
+    expect(validatePplForm(f).errors.name).toMatch(/required/i);
+  });
+
+  it('rejects empty query', () => {
+    const f = validPplForm();
+    f.query = '   ';
+    expect(validatePplForm(f).errors.query).toMatch(/required/i);
+  });
+
+  it('rejects query above the cap', () => {
+    const f = validPplForm();
+    f.query = 'a'.repeat(PPL_QUERY_MAX_LENGTH + 1);
+    expect(validatePplForm(f).errors.query).toMatch(/2000/);
+  });
+
+  it('rejects empty triggers list', () => {
+    const f = validPplForm();
+    f.pplTriggers = [];
+    expect(validatePplForm(f).errors.pplTriggers).toMatch(/at least one trigger/i);
+  });
+
+  it('rejects an out-of-range num-results threshold', () => {
+    const f = validPplForm();
+    f.pplTriggers[0].numResultsValue = PPL_NUM_RESULTS_MAX + 1;
+    expect(validatePplForm(f).errors['pplTriggers[0].numResultsValue']).toMatch(/integer/i);
+  });
+
+  it('rejects a non-integer num-results threshold', () => {
+    const f = validPplForm();
+    f.pplTriggers[0].numResultsValue = 1.5;
+    expect(validatePplForm(f).errors['pplTriggers[0].numResultsValue']).toMatch(/integer/i);
+  });
+
+  it('rejects a custom condition without "where"', () => {
+    const f = validPplForm();
+    f.pplTriggers[0] = { ...f.pplTriggers[0], type: 'custom', customCondition: 'eval x = 1' };
+    expect(validatePplForm(f).errors['pplTriggers[0].customCondition']).toMatch(/where/i);
+  });
+
+  it('accepts a custom condition starting with "where"', () => {
+    const f = validPplForm();
+    f.pplTriggers[0] = {
+      ...f.pplTriggers[0],
+      type: 'custom',
+      customCondition: 'where avg > 10',
+    };
+    expect(validatePplForm(f).valid).toBe(true);
+  });
+
+  it('rejects an action without a destination', () => {
+    const f = validPplForm();
+    f.pplTriggers[0].actions = [{ destinationId: '', subject: '', message: 'msg' }];
+    expect(validatePplForm(f).errors['pplTriggers[0].actions[0].destinationId']).toMatch(
+      /required/i
+    );
+  });
+
+  it('rejects subject above the cap', () => {
+    const f = validPplForm();
+    f.pplTriggers[0].actions = [
+      {
+        destinationId: 'd',
+        subject: 'x'.repeat(PPL_NOTIFICATION_SUBJECT_MAX + 1),
+        message: 'm',
+      },
+    ];
+    expect(validatePplForm(f).errors['pplTriggers[0].actions[0].subject']).toMatch(/1000/);
+  });
+
+  it('rejects empty action message', () => {
+    const f = validPplForm();
+    f.pplTriggers[0].actions = [{ destinationId: 'd', subject: '', message: '' }];
+    expect(validatePplForm(f).errors['pplTriggers[0].actions[0].message']).toMatch(/required/i);
+  });
+
+  it('rejects message above the cap', () => {
+    const f = validPplForm();
+    f.pplTriggers[0].actions = [
+      {
+        destinationId: 'd',
+        subject: '',
+        message: 'x'.repeat(PPL_NOTIFICATION_MESSAGE_MAX + 1),
+      },
+    ];
+    expect(validatePplForm(f).errors['pplTriggers[0].actions[0].message']).toMatch(/5000/);
   });
 });

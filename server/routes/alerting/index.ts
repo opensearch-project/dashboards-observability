@@ -391,6 +391,33 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     }
   );
 
+  // Read-only destinations list. Destination CRUD lives in the OpenSearch
+  // Alerting plugin — this endpoint only feeds the Create/Edit flyout's picker.
+  router.get(
+    {
+      path: '/api/alerting/opensearch/{dsId}/destinations',
+      validate: { params: schema.object({ dsId: alertingIdSchema }) },
+    },
+    async (ctx, req, res) => {
+      try {
+        const client = await getAlertingClient(ctx as AlertingHandlerContext, req.params.dsId);
+        const destinations = await osBackend.getDestinations(client);
+        return res.ok({
+          body: {
+            destinations: destinations.map((d) => ({ id: d.id, name: d.name, type: d.type })),
+          },
+        });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        logger.warn(`getDestinations failed for ds ${req.params.dsId}: ${message}`);
+        return res.customError({
+          statusCode: 502,
+          body: toErrorBody({ message: `Failed to list destinations: ${message}` }),
+        });
+      }
+    }
+  );
+
   // POST /monitors/{monitorId}/acknowledge moved to `./mutations/`.
 
   // Prometheus routes

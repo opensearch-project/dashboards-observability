@@ -444,11 +444,20 @@ export function hashRuleIdentity(labels: Record<string, string>): string {
  * Detect the actual monitor kind from the OS monitor's inputs,
  * since cluster metrics monitors share monitor_type 'query_level_monitor'.
  */
-export function detectMonitorKind(m: OSMonitor): 'query' | 'bucket' | 'doc' | 'cluster_metrics' {
+export function detectMonitorKind(
+  m: OSMonitor
+): 'query' | 'bucket' | 'doc' | 'cluster_metrics' | 'ppl' {
+  if (m.monitor_type === 'ppl_monitor') return 'ppl';
   if (m.monitor_type === 'bucket_level_monitor') return 'bucket';
   if (m.monitor_type === 'doc_level_monitor') return 'doc';
   if (m.inputs[0] && 'uri' in m.inputs[0]) return 'cluster_metrics';
   return 'query';
+}
+
+function isPplTrigger(
+  t: OSMonitor['triggers'][number]
+): t is Extract<OSMonitor['triggers'][number], { ppl_trigger: unknown }> {
+  return !!t && typeof t === 'object' && 'ppl_trigger' in t;
 }
 
 export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): UnifiedRuleSummary {
@@ -475,17 +484,47 @@ export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): Unifi
       labels.indices = indices.join(',');
     }
     labels.doc_queries = String(input.doc_level_input.queries?.length ?? 0);
+  } else if (input && 'ppl_input' in input) {
+    labels.query_language = input.ppl_input.query_language;
   }
   labels.monitor_type = m.monitor_type;
   labels.monitor_kind = kind;
   labels.datasource_id = dsId;
 
-  const annotations: Record<string, string> = {};
-  if (trigger?.actions?.[0]?.message_template?.source) {
-    annotations.summary = trigger.actions[0].message_template.source;
+  let triggerSeverity: string | number | undefined;
+  let conditionSource = '';
+  let triggerActions: Array<{ name: string; message_template?: { source: string } }> = [];
+  let pplBody:
+    | {
+        type?: 'number_of_results' | 'custom';
+        num_results_condition?: string;
+        num_results_value?: number;
+        custom_condition?: string;
+      }
+    | undefined;
+
+  if (trigger && isPplTrigger(trigger)) {
+    const body = trigger.ppl_trigger;
+    pplBody = body;
+    triggerSeverity = body.severity;
+    triggerActions = body.actions;
+    if (body.type === 'custom') {
+      conditionSource = body.custom_condition ?? '';
+    } else if (body.num_results_condition && body.num_results_value !== undefined) {
+      conditionSource = `count ${body.num_results_condition} ${body.num_results_value}`;
+    }
+  } else if (trigger) {
+    triggerSeverity = trigger.severity;
+    triggerActions = trigger.actions;
+    conditionSource = trigger.condition?.script?.source ?? '';
   }
 
-  const severity = trigger ? osSeverityToUnified(trigger.severity) : 'info';
+  const annotations: Record<string, string> = {};
+  if (triggerActions[0]?.message_template?.source) {
+    annotations.summary = triggerActions[0].message_template.source;
+  }
+
+  const severity = trigger ? osSeverityToUnified(String(triggerSeverity ?? '3')) : 'info';
   const status: MonitorStatus = !isEnabled ? 'disabled' : 'active';
 
   // Extract query string based on input type
@@ -497,13 +536,17 @@ export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): Unifi
     query = docQueries.map((q) => `${q.name}: ${q.query}`).join('; ') || '(no queries)';
   } else if (input && 'search' in input) {
     query = JSON.stringify(input.search.query ?? {});
+  } else if (input && 'ppl_input' in input) {
+    query = input.ppl_input.query;
   } else {
     query = '{}';
   }
 
   // Derive monitor type from kind and index patterns
   let monitorType: MonitorType;
-  if (kind === 'cluster_metrics') {
+  if (kind === 'ppl') {
+    monitorType = 'ppl';
+  } else if (kind === 'cluster_metrics') {
     monitorType = 'cluster_metrics';
   } else if (kind === 'doc') {
     monitorType = 'log';
@@ -521,10 +564,26 @@ export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): Unifi
     }
   }
 
-  const destNames = trigger?.actions?.map((a) => a.name) ?? [];
+  const destNames = triggerActions.map((a) => a.name);
   const intervalUnit = m.schedule.period.unit;
   const intervalVal = m.schedule.period.interval;
   const evalInterval = `${intervalVal} ${intervalUnit.toLowerCase()}`;
+
+  let threshold: UnifiedRuleSummary['threshold'];
+  if (pplBody && pplBody.type === 'number_of_results') {
+    threshold = {
+      operator: pplBody.num_results_condition ?? '>',
+      value: pplBody.num_results_value ?? 0,
+      unit: '',
+    };
+  } else if (trigger && !isPplTrigger(trigger)) {
+    const parsed = parseThreshold(conditionSource);
+    threshold = {
+      operator: parsed.operator,
+      value: parsed.value,
+      unit: inferUnitFromExpression(query),
+    };
+  }
 
   return {
     id: m.id,
@@ -534,7 +593,7 @@ export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): Unifi
     enabled: isEnabled,
     severity,
     query,
-    condition: trigger?.condition?.script?.source ?? '',
+    condition: conditionSource,
     labels,
     annotations,
     monitorType,
@@ -547,16 +606,7 @@ export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): Unifi
     notificationDestinations: destNames,
     evaluationInterval: evalInterval,
     pendingPeriod: evalInterval,
-    threshold: trigger
-      ? (() => {
-          const parsed = parseThreshold(trigger.condition.script.source);
-          return {
-            operator: parsed.operator,
-            value: parsed.value,
-            unit: inferUnitFromExpression(query),
-          };
-        })()
-      : undefined,
+    threshold,
   };
 }
 

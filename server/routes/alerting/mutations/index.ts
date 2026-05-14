@@ -61,6 +61,9 @@ const triggerSchema = schema.object(
     query_level_trigger: schema.maybe(schema.object({}, { unknowns: 'ignore' })),
     bucket_level_trigger: schema.maybe(schema.object({}, { unknowns: 'ignore' })),
     doc_level_trigger: schema.maybe(schema.object({}, { unknowns: 'ignore' })),
+    // PPL monitor trigger wrapper — the alerting plugin validates the inner
+    // shape (`type`, `num_results_*`, `custom_condition`) server-side.
+    ppl_trigger: schema.maybe(schema.object({}, { unknowns: 'ignore' })),
   },
   { unknowns: 'ignore' }
 );
@@ -83,6 +86,15 @@ const inputSchema = schema.object(
           description: schema.maybe(schema.string()),
           indices: schema.maybe(schema.arrayOf(schema.string())),
           queries: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'ignore' }))),
+        },
+        { unknowns: 'ignore' }
+      )
+    ),
+    ppl_input: schema.maybe(
+      schema.object(
+        {
+          query: schema.string(),
+          query_language: schema.maybe(schema.string()),
         },
         { unknowns: 'ignore' }
       )

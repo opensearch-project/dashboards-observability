@@ -12,9 +12,14 @@ import {
   AlertingOSClient,
   Logger,
   OpenSearchBackend,
+  OSAction,
   OSMonitor,
   OSAlert,
   OSDestination,
+  OSPPLConditionType,
+  OSPPLNumResultsOperator,
+  OSPPLTrigger,
+  OSPPLTriggerBody,
   OSTrigger,
   OSSearchResponse,
   OSGetMonitorResponse,
@@ -22,6 +27,7 @@ import {
   OSAlertsApiResponse,
   OSAlertRaw,
   OSMonitorSource,
+  OSRawPPLTrigger,
   OSRawTrigger,
   OSRawAction,
   OSDestinationRaw,
@@ -384,15 +390,27 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
   }
 
   private mapMonitor(id: string, source: OSMonitorSource): OSMonitor {
+    const rawType = source.monitor_type;
+    const monitorType: OSMonitor['monitor_type'] =
+      rawType === 'query_level_monitor' ||
+      rawType === 'bucket_level_monitor' ||
+      rawType === 'doc_level_monitor' ||
+      rawType === 'ppl_monitor'
+        ? rawType
+        : 'query_level_monitor';
+
+    const isPpl = monitorType === 'ppl_monitor';
     return {
       id,
       type: (source.type as OSMonitor['type']) || 'monitor',
-      monitor_type: (source.monitor_type as OSMonitor['monitor_type']) || 'query_level_monitor',
+      monitor_type: monitorType,
       name: source.name || '',
       enabled: source.enabled ?? true,
       schedule: source.schedule || { period: { interval: 5, unit: 'MINUTES' } },
       inputs: source.inputs || [],
-      triggers: (source.triggers || []).map((t: OSRawTrigger) => this.mapTrigger(t)),
+      triggers: (source.triggers || []).map((t: OSRawTrigger) =>
+        isPpl || t.ppl_trigger ? this.mapPplTrigger(t) : this.mapTrigger(t)
+      ),
       last_update_time: source.last_update_time || Date.now(),
       schema_version: source.schema_version,
     };
@@ -417,17 +435,39 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
           lang: inner.condition?.script?.lang || 'painless',
         },
       },
-      actions: (inner.actions || []).map((a: OSRawAction) => ({
-        id: a.id || '',
-        name: a.name || '',
-        destination_id: a.destination_id || '',
-        message_template: { source: a.message_template?.source || '' },
-        subject_template: a.subject_template
-          ? { source: a.subject_template.source || '' }
-          : undefined,
-        throttle_enabled: a.throttle_enabled ?? false,
-        throttle: a.throttle as OSTrigger['actions'][0]['throttle'],
-      })),
+      actions: (inner.actions || []).map((a: OSRawAction) => this.mapAction(a)),
+    };
+  }
+
+  private mapPplTrigger(t: OSRawTrigger): OSPPLTrigger {
+    const inner = (t.ppl_trigger || t) as OSRawPPLTrigger;
+    const conditionType: OSPPLConditionType =
+      inner.type === 'custom' ? 'custom' : 'number_of_results';
+    return {
+      ppl_trigger: {
+        id: inner.id || '',
+        name: inner.name || '',
+        severity: String(inner.severity || '3') as OSPPLTriggerBody['severity'],
+        actions: (inner.actions || []).map((a: OSRawAction) => this.mapAction(a)),
+        type: conditionType,
+        num_results_condition: inner.num_results_condition as OSPPLNumResultsOperator | undefined,
+        num_results_value: inner.num_results_value,
+        custom_condition: inner.custom_condition,
+      },
+    };
+  }
+
+  private mapAction(a: OSRawAction): OSAction {
+    return {
+      id: a.id || '',
+      name: a.name || '',
+      destination_id: a.destination_id || '',
+      message_template: { source: a.message_template?.source || '' },
+      subject_template: a.subject_template
+        ? { source: a.subject_template.source || '' }
+        : undefined,
+      throttle_enabled: a.throttle_enabled ?? false,
+      throttle: a.throttle as OSAction['throttle'],
     };
   }
 

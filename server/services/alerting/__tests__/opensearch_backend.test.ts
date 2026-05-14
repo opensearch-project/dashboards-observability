@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { AlertingOSClient, Logger } from '../../../../common/types/alerting';
+import type { AlertingOSClient, Logger, OSPPLTrigger } from '../../../../common/types/alerting';
 import { HttpOpenSearchBackend } from '../opensearch_backend';
 
 const mockLogger: Logger = {
@@ -81,9 +81,12 @@ describe('HttpOpenSearchBackend', () => {
 
       const result = await backend.getMonitors(client);
       expect(result).toHaveLength(101);
-      expect(result[0].triggers[0].id).toBe('t-1');
-      expect(result[0].triggers[0].severity).toBe('1');
-      expect(result[0].triggers[0].actions[0].destination_id).toBe('d-1');
+      // Fixture monitors are query_level_monitor — triggers are OS-native, not PPL.
+      // Cast through `as` since `triggers` is a union of OSTrigger | OSPPLTrigger.
+      const t0 = result[0].triggers[0] as import('../../../../common/types/alerting').OSTrigger;
+      expect(t0.id).toBe('t-1');
+      expect(t0.severity).toBe('1');
+      expect(t0.actions[0].destination_id).toBe('d-1');
 
       expect(request).toHaveBeenCalledTimes(2);
       // Second call should include search_after derived from the last hit of page 1.
@@ -395,5 +398,88 @@ describe('HttpOpenSearchBackend', () => {
         body: { dryrun: true },
       });
     });
+  });
+});
+
+const pplMonitorHit = (id: string, name: string) => ({
+  _id: id,
+  _source: {
+    type: 'monitor',
+    monitor_type: 'ppl_monitor',
+    name,
+    enabled: true,
+    schedule: { period: { interval: 5, unit: 'MINUTES' } },
+    inputs: [
+      {
+        ppl_input: { query: 'source = logs-* | stats count() as cnt', query_language: 'ppl' },
+      },
+    ],
+    triggers: [
+      {
+        ppl_trigger: {
+          id: 'ppl-t-1',
+          name: 'high-count',
+          severity: '2',
+          actions: [
+            {
+              id: 'ppl-a-1',
+              name: 'page',
+              destination_id: 'd-pd',
+              message_template: { source: 'too many' },
+            },
+          ],
+          type: 'number_of_results',
+          num_results_condition: '>',
+          num_results_value: 10,
+        },
+      },
+    ],
+    last_update_time: 1_700_000_000_000,
+  },
+  sort: [id],
+});
+
+describe('HttpOpenSearchBackend — PPL monitor mapping', () => {
+  const backend = new HttpOpenSearchBackend(mockLogger);
+
+  it('preserves monitor_type "ppl_monitor" through the mapper', async () => {
+    const { client } = makeClient([
+      { body: { hits: { hits: [pplMonitorHit('mon-ppl-1', 'ppl')] } } },
+    ]);
+    const [m] = await backend.getMonitors(client);
+    expect(m.monitor_type).toBe('ppl_monitor');
+  });
+
+  it('unwraps ppl_trigger and exposes the canonical PPL trigger shape', async () => {
+    const { client } = makeClient([
+      { body: { hits: { hits: [pplMonitorHit('mon-ppl-1', 'ppl')] } } },
+    ]);
+    const [m] = await backend.getMonitors(client);
+    const trigger = m.triggers[0] as OSPPLTrigger;
+    expect(trigger.ppl_trigger).toBeDefined();
+    expect(trigger.ppl_trigger.id).toBe('ppl-t-1');
+    expect(trigger.ppl_trigger.severity).toBe('2');
+    expect(trigger.ppl_trigger.type).toBe('number_of_results');
+    expect(trigger.ppl_trigger.num_results_condition).toBe('>');
+    expect(trigger.ppl_trigger.num_results_value).toBe(10);
+    expect(trigger.ppl_trigger.actions[0].destination_id).toBe('d-pd');
+  });
+
+  it('passes inputs through unchanged for PPL monitors', async () => {
+    const { client } = makeClient([
+      { body: { hits: { hits: [pplMonitorHit('mon-ppl-1', 'ppl')] } } },
+    ]);
+    const [m] = await backend.getMonitors(client);
+    expect(m.inputs[0]).toEqual({
+      ppl_input: { query: 'source = logs-* | stats count() as cnt', query_language: 'ppl' },
+    });
+  });
+
+  it('falls back to query_level_monitor for unknown monitor_type strings', async () => {
+    const hit = pplMonitorHit('mon-x', 'x');
+    (hit._source as Record<string, unknown>).monitor_type = 'mystery_monitor';
+    const { client } = makeClient([{ body: { hits: { hits: [hit] } } }]);
+    const [m] = await backend.getMonitors(client);
+    expect(m.monitor_type).toBe('query_level_monitor');
   });
 });
