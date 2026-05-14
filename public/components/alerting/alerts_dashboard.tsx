@@ -26,6 +26,8 @@ import {
   EuiResizableContainer,
   EuiCallOut,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import {
   DatasourceFetchFallback,
   UnifiedAlertSummary,
@@ -689,15 +691,22 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                 {truncated && (
                   <>
                     <EuiCallOut
-                      title="Results capped at 1000. Narrow the range."
+                      title={i18n.translate(
+                        'observability.alerting.dashboard.truncatedCallout.title',
+                        {
+                          defaultMessage: 'Search incomplete — too many alerts to scan',
+                        }
+                      )}
                       color="warning"
                       iconType="alert"
                       size="s"
                       data-test-subj="alerts-truncated-callout"
                     >
                       <p>
-                        One or more datasources returned more alerts than can be shown. Pick a
-                        shorter time range or refine your filters to see all matches.
+                        <FormattedMessage
+                          id="observability.alerting.dashboard.truncatedCallout.body"
+                          defaultMessage="Narrow the time range or refine your filters and try again."
+                        />
                       </p>
                     </EuiCallOut>
                     <EuiSpacer size="s" />
@@ -706,7 +715,12 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                 {fallbackHints && fallbackHints.length > 0 && (
                   <>
                     <EuiCallOut
-                      title="Showing current alerts only"
+                      title={i18n.translate(
+                        'observability.alerting.dashboard.fallbackCallout.title',
+                        {
+                          defaultMessage: 'Showing current alerts only',
+                        }
+                      )}
                       color="warning"
                       iconType="alert"
                       size="s"
@@ -714,8 +728,14 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                     >
                       {fallbackHints.map((h, i) => (
                         <p key={i}>
-                          <strong>{h.datasourceName}</strong>: historical alert data unavailable;
-                          showing currently active alerts instead ({h.fallback}).
+                          <FormattedMessage
+                            id="observability.alerting.dashboard.fallbackCallout.entry"
+                            defaultMessage="{datasourceName}: historical alert data unavailable; showing currently active alerts instead ({fallback})."
+                            values={{
+                              datasourceName: <strong>{h.datasourceName}</strong>,
+                              fallback: h.fallback,
+                            }}
+                          />
                         </p>
                       ))}
                     </EuiCallOut>

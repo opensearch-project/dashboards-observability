@@ -35,6 +35,7 @@ import {
   EuiFlexItem,
   EuiSuperDatePicker,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { toMountPoint } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 import { useToast } from '../common/toast';
 import {
@@ -1029,7 +1030,9 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       {/* existing `error` callout pattern used for the Rules path.          */}
       {alertsErrorMessage && activeTab === 'alerts' && (
         <EuiCallOut
-          title="Error loading alerts"
+          title={i18n.translate('observability.alerting.alarmsPage.alertsError.title', {
+            defaultMessage: 'Error loading alerts',
+          })}
           color="danger"
           iconType="alert"
           size="s"

@@ -208,6 +208,42 @@ describe('MultiBackendAlertService — routing & list', () => {
     expect(mockPromBackend.getAlerts).not.toHaveBeenCalled();
   });
 
+  it('endTime "now" resolves endIsNow=true (live merge enabled)', async () => {
+    mockOsBackend.getAlerts.mockResolvedValueOnce({
+      alerts: [],
+      totalAlerts: 0,
+      truncated: false,
+    });
+    mockPromBackend.getHistoricalAlerts.mockResolvedValueOnce({ alerts: [] });
+    const resolver = jest.fn(async () => ({} as never));
+    await svc.getUnifiedAlerts(resolver, {
+      startTime: 'now-1h',
+      endTime: 'now',
+    });
+    // endIsNow is the 6th positional arg (after client, ds, startSec, endSec, step).
+    const callArgs = mockPromBackend.getHistoricalAlerts.mock.calls[0];
+    expect(callArgs[5]).toBe(true);
+  });
+
+  it('past-only window (endTime "now-1h") resolves endIsNow=false (no live merge)', async () => {
+    // Regression: \bnow\b regex used to match "now-1h" and incorrectly merge
+    // currently-firing alerts into a window that ended an hour ago. The fix
+    // compares the resolved endMs against Date.now() with a tolerance.
+    mockOsBackend.getAlerts.mockResolvedValueOnce({
+      alerts: [],
+      totalAlerts: 0,
+      truncated: false,
+    });
+    mockPromBackend.getHistoricalAlerts.mockResolvedValueOnce({ alerts: [] });
+    const resolver = jest.fn(async () => ({} as never));
+    await svc.getUnifiedAlerts(resolver, {
+      startTime: 'now-2h',
+      endTime: 'now-1h',
+    });
+    const callArgs = mockPromBackend.getHistoricalAlerts.mock.calls[0];
+    expect(callArgs[5]).toBe(false);
+  });
+
   it('undefined range ⇒ legacy path for both backends', async () => {
     mockOsBackend.getAlerts.mockResolvedValueOnce({
       alerts: [],

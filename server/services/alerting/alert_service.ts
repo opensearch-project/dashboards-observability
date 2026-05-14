@@ -94,20 +94,27 @@ interface FetchAlertsRawResult {
  * unparseable — route-layer `validateDateMath` validators should already
  * have rejected that case with a 400, so a throw here is a genuine bug.
  *
- * `endIsNow` is true when `endTime` is a `now`-relative date-math
- * expression (`"now"`, `"now-5m"`, `"now/d"`); the Prometheus historical
- * path uses this to decide whether an empty matrix should fall back to
- * the current-only API. Absolute timestamps resolve to `endIsNow: false`.
+ * `endIsNow` is true when the resolved end timestamp is at or near the
+ * current wall-clock instant. The Prometheus historical path uses this to
+ * decide whether an empty matrix should fall back to the current-only API
+ * — that fallback only makes sense for windows that include "right now".
+ * `"now-1h"` is `now`-relative but its window ENDS an hour ago, so it must
+ * resolve to `endIsNow: false` (otherwise we'd merge `/api/v1/alerts`
+ * results — which ignore time entirely — into a window they don't belong to).
  */
+const NOW_TOLERANCE_MS = 60_000;
+
 function resolveRangeMsFromOptions(options?: {
   startTime?: string;
   endTime?: string;
 }): ResolvedRange | undefined {
   if (!options?.startTime || !options.endTime) return undefined;
+  const startMs = parseDateMathMs(options.startTime, /* isEndTime */ false);
+  const endMs = parseDateMathMs(options.endTime, /* isEndTime */ true);
   return {
-    startMs: parseDateMathMs(options.startTime, /* isEndTime */ false),
-    endMs: parseDateMathMs(options.endTime, /* isEndTime */ true),
-    endIsNow: /\bnow\b/.test(options.endTime),
+    startMs,
+    endMs,
+    endIsNow: Math.abs(endMs - Date.now()) <= NOW_TOLERANCE_MS,
   };
 }
 

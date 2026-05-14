@@ -289,6 +289,41 @@ describe('HttpOpenSearchBackend', () => {
       expect(result.totalAlerts).toBe(5);
     });
 
+    it('sparse-overlap on a huge backlog hits SCAN_CAP and sets truncated:true', async () => {
+      // Cluster with a 10k+ alert backlog where almost none overlap the
+      // picked window. The post-filter cap (1000 matches) never trips, but
+      // the scan cap (10k raw rows = 100 pages of 100) must, so the user
+      // gets the "search incomplete" hint instead of an empty list.
+      const outOfWindow = mkAlert('out', 0, 100); // resolves before the window
+      const responses: Array<{ body: unknown }> = [];
+      // The pagination loop terminates on `pageAlerts.length < PAGE_SIZE`,
+      // so every page must be exactly PAGE_SIZE (100) until the scan cap
+      // breaks the loop. Provide 100 full pages.
+      for (let p = 0; p < 100; p++) {
+        responses.push({
+          body: {
+            totalAlerts: 50_000,
+            alerts: Array.from({ length: 100 }, (_, i) => ({
+              ...outOfWindow,
+              id: `out-${p}-${i}`,
+            })),
+          },
+        });
+      }
+
+      const { client, request } = makeClient(responses);
+      const result = await backend.getAlerts(client, {
+        startMs: WINDOW_START,
+        endMs: WINDOW_END,
+      });
+      // No alerts overlap the window — final list is empty …
+      expect(result.alerts).toHaveLength(0);
+      // … but truncated must still flip so the UI surfaces "search incomplete".
+      expect(result.truncated).toBe(true);
+      // Loop stopped at SCAN_CAP (10k = 100 pages); shouldn't have walked further.
+      expect(request).toHaveBeenCalledTimes(100);
+    });
+
     it('caps at 1000 overlapping alerts and sets truncated:true', async () => {
       // Construct 1001 alerts, all overlapping the window. The helper
       // returns up to PAGE_SIZE (100) per call; we need 11 pages to yield
