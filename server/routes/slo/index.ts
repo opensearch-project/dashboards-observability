@@ -14,13 +14,23 @@
  */
 
 import { schema } from '@osd/config-schema';
-import type { IRouter, Logger, RequestHandlerContext } from '../../../../../src/core/server';
+import type {
+  IRouter,
+  Logger,
+  OpenSearchDashboardsRequest,
+  RequestHandlerContext,
+} from '../../../../../src/core/server';
+import { getWorkspaceState } from '../../../../../src/core/server/utils';
 import { OBSERVABILITY_BASE } from '../../../common/constants/shared';
 import type {
   SloDeployContext,
   SloStatusAggregationContext,
 } from '../../../common/slo/slo_service';
-import { SloService, SloValidationError } from '../../../common/slo/slo_service';
+import {
+  SloService,
+  SloValidationError,
+  sloRulerNamespaceFor,
+} from '../../../common/slo/slo_service';
 import type { AlertingOSClient, Datasource } from '../../../common/types/alerting';
 import { SavedObjectDatasourceService } from '../../services/alerting/saved_object_datasource_service';
 import type { RulerClient } from '../../services/slo/ruler_client';
@@ -302,17 +312,92 @@ const previewBody = schema.object({
 // ============================================================================
 
 /**
- * FIXME(pr-2): extract the acting user from the request (OpenSearch
- * security plugin exposes it via `req.auth`, or the `securitytenant` /
- * `Authorization` headers when the plugin is disabled). PR 1 stamps a
- * sentinel so audit rows can be re-attributed once the resolver lands —
- * every mutation's createdBy / updatedBy comes through here.
+ * Pull a single string from a header value that may be a string, an array
+ * (multi-valued header), or undefined. Trims and rejects empty strings so
+ * a `''` header doesn't get stamped as the acting user.
  */
-const SLO_ACTING_USER_PLACEHOLDER = 'osd-user';
-function resolveActingUser(_req: {
+function firstHeaderValue(value: string | string[] | undefined): string | undefined {
+  if (Array.isArray(value)) {
+    for (const v of value) {
+      const trimmed = typeof v === 'string' ? v.trim() : '';
+      if (trimmed) return trimmed;
+    }
+    return undefined;
+  }
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed || undefined;
+  }
+  return undefined;
+}
+
+/**
+ * Resolve the acting user for audit fields (`createdBy` / `updatedBy`).
+ *
+ * Lookup order:
+ *   1. `req.auth.credentials.username` — populated by the OpenSearch
+ *      security plugin's auth handler when installed.
+ *   2. `x-proxy-user` request header — set by SAML / proxy auth setups.
+ *   3. `x-forwarded-user` request header — set by reverse proxies that
+ *      front the cluster.
+ *   4. `'unknown'` — when no signal is available (security plugin
+ *      disabled, no proxy, anonymous request).
+ *
+ * The header names mirror the `auth.unsupported_trusted_header` config the
+ * security plugin documents, so deployments that already use one of those
+ * proxy auth modes get the right `createdBy` for free.
+ */
+export function resolveActingUser(req: {
+  auth?: { isAuthenticated?: boolean; credentials?: { username?: unknown } };
   headers?: Record<string, string | string[] | undefined>;
 }): string {
-  return SLO_ACTING_USER_PLACEHOLDER;
+  const credentials = req.auth?.credentials;
+  const username = credentials && (credentials as { username?: unknown }).username;
+  if (typeof username === 'string' && username.trim().length > 0) {
+    return username.trim();
+  }
+  const headers = req.headers ?? {};
+  const proxyUser = firstHeaderValue(headers['x-proxy-user']);
+  if (proxyUser) return proxyUser;
+  const forwardedUser = firstHeaderValue(headers['x-forwarded-user']);
+  if (forwardedUser) return forwardedUser;
+  return 'unknown';
+}
+
+// ============================================================================
+// Workspace id
+// ============================================================================
+
+/**
+ * Resolve the workspace id for the request.
+ *
+ * - When OSD workspaces are enabled, `getWorkspaceState(req).requestWorkspaceId`
+ *   carries the id off the request scope (set by the workspace plugin's
+ *   `onPreRouting` handler).
+ * - When workspaces are disabled (a supported deployment mode) the value is
+ *   absent and we fall through to `'default'` — matching the service-layer
+ *   contract that `effectiveWorkspaceId = spec.workspaceId ?? 'default'`.
+ *
+ * The result is then validated against `sloRulerNamespaceFor`'s shape check
+ * so a malformed id (path traversal, URL-special chars, overlong, empty)
+ * surfaces as a 400 rather than a 500 deep inside ruler dispatch. The
+ * AMP invariant — every rule group for workspace W lives in
+ * `slo-generated-<W>` — depends on this gate being the only path the
+ * value can take to reach the ruler.
+ */
+export function resolveWorkspaceId(req: OpenSearchDashboardsRequest): string {
+  const fromState = getWorkspaceState(req).requestWorkspaceId;
+  const candidate = typeof fromState === 'string' && fromState.length > 0 ? fromState : 'default';
+  // Throws Error on shape failure; we re-cast to SloValidationError so
+  // routes can fall through the existing 400 envelope.
+  try {
+    sloRulerNamespaceFor(candidate);
+  } catch (_e) {
+    throw new SloValidationError({
+      workspaceId: `Workspace id "${candidate}" is not valid for SLO routing. Workspace ids must match /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,62}$/.`,
+    });
+  }
+  return candidate;
 }
 
 // ============================================================================
@@ -329,15 +414,15 @@ function resolveActingUser(_req: {
  * resolve it to a DirectQuery-Prometheus datasource, throws
  * SloValidationError so the route responds 400 with a field-keyed message.
  *
- * `workspaceId` resolution: for now we use `'default'` since OSD workspace
- * context isn't plumbed onto the deploy context. A follow-up PR will pull
- * the real workspace id from the request scope; the AMP invariant (every
- * rule group for workspace W writes to `slo-generated-<W>`) already resolves
- * through `sloRulerNamespaceFor(workspaceId)` so the change is isolated to
- * this one call site.
+ * `workspaceId` is resolved from request scope (`getWorkspaceState`) before
+ * this function is called and validated through `sloRulerNamespaceFor`'s
+ * regex. The AMP invariant — every rule group for workspace W writes to
+ * `slo-generated-<W>` — depends on this validation having already happened
+ * before any value reaches the ruler.
  */
 async function buildDeployContext(
   ctx: SloHandlerContext,
+  workspaceId: string,
   datasourceId: string | undefined,
   rulerClient: RulerClient | undefined,
   logger: Logger
@@ -372,22 +457,13 @@ async function buildDeployContext(
     ruler: rulerClient,
     client,
     datasource: ds as Datasource,
-    // FIXME(pr-2): this is the single site where PR 1 hard-codes the
-    // deploy-context workspace id. PR 2 will resolve the real workspace
-    // from OSD's request scope (`core.workspace.resolveRequest(req)`) and
-    // may refuse the write when the workspace isn't resolvable. The
-    // service layer already threads the value through `sloRulerNamespaceFor`
-    // so the AMP invariant ("every rule group for workspace W writes to
-    // `slo-generated-<W>`") holds regardless of how this value was
-    // obtained; PR 1 ships the plumbing, PR 2 ships the resolver. See the
-    // cross-workspace integration test for the invariant's service-layer
-    // contract (`common/slo/__tests__/slo_workspace_isolation.integration.test.ts`).
-    workspaceId: 'default',
+    workspaceId,
   };
 }
 
 async function tryBuildDeployContext(
   ctx: SloHandlerContext,
+  req: OpenSearchDashboardsRequest,
   datasourceId: string | undefined,
   rulerClient: RulerClient | undefined,
   logger: Logger
@@ -396,7 +472,8 @@ async function tryBuildDeployContext(
   | { deploy?: undefined; errorResponse: { status: number; body: Record<string, unknown> } }
 > {
   try {
-    const deploy = await buildDeployContext(ctx, datasourceId, rulerClient, logger);
+    const workspaceId = resolveWorkspaceId(req);
+    const deploy = await buildDeployContext(ctx, workspaceId, datasourceId, rulerClient, logger);
     return { deploy };
   } catch (e) {
     if (e instanceof SloValidationError) {
@@ -413,6 +490,7 @@ async function tryBuildDeployContext(
 
 function buildStatusContext(
   ctx: SloHandlerContext,
+  workspaceId: string,
   logger: Logger,
   ruleDedupEnabled?: boolean
 ): SloStatusAggregationContext | undefined {
@@ -420,10 +498,7 @@ function buildStatusContext(
   const datasourceService = new SavedObjectDatasourceService(ctx.core.savedObjects.client, logger);
   return {
     client,
-    // FIXME(pr-2): same as `buildDeployContext` — workspace id is hard-
-    // coded to 'default' in PR 1 and will be resolved from request scope
-    // in PR 2. Listing/status paths are read-only today; safe placeholder.
-    workspaceId: 'default',
+    workspaceId,
     resolveDatasource: async (datasourceId: string) => {
       const ds = await datasourceService.get(datasourceId);
       if (!ds) return undefined;
@@ -431,6 +506,31 @@ function buildStatusContext(
     },
     ruleDedupEnabled,
   };
+}
+
+/**
+ * Resolve the workspace id for read-only routes (list / get / statuses).
+ * On a malformed workspace id we return the same 400 envelope as a write
+ * route so the wizard / listing UI gets a consistent error shape.
+ */
+function tryResolveWorkspaceId(
+  req: OpenSearchDashboardsRequest
+):
+  | { workspaceId: string; errorResponse?: undefined }
+  | { workspaceId?: undefined; errorResponse: { status: number; body: Record<string, unknown> } } {
+  try {
+    return { workspaceId: resolveWorkspaceId(req) };
+  } catch (e) {
+    if (e instanceof SloValidationError) {
+      return {
+        errorResponse: {
+          status: 400,
+          body: { error: 'Validation failed', errors: e.errors },
+        },
+      };
+    }
+    throw e;
+  }
 }
 
 // ============================================================================
@@ -511,7 +611,24 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         mode: q.mode ? (q.mode.split(',') as Array<'active' | 'shadow'>) : undefined,
         search: q.search,
       };
-      const statusCtx = buildStatusContext(ctx as SloHandlerContext, logger, ruleDedupEnabled);
+      const wsResolved = tryResolveWorkspaceId(req);
+      if (wsResolved.errorResponse) {
+        return res.customError({
+          statusCode: wsResolved.errorResponse.status,
+          body: {
+            message: String(
+              (wsResolved.errorResponse.body as { error?: string }).error ?? 'Failed'
+            ),
+            attributes: wsResolved.errorResponse.body,
+          },
+        });
+      }
+      const statusCtx = buildStatusContext(
+        ctx as SloHandlerContext,
+        wsResolved.workspaceId,
+        logger,
+        ruleDedupEnabled
+      );
       const result = await handleListSLOs(sloService, filters, logger, statusCtx);
       if (result.status >= 400) {
         return res.customError({
@@ -529,6 +646,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
   router.post({ path: SLO_BASE, validate: { body: createBody } }, async (ctx, req, res) => {
     const built = await tryBuildDeployContext(
       ctx as SloHandlerContext,
+      req,
       req.body?.spec?.datasourceId,
       rulerClient,
       logger
@@ -582,7 +700,24 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       validate: { body: schema.object({ ids: schema.arrayOf(schema.string()) }) },
     },
     async (ctx, req, res) => {
-      const statusCtx = buildStatusContext(ctx as SloHandlerContext, logger, ruleDedupEnabled);
+      const wsResolved = tryResolveWorkspaceId(req);
+      if (wsResolved.errorResponse) {
+        return res.customError({
+          statusCode: wsResolved.errorResponse.status,
+          body: {
+            message: String(
+              (wsResolved.errorResponse.body as { error?: string }).error ?? 'Failed'
+            ),
+            attributes: wsResolved.errorResponse.body,
+          },
+        });
+      }
+      const statusCtx = buildStatusContext(
+        ctx as SloHandlerContext,
+        wsResolved.workspaceId,
+        logger,
+        ruleDedupEnabled
+      );
       const result = await handleGetSLOStatuses(sloService, req.body.ids, logger, statusCtx);
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({
@@ -601,7 +736,24 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       validate: { params: schema.object({ id: schema.string() }) },
     },
     async (ctx, req, res) => {
-      const statusCtx = buildStatusContext(ctx as SloHandlerContext, logger, ruleDedupEnabled);
+      const wsResolved = tryResolveWorkspaceId(req);
+      if (wsResolved.errorResponse) {
+        return res.customError({
+          statusCode: wsResolved.errorResponse.status,
+          body: {
+            message: String(
+              (wsResolved.errorResponse.body as { error?: string }).error ?? 'Not found'
+            ),
+            attributes: wsResolved.errorResponse.body,
+          },
+        });
+      }
+      const statusCtx = buildStatusContext(
+        ctx as SloHandlerContext,
+        wsResolved.workspaceId,
+        logger,
+        ruleDedupEnabled
+      );
       const result = await handleGetSLO(sloService, req.params.id, logger, statusCtx);
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({
@@ -626,6 +778,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       const existing = await sloService.get(req.params.id);
       const built = await tryBuildDeployContext(
         ctx as SloHandlerContext,
+        req,
         existing?.spec.datasourceId,
         rulerClient,
         logger
@@ -669,6 +822,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       const existing = await sloService.get(req.params.id);
       const built = await tryBuildDeployContext(
         ctx as SloHandlerContext,
+        req,
         existing?.spec.datasourceId,
         rulerClient,
         logger
@@ -712,6 +866,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       const existing = await sloService.get(req.params.id);
       const built = await tryBuildDeployContext(
         ctx as SloHandlerContext,
+        req,
         existing?.spec.datasourceId,
         rulerClient,
         logger
@@ -754,6 +909,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       const existing = await sloService.get(req.params.id);
       const built = await tryBuildDeployContext(
         ctx as SloHandlerContext,
+        req,
         existing?.spec.datasourceId,
         rulerClient,
         logger

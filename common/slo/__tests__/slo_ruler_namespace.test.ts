@@ -9,11 +9,12 @@
  * writes to `slo-generated-<W>`") holds iff every caller goes through this
  * helper with a validated workspace id.
  *
- * Today PR 1 hard-codes `workspaceId: 'default'` at the route layer; PR 2
- * will plumb real workspace ids from request scope. The shape check here
- * makes sure a caller that forgets to normalize trips a server-side error
- * rather than silently landing a namespace with `..` or `%`-encoded bytes
- * in a ruler URL.
+ * As of PR 2, the route layer pulls real workspace ids from request scope
+ * via `getWorkspaceState(req).requestWorkspaceId`, falling back to
+ * `'default'` when OSD workspaces are disabled. The shape check here makes
+ * sure a caller that forgets to normalize trips a server-side error rather
+ * than silently landing a namespace with `..` or `%`-encoded bytes in a
+ * ruler URL.
  */
 
 import { sloRulerNamespaceFor } from '../slo_service';
