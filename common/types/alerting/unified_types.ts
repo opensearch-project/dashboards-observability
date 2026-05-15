@@ -15,6 +15,18 @@
 import type { OSAlert, OSMonitor } from './opensearch_types';
 import type { PromAlert, PromAlertingRule } from './prometheus_types';
 
+/**
+ * Known fallback reasons a backend may surface through
+ * `DatasourceFetchResult.fallback`. String-literal union (not `string`) so
+ * the UI can exhaustively switch on the value and a new reason requires a
+ * type-level declaration.
+ *
+ * Today's only member: Prometheus historical reconstruction returned an
+ * empty matrix on a `now`-relative range, and the backend fell back to
+ * `/api/v1/alerts` (current-active only).
+ */
+export type DatasourceFetchFallback = 'prometheus-alerts-current-only';
+
 // ============================================================================
 // OSD scoped client — structural shape of the subset we use
 // ============================================================================
@@ -239,6 +251,19 @@ export interface DatasourceFetchResult<T> {
   data: T[];
   error?: string;
   durationMs: number;
+  /**
+   * Set by the OpenSearch backend when the post-fetch time-range filter
+   * stopped paginating after hitting the 1000-alert cap. UI renders an
+   * `EuiCallOut` prompting the user to narrow the range.
+   */
+  truncated?: boolean;
+  /**
+   * Set by the Prometheus backend when the historical range query returned
+   * an empty matrix AND the range included `now`, so the backend fell back
+   * to the legacy `/api/v1/alerts` (active-only) endpoint. UI renders a
+   * per-datasource banner explaining the coverage limit.
+   */
+  fallback?: DatasourceFetchFallback;
 }
 
 export interface ProgressiveResponse<T> {
@@ -261,6 +286,18 @@ export interface UnifiedFetchOptions {
   pageSize?: number;
   /** Maximum total results to return. Defaults to 5000. Prevents unbounded responses. */
   maxResults?: number;
+  /**
+   * Start of the time window as a date-math string (e.g. `"now-1h"`).
+   * When both `startTime` and `endTime` are provided, backends scope
+   * results to alerts whose active interval overlaps the window.
+   * When omitted, legacy "no range" behavior is preserved.
+   */
+  startTime?: string;
+  /**
+   * End of the time window as a date-math string (e.g. `"now"`). See
+   * {@link UnifiedFetchOptions.startTime} for semantics.
+   */
+  endTime?: string;
 }
 
 // ============================================================================
