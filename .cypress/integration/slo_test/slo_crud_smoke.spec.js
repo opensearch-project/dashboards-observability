@@ -6,7 +6,11 @@
 /// <reference types="cypress" />
 
 /*
- * PR-1 SLO CRUD smoke — create → detail → listing row → delete → row gone.
+ * SLO CRUD smoke — create → detail → listing row → delete → row gone.
+ *
+ * The wizard surface targeted here is the PR 2 multi-section wizard. Test-subj
+ * naming follows the `slos*` convention introduced in PR 2 (vs. PR 1's
+ * `sloWizard*` names which the wizard rewrite replaced).
  *
  * Prereqs:
  *   - Dev stack running with `observability.slo.enabled: true` in
@@ -19,8 +23,6 @@
  *   yarn cypress:run \
  *     --spec .cypress/integration/slo_test/slo_crud_smoke.spec.js \
  *     --env workspaceId=<WS_ID>,sloDatasourceId=<DS_ID>,baseUrl=http://localhost:5602
- *
- * The baseUrl env overrides `cypress.config.js` for dev servers on :5602.
  */
 
 const WORKSPACE_ID = Cypress.env('workspaceId');
@@ -37,7 +39,7 @@ const sloApp = `${prefix}/app/observability-apm-slo`;
 // doesn't have the stack up without failing the whole suite.
 const SLO_ENABLED = Cypress.env('sloEnabled') !== false;
 
-describe('SLO — CRUD smoke (PR 1)', () => {
+describe('SLO — CRUD smoke', () => {
   before(function () {
     if (!SLO_ENABLED) this.skip();
   });
@@ -48,21 +50,23 @@ describe('SLO — CRUD smoke (PR 1)', () => {
 
     // Land on the listing page.
     cy.visit(`${sloApp}#/slos`);
-    // Wait for the listing to render — either an empty prompt or the table.
     cy.get(
       '[data-test-subj="sloCreateBtn"], [data-test-subj="sloCreateBtnEmpty"]'
     )
       .first()
       .click();
 
-    // Fill the wizard.
-    cy.get('[data-test-subj="sloWizardName"]').type(name);
-    cy.get('[data-test-subj="sloWizardService"]').type(service);
-    cy.get('[data-test-subj="sloWizardTeam"]').type('platform');
-    cy.get('[data-test-subj="sloWizardDatasource"]').type(DATASOURCE_ID);
-    cy.get('[data-test-subj="sloWizardMetric"]').clear().type('http_requests_total');
-    cy.get('[data-test-subj="sloWizardTarget"]').clear().type('99.9');
-    cy.get('[data-test-subj="sloWizardSubmit"]').click();
+    // Pick a template (HTTP availability — single objective, no probe path).
+    cy.get('[data-test-subj="slosTemplate-http-availability"]', { timeout: 10000 }).click();
+
+    // Fill the wizard fields. Identity, owner, datasource — single objective
+    // suffices for the smoke path.
+    cy.get('[data-test-subj="slosWizardDatasourceId"]').clear().type(DATASOURCE_ID);
+    cy.get('[data-test-subj="slosWizardName"]').type(name);
+    cy.get('[data-test-subj="slosWizardService"]').type(service);
+    cy.get('[data-test-subj="slosWizardOwnerTeam"]').type('platform');
+
+    cy.get('[data-test-subj="slosWizardSubmit"]').click();
 
     // After create the wizard redirects to the detail page for the new SLO.
     cy.location('hash', { timeout: 15000 }).should('match', /#\/slos\/[0-9a-f-]{36}/);

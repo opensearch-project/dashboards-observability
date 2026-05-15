@@ -5,9 +5,10 @@
 
 /**
  * Root mount for the SLO/SLI app. Hash routes:
- *   /slos             — listing
- *   /slos/create      — wizard
- *   /slos/:id         — detail view
+ *   /slos                       — listing
+ *   /slos/create                — wizard template selector
+ *   /slos/create/:templateId    — wizard prefilled with the named template
+ *   /slos/:id                   — detail view
  */
 
 import React, { useMemo } from 'react';
@@ -54,7 +55,7 @@ export const SlosPage: React.FC<SlosPageProps> = ({
             parentBreadcrumb={parentBreadcrumb}
           />
         </Route>
-        <Route exact path="/slos/create">
+        <Route exact path={['/slos/create', '/slos/create/:templateId']}>
           <SloWizardPage
             apiClient={apiClient}
             chrome={chrome}
