@@ -242,7 +242,10 @@ export interface OpenSearchBackend {
   deleteMonitor(client: AlertingOSClient, monitorId: string): Promise<boolean>;
 
   // Alerts — read + acknowledge.
-  getAlerts(client: AlertingOSClient): Promise<{ alerts: OSAlert[]; totalAlerts: number }>;
+  getAlerts(
+    client: AlertingOSClient,
+    options?: { startMs?: number; endMs?: number }
+  ): Promise<{ alerts: OSAlert[]; totalAlerts: number; truncated: boolean }>;
   acknowledgeAlerts(
     client: AlertingOSClient,
     monitorId: string,

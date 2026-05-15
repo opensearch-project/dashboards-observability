@@ -21,6 +21,16 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   unobserve: jest.fn(),
 }));
 
+// Spy on AlertTimeline so we can assert the resolved startMs/endMs values
+// flow through as numeric props (rather than the picker's date-math strings).
+const mockTimeline = jest.fn();
+jest.mock('../alerts_charts', () => ({
+  AlertTimeline: (props: { alerts: unknown[]; startMs: number; endMs: number }) => {
+    mockTimeline(props);
+    return <div data-test-subj="alert-timeline-stub" />;
+  },
+}));
+
 import { AlertsDashboard } from '../alerts_dashboard';
 import type { UnifiedAlertSummary, Datasource } from '../../../../common/types/alerting';
 
@@ -45,6 +55,9 @@ const sampleDs: Datasource = {
   enabled: true,
 };
 
+const HOUR_MS = 60 * 60 * 1000;
+const NOW = Date.now();
+
 const baseProps = {
   alerts: [] as UnifiedAlertSummary[],
   datasources: [sampleDs],
@@ -58,7 +71,13 @@ const baseProps = {
   rulesTotal: 1,
   defaultDatasources: [],
   onGoToRules: jest.fn(),
+  startMs: NOW - HOUR_MS,
+  endMs: NOW,
 };
+
+beforeEach(() => {
+  mockTimeline.mockClear();
+});
 
 describe('AlertsDashboard', () => {
   it('renders "no alerts in range" empty state when rules exist but no alerts', () => {
@@ -79,5 +98,54 @@ describe('AlertsDashboard', () => {
   it('renders alert table when alerts provided', () => {
     const { getByText } = render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
     expect(getByText('HighCPU')).toBeInTheDocument();
+  });
+
+  it('renders timeline title without the (24h) suffix', () => {
+    const { getByText, queryByText } = render(
+      <AlertsDashboard {...baseProps} alerts={[sampleAlert]} />
+    );
+    expect(getByText('Alert Timeline')).toBeInTheDocument();
+    expect(queryByText('Alert Timeline (24h)')).not.toBeInTheDocument();
+  });
+
+  it('forwards numeric startMs/endMs to AlertTimeline (not the date-math strings)', () => {
+    render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
+    expect(mockTimeline).toHaveBeenCalled();
+    const lastCall = mockTimeline.mock.calls[mockTimeline.mock.calls.length - 1][0];
+    expect(lastCall.startMs).toBe(NOW - HOUR_MS);
+    expect(lastCall.endMs).toBe(NOW);
+  });
+
+  it('renders the truncated callout when `truncated` is true', () => {
+    const { getByTestId } = render(
+      <AlertsDashboard {...baseProps} alerts={[sampleAlert]} truncated />
+    );
+    expect(getByTestId('alerts-truncated-callout')).toBeInTheDocument();
+  });
+
+  it('does not render the truncated callout when `truncated` is false/undefined', () => {
+    const { queryByTestId } = render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
+    expect(queryByTestId('alerts-truncated-callout')).not.toBeInTheDocument();
+  });
+
+  it('renders the fallback callout listing each fallback datasource', () => {
+    const { getByTestId, getByText } = render(
+      <AlertsDashboard
+        {...baseProps}
+        alerts={[sampleAlert]}
+        fallbackHints={[
+          { datasourceName: 'prom-prod', fallback: 'prometheus-alerts-current-only' },
+        ]}
+      />
+    );
+    expect(getByTestId('alerts-fallback-callout')).toBeInTheDocument();
+    expect(getByText('prom-prod')).toBeInTheDocument();
+  });
+
+  it('does not render the fallback callout when `fallbackHints` is empty', () => {
+    const { queryByTestId } = render(
+      <AlertsDashboard {...baseProps} alerts={[sampleAlert]} fallbackHints={[]} />
+    );
+    expect(queryByTestId('alerts-fallback-callout')).not.toBeInTheDocument();
   });
 });

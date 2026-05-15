@@ -20,6 +20,8 @@ import {
   handleCreateOSMonitor,
   handleDeleteOSMonitor,
   handleGetUnifiedAlerts,
+  handleGetOSAlerts,
+  handleGetPromAlerts,
   handleGetAlertDetail,
   handleGetRuleDetail,
 } from '../handlers';
@@ -73,11 +75,18 @@ describe('handlers', () => {
       maxResults: '10',
     });
     expect(result.status).toBe(200);
-    expect(mockAlertSvc.getUnifiedAlerts).toHaveBeenCalledWith(resolver, {
-      dsIds: ['a', 'b'],
-      timeoutMs: undefined,
-      maxResults: 10,
-    });
+    // Use `objectContaining` because the handler always forwards the new
+    // `startTime`/`endTime` keys (as `undefined` when absent). An exact
+    // deep-equal would pass today by Jest's loose-undefined semantics but
+    // becomes misleading if that behavior changes.
+    expect(mockAlertSvc.getUnifiedAlerts).toHaveBeenCalledWith(
+      resolver,
+      expect.objectContaining({
+        dsIds: ['a', 'b'],
+        timeoutMs: undefined,
+        maxResults: 10,
+      })
+    );
   });
 
   it('handleGetAlertDetail returns 404 when not found', async () => {
@@ -90,5 +99,67 @@ describe('handlers', () => {
     mockAlertSvc.getRuleDetail.mockResolvedValueOnce(null);
     const result = await handleGetRuleDetail(mockAlertSvc as never, mockClient, 'ds-1', 'nope');
     expect(result.status).toBe(404);
+  });
+
+  // =========================================================================
+  // Range threading
+  // =========================================================================
+
+  it('handleGetUnifiedAlerts forwards startTime/endTime to the service', async () => {
+    mockAlertSvc.getUnifiedAlerts.mockResolvedValueOnce({ results: [] });
+    const resolver = jest.fn();
+    await handleGetUnifiedAlerts(mockAlertSvc as never, resolver, {
+      dsIds: 'a',
+      startTime: 'now-1h',
+      endTime: 'now',
+    });
+    expect(mockAlertSvc.getUnifiedAlerts).toHaveBeenCalledWith(
+      resolver,
+      expect.objectContaining({
+        startTime: 'now-1h',
+        endTime: 'now',
+      })
+    );
+  });
+
+  it('handleGetOSAlerts forwards range to getOSAlerts', async () => {
+    mockAlertSvc.getOSAlerts.mockResolvedValueOnce({
+      alerts: [],
+      totalAlerts: 0,
+      truncated: false,
+    });
+    await handleGetOSAlerts(mockAlertSvc as never, mockClient, 'ds-1', {
+      startTime: 'now-2h',
+      endTime: 'now',
+    });
+    expect(mockAlertSvc.getOSAlerts).toHaveBeenCalledWith(mockClient, 'ds-1', {
+      startTime: 'now-2h',
+      endTime: 'now',
+    });
+  });
+
+  it('handleGetPromAlerts forwards range to getPromAlerts', async () => {
+    mockAlertSvc.getPromAlerts.mockResolvedValueOnce([]);
+    await handleGetPromAlerts(mockAlertSvc as never, mockClient, 'ds-1', {
+      startTime: 'now-30m',
+      endTime: 'now',
+    });
+    expect(mockAlertSvc.getPromAlerts).toHaveBeenCalledWith(mockClient, 'ds-1', {
+      startTime: 'now-30m',
+      endTime: 'now',
+    });
+  });
+
+  it('handleGetOSAlerts accepts absent range (undefined options)', async () => {
+    mockAlertSvc.getOSAlerts.mockResolvedValueOnce({
+      alerts: [],
+      totalAlerts: 0,
+      truncated: false,
+    });
+    await handleGetOSAlerts(mockAlertSvc as never, mockClient, 'ds-1');
+    expect(mockAlertSvc.getOSAlerts).toHaveBeenCalledWith(mockClient, 'ds-1', {
+      startTime: undefined,
+      endTime: undefined,
+    });
   });
 });

@@ -302,6 +302,145 @@ export function promAlertToUnified(a: PromAlert, dsId: string): UnifiedAlertSumm
 }
 
 /**
+ * Reconstructed Prometheus alert episode — output of the
+ * `queryRangeMatrix('ALERTS', ...)` run-scanner in
+ * `DirectQueryPrometheusBackend.getHistoricalAlerts`. Represents a
+ * contiguous window of `value === 1` samples from a single series.
+ *
+ * Flags:
+ *   - `truncatedStart`: the series was already firing at the window's left
+ *     edge (first sample in the matrix). The real firing time is earlier
+ *     than `startMs`, which has been clamped to the window start. UI
+ *     renders a badge so operators know the duration is a lower bound.
+ *   - `stillActiveAtRangeEnd`: the series was still firing at the window's
+ *     right edge (last sample in the matrix). Emits `state: 'active'`
+ *     instead of `'resolved'`; `endMs` is the window end, not a real
+ *     resolution time.
+ */
+export interface PromAlertEpisode {
+  labels: Record<string, string>;
+  startMs: number;
+  endMs: number;
+  truncatedStart?: boolean;
+  stillActiveAtRangeEnd?: boolean;
+}
+
+/**
+ * Map a reconstructed Prometheus alert episode to the UI's
+ * `UnifiedAlertSummary` shape. Paralleling `promAlertToUnified` (which maps
+ * the current-active `/api/v1/alerts` shape) but drives state from the
+ * `stillActiveAtRangeEnd` flag rather than a Prometheus `state` string —
+ * historical matrix data has no equivalent of `'firing'`/`'pending'` at a
+ * point in time, we derive it from whether the firing run reached the
+ * right edge of the window.
+ *
+ * Severity preference mirrors `promSeverityFromLabels` so an episode with
+ * `severity: "critical"` sorts the same as a live alert with the same
+ * label. Missing severity falls back to `'medium'` (not `'info'`) — the
+ * plan specifically calls this out, rationale being that an alert that
+ * fired at some point is more noteworthy than a raw metric query, so
+ * unknown-severity shouldn't sink below all current active alerts in the
+ * list view.
+ *
+ * `truncatedStart` surfaces as `annotations.truncatedStart = 'true'` so the
+ * UI can render a badge without needing to extend `UnifiedAlertSummary`.
+ */
+export function promEpisodeToUnified(ep: PromAlertEpisode, dsId: string): UnifiedAlertSummary {
+  const name = ep.labels.alertname || 'Unknown';
+  // Historical episodes with no `labels.severity` (missing key OR empty
+  // value) fall back to `'medium'` rather than `'info'` (the live-alert
+  // default). When severity IS a non-empty string, defer to
+  // `promSeverityFromLabels` so `warning` / `page` aliases stay consistent
+  // with live alerts — an unrecognized non-empty severity still falls
+  // through to `'info'` there, matching live-alert behavior.
+  const finalSeverity = ep.labels.severity ? promSeverityFromLabels(ep.labels) : 'medium';
+  const state: UnifiedAlertState = ep.stillActiveAtRangeEnd ? 'active' : 'resolved';
+
+  const annotations: Record<string, string> = {};
+  if (ep.truncatedStart) {
+    annotations.truncatedStart = 'true';
+  }
+
+  return {
+    // Include a stable hash of the full label map so two episodes of the
+    // same rule with distinct labels — e.g. `service_name=cart` vs
+    // `service_name=recommendation`, or `alertstate=firing` vs
+    // `alertstate=pending` — produce distinct ids. Using just alertname +
+    // instance + alertstate collides on rules that don't emit `instance`
+    // but split along other labels (`job`, `service`, `container_id`, …),
+    // which is typical for OTel-instrumented Prometheus rules.
+    id: `${dsId}-${name}-${hashLabels(ep.labels)}-${ep.startMs}`,
+    datasourceId: dsId,
+    datasourceType: 'prometheus',
+    name,
+    state,
+    severity: finalSeverity,
+    startTime: new Date(ep.startMs).toISOString(),
+    lastUpdated: new Date(ep.endMs).toISOString(),
+    labels: ep.labels,
+    annotations,
+  };
+}
+
+/**
+ * Stable 32-bit FNV-1a hash of a label map, rendered as 8 lower-case hex
+ * chars. Sorted so key order doesn't change the hash, and the
+ * `${key}\x00${value}\x01` separators are bytes that can't appear in
+ * Prometheus label names / values so `{a: "b", c: "d"}` and
+ * `{ab: "", cd: ""}` can't collide.
+ *
+ * Not cryptographic — we need a cheap deterministic discriminator for the
+ * client-side `UnifiedAlertSummary.id` field, nothing more.
+ */
+/* eslint-disable no-bitwise -- FNV-1a is defined in terms of 32-bit XOR and
+   shift operations; the whole function is bitwise by design. */
+function hashLabels(labels: Record<string, string>): string {
+  const entries = Object.entries(labels).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+  let hash = 0x811c9dc5; // FNV-1a 32-bit offset basis
+  for (const [k, v] of entries) {
+    const segment = `${k}\x00${v}\x01`;
+    for (let i = 0; i < segment.length; i++) {
+      hash ^= segment.charCodeAt(i) & 0xff;
+      // FNV-1a prime multiplication expressed as shifts — keeps the result
+      // in 32-bit range without depending on BigInt. Matches the canonical
+      // implementation (prime = 16777619 = (1<<24) + (1<<8) + (1<<7) + (1<<4) + (1<<1) + 1).
+      hash = (hash + ((hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24))) >>> 0;
+    }
+  }
+  return hash.toString(16).padStart(8, '0');
+}
+/* eslint-enable no-bitwise */
+
+/**
+ * Labels that identify the transport shape of a Prometheus alert sample
+ * rather than the rule itself. Strip these before hashing so the hash
+ * matches between the two places alerts come from:
+ *   - `ALERTS{}` matrix series carry `__name__="ALERTS"` and an
+ *     `alertstate` label set by Prometheus to `"firing"` or `"pending"`.
+ *   - `/api/v1/alerts` responses carry neither of those; the rule
+ *     identity is what's left (`alertname` + user-defined labels).
+ *
+ * Without stripping these, the dedupe set built from matrix episodes
+ * would never match a live alert and we'd double-report every active
+ * alert.
+ */
+const RULE_IDENTITY_STRIP_LABELS = new Set(['__name__', 'alertstate']);
+
+/**
+ * Hash of the labels that identify a Prometheus rule instance — the full
+ * label set minus transport metadata (see `RULE_IDENTITY_STRIP_LABELS`).
+ * Used as a dedupe key when merging historical episodes with live
+ * `/api/v1/alerts` results.
+ */
+export function hashRuleIdentity(labels: Record<string, string>): string {
+  const filtered: Record<string, string> = {};
+  for (const [k, v] of Object.entries(labels)) {
+    if (!RULE_IDENTITY_STRIP_LABELS.has(k)) filtered[k] = v;
+  }
+  return hashLabels(filtered);
+}
+
+/**
  * Detect the actual monitor kind from the OS monitor's inputs,
  * since cluster metrics monitors share monitor_type 'query_level_monitor'.
  */
