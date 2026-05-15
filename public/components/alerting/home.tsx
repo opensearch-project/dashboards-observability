@@ -5,6 +5,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { HashRouter, Route } from 'react-router-dom';
+import { i18n } from '@osd/i18n';
 import { coreRefs } from '../../framework/core_refs';
 import {
   ALERT_MANAGER_DEFAULT_DATASOURCES_SETTING,
@@ -24,9 +25,13 @@ export const AlertingHome = () => {
     const chrome = coreRefs.chrome;
     if (!chrome?.setBadge) return undefined;
     chrome.setBadge({
-      text: 'Beta',
-      tooltip:
-        'Alert Manager is in beta. Features may change and some functionality is still evolving.',
+      text: i18n.translate('observability.alerting.home.betaBadge', {
+        defaultMessage: 'Beta',
+      }),
+      tooltip: i18n.translate('observability.alerting.home.betaBadgeTooltip', {
+        defaultMessage:
+          'Alert Manager is in beta. Features may change and some functionality is still evolving.',
+      }),
       iconType: 'beaker',
     });
     return () => {

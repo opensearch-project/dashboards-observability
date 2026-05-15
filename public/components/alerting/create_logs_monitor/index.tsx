@@ -39,6 +39,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import {
   ActionState,
   CreateLogsMonitorProps,
@@ -117,10 +118,14 @@ export const CreateLogsMonitor: React.FC<CreateLogsMonitorProps> = ({ onCancel, 
 
   const handleMonitorTypeChange = useCallback(
     (type: LogsMonitorType) => {
+      const defaultFirstTriggerName = i18n.translate(
+        'observability.alerting.createLogsMonitor.defaultTriggerName',
+        { defaultMessage: 'Trigger {index}', values: { index: 1 } }
+      );
       const isModified =
         form.monitorName.trim() !== '' ||
         form.triggers.length !== 1 ||
-        form.triggers[0]?.name !== 'Trigger 1' ||
+        form.triggers[0]?.name !== defaultFirstTriggerName ||
         form.triggers[0]?.actions.length > 0 ||
         form.triggers[0]?.conditionValue !== 5;
       if (isModified) {
@@ -212,11 +217,17 @@ export const CreateLogsMonitor: React.FC<CreateLogsMonitorProps> = ({ onCancel, 
     <EuiFlyout onClose={handleClose} size="l" ownFocus aria-labelledby="createLogsMonitorTitle">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="createLogsMonitorTitle">Create Logs Monitor</h2>
+          <h2 id="createLogsMonitorTitle">
+            {i18n.translate('observability.alerting.createLogsMonitor.title', {
+              defaultMessage: 'Create Logs Monitor',
+            })}
+          </h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="xs" color="subdued">
-          Log-based alerting monitor
+          {i18n.translate('observability.alerting.createLogsMonitor.subtitle', {
+            defaultMessage: 'Log-based alerting monitor',
+          })}
         </EuiText>
       </EuiFlyoutHeader>
 
@@ -249,11 +260,17 @@ export const CreateLogsMonitor: React.FC<CreateLogsMonitorProps> = ({ onCancel, 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd" responsive={false} gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={handleClose}>Cancel</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={handleClose}>
+              {i18n.translate('observability.alerting.createLogsMonitor.cancelButton', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton fill onClick={() => onSave(form)} isDisabled={!isValid}>
-              Create
+              {i18n.translate('observability.alerting.createLogsMonitor.createButton', {
+                defaultMessage: 'Create',
+              })}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -261,31 +278,55 @@ export const CreateLogsMonitor: React.FC<CreateLogsMonitorProps> = ({ onCancel, 
 
       {showDiscardConfirm && (
         <EuiConfirmModal
-          title="Discard unsaved changes?"
+          title={i18n.translate('observability.alerting.createLogsMonitor.discardModalTitle', {
+            defaultMessage: 'Discard unsaved changes?',
+          })}
           onCancel={() => setShowDiscardConfirm(false)}
           onConfirm={() => {
             setShowDiscardConfirm(false);
             onCancel();
           }}
-          cancelButtonText="Keep editing"
-          confirmButtonText="Discard"
+          cancelButtonText={i18n.translate(
+            'observability.alerting.createLogsMonitor.discardModalCancel',
+            { defaultMessage: 'Keep editing' }
+          )}
+          confirmButtonText={i18n.translate(
+            'observability.alerting.createLogsMonitor.discardModalConfirm',
+            { defaultMessage: 'Discard' }
+          )}
           buttonColor="danger"
         >
-          <p>You have unsaved changes. Discard?</p>
+          <p>
+            {i18n.translate('observability.alerting.createLogsMonitor.discardModalBody', {
+              defaultMessage: 'You have unsaved changes. Discard?',
+            })}
+          </p>
         </EuiConfirmModal>
       )}
 
       {pendingTypeSwitch !== null && (
         <EuiConfirmModal
-          title="Change monitor type?"
+          title={i18n.translate('observability.alerting.createLogsMonitor.typeSwitchModalTitle', {
+            defaultMessage: 'Change monitor type?',
+          })}
           onCancel={() => setPendingTypeSwitch(null)}
           onConfirm={() => applyTypeSwitch(pendingTypeSwitch)}
-          cancelButtonText="Cancel"
-          confirmButtonText="Confirm"
+          cancelButtonText={i18n.translate(
+            'observability.alerting.createLogsMonitor.typeSwitchModalCancel',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={i18n.translate(
+            'observability.alerting.createLogsMonitor.typeSwitchModalConfirm',
+            { defaultMessage: 'Confirm' }
+          )}
           buttonColor="danger"
           data-test-subj="confirmTypeSwitchModal"
         >
-          <p>Changing monitor type will reset your query and triggers. Continue?</p>
+          <p>
+            {i18n.translate('observability.alerting.createLogsMonitor.typeSwitchModalBody', {
+              defaultMessage: 'Changing monitor type will reset your query and triggers. Continue?',
+            })}
+          </p>
         </EuiConfirmModal>
       )}
     </EuiFlyout>

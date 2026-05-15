@@ -9,6 +9,7 @@
  */
 import React from 'react';
 import { EuiAccordion, EuiButtonGroup, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { LogsMonitorType } from '../create_logs_monitor_types';
 import { MONITOR_TYPE_DESCRIPTIONS, MONITOR_TYPE_OPTIONS } from '../create_logs_monitor_constants';
 
@@ -19,12 +20,20 @@ export const MonitorTypeSection = React.memo<{
 }>(({ monitorType, onUpdate }) => (
   <EuiAccordion
     id="logs-monitor-type"
-    buttonContent={<strong>Monitor type</strong>}
+    buttonContent={
+      <strong>
+        {i18n.translate('observability.alerting.createLogsMonitor.monitorType.sectionTitle', {
+          defaultMessage: 'Monitor type',
+        })}
+      </strong>
+    }
     initialIsOpen
     paddingSize="m"
   >
     <EuiButtonGroup
-      legend="Select monitor type"
+      legend={i18n.translate('observability.alerting.createLogsMonitor.monitorType.legend', {
+        defaultMessage: 'Select monitor type',
+      })}
       options={MONITOR_TYPE_OPTIONS}
       idSelected={monitorType}
       onChange={(id) => onUpdate(id as LogsMonitorType)}

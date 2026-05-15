@@ -20,6 +20,7 @@
 import React, { useMemo } from 'react';
 import moment from 'moment-timezone';
 import { EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@osd/i18n/react';
 import { EchartsRender } from './echarts_render';
 import { UnifiedAlertSummary } from '../../../common/types/alerting';
 import { uiSettingsService } from '../../../common/utils';
@@ -194,7 +195,10 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
   if (alerts.length === 0)
     return (
       <EuiText size="s" color="subdued">
-        No timeline data
+        <FormattedMessage
+          id="observability.alerting.alertsCharts.noTimelineData"
+          defaultMessage="No timeline data"
+        />
       </EuiText>
     );
 

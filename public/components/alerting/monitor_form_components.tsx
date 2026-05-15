@@ -27,6 +27,8 @@ import {
   EuiBadge,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { Datasource } from '../../../common/types/alerting';
 
 // ============================================================================
@@ -105,11 +107,22 @@ export const LabelEditor: React.FC<{
         >
           <EuiFlexItem grow={2}>
             <EuiFieldText
-              placeholder="Key"
+              placeholder={i18n.translate(
+                'observability.alerting.monitorFormComponents.labelKeyPlaceholder',
+                {
+                  defaultMessage: 'Key',
+                }
+              )}
               value={label.key}
               onChange={(e) => updateLabel(i, 'key', e.target.value)}
               compressed
-              aria-label={`Label key ${i + 1}`}
+              aria-label={i18n.translate(
+                'observability.alerting.monitorFormComponents.labelKeyAriaLabel',
+                {
+                  defaultMessage: 'Label key {index}',
+                  values: { index: i + 1 },
+                }
+              )}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -117,18 +130,54 @@ export const LabelEditor: React.FC<{
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
             <EuiFieldText
-              placeholder={label.isDynamic ? '{{ $labels.severity }}' : 'Value'}
+              placeholder={
+                label.isDynamic
+                  ? '{{ $labels.severity }}'
+                  : i18n.translate(
+                      'observability.alerting.monitorFormComponents.labelValuePlaceholder',
+                      {
+                        defaultMessage: 'Value',
+                      }
+                    )
+              }
               value={label.value}
               onChange={(e) => updateLabel(i, 'value', e.target.value)}
               compressed
-              aria-label={`Label value ${i + 1}`}
+              aria-label={i18n.translate(
+                'observability.alerting.monitorFormComponents.labelValueAriaLabel',
+                {
+                  defaultMessage: 'Label value {index}',
+                  values: { index: i + 1 },
+                }
+              )}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={label.isDynamic ? 'Dynamic (template)' : 'Static value'}>
+            <EuiToolTip
+              content={
+                label.isDynamic
+                  ? i18n.translate(
+                      'observability.alerting.monitorFormComponents.dynamicTemplateTooltip',
+                      {
+                        defaultMessage: 'Dynamic (template)',
+                      }
+                    )
+                  : i18n.translate(
+                      'observability.alerting.monitorFormComponents.staticValueTooltip',
+                      {
+                        defaultMessage: 'Static value',
+                      }
+                    )
+              }
+            >
               <EuiButtonIcon
                 iconType={label.isDynamic ? 'bolt' : 'tag'}
-                aria-label="Toggle dynamic"
+                aria-label={i18n.translate(
+                  'observability.alerting.monitorFormComponents.toggleDynamicAriaLabel',
+                  {
+                    defaultMessage: 'Toggle dynamic',
+                  }
+                )}
                 onClick={() => toggleDynamic(i)}
                 color={label.isDynamic ? 'primary' : 'text'}
                 size="s"
@@ -138,7 +187,12 @@ export const LabelEditor: React.FC<{
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               iconType="trash"
-              aria-label="Remove label"
+              aria-label={i18n.translate(
+                'observability.alerting.monitorFormComponents.removeLabelAriaLabel',
+                {
+                  defaultMessage: 'Remove label',
+                }
+              )}
               onClick={() => removeLabel(i)}
               color="danger"
               size="s"
@@ -149,13 +203,19 @@ export const LabelEditor: React.FC<{
       <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={addLabel}>
-            Add label
+            <FormattedMessage
+              id="observability.alerting.monitorFormComponents.addLabelButton"
+              defaultMessage="Add label"
+            />
           </EuiButtonEmpty>
         </EuiFlexItem>
         {context && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty size="xs" iconType="importAction" onClick={autoPopulate}>
-              Auto-populate from context
+              <FormattedMessage
+                id="observability.alerting.monitorFormComponents.autoPopulateButton"
+                defaultMessage="Auto-populate from context"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
         )}
@@ -168,7 +228,13 @@ export const LabelEditor: React.FC<{
                   <EuiBadge
                     color="hollow"
                     onClick={() => onChange([...labels, { key: k, value: '' }])}
-                    onClickAriaLabel={`Add ${k} label`}
+                    onClickAriaLabel={i18n.translate(
+                      'observability.alerting.monitorFormComponents.addLabelByKeyAriaLabel',
+                      {
+                        defaultMessage: 'Add {key} label',
+                        values: { key: k },
+                      }
+                    )}
                   >
                     + {k}
                   </EuiBadge>
@@ -203,11 +269,26 @@ export const AnnotationEditor: React.FC<{
   };
 
   const placeholders: Record<string, string> = {
-    summary: 'Brief alert summary, e.g. "CPU usage above 80% on {{ $labels.instance }}"',
-    description: 'Detailed description of what this alert means and potential impact',
+    summary: i18n.translate('observability.alerting.monitorFormComponents.placeholder.summary', {
+      defaultMessage: 'Brief alert summary, e.g. "CPU usage above 80% on {example}"',
+      values: { example: '{{ $labels.instance }}' },
+    }),
+    description: i18n.translate(
+      'observability.alerting.monitorFormComponents.placeholder.description',
+      {
+        defaultMessage: 'Detailed description of what this alert means and potential impact',
+      }
+    ),
     runbook_url: 'https://wiki.example.com/runbooks/...',
     dashboard_url: 'https://grafana.example.com/d/...',
   };
+
+  const valuePlaceholder = i18n.translate(
+    'observability.alerting.monitorFormComponents.annotationValuePlaceholder',
+    {
+      defaultMessage: 'Value',
+    }
+  );
 
   return (
     <div data-test-subj="annotationEditor">
@@ -216,37 +297,65 @@ export const AnnotationEditor: React.FC<{
           <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
             <EuiFlexItem grow={2}>
               <EuiFieldText
-                placeholder="Key"
+                placeholder={i18n.translate(
+                  'observability.alerting.monitorFormComponents.annotationKeyPlaceholder',
+                  {
+                    defaultMessage: 'Key',
+                  }
+                )}
                 value={ann.key}
                 onChange={(e) => updateKey(i, e.target.value)}
                 compressed
-                aria-label={`Annotation key ${i + 1}`}
+                aria-label={i18n.translate(
+                  'observability.alerting.monitorFormComponents.annotationKeyAriaLabel',
+                  {
+                    defaultMessage: 'Annotation key {index}',
+                    values: { index: i + 1 },
+                  }
+                )}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={5}>
               {ann.key === 'description' || ann.key === 'summary' ? (
                 <EuiTextArea
-                  placeholder={placeholders[ann.key] || 'Value'}
+                  placeholder={placeholders[ann.key] || valuePlaceholder}
                   value={ann.value}
                   onChange={(e) => updateAnnotation(i, e.target.value)}
                   compressed
                   rows={2}
-                  aria-label={`Annotation value ${i + 1}`}
+                  aria-label={i18n.translate(
+                    'observability.alerting.monitorFormComponents.annotationValueAriaLabel',
+                    {
+                      defaultMessage: 'Annotation value {index}',
+                      values: { index: i + 1 },
+                    }
+                  )}
                 />
               ) : (
                 <EuiFieldText
-                  placeholder={placeholders[ann.key] || 'Value'}
+                  placeholder={placeholders[ann.key] || valuePlaceholder}
                   value={ann.value}
                   onChange={(e) => updateAnnotation(i, e.target.value)}
                   compressed
-                  aria-label={`Annotation value ${i + 1}`}
+                  aria-label={i18n.translate(
+                    'observability.alerting.monitorFormComponents.annotationValueAriaLabel',
+                    {
+                      defaultMessage: 'Annotation value {index}',
+                      values: { index: i + 1 },
+                    }
+                  )}
                 />
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 iconType="trash"
-                aria-label="Remove annotation"
+                aria-label={i18n.translate(
+                  'observability.alerting.monitorFormComponents.removeAnnotationAriaLabel',
+                  {
+                    defaultMessage: 'Remove annotation',
+                  }
+                )}
                 onClick={() => removeAnnotation(i)}
                 color="danger"
                 size="s"
@@ -256,7 +365,10 @@ export const AnnotationEditor: React.FC<{
         </div>
       ))}
       <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={addAnnotation}>
-        Add annotation
+        <FormattedMessage
+          id="observability.alerting.monitorFormComponents.addAnnotationButton"
+          defaultMessage="Add annotation"
+        />
       </EuiButtonEmpty>
     </div>
   );
@@ -280,13 +392,31 @@ export const DatasourceTargetSelector: React.FC<{
 
   return (
     <EuiFormRow
-      label="Target Datasource"
-      helpText="Where this monitor will be created"
+      label={i18n.translate('observability.alerting.monitorFormComponents.targetDatasourceLabel', {
+        defaultMessage: 'Target Datasource',
+      })}
+      helpText={i18n.translate(
+        'observability.alerting.monitorFormComponents.targetDatasourceHelpText',
+        {
+          defaultMessage: 'Where this monitor will be created',
+        }
+      )}
       fullWidth
       data-test-subj="datasourceTargetSelector"
     >
       <EuiSelect
-        options={[{ value: '', text: 'Select a datasource...' }, ...options]}
+        options={[
+          {
+            value: '',
+            text: i18n.translate(
+              'observability.alerting.monitorFormComponents.selectDatasourceOption',
+              {
+                defaultMessage: 'Select a datasource...',
+              }
+            ),
+          },
+          ...options,
+        ]}
         value={selectedId}
         onChange={(e) => {
           const id = e.target.value;
@@ -294,7 +424,12 @@ export const DatasourceTargetSelector: React.FC<{
           if (ds) onChange(id, ds.type as MonitorBackendType);
         }}
         fullWidth
-        aria-label="Target datasource"
+        aria-label={i18n.translate(
+          'observability.alerting.monitorFormComponents.targetDatasourceAriaLabel',
+          {
+            defaultMessage: 'Target datasource',
+          }
+        )}
       />
     </EuiFormRow>
   );

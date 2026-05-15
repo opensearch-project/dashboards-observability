@@ -4,8 +4,8 @@
  */
 
 /**
- * Enhanced Monitors Table — search, filter, sort, column customization,
- * saved searches, bulk delete, and JSON export.
+ * Enhanced Monitors Table — search, filter, sort, saved searches, and bulk
+ * delete.
  *
  * This file is the top-level component and state owner. Sub-files in this
  * folder:
@@ -20,14 +20,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiResizableContainer } from '@elastic/eui';
 import { Datasource, UnifiedRuleSummary } from '../../../../common/types/alerting';
-import { serializeMonitors } from '../../../../common/services/alerting/serializer';
 import { useFacetCollapse } from '../facet_filter_panel';
-import {
-  BASE_COLUMNS,
-  buildTableColumns,
-  ColumnId,
-  DEFAULT_VISIBLE,
-} from './monitors_table_columns';
+import { buildTableColumns, DEFAULT_VISIBLE } from './monitors_table_columns';
 import {
   buildSuggestions,
   collectLabelKeys,
@@ -49,7 +43,6 @@ interface MonitorsTableProps {
   loading: boolean;
   onDelete: (ids: string[]) => void;
   onClone?: (monitor: UnifiedRuleSummary) => void;
-  onImport?: (configs: Array<Record<string, unknown>>) => void;
   onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics' | 'slo') => void;
   /** Currently selected datasource IDs */
   selectedDsIds: string[];
@@ -71,7 +64,6 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   loading,
   onDelete,
   onClone,
-  onImport,
   onCreateMonitor,
   selectedDsIds,
   onDatasourceChange,
@@ -81,10 +73,8 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<FilterState>(emptyFilters());
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [visibleColumns, setVisibleColumns] = useState<Set<ColumnId>>(new Set(DEFAULT_VISIBLE));
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showColumnPicker, setShowColumnPicker] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
@@ -95,6 +85,9 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   const [saveSearchName, setSaveSearchName] = useState('');
   const searchRef = useRef<HTMLDivElement>(null);
   const tableWrapperRef = useRef<HTMLDivElement>(null);
+
+  // Column-customization UI was removed — render the default visible set.
+  const visibleColumns = useMemo(() => new Set(DEFAULT_VISIBLE), []);
 
   const rowProps = useCallback(
     (item: UnifiedRuleSummary) => ({
@@ -116,15 +109,6 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
 
   const allSuggestions = useMemo(() => buildSuggestions(rules), [rules]);
   const labelKeys = useMemo(() => collectLabelKeys(rules), [rules]);
-
-  // Build available columns including dynamic label columns
-  const allColumns = useMemo(() => {
-    const cols = [...BASE_COLUMNS];
-    for (const key of labelKeys) {
-      cols.push({ id: `label:${key}`, label: `Label: ${key}`, isLabelColumn: true });
-    }
-    return cols;
-  }, [labelKeys]);
 
   // Update suggestions as user types
   useEffect(() => {
@@ -189,42 +173,6 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   };
   const deleteSavedSearch = (id: string) => {
     setSavedSearches((prev) => prev.filter((s) => s.id !== id));
-  };
-
-  // Export
-  const exportJson = () => {
-    const configs = serializeMonitors(filtered);
-    const blob = new Blob([JSON.stringify(configs, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'monitors-export.json';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  // Import
-  const handleImportFile = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = (e: Event) => {
-      const file = (e.target as HTMLInputElement)?.files?.[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        try {
-          const data = JSON.parse(ev.target?.result as string);
-          const configs = Array.isArray(data) ? data : data.monitors;
-          if (onImport && Array.isArray(configs))
-            onImport(configs as Array<Record<string, unknown>>);
-        } catch (_err) {
-          alert('Invalid JSON file');
-        }
-      };
-      reader.readAsText(file);
-    };
-    input.click();
   };
 
   // Bulk delete
@@ -412,17 +360,9 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 clearAllFilters={clearAllFilters}
                 selectedIds={selectedIds}
                 setSelectedIds={setSelectedIds}
-                allColumns={allColumns}
-                visibleColumns={visibleColumns}
-                setVisibleColumns={setVisibleColumns}
-                showColumnPicker={showColumnPicker}
-                setShowColumnPicker={setShowColumnPicker}
                 onCreateMonitor={onCreateMonitor}
                 showCreatePopover={showCreatePopover}
                 setShowCreatePopover={setShowCreatePopover}
-                exportJson={exportJson}
-                onImport={onImport}
-                handleImportFile={handleImportFile}
                 showDeleteConfirm={showDeleteConfirm}
                 setShowDeleteConfirm={setShowDeleteConfirm}
                 handleBulkDelete={handleBulkDelete}

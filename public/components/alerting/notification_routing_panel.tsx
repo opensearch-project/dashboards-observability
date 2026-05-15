@@ -28,6 +28,8 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { Datasource } from '../../../common/types/alerting';
 import { AlertmanagerAdminService } from './query_services/alertmanager_admin_service';
 
@@ -190,7 +192,13 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
       // handed back raw from Alertmanager; narrow to our local shape here.
       setConfig((res as unknown) as AlertmanagerConfig);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed to fetch Alertmanager config');
+      setError(
+        e instanceof Error
+          ? e.message
+          : i18n.translate('observability.alerting.notificationRoutingPanel.fetchConfigError', {
+              defaultMessage: 'Failed to fetch Alertmanager config',
+            })
+      );
     }
     setLoading(false);
   }, [adminService, selectedDsId]);
@@ -219,12 +227,17 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
   const datasourceSelector =
     promDatasources.length > 0 && selectedDsId ? (
       <EuiCompressedSelect
-        prepend="Source"
+        prepend={i18n.translate('observability.alerting.notificationRoutingPanel.sourcePrepend', {
+          defaultMessage: 'Source',
+        })}
         options={selectorOptions}
         value={selectedDsId}
         onChange={(e) => setSelectedDsId(e.target.value)}
         disabled={promDatasources.length === 1}
-        aria-label="Prometheus datasource"
+        aria-label={i18n.translate(
+          'observability.alerting.notificationRoutingPanel.sourceAriaLabel',
+          { defaultMessage: 'Prometheus datasource' }
+        )}
         data-test-subj="alertManager-routing-datasourceSelect"
         style={{ minWidth: 220 }}
       />
@@ -261,7 +274,14 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
             <EuiSpacer size="s" />
           </>
         )}
-        <EuiCallOut title="Error loading Alertmanager config" color="danger" iconType="alert">
+        <EuiCallOut
+          title={i18n.translate(
+            'observability.alerting.notificationRoutingPanel.errorCallout.title',
+            { defaultMessage: 'Error loading Alertmanager config' }
+          )}
+          color="danger"
+          iconType="alert"
+        >
           {error}
         </EuiCallOut>
       </div>
@@ -281,11 +301,21 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
         )}
         <EuiEmptyPrompt
           iconType="bell"
-          title={<h2>Alertmanager Not Available</h2>}
+          title={
+            <h2>
+              <FormattedMessage
+                id="observability.alerting.notificationRoutingPanel.notAvailable.title"
+                defaultMessage="Alertmanager Not Available"
+              />
+            </h2>
+          }
           body={
             <p>
-              No Alertmanager is connected. Ensure your Prometheus datasource in the OpenSearch SQL
-              plugin has <code>alertmanager.uri</code> configured in its properties.
+              <FormattedMessage
+                id="observability.alerting.notificationRoutingPanel.notAvailable.body"
+                defaultMessage="No Alertmanager is connected. Ensure your Prometheus datasource in the OpenSearch SQL plugin has {code} configured in its properties."
+                values={{ code: <code>alertmanager.uri</code> }}
+              />
             </p>
           }
         />
@@ -296,7 +326,14 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
   if (config.configParseError) {
     return (
       <div style={{ padding: '0 16px' }}>
-        <EuiCallOut title="Failed to parse Alertmanager config" color="warning" iconType="alert">
+        <EuiCallOut
+          title={i18n.translate(
+            'observability.alerting.notificationRoutingPanel.parseErrorCallout.title',
+            { defaultMessage: 'Failed to parse Alertmanager config' }
+          )}
+          color="warning"
+          iconType="alert"
+        >
           <p>{config.configParseError}</p>
         </EuiCallOut>
       </div>
@@ -316,13 +353,20 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
   const routeColumns = [
     {
       field: 'receiver',
-      name: 'Receiver',
+      name: i18n.translate('observability.alerting.notificationRoutingPanel.column.receiver', {
+        defaultMessage: 'Receiver',
+      }),
       render: (val: string, item: FlatRoute) => (
         <span style={{ paddingLeft: item.depth * 20, fontWeight: item.depth === 0 ? 600 : 400 }}>
           {item.depth > 0 && <span style={{ color: '#98A2B3', marginRight: 6 }}>{'└'}</span>}
           {val || (
             <EuiText size="xs" color="subdued">
-              <em>inherited</em>
+              <em>
+                <FormattedMessage
+                  id="observability.alerting.notificationRoutingPanel.receiverInherited"
+                  defaultMessage="inherited"
+                />
+              </em>
             </EuiText>
           )}
         </span>
@@ -330,7 +374,9 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
     },
     {
       field: 'matchers',
-      name: 'Matchers',
+      name: i18n.translate('observability.alerting.notificationRoutingPanel.column.matchers', {
+        defaultMessage: 'Matchers',
+      }),
       render: (m: string[]) =>
         m.length > 0 ? (
           m.map((s, i) => (
@@ -339,12 +385,18 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
             </EuiBadge>
           ))
         ) : (
-          <EuiBadge color="default">catch-all</EuiBadge>
+          <EuiBadge color="default">
+            {i18n.translate('observability.alerting.notificationRoutingPanel.catchAll', {
+              defaultMessage: 'catch-all',
+            })}
+          </EuiBadge>
         ),
     },
     {
       field: 'groupBy',
-      name: 'Group By',
+      name: i18n.translate('observability.alerting.notificationRoutingPanel.column.groupBy', {
+        defaultMessage: 'Group By',
+      }),
       render: (g: string[]) =>
         g.length > 0 ? (
           g.map((s, i) => (
@@ -358,19 +410,48 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
           </EuiText>
         ),
     },
-    { field: 'groupWait', name: 'Wait', width: '70px', render: (v: string) => v || '—' },
-    { field: 'groupInterval', name: 'Interval', width: '80px', render: (v: string) => v || '—' },
-    { field: 'repeatInterval', name: 'Repeat', width: '80px', render: (v: string) => v || '—' },
+    {
+      field: 'groupWait',
+      name: i18n.translate('observability.alerting.notificationRoutingPanel.column.wait', {
+        defaultMessage: 'Wait',
+      }),
+      width: '70px',
+      render: (v: string) => v || '—',
+    },
+    {
+      field: 'groupInterval',
+      name: i18n.translate('observability.alerting.notificationRoutingPanel.column.interval', {
+        defaultMessage: 'Interval',
+      }),
+      width: '80px',
+      render: (v: string) => v || '—',
+    },
+    {
+      field: 'repeatInterval',
+      name: i18n.translate('observability.alerting.notificationRoutingPanel.column.repeat', {
+        defaultMessage: 'Repeat',
+      }),
+      width: '80px',
+      render: (v: string) => v || '—',
+    },
     {
       field: 'continueMatching',
-      name: 'Continue',
+      name: i18n.translate('observability.alerting.notificationRoutingPanel.column.continue', {
+        defaultMessage: 'Continue',
+      }),
       width: '70px',
       render: (v: boolean) =>
         v ? (
-          <EuiBadge color="warning">yes</EuiBadge>
+          <EuiBadge color="warning">
+            {i18n.translate('observability.alerting.notificationRoutingPanel.continueYes', {
+              defaultMessage: 'yes',
+            })}
+          </EuiBadge>
         ) : (
           <EuiText size="xs" color="subdued">
-            no
+            {i18n.translate('observability.alerting.notificationRoutingPanel.continueNo', {
+              defaultMessage: 'no',
+            })}
           </EuiText>
         ),
     },
@@ -381,10 +462,18 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
   // -----------------------------------------------------------------------
 
   const receiverColumns: Array<EuiBasicTableColumn<ReceiverInfo>> = [
-    { field: 'name', name: 'Receiver', sortable: true },
+    {
+      field: 'name',
+      name: i18n.translate('observability.alerting.notificationRoutingPanel.column.receiverName', {
+        defaultMessage: 'Receiver',
+      }),
+      sortable: true,
+    },
     {
       field: 'integrations',
-      name: 'Integrations',
+      name: i18n.translate('observability.alerting.notificationRoutingPanel.column.integrations', {
+        defaultMessage: 'Integrations',
+      }),
       render: (intgs: Array<{ type: string; summary: string }>) =>
         intgs.map((intg, i) => (
           <EuiToolTip key={i} content={intg.summary}>
@@ -402,7 +491,10 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
 
   const inhibitColumns = [
     {
-      name: 'Source Matchers',
+      name: i18n.translate(
+        'observability.alerting.notificationRoutingPanel.column.sourceMatchers',
+        { defaultMessage: 'Source Matchers' }
+      ),
       render: (rule: InhibitRule) => {
         const matchers =
           rule.source_matchers ||
@@ -415,7 +507,10 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
       },
     },
     {
-      name: 'Target Matchers',
+      name: i18n.translate(
+        'observability.alerting.notificationRoutingPanel.column.targetMatchers',
+        { defaultMessage: 'Target Matchers' }
+      ),
       render: (rule: InhibitRule) => {
         const matchers =
           rule.target_matchers ||
@@ -429,7 +524,9 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
     },
     {
       field: 'equal',
-      name: 'Equal Labels',
+      name: i18n.translate('observability.alerting.notificationRoutingPanel.column.equalLabels', {
+        defaultMessage: 'Equal Labels',
+      }),
       render: (labels: string[]) =>
         (labels || []).map((l, i) => (
           <EuiBadge key={i} color="hollow">
@@ -442,10 +539,20 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
   return (
     <div style={{ padding: '0 16px' }}>
       {/* Read-only explanation banner (UX audit M6 + S-m8) */}
-      <EuiCallOut title="Read-only view" color="primary" iconType="iInCircle" size="s">
+      <EuiCallOut
+        title={i18n.translate(
+          'observability.alerting.notificationRoutingPanel.readOnlyCallout.title',
+          { defaultMessage: 'Read-only view' }
+        )}
+        color="primary"
+        iconType="iInCircle"
+        size="s"
+      >
         <p>
-          Routing configuration is managed via the Alertmanager configuration file or API. This view
-          shows the current routing tree for all Prometheus datasources.
+          <FormattedMessage
+            id="observability.alerting.notificationRoutingPanel.readOnlyCallout.body"
+            defaultMessage="Routing configuration is managed via the Alertmanager configuration file or API. This view shows the current routing tree for all Prometheus datasources."
+          />
         </p>
       </EuiCallOut>
       <EuiSpacer size="s" />
@@ -455,29 +562,57 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiHealth color={cluster?.status === 'ready' ? 'success' : 'danger'}>
-              {cluster?.status || 'unknown'}
+              {cluster?.status ||
+                i18n.translate(
+                  'observability.alerting.notificationRoutingPanel.clusterStatusUnknown',
+                  { defaultMessage: 'unknown' }
+                )}
             </EuiHealth>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs">
-              <strong>Alertmanager</strong> v{version}
+              <FormattedMessage
+                id="observability.alerting.notificationRoutingPanel.alertmanagerVersion"
+                defaultMessage="{label} v{version}"
+                values={{ label: <strong>Alertmanager</strong>, version }}
+              />
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
-              Uptime: {formatUptime(config.uptime)}
+              <FormattedMessage
+                id="observability.alerting.notificationRoutingPanel.uptime"
+                defaultMessage="Uptime: {uptime}"
+                values={{ uptime: formatUptime(config.uptime) }}
+              />
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
-              Peers: {cluster?.peerCount ?? 0}
+              <FormattedMessage
+                id="observability.alerting.notificationRoutingPanel.peers"
+                defaultMessage="Peers: {count}"
+                values={{ count: cluster?.peerCount ?? 0 }}
+              />
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow />
           {datasourceSelector && <EuiFlexItem grow={false}>{datasourceSelector}</EuiFlexItem>}
           <EuiFlexItem grow={false}>
-            <EuiToolTip content="Refresh">
-              <EuiButtonIcon iconType="refresh" aria-label="Refresh" onClick={fetchConfig} />
+            <EuiToolTip
+              content={i18n.translate(
+                'observability.alerting.notificationRoutingPanel.refreshTooltip',
+                { defaultMessage: 'Refresh' }
+              )}
+            >
+              <EuiButtonIcon
+                iconType="refresh"
+                aria-label={i18n.translate(
+                  'observability.alerting.notificationRoutingPanel.refreshAriaLabel',
+                  { defaultMessage: 'Refresh' }
+                )}
+                onClick={fetchConfig}
+              />
             </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -487,14 +622,22 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
 
       {/* Route tree */}
       <EuiTitle size="xs">
-        <h3>Route Tree</h3>
+        <h3>
+          <FormattedMessage
+            id="observability.alerting.notificationRoutingPanel.routeTreeTitle"
+            defaultMessage="Route Tree"
+          />
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       {routes.length > 0 ? (
         <EuiBasicTable items={routes} columns={routeColumns} />
       ) : (
         <EuiText size="s" color="subdued">
-          No routes configured
+          <FormattedMessage
+            id="observability.alerting.notificationRoutingPanel.noRoutes"
+            defaultMessage="No routes configured"
+          />
         </EuiText>
       )}
 
@@ -502,14 +645,23 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
 
       {/* Receivers */}
       <EuiTitle size="xs">
-        <h3>Receivers ({receivers.length})</h3>
+        <h3>
+          <FormattedMessage
+            id="observability.alerting.notificationRoutingPanel.receiversTitle"
+            defaultMessage="Receivers ({count})"
+            values={{ count: receivers.length }}
+          />
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       {receivers.length > 0 ? (
         <EuiBasicTable items={receivers} columns={receiverColumns} />
       ) : (
         <EuiText size="s" color="subdued">
-          No receivers configured
+          <FormattedMessage
+            id="observability.alerting.notificationRoutingPanel.noReceivers"
+            defaultMessage="No receivers configured"
+          />
         </EuiText>
       )}
 
@@ -517,14 +669,23 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
 
       {/* Inhibit rules */}
       <EuiTitle size="xs">
-        <h3>Inhibit Rules ({inhibitRules.length})</h3>
+        <h3>
+          <FormattedMessage
+            id="observability.alerting.notificationRoutingPanel.inhibitRulesTitle"
+            defaultMessage="Inhibit Rules ({count})"
+            values={{ count: inhibitRules.length }}
+          />
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       {inhibitRules.length > 0 ? (
         <EuiBasicTable items={inhibitRules} columns={inhibitColumns} />
       ) : (
         <EuiText size="s" color="subdued">
-          No inhibit rules configured
+          <FormattedMessage
+            id="observability.alerting.notificationRoutingPanel.noInhibitRules"
+            defaultMessage="No inhibit rules configured"
+          />
         </EuiText>
       )}
     </div>

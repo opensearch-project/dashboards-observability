@@ -9,6 +9,7 @@
  */
 import React from 'react';
 import { EuiAccordion, EuiFieldText, EuiFormRow, EuiSpacer, EuiTextArea } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { LogsMonitorFormState } from '../create_logs_monitor_types';
 
 /** Section 1: Monitor Details */
@@ -18,42 +19,72 @@ export const MonitorDetailsSection = React.memo<{
 }>(({ form, onUpdate }) => (
   <EuiAccordion
     id="logs-monitor-details"
-    buttonContent={<strong>Monitor Details</strong>}
+    buttonContent={
+      <strong>
+        {i18n.translate('observability.alerting.createLogsMonitor.monitorDetails.sectionTitle', {
+          defaultMessage: 'Monitor Details',
+        })}
+      </strong>
+    }
     initialIsOpen
     paddingSize="m"
   >
-    <EuiFormRow label="Monitor name" fullWidth>
+    <EuiFormRow
+      label={i18n.translate(
+        'observability.alerting.createLogsMonitor.monitorDetails.monitorNameLabel',
+        { defaultMessage: 'Monitor name' }
+      )}
+      fullWidth
+    >
       <EuiFieldText
-        placeholder="Enter a monitor name"
+        placeholder={i18n.translate(
+          'observability.alerting.createLogsMonitor.monitorDetails.monitorNamePlaceholder',
+          { defaultMessage: 'Enter a monitor name' }
+        )}
         value={form.monitorName}
         onChange={(e) => onUpdate({ monitorName: e.target.value })}
         fullWidth
         compressed
-        aria-label="Monitor name"
+        aria-label={i18n.translate(
+          'observability.alerting.createLogsMonitor.monitorDetails.monitorNameAriaLabel',
+          { defaultMessage: 'Monitor name' }
+        )}
       />
     </EuiFormRow>
     <EuiSpacer size="m" />
     <EuiFormRow
       label={
         <span>
-          Description{' '}
+          {i18n.translate(
+            'observability.alerting.createLogsMonitor.monitorDetails.descriptionLabel',
+            { defaultMessage: 'Description' }
+          )}{' '}
           <span
             style={{ fontSize: 12, color: '#98A2B3', fontStyle: 'italic', fontWeight: 'normal' }}
           >
-            — optional
+            {i18n.translate(
+              'observability.alerting.createLogsMonitor.monitorDetails.descriptionOptional',
+              { defaultMessage: '— optional' }
+            )}
           </span>
         </span>
       }
       fullWidth
     >
       <EuiTextArea
-        placeholder="Describe this monitor"
+        placeholder={i18n.translate(
+          'observability.alerting.createLogsMonitor.monitorDetails.descriptionPlaceholder',
+          { defaultMessage: 'Describe this monitor' }
+        )}
         value={form.description}
         onChange={(e) => onUpdate({ description: e.target.value })}
         rows={3}
         fullWidth
         compressed
-        aria-label="Monitor description"
+        aria-label={i18n.translate(
+          'observability.alerting.createLogsMonitor.monitorDetails.descriptionAriaLabel',
+          { defaultMessage: 'Monitor description' }
+        )}
       />
     </EuiFormRow>
   </EuiAccordion>

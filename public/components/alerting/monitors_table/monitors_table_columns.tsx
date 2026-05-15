@@ -20,6 +20,7 @@
  */
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import {
   MonitorHealthStatus,
   MonitorStatus,
@@ -58,21 +59,96 @@ export interface ColumnDef {
 }
 
 export const BASE_COLUMNS: ColumnDef[] = [
-  { id: 'name', label: 'Name' },
-  { id: 'status', label: 'Status' },
-  { id: 'severity', label: 'Severity' },
-  { id: 'monitorType', label: 'Type' },
-  { id: 'healthStatus', label: 'Health' },
-  { id: 'labels', label: 'Labels' },
-  { id: 'backend', label: 'Backend' },
-  { id: 'datasource', label: 'Datasource' },
-  { id: 'createdBy', label: 'Created By' },
-  { id: 'createdAt', label: 'Created' },
-  { id: 'lastModified', label: 'Last Modified' },
-  { id: 'lastTriggered', label: 'Last Triggered' },
-  { id: 'destinations', label: 'Destinations' },
-  { id: 'query', label: 'Query' },
-  { id: 'group', label: 'Group' },
+  {
+    id: 'name',
+    label: i18n.translate('observability.alerting.monitorsTable.columns.name', {
+      defaultMessage: 'Name',
+    }),
+  },
+  {
+    id: 'status',
+    label: i18n.translate('observability.alerting.monitorsTable.columns.status', {
+      defaultMessage: 'Status',
+    }),
+  },
+  {
+    id: 'severity',
+    label: i18n.translate('observability.alerting.monitorsTable.columns.severity', {
+      defaultMessage: 'Severity',
+    }),
+  },
+  {
+    id: 'monitorType',
+    label: i18n.translate('observability.alerting.monitorsTable.columns.type', {
+      defaultMessage: 'Type',
+    }),
+  },
+  {
+    id: 'healthStatus',
+    label: i18n.translate('observability.alerting.monitorsTable.columns.health', {
+      defaultMessage: 'Health',
+    }),
+  },
+  {
+    id: 'labels',
+    label: i18n.translate('observability.alerting.monitorsTable.columns.labels', {
+      defaultMessage: 'Labels',
+    }),
+  },
+  {
+    id: 'backend',
+    label: i18n.translate('observability.alerting.monitorsTable.columns.backend', {
+      defaultMessage: 'Backend',
+    }),
+  },
+  {
+    id: 'datasource',
+    label: i18n.translate('observability.alerting.monitorsTable.columns.datasource', {
+      defaultMessage: 'Datasource',
+    }),
+  },
+  {
+    id: 'createdBy',
+    label: i18n.translate('observability.alerting.monitorsTable.columns.createdBy', {
+      defaultMessage: 'Created By',
+    }),
+  },
+  {
+    id: 'createdAt',
+    label: i18n.translate('observability.alerting.monitorsTable.columns.created', {
+      defaultMessage: 'Created',
+    }),
+  },
+  {
+    id: 'lastModified',
+    label: i18n.translate('observability.alerting.monitorsTable.columns.lastModified', {
+      defaultMessage: 'Last Modified',
+    }),
+  },
+  {
+    id: 'lastTriggered',
+    label: i18n.translate('observability.alerting.monitorsTable.columns.lastTriggered', {
+      defaultMessage: 'Last Triggered',
+    }),
+  },
+  {
+    id: 'destinations',
+    label: i18n.translate('observability.alerting.monitorsTable.columns.destinations', {
+      defaultMessage: 'Destinations',
+    }),
+  },
+  {
+    id: 'query',
+    label: i18n.translate('observability.alerting.monitorsTable.columns.query', {
+      defaultMessage: 'Query',
+    }),
+  },
+  {
+    id: 'group',
+    label: i18n.translate('observability.alerting.monitorsTable.columns.group', {
+      defaultMessage: 'Group',
+    }),
+  },
 ];
 
 export const DEFAULT_VISIBLE: ColumnId[] = [
@@ -124,7 +200,12 @@ export function buildTableColumns({
           type="checkbox"
           checked={filtered.length > 0 && selectedIds.size === filtered.length}
           onChange={toggleSelectAll}
-          aria-label="Select all monitors"
+          aria-label={i18n.translate(
+            'observability.alerting.monitorsTable.columns.selectAllAriaLabel',
+            {
+              defaultMessage: 'Select all monitors',
+            }
+          )}
         />
       ),
       width: '32px',
@@ -133,7 +214,13 @@ export function buildTableColumns({
           type="checkbox"
           checked={selectedIds.has(item.id)}
           onChange={() => toggleSelect(item.id)}
-          aria-label={`Select ${item.name}`}
+          aria-label={i18n.translate(
+            'observability.alerting.monitorsTable.columns.selectRowAriaLabel',
+            {
+              defaultMessage: 'Select {name}',
+              values: { name: item.name },
+            }
+          )}
         />
       ),
     },
@@ -143,7 +230,9 @@ export function buildTableColumns({
     if (colId === 'name') {
       cols.push({
         field: 'name',
-        name: 'Name',
+        name: i18n.translate('observability.alerting.monitorsTable.columns.name', {
+          defaultMessage: 'Name',
+        }),
         sortable: true,
         truncateText: true,
         width: w('name'),
@@ -156,7 +245,13 @@ export function buildTableColumns({
             onKeyDown={(e: React.KeyboardEvent) => {
               if (e.key === 'Enter') setSelectedMonitor(item);
             }}
-            aria-label={`View details for ${name}`}
+            aria-label={i18n.translate(
+              'observability.alerting.monitorsTable.columns.viewDetailsAriaLabel',
+              {
+                defaultMessage: 'View details for {name}',
+                values: { name },
+              }
+            )}
           >
             {name}
           </span>
@@ -165,7 +260,9 @@ export function buildTableColumns({
     } else if (colId === 'status') {
       cols.push({
         field: 'status',
-        name: 'Status',
+        name: i18n.translate('observability.alerting.monitorsTable.columns.status', {
+          defaultMessage: 'Status',
+        }),
         sortable: true,
         width: w('status'),
         render: (s: MonitorStatus) => (
@@ -175,7 +272,9 @@ export function buildTableColumns({
     } else if (colId === 'severity') {
       cols.push({
         field: 'severity',
-        name: 'Severity',
+        name: i18n.translate('observability.alerting.monitorsTable.columns.severity', {
+          defaultMessage: 'Severity',
+        }),
         sortable: true,
         width: w('severity'),
         render: (s: UnifiedAlertSeverity) => (
@@ -185,7 +284,9 @@ export function buildTableColumns({
     } else if (colId === 'monitorType') {
       cols.push({
         field: 'monitorType',
-        name: 'Type',
+        name: i18n.translate('observability.alerting.monitorsTable.columns.type', {
+          defaultMessage: 'Type',
+        }),
         sortable: true,
         width: w('monitorType'),
         render: (t: MonitorType) => <EuiBadge color="hollow">{TYPE_LABELS[t] || t}</EuiBadge>,
@@ -193,7 +294,9 @@ export function buildTableColumns({
     } else if (colId === 'healthStatus') {
       cols.push({
         field: 'healthStatus',
-        name: 'Health',
+        name: i18n.translate('observability.alerting.monitorsTable.columns.health', {
+          defaultMessage: 'Health',
+        }),
         sortable: true,
         width: w('healthStatus'),
         render: (h: MonitorHealthStatus) => (
@@ -203,7 +306,9 @@ export function buildTableColumns({
     } else if (colId === 'labels') {
       cols.push({
         field: 'labels',
-        name: 'Labels',
+        name: i18n.translate('observability.alerting.monitorsTable.columns.labels', {
+          defaultMessage: 'Labels',
+        }),
         width: w('labels'),
         render: (labels: Record<string, string>) => {
           const entries = Object.entries(labels);
@@ -224,7 +329,9 @@ export function buildTableColumns({
     } else if (colId === 'backend') {
       cols.push({
         field: 'datasourceType',
-        name: 'Backend',
+        name: i18n.translate('observability.alerting.monitorsTable.columns.backend', {
+          defaultMessage: 'Backend',
+        }),
         sortable: true,
         width: w('backend'),
         render: (t: string) => (
@@ -234,7 +341,9 @@ export function buildTableColumns({
     } else if (colId === 'datasource') {
       cols.push({
         field: 'datasourceId',
-        name: 'Datasource',
+        name: i18n.translate('observability.alerting.monitorsTable.columns.datasource', {
+          defaultMessage: 'Datasource',
+        }),
         sortable: (r: UnifiedRuleSummary) =>
           (dsNameMap.get(r.datasourceId) || r.datasourceId).toLowerCase(),
         width: w('datasource'),
@@ -243,14 +352,18 @@ export function buildTableColumns({
     } else if (colId === 'createdBy') {
       cols.push({
         field: 'createdBy',
-        name: 'Created By',
+        name: i18n.translate('observability.alerting.monitorsTable.columns.createdBy', {
+          defaultMessage: 'Created By',
+        }),
         sortable: true,
         width: w('createdBy'),
       });
     } else if (colId === 'createdAt') {
       cols.push({
         field: 'createdAt',
-        name: 'Created',
+        name: i18n.translate('observability.alerting.monitorsTable.columns.created', {
+          defaultMessage: 'Created',
+        }),
         sortable: true,
         width: w('createdAt'),
         render: (ts: string) => (ts ? new Date(ts).toLocaleDateString() : '-'),
@@ -258,7 +371,9 @@ export function buildTableColumns({
     } else if (colId === 'lastModified') {
       cols.push({
         field: 'lastModified',
-        name: 'Last Modified',
+        name: i18n.translate('observability.alerting.monitorsTable.columns.lastModified', {
+          defaultMessage: 'Last Modified',
+        }),
         sortable: true,
         width: w('lastModified'),
         render: (ts: string) => (ts ? new Date(ts).toLocaleString() : '-'),
@@ -266,15 +381,24 @@ export function buildTableColumns({
     } else if (colId === 'lastTriggered') {
       cols.push({
         field: 'lastTriggered',
-        name: 'Last Triggered',
+        name: i18n.translate('observability.alerting.monitorsTable.columns.lastTriggered', {
+          defaultMessage: 'Last Triggered',
+        }),
         sortable: true,
         width: w('lastTriggered'),
-        render: (ts: string) => (ts ? new Date(ts).toLocaleString() : 'Never'),
+        render: (ts: string) =>
+          ts
+            ? new Date(ts).toLocaleString()
+            : i18n.translate('observability.alerting.monitorsTable.columns.lastTriggered.never', {
+                defaultMessage: 'Never',
+              }),
       });
     } else if (colId === 'destinations') {
       cols.push({
         field: 'notificationDestinations',
-        name: 'Destinations',
+        name: i18n.translate('observability.alerting.monitorsTable.columns.destinations', {
+          defaultMessage: 'Destinations',
+        }),
         width: w('destinations'),
         render: (dests: string[]) =>
           dests.length > 0 ? (
@@ -284,15 +408,28 @@ export function buildTableColumns({
               </EuiBadge>
             ))
           ) : (
-            <span style={{ color: '#999' }}>None</span>
+            <span style={{ color: '#999' }}>
+              {i18n.translate('observability.alerting.monitorsTable.columns.destinations.none', {
+                defaultMessage: 'None',
+              })}
+            </span>
           ),
       });
     } else if (colId === 'query') {
-      cols.push({ field: 'query', name: 'Query', truncateText: true, width: w('query') });
+      cols.push({
+        field: 'query',
+        name: i18n.translate('observability.alerting.monitorsTable.columns.query', {
+          defaultMessage: 'Query',
+        }),
+        truncateText: true,
+        width: w('query'),
+      });
     } else if (colId === 'group') {
       cols.push({
         field: 'group',
-        name: 'Group',
+        name: i18n.translate('observability.alerting.monitorsTable.columns.group', {
+          defaultMessage: 'Group',
+        }),
         width: w('group'),
         render: (g: string) => g || '-',
       });

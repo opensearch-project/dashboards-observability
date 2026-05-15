@@ -29,6 +29,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { PromQLEditor } from '../promql_editor';
 import { MetricBrowser } from '../metric_browser';
 import { AnnotationEditor, LabelEditor } from '../monitor_form_components';
@@ -99,15 +101,23 @@ export const PrometheusFormSection: React.FC<{
       {/* Query Definition */}
       <EuiPanel paddingSize="m" color="subdued">
         <EuiTitle size="xs">
-          <h3>PromQL Query</h3>
+          <h3>
+            {i18n.translate('observability.alerting.prometheusFormSection.promqlQueryTitle', {
+              defaultMessage: 'PromQL Query',
+            })}
+          </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiTabs size="s">
           <EuiTab isSelected={queryTab === 'editor'} onClick={() => setQueryTab('editor')}>
-            Query Editor
+            {i18n.translate('observability.alerting.prometheusFormSection.queryEditorTab', {
+              defaultMessage: 'Query Editor',
+            })}
           </EuiTab>
           <EuiTab isSelected={queryTab === 'browser'} onClick={() => setQueryTab('browser')}>
-            Metric Browser
+            {i18n.translate('observability.alerting.prometheusFormSection.metricBrowserTab', {
+              defaultMessage: 'Metric Browser',
+            })}
           </EuiTab>
         </EuiTabs>
         <EuiSpacer size="s" />
@@ -123,15 +133,27 @@ export const PrometheusFormSection: React.FC<{
       {/* Threshold Condition */}
       <EuiPanel paddingSize="m" color="subdued">
         <EuiTitle size="xs">
-          <h3>Alert Condition</h3>
+          <h3>
+            {i18n.translate('observability.alerting.prometheusFormSection.alertConditionTitle', {
+              defaultMessage: 'Alert Condition',
+            })}
+          </h3>
         </EuiTitle>
         <EuiText size="xs" color="subdued">
-          Define when this monitor should fire an alert
+          {i18n.translate(
+            'observability.alerting.prometheusFormSection.alertConditionDescription',
+            { defaultMessage: 'Define when this monitor should fire an alert' }
+          )}
         </EuiText>
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s" wrap>
           <EuiFlexItem style={{ minWidth: 160 }}>
-            <EuiFormRow label="Operator" display="rowCompressed">
+            <EuiFormRow
+              label={i18n.translate('observability.alerting.prometheusFormSection.operatorLabel', {
+                defaultMessage: 'Operator',
+              })}
+              display="rowCompressed"
+            >
               <EuiSelect
                 options={OPERATOR_OPTIONS}
                 value={form.threshold.operator}
@@ -139,39 +161,68 @@ export const PrometheusFormSection: React.FC<{
                   updateThreshold('operator', e.target.value as ThresholdCondition['operator'])
                 }
                 compressed
-                aria-label="Threshold operator"
+                aria-label={i18n.translate(
+                  'observability.alerting.prometheusFormSection.thresholdOperatorAriaLabel',
+                  { defaultMessage: 'Threshold operator' }
+                )}
               />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem style={{ minWidth: 100 }}>
-            <EuiFormRow label="Value" display="rowCompressed">
+            <EuiFormRow
+              label={i18n.translate('observability.alerting.prometheusFormSection.valueLabel', {
+                defaultMessage: 'Value',
+              })}
+              display="rowCompressed"
+            >
               <EuiFieldNumber
                 value={form.threshold.value}
                 onChange={(e) => updateThreshold('value', parseFloat(e.target.value) || 0)}
                 compressed
-                aria-label="Threshold value"
+                aria-label={i18n.translate(
+                  'observability.alerting.prometheusFormSection.thresholdValueAriaLabel',
+                  { defaultMessage: 'Threshold value' }
+                )}
               />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem style={{ minWidth: 60 }}>
-            <EuiFormRow label="Unit" display="rowCompressed">
+            <EuiFormRow
+              label={i18n.translate(
+                'observability.alerting.prometheusFormSection.thresholdUnitLabel',
+                { defaultMessage: 'Unit' }
+              )}
+              display="rowCompressed"
+            >
               <EuiFieldText
                 value={form.threshold.unit}
                 onChange={(e) => updateThreshold('unit', e.target.value)}
                 placeholder="%"
                 compressed
-                aria-label="Threshold unit"
+                aria-label={i18n.translate(
+                  'observability.alerting.prometheusFormSection.thresholdUnitAriaLabel',
+                  { defaultMessage: 'Threshold unit' }
+                )}
               />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem style={{ minWidth: 160 }}>
-            <EuiFormRow label="For Duration" display="rowCompressed">
+            <EuiFormRow
+              label={i18n.translate(
+                'observability.alerting.prometheusFormSection.forDurationLabel',
+                { defaultMessage: 'For Duration' }
+              )}
+              display="rowCompressed"
+            >
               <EuiSelect
                 options={DURATION_OPTIONS}
                 value={form.threshold.forDuration}
                 onChange={(e) => updateThreshold('forDuration', e.target.value)}
                 compressed
-                aria-label="For duration"
+                aria-label={i18n.translate(
+                  'observability.alerting.prometheusFormSection.forDurationAriaLabel',
+                  { defaultMessage: 'For duration' }
+                )}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -179,12 +230,19 @@ export const PrometheusFormSection: React.FC<{
         <EuiSpacer size="s" />
         <EuiCallOut size="s" color="primary" iconType="iInCircle">
           <EuiText size="xs">
-            Alert fires when:{' '}
-            <code>
-              {form.query || '<query>'} {form.threshold.operator} {form.threshold.value}
-              {form.threshold.unit}
-            </code>{' '}
-            for {form.threshold.forDuration}
+            <FormattedMessage
+              id="observability.alerting.prometheusFormSection.alertFiresMessage"
+              defaultMessage="Alert fires when: {expression} for {forDuration}"
+              values={{
+                expression: (
+                  <code>
+                    {form.query || '<query>'} {form.threshold.operator} {form.threshold.value}
+                    {form.threshold.unit}
+                  </code>
+                ),
+                forDuration: form.threshold.forDuration,
+              }}
+            />
           </EuiText>
         </EuiCallOut>
       </EuiPanel>
@@ -194,14 +252,25 @@ export const PrometheusFormSection: React.FC<{
       {/* Evaluation Settings */}
       <EuiPanel paddingSize="m" color="subdued">
         <EuiTitle size="xs">
-          <h3>Evaluation Settings</h3>
+          <h3>
+            {i18n.translate(
+              'observability.alerting.prometheusFormSection.evaluationSettingsTitle',
+              { defaultMessage: 'Evaluation Settings' }
+            )}
+          </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s" wrap>
           <EuiFlexItem style={{ minWidth: 160 }}>
             <EuiFormRow
-              label="Eval Interval"
-              helpText="How often evaluated"
+              label={i18n.translate(
+                'observability.alerting.prometheusFormSection.evalIntervalLabel',
+                { defaultMessage: 'Eval Interval' }
+              )}
+              helpText={i18n.translate(
+                'observability.alerting.prometheusFormSection.evalIntervalHelpText',
+                { defaultMessage: 'How often evaluated' }
+              )}
               display="rowCompressed"
             >
               <EuiSelect
@@ -209,29 +278,58 @@ export const PrometheusFormSection: React.FC<{
                 value={form.evaluationInterval}
                 onChange={(e) => onUpdate('evaluationInterval', e.target.value)}
                 compressed
-                aria-label="Evaluation interval"
+                aria-label={i18n.translate(
+                  'observability.alerting.prometheusFormSection.evaluationIntervalAriaLabel',
+                  { defaultMessage: 'Evaluation interval' }
+                )}
               />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem style={{ minWidth: 160 }}>
-            <EuiFormRow label="Pending Period" helpText="Before firing" display="rowCompressed">
+            <EuiFormRow
+              label={i18n.translate(
+                'observability.alerting.prometheusFormSection.pendingPeriodLabel',
+                { defaultMessage: 'Pending Period' }
+              )}
+              helpText={i18n.translate(
+                'observability.alerting.prometheusFormSection.pendingPeriodHelpText',
+                { defaultMessage: 'Before firing' }
+              )}
+              display="rowCompressed"
+            >
               <EuiSelect
                 options={DURATION_OPTIONS}
                 value={form.pendingPeriod}
                 onChange={(e) => onUpdate('pendingPeriod', e.target.value)}
                 compressed
-                aria-label="Pending period"
+                aria-label={i18n.translate(
+                  'observability.alerting.prometheusFormSection.pendingPeriodAriaLabel',
+                  { defaultMessage: 'Pending period' }
+                )}
               />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem style={{ minWidth: 160 }}>
-            <EuiFormRow label="Firing Period" helpText="Min firing time" display="rowCompressed">
+            <EuiFormRow
+              label={i18n.translate(
+                'observability.alerting.prometheusFormSection.firingPeriodLabel',
+                { defaultMessage: 'Firing Period' }
+              )}
+              helpText={i18n.translate(
+                'observability.alerting.prometheusFormSection.firingPeriodHelpText',
+                { defaultMessage: 'Min firing time' }
+              )}
+              display="rowCompressed"
+            >
               <EuiSelect
                 options={DURATION_OPTIONS}
                 value={form.firingPeriod}
                 onChange={(e) => onUpdate('firingPeriod', e.target.value)}
                 compressed
-                aria-label="Firing period"
+                aria-label={i18n.translate(
+                  'observability.alerting.prometheusFormSection.firingPeriodAriaLabel',
+                  { defaultMessage: 'Firing period' }
+                )}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -245,12 +343,18 @@ export const PrometheusFormSection: React.FC<{
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           <EuiFlexItem>
             <EuiTitle size="xs">
-              <h3>Labels</h3>
+              <h3>
+                {i18n.translate('observability.alerting.prometheusFormSection.labelsTitle', {
+                  defaultMessage: 'Labels',
+                })}
+              </h3>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
-              Categorize and route alerts
+              {i18n.translate('observability.alerting.prometheusFormSection.labelsDescription', {
+                defaultMessage: 'Categorize and route alerts',
+              })}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -271,10 +375,18 @@ export const PrometheusFormSection: React.FC<{
           buttonContent={
             <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
               <EuiFlexItem grow={false}>
-                <strong>Annotations</strong>
+                <strong>
+                  {i18n.translate('observability.alerting.prometheusFormSection.annotationsTitle', {
+                    defaultMessage: 'Annotations',
+                  })}
+                </strong>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">Optional</EuiBadge>
+                <EuiBadge color="hollow">
+                  {i18n.translate('observability.alerting.prometheusFormSection.optionalBadge', {
+                    defaultMessage: 'Optional',
+                  })}
+                </EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
           }
@@ -297,7 +409,11 @@ export const PrometheusFormSection: React.FC<{
         buttonContent={
           <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
             <EuiFlexItem grow={false}>
-              <strong>Rule Preview (YAML)</strong>
+              <strong>
+                {i18n.translate('observability.alerting.prometheusFormSection.rulePreviewTitle', {
+                  defaultMessage: 'Rule Preview (YAML)',
+                })}
+              </strong>
             </EuiFlexItem>
           </EuiFlexGroup>
         }

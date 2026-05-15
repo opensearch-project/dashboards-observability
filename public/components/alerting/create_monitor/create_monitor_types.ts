@@ -19,6 +19,7 @@
  *     `SEVERITY_OPTIONS`, `OS_MONITOR_TYPE_OPTIONS`,
  *     `CLUSTER_METRICS_API_OPTIONS`, `OS_SCHEDULE_UNIT_OPTIONS`
  */
+import { i18n } from '@osd/i18n';
 import { UnifiedAlertSeverity } from '../../../../common/types/alerting';
 import type { AnnotationEntry, LabelEntry, MonitorBackendType } from '../monitor_form_components';
 
@@ -144,69 +145,304 @@ export const DEFAULT_OS_FORM: OpenSearchFormState = {
 // ============================================================================
 
 export const INTERVAL_OPTIONS = [
-  { value: '15s', text: '15 seconds' },
-  { value: '30s', text: '30 seconds' },
-  { value: '1m', text: '1 minute' },
-  { value: '2m', text: '2 minutes' },
-  { value: '5m', text: '5 minutes' },
-  { value: '10m', text: '10 minutes' },
-  { value: '15m', text: '15 minutes' },
-  { value: '30m', text: '30 minutes' },
-  { value: '1h', text: '1 hour' },
+  {
+    value: '15s',
+    text: i18n.translate('observability.alerting.createMonitorTypes.interval15s', {
+      defaultMessage: '15 seconds',
+    }),
+  },
+  {
+    value: '30s',
+    text: i18n.translate('observability.alerting.createMonitorTypes.interval30s', {
+      defaultMessage: '30 seconds',
+    }),
+  },
+  {
+    value: '1m',
+    text: i18n.translate('observability.alerting.createMonitorTypes.interval1m', {
+      defaultMessage: '1 minute',
+    }),
+  },
+  {
+    value: '2m',
+    text: i18n.translate('observability.alerting.createMonitorTypes.interval2m', {
+      defaultMessage: '2 minutes',
+    }),
+  },
+  {
+    value: '5m',
+    text: i18n.translate('observability.alerting.createMonitorTypes.interval5m', {
+      defaultMessage: '5 minutes',
+    }),
+  },
+  {
+    value: '10m',
+    text: i18n.translate('observability.alerting.createMonitorTypes.interval10m', {
+      defaultMessage: '10 minutes',
+    }),
+  },
+  {
+    value: '15m',
+    text: i18n.translate('observability.alerting.createMonitorTypes.interval15m', {
+      defaultMessage: '15 minutes',
+    }),
+  },
+  {
+    value: '30m',
+    text: i18n.translate('observability.alerting.createMonitorTypes.interval30m', {
+      defaultMessage: '30 minutes',
+    }),
+  },
+  {
+    value: '1h',
+    text: i18n.translate('observability.alerting.createMonitorTypes.interval1h', {
+      defaultMessage: '1 hour',
+    }),
+  },
 ];
 
 export const DURATION_OPTIONS = [
-  { value: '0s', text: 'Immediately (0s)' },
-  { value: '30s', text: '30 seconds' },
-  { value: '1m', text: '1 minute' },
-  { value: '2m', text: '2 minutes' },
-  { value: '5m', text: '5 minutes' },
-  { value: '10m', text: '10 minutes' },
-  { value: '15m', text: '15 minutes' },
-  { value: '30m', text: '30 minutes' },
-  { value: '1h', text: '1 hour' },
+  {
+    value: '0s',
+    text: i18n.translate('observability.alerting.createMonitorTypes.duration0s', {
+      defaultMessage: 'Immediately (0s)',
+    }),
+  },
+  {
+    value: '30s',
+    text: i18n.translate('observability.alerting.createMonitorTypes.duration30s', {
+      defaultMessage: '30 seconds',
+    }),
+  },
+  {
+    value: '1m',
+    text: i18n.translate('observability.alerting.createMonitorTypes.duration1m', {
+      defaultMessage: '1 minute',
+    }),
+  },
+  {
+    value: '2m',
+    text: i18n.translate('observability.alerting.createMonitorTypes.duration2m', {
+      defaultMessage: '2 minutes',
+    }),
+  },
+  {
+    value: '5m',
+    text: i18n.translate('observability.alerting.createMonitorTypes.duration5m', {
+      defaultMessage: '5 minutes',
+    }),
+  },
+  {
+    value: '10m',
+    text: i18n.translate('observability.alerting.createMonitorTypes.duration10m', {
+      defaultMessage: '10 minutes',
+    }),
+  },
+  {
+    value: '15m',
+    text: i18n.translate('observability.alerting.createMonitorTypes.duration15m', {
+      defaultMessage: '15 minutes',
+    }),
+  },
+  {
+    value: '30m',
+    text: i18n.translate('observability.alerting.createMonitorTypes.duration30m', {
+      defaultMessage: '30 minutes',
+    }),
+  },
+  {
+    value: '1h',
+    text: i18n.translate('observability.alerting.createMonitorTypes.duration1h', {
+      defaultMessage: '1 hour',
+    }),
+  },
 ];
 
 export const OPERATOR_OPTIONS = [
-  { value: '>', text: '> (greater than)' },
-  { value: '>=', text: '>= (greater or equal)' },
-  { value: '<', text: '< (less than)' },
-  { value: '<=', text: '<= (less or equal)' },
-  { value: '==', text: '== (equal)' },
-  { value: '!=', text: '!= (not equal)' },
+  {
+    value: '>',
+    text: i18n.translate('observability.alerting.createMonitorTypes.operatorGt', {
+      defaultMessage: '> (greater than)',
+    }),
+  },
+  {
+    value: '>=',
+    text: i18n.translate('observability.alerting.createMonitorTypes.operatorGte', {
+      defaultMessage: '>= (greater or equal)',
+    }),
+  },
+  {
+    value: '<',
+    text: i18n.translate('observability.alerting.createMonitorTypes.operatorLt', {
+      defaultMessage: '< (less than)',
+    }),
+  },
+  {
+    value: '<=',
+    text: i18n.translate('observability.alerting.createMonitorTypes.operatorLte', {
+      defaultMessage: '<= (less or equal)',
+    }),
+  },
+  {
+    value: '==',
+    text: i18n.translate('observability.alerting.createMonitorTypes.operatorEq', {
+      defaultMessage: '== (equal)',
+    }),
+  },
+  {
+    value: '!=',
+    text: i18n.translate('observability.alerting.createMonitorTypes.operatorNeq', {
+      defaultMessage: '!= (not equal)',
+    }),
+  },
 ];
 
 export const SEVERITY_OPTIONS = [
-  { value: 'critical', text: 'Critical' },
-  { value: 'high', text: 'High' },
-  { value: 'medium', text: 'Medium (Warning)' },
-  { value: 'low', text: 'Low' },
-  { value: 'info', text: 'Info' },
+  {
+    value: 'critical',
+    text: i18n.translate('observability.alerting.createMonitorTypes.severityCritical', {
+      defaultMessage: 'Critical',
+    }),
+  },
+  {
+    value: 'high',
+    text: i18n.translate('observability.alerting.createMonitorTypes.severityHigh', {
+      defaultMessage: 'High',
+    }),
+  },
+  {
+    value: 'medium',
+    text: i18n.translate('observability.alerting.createMonitorTypes.severityMedium', {
+      defaultMessage: 'Medium (Warning)',
+    }),
+  },
+  {
+    value: 'low',
+    text: i18n.translate('observability.alerting.createMonitorTypes.severityLow', {
+      defaultMessage: 'Low',
+    }),
+  },
+  {
+    value: 'info',
+    text: i18n.translate('observability.alerting.createMonitorTypes.severityInfo', {
+      defaultMessage: 'Info',
+    }),
+  },
 ];
 
 export const OS_MONITOR_TYPE_OPTIONS = [
-  { value: 'ppl_monitor', text: 'PPL (Piped Processing Language)' },
-  { value: 'query_level_monitor', text: 'Per query (DSL)' },
-  { value: 'bucket_level_monitor', text: 'Per bucket (DSL)' },
-  { value: 'doc_level_monitor', text: 'Per document (DSL)' },
-  { value: 'cluster_metrics_monitor', text: 'Cluster Metrics' },
+  {
+    value: 'ppl_monitor',
+    text: i18n.translate('observability.alerting.createMonitorTypes.osMonitorTypePpl', {
+      defaultMessage: 'PPL (Piped Processing Language)',
+    }),
+  },
+  {
+    value: 'query_level_monitor',
+    text: i18n.translate('observability.alerting.createMonitorTypes.osMonitorTypeQueryLevel', {
+      defaultMessage: 'Per query (DSL)',
+    }),
+  },
+  {
+    value: 'bucket_level_monitor',
+    text: i18n.translate('observability.alerting.createMonitorTypes.osMonitorTypeBucketLevel', {
+      defaultMessage: 'Per bucket (DSL)',
+    }),
+  },
+  {
+    value: 'doc_level_monitor',
+    text: i18n.translate('observability.alerting.createMonitorTypes.osMonitorTypeDocLevel', {
+      defaultMessage: 'Per document (DSL)',
+    }),
+  },
+  {
+    value: 'cluster_metrics_monitor',
+    text: i18n.translate('observability.alerting.createMonitorTypes.osMonitorTypeClusterMetrics', {
+      defaultMessage: 'Cluster Metrics',
+    }),
+  },
 ];
 
 export const CLUSTER_METRICS_API_OPTIONS = [
-  { value: 'CLUSTER_HEALTH', text: 'Cluster Health' },
-  { value: 'CLUSTER_STATS', text: 'Cluster Stats' },
-  { value: 'CLUSTER_SETTINGS', text: 'Cluster Settings' },
-  { value: 'NODES_STATS', text: 'Nodes Stats' },
-  { value: 'CAT_INDICES', text: 'CAT Indices' },
-  { value: 'CAT_PENDING_TASKS', text: 'CAT Pending Tasks' },
-  { value: 'CAT_RECOVERY', text: 'CAT Recovery' },
-  { value: 'CAT_SHARDS', text: 'CAT Shards' },
-  { value: 'CAT_SNAPSHOTS', text: 'CAT Snapshots' },
-  { value: 'CAT_TASKS', text: 'CAT Tasks' },
+  {
+    value: 'CLUSTER_HEALTH',
+    text: i18n.translate('observability.alerting.createMonitorTypes.apiClusterHealth', {
+      defaultMessage: 'Cluster Health',
+    }),
+  },
+  {
+    value: 'CLUSTER_STATS',
+    text: i18n.translate('observability.alerting.createMonitorTypes.apiClusterStats', {
+      defaultMessage: 'Cluster Stats',
+    }),
+  },
+  {
+    value: 'CLUSTER_SETTINGS',
+    text: i18n.translate('observability.alerting.createMonitorTypes.apiClusterSettings', {
+      defaultMessage: 'Cluster Settings',
+    }),
+  },
+  {
+    value: 'NODES_STATS',
+    text: i18n.translate('observability.alerting.createMonitorTypes.apiNodesStats', {
+      defaultMessage: 'Nodes Stats',
+    }),
+  },
+  {
+    value: 'CAT_INDICES',
+    text: i18n.translate('observability.alerting.createMonitorTypes.apiCatIndices', {
+      defaultMessage: 'CAT Indices',
+    }),
+  },
+  {
+    value: 'CAT_PENDING_TASKS',
+    text: i18n.translate('observability.alerting.createMonitorTypes.apiCatPendingTasks', {
+      defaultMessage: 'CAT Pending Tasks',
+    }),
+  },
+  {
+    value: 'CAT_RECOVERY',
+    text: i18n.translate('observability.alerting.createMonitorTypes.apiCatRecovery', {
+      defaultMessage: 'CAT Recovery',
+    }),
+  },
+  {
+    value: 'CAT_SHARDS',
+    text: i18n.translate('observability.alerting.createMonitorTypes.apiCatShards', {
+      defaultMessage: 'CAT Shards',
+    }),
+  },
+  {
+    value: 'CAT_SNAPSHOTS',
+    text: i18n.translate('observability.alerting.createMonitorTypes.apiCatSnapshots', {
+      defaultMessage: 'CAT Snapshots',
+    }),
+  },
+  {
+    value: 'CAT_TASKS',
+    text: i18n.translate('observability.alerting.createMonitorTypes.apiCatTasks', {
+      defaultMessage: 'CAT Tasks',
+    }),
+  },
 ];
 
 export const OS_SCHEDULE_UNIT_OPTIONS = [
-  { value: 'MINUTES', text: 'Minutes' },
-  { value: 'HOURS', text: 'Hours' },
-  { value: 'DAYS', text: 'Days' },
+  {
+    value: 'MINUTES',
+    text: i18n.translate('observability.alerting.createMonitorTypes.scheduleUnitMinutes', {
+      defaultMessage: 'Minutes',
+    }),
+  },
+  {
+    value: 'HOURS',
+    text: i18n.translate('observability.alerting.createMonitorTypes.scheduleUnitHours', {
+      defaultMessage: 'Hours',
+    }),
+  },
+  {
+    value: 'DAYS',
+    text: i18n.translate('observability.alerting.createMonitorTypes.scheduleUnitDays', {
+      defaultMessage: 'Days',
+    }),
+  },
 ];

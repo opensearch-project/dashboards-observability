@@ -24,6 +24,7 @@
  * type for Prometheus, add the parallel `data-source` read for MDS OpenSearch.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { i18n } from '@osd/i18n';
 import type { SavedObject } from '../../../../../../src/core/public';
 import { coreRefs } from '../../../framework/core_refs';
 import type { Datasource } from '../../../../common/types/alerting';
@@ -79,7 +80,9 @@ export function mapSavedObjectsToDatasources(
       : [
           {
             id: 'local',
-            name: 'Local Cluster',
+            name: i18n.translate('observability.alerting.hooks.useDatasources.localCluster', {
+              defaultMessage: 'Local Cluster',
+            }),
             type: 'opensearch' as const,
             url: 'local',
             enabled: true,

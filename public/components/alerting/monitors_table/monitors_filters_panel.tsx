@@ -23,6 +23,8 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import {
   Datasource,
   MonitorHealthStatus,
@@ -150,14 +152,24 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
       >
         <EuiFlexItem>
           <EuiText size="xs">
-            <strong>Filters</strong>
+            <strong>
+              <FormattedMessage
+                id="observability.alerting.monitorsTable.filtersPanel.filtersHeader"
+                defaultMessage="Filters"
+              />
+            </strong>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType="menuLeft"
             onClick={onToggleOpen}
-            aria-label="Collapse filters"
+            aria-label={i18n.translate(
+              'observability.alerting.monitorsTable.filtersPanel.collapseAriaLabel',
+              {
+                defaultMessage: 'Collapse filters',
+              }
+            )}
             data-test-subj="monitorsFiltersPanelToggle"
           />
         </EuiFlexItem>
@@ -165,7 +177,9 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
       <div className="altFiltersBody">
         <FacetFilterGroup
           id="datasource"
-          label="Datasource"
+          label={i18n.translate('observability.alerting.monitorsTable.filtersPanel.datasource', {
+            defaultMessage: 'Datasource',
+          })}
           options={datasourceEntries.map((e) => e.label)}
           selected={selectedDsIds
             .map((id) => datasourceEntries.find((e) => e.id === id)?.label || '')
@@ -188,7 +202,12 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
           initialVisible={5}
           maxSelected={maxDatasources}
           onCapReached={onDatasourceCapReached}
-          searchAriaLabel="Search datasources"
+          searchAriaLabel={i18n.translate(
+            'observability.alerting.monitorsTable.filtersPanel.searchDatasourcesAriaLabel',
+            {
+              defaultMessage: 'Search datasources',
+            }
+          )}
           checkedFirst
           isCollapsed={isFacetCollapsed('datasource')}
           onToggleCollapse={toggleFacetCollapse}
@@ -196,7 +215,9 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
 
         {renderFacetGroup(
           'status',
-          'Status',
+          i18n.translate('observability.alerting.monitorsTable.filtersPanel.status', {
+            defaultMessage: 'Status',
+          }),
           uniqueStatuses,
           filters.status,
           (v) => updateFilter('status', v as MonitorStatus[]),
@@ -206,7 +227,9 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
         )}
         {renderFacetGroup(
           'severity',
-          'Severity',
+          i18n.translate('observability.alerting.monitorsTable.filtersPanel.severity', {
+            defaultMessage: 'Severity',
+          }),
           uniqueSeverities,
           filters.severity,
           (v) => updateFilter('severity', v as UnifiedAlertSeverity[]),
@@ -216,7 +239,9 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
         )}
         {renderFacetGroup(
           'monitorType',
-          'Type',
+          i18n.translate('observability.alerting.monitorsTable.filtersPanel.type', {
+            defaultMessage: 'Type',
+          }),
           uniqueTypes,
           filters.monitorType,
           (v) => updateFilter('monitorType', v as MonitorType[]),
@@ -225,7 +250,9 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
         )}
         {renderFacetGroup(
           'healthStatus',
-          'Health',
+          i18n.translate('observability.alerting.monitorsTable.filtersPanel.health', {
+            defaultMessage: 'Health',
+          }),
           uniqueHealth,
           filters.healthStatus,
           (v) => updateFilter('healthStatus', v as MonitorHealthStatus[]),
@@ -235,7 +262,9 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
         )}
         {renderFacetGroup(
           'backend',
-          'Backend',
+          i18n.translate('observability.alerting.monitorsTable.filtersPanel.backend', {
+            defaultMessage: 'Backend',
+          }),
           uniqueBackends,
           filters.backend,
           (v) => updateFilter('backend', v),
@@ -244,7 +273,9 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
         )}
         {renderFacetGroup(
           'createdBy',
-          'Created By',
+          i18n.translate('observability.alerting.monitorsTable.filtersPanel.createdBy', {
+            defaultMessage: 'Created By',
+          }),
           uniqueCreators,
           filters.createdBy,
           (v) => updateFilter('createdBy', v),
@@ -256,7 +287,12 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
           <>
             <EuiSpacer size="xs" />
             <EuiText size="xs" color="subdued" style={{ marginBottom: 6 }}>
-              <strong>Labels</strong>
+              <strong>
+                <FormattedMessage
+                  id="observability.alerting.monitorsTable.filtersPanel.labelsHeader"
+                  defaultMessage="Labels"
+                />
+              </strong>
             </EuiText>
             {labelKeys
               .filter((k) => !INTERNAL_LABEL_KEYS.has(k))
@@ -276,12 +312,20 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
         {/* Saved searches */}
         <EuiSpacer size="s" />
         <EuiText size="xs">
-          <strong>Saved Searches</strong>
+          <strong>
+            <FormattedMessage
+              id="observability.alerting.monitorsTable.filtersPanel.savedSearches"
+              defaultMessage="Saved Searches"
+            />
+          </strong>
         </EuiText>
         <EuiSpacer size="xs" />
         {savedSearches.length === 0 ? (
           <EuiText size="xs" color="subdued">
-            None yet
+            <FormattedMessage
+              id="observability.alerting.monitorsTable.filtersPanel.noneYet"
+              defaultMessage="None yet"
+            />
           </EuiText>
         ) : (
           savedSearches.map((ss) => (
@@ -311,7 +355,13 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
                 <EuiButtonIcon
                   iconType="cross"
                   size="s"
-                  aria-label={`Delete ${ss.name}`}
+                  aria-label={i18n.translate(
+                    'observability.alerting.monitorsTable.filtersPanel.deleteSavedSearchAriaLabel',
+                    {
+                      defaultMessage: 'Delete {name}',
+                      values: { name: ss.name },
+                    }
+                  )}
                   onClick={() => deleteSavedSearch(ss.id)}
                   color="text"
                 />
@@ -323,11 +373,21 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem>
               <EuiFieldText
-                placeholder="Search name"
+                placeholder={i18n.translate(
+                  'observability.alerting.monitorsTable.filtersPanel.searchNamePlaceholder',
+                  {
+                    defaultMessage: 'Search name',
+                  }
+                )}
                 value={saveSearchName}
                 onChange={(e) => setSaveSearchName(e.target.value)}
                 compressed
-                aria-label="Saved search name"
+                aria-label={i18n.translate(
+                  'observability.alerting.monitorsTable.filtersPanel.searchNameAriaLabel',
+                  {
+                    defaultMessage: 'Saved search name',
+                  }
+                )}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && saveSearchName.trim()) {
                     setSavedSearches((prev) => [
@@ -369,14 +429,22 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
                   }
                 }}
               >
-                Save
+                <FormattedMessage
+                  id="observability.alerting.monitorsTable.filtersPanel.saveButton"
+                  defaultMessage="Save"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 iconType="cross"
                 size="s"
-                aria-label="Cancel"
+                aria-label={i18n.translate(
+                  'observability.alerting.monitorsTable.filtersPanel.cancelAriaLabel',
+                  {
+                    defaultMessage: 'Cancel',
+                  }
+                )}
                 onClick={() => {
                   setShowSaveSearchInput(false);
                   setSaveSearchName('');
@@ -393,7 +461,10 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
             disabled={!searchQuery && activeFilterCount === 0}
             flush="left"
           >
-            Save current
+            <FormattedMessage
+              id="observability.alerting.monitorsTable.filtersPanel.saveCurrentButton"
+              defaultMessage="Save current"
+            />
           </EuiButtonEmpty>
         )}
       </div>

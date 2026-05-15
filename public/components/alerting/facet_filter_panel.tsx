@@ -23,6 +23,8 @@ import {
   EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 
 // ============================================================================
 // Types
@@ -234,7 +236,12 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
               }}
               data-test-subj={`facetGroup-${id}-clear`}
             >
-              <EuiText size="xs">Clear</EuiText>
+              <EuiText size="xs">
+                <FormattedMessage
+                  id="observability.alerting.facetFilterPanel.clear"
+                  defaultMessage="Clear"
+                />
+              </EuiText>
             </EuiLink>
           </EuiFlexItem>
         )}
@@ -246,10 +253,22 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
               <EuiFieldSearch
                 compressed
                 fullWidth
-                placeholder={`Search ${label.toLowerCase()}`}
+                placeholder={i18n.translate(
+                  'observability.alerting.facetFilterPanel.searchPlaceholder',
+                  {
+                    defaultMessage: 'Search {label}',
+                    values: { label: label.toLowerCase() },
+                  }
+                )}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                aria-label={searchAriaLabel || `Search ${label}`}
+                aria-label={
+                  searchAriaLabel ||
+                  i18n.translate('observability.alerting.facetFilterPanel.searchAriaLabel', {
+                    defaultMessage: 'Search {label}',
+                    values: { label },
+                  })
+                }
                 data-test-subj={`facetGroup-${id}-search`}
               />
               <EuiSpacer size="xs" />
@@ -308,7 +327,15 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
                   checked={isActive}
                   disabled={isDisabled}
                   aria-label={
-                    isDisabled ? `${displayLabel} (maximum datasources reached)` : undefined
+                    isDisabled
+                      ? i18n.translate(
+                          'observability.alerting.facetFilterPanel.disabledAriaLabel',
+                          {
+                            defaultMessage: '{displayLabel} (maximum datasources reached)',
+                            values: { displayLabel },
+                          }
+                        )
+                      : undefined
                   }
                   onChange={() => {
                     if (isActive) {
@@ -333,7 +360,20 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
               data-test-subj={`facetGroup-${id}-showMore`}
               style={{ marginTop: 4 }}
             >
-              <EuiText size="xs">{showAll ? 'Show less' : `+${remainingCount} more`}</EuiText>
+              <EuiText size="xs">
+                {showAll ? (
+                  <FormattedMessage
+                    id="observability.alerting.facetFilterPanel.showLess"
+                    defaultMessage="Show less"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="observability.alerting.facetFilterPanel.showMore"
+                    defaultMessage="+{count} more"
+                    values={{ count: remainingCount }}
+                  />
+                )}
+              </EuiText>
             </EuiLink>
           )}
           {capReached && !onCapReached && (
@@ -343,7 +383,11 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
               style={{ marginTop: 4 }}
               data-test-subj={`facetGroup-${id}-cap-helper`}
             >
-              Maximum {maxSelected} datasources can be selected
+              <FormattedMessage
+                id="observability.alerting.facetFilterPanel.maxDatasources"
+                defaultMessage="Maximum {maxSelected} datasources can be selected"
+                values={{ maxSelected }}
+              />
             </EuiText>
           )}
         </div>
@@ -356,19 +400,30 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
 // useFacetCollapse — hook to manage collapsed state
 // ============================================================================
 
+// User overrides are stored as a Map<id, boolean>:
+//   - present + true  → user explicitly collapsed
+//   - present + false → user explicitly expanded
+//   - absent          → fall through to the per-call default
+// This lets callers default specific facets (e.g. label facets discovered
+// dynamically from alert data) to collapsed without forcing the user to
+// re-collapse them on every render.
 export function useFacetCollapse() {
-  const [collapsedFacets, setCollapsedFacets] = useState<Set<string>>(new Set());
+  const [overrides, setOverrides] = useState<Map<string, boolean>>(() => new Map());
 
-  const toggleFacetCollapse = useCallback((id: string) => {
-    setCollapsedFacets((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+  const toggleFacetCollapse = useCallback((id: string, defaultCollapsed = false) => {
+    setOverrides((prev) => {
+      const current = prev.has(id) ? prev.get(id)! : defaultCollapsed;
+      const next = new Map(prev);
+      next.set(id, !current);
       return next;
     });
   }, []);
 
-  const isCollapsed = useCallback((id: string) => collapsedFacets.has(id), [collapsedFacets]);
+  const isCollapsed = useCallback(
+    (id: string, defaultCollapsed = false) =>
+      overrides.has(id) ? overrides.get(id)! : defaultCollapsed,
+    [overrides]
+  );
 
-  return { collapsedFacets, toggleFacetCollapse, isCollapsed };
+  return { toggleFacetCollapse, isCollapsed };
 }

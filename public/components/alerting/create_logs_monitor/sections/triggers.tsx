@@ -10,6 +10,8 @@
  */
 import React from 'react';
 import { EuiButtonEmpty, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { ActionState, LogsMonitorType, TriggerState } from '../create_logs_monitor_types';
 import { TriggerItem } from './trigger_item';
 
@@ -33,9 +35,20 @@ export const TriggersSection = React.memo<{
     onDeleteAction,
     onAddAction,
   }) => (
-    <section aria-label="Triggers">
+    <section
+      aria-label={i18n.translate(
+        'observability.alerting.createLogsMonitor.triggers.sectionAriaLabel',
+        { defaultMessage: 'Triggers' }
+      )}
+    >
       <EuiTitle size="xs">
-        <h3>Triggers ({triggers.length})</h3>
+        <h3>
+          <FormattedMessage
+            id="observability.alerting.createLogsMonitor.triggers.sectionTitle"
+            defaultMessage="Triggers ({count})"
+            values={{ count: triggers.length }}
+          />
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       {triggers.map((trigger, idx) => (
@@ -61,9 +74,14 @@ export const TriggersSection = React.memo<{
         size="s"
         iconType="plusInCircle"
         onClick={onAddTrigger}
-        aria-label="Add another trigger"
+        aria-label={i18n.translate(
+          'observability.alerting.createLogsMonitor.triggers.addTriggerAriaLabel',
+          { defaultMessage: 'Add another trigger' }
+        )}
       >
-        Add another trigger
+        {i18n.translate('observability.alerting.createLogsMonitor.triggers.addTriggerButton', {
+          defaultMessage: 'Add another trigger',
+        })}
       </EuiButtonEmpty>
     </section>
   )

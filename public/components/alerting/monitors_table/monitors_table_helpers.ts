@@ -14,6 +14,7 @@
  *   - `BACKEND_DISPLAY` — datasource-type → display-name map
  *   - `SavedSearch` — persisted search + filter snapshot
  */
+import { i18n } from '@osd/i18n';
 import type { FilterState } from './monitors_table_filters';
 
 // ============================================================================
@@ -31,8 +32,12 @@ export const INTERNAL_LABEL_KEYS = new Set([
 ]);
 
 export const BACKEND_DISPLAY: Record<string, string> = {
-  opensearch: 'OpenSearch',
-  prometheus: 'Prometheus',
+  opensearch: i18n.translate('observability.alerting.monitorsTable.helpers.backend.opensearch', {
+    defaultMessage: 'OpenSearch',
+  }),
+  prometheus: i18n.translate('observability.alerting.monitorsTable.helpers.backend.prometheus', {
+    defaultMessage: 'Prometheus',
+  }),
 };
 
 // ============================================================================
