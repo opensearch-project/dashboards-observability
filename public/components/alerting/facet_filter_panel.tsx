@@ -39,10 +39,20 @@ export interface FacetGroupConfig {
   counts: Record<string, number>;
   displayMap?: Record<string, string>;
   colorMap?: Record<string, string>;
+  /** Optional per-option leading icon (e.g. logoOpenSearch / logoPrometheus). */
+  iconMap?: Record<string, string>;
   /** Enables a case-insensitive search input above the options list. */
   searchable?: boolean;
   /** Hide the `(count)` badge next to each option. Defaults to true. */
   showCounts?: boolean;
+  /**
+   * Render the number of distinct options as a subdued count next to the
+   * facet header (Grafana-style: `instance 9`). Useful for label-key facets
+   * where the value cardinality is the most informative thing about the key.
+   * Defaults to false — non-label facets (Severity, State, …) read better
+   * without it because their option set is small and stable.
+   */
+  showOptionCount?: boolean;
   /** Override the aria-label for the search input (defaults to `Search ${label}`). */
   searchAriaLabel?: string;
   /**
@@ -146,8 +156,10 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
   counts,
   displayMap,
   colorMap,
+  iconMap,
   searchable,
   showCounts = true,
+  showOptionCount = false,
   searchAriaLabel,
   initialVisible,
   maxSelected,
@@ -219,6 +231,19 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
         <EuiFlexItem>
           <EuiText size="xs">
             <strong>{label}</strong>
+            {showOptionCount && (
+              <>
+                {' '}
+                <EuiText
+                  size="xs"
+                  color="subdued"
+                  className="altFacetCount"
+                  data-test-subj={`facetGroup-${id}-optionCount`}
+                >
+                  {options.length}
+                </EuiText>
+              </>
+            )}
           </EuiText>
         </EuiFlexItem>
         {activeCount > 0 && (
@@ -308,6 +333,14 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
                 >
                   {colorMap && (
                     <EuiHealth color={colorMap[opt] || 'subdued'} style={{ marginRight: 0 }} />
+                  )}
+                  {iconMap?.[opt] && (
+                    <EuiIcon
+                      type={iconMap[opt]}
+                      size="m"
+                      style={{ flexShrink: 0 }}
+                      data-test-subj={`facetGroup-${id}-icon-${opt}`}
+                    />
                   )}
                   <TruncatedLabel text={displayLabel} />
                 </span>

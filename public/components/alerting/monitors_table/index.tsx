@@ -146,7 +146,6 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     count += filters.healthStatus.length;
     count += filters.createdBy.length;
     count += filters.destinations.length;
-    count += filters.backend.length;
     for (const vals of Object.values(filters.labels)) count += vals.length;
     return count;
   }, [filters]);
@@ -210,9 +209,6 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   const uniqueTypes = useMemo(() => collectUniqueValues(rules, (r) => r.monitorType), [rules]);
   const uniqueHealth = useMemo(() => collectUniqueValues(rules, (r) => r.healthStatus), [rules]);
   const uniqueCreators = useMemo(() => collectUniqueValues(rules, (r) => r.createdBy), [rules]);
-  const uniqueBackends = useMemo(() => collectUniqueValues(rules, (r) => r.datasourceType), [
-    rules,
-  ]);
 
   const updateFilter = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -256,7 +252,6 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
       severity: {},
       monitorType: {},
       healthStatus: {},
-      backend: {},
       createdBy: {},
     };
     for (const r of searchMatched) {
@@ -264,7 +259,6 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
       counts.severity[r.severity] = (counts.severity[r.severity] || 0) + 1;
       counts.monitorType[r.monitorType] = (counts.monitorType[r.monitorType] || 0) + 1;
       counts.healthStatus[r.healthStatus] = (counts.healthStatus[r.healthStatus] || 0) + 1;
-      counts.backend[r.datasourceType] = (counts.backend[r.datasourceType] || 0) + 1;
       counts.createdBy[r.createdBy] = (counts.createdBy[r.createdBy] || 0) + 1;
     }
     // Label counts
@@ -313,7 +307,6 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 uniqueSeverities={uniqueSeverities}
                 uniqueTypes={uniqueTypes}
                 uniqueHealth={uniqueHealth}
-                uniqueBackends={uniqueBackends}
                 uniqueCreators={uniqueCreators}
                 facetCounts={facetCounts}
                 isFacetCollapsed={isFacetCollapsed}

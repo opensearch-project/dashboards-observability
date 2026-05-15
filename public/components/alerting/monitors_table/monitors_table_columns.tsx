@@ -46,7 +46,6 @@ export type ColumnId =
   | 'severity'
   | 'monitorType'
   | 'healthStatus'
-  | 'backend'
   | 'datasource'
   | 'query'
   | 'group'
@@ -63,7 +62,6 @@ export const DEFAULT_VISIBLE: ColumnId[] = [
   'severity',
   'monitorType',
   'healthStatus',
-  'backend',
   'datasource',
 ];
 
@@ -142,23 +140,32 @@ export function buildTableColumns({
         sortable: true,
         truncateText: true,
         width: w('name'),
-        render: (name: string, item: UnifiedRuleSummary) => (
-          <EuiButtonEmpty
-            size="xs"
-            flush="left"
-            color="primary"
-            onClick={() => setSelectedMonitor(item)}
-            aria-label={i18n.translate(
-              'observability.alerting.monitorsTable.columns.viewDetailsAriaLabel',
-              {
-                defaultMessage: 'View details for {name}',
-                values: { name },
-              }
-            )}
-          >
-            <strong>{name}</strong>
-          </EuiButtonEmpty>
-        ),
+        render: (name: string, item: UnifiedRuleSummary) => {
+          const iconType =
+            item.datasourceType === 'prometheus' ? 'logoPrometheus' : 'logoOpenSearch';
+          // Use EuiButtonEmpty's `iconType` so the glyph lands in the
+          // button's vertically-centered icon slot. Putting <EuiIcon> inside
+          // the children slot lands inside .euiButtonEmpty__text which is
+          // not center-aligned, so the icon visually sits above the label.
+          return (
+            <EuiButtonEmpty
+              size="xs"
+              flush="left"
+              color="primary"
+              iconType={iconType}
+              onClick={() => setSelectedMonitor(item)}
+              aria-label={i18n.translate(
+                'observability.alerting.monitorsTable.columns.viewDetailsAriaLabel',
+                {
+                  defaultMessage: 'View details for {name}',
+                  values: { name },
+                }
+              )}
+            >
+              <strong>{name}</strong>
+            </EuiButtonEmpty>
+          );
+        },
       });
     } else if (colId === 'status') {
       cols.push({
@@ -228,18 +235,6 @@ export function buildTableColumns({
             </EuiFlexGroup>
           );
         },
-      });
-    } else if (colId === 'backend') {
-      cols.push({
-        field: 'datasourceType',
-        name: i18n.translate('observability.alerting.monitorsTable.columns.backend', {
-          defaultMessage: 'Backend',
-        }),
-        sortable: true,
-        width: w('backend'),
-        render: (t: string) => (
-          <EuiBadge color={t === 'opensearch' ? 'primary' : 'accent'}>{t}</EuiBadge>
-        ),
       });
     } else if (colId === 'datasource') {
       cols.push({

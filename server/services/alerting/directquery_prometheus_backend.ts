@@ -805,8 +805,12 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
 
     const liveAdditions: UnifiedAlertSummary[] = [];
     for (const la of liveAlerts) {
-      // Skip pending — same step-flapping reason as the matrix filter.
-      if (la.state === 'pending') continue;
+      // Pending alerts come straight from the live `/api/v1/alerts` endpoint
+      // (only available when the window ends at `now`), so they can't flap
+      // with the matrix step. Include them so the Alerts tab matches the
+      // Rules tab's pending count for currently-pending rules. Historical
+      // pending samples stay filtered at the matrix-query level — point-in-
+      // time pending isn't reliably reconstructible from a coarse step.
       if (!activeEpisodeHashes.has(hashRuleIdentity(la.labels))) {
         liveAdditions.push(promAlertToUnified(la, ds.id));
       }

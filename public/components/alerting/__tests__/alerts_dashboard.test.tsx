@@ -73,6 +73,10 @@ const baseProps = {
   onGoToRules: jest.fn(),
   startMs: NOW - HOUR_MS,
   endMs: NOW,
+  pickerStart: 'now-24h',
+  pickerEnd: 'now',
+  onTimeChange: jest.fn(),
+  onRefresh: jest.fn(),
 };
 
 beforeEach(() => {

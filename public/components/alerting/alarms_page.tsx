@@ -25,16 +25,7 @@
  *   - `AlertManagerEndTime`   — date-math string for picker end.
  */
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import {
-  EuiLink,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSuperDatePicker,
-} from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { toMountPoint } from '../../../../../src/plugins/opensearch_dashboards_react/public';
@@ -573,6 +564,33 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     setDeletedRuleIds(new Set());
   }, []);
 
+  // ---- Time-picker callbacks ----
+  //
+  // Stable identities (`useCallback`) so passing them down to `AlertsDashboard`
+  // doesn't invalidate that subtree's React.memo / dependent memos on every
+  // page-level re-render. Logic is identical to the previous inline handlers.
+  const handleTimeChange = useCallback(
+    ({ start, end }: { start: string; end: string }) => {
+      if (start === startTime && end === endTime) return;
+      setStartTime(start);
+      setEndTime(end);
+      persistTimeRange(start, end);
+    },
+    [startTime, endTime]
+  );
+
+  const handleRefreshTime = useCallback(
+    ({ start, end }: { start: string; end: string }) => {
+      if (start !== startTime || end !== endTime) {
+        setStartTime(start);
+        setEndTime(end);
+        persistTimeRange(start, end);
+      }
+      setRefreshToken((t) => t + 1);
+    },
+    [startTime, endTime]
+  );
+
   // ---- Handlers ----
 
   const handleAcknowledgeAlert = async (alertId: string) => {
@@ -1086,6 +1104,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             onGoToRules={() => setActiveTab('rules')}
             startMs={startMs}
             endMs={endMs}
+            pickerStart={startTime}
+            pickerEnd={endTime}
+            onTimeChange={handleTimeChange}
+            onRefresh={handleRefreshTime}
             truncated={alertsTruncated}
             fallbackHints={alertsFallbackHints}
           />
@@ -1128,60 +1150,20 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       data-test-subj="alertManager-page"
       style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
     >
-      {/* Tabs + time-range picker share a single row: tabs grow left,        */}
-      {/* picker + refresh sit right-aligned. Picker only renders on Alerts.  */}
-      <EuiFlexGroup
-        gutterSize="m"
-        alignItems="center"
-        responsive={false}
-        data-test-subj="alertManager-tabBar"
-      >
-        <EuiFlexItem grow={true}>
-          <EuiTabs data-test-subj="alertManager-tabs">
-            {tabs.map((t) => (
-              <EuiTab
-                key={t.id}
-                isSelected={activeTab === t.id}
-                onClick={() => setActiveTab(t.id)}
-                data-test-subj={`alertManager-tabs-${t.id}`}
-              >
-                {t.name}
-              </EuiTab>
-            ))}
-          </EuiTabs>
-        </EuiFlexItem>
-        {activeTab === 'alerts' && (
-          <EuiFlexItem grow={false} data-test-subj="alertManager-timeRangeBar">
-            <EuiSuperDatePicker
-              compressed
-              start={startTime}
-              end={endTime}
-              onTimeChange={({ start, end }) => {
-                if (start === startTime && end === endTime) return;
-                setStartTime(start);
-                setEndTime(end);
-                persistTimeRange(start, end);
-              }}
-              // EuiSuperDatePicker.onRefresh delivers the picker's resolved
-              // `{ start, end }` along with the interval. Sync them back
-              // into component state so the refetch uses the picker's
-              // current snapshot rather than the potentially-stale
-              // `startTime`/`endTime` captured on mount. Persist so the
-              // next page load matches what the user just saw.
-              onRefresh={({ start, end }) => {
-                if (start !== startTime || end !== endTime) {
-                  setStartTime(start);
-                  setEndTime(end);
-                  persistTimeRange(start, end);
-                }
-                setRefreshToken((t) => t + 1);
-              }}
-              data-test-subj="alertManager-datePicker"
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      {/* Tab bar — picker now lives inside the Alert Timeline panel header */}
+      {/* so it's adjacent to the chart it controls.                       */}
+      <EuiTabs data-test-subj="alertManager-tabs">
+        {tabs.map((t) => (
+          <EuiTab
+            key={t.id}
+            isSelected={activeTab === t.id}
+            onClick={() => setActiveTab(t.id)}
+            data-test-subj={`alertManager-tabs-${t.id}`}
+          >
+            {t.name}
+          </EuiTab>
+        ))}
+      </EuiTabs>
 
       {/* Surface the hook's error if alerts fetch failed. Mirrors the       */}
       {/* existing `error` callout pattern used for the Rules path.          */}

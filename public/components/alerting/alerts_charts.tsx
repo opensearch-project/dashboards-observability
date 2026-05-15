@@ -165,6 +165,11 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
       tooltip: {
         trigger: 'axis' as const,
         axisPointer: { type: 'shadow' as const },
+        // Render the tooltip on document.body so it escapes the chart's
+        // bounding box. Without this the tooltip clips against the chart
+        // container's top edge when the cursor is over the lower buckets.
+        appendToBody: true,
+        confine: false,
       },
       legend: { bottom: 0, left: 'center', textStyle: { fontSize: 10 } },
       grid: { top: 10, right: 15, bottom: 36, left: 40 },

@@ -100,17 +100,15 @@ describe('AlarmsPage', () => {
     expect(screen.getByTestId('monitors-table')).toBeInTheDocument();
   });
 
-  it('renders the time-range bar (picker + refresh) only on the Alerts tab', async () => {
+  it('forwards picker state + handlers to the AlertsDashboard (picker now lives in the timeline panel)', async () => {
     await act(async () => {
       render(<AlarmsPage {...defaultProps} />);
     });
-    expect(screen.getByTestId('alertManager-timeRangeBar')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByTestId('alertManager-tabs-rules'));
-    expect(screen.queryByTestId('alertManager-timeRangeBar')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByTestId('alertManager-tabs-routing'));
-    expect(screen.queryByTestId('alertManager-timeRangeBar')).not.toBeInTheDocument();
+    const last = mockDashboard.mock.calls[mockDashboard.mock.calls.length - 1][0];
+    expect(last.pickerStart).toBe('now-24h');
+    expect(last.pickerEnd).toBe('now');
+    expect(typeof last.onTimeChange).toBe('function');
+    expect(typeof last.onRefresh).toBe('function');
   });
 
   it('defaults startTime=now-24h / endTime=now when sessionStorage is empty', async () => {
@@ -135,15 +133,18 @@ describe('AlarmsPage', () => {
     expect(last.endTime).toBe('now-5m');
   });
 
-  it('clicking refresh increments the refreshToken passed to useAlerts', async () => {
+  it('invoking onRefresh on the dashboard increments the refreshToken passed to useAlerts', async () => {
     await act(async () => {
       render(<AlarmsPage {...defaultProps} />);
     });
     const before = mockUseAlerts.mock.calls[mockUseAlerts.mock.calls.length - 1][0].refreshToken;
 
-    // The built-in EuiSuperDatePicker refresh button (showUpdateButton=true default)
-    const refreshBtn = screen.getByTestId('superDatePickerApplyTimeButton');
-    fireEvent.click(refreshBtn);
+    // The picker is now rendered inside AlertsDashboard (mocked here), so we
+    // exercise the same path by invoking the forwarded callback directly.
+    const dashboardProps = mockDashboard.mock.calls[mockDashboard.mock.calls.length - 1][0];
+    await act(async () => {
+      dashboardProps.onRefresh({ start: 'now-24h', end: 'now' });
+    });
 
     const after = mockUseAlerts.mock.calls[mockUseAlerts.mock.calls.length - 1][0].refreshToken;
     expect(after).toBe(before + 1);
