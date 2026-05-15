@@ -19,7 +19,7 @@ import { useDatasources } from './hooks/use_datasources';
 export const AlertingHome = () => {
   const { datasources, isLoading: datasourcesLoading } = useDatasources();
 
-  // Show a "Beta" badge in the top chrome bar while the Alert Manager app is
+  // Show a "Beta" badge in the top chrome bar while the Alerts app is
   // mounted; clear it on unmount so it doesn't leak into other apps.
   useEffect(() => {
     const chrome = coreRefs.chrome;
@@ -30,7 +30,7 @@ export const AlertingHome = () => {
       }),
       tooltip: i18n.translate('observability.alerting.home.betaBadgeTooltip', {
         defaultMessage:
-          'Alert Manager is in beta. Features may change and some functionality is still evolving.',
+          'Alerts is in beta. Features may change and some functionality is still evolving.',
       }),
       iconType: 'beaker',
     });

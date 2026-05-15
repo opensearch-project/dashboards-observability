@@ -94,19 +94,45 @@
 }
 
 // Custom tooltip — appears instantly on hover. Styled to match EUI's
-// dark tooltip, but manually positioned with `position: fixed` so it
-// escapes the filter panel's `overflow: hidden` clipping. Top/left are
-// set inline by the component from `getBoundingClientRect()`.
+// dark tooltip via OUI vars, but manually positioned with `position: fixed`
+// so it escapes the filter panel's `overflow: hidden` clipping. Top/left
+// are set inline by the component from `getBoundingClientRect()`.
 .altTruncatedLabelTooltip {
+  @include euiBottomShadowSmall;
   position: fixed;
   z-index: 9000;
-  background: #1a1c21;
-  color: #fff;
-  font-size: 12px;
+  background: $euiColorFullShade;
+  color: $euiColorEmptyShade;
+  font-size: $euiFontSizeXS;
   line-height: 1.4;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: $euiSizeXS $euiSizeS;
+  border-radius: $euiBorderRadius;
   white-space: nowrap;
   pointer-events: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+// Per-row count badge after each facet option label. EuiText "subdued"
+// + "xs" handles theming; the inline-block keeps it on the same line as
+// the truncated label without expanding the row height.
+.altFacetCount {
+  display: inline-block;
+  line-height: 18px;
+}
+
+// Monitors table wrapper — keeps the table content scrollable horizontally
+// inside the resizable panel and removes the trailing header-cell border so
+// the right edge sits flush with the panel edge.
+.monitors-table-wrapper {
+  .euiTable {
+    table-layout: auto;
+    min-width: 100%;
+  }
+
+  .euiTableHeaderCell {
+    position: relative;
+
+    &:last-child {
+      border-right: none;
+    }
+  }
 }

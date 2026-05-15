@@ -312,9 +312,9 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
                   <TruncatedLabel text={displayLabel} />
                 </span>
                 {showCounts && (
-                  <span style={{ fontSize: '12px', lineHeight: '18px', color: '#69707D' }}>
+                  <EuiText size="xs" color="subdued" className="altFacetCount">
                     ({count})
-                  </span>
+                  </EuiText>
                 )}
               </span>
             );

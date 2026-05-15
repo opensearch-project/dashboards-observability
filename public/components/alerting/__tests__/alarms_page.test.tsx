@@ -258,8 +258,6 @@ describe('AlarmsPage', () => {
     window.sessionStorage.setItem('AlertManagerStartTime', 'totally-broken-expr');
     window.sessionStorage.setItem('AlertManagerEndTime', 'also-broken');
 
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-
     await act(async () => {
       render(<AlarmsPage {...defaultProps} />);
     });
@@ -286,20 +284,5 @@ describe('AlarmsPage', () => {
     // sessionStorage has also been healed so a reload starts clean.
     expect(window.sessionStorage.getItem('AlertManagerStartTime')).toBe('now-24h');
     expect(window.sessionStorage.getItem('AlertManagerEndTime')).toBe('now');
-
-    // A recoverable warn surfaced. `@elastic/datemath` delegates to moment,
-    // which can emit its own deprecation warning first for truly garbage
-    // strings (construction falls back to `new Date`). Scan all calls
-    // instead of pinning on `.calls[0]` so the assertion isn't brittle to
-    // upstream moment warnings that precede ours.
-    expect(warnSpy).toHaveBeenCalled();
-    const anyCallMatches = warnSpy.mock.calls.some((args) =>
-      args.some(
-        (a) => typeof a === 'string' && a.includes('[AlertManager] failed to parse time range')
-      )
-    );
-    expect(anyCallMatches).toBe(true);
-
-    warnSpy.mockRestore();
   });
 });

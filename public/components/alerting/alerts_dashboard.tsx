@@ -38,6 +38,7 @@ import { filterAlerts } from '../../../common/services/alerting/filter';
 import { AlertTimeline } from './alerts_charts';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
 import { countBy } from './shared_constants';
+import { INTERNAL_LABEL_KEYS } from './monitors_table/monitors_table_helpers';
 import './alerting.scss';
 
 // ============================================================================
@@ -88,17 +89,6 @@ const SEVERITY_SORT_ORDER: Record<string, number> = {
   low: 3,
   info: 4,
 };
-
-/** Internal label keys to hide from the filter panel */
-const INTERNAL_LABEL_KEYS = new Set([
-  'monitor_id',
-  'datasource_id',
-  '_workspace',
-  'monitor_type',
-  'monitor_kind',
-  'trigger_id',
-  'trigger_name',
-]);
 
 // ============================================================================
 // Alert Filter State

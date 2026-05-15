@@ -11,15 +11,20 @@
  *
  * Contents:
  *   - `ColumnId` — string union of known columns plus dynamic `label:<key>`
- *   - `ColumnDef` — `{ id, label, isLabelColumn? }` shape for the column picker
- *   - `BASE_COLUMNS` — ordered list of non-label columns for the picker
  *   - `DEFAULT_VISIBLE` — columns shown on first render
  *   - `buildTableColumns` — factory that returns the EuiInMemoryTable column
  *     array, taking the bits of component state the cell renderers need as
  *     explicit arguments (no closure over `this`)
  */
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHealth,
+  EuiTextColor,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
   MonitorHealthStatus,
@@ -51,105 +56,6 @@ export type ColumnId =
   | 'lastTriggered'
   | 'destinations'
   | string; // string for label columns
-
-export interface ColumnDef {
-  id: ColumnId;
-  label: string;
-  isLabelColumn?: boolean;
-}
-
-export const BASE_COLUMNS: ColumnDef[] = [
-  {
-    id: 'name',
-    label: i18n.translate('observability.alerting.monitorsTable.columns.name', {
-      defaultMessage: 'Name',
-    }),
-  },
-  {
-    id: 'status',
-    label: i18n.translate('observability.alerting.monitorsTable.columns.status', {
-      defaultMessage: 'Status',
-    }),
-  },
-  {
-    id: 'severity',
-    label: i18n.translate('observability.alerting.monitorsTable.columns.severity', {
-      defaultMessage: 'Severity',
-    }),
-  },
-  {
-    id: 'monitorType',
-    label: i18n.translate('observability.alerting.monitorsTable.columns.type', {
-      defaultMessage: 'Type',
-    }),
-  },
-  {
-    id: 'healthStatus',
-    label: i18n.translate('observability.alerting.monitorsTable.columns.health', {
-      defaultMessage: 'Health',
-    }),
-  },
-  {
-    id: 'labels',
-    label: i18n.translate('observability.alerting.monitorsTable.columns.labels', {
-      defaultMessage: 'Labels',
-    }),
-  },
-  {
-    id: 'backend',
-    label: i18n.translate('observability.alerting.monitorsTable.columns.backend', {
-      defaultMessage: 'Backend',
-    }),
-  },
-  {
-    id: 'datasource',
-    label: i18n.translate('observability.alerting.monitorsTable.columns.datasource', {
-      defaultMessage: 'Datasource',
-    }),
-  },
-  {
-    id: 'createdBy',
-    label: i18n.translate('observability.alerting.monitorsTable.columns.createdBy', {
-      defaultMessage: 'Created By',
-    }),
-  },
-  {
-    id: 'createdAt',
-    label: i18n.translate('observability.alerting.monitorsTable.columns.created', {
-      defaultMessage: 'Created',
-    }),
-  },
-  {
-    id: 'lastModified',
-    label: i18n.translate('observability.alerting.monitorsTable.columns.lastModified', {
-      defaultMessage: 'Last Modified',
-    }),
-  },
-  {
-    id: 'lastTriggered',
-    label: i18n.translate('observability.alerting.monitorsTable.columns.lastTriggered', {
-      defaultMessage: 'Last Triggered',
-    }),
-  },
-  {
-    id: 'destinations',
-    label: i18n.translate('observability.alerting.monitorsTable.columns.destinations', {
-      defaultMessage: 'Destinations',
-    }),
-  },
-  {
-    id: 'query',
-    label: i18n.translate('observability.alerting.monitorsTable.columns.query', {
-      defaultMessage: 'Query',
-    }),
-  },
-  {
-    id: 'group',
-    label: i18n.translate('observability.alerting.monitorsTable.columns.group', {
-      defaultMessage: 'Group',
-    }),
-  },
-];
 
 export const DEFAULT_VISIBLE: ColumnId[] = [
   'name',
@@ -237,14 +143,11 @@ export function buildTableColumns({
         truncateText: true,
         width: w('name'),
         render: (name: string, item: UnifiedRuleSummary) => (
-          <span
-            role="button"
-            tabIndex={0}
-            style={{ fontWeight: 500, color: '#006BB4', cursor: 'pointer' }}
+          <EuiButtonEmpty
+            size="xs"
+            flush="left"
+            color="primary"
             onClick={() => setSelectedMonitor(item)}
-            onKeyDown={(e: React.KeyboardEvent) => {
-              if (e.key === 'Enter') setSelectedMonitor(item);
-            }}
             aria-label={i18n.translate(
               'observability.alerting.monitorsTable.columns.viewDetailsAriaLabel',
               {
@@ -253,8 +156,8 @@ export function buildTableColumns({
               }
             )}
           >
-            {name}
-          </span>
+            <strong>{name}</strong>
+          </EuiButtonEmpty>
         ),
       });
     } else if (colId === 'status') {
@@ -312,7 +215,7 @@ export function buildTableColumns({
         width: w('labels'),
         render: (labels: Record<string, string>) => {
           const entries = Object.entries(labels);
-          if (entries.length === 0) return <span style={{ color: '#999' }}>—</span>;
+          if (entries.length === 0) return <EuiTextColor color="subdued">—</EuiTextColor>;
           return (
             <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
               {entries.map(([k, v]) => (
@@ -408,11 +311,11 @@ export function buildTableColumns({
               </EuiBadge>
             ))
           ) : (
-            <span style={{ color: '#999' }}>
+            <EuiTextColor color="subdued">
               {i18n.translate('observability.alerting.monitorsTable.columns.destinations.none', {
                 defaultMessage: 'None',
               })}
-            </span>
+            </EuiTextColor>
           ),
       });
     } else if (colId === 'query') {
@@ -445,7 +348,7 @@ export function buildTableColumns({
           return val ? (
             <EuiBadge color="hollow">{val}</EuiBadge>
           ) : (
-            <span style={{ color: '#999' }}>—</span>
+            <EuiTextColor color="subdued">—</EuiTextColor>
           );
         },
       });

@@ -61,7 +61,7 @@ export interface MonitorsMainPanelProps {
   setSelectedIds: React.Dispatch<React.SetStateAction<Set<string>>>;
 
   // Create
-  onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics' | 'slo') => void;
+  onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics') => void;
   showCreatePopover: boolean;
   setShowCreatePopover: React.Dispatch<React.SetStateAction<boolean>>;
 
@@ -320,11 +320,6 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
           className="monitors-table-wrapper"
           ref={tableWrapperRef}
         >
-          <style>{`
-              .monitors-table-wrapper .euiTable { table-layout: auto; min-width: 100%; }
-              .monitors-table-wrapper .euiTableHeaderCell { position: relative; }
-              .monitors-table-wrapper .euiTableHeaderCell:last-child { border-right: none; }
-            `}</style>
           {!loading && filtered.length === 0 ? (
             <EuiEmptyPrompt
               title={

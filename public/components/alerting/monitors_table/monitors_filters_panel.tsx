@@ -19,6 +19,8 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -65,8 +67,8 @@ export interface MonitorsFiltersPanelProps {
     labelCounts: Record<string, Record<string, number>>;
   };
 
-  isFacetCollapsed: (id: string) => boolean;
-  toggleFacetCollapse: (id: string) => void;
+  isFacetCollapsed: (id: string, defaultCollapsed?: boolean) => boolean;
+  toggleFacetCollapse: (id: string, defaultCollapsed?: boolean) => void;
 
   onToggleOpen: () => void;
 
@@ -125,7 +127,8 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
     onChange: (v: string[]) => void,
     counts: Record<string, number>,
     displayMap?: Record<string, string>,
-    colorMap?: Record<string, string>
+    colorMap?: Record<string, string>,
+    defaultCollapsed = false
   ) => (
     <FacetFilterGroup
       key={id}
@@ -137,8 +140,8 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
       counts={counts}
       displayMap={displayMap}
       colorMap={colorMap}
-      isCollapsed={isFacetCollapsed(id)}
-      onToggleCollapse={toggleFacetCollapse}
+      isCollapsed={isFacetCollapsed(id, defaultCollapsed)}
+      onToggleCollapse={(facetId) => toggleFacetCollapse(facetId, defaultCollapsed)}
     />
   );
 
@@ -285,7 +288,7 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
         {/* Label facets */}
         {labelKeys.length > 0 && (
           <>
-            <EuiSpacer size="xs" />
+            <EuiHorizontalRule margin="s" />
             <EuiText size="xs" color="subdued" style={{ marginBottom: 6 }}>
               <strong>
                 <FormattedMessage
@@ -303,7 +306,10 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
                   collectLabelValues(rules, key),
                   filters.labels[key] || [],
                   (v) => updateLabelFilter(key, v),
-                  facetCounts.labelCounts[key] || {}
+                  facetCounts.labelCounts[key] || {},
+                  undefined,
+                  undefined,
+                  true
                 )
               )}
           </>
@@ -338,17 +344,9 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
             >
               <EuiFlexItem>
                 <EuiText size="xs">
-                  <span
-                    role="button"
-                    tabIndex={0}
-                    style={{ cursor: 'pointer', color: '#006BB4' }}
-                    onClick={() => loadSavedSearch(ss)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') loadSavedSearch(ss);
-                    }}
-                  >
+                  <EuiLink color="primary" onClick={() => loadSavedSearch(ss)}>
                     {ss.name}
-                  </span>
+                  </EuiLink>
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

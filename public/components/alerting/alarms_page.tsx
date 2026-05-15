@@ -250,13 +250,9 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // `startTime`/`endTime`, resolving at module top-level would crash the
   // page on mount. `useMemo` lets us swallow the error and fall back to
   // the known-good defaults (`now-24h` -> `now`), which ALSO parse through
-  // `parseDateMathMs` so we never ship hard-coded epoch numbers.
-  //
-  // We emit `console.warn` (not `.error`) because the failure is recoverable
-  // and self-healing — the effect below resets state and sessionStorage to
-  // the defaults so the hook (which forwards the raw date-math strings to
-  // the backend) stops sending garbage that the route-layer validator
-  // would reject with a 400.
+  // `parseDateMathMs` so we never ship hard-coded epoch numbers. The
+  // recovery is self-healing: the effect below resets state and
+  // sessionStorage to the defaults so the hook stops forwarding garbage.
   //
   // `refreshToken` is in the deps so that clicking Refresh while the range
   // is relative-to-`now` (e.g. `now-24h` → `now`) re-resolves `now` to the
@@ -266,8 +262,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   const [startMs, endMs, rangeParseFailed] = useMemo(() => {
     try {
       return [parseDateMathMs(startTime, false), parseDateMathMs(endTime, true), false];
-    } catch (e) {
-      console.warn('[AlertManager] failed to parse time range, falling back to defaults', e);
+    } catch {
       return [
         parseDateMathMs(DEFAULT_START_TIME, false),
         parseDateMathMs(DEFAULT_END_TIME, true),
@@ -418,7 +413,14 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           id="observability.alerting.alarmsPage.maxDatasourcesToast.text"
           defaultMessage="Adjust the {settingName} setting in Advanced Settings to raise this cap. {openLink}"
           values={{
-            settingName: <strong>Alert Manager maximum selected datasources</strong>,
+            settingName: (
+              <strong>
+                <FormattedMessage
+                  id="observability.alerting.alarmsPage.maxDatasourcesToast.settingName"
+                  defaultMessage="Alerts maximum selected datasources"
+                />
+              </strong>
+            ),
             openLink: (
               <EuiLink onClick={() => window.location.assign(settingsHref)}>
                 {i18n.translate(
@@ -438,17 +440,15 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // ---- Breadcrumbs ----
 
   useEffect(() => {
-    setNavBreadCrumbs(
-      [{ text: observabilityTitle, href: `${observabilityID}#/` }],
-      [
-        {
-          text: i18n.translate('observability.alerting.alarmsPage.breadcrumb.alerts', {
-            defaultMessage: 'Alerts',
-          }),
-        },
-        { text: TAB_LABELS[activeTab] },
-      ]
-    );
+    const pageLabel = i18n.translate('observability.alerting.alarmsPage.breadcrumb.alerts', {
+      defaultMessage: 'Alerts',
+    });
+    const tabLabel = TAB_LABELS[activeTab];
+    // Suppress the tab segment when it duplicates the page-level segment
+    // (the "Alerts" tab and the page name are both "Alerts").
+    const trail =
+      tabLabel === pageLabel ? [{ text: pageLabel }] : [{ text: pageLabel }, { text: tabLabel }];
+    setNavBreadCrumbs([{ text: observabilityTitle, href: `${observabilityID}#/` }], trail);
   }, [activeTab]);
 
   // ---- Resolve initial selection once datasources are available ----
@@ -765,7 +765,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         }
       }
       if (indices.length > 0) labelsObj.indices = indices.join(', ');
-      labelsObj.monitorType = formState.monitorType;
+      // monitorType already lives on UnifiedRule as a top-level field — emitting
+      // it as a label too would leak into the Labels facet.
 
       return {
         id: `new-${Date.now()}-${index}`,
@@ -905,7 +906,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       condition: logsForm.triggers
         .map((t) => `${t.conditionOperator} ${t.conditionValue}`)
         .join(', '),
-      labels: { monitorType: logsForm.monitorType },
+      labels: {},
       annotations: { description: logsForm.description },
       monitorType: 'log',
       status: 'active',

@@ -9,7 +9,7 @@
  *
  * This file is the top-level component and state owner. Sub-files in this
  * folder:
- *   - `monitors_table_columns.tsx`  — ColumnDef, BASE_COLUMNS, cell renderers
+ *   - `monitors_table_columns.tsx`  — ColumnId, DEFAULT_VISIBLE, cell renderers
  *   - `monitors_table_filters.tsx`  — FilterState + search/filter/label helpers
  *   - `monitors_table_helpers.ts`   — constants + SavedSearch type
  *   - `resizable_columns.ts`        — DEFAULT_WIDTHS + `useResizableColumns`
@@ -43,7 +43,7 @@ interface MonitorsTableProps {
   loading: boolean;
   onDelete: (ids: string[]) => void;
   onClone?: (monitor: UnifiedRuleSummary) => void;
-  onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics' | 'slo') => void;
+  onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics') => void;
   /** Currently selected datasource IDs */
   selectedDsIds: string[];
   /** Callback when datasource selection changes */
