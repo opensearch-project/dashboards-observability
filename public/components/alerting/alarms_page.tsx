@@ -4,11 +4,38 @@
  */
 
 /**
- * Alert Manager UI — single-datasource selection with server-side pagination.
- * Prometheus datasources are decomposed into selectable workspaces.
+ * Alert Manager UI — top-level container.
+ *
+ * Owns:
+ *   - Datasource selection (persisted per-tab in `localStorage` by name).
+ *   - Time-range picker state (persisted per-tab in `sessionStorage` as
+ *     date-math strings, defaulting to `now-24h` → `now`). Pagination of the
+ *     in-memory alerts list stays local.
+ *   - `refreshToken` state bumped by the refresh button next to the picker;
+ *     `useAlerts` treats it as an effect dependency so bumping it refetches
+ *     without changing the range.
+ *
+ * Alerts data flows via `useAlerts` — the hook wraps the APM-pattern
+ * `AlertingOpenSearchService.listAlerts` transport (no `alarms_client.ts`).
+ * Rules data still uses the inline `fetchRules` callback; migrating Rules
+ * onto `useRules` is tracked as a follow-up.
+ *
+ * sessionStorage keys:
+ *   - `AlertManagerStartTime` — date-math string for picker start.
+ *   - `AlertManagerEndTime`   — date-math string for picker end.
  */
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { EuiLink, EuiSpacer, EuiTab, EuiTabs, EuiCallOut } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSuperDatePicker,
+} from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { toMountPoint } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 import { useToast } from '../common/toast';
 import {
@@ -27,6 +54,7 @@ import { CreateLogsMonitor, LogsMonitorFormState } from './create_logs_monitor';
 import { CreateMetricsMonitor, MetricsMonitorFormState } from './create_metrics_monitor';
 // Phase 2: import SloListing from './slo_listing';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
+import { useAlerts } from './hooks/use_alerts';
 import { useMonitorMutations } from './hooks/use_monitor_mutations';
 import { coreRefs } from '../../framework/core_refs';
 import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
@@ -39,6 +67,7 @@ import {
   transformLogsFormToPayload,
   transformMetricsFormToPayload,
 } from '../../../common/services/alerting/form_transforms';
+import { parseDateMathMs } from '../../../common/services/alerting/time_range';
 
 // ============================================================================
 // Main Page Component
@@ -76,6 +105,42 @@ function persistSelection(names: string[]) {
     window.localStorage.setItem(ALERT_MANAGER_SELECTED_DS_STORAGE_KEY, JSON.stringify(names));
   } catch (_e) {
     // localStorage can be unavailable (private mode / quota). Not fatal.
+  }
+}
+
+// ---- Time-range persistence ----
+//
+// Keyed in sessionStorage (not localStorage) so each tab keeps its own
+// picked range — mirrors APM's precedent. Falls back to the default
+// (`now-24h` → `now`) when the key is absent or the underlying storage
+// throws (SSR, private mode, quota exceeded).
+const ALERT_MANAGER_START_TIME_KEY = 'AlertManagerStartTime';
+const ALERT_MANAGER_END_TIME_KEY = 'AlertManagerEndTime';
+const DEFAULT_START_TIME = 'now-24h';
+const DEFAULT_END_TIME = 'now';
+
+function loadPersistedStartTime(): string {
+  try {
+    return window.sessionStorage.getItem(ALERT_MANAGER_START_TIME_KEY) || DEFAULT_START_TIME;
+  } catch (_e) {
+    return DEFAULT_START_TIME;
+  }
+}
+
+function loadPersistedEndTime(): string {
+  try {
+    return window.sessionStorage.getItem(ALERT_MANAGER_END_TIME_KEY) || DEFAULT_END_TIME;
+  } catch (_e) {
+    return DEFAULT_END_TIME;
+  }
+}
+
+function persistTimeRange(start: string, end: string) {
+  try {
+    window.sessionStorage.setItem(ALERT_MANAGER_START_TIME_KEY, start);
+    window.sessionStorage.setItem(ALERT_MANAGER_END_TIME_KEY, end);
+  } catch (_e) {
+    // sessionStorage can be unavailable (SSR / private mode / quota). Not fatal.
   }
 }
 
@@ -138,16 +203,146 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   const mutations = useMonitorMutations();
   const [activeTab, setActiveTab] = useState<TabId>('alerts');
   const [selectedDsIds, setSelectedDsIds] = useState<string[]>([]);
+  // `dataLoading` / `error` / `rulesWarnings` only drive the Rules flow now —
+  // the Alerts path reads loading/error/warnings from `useAlerts` below.
   const [dataLoading, setDataLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [warnings, setWarnings] = useState<Array<{ datasourceName: string; error: string }>>([]);
+  const [rulesWarnings, setRulesWarnings] = useState<
+    Array<{ datasourceName: string; error: string }>
+  >([]);
 
-  // Paginated data — list endpoints return summary shapes.
-  // Detail flyouts re-fetch the full UnifiedAlert / UnifiedRule on demand.
-  const [alerts, setAlerts] = useState<UnifiedAlertSummary[]>([]);
-  const [alertsTotal, setAlertsTotal] = useState(0);
-  const [alertsPage, setAlertsPage] = useState(1);
-  const [alertsPageSize] = useState(DEFAULT_PAGE_SIZE);
+  // ---- Time-range state ----
+  //
+  // Initialized lazily from sessionStorage so SSR / JSDOM first-render is
+  // still stable when storage access throws. Writes happen eagerly via
+  // `onTimeChange` (picker) and `onRefresh` (refresh button).
+  const [startTime, setStartTime] = useState<string>(loadPersistedStartTime);
+  const [endTime, setEndTime] = useState<string>(loadPersistedEndTime);
+  const [refreshToken, setRefreshToken] = useState(0);
+
+  // Resolve once per render, guarded.
+  //
+  // `parseDateMathMs` throws on malformed input (invalid date-math). If a
+  // user or a browser extension corrupts the sessionStorage-hydrated
+  // `startTime`/`endTime`, resolving at module top-level would crash the
+  // page on mount. `useMemo` lets us swallow the error and fall back to
+  // the known-good defaults (`now-24h` -> `now`), which ALSO parse through
+  // `parseDateMathMs` so we never ship hard-coded epoch numbers.
+  //
+  // We emit `console.warn` (not `.error`) because the failure is recoverable
+  // and self-healing — the effect below resets state and sessionStorage to
+  // the defaults so the hook (which forwards the raw date-math strings to
+  // the backend) stops sending garbage that the route-layer validator
+  // would reject with a 400.
+  //
+  // `refreshToken` is in the deps so that clicking Refresh while the range
+  // is relative-to-`now` (e.g. `now-24h` → `now`) re-resolves `now` to the
+  // current wall clock. Without it the chart window would stay pinned to
+  // the mount-time snapshot even though the hook refetches new data, which
+  // would misalign bars at the right edge of the chart.
+  const [startMs, endMs, rangeParseFailed] = useMemo(() => {
+    try {
+      return [parseDateMathMs(startTime, false), parseDateMathMs(endTime, true), false];
+    } catch (e) {
+      console.warn('[AlertManager] failed to parse time range, falling back to defaults', e);
+      return [
+        parseDateMathMs(DEFAULT_START_TIME, false),
+        parseDateMathMs(DEFAULT_END_TIME, true),
+        true,
+      ];
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startTime, endTime, refreshToken]);
+
+  // When parse failed (corrupted sessionStorage, manual DevTools edit),
+  // heal the stored values back to defaults. Without this, `startTime` /
+  // `endTime` keep leaking garbage into `useAlerts` → the backend route,
+  // which rejects it with a 400 and surfaces as `alertsError`. Resetting
+  // state + persistence both (a) stops the 400 loop and (b) means the
+  // next render sees a clean, good range.
+  useEffect(() => {
+    if (!rangeParseFailed) return;
+    setStartTime(DEFAULT_START_TIME);
+    setEndTime(DEFAULT_END_TIME);
+    persistTimeRange(DEFAULT_START_TIME, DEFAULT_END_TIME);
+  }, [rangeParseFailed]);
+
+  // ---- Alerts data (migrated off inline fetchAlerts onto useAlerts) ----
+  const { data: alertsData, isLoading: alertsLoading, error: alertsError } = useAlerts({
+    dsIds: selectedDsIds,
+    startTime,
+    endTime,
+    refreshToken,
+  });
+
+  // Optimistic ack overrides — keyed by alertId. The hook owns the alerts
+  // array (single source of truth), so we layer the user's pending acks
+  // on top in render rather than mutating the hook's data. Cleared per-id
+  // once a refetch confirms the ack landed (or the id disappears from the
+  // list, e.g. retention drop). Without this, clicking Acknowledge feels
+  // unresponsive because the Prometheus historical-reconstruction refetch
+  // can take seconds before the row state visibly flips.
+  const [ackOverrides, setAckOverrides] = useState<
+    Record<string, { state: 'acknowledged'; lastUpdated: string }>
+  >({});
+
+  // Public-facing projections. Kept in the same shape the rest of this
+  // component consumed before the migration so the downstream code didn't
+  // have to change. Behaviorally identical to the old `alerts`/`alertsTotal`
+  // state but now driven by the hook.
+  const rawAlerts: UnifiedAlertSummary[] = useMemo(() => alertsData?.results || [], [alertsData]);
+  const alerts: UnifiedAlertSummary[] = useMemo(() => {
+    if (Object.keys(ackOverrides).length === 0) return rawAlerts;
+    return rawAlerts.map((a) => {
+      const ov = ackOverrides[a.id];
+      return ov ? { ...a, state: ov.state, lastUpdated: ov.lastUpdated } : a;
+    });
+  }, [rawAlerts, ackOverrides]);
+  const alertsTotal = alerts.length;
+
+  // Drop overrides whose target alert is now acknowledged on the server
+  // (or has fallen out of the result set entirely). Runs after every hook
+  // refetch — keeps the override map from leaking memory across many acks.
+  useEffect(() => {
+    setAckOverrides((prev) => {
+      if (Object.keys(prev).length === 0) return prev;
+      let changed = false;
+      const next = { ...prev };
+      const byId = new Map(rawAlerts.map((a) => [a.id, a]));
+      for (const id of Object.keys(prev)) {
+        const live = byId.get(id);
+        if (!live || live.state === 'acknowledged') {
+          delete next[id];
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [rawAlerts]);
+  const alertsWarnings = useMemo(() => {
+    const failed = (alertsData?.datasourceStatus || []).filter((s) => s.status === 'error');
+    return failed.map((s) => ({
+      datasourceName: s.datasourceName,
+      error: s.error || 'Unknown error',
+    }));
+  }, [alertsData]);
+  // Backend hints surfaced through the dashboard banner props.
+  const alertsTruncated = (alertsData?.datasourceStatus || []).some((s) => s.truncated);
+  const alertsFallbackHints = useMemo(
+    () =>
+      (alertsData?.datasourceStatus || [])
+        .filter((s) => s.fallback)
+        .map((s) => ({ datasourceName: s.datasourceName, fallback: s.fallback! })),
+    [alertsData]
+  );
+  const alertsErrorMessage =
+    alertsError instanceof Error ? alertsError.message : alertsError ? String(alertsError) : null;
+
+  // Pagination state: previously `alertsPage` / `alertsPageSize` lived here
+  // to feed the old inline `fetchAlerts` callback. `useAlerts` returns the
+  // full dataset (server doesn't paginate the unified endpoint), so local
+  // alerts pagination state is no longer needed — `AlertsDashboard` slices
+  // the results client-side via `EuiInMemoryTable`.
 
   const [rules, setRules] = useState<UnifiedRuleSummary[]>([]);
   const [rulesTotal, setRulesTotal] = useState(-1); // -1 = not yet loaded
@@ -260,40 +455,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   }, [selectedDsIds, datasources]);
 
   // ---- Fetch data when datasource selection or page changes ----
-
-  const fetchAlerts = useCallback(
-    async (dsIds: string[], _page: number, _pageSize: number) => {
-      if (dsIds.length === 0) {
-        setAlerts([]);
-        setAlertsTotal(0);
-        return;
-      }
-      setDataLoading(true);
-      setError(null);
-      setWarnings([]);
-      try {
-        const res = await osService.listAlerts({ dsIds });
-        setAlerts(res.results || []);
-        setAlertsTotal((res.results || []).length);
-        // Convert per-datasource failure entries from the progressive response
-        // into the UI's warning shape.
-        const failedStatuses = (res.datasourceStatus || []).filter((s) => s.status === 'error');
-        if (failedStatuses.length > 0) {
-          setWarnings(
-            failedStatuses.map((s) => ({
-              datasourceName: s.datasourceName,
-              error: s.error || 'Unknown error',
-            }))
-          );
-        }
-      } catch (e: unknown) {
-        setError(e instanceof Error ? e.message : 'Failed to fetch alerts');
-      } finally {
-        setDataLoading(false);
-      }
-    },
-    [osService]
-  );
+  //
+  // Alerts: now driven by `useAlerts` above — no inline callback needed.
+  // Changing `selectedDsIds`, `startTime`, `endTime`, or `refreshToken`
+  // triggers a refetch through the hook's effect.
 
   const fetchRules = useCallback(
     async (dsIds: string[], _page: number, _pageSize: number) => {
@@ -304,14 +469,14 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       }
       setDataLoading(true);
       setError(null);
-      setWarnings([]);
+      setRulesWarnings([]);
       try {
         const res = await osService.listRules({ dsIds });
         setRules(res.results || []);
         setRulesTotal((res.results || []).length);
         const failedStatuses = (res.datasourceStatus || []).filter((s) => s.status === 'error');
         if (failedStatuses.length > 0) {
-          setWarnings(
+          setRulesWarnings(
             failedStatuses.map((s) => ({
               datasourceName: s.datasourceName,
               error: s.error || 'Unknown error',
@@ -327,19 +492,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     [osService]
   );
 
-  // Fetch when selection or pagination changes
-  useEffect(() => {
-    if (selectedDsIds.length === 0) {
-      setAlerts([]);
-      setAlertsTotal(0);
-      return;
-    }
-    // Fetch alerts regardless of active tab so the "Alerts (N)" tab label
-    // stays in sync when the user changes filters (e.g., datasource) while
-    // on a different tab. Mirrors the Rules-fetch effect below.
-    fetchAlerts(selectedDsIds, alertsPage, alertsPageSize);
-  }, [selectedDsIds, alertsPage, alertsPageSize, fetchAlerts]);
-
+  // Rules fetch effect (alerts effect removed — `useAlerts` hook drives that flow).
   useEffect(() => {
     if (selectedDsIds.length === 0) {
       setRules([]);
@@ -351,10 +504,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     fetchRules(selectedDsIds, rulesPage, rulesPageSize);
   }, [selectedDsIds, rulesPage, rulesPageSize, fetchRules]);
 
-  // Reset pages when datasource selection changes
+  // Reset pages when datasource selection changes. `useAlerts` refetches
+  // automatically on `selectedDsIds` change, so no alerts-page reset here.
   const handleDatasourceChange = useCallback((ids: string[]) => {
     setSelectedDsIds(ids);
-    setAlertsPage(1);
     setRulesPage(1);
     setDeletedRuleIds(new Set());
   }, []);
@@ -366,17 +519,18 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     try {
       await mutations.acknowledgeAlert(alertId, alert?.datasourceId, alert?.labels?.monitor_id);
       addToast('Alert acknowledged');
-      setAlerts((prev) =>
-        prev.map((a) =>
-          a.id === alertId
-            ? { ...a, state: 'acknowledged' as const, lastUpdated: new Date().toISOString() }
-            : a
-        )
-      );
+      // Layer an optimistic override so the row flips to "acknowledged"
+      // immediately. The override is dropped once the refetch's response
+      // either confirms the ack or removes the row.
+      const lastUpdated = new Date().toISOString();
+      setAckOverrides((prev) => ({ ...prev, [alertId]: { state: 'acknowledged', lastUpdated } }));
+      // Bump the refresh token so the hook refetches and the override can
+      // be reconciled / cleared once the backend agrees.
+      setRefreshToken((t) => t + 1);
       // Update the flyout's selected alert inline so it stays open with fresh state
       setSelectedAlert((prev) =>
         prev && prev.id === alertId
-          ? { ...prev, state: 'acknowledged' as const, lastUpdated: new Date().toISOString() }
+          ? { ...prev, state: 'acknowledged' as const, lastUpdated }
           : prev
       );
     } catch (e: unknown) {
@@ -765,13 +919,17 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           <AlertsDashboard
             alerts={alerts}
             datasources={datasources}
-            loading={dataLoading}
+            loading={alertsLoading}
             onViewDetail={(alert) => setSelectedAlert(alert)}
             onAcknowledge={handleAcknowledgeAlert}
             selectedDsIds={selectedDsIds}
             onDatasourceChange={handleDatasourceChange}
             maxDatasources={maxDatasources}
             onDatasourceCapReached={handleDatasourceCapReached}
+            startMs={startMs}
+            endMs={endMs}
+            truncated={alertsTruncated}
+            fallbackHints={alertsFallbackHints}
           />
         </>
       );
@@ -813,21 +971,77 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       data-test-subj="alertManager-page"
       style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
     >
-      <EuiTabs data-test-subj="alertManager-tabs">
-        {tabs.map((t) => (
-          <EuiTab
-            key={t.id}
-            isSelected={activeTab === t.id}
-            onClick={() => setActiveTab(t.id)}
-            data-test-subj={`alertManager-tabs-${t.id}`}
-          >
-            {t.name}
-          </EuiTab>
-        ))}
-      </EuiTabs>
+      {/* Tabs + time-range picker share a single row: tabs grow left,        */}
+      {/* picker + refresh sit right-aligned. Picker only renders on Alerts.  */}
+      <EuiFlexGroup
+        gutterSize="m"
+        alignItems="center"
+        responsive={false}
+        data-test-subj="alertManager-tabBar"
+      >
+        <EuiFlexItem grow={true}>
+          <EuiTabs data-test-subj="alertManager-tabs">
+            {tabs.map((t) => (
+              <EuiTab
+                key={t.id}
+                isSelected={activeTab === t.id}
+                onClick={() => setActiveTab(t.id)}
+                data-test-subj={`alertManager-tabs-${t.id}`}
+              >
+                {t.name}
+              </EuiTab>
+            ))}
+          </EuiTabs>
+        </EuiFlexItem>
+        {activeTab === 'alerts' && (
+          <EuiFlexItem grow={false} data-test-subj="alertManager-timeRangeBar">
+            <EuiSuperDatePicker
+              compressed
+              start={startTime}
+              end={endTime}
+              onTimeChange={({ start, end }) => {
+                if (start === startTime && end === endTime) return;
+                setStartTime(start);
+                setEndTime(end);
+                persistTimeRange(start, end);
+              }}
+              // EuiSuperDatePicker.onRefresh delivers the picker's resolved
+              // `{ start, end }` along with the interval. Sync them back
+              // into component state so the refetch uses the picker's
+              // current snapshot rather than the potentially-stale
+              // `startTime`/`endTime` captured on mount. Persist so the
+              // next page load matches what the user just saw.
+              onRefresh={({ start, end }) => {
+                if (start !== startTime || end !== endTime) {
+                  setStartTime(start);
+                  setEndTime(end);
+                  persistTimeRange(start, end);
+                }
+                setRefreshToken((t) => t + 1);
+              }}
+              data-test-subj="alertManager-datePicker"
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
 
-      {/* Datasource selector removed — now integrated into filter panels */}
+      {/* Surface the hook's error if alerts fetch failed. Mirrors the       */}
+      {/* existing `error` callout pattern used for the Rules path.          */}
+      {alertsErrorMessage && activeTab === 'alerts' && (
+        <EuiCallOut
+          title={i18n.translate('observability.alerting.alarmsPage.alertsError.title', {
+            defaultMessage: 'Error loading alerts',
+          })}
+          color="danger"
+          iconType="alert"
+          size="s"
+          style={{ marginBottom: 12 }}
+          data-test-subj="alertManager-alertsError"
+        >
+          <p>{alertsErrorMessage}</p>
+        </EuiCallOut>
+      )}
 
       {error && (
         <EuiCallOut
@@ -841,21 +1055,30 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         </EuiCallOut>
       )}
 
-      {warnings.length > 0 && (
-        <EuiCallOut
-          title="Some datasources could not be reached"
-          color="warning"
-          iconType="alert"
-          size="s"
-          style={{ marginBottom: 12 }}
-        >
-          {warnings.map((w, i) => (
-            <p key={i}>
-              <strong>{w.datasourceName}</strong>: {w.error}
-            </p>
-          ))}
-        </EuiCallOut>
-      )}
+      {(() => {
+        // Merge Rules-path `rulesWarnings` with the hook-driven `alertsWarnings`
+        // so we render a single callout regardless of which tab is active.
+        // Keyed by datasource name to dedupe when both paths report the
+        // same backend (possible if the user flips tabs rapidly while
+        // a slow datasource is still timing out on both flows).
+        const combined = activeTab === 'alerts' ? alertsWarnings : rulesWarnings;
+        if (combined.length === 0) return null;
+        return (
+          <EuiCallOut
+            title="Some datasources could not be reached"
+            color="warning"
+            iconType="alert"
+            size="s"
+            style={{ marginBottom: 12 }}
+          >
+            {combined.map((w, i) => (
+              <p key={i}>
+                <strong>{w.datasourceName}</strong>: {w.error}
+              </p>
+            ))}
+          </EuiCallOut>
+        );
+      })()}
 
       <div aria-live="polite" className="euiScreenReaderOnly">
         {`Showing ${tabs.find((t) => t.id === activeTab)?.name ?? activeTab} tab`}

@@ -24,8 +24,15 @@ import {
   EuiEmptyPrompt,
   EuiButtonEmpty,
   EuiResizableContainer,
+  EuiCallOut,
 } from '@elastic/eui';
-import { UnifiedAlertSummary, Datasource } from '../../../common/types/alerting';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
+import {
+  DatasourceFetchFallback,
+  UnifiedAlertSummary,
+  Datasource,
+} from '../../../common/types/alerting';
 import { filterAlerts } from '../../../common/services/alerting/filter';
 import { AlertTimeline } from './alerts_charts';
 import { AlertsSummaryCards } from './alerts_summary_cards';
@@ -183,6 +190,23 @@ export interface AlertsDashboardProps {
   maxDatasources: number;
   /** Callback fired when user tries to exceed `maxDatasources`. */
   onDatasourceCapReached: () => void;
+  /** Picker start resolved to epoch ms (resolved once by the parent). */
+  startMs: number;
+  /** Picker end resolved to epoch ms (resolved once by the parent). */
+  endMs: number;
+  /**
+   * Set by the parent when any backend reported a hard cap on returned
+   * alerts (e.g. the OpenSearch 1000-alert post-filter cap). Drives a
+   * warning callout near the timeline telling the user to narrow the
+   * range.
+   */
+  truncated?: boolean;
+  /**
+   * Per-datasource hints from the unified fetch, used to surface backend
+   * fallbacks (e.g. Prometheus empty-matrix → legacy /alerts active-only).
+   * Rendered as a callout above the timeline.
+   */
+  fallbackHints?: Array<{ datasourceName: string; fallback: DatasourceFetchFallback }>;
 }
 
 export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
@@ -195,6 +219,10 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   onDatasourceChange,
   maxDatasources,
   onDatasourceCapReached,
+  startMs,
+  endMs,
+  truncated,
+  fallbackHints,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [severityFilter, setSeverityFilter] = useState('all');
@@ -650,15 +678,80 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
 
                 <EuiSpacer size="m" />
 
+                {/* ---- Backend hints / fallbacks ---- */}
+                {/* Surfaced here (above the timeline) because both hints      */}
+                {/* directly explain what the chart and table are showing:     */}
+                {/*   - `truncated` → the backend capped results (OS 1000      */}
+                {/*     post-filter cap) so the chart is missing bars and the  */}
+                {/*     table row count is lower than reality.                 */}
+                {/*   - `fallbackHints` → a Prometheus datasource returned no  */}
+                {/*     historical matrix and fell back to the legacy         */}
+                {/*     `/api/v1/alerts` endpoint, which is active-only and   */}
+                {/*     does not reflect the selected time range.             */}
+                {truncated && (
+                  <>
+                    <EuiCallOut
+                      title={i18n.translate(
+                        'observability.alerting.dashboard.truncatedCallout.title',
+                        {
+                          defaultMessage: 'Search incomplete — too many alerts to scan',
+                        }
+                      )}
+                      color="warning"
+                      iconType="alert"
+                      size="s"
+                      data-test-subj="alerts-truncated-callout"
+                    >
+                      <p>
+                        <FormattedMessage
+                          id="observability.alerting.dashboard.truncatedCallout.body"
+                          defaultMessage="Narrow the time range or refine your filters and try again."
+                        />
+                      </p>
+                    </EuiCallOut>
+                    <EuiSpacer size="s" />
+                  </>
+                )}
+                {fallbackHints && fallbackHints.length > 0 && (
+                  <>
+                    <EuiCallOut
+                      title={i18n.translate(
+                        'observability.alerting.dashboard.fallbackCallout.title',
+                        {
+                          defaultMessage: 'Showing current alerts only',
+                        }
+                      )}
+                      color="warning"
+                      iconType="alert"
+                      size="s"
+                      data-test-subj="alerts-fallback-callout"
+                    >
+                      {fallbackHints.map((h, i) => (
+                        <p key={i}>
+                          <FormattedMessage
+                            id="observability.alerting.dashboard.fallbackCallout.entry"
+                            defaultMessage="{datasourceName}: historical alert data unavailable; showing currently active alerts instead ({fallback})."
+                            values={{
+                              datasourceName: <strong>{h.datasourceName}</strong>,
+                              fallback: h.fallback,
+                            }}
+                          />
+                        </p>
+                      ))}
+                    </EuiCallOut>
+                    <EuiSpacer size="s" />
+                  </>
+                )}
+
                 {/* ---- Visualization Row ---- */}
                 <EuiFlexGroup gutterSize="m" responsive={true}>
                   <EuiFlexItem grow={3}>
                     <EuiPanel paddingSize="m" hasBorder>
                       <EuiTitle size="xxs">
-                        <h4>Alert Timeline (24h)</h4>
+                        <h4>Alert Timeline</h4>
                       </EuiTitle>
                       <EuiSpacer size="s" />
-                      <AlertTimeline alerts={filteredAlerts} />
+                      <AlertTimeline alerts={filteredAlerts} startMs={startMs} endMs={endMs} />
                     </EuiPanel>
                   </EuiFlexItem>
                 </EuiFlexGroup>

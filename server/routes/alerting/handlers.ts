@@ -98,10 +98,17 @@ export async function handleDeleteOSMonitor(
 export async function handleGetOSAlerts(
   alertSvc: MultiBackendAlertService,
   client: AlertingOSClient,
-  dsId: string
+  dsId: string,
+  query?: { startTime?: string; endTime?: string }
 ): Promise<HandlerResult> {
   try {
-    return { status: 200, body: await alertSvc.getOSAlerts(client, dsId) };
+    return {
+      status: 200,
+      body: await alertSvc.getOSAlerts(client, dsId, {
+        startTime: query?.startTime,
+        endTime: query?.endTime,
+      }),
+    };
   } catch (e: unknown) {
     return toHandlerResult(e);
   }
@@ -146,10 +153,14 @@ export async function handleGetPromRuleGroups(
 export async function handleGetPromAlerts(
   alertSvc: MultiBackendAlertService,
   client: AlertingOSClient,
-  dsId: string
+  dsId: string,
+  query?: { startTime?: string; endTime?: string }
 ): Promise<HandlerResult> {
   try {
-    const alerts = await alertSvc.getPromAlerts(client, dsId);
+    const alerts = await alertSvc.getPromAlerts(client, dsId, {
+      startTime: query?.startTime,
+      endTime: query?.endTime,
+    });
     return { status: 200, body: { status: 'success', data: { alerts } } };
   } catch (e: unknown) {
     return toHandlerResult(e);
@@ -163,7 +174,13 @@ export async function handleGetPromAlerts(
 export async function handleGetUnifiedAlerts(
   alertSvc: MultiBackendAlertService,
   clientResolver: (dsId: string) => Promise<AlertingOSClient>,
-  query?: { dsIds?: string; timeout?: string; maxResults?: string }
+  query?: {
+    dsIds?: string;
+    timeout?: string;
+    maxResults?: string;
+    startTime?: string;
+    endTime?: string;
+  }
 ): Promise<HandlerResult> {
   try {
     const dsIds = query?.dsIds ? query.dsIds.split(',').filter(Boolean) : undefined;
@@ -177,6 +194,8 @@ export async function handleGetUnifiedAlerts(
       dsIds,
       timeoutMs,
       maxResults,
+      startTime: query?.startTime,
+      endTime: query?.endTime,
     });
     return { status: 200, body: response };
   } catch (e: unknown) {
