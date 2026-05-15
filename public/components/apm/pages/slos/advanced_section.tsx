@@ -9,8 +9,10 @@
  *
  *   1. MWMBR burn-rate tiers — short/long windows, multiplier, severity.
  *   2. Budget-warning thresholds — fraction remaining + severity.
- *   3. Supplemental alarm toggles — sliHealth, attainmentBreach, noData,
- *      resolved. budgetWarning is covered by the thresholds editor above.
+ *   3. Supplemental alarm toggles — sliHealth, attainmentBreach,
+ *      budgetWarning, noData, resolved. The budgetWarning toggle gates
+ *      *alert emission*; the thresholds editor above edits the threshold
+ *      *values*. Both surfaces are needed.
  *
  * Progressive disclosure: defaults match the hardcoded values
  * (google-30d.yaml burn rates, 50%/20% budget warnings, alarms off-by-default

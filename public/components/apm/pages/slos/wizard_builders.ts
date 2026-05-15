@@ -20,20 +20,6 @@ import type { SloTemplate } from '../../../../../common/slo/slo_templates';
 import type { FormState } from './wizard_state';
 import type { KeyValueEntry } from './wizard_key_value_grid';
 
-export function parseKeyValueBlock(raw: string): Record<string, string> {
-  const out: Record<string, string> = {};
-  for (const line of raw.split(/\r?\n/)) {
-    const trimmed = line.trim();
-    if (!trimmed) continue;
-    const eq = trimmed.indexOf('=');
-    if (eq <= 0) continue;
-    const key = trimmed.slice(0, eq).trim();
-    const value = trimmed.slice(eq + 1).trim();
-    if (key) out[key] = value;
-  }
-  return out;
-}
-
 /**
  * Flatten a KeyValueEntry[] into the flat Record<string,string> shape the
  * spec expects. Rows without a key are dropped (the user likely hasn't

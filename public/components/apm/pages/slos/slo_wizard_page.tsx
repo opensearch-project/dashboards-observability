@@ -141,7 +141,6 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
   const { templateId: urlTemplateId } = useParams<{ templateId?: string }>();
   const [state, dispatch] = useReducer(reducer, undefined, initialState);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [warnings, setWarnings] = useState<Record<string, string>>({});
   const [rulerError, setRulerError] = useState<SloRulerErrorEnvelope | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [createdSuccessfully, setCreatedSuccessfully] = useState(false);
@@ -174,20 +173,19 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
     () => (template ? buildCreateInput(state, template) : null),
     [state, template]
   );
-  const liveWarnings = useMemo<Record<string, string>>(
-    () => (liveInput ? validateSloSpec(liveInput.spec).warnings : {}),
-    [liveInput]
-  );
-  // Live errors drive the rule-preview empty-state list — *before* the user
-  // has clicked submit. Distinct from the `errors` state variable which only
-  // populates after submit (and gates the top-level summary).
-  const liveErrors = useMemo<Record<string, string>>(
-    () => (liveInput ? validateSloSpec(liveInput.spec).errors : {}),
-    [liveInput]
-  );
-  useEffect(() => {
-    setWarnings(liveWarnings);
-  }, [liveWarnings]);
+  // Live warnings + errors are derived from the live input. Warnings render
+  // unconditionally (advisory). Errors drive the rule-preview empty-state
+  // list — *before* the user has clicked submit. Distinct from the `errors`
+  // state variable which only populates after submit (and gates the top-
+  // level summary).
+  const { liveErrors, warnings } = useMemo<{
+    liveErrors: Record<string, string>;
+    warnings: Record<string, string>;
+  }>(() => {
+    if (!liveInput) return { liveErrors: {}, warnings: {} };
+    const result = validateSloSpec(liveInput.spec);
+    return { liveErrors: result.errors, warnings: result.warnings };
+  }, [liveInput]);
 
   // Track dirty state for the unsaved-changes prompt. The wizard becomes
   // dirty once the user types anything beyond the template default — we use
@@ -219,8 +217,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
     if (!template) return;
     dispatch({ kind: 'markSubmitAttempted' });
     const input = buildCreateInput(state, template);
-    const { errors: specErrors, warnings: specWarnings } = validateSloSpec(input.spec);
-    setWarnings(specWarnings);
+    const { errors: specErrors } = validateSloSpec(input.spec);
     if (Object.keys(specErrors).length > 0) {
       setErrors(specErrors);
       notifications.toasts.addWarning({

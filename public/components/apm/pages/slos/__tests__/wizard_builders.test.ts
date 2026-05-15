@@ -11,7 +11,7 @@
 
 import { SLO_TEMPLATES } from '../../../../../../common/slo/slo_templates';
 import type { SloTemplate } from '../../../../../../common/slo/slo_templates';
-import { buildCreateInput, entriesToRecord, parseKeyValueBlock } from '../wizard_builders';
+import { buildCreateInput, entriesToRecord } from '../wizard_builders';
 import { initialState, reducer } from '../wizard_state';
 import type { FormState } from '../wizard_state';
 
@@ -142,19 +142,5 @@ describe('entriesToRecord', () => {
         { key: 'b', value: '' },
       ])
     ).toEqual({ a: '1', b: '' });
-  });
-});
-
-describe('parseKeyValueBlock', () => {
-  it('parses a multi-line key=value block, tolerating whitespace', () => {
-    const block = `
-      compliance = pci
-      runbook=https://wiki/slo
-      ignored without equals
-    `;
-    expect(parseKeyValueBlock(block)).toEqual({
-      compliance: 'pci',
-      runbook: 'https://wiki/slo',
-    });
   });
 });

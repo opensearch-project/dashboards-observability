@@ -351,6 +351,10 @@ export function resolveActingUser(req: {
   auth?: { isAuthenticated?: boolean; credentials?: { username?: unknown } };
   headers?: Record<string, string | string[] | undefined>;
 }): string {
+  // We deliberately do NOT gate on `auth.isAuthenticated`: proxy-auth
+  // deployments populate `credentials.username` without establishing a
+  // security session, and we'd rather audit-attribute those writes to the
+  // proxied user than fall through to a header read or to 'unknown'.
   const credentials = req.auth?.credentials;
   const username = credentials && (credentials as { username?: unknown }).username;
   if (typeof username === 'string' && username.trim().length > 0) {
@@ -389,12 +393,17 @@ export function resolveWorkspaceId(req: OpenSearchDashboardsRequest): string {
   const fromState = getWorkspaceState(req).requestWorkspaceId;
   const candidate = typeof fromState === 'string' && fromState.length > 0 ? fromState : 'default';
   // Throws Error on shape failure; we re-cast to SloValidationError so
-  // routes can fall through the existing 400 envelope.
+  // routes can fall through the existing 400 envelope. Don't echo the
+  // candidate value back in the user-visible message — `requestWorkspaceId`
+  // is set from the URL path (`/w/<x>`) so it's user-controllable, and
+  // reflecting an arbitrary string into the response body invites
+  // log-injection / response-splitting style mischief.
   try {
     sloRulerNamespaceFor(candidate);
   } catch (_e) {
     throw new SloValidationError({
-      workspaceId: `Workspace id "${candidate}" is not valid for SLO routing. Workspace ids must match /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,62}$/.`,
+      workspaceId:
+        'Workspace id is not valid for SLO routing. Workspace ids must match /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,62}$/.',
     });
   }
   return candidate;
