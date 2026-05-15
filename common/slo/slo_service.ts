@@ -662,6 +662,15 @@ export class SloService {
     //
     // Alert groups are per-SLO and can't collide; we still delete those
     // synchronously on rollback.
+    //
+    // Refcount key: `(workspaceId, spec.datasourceId, fingerprint)`.
+    // `spec.datasourceId` is the canonical datasource *name* — the value
+    // persisted on the SO and the value the read path
+    // (`getFingerprintRefcounts`) keys on. The registry-id form
+    // `deploy.datasource.id` (e.g. `ds-4`) only exists in the OSD process
+    // memory and shifts across restarts; using it here would desync the
+    // increment/decrement keys from the read keys.
+    const refDatasourceId = spec.datasourceId;
     const incrementedFps: string[] = [];
     const rollback = async (): Promise<void> => {
       for (const fp of incrementedFps) {
@@ -669,7 +678,7 @@ export class SloService {
           try {
             await this.refStore.decrementRef({
               workspaceId: deploy.workspaceId,
-              datasourceId: deploy.datasource.id,
+              datasourceId: refDatasourceId,
               fingerprint: fp,
               fingerprintVersion: FINGERPRINT_VERSION,
             });
@@ -697,7 +706,7 @@ export class SloService {
         try {
           const r = await this.refStore.incrementRef({
             workspaceId: deploy.workspaceId,
-            datasourceId: deploy.datasource.id,
+            datasourceId: refDatasourceId,
             fingerprint: fp,
             fingerprintVersion: FINGERPRINT_VERSION,
             groupName,
@@ -905,13 +914,28 @@ export class SloService {
     deploy: SloDeployContext
   ): Promise<SloDocument> {
     const now = new Date().toISOString();
+    // Single source of truth for the workspace value used through this
+    // update. `existing.spec.workspaceId` is the authority because it was
+    // stamped at create time and the spec keeps it immutable; defending
+    // here against `deploy.workspaceId` drift means a future cross-
+    // workspace move (PR 2+) can't silently route writes to the wrong
+    // namespace or alert-group hash domain. The deploy context value must
+    // already match — assert once at function entry.
+    if (existing.spec.workspaceId && existing.spec.workspaceId !== deploy.workspaceId) {
+      throw new SloValidationError({
+        'spec.workspaceId': `Workspace mismatch: SLO is in workspace "${existing.spec.workspaceId}" but the request resolved to "${deploy.workspaceId}". Workspace is immutable after create.`,
+      });
+    }
+    const updateWorkspaceId = existing.spec.workspaceId ?? deploy.workspaceId;
     // Prefer the persisted namespace — see `update()`'s rationale. Falls back
-    // to the deploy context only for legacy SOs that pre-date the stamp.
+    // to the unified workspace value only for legacy SOs that pre-date the
+    // stamp; never directly to `deploy.workspaceId`, which can diverge from
+    // the spec's stamped value once cross-workspace moves land.
     const namespace =
       existing.status.provisioning.backend === 'prometheus' &&
       existing.status.provisioning.rulerNamespace
         ? existing.status.provisioning.rulerNamespace
-        : sloRulerNamespaceFor(deploy.workspaceId);
+        : sloRulerNamespaceFor(updateWorkspaceId);
     const newFingerprints = this.computeObjectiveFingerprints(merged);
     const oldFingerprints =
       existing.status.provisioning.backend === 'prometheus'
@@ -922,7 +946,13 @@ export class SloService {
     const toAdd = [...newUnique].filter((fp) => !oldUnique.has(fp));
     const toDrop = [...oldUnique].filter((fp) => !newUnique.has(fp));
 
-    const alertGroupName = dedupAlertGroupName(merged.name, deploy.workspaceId, existing.id);
+    const alertGroupName = dedupAlertGroupName(merged.name, updateWorkspaceId, existing.id);
+
+    // See `createDedup` for rationale: refcount key uses
+    // `spec.datasourceId` (the canonical name persisted on the SO and used
+    // by the read path), not `deploy.datasource.id` (registry id like
+    // `ds-N`, ephemeral across restarts).
+    const refDatasourceId = merged.datasourceId;
 
     // Bookkeeping for rollback.
     //
@@ -939,8 +969,8 @@ export class SloService {
         if (this.refStore) {
           try {
             await this.refStore.decrementRef({
-              workspaceId: deploy.workspaceId,
-              datasourceId: deploy.datasource.id,
+              workspaceId: updateWorkspaceId,
+              datasourceId: refDatasourceId,
               fingerprint: fp,
               fingerprintVersion: FINGERPRINT_VERSION,
             });
@@ -964,8 +994,8 @@ export class SloService {
       if (this.refStore) {
         try {
           const r = await this.refStore.incrementRef({
-            workspaceId: deploy.workspaceId,
-            datasourceId: deploy.datasource.id,
+            workspaceId: updateWorkspaceId,
+            datasourceId: refDatasourceId,
             fingerprint: fp,
             fingerprintVersion: FINGERPRINT_VERSION,
             groupName,
@@ -1024,7 +1054,7 @@ export class SloService {
     const alertGroup = buildAlertGroupWithProvenance(
       updated,
       newFingerprints,
-      deploy.workspaceId,
+      updateWorkspaceId,
       deploy.datasource.name,
       this.pluginVersion,
       existing.status.createdAt,
@@ -1052,8 +1082,8 @@ export class SloService {
       for (const fp of toDrop) {
         try {
           await this.refStore.decrementRef({
-            workspaceId: deploy.workspaceId,
-            datasourceId: deploy.datasource.id,
+            workspaceId: updateWorkspaceId,
+            datasourceId: refDatasourceId,
             fingerprint: fp,
             fingerprintVersion: FINGERPRINT_VERSION,
           });
@@ -1168,10 +1198,14 @@ export class SloService {
       return { deleted: false };
     }
     const provisioning = existing.status.provisioning;
-    const namespace = provisioning.rulerNamespace || sloRulerNamespaceFor(deploy.workspaceId);
+    // Use the persisted spec workspace as the source of truth for namespace
+    // + alert-group hash, falling back to the deploy context only when the
+    // spec pre-dates the stamp. See `updateDedup` for the same invariant.
+    const deleteWorkspaceId = existing.spec.workspaceId ?? deploy.workspaceId;
+    const namespace = provisioning.rulerNamespace || sloRulerNamespaceFor(deleteWorkspaceId);
     const alertGroupName =
       provisioning.alertGroupName ||
-      dedupAlertGroupName(existing.spec.name, deploy.workspaceId, existing.id);
+      dedupAlertGroupName(existing.spec.name, deleteWorkspaceId, existing.id);
 
     await deploy.ruler.deleteRuleGroup(deploy.client, deploy.datasource, namespace, alertGroupName);
 
@@ -1184,8 +1218,8 @@ export class SloService {
       for (const fp of uniqueFps) {
         try {
           await this.refStore.decrementRef({
-            workspaceId: deploy.workspaceId,
-            datasourceId: deploy.datasource.id,
+            workspaceId: deleteWorkspaceId,
+            datasourceId: existing.spec.datasourceId,
             fingerprint: fp,
             fingerprintVersion: FINGERPRINT_VERSION,
           });

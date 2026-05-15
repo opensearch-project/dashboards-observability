@@ -22,6 +22,7 @@
  */
 
 import { createHash } from 'crypto';
+import { dump as yamlDump } from 'js-yaml';
 import type {
   BurnRateConfig,
   GeneratedRule,
@@ -319,12 +320,23 @@ export function ensureBucketMetric(metric: string): string {
  * Convert a latency bound + unit into the string Prometheus expects on the
  * histogram `le` label. Prometheus convention is seconds, so millisecond bounds
  * are scaled down.
+ *
+ * Bucket labels must literally match the producer's `le=` annotation, so the
+ * output stays in fixed decimal notation regardless of magnitude — using
+ * `parseFloat(toPrecision)` would emit scientific notation (e.g. `"1e-7"`)
+ * for very small bounds and silently miss the bucket. We pick `toFixed(9)`
+ * (the smallest histogram bucket Cortex emits is `1ns = 1e-9 s`) and trim
+ * trailing zeros so common bounds like `0.5`, `1`, `30` stay terse.
  */
-function formatLatencyBoundLe(bound: number, unit: 'seconds' | 'milliseconds'): string {
+export function formatLatencyBoundLe(bound: number, unit: 'seconds' | 'milliseconds'): string {
   const seconds = unit === 'milliseconds' ? bound / 1000 : bound;
-  // Trim trailing zeros; keep a handful of significant digits.
-  const s = seconds.toPrecision(10);
-  return parseFloat(s).toString();
+  if (!Number.isFinite(seconds) || seconds <= 0) return '0';
+  return trimTrailingZeros(seconds.toFixed(9));
+}
+
+function trimTrailingZeros(decimal: string): string {
+  if (!decimal.includes('.')) return decimal;
+  return decimal.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
 }
 
 // ============================================================================
@@ -390,7 +402,13 @@ function generateBurnRateAlerts(
 }
 
 function roundThreshold(n: number): string {
-  return parseFloat(n.toPrecision(6)).toString();
+  // `parseFloat(n.toPrecision(N))` produces scientific notation for very
+  // small/large values (e.g. `1e-7`); the same string also lands in label
+  // values like `slo_budget_threshold`, where consumer dashboards expect a
+  // plain decimal. Use `toFixed(6)` and trim trailing zeros for stable
+  // output across magnitudes.
+  if (!Number.isFinite(n)) return '0';
+  return trimTrailingZeros(n.toFixed(6));
 }
 
 // ============================================================================
@@ -556,37 +574,55 @@ function formatInterval(seconds: number): string {
   return `${seconds}s`;
 }
 
-function escapeYaml(s: string): string {
-  return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+/**
+ * Serialize a Prometheus rule group via `js-yaml` so the same library both
+ * the wizard preview and the ruler dual-write path use produces byte-equal
+ * output. The previous handrolled emitter only escaped `\` and `"` and
+ * passed control characters through verbatim, which let `\n`/`\r`/`\t`
+ * inside a user-supplied label value (e.g. spec.name) terminate the
+ * double-quoted scalar mid-line. js-yaml emits a literal block (`expr: |`)
+ * for multi-line strings automatically and properly escapes control chars
+ * inside double-quoted scalars, so neither the YAML structure nor the
+ * deployed expression can be smuggled through user fields.
+ */
+function rulesToYaml(groupName: string, interval: number, rules: GeneratedRule[]): string {
+  const doc: Record<string, unknown> = {
+    name: groupName,
+    interval: formatInterval(interval),
+    rules: rules.map((rule) => {
+      const out: Record<string, unknown> = {};
+      if (rule.type === 'recording') {
+        out.record = rule.name;
+      } else {
+        out.alert = rule.name;
+      }
+      out.expr = rule.expr;
+      if (rule.for) out.for = rule.for;
+      if (rule.labels && Object.keys(rule.labels).length > 0) {
+        out.labels = stringifyMap(rule.labels);
+      }
+      if (rule.annotations && Object.keys(rule.annotations).length > 0) {
+        out.annotations = stringifyMap(rule.annotations);
+      }
+      return out;
+    }),
+  };
+  return yamlDump(doc, { noRefs: true, lineWidth: -1, sortKeys: false });
 }
 
-function rulesToYaml(groupName: string, interval: number, rules: GeneratedRule[]): string {
-  const lines: string[] = [];
-  lines.push(`name: ${groupName}`);
-  lines.push(`interval: ${formatInterval(interval)}`);
-  lines.push('rules:');
-  for (const rule of rules) {
-    lines.push('');
-    lines.push(rule.type === 'recording' ? `  - record: ${rule.name}` : `  - alert: ${rule.name}`);
-    lines.push(`    expr: |`);
-    for (const line of rule.expr.split('\n')) {
-      lines.push(`      ${line}`);
-    }
-    if (rule.for) lines.push(`    for: ${rule.for}`);
-    if (rule.labels && Object.keys(rule.labels).length > 0) {
-      lines.push('    labels:');
-      for (const [k, v] of Object.entries(rule.labels)) {
-        lines.push(`      ${k}: "${escapeYaml(v)}"`);
-      }
-    }
-    if (rule.annotations && Object.keys(rule.annotations).length > 0) {
-      lines.push('    annotations:');
-      for (const [k, v] of Object.entries(rule.annotations)) {
-        lines.push(`      ${k}: "${escapeYaml(v)}"`);
-      }
-    }
+/**
+ * Coerce label / annotation values to strings before handing them to
+ * `js-yaml`. Defensive against callers passing through `undefined` or
+ * non-string values via the caller-controlled provenance JSON-string
+ * (`buildAlertProvenance`); the upstream emitter assumed string and
+ * silently produced `"k: undefined"` which Cortex rejects.
+ */
+function stringifyMap(map: Record<string, unknown>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(map)) {
+    out[k] = v == null ? '' : String(v);
   }
-  return lines.join('\n');
+  return out;
 }
 
 // ============================================================================

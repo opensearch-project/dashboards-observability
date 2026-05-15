@@ -26,6 +26,26 @@ import type { SloCreateInput, SloListFilters, SloUpdateInput } from '../../../co
 import type { HandlerResult } from '../alerting/route_utils';
 import { toHandlerResult } from '../alerting/route_utils';
 
+/**
+ * Cap on the upstream ruler diagnostic surfaced to the client. Cortex's
+ * verbose error envelopes can carry tenant ids, internal hostnames, or
+ * stack traces that don't belong in a multi-tenant OSD toast — the full
+ * body is logged server-side at `warn`, the client gets a short, ANSI-
+ * stripped excerpt that's still long enough to identify the failure
+ * class (e.g. "rule contains label X with empty value").
+ */
+const RULER_RAW_BODY_MAX_LEN = 256;
+function sanitizeRulerRawBody(body: string): string {
+  if (!body) return '';
+  // Strip ANSI/VT escape sequences that some Cortex builds embed.
+  const stripped = body.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '');
+  // Collapse all remaining control chars (incl. CR/LF/TAB) to spaces so
+  // the toast renders as a single line.
+  const flattened = stripped.replace(/[\x00-\x1F\x7F]+/g, ' ').trim();
+  if (flattened.length <= RULER_RAW_BODY_MAX_LEN) return flattened;
+  return `${flattened.slice(0, RULER_RAW_BODY_MAX_LEN - 1)}…`;
+}
+
 function toSloError(e: unknown, logger?: Logger): HandlerResult {
   if (e instanceof SloValidationError) {
     if (logger) logger.warn(e.message);
@@ -45,18 +65,25 @@ function toSloError(e: unknown, logger?: Logger): HandlerResult {
     };
   }
   if (e instanceof SloRulerError) {
-    if (logger) logger.warn(`Ruler dual-write failed: ${e.code} (HTTP ${e.httpStatus})`);
+    if (logger) {
+      // Log the full upstream body server-side so ops still has the raw
+      // diagnostic; the client gets a sanitized excerpt instead.
+      logger.warn(
+        `Ruler dual-write failed: ${e.code} (HTTP ${e.httpStatus}). Upstream body: ${e.rawBody}`
+      );
+    }
     // Surface upstream status verbatim when available (4xx) so the wizard can
-    // show Cortex's own diagnostic. 0 (unreachable) maps to 502 — closest
-    // semantic match (upstream gateway failure).
-    const status = e.httpStatus >= 400 && e.httpStatus < 600 ? e.httpStatus : 502;
+    // show Cortex's own diagnostic. 0 (transport / network failure with no
+    // response) maps to 503 — semantically "upstream unavailable" rather
+    // than 502 "bad gateway response".
+    const status = e.httpStatus >= 400 && e.httpStatus < 600 ? e.httpStatus : 503;
     return {
       status,
       body: {
         error: e.message,
         code: e.code,
         httpStatus: e.httpStatus,
-        rawBody: e.rawBody,
+        rawBody: sanitizeRulerRawBody(e.rawBody),
       },
     };
   }

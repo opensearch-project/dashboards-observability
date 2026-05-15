@@ -430,11 +430,14 @@ export function substituteCustomPromqlDefaults(
   defaults: SloTemplateCustomDefaults,
   vars: { service?: string; remoteService?: string; environment?: string }
 ): SloTemplateCustomDefaults {
+  // Use the function form of `replace` so a `vars.service` value containing
+  // regex-replacement special tokens (`$&`, `$1`, `$$`, ...) is treated as a
+  // literal substitution rather than a backreference.
   const replace = (s: string) =>
     s
-      .replace(/\$\{service\}/g, vars.service || '${service}')
-      .replace(/\$\{remoteService\}/g, vars.remoteService || '${remoteService}')
-      .replace(/\$\{environment\}/g, vars.environment || '${environment}');
+      .replace(/\$\{service\}/g, () => vars.service || '${service}')
+      .replace(/\$\{remoteService\}/g, () => vars.remoteService || '${remoteService}')
+      .replace(/\$\{environment\}/g, () => vars.environment || '${environment}');
   if (defaults.mode === 'events') {
     return {
       mode: 'events',

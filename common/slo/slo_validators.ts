@@ -15,7 +15,11 @@ import { parseDurationToMs, RECORDING_WINDOWS } from './slo_promql_generator';
 const METRIC_NAME_RE = /^[a-zA-Z_:][a-zA-Z0-9_:]*$/;
 const LABEL_NAME_RE = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
 const UNSAFE_LABEL_VALUE_RE = /["\\\n{}()]/;
-const SLUG_ID_RE = /^[a-z][a-z0-9-]{2,62}$/;
+// Slug shape — leading lowercase letter, internal alphanumerics with
+// single hyphens between segments, total length 3–63. Trailing/double
+// hyphens forbidden (cosmetic for URLs; tightens the prior pattern that
+// allowed `a--b` and `a-`).
+const SLUG_ID_RE = /^(?=.{3,63}$)[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 
 /**
  * Cardinality guardrail (design §10.3): UUID-shaped label values explode
@@ -49,10 +53,16 @@ function validateCustomPromQL(expr: string): string | null {
   }
   // Strip string literals before counting delimiters so a matcher like
   // `{status!~"5[0-9](}"}` isn't flagged as unbalanced. PromQL string
-  // literals use double or single quotes; the regex consumes `\\` (escaped
-  // backslash) and `\"` / `\'` (escaped quote) inside the span so a
-  // legitimate matcher like `"a\"b"` isn't truncated mid-literal.
-  const stripped = expr.replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g, '');
+  // literals use double quotes, single quotes, or backticks (the latter
+  // are raw — escapes don't apply). The regex consumes `\\` (escaped
+  // backslash) and `\"` / `\'` inside double/single-quoted spans so a
+  // legitimate matcher like `"a\"b"` isn't truncated mid-literal. Line
+  // comments (`# ...`) are also stripped so a `# ))` doesn't trip the
+  // balance check.
+  const stripped = expr
+    .replace(/`[^`]*`/g, '')
+    .replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g, '')
+    .replace(/#[^\n]*/g, '');
   let parens = 0;
   let braces = 0;
   let brackets = 0;
@@ -75,9 +85,40 @@ function validateCustomPromQL(expr: string): string | null {
   if (/\\\s*$/.test(stripped)) return 'PromQL expression must not end with a backslash';
   // Control chars (other than tab/newline) have no legitimate use in
   // PromQL; reject them so a paste from a rich-text editor doesn't smuggle
-  // zero-width or bidi-override chars into emitted YAML.
-  if (/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/.test(stripped)) {
+  // zero-width or bidi-override chars into emitted YAML. CR is rejected
+  // explicitly because YAML parsers behave inconsistently when a literal
+  // CR lands inside a literal-block scalar (`expr: |`).
+  if (/[\x00-\x08\x0B\x0C\x0D\x0E-\x1F\x7F]/.test(stripped)) {
     return 'PromQL expression contains control characters';
+  }
+  return null;
+}
+
+/**
+ * Strict shape for `goodEventsFilter`: a single matcher
+ * `<label> = "value"` (or `!=`, `=~`, `!~`). The generator splices the
+ * filter into a comma-separated label-matcher list, so any input that
+ * smuggles a comma can stack additional matchers on the metric and shift
+ * the recorded series. Rejecting commas + control chars (LF, CR, NULL,
+ * etc.) closes that path entirely. We also forbid backslashes outside
+ * the matcher value to prevent escape-sequence smuggling into the YAML
+ * mapping line.
+ *
+ * Allowed: `status="200"`, `code=~"5..", `path!="/healthz"`.
+ * Rejected: `status="x",pwn="y"`, `path="\nfoo"`, `code=~"5.."[`.
+ */
+const GOOD_EVENTS_FILTER_RE = /^[a-zA-Z_][a-zA-Z_0-9]*\s*(=|!=|=~|!~)\s*"([^"\\\n\r\t\x00-\x1F\x7F]|\\.)*"$/;
+function validateGoodEventsFilter(filter: string): string | null {
+  if (/[\n\r\t\x00-\x1F\x7F]/.test(filter)) {
+    return 'Good events filter must not contain control characters';
+  }
+  // Disallow comma so a filter cannot stack additional matchers via the
+  // generator's label-list join. Requires exactly one matcher per filter.
+  if (filter.includes(',')) {
+    return 'Good events filter must contain exactly one matcher (comma not allowed)';
+  }
+  if (!GOOD_EVENTS_FILTER_RE.test(filter.trim())) {
+    return 'Good events filter must match `<label> (=|!=|=~|!~) "value"` (no leading/trailing whitespace, no nested quotes)';
   }
   return null;
 }
@@ -97,6 +138,16 @@ const RESERVED_LABEL_KEYS = new Set([
   'slo_burn_rate_multiplier',
   'slo_window_approximated',
   'slo_budget_threshold',
+  // Prototype-pollution guard. `LABEL_NAME_RE` allows
+  // `[a-zA-Z_][a-zA-Z_0-9]*`, which matches `__proto__` /
+  // `constructor` / `prototype`. Cortex would reject the resulting rule
+  // (`slo_label___proto__: "x"`) at deploy time, so blocking earlier
+  // gives the user a clear validation error instead of an opaque ruler
+  // 400. Belt-and-braces — `normalizeSpec` already strips top-level
+  // unknowns from the SO attrs, but a label key is preserved verbatim.
+  '__proto__',
+  'constructor',
+  'prototype',
 ]);
 
 export interface SloValidationResult {
@@ -107,7 +158,24 @@ export interface SloValidationResult {
 /** Validate a user-supplied slug ID. Server generates UUIDs otherwise. */
 export function validateSloId(id: string): string | null {
   if (!SLUG_ID_RE.test(id)) {
-    return `Invalid SLO id. Must match /^[a-z][a-z0-9-]{2,62}$/`;
+    return 'Invalid SLO id. 3–63 characters; lowercase letters, digits, single hyphens between segments; must start with a letter.';
+  }
+  return null;
+}
+
+/**
+ * Reject character classes that break the YAML emitter's double-quoted
+ * scalars: literal LF / CR / TAB / NULL / DEL and the unicode line/
+ * paragraph separators the spec also forbids inside flow scalars. js-yaml
+ * escapes most of these correctly, but we block at the validator layer
+ * too so the rejection lands locally in the wizard rather than as a
+ * surprising-looking ruler error toast.
+ */
+const UNSAFE_USER_FIELD_RE = /[\x00-\x1F\x7F\u2028\u2029]/;
+function validateUserField(label: string, value: string | undefined): string | null {
+  if (value === undefined) return null;
+  if (UNSAFE_USER_FIELD_RE.test(value)) {
+    return `${label} must not contain control characters or unicode line/paragraph separators`;
   }
   return null;
 }
@@ -121,6 +189,9 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
     errors['spec.name'] = 'SLO name is required';
   } else if (input.name.length > 128) {
     errors['spec.name'] = 'SLO name must be 128 characters or fewer';
+  } else {
+    const nameErr = validateUserField('SLO name', input.name);
+    if (nameErr) errors['spec.name'] = nameErr;
   }
 
   if (!input.datasourceId) {
@@ -132,10 +203,25 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
     errors['spec.mode'] = `mode must be 'active' or 'shadow'`;
   }
 
-  if (!input.service) errors['spec.service'] = 'Service is required';
+  if (!input.service) {
+    errors['spec.service'] = 'Service is required';
+  } else {
+    const serviceErr = validateUserField('Service', input.service);
+    if (serviceErr) errors['spec.service'] = serviceErr;
+  }
+
+  if (input.tier !== undefined) {
+    const tierErr = validateUserField('Tier', input.tier);
+    if (tierErr) errors['spec.tier'] = tierErr;
+  }
 
   if (!input.owner || !Array.isArray(input.owner.teams) || input.owner.teams.length === 0) {
     errors['spec.owner.teams'] = 'At least one team is required';
+  } else {
+    for (let i = 0; i < input.owner.teams.length; i++) {
+      const teamErr = validateUserField('Owner team', input.owner.teams[i]);
+      if (teamErr) errors[`spec.owner.teams[${i}]`] = teamErr;
+    }
   }
 
   // --- SLI ---
@@ -151,9 +237,9 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
         if (!prom.metric) errors['spec.sli.definition.metric'] = 'Metric name is required';
         else if (!METRIC_NAME_RE.test(prom.metric))
           errors['spec.sli.definition.metric'] = 'Invalid Prometheus metric name';
-        if (prom.goodEventsFilter && /[{}()\n\\]/.test(prom.goodEventsFilter)) {
-          errors['spec.sli.definition.goodEventsFilter'] =
-            'Good events filter must not contain braces, parentheses, backslashes, or newlines';
+        if (prom.goodEventsFilter) {
+          const filterErr = validateGoodEventsFilter(prom.goodEventsFilter);
+          if (filterErr) errors['spec.sli.definition.goodEventsFilter'] = filterErr;
         }
       } else if (prom.type === 'latency_threshold') {
         if (!prom.metric) errors['spec.sli.definition.metric'] = 'Histogram metric is required';
@@ -316,17 +402,27 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
         errors[`spec.labels["${k}"]`] = `"${k}" collides with a reserved slo_* label`;
       }
       const values = Array.isArray(v) ? v : [v];
-      for (const val of values) {
+      // Collect all per-value errors into one message so a user fixing the
+      // first value doesn't have to resubmit to discover others. Mirrors
+      // the per-index dimension reporting elsewhere in the validator.
+      const valueErrors: string[] = [];
+      for (let i = 0; i < values.length; i++) {
+        const val = values[i];
+        const tag = values.length > 1 ? `[${i}] ` : '';
         if (typeof val !== 'string') {
-          errors[`spec.labels["${k}"]`] = 'Label values must be strings';
+          valueErrors.push(`${tag}must be a string`);
         } else if (val.length > 256) {
-          errors[`spec.labels["${k}"]`] = 'Label values must be 256 characters or fewer';
+          valueErrors.push(`${tag}must be 256 characters or fewer`);
         } else if (UNSAFE_LABEL_VALUE_RE.test(val)) {
-          errors[`spec.labels["${k}"]`] =
-            'Label value must not contain double quotes, backslashes, newlines, or braces';
+          valueErrors.push(
+            `${tag}must not contain double quotes, backslashes, newlines, or braces`
+          );
         } else if (UUID_LABEL_VALUE_RE.test(val)) {
-          errors[`spec.labels["${k}"]`] = 'Label values must not be UUIDs (cardinality guardrail)';
+          valueErrors.push(`${tag}must not be a UUID (cardinality guardrail)`);
         }
+      }
+      if (valueErrors.length > 0) {
+        errors[`spec.labels["${k}"]`] = `Label value: ${valueErrors.join('; ')}`;
       }
     }
   }

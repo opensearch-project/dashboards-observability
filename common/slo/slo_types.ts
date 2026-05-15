@@ -341,7 +341,11 @@ export interface SloPersistedStatus {
 // ============================================================================
 
 export interface SloDocument {
-  /** Immutable. UUIDv4 or user-supplied slug matching /^[a-z][a-z0-9-]{2,62}$/. */
+  /**
+   * Immutable. UUIDv4 or user-supplied slug — 3–63 chars, lowercase
+   * letters/digits with single hyphens between segments, must start with
+   * a letter (no trailing/double hyphens).
+   */
   id: string;
   spec: SloSpec;
   status: SloPersistedStatus;

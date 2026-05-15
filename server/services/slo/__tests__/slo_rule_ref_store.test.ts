@@ -192,8 +192,9 @@ describe('SloRuleRefStore', () => {
       expect(doc.attributes.refcount).toBe(2);
     });
 
-    it('throws SloRuleRefConflictError after 3 exhausted retries', async () => {
-      const { store } = makeStore({ conflictCount: 3 });
+    it('throws SloRuleRefConflictError after the retry budget is exhausted', async () => {
+      // MAX_RETRIES = 5; a conflictCount of 5 saturates every attempt.
+      const { store } = makeStore({ conflictCount: 5 });
       await store.incrementRef(BASE_INPUT); // create ok
       await expect(store.incrementRef(BASE_INPUT)).rejects.toBeInstanceOf(SloRuleRefConflictError);
     });

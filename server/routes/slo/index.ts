@@ -192,6 +192,18 @@ const budgetWarningThresholdSchema = schema.object({
   severity: schema.string({ minLength: 1 }),
 });
 
+const canonicalKindSchema = schema.oneOf([
+  schema.literal('apm-availability'),
+  schema.literal('apm-latency'),
+  schema.literal('http-availability'),
+  schema.literal('http-latency'),
+  schema.literal('rpc-availability'),
+  schema.literal('rpc-latency'),
+  schema.literal('db-latency'),
+  schema.literal('messaging-latency'),
+  schema.literal('genai-availability'),
+]);
+
 const sloSpecSchema = schema.object(
   {
     datasourceId: schema.string({ minLength: 1 }),
@@ -207,19 +219,7 @@ const sloSpecSchema = schema.object(
       primaryUser: schema.maybe(schema.string()),
     }),
     tier: schema.maybe(schema.string()),
-    canonicalKind: schema.maybe(
-      schema.oneOf([
-        schema.literal('apm-availability'),
-        schema.literal('apm-latency'),
-        schema.literal('http-availability'),
-        schema.literal('http-latency'),
-        schema.literal('rpc-availability'),
-        schema.literal('rpc-latency'),
-        schema.literal('db-latency'),
-        schema.literal('messaging-latency'),
-        schema.literal('genai-availability'),
-      ])
-    ),
+    canonicalKind: schema.maybe(canonicalKindSchema),
     sli: sliNodeSchema,
     objectives: schema.arrayOf(objectiveSchema, { minSize: 1 }),
     budgetWarningThresholds: schema.arrayOf(budgetWarningThresholdSchema),
@@ -236,6 +236,49 @@ const sloSpecSchema = schema.object(
   { unknowns: 'allow' }
 );
 
+/**
+ * Partial spec schema for PUT (update) and preview. Mirrors `sloSpecSchema`
+ * but every top-level field is optional so partial patches still validate.
+ * Inner shapes stay strict — a field that *is* sent must match the strict
+ * shape, so a malformed `objectives[i]` or `sli` can't land at the service
+ * via a typo. Field-level `unknowns: 'allow'` is preserved on inner shapes
+ * to stay forgiving of older clients that send extra keys.
+ */
+const sloSpecPartialSchema = schema.object(
+  {
+    datasourceId: schema.maybe(schema.string({ minLength: 1 })),
+    workspaceId: schema.maybe(schema.string()),
+    name: schema.maybe(schema.string({ minLength: 1, maxLength: 128 })),
+    description: schema.maybe(schema.string()),
+    enabled: schema.maybe(schema.boolean()),
+    mode: schema.maybe(schema.oneOf([schema.literal('active'), schema.literal('shadow')])),
+    service: schema.maybe(schema.string({ minLength: 1 })),
+    owner: schema.maybe(
+      schema.object({
+        teams: schema.arrayOf(schema.string(), { minSize: 1 }),
+        primaryUser: schema.maybe(schema.string()),
+      })
+    ),
+    tier: schema.maybe(schema.string()),
+    canonicalKind: schema.maybe(canonicalKindSchema),
+    sli: schema.maybe(sliNodeSchema),
+    objectives: schema.maybe(schema.arrayOf(objectiveSchema, { minSize: 1 })),
+    budgetWarningThresholds: schema.maybe(schema.arrayOf(budgetWarningThresholdSchema)),
+    window: schema.maybe(windowSchema),
+    alerting: schema.maybe(alertingSchema),
+    alarms: schema.maybe(alarmsSchema),
+    exclusionWindows: schema.maybe(schema.arrayOf(exclusionWindowSchema)),
+    labels: schema.maybe(
+      schema.recordOf(
+        schema.string(),
+        schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+      )
+    ),
+    annotations: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  },
+  { unknowns: 'allow' }
+);
+
 const createBody = schema.object({
   id: schema.maybe(schema.string()),
   spec: sloSpecSchema,
@@ -243,12 +286,15 @@ const createBody = schema.object({
 
 const updateBody = schema.object({
   version: schema.number({ min: 1 }),
-  spec: schema.object({}, { unknowns: 'allow' }),
+  spec: sloSpecPartialSchema,
 });
 
 const previewBody = schema.object({
   id: schema.maybe(schema.string()),
-  spec: schema.object({}, { unknowns: 'allow' }),
+  // Preview is dry-run but the user expects the same field-level rejections
+  // they'd hit on create — share the strict spec schema so the wizard can't
+  // compose a preview with a malformed `objectives[i]` or unknown `mode`.
+  spec: sloSpecSchema,
 });
 
 // ============================================================================
@@ -426,9 +472,15 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
     },
     async (ctx, req, res) => {
       const q = req.query;
+      // Clamp at the route boundary so a malformed `?pageSize=99999999` fails
+      // fast before reaching the service-layer cap (100). NaN / non-positive
+      // values fall back to the service default.
+      const rawPage = q.page ? parseInt(q.page, 10) : NaN;
+      const rawPageSize = q.pageSize ? parseInt(q.pageSize, 10) : NaN;
       const filters = {
-        page: q.page ? parseInt(q.page, 10) : undefined,
-        pageSize: q.pageSize ? parseInt(q.pageSize, 10) : undefined,
+        page: Number.isFinite(rawPage) && rawPage > 0 ? rawPage : undefined,
+        pageSize:
+          Number.isFinite(rawPageSize) && rawPageSize > 0 ? Math.min(rawPageSize, 100) : undefined,
         datasourceId: q.datasourceId ? q.datasourceId.split(',').filter(Boolean) : undefined,
         state: q.state
           ? (q.state.split(',') as Array<
@@ -464,7 +516,10 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       if (result.status >= 400) {
         return res.customError({
           statusCode: result.status,
-          body: { message: String((result.body as { error?: string }).error ?? 'Failed') },
+          body: {
+            message: String((result.body as { error?: string }).error ?? 'Failed'),
+            attributes: result.body,
+          },
         });
       }
       return res.ok({ body: result.body });
@@ -532,7 +587,10 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({
         statusCode: result.status,
-        body: { message: String((result.body as { error?: string }).error ?? 'Failed') },
+        body: {
+          message: String((result.body as { error?: string }).error ?? 'Failed'),
+          attributes: result.body,
+        },
       });
     }
   );
@@ -548,7 +606,10 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({
         statusCode: result.status,
-        body: { message: String((result.body as { error?: string }).error ?? 'Not found') },
+        body: {
+          message: String((result.body as { error?: string }).error ?? 'Not found'),
+          attributes: result.body,
+        },
       });
     }
   );
@@ -612,18 +673,25 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         rulerClient,
         logger
       );
+      // Tolerant DELETE: when the datasource has been removed out-of-band
+      // the deploy-context build returns a 400. Without this branch the
+      // user is wedged — they can't drop the orphan SO via the API and
+      // have to use saved-object management UI to clean up. Log a warn so
+      // ops can spot the dangling ruler state, then proceed without a
+      // deploy context. The service still throws
+      // `SloRulerTeardownRequiredError` if the SO carries a rule group,
+      // which is the safe default for an SLO that needs ruler teardown
+      // before its SO record can be dropped.
+      let deploy = built.deploy;
       if (built.errorResponse) {
-        return res.customError({
-          statusCode: built.errorResponse.status,
-          body: {
-            message: String(
-              (built.errorResponse.body as { error?: string }).error ?? 'Delete failed'
-            ),
-            attributes: built.errorResponse.body,
-          },
-        });
+        logger.warn(
+          `SLO DELETE ${req.params.id}: datasource resolution failed (${
+            (built.errorResponse.body as { error?: string }).error ?? 'unknown'
+          }) — proceeding without a deploy context. The reconciler will sweep any orphan rule groups.`
+        );
+        deploy = undefined;
       }
-      const result = await handleDeleteSLO(sloService, req.params.id, logger, built.deploy);
+      const result = await handleDeleteSLO(sloService, req.params.id, logger, deploy);
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({
         statusCode: result.status,
@@ -669,7 +737,10 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({
         statusCode: result.status,
-        body: { message: String((result.body as { error?: string }).error ?? 'Enable failed') },
+        body: {
+          message: String((result.body as { error?: string }).error ?? 'Enable failed'),
+          attributes: result.body,
+        },
       });
     }
   );
@@ -708,7 +779,10 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({
         statusCode: result.status,
-        body: { message: String((result.body as { error?: string }).error ?? 'Disable failed') },
+        body: {
+          message: String((result.body as { error?: string }).error ?? 'Disable failed'),
+          attributes: result.body,
+        },
       });
     }
   );

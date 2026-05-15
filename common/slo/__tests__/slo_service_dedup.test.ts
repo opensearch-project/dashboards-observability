@@ -338,6 +338,24 @@ describe('SloService dedup — update (W3.8)', () => {
     expect(ruler.hasGroup('slo-generated-ws-001', dedupRecordingGroupName(fpNew))).toBe(true);
   });
 
+  it('rejects an update whose deploy.workspaceId does not match the SLO workspace', async () => {
+    const { svc, deploy } = makeHarness();
+    const spec = validSpec();
+    const created = await svc.create({ spec }, 'alice', deploy);
+    // Same datasource + ruler, but resolved deploy context for a *different*
+    // workspace. Workspace is immutable-after-create; the service must
+    // throw before doing any ruler/SO work.
+    const wrongDeploy: SloDeployContext = { ...deploy, workspaceId: 'ws-002' };
+    await expect(
+      svc.update(
+        created.id,
+        { spec: { description: 'evil' }, version: created.status.version },
+        'alice',
+        wrongDeploy
+      )
+    ).rejects.toMatchObject({ name: 'SloValidationError' });
+  });
+
   it('convergence: A edits to match B → refcount 1→2, no new recording group ever written', async () => {
     const { svc, ruler, refStore, deploy } = makeHarness();
     const specA = validSpec({

@@ -30,11 +30,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import type {
-  ChromeStart,
-  HttpStart,
-  NotificationsStart,
-} from '../../../../../../../src/core/public';
+import type { ChromeStart, NotificationsStart } from '../../../../../../../src/core/public';
 import { formatPct, SLO_PRECISION, TABULAR_NUMS_STYLE } from '../../../../../common/slo/format';
 import { getSloHealthColor, getSloHealthLabel } from '../../../../../common/slo/state';
 import type { SloSummary } from '../../../../../common/slo/slo_types';
@@ -42,7 +38,6 @@ import { SloApiClient, extractServerMessage } from './slo_api_client';
 
 export interface SloListingPageProps {
   apiClient: SloApiClient;
-  http: HttpStart;
   chrome: ChromeStart;
   notifications: NotificationsStart;
   parentBreadcrumb: { text: string; href: string };
@@ -191,7 +186,7 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
         // forbids `href` + `onClick` together, and a plain anchor wouldn't
         // pick up the primary-link style. The `euiLink` class matches.
         <Link
-          to={`/slos/${slo.id}`}
+          to={`/slos/${encodeURIComponent(slo.id)}`}
           className="euiLink euiLink--primary"
           data-test-subj="sloRowName"
         >
@@ -275,7 +270,7 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
               items={rows}
               columns={columns}
               loading={loading}
-              rowProps={(row) => ({ 'data-test-subj': `sloRow-${row.id}` })}
+              rowProps={(row) => ({ 'data-test-subj': `sloRow_${row.id}` })}
               pagination={{
                 pageIndex,
                 pageSize,

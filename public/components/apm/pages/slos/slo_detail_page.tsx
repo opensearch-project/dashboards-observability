@@ -125,7 +125,7 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
     chrome.setBreadcrumbs([
       parentBreadcrumb,
       { text: I18N.breadcrumbSlos, href: '#/slos' },
-      { text: doc?.spec.name ?? id, href: `#/slos/${id}` },
+      { text: doc?.spec.name ?? id, href: `#/slos/${encodeURIComponent(id)}` },
     ]);
   }, [chrome, id, doc, parentBreadcrumb]);
 

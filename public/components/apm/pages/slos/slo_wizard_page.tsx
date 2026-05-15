@@ -9,8 +9,8 @@
  * and exclusion windows lands in later PRs.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Prompt, useHistory } from 'react-router-dom';
 import { i18n } from '@osd/i18n';
 import {
   EuiButton,
@@ -93,6 +93,16 @@ const I18N = {
   toastCreateFailed: i18n.translate('observability.slo.wizard.toastCreateFailed', {
     defaultMessage: 'Failed to create SLO',
   }),
+  unsavedChangesPrompt: i18n.translate('observability.slo.wizard.unsavedChangesPrompt', {
+    defaultMessage:
+      'You have unsaved changes. Are you sure you want to leave this page? Your form will be lost.',
+  }),
+  errorRequired: i18n.translate('observability.slo.wizard.errorRequired', {
+    defaultMessage: 'Required',
+  }),
+  errorTargetRange: i18n.translate('observability.slo.wizard.errorTargetRange', {
+    defaultMessage: 'Target must be between 50 and 99.999',
+  }),
 };
 
 interface FormState {
@@ -101,7 +111,9 @@ interface FormState {
   team: string;
   datasourceId: string;
   metric: string;
-  target: number;
+  // `target` is the raw text from `EuiFieldNumber` so an empty input
+  // doesn't collapse to `0` mid-edit. Parsed at validation/submit time.
+  target: string;
   description: string;
 }
 
@@ -111,13 +123,19 @@ const INITIAL: FormState = {
   team: '',
   datasourceId: '',
   metric: 'http_requests_total',
-  target: 99.9,
+  target: '99.9',
   description: '',
 };
 
+function parseTarget(raw: string): number {
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : NaN;
+}
+
 function buildSpec(form: FormState): SloSpec {
   // Clamp target from percentage input (99.9) to the ratio the server stores (0.999).
-  const target = Math.min(0.99999, Math.max(0.5, form.target / 100));
+  const targetPct = parseTarget(form.target);
+  const target = Math.min(0.99999, Math.max(0.5, targetPct / 100));
   return {
     datasourceId: form.datasourceId.trim(),
     name: form.name.trim(),
@@ -162,6 +180,19 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
   const history = useHistory();
   const [form, setForm] = useState<FormState>(INITIAL);
   const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  // Mirrors the `generationRef` cancellation pattern from the listing page:
+  // submit completes asynchronously, and a parent unmount (browser back,
+  // breadcrumb click) before the response lands would otherwise call
+  // setState on an unmounted component. Tick this on unmount to drop late
+  // resolutions silently.
+  const submitGenerationRef = useRef(0);
+
+  useEffect(() => {
+    return () => {
+      submitGenerationRef.current++;
+    };
+  }, []);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -175,16 +206,50 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
     setForm((prev) => ({ ...prev, [k]: v }));
   };
 
+  const targetPct = parseTarget(form.target);
+  const validations = useMemo(
+    () => ({
+      name: form.name.trim().length > 0,
+      service: form.service.trim().length > 0,
+      team: form.team.trim().length > 0,
+      datasource: form.datasourceId.trim().length > 0,
+      metric: form.metric.trim().length > 0,
+      target: Number.isFinite(targetPct) && targetPct >= 50 && targetPct <= 99.999,
+    }),
+    [form, targetPct]
+  );
+  const valid = Object.values(validations).every(Boolean);
+
+  const dirty = useMemo(() => {
+    return (
+      form.name !== INITIAL.name ||
+      form.service !== INITIAL.service ||
+      form.team !== INITIAL.team ||
+      form.datasourceId !== INITIAL.datasourceId ||
+      form.metric !== INITIAL.metric ||
+      form.target !== INITIAL.target ||
+      form.description !== INITIAL.description
+    );
+  }, [form]);
+
   const onSubmit = useCallback(async () => {
+    if (!valid) {
+      setSubmitted(true);
+      return;
+    }
+    const myGen = ++submitGenerationRef.current;
     setSubmitting(true);
+    setSubmitted(true);
     try {
       const input: SloCreateInput = { spec: buildSpec(form) };
       const doc = await apiClient.create(input);
+      if (myGen !== submitGenerationRef.current) return;
       notifications.toasts.addSuccess(I18N.toastCreated(doc.spec.name));
       // Redirect to the detail page so the user sees the spec they authored
       // and so a new SLO on page 2 of a paginated listing doesn't "disappear".
-      history.push(`/slos/${doc.id}`);
+      history.push(`/slos/${encodeURIComponent(doc.id)}`);
     } catch (err) {
+      if (myGen !== submitGenerationRef.current) return;
       const ruler = extractRulerErrorEnvelope(err);
       if (ruler) {
         notifications.toasts.addDanger({
@@ -198,71 +263,122 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
         });
       }
     } finally {
-      setSubmitting(false);
+      if (myGen === submitGenerationRef.current) setSubmitting(false);
     }
-  }, [apiClient, form, history, notifications]);
+  }, [apiClient, form, history, notifications, valid]);
 
-  const valid =
-    form.name.trim().length > 0 &&
-    form.service.trim().length > 0 &&
-    form.team.trim().length > 0 &&
-    form.datasourceId.trim().length > 0 &&
-    form.metric.trim().length > 0 &&
-    form.target >= 50 &&
-    form.target <= 99.999;
-
+  // Show field errors only after the user attempted submit OR after they
+  // touched the field — avoids blasting the form red on first render.
+  const showError = submitted;
   return (
     <EuiPage>
       <EuiPageBody>
         <EuiPageContent>
-          <EuiForm component="form">
-            <EuiFormRow label={I18N.labelName} fullWidth>
+          {/*
+            Block in-app navigation when the form is dirty and we haven't
+            successfully submitted yet. `submitting` is allowed through so
+            the post-create `history.push('/slos/<id>')` redirect lands.
+          */}
+          <Prompt when={dirty && !submitting} message={I18N.unsavedChangesPrompt} />
+          <EuiForm
+            component="form"
+            onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
+              // Default form submit reloads the page when the form has no
+              // explicit `action` — which the wizard doesn't, since submit
+              // is handled by the create button below.
+              e.preventDefault();
+              if (!submitting) onSubmit();
+            }}
+          >
+            <EuiFormRow
+              label={I18N.labelName}
+              fullWidth
+              isInvalid={showError && !validations.name}
+              error={showError && !validations.name ? I18N.errorRequired : undefined}
+            >
               <EuiFieldText
                 value={form.name}
                 onChange={(e) => onField('name')(e.target.value)}
+                isInvalid={showError && !validations.name}
                 data-test-subj="sloWizardName"
                 fullWidth
               />
             </EuiFormRow>
-            <EuiFormRow label={I18N.labelService} fullWidth>
+            <EuiFormRow
+              label={I18N.labelService}
+              fullWidth
+              isInvalid={showError && !validations.service}
+              error={showError && !validations.service ? I18N.errorRequired : undefined}
+            >
               <EuiFieldText
                 value={form.service}
                 onChange={(e) => onField('service')(e.target.value)}
+                isInvalid={showError && !validations.service}
                 data-test-subj="sloWizardService"
                 fullWidth
               />
             </EuiFormRow>
-            <EuiFormRow label={I18N.labelTeam} fullWidth>
+            <EuiFormRow
+              label={I18N.labelTeam}
+              fullWidth
+              isInvalid={showError && !validations.team}
+              error={showError && !validations.team ? I18N.errorRequired : undefined}
+            >
               <EuiFieldText
                 value={form.team}
                 onChange={(e) => onField('team')(e.target.value)}
+                isInvalid={showError && !validations.team}
                 data-test-subj="sloWizardTeam"
                 fullWidth
               />
             </EuiFormRow>
-            <EuiFormRow label={I18N.labelDatasource} helpText={I18N.helpDatasource} fullWidth>
+            <EuiFormRow
+              label={I18N.labelDatasource}
+              helpText={I18N.helpDatasource}
+              fullWidth
+              isInvalid={showError && !validations.datasource}
+              error={showError && !validations.datasource ? I18N.errorRequired : undefined}
+            >
               <EuiFieldText
                 value={form.datasourceId}
                 onChange={(e) => onField('datasourceId')(e.target.value)}
+                isInvalid={showError && !validations.datasource}
                 data-test-subj="sloWizardDatasource"
                 fullWidth
               />
             </EuiFormRow>
-            <EuiFormRow label={I18N.labelMetric} helpText={I18N.helpMetric} fullWidth>
+            <EuiFormRow
+              label={I18N.labelMetric}
+              helpText={I18N.helpMetric}
+              fullWidth
+              isInvalid={showError && !validations.metric}
+              error={showError && !validations.metric ? I18N.errorRequired : undefined}
+            >
               <EuiFieldText
                 value={form.metric}
                 onChange={(e) => onField('metric')(e.target.value)}
+                isInvalid={showError && !validations.metric}
                 data-test-subj="sloWizardMetric"
                 fullWidth
               />
             </EuiFormRow>
-            <EuiFormRow label={I18N.labelTarget} helpText={I18N.helpTarget} fullWidth>
+            <EuiFormRow
+              label={I18N.labelTarget}
+              helpText={I18N.helpTarget}
+              fullWidth
+              isInvalid={showError && !validations.target}
+              error={showError && !validations.target ? I18N.errorTargetRange : undefined}
+            >
               <EuiFieldNumber
+                // Store the raw text in form state — `Number('')` collapses
+                // to `0`, which would silently overwrite the user's edit
+                // when they clear the field to retype.
                 value={form.target}
-                onChange={(e) => onField('target')(Number(e.target.value))}
+                onChange={(e) => onField('target')(e.target.value)}
                 min={50}
                 max={99.999}
                 step={0.001}
+                isInvalid={showError && !validations.target}
                 data-test-subj="sloWizardTarget"
                 fullWidth
               />
@@ -279,9 +395,9 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
             <EuiButtonEmpty onClick={() => history.push('/slos')}>{I18N.cancel}</EuiButtonEmpty>
             <EuiButton
               fill
-              isDisabled={!valid || submitting}
+              type="submit"
+              isDisabled={submitting}
               isLoading={submitting}
-              onClick={onSubmit}
               data-test-subj="sloWizardSubmit"
             >
               {I18N.create}

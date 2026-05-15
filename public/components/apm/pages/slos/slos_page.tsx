@@ -49,7 +49,6 @@ export const SlosPage: React.FC<SlosPageProps> = ({
         <Route exact path="/slos">
           <SloListingPage
             apiClient={apiClient}
-            http={http}
             chrome={chrome}
             notifications={notifications}
             parentBreadcrumb={parentBreadcrumb}
