@@ -291,12 +291,15 @@ export class SloRuleRefStore {
           nextAttrs,
           { version: existing.version }
         );
-        // Trust the SO client's response: the OSD client returns merged
-        // post-write attributes, which may include fields the reconciler
-        // (PR 5+) wrote concurrently (`zeroSinceAt` clears, etc.).
-        // Spreading `nextAttrs` over `updated.attributes` would clobber
-        // those with our stale pre-write copies; rely on the response
-        // shape instead.
+        // Layer the SO client's response over `prior`, not over `nextAttrs`.
+        // `SavedObjectsClientContract.update` types `attributes` as
+        // `Partial<T>` — today's repository echoes the request body so
+        // either base would work, but a future wrapper (or refetch-on-write
+        // impl that picks up a concurrent reconciler edit to `zeroSinceAt`)
+        // could legitimately return a partial. Re-spreading our pre-write
+        // `nextAttrs` here would let stale values clobber any such field
+        // the SO server actually returned; spreading `prior` only fills
+        // gaps the response left out.
         return {
           doc: {
             id,
