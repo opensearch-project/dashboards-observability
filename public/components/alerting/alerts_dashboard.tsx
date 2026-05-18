@@ -324,12 +324,15 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     });
   }, [alerts, searchQuery, filters]);
 
-  // Clearing the datasource filter must also clear dependent facets because
-  // severity/state/label options are derived from the currently selected
-  // datasources' alerts — leaving stale selections would filter against
-  // values that no longer exist in the visible dataset.
+  // Clearing the datasource filter must also clear dependent facets and the
+  // search box because severity/state/label options are derived from the
+  // currently selected datasources' alerts — leaving stale selections (or a
+  // stale search query) would filter against values that no longer exist in
+  // the visible dataset. Mirrors clearAllFilters in monitors_table/index.tsx
+  // so the cascade-clear behavior is consistent across tabs.
   const clearDependentFilters = () => {
     setFilters(emptyAlertFilters());
+    setSearchQuery('');
   };
 
   const updateFilter = <K extends keyof AlertFilterState>(key: K, value: AlertFilterState[K]) => {
@@ -599,8 +602,8 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                       .filter(Boolean) as string[];
                     onDatasourceChange(ids);
                     // Clearing datasource invalidates the other facet options
-                    // (severity/state/backend/labels are derived from the
-                    // selected datasources' alerts), so wipe dependent filters.
+                    // (severity/state/labels are derived from the selected
+                    // datasources' alerts), so wipe dependent filters.
                     if (ids.length === 0) clearDependentFilters();
                   }}
                   counts={countBy(

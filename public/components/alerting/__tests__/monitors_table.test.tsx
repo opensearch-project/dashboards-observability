@@ -67,4 +67,22 @@ describe('MonitorsTable', () => {
     // After selecting, the Delete button should appear
     expect(screen.getByText(/Delete/)).toBeInTheDocument();
   });
+
+  // Regression: deselecting all datasources must wipe both the dependent
+  // facet selections AND the search box, mirroring the cascade-clear in
+  // alerts_dashboard.tsx. Keep the two tabs aligned.
+  it('clears the search box when all datasources are deselected', () => {
+    const onDatasourceChange = jest.fn();
+    render(<MonitorsTable {...defaultProps} onDatasourceChange={onDatasourceChange} />);
+
+    const searchInput = screen.getByPlaceholderText(/Search monitors/i) as HTMLInputElement;
+    fireEvent.change(searchInput, { target: { value: 'HighCPU' } });
+    expect(searchInput.value).toBe('HighCPU');
+
+    // Uncheck the only selected datasource in the filter panel.
+    fireEvent.click(screen.getByLabelText(/prom1/));
+
+    expect(onDatasourceChange).toHaveBeenCalledWith([]);
+    expect(searchInput.value).toBe('');
+  });
 });

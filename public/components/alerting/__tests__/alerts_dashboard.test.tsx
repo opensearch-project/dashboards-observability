@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
 
 jest.mock('echarts', () => ({
   init: jest.fn(() => ({
@@ -151,5 +151,31 @@ describe('AlertsDashboard', () => {
       <AlertsDashboard {...baseProps} alerts={[sampleAlert]} fallbackHints={[]} />
     );
     expect(queryByTestId('alerts-fallback-callout')).not.toBeInTheDocument();
+  });
+
+  // Regression: deselecting all datasources must wipe both the dependent
+  // facet selections AND the search box. The Rules tab does this in
+  // monitors_table/index.tsx#clearAllFilters; the cascade-clear behavior
+  // should match across tabs.
+  it('clears the search box when all datasources are deselected', () => {
+    const onDatasourceChange = jest.fn();
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        alerts={[sampleAlert]}
+        onDatasourceChange={onDatasourceChange}
+      />
+    );
+
+    const searchInput = screen.getByLabelText('Search alerts') as HTMLInputElement;
+    fireEvent.change(searchInput, { target: { value: 'HighCPU' } });
+    expect(searchInput.value).toBe('HighCPU');
+
+    // Uncheck the only selected datasource — drives onChange([]) which
+    // routes through clearDependentFilters in the dashboard.
+    fireEvent.click(screen.getByLabelText(/Local/));
+
+    expect(onDatasourceChange).toHaveBeenCalledWith([]);
+    expect(searchInput.value).toBe('');
   });
 });

@@ -337,7 +337,7 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
                   {iconMap?.[opt] && (
                     <EuiIcon
                       type={iconMap[opt]}
-                      size="m"
+                      size="s"
                       style={{ flexShrink: 0 }}
                       data-test-subj={`facetGroup-${id}-icon-${opt}`}
                     />
