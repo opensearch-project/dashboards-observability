@@ -44,7 +44,6 @@ interface MonitorsTableProps {
   onDelete: (ids: string[]) => void;
   onClone?: (monitor: UnifiedRuleSummary) => void;
   onEdit?: (monitor: UnifiedRuleSummary) => void;
-  onImport?: (configs: Array<Record<string, unknown>>) => void;
   onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics' | 'slo') => void;
   /** Currently selected datasource IDs */
   selectedDsIds: string[];
@@ -67,7 +66,6 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   onDelete,
   onClone,
   onEdit,
-  onImport,
   onCreateMonitor,
   selectedDsIds,
   onDatasourceChange,
