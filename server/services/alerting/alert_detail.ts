@@ -20,7 +20,6 @@ import {
   AlertingOSClient,
   Datasource,
   DatasourceService,
-  NotificationRouting,
   OpenSearchBackend,
   PromAlertingRule,
   PrometheusBackend,
@@ -87,27 +86,6 @@ export async function getOSRuleDetail(
     // Alert history fetch is best-effort
   }
 
-  // Build notification routing from trigger actions + destinations
-  const notificationRouting: NotificationRouting[] = [];
-  try {
-    const destinations = await osBackend.getDestinations(client);
-    const destMap = new Map(destinations.map((d) => [d.id, d]));
-    for (const trigger of monitor.triggers) {
-      for (const action of trigger.actions) {
-        const dest = destMap.get(action.destination_id);
-        notificationRouting.push({
-          channel: dest?.type || 'unknown',
-          destination: dest?.name || action.name || action.destination_id,
-          throttle: action.throttle
-            ? `${action.throttle.value} ${action.throttle.unit}`
-            : undefined,
-        });
-      }
-    }
-  } catch {
-    // Destination fetch is best-effort
-  }
-
   // Build description from trigger message template or input type
   const trigger = monitor.triggers[0];
   const kind = detectMonitorKind(monitor);
@@ -151,7 +129,10 @@ export async function getOSRuleDetail(
     lookbackPeriod: undefined,
     alertHistory,
     conditionPreviewData,
-    notificationRouting,
+    // Notification routing is fetched lazily by the flyout when the user
+    // expands the accordion. The dedicated /routing endpoint owns the
+    // destinations lookup so the detail path stays cheap.
+    notificationRouting: [],
     // Suppression rules from the in-memory service (not from OS API)
     suppressionRules: [],
     raw: monitor,

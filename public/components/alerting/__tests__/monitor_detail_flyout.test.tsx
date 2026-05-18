@@ -20,12 +20,12 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   unobserve: jest.fn(),
 }));
 
-// Post-Phase 4: MonitorDetailFlyout instantiates AlertingOpenSearchService
-// internally via `useMemo(() => new AlertingOpenSearchService(), [])` and
-// calls `getRuleDetail(dsId, ruleId)` on mount. Mock the class so the
-// constructor returns a stubbed instance with `getRuleDetail` resolving to
-// `null` — the flyout falls back to the monitor summary in that case,
-// which is what these render tests exercise.
+// MonitorDetailFlyout instantiates AlertingOpenSearchService internally
+// via `useMemo(() => new AlertingOpenSearchService(), [])` and calls
+// `getRuleDetail(dsId, ruleId)` on mount. Mock the class so the
+// constructor returns a stubbed instance with `getRuleDetail` resolving
+// to `null` — the flyout falls back to the monitor summary in that
+// case, which is what these render tests exercise.
 jest.mock('../query_services/alerting_opensearch_service', () => ({
   AlertingOpenSearchService: jest.fn().mockImplementation(() => ({
     getRuleDetail: jest.fn().mockResolvedValue(null),

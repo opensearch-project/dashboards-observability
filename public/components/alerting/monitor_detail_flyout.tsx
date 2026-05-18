@@ -7,7 +7,7 @@
  * Monitor Detail Flyout — comprehensive view of a single monitor's
  * configuration, behavior, and impact with quick actions.
  */
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { EChartsOption, SeriesOption } from 'echarts';
 import {
   EuiFlyout,
@@ -38,10 +38,8 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { EchartsRender } from './echarts_render';
 import {
   AlertHistoryEntry,
-  NotificationRouting,
   OSMonitor,
   OSMonitorInput,
-  UnifiedAlertSeverity,
   UnifiedRule,
   UnifiedRuleSummary,
 } from '../../../common/types/alerting';
@@ -258,7 +256,6 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   // detail-only fields are empty until the fetch resolves.
   const alertHistory = detail?.alertHistory ?? [];
   const conditionPreviewData = detail?.conditionPreviewData ?? [];
-  const notificationRouting = detail?.notificationRouting ?? [];
   const suppressionRules = detail?.suppressionRules ?? [];
   const description = detail?.description ?? '';
   const evaluationInterval = detail?.evaluationInterval ?? monitor.evaluationInterval ?? '—';
@@ -313,48 +310,6 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
         defaultMessage: 'Message',
       }),
       truncateText: true,
-    },
-  ];
-
-  // Notification routing columns
-  const routingColumns: Array<EuiBasicTableColumn<NotificationRouting>> = [
-    {
-      field: 'channel',
-      name: i18n.translate('observability.alerting.monitorDetailFlyout.routing.channel', {
-        defaultMessage: 'Channel',
-      }),
-      width: '100px',
-    },
-    {
-      field: 'destination',
-      name: i18n.translate('observability.alerting.monitorDetailFlyout.routing.destination', {
-        defaultMessage: 'Destination',
-      }),
-    },
-    {
-      field: 'severity',
-      name: i18n.translate('observability.alerting.monitorDetailFlyout.routing.severities', {
-        defaultMessage: 'Severities',
-      }),
-      width: '160px',
-      render: (sevs: UnifiedAlertSeverity[] | undefined) =>
-        sevs
-          ? sevs.map((s) => (
-              <EuiBadge key={s} color={SEVERITY_COLORS[s]}>
-                {s}
-              </EuiBadge>
-            ))
-          : i18n.translate('observability.alerting.monitorDetailFlyout.routing.allSeverities', {
-              defaultMessage: 'All',
-            }),
-    },
-    {
-      field: 'throttle',
-      name: i18n.translate('observability.alerting.monitorDetailFlyout.routing.throttle', {
-        defaultMessage: 'Throttle',
-      }),
-      width: '100px',
-      render: (t: string) => t || '—',
     },
   ];
 
@@ -736,8 +691,8 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                 buttonContent={
                   <strong>
                     <FormattedMessage
-                      id="observability.alerting.monitorDetailFlyout.recentAlertHistoryHeader"
-                      defaultMessage="Recent Alert History ({count})"
+                      id="observability.alerting.monitorDetailFlyout.recentAlertsHeader"
+                      defaultMessage="Recent alerts ({count})"
                       values={{ count: alertHistory.length }}
                     />
                   </strong>
@@ -746,35 +701,6 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                 paddingSize="m"
               >
                 <EuiBasicTable items={alertHistory} columns={historyColumns} compressed />
-              </EuiAccordion>
-
-              <EuiSpacer size="m" />
-
-              {/* Notification Routing */}
-              <EuiAccordion
-                id={`routing-${monitor.id}`}
-                buttonContent={
-                  <strong>
-                    <FormattedMessage
-                      id="observability.alerting.monitorDetailFlyout.notificationRoutingHeader"
-                      defaultMessage="Notification Routing ({count})"
-                      values={{ count: notificationRouting.length }}
-                    />
-                  </strong>
-                }
-                initialIsOpen={false}
-                paddingSize="m"
-              >
-                {notificationRouting.length > 0 ? (
-                  <EuiBasicTable items={notificationRouting} columns={routingColumns} compressed />
-                ) : (
-                  <EuiText size="s" color="subdued">
-                    <FormattedMessage
-                      id="observability.alerting.monitorDetailFlyout.noRouting"
-                      defaultMessage="No notification routing configured"
-                    />
-                  </EuiText>
-                )}
               </EuiAccordion>
 
               <EuiSpacer size="m" />
