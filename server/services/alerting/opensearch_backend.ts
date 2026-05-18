@@ -209,9 +209,16 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
 
   async getAlerts(
     client: AlertingOSClient,
-    options?: { startMs?: number; endMs?: number; monitorId?: string }
+    options?: { startMs?: number; endMs?: number; monitorId?: string; limit?: number }
   ): Promise<{ alerts: OSAlert[]; totalAlerts: number; truncated: boolean }> {
-    const PAGE_SIZE = 100;
+    // When the caller asks for a bounded set (e.g. rule flyout's "last N
+    // alerts"), shrink page size to that cap so the upstream returns at
+    // most `limit` rows in one request. Without this, even a tiny
+    // `.slice(0, 20)` consumer pays for a full 100-row page and drives
+    // pagination loops on busy monitors.
+    const requestedLimit =
+      options?.limit !== undefined && options.limit > 0 ? options.limit : undefined;
+    const PAGE_SIZE = requestedLimit !== undefined ? Math.min(requestedLimit, 100) : 100;
     /**
      * Cap applied only when a time window is supplied. OpenSearch Alerting's
      * `GET monitors/alerts` endpoint has no documented server-side time
@@ -285,6 +292,7 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
         allAlerts.push(...pageAlerts);
       }
 
+      if (requestedLimit !== undefined && allAlerts.length >= requestedLimit) break;
       if (pageAlerts.length < PAGE_SIZE) break;
       if (!hasRange && allAlerts.length >= totalAlerts) break;
       // We intentionally do NOT early-exit on `startIndex + PAGE_SIZE >=
@@ -303,13 +311,16 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
       }
     }
 
+    const finalAlerts =
+      requestedLimit !== undefined ? allAlerts.slice(0, requestedLimit) : allAlerts;
+
     // When filtering, `totalAlerts` on the return object reflects the
     // filtered-and-capped count (what the caller actually received); the
     // raw index total is no longer a useful number for a post-filtered
     // payload and would confuse UI consumers.
     return {
-      alerts: allAlerts,
-      totalAlerts: hasRange ? allAlerts.length : totalAlerts,
+      alerts: finalAlerts,
+      totalAlerts: hasRange ? finalAlerts.length : totalAlerts,
       truncated,
     };
   }

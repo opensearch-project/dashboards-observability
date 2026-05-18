@@ -72,11 +72,12 @@ export async function getOSRuleDetail(
   const summary = osMonitorToUnifiedRuleSummary(monitor, ds.id);
 
   // Fetch real alert history for this monitor — scoped at the upstream
-  // via `monitorId` so we don't full-scan every alert in the cluster.
+  // via `monitorId` and bounded to 20 rows so the upstream returns one
+  // small page even on busy monitors with thousands of alerts.
   let alertHistory: AlertHistoryEntry[] = [];
   try {
-    const { alerts } = await osBackend.getAlerts(client, { monitorId });
-    alertHistory = alerts.slice(0, 20).map((a) => ({
+    const { alerts } = await osBackend.getAlerts(client, { monitorId, limit: 20 });
+    alertHistory = alerts.map((a) => ({
       timestamp: new Date(a.start_time).toISOString(),
       state: osStateToUnified(a.state),
       value: a.severity,
