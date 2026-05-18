@@ -256,7 +256,6 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   // detail-only fields are empty until the fetch resolves.
   const alertHistory = detail?.alertHistory ?? [];
   const conditionPreviewData = detail?.conditionPreviewData ?? [];
-  const suppressionRules = detail?.suppressionRules ?? [];
   const description = detail?.description ?? '';
   const evaluationInterval = detail?.evaluationInterval ?? monitor.evaluationInterval ?? '—';
   const pendingPeriod = detail?.pendingPeriod ?? monitor.pendingPeriod ?? '—';
@@ -685,16 +684,24 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
 
               <EuiSpacer size="m" />
 
-              {/* Alert History */}
+              {/* Recent alerts (OS = mixed-state slice, Prom = currently firing/pending) */}
               <EuiAccordion
                 id={`alertHistory-${monitor.id}`}
                 buttonContent={
                   <strong>
-                    <FormattedMessage
-                      id="observability.alerting.monitorDetailFlyout.recentAlertsHeader"
-                      defaultMessage="Recent alerts ({count})"
-                      values={{ count: alertHistory.length }}
-                    />
+                    {monitor.datasourceType === 'prometheus' ? (
+                      <FormattedMessage
+                        id="observability.alerting.monitorDetailFlyout.firingPendingAlertsHeader"
+                        defaultMessage="Currently firing/pending alerts ({count})"
+                        values={{ count: alertHistory.length }}
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="observability.alerting.monitorDetailFlyout.recentAlertsHeader"
+                        defaultMessage="Recent alerts ({count})"
+                        values={{ count: alertHistory.length }}
+                      />
+                    )}
                   </strong>
                 }
                 initialIsOpen={false}
@@ -705,83 +712,14 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
 
               <EuiSpacer size="m" />
 
-              {/* Suppression Rules */}
-              <EuiAccordion
-                id={`suppression-${monitor.id}`}
-                buttonContent={
-                  <strong>
-                    <FormattedMessage
-                      id="observability.alerting.monitorDetailFlyout.suppressionRulesHeader"
-                      defaultMessage="Suppression Rules ({count})"
-                      values={{ count: suppressionRules.length }}
-                    />
-                  </strong>
-                }
-                initialIsOpen={false}
-                paddingSize="m"
-              >
-                {suppressionRules.length > 0 ? (
-                  suppressionRules.map((sr) => (
-                    <EuiPanel
-                      key={sr.id}
-                      paddingSize="s"
-                      color={sr.active ? 'plain' : 'subdued'}
-                      style={{ marginBottom: 8 }}
-                    >
-                      <EuiFlexGroup alignItems="center" responsive={false}>
-                        <EuiFlexItem>
-                          <EuiText size="s">
-                            <strong>{sr.name}</strong>
-                          </EuiText>
-                          <EuiText size="xs" color="subdued">
-                            {sr.reason}
-                          </EuiText>
-                          {sr.schedule && (
-                            <EuiText size="xs">
-                              <FormattedMessage
-                                id="observability.alerting.monitorDetailFlyout.scheduleLabel"
-                                defaultMessage="Schedule: {schedule}"
-                                values={{ schedule: sr.schedule }}
-                              />
-                            </EuiText>
-                          )}
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiBadge color={sr.active ? 'success' : 'default'}>
-                            {sr.active
-                              ? i18n.translate(
-                                  'observability.alerting.monitorDetailFlyout.suppressionActive',
-                                  { defaultMessage: 'Active' }
-                                )
-                              : i18n.translate(
-                                  'observability.alerting.monitorDetailFlyout.suppressionInactive',
-                                  { defaultMessage: 'Inactive' }
-                                )}
-                          </EuiBadge>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiPanel>
-                  ))
-                ) : (
-                  <EuiText size="s" color="subdued">
-                    <FormattedMessage
-                      id="observability.alerting.monitorDetailFlyout.noSuppression"
-                      defaultMessage="No suppression rules applied"
-                    />
-                  </EuiText>
-                )}
-              </EuiAccordion>
-
-              <EuiSpacer size="m" />
-
-              {/* Creation / Modification History */}
+              {/* Details — creation / modification metadata */}
               <EuiAccordion
                 id={`history-${monitor.id}`}
                 buttonContent={
                   <strong>
                     <FormattedMessage
-                      id="observability.alerting.monitorDetailFlyout.historyHeader"
-                      defaultMessage="History"
+                      id="observability.alerting.monitorDetailFlyout.detailsHeader"
+                      defaultMessage="Details"
                     />
                   </strong>
                 }
