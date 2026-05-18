@@ -209,7 +209,7 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
 
   async getAlerts(
     client: AlertingOSClient,
-    options?: { startMs?: number; endMs?: number }
+    options?: { startMs?: number; endMs?: number; monitorId?: string }
   ): Promise<{ alerts: OSAlert[]; totalAlerts: number; truncated: boolean }> {
     const PAGE_SIZE = 100;
     /**
@@ -236,6 +236,9 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
     const hasRange = options?.startMs !== undefined && options?.endMs !== undefined;
     const windowStart = options?.startMs ?? 0;
     const windowEnd = options?.endMs ?? Number.POSITIVE_INFINITY;
+    const monitorIdParam = options?.monitorId
+      ? `&monitorId=${encodeURIComponent(options.monitorId)}`
+      : '';
 
     const allAlerts: OSAlert[] = [];
     let startIndex = 0;
@@ -247,7 +250,7 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
       const resp = await this.req<OSAlertsApiResponse>(
         client,
         'GET',
-        `/_plugins/_alerting/monitors/alerts?size=${PAGE_SIZE}&startIndex=${startIndex}`
+        `/_plugins/_alerting/monitors/alerts?size=${PAGE_SIZE}&startIndex=${startIndex}${monitorIdParam}`
       );
       totalAlerts = resp.body.totalAlerts ?? 0;
       const pageAlerts: OSAlert[] = (resp.body.alerts ?? []).map((a: OSAlertRaw) =>

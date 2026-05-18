@@ -282,6 +282,7 @@ export function osAlertToUnified(a: OSAlert, dsId: string): UnifiedAlertSummary 
       trigger_name: a.trigger_name,
     },
     annotations: {},
+    monitorId: a.monitor_id || undefined,
   };
 }
 

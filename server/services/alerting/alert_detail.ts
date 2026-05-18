@@ -226,6 +226,12 @@ export async function getPromRuleDetail(
 
 /**
  * Get full detail for a single alert including raw backend data.
+ *
+ * `monitorId` (optional) scopes the OS lookup to one monitor's alerts via
+ * the `monitorId` query param on `_plugins/_alerting/monitors/alerts`. The
+ * unified flyout already has it on the summary; passing it avoids the
+ * full-cluster scan that this function used to do. Without it, the
+ * legacy unscoped path is preserved for any direct-API consumer.
  */
 export async function getAlertDetail(
   datasourceService: DatasourceService,
@@ -233,13 +239,14 @@ export async function getAlertDetail(
   promBackend: PrometheusBackend | undefined,
   client: AlertingOSClient,
   dsId: string,
-  alertId: string
+  alertId: string,
+  monitorId?: string
 ): Promise<UnifiedAlert | null> {
   const ds = await datasourceService.get(dsId);
   if (!ds) return null;
 
   if (ds.type === 'opensearch' && osBackend) {
-    const { alerts } = await osBackend.getAlerts(client);
+    const { alerts } = await osBackend.getAlerts(client, monitorId ? { monitorId } : undefined);
     const alert = alerts.find((a) => a.id === alertId);
     if (!alert) return null;
     const summary = osAlertToUnified(alert, ds!.id);

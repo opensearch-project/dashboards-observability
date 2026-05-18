@@ -157,6 +157,12 @@ export interface UnifiedAlertSummary {
   lastUpdated: string;
   labels: Record<string, string>;
   annotations: Record<string, string>;
+  /**
+   * Owning monitor/rule id. OS alerts always have one; Prom alerts have no
+   * monitor concept and leave it undefined. The detail flyout forwards this
+   * to scope `getAlertDetail` to one monitor's alerts (avoids full-scan).
+   */
+  monitorId?: string;
 }
 
 /** Full alert with backend-specific raw data. Use for detail views only. */

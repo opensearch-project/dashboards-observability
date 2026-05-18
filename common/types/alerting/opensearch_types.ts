@@ -244,7 +244,7 @@ export interface OpenSearchBackend {
   // Alerts — read + acknowledge.
   getAlerts(
     client: AlertingOSClient,
-    options?: { startMs?: number; endMs?: number }
+    options?: { startMs?: number; endMs?: number; monitorId?: string }
   ): Promise<{ alerts: OSAlert[]; totalAlerts: number; truncated: boolean }>;
   acknowledgeAlerts(
     client: AlertingOSClient,
