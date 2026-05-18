@@ -349,6 +349,87 @@ describe('HttpOpenSearchBackend', () => {
       expect(result.truncated).toBe(true);
       expect(result.totalAlerts).toBe(1000);
     });
+
+    // ---- monitorId scoping ----
+
+    it('appends URL-encoded monitorId when provided', async () => {
+      const { client, request } = makeClient([{ body: { totalAlerts: 0, alerts: [] } }]);
+      await backend.getAlerts(client, { monitorId: 'mon/with/slash' });
+      expect(request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'GET',
+          path: expect.stringContaining('&monitorId=mon%2Fwith%2Fslash'),
+        })
+      );
+    });
+
+    // ---- limit semantics ----
+
+    const makeMinimalAlertPage = (from: number, count: number) =>
+      Array.from({ length: count }, (_, i) => ({
+        id: `a-${from + i}`,
+        monitor_id: 'm-1',
+        monitor_name: 'A',
+        trigger_id: 't-1',
+        trigger_name: 'trig',
+        state: 'COMPLETED',
+        severity: 3,
+      }));
+
+    it('limit shrinks PAGE_SIZE and trims to exactly limit', async () => {
+      const { client, request } = makeClient([
+        { body: { totalAlerts: 50, alerts: makeMinimalAlertPage(0, 5) } },
+      ]);
+      const result = await backend.getAlerts(client, { monitorId: 'm-1', limit: 5 });
+      expect(result.alerts).toHaveLength(5);
+      expect(request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'GET',
+          path: expect.stringContaining('size=5'),
+        })
+      );
+      expect(request).toHaveBeenCalledTimes(1);
+    });
+
+    it('limit > 100 clamps PAGE_SIZE to 100 and iterates until trimmed to limit', async () => {
+      const { client, request } = makeClient([
+        { body: { totalAlerts: 200, alerts: makeMinimalAlertPage(0, 100) } },
+        { body: { totalAlerts: 200, alerts: makeMinimalAlertPage(100, 100) } },
+      ]);
+      const result = await backend.getAlerts(client, { monitorId: 'm-1', limit: 150 });
+      expect(result.alerts).toHaveLength(150);
+      expect(request).toHaveBeenCalledTimes(2);
+      expect(request).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          path: expect.stringContaining('size=100'),
+        })
+      );
+    });
+
+    it('limit short-circuit sets truncated when more rows are available upstream', async () => {
+      // Monitor has 50 alerts upstream; caller requests only 20. The loop
+      // breaks after page 1 (which is full at PAGE_SIZE=limit=20), and
+      // `truncated` must be true so future callers can surface "more
+      // available" rather than treating the bounded slice as complete.
+      const { client } = makeClient([
+        { body: { totalAlerts: 50, alerts: makeMinimalAlertPage(0, 20) } },
+      ]);
+      const result = await backend.getAlerts(client, { monitorId: 'm-1', limit: 20 });
+      expect(result.alerts).toHaveLength(20);
+      expect(result.truncated).toBe(true);
+    });
+
+    it('limit not reached ⇒ truncated stays false', async () => {
+      // Upstream has fewer rows than the limit; loop exits via the
+      // `pageAlerts.length < PAGE_SIZE` end-of-stream signal.
+      const { client } = makeClient([
+        { body: { totalAlerts: 3, alerts: makeMinimalAlertPage(0, 3) } },
+      ]);
+      const result = await backend.getAlerts(client, { monitorId: 'm-1', limit: 20 });
+      expect(result.alerts).toHaveLength(3);
+      expect(result.truncated).toBe(false);
+    });
   });
 
   describe('getDestinations', () => {

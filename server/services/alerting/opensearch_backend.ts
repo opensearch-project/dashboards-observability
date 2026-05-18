@@ -292,7 +292,18 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
         allAlerts.push(...pageAlerts);
       }
 
-      if (requestedLimit !== undefined && allAlerts.length >= requestedLimit) break;
+      if (requestedLimit !== undefined && allAlerts.length >= requestedLimit) {
+        // Hit the caller's cap before exhausting upstream pages. If more
+        // rows were available, signal truncation so the caller can surface
+        // it (today's only consumer ignores `truncated`, but Phase-4 callers
+        // will read it). The page itself was full ⇒ there is at least one
+        // more row upstream; or, in non-range mode, the unfiltered count
+        // overshoots what we collected.
+        if (pageAlerts.length === PAGE_SIZE || (!hasRange && allAlerts.length < totalAlerts)) {
+          truncated = true;
+        }
+        break;
+      }
       if (pageAlerts.length < PAGE_SIZE) break;
       if (!hasRange && allAlerts.length >= totalAlerts) break;
       // We intentionally do NOT early-exit on `startIndex + PAGE_SIZE >=
