@@ -29,6 +29,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { EchartsRender } from '../../echarts_render';
 import { LogsMonitorFormState } from '../create_logs_monitor_types';
 import {
@@ -62,24 +63,43 @@ export const QuerySection = React.memo<{
     return (
       <EuiAccordion
         id="logs-query-section"
-        buttonContent={<strong>Cluster metrics</strong>}
+        buttonContent={
+          <strong>
+            {i18n.translate('observability.alerting.createLogsMonitor.query.clusterMetricsTitle', {
+              defaultMessage: 'Cluster metrics',
+            })}
+          </strong>
+        }
         initialIsOpen
         paddingSize="m"
       >
-        <EuiFormRow label="API" fullWidth>
+        <EuiFormRow
+          label={i18n.translate('observability.alerting.createLogsMonitor.query.apiLabel', {
+            defaultMessage: 'API',
+          })}
+          fullWidth
+        >
           <EuiSelect
             options={CLUSTER_METRICS_API_OPTIONS}
             value={form.clusterMetricsApi}
             onChange={(e) => onUpdate({ clusterMetricsApi: e.target.value })}
             compressed
             fullWidth
-            aria-label="Cluster metrics API"
+            aria-label={i18n.translate(
+              'observability.alerting.createLogsMonitor.query.clusterMetricsApiAriaLabel',
+              { defaultMessage: 'Cluster metrics API' }
+            )}
           />
         </EuiFormRow>
         <EuiSpacer size="s" />
         <EuiText size="xs" color="subdued">
-          The monitor will periodically call the selected API and evaluate the trigger condition
-          against the response.
+          {i18n.translate(
+            'observability.alerting.createLogsMonitor.query.clusterMetricsDescription',
+            {
+              defaultMessage:
+                'The monitor will periodically call the selected API and evaluate the trigger condition against the response.',
+            }
+          )}
         </EuiText>
       </EuiAccordion>
     );
@@ -90,12 +110,27 @@ export const QuerySection = React.memo<{
   return (
     <EuiAccordion
       id="logs-query-section"
-      buttonContent={<strong>Query</strong>}
+      buttonContent={
+        <strong>
+          {i18n.translate('observability.alerting.createLogsMonitor.query.sectionTitle', {
+            defaultMessage: 'Query',
+          })}
+        </strong>
+      }
       initialIsOpen
       paddingSize="m"
       extraAction={
-        <EuiButton size="s" onClick={onRunPreview} aria-label="Run preview">
-          Run preview
+        <EuiButton
+          size="s"
+          onClick={onRunPreview}
+          aria-label={i18n.translate(
+            'observability.alerting.createLogsMonitor.query.runPreviewAriaLabel',
+            { defaultMessage: 'Run preview' }
+          )}
+        >
+          {i18n.translate('observability.alerting.createLogsMonitor.query.runPreviewButton', {
+            defaultMessage: 'Run preview',
+          })}
         </EuiButton>
       }
     >
@@ -105,7 +140,15 @@ export const QuerySection = React.memo<{
           <EuiFlexItem grow={false}>
             <EuiBetaBadge
               label={isPPL ? 'PPL' : 'DSL'}
-              tooltipContent={isPPL ? 'Piped Processing Language' : 'OpenSearch Query DSL'}
+              tooltipContent={
+                isPPL
+                  ? i18n.translate('observability.alerting.createLogsMonitor.query.pplTooltip', {
+                      defaultMessage: 'Piped Processing Language',
+                    })
+                  : i18n.translate('observability.alerting.createLogsMonitor.query.dslTooltip', {
+                      defaultMessage: 'OpenSearch Query DSL',
+                    })
+              }
               size="s"
             />
           </EuiFlexItem>
@@ -117,7 +160,10 @@ export const QuerySection = React.memo<{
                   iconType="database"
                   iconSide="left"
                   onClick={() => setShowDsPicker(!showDsPicker)}
-                  aria-label="Select data source"
+                  aria-label={i18n.translate(
+                    'observability.alerting.createLogsMonitor.query.selectDatasourceAriaLabel',
+                    { defaultMessage: 'Select data source' }
+                  )}
                 >
                   <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>{form.selectedDatasource}</EuiFlexItem>
@@ -155,10 +201,18 @@ export const QuerySection = React.memo<{
                     iconType="addBookmark"
                     iconSide="left"
                     onClick={() => setShowQueryLibrary(!showQueryLibrary)}
-                    aria-label="Query library"
+                    aria-label={i18n.translate(
+                      'observability.alerting.createLogsMonitor.query.queryLibraryAriaLabel',
+                      { defaultMessage: 'Query library' }
+                    )}
                   >
                     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                      <EuiFlexItem grow={false}>Query library</EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        {i18n.translate(
+                          'observability.alerting.createLogsMonitor.query.queryLibraryLabel',
+                          { defaultMessage: 'Query library' }
+                        )}
+                      </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiIcon type="arrowDown" size="s" />
                       </EuiFlexItem>
@@ -235,13 +289,28 @@ export const QuerySection = React.memo<{
                 resize: 'none',
                 backgroundColor: 'transparent',
               }}
-              aria-label={`${isPPL ? 'PPL' : 'DSL'} query editor`}
+              aria-label={
+                isPPL
+                  ? i18n.translate(
+                      'observability.alerting.createLogsMonitor.query.editorAriaLabelPpl',
+                      { defaultMessage: 'PPL query editor' }
+                    )
+                  : i18n.translate(
+                      'observability.alerting.createLogsMonitor.query.editorAriaLabelDsl',
+                      { defaultMessage: 'DSL query editor' }
+                    )
+              }
             />
           </div>
           <div
             style={{ position: 'absolute', top: 4, right: 4, zIndex: 2, display: 'flex', gap: 2 }}
           >
-            <EuiToolTip content="Copy query">
+            <EuiToolTip
+              content={i18n.translate(
+                'observability.alerting.createLogsMonitor.query.copyQueryTooltip',
+                { defaultMessage: 'Copy query' }
+              )}
+            >
               <EuiButtonIcon
                 iconType="copy"
                 size="s"
@@ -253,7 +322,10 @@ export const QuerySection = React.memo<{
                     /* clipboard unavailable */
                   }
                 }}
-                aria-label="Copy query"
+                aria-label={i18n.translate(
+                  'observability.alerting.createLogsMonitor.query.copyQueryAriaLabel',
+                  { defaultMessage: 'Copy query' }
+                )}
               />
             </EuiToolTip>
           </div>
@@ -266,24 +338,45 @@ export const QuerySection = React.memo<{
           <EuiSpacer size="m" />
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
-              <EuiFormRow label="Bucket field" display="rowCompressed">
+              <EuiFormRow
+                label={i18n.translate(
+                  'observability.alerting.createLogsMonitor.query.bucketFieldLabel',
+                  { defaultMessage: 'Bucket field' }
+                )}
+                display="rowCompressed"
+              >
                 <EuiFieldText
-                  placeholder="e.g. host.keyword"
+                  placeholder={i18n.translate(
+                    'observability.alerting.createLogsMonitor.query.bucketFieldPlaceholder',
+                    { defaultMessage: 'e.g. host.keyword' }
+                  )}
                   value={form.bucketField}
                   onChange={(e) => onUpdate({ bucketField: e.target.value })}
                   compressed
-                  aria-label="Bucket field"
+                  aria-label={i18n.translate(
+                    'observability.alerting.createLogsMonitor.query.bucketFieldAriaLabel',
+                    { defaultMessage: 'Bucket field' }
+                  )}
                 />
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFormRow label="Aggregation" display="rowCompressed">
+              <EuiFormRow
+                label={i18n.translate(
+                  'observability.alerting.createLogsMonitor.query.aggregationLabel',
+                  { defaultMessage: 'Aggregation' }
+                )}
+                display="rowCompressed"
+              >
                 <EuiSelect
                   options={BUCKET_AGGREGATION_OPTIONS}
                   value={form.bucketAggregation}
                   onChange={(e) => onUpdate({ bucketAggregation: e.target.value })}
                   compressed
-                  aria-label="Bucket aggregation"
+                  aria-label={i18n.translate(
+                    'observability.alerting.createLogsMonitor.query.bucketAggregationAriaLabel',
+                    { defaultMessage: 'Bucket aggregation' }
+                  )}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -297,28 +390,51 @@ export const QuerySection = React.memo<{
           <EuiSpacer size="m" />
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
-              <EuiFormRow label="Indices" display="rowCompressed">
+              <EuiFormRow
+                label={i18n.translate(
+                  'observability.alerting.createLogsMonitor.query.indicesLabel',
+                  { defaultMessage: 'Indices' }
+                )}
+                display="rowCompressed"
+              >
                 <EuiFieldText
-                  placeholder="e.g. logs-*, application-logs"
+                  placeholder={i18n.translate(
+                    'observability.alerting.createLogsMonitor.query.indicesPlaceholder',
+                    { defaultMessage: 'e.g. logs-*, application-logs' }
+                  )}
                   value={form.docLevelIndices}
                   onChange={(e) => onUpdate({ docLevelIndices: e.target.value })}
                   compressed
-                  aria-label="Document level indices"
+                  aria-label={i18n.translate(
+                    'observability.alerting.createLogsMonitor.query.docLevelIndicesAriaLabel',
+                    { defaultMessage: 'Document level indices' }
+                  )}
                 />
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFormRow
-                label="Tags"
+                label={i18n.translate('observability.alerting.createLogsMonitor.query.tagsLabel', {
+                  defaultMessage: 'Tags',
+                })}
                 display="rowCompressed"
-                helpText="Comma-separated tags for document-level queries"
+                helpText={i18n.translate(
+                  'observability.alerting.createLogsMonitor.query.tagsHelpText',
+                  { defaultMessage: 'Comma-separated tags for document-level queries' }
+                )}
               >
                 <EuiFieldText
-                  placeholder="e.g. error, critical"
+                  placeholder={i18n.translate(
+                    'observability.alerting.createLogsMonitor.query.tagsPlaceholder',
+                    { defaultMessage: 'e.g. error, critical' }
+                  )}
                   value={form.docLevelTags}
                   onChange={(e) => onUpdate({ docLevelTags: e.target.value })}
                   compressed
-                  aria-label="Document level tags"
+                  aria-label={i18n.translate(
+                    'observability.alerting.createLogsMonitor.query.docLevelTagsAriaLabel',
+                    { defaultMessage: 'Document level tags' }
+                  )}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -335,7 +451,11 @@ export const QuerySection = React.memo<{
             buttonContent={
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <strong>Results (34)</strong>
+                  <strong>
+                    {i18n.translate('observability.alerting.createLogsMonitor.query.resultsTitle', {
+                      defaultMessage: 'Results (34)',
+                    })}
+                  </strong>
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
@@ -343,7 +463,12 @@ export const QuerySection = React.memo<{
             paddingSize="s"
           >
             <EuiCallOut size="s" color="warning" iconType="iInCircle">
-              <EuiText size="xs">Sample data — run the monitor to see real results</EuiText>
+              <EuiText size="xs">
+                {i18n.translate(
+                  'observability.alerting.createLogsMonitor.query.sampleDataCallout',
+                  { defaultMessage: 'Sample data — run the monitor to see real results' }
+                )}
+              </EuiText>
             </EuiCallOut>
             <EuiSpacer size="s" />
             <EuiText size="xs" color="subdued">
@@ -355,9 +480,27 @@ export const QuerySection = React.memo<{
             <EuiBasicTable
               items={MOCK_TABLE_ROWS}
               columns={[
-                { field: 'date', name: 'Date' },
-                { field: 'eventType', name: 'Event type' },
-                { field: 'status', name: 'Status' },
+                {
+                  field: 'date',
+                  name: i18n.translate(
+                    'observability.alerting.createLogsMonitor.query.tableColumnDate',
+                    { defaultMessage: 'Date' }
+                  ),
+                },
+                {
+                  field: 'eventType',
+                  name: i18n.translate(
+                    'observability.alerting.createLogsMonitor.query.tableColumnEventType',
+                    { defaultMessage: 'Event type' }
+                  ),
+                },
+                {
+                  field: 'status',
+                  name: i18n.translate(
+                    'observability.alerting.createLogsMonitor.query.tableColumnStatus',
+                    { defaultMessage: 'Status' }
+                  ),
+                },
               ]}
               tableLayout="auto"
             />

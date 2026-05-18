@@ -30,6 +30,8 @@ import {
   EuiToolTip,
   EuiLink,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { UnifiedAlert, UnifiedAlertSummary, Datasource } from '../../../common/types/alerting';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { SEVERITY_COLORS, STATE_COLORS, sanitizeExternalUrl } from './shared_constants';
@@ -130,7 +132,10 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
           </EuiText>
         ) : (
           <EuiText size="s" color="subdued">
-            Not available
+            <FormattedMessage
+              id="observability.alerting.alertDetailFlyout.notAvailable"
+              defaultMessage="Not available"
+            />
           </EuiText>
         )}
       </EuiFlyoutHeader>
@@ -145,10 +150,20 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
                 <EuiIcon type="compute" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <strong>AI Analysis</strong>
+                <strong>
+                  <FormattedMessage
+                    id="observability.alerting.alertDetailFlyout.aiAnalysis"
+                    defaultMessage="AI Analysis"
+                  />
+                </strong>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">Beta</EuiBadge>
+                <EuiBadge color="hollow">
+                  <FormattedMessage
+                    id="observability.alerting.alertDetailFlyout.betaBadge"
+                    defaultMessage="Beta"
+                  />
+                </EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
           }
@@ -167,7 +182,14 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
         {/* Alert Details */}
         <EuiAccordion
           id={`alertDetails-${alert.id}`}
-          buttonContent={<strong>Alert Details</strong>}
+          buttonContent={
+            <strong>
+              <FormattedMessage
+                id="observability.alerting.alertDetailFlyout.alertDetails"
+                defaultMessage="Alert Details"
+              />
+            </strong>
+          }
           initialIsOpen={true}
           paddingSize="m"
         >
@@ -175,24 +197,58 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
             type="column"
             compressed
             listItems={[
-              { title: 'Alert ID', description: alert.id || '\u2014' },
-              { title: 'State', description: alert.state || '\u2014' },
-              { title: 'Severity', description: alert.severity || '\u2014' },
-              { title: 'Backend', description: alert.datasourceType || '\u2014' },
-              { title: 'Datasource', description: dsName },
               {
-                title: 'Started',
+                title: i18n.translate('observability.alerting.alertDetailFlyout.alertId', {
+                  defaultMessage: 'Alert ID',
+                }),
+                description: alert.id || '\u2014',
+              },
+              {
+                title: i18n.translate('observability.alerting.alertDetailFlyout.state', {
+                  defaultMessage: 'State',
+                }),
+                description: alert.state || '\u2014',
+              },
+              {
+                title: i18n.translate('observability.alerting.alertDetailFlyout.severity', {
+                  defaultMessage: 'Severity',
+                }),
+                description: alert.severity || '\u2014',
+              },
+              {
+                title: i18n.translate('observability.alerting.alertDetailFlyout.backend', {
+                  defaultMessage: 'Backend',
+                }),
+                description: alert.datasourceType || '\u2014',
+              },
+              {
+                title: i18n.translate('observability.alerting.alertDetailFlyout.datasource', {
+                  defaultMessage: 'Datasource',
+                }),
+                description: dsName,
+              },
+              {
+                title: i18n.translate('observability.alerting.alertDetailFlyout.started', {
+                  defaultMessage: 'Started',
+                }),
                 description: alert.startTime
                   ? new Date(alert.startTime).toLocaleString()
                   : '\u2014',
               },
               {
-                title: 'Last Updated',
+                title: i18n.translate('observability.alerting.alertDetailFlyout.lastUpdated', {
+                  defaultMessage: 'Last Updated',
+                }),
                 description: alert.lastUpdated
                   ? new Date(alert.lastUpdated).toLocaleString()
                   : '\u2014',
               },
-              { title: 'Duration', description: getAlertDuration(alert.startTime) },
+              {
+                title: i18n.translate('observability.alerting.alertDetailFlyout.duration', {
+                  defaultMessage: 'Duration',
+                }),
+                description: getAlertDuration(alert.startTime),
+              },
             ]}
           />
         </EuiAccordion>
@@ -202,7 +258,15 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
         {/* Labels (internal keys filtered — see INTERNAL_LABEL_KEYS) */}
         <EuiAccordion
           id={`alertLabels-${alert.id}`}
-          buttonContent={<strong>Labels ({Object.keys(labels).length})</strong>}
+          buttonContent={
+            <strong>
+              <FormattedMessage
+                id="observability.alerting.alertDetailFlyout.labelsHeader"
+                defaultMessage="Labels ({count})"
+                values={{ count: Object.keys(labels).length }}
+              />
+            </strong>
+          }
           initialIsOpen={true}
           paddingSize="m"
         >
@@ -218,7 +282,10 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
             </EuiFlexGroup>
           ) : (
             <EuiText size="s" color="subdued">
-              Not available
+              <FormattedMessage
+                id="observability.alerting.alertDetailFlyout.labelsNotAvailable"
+                defaultMessage="Not available"
+              />
             </EuiText>
           )}
         </EuiAccordion>
@@ -228,7 +295,15 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
         {/* Annotations */}
         <EuiAccordion
           id={`alertAnnotations-${alert.id}`}
-          buttonContent={<strong>Annotations ({Object.keys(annotations).length})</strong>}
+          buttonContent={
+            <strong>
+              <FormattedMessage
+                id="observability.alerting.alertDetailFlyout.annotationsHeader"
+                defaultMessage="Annotations ({count})"
+                values={{ count: Object.keys(annotations).length }}
+              />
+            </strong>
+          }
           initialIsOpen={true}
           paddingSize="m"
         >
@@ -243,7 +318,10 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
             />
           ) : (
             <EuiText size="s" color="subdued">
-              Not available
+              <FormattedMessage
+                id="observability.alerting.alertDetailFlyout.annotationsNotAvailable"
+                defaultMessage="Not available"
+              />
             </EuiText>
           )}
         </EuiAccordion>
@@ -259,7 +337,12 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
                 <EuiIcon type="bellSlash" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <strong>Suppression Status</strong>
+                <strong>
+                  <FormattedMessage
+                    id="observability.alerting.alertDetailFlyout.suppressionStatus"
+                    defaultMessage="Suppression Status"
+                  />
+                </strong>
               </EuiFlexItem>
             </EuiFlexGroup>
           }
@@ -270,18 +353,29 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
             <EuiPanel color="subdued" paddingSize="s">
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="default">Silenced</EuiBadge>
+                  <EuiBadge color="default">
+                    <FormattedMessage
+                      id="observability.alerting.alertDetailFlyout.silencedBadge"
+                      defaultMessage="Silenced"
+                    />
+                  </EuiBadge>
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText size="xs" color="subdued">
-                    This alert has been silenced or resolved.
+                    <FormattedMessage
+                      id="observability.alerting.alertDetailFlyout.silencedMessage"
+                      defaultMessage="This alert has been silenced or resolved."
+                    />
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
           ) : (
             <EuiText size="s" color="subdued">
-              No active suppression rules affecting this alert.
+              <FormattedMessage
+                id="observability.alerting.alertDetailFlyout.noSuppressionMessage"
+                defaultMessage="No active suppression rules affecting this alert."
+              />
             </EuiText>
           )}
         </EuiAccordion>
@@ -297,7 +391,12 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
                 <EuiIcon type="bell" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <strong>Notification Routing</strong>
+                <strong>
+                  <FormattedMessage
+                    id="observability.alerting.alertDetailFlyout.notificationRouting"
+                    defaultMessage="Notification Routing"
+                  />
+                </strong>
               </EuiFlexItem>
             </EuiFlexGroup>
           }
@@ -305,17 +404,28 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
           paddingSize="m"
         >
           <EuiText size="s" color="subdued">
-            Routing is determined by the monitor&apos;s notification configuration and matching
-            routing rules. Check the associated monitor&apos;s detail view for full routing setup.
+            <FormattedMessage
+              id="observability.alerting.alertDetailFlyout.routingDescription"
+              defaultMessage="Routing is determined by the monitor's notification configuration and matching routing rules. Check the associated monitor's detail view for full routing setup."
+            />
           </EuiText>
           {alert.labels.service && (
             <EuiPanel color="subdued" paddingSize="s" style={{ marginTop: 8 }}>
               <EuiText size="xs">
-                Service: <EuiBadge color="hollow">{alert.labels.service}</EuiBadge>
+                <FormattedMessage
+                  id="observability.alerting.alertDetailFlyout.serviceLabel"
+                  defaultMessage="Service:"
+                />{' '}
+                <EuiBadge color="hollow">{alert.labels.service}</EuiBadge>
                 {alert.labels.team && (
                   <>
                     {' '}
-                    | Team: <EuiBadge color="hollow">{alert.labels.team}</EuiBadge>
+                    |{' '}
+                    <FormattedMessage
+                      id="observability.alerting.alertDetailFlyout.teamLabel"
+                      defaultMessage="Team:"
+                    />{' '}
+                    <EuiBadge color="hollow">{alert.labels.team}</EuiBadge>
                   </>
                 )}
               </EuiText>
@@ -328,7 +438,14 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
         {/* Raw Data */}
         <EuiAccordion
           id={`alertRaw-${alert.id}`}
-          buttonContent={<strong>Raw Alert Data</strong>}
+          buttonContent={
+            <strong>
+              <FormattedMessage
+                id="observability.alerting.alertDetailFlyout.rawAlertData"
+                defaultMessage="Raw Alert Data"
+              />
+            </strong>
+          }
           initialIsOpen={false}
           paddingSize="m"
         >
@@ -348,7 +465,12 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
                 <EuiIcon type="sparkles" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <strong>Suggested Actions</strong>
+                <strong>
+                  <FormattedMessage
+                    id="observability.alerting.alertDetailFlyout.suggestedActions"
+                    defaultMessage="Suggested Actions"
+                  />
+                </strong>
               </EuiFlexItem>
             </EuiFlexGroup>
           }
@@ -396,7 +518,14 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
                     <EuiText size="xs" color="subdued">
                       {action.description}
                       {!isClickable && (
-                        <em style={{ marginLeft: 4 }}> &mdash; Manual action required</em>
+                        <em style={{ marginLeft: 4 }}>
+                          {' '}
+                          &mdash;{' '}
+                          <FormattedMessage
+                            id="observability.alerting.alertDetailFlyout.manualActionRequired"
+                            defaultMessage="Manual action required"
+                          />
+                        </em>
                       )}
                     </EuiText>
                   </EuiFlexItem>
@@ -415,7 +544,12 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose}>Close</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={onClose}>
+              <FormattedMessage
+                id="observability.alerting.alertDetailFlyout.closeButton"
+                defaultMessage="Close"
+              />
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" responsive={false}>
@@ -423,15 +557,28 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
               {alert.state === 'active' && alert.datasourceType !== 'prometheus' && (
                 <EuiFlexItem grow={false}>
                   <EuiButton fill size="s" iconType="check" onClick={() => onAcknowledge(alert.id)}>
-                    Acknowledge
+                    <FormattedMessage
+                      id="observability.alerting.alertDetailFlyout.acknowledgeButton"
+                      defaultMessage="Acknowledge"
+                    />
                   </EuiButton>
                 </EuiFlexItem>
               )}
               {alert.state === 'active' && alert.datasourceType === 'prometheus' && (
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content="Acknowledgement not supported for Prometheus alerts">
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'observability.alerting.alertDetailFlyout.acknowledgeNotSupportedTooltip',
+                      {
+                        defaultMessage: 'Acknowledgement not supported for Prometheus alerts',
+                      }
+                    )}
+                  >
                     <EuiButton fill size="s" iconType="check" isDisabled>
-                      Acknowledge
+                      <FormattedMessage
+                        id="observability.alerting.alertDetailFlyout.acknowledgeDisabledButton"
+                        defaultMessage="Acknowledge"
+                      />
                     </EuiButton>
                   </EuiToolTip>
                 </EuiFlexItem>
@@ -500,8 +647,16 @@ function getSuggestedActions(alert: UnifiedAlertSummary): SuggestedAction[] {
 
   if (alert.state === 'active') {
     actions.push({
-      title: 'Acknowledge this alert',
-      description: 'Mark as acknowledged to stop repeated notifications while you investigate.',
+      title: i18n.translate('observability.alerting.alertDetailFlyout.action.acknowledge.title', {
+        defaultMessage: 'Acknowledge this alert',
+      }),
+      description: i18n.translate(
+        'observability.alerting.alertDetailFlyout.action.acknowledge.description',
+        {
+          defaultMessage:
+            'Mark as acknowledged to stop repeated notifications while you investigate.',
+        }
+      ),
       icon: 'check',
       color: 'primary',
       actionType: alert.datasourceType === 'prometheus' ? 'manual' : 'acknowledge',
@@ -511,8 +666,14 @@ function getSuggestedActions(alert: UnifiedAlertSummary): SuggestedAction[] {
   if (alert.severity === 'critical' || alert.severity === 'high') {
     const safeRunbookUrl = sanitizeExternalUrl(alert.annotations?.runbook_url);
     actions.push({
-      title: 'Check related runbook',
-      description: safeRunbookUrl || 'No runbook URL configured \u2014 consider adding one.',
+      title: i18n.translate('observability.alerting.alertDetailFlyout.action.runbook.title', {
+        defaultMessage: 'Check related runbook',
+      }),
+      description:
+        safeRunbookUrl ||
+        i18n.translate('observability.alerting.alertDetailFlyout.action.runbook.noUrl', {
+          defaultMessage: 'No runbook URL configured \u2014 consider adding one.',
+        }),
       icon: 'document',
       color: 'warning',
       actionType: safeRunbookUrl ? 'link' : 'manual',
@@ -522,8 +683,19 @@ function getSuggestedActions(alert: UnifiedAlertSummary): SuggestedAction[] {
 
   if (alert.labels?.instance) {
     actions.push({
-      title: `Investigate host ${alert.labels.instance}`,
-      description: 'Open host metrics dashboard to correlate with other system indicators.',
+      title: i18n.translate(
+        'observability.alerting.alertDetailFlyout.action.investigateHost.title',
+        {
+          defaultMessage: 'Investigate host {instance}',
+          values: { instance: alert.labels.instance },
+        }
+      ),
+      description: i18n.translate(
+        'observability.alerting.alertDetailFlyout.action.investigateHost.description',
+        {
+          defaultMessage: 'Open host metrics dashboard to correlate with other system indicators.',
+        }
+      ),
       icon: 'compute',
       color: 'default',
       actionType: 'manual',
@@ -532,8 +704,16 @@ function getSuggestedActions(alert: UnifiedAlertSummary): SuggestedAction[] {
 
   if (alert.labels?.service) {
     actions.push({
-      title: `Review ${alert.labels.service} service health`,
-      description: 'Check service-level metrics, recent deployments, and dependency health.',
+      title: i18n.translate('observability.alerting.alertDetailFlyout.action.reviewService.title', {
+        defaultMessage: 'Review {service} service health',
+        values: { service: alert.labels.service },
+      }),
+      description: i18n.translate(
+        'observability.alerting.alertDetailFlyout.action.reviewService.description',
+        {
+          defaultMessage: 'Check service-level metrics, recent deployments, and dependency health.',
+        }
+      ),
       icon: 'apps',
       color: 'default',
       actionType: 'manual',

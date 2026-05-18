@@ -14,8 +14,6 @@ import { MonitorMutationsClient } from '../mutations/monitor_mutations_client';
 import type {
   AcknowledgeAlertResponse,
   MonitorDeleteResponse,
-  MonitorExportResponse,
-  MonitorImportResponse,
   MonitorResponse,
 } from '../mutations/monitor_mutations_client';
 
@@ -27,11 +25,6 @@ export interface UseMonitorMutationsResult {
     dsId: string
   ) => Promise<MonitorResponse>;
   deleteMonitor: (id: string, dsId: string) => Promise<MonitorDeleteResponse>;
-  importMonitors: (
-    json: { monitors: Array<Record<string, unknown>> },
-    dsId: string
-  ) => Promise<MonitorImportResponse>;
-  exportMonitors: (dsId: string) => Promise<MonitorExportResponse>;
   acknowledgeAlert: (
     alertId: string,
     datasourceId?: string,
@@ -46,8 +39,6 @@ export function useMonitorMutations(): UseMonitorMutationsResult {
       createMonitor: (data, dsId) => client.createMonitor(data, dsId),
       updateMonitor: (id, data, dsId) => client.updateMonitor(id, data, dsId),
       deleteMonitor: (id, dsId) => client.deleteMonitor(id, dsId),
-      importMonitors: (json, dsId) => client.importMonitors(json, dsId),
-      exportMonitors: (dsId) => client.exportMonitors(dsId),
       acknowledgeAlert: (alertId, datasourceId, monitorId) =>
         client.acknowledgeAlert(alertId, datasourceId, monitorId),
     }),

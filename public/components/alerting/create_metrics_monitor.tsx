@@ -40,6 +40,8 @@ import {
   EuiBetaBadge,
   EuiConfirmModal,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { EchartsRender } from './echarts_render';
 import { PromQLEditor } from './promql_editor';
 import { MetricBrowser } from './metric_browser';
@@ -94,61 +96,217 @@ export interface CreateMetricsMonitorProps {
 // ============================================================================
 
 const OPERATOR_OPTIONS = [
-  { value: '>', text: '> (greater than)' },
-  { value: '>=', text: '>= (greater or equal)' },
-  { value: '<', text: '< (less than)' },
-  { value: '<=', text: '<= (less or equal)' },
-  { value: '==', text: '== (equal)' },
-  { value: '!=', text: '!= (not equal)' },
+  {
+    value: '>',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.operatorGt', {
+      defaultMessage: '> (greater than)',
+    }),
+  },
+  {
+    value: '>=',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.operatorGte', {
+      defaultMessage: '>= (greater or equal)',
+    }),
+  },
+  {
+    value: '<',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.operatorLt', {
+      defaultMessage: '< (less than)',
+    }),
+  },
+  {
+    value: '<=',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.operatorLte', {
+      defaultMessage: '<= (less or equal)',
+    }),
+  },
+  {
+    value: '==',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.operatorEq', {
+      defaultMessage: '== (equal)',
+    }),
+  },
+  {
+    value: '!=',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.operatorNeq', {
+      defaultMessage: '!= (not equal)',
+    }),
+  },
 ];
 
 const FOR_DURATION_OPTIONS = [
-  { value: '1m', text: '1 minute' },
-  { value: '5m', text: '5 minutes' },
-  { value: '10m', text: '10 minutes' },
-  { value: '15m', text: '15 minutes' },
-  { value: '30m', text: '30 minutes' },
-  { value: '1h', text: '1 hour' },
+  {
+    value: '1m',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.forDuration1m', {
+      defaultMessage: '1 minute',
+    }),
+  },
+  {
+    value: '5m',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.forDuration5m', {
+      defaultMessage: '5 minutes',
+    }),
+  },
+  {
+    value: '10m',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.forDuration10m', {
+      defaultMessage: '10 minutes',
+    }),
+  },
+  {
+    value: '15m',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.forDuration15m', {
+      defaultMessage: '15 minutes',
+    }),
+  },
+  {
+    value: '30m',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.forDuration30m', {
+      defaultMessage: '30 minutes',
+    }),
+  },
+  {
+    value: '1h',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.forDuration1h', {
+      defaultMessage: '1 hour',
+    }),
+  },
 ];
 
 const FIRING_PERIOD_OPTIONS = [
-  { value: '0s', text: 'None (resolve immediately)' },
-  { value: '30s', text: '30 seconds' },
-  { value: '1m', text: '1 minute' },
-  { value: '5m', text: '5 minutes' },
-  { value: '10m', text: '10 minutes' },
-  { value: '15m', text: '15 minutes' },
-  { value: '30m', text: '30 minutes' },
-  { value: '1h', text: '1 hour' },
+  {
+    value: '0s',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.firingNone', {
+      defaultMessage: 'None (resolve immediately)',
+    }),
+  },
+  {
+    value: '30s',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.firing30s', {
+      defaultMessage: '30 seconds',
+    }),
+  },
+  {
+    value: '1m',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.firing1m', {
+      defaultMessage: '1 minute',
+    }),
+  },
+  {
+    value: '5m',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.firing5m', {
+      defaultMessage: '5 minutes',
+    }),
+  },
+  {
+    value: '10m',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.firing10m', {
+      defaultMessage: '10 minutes',
+    }),
+  },
+  {
+    value: '15m',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.firing15m', {
+      defaultMessage: '15 minutes',
+    }),
+  },
+  {
+    value: '30m',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.firing30m', {
+      defaultMessage: '30 minutes',
+    }),
+  },
+  {
+    value: '1h',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.firing1h', {
+      defaultMessage: '1 hour',
+    }),
+  },
 ];
 
 const EVAL_INTERVAL_OPTIONS = [
-  { value: '30s', text: '30 seconds' },
-  { value: '1m', text: '1 minute' },
-  { value: '5m', text: '5 minutes' },
-  { value: '10m', text: '10 minutes' },
-  { value: '15m', text: '15 minutes' },
-  { value: '30m', text: '30 minutes' },
-  { value: '1h', text: '1 hour' },
+  {
+    value: '30s',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.eval30s', {
+      defaultMessage: '30 seconds',
+    }),
+  },
+  {
+    value: '1m',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.eval1m', {
+      defaultMessage: '1 minute',
+    }),
+  },
+  {
+    value: '5m',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.eval5m', {
+      defaultMessage: '5 minutes',
+    }),
+  },
+  {
+    value: '10m',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.eval10m', {
+      defaultMessage: '10 minutes',
+    }),
+  },
+  {
+    value: '15m',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.eval15m', {
+      defaultMessage: '15 minutes',
+    }),
+  },
+  {
+    value: '30m',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.eval30m', {
+      defaultMessage: '30 minutes',
+    }),
+  },
+  {
+    value: '1h',
+    text: i18n.translate('observability.alerting.createMetricsMonitor.eval1h', {
+      defaultMessage: '1 hour',
+    }),
+  },
 ];
 
 const MOCK_DATASOURCES = [
-  { id: 'prom-1', name: 'Prometheus (production)' },
-  { id: 'prom-2', name: 'Prometheus (staging)' },
+  {
+    id: 'prom-1',
+    name: i18n.translate('observability.alerting.createMetricsMonitor.datasourceProd', {
+      defaultMessage: 'Prometheus (production)',
+    }),
+  },
+  {
+    id: 'prom-2',
+    name: i18n.translate('observability.alerting.createMetricsMonitor.datasourceStaging', {
+      defaultMessage: 'Prometheus (staging)',
+    }),
+  },
 ];
 
 const MOCK_SAMPLE_QUERIES = [
-  { label: 'High CPU usage', query: 'rate(node_cpu_seconds_total{mode!="idle"}[5m]) > 0.8' },
   {
-    label: 'High memory usage',
+    label: i18n.translate('observability.alerting.createMetricsMonitor.sampleHighCpu', {
+      defaultMessage: 'High CPU usage',
+    }),
+    query: 'rate(node_cpu_seconds_total{mode!="idle"}[5m]) > 0.8',
+  },
+  {
+    label: i18n.translate('observability.alerting.createMetricsMonitor.sampleHighMemory', {
+      defaultMessage: 'High memory usage',
+    }),
     query: '(1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 0.9',
   },
   {
-    label: 'High error rate',
+    label: i18n.translate('observability.alerting.createMetricsMonitor.sampleHighErrorRate', {
+      defaultMessage: 'High error rate',
+    }),
     query: 'rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05',
   },
   {
-    label: 'Disk almost full',
+    label: i18n.translate('observability.alerting.createMetricsMonitor.sampleDiskFull', {
+      defaultMessage: 'Disk almost full',
+    }),
     query: '(1 - node_filesystem_avail_bytes / node_filesystem_size_bytes) > 0.85',
   },
 ];
@@ -215,42 +373,69 @@ const MonitorDetailsSection = React.memo<{
 }>(({ form, onUpdate }) => (
   <EuiAccordion
     id="prom-monitor-details"
-    buttonContent={<strong>Monitor details</strong>}
+    buttonContent={
+      <strong>
+        {i18n.translate('observability.alerting.createMetricsMonitor.monitorDetailsTitle', {
+          defaultMessage: 'Monitor details',
+        })}
+      </strong>
+    }
     initialIsOpen
     paddingSize="m"
   >
-    <EuiFormRow label="Monitor name" fullWidth>
+    <EuiFormRow
+      label={i18n.translate('observability.alerting.createMetricsMonitor.monitorNameLabel', {
+        defaultMessage: 'Monitor name',
+      })}
+      fullWidth
+    >
       <EuiFieldText
-        placeholder="Enter a monitor name"
+        placeholder={i18n.translate(
+          'observability.alerting.createMetricsMonitor.monitorNamePlaceholder',
+          { defaultMessage: 'Enter a monitor name' }
+        )}
         value={form.monitorName}
         onChange={(e) => onUpdate({ monitorName: e.target.value })}
         fullWidth
         compressed
-        aria-label="Monitor name"
+        aria-label={i18n.translate(
+          'observability.alerting.createMetricsMonitor.monitorNameAriaLabel',
+          { defaultMessage: 'Monitor name' }
+        )}
       />
     </EuiFormRow>
     <EuiSpacer size="m" />
     <EuiFormRow
       label={
         <span>
-          Description{' '}
+          {i18n.translate('observability.alerting.createMetricsMonitor.descriptionLabel', {
+            defaultMessage: 'Description',
+          })}{' '}
           <span
             style={{ fontSize: 12, color: '#98A2B3', fontStyle: 'italic', fontWeight: 'normal' }}
           >
-            — optional
+            {i18n.translate('observability.alerting.createMetricsMonitor.descriptionOptional', {
+              defaultMessage: '— optional',
+            })}
           </span>
         </span>
       }
       fullWidth
     >
       <EuiTextArea
-        placeholder="Describe this monitor"
+        placeholder={i18n.translate(
+          'observability.alerting.createMetricsMonitor.descriptionPlaceholder',
+          { defaultMessage: 'Describe this monitor' }
+        )}
         value={form.description}
         onChange={(e) => onUpdate({ description: e.target.value })}
         rows={2}
         fullWidth
         compressed
-        aria-label="Monitor description"
+        aria-label={i18n.translate(
+          'observability.alerting.createMetricsMonitor.descriptionAriaLabel',
+          { defaultMessage: 'Monitor description' }
+        )}
       />
     </EuiFormRow>
   </EuiAccordion>
@@ -286,12 +471,27 @@ const QuerySection = React.memo<{
   return (
     <EuiAccordion
       id="prom-query-section"
-      buttonContent={<strong>Query</strong>}
+      buttonContent={
+        <strong>
+          {i18n.translate('observability.alerting.createMetricsMonitor.queryTitle', {
+            defaultMessage: 'Query',
+          })}
+        </strong>
+      }
       initialIsOpen
       paddingSize="m"
       extraAction={
-        <EuiButton size="s" onClick={onRunPreview} aria-label="Run preview">
-          Run preview
+        <EuiButton
+          size="s"
+          onClick={onRunPreview}
+          aria-label={i18n.translate(
+            'observability.alerting.createMetricsMonitor.runPreviewAriaLabel',
+            { defaultMessage: 'Run preview' }
+          )}
+        >
+          {i18n.translate('observability.alerting.createMetricsMonitor.runPreviewButton', {
+            defaultMessage: 'Run preview',
+          })}
         </EuiButton>
       }
     >
@@ -299,7 +499,14 @@ const QuerySection = React.memo<{
       <EuiPanel paddingSize="s" hasBorder style={{ borderRadius: 4 }}>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
           <EuiFlexItem grow={false}>
-            <EuiBetaBadge label="PromQL" tooltipContent="Prometheus Query Language" size="s" />
+            <EuiBetaBadge
+              label="PromQL"
+              tooltipContent={i18n.translate(
+                'observability.alerting.createMetricsMonitor.promqlTooltip',
+                { defaultMessage: 'Prometheus Query Language' }
+              )}
+              size="s"
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiPopover
@@ -309,7 +516,10 @@ const QuerySection = React.memo<{
                   iconType="database"
                   iconSide="left"
                   onClick={() => setShowDatasourcePicker(!showDatasourcePicker)}
-                  aria-label="Pick data source"
+                  aria-label={i18n.translate(
+                    'observability.alerting.createMetricsMonitor.pickDatasourceAriaLabel',
+                    { defaultMessage: 'Pick data source' }
+                  )}
                 >
                   <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>{selectedDs.name}</EuiFlexItem>
@@ -346,10 +556,18 @@ const QuerySection = React.memo<{
                   iconType="starEmpty"
                   iconSide="left"
                   onClick={() => setShowQueryLibrary(!showQueryLibrary)}
-                  aria-label="Query library"
+                  aria-label={i18n.translate(
+                    'observability.alerting.createMetricsMonitor.queryLibraryAriaLabel',
+                    { defaultMessage: 'Query library' }
+                  )}
                 >
                   <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>Query library</EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      {i18n.translate(
+                        'observability.alerting.createMetricsMonitor.queryLibraryLabel',
+                        { defaultMessage: 'Query library' }
+                      )}
+                    </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiIcon type="arrowDown" size="s" />
                     </EuiFlexItem>
@@ -378,10 +596,18 @@ const QuerySection = React.memo<{
                 <EuiButtonEmpty
                   size="xs"
                   onClick={() => setShowMetricBrowser(!showMetricBrowser)}
-                  aria-label="Metric browser"
+                  aria-label={i18n.translate(
+                    'observability.alerting.createMetricsMonitor.metricBrowserAriaLabel',
+                    { defaultMessage: 'Metric browser' }
+                  )}
                 >
                   <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>Metric browser</EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      {i18n.translate(
+                        'observability.alerting.createMetricsMonitor.metricBrowserLabel',
+                        { defaultMessage: 'Metric browser' }
+                      )}
+                    </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiIcon type="arrowDown" size="s" />
                     </EuiFlexItem>
@@ -414,7 +640,12 @@ const QuerySection = React.memo<{
           <div
             style={{ position: 'absolute', top: 4, right: 4, zIndex: 2, display: 'flex', gap: 2 }}
           >
-            <EuiToolTip content="Copy query">
+            <EuiToolTip
+              content={i18n.translate(
+                'observability.alerting.createMetricsMonitor.copyQueryTooltip',
+                { defaultMessage: 'Copy query' }
+              )}
+            >
               <EuiButtonIcon
                 iconType="copy"
                 size="s"
@@ -426,7 +657,10 @@ const QuerySection = React.memo<{
                     /* clipboard unavailable */
                   }
                 }}
-                aria-label="Copy query"
+                aria-label={i18n.translate(
+                  'observability.alerting.createMetricsMonitor.copyQueryAriaLabel',
+                  { defaultMessage: 'Copy query' }
+                )}
               />
             </EuiToolTip>
           </div>
@@ -442,7 +676,13 @@ const QuerySection = React.memo<{
             buttonContent={
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <strong>Results ({PREVIEW_VALUES.length})</strong>
+                  <strong>
+                    <FormattedMessage
+                      id="observability.alerting.createMetricsMonitor.resultsTitle"
+                      defaultMessage="Results ({count})"
+                      values={{ count: PREVIEW_VALUES.length }}
+                    />
+                  </strong>
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
@@ -450,7 +690,11 @@ const QuerySection = React.memo<{
             paddingSize="s"
           >
             <EuiCallOut size="s" color="warning" iconType="iInCircle">
-              <EuiText size="xs">Sample data — run the monitor to see real results</EuiText>
+              <EuiText size="xs">
+                {i18n.translate('observability.alerting.createMetricsMonitor.sampleDataCallout', {
+                  defaultMessage: 'Sample data — run the monitor to see real results',
+                })}
+              </EuiText>
             </EuiCallOut>
             <EuiSpacer size="s" />
             <EuiText size="xs" color="subdued">
@@ -472,13 +716,24 @@ const TriggerConditionSection = React.memo<{
 }>(({ form, onUpdate }) => (
   <EuiAccordion
     id="prom-trigger-condition"
-    buttonContent={<strong>Trigger condition</strong>}
+    buttonContent={
+      <strong>
+        {i18n.translate('observability.alerting.createMetricsMonitor.triggerConditionTitle', {
+          defaultMessage: 'Trigger condition',
+        })}
+      </strong>
+    }
     initialIsOpen
     paddingSize="m"
   >
     <EuiFlexGroup gutterSize="s" wrap>
       <EuiFlexItem style={{ minWidth: 160 }}>
-        <EuiFormRow label="Operator" display="rowCompressed">
+        <EuiFormRow
+          label={i18n.translate('observability.alerting.createMetricsMonitor.operatorLabel', {
+            defaultMessage: 'Operator',
+          })}
+          display="rowCompressed"
+        >
           <EuiSelect
             options={OPERATOR_OPTIONS}
             value={form.operator}
@@ -486,28 +741,47 @@ const TriggerConditionSection = React.memo<{
               onUpdate({ operator: e.target.value as MetricsMonitorFormState['operator'] })
             }
             compressed
-            aria-label="Threshold operator"
+            aria-label={i18n.translate(
+              'observability.alerting.createMetricsMonitor.thresholdOperatorAriaLabel',
+              { defaultMessage: 'Threshold operator' }
+            )}
           />
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem style={{ minWidth: 100 }}>
-        <EuiFormRow label="Value" display="rowCompressed">
+        <EuiFormRow
+          label={i18n.translate('observability.alerting.createMetricsMonitor.valueLabel', {
+            defaultMessage: 'Value',
+          })}
+          display="rowCompressed"
+        >
           <EuiFieldNumber
             value={form.thresholdValue}
             onChange={(e) => onUpdate({ thresholdValue: parseFloat(e.target.value) || 0 })}
             compressed
-            aria-label="Threshold value"
+            aria-label={i18n.translate(
+              'observability.alerting.createMetricsMonitor.thresholdValueAriaLabel',
+              { defaultMessage: 'Threshold value' }
+            )}
           />
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem style={{ minWidth: 160 }}>
-        <EuiFormRow label="For duration" display="rowCompressed">
+        <EuiFormRow
+          label={i18n.translate('observability.alerting.createMetricsMonitor.forDurationLabel', {
+            defaultMessage: 'For duration',
+          })}
+          display="rowCompressed"
+        >
           <EuiSelect
             options={FOR_DURATION_OPTIONS}
             value={form.forDuration}
             onChange={(e) => onUpdate({ forDuration: e.target.value })}
             compressed
-            aria-label="For duration"
+            aria-label={i18n.translate(
+              'observability.alerting.createMetricsMonitor.forDurationAriaLabel',
+              { defaultMessage: 'For duration' }
+            )}
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -518,11 +792,18 @@ const TriggerConditionSection = React.memo<{
     {/* Condition summary callout */}
     <EuiCallOut size="s" color="primary" iconType="iInCircle">
       <EuiText size="xs">
-        Alert fires when:{' '}
-        <code>
-          {form.query || '<query>'} {form.operator} {form.thresholdValue}
-        </code>{' '}
-        for {form.forDuration}
+        <FormattedMessage
+          id="observability.alerting.createMetricsMonitor.alertFiresMessage"
+          defaultMessage="Alert fires when: {expression} for {forDuration}"
+          values={{
+            expression: (
+              <code>
+                {form.query || '<query>'} {form.operator} {form.thresholdValue}
+              </code>
+            ),
+            forDuration: form.forDuration,
+          }}
+        />
       </EuiText>
     </EuiCallOut>
 
@@ -530,11 +811,19 @@ const TriggerConditionSection = React.memo<{
 
     {/* Threshold visualization */}
     <EuiCallOut size="s" color="warning" iconType="iInCircle">
-      <EuiText size="xs">Sample data — run the monitor to see real results</EuiText>
+      <EuiText size="xs">
+        {i18n.translate('observability.alerting.createMetricsMonitor.thresholdSampleDataCallout', {
+          defaultMessage: 'Sample data — run the monitor to see real results',
+        })}
+      </EuiText>
     </EuiCallOut>
     <EuiSpacer size="xs" />
     <EuiText size="xs">
-      <strong>Results</strong>
+      <strong>
+        {i18n.translate('observability.alerting.createMetricsMonitor.thresholdResultsLabel', {
+          defaultMessage: 'Results',
+        })}
+      </strong>
     </EuiText>
     <EuiText size="xs" color="subdued">
       http_requests_total
@@ -551,37 +840,72 @@ const EvaluationSettingsSection = React.memo<{
 }>(({ form, onUpdate }) => (
   <EuiAccordion
     id="prom-evaluation-settings"
-    buttonContent={<strong>Evaluation settings</strong>}
+    buttonContent={
+      <strong>
+        {i18n.translate('observability.alerting.createMetricsMonitor.evaluationSettingsTitle', {
+          defaultMessage: 'Evaluation settings',
+        })}
+      </strong>
+    }
     initialIsOpen={false}
     paddingSize="m"
   >
     <EuiFlexGroup gutterSize="s" wrap>
       <EuiFlexItem style={{ minWidth: 160 }}>
-        <EuiFormRow label="Eval interval" helpText="How often evaluated" display="rowCompressed">
+        <EuiFormRow
+          label={i18n.translate('observability.alerting.createMetricsMonitor.evalIntervalLabel', {
+            defaultMessage: 'Eval interval',
+          })}
+          helpText={i18n.translate(
+            'observability.alerting.createMetricsMonitor.evalIntervalHelpText',
+            { defaultMessage: 'How often evaluated' }
+          )}
+          display="rowCompressed"
+        >
           <EuiSelect
             options={EVAL_INTERVAL_OPTIONS}
             value={form.evalInterval}
             onChange={(e) => onUpdate({ evalInterval: e.target.value })}
             compressed
-            aria-label="Evaluation interval"
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: 160 }}>
-        <EuiFormRow label="Pending period" helpText="Before firing" display="rowCompressed">
-          <EuiSelect
-            options={EVAL_INTERVAL_OPTIONS}
-            value={form.pendingPeriod}
-            onChange={(e) => onUpdate({ pendingPeriod: e.target.value })}
-            compressed
-            aria-label="Pending period"
+            aria-label={i18n.translate(
+              'observability.alerting.createMetricsMonitor.evaluationIntervalAriaLabel',
+              { defaultMessage: 'Evaluation interval' }
+            )}
           />
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem style={{ minWidth: 160 }}>
         <EuiFormRow
-          label="Firing period"
-          helpText="Keep firing after condition clears"
+          label={i18n.translate('observability.alerting.createMetricsMonitor.pendingPeriodLabel', {
+            defaultMessage: 'Pending period',
+          })}
+          helpText={i18n.translate(
+            'observability.alerting.createMetricsMonitor.pendingPeriodHelpText',
+            { defaultMessage: 'Before firing' }
+          )}
+          display="rowCompressed"
+        >
+          <EuiSelect
+            options={EVAL_INTERVAL_OPTIONS}
+            value={form.pendingPeriod}
+            onChange={(e) => onUpdate({ pendingPeriod: e.target.value })}
+            compressed
+            aria-label={i18n.translate(
+              'observability.alerting.createMetricsMonitor.pendingPeriodAriaLabel',
+              { defaultMessage: 'Pending period' }
+            )}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem style={{ minWidth: 160 }}>
+        <EuiFormRow
+          label={i18n.translate('observability.alerting.createMetricsMonitor.firingPeriodLabel', {
+            defaultMessage: 'Firing period',
+          })}
+          helpText={i18n.translate(
+            'observability.alerting.createMetricsMonitor.firingPeriodHelpText',
+            { defaultMessage: 'Keep firing after condition clears' }
+          )}
           display="rowCompressed"
         >
           <EuiSelect
@@ -589,7 +913,10 @@ const EvaluationSettingsSection = React.memo<{
             value={form.firingPeriod}
             onChange={(e) => onUpdate({ firingPeriod: e.target.value })}
             compressed
-            aria-label="Firing period"
+            aria-label={i18n.translate(
+              'observability.alerting.createMetricsMonitor.firingPeriodAriaLabel',
+              { defaultMessage: 'Firing period' }
+            )}
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -613,12 +940,20 @@ const LabelsSection = React.memo<{
   return (
     <EuiAccordion
       id="prom-labels"
-      buttonContent={<strong>Labels</strong>}
+      buttonContent={
+        <strong>
+          {i18n.translate('observability.alerting.createMetricsMonitor.labelsTitle', {
+            defaultMessage: 'Labels',
+          })}
+        </strong>
+      }
       initialIsOpen
       paddingSize="m"
     >
       <EuiText size="xs" color="subdued">
-        Categorize and route alerts
+        {i18n.translate('observability.alerting.createMetricsMonitor.labelsDescription', {
+          defaultMessage: 'Categorize and route alerts',
+        })}
       </EuiText>
       <EuiSpacer size="s" />
       {labels.map((label, i) => (
@@ -631,30 +966,67 @@ const LabelsSection = React.memo<{
         >
           <EuiFlexItem grow={2}>
             <EuiFieldText
-              placeholder="e.g. severity, team, service"
+              placeholder={i18n.translate(
+                'observability.alerting.createMetricsMonitor.labelKeyPlaceholder',
+                { defaultMessage: 'e.g. severity, team, service' }
+              )}
               value={label.key}
               onChange={(e) => updateLabel(i, { key: e.target.value })}
               compressed
-              aria-label={`Label key ${i + 1}`}
+              aria-label={i18n.translate(
+                'observability.alerting.createMetricsMonitor.labelKeyAriaLabel',
+                { defaultMessage: 'Label key {index}', values: { index: i + 1 } }
+              )}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
             <EuiFieldText
-              placeholder={label.isDynamic ? '{{ $value }}' : 'Value'}
+              placeholder={
+                label.isDynamic
+                  ? '{{ $value }}'
+                  : i18n.translate(
+                      'observability.alerting.createMetricsMonitor.labelValuePlaceholder',
+                      { defaultMessage: 'Value' }
+                    )
+              }
               value={label.value}
               onChange={(e) => updateLabel(i, { value: e.target.value })}
               compressed
-              aria-label={`Label value ${i + 1}`}
+              aria-label={i18n.translate(
+                'observability.alerting.createMetricsMonitor.labelValueAriaLabel',
+                { defaultMessage: 'Label value {index}', values: { index: i + 1 } }
+              )}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={label.isDynamic ? 'Dynamic (Go template)' : 'Static value'}>
+            <EuiToolTip
+              content={
+                label.isDynamic
+                  ? i18n.translate(
+                      'observability.alerting.createMetricsMonitor.labelDynamicTooltip',
+                      { defaultMessage: 'Dynamic (Go template)' }
+                    )
+                  : i18n.translate(
+                      'observability.alerting.createMetricsMonitor.labelStaticTooltip',
+                      { defaultMessage: 'Static value' }
+                    )
+              }
+            >
               <EuiSwitch
-                label="Dynamic"
+                label={i18n.translate(
+                  'observability.alerting.createMetricsMonitor.labelDynamicSwitch',
+                  { defaultMessage: 'Dynamic' }
+                )}
                 checked={label.isDynamic}
                 onChange={(e) => updateLabel(i, { isDynamic: e.target.checked })}
                 compressed
-                aria-label={`Toggle dynamic for label ${i + 1}`}
+                aria-label={i18n.translate(
+                  'observability.alerting.createMetricsMonitor.labelToggleDynamicAriaLabel',
+                  {
+                    defaultMessage: 'Toggle dynamic for label {index}',
+                    values: { index: i + 1 },
+                  }
+                )}
               />
             </EuiToolTip>
           </EuiFlexItem>
@@ -664,14 +1036,22 @@ const LabelsSection = React.memo<{
               color="danger"
               size="s"
               onClick={() => removeLabel(i)}
-              aria-label={`Delete label ${label.key || i + 1}`}
+              aria-label={i18n.translate(
+                'observability.alerting.createMetricsMonitor.deleteLabelAriaLabel',
+                {
+                  defaultMessage: 'Delete label {label}',
+                  values: { label: label.key || i + 1 },
+                }
+              )}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
       ))}
       <EuiSpacer size="xs" />
       <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={addLabel}>
-        Add label
+        {i18n.translate('observability.alerting.createMetricsMonitor.addLabelButton', {
+          defaultMessage: 'Add label',
+        })}
       </EuiButtonEmpty>
     </EuiAccordion>
   );
@@ -696,10 +1076,18 @@ const AnnotationsSection = React.memo<{
       buttonContent={
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <strong>Annotations</strong>
+            <strong>
+              {i18n.translate('observability.alerting.createMetricsMonitor.annotationsTitle', {
+                defaultMessage: 'Annotations',
+              })}
+            </strong>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">Optional</EuiBadge>
+            <EuiBadge color="hollow">
+              {i18n.translate('observability.alerting.createMetricsMonitor.annotationsOptional', {
+                defaultMessage: 'Optional',
+              })}
+            </EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
       }
@@ -716,20 +1104,32 @@ const AnnotationsSection = React.memo<{
         >
           <EuiFlexItem grow={2}>
             <EuiFieldText
-              placeholder="e.g. summary, description, runbook_url"
+              placeholder={i18n.translate(
+                'observability.alerting.createMetricsMonitor.annotationKeyPlaceholder',
+                { defaultMessage: 'e.g. summary, description, runbook_url' }
+              )}
               value={ann.key}
               onChange={(e) => updateAnnotation(i, { key: e.target.value })}
               compressed
-              aria-label={`Annotation key ${i + 1}`}
+              aria-label={i18n.translate(
+                'observability.alerting.createMetricsMonitor.annotationKeyAriaLabel',
+                { defaultMessage: 'Annotation key {index}', values: { index: i + 1 } }
+              )}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={4}>
             <EuiFieldText
-              placeholder="Supports Go template syntax"
+              placeholder={i18n.translate(
+                'observability.alerting.createMetricsMonitor.annotationValuePlaceholder',
+                { defaultMessage: 'Supports Go template syntax' }
+              )}
               value={ann.value}
               onChange={(e) => updateAnnotation(i, { value: e.target.value })}
               compressed
-              aria-label={`Annotation value ${i + 1}`}
+              aria-label={i18n.translate(
+                'observability.alerting.createMetricsMonitor.annotationValueAriaLabel',
+                { defaultMessage: 'Annotation value {index}', values: { index: i + 1 } }
+              )}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -738,14 +1138,22 @@ const AnnotationsSection = React.memo<{
               color="danger"
               size="s"
               onClick={() => removeAnnotation(i)}
-              aria-label={`Delete annotation ${ann.key || i + 1}`}
+              aria-label={i18n.translate(
+                'observability.alerting.createMetricsMonitor.deleteAnnotationAriaLabel',
+                {
+                  defaultMessage: 'Delete annotation {annotation}',
+                  values: { annotation: ann.key || i + 1 },
+                }
+              )}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
       ))}
       <EuiSpacer size="xs" />
       <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={addAnnotation}>
-        Add annotation
+        {i18n.translate('observability.alerting.createMetricsMonitor.addAnnotationButton', {
+          defaultMessage: 'Add annotation',
+        })}
       </EuiButtonEmpty>
     </EuiAccordion>
   );
@@ -757,11 +1165,22 @@ const ActionsSection = React.memo<{
   onDeleteAction: (id: string) => void;
   onAddAction: () => void;
 }>(({ actions, onDeleteAction, onAddAction }) => (
-  <section aria-label="Matched notification actions">
+  <section
+    aria-label={i18n.translate(
+      'observability.alerting.createMetricsMonitor.matchedActionsAriaLabel',
+      { defaultMessage: 'Matched notification actions' }
+    )}
+  >
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
-          <h3>Matched notification actions ({actions.length})</h3>
+          <h3>
+            <FormattedMessage
+              id="observability.alerting.createMetricsMonitor.matchedActionsTitle"
+              defaultMessage="Matched notification actions ({count})"
+              values={{ count: actions.length }}
+            />
+          </h3>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -783,16 +1202,34 @@ const ActionsSection = React.memo<{
                 size="xs"
                 color="danger"
                 onClick={() => onDeleteAction(action.id)}
-                aria-label={`Delete action ${action.name}`}
+                aria-label={i18n.translate(
+                  'observability.alerting.createMetricsMonitor.deleteActionAriaLabel',
+                  { defaultMessage: 'Delete action {name}', values: { name: action.name } }
+                )}
               >
-                Delete
+                {i18n.translate('observability.alerting.createMetricsMonitor.deleteActionButton', {
+                  defaultMessage: 'Delete',
+                })}
               </EuiButtonEmpty>
             }
           >
-            <EuiCallOut size="s" color="primary" iconType="iInCircle" title="Coming soon">
+            <EuiCallOut
+              size="s"
+              color="primary"
+              iconType="iInCircle"
+              title={i18n.translate(
+                'observability.alerting.createMetricsMonitor.comingSoonCalloutTitle',
+                { defaultMessage: 'Coming soon' }
+              )}
+            >
               <EuiText size="xs">
-                Full action configuration (destination, message template, throttling) will be
-                available in a future update.
+                {i18n.translate(
+                  'observability.alerting.createMetricsMonitor.comingSoonCalloutBody',
+                  {
+                    defaultMessage:
+                      'Full action configuration (destination, message template, throttling) will be available in a future update.',
+                  }
+                )}
               </EuiText>
             </EuiCallOut>
           </EuiAccordion>
@@ -804,9 +1241,13 @@ const ActionsSection = React.memo<{
       size="s"
       iconType="plusInCircle"
       onClick={onAddAction}
-      aria-label="Add another action"
+      aria-label={i18n.translate('observability.alerting.createMetricsMonitor.addActionAriaLabel', {
+        defaultMessage: 'Add another action',
+      })}
     >
-      Add another action
+      {i18n.translate('observability.alerting.createMetricsMonitor.addActionButton', {
+        defaultMessage: 'Add another action',
+      })}
     </EuiButtonEmpty>
   </section>
 ));
@@ -850,7 +1291,13 @@ const RulePreviewSection = React.memo<{
   return (
     <EuiAccordion
       id="prom-rule-preview"
-      buttonContent={<strong>Rule Preview (YAML)</strong>}
+      buttonContent={
+        <strong>
+          {i18n.translate('observability.alerting.createMetricsMonitor.rulePreviewTitle', {
+            defaultMessage: 'Rule Preview (YAML)',
+          })}
+        </strong>
+      }
       initialIsOpen={false}
       paddingSize="m"
     >
@@ -971,11 +1418,17 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({ onCa
     <EuiFlyout onClose={handleClose} size="l" ownFocus aria-labelledby="createMetricsMonitorTitle">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="createMetricsMonitorTitle">Create Metrics Monitor</h2>
+          <h2 id="createMetricsMonitorTitle">
+            {i18n.translate('observability.alerting.createMetricsMonitor.flyoutTitle', {
+              defaultMessage: 'Create Metrics Monitor',
+            })}
+          </h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="xs" color="subdued">
-          PromQL-based alerting rule
+          {i18n.translate('observability.alerting.createMetricsMonitor.flyoutSubtitle', {
+            defaultMessage: 'PromQL-based alerting rule',
+          })}
         </EuiText>
       </EuiFlyoutHeader>
 
@@ -1024,11 +1477,17 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({ onCa
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd" responsive={false} gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={handleClose}>Cancel</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={handleClose}>
+              {i18n.translate('observability.alerting.createMetricsMonitor.cancelButton', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton fill onClick={() => onSave(form)} isDisabled={!isValid}>
-              Create
+              {i18n.translate('observability.alerting.createMetricsMonitor.createButton', {
+                defaultMessage: 'Create',
+              })}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -1036,17 +1495,29 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({ onCa
 
       {showDiscardConfirm && (
         <EuiConfirmModal
-          title="Discard unsaved changes?"
+          title={i18n.translate('observability.alerting.createMetricsMonitor.discardModalTitle', {
+            defaultMessage: 'Discard unsaved changes?',
+          })}
           onCancel={() => setShowDiscardConfirm(false)}
           onConfirm={() => {
             setShowDiscardConfirm(false);
             onCancel();
           }}
-          cancelButtonText="Keep editing"
-          confirmButtonText="Discard"
+          cancelButtonText={i18n.translate(
+            'observability.alerting.createMetricsMonitor.discardModalCancel',
+            { defaultMessage: 'Keep editing' }
+          )}
+          confirmButtonText={i18n.translate(
+            'observability.alerting.createMetricsMonitor.discardModalConfirm',
+            { defaultMessage: 'Discard' }
+          )}
           buttonColor="danger"
         >
-          <p>You have unsaved changes. Discard?</p>
+          <p>
+            {i18n.translate('observability.alerting.createMetricsMonitor.discardModalBody', {
+              defaultMessage: 'You have unsaved changes. Discard?',
+            })}
+          </p>
         </EuiConfirmModal>
       )}
     </EuiFlyout>

@@ -177,13 +177,13 @@ export const registerObservabilityUISettings = (
   uiSettings.register({
     [ALERT_MANAGER_DEFAULT_DATASOURCES_SETTING]: {
       name: i18n.translate('observability.alertManagerSelectedDatasources.name', {
-        defaultMessage: 'Alert Manager selected datasources',
+        defaultMessage: 'Alerts selected datasources',
       }),
       value: [],
       category: ['Observability'],
       description: i18n.translate('observability.alertManagerSelectedDatasources.description', {
         defaultMessage:
-          'Datasources pre-selected when the Alert Manager page first loads. Each entry can be a datasource name (recommended — stable across restarts) or id. Leave empty to default to the first discovered datasource. Entries beyond the maximum are ignored; unknown entries are skipped. Also used as a fallback when a previously cached selection no longer resolves.',
+          'Datasources pre-selected when the Alerts page first loads. Each entry can be a datasource name (recommended — stable across restarts) or id. Leave empty to default to the first discovered datasource. Entries beyond the maximum are ignored; unknown entries are skipped. Also used as a fallback when a previously cached selection no longer resolves.',
       }),
       schema: schema.arrayOf(schema.string()),
       // Read once at mount in home.tsx; changes only take effect on a fresh
@@ -195,13 +195,13 @@ export const registerObservabilityUISettings = (
   uiSettings.register({
     [ALERT_MANAGER_MAX_DATASOURCES_SETTING]: {
       name: i18n.translate('observability.alertManagerMaxDatasources.name', {
-        defaultMessage: 'Alert Manager maximum selected datasources',
+        defaultMessage: 'Alerts maximum selected datasources',
       }),
       value: ALERT_MANAGER_MAX_DATASOURCES_DEFAULT,
       category: ['Observability'],
       description: i18n.translate('observability.alertManagerMaxDatasources.description', {
         defaultMessage:
-          'Maximum number of datasources that can be selected at once on the Alert Manager page. Raising this increases fan-out query cost.',
+          'Maximum number of datasources that can be selected at once on the Alerts page. Raising this increases fan-out query cost.',
       }),
       schema: schema.number({
         min: 1,

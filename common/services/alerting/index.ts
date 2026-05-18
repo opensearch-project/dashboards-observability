@@ -4,7 +4,6 @@
  */
 
 export * from './filter';
-export * from './serializer';
 export * from './validators';
 export * from './promql_validator';
 export * from './time_range';

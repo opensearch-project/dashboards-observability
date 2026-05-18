@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiHealth,
   EuiInMemoryTable,
+  EuiLink,
   EuiText,
   EuiTitle,
   EuiButtonIcon,
@@ -25,6 +26,8 @@ import {
   EuiButtonEmpty,
   EuiResizableContainer,
   EuiCallOut,
+  EuiHorizontalRule,
+  EuiSuperDatePicker,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -35,9 +38,10 @@ import {
 } from '../../../common/types/alerting';
 import { filterAlerts } from '../../../common/services/alerting/filter';
 import { AlertTimeline } from './alerts_charts';
-import { AlertsSummaryCards } from './alerts_summary_cards';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
 import { countBy } from './shared_constants';
+import { INTERNAL_LABEL_KEYS } from './monitors_table/monitors_table_helpers';
+import './alerting.scss';
 
 // ============================================================================
 // Color maps (used by table columns and filter panel)
@@ -80,6 +84,12 @@ function formatDuration(startTime: string | number): string {
   return Math.floor(ms / 86400000) + 'd ' + (Math.floor(ms / 3600000) % 24) + 'h';
 }
 
+// Cap on label-key facets rendered before the user expands the section.
+// Mirrors Grafana's label browser pattern: show a truncated list, with a
+// `Show all (N)` toggle to reveal the rest. 10 fits the common case
+// (severity / instance / job / namespace / etc.) on screen at once.
+const LABEL_KEY_INITIAL_VISIBLE = 10;
+
 const SEVERITY_SORT_ORDER: Record<string, number> = {
   critical: 0,
   high: 1,
@@ -88,17 +98,6 @@ const SEVERITY_SORT_ORDER: Record<string, number> = {
   info: 4,
 };
 
-/** Internal label keys to hide from the filter panel */
-const INTERNAL_LABEL_KEYS = new Set([
-  'monitor_id',
-  'datasource_id',
-  '_workspace',
-  'monitor_type',
-  'monitor_kind',
-  'trigger_id',
-  'trigger_name',
-]);
-
 // ============================================================================
 // Alert Filter State
 // ============================================================================
@@ -106,14 +105,12 @@ const INTERNAL_LABEL_KEYS = new Set([
 interface AlertFilterState {
   severity: string[];
   state: string[];
-  backend: string[];
   labels: Record<string, string[]>;
 }
 
 const emptyAlertFilters = (): AlertFilterState => ({
   severity: [],
   state: [],
-  backend: [],
   labels: {},
 });
 
@@ -190,10 +187,27 @@ export interface AlertsDashboardProps {
   maxDatasources: number;
   /** Callback fired when user tries to exceed `maxDatasources`. */
   onDatasourceCapReached: () => void;
+  /**
+   * Total number of rules across the selected datasources. `-1` means rules have
+   * not yet been fetched; `0` means none exist. Drives the "no rules" empty state.
+   */
+  rulesTotal: number;
+  /** Default datasource ids from advanced settings; shown in the "no datasource" empty state. */
+  defaultDatasources: string[];
+  /** Switch to the Rules tab (used by the "No rules" empty state CTA). */
+  onGoToRules: () => void;
   /** Picker start resolved to epoch ms (resolved once by the parent). */
   startMs: number;
   /** Picker end resolved to epoch ms (resolved once by the parent). */
   endMs: number;
+  /** Date-math start string passed to EuiSuperDatePicker (parent owns persistence). */
+  pickerStart: string;
+  /** Date-math end string passed to EuiSuperDatePicker (parent owns persistence). */
+  pickerEnd: string;
+  /** Fires when the user picks a new range. */
+  onTimeChange: (range: { start: string; end: string }) => void;
+  /** Fires when the user clicks the picker's refresh button. */
+  onRefresh: (range: { start: string; end: string }) => void;
   /**
    * Set by the parent when any backend reported a hard cap on returned
    * alerts (e.g. the OpenSearch 1000-alert post-filter cap). Drives a
@@ -219,16 +233,23 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   onDatasourceChange,
   maxDatasources,
   onDatasourceCapReached,
+  rulesTotal,
+  defaultDatasources,
+  onGoToRules,
   startMs,
   endMs,
+  pickerStart,
+  pickerEnd,
+  onTimeChange,
+  onRefresh,
   truncated,
   fallbackHints,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [severityFilter, setSeverityFilter] = useState('all');
-  const [stateFilter, setStateFilter] = useState('all');
   const [filters, setFilters] = useState<AlertFilterState>(emptyAlertFilters());
   const { toggleFacetCollapse, isCollapsed: isFacetCollapsed } = useFacetCollapse();
+  const [labelSearch, setLabelSearch] = useState('');
+  const [showAllLabels, setShowAllLabels] = useState(false);
 
   // Build selectable datasource entries for the filter facet — alpha by name
   const datasourceEntries = useMemo(
@@ -239,14 +260,22 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     [datasources]
   );
 
+  // Per-name icon map so the datasource facet renders a leading
+  // OpenSearch / Prometheus glyph next to each option (Grafana-style).
+  // Keyed by name because that's the option key passed to FacetFilterGroup.
+  const datasourceIconMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const ds of datasources) {
+      map[ds.name] = ds.type === 'prometheus' ? 'logoPrometheus' : 'logoOpenSearch';
+    }
+    return map;
+  }, [datasources]);
+
   // Unique values for facets
   const uniqueSeverities = useMemo(() => collectAlertUniqueValues(alerts, (a) => a.severity), [
     alerts,
   ]);
   const uniqueStates = useMemo(() => collectAlertUniqueValues(alerts, (a) => a.state), [alerts]);
-  const uniqueBackends = useMemo(() => collectAlertUniqueValues(alerts, (a) => a.datasourceType), [
-    alerts,
-  ]);
   const labelKeys = useMemo(() => collectAlertLabelKeys(alerts), [alerts]);
 
   // Facet counts (against search-matched but not filter-matched alerts)
@@ -263,12 +292,10 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     const counts: Record<string, Record<string, number>> = {
       severity: {},
       state: {},
-      backend: {},
     };
     for (const a of searchMatched) {
       counts.severity[a.severity] = (counts.severity[a.severity] || 0) + 1;
       counts.state[a.state] = (counts.state[a.state] || 0) + 1;
-      counts.backend[a.datasourceType] = (counts.backend[a.datasourceType] || 0) + 1;
     }
     const labelCounts: Record<string, Record<string, number>> = {};
     for (const key of labelKeys) {
@@ -282,69 +309,34 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   }, [alerts, searchQuery, labelKeys]);
 
   const activeFilterCount = useMemo(() => {
-    let count = filters.severity.length + filters.state.length + filters.backend.length;
+    let count = filters.severity.length + filters.state.length;
     for (const vals of Object.values(filters.labels)) count += vals.length;
     return count;
   }, [filters]);
 
   // Filtered + sorted alerts for the table
   const filteredAlerts = useMemo(() => {
-    // Combine stat-card filters with panel filters
-    let sevArr: string[] | undefined;
-    if (filters.severity.length > 0) {
-      sevArr = filters.severity;
-    } else if (severityFilter === 'medium') {
-      sevArr = ['medium', 'low', 'info'];
-    } else if (severityFilter !== 'all') {
-      sevArr = [severityFilter];
-    }
-
-    let stateArr: string[] | undefined;
-    if (filters.state.length > 0) {
-      stateArr = filters.state;
-    } else if (stateFilter !== 'all') {
-      stateArr = [stateFilter];
-    }
-
-    let result = filterAlerts(alerts, {
-      severity: sevArr,
-      state: stateArr,
+    return filterAlerts(alerts, {
+      severity: filters.severity.length > 0 ? filters.severity : undefined,
+      state: filters.state.length > 0 ? filters.state : undefined,
       labels: Object.keys(filters.labels).length > 0 ? filters.labels : undefined,
       search: searchQuery || undefined,
     });
+  }, [alerts, searchQuery, filters]);
 
-    // Apply backend filter separately (not in core filterAlerts)
-    if (filters.backend.length > 0) {
-      result = result.filter((a) => filters.backend.includes(a.datasourceType));
-    }
-
-    return result;
-  }, [alerts, searchQuery, severityFilter, stateFilter, filters]);
-
-  // Severity counts for stat cards — derived from filtered set
-  const severityCounts = useMemo(() => countBy(filteredAlerts, (a) => a.severity), [
-    filteredAlerts,
-  ]);
-  const activeCount = useMemo(() => filteredAlerts.filter((a) => a.state === 'active').length, [
-    filteredAlerts,
-  ]);
-  const isFiltered =
-    activeFilterCount > 0 ||
-    searchQuery !== '' ||
-    severityFilter !== 'all' ||
-    stateFilter !== 'all';
-
-  const clearAllFilters = () => {
+  // Clearing the datasource filter must also clear dependent facets and the
+  // search box because severity/state/label options are derived from the
+  // currently selected datasources' alerts — leaving stale selections (or a
+  // stale search query) would filter against values that no longer exist in
+  // the visible dataset. Mirrors clearAllFilters in monitors_table/index.tsx
+  // so the cascade-clear behavior is consistent across tabs.
+  const clearDependentFilters = () => {
     setFilters(emptyAlertFilters());
-    setSeverityFilter('all');
-    setStateFilter('all');
     setSearchQuery('');
   };
 
   const updateFilter = <K extends keyof AlertFilterState>(key: K, value: AlertFilterState[K]) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
-    if (key === 'severity') setSeverityFilter('all');
-    if (key === 'state') setStateFilter('all');
   };
 
   const updateLabelFilter = (key: string, values: string[]) => {
@@ -358,7 +350,9 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     selected: string[],
     onChange: (v: string[]) => void,
     counts: Record<string, number>,
-    colorMap?: Record<string, string>
+    colorMap?: Record<string, string>,
+    defaultCollapsed = false,
+    showOptionCount = false
   ) => (
     <FacetFilterGroup
       key={id}
@@ -369,8 +363,9 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
       onChange={onChange}
       counts={counts}
       colorMap={colorMap}
-      isCollapsed={isFacetCollapsed(id)}
-      onToggleCollapse={toggleFacetCollapse}
+      showOptionCount={showOptionCount}
+      isCollapsed={isFacetCollapsed(id, defaultCollapsed)}
+      onToggleCollapse={(facetId) => toggleFacetCollapse(facetId, defaultCollapsed)}
     />
   );
 
@@ -380,7 +375,9 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     () => [
       {
         field: 'severity',
-        name: 'Sev',
+        name: i18n.translate('observability.alerting.alertsDashboard.column.sev', {
+          defaultMessage: 'Sev',
+        }),
         width: '60px',
         sortable: (a: UnifiedAlertSummary) => SEVERITY_SORT_ORDER[a.severity] ?? 5,
         render: (s: string) => (
@@ -399,23 +396,37 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
       },
       {
         field: 'name',
-        name: 'Alert',
+        name: i18n.translate('observability.alerting.alertsDashboard.column.alert', {
+          defaultMessage: 'Alert',
+        }),
         sortable: true,
         truncateText: true,
-        render: (name: string, alert: UnifiedAlertSummary) => (
-          <EuiButtonEmpty
-            size="xs"
-            flush="left"
-            onClick={() => onViewDetail(alert)}
-            style={{ fontWeight: 500 }}
-          >
-            {name}
-          </EuiButtonEmpty>
-        ),
+        render: (name: string, alert: UnifiedAlertSummary) => {
+          const iconType =
+            alert.datasourceType === 'prometheus' ? 'logoPrometheus' : 'logoOpenSearch';
+          // `iconType` on EuiButtonEmpty puts the icon in the button's
+          // dedicated icon slot (vertically centered with the label). Inlining
+          // <EuiIcon> as a child instead lands inside the .euiButtonEmpty__text
+          // flex slot which has no `align-items: center`, so it sits at the
+          // top-left of the row.
+          return (
+            <EuiButtonEmpty
+              size="xs"
+              flush="left"
+              iconType={iconType}
+              onClick={() => onViewDetail(alert)}
+              style={{ fontWeight: 500 }}
+            >
+              {name}
+            </EuiButtonEmpty>
+          );
+        },
       },
       {
         field: 'state',
-        name: 'State',
+        name: i18n.translate('observability.alerting.alertsDashboard.column.state', {
+          defaultMessage: 'State',
+        }),
         width: '140px',
         sortable: true,
         render: (state: string) => (
@@ -423,18 +434,10 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         ),
       },
       {
-        field: 'datasourceType',
-        name: 'Source',
-        width: '130px',
-        render: (t: string) => {
-          const displayName =
-            t === 'opensearch' ? 'OpenSearch' : t === 'prometheus' ? 'Prometheus' : t;
-          return <EuiText size="xs">{displayName}</EuiText>;
-        },
-      },
-      {
         field: 'message',
-        name: 'Message',
+        name: i18n.translate('observability.alerting.alertsDashboard.column.message', {
+          defaultMessage: 'Message',
+        }),
         truncateText: true,
         render: (msg: string) => (
           <EuiText size="xs" color="subdued">
@@ -444,7 +447,9 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
       },
       {
         field: 'startTime',
-        name: 'Started',
+        name: i18n.translate('observability.alerting.alertsDashboard.column.started', {
+          defaultMessage: 'Started',
+        }),
         width: '120px',
         sortable: true,
         render: (ts: string) => {
@@ -452,27 +457,49 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
           const abs = new Date(ts).toLocaleString();
           return (
             <EuiToolTip content={abs}>
-              <span style={{ fontSize: 12 }}>{formatDuration(ts)} ago</span>
+              <span style={{ fontSize: 12 }}>
+                <FormattedMessage
+                  id="observability.alerting.alertsDashboard.startedAgo"
+                  defaultMessage="{duration} ago"
+                  values={{ duration: formatDuration(ts) }}
+                />
+              </span>
             </EuiToolTip>
           );
         },
       },
       {
         field: 'startTime',
-        name: 'Duration',
+        name: i18n.translate('observability.alerting.alertsDashboard.column.duration', {
+          defaultMessage: 'Duration',
+        }),
         width: '90px',
         render: (ts: string) => <EuiText size="xs">{ts ? formatDuration(ts) : '—'}</EuiText>,
       },
       {
-        name: 'Actions',
+        name: i18n.translate('observability.alerting.alertsDashboard.column.actions', {
+          defaultMessage: 'Actions',
+        }),
         width: '150px',
         render: (alert: UnifiedAlertSummary) => (
           <EuiFlexGroup gutterSize="xs" responsive={false} wrap={false} alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiToolTip content="View details">
+              <EuiToolTip
+                content={i18n.translate(
+                  'observability.alerting.alertsDashboard.viewDetailsTooltip',
+                  {
+                    defaultMessage: 'View details',
+                  }
+                )}
+              >
                 <EuiButtonIcon
                   iconType="inspect"
-                  aria-label="View"
+                  aria-label={i18n.translate(
+                    'observability.alerting.alertsDashboard.viewAriaLabel',
+                    {
+                      defaultMessage: 'View',
+                    }
+                  )}
                   size="s"
                   onClick={() => onViewDetail(alert)}
                 />
@@ -486,7 +513,10 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   color="primary"
                   onClick={() => onAcknowledge(alert.id)}
                 >
-                  Ack
+                  <FormattedMessage
+                    id="observability.alerting.alertsDashboard.ackButton"
+                    defaultMessage="Ack"
+                  />
                 </EuiButtonEmpty>
               </EuiFlexItem>
             )}
@@ -497,52 +527,71 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     [onAcknowledge, onViewDetail]
   );
 
-  const emptyState = !loading && alerts.length === 0;
+  // Chart-area empty state mode. Cascade:
+  //   'no-ds'    — user hasn't selected any datasource
+  //   'no-rules' — DS selected, but no rules exist across them
+  //   'no-alerts' — rules exist, but none fired in the current time range
+  //   null — render the timeline
+  const emptyMode: 'no-ds' | 'no-rules' | 'no-alerts' | null = !loading
+    ? selectedDsIds.length === 0
+      ? 'no-ds'
+      : rulesTotal === 0
+      ? 'no-rules'
+      : alerts.length === 0
+      ? 'no-alerts'
+      : null
+    : null;
 
   return (
-    <EuiResizableContainer style={{ flex: 1, minHeight: 0 }}>
-      {(EuiResizablePanel, EuiResizableButton) => (
+    <EuiResizableContainer className="altResizableContainer">
+      {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => (
         <>
           <EuiResizablePanel
             id="alerts-filters-panel"
             initialSize={15}
-            minSize="180px"
-            mode={['collapsible', { position: 'top' }]}
-            onToggleCollapsed={() => {}}
+            minSize="10%"
+            mode={['custom', { position: 'top' }]}
             paddingSize="none"
-            style={{ overflow: 'auto', paddingRight: '4px' }}
+            className="altFiltersPanel"
           >
-            <EuiPanel
-              paddingSize="s"
-              hasBorder
-              style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
-            >
-              <div style={{ flex: 1, overflow: 'auto' }}>
-                <EuiFlexGroup
-                  gutterSize="xs"
-                  alignItems="center"
-                  responsive={false}
-                  justifyContent="spaceBetween"
-                >
-                  <EuiFlexItem>
-                    <EuiText size="xs">
-                      <strong>Filters</strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                  {activeFilterCount > 0 && (
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty size="xs" onClick={clearAllFilters} flush="right">
-                        Clear ({activeFilterCount})
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
-
-                {/* Datasource filter — searchable, max 10 visible, max 5 selected */}
+            <EuiPanel className="altFiltersInner">
+              <EuiFlexGroup
+                gutterSize="xs"
+                alignItems="center"
+                responsive={false}
+                justifyContent="spaceBetween"
+              >
+                <EuiFlexItem>
+                  <EuiText size="xs">
+                    <strong>
+                      <FormattedMessage
+                        id="observability.alerting.alertsDashboard.filtersHeader"
+                        defaultMessage="Filters"
+                      />
+                    </strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType="menuLeft"
+                    onClick={() => togglePanel?.('alerts-filters-panel', { direction: 'left' })}
+                    aria-label={i18n.translate(
+                      'observability.alerting.alertsDashboard.collapseFiltersAriaLabel',
+                      {
+                        defaultMessage: 'Collapse filters',
+                      }
+                    )}
+                    data-test-subj="alertsFiltersPanelToggle"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <div className="altFiltersBody">
                 <FacetFilterGroup
                   id="datasource"
-                  label="Datasource"
+                  label={i18n.translate('observability.alerting.alertsDashboard.facet.datasource', {
+                    defaultMessage: 'Datasource',
+                  })}
+                  iconMap={datasourceIconMap}
                   options={datasourceEntries.map((e) => e.label)}
                   selected={selectedDsIds
                     .map((id) => datasourceEntries.find((e) => e.id === id)?.label || '')
@@ -552,6 +601,10 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                       .map((l) => datasourceEntries.find((e) => e.label === l)?.id)
                       .filter(Boolean) as string[];
                     onDatasourceChange(ids);
+                    // Clearing datasource invalidates the other facet options
+                    // (severity/state/labels are derived from the selected
+                    // datasources' alerts), so wipe dependent filters.
+                    if (ids.length === 0) clearDependentFilters();
                   }}
                   counts={countBy(
                     datasourceEntries.filter(
@@ -560,10 +613,16 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                     (e) => e.label
                   )}
                   searchable
-                  maxVisible={10}
+                  showCounts={false}
+                  initialVisible={5}
                   maxSelected={maxDatasources}
                   onCapReached={onDatasourceCapReached}
-                  searchAriaLabel="Search datasources"
+                  searchAriaLabel={i18n.translate(
+                    'observability.alerting.alertsDashboard.searchDatasourcesAriaLabel',
+                    {
+                      defaultMessage: 'Search datasources',
+                    }
+                  )}
                   checkedFirst
                   isCollapsed={isFacetCollapsed('datasource')}
                   onToggleCollapse={toggleFacetCollapse}
@@ -571,7 +630,9 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
 
                 {renderFacetGroup(
                   'severity',
-                  'Severity',
+                  i18n.translate('observability.alerting.alertsDashboard.facet.severity', {
+                    defaultMessage: 'Severity',
+                  }),
                   uniqueSeverities,
                   filters.severity,
                   (v) => updateFilter('severity', v),
@@ -580,42 +641,103 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                 )}
                 {renderFacetGroup(
                   'state',
-                  'State',
+                  i18n.translate('observability.alerting.alertsDashboard.facet.state', {
+                    defaultMessage: 'State',
+                  }),
                   uniqueStates,
                   filters.state,
                   (v) => updateFilter('state', v),
                   facetCounts.counts.state,
                   STATE_COLORS
                 )}
-                {renderFacetGroup(
-                  'backend',
-                  'Backend',
-                  uniqueBackends,
-                  filters.backend,
-                  (v) => updateFilter('backend', v),
-                  facetCounts.counts.backend
-                )}
-
-                {labelKeys.length > 0 && (
-                  <>
-                    <EuiSpacer size="xs" />
-                    <EuiText size="xs" color="subdued" style={{ marginBottom: 6 }}>
-                      <strong>Labels</strong>
-                    </EuiText>
-                    {labelKeys
-                      .filter((key) => !INTERNAL_LABEL_KEYS.has(key))
-                      .map((key) =>
+                {(() => {
+                  const visibleLabelKeys = labelKeys.filter((k) => !INTERNAL_LABEL_KEYS.has(k));
+                  if (visibleLabelKeys.length === 0) return null;
+                  const q = labelSearch.trim().toLowerCase();
+                  const matchedLabelKeys = q
+                    ? visibleLabelKeys.filter((k) => k.toLowerCase().includes(q))
+                    : visibleLabelKeys;
+                  const cappedLabelKeys = showAllLabels
+                    ? matchedLabelKeys
+                    : matchedLabelKeys.slice(0, LABEL_KEY_INITIAL_VISIBLE);
+                  const hasOverflow = matchedLabelKeys.length > LABEL_KEY_INITIAL_VISIBLE;
+                  return (
+                    <>
+                      <EuiHorizontalRule margin="s" />
+                      <EuiText size="xs" color="subdued" style={{ marginBottom: 6 }}>
+                        <strong>
+                          <FormattedMessage
+                            id="observability.alerting.alertsDashboard.labelsHeader"
+                            defaultMessage="Labels"
+                          />
+                        </strong>
+                      </EuiText>
+                      <EuiFieldSearch
+                        compressed
+                        fullWidth
+                        placeholder={i18n.translate(
+                          'observability.alerting.alertsDashboard.searchLabelsPlaceholder',
+                          {
+                            defaultMessage: 'Search labels',
+                          }
+                        )}
+                        value={labelSearch}
+                        onChange={(e) => setLabelSearch(e.target.value)}
+                        aria-label={i18n.translate(
+                          'observability.alerting.alertsDashboard.searchLabelsAriaLabel',
+                          {
+                            defaultMessage: 'Search labels',
+                          }
+                        )}
+                        data-test-subj="alertsLabelsSearch"
+                      />
+                      <EuiSpacer size="xs" />
+                      {cappedLabelKeys.map((key) =>
                         renderFacetGroup(
                           `label:${key}`,
                           key,
                           collectAlertLabelValues(alerts, key),
                           filters.labels[key] || [],
                           (v) => updateLabelFilter(key, v),
-                          facetCounts.labelCounts[key] || {}
+                          facetCounts.labelCounts[key] || {},
+                          undefined,
+                          true,
+                          true
                         )
                       )}
-                  </>
-                )}
+                      {matchedLabelKeys.length === 0 && (
+                        <EuiText size="xs" color="subdued">
+                          <FormattedMessage
+                            id="observability.alerting.alertsDashboard.noLabelMatches"
+                            defaultMessage="No labels match"
+                          />
+                        </EuiText>
+                      )}
+                      {hasOverflow && (
+                        <EuiLink
+                          color="primary"
+                          onClick={() => setShowAllLabels((v) => !v)}
+                          data-test-subj="alertsLabelsShowAll"
+                        >
+                          <EuiText size="xs">
+                            {showAllLabels ? (
+                              <FormattedMessage
+                                id="observability.alerting.alertsDashboard.showLessLabels"
+                                defaultMessage="Show less"
+                              />
+                            ) : (
+                              <FormattedMessage
+                                id="observability.alerting.alertsDashboard.showAllLabels"
+                                defaultMessage="Show all ({count})"
+                                values={{ count: matchedLabelKeys.length }}
+                              />
+                            )}
+                          </EuiText>
+                        </EuiLink>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
             </EuiPanel>
           </EuiResizablePanel>
@@ -625,59 +747,11 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
           <EuiResizablePanel
             initialSize={85}
             minSize="400px"
-            mode="main"
             paddingSize="none"
-            style={{ paddingLeft: '4px', overflow: 'auto' }}
+            className="altContentPanel"
           >
-            {emptyState ? (
-              <EuiEmptyPrompt
-                title={<h2>No Active Alerts</h2>}
-                body={<p>All systems operating normally.</p>}
-                iconType="checkInCircleFilled"
-                iconColor="success"
-              />
-            ) : (
+            {
               <>
-                {/* ---- Summary Stat Cards (extracted component) ---- */}
-                <AlertsSummaryCards
-                  filteredCount={filteredAlerts.length}
-                  totalCount={alerts.length}
-                  activeCount={activeCount}
-                  severityCounts={severityCounts}
-                  severityFilter={severityFilter}
-                  stateFilter={stateFilter}
-                  filtersSeverityLength={filters.severity.length}
-                  filtersStateLength={filters.state.length}
-                  isFiltered={isFiltered}
-                  onShowAll={() => {
-                    setSeverityFilter('all');
-                    setStateFilter('all');
-                    setFilters((prev) => ({ ...prev, severity: [], state: [] }));
-                  }}
-                  onToggleActive={() => {
-                    setSeverityFilter('all');
-                    setStateFilter(stateFilter === 'active' ? 'all' : 'active');
-                    setFilters((prev) => ({ ...prev, severity: [], state: [] }));
-                  }}
-                  onToggleCritical={() => {
-                    setStateFilter('all');
-                    setSeverityFilter(severityFilter === 'critical' ? 'all' : 'critical');
-                    setFilters((prev) => ({ ...prev, severity: [], state: [] }));
-                  }}
-                  onToggleHigh={() => {
-                    setStateFilter('all');
-                    setSeverityFilter(severityFilter === 'high' ? 'all' : 'high');
-                    setFilters((prev) => ({ ...prev, severity: [], state: [] }));
-                  }}
-                  onToggleMedium={() => {
-                    setStateFilter('all');
-                    setSeverityFilter(severityFilter === 'medium' ? 'all' : 'medium');
-                    setFilters((prev) => ({ ...prev, severity: [], state: [] }));
-                  }}
-                />
-
-                <EuiSpacer size="m" />
-
                 {/* ---- Backend hints / fallbacks ---- */}
                 {/* Surfaced here (above the timeline) because both hints      */}
                 {/* directly explain what the chart and table are showing:     */}
@@ -744,41 +818,181 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                 )}
 
                 {/* ---- Visualization Row ---- */}
-                <EuiFlexGroup gutterSize="m" responsive={true}>
-                  <EuiFlexItem grow={3}>
-                    <EuiPanel paddingSize="m" hasBorder>
-                      <EuiTitle size="xxs">
-                        <h4>Alert Timeline</h4>
-                      </EuiTitle>
+                <EuiFlexGroup gutterSize="m" responsive={true} className="altVizRow">
+                  <EuiFlexItem grow={3} className="altVizItem">
+                    <EuiPanel paddingSize="m" hasBorder className="altVizPanel">
+                      {/* Title left, time picker right. Always rendered so the */}
+                      {/* picker stays reachable from the empty states (e.g.    */}
+                      {/* "No alerts in range" → user widens the range).        */}
+                      <EuiFlexGroup
+                        gutterSize="s"
+                        alignItems="center"
+                        responsive={false}
+                        justifyContent="spaceBetween"
+                      >
+                        <EuiFlexItem grow={false}>
+                          <EuiTitle size="xxs">
+                            <h4>
+                              <FormattedMessage
+                                id="observability.alerting.alertsDashboard.alertTimelineTitle"
+                                defaultMessage="Alert Timeline"
+                              />
+                            </h4>
+                          </EuiTitle>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiSuperDatePicker
+                            compressed
+                            start={pickerStart}
+                            end={pickerEnd}
+                            onTimeChange={onTimeChange}
+                            onRefresh={onRefresh}
+                            data-test-subj="alertManager-datePicker"
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                       <EuiSpacer size="s" />
-                      <AlertTimeline alerts={filteredAlerts} startMs={startMs} endMs={endMs} />
+                      {emptyMode === 'no-ds' ? (
+                        <EuiEmptyPrompt
+                          iconType="database"
+                          title={
+                            <h4>
+                              <FormattedMessage
+                                id="observability.alerting.alertsDashboard.noDatasourceTitle"
+                                defaultMessage="No datasource selected"
+                              />
+                            </h4>
+                          }
+                          body={
+                            <p>
+                              <FormattedMessage
+                                id="observability.alerting.alertsDashboard.noDatasourceBody"
+                                defaultMessage="Select a datasource from the filter panel on the left to view alerts."
+                              />
+                            </p>
+                          }
+                          actions={
+                            defaultDatasources.length > 0 ? (
+                              <EuiButtonEmpty
+                                size="s"
+                                onClick={() => onDatasourceChange(defaultDatasources)}
+                                data-test-subj="alertsEmptyResetDefaults"
+                              >
+                                <FormattedMessage
+                                  id="observability.alerting.alertsDashboard.resetToDefaultDatasources"
+                                  defaultMessage="Reset to default datasources"
+                                />
+                              </EuiButtonEmpty>
+                            ) : undefined
+                          }
+                        />
+                      ) : emptyMode === 'no-rules' ? (
+                        <EuiEmptyPrompt
+                          iconType="bell"
+                          title={
+                            <h4>
+                              <FormattedMessage
+                                id="observability.alerting.alertsDashboard.noRulesTitle"
+                                defaultMessage="No rules have been created"
+                              />
+                            </h4>
+                          }
+                          body={
+                            <p>
+                              <FormattedMessage
+                                id="observability.alerting.alertsDashboard.noRulesBody"
+                                defaultMessage="The selected datasource has no alerting rules configured. Create one to start receiving alerts."
+                              />
+                            </p>
+                          }
+                          actions={
+                            <EuiButtonEmpty
+                              size="s"
+                              onClick={onGoToRules}
+                              data-test-subj="alertsEmptyGoToRules"
+                            >
+                              <FormattedMessage
+                                id="observability.alerting.alertsDashboard.goToRules"
+                                defaultMessage="Go to Rules"
+                              />
+                            </EuiButtonEmpty>
+                          }
+                        />
+                      ) : emptyMode === 'no-alerts' ? (
+                        <EuiEmptyPrompt
+                          iconType="checkInCircleFilled"
+                          iconColor="success"
+                          title={
+                            <h4>
+                              <FormattedMessage
+                                id="observability.alerting.alertsDashboard.noAlertsTitle"
+                                defaultMessage="No alerts in the selected time range"
+                              />
+                            </h4>
+                          }
+                          body={
+                            <p>
+                              <FormattedMessage
+                                id="observability.alerting.alertsDashboard.noAlertsBody"
+                                defaultMessage="Try expanding the time range to see more history."
+                              />
+                            </p>
+                          }
+                        />
+                      ) : (
+                        <AlertTimeline alerts={filteredAlerts} startMs={startMs} endMs={endMs} />
+                      )}
                     </EuiPanel>
                   </EuiFlexItem>
                 </EuiFlexGroup>
 
-                <EuiSpacer size="l" />
+                <EuiSpacer size="s" />
 
                 {/* ---- Search + Table ---- */}
                 <EuiPanel paddingSize="m" hasBorder>
                   <EuiTitle size="xs">
-                    <h2>All Alerts</h2>
+                    <h2>
+                      <FormattedMessage
+                        id="observability.alerting.alertsDashboard.allAlertsTitle"
+                        defaultMessage="All Alerts"
+                      />
+                    </h2>
                   </EuiTitle>
                   <EuiSpacer size="s" />
                   <EuiFieldSearch
-                    placeholder="Search alerts by name, message, or label..."
+                    placeholder={i18n.translate(
+                      'observability.alerting.alertsDashboard.searchPlaceholder',
+                      {
+                        defaultMessage: 'Search alerts by name, message, or label...',
+                      }
+                    )}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     isClearable
                     fullWidth
-                    aria-label="Search alerts"
+                    aria-label={i18n.translate(
+                      'observability.alerting.alertsDashboard.searchAlertsAriaLabel',
+                      {
+                        defaultMessage: 'Search alerts',
+                      }
+                    )}
                   />
                   <EuiSpacer size="s" />
                   <EuiText size="s">
-                    <strong>{filteredAlerts.length}</strong> alerts
+                    <FormattedMessage
+                      id="observability.alerting.alertsDashboard.alertsCount"
+                      defaultMessage="{count} alerts"
+                      values={{ count: <strong>{filteredAlerts.length}</strong> }}
+                    />
                     {activeFilterCount > 0 && (
                       <span>
                         {' '}
-                        · {activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''}
+                        ·{' '}
+                        <FormattedMessage
+                          id="observability.alerting.alertsDashboard.filtersCount"
+                          defaultMessage="{count} {count, plural, one {filter} other {filters}}"
+                          values={{ count: activeFilterCount }}
+                        />
                       </span>
                     )}
                   </EuiText>
@@ -788,17 +1002,21 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                     columns={columns}
                     loading={loading}
                     message={
-                      searchQuery ||
-                      activeFilterCount > 0 ||
-                      severityFilter !== 'all' ||
-                      stateFilter !== 'all'
-                        ? 'No alerts match your filters'
-                        : 'No alerts'
+                      searchQuery || activeFilterCount > 0
+                        ? i18n.translate(
+                            'observability.alerting.alertsDashboard.noAlertsMatchFilters',
+                            {
+                              defaultMessage: 'No alerts match your filters',
+                            }
+                          )
+                        : i18n.translate('observability.alerting.alertsDashboard.noAlerts', {
+                            defaultMessage: 'No alerts',
+                          })
                     }
                   />
                 </EuiPanel>
               </>
-            )}
+            }
           </EuiResizablePanel>
         </>
       )}

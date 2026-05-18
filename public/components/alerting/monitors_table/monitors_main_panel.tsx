@@ -15,7 +15,6 @@
 import React from 'react';
 import {
   EuiButton,
-  EuiCheckboxGroup,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFlexGroup,
@@ -27,10 +26,11 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { UnifiedRuleSummary } from '../../../../common/types/alerting';
 import { DeleteModal } from '../../common/helpers/delete_modal';
 import { MonitorDetailFlyout } from '../monitor_detail_flyout';
-import { ColumnDef, ColumnId } from './monitors_table_columns';
 import { MonitorsEuiTable } from './monitors_eui_table';
 
 export interface MonitorsMainPanelProps {
@@ -60,20 +60,10 @@ export interface MonitorsMainPanelProps {
   selectedIds: Set<string>;
   setSelectedIds: React.Dispatch<React.SetStateAction<Set<string>>>;
 
-  // Columns
-  allColumns: ColumnDef[];
-  visibleColumns: Set<ColumnId>;
-  setVisibleColumns: React.Dispatch<React.SetStateAction<Set<ColumnId>>>;
-  showColumnPicker: boolean;
-  setShowColumnPicker: React.Dispatch<React.SetStateAction<boolean>>;
-
-  // Create / import / export
-  onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics' | 'slo') => void;
+  // Create
+  onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics') => void;
   showCreatePopover: boolean;
   setShowCreatePopover: React.Dispatch<React.SetStateAction<boolean>>;
-  exportJson: () => void;
-  onImport?: (configs: Array<Record<string, unknown>>) => void;
-  handleImportFile: () => void;
 
   // Delete
   showDeleteConfirm: boolean;
@@ -106,17 +96,9 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
   activeFilterCount,
   clearAllFilters,
   selectedIds,
-  allColumns,
-  visibleColumns,
-  setVisibleColumns,
-  showColumnPicker,
-  setShowColumnPicker,
   onCreateMonitor,
   showCreatePopover,
   setShowCreatePopover,
-  exportJson,
-  onImport,
-  handleImportFile,
   showDeleteConfirm,
   setShowDeleteConfirm,
   handleBulkDelete,
@@ -150,7 +132,10 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                       size="s"
                       onClick={() => setShowCreatePopover((prev) => !prev)}
                     >
-                      Create Monitor
+                      <FormattedMessage
+                        id="observability.alerting.monitorsTable.mainPanel.createMonitor"
+                        defaultMessage="Create Monitor"
+                      />
                     </EuiButton>
                   }
                   isOpen={showCreatePopover}
@@ -160,20 +145,40 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                 >
                   <EuiListGroup flush style={{ width: 200 }}>
                     <EuiListGroupItem
-                      label="Logs"
+                      label={i18n.translate(
+                        'observability.alerting.monitorsTable.mainPanel.logsOption',
+                        {
+                          defaultMessage: 'Logs',
+                        }
+                      )}
                       onClick={() => {
                         setShowCreatePopover(false);
                         onCreateMonitor('logs');
                       }}
-                      aria-label="Create Logs monitor"
+                      aria-label={i18n.translate(
+                        'observability.alerting.monitorsTable.mainPanel.createLogsAriaLabel',
+                        {
+                          defaultMessage: 'Create Logs monitor',
+                        }
+                      )}
                     />
                     <EuiListGroupItem
-                      label="Metrics"
+                      label={i18n.translate(
+                        'observability.alerting.monitorsTable.mainPanel.metricsOption',
+                        {
+                          defaultMessage: 'Metrics',
+                        }
+                      )}
                       onClick={() => {
                         setShowCreatePopover(false);
                         onCreateMonitor('metrics');
                       }}
-                      aria-label="Create Metrics monitor"
+                      aria-label={i18n.translate(
+                        'observability.alerting.monitorsTable.mainPanel.createMetricsAriaLabel',
+                        {
+                          defaultMessage: 'Create Metrics monitor',
+                        }
+                      )}
                     />
                   </EuiListGroup>
                 </EuiPopover>
@@ -184,7 +189,12 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
           {/* Search bar with suggestions */}
           <div ref={searchRef} style={{ position: 'relative' }}>
             <EuiFieldSearch
-              placeholder="Search monitors by name, labels (team:infra), annotations..."
+              placeholder={i18n.translate(
+                'observability.alerting.monitorsTable.mainPanel.searchPlaceholder',
+                {
+                  defaultMessage: 'Search monitors by name, labels (team:infra), annotations...',
+                }
+              )}
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
@@ -195,7 +205,12 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
               onKeyDown={handleSearchKeyDown}
               isClearable
               fullWidth
-              aria-label="Search monitors"
+              aria-label={i18n.translate(
+                'observability.alerting.monitorsTable.mainPanel.searchAriaLabel',
+                {
+                  defaultMessage: 'Search monitors',
+                }
+              )}
             />
             {showSuggestions && suggestions.length > 0 && (
               <EuiPanel
@@ -243,17 +258,31 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiText size="s">
-                    <strong>{filtered.length}</strong> monitors
+                    <FormattedMessage
+                      id="observability.alerting.monitorsTable.mainPanel.monitorsCount"
+                      defaultMessage="{count} monitors"
+                      values={{ count: <strong>{filtered.length}</strong> }}
+                    />
                     {selectedIds.size > 0 && (
                       <span>
                         {' '}
-                        · <strong>{selectedIds.size}</strong> selected
+                        ·{' '}
+                        <FormattedMessage
+                          id="observability.alerting.monitorsTable.mainPanel.selectedCount"
+                          defaultMessage="{count} selected"
+                          values={{ count: <strong>{selectedIds.size}</strong> }}
+                        />
                       </span>
                     )}
                     {activeFilterCount > 0 && (
                       <span>
                         {' '}
-                        · {activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''}
+                        ·{' '}
+                        <FormattedMessage
+                          id="observability.alerting.monitorsTable.mainPanel.filtersCount"
+                          defaultMessage="{count} {count, plural, one {filter} other {filters}}"
+                          values={{ count: activeFilterCount }}
+                        />
                       </span>
                     )}
                   </EuiText>
@@ -270,62 +299,14 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                       iconType="trash"
                       onClick={() => setShowDeleteConfirm(true)}
                     >
-                      Delete ({selectedIds.size})
-                    </EuiButton>
-                  </EuiFlexItem>
-                )}
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    size="s"
-                    iconType="exportAction"
-                    onClick={exportJson}
-                    isDisabled={filtered.length === 0}
-                  >
-                    Export
-                  </EuiButton>
-                </EuiFlexItem>
-                {onImport && (
-                  <EuiFlexItem grow={false}>
-                    <EuiButton size="s" iconType="importAction" onClick={handleImportFile}>
-                      Import
-                    </EuiButton>
-                  </EuiFlexItem>
-                )}
-                <EuiFlexItem grow={false}>
-                  <EuiPopover
-                    button={
-                      <EuiButton
-                        size="s"
-                        iconType="listAdd"
-                        onClick={() => setShowColumnPicker(!showColumnPicker)}
-                      >
-                        Columns
-                      </EuiButton>
-                    }
-                    isOpen={showColumnPicker}
-                    closePopover={() => setShowColumnPicker(false)}
-                    panelPaddingSize="s"
-                  >
-                    <div style={{ width: 250, maxHeight: 400, overflow: 'auto' }}>
-                      <EuiText size="xs">
-                        <strong>Toggle columns</strong>
-                      </EuiText>
-                      <EuiSpacer size="xs" />
-                      <EuiCheckboxGroup
-                        options={allColumns.map((c) => ({ id: c.id, label: c.label }))}
-                        idToSelectedMap={Object.fromEntries(
-                          allColumns.map((c) => [c.id, visibleColumns.has(c.id)])
-                        )}
-                        onChange={(id) => {
-                          const next = new Set(visibleColumns);
-                          if (next.has(id)) next.delete(id);
-                          else next.add(id);
-                          setVisibleColumns(next);
-                        }}
+                      <FormattedMessage
+                        id="observability.alerting.monitorsTable.mainPanel.deleteSelectedButton"
+                        defaultMessage="Delete ({count})"
+                        values={{ count: selectedIds.size }}
                       />
-                    </div>
-                  </EuiPopover>
-                </EuiFlexItem>
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -339,24 +320,39 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
           className="monitors-table-wrapper"
           ref={tableWrapperRef}
         >
-          <style>{`
-              .monitors-table-wrapper .euiTable { table-layout: auto; min-width: 100%; }
-              .monitors-table-wrapper .euiTableHeaderCell { position: relative; }
-              .monitors-table-wrapper .euiTableHeaderCell:last-child { border-right: none; }
-            `}</style>
           {!loading && filtered.length === 0 ? (
             <EuiEmptyPrompt
-              title={<h2>No Monitors Found</h2>}
+              title={
+                <h2>
+                  <FormattedMessage
+                    id="observability.alerting.monitorsTable.mainPanel.noMonitorsFoundTitle"
+                    defaultMessage="No Monitors Found"
+                  />
+                </h2>
+              }
               body={
                 <p>
-                  {rules.length === 0
-                    ? 'No monitors configured yet.'
-                    : 'No monitors match your current search and filters.'}
+                  {rules.length === 0 ? (
+                    <FormattedMessage
+                      id="observability.alerting.monitorsTable.mainPanel.noMonitorsConfigured"
+                      defaultMessage="No monitors configured yet."
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="observability.alerting.monitorsTable.mainPanel.noMonitorsMatch"
+                      defaultMessage="No monitors match your current search and filters."
+                    />
+                  )}
                 </p>
               }
               actions={
                 activeFilterCount > 0 || searchQuery ? (
-                  <EuiButton onClick={clearAllFilters}>Clear filters</EuiButton>
+                  <EuiButton onClick={clearAllFilters}>
+                    <FormattedMessage
+                      id="observability.alerting.monitorsTable.mainPanel.clearFiltersButton"
+                      defaultMessage="Clear filters"
+                    />
+                  </EuiButton>
                 ) : undefined
               }
             />
@@ -374,10 +370,18 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
       {/* Delete confirmation modal */}
       {showDeleteConfirm && (
         <DeleteModal
-          title={`Delete ${selectedIds.size} monitor${selectedIds.size > 1 ? 's' : ''}?`}
-          message={`This will remove the selected monitor${
-            selectedIds.size > 1 ? 's' : ''
-          } from the current view.`}
+          title={i18n.translate('observability.alerting.monitorsTable.mainPanel.deleteModalTitle', {
+            defaultMessage: 'Delete {count} {count, plural, one {monitor} other {monitors}}?',
+            values: { count: selectedIds.size },
+          })}
+          message={i18n.translate(
+            'observability.alerting.monitorsTable.mainPanel.deleteModalMessage',
+            {
+              defaultMessage:
+                'This will remove the selected {count, plural, one {monitor} other {monitors}} from the current view.',
+              values: { count: selectedIds.size },
+            }
+          )}
           onCancel={() => setShowDeleteConfirm(false)}
           onConfirm={handleBulkDelete}
         />

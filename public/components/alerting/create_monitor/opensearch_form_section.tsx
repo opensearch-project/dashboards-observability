@@ -29,6 +29,8 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { AnnotationEditor, LabelEditor } from '../monitor_form_components';
 import {
   CLUSTER_METRICS_API_OPTIONS,
@@ -85,7 +87,12 @@ export const OpenSearchFormSection: React.FC<{
   return (
     <>
       {/* Monitor Type */}
-      <EuiFormRow label="Monitor Type" fullWidth>
+      <EuiFormRow
+        label={i18n.translate('observability.alerting.opensearchFormSection.monitorTypeLabel', {
+          defaultMessage: 'Monitor Type',
+        })}
+        fullWidth
+      >
         <EuiSelect
           options={OS_MONITOR_TYPE_OPTIONS}
           value={form.monitorType}
@@ -93,7 +100,10 @@ export const OpenSearchFormSection: React.FC<{
             handleMonitorTypeChange(e.target.value as OpenSearchFormState['monitorType'])
           }
           fullWidth
-          aria-label="Monitor type"
+          aria-label={i18n.translate(
+            'observability.alerting.opensearchFormSection.monitorTypeAriaLabel',
+            { defaultMessage: 'Monitor type' }
+          )}
         />
       </EuiFormRow>
 
@@ -103,34 +113,64 @@ export const OpenSearchFormSection: React.FC<{
       {isClusterMetrics ? (
         <EuiPanel paddingSize="m" color="subdued">
           <EuiTitle size="xs">
-            <h3>Cluster Metrics API</h3>
+            <h3>
+              {i18n.translate(
+                'observability.alerting.opensearchFormSection.clusterMetricsApiTitle',
+                { defaultMessage: 'Cluster Metrics API' }
+              )}
+            </h3>
           </EuiTitle>
           <EuiText size="xs" color="subdued">
-            Select a cluster API to monitor. The monitor will call this API on the configured
-            schedule and evaluate the trigger condition against the response.
+            {i18n.translate(
+              'observability.alerting.opensearchFormSection.clusterMetricsApiDescription',
+              {
+                defaultMessage:
+                  'Select a cluster API to monitor. The monitor will call this API on the configured schedule and evaluate the trigger condition against the response.',
+              }
+            )}
           </EuiText>
           <EuiSpacer size="s" />
-          <EuiFormRow label="API Type" fullWidth>
+          <EuiFormRow
+            label={i18n.translate('observability.alerting.opensearchFormSection.apiTypeLabel', {
+              defaultMessage: 'API Type',
+            })}
+            fullWidth
+          >
             <EuiSelect
               options={CLUSTER_METRICS_API_OPTIONS}
               value={form.clusterMetricsApiType}
               onChange={(e) => onUpdate('clusterMetricsApiType', e.target.value)}
               fullWidth
-              aria-label="Cluster metrics API type"
+              aria-label={i18n.translate(
+                'observability.alerting.opensearchFormSection.clusterMetricsApiTypeAriaLabel',
+                { defaultMessage: 'Cluster metrics API type' }
+              )}
             />
           </EuiFormRow>
           <EuiSpacer size="s" />
           <EuiFormRow
-            label="Path Parameters"
-            helpText="Optional path parameters, e.g. index name for CAT indices"
+            label={i18n.translate(
+              'observability.alerting.opensearchFormSection.pathParametersLabel',
+              { defaultMessage: 'Path Parameters' }
+            )}
+            helpText={i18n.translate(
+              'observability.alerting.opensearchFormSection.pathParametersHelpText',
+              { defaultMessage: 'Optional path parameters, e.g. index name for CAT indices' }
+            )}
             fullWidth
           >
             <EuiFieldText
-              placeholder="e.g. my-index-*"
+              placeholder={i18n.translate(
+                'observability.alerting.opensearchFormSection.pathParametersPlaceholder',
+                { defaultMessage: 'e.g. my-index-*' }
+              )}
               value={form.clusterMetricsPathParams}
               onChange={(e) => onUpdate('clusterMetricsPathParams', e.target.value)}
               fullWidth
-              aria-label="Cluster metrics path parameters"
+              aria-label={i18n.translate(
+                'observability.alerting.opensearchFormSection.clusterMetricsPathParamsAriaLabel',
+                { defaultMessage: 'Cluster metrics path parameters' }
+              )}
             />
           </EuiFormRow>
         </EuiPanel>
@@ -138,26 +178,45 @@ export const OpenSearchFormSection: React.FC<{
         <>
           <EuiPanel paddingSize="m" color="subdued">
             <EuiTitle size="xs">
-              <h3>Data Source</h3>
+              <h3>
+                {i18n.translate('observability.alerting.opensearchFormSection.dataSourceTitle', {
+                  defaultMessage: 'Data Source',
+                })}
+              </h3>
             </EuiTitle>
             <EuiSpacer size="s" />
             <EuiFormRow
-              label="Index Pattern"
+              label={i18n.translate(
+                'observability.alerting.opensearchFormSection.indexPatternLabel',
+                { defaultMessage: 'Index Pattern' }
+              )}
               helpText={
                 isPPL
-                  ? 'Used as the PPL source if not specified in the query'
-                  : 'Comma-separated index patterns, e.g. logs-*, metrics-*'
+                  ? i18n.translate(
+                      'observability.alerting.opensearchFormSection.indexPatternHelpTextPpl',
+                      { defaultMessage: 'Used as the PPL source if not specified in the query' }
+                    )
+                  : i18n.translate(
+                      'observability.alerting.opensearchFormSection.indexPatternHelpTextDsl',
+                      { defaultMessage: 'Comma-separated index patterns, e.g. logs-*, metrics-*' }
+                    )
               }
               fullWidth
               isInvalid={hasSubmitted && !!validationErrors.indices}
               error={hasSubmitted ? validationErrors.indices : undefined}
             >
               <EuiFieldText
-                placeholder="logs-*, metrics-*"
+                placeholder={i18n.translate(
+                  'observability.alerting.opensearchFormSection.indexPatternPlaceholder',
+                  { defaultMessage: 'logs-*, metrics-*' }
+                )}
                 value={form.indices}
                 onChange={(e) => onUpdate('indices', e.target.value)}
                 fullWidth
-                aria-label="Index pattern"
+                aria-label={i18n.translate(
+                  'observability.alerting.opensearchFormSection.indexPatternAriaLabel',
+                  { defaultMessage: 'Index pattern' }
+                )}
               />
             </EuiFormRow>
           </EuiPanel>
@@ -167,12 +226,24 @@ export const OpenSearchFormSection: React.FC<{
           {/* Query */}
           <EuiPanel paddingSize="m" color="subdued">
             <EuiTitle size="xs">
-              <h3>Query</h3>
+              <h3>
+                {i18n.translate('observability.alerting.opensearchFormSection.queryTitle', {
+                  defaultMessage: 'Query',
+                })}
+              </h3>
             </EuiTitle>
             <EuiText size="xs" color="subdued">
               {isPPL
-                ? 'Piped Processing Language — pipe-delimited query syntax'
-                : 'OpenSearch Query DSL (JSON)'}
+                ? i18n.translate(
+                    'observability.alerting.opensearchFormSection.queryDescriptionPpl',
+                    {
+                      defaultMessage: 'Piped Processing Language — pipe-delimited query syntax',
+                    }
+                  )
+                : i18n.translate(
+                    'observability.alerting.opensearchFormSection.queryDescriptionDsl',
+                    { defaultMessage: 'OpenSearch Query DSL (JSON)' }
+                  )}
             </EuiText>
             <EuiSpacer size="s" />
             <EuiTextArea
@@ -182,20 +253,47 @@ export const OpenSearchFormSection: React.FC<{
               fullWidth
               placeholder={
                 isPPL
-                  ? 'source = logs-* | where status >= 500 | stats count() as error_count'
-                  : '{ "size": 0, "query": { ... } }'
+                  ? i18n.translate(
+                      'observability.alerting.opensearchFormSection.queryPlaceholderPpl',
+                      {
+                        defaultMessage:
+                          'source = logs-* | where status >= 500 | stats count() as error_count',
+                      }
+                    )
+                  : i18n.translate(
+                      'observability.alerting.opensearchFormSection.queryPlaceholderDsl',
+                      { defaultMessage: '{ "size": 0, "query": { ... } }' }
+                    )
               }
               style={{ fontFamily: 'monospace', fontSize: 12 }}
-              aria-label={isPPL ? 'PPL query' : 'Query DSL'}
+              aria-label={
+                isPPL
+                  ? i18n.translate(
+                      'observability.alerting.opensearchFormSection.queryAriaLabelPpl',
+                      { defaultMessage: 'PPL query' }
+                    )
+                  : i18n.translate(
+                      'observability.alerting.opensearchFormSection.queryAriaLabelDsl',
+                      { defaultMessage: 'Query DSL' }
+                    )
+              }
             />
             {isPPL && (
               <>
                 <EuiSpacer size="xs" />
                 <EuiText size="xs" color="subdued">
-                  Example:{' '}
-                  <code>
-                    source = logs-* | where status {'>'} 500 | stats count() as error_count by host
-                  </code>
+                  <FormattedMessage
+                    id="observability.alerting.opensearchFormSection.pplExample"
+                    defaultMessage="Example: {example}"
+                    values={{
+                      example: (
+                        <code>
+                          source = logs-* | where status {'>'} 500 | stats count() as error_count by
+                          host
+                        </code>
+                      ),
+                    }}
+                  />
                 </EuiText>
               </>
             )}
@@ -208,12 +306,21 @@ export const OpenSearchFormSection: React.FC<{
       {/* Schedule */}
       <EuiPanel paddingSize="m" color="subdued">
         <EuiTitle size="xs">
-          <h3>Schedule</h3>
+          <h3>
+            {i18n.translate('observability.alerting.opensearchFormSection.scheduleTitle', {
+              defaultMessage: 'Schedule',
+            })}
+          </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>
-            <EuiFormRow label="Run every" display="rowCompressed">
+            <EuiFormRow
+              label={i18n.translate('observability.alerting.opensearchFormSection.runEveryLabel', {
+                defaultMessage: 'Run every',
+              })}
+              display="rowCompressed"
+            >
               <EuiFieldNumber
                 value={form.schedule.interval}
                 onChange={(e) =>
@@ -224,12 +331,21 @@ export const OpenSearchFormSection: React.FC<{
                 }
                 min={1}
                 compressed
-                aria-label="Schedule interval"
+                aria-label={i18n.translate(
+                  'observability.alerting.opensearchFormSection.scheduleIntervalAriaLabel',
+                  { defaultMessage: 'Schedule interval' }
+                )}
               />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow label="Unit" display="rowCompressed">
+            <EuiFormRow
+              label={i18n.translate(
+                'observability.alerting.opensearchFormSection.scheduleUnitLabel',
+                { defaultMessage: 'Unit' }
+              )}
+              display="rowCompressed"
+            >
               <EuiSelect
                 options={OS_SCHEDULE_UNIT_OPTIONS}
                 value={form.schedule.unit}
@@ -240,7 +356,10 @@ export const OpenSearchFormSection: React.FC<{
                   })
                 }
                 compressed
-                aria-label="Schedule unit"
+                aria-label={i18n.translate(
+                  'observability.alerting.opensearchFormSection.scheduleUnitAriaLabel',
+                  { defaultMessage: 'Schedule unit' }
+                )}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -255,15 +374,29 @@ export const OpenSearchFormSection: React.FC<{
           {/* Threshold Condition */}
           <EuiPanel paddingSize="m" color="subdued">
             <EuiTitle size="xs">
-              <h3>Alert Condition</h3>
+              <h3>
+                {i18n.translate(
+                  'observability.alerting.opensearchFormSection.alertConditionTitle',
+                  { defaultMessage: 'Alert Condition' }
+                )}
+              </h3>
             </EuiTitle>
             <EuiText size="xs" color="subdued">
-              Define when this monitor should fire an alert
+              {i18n.translate(
+                'observability.alerting.opensearchFormSection.alertConditionDescription',
+                { defaultMessage: 'Define when this monitor should fire an alert' }
+              )}
             </EuiText>
             <EuiSpacer size="s" />
             <EuiFlexGroup gutterSize="s" wrap>
               <EuiFlexItem style={{ minWidth: 160 }}>
-                <EuiFormRow label="Operator" display="rowCompressed">
+                <EuiFormRow
+                  label={i18n.translate(
+                    'observability.alerting.opensearchFormSection.operatorLabel',
+                    { defaultMessage: 'Operator' }
+                  )}
+                  display="rowCompressed"
+                >
                   <EuiSelect
                     options={OPERATOR_OPTIONS}
                     value={form.threshold.operator}
@@ -271,39 +404,68 @@ export const OpenSearchFormSection: React.FC<{
                       updateThreshold('operator', e.target.value as ThresholdCondition['operator'])
                     }
                     compressed
-                    aria-label="Threshold operator"
+                    aria-label={i18n.translate(
+                      'observability.alerting.opensearchFormSection.thresholdOperatorAriaLabel',
+                      { defaultMessage: 'Threshold operator' }
+                    )}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem style={{ minWidth: 100 }}>
-                <EuiFormRow label="Value" display="rowCompressed">
+                <EuiFormRow
+                  label={i18n.translate('observability.alerting.opensearchFormSection.valueLabel', {
+                    defaultMessage: 'Value',
+                  })}
+                  display="rowCompressed"
+                >
                   <EuiFieldNumber
                     value={form.threshold.value}
                     onChange={(e) => updateThreshold('value', parseFloat(e.target.value) || 0)}
                     compressed
-                    aria-label="Threshold value"
+                    aria-label={i18n.translate(
+                      'observability.alerting.opensearchFormSection.thresholdValueAriaLabel',
+                      { defaultMessage: 'Threshold value' }
+                    )}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem style={{ minWidth: 60 }}>
-                <EuiFormRow label="Unit" display="rowCompressed">
+                <EuiFormRow
+                  label={i18n.translate(
+                    'observability.alerting.opensearchFormSection.thresholdUnitLabel',
+                    { defaultMessage: 'Unit' }
+                  )}
+                  display="rowCompressed"
+                >
                   <EuiFieldText
                     value={form.threshold.unit}
                     onChange={(e) => updateThreshold('unit', e.target.value)}
                     placeholder=""
                     compressed
-                    aria-label="Threshold unit"
+                    aria-label={i18n.translate(
+                      'observability.alerting.opensearchFormSection.thresholdUnitAriaLabel',
+                      { defaultMessage: 'Threshold unit' }
+                    )}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem style={{ minWidth: 160 }}>
-                <EuiFormRow label="For Duration" display="rowCompressed">
+                <EuiFormRow
+                  label={i18n.translate(
+                    'observability.alerting.opensearchFormSection.forDurationLabel',
+                    { defaultMessage: 'For Duration' }
+                  )}
+                  display="rowCompressed"
+                >
                   <EuiSelect
                     options={DURATION_OPTIONS}
                     value={form.threshold.forDuration}
                     onChange={(e) => updateThreshold('forDuration', e.target.value)}
                     compressed
-                    aria-label="For duration"
+                    aria-label={i18n.translate(
+                      'observability.alerting.opensearchFormSection.forDurationAriaLabel',
+                      { defaultMessage: 'For duration' }
+                    )}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -311,8 +473,16 @@ export const OpenSearchFormSection: React.FC<{
             <EuiSpacer size="s" />
             <EuiCallOut size="s" color="primary" iconType="iInCircle">
               <EuiText size="xs">
-                Alert fires when query result {form.threshold.operator} {form.threshold.value}
-                {form.threshold.unit} for {form.threshold.forDuration}
+                <FormattedMessage
+                  id="observability.alerting.opensearchFormSection.alertFiresMessage"
+                  defaultMessage="Alert fires when query result {operator} {value}{unit} for {forDuration}"
+                  values={{
+                    operator: form.threshold.operator,
+                    value: form.threshold.value,
+                    unit: form.threshold.unit,
+                    forDuration: form.threshold.forDuration,
+                  }}
+                />
               </EuiText>
             </EuiCallOut>
           </EuiPanel>
@@ -322,14 +492,25 @@ export const OpenSearchFormSection: React.FC<{
           {/* Evaluation Settings */}
           <EuiPanel paddingSize="m" color="subdued">
             <EuiTitle size="xs">
-              <h3>Evaluation Settings</h3>
+              <h3>
+                {i18n.translate(
+                  'observability.alerting.opensearchFormSection.evaluationSettingsTitle',
+                  { defaultMessage: 'Evaluation Settings' }
+                )}
+              </h3>
             </EuiTitle>
             <EuiSpacer size="s" />
             <EuiFlexGroup gutterSize="s" wrap>
               <EuiFlexItem style={{ minWidth: 160 }}>
                 <EuiFormRow
-                  label="Eval Interval"
-                  helpText="How often evaluated"
+                  label={i18n.translate(
+                    'observability.alerting.opensearchFormSection.evalIntervalLabel',
+                    { defaultMessage: 'Eval Interval' }
+                  )}
+                  helpText={i18n.translate(
+                    'observability.alerting.opensearchFormSection.evalIntervalHelpText',
+                    { defaultMessage: 'How often evaluated' }
+                  )}
                   display="rowCompressed"
                 >
                   <EuiSelect
@@ -337,18 +518,34 @@ export const OpenSearchFormSection: React.FC<{
                     value={form.evaluationInterval}
                     onChange={(e) => onUpdate('evaluationInterval', e.target.value)}
                     compressed
-                    aria-label="Evaluation interval"
+                    aria-label={i18n.translate(
+                      'observability.alerting.opensearchFormSection.evaluationIntervalAriaLabel',
+                      { defaultMessage: 'Evaluation interval' }
+                    )}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem style={{ minWidth: 160 }}>
-                <EuiFormRow label="Pending Period" helpText="Before firing" display="rowCompressed">
+                <EuiFormRow
+                  label={i18n.translate(
+                    'observability.alerting.opensearchFormSection.pendingPeriodLabel',
+                    { defaultMessage: 'Pending Period' }
+                  )}
+                  helpText={i18n.translate(
+                    'observability.alerting.opensearchFormSection.pendingPeriodHelpText',
+                    { defaultMessage: 'Before firing' }
+                  )}
+                  display="rowCompressed"
+                >
                   <EuiSelect
                     options={DURATION_OPTIONS}
                     value={form.pendingPeriod}
                     onChange={(e) => onUpdate('pendingPeriod', e.target.value)}
                     compressed
-                    aria-label="Pending period"
+                    aria-label={i18n.translate(
+                      'observability.alerting.opensearchFormSection.pendingPeriodAriaLabel',
+                      { defaultMessage: 'Pending period' }
+                    )}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -362,12 +559,19 @@ export const OpenSearchFormSection: React.FC<{
             <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
               <EuiFlexItem>
                 <EuiTitle size="xs">
-                  <h3>Labels</h3>
+                  <h3>
+                    {i18n.translate('observability.alerting.opensearchFormSection.labelsTitle', {
+                      defaultMessage: 'Labels',
+                    })}
+                  </h3>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
-                  Categorize and route alerts
+                  {i18n.translate(
+                    'observability.alerting.opensearchFormSection.labelsDescription',
+                    { defaultMessage: 'Categorize and route alerts' }
+                  )}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -388,10 +592,20 @@ export const OpenSearchFormSection: React.FC<{
               buttonContent={
                 <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <strong>Annotations</strong>
+                    <strong>
+                      {i18n.translate(
+                        'observability.alerting.opensearchFormSection.annotationsTitle',
+                        { defaultMessage: 'Annotations' }
+                      )}
+                    </strong>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">Optional</EuiBadge>
+                    <EuiBadge color="hollow">
+                      {i18n.translate(
+                        'observability.alerting.opensearchFormSection.optionalBadge',
+                        { defaultMessage: 'Optional' }
+                      )}
+                    </EuiBadge>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               }
@@ -411,22 +625,43 @@ export const OpenSearchFormSection: React.FC<{
           {/* DSL Trigger */}
           <EuiPanel paddingSize="m" color="subdued">
             <EuiTitle size="xs">
-              <h3>Trigger</h3>
+              <h3>
+                {i18n.translate('observability.alerting.opensearchFormSection.triggerTitle', {
+                  defaultMessage: 'Trigger',
+                })}
+              </h3>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiFormRow label="Trigger Name" fullWidth>
+            <EuiFormRow
+              label={i18n.translate(
+                'observability.alerting.opensearchFormSection.triggerNameLabel',
+                { defaultMessage: 'Trigger Name' }
+              )}
+              fullWidth
+            >
               <EuiFieldText
-                placeholder="e.g. Error count threshold"
+                placeholder={i18n.translate(
+                  'observability.alerting.opensearchFormSection.triggerNamePlaceholder',
+                  { defaultMessage: 'e.g. Error count threshold' }
+                )}
                 value={form.triggerName}
                 onChange={(e) => onUpdate('triggerName', e.target.value)}
                 fullWidth
-                aria-label="Trigger name"
+                aria-label={i18n.translate(
+                  'observability.alerting.opensearchFormSection.triggerNameAriaLabel',
+                  { defaultMessage: 'Trigger name' }
+                )}
               />
             </EuiFormRow>
             <EuiSpacer size="s" />
             <EuiFormRow
-              label="Condition (Painless script)"
-              helpText="e.g. ctx.results[0].hits.total.value > 100"
+              label={i18n.translate('observability.alerting.opensearchFormSection.conditionLabel', {
+                defaultMessage: 'Condition (Painless script)',
+              })}
+              helpText={i18n.translate(
+                'observability.alerting.opensearchFormSection.conditionHelpText',
+                { defaultMessage: 'e.g. ctx.results[0].hits.total.value > 100' }
+              )}
               fullWidth
             >
               <EuiFieldText
@@ -435,7 +670,10 @@ export const OpenSearchFormSection: React.FC<{
                 onChange={(e) => onUpdate('triggerCondition', e.target.value)}
                 fullWidth
                 style={{ fontFamily: 'monospace' }}
-                aria-label="Trigger condition"
+                aria-label={i18n.translate(
+                  'observability.alerting.opensearchFormSection.triggerConditionAriaLabel',
+                  { defaultMessage: 'Trigger condition' }
+                )}
               />
             </EuiFormRow>
           </EuiPanel>
@@ -451,10 +689,19 @@ export const OpenSearchFormSection: React.FC<{
           buttonContent={
             <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
               <EuiFlexItem grow={false}>
-                <strong>Action</strong>
+                <strong>
+                  {i18n.translate('observability.alerting.opensearchFormSection.actionTitle', {
+                    defaultMessage: 'Action',
+                  })}
+                </strong>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">Optional</EuiBadge>
+                <EuiBadge color="hollow">
+                  {i18n.translate(
+                    'observability.alerting.opensearchFormSection.actionOptionalBadge',
+                    { defaultMessage: 'Optional' }
+                  )}
+                </EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
           }
@@ -462,31 +709,60 @@ export const OpenSearchFormSection: React.FC<{
           paddingSize="none"
         >
           <EuiSpacer size="s" />
-          <EuiFormRow label="Action Name">
+          <EuiFormRow
+            label={i18n.translate('observability.alerting.opensearchFormSection.actionNameLabel', {
+              defaultMessage: 'Action Name',
+            })}
+          >
             <EuiFieldText
-              placeholder="Notify Slack"
+              placeholder={i18n.translate(
+                'observability.alerting.opensearchFormSection.actionNamePlaceholder',
+                { defaultMessage: 'Notify Slack' }
+              )}
               value={form.actionName}
               onChange={(e) => onUpdate('actionName', e.target.value)}
-              aria-label="Action name"
+              aria-label={i18n.translate(
+                'observability.alerting.opensearchFormSection.actionNameAriaLabel',
+                { defaultMessage: 'Action name' }
+              )}
             />
           </EuiFormRow>
           <EuiSpacer size="s" />
-          <EuiFormRow label="Destination ID">
+          <EuiFormRow
+            label={i18n.translate(
+              'observability.alerting.opensearchFormSection.destinationIdLabel',
+              { defaultMessage: 'Destination ID' }
+            )}
+          >
             <EuiFieldText
-              placeholder="Destination ID"
+              placeholder={i18n.translate(
+                'observability.alerting.opensearchFormSection.destinationIdPlaceholder',
+                { defaultMessage: 'Destination ID' }
+              )}
               value={form.actionDestination}
               onChange={(e) => onUpdate('actionDestination', e.target.value)}
-              aria-label="Destination ID"
+              aria-label={i18n.translate(
+                'observability.alerting.opensearchFormSection.destinationIdAriaLabel',
+                { defaultMessage: 'Destination ID' }
+              )}
             />
           </EuiFormRow>
           <EuiSpacer size="s" />
-          <EuiFormRow label="Message Template">
+          <EuiFormRow
+            label={i18n.translate(
+              'observability.alerting.opensearchFormSection.messageTemplateLabel',
+              { defaultMessage: 'Message Template' }
+            )}
+          >
             <EuiTextArea
               placeholder="Alert: {{ctx.monitor.name}} triggered"
               value={form.actionMessage}
               onChange={(e) => onUpdate('actionMessage', e.target.value)}
               rows={3}
-              aria-label="Message template"
+              aria-label={i18n.translate(
+                'observability.alerting.opensearchFormSection.messageTemplateAriaLabel',
+                { defaultMessage: 'Message template' }
+              )}
             />
           </EuiFormRow>
         </EuiAccordion>

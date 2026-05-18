@@ -484,11 +484,12 @@ describe('DirectQueryPrometheusBackend', () => {
       expect(calls[0][0].body?.query).toBe('ALERTS{alertstate="firing"}');
     });
 
-    it('live alerts in pending state are suppressed in the merge', async () => {
-      // Belt-and-suspenders: even if a Prometheus variant does return
-      // pending alerts from `/api/v1/alerts`, we drop them during the
-      // live-side merge so they don't reintroduce the flicker we just
-      // removed upstream.
+    it('live alerts in pending state are surfaced (matches the Rules tab status)', async () => {
+      // Pending alerts from `/api/v1/alerts` are point-in-time, so they
+      // can't flap with the matrix step. Including them lets the Alerts
+      // tab match the Rules tab when a rule is currently in its
+      // pending-period before promoting to firing. Historical pending
+      // samples remain filtered at the matrix-query level.
       mockClient.transport.request.mockResolvedValueOnce(matrix([]));
       mockClient.transport.request.mockResolvedValueOnce({
         body: {
@@ -518,8 +519,10 @@ describe('DirectQueryPrometheusBackend', () => {
         60,
         /* endIsNow */ true
       );
-      expect(result.alerts).toHaveLength(1);
-      expect(result.alerts[0].name).toBe('Firing');
+      expect(result.alerts).toHaveLength(2);
+      const byName = Object.fromEntries(result.alerts.map((a) => [a.name, a.state]));
+      expect(byName.Firing).toBe('active');
+      expect(byName.Pending).toBe('pending');
     });
 
     it('empty matrix + endIsNow=false ⇒ { alerts: [], no fallback }', async () => {

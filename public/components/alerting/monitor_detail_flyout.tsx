@@ -33,6 +33,8 @@ import {
   EuiLoadingContent,
   EuiStat,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { EchartsRender } from './echarts_render';
 import {
   AlertHistoryEntry,
@@ -63,7 +65,9 @@ function humanizeCondition(condition: string): React.ReactNode {
 
   // "return true" → "Always trigger"
   if (/^return\s+true\s*;?\s*$/.test(trimmed)) {
-    return 'Always trigger';
+    return i18n.translate('observability.alerting.monitorDetailFlyout.condition.alwaysTrigger', {
+      defaultMessage: 'Always trigger',
+    });
   }
 
   // ctx.results[0].hits.total.value <op> N → "Document count <op> N"
@@ -71,7 +75,10 @@ function humanizeCondition(condition: string): React.ReactNode {
     /ctx\.results\[0]\.hits\.total\.value\s*(>=|<=|!=|==|>|<)\s*([\d.]+)/
   );
   if (docCountMatch) {
-    return `Document count ${docCountMatch[1]} ${docCountMatch[2]}`;
+    return i18n.translate('observability.alerting.monitorDetailFlyout.condition.documentCount', {
+      defaultMessage: 'Document count {operator} {value}',
+      values: { operator: docCountMatch[1], value: docCountMatch[2] },
+    });
   }
 
   // Anything else: show the raw condition in a code style
@@ -157,8 +164,10 @@ const ConditionPreviewGraph: React.FC<{
     return (
       <EuiText size="s" color="subdued">
         <em>
-          No recent evaluation data available. The condition preview populates after the monitor
-          executes and records metric data.
+          <FormattedMessage
+            id="observability.alerting.monitorDetailFlyout.preview.noData"
+            defaultMessage="No recent evaluation data available. The condition preview populates after the monitor executes and records metric data."
+          />
         </em>
       </EuiText>
     );
@@ -170,10 +179,24 @@ const ConditionPreviewGraph: React.FC<{
       : latestPoint.value.toFixed(2);
     return (
       <EuiPanel color="subdued" paddingSize="m">
-        <EuiStat title={formattedValue} description="Latest evaluated value" titleSize="l" />
+        <EuiStat
+          title={formattedValue}
+          description={i18n.translate(
+            'observability.alerting.monitorDetailFlyout.preview.latestEvaluatedValue',
+            {
+              defaultMessage: 'Latest evaluated value',
+            }
+          )}
+          titleSize="l"
+        />
         <EuiSpacer size="xs" />
         <EuiText size="xs" color="subdued">
-          <em>Limited evaluation data — showing latest value</em>
+          <em>
+            <FormattedMessage
+              id="observability.alerting.monitorDetailFlyout.preview.limitedData"
+              defaultMessage="Limited evaluation data — showing latest value"
+            />
+          </em>
         </EuiText>
       </EuiPanel>
     );
@@ -264,26 +287,55 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   const historyColumns: Array<EuiBasicTableColumn<AlertHistoryEntry>> = [
     {
       field: 'timestamp',
-      name: 'Time',
+      name: i18n.translate('observability.alerting.monitorDetailFlyout.history.time', {
+        defaultMessage: 'Time',
+      }),
       width: '180px',
       render: (ts: string) => new Date(ts).toLocaleString(),
     },
     {
       field: 'state',
-      name: 'State',
+      name: i18n.translate('observability.alerting.monitorDetailFlyout.history.state', {
+        defaultMessage: 'State',
+      }),
       render: (s: string) => <EuiHealth color={STATE_COLORS[s] || 'subdued'}>{s}</EuiHealth>,
     },
-    { field: 'value', name: 'Value', width: '80px' },
-    { field: 'message', name: 'Message', truncateText: true },
+    {
+      field: 'value',
+      name: i18n.translate('observability.alerting.monitorDetailFlyout.history.value', {
+        defaultMessage: 'Value',
+      }),
+      width: '80px',
+    },
+    {
+      field: 'message',
+      name: i18n.translate('observability.alerting.monitorDetailFlyout.history.message', {
+        defaultMessage: 'Message',
+      }),
+      truncateText: true,
+    },
   ];
 
   // Notification routing columns
   const routingColumns: Array<EuiBasicTableColumn<NotificationRouting>> = [
-    { field: 'channel', name: 'Channel', width: '100px' },
-    { field: 'destination', name: 'Destination' },
+    {
+      field: 'channel',
+      name: i18n.translate('observability.alerting.monitorDetailFlyout.routing.channel', {
+        defaultMessage: 'Channel',
+      }),
+      width: '100px',
+    },
+    {
+      field: 'destination',
+      name: i18n.translate('observability.alerting.monitorDetailFlyout.routing.destination', {
+        defaultMessage: 'Destination',
+      }),
+    },
     {
       field: 'severity',
-      name: 'Severities',
+      name: i18n.translate('observability.alerting.monitorDetailFlyout.routing.severities', {
+        defaultMessage: 'Severities',
+      }),
       width: '160px',
       render: (sevs: UnifiedAlertSeverity[] | undefined) =>
         sevs
@@ -292,9 +344,18 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                 {s}
               </EuiBadge>
             ))
-          : 'All',
+          : i18n.translate('observability.alerting.monitorDetailFlyout.routing.allSeverities', {
+              defaultMessage: 'All',
+            }),
     },
-    { field: 'throttle', name: 'Throttle', width: '100px', render: (t: string) => t || '—' },
+    {
+      field: 'throttle',
+      name: i18n.translate('observability.alerting.monitorDetailFlyout.routing.throttle', {
+        defaultMessage: 'Throttle',
+      }),
+      width: '100px',
+      render: (t: string) => t || '—',
+    },
   ];
 
   return (
@@ -327,15 +388,25 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
           {/* Quick actions */}
           <EuiFlexGroup gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content="Editing not yet available">
+              <EuiToolTip
+                content={i18n.translate('observability.alerting.monitorDetailFlyout.editTooltip', {
+                  defaultMessage: 'Editing not yet available',
+                })}
+              >
                 <EuiButtonEmpty size="s" iconType="pencil" isDisabled>
-                  Edit
+                  <FormattedMessage
+                    id="observability.alerting.monitorDetailFlyout.editButton"
+                    defaultMessage="Edit"
+                  />
                 </EuiButtonEmpty>
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty size="s" iconType="copy" onClick={() => onClone(monitor)}>
-                Clone
+                <FormattedMessage
+                  id="observability.alerting.monitorDetailFlyout.cloneButton"
+                  defaultMessage="Clone"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -345,7 +416,10 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                 color="danger"
                 onClick={() => setShowDeleteConfirm(true)}
               >
-                Delete
+                <FormattedMessage
+                  id="observability.alerting.monitorDetailFlyout.deleteButton"
+                  defaultMessage="Delete"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -368,10 +442,25 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                 buttonContent={
                   <strong>
                     {monitorKind === 'cluster_metrics'
-                      ? 'Cluster API Configuration'
+                      ? i18n.translate(
+                          'observability.alerting.monitorDetailFlyout.queryDef.clusterApi',
+                          {
+                            defaultMessage: 'Cluster API Configuration',
+                          }
+                        )
                       : monitorKind === 'doc'
-                      ? 'Document-Level Queries'
-                      : 'Query Definition'}
+                      ? i18n.translate(
+                          'observability.alerting.monitorDetailFlyout.queryDef.docLevel',
+                          {
+                            defaultMessage: 'Document-Level Queries',
+                          }
+                        )
+                      : i18n.translate(
+                          'observability.alerting.monitorDetailFlyout.queryDef.queryDefinition',
+                          {
+                            defaultMessage: 'Query Definition',
+                          }
+                        )}
                   </strong>
                 }
                 initialIsOpen={true}
@@ -383,13 +472,45 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                       type="column"
                       compressed
                       listItems={[
-                        { title: 'API Type', description: rawInput.uri.api_type },
-                        { title: 'Path', description: rawInput.uri.path || '—' },
-                        { title: 'Path Params', description: rawInput.uri.path_params || '—' },
-                        { title: 'URL', description: rawInput.uri.url || '—' },
                         {
-                          title: 'Clusters',
-                          description: rawInput.uri.clusters?.join(', ') || 'Local cluster',
+                          title: i18n.translate(
+                            'observability.alerting.monitorDetailFlyout.cluster.apiType',
+                            { defaultMessage: 'API Type' }
+                          ),
+                          description: rawInput.uri.api_type,
+                        },
+                        {
+                          title: i18n.translate(
+                            'observability.alerting.monitorDetailFlyout.cluster.path',
+                            { defaultMessage: 'Path' }
+                          ),
+                          description: rawInput.uri.path || '—',
+                        },
+                        {
+                          title: i18n.translate(
+                            'observability.alerting.monitorDetailFlyout.cluster.pathParams',
+                            { defaultMessage: 'Path Params' }
+                          ),
+                          description: rawInput.uri.path_params || '—',
+                        },
+                        {
+                          title: i18n.translate(
+                            'observability.alerting.monitorDetailFlyout.cluster.url',
+                            { defaultMessage: 'URL' }
+                          ),
+                          description: rawInput.uri.url || '—',
+                        },
+                        {
+                          title: i18n.translate(
+                            'observability.alerting.monitorDetailFlyout.cluster.clusters',
+                            { defaultMessage: 'Clusters' }
+                          ),
+                          description:
+                            rawInput.uri.clusters?.join(', ') ||
+                            i18n.translate(
+                              'observability.alerting.monitorDetailFlyout.cluster.localCluster',
+                              { defaultMessage: 'Local cluster' }
+                            ),
                         },
                       ]}
                     />
@@ -397,7 +518,12 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                 ) : monitorKind === 'doc' && rawInput && 'doc_level_input' in rawInput ? (
                   <>
                     <EuiText size="s">
-                      <strong>Target indices:</strong>{' '}
+                      <strong>
+                        <FormattedMessage
+                          id="observability.alerting.monitorDetailFlyout.targetIndices"
+                          defaultMessage="Target indices:"
+                        />
+                      </strong>{' '}
                       {rawInput.doc_level_input.indices?.join(', ') || '—'}
                     </EuiText>
                     {rawInput.doc_level_input.description && (
@@ -438,7 +564,12 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                     </EuiCodeBlock>
                     {monitorKind === 'bucket' && (
                       <EuiText size="xs" color="subdued">
-                        <em>Bucket-level monitor — triggers evaluate per aggregation bucket</em>
+                        <em>
+                          <FormattedMessage
+                            id="observability.alerting.monitorDetailFlyout.bucketLevelDescription"
+                            defaultMessage="Bucket-level monitor — triggers evaluate per aggregation bucket"
+                          />
+                        </em>
                       </EuiText>
                     )}
                   </>
@@ -447,7 +578,11 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                   <>
                     <EuiSpacer size="s" />
                     <EuiText size="xs" color="subdued">
-                      Condition: {humanizeCondition(monitor.condition)}
+                      <FormattedMessage
+                        id="observability.alerting.monitorDetailFlyout.conditionPrefix"
+                        defaultMessage="Condition: {condition}"
+                        values={{ condition: humanizeCondition(monitor.condition) }}
+                      />
                     </EuiText>
                   </>
                 )}
@@ -458,7 +593,14 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
               {/* Conditions & Thresholds */}
               <EuiAccordion
                 id={`conditions-${monitor.id}`}
-                buttonContent={<strong>Conditions &amp; Evaluation</strong>}
+                buttonContent={
+                  <strong>
+                    <FormattedMessage
+                      id="observability.alerting.monitorDetailFlyout.conditionsHeader"
+                      defaultMessage="Conditions & Evaluation"
+                    />
+                  </strong>
+                }
                 initialIsOpen={true}
                 paddingSize="m"
               >
@@ -466,18 +608,49 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                   type="column"
                   compressed
                   listItems={[
-                    { title: 'Evaluation Interval', description: evaluationInterval },
-                    { title: 'Pending Period', description: pendingPeriod },
+                    {
+                      title: i18n.translate(
+                        'observability.alerting.monitorDetailFlyout.evaluationInterval',
+                        { defaultMessage: 'Evaluation Interval' }
+                      ),
+                      description: evaluationInterval,
+                    },
+                    {
+                      title: i18n.translate(
+                        'observability.alerting.monitorDetailFlyout.pendingPeriod',
+                        { defaultMessage: 'Pending Period' }
+                      ),
+                      description: pendingPeriod,
+                    },
                     ...(detail?.firingPeriod
-                      ? [{ title: 'Firing Period', description: detail.firingPeriod }]
+                      ? [
+                          {
+                            title: i18n.translate(
+                              'observability.alerting.monitorDetailFlyout.firingPeriod',
+                              { defaultMessage: 'Firing Period' }
+                            ),
+                            description: detail.firingPeriod,
+                          },
+                        ]
                       : []),
                     ...(detail?.lookbackPeriod
-                      ? [{ title: 'Lookback Period', description: detail.lookbackPeriod }]
+                      ? [
+                          {
+                            title: i18n.translate(
+                              'observability.alerting.monitorDetailFlyout.lookbackPeriod',
+                              { defaultMessage: 'Lookback Period' }
+                            ),
+                            description: detail.lookbackPeriod,
+                          },
+                        ]
                       : []),
                     ...(monitor.threshold
                       ? [
                           {
-                            title: 'Threshold',
+                            title: i18n.translate(
+                              'observability.alerting.monitorDetailFlyout.threshold',
+                              { defaultMessage: 'Threshold' }
+                            ),
                             description: `${monitor.threshold.operator} ${monitor.threshold.value}${
                               monitor.threshold.unit || ''
                             }`,
@@ -493,7 +666,14 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
               {/* Labels */}
               <EuiAccordion
                 id={`labels-${monitor.id}`}
-                buttonContent={<strong>Labels</strong>}
+                buttonContent={
+                  <strong>
+                    <FormattedMessage
+                      id="observability.alerting.monitorDetailFlyout.labelsHeader"
+                      defaultMessage="Labels"
+                    />
+                  </strong>
+                }
                 initialIsOpen={true}
                 paddingSize="m"
               >
@@ -518,7 +698,10 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                       ))}
                       {visibleLabels.length === 0 && (
                         <EuiText size="s" color="subdued">
-                          Not configured
+                          <FormattedMessage
+                            id="observability.alerting.monitorDetailFlyout.notConfigured"
+                            defaultMessage="Not configured"
+                          />
                         </EuiText>
                       )}
                     </EuiFlexGroup>
@@ -531,7 +714,14 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
               {/* Condition Preview Graph */}
               <EuiAccordion
                 id={`preview-${monitor.id}`}
-                buttonContent={<strong>Condition Preview</strong>}
+                buttonContent={
+                  <strong>
+                    <FormattedMessage
+                      id="observability.alerting.monitorDetailFlyout.conditionPreviewHeader"
+                      defaultMessage="Condition Preview"
+                    />
+                  </strong>
+                }
                 initialIsOpen={true}
                 paddingSize="m"
               >
@@ -543,7 +733,15 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
               {/* Alert History */}
               <EuiAccordion
                 id={`alertHistory-${monitor.id}`}
-                buttonContent={<strong>Recent Alert History ({alertHistory.length})</strong>}
+                buttonContent={
+                  <strong>
+                    <FormattedMessage
+                      id="observability.alerting.monitorDetailFlyout.recentAlertHistoryHeader"
+                      defaultMessage="Recent Alert History ({count})"
+                      values={{ count: alertHistory.length }}
+                    />
+                  </strong>
+                }
                 initialIsOpen={false}
                 paddingSize="m"
               >
@@ -555,7 +753,15 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
               {/* Notification Routing */}
               <EuiAccordion
                 id={`routing-${monitor.id}`}
-                buttonContent={<strong>Notification Routing ({notificationRouting.length})</strong>}
+                buttonContent={
+                  <strong>
+                    <FormattedMessage
+                      id="observability.alerting.monitorDetailFlyout.notificationRoutingHeader"
+                      defaultMessage="Notification Routing ({count})"
+                      values={{ count: notificationRouting.length }}
+                    />
+                  </strong>
+                }
                 initialIsOpen={false}
                 paddingSize="m"
               >
@@ -563,7 +769,10 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                   <EuiBasicTable items={notificationRouting} columns={routingColumns} compressed />
                 ) : (
                   <EuiText size="s" color="subdued">
-                    No notification routing configured
+                    <FormattedMessage
+                      id="observability.alerting.monitorDetailFlyout.noRouting"
+                      defaultMessage="No notification routing configured"
+                    />
                   </EuiText>
                 )}
               </EuiAccordion>
@@ -573,7 +782,15 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
               {/* Suppression Rules */}
               <EuiAccordion
                 id={`suppression-${monitor.id}`}
-                buttonContent={<strong>Suppression Rules ({suppressionRules.length})</strong>}
+                buttonContent={
+                  <strong>
+                    <FormattedMessage
+                      id="observability.alerting.monitorDetailFlyout.suppressionRulesHeader"
+                      defaultMessage="Suppression Rules ({count})"
+                      values={{ count: suppressionRules.length }}
+                    />
+                  </strong>
+                }
                 initialIsOpen={false}
                 paddingSize="m"
               >
@@ -593,11 +810,27 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                           <EuiText size="xs" color="subdued">
                             {sr.reason}
                           </EuiText>
-                          {sr.schedule && <EuiText size="xs">Schedule: {sr.schedule}</EuiText>}
+                          {sr.schedule && (
+                            <EuiText size="xs">
+                              <FormattedMessage
+                                id="observability.alerting.monitorDetailFlyout.scheduleLabel"
+                                defaultMessage="Schedule: {schedule}"
+                                values={{ schedule: sr.schedule }}
+                              />
+                            </EuiText>
+                          )}
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           <EuiBadge color={sr.active ? 'success' : 'default'}>
-                            {sr.active ? 'Active' : 'Inactive'}
+                            {sr.active
+                              ? i18n.translate(
+                                  'observability.alerting.monitorDetailFlyout.suppressionActive',
+                                  { defaultMessage: 'Active' }
+                                )
+                              : i18n.translate(
+                                  'observability.alerting.monitorDetailFlyout.suppressionInactive',
+                                  { defaultMessage: 'Inactive' }
+                                )}
                           </EuiBadge>
                         </EuiFlexItem>
                       </EuiFlexGroup>
@@ -605,7 +838,10 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                   ))
                 ) : (
                   <EuiText size="s" color="subdued">
-                    No suppression rules applied
+                    <FormattedMessage
+                      id="observability.alerting.monitorDetailFlyout.noSuppression"
+                      defaultMessage="No suppression rules applied"
+                    />
                   </EuiText>
                 )}
               </EuiAccordion>
@@ -615,7 +851,14 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
               {/* Creation / Modification History */}
               <EuiAccordion
                 id={`history-${monitor.id}`}
-                buttonContent={<strong>History</strong>}
+                buttonContent={
+                  <strong>
+                    <FormattedMessage
+                      id="observability.alerting.monitorDetailFlyout.historyHeader"
+                      defaultMessage="History"
+                    />
+                  </strong>
+                }
                 initialIsOpen={false}
                 paddingSize="m"
               >
@@ -623,23 +866,50 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                   type="column"
                   compressed
                   listItems={[
-                    { title: 'Created By', description: monitor.createdBy },
                     {
-                      title: 'Created At',
+                      title: i18n.translate(
+                        'observability.alerting.monitorDetailFlyout.history.createdBy',
+                        { defaultMessage: 'Created By' }
+                      ),
+                      description: monitor.createdBy,
+                    },
+                    {
+                      title: i18n.translate(
+                        'observability.alerting.monitorDetailFlyout.history.createdAt',
+                        { defaultMessage: 'Created At' }
+                      ),
                       description: new Date(monitor.createdAt).toLocaleString(),
                     },
                     {
-                      title: 'Last Modified',
+                      title: i18n.translate(
+                        'observability.alerting.monitorDetailFlyout.history.lastModified',
+                        { defaultMessage: 'Last Modified' }
+                      ),
                       description: new Date(monitor.lastModified).toLocaleString(),
                     },
                     {
-                      title: 'Last Triggered',
+                      title: i18n.translate(
+                        'observability.alerting.monitorDetailFlyout.history.lastTriggered',
+                        { defaultMessage: 'Last Triggered' }
+                      ),
                       description: monitor.lastTriggered
                         ? new Date(monitor.lastTriggered).toLocaleString()
                         : '—',
                     },
-                    { title: 'Backend', description: monitor.datasourceType },
-                    { title: 'Datasource ID', description: monitor.datasourceId },
+                    {
+                      title: i18n.translate(
+                        'observability.alerting.monitorDetailFlyout.history.backend',
+                        { defaultMessage: 'Backend' }
+                      ),
+                      description: monitor.datasourceType,
+                    },
+                    {
+                      title: i18n.translate(
+                        'observability.alerting.monitorDetailFlyout.history.datasourceId',
+                        { defaultMessage: 'Datasource ID' }
+                      ),
+                      description: monitor.datasourceId,
+                    },
                   ]}
                 />
               </EuiAccordion>
@@ -650,14 +920,34 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onClose}>Close</EuiButtonEmpty>
+              <EuiButtonEmpty onClick={onClose}>
+                <FormattedMessage
+                  id="observability.alerting.monitorDetailFlyout.closeButton"
+                  defaultMessage="Close"
+                />
+              </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content="Enable/disable is not yet wired to the backend API">
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'observability.alerting.monitorDetailFlyout.enableDisableTooltip',
+                      {
+                        defaultMessage: 'Enable/disable is not yet wired to the backend API',
+                      }
+                    )}
+                  >
                     <EuiButton size="s" isDisabled>
-                      {monitor.enabled === false ? 'Enable Monitor' : 'Disable Monitor'}
+                      {monitor.enabled === false
+                        ? i18n.translate(
+                            'observability.alerting.monitorDetailFlyout.enableMonitor',
+                            { defaultMessage: 'Enable Monitor' }
+                          )
+                        : i18n.translate(
+                            'observability.alerting.monitorDetailFlyout.disableMonitor',
+                            { defaultMessage: 'Disable Monitor' }
+                          )}
                     </EuiButton>
                   </EuiToolTip>
                 </EuiFlexItem>
@@ -670,8 +960,13 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
       {/* Delete confirmation */}
       {showDeleteConfirm && (
         <DeleteModal
-          title={`Delete "${monitor.name}"?`}
-          message="This will remove the monitor from the current view."
+          title={i18n.translate('observability.alerting.monitorDetailFlyout.deleteModalTitle', {
+            defaultMessage: 'Delete "{name}"?',
+            values: { name: monitor.name },
+          })}
+          message={i18n.translate('observability.alerting.monitorDetailFlyout.deleteModalMessage', {
+            defaultMessage: 'This will remove the monitor from the current view.',
+          })}
           onCancel={() => setShowDeleteConfirm(false)}
           onConfirm={() => {
             onDelete(monitor.id);

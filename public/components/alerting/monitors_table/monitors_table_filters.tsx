@@ -37,7 +37,6 @@ export interface FilterState {
   labels: Record<string, string[]>;
   createdBy: string[];
   destinations: string[];
-  backend: string[];
 }
 
 export const emptyFilters = (): FilterState => ({
@@ -48,7 +47,6 @@ export const emptyFilters = (): FilterState => ({
   labels: {},
   createdBy: [],
   destinations: [],
-  backend: [],
 });
 
 // ============================================================================
@@ -102,7 +100,6 @@ export function matchesFilters(rule: UnifiedRuleSummary, filters: FilterState): 
   if (filters.healthStatus.length > 0 && !filters.healthStatus.includes(rule.healthStatus))
     return false;
   if (filters.createdBy.length > 0 && !filters.createdBy.includes(rule.createdBy)) return false;
-  if (filters.backend.length > 0 && !filters.backend.includes(rule.datasourceType)) return false;
   if (filters.destinations.length > 0) {
     const hasMatch = rule.notificationDestinations.some((d) => filters.destinations.includes(d));
     if (!hasMatch) return false;

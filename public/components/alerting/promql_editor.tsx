@@ -18,6 +18,8 @@ import {
   EuiBadge,
   EuiPanel,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import {
   validatePromQL as coreValidatePromQL,
   prettifyPromQL as corePrettifyPromQL,
@@ -551,7 +553,9 @@ export interface PromQLEditorProps {
 export const PromQLEditor: React.FC<PromQLEditorProps> = ({
   value,
   onChange,
-  placeholder = 'Enter PromQL query...',
+  placeholder = i18n.translate('observability.alerting.promqlEditor.placeholder', {
+    defaultMessage: 'Enter PromQL query...',
+  }),
   height = 120,
   showLineNumbers = false,
   hideToolbar = false,
@@ -726,7 +730,9 @@ export const PromQLEditor: React.FC<PromQLEditorProps> = ({
             }}
             placeholder=""
             spellCheck={false}
-            aria-label="PromQL query editor"
+            aria-label={i18n.translate('observability.alerting.promqlEditor.ariaLabel', {
+              defaultMessage: 'PromQL query editor',
+            })}
             style={{
               width: '100%',
               height,
@@ -756,34 +762,52 @@ export const PromQLEditor: React.FC<PromQLEditorProps> = ({
           style={{ marginTop: 4 }}
         >
           <EuiFlexItem grow={false}>
-            <EuiToolTip content="Format query">
+            <EuiToolTip
+              content={i18n.translate('observability.alerting.promqlEditor.formatQueryTooltip', {
+                defaultMessage: 'Format query',
+              })}
+            >
               <EuiButtonEmpty
                 size="xs"
                 iconType="editorCodeBlock"
                 onClick={handlePrettify}
                 isDisabled={!value}
               >
-                Prettify
+                <FormattedMessage
+                  id="observability.alerting.promqlEditor.prettifyButton"
+                  defaultMessage="Prettify"
+                />
               </EuiButtonEmpty>
             </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
-              Ctrl+Space for suggestions
+              <FormattedMessage
+                id="observability.alerting.promqlEditor.suggestionsHint"
+                defaultMessage="Ctrl+Space for suggestions"
+              />
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem />
           {errorCount > 0 && (
             <EuiFlexItem grow={false}>
               <EuiBadge color="danger">
-                {errorCount} error{errorCount > 1 ? 's' : ''}
+                <FormattedMessage
+                  id="observability.alerting.promqlEditor.errorBadge"
+                  defaultMessage="{count} {count, plural, one {error} other {errors}}"
+                  values={{ count: errorCount }}
+                />
               </EuiBadge>
             </EuiFlexItem>
           )}
           {warnCount > 0 && (
             <EuiFlexItem grow={false}>
               <EuiBadge color="warning">
-                {warnCount} warning{warnCount > 1 ? 's' : ''}
+                <FormattedMessage
+                  id="observability.alerting.promqlEditor.warningBadge"
+                  defaultMessage="{count} {count, plural, one {warning} other {warnings}}"
+                  values={{ count: warnCount }}
+                />
               </EuiBadge>
             </EuiFlexItem>
           )}
