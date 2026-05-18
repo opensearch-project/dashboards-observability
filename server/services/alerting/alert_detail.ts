@@ -32,7 +32,6 @@ import {
   osAlertToUnified,
   osMonitorToUnifiedRuleSummary,
   osStateToUnified,
-  promAlertToUnified,
   promRuleToUnified,
   promStateToUnified,
 } from './alert_utils';
@@ -243,14 +242,11 @@ export async function getAlertDetail(
     const summary = osAlertToUnified(alert, ds!.id);
     return { ...summary, raw: alert };
   } else if (ds.type === 'prometheus' && promBackend) {
-    const promAlerts = await promBackend.getAlerts(client, ds);
-    const resolvedId = ds!.id;
-    const alert = promAlerts.find(
-      (a) => `${resolvedId}-${a.labels.alertname}-${a.labels.instance || ''}` === alertId
-    );
-    if (!alert) return null;
-    const summary = promAlertToUnified(alert, resolvedId);
-    return { ...summary, raw: alert };
+    // Prom doesn't expose a per-alert lookup; the previous code scanned the
+    // entire firing-alerts list to find one row. The flyout already has the
+    // summary's labels/annotations on hand and falls back to rendering them
+    // when this returns null, so the scan is wasted work.
+    return null;
   }
   return null;
 }
