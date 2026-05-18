@@ -45,6 +45,8 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
   describe('Creating visualizations', () => {
     beforeEach(() => {
       moveToEventsHome();
+      cy.reload(true);
+      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     });
 
     it('Create first visualization in event analytics', () => {
