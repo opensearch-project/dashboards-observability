@@ -21,13 +21,15 @@ import {
 import {
   observabilityApmServicesID,
   observabilityApmApplicationMapID,
+  observabilityApmSloID,
 } from '../../common/constants/apm';
 import { AppPluginStartDependencies } from '../types';
 
 function registerIconSideNavGroups(
   core: CoreSetup<AppPluginStartDependencies>,
   apmEnabled: boolean,
-  alertManagerEnabled: boolean = false
+  alertManagerEnabled: boolean = false,
+  sloEnabled: boolean = false
 ) {
   // Notebooks → Tools category
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
@@ -90,6 +92,17 @@ function registerIconSideNavGroups(
         euiIconType: 'graphApp',
         startCluster: true,
       },
+      ...(sloEnabled
+        ? [
+            {
+              id: observabilityApmSloID,
+              category: DEFAULT_APP_CATEGORIES.applicationPerformance,
+              showInAllNavGroup: true,
+              order: 500,
+              euiIconType: 'visGauge',
+            },
+          ]
+        : []),
     ]);
   } else {
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
@@ -115,7 +128,8 @@ function registerDefaultNavGroups(
   core: CoreSetup<AppPluginStartDependencies>,
   apmEnabled: boolean,
   applicationMonitoringCategory: AppCategory,
-  alertManagerEnabled: boolean = false
+  alertManagerEnabled: boolean = false,
+  sloEnabled: boolean = false
 ) {
   core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
     {
@@ -226,6 +240,16 @@ function registerDefaultNavGroups(
         showInAllNavGroup: true,
         order: 200,
       },
+      ...(sloEnabled
+        ? [
+            {
+              id: observabilityApmSloID,
+              category: applicationMonitoringCategory,
+              showInAllNavGroup: true,
+              order: 300,
+            },
+          ]
+        : []),
       {
         id: 'observability-traces-nav',
         category: DEFAULT_APP_CATEGORIES.investigate,
@@ -261,11 +285,18 @@ export function registerAllPluginNavGroups(
   core: CoreSetup<AppPluginStartDependencies>,
   apmEnabled: boolean,
   applicationMonitoringCategory: AppCategory,
-  alertManagerEnabled: boolean = false
+  alertManagerEnabled: boolean = false,
+  sloEnabled: boolean = false
 ) {
   if (core.chrome.getIsIconSideNavEnabled()) {
-    registerIconSideNavGroups(core, apmEnabled, alertManagerEnabled);
+    registerIconSideNavGroups(core, apmEnabled, alertManagerEnabled, sloEnabled);
   } else {
-    registerDefaultNavGroups(core, apmEnabled, applicationMonitoringCategory, alertManagerEnabled);
+    registerDefaultNavGroups(
+      core,
+      apmEnabled,
+      applicationMonitoringCategory,
+      alertManagerEnabled,
+      sloEnabled
+    );
   }
 }

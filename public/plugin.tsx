@@ -76,6 +76,9 @@ import {
   observabilityApmApplicationMapID,
   observabilityApmApplicationMapTitle,
   observabilityApmApplicationMapPluginOrder,
+  observabilityApmSloID,
+  observabilityApmSloTitle,
+  observabilityApmSloPluginOrder,
 } from '../common/constants/apm';
 import { QueryManager } from '../common/query_manager';
 import {
@@ -144,6 +147,9 @@ interface PublicConfig {
     enabled: boolean;
   };
   alertManager: {
+    enabled: boolean;
+  };
+  slo?: {
     enabled: boolean;
   };
 }
@@ -441,6 +447,20 @@ export class ObservabilityPlugin
           updater$: this.apmAppUpdater$,
         });
 
+        // SLO app — gated behind observability.slo.enabled so PR 1 ships dark
+        // by default. Mirrors the alertManager.enabled pattern above; opt in
+        // via `opensearch_dashboards.yml` with `observability.slo.enabled: true`.
+        if (this.config.slo?.enabled) {
+          core.application.register({
+            id: observabilityApmSloID,
+            title: observabilityApmSloTitle,
+            category: APPLICATION_MONITORING_CATEGORY,
+            order: observabilityApmSloPluginOrder,
+            mount: appMountWithStartPage('apm-slo', '/slos'),
+            updater$: this.apmAppUpdater$,
+          });
+        }
+
         // Trace Analytics apps - visible when traces capability DISABLED (fallback)
         core.application.register({
           id: observabilityTracesNewNavID,
@@ -529,7 +549,8 @@ export class ObservabilityPlugin
       core,
       this.apmEnabled,
       APPLICATION_MONITORING_CATEGORY,
-      !!this.config.alertManager?.enabled
+      !!this.config.alertManager?.enabled,
+      !!this.config.slo?.enabled
     );
 
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
