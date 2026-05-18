@@ -11,9 +11,13 @@
  *
  * Contents:
  *   - `getRuleDetail` — dispatches to OS or Prom based on the datasource type
- *   - `getOSRuleDetail` — full OS monitor detail (history, routing, preview)
+ *   - `getOSRuleDetail` — full OS monitor detail (history + preview)
  *   - `getPromRuleDetail` — full Prometheus rule detail
  *   - `getAlertDetail` — full alert detail with raw backend data
+ *
+ * Notification routing is intentionally not fetched here — the rule
+ * flyout no longer surfaces it inline. Alertmanager owns Prom routing
+ * and the standalone Routing tab is the canonical place for it.
  */
 import {
   AlertHistoryEntry,
@@ -37,9 +41,10 @@ import {
 import { fetchOSPreviewTimeSeries, fetchPromPreviewData } from './alert_preview';
 
 /**
- * Get full detail for a single rule/monitor. Fetches real metadata from
- * the backend (alert history, destinations, annotations). Fields that
- * cannot be fetched from the API are marked as mock placeholders.
+ * Get full detail for a single rule/monitor. Real metadata where the
+ * upstream API exposes it (alert history, monitor config, annotations);
+ * `aiSummary` and `suppressionRules` are intentionally empty — no API
+ * source today and the flyout treats them as optional.
  */
 export async function getRuleDetail(
   datasourceService: DatasourceService,
