@@ -36,11 +36,7 @@ import {
   promRuleToUnified,
   promStateToUnified,
 } from './alert_utils';
-import {
-  extractOSPreviewData,
-  fetchOSPreviewTimeSeries,
-  fetchPromPreviewData,
-} from './alert_preview';
+import { fetchOSPreviewTimeSeries, fetchPromPreviewData } from './alert_preview';
 
 /**
  * Get full detail for a single rule/monitor. Fetches real metadata from
@@ -77,12 +73,12 @@ export async function getOSRuleDetail(
 
   const summary = osMonitorToUnifiedRuleSummary(monitor, ds.id);
 
-  // Fetch real alert history for this monitor
+  // Fetch real alert history for this monitor — scoped at the upstream
+  // via `monitorId` so we don't full-scan every alert in the cluster.
   let alertHistory: AlertHistoryEntry[] = [];
   try {
-    const { alerts } = await osBackend.getAlerts(client);
-    const monitorAlerts = alerts.filter((a) => a.monitor_id === monitorId).slice(0, 20);
-    alertHistory = monitorAlerts.map((a) => ({
+    const { alerts } = await osBackend.getAlerts(client, { monitorId });
+    alertHistory = alerts.slice(0, 20).map((a) => ({
       timestamp: new Date(a.start_time).toISOString(),
       state: osStateToUnified(a.state),
       value: a.severity,
@@ -135,21 +131,16 @@ export async function getOSRuleDetail(
   }
   const description = trigger?.actions?.[0]?.message_template?.source || descriptionFallback;
 
-  // Fetch condition preview: run the monitor's query as a date_histogram to build a time-series
+  // Fetch condition preview: run the monitor's query as a date_histogram to
+  // build a time-series. If extraction produces no points the flyout's
+  // `ConditionPreviewGraph` shows its own empty state — we deliberately do
+  // NOT fall back to `runMonitor(_, dryRun=true)`, which re-executes the
+  // customer's monitor against live data on every flyout open.
   let conditionPreviewData: Array<{ timestamp: number; value: number }> = [];
   try {
     conditionPreviewData = await fetchOSPreviewTimeSeries(osBackend, client, ds, monitor);
   } catch {
     // Preview data fetch is best-effort
-  }
-  // Fallback: try dry-run execution if time-series extraction produced nothing
-  if (conditionPreviewData.length === 0) {
-    try {
-      const execResult = await osBackend.runMonitor(client, monitorId, true);
-      conditionPreviewData = extractOSPreviewData(execResult);
-    } catch {
-      // Dry run is best-effort — some monitors may not support it
-    }
   }
 
   return {
