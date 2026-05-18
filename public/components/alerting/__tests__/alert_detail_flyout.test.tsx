@@ -22,15 +22,16 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   unobserve: jest.fn(),
 }));
 
-// Post-Phase 4: AlertDetailFlyout instantiates AlertingOpenSearchService
-// internally via `useMemo(() => new AlertingOpenSearchService(), [])` and
-// calls `getAlertDetail(dsId, alertId)` on mount. Mock the class so the
-// constructor returns a stubbed instance with `getAlertDetail` resolving to
-// `null` — the flyout falls back to the alert summary in that case, which
-// is exactly what these render tests exercise.
+// AlertDetailFlyout instantiates AlertingOpenSearchService internally via
+// `useMemo(() => new AlertingOpenSearchService(), [])`. The flyout no
+// longer fetches detail eagerly — `getAlertDetail` only fires when the
+// Raw Alert Data accordion expands. Mock both methods so the
+// constructor returns a stubbed instance and any lazy fetch resolves
+// without hitting the real HTTP transport.
+const mockGetAlertDetail = jest.fn().mockResolvedValue(null);
 jest.mock('../query_services/alerting_opensearch_service', () => ({
   AlertingOpenSearchService: jest.fn().mockImplementation(() => ({
-    getAlertDetail: jest.fn().mockResolvedValue(null),
+    getAlertDetail: mockGetAlertDetail,
   })),
 }));
 
@@ -124,54 +125,13 @@ describe('AlertDetailFlyout', () => {
     expect(onAcknowledge).not.toHaveBeenCalled();
   });
 
-  describe('runbook URL sanitization', () => {
-    it('does not render the runbook as a link when the URL uses a javascript: protocol', () => {
-      const alertWithBadUrl: UnifiedAlertSummary = {
-        ...baseAlert,
-        annotations: {
-          ...baseAlert.annotations,
-          // eslint-disable-next-line no-script-url
-          runbook_url: 'javascript:alert(document.cookie)',
-        },
-      };
-      const { getByText } = render(
-        <AlertDetailFlyout
-          alert={alertWithBadUrl}
-          datasources={datasources}
-          onClose={jest.fn()}
-          onAcknowledge={jest.fn()}
-        />
-      );
-      const runbookTitle = getByText('Check related runbook');
-      expect(runbookTitle.closest('a')).toBeNull();
+  describe('lazy detail fetch', () => {
+    beforeEach(() => {
+      mockGetAlertDetail.mockClear();
     });
 
-    it('renders the runbook as an external link with rel="noopener noreferrer" for an https URL', () => {
-      const alertWithGoodUrl: UnifiedAlertSummary = {
-        ...baseAlert,
-        annotations: {
-          ...baseAlert.annotations,
-          runbook_url: 'https://runbooks.example.com/high-error-rate',
-        },
-      };
-      const { getByText } = render(
-        <AlertDetailFlyout
-          alert={alertWithGoodUrl}
-          datasources={datasources}
-          onClose={jest.fn()}
-          onAcknowledge={jest.fn()}
-        />
-      );
-      const runbookTitle = getByText('Check related runbook');
-      const anchor = runbookTitle.closest('a');
-      expect(anchor).not.toBeNull();
-      expect(anchor?.getAttribute('href')).toBe('https://runbooks.example.com/high-error-rate');
-      expect(anchor?.getAttribute('rel')).toBe('noopener noreferrer');
-      expect(anchor?.getAttribute('target')).toBe('_blank');
-    });
-
-    it('does not render the runbook as a link when no URL is configured', () => {
-      const { getByText } = render(
+    it('does not call getAlertDetail when the flyout opens', () => {
+      render(
         <AlertDetailFlyout
           alert={baseAlert}
           datasources={datasources}
@@ -179,8 +139,40 @@ describe('AlertDetailFlyout', () => {
           onAcknowledge={jest.fn()}
         />
       );
-      const runbookTitle = getByText('Check related runbook');
-      expect(runbookTitle.closest('a')).toBeNull();
+      expect(mockGetAlertDetail).not.toHaveBeenCalled();
+    });
+
+    it('calls getAlertDetail with monitorId when the Raw Alert Data accordion expands', () => {
+      const alertWithMonitor: UnifiedAlertSummary = { ...baseAlert, monitorId: 'mon-7' };
+      const { getByText } = render(
+        <AlertDetailFlyout
+          alert={alertWithMonitor}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      // Accordion buttons toggle on click; clicking the label expands it.
+      fireEvent.click(getByText('Raw Alert Data'));
+      expect(mockGetAlertDetail).toHaveBeenCalledTimes(1);
+      expect(mockGetAlertDetail).toHaveBeenCalledWith('ds-prom', 'alert-42', 'mon-7');
+    });
+  });
+
+  describe('removed mock sections', () => {
+    it('does not render AI Analysis, Suggested Actions, Suppression Status, or Notification Routing accordions', () => {
+      const { queryByText } = render(
+        <AlertDetailFlyout
+          alert={baseAlert}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      expect(queryByText('AI Analysis')).toBeNull();
+      expect(queryByText('Suggested Actions')).toBeNull();
+      expect(queryByText('Suppression Status')).toBeNull();
+      expect(queryByText('Notification Routing')).toBeNull();
     });
   });
 });
