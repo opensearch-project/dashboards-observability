@@ -47,13 +47,40 @@ export interface SloRulerErrorEnvelope {
  * a richer `body.message`. Falls back to `err.message` when the envelope
  * is absent. Symmetric with how the wizard surfaces ruler diagnostics via
  * `extractRulerErrorEnvelope` — extends the same unwrap to generic errors.
+ *
+ * For 400 responses with `body.attributes.errors: Record<string, string>`
+ * (the route layer's per-field validation envelope), the single-error case
+ * is rendered inline as `${body.message}\n${field}: ${msg}` so a typo'd
+ * datasource id surfaces actionably in the toast. The multi-error case
+ * appends `(N field errors)` and lets the wizard's inline
+ * `WizardValidationSummary` carry the per-field detail (PR 8 will merge
+ * those into the summary so toasts don't have to grow).
  */
 export function extractServerMessage(err: unknown): string {
   if (err && typeof err === 'object') {
     const body = (err as { body?: unknown }).body;
     if (body && typeof body === 'object') {
-      const msg = (body as { message?: unknown }).message;
-      if (typeof msg === 'string' && msg.length > 0) return msg;
+      const b = body as { message?: unknown; attributes?: unknown };
+      const headRaw = b.message;
+      const head =
+        typeof headRaw === 'string' && headRaw.length > 0 ? headRaw : 'Validation failed';
+      const attrs = b.attributes as { errors?: unknown } | undefined;
+      const errs = attrs?.errors;
+      if (errs && typeof errs === 'object' && !Array.isArray(errs)) {
+        // Only consume string-valued entries; the route shape is
+        // `Record<string, string>` but we defensively skip anything else.
+        const entries = Object.entries(errs as Record<string, unknown>).filter(
+          ([, v]) => typeof v === 'string' && v.length > 0
+        ) as Array<[string, string]>;
+        if (entries.length === 1) {
+          const [field, msg] = entries[0];
+          return `${head}\n${field}: ${msg}`;
+        }
+        if (entries.length > 1) {
+          return `${head} (${entries.length} field errors)`;
+        }
+      }
+      if (typeof headRaw === 'string' && headRaw.length > 0) return headRaw;
     }
     const msg = (err as { message?: unknown }).message;
     if (typeof msg === 'string' && msg.length > 0) return msg;

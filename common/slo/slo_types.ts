@@ -431,6 +431,15 @@ export interface GeneratedRule {
 
 export interface GeneratedRuleGroup {
   groupName: string;
+  /**
+   * The Prometheus / Cortex rule namespace this group will land in
+   * (`slo-generated-<workspaceId>`). Stamped by the generator from the
+   * doc's `status.provisioning.rulerNamespace` (or composed from
+   * `opts.workspaceId` for previews where the doc isn't persisted yet).
+   * Surfaced so the wizard preview chip matches the saved doc's
+   * `status.provisioning.rulerNamespace` byte-for-byte.
+   */
+  rulerNamespace: string;
   /** Evaluation interval in seconds. */
   interval: number;
   rules: GeneratedRule[];

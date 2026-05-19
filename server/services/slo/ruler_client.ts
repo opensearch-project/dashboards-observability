@@ -273,7 +273,7 @@ export class DirectQueryRulerClient implements RulerClient {
 
     const body = extractResponseBody(response);
     const parsed = parseYamlBody(body);
-    return coerceRuleGroupList(parsed);
+    return coerceRuleGroupList(parsed, namespace);
   }
 
   /**
@@ -459,7 +459,7 @@ function parseYamlBody(body: unknown): unknown {
  * Returns `null` when the input can't plausibly be a rule group so callers
  * can treat "unparseable" as "missing".
  */
-function coerceRuleGroup(doc: unknown): GeneratedRuleGroup | null {
+function coerceRuleGroup(doc: unknown, rulerNamespace: string): GeneratedRuleGroup | null {
   if (!doc || typeof doc !== 'object' || Array.isArray(doc)) return null;
   const record = doc as Record<string, unknown>;
   const name = record.name;
@@ -470,6 +470,7 @@ function coerceRuleGroup(doc: unknown): GeneratedRuleGroup | null {
 
   return {
     groupName: name,
+    rulerNamespace,
     interval: parseIntervalSeconds(record.interval),
     rules,
     yaml: '',
@@ -492,10 +493,10 @@ function isGeneratedRule(rule: GeneratedRule | null): rule is GeneratedRule {
  * reconciler (PR 5) would coerce the error to `[]` and start tearing
  * down rules it incorrectly thinks the ruler dropped.
  */
-function coerceRuleGroupList(doc: unknown): GeneratedRuleGroup[] {
+function coerceRuleGroupList(doc: unknown, rulerNamespace: string): GeneratedRuleGroup[] {
   if (!doc) return [];
   if (Array.isArray(doc)) {
-    return doc.map(coerceRuleGroup).filter(isGeneratedRuleGroup);
+    return doc.map((entry) => coerceRuleGroup(entry, rulerNamespace)).filter(isGeneratedRuleGroup);
   }
   if (typeof doc === 'object') {
     const record = doc as Record<string, unknown>;
@@ -515,7 +516,9 @@ function coerceRuleGroupList(doc: unknown): GeneratedRuleGroup[] {
     if (data && typeof data === 'object' && !Array.isArray(data)) {
       const groups = (data as Record<string, unknown>).groups;
       if (Array.isArray(groups)) {
-        return groups.map(coerceRuleGroup).filter(isGeneratedRuleGroup);
+        return groups
+          .map((entry) => coerceRuleGroup(entry, rulerNamespace))
+          .filter(isGeneratedRuleGroup);
       }
     }
     // Cortex namespace-keyed envelope: take every array-valued field and
@@ -527,14 +530,14 @@ function coerceRuleGroupList(doc: unknown): GeneratedRuleGroup[] {
       if (Array.isArray(value)) {
         sawArrayField = true;
         for (const entry of value) {
-          const group = coerceRuleGroup(entry);
+          const group = coerceRuleGroup(entry, rulerNamespace);
           if (group) fromEnvelope.push(group);
         }
       }
     }
     if (sawArrayField) return fromEnvelope;
     // Single-group shape: `{ name, interval, rules }`.
-    const single = coerceRuleGroup(doc);
+    const single = coerceRuleGroup(doc, rulerNamespace);
     return single ? [single] : [];
   }
   return [];

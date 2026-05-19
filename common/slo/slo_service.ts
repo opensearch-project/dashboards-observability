@@ -724,6 +724,7 @@ export class SloService {
           fingerprint: fp,
           sli: representative.sli,
           objectiveLatencyThreshold: representative.latencyThreshold,
+          workspaceId: deploy.workspaceId,
         });
         if (recGroup) {
           try {
@@ -1013,6 +1014,7 @@ export class SloService {
           fingerprint: fp,
           sli: representative.sli,
           objectiveLatencyThreshold: representative.latencyThreshold,
+          workspaceId: deploy.workspaceId,
         });
         if (recGroup) {
           try {
@@ -1390,6 +1392,7 @@ export class SloService {
         fingerprint: fp,
         sli: representative.sli,
         objectiveLatencyThreshold: representative.latencyThreshold,
+        workspaceId: ctx.deploy.workspaceId,
       });
       if (recGroup) {
         await ctx.deploy.ruler.upsertRuleGroup(

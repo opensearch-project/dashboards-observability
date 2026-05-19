@@ -32,7 +32,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { GeneratedRuleGroup, SloCreateInput } from '../../../../../common/slo/slo_types';
-import { SLO_RULER_NAMESPACE } from '../../../../../common/slo/slo_promql_generator';
 import type { SloApiClient } from './slo_api_client';
 import { findSectionForKey, scrollToErrorKey } from './wizard_sections';
 
@@ -237,7 +236,7 @@ function renderBody(
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued" data-test-subj="slosWizardPreviewNamespace">
-            {I18N.namespacePrefix} <code>{SLO_RULER_NAMESPACE}</code>
+            {I18N.namespacePrefix} <code>{group.rulerNamespace}</code>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

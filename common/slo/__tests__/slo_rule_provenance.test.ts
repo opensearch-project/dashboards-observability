@@ -64,6 +64,7 @@ function ruleStub(name: string, type: 'alerting' | 'recording' = 'alerting'): Ge
 function groupStub(name: string, rules: GeneratedRule[]): GeneratedRuleGroup {
   return {
     groupName: name,
+    rulerNamespace: 'slo-generated-default',
     interval: 60,
     rules,
     yaml: '',

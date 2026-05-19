@@ -58,6 +58,7 @@ function promDatasource(overrides: Partial<Datasource> = {}): Datasource {
 function sampleGroup(): GeneratedRuleGroup {
   return {
     groupName: 'slo:checkout_api_availability_a1b2c3d4',
+    rulerNamespace: 'slo-generated-ws1',
     interval: 60,
     rules: [
       {
@@ -109,6 +110,7 @@ describe('ruleGroupToYaml', () => {
   it('omits labels/annotations when empty so the YAML is tidy', () => {
     const group: GeneratedRuleGroup = {
       groupName: 'g1',
+      rulerNamespace: 'slo-generated-default',
       interval: 60,
       rules: [
         {

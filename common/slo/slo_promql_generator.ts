@@ -48,6 +48,22 @@ const DEFAULT_INTERVAL_SECONDS = 60;
 export const SLO_RULER_NAMESPACE = 'slo-generated';
 
 /**
+ * Compose the workspace-suffixed ruler namespace from a workspace id.
+ *
+ * Generator-local helper used to stamp `GeneratedRuleGroup.rulerNamespace`
+ * for previews / fallbacks where the doc's `status.provisioning.rulerNamespace`
+ * isn't set. The single source of truth for live writes is
+ * `sloRulerNamespaceFor` in `slo_service.ts`, which validates the workspace
+ * id against the path-safe regex; this helper deliberately stays
+ * dependency-free to keep `slo_promql_generator.ts` free of cycles. The
+ * service-layer boundary is the only place untrusted workspace ids enter
+ * the system, so the validation lives there, not here.
+ */
+function composeRulerNamespace(workspaceId: string): string {
+  return `${SLO_RULER_NAMESPACE}-${workspaceId}`;
+}
+
+/**
  * Default MWMBR tiers per the Google SRE Workbook Ch. 5 Table 5-8 and Sloth's
  * google-30d.yaml. Consumers can override per-SLO.
  */
@@ -646,11 +662,17 @@ export function generateSloRuleGroup(
 ): GeneratedRuleGroup {
   const { spec, id } = doc;
   const workspaceId = opts.workspaceId ?? 'default';
+  // Prefer the persisted namespace from the doc — it was stamped at create
+  // time by `sloRulerNamespaceFor` and stays durable across deployments. Only
+  // fall through for previews where `status.provisioning` may be a stub.
+  const rulerNamespace =
+    doc.status?.provisioning?.rulerNamespace ?? composeRulerNamespace(workspaceId);
   const rules: GeneratedRule[] = [];
 
   if (spec.sli.type !== 'single') {
     return {
       groupName: `slo:${id}`,
+      rulerNamespace,
       interval: DEFAULT_INTERVAL_SECONDS,
       rules: [],
       yaml: `# composite SLOs are reserved for P2\n`,
@@ -679,6 +701,7 @@ export function generateSloRuleGroup(
 
   return {
     groupName,
+    rulerNamespace,
     interval: DEFAULT_INTERVAL_SECONDS,
     rules,
     yaml: rulesToYaml(groupName, DEFAULT_INTERVAL_SECONDS, rules),
@@ -757,6 +780,13 @@ export function generateRecordingGroupForFingerprint(input: {
   sli: SingleSli;
   /** Required only when the SLI is a `latency_threshold` type. */
   objectiveLatencyThreshold?: number;
+  /**
+   * Workspace this recording group is being built for. Used to stamp
+   * `GeneratedRuleGroup.rulerNamespace` so the wizard preview / reconciler
+   * can render the namespace without re-deriving it. Defaults to `'default'`
+   * for callers that haven't been threaded yet (preview path falls back).
+   */
+  workspaceId?: string;
 }): GeneratedRuleGroup | null {
   const def = input.sli.definition;
   if (def.backend !== 'prometheus') return null;
@@ -788,6 +818,7 @@ export function generateRecordingGroupForFingerprint(input: {
   const groupName = dedupRecordingGroupName(fingerprint);
   return {
     groupName,
+    rulerNamespace: composeRulerNamespace(input.workspaceId ?? 'default'),
     interval: DEFAULT_INTERVAL_SECONDS,
     rules,
     yaml: rulesToYaml(groupName, DEFAULT_INTERVAL_SECONDS, rules),
@@ -811,6 +842,11 @@ export function generateAlertGroupFor(
 ): GeneratedRuleGroup {
   const { spec, id } = doc;
   const workspaceId = opts.workspaceId ?? 'default';
+  // Same prefer-doc-then-fall-through pattern as `generateSloRuleGroup`. The
+  // alert group lives in the same namespace as the recording groups it
+  // references, since the AMP invariant is "one workspace = one namespace".
+  const rulerNamespace =
+    doc.status?.provisioning?.rulerNamespace ?? composeRulerNamespace(workspaceId);
   const groupSlug = slugifySloObjective(spec.name, 'group');
   const firstSuffix = ruleSuffix(workspaceId, id, 'group');
   const groupName = `slo:alerts:${groupSlug}_${firstSuffix}`;
@@ -819,6 +855,7 @@ export function generateAlertGroupFor(
   if (spec.sli.type !== 'single') {
     return {
       groupName,
+      rulerNamespace,
       interval: DEFAULT_INTERVAL_SECONDS,
       rules: [],
       yaml: rulesToYaml(groupName, DEFAULT_INTERVAL_SECONDS, rules),
@@ -847,6 +884,7 @@ export function generateAlertGroupFor(
 
   return {
     groupName,
+    rulerNamespace,
     interval: DEFAULT_INTERVAL_SECONDS,
     rules,
     yaml: rulesToYaml(groupName, DEFAULT_INTERVAL_SECONDS, rules),
