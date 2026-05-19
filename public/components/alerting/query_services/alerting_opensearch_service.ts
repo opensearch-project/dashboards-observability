@@ -106,10 +106,57 @@ export class AlertingOpenSearchService {
     )) as { destinations: DestinationSummary[] };
     return resp.destinations || [];
   }
+
+  /**
+   * Resolve concrete indices for a wildcard pattern via `_cat/indices`.
+   * Empty `search` returns the cluster-wide list. Pass the search string
+   * through the `query` option so OSD's HTTP client URL-encodes it as a
+   * proper query param instead of folding `?` into the path segment.
+   */
+  async listIndices(dsId: string, search: string): Promise<IndexSummary[]> {
+    const resp = (await this.requireHttp().get(
+      `/api/alerting/opensearch/${encodeURIComponent(dsId)}/indices`,
+      search ? { query: { search } } : undefined
+    )) as { indices: IndexSummary[] };
+    return resp.indices || [];
+  }
+
+  /** Resolve aliases for a wildcard pattern via `_cat/aliases`. */
+  async listAliases(dsId: string, search: string): Promise<AliasSummary[]> {
+    const resp = (await this.requireHttp().get(
+      `/api/alerting/opensearch/${encodeURIComponent(dsId)}/aliases`,
+      search ? { query: { search } } : undefined
+    )) as { aliases: AliasSummary[] };
+    return resp.aliases || [];
+  }
+
+  /**
+   * Fetch fields-by-type from `_mapping` for one or more indices/aliases.
+   * Returns `{ date: ['@timestamp', ...], keyword: [...], ... }`.
+   */
+  async getFieldsByType(dsId: string, indices: string[]): Promise<Record<string, string[]>> {
+    if (indices.length === 0) return {};
+    const resp = (await this.requireHttp().post(
+      `/api/alerting/opensearch/${encodeURIComponent(dsId)}/mappings`,
+      { body: JSON.stringify({ indices }) }
+    )) as { fieldsByType: Record<string, string[]> };
+    return resp.fieldsByType || {};
+  }
 }
 
 export interface DestinationSummary {
   id: string;
   name: string;
   type: string;
+}
+
+export interface IndexSummary {
+  index: string;
+  status?: string;
+  health?: string;
+}
+
+export interface AliasSummary {
+  alias: string;
+  index: string;
 }

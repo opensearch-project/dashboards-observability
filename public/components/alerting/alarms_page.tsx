@@ -42,7 +42,7 @@ import { EditMonitor } from './create_monitor/edit_monitor';
 import { AlertsDashboard } from './alerts_dashboard';
 import { AlertDetailFlyout } from './alert_detail_flyout';
 import { NotificationRoutingPanel } from './notification_routing_panel';
-import { CreateMetricsMonitor, MetricsMonitorFormState } from './create_metrics_monitor';
+import type { MonitorBackendType } from './monitor_form_components';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { useAlerts } from './hooks/use_alerts';
 import { useMonitorMutations } from './hooks/use_monitor_mutations';
@@ -53,10 +53,7 @@ import {
   ALERT_MANAGER_MAX_DATASOURCES_SETTING,
   ALERT_MANAGER_SELECTED_DS_STORAGE_KEY,
 } from '../../../common/constants/alerting_settings';
-import {
-  transformMetricsFormToPayload,
-  transformPplFormToPayload,
-} from '../../../common/services/alerting/form_transforms';
+import { transformPplFormToPayload } from '../../../common/services/alerting/form_transforms';
 import { parseDateMathMs } from '../../../common/services/alerting/time_range';
 import './alerting.scss';
 import type { OpenSearchFormState } from './create_monitor/create_monitor_types';
@@ -364,7 +361,11 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
 
   const [deletedRuleIds, setDeletedRuleIds] = useState<Set<string>>(new Set());
   const [showCreateMonitor, setShowCreateMonitor] = useState(false);
-  const [createMonitorType, setCreateMonitorType] = useState<'metrics' | null>(null);
+  // The popover's "Logs" entry maps to an OpenSearch monitor; "Metrics" toasts
+  // "coming soon" until PR 2 lights up the Prom create flyout. When the user
+  // picks Logs the flyout is forced to the OS variant via this override even
+  // if the parent-page selected datasource happens to be Prometheus.
+  const [createBackendType, setCreateBackendType] = useState<MonitorBackendType | null>(null);
   const [editTarget, setEditTarget] = useState<{ dsId: string; ruleId: string } | null>(null);
   const [selectedAlert, setSelectedAlert] = useState<UnifiedAlertSummary | null>(null);
   const { setToast: addToast } = useToast();
@@ -754,31 +755,16 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         raw: {} as any,
       };
     } else {
-      // OpenSearch monitor
-      const isPPL = formState.monitorType === 'ppl_monitor';
-      const indices = formState.indices
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean);
-      const monitorType =
-        formState.monitorType === 'ppl_monitor'
-          ? ('ppl' as const)
-          : formState.monitorType === 'bucket_level_monitor'
-          ? ('infrastructure' as const)
-          : formState.monitorType === 'doc_level_monitor'
-          ? ('log' as const)
-          : ('metric' as const);
+      // OpenSearch PPL monitor — DSL/cluster-metrics aren't authored in this UI.
+      const indices = formState.indices.map((s) => s.trim()).filter(Boolean);
 
-      // PPL monitors have Prometheus-like labels/annotations
       const labelsObj: Record<string, string> = {};
       const annotationsObj: Record<string, string> = {};
-      if (isPPL) {
-        for (const l of formState.labels) {
-          if (l.key && l.value) labelsObj[l.key] = l.value;
-        }
-        for (const a of formState.annotations) {
-          if (a.key && a.value) annotationsObj[a.key] = a.value;
-        }
+      for (const l of formState.labels) {
+        if (l.key && l.value) labelsObj[l.key] = l.value;
+      }
+      for (const a of formState.annotations) {
+        if (a.key && a.value) annotationsObj[a.key] = a.value;
       }
       if (indices.length > 0) labelsObj.indices = indices.join(', ');
       // monitorType already lives on UnifiedRule as a top-level field — emitting
@@ -792,32 +778,26 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         enabled: formState.enabled,
         severity: formState.severity,
         query: formState.query,
-        condition: isPPL
-          ? `${formState.threshold.operator} ${formState.threshold.value}${formState.threshold.unit}`
-          : formState.triggerCondition,
+        condition: `${formState.threshold.operator} ${formState.threshold.value}${formState.threshold.unit}`,
         labels: labelsObj,
         annotations: annotationsObj,
-        monitorType,
+        monitorType: 'ppl',
         status: formState.enabled ? 'active' : 'disabled',
         healthStatus: 'healthy',
         createdBy: 'current-user',
         createdAt: now,
         lastModified: now,
-        notificationDestinations: formState.actionName ? [formState.actionName] : [],
-        description: isPPL
-          ? `OpenSearch PPL monitor${indices.length > 0 ? ` on ${indices.join(', ')}` : ''}`
-          : `OpenSearch ${formState.monitorType} on ${indices.join(', ')}`,
-        evaluationInterval: isPPL
-          ? formState.evaluationInterval
-          : `${formState.schedule.interval} ${formState.schedule.unit.toLowerCase()}`,
-        pendingPeriod: isPPL ? formState.pendingPeriod : '5 minutes',
-        threshold: isPPL
-          ? {
-              operator: formState.threshold.operator,
-              value: formState.threshold.value,
-              unit: formState.threshold.unit,
-            }
-          : undefined,
+        notificationDestinations: [],
+        description: `OpenSearch PPL monitor${
+          indices.length > 0 ? ` on ${indices.join(', ')}` : ''
+        }`,
+        evaluationInterval: formState.evaluationInterval,
+        pendingPeriod: formState.pendingPeriod,
+        threshold: {
+          operator: formState.threshold.operator,
+          value: formState.threshold.value,
+          unit: formState.threshold.unit,
+        },
         alertHistory: [],
         conditionPreviewData: [],
         notificationRouting: [],
@@ -842,12 +822,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     return dsId;
   };
 
-  // For PPL monitors, transform the form state into the canonical alerting
-  // wire payload before sending to the backend. Other OS monitor types and
-  // Prometheus rules pass the raw form state through (PR 2 will add Prom
-  // transforms; the legacy DSL OS monitor types are unused on this path).
+  // OS create flyout only authors PPL monitors; Prom rules pass raw form state
+  // through (PR 2 will add the Prom transform).
   const buildPayload = (form: MonitorFormState): Record<string, unknown> => {
-    if (form.datasourceType === 'opensearch' && form.monitorType === 'ppl_monitor') {
+    if (form.datasourceType === 'opensearch') {
       const os = form as OpenSearchFormState;
       return transformPplFormToPayload({
         name: os.name,
@@ -872,6 +850,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         })
       );
       setShowCreateMonitor(false);
+      setCreateBackendType(null);
       // Refetch rules so the new monitor (with backend-assigned id /
       // last_update_time) shows up in the list. Optimistic insert is kept
       // for the UI to feel instant; the refetch reconciles.
@@ -941,75 +920,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       setRulesTotal((prev) => prev + succeededRules.length);
     }
     // Don't close flyout — AI wizard shows its own summary step and "Done" button
-  };
-
-  const handleCreateMetricsMonitor = async (metricsForm: MetricsMonitorFormState) => {
-    const now = new Date().toISOString();
-    const severityLabel = metricsForm.labels.find((l) => l.key === 'severity');
-    const rawSeverity = severityLabel?.value || 'medium';
-    const condition = `${metricsForm.operator} ${metricsForm.thresholdValue}`;
-    const labelsObj: Record<string, string> = {};
-    for (const l of metricsForm.labels) {
-      if (l.key && l.value) labelsObj[l.key] = l.value;
-    }
-    const annotationsObj: Record<string, string> = {};
-    for (const a of metricsForm.annotations) {
-      if (a.key && a.value) annotationsObj[a.key] = a.value;
-    }
-    const newRule: UnifiedRule = {
-      id: `new-metrics-${Date.now()}`,
-      datasourceId: metricsForm.datasourceId || selectedDsIds[0],
-      datasourceType: 'prometheus',
-      name: metricsForm.monitorName,
-      enabled: true,
-      severity: (['critical', 'high', 'medium', 'low', 'info'].includes(rawSeverity)
-        ? rawSeverity
-        : 'medium') as 'critical' | 'high' | 'medium' | 'low' | 'info',
-      query: metricsForm.query,
-      condition,
-      labels: labelsObj,
-      annotations: annotationsObj,
-      monitorType: 'metric',
-      status: 'active',
-      healthStatus: 'healthy',
-      createdBy: 'current-user',
-      createdAt: now,
-      lastModified: now,
-      notificationDestinations: metricsForm.actions.map((a) => a.name),
-      description: metricsForm.description,
-      evaluationInterval: metricsForm.evalInterval,
-      pendingPeriod: metricsForm.pendingPeriod,
-      firingPeriod: metricsForm.firingPeriod,
-      threshold: { operator: metricsForm.operator, value: metricsForm.thresholdValue, unit: '' },
-      alertHistory: [],
-      conditionPreviewData: [],
-      notificationRouting: [],
-      suppressionRules: [],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- raw field is empty for new monitors
-      raw: {} as any,
-    };
-    try {
-      await mutations.createMonitor(
-        transformMetricsFormToPayload(metricsForm),
-        metricsForm.datasourceId
-      );
-      addToast(
-        i18n.translate('observability.alerting.alarmsPage.toast.metricsMonitorCreated', {
-          defaultMessage: 'Metrics monitor created successfully',
-        })
-      );
-      setRules((prev) => [newRule, ...prev]);
-      setRulesTotal((prev) => prev + 1);
-      setCreateMonitorType(null);
-    } catch (e: unknown) {
-      addToast(
-        i18n.translate('observability.alerting.alarmsPage.toast.createMetricsMonitorFailed', {
-          defaultMessage: 'Failed to create metrics monitor',
-        }),
-        'danger',
-        e instanceof Error ? e.message : String(e)
-      );
-    }
   };
 
   // ---- Render ----
@@ -1085,11 +995,16 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           onEdit={(monitor) => setEditTarget({ dsId: monitor.datasourceId, ruleId: monitor.id })}
           onCreateMonitor={(type) => {
             if (type === 'logs') {
-              setCreateMonitorType(null);
+              setCreateBackendType('opensearch');
               setShowCreateMonitor(true);
             } else if (type === 'metrics') {
-              setShowCreateMonitor(false);
-              setCreateMonitorType('metrics');
+              addToast(
+                i18n.translate('observability.alerting.alarmsPage.toast.metricsMonitorComingSoon', {
+                  defaultMessage:
+                    'Metrics monitor creation will be available in a follow-up release.',
+                }),
+                'primary'
+              );
             }
           }}
           selectedDsIds={selectedDsIds}
@@ -1192,9 +1107,13 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         <CreateMonitor
           onSave={handleCreateMonitor}
           onBatchSave={handleBatchCreateMonitors}
-          onCancel={() => setShowCreateMonitor(false)}
+          onCancel={() => {
+            setShowCreateMonitor(false);
+            setCreateBackendType(null);
+          }}
           datasources={datasources}
           selectedDsIds={selectedDsIds}
+          initialBackendType={createBackendType ?? undefined}
         />
       )}
       {editTarget && (
@@ -1205,12 +1124,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           onSave={handleEditMonitor}
           datasources={datasources}
           selectedDsIds={selectedDsIds}
-        />
-      )}
-      {createMonitorType === 'metrics' && (
-        <CreateMetricsMonitor
-          onCancel={() => setCreateMonitorType(null)}
-          onSave={handleCreateMetricsMonitor}
         />
       )}
       {selectedAlert && (

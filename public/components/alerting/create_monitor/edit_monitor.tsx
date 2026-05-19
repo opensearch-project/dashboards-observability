@@ -42,12 +42,30 @@ export interface EditMonitorProps {
 
 /**
  * Apply the form-seed produced by `unifiedRuleToOsForm` on top of
- * `DEFAULT_OS_FORM` so unspecified DSL/cluster-metrics fields keep their
- * defaults (the form-state type requires them).
+ * `DEFAULT_OS_FORM`. The form authors PPL only — DSL / cluster-metrics
+ * monitors are read-only in the Rules table, so seeding to the PPL shape
+ * is sufficient.
  *
  * Triggers and actions come back from the seeder without React keys; we
  * patch in fresh `id`s here so row keying stays stable on re-render.
  */
+// Best-effort extraction of the index list from a PPL `source = ...` clause.
+// Examples handled:
+//   `source = logs-* | where ...`           -> ['logs-*']
+//   `source = logs-*, metrics-*`            -> ['logs-*', 'metrics-*']
+//   `source=prod:traces-* |\n  stats ...`   -> ['prod:traces-*']
+// Anything that doesn't match returns []. The picker tolerates missing
+// indices — the user can re-add them inline.
+const SOURCE_CLAUSE_RE = /^\s*source\s*=\s*([^|]+?)(?:\s*\||\s*$)/i;
+function parseIndicesFromPpl(query: string): string[] {
+  const m = query.match(SOURCE_CLAUSE_RE);
+  if (!m) return [];
+  return m[1]
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 function buildEditFormFromRule(rule: UnifiedRule, datasources: Datasource[]): OpenSearchFormState {
   const seed = unifiedRuleToOsForm({
     name: rule.name,
@@ -69,6 +87,15 @@ function buildEditFormFromRule(rule: UnifiedRule, datasources: Datasource[]): Op
   const datasourceId =
     datasources.find((d) => d.id === rule.datasourceId)?.id ?? rule.datasourceId ?? '';
 
+  // Prefer the parsed `source = ...` clause; fall back to the `indices`
+  // label we stamped in `formStateToRule` for round-trip stability.
+  const parsedIndices = parseIndicesFromPpl(seed.query);
+  const labelIndices = (rule.labels?.indices ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const indices = parsedIndices.length > 0 ? parsedIndices : labelIndices;
+
   return {
     ...DEFAULT_OS_FORM,
     name: seed.name,
@@ -76,6 +103,8 @@ function buildEditFormFromRule(rule: UnifiedRule, datasources: Datasource[]): Op
     query: seed.query,
     schedule: seed.schedule,
     pplTriggers,
+    indices,
+    timeField: '',
     monitorType: 'ppl_monitor',
     severity: rule.severity,
     datasourceId,

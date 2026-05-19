@@ -41,6 +41,50 @@ jest.mock('../create_monitor/sections/destination_picker', () => ({
   ),
 }));
 
+jest.mock('../create_monitor/sections/index_picker', () => ({
+  IndexPicker: ({
+    selected,
+    onChange,
+  }: {
+    selected: string[];
+    onChange: (next: string[]) => void;
+  }) => (
+    <input
+      data-test-subj="index-picker-mock"
+      value={selected.join(',')}
+      onChange={(e) =>
+        onChange(
+          e.target.value
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+        )
+      }
+    />
+  ),
+}));
+
+jest.mock('../create_monitor/sections/time_field_selector', () => ({
+  TimeFieldSelector: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+    <input
+      data-test-subj="time-field-selector-mock"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  ),
+}));
+
+jest.mock('../create_monitor/sections/ppl_query_editor', () => ({
+  PplQueryEditor: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+    <textarea
+      data-test-subj="ppl-query-editor-mock"
+      aria-label="PPL query"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  ),
+}));
+
 import { CreateMonitor } from '../create_monitor';
 import type { Datasource } from '../../../../common/types/alerting';
 import type { OpenSearchFormState } from '../create_monitor/create_monitor_types';
@@ -132,6 +176,10 @@ describe('CreateMonitor — PPL form', () => {
     fireEvent.change(screen.getByLabelText('Monitor name'), {
       target: { value: 'monitor-1' },
     });
+    // The default form starts with an empty query — the user types one.
+    fireEvent.change(screen.getByLabelText('PPL query'), {
+      target: { value: 'source = logs-* | stats count() as cnt' },
+    });
 
     const saveBtn = screen.getAllByText(/^Save Monitor$/i)[0];
     fireEvent.click(saveBtn);
@@ -141,6 +189,7 @@ describe('CreateMonitor — PPL form', () => {
     expect(arg.datasourceType).toBe('opensearch');
     expect(arg.monitorType).toBe('ppl_monitor');
     expect(arg.name).toBe('monitor-1');
+    expect(arg.query).toContain('source = logs-*');
     expect(arg.pplTriggers).toHaveLength(1);
     expect(arg.pplTriggers[0].type).toBe('number_of_results');
   });

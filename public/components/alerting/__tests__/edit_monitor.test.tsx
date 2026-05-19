@@ -14,12 +14,20 @@ jest.mock('../hooks/use_rule_detail', () => ({
 }));
 
 jest.mock('../create_monitor', () => ({
-  CreateMonitor: (props: Record<string, unknown>) => (
-    <div data-test-subj="create-monitor-mock" data-mode={String(props.mode)}>
-      mode={String(props.mode)}; name=
-      {(props.initialForm as { name?: string })?.name ?? ''}
-    </div>
-  ),
+  CreateMonitor: (props: Record<string, unknown>) => {
+    const init = props.initialForm as
+      | { name?: string; indices?: string[]; timeField?: string }
+      | undefined;
+    return (
+      <div
+        data-test-subj="create-monitor-mock"
+        data-mode={String(props.mode)}
+        data-indices={(init?.indices ?? []).join(',')}
+      >
+        mode={String(props.mode)}; name={init?.name ?? ''}
+      </div>
+    );
+  },
   MonitorFormState: undefined,
 }));
 
@@ -123,6 +131,9 @@ describe('EditMonitor', () => {
     const mock = screen.getByTestId('create-monitor-mock');
     expect(mock.getAttribute('data-mode')).toBe('edit');
     expect(mock.textContent).toContain('name=monitor-1');
+    // The seeder parses `source = logs-*` out of the PPL query so the picker
+    // round-trips the index list on edit.
+    expect(mock.getAttribute('data-indices')).toBe('logs-*');
   });
 
   it('refuses to edit Prometheus rules', () => {

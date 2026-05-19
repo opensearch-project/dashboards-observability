@@ -372,6 +372,84 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
   }
 
   // =========================================================================
+  // Index discovery — feeds the Create/Edit flyout's "Define index" picker
+  // and the timestamp-field selector. Wraps `_cat/indices`, `_cat/aliases`,
+  // and `_mapping`. Mirrors alerting-dashboards-plugin's OpensearchService
+  // shapes so existing UX patterns transfer cleanly.
+  // =========================================================================
+
+  /** `GET /_cat/indices/{search}?format=json&h=health,index,status` */
+  async getIndices(
+    client: AlertingOSClient,
+    search: string
+  ): Promise<Array<{ index: string; status?: string; health?: string }>> {
+    const safe = encodeURIComponent(search.trim() || '*');
+    try {
+      const resp = await this.req<Array<{ index: string; status?: string; health?: string }>>(
+        client,
+        'GET',
+        `/_cat/indices/${safe}?format=json&h=health,index,status`
+      );
+      return resp.body ?? [];
+    } catch (err) {
+      // Treat index-not-found as empty so partial wildcards return cleanly.
+      if (this.is404(err)) return [];
+      throw err;
+    }
+  }
+
+  /** `GET /_cat/aliases/{search}?format=json&h=alias,index` */
+  async getAliases(
+    client: AlertingOSClient,
+    search: string
+  ): Promise<Array<{ alias: string; index: string }>> {
+    const safe = encodeURIComponent(search.trim() || '*');
+    try {
+      const resp = await this.req<Array<{ alias: string; index: string }>>(
+        client,
+        'GET',
+        `/_cat/aliases/${safe}?format=json&h=alias,index`
+      );
+      return resp.body ?? [];
+    } catch (err) {
+      if (this.is404(err)) return [];
+      throw err;
+    }
+  }
+
+  /**
+   * `GET /{indices}/_mapping` — flattens nested properties into dotted paths
+   * grouped by data type. Returns `{ date: ['@timestamp', ...], keyword: [...], ... }`
+   * matching alerting-dashboards-plugin's `getPathsPerDataType` shape.
+   */
+  async getFieldsByType(
+    client: AlertingOSClient,
+    indices: string[]
+  ): Promise<Record<string, string[]>> {
+    if (indices.length === 0) return {};
+    const path = `/${indices.map(encodeURIComponent).join(',')}/_mapping`;
+    let raw: Record<string, { mappings?: { properties?: Record<string, unknown> } }> = {};
+    try {
+      const resp = await this.req<typeof raw>(client, 'GET', path);
+      raw = resp.body ?? {};
+    } catch (err) {
+      if (this.is404(err)) return {};
+      throw err;
+    }
+    const acc: Record<string, Set<string>> = {};
+    for (const idxBlob of Object.values(raw)) {
+      const props = idxBlob?.mappings?.properties;
+      if (!props) continue;
+      collectFieldPaths(props, '', acc);
+    }
+    const out: Record<string, string[]> = {};
+    for (const [type, set] of Object.entries(acc)) {
+      out[type] = Array.from(set).sort();
+    }
+    return out;
+  }
+
+  // =========================================================================
   // Helpers
   // =========================================================================
 
@@ -507,5 +585,54 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
 
   private is404(err: unknown): boolean {
     return isStatusCode(err, 404);
+  }
+}
+
+// ============================================================================
+// Mapping flattener
+// ============================================================================
+
+interface MappingNode {
+  type?: string;
+  enabled?: boolean;
+  index?: boolean;
+  properties?: Record<string, unknown>;
+  fields?: Record<string, { type?: string }>;
+}
+
+/**
+ * Walk a `_mapping` properties object and collect dotted field paths grouped
+ * by leaf type. Mirrors alerting-dashboards-plugin's traversal:
+ *   - skips `enabled: false` and `index: false`
+ *   - skips `nested` types (UI doesn't surface them)
+ *   - emits `<path>.keyword` when a multifield keyword is declared
+ */
+function collectFieldPaths(
+  properties: Record<string, unknown>,
+  parentPath: string,
+  acc: Record<string, Set<string>>
+): void {
+  for (const [field, raw] of Object.entries(properties)) {
+    const node = raw as MappingNode;
+    if (!node || typeof node !== 'object') continue;
+    if (node.enabled === false || node.index === false || node.type === 'nested') continue;
+
+    const path = parentPath ? `${parentPath}.${field}` : field;
+
+    if (node.properties) {
+      collectFieldPaths(node.properties, path, acc);
+      continue;
+    }
+
+    const type = node.type;
+    if (type) {
+      if (!acc[type]) acc[type] = new Set();
+      acc[type].add(path);
+    }
+
+    if (node.fields?.keyword) {
+      if (!acc.keyword) acc.keyword = new Set();
+      acc.keyword.add(`${path}.keyword`);
+    }
   }
 }

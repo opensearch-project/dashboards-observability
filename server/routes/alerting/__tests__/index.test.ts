@@ -14,8 +14,10 @@
  *       POST   /api/alerting/opensearch/{dsId}/monitors/{monitorId}/acknowledge
  *       PUT    /api/alerting/opensearch/{dsId}/monitors/{monitorId}
  *       DELETE /api/alerting/opensearch/{dsId}/monitors/{monitorId}
- *   - 9 read routes + 1 destinations read route + 1 Alertmanager admin route
- *     registered inline (11 GETs)
+ *   - 9 read routes + 1 destinations read route + 2 index-discovery read
+ *     routes (indices, aliases) + 1 Alertmanager admin route registered
+ *     inline (13 GETs)
+ *   - 1 mappings POST route (POSTs index list in body to avoid URL limits)
  *   - 4 Prometheus metadata routes inside `if (enableMetadataRoutes)` (4 GETs)
  *
  * Datasource CRUD routes were deleted in Phase 3 — these tests also assert
@@ -53,7 +55,7 @@ describe('registerAlertingRoutes', () => {
     mockRouter.delete.mockClear();
   });
 
-  it('registers all runtime routes when metadata routes are enabled (15 GET + 4 mutations = 19)', () => {
+  it('registers all runtime routes when metadata routes are enabled (17 GET + 5 POST + 1 PUT + 1 DELETE = 24)', () => {
     registerAlertingRoutes(mockRouter as never, {
       osBackend: mockOsBackend,
       promBackend: mockPromBackend,
@@ -66,12 +68,13 @@ describe('registerAlertingRoutes', () => {
       mockRouter.post.mock.calls.length +
       mockRouter.put.mock.calls.length +
       mockRouter.delete.mock.calls.length;
-    expect(total).toBe(19);
-    // 11 inline GETs (incl. destinations) + 4 conditional metadata GETs = 15 GETs total
-    expect(mockRouter.get.mock.calls.length).toBe(15);
+    // 13 inline GETs (incl. destinations + indices + aliases) + 4 metadata GETs = 17 GETs
+    // 2 monitor POSTs + 1 PUT + 1 DELETE + 1 mappings POST = 5 non-GET routes
+    expect(total).toBe(22);
+    expect(mockRouter.get.mock.calls.length).toBe(17);
   });
 
-  it('skips the 4 metadata GET routes when enableMetadataRoutes is false (11 GET + 4 mutations = 15)', () => {
+  it('skips the 4 metadata GET routes when enableMetadataRoutes is false (13 GET + 5 mutations = 18)', () => {
     registerAlertingRoutes(mockRouter as never, {
       osBackend: mockOsBackend,
       promBackend: mockPromBackend,
@@ -84,8 +87,8 @@ describe('registerAlertingRoutes', () => {
       mockRouter.post.mock.calls.length +
       mockRouter.put.mock.calls.length +
       mockRouter.delete.mock.calls.length;
-    expect(total).toBe(15);
-    expect(mockRouter.get.mock.calls.length).toBe(11);
+    expect(total).toBe(18);
+    expect(mockRouter.get.mock.calls.length).toBe(13);
   });
 
   it('registers the destinations read route', () => {
@@ -98,6 +101,21 @@ describe('registerAlertingRoutes', () => {
     });
     const getPaths = mockRouter.get.mock.calls.map(([c]: [RouteConfig]) => c.path);
     expect(getPaths).toContain('/api/alerting/opensearch/{dsId}/destinations');
+  });
+
+  it('registers the index-discovery routes', () => {
+    registerAlertingRoutes(mockRouter as never, {
+      osBackend: mockOsBackend,
+      promBackend: mockPromBackend,
+      mutationSvc: mockMutationSvc,
+      logger: mockLogger,
+      enableMetadataRoutes: false,
+    });
+    const getPaths = mockRouter.get.mock.calls.map(([c]: [RouteConfig]) => c.path);
+    const postPaths = mockRouter.post.mock.calls.map(([c]: [RouteConfig]) => c.path);
+    expect(getPaths).toContain('/api/alerting/opensearch/{dsId}/indices');
+    expect(getPaths).toContain('/api/alerting/opensearch/{dsId}/aliases');
+    expect(postPaths).toContain('/api/alerting/opensearch/{dsId}/mappings');
   });
 
   it('registers the 4 surviving mutation paths', () => {

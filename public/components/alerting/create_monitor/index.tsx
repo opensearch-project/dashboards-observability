@@ -88,6 +88,13 @@ export interface CreateMonitorProps {
    * which converts a `UnifiedRule` via `unifiedRuleToOsForm`.
    */
   initialForm?: MonitorFormState;
+  /**
+   * Override the initial backend type. When provided, takes precedence over
+   * the type derived from the parent-page datasource selection. Used by the
+   * Rules tab "Logs" / "Metrics" popover entries to force the matching form
+   * variant even if the user's selected datasource is the other type.
+   */
+  initialBackendType?: MonitorBackendType;
 }
 
 type CreationMode = 'manual' | 'ai';
@@ -101,24 +108,35 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
   context,
   mode = 'create',
   initialForm,
+  initialBackendType,
 }) => {
   const isEdit = mode === 'edit';
 
-  // Determine initial datasource from parent selection
+  // Determine initial datasource from parent selection. When the caller
+  // pinned a backend type (e.g. "Logs" popover -> opensearch), only adopt
+  // the parent's datasource if it matches that type — otherwise fall back
+  // to picking the first datasource of the requested type.
   const initialDs = useMemo(() => {
     if (selectedDsIds && selectedDsIds.length > 0) {
       const ds = datasources.find((d) => d.id === selectedDsIds[0]);
-      if (ds) return ds;
+      if (ds && (!initialBackendType || ds.type === initialBackendType)) return ds;
+    }
+    if (initialBackendType) {
+      const fallback = datasources.find((d) => d.type === initialBackendType);
+      if (fallback) return fallback;
     }
     return null;
-  }, [datasources, selectedDsIds]);
+  }, [datasources, selectedDsIds, initialBackendType]);
 
-  // In edit mode the backend type is pinned by the existing monitor; in
-  // create mode it follows the parent-page datasource selection.
+  // In edit mode the backend type is pinned by the existing monitor; an
+  // explicit `initialBackendType` (popover choice) wins next; otherwise it
+  // follows the parent-page datasource selection.
   const initialType: MonitorBackendType = initialForm
     ? initialForm.datasourceType === 'prometheus'
       ? 'prometheus'
       : 'opensearch'
+    : initialBackendType
+    ? initialBackendType
     : initialDs?.type === 'opensearch'
     ? 'opensearch'
     : 'prometheus';
@@ -190,11 +208,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
     activeForm.datasourceId !== '' &&
     (backendType === 'prometheus'
       ? promForm.query.trim() !== '' && !hasQueryErrors
-      : osForm.monitorType === 'ppl_monitor'
-      ? osForm.query.trim() !== ''
-      : osForm.monitorType === 'cluster_metrics_monitor'
-      ? osForm.clusterMetricsApiType.trim() !== ''
-      : osForm.indices.trim() !== '' && osForm.triggerCondition.trim() !== '');
+      : osForm.query.trim() !== '');
 
   const handleSave = () => {
     setHasSubmitted(true);
@@ -207,40 +221,13 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
       setValidationErrors({});
       onSave(promForm);
     } else {
-      let errors: Record<string, string> = {};
-      if (osForm.monitorType === 'ppl_monitor') {
-        const result = validatePplForm({
-          name: osForm.name,
-          query: osForm.query,
-          pplTriggers: osForm.pplTriggers,
-        });
-        errors = result.errors;
-      } else if (osForm.monitorType === 'cluster_metrics_monitor') {
-        if (!osForm.clusterMetricsApiType.trim())
-          errors.clusterMetricsApiType = i18n.translate(
-            'observability.alerting.createMonitor.apiTypeRequired',
-            {
-              defaultMessage: 'API type is required',
-            }
-          );
-      } else {
-        if (!osForm.indices.trim())
-          errors.indices = i18n.translate(
-            'observability.alerting.createMonitor.indexPatternRequired',
-            {
-              defaultMessage: 'At least one index pattern is required',
-            }
-          );
-        if (!osForm.triggerCondition.trim())
-          errors.triggerCondition = i18n.translate(
-            'observability.alerting.createMonitor.triggerConditionRequired',
-            {
-              defaultMessage: 'Trigger condition is required',
-            }
-          );
-      }
-      if (Object.keys(errors).length > 0) {
-        setValidationErrors(errors);
+      const result = validatePplForm({
+        name: osForm.name,
+        query: osForm.query,
+        pplTriggers: osForm.pplTriggers,
+      });
+      if (!result.valid) {
+        setValidationErrors(result.errors);
         return;
       }
       setValidationErrors({});
@@ -316,9 +303,11 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
 
       <EuiFlyoutBody>
         {/* Target Datasource — locked in edit mode (the existing monitor
-            already binds a datasource; changing it would require re-creating). */}
+            already binds a datasource; changing it would require re-creating).
+            Scoped to the active backend so a Logs flyout never shows
+            Prometheus datasources and vice versa. */}
         <DatasourceTargetSelector
-          datasources={datasources}
+          datasources={datasources.filter((d) => d.type === backendType)}
           selectedId={activeForm.datasourceId}
           onChange={isEdit ? () => undefined : handleDatasourceChange}
         />

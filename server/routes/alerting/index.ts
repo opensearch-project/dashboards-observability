@@ -418,6 +418,95 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     }
   );
 
+  // Index discovery — proxies `_cat/indices`, `_cat/aliases`, and `_mapping`
+  // for the Create/Edit flyout's "Define index" picker and timestamp-field
+  // selector. Read-only and per-request scoped via `getAlertingClient`. The
+  // `search` query string accepts wildcards (e.g. `logs-*`); empty defaults
+  // to `*`.
+  router.get(
+    {
+      path: '/api/alerting/opensearch/{dsId}/indices',
+      validate: {
+        params: schema.object({ dsId: alertingIdSchema }),
+        query: schema.object({
+          search: schema.maybe(schema.string({ maxLength: 256 })),
+        }),
+      },
+    },
+    async (ctx, req, res) => {
+      try {
+        const client = await getAlertingClient(ctx as AlertingHandlerContext, req.params.dsId);
+        const indices = await osBackend.getIndices(client, req.query.search ?? '');
+        return res.ok({ body: { indices } });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        logger.warn(`getIndices failed for ds ${req.params.dsId}: ${message}`);
+        return res.customError({
+          statusCode: 502,
+          body: toErrorBody({ message: `Failed to list indices: ${message}` }),
+        });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: '/api/alerting/opensearch/{dsId}/aliases',
+      validate: {
+        params: schema.object({ dsId: alertingIdSchema }),
+        query: schema.object({
+          search: schema.maybe(schema.string({ maxLength: 256 })),
+        }),
+      },
+    },
+    async (ctx, req, res) => {
+      try {
+        const client = await getAlertingClient(ctx as AlertingHandlerContext, req.params.dsId);
+        const aliases = await osBackend.getAliases(client, req.query.search ?? '');
+        return res.ok({ body: { aliases } });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        logger.warn(`getAliases failed for ds ${req.params.dsId}: ${message}`);
+        return res.customError({
+          statusCode: 502,
+          body: toErrorBody({ message: `Failed to list aliases: ${message}` }),
+        });
+      }
+    }
+  );
+
+  // POST so we can pass an arbitrarily-long index list in the body without
+  // bumping into URL-length limits. Returns `{ fieldsByType: { date: [...],
+  // keyword: [...], ... } }`.
+  router.post(
+    {
+      path: '/api/alerting/opensearch/{dsId}/mappings',
+      validate: {
+        params: schema.object({ dsId: alertingIdSchema }),
+        body: schema.object({
+          indices: schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {
+            minSize: 1,
+            maxSize: 50,
+          }),
+        }),
+      },
+    },
+    async (ctx, req, res) => {
+      try {
+        const client = await getAlertingClient(ctx as AlertingHandlerContext, req.params.dsId);
+        const fieldsByType = await osBackend.getFieldsByType(client, req.body.indices);
+        return res.ok({ body: { fieldsByType } });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        logger.warn(`getFieldsByType failed for ds ${req.params.dsId}: ${message}`);
+        return res.customError({
+          statusCode: 502,
+          body: toErrorBody({ message: `Failed to fetch mappings: ${message}` }),
+        });
+      }
+    }
+  );
+
   // POST /monitors/{monitorId}/acknowledge moved to `./mutations/`.
 
   // Prometheus routes
