@@ -356,27 +356,66 @@ function firstHeaderValue(value: string | string[] | undefined): string | undefi
 const ACTING_USER_MAX_LENGTH = 255;
 
 /**
+ * Reason a candidate username was rejected. Surfaced to the caller so it
+ * can emit a structured debug log per rejection — preserves forensic
+ * signal when a malicious proxy injects values that get sanitized away
+ * (otherwise the chain falls through to `'unknown'` with no trail).
+ */
+type SanitizeRejectReason = 'too-long' | 'control-chars';
+
+/**
  * Sanitize a candidate username before it lands in the audit fields.
  *
- * - Returns `null` when the value contains C0 control chars or DEL — those
- *   are the realistic injection vectors (log injection, CRLF response
- *   splitting). We reject rather than strip so the caller's fallback chain
- *   keeps working.
- * - Returns `null` when the length exceeds `ACTING_USER_MAX_LENGTH` rather
- *   than silently truncating, since truncation could collapse two distinct
+ * Returns the trimmed value when accepted, or a rejection reason. The
+ * caller maps reasons to debug-level logs.
+ *
+ * - `too-long`: length exceeds `ACTING_USER_MAX_LENGTH`. We reject rather
+ *   than truncate, since truncation could collapse two distinct
  *   identities to the same prefix.
- * - Returns the trimmed value otherwise. Realistic usernames span email
- *   (`alice@example.com`), LDAP DN (`CN=Alice,OU=Users,DC=example,DC=com`),
- *   and Unicode forms; we deliberately don't impose a character allow-list
- *   beyond the control-char ban so deployments that use any of those don't
- *   silently fall through to `'unknown'`.
+ * - `control-chars`: contains C0 (0x00–0x1f), DEL (0x7f), or C1
+ *   (0x80–0x9f) control characters. These are the realistic injection
+ *   vectors (log injection, CRLF response splitting, NEL line breaks).
+ *   We reject rather than strip so the caller's fallback chain keeps
+ *   working when a misconfigured proxy injects junk.
+ *
+ * Realistic usernames span email (`alice@example.com`), LDAP DN
+ * (`CN=Alice,OU=Users,DC=example,DC=com`), and Unicode forms; we
+ * deliberately don't impose a character allow-list beyond the
+ * control-char ban so deployments that use any of those don't silently
+ * fall through to `'unknown'`.
  */
-function sanitizeActingUser(raw: string): string | null {
+function sanitizeActingUser(
+  raw: string
+): { ok: true; value: string } | { ok: false; reason: SanitizeRejectReason } {
   const trimmed = raw.trim();
-  if (trimmed.length === 0) return null;
-  if (trimmed.length > ACTING_USER_MAX_LENGTH) return null;
-  if (/[\x00-\x1f\x7f]/.test(trimmed)) return null;
-  return trimmed;
+  // Empty / whitespace-only is treated as "no signal" rather than a
+  // rejection — every fallback in the chain calls this with a possibly-
+  // empty header value, and we don't want to flood the debug log with
+  // "header was empty" lines.
+  if (trimmed.length === 0) return { ok: false, reason: 'control-chars' };
+  if (trimmed.length > ACTING_USER_MAX_LENGTH) return { ok: false, reason: 'too-long' };
+  if (/[\x00-\x1f\x7f-\x9f]/.test(trimmed)) return { ok: false, reason: 'control-chars' };
+  return { ok: true, value: trimmed };
+}
+
+/**
+ * Try one step of the resolveActingUser fallback chain. Logs at debug
+ * level when sanitization rejects a non-empty candidate so operators can
+ * correlate "everything's `unknown`" with the proxy header that
+ * caused it.
+ */
+function tryResolveActingUser(
+  raw: string | undefined,
+  source: string,
+  logger?: Pick<Logger, 'debug'>
+): string | null {
+  if (raw === undefined) return null;
+  // Empty/whitespace doesn't get a log line — see sanitizeActingUser.
+  if (raw.trim().length === 0) return null;
+  const result = sanitizeActingUser(raw);
+  if (result.ok) return result.value;
+  logger?.debug(`resolveActingUser: ${source} rejected (${result.reason}); falling through`);
+  return null;
 }
 
 export function resolveActingUser(
@@ -391,27 +430,24 @@ export function resolveActingUser(
   // security session, and we'd rather audit-attribute those writes to the
   // proxied user than fall through to a header read or to 'unknown'.
   //
-  // Each candidate runs through `sanitizeActingUser`, which rejects
-  // control chars + caps length. A rejected candidate falls through to the
-  // next step rather than aborting — a misconfigured proxy that injects a
-  // junk header shouldn't poison legitimate auth credentials.
+  // Each candidate runs through `sanitizeActingUser` (length cap + C0/C1
+  // control-char ban). A rejected candidate falls through to the next
+  // step rather than aborting — a misconfigured proxy that injects a
+  // junk header shouldn't poison legitimate auth credentials. Rejections
+  // are logged at debug level so a forensics pass can find them.
   const credentials = req.auth?.credentials;
   const username = credentials && (credentials as { username?: unknown }).username;
   if (typeof username === 'string') {
-    const cleaned = sanitizeActingUser(username);
+    const cleaned = tryResolveActingUser(username, 'auth.credentials.username', logger);
     if (cleaned) return cleaned;
   }
   const headers = req.headers ?? {};
   const proxyUser = firstHeaderValue(headers['x-proxy-user']);
-  if (proxyUser) {
-    const cleaned = sanitizeActingUser(proxyUser);
-    if (cleaned) return cleaned;
-  }
+  const cleanedProxy = tryResolveActingUser(proxyUser, 'x-proxy-user', logger);
+  if (cleanedProxy) return cleanedProxy;
   const forwardedUser = firstHeaderValue(headers['x-forwarded-user']);
-  if (forwardedUser) {
-    const cleaned = sanitizeActingUser(forwardedUser);
-    if (cleaned) return cleaned;
-  }
+  const cleanedForwarded = tryResolveActingUser(forwardedUser, 'x-forwarded-user', logger);
+  if (cleanedForwarded) return cleanedForwarded;
   // Debug-level (not warn): legitimately anonymous-write deployments
   // exist (security plugin disabled, no proxy auth) and would otherwise
   // pollute warn-level logs on every create/update. The signal is here

@@ -178,6 +178,61 @@ describe('resolveActingUser', () => {
     ).toBe('alice');
     expect(debug).not.toHaveBeenCalled();
   });
+
+  it('rejects usernames containing C1 control chars (NEL, escape sequences)', () => {
+    // 0x85 is NEL — a line-break treated by some pipelines as equivalent
+    // to LF. 0x9b is CSI. Both belong to the C1 control block (0x80-0x9f).
+    expect(
+      resolveActingUser({
+        auth: { isAuthenticated: true, credentials: { username: 'alice\x85INJECT' } },
+      })
+    ).toBe('unknown');
+    expect(
+      resolveActingUser({
+        auth: { isAuthenticated: true, credentials: { username: 'bob\x9bsomething' } },
+      })
+    ).toBe('unknown');
+  });
+
+  it('emits a debug log per sanitize-rejection so forensics can correlate the bad header', () => {
+    const debug = jest.fn();
+    // Inject CRLF in the credential, then a too-long proxy header, then
+    // a clean forwarded-user. Expect: two debug lines (one per rejected
+    // step), no fallthrough log (the third step succeeds).
+    expect(
+      resolveActingUser(
+        {
+          auth: { isAuthenticated: true, credentials: { username: 'alice\r\nINJECT' } },
+          headers: {
+            'x-proxy-user': 'a'.repeat(256),
+            'x-forwarded-user': 'good-user',
+          },
+        },
+        { debug }
+      )
+    ).toBe('good-user');
+    expect(debug).toHaveBeenCalledTimes(2);
+    expect(debug.mock.calls[0][0]).toMatch(
+      /auth\.credentials\.username rejected \(control-chars\)/
+    );
+    expect(debug.mock.calls[1][0]).toMatch(/x-proxy-user rejected \(too-long\)/);
+  });
+
+  it('does NOT log when a candidate is just empty/whitespace (would be log spam)', () => {
+    const debug = jest.fn();
+    expect(
+      resolveActingUser(
+        {
+          auth: { isAuthenticated: true, credentials: { username: '' } },
+          headers: { 'x-proxy-user': '   ', 'x-forwarded-user': 'final' },
+        },
+        { debug }
+      )
+    ).toBe('final');
+    // No reject lines for the empty/whitespace candidates; no fallthrough
+    // line (succeeded on the third step).
+    expect(debug).not.toHaveBeenCalled();
+  });
 });
 
 describe('resolveWorkspaceId', () => {

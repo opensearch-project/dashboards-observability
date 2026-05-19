@@ -14,7 +14,7 @@
  * rule-health probe in PR 4.
  */
 
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiButton,
@@ -338,6 +338,12 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [rulerError, setRulerError] = useState<SloRulerErrorEnvelope | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // Synchronous mirror of `submitting`. Two concurrent onSubmit invocations
+  // (programmatic burst, Enter-on-form race) could both pass an
+  // `if (submitting) return` check before React's async state update lands.
+  // The ref flips synchronously inside onSubmit, so the second invocation
+  // sees the in-progress state immediately.
+  const submittingRef = useRef(false);
   const [createdSuccessfully, setCreatedSuccessfully] = useState(false);
 
   // Initialize from URL template on mount.
@@ -409,61 +415,70 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
   );
 
   const onSubmit = useCallback(async () => {
-    // Guard against rapid double-submit (programmatic clicks, keyboard
-    // accelerator while the EuiButton is still in `isLoading` state). The
-    // button itself disables on `isLoading`, but a stray Enter on a focused
-    // form control would otherwise re-enter onSubmit and fire a second
-    // POST while the first is in flight.
-    if (!template || submitting) return;
-    dispatch({ kind: 'markSubmitAttempted' });
-    const input = buildCreateInput(state, template);
-    const { errors: specErrors } = validateSloSpec(input.spec);
-    if (Object.keys(specErrors).length > 0) {
-      setErrors(specErrors);
-      // Auto-scroll to the first failing field so users focused on a
-      // lower section see why their submit didn't land. The toast is a
-      // backup signal; the inline anchor is the actionable one.
-      const firstErrorKey = Object.keys(specErrors)[0];
-      if (firstErrorKey) scrollToErrorKey(firstErrorKey);
-      notifications.toasts.addWarning({
-        title: I18N.toastFixValidationTitle,
-        text: I18N.toastFixValidationText,
-      });
-      return;
-    }
-    setErrors({});
-    setRulerError(null);
-    setSubmitting(true);
+    // Guard against rapid double-submit (programmatic burst, Enter on a
+    // focused form control while the EuiButton's `isLoading` state hasn't
+    // landed yet, Cypress chained .click().click()). React state updates
+    // are async, so two consecutive invocations could both pass a
+    // `submitting === false` check before the first setSubmitting renders.
+    // `submittingRef` flips synchronously, before validation or any
+    // dispatch, so the second invocation sees in-progress immediately.
+    if (!template || submittingRef.current) return;
+    submittingRef.current = true;
     try {
-      const doc = await apiClient.create(input);
-      // Allow the post-create redirect to land without the unsaved-changes
-      // prompt firing on the navigation away.
-      setCreatedSuccessfully(true);
-      notifications.toasts.addSuccess({
-        title: I18N.toastCreatedTitle,
-        text: I18N.toastCreatedText(doc.spec.name),
-      });
-      history.push(`/slos/${encodeURIComponent(doc.id)}`);
-    } catch (e) {
-      // Ruler dual-write envelope: surface the raw upstream message inline.
-      // `rawBody` is the user-actionable diagnostic (e.g. "invalid PromQL:
-      // parse error at char 42"); a generic toast would hide it.
-      const envelope = extractRulerErrorEnvelope(e);
-      if (envelope) {
-        setRulerError(envelope);
-      } else {
-        // Use the OSD http-error envelope's `body.message` (richer) when
-        // available; falling back to `err.message` collapses route-layer
-        // 400s like "Datasource X is not registered" to "Bad Request".
-        notifications.toasts.addDanger({
-          title: I18N.toastCreateFailedTitle,
-          text: extractServerMessage(e),
+      dispatch({ kind: 'markSubmitAttempted' });
+      const input = buildCreateInput(state, template);
+      const { errors: specErrors } = validateSloSpec(input.spec);
+      if (Object.keys(specErrors).length > 0) {
+        setErrors(specErrors);
+        // Auto-scroll to the first failing field so users focused on a
+        // lower section see why their submit didn't land. The toast is a
+        // backup signal; the inline anchor is the actionable one.
+        const firstErrorKey = Object.keys(specErrors)[0];
+        if (firstErrorKey) scrollToErrorKey(firstErrorKey);
+        notifications.toasts.addWarning({
+          title: I18N.toastFixValidationTitle,
+          text: I18N.toastFixValidationText,
         });
+        return;
+      }
+      setErrors({});
+      setRulerError(null);
+      setSubmitting(true);
+      try {
+        const doc = await apiClient.create(input);
+        // Allow the post-create redirect to land without the unsaved-changes
+        // prompt firing on the navigation away.
+        setCreatedSuccessfully(true);
+        notifications.toasts.addSuccess({
+          title: I18N.toastCreatedTitle,
+          text: I18N.toastCreatedText(doc.spec.name),
+        });
+        history.push(`/slos/${encodeURIComponent(doc.id)}`);
+      } catch (e) {
+        // Ruler dual-write envelope: surface the raw upstream message inline.
+        // `rawBody` is the user-actionable diagnostic (e.g. "invalid PromQL:
+        // parse error at char 42"); a generic toast would hide it.
+        const envelope = extractRulerErrorEnvelope(e);
+        if (envelope) {
+          setRulerError(envelope);
+        } else {
+          // Use the OSD http-error envelope's `body.message` (richer) when
+          // available; falling back to `err.message` collapses route-layer
+          // 400s like "Datasource X is not registered" to "Bad Request".
+          notifications.toasts.addDanger({
+            title: I18N.toastCreateFailedTitle,
+            text: extractServerMessage(e),
+          });
+        }
+      } finally {
+        setSubmitting(false);
       }
     } finally {
-      setSubmitting(false);
+      // Always release the ref — including on the validation-error early
+      // return — so the user can fix and re-submit without a page reload.
+      submittingRef.current = false;
     }
-  }, [apiClient, history, notifications, state, submitting, template]);
+  }, [apiClient, history, notifications, state, template]);
 
   if (!template) {
     return (
