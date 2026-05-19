@@ -16,9 +16,34 @@
  * custom configuration).
  */
 
+import { i18n } from '@osd/i18n';
 import type { BurnRateConfig } from '../../../../../common/slo/slo_types';
 
 export type BurnRatePresetId = 'balanced' | 'page-heavy' | 'ticket-heavy';
+
+const I18N = {
+  pageHeavyLabel: i18n.translate('observability.slo.burnRatePresets.pageHeavyLabel', {
+    defaultMessage: 'Page-heavy',
+  }),
+  pageHeavySummary: i18n.translate('observability.slo.burnRatePresets.pageHeavySummary', {
+    defaultMessage:
+      '3 tiers, all critical. Adds an immediate 2m/30m guardrail; drops the slow warning tiers.',
+  }),
+  balancedLabel: i18n.translate('observability.slo.burnRatePresets.balancedLabel', {
+    defaultMessage: 'Balanced',
+  }),
+  balancedSummary: i18n.translate('observability.slo.burnRatePresets.balancedSummary', {
+    defaultMessage:
+      '4 tiers (2 critical + 2 warning). Matches the Google SRE Workbook table — the wizard default.',
+  }),
+  ticketHeavyLabel: i18n.translate('observability.slo.burnRatePresets.ticketHeavyLabel', {
+    defaultMessage: 'Ticket-heavy',
+  }),
+  ticketHeavySummary: i18n.translate('observability.slo.burnRatePresets.ticketHeavySummary', {
+    defaultMessage:
+      '3 warning tiers, no immediate paging. Adds a slow 1d/7d ticket tier for chronic drift.',
+  }),
+};
 
 export interface BurnRatePreset {
   id: BurnRatePresetId;
@@ -119,23 +144,20 @@ const ticketHeavyTiers: BurnRateConfig[] = [
 export const BURN_RATE_PRESETS: readonly BurnRatePreset[] = [
   {
     id: 'page-heavy',
-    label: 'Page-heavy',
-    summary:
-      '3 tiers, all critical. Adds an immediate 2m/30m guardrail; drops the slow warning tiers.',
+    label: I18N.pageHeavyLabel,
+    summary: I18N.pageHeavySummary,
     tiers: pageHeavyTiers,
   },
   {
     id: 'balanced',
-    label: 'Balanced',
-    summary:
-      '4 tiers (2 critical + 2 warning). Matches the Google SRE Workbook table — the wizard default.',
+    label: I18N.balancedLabel,
+    summary: I18N.balancedSummary,
     tiers: balancedTiers,
   },
   {
     id: 'ticket-heavy',
-    label: 'Ticket-heavy',
-    summary:
-      '3 warning tiers, no immediate paging. Adds a slow 1d/7d ticket tier for chronic drift.',
+    label: I18N.ticketHeavyLabel,
+    summary: I18N.ticketHeavySummary,
     tiers: ticketHeavyTiers,
   },
 ];

@@ -21,6 +21,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { i18n } from '@osd/i18n';
 import {
   EuiAccordion,
   EuiButton,
@@ -49,10 +50,127 @@ export interface AdvancedSectionProps {
   dispatch: React.Dispatch<Action>;
 }
 
+const I18N = {
+  severityCritical: i18n.translate('observability.slo.advanced.severityCritical', {
+    defaultMessage: 'critical',
+  }),
+  severityWarning: i18n.translate('observability.slo.advanced.severityWarning', {
+    defaultMessage: 'warning',
+  }),
+  severityInfo: i18n.translate('observability.slo.advanced.severityInfo', {
+    defaultMessage: 'info',
+  }),
+  accordionLabel: i18n.translate('observability.slo.advanced.accordionLabel', {
+    defaultMessage: 'Advanced — burn rates, budget warnings, supplemental alarms',
+  }),
+  burnRatesHeading: i18n.translate('observability.slo.advanced.burnRatesHeading', {
+    defaultMessage: 'Burn-rate tiers (MWMBR)',
+  }),
+  burnRatesDescription: i18n.translate('observability.slo.advanced.burnRatesDescription', {
+    defaultMessage:
+      'Pick a preset, or edit the table below for a custom configuration. Presets overwrite the existing tiers.',
+  }),
+  customConfiguration: i18n.translate('observability.slo.advanced.customConfiguration', {
+    defaultMessage: 'Custom configuration',
+  }),
+  shortWindow: i18n.translate('observability.slo.advanced.shortWindow', {
+    defaultMessage: 'Short window',
+  }),
+  longWindow: i18n.translate('observability.slo.advanced.longWindow', {
+    defaultMessage: 'Long window',
+  }),
+  multiplier: i18n.translate('observability.slo.advanced.multiplier', {
+    defaultMessage: 'Multiplier',
+  }),
+  forLabel: i18n.translate('observability.slo.advanced.forLabel', {
+    defaultMessage: 'For',
+  }),
+  severity: i18n.translate('observability.slo.advanced.severity', {
+    defaultMessage: 'Severity',
+  }),
+  alarm: i18n.translate('observability.slo.advanced.alarm', {
+    defaultMessage: 'Alarm',
+  }),
+  removeBurnRateAria: (index: number) =>
+    i18n.translate('observability.slo.advanced.removeBurnRateAria', {
+      defaultMessage: 'Remove burn-rate tier {index}',
+      values: { index },
+    }),
+  addBurnRate: i18n.translate('observability.slo.advanced.addBurnRate', {
+    defaultMessage: 'Add burn-rate tier',
+  }),
+  budgetWarningsHeading: i18n.translate('observability.slo.advanced.budgetWarningsHeading', {
+    defaultMessage: 'Budget-warning thresholds',
+  }),
+  budgetWarningsDescriptionPrefix: i18n.translate(
+    'observability.slo.advanced.budgetWarningsDescriptionPrefix',
+    {
+      defaultMessage: 'Fires when the remaining error budget drops below',
+    }
+  ),
+  budgetWarningsDescriptionSuffix: i18n.translate(
+    'observability.slo.advanced.budgetWarningsDescriptionSuffix',
+    {
+      defaultMessage: '. Values are fractions of the total budget.',
+    }
+  ),
+  thresholdLabel: i18n.translate('observability.slo.advanced.thresholdLabel', {
+    defaultMessage: 'Threshold (fraction remaining)',
+  }),
+  removeBudgetWarningAria: (index: number) =>
+    i18n.translate('observability.slo.advanced.removeBudgetWarningAria', {
+      defaultMessage: 'Remove budget warning {index}',
+      values: { index },
+    }),
+  addBudgetWarning: i18n.translate('observability.slo.advanced.addBudgetWarning', {
+    defaultMessage: 'Add budget-warning threshold',
+  }),
+  alarmsHeading: i18n.translate('observability.slo.advanced.alarmsHeading', {
+    defaultMessage: 'Supplemental alarms',
+  }),
+  noDataAlert: i18n.translate('observability.slo.advanced.noDataAlert', {
+    defaultMessage: 'No-data alert',
+  }),
+  alarmSliHealthLabel: i18n.translate('observability.slo.advanced.alarmSliHealthLabel', {
+    defaultMessage: 'SLI health',
+  }),
+  alarmSliHealthCaption: i18n.translate('observability.slo.advanced.alarmSliHealthCaption', {
+    defaultMessage: 'Overlaps the page-quick tier; default OFF to avoid duplicate pages.',
+  }),
+  alarmAttainmentBreachLabel: i18n.translate(
+    'observability.slo.advanced.alarmAttainmentBreachLabel',
+    {
+      defaultMessage: 'Attainment breach',
+    }
+  ),
+  alarmAttainmentBreachCaption: i18n.translate(
+    'observability.slo.advanced.alarmAttainmentBreachCaption',
+    {
+      defaultMessage:
+        'Fires when attainment falls below the objective target for the whole window.',
+    }
+  ),
+  alarmBudgetWarningLabel: i18n.translate('observability.slo.advanced.alarmBudgetWarningLabel', {
+    defaultMessage: 'Budget-warning alerts',
+  }),
+  alarmBudgetWarningCaption: i18n.translate(
+    'observability.slo.advanced.alarmBudgetWarningCaption',
+    {
+      defaultMessage: 'Emits one alert per (objective × threshold) defined above.',
+    }
+  ),
+  alarmResolvedLabel: i18n.translate('observability.slo.advanced.alarmResolvedLabel', {
+    defaultMessage: 'Resolved notifications',
+  }),
+  alarmResolvedCaption: i18n.translate('observability.slo.advanced.alarmResolvedCaption', {
+    defaultMessage: 'Recovery notification when any firing SLO alert clears.',
+  }),
+};
+
 const SEVERITY_OPTIONS = [
-  { value: 'critical', text: 'critical' },
-  { value: 'warning', text: 'warning' },
-  { value: 'info', text: 'info' },
+  { value: 'critical', text: I18N.severityCritical },
+  { value: 'warning', text: I18N.severityWarning },
+  { value: 'info', text: I18N.severityInfo },
 ];
 
 export const AdvancedSection: React.FC<AdvancedSectionProps> = ({
@@ -65,7 +183,7 @@ export const AdvancedSection: React.FC<AdvancedSectionProps> = ({
   <EuiPanel>
     <EuiAccordion
       id="slosWizardAdvanced"
-      buttonContent="Advanced — burn rates, budget warnings, supplemental alarms"
+      buttonContent={I18N.accordionLabel}
       paddingSize="s"
       data-test-subj="slosWizardAdvancedToggle"
     >
@@ -92,11 +210,10 @@ const BurnRatesEditor: React.FC<{
   return (
     <div data-test-subj="slosWizardBurnrates">
       <EuiText size="s">
-        <h5>Burn-rate tiers (MWMBR)</h5>
+        <h5>{I18N.burnRatesHeading}</h5>
       </EuiText>
       <EuiText size="xs" color="subdued">
-        Pick a preset, or edit the table below for a custom configuration. Presets overwrite the
-        existing tiers.
+        {I18N.burnRatesDescription}
       </EuiText>
       <EuiSpacer size="xs" />
       <EuiFlexGroup gutterSize="s" responsive={false} wrap>
@@ -117,7 +234,7 @@ const BurnRatesEditor: React.FC<{
         {activePresetId === null && (
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued" data-test-subj="slosBurnRatePresetCustom">
-              Custom configuration
+              {I18N.customConfiguration}
             </EuiText>
           </EuiFlexItem>
         )}
@@ -136,7 +253,7 @@ const BurnRatesEditor: React.FC<{
           >
             <EuiFlexItem>
               <EuiFormRow
-                label="Short window"
+                label={I18N.shortWindow}
                 isInvalid={!!errors[`${prefix}.shortWindow`]}
                 error={errors[`${prefix}.shortWindow`]}
               >
@@ -157,7 +274,7 @@ const BurnRatesEditor: React.FC<{
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFormRow
-                label="Long window"
+                label={I18N.longWindow}
                 isInvalid={!!errors[`${prefix}.longWindow`]}
                 error={errors[`${prefix}.longWindow`]}
               >
@@ -178,7 +295,7 @@ const BurnRatesEditor: React.FC<{
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFormRow
-                label="Multiplier"
+                label={I18N.multiplier}
                 isInvalid={!!errors[`${prefix}.burnRateMultiplier`]}
                 error={errors[`${prefix}.burnRateMultiplier`]}
               >
@@ -200,7 +317,7 @@ const BurnRatesEditor: React.FC<{
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFormRow label="For">
+              <EuiFormRow label={I18N.forLabel}>
                 <EuiFieldText
                   value={tier.forDuration}
                   onChange={(e) =>
@@ -217,7 +334,7 @@ const BurnRatesEditor: React.FC<{
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFormRow label="Severity">
+              <EuiFormRow label={I18N.severity}>
                 <EuiSelect
                   value={tier.severity}
                   onChange={(e) =>
@@ -237,7 +354,7 @@ const BurnRatesEditor: React.FC<{
             <EuiFlexItem grow={false}>
               <EuiCheckbox
                 id={`slosWizardBurnrateAlarm-${i}`}
-                label="Alarm"
+                label={I18N.alarm}
                 checked={tier.createAlarm}
                 onChange={(e) =>
                   dispatch({
@@ -255,7 +372,7 @@ const BurnRatesEditor: React.FC<{
                 color="danger"
                 onClick={() => dispatch({ kind: 'removeBurnRate', index: i })}
                 iconType="trash"
-                aria-label={`Remove burn-rate tier ${i}`}
+                aria-label={I18N.removeBurnRateAria(i)}
                 size="s"
                 data-test-subj={`slosWizardBurnrateRemove-${i}`}
               />
@@ -269,7 +386,7 @@ const BurnRatesEditor: React.FC<{
         onClick={() => dispatch({ kind: 'addBurnRate' })}
         data-test-subj="slosWizardBurnrateAdd"
       >
-        Add burn-rate tier
+        {I18N.addBurnRate}
       </EuiButtonEmpty>
     </div>
   );
@@ -284,11 +401,11 @@ const BudgetWarningsEditor: React.FC<{
 }> = ({ budgetWarnings, errors, dispatch }) => (
   <div data-test-subj="slosWizardBudgetWarnings">
     <EuiText size="s">
-      <h5>Budget-warning thresholds</h5>
+      <h5>{I18N.budgetWarningsHeading}</h5>
     </EuiText>
     <EuiText size="xs" color="subdued">
-      Fires when the remaining error budget drops below <code>threshold</code>. Values are fractions
-      of the total budget.
+      {I18N.budgetWarningsDescriptionPrefix} <code>threshold</code>
+      {I18N.budgetWarningsDescriptionSuffix}
     </EuiText>
     <EuiSpacer size="xs" />
     {budgetWarnings.map((bw, i) => {
@@ -303,7 +420,7 @@ const BudgetWarningsEditor: React.FC<{
         >
           <EuiFlexItem>
             <EuiFormRow
-              label="Threshold (fraction remaining)"
+              label={I18N.thresholdLabel}
               isInvalid={!!errors[`${prefix}.threshold`]}
               error={errors[`${prefix}.threshold`]}
             >
@@ -326,7 +443,7 @@ const BudgetWarningsEditor: React.FC<{
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow label="Severity">
+            <EuiFormRow label={I18N.severity}>
               <EuiSelect
                 value={bw.severity}
                 onChange={(e) =>
@@ -348,7 +465,7 @@ const BudgetWarningsEditor: React.FC<{
               color="danger"
               onClick={() => dispatch({ kind: 'removeBudgetWarning', index: i })}
               iconType="trash"
-              aria-label={`Remove budget warning ${i}`}
+              aria-label={I18N.removeBudgetWarningAria(i)}
               size="s"
               data-test-subj={`slosWizardBudgetWarningRemove-${i}`}
             />
@@ -362,7 +479,7 @@ const BudgetWarningsEditor: React.FC<{
       onClick={() => dispatch({ kind: 'addBudgetWarning' })}
       data-test-subj="slosWizardBudgetWarningAdd"
     >
-      Add budget-warning threshold
+      {I18N.addBudgetWarning}
     </EuiButtonEmpty>
   </div>
 );
@@ -378,23 +495,23 @@ interface AlarmToggle {
 const ALARM_TOGGLES: AlarmToggle[] = [
   {
     id: 'sliHealth',
-    label: 'SLI health',
-    caption: 'Overlaps the page-quick tier; default OFF to avoid duplicate pages.',
+    label: I18N.alarmSliHealthLabel,
+    caption: I18N.alarmSliHealthCaption,
   },
   {
     id: 'attainmentBreach',
-    label: 'Attainment breach',
-    caption: 'Fires when attainment falls below the objective target for the whole window.',
+    label: I18N.alarmAttainmentBreachLabel,
+    caption: I18N.alarmAttainmentBreachCaption,
   },
   {
     id: 'budgetWarning',
-    label: 'Budget-warning alerts',
-    caption: 'Emits one alert per (objective × threshold) defined above.',
+    label: I18N.alarmBudgetWarningLabel,
+    caption: I18N.alarmBudgetWarningCaption,
   },
   {
     id: 'resolved',
-    label: 'Resolved notifications',
-    caption: 'Recovery notification when any firing SLO alert clears.',
+    label: I18N.alarmResolvedLabel,
+    caption: I18N.alarmResolvedCaption,
   },
 ];
 
@@ -404,7 +521,7 @@ const AlarmsEditor: React.FC<{
 }> = ({ alarms, dispatch }) => (
   <div data-test-subj="slosWizardSupplementalAlarms">
     <EuiText size="s">
-      <h5>Supplemental alarms</h5>
+      <h5>{I18N.alarmsHeading}</h5>
     </EuiText>
     <EuiSpacer size="xs" />
     {ALARM_TOGGLES.map((a) => (
@@ -427,7 +544,7 @@ const AlarmsEditor: React.FC<{
       <EuiFlexItem grow={false}>
         <EuiCheckbox
           id="slosWizardAlarmNoData"
-          label="No-data alert"
+          label={I18N.noDataAlert}
           checked={alarms.noData.enabled}
           onChange={(e) =>
             dispatch({ kind: 'setAlarmToggle', alarm: 'noData', enabled: e.target.checked })
@@ -436,7 +553,7 @@ const AlarmsEditor: React.FC<{
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFormRow label="For">
+        <EuiFormRow label={I18N.forLabel}>
           <EuiFieldText
             value={alarms.noData.forDuration}
             onChange={(e) => dispatch({ kind: 'setNoDataDuration', forDuration: e.target.value })}

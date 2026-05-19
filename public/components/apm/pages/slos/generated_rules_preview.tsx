@@ -16,6 +16,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { i18n } from '@osd/i18n';
 import {
   EuiAccordion,
   EuiBadge,
@@ -34,6 +35,63 @@ import type { GeneratedRuleGroup, SloCreateInput } from '../../../../../common/s
 import { SLO_RULER_NAMESPACE } from '../../../../../common/slo/slo_promql_generator';
 import type { SloApiClient } from './slo_api_client';
 import { findSectionForKey, scrollToErrorKey } from './wizard_sections';
+
+const I18N = {
+  heading: i18n.translate('observability.slo.rulesPreview.heading', {
+    defaultMessage: 'Rule preview',
+  }),
+  description: i18n.translate('observability.slo.rulesPreview.description', {
+    defaultMessage: 'The Prometheus rule group that will be deployed when you click Create.',
+  }),
+  generating: i18n.translate('observability.slo.rulesPreview.generating', {
+    defaultMessage: 'Generating preview…',
+  }),
+  errorTitle: i18n.translate('observability.slo.rulesPreview.errorTitle', {
+    defaultMessage: 'Preview unavailable',
+  }),
+  errorFallback: i18n.translate('observability.slo.rulesPreview.errorFallback', {
+    defaultMessage: 'Unable to generate preview.',
+  }),
+  ruleSingular: i18n.translate('observability.slo.rulesPreview.ruleSingular', {
+    defaultMessage: 'rule',
+  }),
+  rulePlural: i18n.translate('observability.slo.rulesPreview.rulePlural', {
+    defaultMessage: 'rules',
+  }),
+  ruleCount: (count: number, ruleWord: string) =>
+    i18n.translate('observability.slo.rulesPreview.ruleCount', {
+      defaultMessage: '{count} {ruleWord}',
+      values: { count, ruleWord },
+    }),
+  namespacePrefix: i18n.translate('observability.slo.rulesPreview.namespacePrefix', {
+    defaultMessage: 'namespace',
+  }),
+  evalInterval: (interval: number) =>
+    i18n.translate('observability.slo.rulesPreview.evalInterval', {
+      defaultMessage: 'eval interval {interval}s',
+      values: { interval },
+    }),
+  yamlToggle: i18n.translate('observability.slo.rulesPreview.yamlToggle', {
+    defaultMessage: 'Show rule-group YAML',
+  }),
+  emptyTitle: i18n.translate('observability.slo.rulesPreview.emptyTitle', {
+    defaultMessage: 'Preview renders once the form is valid',
+  }),
+  missingHeader: i18n.translate('observability.slo.rulesPreview.missingHeader', {
+    defaultMessage: 'Missing or invalid fields:',
+  }),
+  pickTemplate: i18n.translate('observability.slo.rulesPreview.pickTemplate', {
+    defaultMessage: 'Pick a template to start building the rule set.',
+  }),
+  fillRequired: i18n.translate('observability.slo.rulesPreview.fillRequired', {
+    defaultMessage: 'Fill in the required fields to see the generated rules.',
+  }),
+  serverMessage: (serverMessage: string) =>
+    i18n.translate('observability.slo.rulesPreview.serverMessage', {
+      defaultMessage: 'Server message: {serverMessage}',
+      values: { serverMessage },
+    }),
+};
 
 export const PREVIEW_DEBOUNCE_MS = 500;
 
@@ -108,10 +166,10 @@ export const GeneratedRulesPreview: React.FC<GeneratedRulesPreviewProps> = ({
   return (
     <EuiPanel data-test-subj="slosWizardPreview">
       <EuiText size="m">
-        <h4>Rule preview</h4>
+        <h4>{I18N.heading}</h4>
       </EuiText>
       <EuiText size="s" color="subdued">
-        The Prometheus rule group that will be deployed when you click Create.
+        {I18N.description}
       </EuiText>
       <EuiSpacer size="s" />
       {renderBody(state, input, errors ?? {})}
@@ -135,7 +193,7 @@ function renderBody(
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued">
-            Generating preview…
+            {I18N.generating}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -150,13 +208,13 @@ function renderBody(
     }
     return (
       <EuiCallOut
-        title="Preview unavailable"
+        title={I18N.errorTitle}
         color="warning"
         iconType="alert"
         size="s"
         data-test-subj="slosWizardPreviewError"
       >
-        <EuiText size="s">{state.error ?? 'Unable to generate preview.'}</EuiText>
+        <EuiText size="s">{state.error ?? I18N.errorFallback}</EuiText>
       </EuiCallOut>
     );
   }
@@ -166,7 +224,10 @@ function renderBody(
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <EuiBadge color="primary" data-test-subj="slosWizardPreviewRuleCount">
-            {group.rules.length} {group.rules.length === 1 ? 'rule' : 'rules'}
+            {I18N.ruleCount(
+              group.rules.length,
+              group.rules.length === 1 ? I18N.ruleSingular : I18N.rulePlural
+            )}
           </EuiBadge>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -176,19 +237,19 @@ function renderBody(
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued" data-test-subj="slosWizardPreviewNamespace">
-            namespace <code>{SLO_RULER_NAMESPACE}</code>
+            {I18N.namespacePrefix} <code>{SLO_RULER_NAMESPACE}</code>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            eval interval {group.interval}s
+            {I18N.evalInterval(group.interval)}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiAccordion
         id="slosWizardPreviewYaml"
-        buttonContent="Show rule-group YAML"
+        buttonContent={I18N.yamlToggle}
         paddingSize="s"
         data-test-subj="slosWizardPreviewYamlToggle"
       >
@@ -221,7 +282,7 @@ function renderEmptyPrompt(
     missingEntries.length > 0 ? (
       <>
         <EuiText size="s" color="subdued">
-          Missing or invalid fields:
+          {I18N.missingHeader}
         </EuiText>
         <ul data-test-subj="slosWizardPreviewMissingList">
           {missingEntries.map(([key, msg]) => {
@@ -241,16 +302,14 @@ function renderEmptyPrompt(
       </>
     ) : (
       <EuiText size="s" color="subdued">
-        {input === null
-          ? 'Pick a template to start building the rule set.'
-          : 'Fill in the required fields to see the generated rules.'}
+        {input === null ? I18N.pickTemplate : I18N.fillRequired}
       </EuiText>
     );
   return (
     <EuiEmptyPrompt
       iconType="inspect"
       titleSize="xs"
-      title={<h4>Preview renders once the form is valid</h4>}
+      title={<h4>{I18N.emptyTitle}</h4>}
       body={
         <>
           {body}
@@ -258,7 +317,7 @@ function renderEmptyPrompt(
             <>
               <EuiSpacer size="s" />
               <EuiText size="xs" color="subdued" data-test-subj="slosWizardPreviewServerMsg">
-                Server message: {serverMessage}
+                {I18N.serverMessage(serverMessage)}
               </EuiText>
             </>
           )}

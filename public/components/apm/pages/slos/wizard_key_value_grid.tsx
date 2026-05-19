@@ -15,6 +15,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@osd/i18n';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -24,6 +25,26 @@ import {
   EuiFormRow,
   EuiText,
 } from '@elastic/eui';
+
+const I18N = {
+  defaultAddLabel: i18n.translate('observability.slo.kvGrid.defaultAddLabel', {
+    defaultMessage: 'Add row',
+  }),
+  defaultKeyPlaceholder: i18n.translate('observability.slo.kvGrid.defaultKeyPlaceholder', {
+    defaultMessage: 'key',
+  }),
+  defaultValuePlaceholder: i18n.translate('observability.slo.kvGrid.defaultValuePlaceholder', {
+    defaultMessage: 'value',
+  }),
+  empty: i18n.translate('observability.slo.kvGrid.empty', {
+    defaultMessage: 'No rows yet.',
+  }),
+  removeAria: (testSubjPrefix: string, index: number) =>
+    i18n.translate('observability.slo.kvGrid.removeAria', {
+      defaultMessage: 'Remove {testSubjPrefix} {index}',
+      values: { testSubjPrefix, index },
+    }),
+};
 
 export interface KeyValueEntry {
   key: string;
@@ -54,15 +75,15 @@ export const WizardKeyValueGrid: React.FC<KeyValueGridProps> = ({
   onRemove,
   rowErrors,
   testSubjPrefix,
-  addLabel = 'Add row',
-  keyPlaceholder = 'key',
-  valuePlaceholder = 'value',
+  addLabel = I18N.defaultAddLabel,
+  keyPlaceholder = I18N.defaultKeyPlaceholder,
+  valuePlaceholder = I18N.defaultValuePlaceholder,
 }) => {
   return (
     <div data-test-subj={`${testSubjPrefix}sGrid`}>
       {entries.length === 0 && (
         <EuiText size="xs" color="subdued" data-test-subj={`${testSubjPrefix}sEmpty`}>
-          No rows yet.
+          {I18N.empty}
         </EuiText>
       )}
       {entries.map((entry, i) => {
@@ -105,7 +126,7 @@ export const WizardKeyValueGrid: React.FC<KeyValueGridProps> = ({
                 <EuiButtonIcon
                   color="danger"
                   iconType="trash"
-                  aria-label={`Remove ${testSubjPrefix} ${i}`}
+                  aria-label={I18N.removeAria(testSubjPrefix, i)}
                   onClick={() => onRemove(i)}
                   data-test-subj={`${testSubjPrefix}Remove-${i}`}
                 />

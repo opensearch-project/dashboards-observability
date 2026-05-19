@@ -22,6 +22,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@osd/i18n';
 import {
   EuiButtonGroup,
   EuiCallOut,
@@ -39,9 +40,46 @@ export interface CustomPromqlEditorProps {
   dispatch: React.Dispatch<Action>;
 }
 
+const I18N = {
+  modeEvents: i18n.translate('observability.slo.customPromql.modeEvents', {
+    defaultMessage: 'Events (good + total)',
+  }),
+  modeRaw: i18n.translate('observability.slo.customPromql.modeRaw', {
+    defaultMessage: 'Raw error-ratio',
+  }),
+  heading: i18n.translate('observability.slo.customPromql.heading', {
+    defaultMessage: 'Custom PromQL',
+  }),
+  description: i18n.translate('observability.slo.customPromql.description', {
+    defaultMessage:
+      'Supply your own PromQL. Preview below shows the exact rule group that will be deployed.',
+  }),
+  modeLegend: i18n.translate('observability.slo.customPromql.modeLegend', {
+    defaultMessage: 'PromQL mode',
+  }),
+  goodLabel: i18n.translate('observability.slo.customPromql.goodLabel', {
+    defaultMessage: 'Good events query',
+  }),
+  goodHelp: i18n.translate('observability.slo.customPromql.goodHelp', {
+    defaultMessage: 'PromQL returning the count of good events (non-errors).',
+  }),
+  totalLabel: i18n.translate('observability.slo.customPromql.totalLabel', {
+    defaultMessage: 'Total events query',
+  }),
+  totalHelp: i18n.translate('observability.slo.customPromql.totalHelp', {
+    defaultMessage: 'PromQL returning the count of total events.',
+  }),
+  rawLabel: i18n.translate('observability.slo.customPromql.rawLabel', {
+    defaultMessage: 'Error-ratio query',
+  }),
+  rawHelp: i18n.translate('observability.slo.customPromql.rawHelp', {
+    defaultMessage: 'PromQL returning a pre-computed error ratio in [0, 1].',
+  }),
+};
+
 const MODE_OPTIONS = [
-  { id: 'events', label: 'Events (good + total)' },
-  { id: 'raw', label: 'Raw error-ratio' },
+  { id: 'events', label: I18N.modeEvents },
+  { id: 'raw', label: I18N.modeRaw },
 ];
 
 const MONO_STYLE: React.CSSProperties = { fontFamily: 'monospace' };
@@ -59,14 +97,14 @@ export const CustomPromqlEditor: React.FC<CustomPromqlEditorProps> = ({
   return (
     <EuiPanel data-test-subj="slosWizardCustomPromql">
       <EuiText size="m">
-        <h4>Custom PromQL</h4>
+        <h4>{I18N.heading}</h4>
       </EuiText>
       <EuiText size="s" color="subdued">
-        Supply your own PromQL. Preview below shows the exact rule group that will be deployed.
+        {I18N.description}
       </EuiText>
       <EuiSpacer size="s" />
       <EuiButtonGroup
-        legend="PromQL mode"
+        legend={I18N.modeLegend}
         idSelected={value.mode}
         onChange={(id) =>
           dispatch({
@@ -92,10 +130,10 @@ export const CustomPromqlEditor: React.FC<CustomPromqlEditorProps> = ({
       {value.mode === 'events' ? (
         <>
           <EuiFormRow
-            label="Good events query"
+            label={I18N.goodLabel}
             isInvalid={!!goodError}
             error={goodError}
-            helpText="PromQL returning the count of good events (non-errors)."
+            helpText={I18N.goodHelp}
             fullWidth
           >
             <EuiTextArea
@@ -111,10 +149,10 @@ export const CustomPromqlEditor: React.FC<CustomPromqlEditorProps> = ({
             />
           </EuiFormRow>
           <EuiFormRow
-            label="Total events query"
+            label={I18N.totalLabel}
             isInvalid={!!totalError}
             error={totalError}
-            helpText="PromQL returning the count of total events."
+            helpText={I18N.totalHelp}
             fullWidth
           >
             <EuiTextArea
@@ -132,10 +170,10 @@ export const CustomPromqlEditor: React.FC<CustomPromqlEditorProps> = ({
         </>
       ) : (
         <EuiFormRow
-          label="Error-ratio query"
+          label={I18N.rawLabel}
           isInvalid={!!rawError}
           error={rawError}
-          helpText="PromQL returning a pre-computed error ratio in [0, 1]."
+          helpText={I18N.rawHelp}
           fullWidth
         >
           <EuiTextArea

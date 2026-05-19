@@ -15,6 +15,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { i18n } from '@osd/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSideNav } from '@elastic/eui';
 import {
   WIZARD_SECTIONS,
@@ -22,6 +23,15 @@ import {
   WizardSectionId,
   sectionsWithErrors,
 } from './wizard_sections';
+
+const I18N = {
+  ariaLabel: i18n.translate('observability.slo.wizardNav.ariaLabel', {
+    defaultMessage: 'SLO wizard sections',
+  }),
+  rootName: i18n.translate('observability.slo.wizardNav.rootName', {
+    defaultMessage: 'Sections',
+  }),
+};
 
 export interface WizardNavProps {
   errors: Record<string, string>;
@@ -95,8 +105,8 @@ export const WizardNav: React.FC<WizardNavProps> = ({ errors, visibleSectionIds 
       }}
     >
       <EuiSideNav
-        aria-label="SLO wizard sections"
-        items={[{ id: 'slosWizardNavRoot', name: 'Sections', items }]}
+        aria-label={I18N.ariaLabel}
+        items={[{ id: 'slosWizardNavRoot', name: I18N.rootName, items }]}
       />
     </div>
   );

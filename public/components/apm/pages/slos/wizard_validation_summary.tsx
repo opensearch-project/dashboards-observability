@@ -15,6 +15,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@osd/i18n';
 import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import {
   WIZARD_SECTIONS,
@@ -22,6 +23,20 @@ import {
   findSectionForKey,
   scrollToErrorKey,
 } from './wizard_sections';
+
+const I18N = {
+  title: (count: number, errorWord: string) =>
+    i18n.translate('observability.slo.wizardSummary.title', {
+      defaultMessage: 'Fix {count} {errorWord} before creating the SLO',
+      values: { count, errorWord },
+    }),
+  errorSingular: i18n.translate('observability.slo.wizardSummary.errorSingular', {
+    defaultMessage: 'error',
+  }),
+  errorPlural: i18n.translate('observability.slo.wizardSummary.errorPlural', {
+    defaultMessage: 'errors',
+  }),
+};
 
 export interface WizardValidationSummaryProps {
   errors: Record<string, string>;
@@ -49,9 +64,7 @@ export const WizardValidationSummary: React.FC<WizardValidationSummaryProps> = (
       <EuiCallOut
         color="danger"
         iconType="alert"
-        title={`Fix ${keys.length} ${
-          keys.length === 1 ? 'error' : 'errors'
-        } before creating the SLO`}
+        title={I18N.title(keys.length, keys.length === 1 ? I18N.errorSingular : I18N.errorPlural)}
         data-test-subj="slosWizardValidationSummary"
       >
         <EuiText size="s">

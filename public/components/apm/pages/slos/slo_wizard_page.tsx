@@ -15,6 +15,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import { i18n } from '@osd/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -40,7 +41,7 @@ import {
 } from '@elastic/eui';
 import { Prompt, useHistory, useParams } from 'react-router-dom';
 import type { ChromeStart, NotificationsStart } from '../../../../../../../src/core/public';
-import { extractRulerErrorEnvelope } from './slo_api_client';
+import { extractRulerErrorEnvelope, extractServerMessage } from './slo_api_client';
 import type { SloApiClient, SloRulerErrorEnvelope } from './slo_api_client';
 import { GeneratedRulesPreview } from './generated_rules_preview';
 import { ObjectivesSection } from './objectives_section';
@@ -73,17 +74,213 @@ export interface SloWizardPageProps {
   parentBreadcrumb: { text: string; href: string };
 }
 
-const UNSAVED_PROMPT =
-  'You have unsaved changes. Are you sure you want to leave this page? Your form will be lost.';
+const I18N = {
+  unsavedPrompt: i18n.translate('observability.slo.wizard.unsavedPrompt', {
+    defaultMessage:
+      'You have unsaved changes. Are you sure you want to leave this page? Your form will be lost.',
+  }),
+  breadcrumbSloSli: i18n.translate('observability.slo.wizard.breadcrumbSloSli', {
+    defaultMessage: 'SLO/SLI',
+  }),
+  breadcrumbCreate: i18n.translate('observability.slo.wizard.breadcrumbCreate', {
+    defaultMessage: 'Create',
+  }),
+  toastFixValidationTitle: i18n.translate('observability.slo.wizard.toastFixValidationTitle', {
+    defaultMessage: 'Fix validation errors',
+  }),
+  toastFixValidationText: i18n.translate('observability.slo.wizard.toastFixValidationText', {
+    defaultMessage: 'Some required fields are missing or invalid.',
+  }),
+  toastCreatedTitle: i18n.translate('observability.slo.wizard.toastCreatedTitle', {
+    defaultMessage: 'SLO created',
+  }),
+  toastCreatedText: (name: string) =>
+    i18n.translate('observability.slo.wizard.toastCreatedText', {
+      defaultMessage: '{name} is now provisioned.',
+      values: { name },
+    }),
+  toastCreateFailedTitle: i18n.translate('observability.slo.wizard.toastCreateFailedTitle', {
+    defaultMessage: 'Failed to create SLO',
+  }),
+  backToSlos: i18n.translate('observability.slo.wizard.backToSlos', {
+    defaultMessage: 'Back to SLOs',
+  }),
+  changeTemplate: i18n.translate('observability.slo.wizard.changeTemplate', {
+    defaultMessage: 'Change template',
+  }),
+  cancel: i18n.translate('observability.slo.wizard.cancel', {
+    defaultMessage: 'Cancel',
+  }),
+  createSlo: i18n.translate('observability.slo.wizard.createSlo', {
+    defaultMessage: 'Create SLO',
+  }),
+  rulerCodeUpstreamHttpPrefix: i18n.translate(
+    'observability.slo.wizard.rulerCodeUpstreamHttpPrefix',
+    {
+      defaultMessage: 'Code:',
+    }
+  ),
+  rulerUpstreamHttp: (httpStatus: number) =>
+    i18n.translate('observability.slo.wizard.rulerUpstreamHttp', {
+      defaultMessage: 'upstream HTTP {httpStatus}',
+      values: { httpStatus },
+    }),
+  pickTemplateHeading: i18n.translate('observability.slo.wizard.pickTemplateHeading', {
+    defaultMessage: 'Pick a template',
+  }),
+  pickTemplateDescription: i18n.translate('observability.slo.wizard.pickTemplateDescription', {
+    defaultMessage:
+      'APM templates build SLIs from the span-derived RED metrics Data Prepper produces for every traced service. OTel templates target direct semconv metrics (HTTP, RPC, DB, messaging, GenAI). Custom starts from blank PromQL.',
+  }),
+  categoryApm: i18n.translate('observability.slo.wizard.categoryApm', {
+    defaultMessage: 'APM service SLOs (span-derived)',
+  }),
+  categoryOtel: i18n.translate('observability.slo.wizard.categoryOtel', {
+    defaultMessage: 'OTel semconv metrics',
+  }),
+  categoryCustom: i18n.translate('observability.slo.wizard.categoryCustom', {
+    defaultMessage: 'Custom',
+  }),
+  identityHeading: (template: string) =>
+    i18n.translate('observability.slo.wizard.identityHeading', {
+      defaultMessage: '{template} — identity',
+      values: { template },
+    }),
+  datasourceLabel: i18n.translate('observability.slo.wizard.datasourceLabel', {
+    defaultMessage: 'Datasource ID',
+  }),
+  datasourcePlaceholder: i18n.translate('observability.slo.wizard.datasourcePlaceholder', {
+    defaultMessage: 'ds-2',
+  }),
+  nameLabel: i18n.translate('observability.slo.wizard.nameLabel', {
+    defaultMessage: 'Name',
+  }),
+  descriptionLabel: i18n.translate('observability.slo.wizard.descriptionLabel', {
+    defaultMessage: 'Description',
+  }),
+  ownerHeading: i18n.translate('observability.slo.wizard.ownerHeading', {
+    defaultMessage: 'Service & owner',
+  }),
+  serviceLabel: i18n.translate('observability.slo.wizard.serviceLabel', {
+    defaultMessage: 'Service',
+  }),
+  primaryTeamLabel: i18n.translate('observability.slo.wizard.primaryTeamLabel', {
+    defaultMessage: 'Primary team',
+  }),
+  primaryUserLabel: i18n.translate('observability.slo.wizard.primaryUserLabel', {
+    defaultMessage: 'Primary user (optional)',
+  }),
+  tierLabel: i18n.translate('observability.slo.wizard.tierLabel', {
+    defaultMessage: 'Tier (optional)',
+  }),
+  sliHeading: i18n.translate('observability.slo.wizard.sliHeading', {
+    defaultMessage: 'SLI',
+  }),
+  goodEventsLabel: i18n.translate('observability.slo.wizard.goodEventsLabel', {
+    defaultMessage: 'Good events filter',
+  }),
+  goodEventsHelpText: (defaultFilter: string) =>
+    i18n.translate('observability.slo.wizard.goodEventsHelpText', {
+      defaultMessage: 'Default: {defaultFilter}',
+      values: { defaultFilter },
+    }),
+  dimensionsLabel: i18n.translate('observability.slo.wizard.dimensionsLabel', {
+    defaultMessage: 'Dimensions',
+  }),
+  dimensionsLabelOptional: i18n.translate('observability.slo.wizard.dimensionsLabelOptional', {
+    defaultMessage: 'Dimensions (optional)',
+  }),
+  dimensionNamePlaceholder: i18n.translate('observability.slo.wizard.dimensionNamePlaceholder', {
+    defaultMessage: 'label name',
+  }),
+  dimensionValuePlaceholder: i18n.translate('observability.slo.wizard.dimensionValuePlaceholder', {
+    defaultMessage: 'label value',
+  }),
+  removeDimensionAria: i18n.translate('observability.slo.wizard.removeDimensionAria', {
+    defaultMessage: 'Remove dimension',
+  }),
+  addDimension: i18n.translate('observability.slo.wizard.addDimension', {
+    defaultMessage: 'Add dimension',
+  }),
+  windowHeading: i18n.translate('observability.slo.wizard.windowHeading', {
+    defaultMessage: 'Window & mode',
+  }),
+  rollingWindowLabel: i18n.translate('observability.slo.wizard.rollingWindowLabel', {
+    defaultMessage: 'Rolling window',
+  }),
+  window7d: i18n.translate('observability.slo.wizard.window7d', {
+    defaultMessage: '7 days',
+  }),
+  window14d: i18n.translate('observability.slo.wizard.window14d', {
+    defaultMessage: '14 days',
+  }),
+  window28d: i18n.translate('observability.slo.wizard.window28d', {
+    defaultMessage: '28 days (recommended)',
+  }),
+  window30d: i18n.translate('observability.slo.wizard.window30d', {
+    defaultMessage: '30 days',
+  }),
+  windowApproximationTitle: i18n.translate('observability.slo.wizard.windowApproximationTitle', {
+    defaultMessage: 'Window approximation',
+  }),
+  shadowModeLabel: i18n.translate('observability.slo.wizard.shadowModeLabel', {
+    defaultMessage: 'Shadow mode (deploy recording rules only; suppress alerts)',
+  }),
+  labelsHeading: i18n.translate('observability.slo.wizard.labelsHeading', {
+    defaultMessage: 'Labels & annotations (optional)',
+  }),
+  labelsDescriptionPrefix: i18n.translate('observability.slo.wizard.labelsDescriptionPrefix', {
+    defaultMessage: 'Labels propagate to rules as',
+  }),
+  labelsDescriptionSuffix: i18n.translate('observability.slo.wizard.labelsDescriptionSuffix', {
+    defaultMessage: '. Annotations stay on the document (e.g., runbook URLs).',
+  }),
+  labelsLabel: i18n.translate('observability.slo.wizard.labelsLabel', {
+    defaultMessage: 'Labels',
+  }),
+  annotationsLabel: i18n.translate('observability.slo.wizard.annotationsLabel', {
+    defaultMessage: 'Annotations',
+  }),
+  addLabel: i18n.translate('observability.slo.wizard.addLabel', {
+    defaultMessage: 'Add label',
+  }),
+  addAnnotation: i18n.translate('observability.slo.wizard.addAnnotation', {
+    defaultMessage: 'Add annotation',
+  }),
+  labelKeyPlaceholder: i18n.translate('observability.slo.wizard.labelKeyPlaceholder', {
+    defaultMessage: 'compliance',
+  }),
+  labelValuePlaceholder: i18n.translate('observability.slo.wizard.labelValuePlaceholder', {
+    defaultMessage: 'pci',
+  }),
+  annotationKeyPlaceholder: i18n.translate('observability.slo.wizard.annotationKeyPlaceholder', {
+    defaultMessage: 'runbook',
+  }),
+  annotationValuePlaceholder: i18n.translate(
+    'observability.slo.wizard.annotationValuePlaceholder',
+    {
+      defaultMessage: 'https://wiki/slo/...',
+    }
+  ),
+  rulerErrorValidation: i18n.translate('observability.slo.wizard.rulerErrorValidation', {
+    defaultMessage: 'Ruler rejected the rule group',
+  }),
+  rulerErrorAuth: i18n.translate('observability.slo.wizard.rulerErrorAuth', {
+    defaultMessage: 'Ruler authentication failed',
+  }),
+  rulerErrorUnreachable: i18n.translate('observability.slo.wizard.rulerErrorUnreachable', {
+    defaultMessage: 'Ruler is unreachable',
+  }),
+};
 
 // ============================================================================
 // Template selector
 // ============================================================================
 
 const CATEGORY_TITLES: Record<string, string> = {
-  apm: 'APM service SLOs (span-derived)',
-  otel: 'OTel semconv metrics',
-  custom: 'Custom',
+  apm: I18N.categoryApm,
+  otel: I18N.categoryOtel,
+  custom: I18N.categoryCustom,
 };
 
 const CATEGORY_ORDER: ReadonlyArray<'apm' | 'otel' | 'custom'> = ['apm', 'otel', 'custom'];
@@ -91,12 +288,10 @@ const CATEGORY_ORDER: ReadonlyArray<'apm' | 'otel' | 'custom'> = ['apm', 'otel',
 const TemplateSelector: React.FC<{ onPick: (id: string) => void }> = ({ onPick }) => (
   <EuiPanel>
     <EuiText size="m">
-      <h4>Pick a template</h4>
+      <h4>{I18N.pickTemplateHeading}</h4>
     </EuiText>
     <EuiText size="s" color="subdued">
-      APM templates build SLIs from the span-derived RED metrics Data Prepper produces for every
-      traced service. OTel templates target direct semconv metrics (HTTP, RPC, DB, messaging,
-      GenAI). Custom starts from blank PromQL.
+      {I18N.pickTemplateDescription}
     </EuiText>
     {CATEGORY_ORDER.map((category) => {
       const templates = SLO_TEMPLATES.filter((t) => t.category === category);
@@ -156,8 +351,8 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
   useEffect(() => {
     chrome.setBreadcrumbs([
       parentBreadcrumb,
-      { text: 'SLO/SLI', href: '#/slos' },
-      { text: 'Create' },
+      { text: I18N.breadcrumbSloSli, href: '#/slos' },
+      { text: I18N.breadcrumbCreate },
     ]);
   }, [chrome, parentBreadcrumb]);
 
@@ -221,8 +416,8 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
     if (Object.keys(specErrors).length > 0) {
       setErrors(specErrors);
       notifications.toasts.addWarning({
-        title: 'Fix validation errors',
-        text: 'Some required fields are missing or invalid.',
+        title: I18N.toastFixValidationTitle,
+        text: I18N.toastFixValidationText,
       });
       return;
     }
@@ -235,8 +430,8 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
       // prompt firing on the navigation away.
       setCreatedSuccessfully(true);
       notifications.toasts.addSuccess({
-        title: 'SLO created',
-        text: `${doc.spec.name} is now provisioned.`,
+        title: I18N.toastCreatedTitle,
+        text: I18N.toastCreatedText(doc.spec.name),
       });
       history.push(`/slos/${encodeURIComponent(doc.id)}`);
     } catch (e) {
@@ -247,10 +442,12 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
       if (envelope) {
         setRulerError(envelope);
       } else {
-        const err = e instanceof Error ? e : new Error(String(e));
+        // Use the OSD http-error envelope's `body.message` (richer) when
+        // available; falling back to `err.message` collapses route-layer
+        // 400s like "Datasource X is not registered" to "Bad Request".
         notifications.toasts.addDanger({
-          title: 'Failed to create SLO',
-          text: err.message,
+          title: I18N.toastCreateFailedTitle,
+          text: extractServerMessage(e),
         });
       }
     } finally {
@@ -272,7 +469,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
                     size="s"
                     data-test-subj="slosCancel"
                   >
-                    Back to SLOs
+                    {I18N.backToSlos}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -304,7 +501,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
         {/* Block in-app navigation when the form is dirty and we haven't
             successfully submitted yet. `submitting` is allowed through so the
             post-create `history.push('/slos/<id>')` redirect lands. */}
-        <Prompt when={dirty && !createdSuccessfully && !submitting} message={UNSAVED_PROMPT} />
+        <Prompt when={dirty && !createdSuccessfully && !submitting} message={I18N.unsavedPrompt} />
         <EuiPageContent color="transparent" hasBorder={false} paddingSize="none">
           <EuiPageContentBody>
             <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
@@ -315,12 +512,12 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
                   size="s"
                   data-test-subj="slosTemplateBack"
                 >
-                  Change template
+                  {I18N.changeTemplate}
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty href="#/slos" size="s" data-test-subj="slosWizardCancel">
-                  Cancel
+                  {I18N.cancel}
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -331,7 +528,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
                   onClick={onSubmit}
                   data-test-subj="slosWizardSubmit"
                 >
-                  Create SLO
+                  {I18N.createSlo}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -465,8 +662,8 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
                           <p data-test-subj="slosWizardRulerErrorBody">{rulerError.rawBody}</p>
                           <p>
                             <small>
-                              Code: <code>{rulerError.code}</code> · upstream HTTP{' '}
-                              {rulerError.httpStatus}
+                              {I18N.rulerCodeUpstreamHttpPrefix} <code>{rulerError.code}</code> ·{' '}
+                              {I18N.rulerUpstreamHttp(rulerError.httpStatus)}
                             </small>
                           </p>
                         </EuiText>
@@ -505,11 +702,11 @@ const IdentityPanel: React.FC<PanelProps & { template: string }> = ({
 }) => (
   <EuiPanel>
     <EuiText size="m">
-      <h4>{template} — identity</h4>
+      <h4>{I18N.identityHeading(template)}</h4>
     </EuiText>
     <EuiSpacer size="s" />
     <EuiFormRow
-      label="Datasource ID"
+      label={I18N.datasourceLabel}
       isInvalid={!!errors['spec.datasourceId']}
       error={errors['spec.datasourceId']}
     >
@@ -519,17 +716,21 @@ const IdentityPanel: React.FC<PanelProps & { template: string }> = ({
           dispatch({ kind: 'setField', field: 'datasourceId', value: e.target.value })
         }
         data-test-subj="slosWizardDatasourceId"
-        placeholder="ds-2"
+        placeholder={I18N.datasourcePlaceholder}
       />
     </EuiFormRow>
-    <EuiFormRow label="Name" isInvalid={!!errors['spec.name']} error={errors['spec.name']}>
+    <EuiFormRow
+      label={I18N.nameLabel}
+      isInvalid={!!errors['spec.name']}
+      error={errors['spec.name']}
+    >
       <EuiFieldText
         value={state.name}
         onChange={(e) => dispatch({ kind: 'setField', field: 'name', value: e.target.value })}
         data-test-subj="slosWizardName"
       />
     </EuiFormRow>
-    <EuiFormRow label="Description">
+    <EuiFormRow label={I18N.descriptionLabel}>
       <EuiTextArea
         rows={2}
         value={state.description}
@@ -545,10 +746,14 @@ const IdentityPanel: React.FC<PanelProps & { template: string }> = ({
 const OwnerPanel: React.FC<PanelProps> = ({ state, errors, dispatch }) => (
   <EuiPanel>
     <EuiText size="m">
-      <h4>Service &amp; owner</h4>
+      <h4>{I18N.ownerHeading}</h4>
     </EuiText>
     <EuiSpacer size="s" />
-    <EuiFormRow label="Service" isInvalid={!!errors['spec.service']} error={errors['spec.service']}>
+    <EuiFormRow
+      label={I18N.serviceLabel}
+      isInvalid={!!errors['spec.service']}
+      error={errors['spec.service']}
+    >
       <EuiFieldText
         value={state.service}
         onChange={(e) => dispatch({ kind: 'setField', field: 'service', value: e.target.value })}
@@ -556,7 +761,7 @@ const OwnerPanel: React.FC<PanelProps> = ({ state, errors, dispatch }) => (
       />
     </EuiFormRow>
     <EuiFormRow
-      label="Primary team"
+      label={I18N.primaryTeamLabel}
       isInvalid={!!errors['spec.owner.teams']}
       error={errors['spec.owner.teams']}
     >
@@ -566,7 +771,7 @@ const OwnerPanel: React.FC<PanelProps> = ({ state, errors, dispatch }) => (
         data-test-subj="slosWizardOwnerTeam"
       />
     </EuiFormRow>
-    <EuiFormRow label="Primary user (optional)">
+    <EuiFormRow label={I18N.primaryUserLabel}>
       <EuiFieldText
         value={state.ownerPrimaryUser}
         onChange={(e) =>
@@ -575,7 +780,7 @@ const OwnerPanel: React.FC<PanelProps> = ({ state, errors, dispatch }) => (
         data-test-subj="slosWizardOwnerPrimaryUser"
       />
     </EuiFormRow>
-    <EuiFormRow label="Tier (optional)">
+    <EuiFormRow label={I18N.tierLabel}>
       <EuiFieldText
         value={state.tier}
         onChange={(e) => dispatch({ kind: 'setField', field: 'tier', value: e.target.value })}
@@ -593,13 +798,13 @@ const SliPanel: React.FC<PanelProps & { template: SloTemplate }> = ({
 }) => (
   <EuiPanel>
     <EuiText size="m">
-      <h4>SLI</h4>
+      <h4>{I18N.sliHeading}</h4>
     </EuiText>
     <EuiSpacer size="s" />
     {template.sli.type === 'availability' && (
       <EuiFormRow
-        label="Good events filter"
-        helpText={`Default: ${template.sli.goodEventsFilter ?? ''}`}
+        label={I18N.goodEventsLabel}
+        helpText={I18N.goodEventsHelpText(template.sli.goodEventsFilter ?? '')}
       >
         <EuiFieldText
           value={state.goodEventsFilter}
@@ -611,7 +816,7 @@ const SliPanel: React.FC<PanelProps & { template: SloTemplate }> = ({
       </EuiFormRow>
     )}
     <EuiFormRow
-      label={template.sli.type === 'custom' ? 'Dimensions (optional)' : 'Dimensions'}
+      label={template.sli.type === 'custom' ? I18N.dimensionsLabelOptional : I18N.dimensionsLabel}
       isInvalid={!!errors['spec.sli.dimensions']}
       error={errors['spec.sli.dimensions']}
       fullWidth
@@ -621,7 +826,7 @@ const SliPanel: React.FC<PanelProps & { template: SloTemplate }> = ({
           <EuiFlexGroup key={i} gutterSize="s" alignItems="flexEnd" style={{ marginBottom: 4 }}>
             <EuiFlexItem>
               <EuiFieldText
-                placeholder="label name"
+                placeholder={I18N.dimensionNamePlaceholder}
                 value={dim.name}
                 onChange={(e) =>
                   dispatch({
@@ -636,7 +841,7 @@ const SliPanel: React.FC<PanelProps & { template: SloTemplate }> = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFieldText
-                placeholder="label value"
+                placeholder={I18N.dimensionValuePlaceholder}
                 value={dim.value}
                 onChange={(e) =>
                   dispatch({
@@ -655,7 +860,7 @@ const SliPanel: React.FC<PanelProps & { template: SloTemplate }> = ({
                 onClick={() => dispatch({ kind: 'removeDimension', index: i })}
                 disabled={state.dimensions.length <= 1}
                 iconType="trash"
-                aria-label="Remove dimension"
+                aria-label={I18N.removeDimensionAria}
                 size="s"
                 data-test-subj={`slosWizardDimRemove-${i}`}
               />
@@ -668,7 +873,7 @@ const SliPanel: React.FC<PanelProps & { template: SloTemplate }> = ({
           onClick={() => dispatch({ kind: 'addDimension' })}
           data-test-subj="slosWizardDimAdd"
         >
-          Add dimension
+          {I18N.addDimension}
         </EuiButtonEmpty>
       </div>
     </EuiFormRow>
@@ -682,10 +887,10 @@ const WindowPanel: React.FC<{
 }> = ({ state, warnings, dispatch }) => (
   <EuiPanel>
     <EuiText size="m">
-      <h4>Window &amp; mode</h4>
+      <h4>{I18N.windowHeading}</h4>
     </EuiText>
     <EuiSpacer size="s" />
-    <EuiFormRow label="Rolling window">
+    <EuiFormRow label={I18N.rollingWindowLabel}>
       <EuiSelect
         value={state.windowDuration}
         onChange={(e) =>
@@ -696,10 +901,10 @@ const WindowPanel: React.FC<{
           })
         }
         options={[
-          { value: '7d', text: '7 days' },
-          { value: '14d', text: '14 days' },
-          { value: '28d', text: '28 days (recommended)' },
-          { value: '30d', text: '30 days' },
+          { value: '7d', text: I18N.window7d },
+          { value: '14d', text: I18N.window14d },
+          { value: '28d', text: I18N.window28d },
+          { value: '30d', text: I18N.window30d },
         ]}
         data-test-subj="slosWizardWindow"
       />
@@ -708,7 +913,7 @@ const WindowPanel: React.FC<{
       <>
         <EuiSpacer size="s" />
         <EuiCallOut
-          title="Window approximation"
+          title={I18N.windowApproximationTitle}
           color="warning"
           iconType="iInCircle"
           size="s"
@@ -720,7 +925,7 @@ const WindowPanel: React.FC<{
     )}
     <EuiCheckbox
       id="slosWizardShadow"
-      label="Shadow mode (deploy recording rules only; suppress alerts)"
+      label={I18N.shadowModeLabel}
       checked={state.shadow}
       onChange={(e) => dispatch({ kind: 'setField', field: 'shadow', value: e.target.checked })}
       data-test-subj="slosWizardShadow"
@@ -745,15 +950,15 @@ const LabelsAnnotationsPanel: React.FC<PanelProps> = ({ state, errors, dispatch 
   return (
     <EuiPanel>
       <EuiText size="m">
-        <h4>Labels &amp; annotations (optional)</h4>
+        <h4>{I18N.labelsHeading}</h4>
       </EuiText>
       <EuiText size="xs" color="subdued">
-        Labels propagate to rules as <code>slo_label_&lt;key&gt;</code>. Annotations stay on the
-        document (e.g., runbook URLs).
+        {I18N.labelsDescriptionPrefix} <code>slo_label_&lt;key&gt;</code>
+        {I18N.labelsDescriptionSuffix}
       </EuiText>
       <EuiSpacer size="s" />
       <EuiFormRow
-        label="Labels"
+        label={I18N.labelsLabel}
         fullWidth
         data-test-subj="slosWizardLabelsRow"
         display="rowCompressed"
@@ -767,14 +972,14 @@ const LabelsAnnotationsPanel: React.FC<PanelProps> = ({ state, errors, dispatch 
           onAdd={() => dispatch({ kind: 'addLabelEntry' })}
           onRemove={(index) => dispatch({ kind: 'removeLabelEntry', index })}
           testSubjPrefix="slosWizardLabel"
-          addLabel="Add label"
-          keyPlaceholder="compliance"
-          valuePlaceholder="pci"
+          addLabel={I18N.addLabel}
+          keyPlaceholder={I18N.labelKeyPlaceholder}
+          valuePlaceholder={I18N.labelValuePlaceholder}
         />
       </EuiFormRow>
       <EuiSpacer size="s" />
       <EuiFormRow
-        label="Annotations"
+        label={I18N.annotationsLabel}
         fullWidth
         isInvalid={!!annotationScalarError}
         error={annotationScalarError}
@@ -790,9 +995,9 @@ const LabelsAnnotationsPanel: React.FC<PanelProps> = ({ state, errors, dispatch 
           onAdd={() => dispatch({ kind: 'addAnnotationEntry' })}
           onRemove={(index) => dispatch({ kind: 'removeAnnotationEntry', index })}
           testSubjPrefix="slosWizardAnnotation"
-          addLabel="Add annotation"
-          keyPlaceholder="runbook"
-          valuePlaceholder="https://wiki/slo/..."
+          addLabel={I18N.addAnnotation}
+          keyPlaceholder={I18N.annotationKeyPlaceholder}
+          valuePlaceholder={I18N.annotationValuePlaceholder}
         />
       </EuiFormRow>
     </EuiPanel>
@@ -802,10 +1007,10 @@ const LabelsAnnotationsPanel: React.FC<PanelProps> = ({ state, errors, dispatch 
 function rulerErrorTitle(envelope: SloRulerErrorEnvelope): string {
   switch (envelope.code) {
     case 'RULER_VALIDATION_FAILED':
-      return 'Ruler rejected the rule group';
+      return I18N.rulerErrorValidation;
     case 'RULER_AUTH_FAILED':
-      return 'Ruler authentication failed';
+      return I18N.rulerErrorAuth;
     case 'RULER_UNREACHABLE':
-      return 'Ruler is unreachable';
+      return I18N.rulerErrorUnreachable;
   }
 }
