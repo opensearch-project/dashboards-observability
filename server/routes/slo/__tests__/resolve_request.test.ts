@@ -88,6 +88,78 @@ describe('resolveActingUser', () => {
       })
     ).toBe('frank');
   });
+
+  it('rejects usernames longer than the audit-field cap and falls through', () => {
+    // 256-char username triggers the >255 reject; the proxy header takes
+    // over so audit attribution still has a real signal.
+    const tooLong = 'a'.repeat(256);
+    expect(
+      resolveActingUser({
+        auth: { isAuthenticated: true, credentials: { username: tooLong } },
+        headers: { 'x-proxy-user': 'fallback-from-overflow' },
+      })
+    ).toBe('fallback-from-overflow');
+  });
+
+  it('accepts a 255-char username at the cap', () => {
+    const atCap = 'a'.repeat(255);
+    expect(
+      resolveActingUser({
+        auth: { isAuthenticated: true, credentials: { username: atCap } },
+      })
+    ).toBe(atCap);
+  });
+
+  it('rejects usernames containing C0 control chars (log-injection / response-splitting vectors)', () => {
+    // CRLF + null byte + DEL — each rejected; falls through to 'unknown'
+    // when there is no other signal.
+    expect(
+      resolveActingUser({
+        auth: { isAuthenticated: true, credentials: { username: 'alice\r\nSet-Cookie: x=y' } },
+        headers: {},
+      })
+    ).toBe('unknown');
+    expect(
+      resolveActingUser({
+        auth: { isAuthenticated: true, credentials: { username: 'bob\x00admin' } },
+      })
+    ).toBe('unknown');
+    expect(
+      resolveActingUser({
+        headers: { 'x-proxy-user': 'mallory\x7f' },
+      })
+    ).toBe('unknown');
+  });
+
+  it('falls through to a clean header when the credential carries control chars', () => {
+    expect(
+      resolveActingUser({
+        auth: { isAuthenticated: true, credentials: { username: 'alice\nINJECT' } },
+        headers: { 'x-proxy-user': 'clean-fallback' },
+      })
+    ).toBe('clean-fallback');
+  });
+
+  it('accepts realistic non-ASCII username shapes (LDAP DN, email, Unicode) — only control chars are banned', () => {
+    expect(
+      resolveActingUser({
+        auth: {
+          isAuthenticated: true,
+          credentials: { username: 'CN=Alice,OU=Users,DC=example,DC=com' },
+        },
+      })
+    ).toBe('CN=Alice,OU=Users,DC=example,DC=com');
+    expect(
+      resolveActingUser({
+        auth: { isAuthenticated: true, credentials: { username: 'alice@example.com' } },
+      })
+    ).toBe('alice@example.com');
+    expect(
+      resolveActingUser({
+        auth: { isAuthenticated: true, credentials: { username: 'アリス' } },
+      })
+    ).toBe('アリス');
+  });
 });
 
 describe('resolveWorkspaceId', () => {

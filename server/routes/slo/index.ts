@@ -347,6 +347,38 @@ function firstHeaderValue(value: string | string[] | undefined): string | undefi
  * security plugin documents, so deployments that already use one of those
  * proxy auth modes get the right `createdBy` for free.
  */
+/**
+ * Cap on persisted `createdBy` / `updatedBy` length. The OpenSearch index
+ * mapping for these fields has its own bounds; this gate also closes off
+ * a payload-bloat vector where a malicious proxy injects a megabyte-scale
+ * header value into every audit row.
+ */
+const ACTING_USER_MAX_LENGTH = 255;
+
+/**
+ * Sanitize a candidate username before it lands in the audit fields.
+ *
+ * - Returns `null` when the value contains C0 control chars or DEL — those
+ *   are the realistic injection vectors (log injection, CRLF response
+ *   splitting). We reject rather than strip so the caller's fallback chain
+ *   keeps working.
+ * - Returns `null` when the length exceeds `ACTING_USER_MAX_LENGTH` rather
+ *   than silently truncating, since truncation could collapse two distinct
+ *   identities to the same prefix.
+ * - Returns the trimmed value otherwise. Realistic usernames span email
+ *   (`alice@example.com`), LDAP DN (`CN=Alice,OU=Users,DC=example,DC=com`),
+ *   and Unicode forms; we deliberately don't impose a character allow-list
+ *   beyond the control-char ban so deployments that use any of those don't
+ *   silently fall through to `'unknown'`.
+ */
+function sanitizeActingUser(raw: string): string | null {
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) return null;
+  if (trimmed.length > ACTING_USER_MAX_LENGTH) return null;
+  if (/[\x00-\x1f\x7f]/.test(trimmed)) return null;
+  return trimmed;
+}
+
 export function resolveActingUser(req: {
   auth?: { isAuthenticated?: boolean; credentials?: { username?: unknown } };
   headers?: Record<string, string | string[] | undefined>;
@@ -355,16 +387,28 @@ export function resolveActingUser(req: {
   // deployments populate `credentials.username` without establishing a
   // security session, and we'd rather audit-attribute those writes to the
   // proxied user than fall through to a header read or to 'unknown'.
+  //
+  // Each candidate runs through `sanitizeActingUser`, which rejects
+  // control chars + caps length. A rejected candidate falls through to the
+  // next step rather than aborting — a misconfigured proxy that injects a
+  // junk header shouldn't poison legitimate auth credentials.
   const credentials = req.auth?.credentials;
   const username = credentials && (credentials as { username?: unknown }).username;
-  if (typeof username === 'string' && username.trim().length > 0) {
-    return username.trim();
+  if (typeof username === 'string') {
+    const cleaned = sanitizeActingUser(username);
+    if (cleaned) return cleaned;
   }
   const headers = req.headers ?? {};
   const proxyUser = firstHeaderValue(headers['x-proxy-user']);
-  if (proxyUser) return proxyUser;
+  if (proxyUser) {
+    const cleaned = sanitizeActingUser(proxyUser);
+    if (cleaned) return cleaned;
+  }
   const forwardedUser = firstHeaderValue(headers['x-forwarded-user']);
-  if (forwardedUser) return forwardedUser;
+  if (forwardedUser) {
+    const cleaned = sanitizeActingUser(forwardedUser);
+    if (cleaned) return cleaned;
+  }
   return 'unknown';
 }
 

@@ -56,7 +56,7 @@ import { initialState, reducer } from './wizard_state';
 import type { Action, FormState } from './wizard_state';
 import { buildCreateInput } from './wizard_builders';
 import { WizardNav } from './wizard_nav';
-import { WIZARD_SECTIONS } from './wizard_sections';
+import { WIZARD_SECTIONS, scrollToErrorKey } from './wizard_sections';
 import type { WizardSectionId } from './wizard_sections';
 import { WizardValidationSummary } from './wizard_validation_summary';
 import { WizardKeyValueGrid } from './wizard_key_value_grid';
@@ -409,12 +409,22 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
   );
 
   const onSubmit = useCallback(async () => {
-    if (!template) return;
+    // Guard against rapid double-submit (programmatic clicks, keyboard
+    // accelerator while the EuiButton is still in `isLoading` state). The
+    // button itself disables on `isLoading`, but a stray Enter on a focused
+    // form control would otherwise re-enter onSubmit and fire a second
+    // POST while the first is in flight.
+    if (!template || submitting) return;
     dispatch({ kind: 'markSubmitAttempted' });
     const input = buildCreateInput(state, template);
     const { errors: specErrors } = validateSloSpec(input.spec);
     if (Object.keys(specErrors).length > 0) {
       setErrors(specErrors);
+      // Auto-scroll to the first failing field so users focused on a
+      // lower section see why their submit didn't land. The toast is a
+      // backup signal; the inline anchor is the actionable one.
+      const firstErrorKey = Object.keys(specErrors)[0];
+      if (firstErrorKey) scrollToErrorKey(firstErrorKey);
       notifications.toasts.addWarning({
         title: I18N.toastFixValidationTitle,
         text: I18N.toastFixValidationText,
@@ -453,7 +463,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
     } finally {
       setSubmitting(false);
     }
-  }, [apiClient, history, notifications, state, template]);
+  }, [apiClient, history, notifications, state, submitting, template]);
 
   if (!template) {
     return (
