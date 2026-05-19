@@ -379,10 +379,13 @@ function sanitizeActingUser(raw: string): string | null {
   return trimmed;
 }
 
-export function resolveActingUser(req: {
-  auth?: { isAuthenticated?: boolean; credentials?: { username?: unknown } };
-  headers?: Record<string, string | string[] | undefined>;
-}): string {
+export function resolveActingUser(
+  req: {
+    auth?: { isAuthenticated?: boolean; credentials?: { username?: unknown } };
+    headers?: Record<string, string | string[] | undefined>;
+  },
+  logger?: Pick<Logger, 'debug'>
+): string {
   // We deliberately do NOT gate on `auth.isAuthenticated`: proxy-auth
   // deployments populate `credentials.username` without establishing a
   // security session, and we'd rather audit-attribute those writes to the
@@ -409,6 +412,14 @@ export function resolveActingUser(req: {
     const cleaned = sanitizeActingUser(forwardedUser);
     if (cleaned) return cleaned;
   }
+  // Debug-level (not warn): legitimately anonymous-write deployments
+  // exist (security plugin disabled, no proxy auth) and would otherwise
+  // pollute warn-level logs on every create/update. The signal is here
+  // so operators investigating "why is everything 'unknown'?" can flip
+  // log level and confirm the chain is being walked.
+  logger?.debug(
+    'resolveActingUser: no signal in auth credentials or proxy headers; using "unknown"'
+  );
   return 'unknown';
 }
 
@@ -718,7 +729,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
     const result = await handleCreateSLO(
       sloService,
       req.body,
-      resolveActingUser(req),
+      resolveActingUser(req, logger),
       logger,
       built.deploy
     );
@@ -851,7 +862,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         sloService,
         req.params.id,
         req.body,
-        resolveActingUser(req),
+        resolveActingUser(req, logger),
         logger,
         built.deploy
       );
@@ -938,7 +949,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       const result = await handleEnableSLO(
         sloService,
         req.params.id,
-        resolveActingUser(req),
+        resolveActingUser(req, logger),
         logger,
         built.deploy
       );
@@ -981,7 +992,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       const result = await handleDisableSLO(
         sloService,
         req.params.id,
-        resolveActingUser(req),
+        resolveActingUser(req, logger),
         logger,
         built.deploy
       );

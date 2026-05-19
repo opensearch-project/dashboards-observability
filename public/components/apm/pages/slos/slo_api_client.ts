@@ -158,7 +158,7 @@ export class SloApiClient {
     return this.http.delete(`${SLO_BASE}/${encodeURIComponent(id)}`);
   }
 
-  preview(input: SloCreateInput): Promise<GeneratedRuleGroup> {
-    return this.http.post(`${SLO_BASE}/preview`, { body: JSON.stringify(input) });
+  preview(input: SloCreateInput, signal?: AbortSignal): Promise<GeneratedRuleGroup> {
+    return this.http.post(`${SLO_BASE}/preview`, { body: JSON.stringify(input), signal });
   }
 }

@@ -160,6 +160,24 @@ describe('resolveActingUser', () => {
       })
     ).toBe('アリス');
   });
+
+  it('emits a debug log when falling through to "unknown" so operators can confirm the chain was walked', () => {
+    const debug = jest.fn();
+    expect(resolveActingUser({}, { debug })).toBe('unknown');
+    expect(debug).toHaveBeenCalledTimes(1);
+    expect(debug.mock.calls[0][0]).toMatch(/no signal in auth credentials or proxy headers/);
+  });
+
+  it('does NOT log when a candidate is found (debug noise stays bounded)', () => {
+    const debug = jest.fn();
+    expect(
+      resolveActingUser(
+        { auth: { isAuthenticated: true, credentials: { username: 'alice' } } },
+        { debug }
+      )
+    ).toBe('alice');
+    expect(debug).not.toHaveBeenCalled();
+  });
 });
 
 describe('resolveWorkspaceId', () => {

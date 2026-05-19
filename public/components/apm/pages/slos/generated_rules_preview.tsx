@@ -144,21 +144,26 @@ export const GeneratedRulesPreview: React.FC<GeneratedRulesPreviewProps> = ({
       setState(INITIAL);
       return;
     }
-    let cancelled = false;
+    // AbortController over a `cancelled` flag: aborts the fetch itself when
+    // the input changes mid-flight or the component unmounts, so we don't
+    // hold a network slot open just to discard the response. The catch
+    // branch still has to filter out the resulting AbortError so it doesn't
+    // surface as a preview error toast.
+    const ac = new AbortController();
     setState({ status: 'loading' });
     apiClient
-      .preview(JSON.parse(debouncedSerialized) as SloCreateInput)
+      .preview(JSON.parse(debouncedSerialized) as SloCreateInput, ac.signal)
       .then((group) => {
-        if (cancelled) return;
+        if (ac.signal.aborted) return;
         setState({ status: 'success', group });
       })
       .catch((e) => {
-        if (cancelled) return;
+        if (ac.signal.aborted) return;
         const message = e instanceof Error ? e.message : String(e);
         setState({ status: 'error', error: message });
       });
     return () => {
-      cancelled = true;
+      ac.abort();
     };
   }, [apiClient, debouncedSerialized]);
 
