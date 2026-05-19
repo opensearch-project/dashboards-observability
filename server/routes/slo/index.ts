@@ -360,8 +360,14 @@ const ACTING_USER_MAX_LENGTH = 255;
  * can emit a structured debug log per rejection — preserves forensic
  * signal when a malicious proxy injects values that get sanitized away
  * (otherwise the chain falls through to `'unknown'` with no trail).
+ *
+ * `'empty'` is semantically distinct from the security rejections — it's
+ * "this slot wasn't populated", which is the common case for an unset
+ * header. The caller (`tryResolveActingUser`) suppresses logging for
+ * `'empty'` to keep debug noise bounded; the other reasons always log
+ * since they signal either a misconfigured proxy or an injection attempt.
  */
-type SanitizeRejectReason = 'too-long' | 'control-chars';
+type SanitizeRejectReason = 'empty' | 'too-long' | 'control-chars';
 
 /**
  * Sanitize a candidate username before it lands in the audit fields.
@@ -388,11 +394,13 @@ function sanitizeActingUser(
   raw: string
 ): { ok: true; value: string } | { ok: false; reason: SanitizeRejectReason } {
   const trimmed = raw.trim();
-  // Empty / whitespace-only is treated as "no signal" rather than a
+  // Empty / whitespace-only is "no signal" rather than a security
   // rejection — every fallback in the chain calls this with a possibly-
-  // empty header value, and we don't want to flood the debug log with
-  // "header was empty" lines.
-  if (trimmed.length === 0) return { ok: false, reason: 'control-chars' };
+  // empty header value. The dedicated `'empty'` reason keeps debug logs
+  // accurate (vs. earlier code that misreported these as `'control-chars'`)
+  // and the caller suppresses the log line for `'empty'` so we don't
+  // flood logs on every unset header.
+  if (trimmed.length === 0) return { ok: false, reason: 'empty' };
   if (trimmed.length > ACTING_USER_MAX_LENGTH) return { ok: false, reason: 'too-long' };
   if (/[\x00-\x1f\x7f-\x9f]/.test(trimmed)) return { ok: false, reason: 'control-chars' };
   return { ok: true, value: trimmed };
@@ -410,11 +418,14 @@ function tryResolveActingUser(
   logger?: Pick<Logger, 'debug'>
 ): string | null {
   if (raw === undefined) return null;
-  // Empty/whitespace doesn't get a log line — see sanitizeActingUser.
-  if (raw.trim().length === 0) return null;
   const result = sanitizeActingUser(raw);
   if (result.ok) return result.value;
-  logger?.debug(`resolveActingUser: ${source} rejected (${result.reason}); falling through`);
+  // `'empty'` is the unset-header case — common, expected, not worth a
+  // log line per request. Other reasons (`'too-long'`, `'control-chars'`)
+  // signal a misconfigured or hostile proxy and always log.
+  if (result.reason !== 'empty') {
+    logger?.debug(`resolveActingUser: ${source} rejected (${result.reason}); falling through`);
+  }
   return null;
 }
 
