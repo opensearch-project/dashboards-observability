@@ -402,7 +402,14 @@ function sanitizeActingUser(
   // flood logs on every unset header.
   if (trimmed.length === 0) return { ok: false, reason: 'empty' };
   if (trimmed.length > ACTING_USER_MAX_LENGTH) return { ok: false, reason: 'too-long' };
-  if (/[\x00-\x1f\x7f-\x9f]/.test(trimmed)) return { ok: false, reason: 'control-chars' };
+  // C0 (0x00-0x1f) + DEL + C1 (0x7f-0x9f) cover ASCII-style injection
+  // vectors. Unicode line/paragraph separators (U+2028, U+2029) are also
+  // line-terminators in JavaScript and a few logging pipelines, so we
+  // ban them as the same class of vector — they're outside the C0/C1
+  // ranges so the regex needs them spelled out.
+  if (/[\x00-\x1f\x7f-\x9f\u2028\u2029]/.test(trimmed)) {
+    return { ok: false, reason: 'control-chars' };
+  }
   return { ok: true, value: trimmed };
 }
 

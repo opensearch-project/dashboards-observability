@@ -179,6 +179,22 @@ describe('resolveActingUser', () => {
     expect(debug).not.toHaveBeenCalled();
   });
 
+  it('rejects usernames containing Unicode line/paragraph separators (U+2028, U+2029)', () => {
+    // U+2028 (LINE SEPARATOR) and U+2029 (PARAGRAPH SEPARATOR) are
+    // line-terminators in JS source and a few logging pipelines —
+    // outside the C0/C1 ranges so they need an explicit ban.
+    expect(
+      resolveActingUser({
+        auth: { isAuthenticated: true, credentials: { username: 'alice\u2028INJECT' } },
+      })
+    ).toBe('unknown');
+    expect(
+      resolveActingUser({
+        auth: { isAuthenticated: true, credentials: { username: 'bob\u2029PARA' } },
+      })
+    ).toBe('unknown');
+  });
+
   it('rejects usernames containing C1 control chars (NEL, escape sequences)', () => {
     // 0x85 is NEL — a line-break treated by some pipelines as equivalent
     // to LF. 0x9b is CSI. Both belong to the C1 control block (0x80-0x9f).
