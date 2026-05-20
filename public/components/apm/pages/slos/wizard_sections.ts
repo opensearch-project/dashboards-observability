@@ -52,7 +52,7 @@ export const WIZARD_SECTIONS: readonly WizardSection[] = [
     },
   },
   // Window comes before SLI + objectives because the chosen time window
-  // conditions the SLI shape (Grafana SLO creation flow, audit cite S5).
+  // conditions the SLI shape (audit cite S5).
   {
     id: 'window',
     label: 'Window & mode',
