@@ -60,6 +60,7 @@ import {
   transformMetricsFormToPayload,
 } from '../../../common/services/alerting/form_transforms';
 import { parseDateMathMs } from '../../../common/services/alerting/time_range';
+import './alerting.scss';
 
 // ============================================================================
 // Main Page Component
@@ -1146,10 +1147,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   };
 
   return (
-    <div
-      data-test-subj="alertManager-page"
-      style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
-    >
+    <div data-test-subj="alertManager-page" className="altPageRoot">
       {/* Tab bar — picker now lives inside the Alert Timeline panel header */}
       {/* so it's adjacent to the chart it controls.                       */}
       <EuiTabs data-test-subj="alertManager-tabs">

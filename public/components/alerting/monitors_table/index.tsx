@@ -287,6 +287,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
               minSize="10%"
               mode={['custom', { position: 'top' }]}
               paddingSize="none"
+              scrollable={false}
               className="altFiltersPanel"
             >
               <MonitorsFiltersPanel
@@ -331,6 +332,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
               initialSize={85}
               minSize="400px"
               paddingSize="none"
+              scrollable={false}
               className="altContentPanel"
             >
               <MonitorsMainPanel
