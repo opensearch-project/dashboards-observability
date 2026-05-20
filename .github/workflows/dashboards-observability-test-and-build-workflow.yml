@@ -53,7 +53,8 @@ jobs:
           command: |
             chown -R 1000:1000 `pwd`
             cd ./OpenSearch-Dashboards/
-            su `id -un 1000` -c "source $NVM_DIR/nvm.sh && nvm use && node -v && yarn -v &&
+            su `id -un 1000` -c "source $NVM_DIR/nvm.sh && nvm install && node -v &&
+                                 npm i -g yarn@\$(node -p \"require('./package.json').engines.yarn\") && yarn -v &&
                                  yarn config set network-timeout 1000000 -g &&
                                  yarn osd bootstrap --single-version=loose"
 
@@ -61,7 +62,8 @@ jobs:
         run: |
           chown -R 1000:1000 `pwd`
           cd ./OpenSearch-Dashboards/
-          su `id -un 1000` -c "source $NVM_DIR/nvm.sh && nvm use && node -v && yarn -v &&
+          su `id -un 1000` -c "source $NVM_DIR/nvm.sh && nvm install && node -v &&
+                               npm i -g yarn@\$(node -p \"require('./package.json').engines.yarn\") && yarn -v &&
                                cd plugins/dashboards-observability &&
                                yarn osd bootstrap --single-version=loose && yarn test --coverage --maxWorkers=100%"
 
@@ -76,7 +78,8 @@ jobs:
         run: |
           chown -R 1000:1000 `pwd`
           cd ./OpenSearch-Dashboards/
-          su `id -un 1000` -c "source $NVM_DIR/nvm.sh && nvm use && node -v && yarn -v &&
+          su `id -un 1000` -c "source $NVM_DIR/nvm.sh && nvm install && node -v &&
+                               npm i -g yarn@\$(node -p \"require('./package.json').engines.yarn\") && yarn -v &&
                                cd plugins/dashboards-observability &&
                                yarn build && mv ./build/*.zip ./build/${{ env.PLUGIN_NAME }}-${{ env.OPENSEARCH_PLUGIN_VERSION }}.zip"
 
