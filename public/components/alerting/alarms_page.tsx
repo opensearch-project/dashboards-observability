@@ -44,7 +44,6 @@ import { NotificationRoutingPanel } from './notification_routing_panel';
 // Phase 2: import { SuppressionRulesPanel } from './suppression_rules_panel';
 import { CreateLogsMonitor, LogsMonitorFormState } from './create_logs_monitor';
 import { CreateMetricsMonitor, MetricsMonitorFormState } from './create_metrics_monitor';
-// Phase 2: import SloListing from './slo_listing';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { useAlerts } from './hooks/use_alerts';
 import { useMonitorMutations } from './hooks/use_monitor_mutations';

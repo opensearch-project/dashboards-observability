@@ -60,12 +60,12 @@ const probeBody = schema.object({
   ),
 });
 
-export interface ProbeSamplePoint {
+interface ProbeSamplePoint {
   t: number;
   v: number;
 }
 
-export interface ProbeSliResponse {
+interface ProbeSliResponse {
   goodCount?: number;
   totalCount?: number;
   sliRatio?: number;

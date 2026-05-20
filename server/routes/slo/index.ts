@@ -23,7 +23,6 @@ import type { DatasourceDiscoveryService } from '../../services/alerting/datasou
 import type { DirectQueryPrometheusBackend } from '../../services/alerting/directquery_prometheus_backend';
 import type { RulerClient } from '../../services/slo/ruler_client';
 import type { RuleHealthChecker } from '../../services/slo/rule_health_checker';
-import type { SloReconciler } from '../../services/slo/reconciler';
 import {
   handleCreateSLO,
   handleDeleteSLO,
@@ -38,8 +37,6 @@ import {
   handleUpdateSLO,
 } from './handlers';
 import { registerProbeSliRoute } from './probe_sli';
-import { registerSloReconcileRoute } from './reconcile_route';
-import { registerSloAdoptionRoutes } from './adoption_route';
 import { registerSloAggregateRoute } from './aggregate_route';
 
 /**
@@ -496,11 +493,8 @@ export interface RegisterSloRoutesOptions {
   discoveryService?: DatasourceDiscoveryService;
   prometheusBackend?: DirectQueryPrometheusBackend;
   ruleHealthChecker?: RuleHealthChecker;
-  reconciler?: SloReconciler;
   /** Phase 3 (W3.6) — gates fingerprint-keyed selectors on the aggregator. */
   ruleDedupEnabled?: boolean;
-  /** Phase 4 (W4.6) — gates `_orphans`, `_recover`, `_clone` adoption endpoints. Default false. */
-  ruleAdoptionEnabled?: boolean;
 }
 
 export function registerSloRoutes(options: RegisterSloRoutesOptions) {
@@ -513,9 +507,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
     discoveryService,
     prometheusBackend,
     ruleHealthChecker,
-    reconciler,
     ruleDedupEnabled = false,
-    ruleAdoptionEnabled = false,
   } = options;
   if (prometheusBackend) {
     registerProbeSliRoute(router, logger, prometheusBackend, datasourceService, discoveryService);
@@ -974,35 +966,4 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       });
     }
   );
-
-  // --------------------------------------------------------------------------
-  // W2.4 — admin reconcile endpoint
-  //
-  // Registered unconditionally. When `reconciler` is undefined the route
-  // returns 501 via `handleReconcile` so tests / smoke probes can always
-  // hit the path.
-  // --------------------------------------------------------------------------
-  registerSloReconcileRoute(router, reconciler, discoveryService, logger);
-
-  // --------------------------------------------------------------------------
-  // W4.6 — adoption endpoints (`_orphans`, `_recover`, `_clone`).
-  //
-  // Registered unconditionally; each handler applies the 412 Precondition-
-  // Failed feature-flag gate (`ruleDedup` AND `ruleAdoption`) before any
-  // downstream call. When the dependency set is incomplete (e.g. no
-  // reconciler wired), the handlers surface a 501 of their own rather than
-  // having the route stop registering — so the path is always present for
-  // smoke probes and UI error surfaces don't have to branch on 404-vs-412.
-  // --------------------------------------------------------------------------
-  registerSloAdoptionRoutes({
-    router,
-    sloService,
-    logger,
-    rulerClient,
-    datasourceService,
-    discoveryService,
-    reconciler,
-    ruleDedupEnabled,
-    ruleAdoptionEnabled,
-  });
 }

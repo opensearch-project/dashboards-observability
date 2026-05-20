@@ -21,7 +21,6 @@ import type {
   SloDocument,
   SloLiveStatus,
   SloListFilters,
-  SloSpec,
   SloSummary,
   SloUpdateInput,
 } from '../../../../../common/slo/slo_types';
@@ -112,115 +111,6 @@ export function extractRulerErrorEnvelope(err: unknown): SloRulerErrorEnvelope |
     };
   }
   return null;
-}
-
-// ============================================================================
-// Phase 4 Batch 3 — adoption endpoint types (browser-side mirror of the
-// server contract). Kept structurally identical to the handler shapes in
-// `server/routes/slo/handlers.ts` and `server/routes/slo/adoption_route.ts`
-// so the client compiles before the deeper B2A / B2B types are re-exported
-// from `common/slo/slo_adoption_types.ts`. See the orchestrator plan
-// (Phase 4 W4.6) for the authoritative contract.
-// ============================================================================
-
-/** Outcome of the server's `verifyProvenance` on an orphan row. */
-export type OrphanSpecIntegrity = 'ok' | 'mismatch' | 'unsupported_schema';
-
-/**
- * Row-shape for the `_orphans.candidates` array. Fields match the envelope
- * `handleListOrphans` synthesises in `server/routes/slo/handlers.ts`.
- */
-export interface OrphanCandidate {
-  sloId: string;
-  datasourceId: string;
-  workspaceId: string;
-  namespace: string;
-  groupName: string;
-  spec: SloSpec;
-  specSha256: string;
-  specIntegrity: OrphanSpecIntegrity;
-  fingerprints: string[];
-  tombstoned: boolean;
-  tombstoneCreatedAt?: string;
-}
-
-/** Row-shape for `_orphans.unknowns` — informational, no actions. */
-export interface OrphanUnknown {
-  datasourceId: string;
-  namespace: string;
-  groupName: string;
-  diagnostic?: string;
-  /**
-   * Populated when the detector found an alert-provenance annotation on the
-   * group but rejected it — today only the schemaVersion-mismatch path lands
-   * here, and only when the payload was parseable JSON. The UI renders an
-   * "upgrade plugin" affordance on rows where `specIntegrity ===
-   * 'unsupported_schema'`.
-   */
-  sourceSloId?: string;
-  sourceWorkspaceId?: string;
-  schemaVersion?: number;
-  specIntegrity?: OrphanSpecIntegrity;
-}
-
-export interface OrphanListResponse {
-  candidates: OrphanCandidate[];
-  unknowns: OrphanUnknown[];
-}
-
-export interface RecoverRequestBody {
-  sloId: string;
-  datasourceId: string;
-  workspaceId?: string;
-  acknowledgeTombstone?: boolean;
-}
-
-export interface RecoverRefcountChange {
-  fingerprint: string;
-  previousRefcount: number;
-  newRefcount: number;
-}
-
-export interface RecoverResponseBody {
-  slo: SloDocument;
-  tombstoneCleared: boolean;
-  refcountChanges: RecoverRefcountChange[];
-}
-
-/**
- * Envelope returned by the 412 feature-flag gate in `adoption_route.ts`.
- * Populated into `IHttpFetchError.body.attributes` by OSD's `res.customError`
- * pathway.
- */
-export interface PreconditionFailedEnvelope {
-  error: 'PRECONDITION_FAILED';
-  message: string;
-  missingFlags: Array<'ruleDedup' | 'ruleAdoption'>;
-}
-
-/**
- * Narrow an unknown caught error to the 412 / Precondition-Failed shape the
- * adoption endpoints return when feature flags are off. Uses the same
- * `body.attributes` unwrap pattern as `extractRulerErrorEnvelope` above.
- */
-export function isPreconditionFailed(
-  err: unknown
-): err is {
-  response?: { status: 412 };
-  body?: { message: string; attributes?: PreconditionFailedEnvelope };
-} {
-  if (!err || typeof err !== 'object') return false;
-  const rec = err as {
-    response?: { status?: unknown };
-    body?: { attributes?: unknown };
-  };
-  const status = rec.response?.status;
-  const attrs = rec.body?.attributes as { error?: unknown } | undefined;
-  // Prefer status-code match when OSD sets it; fall back to the envelope
-  // `error === 'PRECONDITION_FAILED'` so tests can exercise either axis.
-  if (status === 412) return true;
-  if (attrs && typeof attrs === 'object' && attrs.error === 'PRECONDITION_FAILED') return true;
-  return false;
 }
 
 /** Convert filter array/boolean fields to the string form the server expects. */
@@ -320,21 +210,5 @@ export class SloApiClient {
 
   getRuleHealth(id: string): Promise<RuleHealthResponse> {
     return this.http.get(`${SLO_BASE}/${encodeURIComponent(id)}/rule_health`);
-  }
-
-  // ==========================================================================
-  // Phase 4 Batch 3 (W4.8 / W4.9) — adoption admin endpoints.
-  // The feature-flag gate lives server-side; callers treat a 412 response as
-  // "feature disabled" via `isPreconditionFailed(err)` above.
-  // ==========================================================================
-
-  async listOrphans(datasourceId?: string): Promise<OrphanListResponse> {
-    const query: Record<string, string> = {};
-    if (datasourceId) query.datasourceId = datasourceId;
-    return this.http.get(`${SLO_BASE}/_orphans`, { query });
-  }
-
-  async recoverSlo(input: RecoverRequestBody): Promise<RecoverResponseBody> {
-    return this.http.post(`${SLO_BASE}/_recover`, { body: JSON.stringify(input) });
   }
 }

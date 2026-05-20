@@ -19,7 +19,6 @@ import { SloListingPage } from './slo_listing_page';
 import { SloWizardPage } from './slo_wizard_page';
 import { SloDetailPage } from './slo_detail_page';
 import { SloSuggestPage } from './slo_suggest_page';
-import { SloAdoptionPage } from './adoption';
 import { SloApiClient } from './slo_api_client';
 
 export interface SlosPageProps {
@@ -54,15 +53,6 @@ export const SlosPage: React.FC<SlosPageProps> = ({
         </Route>
         <Route exact path="/slos/suggest">
           <SloSuggestPage
-            apiClient={apiClient}
-            http={http}
-            chrome={chrome}
-            notifications={notifications}
-            parentBreadcrumb={parentBreadcrumb}
-          />
-        </Route>
-        <Route exact path="/slos/adoption">
-          <SloAdoptionPage
             apiClient={apiClient}
             http={http}
             chrome={chrome}

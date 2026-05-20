@@ -78,15 +78,12 @@ export interface AlertProvenance {
  * Compute SHA-256 of a canonical-JSON stringification of the spec. Object
  * keys are sorted at every level; array order is preserved. Returned as
  * lowercase hex.
- *
- * The canonicalization MUST stay identical between `buildAlertProvenance`
- * time and Phase 4's integrity check — that's the point of exporting it.
  */
-export function computeSpecSha256(spec: SloSpec): string {
+function computeSpecSha256(spec: SloSpec): string {
   return createHash('sha256').update(canonicalJson(spec)).digest('hex');
 }
 
-export interface BuildAlertProvenanceInput {
+interface BuildAlertProvenanceInput {
   pluginVersion: string;
   sloId: string;
   workspaceId: string;
@@ -169,34 +166,6 @@ export function buildSentinelAlert(sloId: string, provenance: AlertProvenance): 
   };
 }
 
-/**
- * Parse an alert-provenance annotation value back to a typed object.
- * Returns `null` on malformed JSON or on shape mismatch (wrong
- * schemaVersion, missing required field). Phase 4's adoption path treats a
- * `null` return as "this rule group wasn't emitted by us (or was emitted
- * by an unsupported schema version)".
- */
-export function parseAlertProvenance(annotationValue: string): AlertProvenance | null {
-  const parsed = safeJsonParse(annotationValue);
-  if (!parsed || typeof parsed !== 'object') return null;
-  const obj = parsed as Partial<AlertProvenance>;
-  if (obj.schemaVersion !== PROVENANCE_SCHEMA_VERSION) return null;
-  if (
-    typeof obj.pluginVersion !== 'string' ||
-    typeof obj.sloId !== 'string' ||
-    typeof obj.workspaceId !== 'string' ||
-    typeof obj.datasourceId !== 'string' ||
-    typeof obj.createdAt !== 'string' ||
-    typeof obj.updatedAt !== 'string' ||
-    typeof obj.specSha256 !== 'string' ||
-    !obj.spec ||
-    typeof obj.spec !== 'object'
-  ) {
-    return null;
-  }
-  return parsed as AlertProvenance;
-}
-
 // ============================================================================
 // Helpers
 // ============================================================================
@@ -214,14 +183,6 @@ function sortKeys(value: unknown): unknown {
     out[key] = sortKeys(obj[key]);
   }
   return out;
-}
-
-function safeJsonParse(input: string): unknown {
-  try {
-    return JSON.parse(input);
-  } catch {
-    return null;
-  }
 }
 
 function truncateName(input: string, max: number): string {

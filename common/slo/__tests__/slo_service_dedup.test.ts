@@ -222,7 +222,6 @@ describe('SloService dedup — create (W3.8)', () => {
       [spec.objectives[0].name]: fp,
     });
     expect(promProv?.alertGroupName).toBe(alertGroupName);
-    expect(promProv?.needsRedeploy).toBe(false);
   });
 
   it('second create sharing the same fingerprint: ref 1→2, recording NOT re-upserted', async () => {

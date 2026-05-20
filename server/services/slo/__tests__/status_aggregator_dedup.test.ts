@@ -96,7 +96,6 @@ function dedupDoc(
         rulerNamespace: 'slo-generated-default',
         recordingFingerprints: fps,
         alertGroupName: `slo:alerts:checkout_group_${id}`,
-        needsRedeploy: false,
       },
     },
   };

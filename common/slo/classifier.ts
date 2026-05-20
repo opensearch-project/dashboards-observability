@@ -52,14 +52,14 @@ export function classifySloKind(slo: SloSummary): CanonicalKind | undefined {
   return undefined;
 }
 
-export function kindSide(kind: CanonicalKind | undefined): 'availability' | 'latency' | undefined {
+function kindSide(kind: CanonicalKind | undefined): 'availability' | 'latency' | undefined {
   if (!kind) return undefined;
   if (kind.endsWith('-availability')) return 'availability';
   if (kind.endsWith('-latency')) return 'latency';
   return undefined;
 }
 
-export function emptyBucket(): SloHealthBucket {
+function emptyBucket(): SloHealthBucket {
   return {
     total: 0,
     ok: 0,

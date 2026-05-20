@@ -290,25 +290,6 @@ export interface PrometheusProvisioning {
    * `slo:alerts:<slug>_<suffix>`.
    */
   alertGroupName?: string;
-  /**
-   * Phase 3 (W3.5 migration) — set by the slo_v2 migration when an existing
-   * SO is rewritten to the new shape. W3.10 SloRedeployTask consumes this
-   * flag during plugin start, upserts the new groups, deletes the old
-   * monolithic group, and clears the flag.
-   */
-  needsRedeploy?: boolean;
-  /**
-   * Phase 4 (W4.4 / W4.5) — stamped when the SO was materialized from an
-   * orphan adoption flow rather than a fresh create. Absent for normal
-   * creates; surfaced to the UI so users can tell a recovered SLO from a
-   * hand-authored one. Does not affect rule generation.
-   */
-  adoptionSource?: {
-    source: 'recover' | 'clone';
-    recoveredAt: string;
-    sourceSloId?: string;
-    sourceDatasourceId?: string;
-  };
 }
 
 /** Reserved for P2. */

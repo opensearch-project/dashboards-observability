@@ -913,7 +913,7 @@ interface SuggestionInlineRowProps {
   rowStatusMessage?: string;
 }
 
-export const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
+const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
   suggestion,
   selected,
   onToggle,

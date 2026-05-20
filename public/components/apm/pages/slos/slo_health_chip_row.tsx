@@ -19,14 +19,14 @@ import { i18n } from '@osd/i18n';
 import type { SloHealthBucket } from './slo_health_summary';
 import { TABULAR_NUMS_STYLE } from '../../../../../common/slo/format';
 
-export interface ChipSpec {
+interface ChipSpec {
   key: 'breached' | 'warning' | 'noData' | 'ok' | 'disabled';
   color: 'danger' | 'warning' | 'subdued' | 'success' | 'default';
   label: (n: number) => string;
   count: number;
 }
 
-export function chipSpecsForBucket(b: SloHealthBucket): ChipSpec[] {
+function chipSpecsForBucket(b: SloHealthBucket): ChipSpec[] {
   // `rules_missing` folds into breached (both danger); `stale` folds into
   // noData (both subdued). Keeps the row at exactly five chips for layout
   // stability across refetches.
