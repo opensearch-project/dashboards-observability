@@ -4,35 +4,32 @@
  */
 
 /**
- * Root mount for the SLO/SLI app. Hash routes:
- *   /slos             — listing
- *   /slos/create      — wizard
- *   /slos/:id         — detail view
+ * Root mount for the SLO/SLI app under Application Monitoring.
+ * Hash routes:
+ *   /slos                       — listing
+ *   /slos/create                — template selector (picks a template, then opens wizard)
+ *   /slos/create/:templateId    — wizard prefilled from the named template
+ *   /slos/:id                   — detail view
  */
 
 import React, { useMemo } from 'react';
 import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
-import type {
-  ChromeStart,
-  HttpStart,
-  NotificationsStart,
-} from '../../../../../../../src/core/public';
-import { SloApiClient } from './slo_api_client';
+import { ChromeStart, HttpStart, NotificationsStart } from '../../../../../../../src/core/public';
 import { SloListingPage } from './slo_listing_page';
 import { SloWizardPage } from './slo_wizard_page';
 import { SloDetailPage } from './slo_detail_page';
+import { SloSuggestPage } from './slo_suggest_page';
+import { SloAdoptionPage } from './adoption';
+import { SloApiClient } from './slo_api_client';
 
 export interface SlosPageProps {
   http: HttpStart;
   chrome: ChromeStart;
   notifications: NotificationsStart;
   parentBreadcrumb: { text: string; href: string };
-  /**
-   * Trace Analytics DepsStart bag spread through by the ApmConfigProvider
-   * wrapper in `app.tsx`. Shape matches the ApmServicesProps / ApmApplicationMapProps
-   * contract — declare only the field we actually use.
-   */
+  /** Injected by app.tsx via spread; consumed by the ApmConfigProvider wrapper. */
   DepsStart?: { data?: unknown };
+  [key: string]: unknown;
 }
 
 export const SlosPage: React.FC<SlosPageProps> = ({
@@ -49,12 +46,39 @@ export const SlosPage: React.FC<SlosPageProps> = ({
         <Route exact path="/slos">
           <SloListingPage
             apiClient={apiClient}
+            http={http}
+            chrome={chrome}
+            notifications={notifications}
+            parentBreadcrumb={parentBreadcrumb}
+          />
+        </Route>
+        <Route exact path="/slos/suggest">
+          <SloSuggestPage
+            apiClient={apiClient}
+            http={http}
+            chrome={chrome}
+            notifications={notifications}
+            parentBreadcrumb={parentBreadcrumb}
+          />
+        </Route>
+        <Route exact path="/slos/adoption">
+          <SloAdoptionPage
+            apiClient={apiClient}
+            http={http}
             chrome={chrome}
             notifications={notifications}
             parentBreadcrumb={parentBreadcrumb}
           />
         </Route>
         <Route exact path="/slos/create">
+          <SloWizardPage
+            apiClient={apiClient}
+            chrome={chrome}
+            notifications={notifications}
+            parentBreadcrumb={parentBreadcrumb}
+          />
+        </Route>
+        <Route exact path="/slos/create/:templateId">
           <SloWizardPage
             apiClient={apiClient}
             chrome={chrome}
@@ -70,7 +94,7 @@ export const SlosPage: React.FC<SlosPageProps> = ({
             parentBreadcrumb={parentBreadcrumb}
           />
         </Route>
-        <Route path="*">
+        <Route>
           <Redirect to="/slos" />
         </Route>
       </Switch>

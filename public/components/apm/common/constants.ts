@@ -146,6 +146,7 @@ export const SERVICE_DETAILS_CONSTANTS = {
     OVERVIEW: 'overview',
     OPERATIONS: 'operations',
     DEPENDENCIES: 'dependencies',
+    SLOS: 'slos',
   } as const,
 
   // Table pagination

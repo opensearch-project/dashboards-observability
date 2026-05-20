@@ -27,7 +27,7 @@
  * server routes without reaching across layers.
  */
 
-import type { Datasource } from '../types/alerting';
+import type { Datasource } from '../types/alerting/types';
 
 /**
  * Resolver contract. Structural on purpose so both the server-side

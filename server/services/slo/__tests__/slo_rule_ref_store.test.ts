@@ -147,7 +147,6 @@ const BASE_INPUT = {
 const expectedId = sloRuleRefId(
   BASE_INPUT.workspaceId,
   BASE_INPUT.datasourceId,
-  BASE_INPUT.fingerprintVersion,
   BASE_INPUT.fingerprint
 );
 
@@ -192,9 +191,8 @@ describe('SloRuleRefStore', () => {
       expect(doc.attributes.refcount).toBe(2);
     });
 
-    it('throws SloRuleRefConflictError after the retry budget is exhausted', async () => {
-      // MAX_RETRIES = 5; a conflictCount of 5 saturates every attempt.
-      const { store } = makeStore({ conflictCount: 5 });
+    it('throws SloRuleRefConflictError after 3 exhausted retries', async () => {
+      const { store } = makeStore({ conflictCount: 3 });
       await store.incrementRef(BASE_INPUT); // create ok
       await expect(store.incrementRef(BASE_INPUT)).rejects.toBeInstanceOf(SloRuleRefConflictError);
     });
@@ -255,7 +253,6 @@ describe('SloRuleRefStore', () => {
       const ok = await store.remove(
         BASE_INPUT.workspaceId,
         BASE_INPUT.datasourceId,
-        BASE_INPUT.fingerprintVersion,
         BASE_INPUT.fingerprint
       );
       expect(ok).toBe(true);
@@ -267,7 +264,6 @@ describe('SloRuleRefStore', () => {
       const ok = await store.remove(
         BASE_INPUT.workspaceId,
         BASE_INPUT.datasourceId,
-        BASE_INPUT.fingerprintVersion,
         BASE_INPUT.fingerprint
       );
       expect(ok).toBe(false);
@@ -302,7 +298,7 @@ describe('SloRuleRefStore', () => {
   describe('get / listByDatasource', () => {
     it('get returns null when the ref is absent', async () => {
       const { store } = makeStore();
-      const res = await store.get('ws-x', 'ds-x', 'v1', 'abcdef0123456789');
+      const res = await store.get('ws-x', 'ds-x', 'abcdef0123456789');
       expect(res).toBeNull();
     });
 
@@ -312,7 +308,6 @@ describe('SloRuleRefStore', () => {
       const res = await store.get(
         BASE_INPUT.workspaceId,
         BASE_INPUT.datasourceId,
-        BASE_INPUT.fingerprintVersion,
         BASE_INPUT.fingerprint
       );
       expect(res?.attributes.refcount).toBe(1);

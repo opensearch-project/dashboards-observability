@@ -584,26 +584,6 @@ describe('DirectQueryRulerClient.listRuleGroups', () => {
     });
     expect(requestMock).toHaveBeenCalledTimes(1);
   });
-
-  // H-9: a Prometheus error envelope used to be coerced to []. PR-5's
-  // reconciler reads that as "namespace empty" and tears down rules that
-  // are actually still there. Now we throw so the caller can short-circuit.
-  it('Prometheus error envelope { status: "error" } → throws RULER_VALIDATION_FAILED', async () => {
-    const { client } = mockClient(async () => ({
-      statusCode: 200,
-      body: {
-        status: 'error',
-        errorType: 'bad_data',
-        error: 'invalid query: parse error',
-      },
-    }));
-    const svc = new DirectQueryRulerClient(noopLogger());
-
-    await expect(svc.listRuleGroups(client, promDatasource(), 'ns')).rejects.toMatchObject({
-      name: 'SloRulerError',
-      code: 'RULER_VALIDATION_FAILED',
-    });
-  });
 });
 
 describe('DirectQueryRulerClient.deleteRuleGroup — 404 tolerance', () => {

@@ -7,10 +7,6 @@
  * OSD route adapter for SLO CRUD. Routes are versioned under
  * `${OBSERVABILITY_BASE}/v1/slos` so a future schema change can coexist
  * with v1 behind a new prefix.
- *
- * PR 1 surface: list / create / get / update / delete / enable / disable /
- * preview / statuses. Repair, rule-health, reconcile, aggregate, adoption,
- * and probe-sli endpoints land in later PRs.
  */
 
 import { schema } from '@osd/config-schema';
@@ -21,23 +17,35 @@ import type {
   SloStatusAggregationContext,
 } from '../../../common/slo/slo_service';
 import { SloService, SloValidationError } from '../../../common/slo/slo_service';
-import type { AlertingOSClient, Datasource } from '../../../common/types/alerting';
-import { SavedObjectDatasourceService } from '../../services/alerting/saved_object_datasource_service';
+import type { AlertingOSClient, Datasource } from '../../../common/types/alerting/types';
+import type { InMemoryDatasourceService } from '../../services/alerting/datasource_service';
+import type { DatasourceDiscoveryService } from '../../services/alerting/datasource_discovery';
+import type { DirectQueryPrometheusBackend } from '../../services/alerting/directquery_prometheus_backend';
 import type { RulerClient } from '../../services/slo/ruler_client';
+import type { RuleHealthChecker } from '../../services/slo/rule_health_checker';
+import type { SloReconciler } from '../../services/slo/reconciler';
 import {
   handleCreateSLO,
   handleDeleteSLO,
   handleDisableSLO,
   handleEnableSLO,
+  handleGetRuleHealth,
   handleGetSLO,
   handleGetSLOStatuses,
   handleListSLOs,
   handlePreviewSLORules,
+  handleRepairSLO,
   handleUpdateSLO,
 } from './handlers';
+import { registerProbeSliRoute } from './probe_sli';
+import { registerSloReconcileRoute } from './reconcile_route';
+import { registerSloAdoptionRoutes } from './adoption_route';
+import { registerSloAggregateRoute } from './aggregate_route';
 
 /**
- * OSD context type with the optional `dataSource` plugin extension.
+ * OSD context type with the optional `dataSource` plugin extension. Same
+ * shape used by the alerting routes — declared here so SLO routes don't
+ * reach into the alerting tree for it.
  */
 type SloHandlerContext = RequestHandlerContext & {
   dataSource?: {
@@ -51,11 +59,18 @@ const SLO_BASE = `${OBSERVABILITY_BASE}/v1/slos`;
 
 // ============================================================================
 // @osd/config-schema shapes for validation at the boundary.
+// Note: `{ unknowns: 'allow' }` on nested objects lets us accept reserved P2
+// fields without validation churn as the schema evolves.
 // ============================================================================
 
 const dimensionSchema = schema.object({
   name: schema.string({ minLength: 1, maxLength: 128 }),
-  value: schema.string({ minLength: 1, maxLength: 256 }),
+  // Empty-string values are legitimate Prometheus matchers (`label=""`
+  // matches series where the label is absent or empty) — Data Prepper
+  // relies on `remoteService=""` to scope to server-side spans. The
+  // service-layer validator catches truly invalid inputs (control chars,
+  // unsafe chars) — let the route layer accept the empty case.
+  value: schema.string({ maxLength: 256 }),
 });
 
 const burnRateSchema = schema.object({
@@ -129,8 +144,10 @@ const prometheusSliSchema = schema.object(
 const sliNodeSchema = schema.object(
   {
     type: schema.oneOf([schema.literal('single'), schema.literal('composite')]),
+    // Single arm — keys below. Composite reserved for P2; let the service layer reject.
     definition: schema.maybe(prometheusSliSchema),
     dimensions: schema.maybe(schema.arrayOf(dimensionSchema)),
+    // Composite arm keys (reserved)
     operator: schema.maybe(schema.oneOf([schema.literal('all'), schema.literal('any')])),
     members: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   },
@@ -207,8 +224,6 @@ const canonicalKindSchema = schema.oneOf([
 const sloSpecSchema = schema.object(
   {
     datasourceId: schema.string({ minLength: 1 }),
-    // workspaceId is server-stamped; clients may send it but it's overwritten.
-    workspaceId: schema.maybe(schema.string()),
     name: schema.string({ minLength: 1, maxLength: 128 }),
     description: schema.maybe(schema.string()),
     enabled: schema.boolean(),
@@ -241,13 +256,11 @@ const sloSpecSchema = schema.object(
  * but every top-level field is optional so partial patches still validate.
  * Inner shapes stay strict — a field that *is* sent must match the strict
  * shape, so a malformed `objectives[i]` or `sli` can't land at the service
- * via a typo. Field-level `unknowns: 'allow'` is preserved on inner shapes
- * to stay forgiving of older clients that send extra keys.
+ * via a typo.
  */
 const sloSpecPartialSchema = schema.object(
   {
     datasourceId: schema.maybe(schema.string({ minLength: 1 })),
-    workspaceId: schema.maybe(schema.string()),
     name: schema.maybe(schema.string({ minLength: 1, maxLength: 128 })),
     description: schema.maybe(schema.string()),
     enabled: schema.maybe(schema.boolean()),
@@ -284,67 +297,69 @@ const createBody = schema.object({
   spec: sloSpecSchema,
 });
 
+// Update accepts a partial spec — consumer supplies only the fields they're
+// changing plus the version for optimistic concurrency. Inner shapes stay
+// strict via `sloSpecPartialSchema` so a malformed `sli` / `objectives[i]`
+// can't bypass route-level validation by exploiting a wide-open `spec`.
 const updateBody = schema.object({
   version: schema.number({ min: 1 }),
   spec: sloSpecPartialSchema,
 });
 
+// Preview accepts an incomplete spec so the wizard can render the rule YAML
+// as the user fills the form. Uses the same partial schema as PUT — the
+// service's `validateSloSpec` still rejects truly-broken specs and the
+// handler returns a 400 with field-keyed errors.
 const previewBody = schema.object({
   id: schema.maybe(schema.string()),
-  // Preview is dry-run but the user expects the same field-level rejections
-  // they'd hit on create — share the strict spec schema so the wizard can't
-  // compose a preview with a malformed `objectives[i]` or unknown `mode`.
-  spec: sloSpecSchema,
+  spec: sloSpecPartialSchema,
 });
 
 // ============================================================================
-// Acting user
-// ============================================================================
-
-/**
- * FIXME(pr-2): extract the acting user from the request (OpenSearch
- * security plugin exposes it via `req.auth`, or the `securitytenant` /
- * `Authorization` headers when the plugin is disabled). PR 1 stamps a
- * sentinel so audit rows can be re-attributed once the resolver lands —
- * every mutation's createdBy / updatedBy comes through here.
- */
-const SLO_ACTING_USER_PLACEHOLDER = 'osd-user';
-function resolveActingUser(_req: {
-  headers?: Record<string, string | string[] | undefined>;
-}): string {
-  return SLO_ACTING_USER_PLACEHOLDER;
-}
-
-// ============================================================================
-// Deploy context + status context builders
+// Registration
 // ============================================================================
 
 /**
  * Build the per-request SloDeployContext the service needs to dual-write to
  * the ruler on create/update/delete.
  *
- * When the caller genuinely didn't ask for a ruler write (no ruler client, no
- * datasource service, no datasourceId), returns undefined and the SO-only
- * path runs. When the caller *did* supply a datasourceId but we can't
- * resolve it to a DirectQuery-Prometheus datasource, throws
- * SloValidationError so the route responds 400 with a field-keyed message.
+ * Returns `undefined` (no ruler call, but the SO still writes) ONLY when the
+ * caller genuinely didn't ask for a ruler write — i.e. the plugin is running
+ * without a ruler client or datasource service (tests, offline dev), or the
+ * request carried no `datasourceId` at all.
  *
- * `workspaceId` resolution: for now we use `'default'` since OSD workspace
- * context isn't plumbed onto the deploy context. A follow-up PR will pull
- * the real workspace id from the request scope; the AMP invariant (every
- * rule group for workspace W writes to `slo-generated-<W>`) already resolves
- * through `sloRulerNamespaceFor(workspaceId)` so the change is isolated to
- * this one call site.
+ * If the caller did supply a `datasourceId` but we can't resolve it — the
+ * datasource isn't discovered, or it isn't a DirectQuery Prometheus — throws
+ * `SloValidationError`. This prevents the prior failure mode where a
+ * typo'd datasource ID produced a silent no-op: the SO saved, the UI
+ * reported "N rules provisioned", but Cortex never received the rule group.
+ *
+ * TODO(W1.5): derive `workspaceId` from OSD's workspace scope once the SLO
+ * spec carries a workspace reference. For now the datasource ID doubles as a
+ * tenant discriminator — safe because `slo-generated-<ds>` is deterministic
+ * and unique per Prometheus connection. Cross-ref memo §Workspace → Cortex
+ * tenant mapping.
  */
 async function buildDeployContext(
   ctx: SloHandlerContext,
   datasourceId: string | undefined,
   rulerClient: RulerClient | undefined,
+  datasourceService: InMemoryDatasourceService | undefined,
+  discoveryService: DatasourceDiscoveryService | undefined,
   logger: Logger
 ): Promise<SloDeployContext | undefined> {
-  if (!rulerClient || !datasourceId) return undefined;
+  if (!rulerClient || !datasourceService || !datasourceId) return undefined;
 
-  const datasourceService = new SavedObjectDatasourceService(ctx.core.savedObjects.client, logger);
+  // Hydrate the datasource registry from OSD saved objects before the lookup.
+  // The alerting routes populate the registry lazily on their first call; SLO
+  // routes can arrive first on cold start (e.g., the user lands on the SLO
+  // detail page directly after a restart). Without this the lookup would
+  // spuriously report "not registered" even though the datasource exists in
+  // the OSD saved-object store.
+  if (discoveryService) {
+    await discoveryService.ensure(ctx);
+  }
+
   const ds = await datasourceService.get(datasourceId);
   if (!ds) {
     logger.warn(
@@ -363,6 +378,7 @@ async function buildDeployContext(
     });
   }
 
+  // Local-cluster fallback (no MDS) — the alerting routes use the same pattern.
   const client: AlertingOSClient =
     ds.mdsId && ctx.dataSource
       ? await ctx.dataSource.opensearch.getClient(ds.mdsId)
@@ -372,31 +388,37 @@ async function buildDeployContext(
     ruler: rulerClient,
     client,
     datasource: ds as Datasource,
-    // FIXME(pr-2): this is the single site where PR 1 hard-codes the
-    // deploy-context workspace id. PR 2 will resolve the real workspace
-    // from OSD's request scope (`core.workspace.resolveRequest(req)`) and
-    // may refuse the write when the workspace isn't resolvable. The
-    // service layer already threads the value through `sloRulerNamespaceFor`
-    // so the AMP invariant ("every rule group for workspace W writes to
-    // `slo-generated-<W>`") holds regardless of how this value was
-    // obtained; PR 1 ships the plumbing, PR 2 ships the resolver. See the
-    // cross-workspace integration test for the invariant's service-layer
-    // contract (`common/slo/__tests__/slo_workspace_isolation.integration.test.ts`).
-    workspaceId: 'default',
+    // TODO: pull real workspaceId from OSD request scope once plumbed.
+    workspaceId: datasourceId,
   };
 }
 
+/**
+ * Wrap `buildDeployContext` so the route adapter can distinguish "no deploy
+ * intended" (undefined → continue, SO-only write) from "deploy requested but
+ * the datasource was unresolvable" (validation error → 400 with field-keyed
+ * message the wizard can render inline at `spec.datasourceId`).
+ */
 async function tryBuildDeployContext(
   ctx: SloHandlerContext,
   datasourceId: string | undefined,
   rulerClient: RulerClient | undefined,
+  datasourceService: InMemoryDatasourceService | undefined,
+  discoveryService: DatasourceDiscoveryService | undefined,
   logger: Logger
 ): Promise<
   | { deploy: SloDeployContext | undefined; errorResponse?: undefined }
   | { deploy?: undefined; errorResponse: { status: number; body: Record<string, unknown> } }
 > {
   try {
-    const deploy = await buildDeployContext(ctx, datasourceId, rulerClient, logger);
+    const deploy = await buildDeployContext(
+      ctx,
+      datasourceId,
+      rulerClient,
+      datasourceService,
+      discoveryService,
+      logger
+    );
     return { deploy };
   } catch (e) {
     if (e instanceof SloValidationError) {
@@ -411,43 +433,105 @@ async function tryBuildDeployContext(
   }
 }
 
+/**
+ * Build a per-request context for the live-status aggregator. Uses the same
+ * OSD scoped client as the deploy context + the alerting datasource service
+ * to resolve `directQueryName` per SLO.
+ *
+ * Returns undefined when the alerting datasource service isn't available
+ * (e.g. offline dev) — SloService falls through to the stub.
+ *
+ * TODO(W3.1 follow-up): pull real workspaceId from OSD request scope once
+ * plumbed. Today we use the alerting default workspace ('default').
+ */
 function buildStatusContext(
   ctx: SloHandlerContext,
-  logger: Logger,
+  datasourceService: InMemoryDatasourceService | undefined,
+  discoveryService: DatasourceDiscoveryService | undefined,
+  ruleHealthChecker: RuleHealthChecker | undefined,
   ruleDedupEnabled?: boolean
 ): SloStatusAggregationContext | undefined {
+  if (!datasourceService) return undefined;
   const client = ctx.core.opensearch.client.asCurrentUser;
-  const datasourceService = new SavedObjectDatasourceService(ctx.core.savedObjects.client, logger);
   return {
     client,
-    // FIXME(pr-2): same as `buildDeployContext` — workspace id is hard-
-    // coded to 'default' in PR 1 and will be resolved from request scope
-    // in PR 2. Listing/status paths are read-only today; safe placeholder.
     workspaceId: 'default',
     resolveDatasource: async (datasourceId: string) => {
+      if (discoveryService) {
+        await discoveryService.ensure(ctx);
+      }
       const ds = await datasourceService.get(datasourceId);
       if (!ds) return undefined;
+      // If this datasource is MDS-scoped, prefer that client — but we only
+      // have one client per request here, so for P0 we just return the
+      // datasource with whatever scoped client the handler started with.
+      // This is equivalent to how read-path /api/alerting/unified/rules
+      // works today (single scoped client per request).
       return ds as Datasource;
     },
+    // W1.6 priority merge: if the health checker is available, the
+    // aggregator overlays `rules_missing` / `ruler_unreachable` on top of
+    // the sample-derived state. When absent (offline dev / tests), the
+    // aggregator falls through to the existing derivation.
+    healthChecker: ruleHealthChecker,
+    // Phase 3 (W3.6): propagate the dedup flag so the aggregator (W3.9) can
+    // pick fingerprint-keyed selectors when true.
     ruleDedupEnabled,
   };
 }
 
-// ============================================================================
-// Registration
-// ============================================================================
-
+/**
+ * Options bag for `registerSloRoutes`. Replaces the pre-Phase-4 positional
+ * signature (W3.6 left this as tech debt; Phase 4 W4.6 added a third new
+ * route group — the adoption endpoints — which made the positional form
+ * unmaintainable). Every field except `router`, `sloService`, and `logger`
+ * is optional so offline-dev and test wiring can omit downstream deps.
+ */
 export interface RegisterSloRoutesOptions {
   router: IRouter;
   sloService: SloService;
   logger: Logger;
   rulerClient?: RulerClient;
-  /** Gates fingerprint-keyed selectors on the aggregator (PR-3+). */
+  datasourceService?: InMemoryDatasourceService;
+  discoveryService?: DatasourceDiscoveryService;
+  prometheusBackend?: DirectQueryPrometheusBackend;
+  ruleHealthChecker?: RuleHealthChecker;
+  reconciler?: SloReconciler;
+  /** Phase 3 (W3.6) — gates fingerprint-keyed selectors on the aggregator. */
   ruleDedupEnabled?: boolean;
+  /** Phase 4 (W4.6) — gates `_orphans`, `_recover`, `_clone` adoption endpoints. Default false. */
+  ruleAdoptionEnabled?: boolean;
 }
 
 export function registerSloRoutes(options: RegisterSloRoutesOptions) {
-  const { router, sloService, logger, rulerClient, ruleDedupEnabled = false } = options;
+  const {
+    router,
+    sloService,
+    logger,
+    rulerClient,
+    datasourceService,
+    discoveryService,
+    prometheusBackend,
+    ruleHealthChecker,
+    reconciler,
+    ruleDedupEnabled = false,
+    ruleAdoptionEnabled = false,
+  } = options;
+  if (prometheusBackend) {
+    registerProbeSliRoute(router, logger, prometheusBackend, datasourceService, discoveryService);
+  }
+
+  // F1 — per-service aggregate rollup. Registered ahead of the list route so
+  // the `/_aggregate` path isn't shadowed by the `/{id}` catch-all.
+  registerSloAggregateRoute(router, sloService, logger, (ctx) =>
+    buildStatusContext(
+      ctx,
+      datasourceService,
+      discoveryService,
+      ruleHealthChecker,
+      ruleDedupEnabled
+    )
+  );
 
   router.get(
     {
@@ -472,15 +556,9 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
     },
     async (ctx, req, res) => {
       const q = req.query;
-      // Clamp at the route boundary so a malformed `?pageSize=99999999` fails
-      // fast before reaching the service-layer cap (100). NaN / non-positive
-      // values fall back to the service default.
-      const rawPage = q.page ? parseInt(q.page, 10) : NaN;
-      const rawPageSize = q.pageSize ? parseInt(q.pageSize, 10) : NaN;
       const filters = {
-        page: Number.isFinite(rawPage) && rawPage > 0 ? rawPage : undefined,
-        pageSize:
-          Number.isFinite(rawPageSize) && rawPageSize > 0 ? Math.min(rawPageSize, 100) : undefined,
+        page: q.page ? parseInt(q.page, 10) : undefined,
+        pageSize: q.pageSize ? parseInt(q.pageSize, 10) : undefined,
         datasourceId: q.datasourceId ? q.datasourceId.split(',').filter(Boolean) : undefined,
         state: q.state
           ? (q.state.split(',') as Array<
@@ -511,15 +589,18 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         mode: q.mode ? (q.mode.split(',') as Array<'active' | 'shadow'>) : undefined,
         search: q.search,
       };
-      const statusCtx = buildStatusContext(ctx as SloHandlerContext, logger, ruleDedupEnabled);
+      const statusCtx = buildStatusContext(
+        ctx as SloHandlerContext,
+        datasourceService,
+        discoveryService,
+        ruleHealthChecker,
+        ruleDedupEnabled
+      );
       const result = await handleListSLOs(sloService, filters, logger, statusCtx);
       if (result.status >= 400) {
         return res.customError({
           statusCode: result.status,
-          body: {
-            message: String((result.body as { error?: string }).error ?? 'Failed'),
-            attributes: result.body,
-          },
+          body: { message: String((result.body as { error?: string }).error ?? 'Failed') },
         });
       }
       return res.ok({ body: result.body });
@@ -527,10 +608,13 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
   );
 
   router.post({ path: SLO_BASE, validate: { body: createBody } }, async (ctx, req, res) => {
+    // TODO: once request auth context is wired, pull from req.auth.
     const built = await tryBuildDeployContext(
       ctx as SloHandlerContext,
       req.body?.spec?.datasourceId,
       rulerClient,
+      datasourceService,
+      discoveryService,
       logger
     );
     if (built.errorResponse) {
@@ -544,13 +628,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         },
       });
     }
-    const result = await handleCreateSLO(
-      sloService,
-      req.body,
-      resolveActingUser(req),
-      logger,
-      built.deploy
-    );
+    const result = await handleCreateSLO(sloService, req.body, 'osd-user', logger, built.deploy);
     if (result.status === 201) return res.ok({ body: result.body });
     return res.customError({
       statusCode: result.status,
@@ -582,15 +660,18 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       validate: { body: schema.object({ ids: schema.arrayOf(schema.string()) }) },
     },
     async (ctx, req, res) => {
-      const statusCtx = buildStatusContext(ctx as SloHandlerContext, logger, ruleDedupEnabled);
+      const statusCtx = buildStatusContext(
+        ctx as SloHandlerContext,
+        datasourceService,
+        discoveryService,
+        ruleHealthChecker,
+        ruleDedupEnabled
+      );
       const result = await handleGetSLOStatuses(sloService, req.body.ids, logger, statusCtx);
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({
         statusCode: result.status,
-        body: {
-          message: String((result.body as { error?: string }).error ?? 'Failed'),
-          attributes: result.body,
-        },
+        body: { message: String((result.body as { error?: string }).error ?? 'Failed') },
       });
     }
   );
@@ -601,15 +682,18 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       validate: { params: schema.object({ id: schema.string() }) },
     },
     async (ctx, req, res) => {
-      const statusCtx = buildStatusContext(ctx as SloHandlerContext, logger, ruleDedupEnabled);
+      const statusCtx = buildStatusContext(
+        ctx as SloHandlerContext,
+        datasourceService,
+        discoveryService,
+        ruleHealthChecker,
+        ruleDedupEnabled
+      );
       const result = await handleGetSLO(sloService, req.params.id, logger, statusCtx);
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({
         statusCode: result.status,
-        body: {
-          message: String((result.body as { error?: string }).error ?? 'Not found'),
-          attributes: result.body,
-        },
+        body: { message: String((result.body as { error?: string }).error ?? 'Not found') },
       });
     }
   );
@@ -623,11 +707,15 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       },
     },
     async (ctx, req, res) => {
+      // The update body may not carry datasourceId (partial spec); fetch the
+      // existing doc to resolve the datasource for the deploy context.
       const existing = await sloService.get(req.params.id);
       const built = await tryBuildDeployContext(
         ctx as SloHandlerContext,
         existing?.spec.datasourceId,
         rulerClient,
+        datasourceService,
+        discoveryService,
         logger
       );
       if (built.errorResponse) {
@@ -645,7 +733,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         sloService,
         req.params.id,
         req.body,
-        resolveActingUser(req),
+        'osd-user',
         logger,
         built.deploy
       );
@@ -667,31 +755,31 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
     },
     async (ctx, req, res) => {
       const existing = await sloService.get(req.params.id);
+      // Delete is ruler-first, SO-second — if there's a rule group to remove,
+      // we need a working deploy context (i.e. a resolvable datasource). An
+      // unresolvable datasource here surfaces to the user as a 409: dropping
+      // the SO while the rule group stays live in Cortex would leave dead
+      // alerts evaluating against the cluster.
       const built = await tryBuildDeployContext(
         ctx as SloHandlerContext,
         existing?.spec.datasourceId,
         rulerClient,
+        datasourceService,
+        discoveryService,
         logger
       );
-      // Tolerant DELETE: when the datasource has been removed out-of-band
-      // the deploy-context build returns a 400. Without this branch the
-      // user is wedged — they can't drop the orphan SO via the API and
-      // have to use saved-object management UI to clean up. Log a warn so
-      // ops can spot the dangling ruler state, then proceed without a
-      // deploy context. The service still throws
-      // `SloRulerTeardownRequiredError` if the SO carries a rule group,
-      // which is the safe default for an SLO that needs ruler teardown
-      // before its SO record can be dropped.
-      let deploy = built.deploy;
       if (built.errorResponse) {
-        logger.warn(
-          `SLO DELETE ${req.params.id}: datasource resolution failed (${
-            (built.errorResponse.body as { error?: string }).error ?? 'unknown'
-          }) — proceeding without a deploy context. The reconciler will sweep any orphan rule groups.`
-        );
-        deploy = undefined;
+        return res.customError({
+          statusCode: built.errorResponse.status,
+          body: {
+            message: String(
+              (built.errorResponse.body as { error?: string }).error ?? 'Delete failed'
+            ),
+            attributes: built.errorResponse.body,
+          },
+        });
       }
-      const result = await handleDeleteSLO(sloService, req.params.id, logger, deploy);
+      const result = await handleDeleteSLO(sloService, req.params.id, logger, built.deploy);
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({
         statusCode: result.status,
@@ -714,6 +802,8 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         ctx as SloHandlerContext,
         existing?.spec.datasourceId,
         rulerClient,
+        datasourceService,
+        discoveryService,
         logger
       );
       if (built.errorResponse) {
@@ -730,17 +820,14 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       const result = await handleEnableSLO(
         sloService,
         req.params.id,
-        resolveActingUser(req),
+        'osd-user',
         logger,
         built.deploy
       );
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({
         statusCode: result.status,
-        body: {
-          message: String((result.body as { error?: string }).error ?? 'Enable failed'),
-          attributes: result.body,
-        },
+        body: { message: String((result.body as { error?: string }).error ?? 'Enable failed') },
       });
     }
   );
@@ -756,6 +843,8 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         ctx as SloHandlerContext,
         existing?.spec.datasourceId,
         rulerClient,
+        datasourceService,
+        discoveryService,
         logger
       );
       if (built.errorResponse) {
@@ -772,18 +861,148 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       const result = await handleDisableSLO(
         sloService,
         req.params.id,
-        resolveActingUser(req),
+        'osd-user',
         logger,
         built.deploy
       );
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({
         statusCode: result.status,
+        body: { message: String((result.body as { error?: string }).error ?? 'Disable failed') },
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // W1.5 — Repair + rule_health
+  //
+  // Both routes require a resolved deploy context (a DirectQuery-Prometheus
+  // datasource that exists in the registry) AND a `ruleHealthChecker`. When
+  // the caller didn't supply a checker we still register the routes so tests
+  // can rely on the path being present; the handlers return 501 themselves.
+  // --------------------------------------------------------------------------
+  router.post(
+    {
+      path: `${SLO_BASE}/{id}/repair`,
+      validate: { params: schema.object({ id: schema.string() }) },
+    },
+    async (ctx, req, res) => {
+      const existing = await sloService.get(req.params.id);
+      if (!existing) {
+        return res.customError({
+          statusCode: 404,
+          body: { message: 'SLO not found' },
+        });
+      }
+      const built = await tryBuildDeployContext(
+        ctx as SloHandlerContext,
+        existing.spec.datasourceId,
+        rulerClient,
+        datasourceService,
+        discoveryService,
+        logger
+      );
+      if (built.errorResponse) {
+        return res.customError({
+          statusCode: built.errorResponse.status,
+          body: {
+            message: String(
+              (built.errorResponse.body as { error?: string }).error ?? 'Repair failed'
+            ),
+            attributes: built.errorResponse.body,
+          },
+        });
+      }
+      const result = await handleRepairSLO(sloService, req.params.id, logger, {
+        health: ruleHealthChecker,
+        deploy: built.deploy,
+      });
+      if (result.status === 200) return res.ok({ body: result.body });
+      return res.customError({
+        statusCode: result.status,
         body: {
-          message: String((result.body as { error?: string }).error ?? 'Disable failed'),
-          attributes: result.body,
+          message: String((result.body as { error?: string }).error ?? 'Repair failed'),
+          attributes: result.body as Record<string, unknown>,
         },
       });
     }
   );
+
+  router.get(
+    {
+      path: `${SLO_BASE}/{id}/rule_health`,
+      validate: { params: schema.object({ id: schema.string() }) },
+    },
+    async (ctx, req, res) => {
+      const existing = await sloService.get(req.params.id);
+      if (!existing) {
+        return res.customError({
+          statusCode: 404,
+          body: { message: 'SLO not found' },
+        });
+      }
+      const built = await tryBuildDeployContext(
+        ctx as SloHandlerContext,
+        existing.spec.datasourceId,
+        rulerClient,
+        datasourceService,
+        discoveryService,
+        logger
+      );
+      if (built.errorResponse) {
+        return res.customError({
+          statusCode: built.errorResponse.status,
+          body: {
+            message: String(
+              (built.errorResponse.body as { error?: string }).error ?? 'Rule health probe failed'
+            ),
+            attributes: built.errorResponse.body,
+          },
+        });
+      }
+      const result = await handleGetRuleHealth(sloService, req.params.id, logger, {
+        health: ruleHealthChecker,
+        deploy: built.deploy,
+      });
+      if (result.status === 200) return res.ok({ body: result.body });
+      return res.customError({
+        statusCode: result.status,
+        body: {
+          message: String((result.body as { error?: string }).error ?? 'Rule health probe failed'),
+          attributes: result.body as Record<string, unknown>,
+        },
+      });
+    }
+  );
+
+  // --------------------------------------------------------------------------
+  // W2.4 — admin reconcile endpoint
+  //
+  // Registered unconditionally. When `reconciler` is undefined the route
+  // returns 501 via `handleReconcile` so tests / smoke probes can always
+  // hit the path.
+  // --------------------------------------------------------------------------
+  registerSloReconcileRoute(router, reconciler, discoveryService, logger);
+
+  // --------------------------------------------------------------------------
+  // W4.6 — adoption endpoints (`_orphans`, `_recover`, `_clone`).
+  //
+  // Registered unconditionally; each handler applies the 412 Precondition-
+  // Failed feature-flag gate (`ruleDedup` AND `ruleAdoption`) before any
+  // downstream call. When the dependency set is incomplete (e.g. no
+  // reconciler wired), the handlers surface a 501 of their own rather than
+  // having the route stop registering — so the path is always present for
+  // smoke probes and UI error surfaces don't have to branch on 404-vs-412.
+  // --------------------------------------------------------------------------
+  registerSloAdoptionRoutes({
+    router,
+    sloService,
+    logger,
+    rulerClient,
+    datasourceService,
+    discoveryService,
+    reconciler,
+    ruleDedupEnabled,
+    ruleAdoptionEnabled,
+  });
 }

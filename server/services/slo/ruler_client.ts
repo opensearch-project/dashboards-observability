@@ -31,7 +31,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { dump as yamlDump, load as yamlLoad } from 'js-yaml';
-import type { AlertingOSClient, Datasource, Logger } from '../../../common/types/alerting';
+import type { AlertingOSClient, Datasource, Logger } from '../../../common/types/alerting/types';
 import type { GeneratedRule, GeneratedRuleGroup } from '../../../common/slo/slo_types';
 import { SloRulerError } from '../../../common/slo/slo_errors';
 
@@ -345,71 +345,15 @@ function isWrappedEmptyNamespaceError(err: unknown): boolean {
   const raw = err as { body?: unknown; meta?: { body?: unknown }; message?: string };
   const bodyCandidates: unknown[] = [raw?.body, raw?.meta?.body, raw?.message];
   for (const candidate of bodyCandidates) {
-    if (matchesEmptyNamespaceEnvelope(candidate)) return true;
-  }
-  return false;
-}
-
-/**
- * Parse the SQL plugin's wrapped-error envelope and look for the exact
- * `details` field that carries the upstream ruler status. Cortex returns
- * HTTP 404 with body `no rule groups found` when a namespace exists but
- * holds nothing; the SQL plugin re-wraps that as HTTP 400 with
- * `{ "type": "DataSourceClientException", "details": "Ruler request
- *   failed with code: 404. Error details: no rule groups found", ... }`.
- *
- * Pin to the typed `details` field rather than substring-sniffing the
- * full response so verbose stack traces or generic 404 templates that
- * happen to contain similar phrases don't reclassify a real validation
- * failure as "empty namespace".
- */
-function matchesEmptyNamespaceEnvelope(candidate: unknown): boolean {
-  let parsed: unknown = candidate;
-  if (typeof candidate === 'string') {
-    const trimmed = candidate.trim();
-    if (trimmed.length === 0) return false;
-    try {
-      parsed = JSON.parse(trimmed);
-    } catch {
-      // Fall back to substring-sniff on the original string so a
-      // non-JSON error envelope still benefits from the legacy heuristic.
-      const normalized = trimmed.toLowerCase();
-      return (
-        normalized.includes('no rule groups found') &&
-        normalized.includes('code: 404') &&
-        normalized.includes('ruler request failed')
-      );
+    const text = stringifyBody(candidate);
+    if (!text) continue;
+    const normalized = text.toLowerCase();
+    if (normalized.includes('no rule groups found')) return true;
+    if (normalized.includes('code: 404') && normalized.includes('ruler request failed')) {
+      return true;
     }
   }
-  if (!parsed || typeof parsed !== 'object') return false;
-  const details = extractWrappedDetails(parsed as Record<string, unknown>);
-  if (!details) return false;
-  const normalized = details.toLowerCase();
-  return (
-    normalized.includes('no rule groups found') &&
-    normalized.includes('code: 404') &&
-    normalized.includes('ruler request failed')
-  );
-}
-
-/**
- * Pull the `details` string out of either the flat or nested SQL plugin
- * error envelope. Real production responses are
- * `{ "status": 400, "error": { "type": "...", "details": "..." } }`;
- * some test fixtures collapse to `{ "details": "..." }`. Pin to the
- * typed `details` field — reading `message`/`error` (string) too would
- * let any 400 whose message mentions "no rule groups found" reclassify
- * as an empty namespace, which is the failure mode the JSON-envelope
- * check exists to prevent.
- */
-function extractWrappedDetails(record: Record<string, unknown>): string | null {
-  if (typeof record.details === 'string') return record.details;
-  const error = record.error;
-  if (error && typeof error === 'object' && !Array.isArray(error)) {
-    const inner = error as Record<string, unknown>;
-    if (typeof inner.details === 'string') return inner.details;
-  }
-  return null;
+  return false;
 }
 
 function extractHttpStatus(err: unknown): number {
@@ -486,11 +430,6 @@ function isGeneratedRule(rule: GeneratedRule | null): rule is GeneratedRule {
  * interval, rules, ... }, ... ] } }`. Cortex's ruler CRUD admin surface also
  * accepts `{ "<ns>": [ { name, interval, rules }, ... ] }`; some tests feed a
  * top-level array or a single group. Accept all four shapes.
- *
- * Throws `SloRulerError` when the body is a Prometheus error envelope
- * (`{ status: "error", errorType: "...", error: "..." }`). Otherwise the
- * reconciler (PR 5) would coerce the error to `[]` and start tearing
- * down rules it incorrectly thinks the ruler dropped.
  */
 function coerceRuleGroupList(doc: unknown): GeneratedRuleGroup[] {
   if (!doc) return [];
@@ -499,17 +438,6 @@ function coerceRuleGroupList(doc: unknown): GeneratedRuleGroup[] {
   }
   if (typeof doc === 'object') {
     const record = doc as Record<string, unknown>;
-    // Prometheus response envelope. `status === 'error'` => failure;
-    // throw rather than silently coercing to empty.
-    if (record.status === 'error') {
-      const errorType = typeof record.errorType === 'string' ? record.errorType : 'unknown_error';
-      const errorMsg = typeof record.error === 'string' ? record.error : '';
-      throw new SloRulerError(
-        'RULER_VALIDATION_FAILED',
-        0,
-        `Ruler returned ${errorType}: ${errorMsg}`
-      );
-    }
     // Prometheus response envelope: `{ data: { groups: [...] } }`.
     const data = record.data;
     if (data && typeof data === 'object' && !Array.isArray(data)) {

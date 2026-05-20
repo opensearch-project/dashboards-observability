@@ -226,8 +226,5 @@ function safeJsonParse(input: string): unknown {
 
 function truncateName(input: string, max: number): string {
   if (input.length <= max) return input;
-  // Iterate code points so a multibyte / surrogate-pair character at the
-  // boundary doesn't get sliced in half. Rule names are ASCII-constrained
-  // upstream, but this stays safe if a future migration loosens that.
-  return Array.from(input).slice(0, max).join('');
+  return input.slice(0, max);
 }

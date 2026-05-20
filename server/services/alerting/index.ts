@@ -30,6 +30,11 @@ export { HttpOpenSearchBackend } from './opensearch_backend';
 export { DirectQueryPrometheusBackend } from './directquery_prometheus_backend';
 export { PrometheusMetadataService } from './prometheus_metadata_service';
 export { SavedObjectDatasourceService } from './saved_object_datasource_service';
+// SLO routes/tests rely on the in-memory datasource service + discovery
+// helpers (followups' wiring carried these forward). Keep them exported
+// alongside the redesigned alerting backend.
+export { InMemoryDatasourceService } from './datasource_service';
+export { DatasourceDiscoveryService } from './datasource_discovery';
 
 export type {
   AlertManagerError,

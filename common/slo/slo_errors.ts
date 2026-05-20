@@ -41,9 +41,10 @@ export class SloVersionConflictError extends Error {
 }
 
 /**
- * Stable error codes for ruler dual-write failures. The wizard branches on
- * `code` to render a self-service message; the raw upstream body is
- * preserved so the user can read Cortex's own diagnostic.
+ * Stable error codes for ruler dual-write failures (W1.5, design memo
+ * "Error surface contract"). The wizard branches on `code` to render a
+ * self-service message; the raw upstream body is preserved so the user
+ * can read Cortex's own diagnostic (e.g. "invalid PromQL: parse error").
  */
 export type SloRulerErrorCode =
   | 'RULER_VALIDATION_FAILED'
@@ -53,9 +54,11 @@ export type SloRulerErrorCode =
 /**
  * Thrown when the ruler dual-write fails during SLO create / update / delete.
  * Wraps the underlying DirectQuery transport error, preserving the upstream
- * HTTP status and raw body verbatim. Fail-loud semantics: no retry, no
- * backoff, one call only. If this escapes create/update, the SO was never
- * written.
+ * HTTP status and raw body verbatim so the wizard can show a self-service
+ * diagnostic without needing a separate lookup.
+ *
+ * Fail-loud semantics (memo): no retry, no backoff, one call only. If this
+ * escapes `SloService.create/update`, the SO was never written.
  */
 export class SloRulerError extends Error {
   constructor(
@@ -72,9 +75,11 @@ export class SloRulerError extends Error {
 /**
  * Thrown when `SloService.delete` is asked to tear down an SLO with a
  * provisioned rule group but has no deploy context — typically because the
- * SLO's `datasourceId` is no longer registered. Delete is ruler-first, so we
- * refuse to drop the SO: that would leave a dangling rule group in Cortex.
- * The user has to restore the datasource before the SLO can be removed.
+ * SLO's `datasourceId` is no longer registered (datasource was removed or
+ * renamed). Delete is ruler-first, so we refuse to drop the SO here: that
+ * would leave a dangling rule group in Cortex still evaluating against the
+ * live cluster. The user has to restore the datasource (or the operator has
+ * to force a ruler-side cleanup) before the SLO can be removed.
  */
 export class SloRulerTeardownRequiredError extends Error {
   constructor(public readonly sloId: string, public readonly datasourceId: string) {
@@ -83,5 +88,46 @@ export class SloRulerTeardownRequiredError extends Error {
         `so the rule group cannot be removed from Cortex. Re-register the datasource and retry.`
     );
     this.name = 'SloRulerTeardownRequiredError';
+  }
+}
+
+/**
+ * Stable error codes for Phase 4 SLO orphan-recovery.
+ * Route handlers map these to HTTP statuses and the UI branches on them to
+ * render diagnostic copy.
+ *
+ *   ORPHAN_SPEC_DRIFT        — embedded provenance spec no longer matches the
+ *                              ruler-side rules (sha256 drift, missing
+ *                              recording groups, or fails current validation).
+ *   ORPHAN_WORKSPACE_MISMATCH — orphan belongs to a different
+ *                              datasource / workspace than the caller's.
+ *   ORPHAN_CLAIM_CONFLICT    — another live SLO already owns the id or a
+ *                              ref-store write collided mid-recover.
+ *   ORPHAN_UNSUPPORTED_SCHEMA — provenance schemaVersion not recognized
+ *                              (future plugin wrote it, or it's corrupted).
+ *   ORPHAN_TOMBSTONED        — SLO was deliberately deleted; caller must
+ *                              re-confirm before adoption proceeds.
+ */
+export type AdoptionErrorCode =
+  | 'ORPHAN_SPEC_DRIFT'
+  | 'ORPHAN_WORKSPACE_MISMATCH'
+  | 'ORPHAN_CLAIM_CONFLICT'
+  | 'ORPHAN_UNSUPPORTED_SCHEMA'
+  | 'ORPHAN_TOMBSTONED';
+
+/**
+ * Thrown by `SloService.recover` when an adoption precondition fails. `code`
+ * is the stable contract surface B2B's route handlers map to HTTP statuses;
+ * `context` carries structured hints the UI can surface without re-parsing
+ * the message.
+ */
+export class SloAdoptionError extends Error {
+  constructor(
+    public readonly code: AdoptionErrorCode,
+    message: string,
+    public readonly context?: Record<string, string>
+  ) {
+    super(message);
+    this.name = 'SloAdoptionError';
   }
 }

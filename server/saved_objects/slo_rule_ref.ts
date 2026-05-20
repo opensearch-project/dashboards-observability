@@ -4,13 +4,18 @@
  */
 
 /**
- * Saved-object type definition for the `slo-rule-ref` registry.
+ * Saved-object type definition for the `slo-rule-ref` registry (Phase 3 W3.2).
  *
- * One SO per distinct (workspaceId, datasourceId, fingerprintVersion,
- * fingerprint) tuple. The SO tracks how many active SLOs currently reference
- * a given fingerprint — when the refcount hits zero the recording group is
- * eligible for deletion after the grace period (enforced by a later-PR
- * reconciler sweep).
+ * One SO per distinct (workspaceId, datasourceId, fingerprint) tuple. The SO
+ * tracks how many active SLOs currently reference a given fingerprint — when
+ * the refcount hits zero the recording group is eligible for deletion after
+ * the 24h grace period (enforced by the reconciler in W3.11).
+ *
+ * FIXME (workspaceId plumbing): Phase 3 uses `datasourceId` as the workspace
+ * discriminator (`workspaceId === datasourceId`). A future phase will thread a
+ * real workspace id through the deploy context; when that happens the SO id
+ * format `rule-ref:<ws>:<ds>:<fp>` already separates the two so only the
+ * caller of `sloRuleRefId(...)` has to change.
  */
 
 import type { SavedObjectsType } from '../../../../src/core/server';
@@ -39,23 +44,18 @@ export interface SloRuleRefAttributes {
 }
 
 /**
- * Build the canonical SO id for a (workspace, datasource, fingerprintVersion,
- * fingerprint) tuple. Including `fingerprintVersion` in the id means a future
- * bump of `FINGERPRINT_VERSION` produces a disjoint id namespace — old and
- * new-version entries coexist in the same index, and the reconciler's
- * grace-period sweep is the one that eventually reaps the old ones.
+ * Build the canonical SO id for a (workspace, datasource, fingerprint) tuple.
  *
- * Separator `:` is not legal inside any of the four fields (workspace and
- * datasource are OSD SO ids; fpv is a constant; fingerprint is lowercase
- * hex), so the concat is unambiguous.
+ * Separator `:` is not legal inside any of the three fields (workspace and
+ * datasource are OSD SO ids; fingerprint is lowercase hex), so the concat is
+ * unambiguous.
  */
 export function sloRuleRefId(
   workspaceId: string,
   datasourceId: string,
-  fingerprintVersion: string,
   fingerprint: string
 ): string {
-  return `rule-ref:${workspaceId}:${datasourceId}:${fingerprintVersion}:${fingerprint}`;
+  return `rule-ref:${workspaceId}:${datasourceId}:${fingerprint}`;
 }
 
 export const sloRuleRefType: SavedObjectsType = {

@@ -90,6 +90,12 @@ function tallyState(bucket: SloHealthBucket, state: SloHealthState): void {
     case 'no_data':
       bucket.noData += 1;
       break;
+    case 'source_idle':
+      // Roll source_idle into the same bucket as no_data — both surface as
+      // "no signal" on services-home. Listing/detail surfaces still
+      // distinguish them via the badge label and color.
+      bucket.noData += 1;
+      break;
     case 'stale':
       bucket.stale += 1;
       break;
