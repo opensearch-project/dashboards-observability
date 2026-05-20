@@ -489,4 +489,7 @@ export const SloHealthCell = React.memo(SloHealthCellUI);
 
 export const SLO_HEALTH_COLUMN_HEADER = t.columnHeader;
 export const SLO_HEALTH_COLUMN_HEADER_TIP = t.columnHeaderTip;
-export const SLO_HEALTH_COLUMN_WIDTH = '180px';
+// Percentage so the services-home table's column widths sum to 100% — a
+// fixed-pixel cell mixed in with the other percentage columns added up to
+// >100% at typical viewports and forced columns to overlap.
+export const SLO_HEALTH_COLUMN_WIDTH = '18%';

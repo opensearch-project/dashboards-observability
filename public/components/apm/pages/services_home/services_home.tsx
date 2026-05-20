@@ -804,7 +804,15 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         field: 'serviceName',
         name: i18nTexts.table.serviceName,
         sortable: true,
-        width: '20%',
+        // Column widths sum to 100% so EuiBasicTable doesn't overflow its
+        // container — the prior mix of %s + fixed-px columns added up to
+        // ~110%, and at typical table widths (~720px once the left filter
+        // sidebar claims its share) the failure-ratio header truncated
+        // mid-word and the throughput sparkline visibly bled into the
+        // failure-rate cell. Metric columns (latency / throughput /
+        // failure rate) need ~130px to fit `<value>` + the 60px sparkline;
+        // budget the remaining width proportionally.
+        width: '15%',
         render: (serviceName: string, item: ServiceTableItem) => {
           const language = item.groupByAttributes?.telemetry?.sdk?.language;
 
@@ -835,7 +843,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             <EuiFlexItem grow={false}>{i18nTexts.table.actions}</EuiFlexItem>
           </EuiFlexGroup>
         ),
-        width: '10%',
+        width: '8%',
         align: 'center',
         render: (item: ServiceTableItem) => (
           <EuiFlexGroup
@@ -906,7 +914,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
-        width: '21%',
+        width: '19%',
         align: 'center',
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
@@ -927,16 +935,19 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               justifyContent="center"
               responsive={false}
             >
-              <EuiFlexItem grow={false} style={{ minWidth: '60px' }}>
+              <EuiFlexItem grow={false} style={{ minWidth: '50px' }}>
                 <EuiText size="s">{latencyMs} ms</EuiText>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              {/* Sparkline grows to fill the cell so wide screens get a
+                  longer trend; minWidth keeps it readable when the column
+                  shrinks; maxWidth keeps it from looking absurdly stretched
+                  on a 4K display. */}
+              <EuiFlexItem grow={1} style={{ minWidth: 60, maxWidth: 200 }}>
                 <MetricSparkline
                   data={latencyData}
                   isLoading={metricsLoading}
                   color={APM_CONSTANTS.COLORS.LATENCY}
                   height={APM_CONSTANTS.SPARKLINE_HEIGHT}
-                  width={APM_CONSTANTS.SPARKLINE_WIDTH}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -955,7 +966,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
-        width: '21%',
+        width: '19%',
         align: 'center',
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
@@ -977,16 +988,15 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               justifyContent="center"
               responsive={false}
             >
-              <EuiFlexItem grow={false} style={{ minWidth: '90px' }}>
+              <EuiFlexItem grow={false} style={{ minWidth: '70px' }}>
                 <EuiText size="s">{throughputFormatted}</EuiText>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={1} style={{ minWidth: 60, maxWidth: 200 }}>
                 <MetricSparkline
                   data={throughputData}
                   isLoading={metricsLoading}
                   color={APM_CONSTANTS.COLORS.THROUGHPUT}
                   height={APM_CONSTANTS.SPARKLINE_HEIGHT}
-                  width={APM_CONSTANTS.SPARKLINE_WIDTH}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -1005,7 +1015,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
-        width: '100px',
+        width: '13%',
         align: 'center',
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
@@ -1026,16 +1036,15 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               justifyContent="center"
               responsive={false}
             >
-              <EuiFlexItem grow={false} style={{ minWidth: '50px' }}>
+              <EuiFlexItem grow={false} style={{ minWidth: '40px' }}>
                 <EuiText size="s">{failureFormatted}%</EuiText>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={1} style={{ minWidth: 60, maxWidth: 200 }}>
                 <MetricSparkline
                   data={failureData}
                   isLoading={metricsLoading}
                   color={APM_CONSTANTS.COLORS.FAILURE_RATE}
                   height={APM_CONSTANTS.SPARKLINE_HEIGHT}
-                  width={APM_CONSTANTS.SPARKLINE_WIDTH}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -1051,7 +1060,10 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         ),
         sortable: true,
         align: 'center',
-        width: '10%',
+        width: '8%',
+        // Widths: 15 + 8 + 19 + 19 + 13 + 8 + 18 = 100% (SLO health column
+        // adds 18% only when sloFeatureEnabled; without it the others
+        // distribute the remainder via EuiBasicTable's flex rules).
         render: (environment: string) => {
           return <EuiText size="s">{getEnvironmentDisplayName(environment)}</EuiText>;
         },
