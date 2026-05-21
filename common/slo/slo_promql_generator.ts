@@ -89,6 +89,9 @@ export const DEFAULT_MWMBR_TIERS: readonly BurnRateConfig[] = [
 /** Burn-rate tier labels in index order. */
 const MWMBR_TIER_LABELS = ['PageQuick', 'PageSlow', 'TicketQuick', 'TicketSlow'] as const;
 
+/** Hard cap on burn-rate tiers — matches the canonical labels above. */
+export const MWMBR_MAX_TIERS = MWMBR_TIER_LABELS.length;
+
 // ============================================================================
 // Name helpers
 // ============================================================================
@@ -332,7 +335,7 @@ export function ensureBucketMetric(metric: string): string {
  * (the smallest histogram bucket Cortex emits is `1ns = 1e-9 s`) and trim
  * trailing zeros so common bounds like `0.5`, `1`, `30` stay terse.
  */
-function formatLatencyBoundLe(bound: number, unit: 'seconds' | 'milliseconds'): string {
+export function formatLatencyBoundLe(bound: number, unit: 'seconds' | 'milliseconds'): string {
   const seconds = unit === 'milliseconds' ? bound / 1000 : bound;
   if (!Number.isFinite(seconds) || seconds <= 0) return '0';
   return trimTrailingZeros(seconds.toFixed(9));

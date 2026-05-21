@@ -401,25 +401,47 @@ export class SloService {
    */
   async getFingerprintRefcounts(
     doc: SloDocument,
-    workspaceId: string
+    workspaceId: string,
+    resolveDatasource?: (datasourceId: string) => Promise<Datasource | undefined>
   ): Promise<Record<string, number>> {
     if (!this.refStore) return {};
     if (doc.status.provisioning.backend !== 'prometheus') return {};
     const fps = doc.status.provisioning.recordingFingerprints;
     if (!fps) return {};
+    // Refcount writes (createDedup / updateDedup / deleteDedup) key on
+    // `deploy.datasource.name` — the canonical, stable-across-restart
+    // value. `spec.datasourceId` is *also* pinned to that name on every
+    // create/update via the routes, but legacy SOs persisted before the
+    // pin landed may carry a volatile `ds-N` instead. Try the canonical
+    // name first when we can resolve it; fall back to the persisted value
+    // so legacy SOs that were never re-pinned still resolve.
+    const candidateKeys = new Set<string>([doc.spec.datasourceId]);
+    if (resolveDatasource) {
+      try {
+        const ds = await resolveDatasource(doc.spec.datasourceId);
+        if (ds?.name) candidateKeys.add(ds.name);
+      } catch {
+        // Resolution failures are non-fatal — fall back to the persisted key only.
+      }
+    }
     const unique = [...new Set(Object.values(fps))];
     const out: Record<string, number> = {};
     await Promise.all(
       unique.map(async (fp) => {
-        try {
-          const entry = await this.refStore!.get(workspaceId, doc.spec.datasourceId, fp);
-          if (entry) out[fp] = entry.attributes.refcount;
-        } catch (err) {
-          this.logger.warn(
-            `SloService.getFingerprintRefcounts: lookup failed for fp=${fp}: ${
-              err instanceof Error ? err.message : String(err)
-            }`
-          );
+        for (const key of candidateKeys) {
+          try {
+            const entry = await this.refStore!.get(workspaceId, key, fp);
+            if (entry) {
+              out[fp] = entry.attributes.refcount;
+              return;
+            }
+          } catch (err) {
+            this.logger.warn(
+              `SloService.getFingerprintRefcounts: lookup failed for fp=${fp} key=${key}: ${
+                err instanceof Error ? err.message : String(err)
+              }`
+            );
+          }
         }
       })
     );
@@ -711,7 +733,13 @@ export class SloService {
   }
 
   async get(id: string): Promise<SloDocument | null> {
-    return this.store.get(id);
+    const doc = await this.store.get(id);
+    if (!doc) return null;
+    // Read-boundary defaulting: legacy SOs that pre-date later `alarms.*`
+    // additions land here without those keys. `normalizeSloSpec` fills in
+    // the canonical defaults so consumers (rule-generator paths, UI) can
+    // dereference `spec.alarms.<key>` without a guard.
+    return { ...doc, spec: normalizeSloSpec(doc.spec) };
   }
 
   async update(
@@ -729,7 +757,12 @@ export class SloService {
 
     // Merge partial input onto the current spec, then normalize (clamp target
     // precision, etc.) BEFORE validation so rule generation sees canonical values.
-    const merged: SloSpec = normalizeSpec({ ...existing.spec, ...input.spec });
+    // `normalizeSloSpec` on `existing.spec` first guarantees legacy docs (missing
+    // `alarms.*` keys) carry the canonical defaults forward through the merge.
+    const merged: SloSpec = normalizeSpec({
+      ...normalizeSloSpec(existing.spec),
+      ...input.spec,
+    });
 
     const { errors } = validateSloSpec(merged);
     if (Object.keys(errors).length > 0) throw new SloValidationError(errors);
@@ -747,13 +780,19 @@ export class SloService {
       return this.updateDedup(existing, merged, updatedBy, deploy);
     }
 
-    // If the caller provides a deploy context, derive the namespace from the
-    // workspace; otherwise preserve whatever namespace the existing SO carries.
-    const namespace = deploy
-      ? sloRulerNamespaceFor(deploy.workspaceId)
-      : existing.status.provisioning.backend === 'prometheus'
-      ? existing.status.provisioning.rulerNamespace
-      : SLO_RULER_NAMESPACE;
+    // Prefer the namespace stamped on the SO at create time. Falling back to
+    // `sloRulerNamespaceFor(deploy.workspaceId)` would silently route the
+    // upsert to a different namespace if `deploy.workspaceId` ever drifts
+    // from the persisted value, leaving the original recording rules dangling.
+    // The deploy-derived namespace only kicks in for legacy SOs that pre-date
+    // the stamp; in steady state the two values are identical.
+    const namespace =
+      existing.status.provisioning.backend === 'prometheus' &&
+      existing.status.provisioning.rulerNamespace
+        ? existing.status.provisioning.rulerNamespace
+        : deploy
+        ? sloRulerNamespaceFor(deploy.workspaceId)
+        : SLO_RULER_NAMESPACE;
 
     const updated: SloDocument = {
       id: existing.id,
@@ -819,7 +858,14 @@ export class SloService {
     deploy: SloDeployContext
   ): Promise<SloDocument> {
     const now = new Date().toISOString();
-    const namespace = sloRulerNamespaceFor(deploy.workspaceId);
+    // Prefer the namespace stamped on the SO at create time (matches
+    // `deleteDedup` and `repair`). Falls back to the deploy-derived value
+    // only for legacy SOs that pre-date the stamp.
+    const namespace =
+      existing.status.provisioning.backend === 'prometheus' &&
+      existing.status.provisioning.rulerNamespace
+        ? existing.status.provisioning.rulerNamespace
+        : sloRulerNamespaceFor(deploy.workspaceId);
     const newFingerprints = this.computeObjectiveFingerprints(merged);
     const oldFingerprints =
       existing.status.provisioning.backend === 'prometheus'

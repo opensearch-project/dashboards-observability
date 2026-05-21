@@ -17,7 +17,10 @@ import type {
   ExclusionWindow,
   SloAlarmConfig,
 } from '../../../../../common/slo/slo_types';
-import { DEFAULT_MWMBR_TIERS } from '../../../../../common/slo/slo_promql_generator';
+import {
+  DEFAULT_MWMBR_TIERS,
+  MWMBR_MAX_TIERS,
+} from '../../../../../common/slo/slo_promql_generator';
 import {
   SLO_TEMPLATES,
   substituteCustomPromqlDefaults,
@@ -370,6 +373,7 @@ export function reducer(state: FormState, action: Action): FormState {
       return { ...state, burnRates: next };
     }
     case 'addBurnRate': {
+      if (state.burnRates.length >= MWMBR_MAX_TIERS) return state;
       const base = state.burnRates[state.burnRates.length - 1] ?? DEFAULT_MWMBR_TIERS[0];
       return {
         ...state,

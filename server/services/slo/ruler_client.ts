@@ -441,6 +441,19 @@ function coerceRuleGroupList(doc: unknown): GeneratedRuleGroup[] {
   }
   if (typeof doc === 'object') {
     const record = doc as Record<string, unknown>;
+    // Prometheus response envelope. `status === 'error'` on a 200 body must
+    // not coerce to `[]` — the caller (reconciler / probe) cannot otherwise
+    // distinguish "ruler reported an error" from "namespace is empty" and
+    // would happily proceed to tear down rules that still exist.
+    if (record.status === 'error') {
+      const errorType = typeof record.errorType === 'string' ? record.errorType : 'unknown_error';
+      const errorMsg = typeof record.error === 'string' ? record.error : '';
+      throw new SloRulerError(
+        'RULER_VALIDATION_FAILED',
+        0,
+        `Ruler returned ${errorType}: ${errorMsg}`
+      );
+    }
     // Prometheus response envelope: `{ data: { groups: [...] } }`.
     const data = record.data;
     if (data && typeof data === 'object' && !Array.isArray(data)) {

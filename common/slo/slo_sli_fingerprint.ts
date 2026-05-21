@@ -25,6 +25,7 @@
 
 import { createHash } from 'crypto';
 import type { Dimension, Objective, SliNode, CustomPromQLExpr } from './slo_types';
+import { formatLatencyBoundLe } from './slo_promql_generator';
 
 export const FINGERPRINT_VERSION = 'v1';
 
@@ -51,7 +52,15 @@ export function computeSliFingerprint(
     goodEventsFilter: normalizeGoodEventsFilter(prom.goodEventsFilter),
     latencyThresholdUnit:
       prom.type === 'latency_threshold' ? prom.latencyThresholdUnit ?? null : null,
-    latencyThreshold: prom.type === 'latency_threshold' ? objective.latencyThreshold ?? null : null,
+    // Hash the *formatted* latency bound (the same `le=` string the
+    // recording-rule generator emits) rather than the raw number. Two
+    // semantically identical thresholds that differ only in float
+    // representation (e.g. `0.1+0.2` vs `0.3`) would otherwise fingerprint
+    // differently and defeat shared-recording-group dedup.
+    latencyThreshold:
+      prom.type === 'latency_threshold' && typeof objective.latencyThreshold === 'number'
+        ? formatLatencyBoundLe(objective.latencyThreshold, prom.latencyThresholdUnit ?? 'seconds')
+        : null,
     periodLength: prom.periodLength ?? null,
     customExpr: normalizeCustomExpr(prom.customExpr),
     dimensions: normalizeDimensions(sli.dimensions),
@@ -71,19 +80,65 @@ function normalizeMetric(metric: string | undefined): string | null {
 }
 
 /**
- * Trim, collapse whitespace runs to a single space, then strip a single pair
- * of wrapping `{` / `}` if the entire trimmed string is wrapped. Inner braces
- * are preserved.
+ * Trim, collapse whitespace runs *outside PromQL string literals* to a single
+ * space, then strip a single pair of wrapping `{` / `}` if the entire trimmed
+ * string is wrapped. Inner braces are preserved.
+ *
+ * Whitespace inside double-quoted matcher values (e.g. `status=" 5xx "`) is
+ * preserved verbatim — it changes which series the matcher selects, so two
+ * filters that differ only in literal whitespace must fingerprint differently.
  */
 function normalizeGoodEventsFilter(filter: string | undefined): string | null {
   if (filter === undefined || filter === null) return null;
-  const collapsed = filter.trim().replace(/\s+/g, ' ');
+  const collapsed = collapseWhitespaceOutsideLiterals(filter.trim());
   if (collapsed.length === 0) return null;
   if (collapsed.startsWith('{') && collapsed.endsWith('}')) {
-    const inner = collapsed.slice(1, -1).trim().replace(/\s+/g, ' ');
+    const inner = collapseWhitespaceOutsideLiterals(collapsed.slice(1, -1).trim());
     return inner.length === 0 ? null : inner;
   }
   return collapsed;
+}
+
+/**
+ * Collapse whitespace runs only outside double-quoted string literals.
+ * PromQL matcher values use double quotes with `\"` escapes; backslashes
+ * inside the literal escape the next character. Anything outside a literal
+ * is plain syntax and safe to collapse.
+ */
+function collapseWhitespaceOutsideLiterals(input: string): string {
+  let out = '';
+  let inLiteral = false;
+  let lastWasSpaceOutside = false;
+  for (let i = 0; i < input.length; i++) {
+    const ch = input[i];
+    if (inLiteral) {
+      out += ch;
+      if (ch === '\\' && i + 1 < input.length) {
+        out += input[i + 1];
+        i++;
+      } else if (ch === '"') {
+        inLiteral = false;
+      }
+      lastWasSpaceOutside = false;
+      continue;
+    }
+    if (ch === '"') {
+      out += ch;
+      inLiteral = true;
+      lastWasSpaceOutside = false;
+      continue;
+    }
+    if (/\s/.test(ch)) {
+      if (!lastWasSpaceOutside) {
+        out += ' ';
+        lastWasSpaceOutside = true;
+      }
+      continue;
+    }
+    out += ch;
+    lastWasSpaceOutside = false;
+  }
+  return out.trim();
 }
 
 function normalizeCustomExpr(expr: CustomPromQLExpr | undefined): CustomPromQLExpr | null {

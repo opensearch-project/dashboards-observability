@@ -152,7 +152,11 @@ export async function handleGetSLO(
     // is wired (offline / tests / legacy docs) the map is `{}` and the UI
     // treats every fingerprint as unshared.
     const workspaceId = statusCtx?.workspaceId ?? 'default';
-    const recordingFingerprintRefcounts = await svc.getFingerprintRefcounts(doc, workspaceId);
+    const recordingFingerprintRefcounts = await svc.getFingerprintRefcounts(
+      doc,
+      workspaceId,
+      statusCtx?.resolveDatasource
+    );
     return {
       status: 200,
       body: { ...doc, liveStatus, recordingFingerprintRefcounts },

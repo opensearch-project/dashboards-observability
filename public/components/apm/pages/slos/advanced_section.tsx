@@ -36,6 +36,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { BudgetWarningThreshold, BurnRateConfig } from '../../../../../common/slo/slo_types';
+import { MWMBR_MAX_TIERS } from '../../../../../common/slo/slo_promql_generator';
 import type { Action, FormState, ToggleableAlarm } from './wizard_state';
 import { BURN_RATE_PRESETS, isPresetApplied } from './burn_rate_presets';
 
@@ -266,10 +267,13 @@ const BurnRatesEditor: React.FC<{
       <EuiButtonEmpty
         iconType="plusInCircle"
         size="s"
+        isDisabled={burnRates.length >= MWMBR_MAX_TIERS}
         onClick={() => dispatch({ kind: 'addBurnRate' })}
         data-test-subj="slosWizardBurnrateAdd"
       >
-        Add burn-rate tier
+        {burnRates.length >= MWMBR_MAX_TIERS
+          ? `At cap (${MWMBR_MAX_TIERS} tiers)`
+          : 'Add burn-rate tier'}
       </EuiButtonEmpty>
     </div>
   );

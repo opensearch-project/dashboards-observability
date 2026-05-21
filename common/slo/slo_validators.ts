@@ -10,7 +10,7 @@
  */
 
 import type { BurnRateConfig, SloSpec, Objective } from './slo_types';
-import { parseDurationToMs, RECORDING_WINDOWS } from './slo_promql_generator';
+import { MWMBR_MAX_TIERS, parseDurationToMs, RECORDING_WINDOWS } from './slo_promql_generator';
 
 const METRIC_NAME_RE = /^[a-zA-Z_:][a-zA-Z0-9_:]*$/;
 const LABEL_NAME_RE = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
@@ -348,6 +348,11 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
       warnings['spec.alerting.burnRates'] =
         'No burn-rate tiers configured — no MWMBR alerts will be generated';
     } else {
+      if (input.alerting.burnRates.length > MWMBR_MAX_TIERS) {
+        errors[
+          'spec.alerting.burnRates'
+        ] = `At most ${MWMBR_MAX_TIERS} burn-rate tiers are supported; received ${input.alerting.burnRates.length}.`;
+      }
       const firstObjTarget = input.objectives?.[0]?.target;
       const errorBudget = firstObjTarget !== undefined ? 1 - firstObjTarget : undefined;
       for (let i = 0; i < input.alerting.burnRates.length; i++) {
