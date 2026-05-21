@@ -135,6 +135,24 @@ describe('MultiBackendAlertService — mutations + detail', () => {
     expect(Array.isArray(result!.alertHistory)).toBe(true);
   });
 
+  it('getRuleDetail bounds the alert history with limit + start_time desc sort', async () => {
+    mockOsBackend.getMonitor.mockResolvedValueOnce(sampleOSMonitor);
+    mockOsBackend.getAlerts.mockResolvedValueOnce({ alerts: [], totalAlerts: 0, truncated: false });
+    mockOsBackend.searchQuery.mockResolvedValueOnce({
+      aggregations: { time_buckets: { buckets: [] } },
+    });
+    await svc.getRuleDetail(mockClient, 'ds-os', sampleOSMonitor.id);
+    expect(mockOsBackend.getAlerts).toHaveBeenCalledWith(
+      mockClient,
+      expect.objectContaining({
+        monitorId: sampleOSMonitor.id,
+        limit: 20,
+        sortString: 'start_time',
+        sortOrder: 'desc',
+      })
+    );
+  });
+
   // ---- getAlertDetail ----
   it('getAlertDetail returns null for unknown datasource', async () => {
     expect(await svc.getAlertDetail(mockClient, 'unknown', 'a1')).toBeNull();
@@ -145,5 +163,21 @@ describe('MultiBackendAlertService — mutations + detail', () => {
     const result = await svc.getAlertDetail(mockClient, 'ds-os', sampleOSAlert.id);
     expect(result).not.toBeNull();
     expect(result!.raw).toBe(sampleOSAlert);
+  });
+
+  it('getAlertDetail forwards findAlertId so backend pagination short-circuits on match', async () => {
+    mockOsBackend.getAlerts.mockResolvedValueOnce({ alerts: [sampleOSAlert], totalAlerts: 1 });
+    await svc.getAlertDetail(mockClient, 'ds-os', sampleOSAlert.id, 'mon-7');
+    expect(mockOsBackend.getAlerts).toHaveBeenCalledWith(
+      mockClient,
+      expect.objectContaining({ findAlertId: sampleOSAlert.id, monitorId: 'mon-7' })
+    );
+  });
+
+  it('getAlertDetail still forwards findAlertId when monitorId is omitted', async () => {
+    mockOsBackend.getAlerts.mockResolvedValueOnce({ alerts: [sampleOSAlert], totalAlerts: 1 });
+    await svc.getAlertDetail(mockClient, 'ds-os', sampleOSAlert.id);
+    const callOpts = mockOsBackend.getAlerts.mock.calls[0][1];
+    expect(callOpts).toEqual({ findAlertId: sampleOSAlert.id });
   });
 });

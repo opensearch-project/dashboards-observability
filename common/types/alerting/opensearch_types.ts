@@ -244,7 +244,21 @@ export interface OpenSearchBackend {
   // Alerts — read + acknowledge.
   getAlerts(
     client: AlertingOSClient,
-    options?: { startMs?: number; endMs?: number; monitorId?: string; limit?: number }
+    options?: {
+      startMs?: number;
+      endMs?: number;
+      monitorId?: string;
+      limit?: number;
+      sortString?: string;
+      sortOrder?: 'asc' | 'desc';
+      /**
+       * Short-circuit pagination once an alert with this id appears on
+       * a page. The upstream REST endpoint does not expose a per-id
+       * filter, so this is a client-side optimization for the
+       * single-alert lookup used by `getAlertDetail`.
+       */
+      findAlertId?: string;
+    }
   ): Promise<{ alerts: OSAlert[]; totalAlerts: number; truncated: boolean }>;
   acknowledgeAlerts(
     client: AlertingOSClient,

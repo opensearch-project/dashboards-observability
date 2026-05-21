@@ -352,15 +352,89 @@ describe('HttpOpenSearchBackend', () => {
 
     // ---- monitorId scoping ----
 
-    it('appends URL-encoded monitorId when provided', async () => {
+    it('forwards a route-shaped monitorId on the URL when provided', async () => {
+      // Route validation (`alertingIdSchema`) restricts ids to
+      // `[A-Za-z0-9_-]{1,128}` before they reach this layer, so we
+      // exercise a representative shape (UUID-like with hyphens) and
+      // assert it round-trips through `encodeURIComponent` unchanged.
       const { client, request } = makeClient([{ body: { totalAlerts: 0, alerts: [] } }]);
-      await backend.getAlerts(client, { monitorId: 'mon/with/slash' });
+      await backend.getAlerts(client, { monitorId: 'mon-7e3f1a2b-uuid' });
       expect(request).toHaveBeenCalledWith(
         expect.objectContaining({
           method: 'GET',
-          path: expect.stringContaining('&monitorId=mon%2Fwith%2Fslash'),
+          path: expect.stringContaining('&monitorId=mon-7e3f1a2b-uuid'),
         })
       );
+    });
+
+    // ---- findAlertId early exit ----
+
+    it('findAlertId short-circuits pagination on the first matching page', async () => {
+      // Target id is on page 2; page 3 must NOT be requested.
+      const target = makeMinimalAlertPage(150, 1)[0]; // id = 'a-150'
+      const page1 = makeMinimalAlertPage(0, 100);
+      const page2WithTarget = [
+        ...makeMinimalAlertPage(100, 50),
+        target,
+        ...makeMinimalAlertPage(151, 49),
+      ];
+      const { client, request } = makeClient([
+        { body: { totalAlerts: 500, alerts: page1 } },
+        { body: { totalAlerts: 500, alerts: page2WithTarget } },
+        { body: { totalAlerts: 500, alerts: makeMinimalAlertPage(200, 100) } },
+      ]);
+      const result = await backend.getAlerts(client, {
+        monitorId: 'm-1',
+        findAlertId: 'a-150',
+      });
+      expect(result.alerts).toHaveLength(1);
+      expect(result.alerts[0].id).toBe('a-150');
+      // Stops after page 2 — page 3 must NOT be requested.
+      expect(request).toHaveBeenCalledTimes(2);
+    });
+
+    it('findAlertId on the first page issues exactly one upstream request', async () => {
+      const { client, request } = makeClient([
+        { body: { totalAlerts: 50, alerts: makeMinimalAlertPage(0, 50) } },
+      ]);
+      const result = await backend.getAlerts(client, {
+        monitorId: 'm-1',
+        findAlertId: 'a-0',
+      });
+      expect(result.alerts).toHaveLength(1);
+      expect(result.alerts[0].id).toBe('a-0');
+      expect(request).toHaveBeenCalledTimes(1);
+    });
+
+    it('findAlertId returns empty when the alert is not in any page', async () => {
+      const { client, request } = makeClient([
+        { body: { totalAlerts: 5, alerts: makeMinimalAlertPage(0, 5) } },
+      ]);
+      const result = await backend.getAlerts(client, {
+        monitorId: 'm-1',
+        findAlertId: 'nonexistent',
+      });
+      expect(result.alerts).toEqual([]);
+      // Loop exits via the regular pageAlerts.length < PAGE_SIZE end-of-stream.
+      expect(request).toHaveBeenCalledTimes(1);
+    });
+
+    // ---- sort params ----
+
+    it('appends URL-encoded sortString and sortOrder when provided', async () => {
+      const { client, request } = makeClient([{ body: { totalAlerts: 0, alerts: [] } }]);
+      await backend.getAlerts(client, { sortString: 'start_time', sortOrder: 'desc' });
+      const path = (request.mock.calls[0][0] as { path: string }).path;
+      expect(path).toContain('&sortString=start_time');
+      expect(path).toContain('&sortOrder=desc');
+    });
+
+    it('omits sort params when not provided', async () => {
+      const { client, request } = makeClient([{ body: { totalAlerts: 0, alerts: [] } }]);
+      await backend.getAlerts(client);
+      const path = (request.mock.calls[0][0] as { path: string }).path;
+      expect(path).not.toContain('sortString=');
+      expect(path).not.toContain('sortOrder=');
     });
 
     // ---- limit semantics ----
@@ -428,6 +502,19 @@ describe('HttpOpenSearchBackend', () => {
       ]);
       const result = await backend.getAlerts(client, { monitorId: 'm-1', limit: 20 });
       expect(result.alerts).toHaveLength(3);
+      expect(result.truncated).toBe(false);
+    });
+
+    it('upstream returns exactly limit rows with no overshoot ⇒ truncated stays false', async () => {
+      // Edge case: PAGE_SIZE === limit (20), `pageAlerts.length === PAGE_SIZE`,
+      // but `totalAlerts` matches what we collected. This is a complete
+      // result, not a truncated one. The previous `||` short-circuit on
+      // `pageAlerts.length === PAGE_SIZE` flagged this as truncated.
+      const { client } = makeClient([
+        { body: { totalAlerts: 20, alerts: makeMinimalAlertPage(0, 20) } },
+      ]);
+      const result = await backend.getAlerts(client, { monitorId: 'm-1', limit: 20 });
+      expect(result.alerts).toHaveLength(20);
       expect(result.truncated).toBe(false);
     });
   });

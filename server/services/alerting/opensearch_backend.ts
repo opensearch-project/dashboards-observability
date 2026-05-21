@@ -209,7 +209,15 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
 
   async getAlerts(
     client: AlertingOSClient,
-    options?: { startMs?: number; endMs?: number; monitorId?: string; limit?: number }
+    options?: {
+      startMs?: number;
+      endMs?: number;
+      monitorId?: string;
+      limit?: number;
+      sortString?: string;
+      sortOrder?: 'asc' | 'desc';
+      findAlertId?: string;
+    }
   ): Promise<{ alerts: OSAlert[]; totalAlerts: number; truncated: boolean }> {
     // When the caller asks for a bounded set (e.g. rule flyout's "last N
     // alerts"), shrink page size to that cap so the upstream returns at
@@ -246,6 +254,20 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
     const monitorIdParam = options?.monitorId
       ? `&monitorId=${encodeURIComponent(options.monitorId)}`
       : '';
+    // `sortString` / `sortOrder` are exposed by `RestGetAlertsAction` on
+    // the upstream and let bounded callers (e.g. rule flyout's "last N
+    // alerts") request a deterministic, semantically-correct slice
+    // instead of relying on shard-order-dependent default ordering.
+    //
+    // Note: the upstream REST handler does NOT accept `&alertIds=...` —
+    // only the internal transport-client API path does — so callers
+    // that want a single alert by id must paginate (`findAlertId` below
+    // short-circuits the loop on first match).
+    const sortStringParam = options?.sortString
+      ? `&sortString=${encodeURIComponent(options.sortString)}`
+      : '';
+    const sortOrderParam = options?.sortOrder ? `&sortOrder=${options.sortOrder}` : '';
+    const findAlertId = options?.findAlertId;
 
     const allAlerts: OSAlert[] = [];
     let startIndex = 0;
@@ -257,12 +279,24 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
       const resp = await this.req<OSAlertsApiResponse>(
         client,
         'GET',
-        `/_plugins/_alerting/monitors/alerts?size=${PAGE_SIZE}&startIndex=${startIndex}${monitorIdParam}`
+        `/_plugins/_alerting/monitors/alerts?size=${PAGE_SIZE}&startIndex=${startIndex}${monitorIdParam}${sortStringParam}${sortOrderParam}`
       );
       totalAlerts = resp.body.totalAlerts ?? 0;
       const pageAlerts: OSAlert[] = (resp.body.alerts ?? []).map((a: OSAlertRaw) =>
         this.mapAlert(a)
       );
+
+      // Single-alert lookup: short-circuit as soon as the target id
+      // appears on a page, then trim the result to that one row. This
+      // is the path used by `getAlertDetail` — without the early exit
+      // we'd page through the entire monitor history just to `.find()`
+      // one row.
+      if (findAlertId) {
+        const hit = pageAlerts.find((a) => a.id === findAlertId);
+        if (hit) {
+          return { alerts: [hit], totalAlerts: totalAlerts || 1, truncated: false };
+        }
+      }
 
       if (hasRange) {
         for (const a of pageAlerts) {
@@ -293,13 +327,20 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
       }
 
       if (requestedLimit !== undefined && allAlerts.length >= requestedLimit) {
-        // Hit the caller's cap before exhausting upstream pages. If more
-        // rows were available, signal truncation so the caller can surface
-        // it (today's only consumer ignores `truncated`, but Phase-4 callers
-        // will read it). The page itself was full ⇒ there is at least one
-        // more row upstream; or, in non-range mode, the unfiltered count
-        // overshoots what we collected.
-        if (pageAlerts.length === PAGE_SIZE || (!hasRange && allAlerts.length < totalAlerts)) {
+        // Hit the caller's cap before exhausting upstream pages. We only
+        // mark truncated when upstream genuinely has more rows than we
+        // collected — a page that happens to be exactly `limit` long with
+        // no further upstream rows is complete, not truncated.
+        //
+        //  - Non-range mode: `totalAlerts` from the upstream is the
+        //    authoritative count of rows the index would yield, so an
+        //    overshoot proves there's at least one row we didn't fetch.
+        //  - Range mode: there is no upstream filtered count, so a full
+        //    page is the only "more available" signal we have. Accept the
+        //    false positive on exact page-multiples.
+        if (!hasRange) {
+          if (allAlerts.length < totalAlerts) truncated = true;
+        } else if (pageAlerts.length === PAGE_SIZE) {
           truncated = true;
         }
         break;
@@ -320,6 +361,11 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
         truncated = true;
         break;
       }
+    }
+
+    // findAlertId fell through every page without a match.
+    if (findAlertId) {
+      return { alerts: [], totalAlerts: 0, truncated: false };
     }
 
     const finalAlerts =

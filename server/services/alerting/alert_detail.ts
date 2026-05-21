@@ -77,11 +77,18 @@ export async function getOSRuleDetail(
   const summary = osMonitorToUnifiedRuleSummary(monitor, ds.id);
 
   // Fetch real alert history for this monitor — scoped at the upstream
-  // via `monitorId` and bounded to 20 rows so the upstream returns one
-  // small page even on busy monitors with thousands of alerts.
+  // via `monitorId`, bounded to 20 rows so the upstream returns one
+  // small page even on busy monitors with thousands of alerts, and
+  // sorted by `start_time desc` so the "Recent alerts" label is honest
+  // (default OS Alerting ordering is shard-order-dependent).
   let alertHistory: AlertHistoryEntry[] = [];
   try {
-    const { alerts } = await osBackend.getAlerts(client, { monitorId, limit: 20 });
+    const { alerts } = await osBackend.getAlerts(client, {
+      monitorId,
+      limit: 20,
+      sortString: 'start_time',
+      sortOrder: 'desc',
+    });
     alertHistory = alerts.map((a) => ({
       timestamp: new Date(a.start_time).toISOString(),
       state: osStateToUnified(a.state),
@@ -135,9 +142,11 @@ export async function getOSRuleDetail(
     lookbackPeriod: undefined,
     alertHistory,
     conditionPreviewData,
-    // Notification routing is fetched lazily by the flyout when the user
-    // expands the accordion. The dedicated /routing endpoint owns the
-    // destinations lookup so the detail path stays cheap.
+    // Notification routing is no longer surfaced inline on the rule
+    // flyout. The standalone Routing tab (Alertmanager-fed for Prom; OS
+    // destinations for OS) owns it. We keep the empty array on the
+    // response shape so existing UnifiedRule consumers don't need a
+    // type change.
     notificationRouting: [],
     // Suppression rules from the in-memory service (not from OS API)
     suppressionRules: [],
@@ -204,11 +213,12 @@ export async function getPromRuleDetail(
 /**
  * Get full detail for a single alert including raw backend data.
  *
- * `monitorId` (optional) scopes the OS lookup to one monitor's alerts via
- * the `monitorId` query param on `_plugins/_alerting/monitors/alerts`. The
- * unified flyout already has it on the summary; passing it avoids the
- * full-cluster scan that this function used to do. Without it, the
- * legacy unscoped path is preserved for any direct-API consumer.
+ * The OS Alerting REST endpoint (`_plugins/_alerting/monitors/alerts`)
+ * does not expose a per-id filter, so we paginate scoped by `monitorId`
+ * and short-circuit pagination on the first page that contains the
+ * target alert (`findAlertId`). With `monitorId` set, the upstream
+ * scans one monitor's alerts; the early exit caps the work at the
+ * page that holds the row.
  */
 export async function getAlertDetail(
   datasourceService: DatasourceService,
@@ -223,7 +233,10 @@ export async function getAlertDetail(
   if (!ds) return null;
 
   if (ds.type === 'opensearch' && osBackend) {
-    const { alerts } = await osBackend.getAlerts(client, monitorId ? { monitorId } : undefined);
+    const { alerts } = await osBackend.getAlerts(client, {
+      findAlertId: alertId,
+      ...(monitorId ? { monitorId } : {}),
+    });
     const alert = alerts.find((a) => a.id === alertId);
     if (!alert) return null;
     const summary = osAlertToUnified(alert, ds!.id);
