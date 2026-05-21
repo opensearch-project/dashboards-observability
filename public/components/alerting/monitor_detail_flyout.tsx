@@ -714,7 +714,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
 
               {/* Details — creation / modification metadata */}
               <EuiAccordion
-                id={`history-${monitor.id}`}
+                id={`details-${monitor.id}`}
                 buttonContent={
                   <strong>
                     <FormattedMessage
