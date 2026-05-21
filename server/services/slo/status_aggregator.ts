@@ -439,53 +439,58 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
 
     if (legacyByLongWindow.size === 0) return prefetched;
 
-    // Fan out one batched query per longWindow. Independent of one another;
-    // run in parallel.
-    const fetches = Array.from(legacyByLongWindow.entries()).map(async ([longWindow, slos]) => {
-      const sloIds = slos.map((d) => d.id);
-      const query = buildBatchedLongWindowQuery(sloIds, longWindow);
-      if (!query) return;
-      try {
-        const { samples, nonFinite } = await this.queryInstant(ctx.client, ds, query);
+    // Fan out one batched query per (longWindow, batch). The batched PromQL
+    // is a single regex alternation over `slo_id`; its size grows linearly
+    // with the SLO count, so chunk into sub-batches to keep the PromQL string
+    // well below typical Prometheus query-length limits (~10–60 KB depending
+    // on backend). Independent batches run in parallel.
+    const fetches = Array.from(legacyByLongWindow.entries()).flatMap(([longWindow, slos]) => {
+      const allIds = slos.map((d) => d.id);
+      return chunk(allIds, MAX_SLO_IDS_PER_BATCH).map(async (sloIds) => {
+        const query = buildBatchedLongWindowQuery(sloIds, longWindow);
+        if (!query) return;
+        try {
+          const { samples, nonFinite } = await this.queryInstant(ctx.client, ds, query);
 
-        // Initialize empty maps for every SLO in the group so a missing
-        // sample on a particular SLO still distinguishes "ruler returned
-        // nothing for me" from "we never queried" downstream.
-        for (const id of sloIds) {
-          prefetched.set(id, {
-            byObjective: new Map<string, InstantSample>(),
-            sourceIdleObjectives: new Set<string>(),
-          });
-        }
-
-        for (const s of samples) {
-          const sloId = s.labels.slo_id;
-          const objectiveName = s.labels.slo_objective;
-          if (!sloId || !objectiveName) continue;
-          const slot = prefetched.get(sloId);
-          if (!slot) continue;
-          slot.byObjective.set(objectiveName, s);
-        }
-        for (const s of nonFinite) {
-          const sloId = s.labels.slo_id;
-          const objectiveName = s.labels.slo_objective;
-          if (!sloId || !objectiveName) continue;
-          const slot = prefetched.get(sloId);
-          if (!slot) continue;
-          if (!slot.byObjective.has(objectiveName)) {
-            slot.sourceIdleObjectives.add(objectiveName);
+          // Initialize empty maps for every SLO in the batch so a missing
+          // sample on a particular SLO still distinguishes "ruler returned
+          // nothing for me" from "we never queried" downstream.
+          for (const id of sloIds) {
+            prefetched.set(id, {
+              byObjective: new Map<string, InstantSample>(),
+              sourceIdleObjectives: new Set<string>(),
+            });
           }
+
+          for (const s of samples) {
+            const sloId = s.labels.slo_id;
+            const objectiveName = s.labels.slo_objective;
+            if (!sloId || !objectiveName) continue;
+            const slot = prefetched.get(sloId);
+            if (!slot) continue;
+            slot.byObjective.set(objectiveName, s);
+          }
+          for (const s of nonFinite) {
+            const sloId = s.labels.slo_id;
+            const objectiveName = s.labels.slo_objective;
+            if (!sloId || !objectiveName) continue;
+            const slot = prefetched.get(sloId);
+            if (!slot) continue;
+            if (!slot.byObjective.has(objectiveName)) {
+              slot.sourceIdleObjectives.add(objectiveName);
+            }
+          }
+        } catch (err) {
+          this.logger.warn(
+            `StatusAggregator: batched longWindow=${longWindow} fetch failed for ds=${
+              ds.id
+            }: ${errMsg(err)}. Falling back to per-SLO queries.`
+          );
+          // Drop any partial prefetch for this batch so statusForSlo runs
+          // its own queryInstant fallback.
+          for (const id of sloIds) prefetched.delete(id);
         }
-      } catch (err) {
-        this.logger.warn(
-          `StatusAggregator: batched longWindow=${longWindow} fetch failed for ds=${
-            ds.id
-          }: ${errMsg(err)}. Falling back to per-SLO queries.`
-        );
-        // Drop any partial prefetch for this group so statusForSlo runs
-        // its own queryInstant fallback.
-        for (const id of sloIds) prefetched.delete(id);
-      }
+      });
     });
     await Promise.all(fetches);
     return prefetched;
@@ -718,6 +723,24 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
 // ============================================================================
 // Pure helpers — unit-testable without a transport
 // ============================================================================
+
+/**
+ * Maximum SLO ids folded into a single batched PromQL `slo_id=~"..."` regex
+ * alternation. Each id contributes its own length plus a `|` separator and any
+ * RE2 escapes; UUIDs hover around 40 chars after escaping. 200 ids keeps the
+ * query body under ~10 KB which sits well below typical Prometheus / Cortex
+ * `max-query-length` limits while still amortising the round-trip cost over a
+ * large fleet.
+ */
+const MAX_SLO_IDS_PER_BATCH = 200;
+
+/** Split an array into fixed-size chunks. Last chunk may be shorter. */
+function chunk<T>(items: T[], size: number): T[][] {
+  if (size <= 0) return [items];
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
+  return out;
+}
 
 /**
  * Build a PromQL instant query that returns one sample per objective for a

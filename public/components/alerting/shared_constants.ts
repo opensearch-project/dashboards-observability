@@ -145,16 +145,6 @@ export function formatDatasourceType(type: string): string {
 // ============================================================================
 
 /**
- * Maps SloStatus values to OUI semantic badge color names.
- */
-export const SLO_STATUS_COLORS: Record<string, string> = {
-  breached: 'danger',
-  warning: 'warning',
-  ok: 'success',
-  no_data: 'subdued',
-};
-
-/**
  * Human-readable labels for SLI types.
  */
 export const SLI_TYPE_LABELS: Record<string, string> = {

@@ -60,7 +60,11 @@ export function sloRuleRefId(
 
 export const sloRuleRefType: SavedObjectsType = {
   name: SLO_RULE_REF_SO_TYPE,
-  hidden: false,
+  // Hidden so the SLO ruler-ref registry does not surface in the SO management
+  // UI; it's an internal refcount index, not a user-managed object. The plugin
+  // accesses it via `createInternalRepository(['slo-definition', SLO_RULE_REF_SO_TYPE])`,
+  // which passes the type as an `extraType` to bypass the hidden filter.
+  hidden: true,
   namespaceType: 'single',
   mappings: {
     properties: {

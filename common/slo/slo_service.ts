@@ -49,6 +49,7 @@ import {
   SloValidationError,
   SloVersionConflictError,
 } from './slo_errors';
+import type { SloRulerErrorCode } from './slo_errors';
 import { computeSliFingerprint, FINGERPRINT_VERSION } from './slo_sli_fingerprint';
 import {
   annotateAlertGroup,
@@ -247,24 +248,31 @@ export function sloRulerNamespaceFor(workspaceId: string): string {
 // ============================================================================
 
 /**
- * Structural mirror of `RuleHealthState` from
- * `server/services/slo/rule_health_checker.ts`. Declared locally so
- * `slo_service.ts` (which is importable from browser bundles via tests) does
- * not reach into the server tree.
+ * Canonical rule-health state shared across server, common, and public layers.
+ * Lives in `common/slo/slo_service.ts` because it's referenced by both server-
+ * only (`rule_health_checker.ts`) and browser-only (`slo_api_client.ts`) code,
+ * and `common/` is the only tree both can import from.
  */
-export type SloRuleHealthStateLite = 'ok' | 'rules_partial' | 'rules_missing' | 'ruler_unreachable';
+export type SloRuleHealthState = 'ok' | 'rules_partial' | 'rules_missing' | 'ruler_unreachable';
 
 /**
- * Structural mirror of `RuleHealthReport`. Same rationale as above — we want
- * the common surface to describe its own contract without depending on server
- * types.
+ * Backward-compat alias. Older callsites referenced the historical name; new
+ * callers should use `SloRuleHealthState`.
+ *
+ * @deprecated Use `SloRuleHealthState`.
+ */
+export type SloRuleHealthStateLite = SloRuleHealthState;
+
+/**
+ * Canonical rule-health report shape returned by the server's `RuleHealthChecker`
+ * and consumed by the public `SloApiClient`.
  */
 export interface RuleHealthReportLite {
-  state: SloRuleHealthStateLite;
+  state: SloRuleHealthState;
   expectedGroups: string[];
   presentGroups: string[];
   missingGroups: string[];
-  rulerErrorCode?: 'RULER_UNREACHABLE' | 'RULER_AUTH_FAILED' | 'RULER_VALIDATION_FAILED';
+  rulerErrorCode?: SloRulerErrorCode;
   computedAt: string;
 }
 
@@ -1555,7 +1563,10 @@ export class SloService {
       return ids.map((id) => result.get(id) ?? this.missingStatus(id));
     }
 
-    const docs = await Promise.all(uncached.map((id) => this.store.get(id)));
+    // Bound the SO read fan-out — `ids` is caller-controlled (the listing
+    // page or aggregate endpoint), and a 500-id batch issuing 500 concurrent
+    // `client.get` calls puts unnecessary pressure on the saved-objects layer.
+    const docs = await mapWithConcurrency(uncached, 16, (id) => this.store.get(id));
     const presentDocs: SloDocument[] = [];
     const missing: string[] = [];
     for (let i = 0; i < uncached.length; i++) {
@@ -1726,6 +1737,31 @@ function inferUnit(doc: SloDocument): 'ratio' | 'seconds' | 'count' {
   const def = doc.spec.sli.definition;
   if (def.backend === 'prometheus' && def.type === 'latency_threshold') return 'seconds';
   return 'ratio';
+}
+
+/**
+ * Run `worker(item)` over `items` with at most `limit` calls in flight at once.
+ * Output preserves input order. Use to bound parallel SO reads / network I/O so
+ * a large `getStatuses` call doesn't hammer the saved-objects layer with N
+ * simultaneous reads.
+ */
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  worker: (item: T, index: number) => Promise<R>
+): Promise<R[]> {
+  if (items.length === 0) return [];
+  const out: R[] = new Array(items.length);
+  let cursor = 0;
+  const runners = Array.from({ length: Math.max(1, Math.min(limit, items.length)) }, async () => {
+    while (cursor < items.length) {
+      const i = cursor;
+      cursor += 1;
+      out[i] = await worker(items[i], i);
+    }
+  });
+  await Promise.all(runners);
+  return out;
 }
 
 /**

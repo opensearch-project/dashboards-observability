@@ -34,8 +34,6 @@ interface DataConnectionSOAttributes {
 
 type DiscoveryContext = RequestHandlerContext;
 
-const LOCAL_CLUSTER_PATTERNS = /localhost|127\.0\.0\.1|0\.0\.0\.0|::1|opensearch:9200|opensearch-cluster-master|opensearch-master/i;
-
 export class DatasourceDiscoveryService {
   private lastRunTs = 0;
   private inflight: Promise<void> | null = null;
@@ -85,34 +83,27 @@ export class DatasourceDiscoveryService {
         soClient.find<DataConnectionSOAttributes>({ type: 'data-connection', perPage: 100 }),
       ]);
 
-      // Partition OS data-source saved objects into "points at local cluster"
-      // vs "remote". If the user has created an MDS entry that targets the
-      // local cluster, surface their name/entry instead of the hardcoded
-      // "Local Cluster" seed — avoids showing two rows for the same cluster.
-      const osSavedObjects = osResult.saved_objects || [];
-      const osLocal = osSavedObjects.filter((so) =>
-        LOCAL_CLUSTER_PATTERNS.test(so.attributes?.endpoint || '')
-      );
-      const osRemote = osSavedObjects.filter(
-        (so) => !LOCAL_CLUSTER_PATTERNS.test(so.attributes?.endpoint || '')
-      );
-
       // Local-cluster representation:
-      //   - If the user registered one or more MDS data sources pointing at
-      //     the local cluster, surface them with their user-given names.
-      //   - Otherwise, emit the default "Local Cluster" sentinel.
-      // Both go through `reconcile` (not `seed`) so the stable-key upsert path
-      // handles re-runs idempotently — `seed` always increments the counter
-      // and would leak orphan rows on every TTL refresh.
+      //   - If the user registered any MDS data sources, surface them all with
+      //     their user-given names — including any that may point at the local
+      //     cluster. The MDS framework already owns the local-cluster identity;
+      //     classifying by endpoint substring is fragile (load balancers, VPNs,
+      //     custom hostnames) and produced false positives in practice.
+      //   - If no MDS rows exist, emit the default "Local Cluster" sentinel so
+      //     the alert-manager UI still has at least one OpenSearch target to
+      //     bind to on a non-MDS deployment.
+      // `reconcile` (not `seed`) preserves stable keys across TTL refreshes.
+      const osSavedObjects = osResult.saved_objects || [];
+      const osDiscovered = osSavedObjects.map((so: SavedObject<DataSourceSOAttributes>) => ({
+        name: so.attributes.title || so.id,
+        type: 'opensearch' as const,
+        url: so.id,
+        enabled: true,
+        mdsId: so.id as string | undefined,
+      }));
       const localDiscovered =
-        osLocal.length > 0
-          ? osLocal.map((so: SavedObject<DataSourceSOAttributes>) => ({
-              name: so.attributes.title || so.id,
-              type: 'opensearch' as const,
-              url: so.id,
-              enabled: true,
-              mdsId: so.id as string | undefined,
-            }))
+        osDiscovered.length > 0
+          ? []
           : [
               {
                 name: 'Local Cluster',
@@ -122,14 +113,6 @@ export class DatasourceDiscoveryService {
                 mdsId: undefined as string | undefined,
               },
             ];
-
-      const osDiscovered = osRemote.map((so: SavedObject<DataSourceSOAttributes>) => ({
-        name: so.attributes.title || so.id,
-        type: 'opensearch' as const,
-        url: so.id,
-        enabled: true,
-        mdsId: so.id,
-      }));
 
       const promDiscovered = (dcResult.saved_objects || [])
         .filter((so: SavedObject<DataConnectionSOAttributes>) => {

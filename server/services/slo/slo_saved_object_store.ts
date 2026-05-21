@@ -116,6 +116,11 @@ export class SavedObjectSloStore implements ISloStore {
     const results: SloDocument[] = [];
     let page = 1;
     const perPage = 1000;
+    // Hard cap on accumulated results — protects against runaway memory if a
+    // tenant somehow accumulates beyond the supported limit. Listing UI shows
+    // a 100-row pageful today; 10k is well above any realistic upper bound and
+    // pages beyond this trigger a logged warning rather than silent truncation.
+    const MAX_RESULTS = 10_000;
     while (true) {
       const findOpts: {
         type: string;
@@ -139,6 +144,7 @@ export class SavedObjectSloStore implements ISloStore {
         }
       }
       if (response.saved_objects.length === 0 || results.length >= response.total) break;
+      if (results.length >= MAX_RESULTS) break;
       page++;
     }
     return results;

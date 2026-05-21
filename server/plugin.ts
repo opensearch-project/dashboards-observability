@@ -478,13 +478,7 @@ export class ObservabilityPlugin
         'slo-definition',
         SLO_RULE_REF_SO_TYPE,
       ]);
-      const sloStoreLogger = {
-        info: (msg: string) => this.logger.info(msg),
-        warn: (msg: string) => this.logger.warn(msg),
-        error: (msg: string) => this.logger.error(msg),
-        debug: (msg: string) => this.logger.debug(msg),
-      };
-      const soStore = new SavedObjectSloStore(repository, sloStoreLogger);
+      const soStore = new SavedObjectSloStore(repository);
       this.sloService.setStore(soStore);
       const refStore = new SloRuleRefStore(
         (repository as unknown) as import('../../../src/core/server').SavedObjectsClientContract

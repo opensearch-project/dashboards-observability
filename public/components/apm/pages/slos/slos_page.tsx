@@ -13,6 +13,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { EuiCallOut, EuiCode, EuiSpacer, EuiText } from '@elastic/eui';
 import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
 import { ChromeStart, HttpStart, NotificationsStart } from '../../../../../../../src/core/public';
 import { SloListingPage } from './slo_listing_page';
@@ -20,6 +21,61 @@ import { SloWizardPage } from './slo_wizard_page';
 import { SloDetailPage } from './slo_detail_page';
 import { SloSuggestPage } from './slo_suggest_page';
 import { SloApiClient } from './slo_api_client';
+
+/**
+ * Catches render-time errors anywhere in the SLO router tree so a single
+ * panel/page failing to render doesn't unmount the entire APM app. Without
+ * this, a stray `undefined.foo` deep inside `SloDetailPage` would propagate
+ * up to the embedding `apm/pages/index` mount and the user would see a blank
+ * APM screen with a console-only error.
+ *
+ * Class component because React's error-boundary API still requires
+ * `getDerivedStateFromError` / `componentDidCatch` — there is no functional
+ * equivalent in this React 18 line.
+ */
+interface ErrorBoundaryState {
+  error: Error | null;
+}
+
+class SloRouterErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  ErrorBoundaryState
+> {
+  state: ErrorBoundaryState = { error: null };
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { error };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo): void {
+    console.error('[slo] Unhandled render error in SLO router', error, info);
+  }
+
+  render(): React.ReactNode {
+    if (this.state.error) {
+      return (
+        <div style={{ padding: 24 }}>
+          <EuiCallOut
+            color="danger"
+            iconType="alert"
+            title="The SLO/SLI page hit an unexpected error"
+            data-test-subj="sloRouterErrorBoundary"
+          >
+            <EuiText size="s">
+              Reloading the page typically clears this. If it persists, file an issue with the error
+              message below.
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EuiCode language="text">
+              {String(this.state.error?.message ?? this.state.error)}
+            </EuiCode>
+          </EuiCallOut>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 export interface SlosPageProps {
   http: HttpStart;
@@ -40,54 +96,56 @@ export const SlosPage: React.FC<SlosPageProps> = ({
   const apiClient = useMemo(() => new SloApiClient(http), [http]);
 
   return (
-    <HashRouter>
-      <Switch>
-        <Route exact path="/slos">
-          <SloListingPage
-            apiClient={apiClient}
-            http={http}
-            chrome={chrome}
-            notifications={notifications}
-            parentBreadcrumb={parentBreadcrumb}
-          />
-        </Route>
-        <Route exact path="/slos/suggest">
-          <SloSuggestPage
-            apiClient={apiClient}
-            http={http}
-            chrome={chrome}
-            notifications={notifications}
-            parentBreadcrumb={parentBreadcrumb}
-          />
-        </Route>
-        <Route exact path="/slos/create">
-          <SloWizardPage
-            apiClient={apiClient}
-            chrome={chrome}
-            notifications={notifications}
-            parentBreadcrumb={parentBreadcrumb}
-          />
-        </Route>
-        <Route exact path="/slos/create/:templateId">
-          <SloWizardPage
-            apiClient={apiClient}
-            chrome={chrome}
-            notifications={notifications}
-            parentBreadcrumb={parentBreadcrumb}
-          />
-        </Route>
-        <Route exact path="/slos/:id">
-          <SloDetailPage
-            apiClient={apiClient}
-            chrome={chrome}
-            notifications={notifications}
-            parentBreadcrumb={parentBreadcrumb}
-          />
-        </Route>
-        <Route>
-          <Redirect to="/slos" />
-        </Route>
-      </Switch>
-    </HashRouter>
+    <SloRouterErrorBoundary>
+      <HashRouter>
+        <Switch>
+          <Route exact path="/slos">
+            <SloListingPage
+              apiClient={apiClient}
+              http={http}
+              chrome={chrome}
+              notifications={notifications}
+              parentBreadcrumb={parentBreadcrumb}
+            />
+          </Route>
+          <Route exact path="/slos/suggest">
+            <SloSuggestPage
+              apiClient={apiClient}
+              http={http}
+              chrome={chrome}
+              notifications={notifications}
+              parentBreadcrumb={parentBreadcrumb}
+            />
+          </Route>
+          <Route exact path="/slos/create">
+            <SloWizardPage
+              apiClient={apiClient}
+              chrome={chrome}
+              notifications={notifications}
+              parentBreadcrumb={parentBreadcrumb}
+            />
+          </Route>
+          <Route exact path="/slos/create/:templateId">
+            <SloWizardPage
+              apiClient={apiClient}
+              chrome={chrome}
+              notifications={notifications}
+              parentBreadcrumb={parentBreadcrumb}
+            />
+          </Route>
+          <Route exact path="/slos/:id">
+            <SloDetailPage
+              apiClient={apiClient}
+              chrome={chrome}
+              notifications={notifications}
+              parentBreadcrumb={parentBreadcrumb}
+            />
+          </Route>
+          <Route>
+            <Redirect to="/slos" />
+          </Route>
+        </Switch>
+      </HashRouter>
+    </SloRouterErrorBoundary>
   );
 };

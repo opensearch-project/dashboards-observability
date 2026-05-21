@@ -24,6 +24,10 @@ import type {
   SloSummary,
   SloUpdateInput,
 } from '../../../../../common/slo/slo_types';
+import type { SloRulerErrorCode } from '../../../../../common/slo/slo_errors';
+import type { SloRuleHealthState } from '../../../../../common/slo/slo_service';
+
+export type { SloRulerErrorCode, SloRuleHealthState };
 
 const SLO_BASE = `${OBSERVABILITY_BASE}/v1/slos`;
 
@@ -34,11 +38,6 @@ const SLO_BASE = `${OBSERVABILITY_BASE}/v1/slos`;
  * "invalid PromQL: parse error at char 42"), not a generic create-failed
  * toast. `code` lets the wizard branch on coarse failure mode.
  */
-export type SloRulerErrorCode =
-  | 'RULER_VALIDATION_FAILED'
-  | 'RULER_AUTH_FAILED'
-  | 'RULER_UNREACHABLE';
-
 export interface SloRulerErrorEnvelope {
   error: string;
   code: SloRulerErrorCode;
@@ -57,18 +56,18 @@ export interface SloRulerErrorEnvelope {
  *   `rulerErrorCode` field carries the coarse failure mode for the UI to
  *   surface a retry hint vs. a config-fix hint.
  *
- * Types are declared locally (rather than imported from `common/slo/slo_types`)
- * because parallel workstreams are editing `slo_types.ts` in flight.
+ * @deprecated alias of `SloRuleHealthState`. New callers should import the
+ * canonical name from `common/slo/slo_service`.
  */
-export type RuleHealthState = 'ok' | 'rules_partial' | 'rules_missing' | 'ruler_unreachable';
+export type RuleHealthState = SloRuleHealthState;
 
 export interface RuleHealthResponse {
   sloId: string;
-  state: RuleHealthState;
+  state: SloRuleHealthState;
   expectedGroups: string[];
   presentGroups: string[];
   missingGroups: string[];
-  rulerErrorCode?: 'RULER_UNREACHABLE' | 'RULER_AUTH_FAILED' | 'RULER_VALIDATION_FAILED';
+  rulerErrorCode?: SloRulerErrorCode;
   computedAt: string;
 }
 

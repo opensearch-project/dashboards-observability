@@ -168,6 +168,10 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   const [metricNames, setMetricNames] = useState<string[]>([]);
   const [labelValuesByMetric, setLabelValuesByMetric] = useState<LabelValuesByMetric>({});
   const [existingRuleGroups, setExistingRuleGroups] = useState<PromRuleGroup[]>([]);
+  /** True when the ruler-rules fetch fell through its catch — dedup against
+   *  pre-existing rules can't run, so the UI surfaces a warning callout
+   *  rather than silently allowing duplicate creates. */
+  const [rulerFetchFailed, setRulerFetchFailed] = useState(false);
   const [discoveryLoading, setDiscoveryLoading] = useState(false);
   /** Bumping this triggers the discovery effect; covers the "Rediscover" button. */
   const [discoveryEpoch, setDiscoveryEpoch] = useState(0);
@@ -177,6 +181,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
       setMetricNames([]);
       setLabelValuesByMetric({});
       setExistingRuleGroups([]);
+      setRulerFetchFailed(false);
       return;
     }
     let cancelled = false;
@@ -230,16 +235,31 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                 query: { selector: `{__name__="${probe.metric}"}` },
               });
               return { metric: probe.metric, label, values: res?.values ?? [] };
-            } catch {
+            } catch (err) {
+              // Per-probe failure is expected (rejected by Cortex when the
+              // metric family is absent). Log at warn level so the failure is
+              // visible in dev tools without blowing up the discovery effect.
+
+              console.warn('[slo-suggest] label-values probe failed for', probe.metric, label, err);
               return { metric: probe.metric, label, values: [] as string[] };
             }
           })
         );
+        // Wrap the ruler fetch so we can distinguish "ruler responded with no
+        // groups" (success, dedup runs against an empty universe) from "ruler
+        // unreachable" (we surface a warning so the user knows duplicate
+        // recording groups may be created if they proceed).
         const rulerPromise = http
           .get<{ data?: { groups?: PromRuleGroup[] } }>(
             `/api/alerting/prometheus/${encodeURIComponent(datasourceId)}/rules`
           )
-          .catch(() => ({ data: { groups: [] as PromRuleGroup[] } }));
+          .then(
+            (res) => ({ ok: true as const, groups: res?.data?.groups ?? [] }),
+            (err) => {
+              console.warn('[slo-suggest] ruler-rules fetch failed', err);
+              return { ok: false as const, groups: [] as PromRuleGroup[] };
+            }
+          );
 
         const [labelResults, rulerRes] = await Promise.all([
           Promise.all(labelPromises),
@@ -261,7 +281,8 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
         }
         setMetricNames([...presentMetrics]);
         setLabelValuesByMetric(labelsByMetric);
-        setExistingRuleGroups(rulerRes?.data?.groups ?? []);
+        setExistingRuleGroups(rulerRes.groups);
+        setRulerFetchFailed(!rulerRes.ok);
       } finally {
         if (!cancelled) setDiscoveryLoading(false);
       }
@@ -665,6 +686,25 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
               </EuiCallOut>
             )}
 
+            {!loading && datasourceId && rulerFetchFailed && (
+              <>
+                <EuiCallOut
+                  size="s"
+                  iconType="alert"
+                  color="warning"
+                  title="Could not verify existing recording rules"
+                  data-test-subj="slosSuggestRulerFetchFailed"
+                >
+                  <EuiText size="s">
+                    The Prometheus ruler did not respond when this page tried to list its current
+                    recording groups. Suggestions and bulk-create still work, but duplicate
+                    recording groups may be created if rules already exist for these SLIs.
+                  </EuiText>
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            )}
+
             {!loading && decoratedSuggestions.length > 0 && (
               <>
                 <EuiPanel paddingSize="m" hasBorder data-test-subj="slosSuggestHeaderStrip">
@@ -849,6 +889,14 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
 // `n` in flight. Uses Promise.allSettled-style semantics: every item runs
 // to completion; the caller captures per-item errors inside `worker`.
 // ============================================================================
+
+/** Cap concurrent preview previews so opening the page on a service tree with
+ *  hundreds of suggestions doesn't fan out hundreds of preview HTTP calls. */
+const PREVIEW_CONCURRENCY_LIMIT = 4;
+
+/** Cap concurrent live-SLI rows so per-row PromQL fan-out (3 queries each)
+ *  doesn't translate to hundreds of in-flight Prometheus instant queries. */
+const LIVE_SLI_ROW_CONCURRENCY_LIMIT = 4;
 
 async function withConcurrency<T>(
   n: number,
@@ -1395,26 +1443,34 @@ const BatchPreviewSection: React.FC<{
         status: 'loading',
       }))
     );
-    Promise.all(
-      serializedInputs.map(async (r) => {
+    // Bound the preview fan-out — opening the suggest page on a service tree
+    // with hundreds of suggestions would otherwise issue all preview requests
+    // at once. PREVIEW_CONCURRENCY_LIMIT keeps the browser's network queue
+    // small enough that the page stays responsive while still loading row
+    // previews fast.
+    const results: PerPreview[] = new Array(serializedInputs.length);
+    withConcurrency(
+      PREVIEW_CONCURRENCY_LIMIT,
+      serializedInputs.map((r, i) => ({ r, i })),
+      async ({ r, i }) => {
         try {
           const group = await apiClient.preview(JSON.parse(r.body) as SloCreateInput);
-          return {
+          results[i] = {
             key: r.key,
             suggestion: r.suggestion,
-            status: 'success' as const,
+            status: 'success',
             group,
           };
         } catch (e) {
-          return {
+          results[i] = {
             key: r.key,
             suggestion: r.suggestion,
-            status: 'error' as const,
+            status: 'error',
             error: e instanceof Error ? e.message : String(e),
           };
         }
-      })
-    ).then((results) => {
+      }
+    ).then(() => {
       if (!cancelled) setPreviews(results);
     });
     return () => {
@@ -1445,33 +1501,36 @@ const BatchPreviewSection: React.FC<{
     setLiveByKey(loading);
 
     const evalTime = getTimeInSeconds(new Date());
-    serializedInputs.forEach((r) => {
+    // Bound per-row PromQL fan-out so a 200-suggestion table doesn't issue
+    // 600 simultaneous instant queries against the Prometheus connection.
+    // Inner per-row queries (3 of them) still fire in parallel; the outer
+    // limit only gates how many rows are in flight at once.
+    withConcurrency(LIVE_SLI_ROW_CONCURRENCY_LIMIT, serializedInputs, async (r) => {
       const kind = liveKindFor(r.suggestion);
       if (!kind) {
-        setLiveByKey((prev) => ({ ...prev, [r.key]: { status: 'skipped' } }));
+        if (!cancelled) setLiveByKey((prev) => ({ ...prev, [r.key]: { status: 'skipped' } }));
         return;
       }
       const queries = buildLiveQueries(kind, r.suggestion, windowChoice);
-      Promise.all(
+      const values = await Promise.all(
         queries.map((q) =>
           promqlService
             .executeInstantQuery({ query: q, time: evalTime })
             .then((resp) => extractScalar(resp))
             .catch(() => undefined)
         )
-      ).then((values) => {
-        if (cancelled) return;
-        const [ratio, samples, p99Ms] = values;
-        setLiveByKey((prev) => ({
-          ...prev,
-          [r.key]: {
-            status: 'success',
-            sliRatio: Number.isFinite(ratio ?? NaN) ? (ratio as number) : undefined,
-            totalSamples: Number.isFinite(samples ?? NaN) ? (samples as number) : undefined,
-            p99Ms: Number.isFinite(p99Ms ?? NaN) ? (p99Ms as number) : undefined,
-          },
-        }));
-      });
+      );
+      if (cancelled) return;
+      const [ratio, samples, p99Ms] = values;
+      setLiveByKey((prev) => ({
+        ...prev,
+        [r.key]: {
+          status: 'success',
+          sliRatio: Number.isFinite(ratio ?? NaN) ? (ratio as number) : undefined,
+          totalSamples: Number.isFinite(samples ?? NaN) ? (samples as number) : undefined,
+          p99Ms: Number.isFinite(p99Ms ?? NaN) ? (p99Ms as number) : undefined,
+        },
+      }));
     });
     return () => {
       cancelled = true;

@@ -134,6 +134,19 @@ const UUID_LABEL_VALUE_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0
 /** Annotation payload cap (design §10.3). Keeps saved-object size bounded. */
 const ANNOTATIONS_BYTE_CAP = 4096;
 
+/**
+ * Cardinality caps on user-controlled arrays. These bound the saved-object
+ * size and the search index footprint — without them, a single SLO can blow up
+ * the keyword-mapped projection arrays and slow down listing-page filtering
+ * for the entire workspace. Values picked to leave significant headroom over
+ * realistic usage (an SLO for an internal API rarely needs more than 5
+ * dimensions, 10 labels, or 5 owner teams).
+ */
+const MAX_LABEL_ENTRIES = 50;
+const MAX_LABEL_VALUES_PER_KEY = 50;
+const MAX_DIMENSIONS = 20;
+const MAX_OWNER_TEAMS = 10;
+
 /** Reserved keys in `spec.labels` — reject these so we don't clobber emitted labels. */
 const RESERVED_LABEL_KEYS = new Set([
   'slo_id',
@@ -209,6 +222,8 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
 
   if (!input.owner || !Array.isArray(input.owner.teams) || input.owner.teams.length === 0) {
     errors['spec.owner.teams'] = 'At least one team is required';
+  } else if (input.owner.teams.length > MAX_OWNER_TEAMS) {
+    errors['spec.owner.teams'] = `At most ${MAX_OWNER_TEAMS} owner teams are allowed`;
   } else {
     for (let i = 0; i < input.owner.teams.length; i++) {
       const teamErr = validateUserField('Owner team', input.owner.teams[i]);
@@ -281,6 +296,8 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
     if (!isCustom) {
       if (!Array.isArray(dimensions) || dimensions.length === 0) {
         errors['spec.sli.dimensions'] = 'At least one dimension is required';
+      } else if (dimensions.length > MAX_DIMENSIONS) {
+        errors['spec.sli.dimensions'] = `At most ${MAX_DIMENSIONS} dimensions are allowed`;
       } else {
         for (let i = 0; i < dimensions.length; i++) {
           const d = dimensions[i];
@@ -396,7 +413,11 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
 
   // --- Labels / annotations ---
   if (input.labels) {
-    for (const [k, v] of Object.entries(input.labels)) {
+    const labelEntries = Object.entries(input.labels);
+    if (labelEntries.length > MAX_LABEL_ENTRIES) {
+      errors['spec.labels'] = `At most ${MAX_LABEL_ENTRIES} label keys are allowed`;
+    }
+    for (const [k, v] of labelEntries) {
       if (!LABEL_NAME_RE.test(k)) {
         errors[`spec.labels["${k}"]`] = 'Label key must match [a-zA-Z_][a-zA-Z0-9_]*';
       }
@@ -404,6 +425,11 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
         errors[`spec.labels["${k}"]`] = `"${k}" collides with a reserved slo_* label`;
       }
       const values = Array.isArray(v) ? v : [v];
+      if (values.length > MAX_LABEL_VALUES_PER_KEY) {
+        errors[
+          `spec.labels["${k}"]`
+        ] = `At most ${MAX_LABEL_VALUES_PER_KEY} values per label key are allowed`;
+      }
       for (const val of values) {
         if (typeof val !== 'string') {
           errors[`spec.labels["${k}"]`] = 'Label values must be strings';

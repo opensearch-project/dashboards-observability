@@ -33,7 +33,6 @@
   "supportedOSDataSourceVersions": ">=2.9.0",
   "requiredOSDataSourcePlugins": [
     "opensearch-sql",
-    "opensearch-observability",
-    "opensearch-alerting"
+    "opensearch-observability"
   ]
 }

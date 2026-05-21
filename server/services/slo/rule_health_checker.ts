@@ -28,6 +28,8 @@
 import type { AlertingOSClient, Datasource, Logger } from '../../../common/types/alerting';
 import type { GeneratedRuleGroup } from '../../../common/slo/slo_types';
 import { SloRulerError } from '../../../common/slo/slo_errors';
+import type { SloRulerErrorCode } from '../../../common/slo/slo_errors';
+import type { SloRuleHealthState } from '../../../common/slo/slo_service';
 import type { RulerClient } from './ruler_client';
 
 /**
@@ -38,8 +40,11 @@ import type { RulerClient } from './ruler_client';
  *   - `ruler_unreachable`  → probe short-circuited because the ruler itself could
  *                            not be contacted or rejected the request (auth failure,
  *                            network error, upstream 5xx, etc.)
+ *
+ * Re-exported alias of the canonical `SloRuleHealthState` from common/slo/slo_service
+ * so existing imports against the checker's surface keep working.
  */
-export type RuleHealthState = 'ok' | 'rules_partial' | 'rules_missing' | 'ruler_unreachable';
+export type RuleHealthState = SloRuleHealthState;
 
 /** Report returned by `RuleHealthChecker.check`. */
 export interface RuleHealthReport {
@@ -55,7 +60,7 @@ export interface RuleHealthReport {
    * `SloRulerError.code` thrown by the probe so the caller can render a
    * self-service error message without catching its own exceptions.
    */
-  rulerErrorCode?: 'RULER_UNREACHABLE' | 'RULER_AUTH_FAILED' | 'RULER_VALIDATION_FAILED';
+  rulerErrorCode?: SloRulerErrorCode;
   /** ISO-8601 timestamp captured via the injected `now()` when the report was computed. */
   computedAt: string;
 }
