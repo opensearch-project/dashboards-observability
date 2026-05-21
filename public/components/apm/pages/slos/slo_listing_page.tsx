@@ -273,9 +273,9 @@ function ruleBadgeSpecFor(state: SloHealthState): RuleBadgeSpec {
   }
   return {
     kind: 'healthy',
-    label: 'Healthy',
+    label: 'Active',
     color: 'success',
-    tooltip: 'Rule groups deployed and evaluating.',
+    tooltip: 'Rule groups deployed and actively evaluating samples.',
   };
 }
 

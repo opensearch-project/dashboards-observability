@@ -42,6 +42,7 @@ import { DirectQueryStatusAggregator } from './services/slo/status_aggregator';
 import { createRuleHealthChecker } from './services/slo/rule_health_checker';
 import { InMemoryDatasourceService } from './services/alerting/datasource_service';
 import { DatasourceDiscoveryService } from './services/alerting/datasource_discovery';
+import { DirectQueryPrometheusBackend } from './services/alerting/directquery_prometheus_backend';
 import { AssistantPluginSetup, ObservabilityPluginSetup, ObservabilityPluginStart } from './types';
 
 export interface ObservabilityPluginSetupDependencies {
@@ -368,6 +369,11 @@ export class ObservabilityPlugin
       // every time a user opens an SLO. Backed by the same ruler client the
       // SLO write path uses, with the default 30s in-memory cache.
       const ruleHealthChecker = createRuleHealthChecker(rulerClient, sloLogger);
+      // Probe-SLI route is gated on a non-null prometheusBackend; without it
+      // the wizard's "Probe SLI" button always 404s. The backend is stateless
+      // (see comment in routes/index.ts beside the alerting promBackend) so
+      // the second instance is fine.
+      const sloPrometheusBackend = new DirectQueryPrometheusBackend(this.logger);
       registerSloRoutes({
         router,
         sloService,
@@ -377,6 +383,7 @@ export class ObservabilityPlugin
         datasourceService: sloDatasourceService,
         discoveryService: sloDiscoveryService,
         ruleHealthChecker,
+        prometheusBackend: sloPrometheusBackend,
       });
     }
 

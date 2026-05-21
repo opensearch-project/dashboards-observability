@@ -269,7 +269,7 @@ describe('SloListingPage — Rules column badge (W1.7)', () => {
     expect(badge).toHaveAttribute('data-test-rule-state', 'disabled');
   });
 
-  it('renders "Healthy" badge for ok rows', async () => {
+  it('renders "Active" badge for ok rows', async () => {
     const summary = makeSummary({
       id: 'slo-healthy',
       status: { ...makeSummary().status, sloId: 'slo-healthy', state: 'ok' },
@@ -278,7 +278,7 @@ describe('SloListingPage — Rules column badge (W1.7)', () => {
       renderWithSummaries([summary]);
     });
     const badge = await screen.findByTestId('slosRulesBadge-slo-healthy');
-    expect(badge).toHaveTextContent('Healthy');
+    expect(badge).toHaveTextContent('Active');
     expect(badge).toHaveAttribute('data-test-rule-state', 'healthy');
   });
 
