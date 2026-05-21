@@ -30,7 +30,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
-import type { Datasource } from '../../../../../common/types/alerting/types';
+import type { Datasource } from '../../../../../common/types/alerting';
 import type {
   SloHealthState,
   SloListFilters,

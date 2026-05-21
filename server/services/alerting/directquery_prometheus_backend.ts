@@ -566,7 +566,8 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     query: string,
     start: number,
     end: number,
-    step: number
+    step: number,
+    opts: { requestTimeoutMs?: number } = {}
   ): Promise<PromTimeSeriesPoint[]> {
     try {
       const dqName = this.resolveDqName(ds);
@@ -574,21 +575,24 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
 
       this.logger.debug(`DirectQuery range query: ${query.substring(0, 80)}...`);
 
-      const resp = await client.transport.request({
-        method: 'POST',
-        path,
-        body: {
-          datasource: dqName,
-          query,
-          language: 'PROMQL',
-          options: {
-            queryType: 'range',
-            start: start.toString(),
-            end: end.toString(),
-            step: step.toString(),
+      const resp = await client.transport.request(
+        {
+          method: 'POST',
+          path,
+          body: {
+            datasource: dqName,
+            query,
+            language: 'PROMQL',
+            options: {
+              queryType: 'range',
+              start: start.toString(),
+              end: end.toString(),
+              step: step.toString(),
+            },
           },
         },
-      });
+        opts.requestTimeoutMs !== undefined ? { requestTimeout: opts.requestTimeoutMs } : undefined
+      );
 
       return this.parseRangeQueryResponse(resp.body as Record<string, unknown>);
     } catch (err) {
@@ -846,7 +850,8 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     client: AlertingOSClient,
     ds: Datasource,
     query: string,
-    time?: number
+    time?: number,
+    opts: { requestTimeoutMs?: number } = {}
   ): Promise<PromTimeSeriesPoint[]> {
     try {
       const dqName = this.resolveDqName(ds);
@@ -859,16 +864,19 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
         options.time = time.toString();
       }
 
-      const resp = await client.transport.request({
-        method: 'POST',
-        path,
-        body: {
-          datasource: dqName,
-          query,
-          language: 'PROMQL',
-          options,
+      const resp = await client.transport.request(
+        {
+          method: 'POST',
+          path,
+          body: {
+            datasource: dqName,
+            query,
+            language: 'PROMQL',
+            options,
+          },
         },
-      });
+        opts.requestTimeoutMs !== undefined ? { requestTimeout: opts.requestTimeoutMs } : undefined
+      );
 
       return this.parseInstantQueryResponse(resp.body as Record<string, unknown>);
     } catch (err) {

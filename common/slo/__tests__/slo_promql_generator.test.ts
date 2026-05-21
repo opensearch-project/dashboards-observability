@@ -201,6 +201,37 @@ describe('generateSloRuleGroup — availability, single objective', () => {
     expect(pageSlow.expr).toContain('> 0.006');
   });
 
+  // Regression: target=0.99999 with multiplier=0.001 yields threshold=1e-8.
+  // Earlier impl emitted toFixed(6).trim() = "0", so the alert expr collapsed
+  // to `... > 0` and fired on any non-zero error.
+  it('preserves sub-decimal thresholds via exponential notation', () => {
+    const doc = baseSlo({
+      objectives: [{ name: 'extreme-target', target: 0.99999 }],
+      alerting: {
+        strategy: 'mwmbr',
+        burnRates: [
+          {
+            shortWindow: '5m',
+            longWindow: '1h',
+            burnRateMultiplier: 0.001,
+            severity: 'page',
+            createAlarm: true,
+            forDuration: '2m',
+          },
+        ],
+      },
+    });
+    const group = generateSloRuleGroup(doc);
+    const burnRate = group.rules.find(
+      (r) => r.type === 'alerting' && r.labels.slo_alarm_type === 'burn_rate'
+    );
+    expect(burnRate).toBeDefined();
+    // Threshold is non-zero (would otherwise produce a false-alarm storm).
+    expect(burnRate!.expr).not.toMatch(/>\s*0(\D|$)/);
+    // Sub-decimal threshold renders in exponential notation.
+    expect(burnRate!.expr).toMatch(/>\s*\d(\.\d+)?e-\d/);
+  });
+
   // Guards against #S5-burnrate-label-mismatch. Recording rules emit different
   // `slo_window` label values for the short vs. long window (e.g. 5m vs 1h), so
   // a bare `and` join produces an empty vector and the alert never fires. The

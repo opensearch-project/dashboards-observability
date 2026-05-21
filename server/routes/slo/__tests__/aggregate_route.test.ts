@@ -244,4 +244,55 @@ describe('registerSloAggregateRoute', () => {
     expect(out.status).toBe(500);
     expect(mockLogger.error).toHaveBeenCalled();
   });
+
+  describe('with datasourceService wired (S3 regression)', () => {
+    function setupWithDs() {
+      const router = makeRouter();
+      const list = jest.fn();
+      const sloService = ({ list } as unknown) as SloService;
+      const buildStatusContext = jest.fn().mockReturnValue(undefined);
+      const datasourceService = ({
+        get: jest.fn(),
+      } as unknown) as { get: jest.Mock };
+      registerSloAggregateRoute(
+        router,
+        sloService,
+        mockLogger as never,
+        buildStatusContext,
+        datasourceService as never
+      );
+      return { router, list, datasourceService };
+    }
+
+    it('returns 400 when the datasource is not registered', async () => {
+      const { router, list, datasourceService } = setupWithDs();
+      datasourceService.get.mockResolvedValue(null);
+      const handler = getAggregateHandler(router);
+      const res = makeRes();
+      const out = (await handler(
+        makeCtx(),
+        { query: { services: 'foo', datasourceId: 'ghost' } },
+        res
+      )) as { status: number };
+      expect(out.status).toBe(400);
+      expect(list).not.toHaveBeenCalled();
+    });
+
+    it('rewrites ds-N to canonical name when filtering the listing', async () => {
+      const { router, list, datasourceService } = setupWithDs();
+      datasourceService.get.mockResolvedValue({
+        id: 'ds-1',
+        name: 'prom-prod',
+        type: 'prometheus',
+      });
+      list.mockResolvedValue([]);
+      const handler = getAggregateHandler(router);
+      const res = makeRes();
+      await handler(makeCtx(), { query: { services: 'foo', datasourceId: 'ds-1' } }, res);
+      expect(list).toHaveBeenCalledWith(
+        expect.objectContaining({ datasourceId: ['prom-prod'] }),
+        undefined
+      );
+    });
+  });
 });

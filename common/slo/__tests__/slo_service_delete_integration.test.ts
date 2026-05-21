@@ -29,7 +29,7 @@ import { InMemorySloStore } from '../slo_store';
 import { DEFAULT_MWMBR_TIERS } from '../slo_promql_generator';
 import { createRuleHealthChecker } from '../../../server/services/slo/rule_health_checker';
 import type { RulerClient } from '../../../server/services/slo/ruler_client';
-import type { AlertingOSClient, Datasource, Logger } from '../../types/alerting/types';
+import type { AlertingOSClient, Datasource, Logger } from '../../types/alerting';
 import type { GeneratedRuleGroup, SloSpec } from '../slo_types';
 
 // ============================================================================

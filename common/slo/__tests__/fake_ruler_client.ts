@@ -16,7 +16,7 @@
  * they're structurally compatible.
  */
 
-import type { AlertingOSClient, Datasource } from '../../types/alerting/types';
+import type { AlertingOSClient, Datasource } from '../../types/alerting';
 import type { GeneratedRuleGroup } from '../slo_types';
 import type { SloRulerClient } from '../slo_service';
 import { SloRulerError } from '../slo_errors';

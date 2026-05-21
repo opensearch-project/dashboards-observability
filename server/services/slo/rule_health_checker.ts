@@ -25,7 +25,7 @@
  * lives elsewhere and W1.1 provides that method on the concrete client.
  */
 
-import type { AlertingOSClient, Datasource, Logger } from '../../../common/types/alerting/types';
+import type { AlertingOSClient, Datasource, Logger } from '../../../common/types/alerting';
 import type { GeneratedRuleGroup } from '../../../common/slo/slo_types';
 import { SloRulerError } from '../../../common/slo/slo_errors';
 import type { RulerClient } from './ruler_client';
@@ -172,33 +172,55 @@ export function createRuleHealthChecker(
       };
     }
 
-    for (const group of expected) {
-      try {
-        const g = await probeGroup(input, group);
-        if (g) {
-          present.push(group);
-        } else {
-          missing.push(group);
+    // Probe all groups in parallel — each probe is an independent ruler RTT
+    // and dedup SLOs commonly carry 7+ recording groups. The outcome shape
+    // matches the sequential version: ruler failure short-circuits to
+    // `ruler_unreachable`; unknown errors propagate.
+    type ProbeOutcome =
+      | { kind: 'present'; group: string }
+      | { kind: 'missing'; group: string }
+      | { kind: 'ruler_error'; group: string; err: SloRulerError }
+      | { kind: 'unknown_error'; err: unknown };
+
+    const outcomes = await Promise.all(
+      expected.map(
+        async (group): Promise<ProbeOutcome> => {
+          try {
+            const g = await probeGroup(input, group);
+            return g ? { kind: 'present', group } : { kind: 'missing', group };
+          } catch (err: unknown) {
+            if (err instanceof SloRulerError) {
+              return { kind: 'ruler_error', group, err };
+            }
+            return { kind: 'unknown_error', err };
+          }
         }
-      } catch (err: unknown) {
-        if (err instanceof SloRulerError) {
-          logger.debug(
-            `RuleHealthChecker: ruler probe failed for sloId=${input.sloId} ns=${input.namespace} group=${group} code=${err.code}`
-          );
-          return {
-            state: 'ruler_unreachable',
-            expectedGroups: expected,
-            presentGroups: [],
-            missingGroups: [],
-            rulerErrorCode: err.code,
-            computedAt,
-          };
-        }
-        // Unknown errors are unexpected and indicate a bug in the probe —
-        // propagate so they surface in logs and don't get silently mapped
-        // to a healthy state.
-        throw err;
-      }
+      )
+    );
+
+    // Bug-class errors (non-SloRulerError throws) take precedence — surface
+    // them so they don't get masked by an in-flight ruler outage.
+    const bug = outcomes.find((o) => o.kind === 'unknown_error');
+    if (bug && bug.kind === 'unknown_error') throw bug.err;
+
+    const rulerError = outcomes.find((o) => o.kind === 'ruler_error');
+    if (rulerError && rulerError.kind === 'ruler_error') {
+      logger.debug(
+        `RuleHealthChecker: ruler probe failed for sloId=${input.sloId} ns=${input.namespace} group=${rulerError.group} code=${rulerError.err.code}`
+      );
+      return {
+        state: 'ruler_unreachable',
+        expectedGroups: expected,
+        presentGroups: [],
+        missingGroups: [],
+        rulerErrorCode: rulerError.err.code,
+        computedAt,
+      };
+    }
+
+    for (const o of outcomes) {
+      if (o.kind === 'present') present.push(o.group);
+      else if (o.kind === 'missing') missing.push(o.group);
     }
 
     let state: RuleHealthState;

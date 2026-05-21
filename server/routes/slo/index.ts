@@ -17,7 +17,7 @@ import type {
   SloStatusAggregationContext,
 } from '../../../common/slo/slo_service';
 import { SloService, SloValidationError, WORKSPACE_ID_RE } from '../../../common/slo/slo_service';
-import type { AlertingOSClient, Datasource } from '../../../common/types/alerting/types';
+import type { AlertingOSClient, Datasource } from '../../../common/types/alerting';
 import type { InMemoryDatasourceService } from '../../services/alerting/datasource_service';
 import type { DatasourceDiscoveryService } from '../../services/alerting/datasource_discovery';
 import type { DirectQueryPrometheusBackend } from '../../services/alerting/directquery_prometheus_backend';
@@ -56,8 +56,10 @@ const SLO_BASE = `${OBSERVABILITY_BASE}/v1/slos`;
 
 // ============================================================================
 // @osd/config-schema shapes for validation at the boundary.
-// Note: `{ unknowns: 'allow' }` on nested objects lets us accept reserved P2
-// fields without validation churn as the schema evolves.
+// Nested objects forbid unknown keys so a client cannot smuggle arbitrary
+// fields through to the persisted saved-object spec (the SO writer
+// shallow-spreads validated input). Add fields to the schema explicitly
+// when extending the shape.
 // ============================================================================
 
 const dimensionSchema = schema.object({
@@ -99,7 +101,7 @@ const objectiveSchema = schema.object(
       })
     ),
   },
-  { unknowns: 'allow' }
+  { unknowns: 'forbid' }
 );
 
 const prometheusSliSchema = schema.object(
@@ -135,7 +137,7 @@ const prometheusSliSchema = schema.object(
       ])
     ),
   },
-  { unknowns: 'allow' }
+  { unknowns: 'forbid' }
 );
 
 const sliNodeSchema = schema.object(
@@ -148,7 +150,7 @@ const sliNodeSchema = schema.object(
     operator: schema.maybe(schema.oneOf([schema.literal('all'), schema.literal('any')])),
     members: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   },
-  { unknowns: 'allow' }
+  { unknowns: 'forbid' }
 );
 
 const windowSchema = schema.object(
@@ -161,7 +163,7 @@ const windowSchema = schema.object(
     timezone: schema.maybe(schema.string()),
     startDay: schema.maybe(schema.number()),
   },
-  { unknowns: 'allow' }
+  { unknowns: 'forbid' }
 );
 
 const alertingSchema = schema.object(
@@ -169,7 +171,7 @@ const alertingSchema = schema.object(
     strategy: schema.literal('mwmbr'),
     burnRates: schema.arrayOf(burnRateSchema),
   },
-  { unknowns: 'allow' }
+  { unknowns: 'forbid' }
 );
 
 const alarmsSchema = schema.object({
@@ -198,7 +200,7 @@ const exclusionWindowSchema = schema.object(
       }),
     ]),
   },
-  { unknowns: 'allow' }
+  { unknowns: 'forbid' }
 );
 
 const budgetWarningThresholdSchema = schema.object({
@@ -245,7 +247,7 @@ const sloSpecSchema = schema.object(
     ),
     annotations: schema.recordOf(schema.string(), schema.string()),
   },
-  { unknowns: 'allow' }
+  { unknowns: 'forbid' }
 );
 
 /**
@@ -286,7 +288,7 @@ const sloSpecPartialSchema = schema.object(
     ),
     annotations: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   },
-  { unknowns: 'allow' }
+  { unknowns: 'forbid' }
 );
 
 const createBody = schema.object({
@@ -526,14 +528,20 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
 
   // F1 — per-service aggregate rollup. Registered ahead of the list route so
   // the `/_aggregate` path isn't shadowed by the `/{id}` catch-all.
-  registerSloAggregateRoute(router, sloService, logger, (ctx) =>
-    buildStatusContext(
-      ctx,
-      datasourceService,
-      discoveryService,
-      ruleHealthChecker,
-      ruleDedupEnabled
-    )
+  registerSloAggregateRoute(
+    router,
+    sloService,
+    logger,
+    (ctx) =>
+      buildStatusContext(
+        ctx,
+        datasourceService,
+        discoveryService,
+        ruleHealthChecker,
+        ruleDedupEnabled
+      ),
+    datasourceService,
+    discoveryService
   );
 
   router.get(

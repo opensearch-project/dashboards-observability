@@ -8,7 +8,7 @@
  * { status, body } into OSD response shapes.
  */
 
-import type { Logger } from '../../../common/types/alerting/types';
+import type { Logger } from '../../../common/types/alerting';
 import {
   deriveExpectedGroups,
   SloDeployContext,

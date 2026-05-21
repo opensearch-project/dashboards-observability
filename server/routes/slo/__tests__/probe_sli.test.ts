@@ -258,6 +258,57 @@ describe('probe-sli route', () => {
     expect(body.sliRatio).toBe(1);
   });
 
+  it('rejects malformed PromQL with 400 before fanning out (M3 regression)', async () => {
+    const ctx = makeCtx();
+    const res = makeRes();
+    await getProbeHandler(router)(
+      ctx,
+      {
+        body: {
+          datasourceId: 'ds-1',
+          goodQuery: 'sum(rate(good[5m])',
+          totalQuery: 'sum(rate(total[5m]))',
+        },
+      },
+      res
+    );
+
+    expect(res.ok).not.toHaveBeenCalled();
+    expect(res.customError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        statusCode: 400,
+        body: expect.objectContaining({
+          attributes: expect.objectContaining({
+            fieldErrors: expect.objectContaining({ goodQuery: expect.stringMatching(/balance/i) }),
+          }),
+        }),
+      })
+    );
+    expect(backend.queryInstant).not.toHaveBeenCalled();
+    expect(backend.queryRange).not.toHaveBeenCalled();
+  });
+
+  it('rejects PromQL containing control characters before fanning out', async () => {
+    const ctx = makeCtx();
+    const res = makeRes();
+    await getProbeHandler(router)(
+      ctx,
+      {
+        body: {
+          datasourceId: 'ds-1',
+          // BEL char escape rejected by validateCustomPromQL.
+          goodQuery: 'sum(rate(good\x07[5m]))',
+          totalQuery: 'sum(rate(total[5m]))',
+        },
+      },
+      res
+    );
+
+    expect(res.ok).not.toHaveBeenCalled();
+    expect(res.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 400 }));
+    expect(backend.queryInstant).not.toHaveBeenCalled();
+  });
+
   it('caps sparkline at 20 points', async () => {
     backend.queryInstant.mockResolvedValueOnce([{ timestamp: 1, value: 1 }]);
     backend.queryInstant.mockResolvedValueOnce([{ timestamp: 1, value: 1 }]);

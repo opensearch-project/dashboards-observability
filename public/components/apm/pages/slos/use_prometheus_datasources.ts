@@ -5,7 +5,7 @@
 
 import { useMemo } from 'react';
 import type { HttpStart } from '../../../../../../../src/core/public';
-import type { Datasource } from '../../../../../common/types/alerting/types';
+import type { Datasource } from '../../../../../common/types/alerting';
 import { useDatasources } from '../../../alerting/hooks/use_datasources';
 
 interface PrometheusDatasourcesState {

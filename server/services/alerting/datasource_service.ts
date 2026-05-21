@@ -12,7 +12,7 @@ import {
   DatasourceService,
   PrometheusBackend,
   Logger,
-} from '../../../common/types/alerting/types';
+} from '../../../common/types/alerting';
 
 /**
  * Identity key used by the discovery reconciler to match a freshly-fetched
@@ -49,14 +49,25 @@ export class InMemoryDatasourceService implements DatasourceService {
     const direct = this.datasources.get(id);
     if (direct) return direct;
     // Discovered Prometheus connections are keyed under auto-generated
-    // `ds-N` IDs, but callers (e.g. the SLO wizard's free-text input) often
-    // pass the user-facing identifier — the SQL-plugin `connectionId`
-    // captured as `directQueryName`, or the display `name`. Match those as a
-    // fallback so a copy-paste from /api/alerting/datasources resolves.
+    // `ds-N` IDs but callers may pass the SQL-plugin `connectionId`
+    // captured as `directQueryName`. The connection id is unique by SQL
+    // plugin contract (one entry per SQL connection). The display `name` is
+    // user-controlled and can collide across datasources, so we deliberately
+    // do NOT fall back on it here — a collision would silently shadow one
+    // datasource's lookups with another's. Callers that have only the
+    // display name must resolve it via `list()` and disambiguate themselves.
+    let match: Datasource | null = null;
     for (const ds of this.datasources.values()) {
-      if (ds.directQueryName === id || ds.name === id) return ds;
+      if (ds.directQueryName !== id) continue;
+      if (match) {
+        this.logger.warn(
+          `datasourceService.get: directQueryName "${id}" matched multiple entries (${match.id}, ${ds.id}); refusing ambiguous resolution`
+        );
+        return null;
+      }
+      match = ds;
     }
-    return null;
+    return match;
   }
 
   async create(input: Omit<Datasource, 'id'>): Promise<Datasource> {

@@ -37,7 +37,7 @@ import {
   dedupRecordingGroupName,
 } from '../slo_promql_generator';
 import { computeSliFingerprint } from '../slo_sli_fingerprint';
-import type { AlertingOSClient, Datasource, Logger } from '../../types/alerting/types';
+import type { AlertingOSClient, Datasource, Logger } from '../../types/alerting';
 import type { GeneratedRuleGroup, ISloStore, SloSpec } from '../slo_types';
 
 function noopLogger(): Logger {
@@ -443,5 +443,43 @@ describe('SloService dedup — rollback on SO save failure (W3.8)', () => {
     // zero-ref cleanup. Per-SLO alert group is safe to delete inline.
     const recGroup = dedupRecordingGroupName(fp);
     expect(ruler.deletes.some((d) => d.groupName === recGroup)).toBe(false);
+  });
+});
+
+describe('SloService dedup — datasourceId canonicalization (M1 regression)', () => {
+  it('create pins persisted spec.datasourceId to deploy.datasource.name even when caller passes ds-N id', async () => {
+    const { svc, refStore, deploy } = makeHarness();
+    // Wizard's free-text field accepts the in-memory id; route resolves the
+    // datasource but historically didn't normalize the spec before persist.
+    const spec = validSpec({ datasourceId: deploy.datasource.id });
+    expect(spec.datasourceId).toBe('ds-1');
+    expect(deploy.datasource.name).toBe('prom-ds-001');
+
+    const doc = await svc.create({ spec }, 'alice', deploy);
+
+    expect(doc.spec.datasourceId).toBe('prom-ds-001');
+    // Refcount must be readable through the persisted key — getFingerprintRefcounts
+    // reads `doc.spec.datasourceId`, so writes-on-name + reads-on-name must align.
+    const fp = computeSliFingerprint(doc.spec.datasourceId, spec.sli, spec.objectives[0])!;
+    expect(refStore.refcount('ws-001', doc.spec.datasourceId, fp)).toBe(1);
+
+    const refcounts = await svc.getFingerprintRefcounts(doc, 'ws-001');
+    expect(refcounts[fp]).toBe(1);
+  });
+
+  it('update pins persisted spec.datasourceId to deploy.datasource.name', async () => {
+    const { svc, deploy } = makeHarness();
+    const spec = validSpec();
+    const doc = await svc.create({ spec }, 'alice', deploy);
+
+    // Caller submits the in-memory id on update; persisted spec must stay
+    // canonical so refcount lookups keep working.
+    const updated = await svc.update(
+      doc.id,
+      { spec: { datasourceId: 'ds-1' }, version: doc.status.version },
+      'alice',
+      deploy
+    );
+    expect(updated.spec.datasourceId).toBe('prom-ds-001');
   });
 });

@@ -16,12 +16,7 @@
  * default that the UI can render without breaking.
  */
 
-import type {
-  AlertingOSClient,
-  Datasource,
-  Logger,
-  PaginatedResponse,
-} from '../types/alerting/types';
+import type { AlertingOSClient, Datasource, Logger, PaginatedResponse } from '../types/alerting';
 import type {
   ISloStore,
   Dimension,
@@ -463,6 +458,14 @@ export class SloService {
     const { errors } = validateSloSpec(spec);
     if (Object.keys(errors).length > 0) throw new SloValidationError(errors);
 
+    // Pin `spec.datasourceId` to the canonical datasource name. The route
+    // accepts either an in-memory `ds-N` id or the connection name (see
+    // `datasourceService.get`), but the persisted spec must be stable:
+    // refcount writes (`createDedup` below) and reads (`getFingerprintRefcounts`)
+    // both have to land on the same key, and the in-memory id rotates on
+    // plugin restart.
+    if (deploy) spec.datasourceId = deploy.datasource.name;
+
     const id = input.id ?? generateUuidV4();
     if (input.id) {
       const slugErr = validateSloId(input.id);
@@ -611,8 +614,9 @@ export class SloService {
           // the in-memory `ds-N` id. The id is allocated by an in-process
           // counter that resets when the plugin process restarts; persistent
           // SOs keyed on it would silently divorce from `getFingerprintRefcounts`,
-          // which reads keyed on `doc.spec.datasourceId` (also the canonical
-          // name).
+          // which reads keyed on `doc.spec.datasourceId`. `create()` pins
+          // `spec.datasourceId = deploy.datasource.name` before reaching
+          // here, so writer + reader land on the same key.
           const r = await this.refStore.incrementRef({
             workspaceId: deploy.workspaceId,
             datasourceId: deploy.datasource.name,
@@ -729,6 +733,11 @@ export class SloService {
 
     const { errors } = validateSloSpec(merged);
     if (Object.keys(errors).length > 0) throw new SloValidationError(errors);
+
+    // See `create` — pin to canonical datasource name so refcount keys stay
+    // consistent across the SLO's lifetime, even if the user passed `ds-N`
+    // in the update body.
+    if (deploy) merged.datasourceId = deploy.datasource.name;
 
     if (merged.name !== existing.spec.name) {
       await this.assertNameUnique(merged.datasourceId, merged.name, id);
@@ -1810,7 +1819,7 @@ export function deriveExpectedGroups(doc: SloDocument): string[] {
  * monolithic group is not fingerprint-sharded so we conservatively count
  * objectives only). Non-prometheus backends return 0.
  */
-function deriveRuleCount(doc: SloDocument): number {
+export function deriveRuleCount(doc: SloDocument): number {
   if (doc.status.provisioning.backend !== 'prometheus') return 0;
   const p = doc.status.provisioning;
   const objectiveCount = Math.max(doc.spec.objectives.length, 1);

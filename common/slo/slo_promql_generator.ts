@@ -324,12 +324,23 @@ export function ensureBucketMetric(metric: string): string {
  * Convert a latency bound + unit into the string Prometheus expects on the
  * histogram `le` label. Prometheus convention is seconds, so millisecond bounds
  * are scaled down.
+ *
+ * Bucket labels must literally match the producer's `le=` annotation, so the
+ * output stays in fixed decimal notation regardless of magnitude — using
+ * `parseFloat(toPrecision)` would emit scientific notation (e.g. `"1e-7"`)
+ * for very small bounds and silently miss the bucket. We pick `toFixed(9)`
+ * (the smallest histogram bucket Cortex emits is `1ns = 1e-9 s`) and trim
+ * trailing zeros so common bounds like `0.5`, `1`, `30` stay terse.
  */
 function formatLatencyBoundLe(bound: number, unit: 'seconds' | 'milliseconds'): string {
   const seconds = unit === 'milliseconds' ? bound / 1000 : bound;
-  // Trim trailing zeros; keep a handful of significant digits.
-  const s = seconds.toPrecision(10);
-  return parseFloat(s).toString();
+  if (!Number.isFinite(seconds) || seconds <= 0) return '0';
+  return trimTrailingZeros(seconds.toFixed(9));
+}
+
+function trimTrailingZeros(decimal: string): string {
+  if (!decimal.includes('.')) return decimal;
+  return decimal.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
 }
 
 // ============================================================================
@@ -395,7 +406,20 @@ function generateBurnRateAlerts(
 }
 
 function roundThreshold(n: number): string {
-  return parseFloat(n.toPrecision(6)).toString();
+  // The threshold lands inside the alert expr (`... > <threshold>`) and as a
+  // label value on burn-rate alerts. PromQL accepts scientific notation for
+  // numeric literals, so for values that toFixed(6) would round to zero we
+  // fall back to `toExponential` to keep the threshold non-zero — otherwise a
+  // legal target=0.99999 + multiplier=0.001 underflows to "0" and the alert
+  // fires on any non-zero error ratio. Plain-decimal output is preserved for
+  // typical magnitudes so dashboards that scrape the label stay readable.
+  if (!Number.isFinite(n) || n <= 0) return '0';
+  const fixed = trimTrailingZeros(n.toFixed(6));
+  if (fixed !== '0') return fixed;
+  // 6-decimal print rounded to zero — fall back to exponential. Trim the
+  // exponential mantissa's trailing zeros (`1.000000e-8` → `1e-8`).
+  const exp = n.toExponential();
+  return exp.replace(/(\.\d*?)0+e/, '$1e').replace(/\.e/, 'e');
 }
 
 // ============================================================================
@@ -574,7 +598,6 @@ function formatInterval(seconds: number): string {
  * scalars.
  */
 function rulesToYaml(groupName: string, interval: number, rules: GeneratedRule[]): string {
-  // Cast to a plain Record so js-yaml emits string keys / values verbatim.
   const doc: Record<string, unknown> = {
     name: groupName,
     interval: formatInterval(interval),
@@ -585,15 +608,31 @@ function rulesToYaml(groupName: string, interval: number, rules: GeneratedRule[]
       out.expr = rule.expr;
       if (rule.for) out.for = rule.for;
       if (rule.labels && Object.keys(rule.labels).length > 0) {
-        out.labels = { ...rule.labels };
+        out.labels = stringifyMap(rule.labels);
       }
       if (rule.annotations && Object.keys(rule.annotations).length > 0) {
-        out.annotations = { ...rule.annotations };
+        out.annotations = stringifyMap(rule.annotations);
       }
       return out;
     }),
   };
   return yamlDump(doc, { noRefs: true, lineWidth: -1, sortKeys: false });
+}
+
+/**
+ * Coerce label / annotation values to strings before handing them to
+ * `js-yaml`. Defensive against callers passing through `undefined` or
+ * non-string values via the caller-controlled provenance JSON-string
+ * (`buildAlertProvenance`); without this the emitter passes the raw object
+ * to js-yaml, which serializes `undefined` as YAML `null` and Cortex
+ * rejects the rule.
+ */
+function stringifyMap(map: Record<string, unknown>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(map)) {
+    out[k] = v == null ? '' : String(v);
+  }
+  return out;
 }
 
 // ============================================================================

@@ -26,7 +26,7 @@ import {
   expectedRuleGroupsFor,
 } from '../status_aggregator';
 import type { SloRuleHealthChecker, SloStatusAggregationContext } from '../status_aggregator';
-import type { AlertingOSClient, Datasource, Logger } from '../../../../common/types/alerting/types';
+import type { AlertingOSClient, Datasource, Logger } from '../../../../common/types/alerting';
 import type { SloDocument, SloSpec } from '../../../../common/slo/slo_types';
 
 function noopLogger(): Logger {

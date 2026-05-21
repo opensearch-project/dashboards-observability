@@ -31,7 +31,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { dump as yamlDump, load as yamlLoad } from 'js-yaml';
-import type { AlertingOSClient, Datasource, Logger } from '../../../common/types/alerting/types';
+import type { AlertingOSClient, Datasource, Logger } from '../../../common/types/alerting';
 import type { GeneratedRule, GeneratedRuleGroup } from '../../../common/slo/slo_types';
 import { SloRulerError } from '../../../common/slo/slo_errors';
 
@@ -330,28 +330,31 @@ function stringifyBody(body: unknown): string {
  * Cortex's ruler returns HTTP 404 with body `no rule groups found` when a
  * namespace exists but holds nothing (or hasn't yet been created). The
  * OpenSearch SQL plugin's DirectQuery proxy does not forward that status —
- * it wraps the response as HTTP 400 with a
- * `DataSourceClientException` / `PrometheusClientException` envelope whose
- * `details` string carries the original upstream status.
+ * it wraps the response as HTTP 400 with a structured envelope:
  *
- * We sniff for the exact wrapped-404 fingerprint so a genuinely empty
- * namespace lines up with the HTTP-404 path (return `[]`) instead of
- * escalating to `SloRulerError('RULER_VALIDATION_FAILED', 400, …)`.
+ *   { error: { type: '<...>ClientException',
+ *              details: 'Ruler request failed with code: 404. ...' } }
  *
- * Anything else at 400 is still treated as a real validation failure.
+ * We pin to the envelope's `error.type` plus the upstream-code field inside
+ * `details` so the classifier doesn't fire on a free-text 400 body that
+ * happens to mention the strings — e.g. a user-supplied PromQL field
+ * reflected back in an error. Anything else at 400 stays as a real
+ * validation failure.
  */
 function isWrappedEmptyNamespaceError(err: unknown): boolean {
   if (extractHttpStatus(err) !== 400) return false;
-  const raw = err as { body?: unknown; meta?: { body?: unknown }; message?: string };
-  const bodyCandidates: unknown[] = [raw?.body, raw?.meta?.body, raw?.message];
-  for (const candidate of bodyCandidates) {
-    const text = stringifyBody(candidate);
-    if (!text) continue;
-    const normalized = text.toLowerCase();
-    if (normalized.includes('no rule groups found')) return true;
-    if (normalized.includes('code: 404') && normalized.includes('ruler request failed')) {
-      return true;
-    }
+  const raw = err as { body?: unknown; meta?: { body?: unknown } };
+  const candidates: unknown[] = [raw?.body, raw?.meta?.body];
+  for (const candidate of candidates) {
+    if (!candidate || typeof candidate !== 'object') continue;
+    const error = (candidate as { error?: unknown }).error;
+    if (!error || typeof error !== 'object') continue;
+    const { type, details } = error as { type?: unknown; details?: unknown };
+    if (typeof type !== 'string' || !/ClientException$/.test(type)) continue;
+    if (typeof details !== 'string') continue;
+    // Upstream Cortex status is embedded as `code: <N>` inside details.
+    const match = /\bcode:\s*(\d{3})\b/.exec(details);
+    if (match && match[1] === '404') return true;
   }
   return false;
 }

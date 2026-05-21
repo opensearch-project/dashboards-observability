@@ -22,7 +22,8 @@
 import { schema } from '@osd/config-schema';
 import type { IRouter, Logger, RequestHandlerContext } from '../../../../../src/core/server';
 import { OBSERVABILITY_BASE } from '../../../common/constants/shared';
-import type { AlertingOSClient, Datasource } from '../../../common/types/alerting/types';
+import type { AlertingOSClient, Datasource } from '../../../common/types/alerting';
+import { PROMQL_SIZE_CAP, validateCustomPromQL } from '../../../common/slo/slo_validators';
 import type { InMemoryDatasourceService } from '../../services/alerting/datasource_service';
 import type { DatasourceDiscoveryService } from '../../services/alerting/datasource_discovery';
 import type { DirectQueryPrometheusBackend } from '../../services/alerting/directquery_prometheus_backend';
@@ -53,8 +54,8 @@ const QUERY_TIMEOUT_MS = 5000;
 
 const probeBody = schema.object({
   datasourceId: schema.string({ minLength: 1 }),
-  goodQuery: schema.string({ minLength: 1 }),
-  totalQuery: schema.string({ minLength: 1 }),
+  goodQuery: schema.string({ minLength: 1, maxLength: PROMQL_SIZE_CAP }),
+  totalQuery: schema.string({ minLength: 1, maxLength: PROMQL_SIZE_CAP }),
   lookback: schema.maybe(
     schema.oneOf([schema.literal('1h'), schema.literal('24h'), schema.literal('7d')])
   ),
@@ -75,9 +76,14 @@ interface ProbeSliResponse {
 }
 
 /**
- * Race a promise against a timeout. The timeout branch resolves to a
- * stringified error rather than throwing so the caller can slot it into the
- * per-query `errors` field without special-casing the timeout path.
+ * Race a promise against a timeout so the route returns to the wizard fast
+ * even if the upstream Prometheus query is slow. The promise this races is
+ * already plumbed with `requestTimeoutMs` so the OS client aborts the
+ * underlying HTTP socket on its own — the local timer is the safety net for
+ * the case where the transport's timer mechanism never fires (e.g. resolved
+ * locally by an upstream proxy that holds the connection open). In that
+ * worst case the route still returns; the upstream socket is freed when the
+ * OS client's timeout cancels it shortly after.
  */
 async function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
   let timer: ReturnType<typeof setTimeout>;
@@ -149,6 +155,25 @@ export function registerProbeSliRoute(
     const { datasourceId, goodQuery, totalQuery } = req.body;
     const lookback = (req.body.lookback ?? '1h') as '1h' | '24h' | '7d';
 
+    // Run the same shape check the wizard runs so the probe and create paths
+    // reject the same class of input. Without this, a client could DoS the
+    // upstream Prometheus by submitting unbalanced / control-char-laden
+    // PromQL the create path would have rejected.
+    const goodErr = validateCustomPromQL(goodQuery);
+    const totalErr = validateCustomPromQL(totalQuery);
+    if (goodErr || totalErr) {
+      const fieldErrors: Record<string, string> = {};
+      if (goodErr) fieldErrors.goodQuery = goodErr;
+      if (totalErr) fieldErrors.totalQuery = totalErr;
+      return res.customError({
+        statusCode: 400,
+        body: {
+          message: goodErr ?? totalErr ?? 'Invalid PromQL',
+          attributes: { fieldErrors },
+        },
+      });
+    }
+
     const resolved = await resolveDatasource(
       ctx as ProbeSliHandlerContext,
       datasourceId,
@@ -179,9 +204,13 @@ export function registerProbeSliRoute(
     // timeout-guarded and any throw becomes a per-query error string. The
     // `time` argument is required by the SQL plugin's PrometheusQueryHandler
     // (it rejects instant requests without one), so pass endSec explicitly.
+    // `requestTimeoutMs` plumbs into the OS client so the upstream HTTP
+    // request is aborted on the wire, not just abandoned locally.
     const [goodInstant, totalInstant] = await Promise.all([
       withTimeout(
-        prometheusBackend.queryInstant(client, ds, goodQuery, endSec),
+        prometheusBackend.queryInstant(client, ds, goodQuery, endSec, {
+          requestTimeoutMs: QUERY_TIMEOUT_MS,
+        }),
         QUERY_TIMEOUT_MS,
         'good-query instant'
       ).catch((e) => {
@@ -190,7 +219,9 @@ export function registerProbeSliRoute(
         return null;
       }),
       withTimeout(
-        prometheusBackend.queryInstant(client, ds, totalQuery, endSec),
+        prometheusBackend.queryInstant(client, ds, totalQuery, endSec, {
+          requestTimeoutMs: QUERY_TIMEOUT_MS,
+        }),
         QUERY_TIMEOUT_MS,
         'total-query instant'
       ).catch((e) => {
@@ -205,7 +236,9 @@ export function registerProbeSliRoute(
     // rather than good alone so the chart reflects what the SLO records.
     const ratioRangeQuery = `(${goodQuery}) / (${totalQuery})`;
     const rangePoints = await withTimeout(
-      prometheusBackend.queryRange(client, ds, ratioRangeQuery, startSec, endSec, stepSec),
+      prometheusBackend.queryRange(client, ds, ratioRangeQuery, startSec, endSec, stepSec, {
+        requestTimeoutMs: QUERY_TIMEOUT_MS,
+      }),
       QUERY_TIMEOUT_MS,
       'ratio range'
     ).catch((e) => {

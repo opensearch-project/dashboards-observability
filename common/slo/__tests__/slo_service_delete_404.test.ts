@@ -20,7 +20,7 @@
 
 import { SloDeployContext, SloRulerClient, SloRulerError, SloService } from '../slo_service';
 import { DEFAULT_MWMBR_TIERS } from '../slo_promql_generator';
-import type { AlertingOSClient, Datasource, Logger } from '../../types/alerting/types';
+import type { AlertingOSClient, Datasource, Logger } from '../../types/alerting';
 import type { GeneratedRuleGroup, ISloStore, SloDocument, SloSpec } from '../slo_types';
 
 function noopLogger(): Logger {

@@ -8,7 +8,7 @@ import type {
   SingleSli,
   SloCreateInput,
 } from '../../../../../../common/slo/slo_types';
-import type { PromRule, PromRuleGroup } from '../../../../../../common/types/alerting/types';
+import type { PromRule, PromRuleGroup } from '../../../../../../common/types/alerting';
 import {
   generateSuggestionsForServices,
   generateSuggestionsFromServices,

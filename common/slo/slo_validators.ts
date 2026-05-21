@@ -52,8 +52,8 @@ function validateUserField(label: string, value: string | undefined): string | n
  * confuse downstream parsers. Returns `null` when shaped reasonably, or an
  * error string to surface at `spec.sli.definition.customExpr.*`.
  */
-const PROMQL_SIZE_CAP = 8192;
-function validateCustomPromQL(expr: string): string | null {
+export const PROMQL_SIZE_CAP = 8192;
+export function validateCustomPromQL(expr: string): string | null {
   if (expr.length > PROMQL_SIZE_CAP) {
     return `PromQL expression exceeds ${PROMQL_SIZE_CAP} characters`;
   }

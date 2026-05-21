@@ -4,7 +4,7 @@
  */
 
 import { InMemoryDatasourceService } from '../datasource_service';
-import type { Logger } from '../../../../common/types/alerting/types';
+import type { Logger } from '../../../../common/types/alerting';
 
 const mockLogger: Logger = { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() };
 
@@ -109,7 +109,7 @@ describe('InMemoryDatasourceService.get', () => {
     expect(ds?.directQueryName).toBe('ObservabilityStack_Prometheus');
   });
 
-  it('falls back to matching display name when ds-N and directQueryName both miss', async () => {
+  it('does NOT fall back on display name (collidable, can shadow another datasource)', async () => {
     const svc = new InMemoryDatasourceService(noopLogger());
     await svc.create({
       name: 'My Cortex',
@@ -118,8 +118,34 @@ describe('InMemoryDatasourceService.get', () => {
       enabled: true,
     });
 
+    // Display name lookup must miss. `name` is user-controlled and can
+    // collide; resolving by it would let a freshly-created datasource shadow
+    // an older one's lookups.
     const ds = await svc.get('My Cortex');
-    expect(ds?.id).toBe('ds-1');
+    expect(ds).toBeNull();
+  });
+
+  it('returns null when directQueryName matches more than one entry (ambiguous)', async () => {
+    const svc = new InMemoryDatasourceService(noopLogger());
+    await svc.create({
+      name: 'Cortex A',
+      type: 'prometheus',
+      url: 'so-1',
+      enabled: true,
+      directQueryName: 'shared-conn',
+    });
+    await svc.create({
+      name: 'Cortex B',
+      type: 'prometheus',
+      url: 'so-2',
+      enabled: true,
+      directQueryName: 'shared-conn',
+    });
+
+    // SQL plugin contract treats connectionId as unique, but if two registry
+    // entries collide we refuse to pick one rather than silently shadowing.
+    const ds = await svc.get('shared-conn');
+    expect(ds).toBeNull();
   });
 
   it('returns null when no id / name / directQueryName matches', async () => {

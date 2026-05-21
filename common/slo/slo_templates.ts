@@ -21,7 +21,7 @@
  */
 
 import type { PrometheusSliType, SliCalcMethod } from './slo_types';
-import type { PrometheusMetricMetadata } from '../types/alerting/types';
+import type { PrometheusMetricMetadata } from '../types/alerting';
 
 // ============================================================================
 // Template interface

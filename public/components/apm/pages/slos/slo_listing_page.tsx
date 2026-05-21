@@ -9,6 +9,7 @@ import {
   EuiBasicTableColumn,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFlexGroup,
@@ -75,6 +76,12 @@ function worstBudgetRemaining(summary: SloSummary): number {
   if (!objectives || objectives.length === 0) return 1;
   return objectives.reduce((acc, o) => Math.min(acc, o.errorBudgetRemaining), 1);
 }
+
+// Server-side cap on a single listing fetch. The listing has no pagination
+// UI yet; rows beyond this cap are dropped on the floor unless filters
+// narrow the result set. Surface the truncation via a callout when it
+// happens so users aren't silently missing data.
+const LISTING_PAGE_SIZE = 100;
 
 /** Compact budget bar for the table column. Identical visual language to the overview leaderboard. */
 const BudgetColumnBar: React.FC<{ remaining: number; width?: number }> = ({
@@ -404,6 +411,8 @@ interface SlosTablePanelProps {
   columns: Array<EuiBasicTableColumn<SloSummary>>;
   loading: boolean;
   resultCount: number;
+  /** Server-reported total when it exceeds the page; null when not truncated. */
+  truncatedTotal: number | null;
   filteredToZero: boolean;
   onClearAllFilters: () => void;
   defaultsLine: string | null;
@@ -414,6 +423,7 @@ const SlosTablePanelUI: React.FC<SlosTablePanelProps> = ({
   columns,
   loading,
   resultCount,
+  truncatedTotal,
   filteredToZero,
   onClearAllFilters,
   defaultsLine,
@@ -454,6 +464,18 @@ const SlosTablePanelUI: React.FC<SlosTablePanelProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
+      {truncatedTotal !== null ? (
+        <>
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="alert"
+            title={`Showing ${resultCount} of ${truncatedTotal} SLOs — narrow the filters to see the rest.`}
+            data-test-subj="slosListingTruncated"
+          />
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
       <EuiInMemoryTable<SloSummary>
         items={items}
         columns={columns}
@@ -494,6 +516,10 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
   );
   const [items, setItems] = useState<SloSummary[]>([]);
   const [totalUnfiltered, setTotalUnfiltered] = useState<number | null>(null);
+  // Server returns up to LISTING_PAGE_SIZE rows; if `total` exceeds the page,
+  // the listing is silently truncated. Surface that to the user — pagination
+  // UI is the longer-term fix; this prevents silent data loss in the meantime.
+  const [truncatedTotal, setTruncatedTotal] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -544,11 +570,12 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
         const effectiveFilters: SloListFilters = {
           ...filters,
           sliBackend: filters.sliBackend?.length ? filters.sliBackend : ['prometheus'],
-          pageSize: 100,
+          pageSize: LISTING_PAGE_SIZE,
         };
         const result = await apiClient.list(effectiveFilters);
         if (!isCurrent()) return;
         setItems(result.results);
+        setTruncatedTotal(result.total > result.results.length ? result.total : null);
         if (Object.keys(filters).length === 0) {
           setTotalUnfiltered(result.total);
         }
@@ -989,6 +1016,7 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
                         columns={columns}
                         loading={loading}
                         resultCount={items.length}
+                        truncatedTotal={truncatedTotal}
                         filteredToZero={filteredToZero}
                         onClearAllFilters={clearAllFilters}
                         defaultsLine={defaultsLine}

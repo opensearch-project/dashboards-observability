@@ -22,6 +22,7 @@
 import {
   DirectQueryStatusAggregator,
   NoopStatusAggregator,
+  buildBatchedLongWindowQuery,
   buildLongWindowQuery,
   deriveTopLevelState,
   expectedRuleGroupsFor,
@@ -30,7 +31,7 @@ import {
   parseInstantResponseWithNonFinite,
 } from '../status_aggregator';
 import type { SloRuleHealthChecker, SloStatusAggregationContext } from '../status_aggregator';
-import type { AlertingOSClient, Datasource, Logger } from '../../../../common/types/alerting/types';
+import type { AlertingOSClient, Datasource, Logger } from '../../../../common/types/alerting';
 import type { ObjectiveStatus, SloDocument, SloSpec } from '../../../../common/slo/slo_types';
 
 // ============================================================================
@@ -275,6 +276,26 @@ describe('buildLongWindowQuery', () => {
   it('escapes quotes and backslashes in the sloId', () => {
     expect(buildLongWindowQuery('a"b\\c', '1h')).toBe(
       '{__name__=~"slo:sli_error:ratio_rate_1h:.*", slo_id="a\\"b\\\\c"}'
+    );
+  });
+});
+
+describe('buildBatchedLongWindowQuery', () => {
+  it('returns null on an empty list', () => {
+    expect(buildBatchedLongWindowQuery([], '3d')).toBeNull();
+  });
+
+  it('folds N sloIds into a single regex-alternation matcher', () => {
+    expect(buildBatchedLongWindowQuery(['slo-1', 'slo-2'], '3d')).toBe(
+      '{__name__=~"slo:sli_error:ratio_rate_3d:.*", slo_id=~"slo-1|slo-2"}'
+    );
+  });
+
+  it('escapes RE2 metacharacters in sloIds', () => {
+    // `.` and `()` must be backslash-escaped so a sloId like `a.b` doesn't
+    // accidentally match `axb` series. The matcher is RE2 inside =~"...".
+    expect(buildBatchedLongWindowQuery(['a.b', 'c(d)'], '1h')).toBe(
+      '{__name__=~"slo:sli_error:ratio_rate_1h:.*", slo_id=~"a\\.b|c\\(d\\)"}'
     );
   });
 });
@@ -556,21 +577,20 @@ describe('DirectQueryStatusAggregator.aggregate — partial failure', () => {
     expect(status.objectives[0].attainment).toBeCloseTo(0.9998, 5);
   });
 
-  it('query endpoint fails for one SLO — that SLO degrades to no_data, sibling keeps working', async () => {
+  it('SLOs missing from the batched response degrade to no_data while siblings stay ok', async () => {
     const doc1 = makeDoc({}, 'slo-1');
     const doc2 = makeDoc({}, 'slo-2');
-    let call = 0;
+    let queryCalls = 0;
     const client: AlertingOSClient = ({
       transport: {
         request: jest.fn(async (params: unknown) => {
           const p = params as { path: string; method: string; body: unknown };
           if (p.path.includes('/_directquery/_query/')) {
-            call++;
-            // Fail the query that targets slo-2 specifically
-            const body = p.body as { query: string };
-            if (body.query.includes('slo_id="slo-2"')) {
-              throw new Error('query failed');
-            }
+            queryCalls++;
+            // The aggregator now batches by (datasource × longWindow), so
+            // both SLOs share a single query. We respond with a sample for
+            // slo-1 only; slo-2 is silently absent and should degrade to
+            // no_data.
             return {
               statusCode: 200,
               body: instantResponse([
@@ -587,7 +607,8 @@ describe('DirectQueryStatusAggregator.aggregate — partial failure', () => {
 
     expect(s1.state).toBe('ok');
     expect(s2.state).toBe('no_data');
-    expect(call).toBeGreaterThan(1);
+    // Single batched query covers both SLOs — used to be 2 (one per SLO).
+    expect(queryCalls).toBe(1);
   });
 });
 

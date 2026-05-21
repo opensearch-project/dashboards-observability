@@ -15,7 +15,7 @@
 import { dump as yamlDump, load as yamlLoad } from 'js-yaml';
 import { DirectQueryRulerClient, ruleGroupToYaml } from '../ruler_client';
 import { SloRulerError } from '../../../../common/slo/slo_errors';
-import type { AlertingOSClient, Datasource, Logger } from '../../../../common/types/alerting/types';
+import type { AlertingOSClient, Datasource, Logger } from '../../../../common/types/alerting';
 import type { GeneratedRuleGroup } from '../../../../common/slo/slo_types';
 
 function noopLogger(): Logger {
@@ -561,6 +561,28 @@ describe('DirectQueryRulerClient.listRuleGroups', () => {
   it('HTTP 400 without the wrapped-404 marker → still throws RULER_VALIDATION_FAILED', async () => {
     const { client } = mockClient(() =>
       Promise.reject(rejectWithStatus(400, { error: { details: 'malformed namespace' } }))
+    );
+    const svc = new DirectQueryRulerClient(noopLogger());
+
+    await expect(svc.listRuleGroups(client, promDatasource(), 'ns')).rejects.toMatchObject({
+      name: 'SloRulerError',
+      code: 'RULER_VALIDATION_FAILED',
+      httpStatus: 400,
+    });
+  });
+
+  // Regression: a 400 whose body simply echoes user-supplied text containing
+  // the marker substrings must NOT be classified as an empty namespace. The
+  // structured-envelope classifier requires `error.type` ending in
+  // `ClientException` AND a `code: 404` group inside `error.details`.
+  it('HTTP 400 with reflected user input mentioning "no rule groups found" → throws, not coerced to []', async () => {
+    const { client } = mockClient(() =>
+      Promise.reject(
+        rejectWithStatus(400, {
+          message:
+            'Validation failed for input "no rule groups found {ruler request failed with code: 404}"',
+        })
+      )
     );
     const svc = new DirectQueryRulerClient(noopLogger());
 

@@ -45,7 +45,7 @@ import type {
   Logger,
   PromRawAlert,
   PromAlertsApiResponse,
-} from '../../../common/types/alerting/types';
+} from '../../../common/types/alerting';
 import type {
   ObjectiveStatus,
   Objective,
@@ -57,8 +57,15 @@ import {
   dedupRecordingRuleName,
   findClosestRecordingWindow,
   parseDurationToMs,
-  RECORDING_WINDOWS,
 } from '../../../common/slo/slo_promql_generator';
+import { deriveExpectedGroups, deriveRuleCount } from '../../../common/slo/slo_service';
+
+/**
+ * Expected ruler group names for an SLO. Re-exported alias of the canonical
+ * helper in `common/slo/slo_service.ts` so existing imports against the
+ * aggregator's public surface keep working.
+ */
+export const expectedRuleGroupsFor = deriveExpectedGroups;
 
 // ============================================================================
 // Interfaces
@@ -183,6 +190,16 @@ interface InstantSampleMaybeFinite {
   value: number | null;
 }
 
+/**
+ * Pre-fetched recording-rule samples for a single SLO, produced by the
+ * batched `(datasource × longWindow)` query and consumed by `statusForSlo`
+ * to skip its own per-SLO `queryInstant`.
+ */
+interface PrefetchedSloSamples {
+  byObjective: Map<string, InstantSample>;
+  sourceIdleObjectives: Set<string>;
+}
+
 export class DirectQueryStatusAggregator implements SloStatusAggregator {
   /**
    * De-dup key for health-checker failure warnings: one warn per
@@ -242,33 +259,65 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
         );
       }
 
-      // Per-SLO: one instant query for the recording-rule samples.
-      await Promise.all(
-        group.map(async (doc) => {
-          // W1.6 priority 1: `disabled` beats everything — don't even call the
-          // ruler or the health checker for a disabled SLO.
-          if (!doc.spec.enabled) {
-            perSloStatus.set(doc.id, disabledStatus(doc));
-            return;
+      // Pre-fetch the long-window recording samples for every *legacy*
+      // (non-dedup) SLO on this datasource in a single PromQL call per
+      // (datasource × longWindow) instead of one per SLO. The aggregator
+      // selector matches on `slo_id=~"id1|id2|..."`, so each row of the
+      // response carries its own `slo_id` label and we route it back to the
+      // right SLO. Dedup-shape SLOs continue to query individually because
+      // their fingerprint regex isn't easily folded across SLOs (different
+      // SLOs may share fingerprints — collapsing them would force a second
+      // membership lookup per sample, with no win).
+      const prefetchedByLongWindow = await this.prefetchLongWindowSamples(group, ds, ctx);
+
+      // Per-SLO: one *fallback* instant query per SLO if the prefetch missed
+      // (dedup-flag enabled, or empty group, or transport failure). Cap the
+      // fan-out so a workspace with hundreds of SLOs on one datasource
+      // doesn't fire that many parallel ruler/instant-query calls per
+      // listing poll.
+      const PER_SLO_CONCURRENCY = 8;
+      let cursor = 0;
+      const runOne = async (doc: SloDocument): Promise<void> => {
+        // W1.6 priority 1: `disabled` beats everything — don't even call the
+        // ruler or the health checker for a disabled SLO.
+        if (!doc.spec.enabled) {
+          perSloStatus.set(doc.id, disabledStatus(doc));
+          return;
+        }
+        let base: SloLiveStatus;
+        try {
+          const prefetch = prefetchedByLongWindow.get(doc.id);
+          base = await this.statusForSlo(
+            doc,
+            ds!,
+            ctx,
+            alertCountBySloId.get(doc.id) ?? 0,
+            prefetch
+          );
+        } catch (err) {
+          this.logger.warn(
+            `StatusAggregator: statusForSlo failed for ${doc.id}: ${errMsg(
+              err
+            )}. Degrading to no_data.`
+          );
+          base = noDataStatus(doc);
+        }
+        // W1.6 priority 2/3: overlay rule-health state on top of the sample
+        // derivation. Health-checker errors never escape (see
+        // applyRuleHealthMerge) — the listing must stay available.
+        const merged = await this.applyRuleHealthMerge(doc, ds!, ctx, base);
+        perSloStatus.set(doc.id, merged);
+      };
+      const workers = Array.from(
+        { length: Math.min(PER_SLO_CONCURRENCY, group.length) },
+        async () => {
+          while (cursor < group.length) {
+            const idx = cursor++;
+            await runOne(group[idx]);
           }
-          let base: SloLiveStatus;
-          try {
-            base = await this.statusForSlo(doc, ds!, ctx, alertCountBySloId.get(doc.id) ?? 0);
-          } catch (err) {
-            this.logger.warn(
-              `StatusAggregator: statusForSlo failed for ${doc.id}: ${errMsg(
-                err
-              )}. Degrading to no_data.`
-            );
-            base = noDataStatus(doc);
-          }
-          // W1.6 priority 2/3: overlay rule-health state on top of the sample
-          // derivation. Health-checker errors never escape (see
-          // applyRuleHealthMerge) — the listing must stay available.
-          const merged = await this.applyRuleHealthMerge(doc, ds!, ctx, base);
-          perSloStatus.set(doc.id, merged);
-        })
+        }
       );
+      await Promise.all(workers);
     }
 
     // Preserve input order.
@@ -351,6 +400,98 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
   }
 
   // --------------------------------------------------------------------------
+  // Cross-SLO sample prefetch
+  // --------------------------------------------------------------------------
+
+  /**
+   * Pre-fetch the long-window recording samples for every legacy SLO on the
+   * given datasource in a single PromQL call per longWindow group. Returns
+   * a per-sloId map of samples keyed by objective name plus the per-sloId
+   * set of source-idle objectives. Dedup-shape SLOs and SLOs whose dedup
+   * flag is on are skipped — `statusForSlo` handles them via its own
+   * `queryDedupObjectiveSamples` path.
+   *
+   * Errors are swallowed so a single failed batched query degrades back
+   * to the per-SLO path rather than poisoning the whole listing.
+   */
+  private async prefetchLongWindowSamples(
+    group: SloDocument[],
+    ds: Datasource,
+    ctx: SloStatusAggregationContext
+  ): Promise<Map<string, PrefetchedSloSamples>> {
+    const prefetched = new Map<string, PrefetchedSloSamples>();
+
+    // Group only legacy (non-dedup) SLOs by long window.
+    const legacyByLongWindow = new Map<string, SloDocument[]>();
+    for (const doc of group) {
+      if (!doc.spec.enabled) continue;
+      const recordingFingerprints =
+        doc.status.provisioning.backend === 'prometheus'
+          ? doc.status.provisioning.recordingFingerprints
+          : undefined;
+      if (ctx.ruleDedupEnabled && recordingFingerprints) continue;
+      const window = doc.spec.window.type === 'rolling' ? doc.spec.window.duration : '3d';
+      const longWindow = findClosestRecordingWindow(window);
+      const list = legacyByLongWindow.get(longWindow) ?? [];
+      list.push(doc);
+      legacyByLongWindow.set(longWindow, list);
+    }
+
+    if (legacyByLongWindow.size === 0) return prefetched;
+
+    // Fan out one batched query per longWindow. Independent of one another;
+    // run in parallel.
+    const fetches = Array.from(legacyByLongWindow.entries()).map(async ([longWindow, slos]) => {
+      const sloIds = slos.map((d) => d.id);
+      const query = buildBatchedLongWindowQuery(sloIds, longWindow);
+      if (!query) return;
+      try {
+        const { samples, nonFinite } = await this.queryInstant(ctx.client, ds, query);
+
+        // Initialize empty maps for every SLO in the group so a missing
+        // sample on a particular SLO still distinguishes "ruler returned
+        // nothing for me" from "we never queried" downstream.
+        for (const id of sloIds) {
+          prefetched.set(id, {
+            byObjective: new Map<string, InstantSample>(),
+            sourceIdleObjectives: new Set<string>(),
+          });
+        }
+
+        for (const s of samples) {
+          const sloId = s.labels.slo_id;
+          const objectiveName = s.labels.slo_objective;
+          if (!sloId || !objectiveName) continue;
+          const slot = prefetched.get(sloId);
+          if (!slot) continue;
+          slot.byObjective.set(objectiveName, s);
+        }
+        for (const s of nonFinite) {
+          const sloId = s.labels.slo_id;
+          const objectiveName = s.labels.slo_objective;
+          if (!sloId || !objectiveName) continue;
+          const slot = prefetched.get(sloId);
+          if (!slot) continue;
+          if (!slot.byObjective.has(objectiveName)) {
+            slot.sourceIdleObjectives.add(objectiveName);
+          }
+        }
+      } catch (err) {
+        this.logger.warn(
+          `StatusAggregator: batched longWindow=${longWindow} fetch failed for ds=${
+            ds.id
+          }: ${errMsg(err)}. Falling back to per-SLO queries.`
+        );
+        // Drop any partial prefetch for this group so statusForSlo runs
+        // its own queryInstant fallback.
+        for (const id of sloIds) prefetched.delete(id);
+      }
+    });
+    await Promise.all(fetches);
+    return prefetched;
+  }
+
+  // --------------------------------------------------------------------------
   // Per-SLO aggregation
   // --------------------------------------------------------------------------
 
@@ -358,7 +499,8 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
     doc: SloDocument,
     ds: Datasource,
     ctx: SloStatusAggregationContext,
-    firingCount: number
+    firingCount: number,
+    prefetched?: PrefetchedSloSamples
   ): Promise<SloLiveStatus> {
     const spec = doc.spec;
     const window =
@@ -375,8 +517,8 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
         : undefined;
     const dedup = !!ctx.ruleDedupEnabled && !!recordingFingerprints;
 
-    let byObjective = new Map<string, InstantSample>();
-    let sourceIdleObjectives = new Set<string>();
+    let byObjective: Map<string, InstantSample>;
+    let sourceIdleObjectives: Set<string>;
     if (dedup) {
       const result = await this.queryDedupObjectiveSamples(
         ctx.client,
@@ -386,7 +528,14 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       );
       byObjective = result.byObjective;
       sourceIdleObjectives = result.sourceIdleObjectives;
+    } else if (prefetched) {
+      // Batched fetch already retrieved this SLO's samples — skip the
+      // per-SLO instant query and use the prefetched maps directly.
+      byObjective = prefetched.byObjective;
+      sourceIdleObjectives = prefetched.sourceIdleObjectives;
     } else {
+      byObjective = new Map();
+      sourceIdleObjectives = new Set();
       const query = buildLongWindowQuery(doc.id, longWindow);
       const { samples, nonFinite } = await this.queryInstant(ctx.client, ds, query);
       for (const s of samples) {
@@ -581,6 +730,28 @@ export function buildLongWindowQuery(sloId: string, longWindow: string): string 
 }
 
 /**
+ * Batched form of `buildLongWindowQuery`. Folds many SLOs onto a single PromQL
+ * instant query by widening the `slo_id` matcher to a regex alternation. The
+ * response carries one series per (sloId × objective); the aggregator keys
+ * back into the right SLO via the sample's `slo_id` label.
+ *
+ * Returns null when `sloIds` is empty so callers can skip the round-trip.
+ */
+export function buildBatchedLongWindowQuery(sloIds: string[], longWindow: string): string | null {
+  if (sloIds.length === 0) return null;
+  // Regex-escape each id. Inside `slo_id=~"..."` Prometheus parses an RE2
+  // pattern, so any character that has meaning in RE2 must be backslash-
+  // escaped — most importantly `.|()[]{}^$?*+\` and the literal `"`.
+  const escapeRe2 = (id: string): string =>
+    id
+      .replace(/\\/g, '\\\\')
+      .replace(/"/g, '\\"')
+      .replace(/[.|()\[\]{}^$?*+]/g, '\\$&');
+  const pattern = sloIds.map(escapeRe2).join('|');
+  return `{__name__=~"slo:sli_error:ratio_rate_${longWindow}:.*", slo_id=~"${pattern}"}`;
+}
+
+/**
  * Phase 3 W3.9 — build a single PromQL query matching every fingerprint-named
  * recording rule the SLO references. Anchored regex on `__name__` so we only
  * match our own rules. Names are hex-only (`sli_<16-hex>`) so no escaping is
@@ -755,22 +926,6 @@ function disabledStatus(doc: SloDocument): SloLiveStatus {
   };
 }
 
-/**
- * Count of rules provisioned for this SLO, derived from spec shape so the
- * listing UI can render without a ruler round trip. Mirrors the helper in
- * `slo_service.ts`; both use the same RECORDING_WINDOWS constant.
- */
-function deriveRuleCount(doc: SloDocument): number {
-  if (doc.status.provisioning.backend !== 'prometheus') return 0;
-  const p = doc.status.provisioning;
-  const objectiveCount = Math.max(doc.spec.objectives.length, 1);
-  if (p.recordingFingerprints) {
-    const uniqueFps = new Set(Object.values(p.recordingFingerprints)).size;
-    return uniqueFps * RECORDING_WINDOWS.length + objectiveCount;
-  }
-  return objectiveCount;
-}
-
 // Values sometimes arrive as NaN (dividing by zero rate on a scraped-once
 // metric). Clamp so downstream charts don't render garbage.
 function clampAttainment(v: number): number {
@@ -894,30 +1049,4 @@ function extractAlerts(
 
 function errMsg(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
-}
-
-/**
- * Derive the list of rule-group names the ruler is expected to serve for
- * this SLO.
- *
- * Dedup shape: one shared recording group per unique fingerprint
- * (`slo:rec:<fp>`) plus one per-SLO alert group (`alertGroupName`). Legacy
- * (flag-off) shape carries only `alertGroupName`.
- *
- * Returns an empty array when there's nothing to probe (non-prometheus
- * backend, or neither shape populated).
- */
-export function expectedRuleGroupsFor(doc: SloDocument): string[] {
-  const p = doc.status.provisioning;
-  if (p.backend !== 'prometheus') return [];
-  const names: string[] = [];
-  if (p.recordingFingerprints) {
-    for (const fp of new Set(Object.values(p.recordingFingerprints))) {
-      names.push(`slo:rec:${fp}`);
-    }
-  }
-  if (p.alertGroupName) {
-    names.push(p.alertGroupName);
-  }
-  return names;
 }

@@ -16,7 +16,7 @@
 import { SloService, SloValidationError } from '../slo_service';
 import type { SloStatusAggregationContext, SloStatusAggregator } from '../slo_service';
 import { DEFAULT_MWMBR_TIERS } from '../slo_promql_generator';
-import type { AlertingOSClient, Datasource, Logger } from '../../types/alerting/types';
+import type { AlertingOSClient, Datasource, Logger } from '../../types/alerting';
 import type { SloDocument, SloLiveStatus, SloSpec } from '../slo_types';
 
 function noopLogger(): Logger {

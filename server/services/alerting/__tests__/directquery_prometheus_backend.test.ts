@@ -130,7 +130,9 @@ describe('DirectQueryPrometheusBackend', () => {
       expect.objectContaining({
         method: 'POST',
         path: '/_plugins/_directquery/_query/my-prom',
-      })
+      }),
+      // No per-call requestTimeout passed — backend forwards undefined for opts.
+      undefined
     );
     expect(points).toEqual([{ timestamp: 1000000, value: 42 }]);
   });

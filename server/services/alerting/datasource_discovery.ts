@@ -19,7 +19,7 @@
  */
 
 import type { RequestHandlerContext, SavedObject } from '../../../../../src/core/server';
-import type { Logger } from '../../../common/types/alerting/types';
+import type { Logger } from '../../../common/types/alerting';
 import type { InMemoryDatasourceService } from './datasource_service';
 
 interface DataSourceSOAttributes {
@@ -97,25 +97,31 @@ export class DatasourceDiscoveryService {
         (so) => !LOCAL_CLUSTER_PATTERNS.test(so.attributes?.endpoint || '')
       );
 
-      // Seed a representation for the local cluster:
+      // Local-cluster representation:
       //   - If the user registered one or more MDS data sources pointing at
       //     the local cluster, surface them with their user-given names.
-      //   - Otherwise, seed the default "Local Cluster" entry.
-      if (osLocal.length > 0) {
-        this.datasourceService.seed(
-          osLocal.map((so: SavedObject<DataSourceSOAttributes>) => ({
-            name: so.attributes.title || so.id,
-            type: 'opensearch' as const,
-            url: so.id,
-            enabled: true,
-            mdsId: so.id,
-          }))
-        );
-      } else {
-        this.datasourceService.seed([
-          { name: 'Local Cluster', type: 'opensearch' as const, url: 'local', enabled: true },
-        ]);
-      }
+      //   - Otherwise, emit the default "Local Cluster" sentinel.
+      // Both go through `reconcile` (not `seed`) so the stable-key upsert path
+      // handles re-runs idempotently — `seed` always increments the counter
+      // and would leak orphan rows on every TTL refresh.
+      const localDiscovered =
+        osLocal.length > 0
+          ? osLocal.map((so: SavedObject<DataSourceSOAttributes>) => ({
+              name: so.attributes.title || so.id,
+              type: 'opensearch' as const,
+              url: so.id,
+              enabled: true,
+              mdsId: so.id as string | undefined,
+            }))
+          : [
+              {
+                name: 'Local Cluster',
+                type: 'opensearch' as const,
+                url: 'local',
+                enabled: true,
+                mdsId: undefined as string | undefined,
+              },
+            ];
 
       const osDiscovered = osRemote.map((so: SavedObject<DataSourceSOAttributes>) => ({
         name: so.attributes.title || so.id,
@@ -141,11 +147,7 @@ export class DatasourceDiscoveryService {
         }));
 
       // Upsert by stable key so ds-N ids are preserved across refreshes.
-      const discovered = [
-        { name: 'Local Cluster', type: 'opensearch' as const, url: 'local', enabled: true },
-        ...osDiscovered,
-        ...promDiscovered,
-      ];
+      const discovered = [...localDiscovered, ...osDiscovered, ...promDiscovered];
       await this.datasourceService.reconcile(discovered);
       this.logger?.info(
         `alerting: Reconciled datasources — ${osDiscovered.length} OpenSearch data source(s), ${promDiscovered.length} Prometheus connection(s)`

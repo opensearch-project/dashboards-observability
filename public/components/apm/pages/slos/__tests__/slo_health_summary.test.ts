@@ -5,7 +5,7 @@
 
 import { renderHook, waitFor, act } from '@testing-library/react';
 import type { SloApiClient } from '../slo_api_client';
-import type { PaginatedResponse } from '../../../../../../common/types/alerting/types';
+import type { PaginatedResponse } from '../../../../../../common/types/alerting';
 import type { SloHealthState, SloSummary } from '../../../../../../common/slo/slo_types';
 import {
   __resetAggregateFallbackLatchForTests,

@@ -25,7 +25,9 @@ import type {
   SloListFilters,
 } from '../../../common/slo/slo_types';
 import type { SloService, SloStatusAggregationContext } from '../../../common/slo/slo_service';
-import type { AlertingOSClient } from '../../../common/types/alerting/types';
+import type { AlertingOSClient } from '../../../common/types/alerting';
+import type { InMemoryDatasourceService } from '../../services/alerting/datasource_service';
+import type { DatasourceDiscoveryService } from '../../services/alerting/datasource_discovery';
 
 type AggregateHandlerContext = RequestHandlerContext & {
   dataSource?: {
@@ -91,7 +93,9 @@ export function registerSloAggregateRoute(
   router: IRouter,
   sloService: SloService,
   logger: Logger,
-  buildStatusContext: (ctx: AggregateHandlerContext) => SloStatusAggregationContext | undefined
+  buildStatusContext: (ctx: AggregateHandlerContext) => SloStatusAggregationContext | undefined,
+  datasourceService?: InMemoryDatasourceService,
+  discoveryService?: DatasourceDiscoveryService
 ): void {
   router.get(
     {
@@ -124,10 +128,32 @@ export function registerSloAggregateRoute(
         });
       }
 
+      // Resolve the datasource the same way probe-sli does so an unknown
+      // datasource id returns a clean 400 instead of leaking a generic 500
+      // (and so the listing path can't be coerced into reading SLOs from a
+      // datasource the caller doesn't have access to).
+      let resolvedDsName = req.query.datasourceId;
+      if (datasourceService) {
+        if (discoveryService) {
+          await discoveryService.ensure(ctx as AggregateHandlerContext);
+        }
+        const ds = await datasourceService.get(req.query.datasourceId);
+        if (!ds) {
+          return res.customError({
+            statusCode: 400,
+            body: { message: `Datasource "${req.query.datasourceId}" is not registered.` },
+          });
+        }
+        // SLO docs persist `spec.datasourceId = ds.name` (see
+        // `SloService.create`). Filter the list with the canonical name so
+        // requests using the volatile `ds-N` id still return the right rows.
+        resolvedDsName = ds.name;
+      }
+
       try {
         const filters: SloListFilters = {
           service: services,
-          datasourceId: [req.query.datasourceId],
+          datasourceId: [resolvedDsName],
         };
         const statusCtx = buildStatusContext(ctx as AggregateHandlerContext);
         // Use `list` (not `getPaginated`) so the server's 100-row pageSize

@@ -10,7 +10,7 @@
  */
 
 import type { HttpStart } from '../../../../../../../src/core/public';
-import type { PaginatedResponse } from '../../../../../common/types/alerting/types';
+import type { PaginatedResponse } from '../../../../../common/types/alerting';
 import { OBSERVABILITY_BASE } from '../../../../../common/constants/shared';
 import type {
   GeneratedRuleGroup,

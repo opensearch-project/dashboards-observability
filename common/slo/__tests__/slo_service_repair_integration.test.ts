@@ -39,7 +39,7 @@ import {
 import { ALERT_PROVENANCE_ANNOTATION_KEY } from '../slo_rule_provenance';
 import { computeSliFingerprint } from '../slo_sli_fingerprint';
 import { createRuleHealthChecker } from '../../../server/services/slo/rule_health_checker';
-import type { AlertingOSClient, Datasource, Logger } from '../../types/alerting/types';
+import type { AlertingOSClient, Datasource, Logger } from '../../types/alerting';
 import type { SloSpec } from '../slo_types';
 import { FakeRulerClient } from './fake_ruler_client';
 

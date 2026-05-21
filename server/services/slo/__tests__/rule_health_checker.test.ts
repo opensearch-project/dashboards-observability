@@ -14,7 +14,7 @@
 
 import { createRuleHealthChecker } from '../rule_health_checker';
 import { SloRulerError } from '../../../../common/slo/slo_errors';
-import type { AlertingOSClient, Datasource, Logger } from '../../../../common/types/alerting/types';
+import type { AlertingOSClient, Datasource, Logger } from '../../../../common/types/alerting';
 import type { GeneratedRuleGroup } from '../../../../common/slo/slo_types';
 import type { RulerClient } from '../ruler_client';
 
@@ -163,8 +163,9 @@ describe('RuleHealthChecker — state transitions', () => {
     expect(report.expectedGroups).toEqual(['g1', 'g2']);
     expect(report.presentGroups).toEqual([]);
     expect(report.missingGroups).toEqual([]);
-    // First probe throws → we short-circuit, no second call.
-    expect(getRuleGroup).toHaveBeenCalledTimes(1);
+    // Probes fan out in parallel: every expected group is dispatched and the
+    // aggregate outcome is `ruler_unreachable` because at least one failed.
+    expect(getRuleGroup).toHaveBeenCalledTimes(2);
   });
 
   it('returns state="ruler_unreachable" with code RULER_AUTH_FAILED when probe throws 401/403', async () => {

@@ -317,6 +317,21 @@ export class ObservabilityPlugin
     if (sloEnabled) {
       core.savedObjects.registerType(sloDefinitionType);
       core.savedObjects.registerType(sloRuleRefType);
+      // SLO storage is single-namespace and reads through an internal SO
+      // repository (see `start()`), which bypasses the workspace ID consumer
+      // wrapper. That means SLO documents are not partitioned by workspace —
+      // workspace A can list/read/write/delete workspace B's SLOs. Hardening
+      // the store to use request-scoped clients is tracked separately. For
+      // now, warn loudly when the operator opts into SLOs on a workspace-
+      // enabled cluster so they understand the multi-tenant gap.
+      if (core.workspace.isWorkspaceEnabled()) {
+        this.logger.warn(
+          'Observability: SLO is enabled on a workspace-enabled cluster. ' +
+            'SLO storage is currently NOT partitioned by workspace — every ' +
+            'workspace will see the same SLO list. Disable observability.slo.enabled ' +
+            'until workspace-scoped storage lands.'
+        );
+      }
     }
 
     // Register server side APIs

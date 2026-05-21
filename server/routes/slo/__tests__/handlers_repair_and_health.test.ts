@@ -21,7 +21,7 @@ import {
   SloService,
 } from '../../../../common/slo/slo_service';
 import { DEFAULT_MWMBR_TIERS } from '../../../../common/slo/slo_promql_generator';
-import type { AlertingOSClient, Datasource, Logger } from '../../../../common/types/alerting/types';
+import type { AlertingOSClient, Datasource, Logger } from '../../../../common/types/alerting';
 import type {
   GeneratedRuleGroup,
   ISloStore,

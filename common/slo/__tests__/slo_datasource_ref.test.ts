@@ -15,7 +15,7 @@
  * unknown input (→ null, no throw).
  */
 
-import type { Datasource } from '../../types/alerting/types';
+import type { Datasource } from '../../types/alerting';
 import {
   refFromDatasource,
   resolveDatasourceRef,
