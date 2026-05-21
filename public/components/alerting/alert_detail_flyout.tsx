@@ -66,14 +66,10 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
   // Detail (raw alert data) is fetched only when the user expands the
   // Raw Alert Data accordion. Opening the flyout fires zero network
   // calls; the visible accordions render from the summary on hand.
-  //
-  // `detailData` and `detailLoading` are intentionally NOT in the dep
-  // array — including them recreates the callback on every state flip
-  // and defeats memoization. The early-return guard reads the latest
-  // state via closure-on-render, which is sufficient because the
-  // accordion can't fire `onToggle` faster than React commits the
-  // `setDetailLoading(true)` from the prior toggle.
+  // The Prom path returns null upstream (no per-alert API), so skip the
+  // round-trip entirely — the summary already has labels/annotations.
   const fetchDetailIfNeeded = useCallback(() => {
+    if (alert.datasourceType === 'prometheus') return;
     if (detailData || detailLoading) return;
     setDetailLoading(true);
     osService
@@ -85,8 +81,15 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
         console.error('Failed to load alert details:', err);
       })
       .finally(() => setDetailLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alert.datasourceId, alert.id, alert.monitorId, osService]);
+  }, [
+    alert.datasourceId,
+    alert.datasourceType,
+    alert.id,
+    alert.monitorId,
+    detailData,
+    detailLoading,
+    osService,
+  ]);
 
   // Merge detail data over summary — detail has `raw` and potentially richer labels
   const alertData = detailData ? { ...alert, ...detailData } : alert;

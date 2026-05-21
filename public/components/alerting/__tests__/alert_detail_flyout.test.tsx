@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
 
 // Flyout doesn't use echarts directly, but some transitive imports from
 // shared_constants / child components can reach it — stub for safety.
@@ -156,6 +156,49 @@ describe('AlertDetailFlyout', () => {
       fireEvent.click(getByText('Raw Alert Data'));
       expect(mockGetAlertDetail).toHaveBeenCalledTimes(1);
       expect(mockGetAlertDetail).toHaveBeenCalledWith('ds-prom', 'alert-42', 'mon-7');
+    });
+
+    it('does not refetch when the Raw Alert Data accordion is collapsed and re-expanded', async () => {
+      const rawDetail = {
+        ...baseAlert,
+        monitorId: 'mon-7',
+        raw: { id: 'alert-42', state: 'ACTIVE' },
+      };
+      mockGetAlertDetail.mockResolvedValueOnce(rawDetail);
+      const alertWithMonitor: UnifiedAlertSummary = { ...baseAlert, monitorId: 'mon-7' };
+      const { getByText } = render(
+        <AlertDetailFlyout
+          alert={alertWithMonitor}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      // Expand → fetch fires once and resolves.
+      fireEvent.click(getByText('Raw Alert Data'));
+      await act(async () => {
+        await Promise.resolve();
+      });
+      // Collapse, then re-expand. The cached detail must short-circuit
+      // the second invocation; otherwise the upstream HTTP call repeats
+      // on every accordion toggle (stale-closure regression).
+      fireEvent.click(getByText('Raw Alert Data'));
+      fireEvent.click(getByText('Raw Alert Data'));
+      expect(mockGetAlertDetail).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not call getAlertDetail for Prometheus alerts when the Raw Alert Data accordion expands', () => {
+      const promAlert: UnifiedAlertSummary = { ...baseAlert, datasourceType: 'prometheus' };
+      const { getByText } = render(
+        <AlertDetailFlyout
+          alert={promAlert}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      fireEvent.click(getByText('Raw Alert Data'));
+      expect(mockGetAlertDetail).not.toHaveBeenCalled();
     });
   });
 
