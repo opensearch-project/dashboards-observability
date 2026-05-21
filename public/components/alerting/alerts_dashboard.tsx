@@ -10,6 +10,7 @@
 import React, { useState, useMemo } from 'react';
 import {
   EuiBasicTableColumn,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -552,6 +553,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
             minSize="10%"
             mode={['custom', { position: 'top' }]}
             paddingSize="none"
+            scrollable={false}
             className="altFiltersPanel"
           >
             <EuiPanel className="altFiltersInner">
@@ -748,6 +750,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
             initialSize={85}
             minSize="400px"
             paddingSize="none"
+            scrollable={false}
             className="altContentPanel"
           >
             {
@@ -906,8 +909,9 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                             </p>
                           }
                           actions={
-                            <EuiButtonEmpty
+                            <EuiButton
                               size="s"
+                              fill
                               onClick={onGoToRules}
                               data-test-subj="alertsEmptyGoToRules"
                             >
@@ -915,7 +919,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                                 id="observability.alerting.alertsDashboard.goToRules"
                                 defaultMessage="Go to Rules"
                               />
-                            </EuiButtonEmpty>
+                            </EuiButton>
                           }
                         />
                       ) : emptyMode === 'no-alerts' ? (
@@ -949,7 +953,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                 <EuiSpacer size="s" />
 
                 {/* ---- Search + Table ---- */}
-                <EuiPanel paddingSize="m" hasBorder>
+                <EuiPanel paddingSize="m" hasBorder className="altTablePanel">
                   <EuiTitle size="xs">
                     <h2>
                       <FormattedMessage

@@ -5,9 +5,13 @@
 
 /* 3-letter prefix `alt` scopes these rules to the Alert Manager UI. */
 
+.altPageRoot {
+  display: flex;
+  flex-direction: column;
+}
+
 .altResizableContainer {
-  flex: 1;
-  min-height: 0;
+  min-height: calc(100vh - 140px);
 }
 
 .altFiltersPanel {
@@ -27,13 +31,19 @@
 .altContentPanel {
   padding-top: 8px;
   padding-left: 4px;
-  overflow-y: auto;
-  overflow-x: hidden;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.altTablePanel {
+  flex: 1;
 }
 
 .altVizRow {
   min-width: 0;
+  flex: 0 0 auto !important;
 }
 
 .altVizItem {
