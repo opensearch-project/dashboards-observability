@@ -41,14 +41,14 @@ function makeSummary(overrides: Partial<SloSummary> = {}): SloSummary {
 describe('SloListFilterPanel (sidebar)', () => {
   it('renders an accordion per facet', () => {
     render(<SloListFilterPanel filters={{}} onChange={jest.fn()} items={[makeSummary()]} />);
-    expect(screen.getByTestId('slosFilterAccordion-state')).toBeInTheDocument();
-    expect(screen.getByTestId('slosFilterAccordion-sliType')).toBeInTheDocument();
-    expect(screen.getByTestId('slosFilterAccordion-canonicalKind')).toBeInTheDocument();
-    expect(screen.getByTestId('slosFilterAccordion-service')).toBeInTheDocument();
-    expect(screen.getByTestId('slosFilterAccordion-team')).toBeInTheDocument();
-    expect(screen.getByTestId('slosFilterAccordion-tier')).toBeInTheDocument();
-    expect(screen.getByTestId('slosFilterAccordion-mode')).toBeInTheDocument();
-    expect(screen.getByTestId('slosFilterAccordion-enabled')).toBeInTheDocument();
+    expect(screen.getByTestId('slosFilterAccordionState')).toBeInTheDocument();
+    expect(screen.getByTestId('slosFilterAccordionSliType')).toBeInTheDocument();
+    expect(screen.getByTestId('slosFilterAccordionCanonicalKind')).toBeInTheDocument();
+    expect(screen.getByTestId('slosFilterAccordionService')).toBeInTheDocument();
+    expect(screen.getByTestId('slosFilterAccordionTeam')).toBeInTheDocument();
+    expect(screen.getByTestId('slosFilterAccordionTier')).toBeInTheDocument();
+    expect(screen.getByTestId('slosFilterAccordionMode')).toBeInTheDocument();
+    expect(screen.getByTestId('slosFilterAccordionEnabled')).toBeInTheDocument();
   });
 
   it('renders human-readable canonical kind labels from KIND_LABEL', () => {

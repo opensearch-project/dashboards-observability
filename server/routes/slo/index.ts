@@ -16,7 +16,7 @@ import type {
   SloDeployContext,
   SloStatusAggregationContext,
 } from '../../../common/slo/slo_service';
-import { SloService, SloValidationError } from '../../../common/slo/slo_service';
+import { SloService, SloValidationError, WORKSPACE_ID_RE } from '../../../common/slo/slo_service';
 import type { AlertingOSClient, Datasource } from '../../../common/types/alerting/types';
 import type { InMemoryDatasourceService } from '../../services/alerting/datasource_service';
 import type { DatasourceDiscoveryService } from '../../services/alerting/datasource_discovery';
@@ -381,12 +381,25 @@ async function buildDeployContext(
       ? await ctx.dataSource.opensearch.getClient(ds.mdsId)
       : ctx.core.opensearch.client.asCurrentUser;
 
+  // Use the resolved canonical id (`ds-N`) — not the raw request input. The
+  // datasource service accepts `directQueryName` / display `name` as a
+  // fallback, so the input may be a free-text name with spaces or other chars
+  // that fail the WORKSPACE_ID_RE shape check inside `sloRulerNamespaceFor`.
+  // Routing that lower-level throw up as a 500 is unactionable for the user;
+  // by the time we're here, `ds.id` is registry-issued and shape-safe.
+  const workspaceId = ds.id;
+  if (!WORKSPACE_ID_RE.test(workspaceId)) {
+    throw new SloValidationError({
+      'spec.datasourceId': `Datasource id "${workspaceId}" is not a valid workspace id; expected ${WORKSPACE_ID_RE}.`,
+    });
+  }
+
   return {
     ruler: rulerClient,
     client,
     datasource: ds as Datasource,
     // TODO: pull real workspaceId from OSD request scope once plumbed.
-    workspaceId: datasourceId,
+    workspaceId,
   };
 }
 
@@ -478,11 +491,9 @@ function buildStatusContext(
 }
 
 /**
- * Options bag for `registerSloRoutes`. Replaces the pre-Phase-4 positional
- * signature (W3.6 left this as tech debt; Phase 4 W4.6 added a third new
- * route group — the adoption endpoints — which made the positional form
- * unmaintainable). Every field except `router`, `sloService`, and `logger`
- * is optional so offline-dev and test wiring can omit downstream deps.
+ * Options bag for `registerSloRoutes`. Every field except `router`,
+ * `sloService`, and `logger` is optional so offline-dev and test wiring can
+ * omit downstream deps.
  */
 export interface RegisterSloRoutesOptions {
   router: IRouter;

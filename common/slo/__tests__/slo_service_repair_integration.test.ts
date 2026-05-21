@@ -103,8 +103,8 @@ function makeHarness() {
   const health = createRuleHealthChecker(ruler, logger, { ttlMs: 0 });
 
   const datasource: Datasource = {
-    id: 'prom-ds-001',
-    name: 'prom',
+    id: 'ds-1',
+    name: 'prom-ds-001',
     type: 'prometheus',
     url: '',
     enabled: true,
@@ -341,8 +341,8 @@ function makeDedupHarness() {
   svc.setRuleRefStore(new FakeRefStore());
   const health = createRuleHealthChecker(ruler, logger, { ttlMs: 0 });
   const datasource: Datasource = {
-    id: 'prom-ds-001',
-    name: 'prom',
+    id: 'ds-1',
+    name: 'prom-ds-001',
     type: 'prometheus',
     url: '',
     enabled: true,

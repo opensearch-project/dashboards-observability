@@ -607,7 +607,13 @@ const SliPanel: React.FC<
     >
       <div>
         {state.dimensions.map((dim, i) => (
-          <EuiFlexGroup key={i} gutterSize="s" alignItems="flexEnd" style={{ marginBottom: 4 }}>
+          <EuiFlexGroup
+            // Stable per-row key — dim.name is the user's natural id.
+            key={dim.name ? `name:${dim.name}` : `idx:${i}`}
+            gutterSize="s"
+            alignItems="flexEnd"
+            style={{ marginBottom: 4 }}
+          >
             <EuiFlexItem>
               <EuiFieldText
                 placeholder="label name"

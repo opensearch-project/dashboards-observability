@@ -431,7 +431,15 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
     }
   }, [runCreateSelected, showPreview]);
 
-  const decoratedSuggestions = suggestions.map(applyOverrides);
+  // Memoize the override-decorated list. Without this, every parent render
+  // creates a fresh array identity, busting every downstream `useMemo` whose
+  // deps include it (uniqueServices, serviceRows, …). The result was a render
+  // loop where typing in a draft override re-derived the entire row tree on
+  // every keystroke for ~38 drafts.
+  const decoratedSuggestions = useMemo(() => suggestions.map(applyOverrides), [
+    suggestions,
+    applyOverrides,
+  ]);
   const selectedCount = decoratedSuggestions.filter((s) => selected.has(s.key)).length;
   const totalRules = decoratedSuggestions
     .filter((s) => selected.has(s.key))
@@ -449,10 +457,6 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
       if (s.input.spec.service) set.add(s.input.spec.service);
     }
     return Array.from(set);
-    // decoratedSuggestions is recomputed every render (it's `.map(applyOverrides)`),
-    // so the closest stable key is the underlying suggestions + override inputs.
-    // services comes straight from the query hook and is referentially stable
-    // between fetches.
   }, [services, decoratedSuggestions]);
 
   const serviceRows: ServiceRowShape[] = useMemo(() => {
@@ -487,10 +491,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
       }
       return next;
     });
-    // serviceRows identity changes every render, but the service-name list is
-    // what actually matters. Key the effect on the joined service names.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serviceRows.map((r) => r.serviceName).join('|')]);
+  }, [serviceRows]);
 
   const toggleExpand = useCallback((serviceName: string) => {
     setExpandedMap((prev) => ({ ...prev, [serviceName]: !prev[serviceName] }));

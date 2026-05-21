@@ -67,9 +67,12 @@ export const WizardKeyValueGrid: React.FC<KeyValueGridProps> = ({
       )}
       {entries.map((entry, i) => {
         const rowError = rowErrors?.[i];
+        // Stable per-row key — entry.key is the natural id; fall back to
+        // index for blank rows that have just been added.
+        const rowKey = entry.key ? `key:${entry.key}` : `idx:${i}`;
         return (
           <EuiFormRow
-            key={i}
+            key={rowKey}
             isInvalid={!!rowError}
             error={rowError}
             fullWidth

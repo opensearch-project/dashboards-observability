@@ -395,46 +395,71 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
     setRefreshTrigger((v) => v + 1);
   }, []);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await apiClient.get(id);
-      setDoc(result);
-    } catch (e) {
-      const err = e instanceof Error ? e : new Error(String(e));
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [apiClient, id]);
+  // `load` and `loadRuleHealth` accept an `isCurrent` flag so the effects
+  // below can ignore stale resolutions on rapid id changes (navigating
+  // SLO → SLO via the breadcrumb fires a new mount before the previous fetch
+  // settles). User-initiated callers (toolbar refresh, repair, toggle-enable)
+  // pass a `() => true` no-op gate.
+  const ALWAYS_CURRENT = useCallback(() => true, []);
+
+  const load = useCallback(
+    async (isCurrent: () => boolean = ALWAYS_CURRENT) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const result = await apiClient.get(id);
+        if (!isCurrent()) return;
+        setDoc(result);
+      } catch (e) {
+        if (!isCurrent()) return;
+        const err = e instanceof Error ? e : new Error(String(e));
+        setError(err);
+      } finally {
+        if (isCurrent()) setLoading(false);
+      }
+    },
+    [ALWAYS_CURRENT, apiClient, id]
+  );
 
   useEffect(() => {
-    load();
+    let cancelled = false;
+    load(() => !cancelled);
+    return () => {
+      cancelled = true;
+    };
   }, [load]);
 
-  const loadRuleHealth = useCallback(async () => {
-    setRuleHealthLoading(true);
-    try {
-      const result = await apiClient.getRuleHealth(id);
-      setRuleHealth(result);
-    } catch (e) {
-      const err = e instanceof Error ? e : new Error(String(e));
-      // Don't render the callout on fetch failure — fall back to the
-      // live-status-derived state. Surface the fetch error as a neutral toast
-      // so users have a breadcrumb if they want to investigate.
-      notifications.toasts.addDanger({
-        title: 'Could not load rule health',
-        text: err.message,
-      });
-      setRuleHealth(null);
-    } finally {
-      setRuleHealthLoading(false);
-    }
-  }, [apiClient, id, notifications]);
+  const loadRuleHealth = useCallback(
+    async (isCurrent: () => boolean = ALWAYS_CURRENT) => {
+      setRuleHealthLoading(true);
+      try {
+        const result = await apiClient.getRuleHealth(id);
+        if (!isCurrent()) return;
+        setRuleHealth(result);
+      } catch (e) {
+        if (!isCurrent()) return;
+        const err = e instanceof Error ? e : new Error(String(e));
+        // Don't render the callout on fetch failure — fall back to the
+        // live-status-derived state. Surface the fetch error as a neutral toast
+        // so users have a breadcrumb if they want to investigate.
+        notifications.toasts.addDanger({
+          title: 'Could not load rule health',
+          text: err.message,
+        });
+        setRuleHealth(null);
+      } finally {
+        if (isCurrent()) setRuleHealthLoading(false);
+      }
+    },
+    [ALWAYS_CURRENT, apiClient, id, notifications]
+  );
 
   useEffect(() => {
-    loadRuleHealth();
+    let cancelled = false;
+    loadRuleHealth(() => !cancelled);
+    return () => {
+      cancelled = true;
+    };
   }, [loadRuleHealth]);
 
   const onRepair = useCallback(async () => {
@@ -530,7 +555,7 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
               color="danger"
               title={<h2>Unable to load SLO</h2>}
               body={<p>{error.message}</p>}
-              actions={<EuiButton onClick={load}>Retry</EuiButton>}
+              actions={<EuiButton onClick={() => load()}>Retry</EuiButton>}
             />
           </EuiPanel>
         </EuiPageBody>
@@ -739,7 +764,7 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
                   <EuiButton
                     size="s"
                     color="warning"
-                    onClick={loadRuleHealth}
+                    onClick={() => loadRuleHealth()}
                     data-test-subj="slosDetailRuleHealthRetry"
                     isLoading={ruleHealthLoading}
                   >

@@ -9,8 +9,8 @@
  *
  *   - `osd_slo_provenance` on the first rule of the alert group — carries the
  *     full SloSpec, the workspace/datasource/sloId tuple, and a `specSha256`
- *     that lets the adoption code verify the rule group hasn't been tampered
- *     with before restoring the SO.
+ *     that future readers can use to verify the rule group hasn't been
+ *     tampered with.
  *   - A synthetic "sentinel" alert is emitted when the alert group would
  *     otherwise be empty (shadow mode, or all burn-rate tiers have
  *     `createAlarm: false`). It carries the `osd_slo_provenance` annotation
@@ -21,13 +21,15 @@
  * on recording rules (only alerting rules may carry them), so any attempt to
  * upsert a recording group with an annotation fails ruler-side with
  * `RULER_VALIDATION_FAILED`. The alert-group provenance carries enough
- * information (full spec + fingerprints are re-derivable from the spec) for
- * the Phase 4 orphan-adoption path to operate; recording-group-level
- * provenance would be redundant.
+ * information (full spec + fingerprints are re-derivable from the spec) that
+ * recording-group-level provenance would be redundant.
  *
  * Prometheus annotations are string-valued. The object defined here is
  * JSON-stringified and assigned verbatim to the annotation value — readers
  * run `JSON.parse` to recover the structured payload.
+ *
+ * No reader currently consumes the provenance — it is forward-compat surface
+ * for future tooling. The schemaVersion field is the upgrade hinge.
  *
  * This module is pure. No I/O, no clock, no logging.
  */
@@ -36,13 +38,12 @@ import { createHash } from 'crypto';
 import type { GeneratedRule, GeneratedRuleGroup, SloSpec } from './slo_types';
 
 // ============================================================================
-// Constants (public contract — Phase 4 reads these)
+// Constants (public contract — readers should treat schemaVersion as a hinge)
 // ============================================================================
 
 /**
- * Schema version stamped into every provenance object. Phase 4 adoption
- * rejects provenance values whose `schemaVersion` it doesn't recognize
- * (surfaces as `unsupported_schema`).
+ * Schema version stamped into every provenance object. Future readers
+ * should reject provenance values whose `schemaVersion` they don't recognize.
  */
 export const PROVENANCE_SCHEMA_VERSION = 1;
 
@@ -53,7 +54,7 @@ export const SENTINEL_ALERT_NAME_PREFIX = 'SLO_ProvenanceSentinel_';
 const SENTINEL_NAME_MAX_LEN = 200;
 
 // ============================================================================
-// Provenance shapes (Phase 4 parses these — change only with a schema bump)
+// Provenance shapes (change only with a schema bump)
 // ============================================================================
 
 export interface AlertProvenance {
@@ -66,7 +67,7 @@ export interface AlertProvenance {
   updatedAt: string;
   /** SHA-256 hex of the canonical-JSON serialized spec. */
   specSha256: string;
-  /** Embedded for adoption — Phase 4 reconstructs the SO from this. */
+  /** Embedded so future tooling can reconstruct the SO from the rule group. */
   spec: SloSpec;
 }
 
@@ -162,7 +163,7 @@ export function buildSentinelAlert(sloId: string, provenance: AlertProvenance): 
       summary: 'SLO provenance sentinel — never fires',
     },
     description:
-      'Sentinel alert carrying SLO provenance metadata for adoption. Expression never evaluates true.',
+      'Sentinel alert carrying SLO provenance metadata. Expression never evaluates true.',
   };
 }
 

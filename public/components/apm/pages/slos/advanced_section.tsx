@@ -125,7 +125,9 @@ const BurnRatesEditor: React.FC<{
         const prefix = `spec.alerting.burnRates[${i}]`;
         return (
           <EuiFlexGroup
-            key={i}
+            // Stable per-row key — severity is the natural discriminator;
+            // fall back to index for the brief moment it's unset.
+            key={tier.severity ? `${tier.severity}:${i}` : `idx:${i}`}
             gutterSize="s"
             alignItems="flexEnd"
             style={{ marginBottom: 6 }}
@@ -293,7 +295,9 @@ const BudgetWarningsEditor: React.FC<{
       const prefix = `spec.budgetWarningThresholds[${i}]`;
       return (
         <EuiFlexGroup
-          key={i}
+          // Severity is the natural id; tag with index to disambiguate two
+          // rows that happen to share the same severity while editing.
+          key={bw.severity ? `${bw.severity}:${i}` : `idx:${i}`}
           gutterSize="s"
           alignItems="flexEnd"
           style={{ marginBottom: 6 }}

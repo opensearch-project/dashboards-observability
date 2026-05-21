@@ -6,24 +6,17 @@
 /**
  * Shared id-vs-name datasource resolution for SLO admin surfaces.
  *
- * The SLO admin routes (`_reconcile`, `_recover`, `_orphans`, listing filter)
- * accept a datasource identifier in any of three equivalent forms:
+ * Callers accept a datasource identifier in any of three equivalent forms:
  *   - the internal registry id (`ds-N`, stamped by `InMemoryDatasourceService`)
  *   - the SQL-plugin `connectionId` (captured as `directQueryName`)
  *   - the user-facing display `name`
  *
- * The same registry already normalizes reads via `InMemoryDatasourceService.get`
+ * The registry already normalizes reads via `InMemoryDatasourceService.get`
  * (see `server/services/alerting/datasource_service.ts`), but callers sometimes
- * need the *normalized envelope* (both canonical id and the persisted-form name)
- * rather than the full Datasource record. Three separate sites in the v3 bug
- * bash each re-invented that envelope:
- *   - `common/slo/slo_service.ts` listing filter  — commit b02e33d9 (Bug A)
- *   - `server/services/slo/reconciler.ts` filter  — commit 689acd80 (Bug D)
- *   - `common/slo/slo_service.ts` recover() match — commit ace8037d (Bug E)
- *
- * This module promotes that pattern into a single helper so the next caller
- * doesn't rediscover it. The resolver is injected (not registry-bound) so this
- * file can live in `common/` — importable from both common SLO code and
+ * need the *normalized envelope* (both canonical id and the persisted-form
+ * name) rather than the full Datasource record. The listing filter is the
+ * primary consumer today; the resolver is injected (not registry-bound) so
+ * this file can live in `common/` — importable from both common SLO code and
  * server routes without reaching across layers.
  */
 
@@ -63,14 +56,8 @@ export interface DatasourceRef {
  * Resolve a raw identifier (id, connectionId, or name) to a normalized
  * envelope. Returns `null` when the resolver can't find a match or the
  * resolver rejects; callers decide whether that's a hard error or a
- * silent-drop (the listing filter short-circuits to an empty result; the
- * reconciler surfaces a per-entry error; the recover path converts to
- * `ORPHAN_WORKSPACE_MISMATCH`).
- *
- * Resolver exceptions are re-thrown (not swallowed) — the reconciler wants to
- * surface a transport failure against a specific filter entry as a reconcile
- * error, and swallowing to `null` would flatten that into "not registered"
- * with no way for the caller to distinguish.
+ * silent-drop. Resolver exceptions are re-thrown (not swallowed) so callers
+ * can distinguish transport failures from "not registered".
  */
 export async function resolveDatasourceRef(
   raw: string,

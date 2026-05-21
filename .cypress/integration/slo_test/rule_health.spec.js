@@ -412,12 +412,12 @@ describe('SLO rule health — Phase 1 recovery', () => {
 
     cy.get('[data-test-subj="slosDetailBrokenDelete"]').click();
 
-    // Confirm modal — title includes "Delete SLO".
-    cy.get('.euiModal', { timeout: 10000 }).should('be.visible');
-    cy.contains('.euiModalHeader', 'Delete SLO').should('be.visible');
-
-    // Click the danger confirm button in the modal footer.
-    cy.get('.euiModalFooter').find('button.euiButton--danger').click();
+    // EuiConfirmModal exposes its own data-test-subj on the wrapper plus
+    // `confirmModalConfirmButton` / `confirmModalCancelButton` on the buttons.
+    // Prefer those over EUI class selectors so an EUI version bump doesn't
+    // silently break the spec.
+    cy.get('[data-test-subj="slosDetailDeleteModal"]', { timeout: 10000 }).should('be.visible');
+    cy.get('[data-test-subj="confirmModalConfirmButton"]').click();
 
     cy.wait('@deleteBroken');
 

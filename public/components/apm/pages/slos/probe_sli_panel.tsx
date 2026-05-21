@@ -264,7 +264,7 @@ const ProbeResult: React.FC<ProbeResultProps> = ({ state }) => {
             iconType="alert"
             size="s"
             title="Good query returned an error"
-            data-test-subj="slosWizardProbeError-good"
+            data-test-subj="slosWizardProbeErrorGood"
           >
             <EuiText size="s">
               <EuiCode>{errors.good}</EuiCode>
@@ -280,7 +280,7 @@ const ProbeResult: React.FC<ProbeResultProps> = ({ state }) => {
             iconType="alert"
             size="s"
             title="Total query returned an error"
-            data-test-subj="slosWizardProbeError-total"
+            data-test-subj="slosWizardProbeErrorTotal"
           >
             <EuiText size="s">
               <EuiCode>{errors.total}</EuiCode>

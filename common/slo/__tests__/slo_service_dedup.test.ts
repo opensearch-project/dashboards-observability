@@ -182,8 +182,10 @@ function makeHarness() {
   svc.setDedupEnabled(true);
   svc.setRuleRefStore(refStore);
   const datasource: Datasource = {
-    id: 'prom-ds-001',
-    name: 'prom',
+    // Refcount keys persist the canonical `name` (it matches `spec.datasourceId`),
+    // not the in-memory `ds-N` id which rotates on plugin restart.
+    id: 'ds-1',
+    name: 'prom-ds-001',
     type: 'prometheus',
     url: '',
     enabled: true,
@@ -416,7 +418,7 @@ describe('SloService dedup — delete (W3.8)', () => {
 });
 
 describe('SloService dedup — rollback on SO save failure (W3.8)', () => {
-  it('create: SO save failure rolls back refs + recording group we just wrote', async () => {
+  it('create: SO save failure rolls back refs + alert group; recording group cleanup is deferred', async () => {
     const { ruler, refStore, deploy } = makeHarness();
     const store: ISloStore = {
       get: async () => null,
@@ -432,10 +434,14 @@ describe('SloService dedup — rollback on SO save failure (W3.8)', () => {
     const spec = validSpec();
     await expect(svc.create({ spec }, 'alice', deploy)).rejects.toThrow(/SO write failed/);
     const fp = computeSliFingerprint(spec.datasourceId, spec.sli, spec.objectives[0])!;
+    // Refcount must drop back to 0 — the bookkeeping is the reconciler's
+    // signal that the group is reapable.
     expect(refStore.refcount('ws-001', spec.datasourceId, fp)).toBe(0);
-    // Rollback should delete both the recording group (since ref dropped back
-    // to 0 and we created it this call) and the alert group.
+    // The shared recording group is NOT deleted synchronously: a concurrent
+    // peer create could have just bumped the ref back up and re-upserted the
+    // byte-equal group. The reconciler's grace-period sweep (W3.11) handles
+    // zero-ref cleanup. Per-SLO alert group is safe to delete inline.
     const recGroup = dedupRecordingGroupName(fp);
-    expect(ruler.deletes.some((d) => d.groupName === recGroup)).toBe(true);
+    expect(ruler.deletes.some((d) => d.groupName === recGroup)).toBe(false);
   });
 });

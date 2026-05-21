@@ -247,7 +247,7 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
               // The tab label carries the breached-count badge so users spot an
               // active breach without opening the tab. Badge is suppressed at zero.
               name: (
-                <span data-test-subj="serviceDetailsTab-slos">
+                <span data-test-subj="serviceDetailsTabSlos">
                   <SloTabLabel breached={breachedCount} />
                 </span>
               ),

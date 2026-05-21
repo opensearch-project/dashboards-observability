@@ -123,8 +123,8 @@ class FakeRefStore implements SloRuleRefStoreLite {
 
 function buildDeploy(ruler: FakeRuler, workspaceId: string): SloDeployContext {
   const datasource: Datasource = {
-    id: 'prom-ds-001',
-    name: 'prom',
+    id: 'ds-1',
+    name: 'prom-ds-001',
     type: 'prometheus',
     url: '',
     enabled: true,

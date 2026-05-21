@@ -118,6 +118,10 @@ export function slugifySloObjective(sloName: string, objectiveName: string): str
  * and portability (identical hex in any sha256 implementation).
  */
 export function ruleSuffix(workspaceId: string, sloId: string, objectiveName: string): string {
+  // The `:` separator assumes none of the inputs contains a literal colon.
+  // `workspaceId` is bounded by `WORKSPACE_ID_RE` and `sloId` by `SLO_ID_RE`,
+  // both of which forbid `:`. Today `objectiveName` is OSD-issued and
+  // colon-free; if it ever becomes user-controlled, escape before composing.
   const input = `${workspaceId}:${sloId}:${objectiveName}`;
   return createHash('sha256').update(input).digest('hex').slice(0, 8);
 }

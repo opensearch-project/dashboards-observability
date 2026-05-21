@@ -129,8 +129,13 @@ export const ObjectivesSection: React.FC<ObjectivesSectionProps> = ({
             )}
           </>
         );
+        // Stable per-row key so removing a middle objective doesn't cause focus
+        // jump / value bleed in the still-mounted siblings. `name` is the SLO's
+        // own stable id; fall back to index for the brief moment a freshly-added
+        // row hasn't been named yet.
+        const rowKey = row.name ? `name:${row.name}` : `idx:${i}`;
         return (
-          <React.Fragment key={i}>
+          <React.Fragment key={rowKey}>
             <EuiFlexGroup
               gutterSize="s"
               alignItems="flexEnd"

@@ -267,10 +267,10 @@ const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
 
   return (
     <EuiAccordion
-      id="slosFilterAccordion-datasource"
+      id="slosFilterAccordionDatasource"
       buttonContent={buttonContent}
       initialIsOpen
-      data-test-subj="slosFilterAccordion-datasource"
+      data-test-subj="slosFilterAccordionDatasource"
     >
       <EuiSpacer size="xs" />
       <EuiText size="xs" color="subdued">
@@ -313,7 +313,7 @@ const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
             isClearable
             compressed
             fullWidth
-            data-test-subj="slosFilterAccordion-datasource-search"
+            data-test-subj="slosFilterAccordionDatasourceSearch"
           />
           <EuiSpacer size="xs" />
           {atCap && (
@@ -338,7 +338,7 @@ const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
               paddingRight: 4,
               marginRight: -4,
             }}
-            data-test-subj="slosFilterAccordion-datasource-list"
+            data-test-subj="slosFilterAccordionDatasourceList"
           >
             {visible.map((ds) => {
               const isSelected = selectedSet.has(ds.id);
@@ -419,9 +419,9 @@ export const SloListFilterPanel: React.FC<SloListFilterPanelProps> = ({
       <EuiHorizontalRule margin="xs" />
 
       <FacetAccordion
-        id="slosFilterAccordion-state"
+        id="slosFilterAccordionState"
         label="State"
-        dataTestSubj="slosFilterAccordion-state"
+        dataTestSubj="slosFilterAccordionState"
         options={SLO_HEALTH_ORDER.map((s) => ({
           id: s,
           label: (
@@ -436,9 +436,9 @@ export const SloListFilterPanel: React.FC<SloListFilterPanelProps> = ({
       <EuiHorizontalRule margin="xs" />
 
       <FacetAccordion
-        id="slosFilterAccordion-sliType"
+        id="slosFilterAccordionSliType"
         label="SLI type"
-        dataTestSubj="slosFilterAccordion-sliType"
+        dataTestSubj="slosFilterAccordionSliType"
         options={allLeafTypes.map((v) => ({ id: v, label: v }))}
         selected={filters.sliLeafType}
         onToggle={(id) => patch({ sliLeafType: toggleInArray(filters.sliLeafType, id) })}
@@ -446,9 +446,9 @@ export const SloListFilterPanel: React.FC<SloListFilterPanelProps> = ({
       <EuiHorizontalRule margin="xs" />
 
       <FacetAccordion
-        id="slosFilterAccordion-canonicalKind"
+        id="slosFilterAccordionCanonicalKind"
         label="Canonical kind"
-        dataTestSubj="slosFilterAccordion-canonicalKind"
+        dataTestSubj="slosFilterAccordionCanonicalKind"
         options={CANONICAL_KIND_ORDER.map((k) => ({ id: k, label: KIND_LABEL[k] }))}
         selected={filters.canonicalKind}
         onToggle={(id) =>
@@ -460,9 +460,9 @@ export const SloListFilterPanel: React.FC<SloListFilterPanelProps> = ({
       <EuiHorizontalRule margin="xs" />
 
       <FacetAccordion
-        id="slosFilterAccordion-service"
+        id="slosFilterAccordionService"
         label="Service"
-        dataTestSubj="slosFilterAccordion-service"
+        dataTestSubj="slosFilterAccordionService"
         options={allServices.map((v) => ({ id: v, label: v }))}
         selected={filters.service}
         onToggle={(id) => patch({ service: toggleInArray(filters.service, id) })}
@@ -471,9 +471,9 @@ export const SloListFilterPanel: React.FC<SloListFilterPanelProps> = ({
       <EuiHorizontalRule margin="xs" />
 
       <FacetAccordion
-        id="slosFilterAccordion-team"
+        id="slosFilterAccordionTeam"
         label="Team"
-        dataTestSubj="slosFilterAccordion-team"
+        dataTestSubj="slosFilterAccordionTeam"
         options={allTeams.map((v) => ({ id: v, label: v }))}
         selected={filters.team}
         onToggle={(id) => patch({ team: toggleInArray(filters.team, id) })}
@@ -482,9 +482,9 @@ export const SloListFilterPanel: React.FC<SloListFilterPanelProps> = ({
       <EuiHorizontalRule margin="xs" />
 
       <FacetAccordion
-        id="slosFilterAccordion-tier"
+        id="slosFilterAccordionTier"
         label="Tier"
-        dataTestSubj="slosFilterAccordion-tier"
+        dataTestSubj="slosFilterAccordionTier"
         options={allTiers.map((v) => ({ id: v, label: v }))}
         selected={filters.tier}
         onToggle={(id) => patch({ tier: toggleInArray(filters.tier, id) })}
@@ -492,9 +492,9 @@ export const SloListFilterPanel: React.FC<SloListFilterPanelProps> = ({
       <EuiHorizontalRule margin="xs" />
 
       <FacetAccordion
-        id="slosFilterAccordion-mode"
+        id="slosFilterAccordionMode"
         label="Mode"
-        dataTestSubj="slosFilterAccordion-mode"
+        dataTestSubj="slosFilterAccordionMode"
         options={(['active', 'shadow'] as const).map((v) => ({ id: v, label: MODE_LABEL[v] }))}
         selected={filters.mode}
         onToggle={(id) => patch({ mode: toggleInArray(filters.mode, id as SloMode) })}
@@ -502,7 +502,7 @@ export const SloListFilterPanel: React.FC<SloListFilterPanelProps> = ({
       <EuiHorizontalRule margin="xs" />
 
       <EuiAccordion
-        id="slosFilterAccordion-enabled"
+        id="slosFilterAccordionEnabled"
         buttonContent={
           <EuiText size="xs">
             <strong>Enabled</strong>
@@ -514,7 +514,7 @@ export const SloListFilterPanel: React.FC<SloListFilterPanelProps> = ({
           </EuiText>
         }
         initialIsOpen
-        data-test-subj="slosFilterAccordion-enabled"
+        data-test-subj="slosFilterAccordionEnabled"
       >
         <EuiSpacer size="xs" />
         <EuiButtonGroup

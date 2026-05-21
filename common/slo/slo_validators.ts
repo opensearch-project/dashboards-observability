@@ -40,6 +40,64 @@ function validateUserField(label: string, value: string | undefined): string | n
 }
 
 /**
+ * Defensive sanity checks on user-supplied PromQL expressions
+ * (`customExpr.goodQuery` / `totalQuery` / `errorRatioQuery`). The expression
+ * is interpolated verbatim into emitted rule YAML wrapped in `(...)` paren
+ * groups. YAML injection is closed by the literal-block indent discipline
+ * in the generator (every line is prefixed with 6 spaces, so the user
+ * cannot terminate the block), but unbalanced parens or trailing backslashes
+ * escape the generator's wrapping parens and produce malformed PromQL that
+ * Cortex rejects only at deploy time. Validating here keeps the error local
+ * (wizard rejects at save) and forbids the class of input most likely to
+ * confuse downstream parsers. Returns `null` when shaped reasonably, or an
+ * error string to surface at `spec.sli.definition.customExpr.*`.
+ */
+const PROMQL_SIZE_CAP = 8192;
+function validateCustomPromQL(expr: string): string | null {
+  if (expr.length > PROMQL_SIZE_CAP) {
+    return `PromQL expression exceeds ${PROMQL_SIZE_CAP} characters`;
+  }
+  // Strip string literals before counting delimiters so a matcher like
+  // `{status!~"5[0-9](}"}` isn't flagged as unbalanced. PromQL string
+  // literals use double quotes, single quotes, or backticks (the latter are
+  // raw \u2014 escapes don't apply). The regex consumes `\\` (escaped backslash)
+  // and `\"`/`\'` inside double/single-quoted spans so a legitimate matcher
+  // like `"a\"b"` isn't truncated mid-literal. Line comments (`# ...`) are
+  // stripped so a `# ))` doesn't trip the balance check.
+  const stripped = expr
+    .replace(/`[^`]*`/g, '')
+    .replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g, '')
+    .replace(/#[^\n]*/g, '');
+  let parens = 0;
+  let braces = 0;
+  let brackets = 0;
+  for (const ch of stripped) {
+    if (ch === '(') parens++;
+    else if (ch === ')') parens--;
+    else if (ch === '{') braces++;
+    else if (ch === '}') braces--;
+    else if (ch === '[') brackets++;
+    else if (ch === ']') brackets--;
+    if (parens < 0) return 'Unbalanced parentheses';
+    if (braces < 0) return 'Unbalanced braces';
+    if (brackets < 0) return 'Unbalanced brackets';
+  }
+  if (parens !== 0) return 'Unbalanced parentheses';
+  if (braces !== 0) return 'Unbalanced braces';
+  if (brackets !== 0) return 'Unbalanced brackets';
+  // Trailing backslash escapes the wrapping paren group if unquoted.
+  if (/\\\s*$/.test(stripped)) return 'PromQL expression must not end with a backslash';
+  // Reject control chars (other than tab/newline) so a paste from a rich-text
+  // editor doesn't smuggle zero-width / bidi-override chars into the YAML.
+  // CR is rejected explicitly because YAML parsers behave inconsistently on
+  // a literal CR inside a literal-block scalar.
+  if (/[\x00-\x08\x0B\x0C\x0D\x0E-\x1F\x7F]/.test(stripped)) {
+    return 'PromQL expression contains control characters';
+  }
+  return null;
+}
+
+/**
  * Strict shape for `goodEventsFilter`: a single matcher
  * `<label> = "value"` (or `!=`, `=~`, `!~`). The generator splices the
  * filter into a comma-separated label-matcher list, so any input that
@@ -192,14 +250,26 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
         if (!prom.customExpr) {
           errors['spec.sli.definition.customExpr'] = 'customExpr is required for custom SLIs';
         } else if (prom.customExpr.mode === 'events') {
-          if (!prom.customExpr.goodQuery)
+          if (!prom.customExpr.goodQuery) {
             errors['spec.sli.definition.customExpr.goodQuery'] = 'goodQuery is required';
-          if (!prom.customExpr.totalQuery)
+          } else {
+            const err = validateCustomPromQL(prom.customExpr.goodQuery);
+            if (err) errors['spec.sli.definition.customExpr.goodQuery'] = err;
+          }
+          if (!prom.customExpr.totalQuery) {
             errors['spec.sli.definition.customExpr.totalQuery'] = 'totalQuery is required';
+          } else {
+            const err = validateCustomPromQL(prom.customExpr.totalQuery);
+            if (err) errors['spec.sli.definition.customExpr.totalQuery'] = err;
+          }
         } else if (prom.customExpr.mode === 'raw') {
-          if (!prom.customExpr.errorRatioQuery)
+          if (!prom.customExpr.errorRatioQuery) {
             errors['spec.sli.definition.customExpr.errorRatioQuery'] =
               'errorRatioQuery is required';
+          } else {
+            const err = validateCustomPromQL(prom.customExpr.errorRatioQuery);
+            if (err) errors['spec.sli.definition.customExpr.errorRatioQuery'] = err;
+          }
         }
       }
     } else if (definition.backend === 'opensearch') {

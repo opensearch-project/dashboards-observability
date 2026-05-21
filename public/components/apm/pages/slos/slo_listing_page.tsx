@@ -533,37 +533,60 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
     });
   }, [filters, location.search, location.pathname, history]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      // Listing is Prometheus-scoped by default — the SLI backend facet was
-      // dropped from the sidebar in favor of a single-backend default. URL
-      // callers can still override via `?sliBackend=opensearch`.
-      const effectiveFilters: SloListFilters = {
-        ...filters,
-        sliBackend: filters.sliBackend?.length ? filters.sliBackend : ['prometheus'],
-        pageSize: 100,
-      };
-      const result = await apiClient.list(effectiveFilters);
-      setItems(result.results);
-      if (Object.keys(filters).length === 0) {
-        setTotalUnfiltered(result.total);
+  const load = useCallback(
+    async (isCurrent: () => boolean) => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Listing is Prometheus-scoped by default — the SLI backend facet was
+        // dropped from the sidebar in favor of a single-backend default. URL
+        // callers can still override via `?sliBackend=opensearch`.
+        const effectiveFilters: SloListFilters = {
+          ...filters,
+          sliBackend: filters.sliBackend?.length ? filters.sliBackend : ['prometheus'],
+          pageSize: 100,
+        };
+        const result = await apiClient.list(effectiveFilters);
+        if (!isCurrent()) return;
+        setItems(result.results);
+        if (Object.keys(filters).length === 0) {
+          setTotalUnfiltered(result.total);
+        }
+      } catch (e) {
+        if (!isCurrent()) return;
+        const err = e instanceof Error ? e : new Error(String(e));
+        setError(err);
+        notifications.toasts.addDanger({
+          title: 'Failed to load SLOs',
+          text: err.message,
+        });
+      } finally {
+        if (isCurrent()) setLoading(false);
       }
-    } catch (e) {
-      const err = e instanceof Error ? e : new Error(String(e));
-      setError(err);
-      notifications.toasts.addDanger({
-        title: 'Failed to load SLOs',
-        text: err.message,
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [apiClient, filters, notifications]);
+    },
+    [apiClient, filters, notifications]
+  );
 
   useEffect(() => {
-    load();
+    // Stale-fetch guard: rapid filter clicks can fire overlapping `apiClient.list()`
+    // requests, and whichever resolves last wins. The flag pins each effect's
+    // request to its render cycle so a slower stale response can't clobber the
+    // newer state.
+    let cancelled = false;
+    load(() => !cancelled);
+    return () => {
+      cancelled = true;
+    };
+  }, [load]);
+
+  // Manual refresh from the toolbar button + error retry. Guarded by a render
+  // counter so a follow-up auto-refresh can't override a manual fetch.
+  const refresh = useCallback(() => {
+    let cancelled = false;
+    load(() => !cancelled);
+    return () => {
+      cancelled = true;
+    };
   }, [load]);
 
   // Majority-value analysis for the three low-cardinality traits. Computed once
@@ -793,7 +816,7 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
 
   const refreshButton = (
     <EuiButtonEmpty
-      onClick={load}
+      onClick={refresh}
       data-test-subj="slosRefresh"
       size="s"
       iconType="refresh"
@@ -839,7 +862,7 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
                   color="danger"
                   title={<h2>Unable to load SLOs</h2>}
                   body={<p>{error.message}</p>}
-                  actions={<EuiButton onClick={load}>Retry</EuiButton>}
+                  actions={<EuiButton onClick={refresh}>Retry</EuiButton>}
                 />
               </EuiPanel>
             ) : noSlosExist ? (

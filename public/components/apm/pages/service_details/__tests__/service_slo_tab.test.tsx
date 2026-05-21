@@ -113,12 +113,12 @@ describe('SloTabLabel', () => {
   it('renders plain label when breached=0', () => {
     render(<SloTabLabel breached={0} />);
     expect(screen.getByText('SLOs')).toBeInTheDocument();
-    expect(screen.queryByTestId('serviceDetailsTab-slos-badge')).toBeNull();
+    expect(screen.queryByTestId('serviceDetailsTabSlosBadge')).toBeNull();
   });
 
   it('renders a notification badge with the breached count when breached>0', () => {
     render(<SloTabLabel breached={3} />);
-    const badge = screen.getByTestId('serviceDetailsTab-slos-badge');
+    const badge = screen.getByTestId('serviceDetailsTabSlosBadge');
     expect(badge).toHaveTextContent('3');
   });
 

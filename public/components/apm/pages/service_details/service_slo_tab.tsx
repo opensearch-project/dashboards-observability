@@ -581,7 +581,7 @@ export const SloTabLabel: React.FC<SloTabLabelProps> = ({ breached }) => {
       >
         <EuiNotificationBadge
           color="accent"
-          data-test-subj="serviceDetailsTab-slos-badge"
+          data-test-subj="serviceDetailsTabSlosBadge"
           style={{ marginLeft: 4 }}
         >
           {breached}

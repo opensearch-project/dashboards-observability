@@ -45,6 +45,12 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
   describe('Creating visualizations', () => {
     beforeEach(() => {
       moveToEventsHome();
+      // Explorer persists savedObjectId in sessionStorage via redux-persist; clear it
+      // so the second test creates a new visualization instead of trying to PUT-update
+      // the previous test's visualization (which the outer beforeEach has just deleted).
+      cy.window().then((win) => win.sessionStorage.clear());
+      cy.reload(true);
+      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     });
 
     it('Create first visualization in event analytics', () => {

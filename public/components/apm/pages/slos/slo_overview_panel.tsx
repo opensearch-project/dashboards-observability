@@ -214,7 +214,7 @@ const HealthRail: React.FC<{
 
   return (
     <div
-      data-test-subj="slosOverview-healthRail"
+      data-test-subj="slosOverviewHealthRail"
       style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}
     >
       <span
@@ -419,7 +419,7 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
               size="xs"
               iconType="cross"
               onClick={() => onStateFilterChange(null)}
-              data-test-subj="slosOverview-clearFilter"
+              data-test-subj="slosOverviewClearFilter"
             >
               Clear filter
             </EuiButtonEmpty>
@@ -477,7 +477,7 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
             tooltip="SLOs where error ratio exceeded the budget"
             onClick={toggle('breached')}
             active={activeStateFilter === 'breached'}
-            dataTestSubj="slosOverview-breached"
+            dataTestSubj="slosOverviewBreached"
           />
           <KpiCell
             value={stats.warning}
@@ -486,7 +486,7 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
             tooltip="SLOs where short-window burn has tripped a warning tier"
             onClick={toggle('warning')}
             active={activeStateFilter === 'warning'}
-            dataTestSubj="slosOverview-warning"
+            dataTestSubj="slosOverviewWarning"
           />
           <KpiCell
             value={stats.ok}
@@ -495,7 +495,7 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
             tooltip="SLOs meeting their objective"
             onClick={toggle('ok')}
             active={activeStateFilter === 'ok'}
-            dataTestSubj="slosOverview-ok"
+            dataTestSubj="slosOverviewOk"
           />
           <KpiCell
             value={stats.firing}
@@ -506,7 +506,7 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
             tooltip="Total MWMBR burn-rate alerts currently firing"
             onClick={toggle('firing')}
             active={activeStateFilter === 'firing'}
-            dataTestSubj="slosOverview-firing"
+            dataTestSubj="slosOverviewFiring"
           />
           <KpiCell
             value={stats.noData + stats.disabled}
@@ -515,7 +515,7 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
             tooltip="SLOs with no recent samples or explicitly disabled"
             onClick={toggle('no_data')}
             active={activeStateFilter === 'no_data'}
-            dataTestSubj="slosOverview-noData"
+            dataTestSubj="slosOverviewNoData"
           />
         </div>
 
@@ -539,7 +539,7 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
         {divider}
 
         <div
-          data-test-subj="slosOverview-atRisk"
+          data-test-subj="slosOverviewAtRisk"
           style={{
             flex: '1 1 260px',
             minWidth: 220,

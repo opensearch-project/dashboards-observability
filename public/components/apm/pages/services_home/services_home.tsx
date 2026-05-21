@@ -1214,7 +1214,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                                 idToSelectedMap={selectedEnvironments}
                                 onChange={onEnvironmentChange}
                                 compressed
-                                data-test-subj="environment-checkboxGroup"
+                                data-test-subj="environmentCheckboxGroup"
                               />
                             ) : (
                               <EuiText size="s" color="subdued">

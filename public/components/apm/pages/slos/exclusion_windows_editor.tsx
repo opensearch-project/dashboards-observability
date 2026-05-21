@@ -66,7 +66,12 @@ export const ExclusionWindowsEditor: React.FC<ExclusionWindowsEditorProps> = ({
         </EuiText>
       )}
       {exclusionWindows.map((ew, i) => (
-        <div key={i} style={{ marginBottom: 12 }} data-test-subj={`slosWizardExclusionRow-${i}`}>
+        <div
+          // Stable per-row key — see objectives_section for rationale.
+          key={ew.name ? `name:${ew.name}` : `idx:${i}`}
+          style={{ marginBottom: 12 }}
+          data-test-subj={`slosWizardExclusionRow-${i}`}
+        >
           <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
             <EuiFlexItem>
               <EuiFormRow label="Name">

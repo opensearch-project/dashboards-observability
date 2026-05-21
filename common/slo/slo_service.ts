@@ -107,11 +107,9 @@ export interface SloRulerClient {
     groupName: string
   ): Promise<void>;
   /**
-   * Phase 4 (W4.4 / W4.5) — required by the adoption paths (recover/clone)
-   * so the service can locate an orphan alert group from its provenance
-   * annotation. Optional here to stay additive for pre-Phase-4 test doubles
-   * (e.g. the dedup test suite's FakeRuler) — `recover()` / `clone()` throw
-   * a clear runtime error when the wired ruler lacks it.
+   * Used by the rule-health checker to enumerate the groups currently in a
+   * namespace. Optional so test doubles that don't need health checks can
+   * skip implementing it.
    */
   listRuleGroups?(
     client: AlertingOSClient,
@@ -219,7 +217,7 @@ export interface SloStatusAggregationContext {
  * opens path traversal, ambiguous `%`-encoded segments, and unicode-
  * normalization surprises. Mirrors the OSD saved-object id shape.
  */
-const WORKSPACE_ID_RE = /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,62}$/;
+export const WORKSPACE_ID_RE = /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,62}$/;
 
 /**
  * Compose the per-workspace ruler namespace. Hyphen separator (not slash) so
@@ -568,21 +566,24 @@ export class SloService {
     const alertGroupName = dedupAlertGroupName(spec.name, deploy.workspaceId, id);
 
     // Step 1: refcount bookkeeping + recording-group upserts. Track what we
-    // touched so rollback can undo it.
+    // touched so rollback can undo it. Recording groups are *shared* across
+    // SLOs by fingerprint, so synchronous deletion on rollback would race a
+    // concurrent peer create that already bumped the ref back up and
+    // re-upserted the byte-equal group — our delete would then orphan the
+    // peer's recording rules. Decrement the refcount; the reconciler's
+    // grace-period sweep (W3.11) handles the zero-ref cleanup safely.
+    // Alert groups are per-SLO and safe to delete synchronously.
     const incrementedFps: string[] = [];
     const createdRecordingGroups: string[] = [];
     const rollback = async (): Promise<void> => {
       for (const fp of incrementedFps) {
         if (this.refStore) {
           try {
-            const r = await this.refStore.decrementRef({
+            await this.refStore.decrementRef({
               workspaceId: deploy.workspaceId,
-              datasourceId: deploy.datasource.id,
+              datasourceId: deploy.datasource.name,
               fingerprint: fp,
             });
-            if (r.droppedToZero && createdRecordingGroups.includes(fp)) {
-              await this.safeRollback(deploy, namespace, dedupRecordingGroupName(fp));
-            }
           } catch (err) {
             this.logger.warn(
               `SloService: rollback decrementRef failed for fingerprint=${fp}: ${
@@ -591,6 +592,8 @@ export class SloService {
             );
           }
         } else if (createdRecordingGroups.includes(fp)) {
+          // No ref store means no shared-state concern — single-tenant test /
+          // offline-dev path. Safe to delete synchronously.
           await this.safeRollback(deploy, namespace, dedupRecordingGroupName(fp));
         }
       }
@@ -604,9 +607,15 @@ export class SloService {
       let wasZero = true;
       if (this.refStore) {
         try {
+          // Refcount keys must use the canonical datasource `name` rather than
+          // the in-memory `ds-N` id. The id is allocated by an in-process
+          // counter that resets when the plugin process restarts; persistent
+          // SOs keyed on it would silently divorce from `getFingerprintRefcounts`,
+          // which reads keyed on `doc.spec.datasourceId` (also the canonical
+          // name).
           const r = await this.refStore.incrementRef({
             workspaceId: deploy.workspaceId,
-            datasourceId: deploy.datasource.id,
+            datasourceId: deploy.datasource.name,
             fingerprint: fp,
             fingerprintVersion: FINGERPRINT_VERSION,
             groupName,
@@ -819,17 +828,17 @@ export class SloService {
     const createdRecordingGroups: string[] = [];
 
     const rollback = async (): Promise<void> => {
+      // See createDedup rollback for why recording groups aren't deleted
+      // synchronously here — they're shared across SLOs by fingerprint and
+      // the reconciler's grace-period sweep handles zero-ref cleanup.
       for (const fp of incrementedFps) {
         if (this.refStore) {
           try {
-            const r = await this.refStore.decrementRef({
+            await this.refStore.decrementRef({
               workspaceId: deploy.workspaceId,
-              datasourceId: deploy.datasource.id,
+              datasourceId: deploy.datasource.name,
               fingerprint: fp,
             });
-            if (r.droppedToZero && createdRecordingGroups.includes(fp)) {
-              await this.safeRollback(deploy, namespace, dedupRecordingGroupName(fp));
-            }
           } catch (err) {
             this.logger.warn(
               `SloService: update rollback decrementRef failed for fingerprint=${fp}: ${
@@ -853,7 +862,7 @@ export class SloService {
         try {
           const r = await this.refStore.incrementRef({
             workspaceId: deploy.workspaceId,
-            datasourceId: deploy.datasource.id,
+            datasourceId: deploy.datasource.name,
             fingerprint: fp,
             fingerprintVersion: FINGERPRINT_VERSION,
             groupName,
@@ -942,7 +951,7 @@ export class SloService {
         try {
           await this.refStore.decrementRef({
             workspaceId: deploy.workspaceId,
-            datasourceId: deploy.datasource.id,
+            datasourceId: deploy.datasource.name,
             fingerprint: fp,
           });
         } catch (err) {
@@ -1065,7 +1074,7 @@ export class SloService {
         try {
           await this.refStore.decrementRef({
             workspaceId: deploy.workspaceId,
-            datasourceId: deploy.datasource.id,
+            datasourceId: deploy.datasource.name,
             fingerprint: fp,
           });
         } catch (err) {
@@ -1176,9 +1185,9 @@ export class SloService {
    * on recording rules and no alert-group annotation. For dedup-shape SOs the
    * expected ruler state is a split: one shared `slo:rec:<fp>` per unique
    * fingerprint (label-free so it's reusable across SLOs) plus one per-SLO
-   * `slo:alerts:<slug>_<suffix>` carrying the provenance annotation the
-   * Phase 4 adoption path reads during lost-SO recovery. A legacy upsert here
-   * produces a third garbage group and leaves the real ones missing.
+   * `slo:alerts:<slug>_<suffix>` carrying the provenance annotation. A legacy
+   * upsert here produces a third garbage group and leaves the real ones
+   * missing.
    *
    * This method mirrors the `createDedup` / `updateDedup` rule-shape path but
    * skips refcount bookkeeping — repair is recovering from ruler-side drift,
