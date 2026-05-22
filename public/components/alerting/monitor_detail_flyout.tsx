@@ -395,7 +395,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
           {/* Quick actions */}
           <EuiFlexGroup gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              {onEdit ? (
+              {onEdit && monitor.monitorType === 'ppl' ? (
                 <EuiButtonEmpty
                   size="s"
                   iconType="pencil"
@@ -412,7 +412,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                   content={i18n.translate(
                     'observability.alerting.monitorDetailFlyout.editTooltip',
                     {
-                      defaultMessage: 'Editing not yet available',
+                      defaultMessage: 'Editing is only supported for PPL monitors',
                     }
                   )}
                 >
