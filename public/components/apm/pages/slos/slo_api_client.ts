@@ -10,7 +10,6 @@
  */
 
 import type { HttpStart } from '../../../../../../../src/core/public';
-import type { PaginatedResponse } from '../../../../../common/types/alerting';
 import { OBSERVABILITY_BASE } from '../../../../../common/constants/shared';
 import type {
   GeneratedRuleGroup,
@@ -113,9 +112,12 @@ export function extractRulerErrorEnvelope(err: unknown): SloRulerErrorEnvelope |
 }
 
 /** Convert filter array/boolean fields to the string form the server expects. */
-function serializeFilters(filters: SloListFilters): Record<string, string | number | boolean> {
+function serializeFilters(
+  filters: SloListFilters,
+  cursor: string | null
+): Record<string, string | number | boolean> {
   const query: Record<string, string | number | boolean> = {};
-  if (filters.page !== undefined) query.page = filters.page;
+  if (cursor) query.cursor = cursor;
   if (filters.pageSize !== undefined) query.pageSize = filters.pageSize;
   if (filters.datasourceId?.length) query.datasourceId = filters.datasourceId.join(',');
   if (filters.state?.length) query.state = filters.state.join(',');
@@ -131,11 +133,22 @@ function serializeFilters(filters: SloListFilters): Record<string, string | numb
   return query;
 }
 
+export interface ListSlosResponse {
+  results: SloSummary[];
+  total: number;
+  pageSize: number;
+  hasMore: boolean;
+  /** Opaque cursor for the next page; null on the final page. */
+  nextCursor: string | null;
+  /** Opaque cursor for the previous page; null on page 1. */
+  prevCursor: string | null;
+}
+
 export class SloApiClient {
   constructor(private readonly http: HttpStart) {}
 
-  list(filters: SloListFilters = {}): Promise<PaginatedResponse<SloSummary>> {
-    return this.http.get(SLO_BASE, { query: serializeFilters(filters) });
+  list(filters: SloListFilters = {}, cursor: string | null = null): Promise<ListSlosResponse> {
+    return this.http.get(SLO_BASE, { query: serializeFilters(filters, cursor) });
   }
 
   /**

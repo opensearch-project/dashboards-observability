@@ -94,9 +94,10 @@ describe('SloListingPage — filter integration', () => {
     const list = jest.fn().mockResolvedValue({
       results: [],
       total: 0,
-      page: 1,
-      pageSize: 100,
+      pageSize: 20,
       hasMore: false,
+      nextCursor: null,
+      prevCursor: null,
     });
     await act(async () => {
       renderPage(list);
@@ -115,9 +116,10 @@ describe('SloListingPage — filter integration', () => {
     const list = jest.fn().mockResolvedValue({
       results: [],
       total: 0,
-      page: 1,
-      pageSize: 100,
+      pageSize: 20,
       hasMore: false,
+      nextCursor: null,
+      prevCursor: null,
     });
     await act(async () => {
       renderPage(list);
@@ -132,9 +134,10 @@ describe('SloListingPage — filter integration', () => {
     const list = jest.fn().mockResolvedValue({
       results: [makeSummary()],
       total: 1,
-      page: 1,
-      pageSize: 100,
+      pageSize: 20,
       hasMore: false,
+      nextCursor: null,
+      prevCursor: null,
     });
     await act(async () => {
       renderPage(list);
@@ -151,12 +154,20 @@ describe('SloListingPage — filter integration', () => {
           return {
             results: [makeSummary({ id: 'a' }), makeSummary({ id: 'b', name: 'b' })],
             total: 2,
-            page: 1,
-            pageSize: 100,
+            pageSize: 20,
             hasMore: false,
+            nextCursor: null,
+            prevCursor: null,
           };
         }
-        return { results: [], total: 0, page: 1, pageSize: 100, hasMore: false };
+        return {
+          results: [],
+          total: 0,
+          pageSize: 20,
+          hasMore: false,
+          nextCursor: null,
+          prevCursor: null,
+        };
       });
 
     await act(async () => {
@@ -180,7 +191,10 @@ describe('SloListingPage — filter integration', () => {
       fireEvent.click(screen.getByTestId('slosEmptyFilteredClear'));
     });
     await waitFor(() => {
-      expect(list).toHaveBeenCalledWith(expect.not.objectContaining({ search: 'no-such-thing' }));
+      expect(list).toHaveBeenCalledWith(
+        expect.not.objectContaining({ search: 'no-such-thing' }),
+        null
+      );
     });
   });
 
@@ -190,9 +204,10 @@ describe('SloListingPage — filter integration', () => {
       .mockResolvedValue({
         results: [makeSummary({ id: 'a', status: { ...makeSummary().status, state: 'breached' } })],
         total: 1,
-        page: 1,
-        pageSize: 100,
+        pageSize: 20,
         hasMore: false,
+        nextCursor: null,
+        prevCursor: null,
       });
 
     await act(async () => {
@@ -201,7 +216,8 @@ describe('SloListingPage — filter integration', () => {
 
     await waitFor(() => {
       expect(list).toHaveBeenCalledWith(
-        expect.objectContaining({ state: ['breached'], pageSize: 100 })
+        expect.objectContaining({ state: ['breached'], pageSize: 20 }),
+        null
       );
     });
   });
@@ -212,9 +228,10 @@ describe('SloListingPage — filter integration', () => {
       .mockResolvedValue({
         results: [makeSummary()],
         total: 1,
-        page: 1,
-        pageSize: 100,
+        pageSize: 20,
         hasMore: false,
+        nextCursor: null,
+        prevCursor: null,
       });
 
     await act(async () => {
@@ -235,9 +252,10 @@ describe('SloListingPage — Rules column badge', () => {
       .mockResolvedValue({
         results,
         total: results.length,
-        page: 1,
-        pageSize: 100,
+        pageSize: 20,
         hasMore: false,
+        nextCursor: null,
+        prevCursor: null,
       });
     return renderPage(list);
   }
@@ -363,9 +381,10 @@ describe('SloListingPage — default sort (P1 #7)', () => {
     const list = jest.fn().mockResolvedValue({
       results: [a, b, c],
       total: 3,
-      page: 1,
-      pageSize: 100,
+      pageSize: 20,
       hasMore: false,
+      nextCursor: null,
+      prevCursor: null,
     });
     await act(async () => {
       renderPage(list);

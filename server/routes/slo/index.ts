@@ -576,8 +576,15 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       path: SLO_BASE,
       validate: {
         query: schema.object({
+          /**
+           * @deprecated retained for clients mid-upgrade. New callers send
+           * `cursor` instead. When both are present, `cursor` wins and
+           * `page` is ignored.
+           */
           page: schema.maybe(schema.string()),
           pageSize: schema.maybe(schema.string()),
+          /** Opaque base64url cursor; produced by a prior listing call. */
+          cursor: schema.maybe(schema.string()),
           datasourceId: schema.maybe(schema.string()),
           state: schema.maybe(schema.string()),
           sliBackend: schema.maybe(schema.string()),
@@ -634,7 +641,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         ruleHealthChecker,
         ruleDedupEnabled
       );
-      const result = await handleListSLOs(sloService, filters, logger, statusCtx, req);
+      const result = await handleListSLOs(sloService, filters, logger, statusCtx, req, q.cursor);
       if (result.status >= 400) {
         return res.customError({
           statusCode: result.status,

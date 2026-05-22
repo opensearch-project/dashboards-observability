@@ -41,6 +41,7 @@ import { SloRuleRefStore } from './services/slo/slo_rule_ref_store';
 import { SloStoreFactory } from './services/slo/slo_store_factory';
 import { SloReconciler } from './services/slo/slo_reconciler';
 import { DirectQueryStatusAggregator } from './services/slo/status_aggregator';
+import { DatasourceCircuitBreaker } from './services/slo/datasource_circuit_breaker';
 import { createRuleHealthChecker } from './services/slo/rule_health_checker';
 import { InMemoryDatasourceService } from './services/alerting/datasource_service';
 import { DatasourceDiscoveryService } from './services/alerting/datasource_discovery';
@@ -292,6 +293,13 @@ export class ObservabilityPlugin
           worstTarget: { type: 'float' },
           labelKeys: { type: 'keyword' },
           labelValues: { type: 'keyword' },
+          // Last-written live state, eagerly persisted by the status pipeline
+          // when the computed value diverges from this stored projection. Not
+          // a source of truth — `SloLiveStatus.state` is recomputed every
+          // listing call by the aggregator. Exists solely so the SO `filter`
+          // clause can push the `state` facet to the index instead of paying
+          // status fold-in for every matching SLO before slicing.
+          cachedState: { type: 'keyword' },
           version: { type: 'integer' },
           createdAt: { type: 'date' },
           createdBy: { type: 'keyword' },
@@ -404,7 +412,25 @@ export class ObservabilityPlugin
       // Wire the DirectQuery status aggregator so SLO list/detail responses
       // surface real Cortex-derived state (healthy/breaching/warning) instead
       // of the no-op stub that always returns no_data.
-      sloService.setStatusAggregator(new DirectQueryStatusAggregator(sloLogger));
+      // Per-server datasource health tracker. One instance per plugin
+      // start; failure counts and cooldown are in-memory and reset on
+      // process restart. Logs once per open/close transition so an
+      // operator sees a flapping datasource without log spam every
+      // listing call.
+      const sloCircuitBreaker = new DatasourceCircuitBreaker({
+        onTransition: (datasourceId, transition) => {
+          if (transition === 'open') {
+            sloLogger.warn(
+              `SLO status aggregator: datasource ${datasourceId} circuit OPEN — fast-failing to no_data until cooldown elapses`
+            );
+          } else {
+            sloLogger.info(
+              `SLO status aggregator: datasource ${datasourceId} circuit CLOSED — resumed live status reads`
+            );
+          }
+        },
+      });
+      sloService.setStatusAggregator(new DirectQueryStatusAggregator(sloLogger, sloCircuitBreaker));
       this.sloService = sloService;
 
       const rulerClient = new DirectQueryRulerClient(this.logger);

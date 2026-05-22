@@ -6,17 +6,16 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
+  EuiBasicTable,
   EuiBasicTableColumn,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
   EuiIcon,
-  EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
   EuiPage,
@@ -25,6 +24,7 @@ import {
   EuiPageContentBody,
   EuiPanel,
   EuiResizableContainer,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiToolTip,
@@ -40,6 +40,7 @@ import { SloOverviewPanel } from './slo_overview_panel';
 import { DATASOURCE_SELECTION_CAP, SloListFilterPanel } from './slo_list_filter_panel';
 import { usePrometheusDatasources } from './use_prometheus_datasources';
 import {
+  deserializeCursorFromSearch,
   deserializeFiltersFromSearch,
   filtersEqual,
   serializeFiltersToSearch,
@@ -77,11 +78,11 @@ function worstBudgetRemaining(summary: SloSummary): number {
   return objectives.reduce((acc, o) => Math.min(acc, o.errorBudgetRemaining), 1);
 }
 
-// Server-side cap on a single listing fetch. The listing has no pagination
-// UI yet; rows beyond this cap are dropped on the floor unless filters
-// narrow the result set. Surface the truncation via a callout when it
-// happens so users aren't silently missing data.
-const LISTING_PAGE_SIZE = 100;
+// Initial page size for cursor-paginated listings. The selector lets users
+// pick a different size at runtime; the value also rides the URL as
+// `?pageSize=N` so a deep-linked page restores the same density.
+const DEFAULT_PAGE_SIZE = 20;
+const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
 /** Compact budget bar for the table column. Identical visual language to the overview leaderboard. */
 const BudgetColumnBar: React.FC<{ remaining: number; width?: number }> = ({
@@ -473,10 +474,15 @@ interface SlosTablePanelProps {
   columns: Array<EuiBasicTableColumn<SloSummary>>;
   loading: boolean;
   resultCount: number;
-  /** Server-reported total when it exceeds the page; null when not truncated. */
-  truncatedTotal: number | null;
+  total: number;
+  pageSize: number;
+  hasMore: boolean;
+  hasPrev: boolean;
   filteredToZero: boolean;
   onClearAllFilters: () => void;
+  onPrev: () => void;
+  onNext: () => void;
+  onPageSizeChange: (next: number) => void;
   defaultsLine: string | null;
 }
 
@@ -485,9 +491,15 @@ const SlosTablePanelUI: React.FC<SlosTablePanelProps> = ({
   columns,
   loading,
   resultCount,
-  truncatedTotal,
+  total,
+  pageSize,
+  hasMore,
+  hasPrev,
   filteredToZero,
   onClearAllFilters,
+  onPrev,
+  onNext,
+  onPageSizeChange,
   defaultsLine,
 }) => {
   if (filteredToZero) {
@@ -521,6 +533,7 @@ const SlosTablePanelUI: React.FC<SlosTablePanelProps> = ({
       </EuiPanel>
     );
   }
+  const sizeOptions = PAGE_SIZE_OPTIONS.map((n) => ({ value: String(n), text: String(n) }));
   return (
     <EuiPanel>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -539,42 +552,63 @@ const SlosTablePanelUI: React.FC<SlosTablePanelProps> = ({
           ) : null}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued" data-test-subj="slosListingResultCount">
-            {i18n.translate('observability.apm.slo.listing.resultCount', {
-              defaultMessage: '{resultCount, plural, one {# SLO} other {# SLOs}}',
-              values: { resultCount },
-            })}
-          </EuiText>
+          <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued" data-test-subj="slosListingResultCount">
+                {i18n.translate('observability.apm.slo.listing.resultCountTotal', {
+                  defaultMessage: '{resultCount, plural, one {# SLO} other {# SLOs}} of {total}',
+                  values: { resultCount, total },
+                })}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSelect
+                compressed
+                aria-label={i18n.translate('observability.apm.slo.listing.pageSizeLabel', {
+                  defaultMessage: 'Rows per page',
+                })}
+                value={String(pageSize)}
+                options={sizeOptions}
+                onChange={(e) => onPageSizeChange(parseInt(e.target.value, 10))}
+                data-test-subj="slosPaginationPageSize"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      {truncatedTotal !== null ? (
-        <>
-          <EuiCallOut
-            size="s"
-            color="warning"
-            iconType="alert"
-            title={i18n.translate('observability.apm.slo.listing.truncatedCallout', {
-              defaultMessage:
-                'Showing {resultCount} of {truncatedTotal} SLOs — narrow the filters to see the rest.',
-              values: { resultCount, truncatedTotal },
-            })}
-            data-test-subj="slosListingTruncated"
-          />
-          <EuiSpacer size="s" />
-        </>
-      ) : null}
-      <EuiInMemoryTable<SloSummary>
+      <EuiBasicTable<SloSummary>
         items={items}
         columns={columns}
-        pagination={{
-          initialPageSize: 20,
-          pageSizeOptions: [10, 20, 50, 100],
-        }}
-        sorting={{ sort: { field: 'name', direction: 'asc' } }}
         loading={loading}
         data-test-subj="slosTable"
       />
+      <EuiSpacer size="s" />
+      <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            iconType="arrowLeft"
+            isDisabled={!hasPrev || loading}
+            onClick={onPrev}
+            data-test-subj="slosPaginationPrev"
+          >
+            {i18n.translate('observability.apm.slo.listing.prev', { defaultMessage: 'Previous' })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            iconType="arrowRight"
+            iconSide="right"
+            isDisabled={!hasMore || loading}
+            onClick={onNext}
+            data-test-subj="slosPaginationNext"
+          >
+            {i18n.translate('observability.apm.slo.listing.next', { defaultMessage: 'Next' })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };
@@ -602,12 +636,17 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
   const [filters, setFilters] = useState<SloListFilters>(() =>
     deserializeFiltersFromSearch(location.search)
   );
+  const [cursor, setCursor] = useState<string | null>(() =>
+    deserializeCursorFromSearch(location.search)
+  );
   const [items, setItems] = useState<SloSummary[]>([]);
   const [totalUnfiltered, setTotalUnfiltered] = useState<number | null>(null);
-  // Server returns up to LISTING_PAGE_SIZE rows; if `total` exceeds the page,
-  // the listing is silently truncated. Surface that to the user — pagination
-  // UI is the longer-term fix; this prevents silent data loss in the meantime.
-  const [truncatedTotal, setTruncatedTotal] = useState<number | null>(null);
+  const [total, setTotal] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(
+    () => deserializeFiltersFromSearch(location.search).pageSize ?? DEFAULT_PAGE_SIZE
+  );
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [prevCursor, setPrevCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -622,16 +661,20 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
     ]);
   }, [chrome, parentBreadcrumb]);
 
-  // Filter ↔ URL sync. Single effect, guarded by a ref that stores the last
-  // serialized string we reconciled. Writing to URL via history.replace
-  // intentionally does NOT re-trigger a setFilters, and an external URL
-  // change (paste, back button) does NOT re-write the URL we just received.
-  // Without this guard the two effects form a loop: write URL → read URL →
-  // parse → setFilters(newObj) → compare → write URL → ...
-  const lastSyncedSearch = useRef<string>(serializeFiltersToSearch(filters));
+  // Filter+cursor ↔ URL sync. Single effect, guarded by a ref that stores the
+  // last serialized string we reconciled. Writing to URL via history.replace
+  // intentionally does NOT re-trigger a setFilters/setCursor, and an external
+  // URL change (paste, back button) does NOT re-write the URL we just
+  // received. Without this guard the two effects form a loop: write URL →
+  // read URL → parse → setState(newObj) → compare → write URL → ...
+  const filtersForUrl = useMemo<SloListFilters>(
+    () => ({ ...filters, pageSize: pageSize !== DEFAULT_PAGE_SIZE ? pageSize : undefined }),
+    [filters, pageSize]
+  );
+  const lastSyncedSearch = useRef<string>(serializeFiltersToSearch(filtersForUrl, cursor));
   useEffect(() => {
     const rawUrl = location.search.startsWith('?') ? location.search.slice(1) : location.search;
-    const fromState = serializeFiltersToSearch(filters);
+    const fromState = serializeFiltersToSearch(filtersForUrl, cursor);
 
     if (fromState === rawUrl) {
       lastSyncedSearch.current = fromState;
@@ -640,9 +683,18 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
 
     if (rawUrl !== lastSyncedSearch.current) {
       const parsed = deserializeFiltersFromSearch(location.search);
-      if (!filtersEqual(parsed, filters)) {
+      const parsedCursor = deserializeCursorFromSearch(location.search);
+      const parsedSize = parsed.pageSize ?? DEFAULT_PAGE_SIZE;
+      if (
+        !filtersEqual(parsed, filtersForUrl) ||
+        parsedCursor !== cursor ||
+        parsedSize !== pageSize
+      ) {
         lastSyncedSearch.current = rawUrl;
-        setFilters(parsed);
+        const { pageSize: _ignored, ...rest } = parsed;
+        setFilters(rest);
+        setCursor(parsedCursor);
+        setPageSize(parsedSize);
       }
       return;
     }
@@ -652,7 +704,7 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
       pathname: location.pathname,
       search: fromState.length ? `?${fromState}` : '',
     });
-  }, [filters, location.search, location.pathname, history]);
+  }, [filtersForUrl, cursor, pageSize, location.search, location.pathname, history]);
 
   const load = useCallback(
     async (isCurrent: () => boolean) => {
@@ -665,13 +717,18 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
         const effectiveFilters: SloListFilters = {
           ...filters,
           sliBackend: filters.sliBackend?.length ? filters.sliBackend : ['prometheus'],
-          pageSize: LISTING_PAGE_SIZE,
+          pageSize,
         };
-        const result = await apiClient.list(effectiveFilters);
+        const result = await apiClient.list(effectiveFilters, cursor);
         if (!isCurrent()) return;
         setItems(result.results);
-        setTruncatedTotal(result.total > result.results.length ? result.total : null);
-        if (Object.keys(filters).length === 0) {
+        setTotal(result.total);
+        setNextCursor(result.nextCursor);
+        setPrevCursor(result.prevCursor);
+        // `totalUnfiltered` only reflects an empty-filters fetch — when the
+        // user has filters applied, the cached value persists from earlier.
+        // Used solely for the "no SLOs at all" empty-state branch.
+        if (Object.keys(filters).length === 0 && cursor === null) {
           setTotalUnfiltered(result.total);
         }
       } catch (e) {
@@ -688,7 +745,7 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
         if (isCurrent()) setLoading(false);
       }
     },
-    [apiClient, filters, notifications]
+    [apiClient, filters, cursor, pageSize, notifications]
   );
 
   useEffect(() => {
@@ -725,11 +782,11 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
   }, [items]);
 
   // Default sort for the listing: worst remaining budget first (P1 #7).
-  // EuiInMemoryTable's sorting={{ field: 'name' }} config takes over as soon as
-  // the user clicks a column header — until then, EUI renders items in input
-  // order, so pre-sorting here makes "what's burning" the first row instead of
-  // whatever's alphabetically first. Stable tiebreaker on name keeps the
-  // no-data cluster (every row returns `remaining = 1`) reading alphabetically.
+  // The server returns the page in `name asc` order so the catalog reads the
+  // same way regardless of cursor, and we re-sort the visible page client-
+  // side here so "what's burning" rises to the top within the rendered
+  // window. Stable tiebreaker on name keeps the no-data cluster (every row
+  // returns `remaining = 1`) reading alphabetically.
   const sortedItems = useMemo(() => {
     return [...items].sort((a, b) => {
       const diff = worstBudgetRemaining(a) - worstBudgetRemaining(b);
@@ -864,14 +921,35 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
     [filters]
   );
 
-  const clearAllFilters = useCallback(() => setFilters({}), []);
+  // Filter changes always reset the cursor to page 1 — the cursor is bound
+  // to the filter fingerprint (server-side), and stale cursors silently
+  // reset to page 1 anyway. Resetting client-side keeps the URL clean.
+  const setFiltersAndResetCursor = useCallback<typeof setFilters>((next) => {
+    setCursor(null);
+    setFilters(next);
+  }, []);
+
+  const clearAllFilters = useCallback(() => setFiltersAndResetCursor({}), [
+    setFiltersAndResetCursor,
+  ]);
+
+  const onPrev = useCallback(() => {
+    if (prevCursor) setCursor(prevCursor);
+  }, [prevCursor]);
+  const onNext = useCallback(() => {
+    if (nextCursor) setCursor(nextCursor);
+  }, [nextCursor]);
+  const onPageSizeChange = useCallback((next: number) => {
+    setPageSize(next);
+    setCursor(null);
+  }, []);
 
   // Build the shared ActiveFilterBadges rows. Each badge clears all values for
   // its category at once — mirrors services_home.
   const activeFilters: FilterBadge[] = useMemo(() => {
     const badges: FilterBadge[] = [];
     const clearKey = (key: keyof SloListFilters) =>
-      setFilters((f) => {
+      setFiltersAndResetCursor((f) => {
         const next = { ...f };
         delete next[key];
         return next;
@@ -986,7 +1064,7 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
       });
     }
     return badges;
-  }, [filters, promDatasources]);
+  }, [filters, promDatasources, setFiltersAndResetCursor]);
 
   const createButton = (
     <EuiButton
@@ -1019,13 +1097,19 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
   // Overview panel tile-click: map the tile to a state filter slice so the
   // strip + chips stay in sync with the tile highlight.
   const overviewActive = filterStateToTile(filters.state);
-  const setOverviewStateFilter = useCallback((tile: SloHealthState | 'firing' | null) => {
-    setFilters((prev) => ({ ...prev, state: stateTileToFilterState(tile) }));
-  }, []);
+  const setOverviewStateFilter = useCallback(
+    (tile: SloHealthState | 'firing' | null) => {
+      setFiltersAndResetCursor((prev) => ({ ...prev, state: stateTileToFilterState(tile) }));
+    },
+    [setFiltersAndResetCursor]
+  );
 
-  const onSearchChange = useCallback((next: string) => {
-    setFilters((f) => ({ ...f, search: next || undefined }));
-  }, []);
+  const onSearchChange = useCallback(
+    (next: string) => {
+      setFiltersAndResetCursor((f) => ({ ...f, search: next || undefined }));
+    },
+    [setFiltersAndResetCursor]
+  );
 
   // --- Render states ---
   const isFirstLoad = loading && items.length === 0 && totalUnfiltered === null;
@@ -1131,7 +1215,7 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
                         <EuiSpacer size="xs" />
                         <SloListFilterPanel
                           filters={filters}
-                          onChange={setFilters}
+                          onChange={setFiltersAndResetCursor}
                           items={items}
                           datasources={promDatasources}
                           datasourcesLoading={promDatasourcesLoading}
@@ -1208,9 +1292,15 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
                         columns={columns}
                         loading={loading}
                         resultCount={items.length}
-                        truncatedTotal={truncatedTotal}
+                        total={total}
+                        pageSize={pageSize}
+                        hasMore={nextCursor !== null}
+                        hasPrev={prevCursor !== null}
                         filteredToZero={filteredToZero}
                         onClearAllFilters={clearAllFilters}
+                        onPrev={onPrev}
+                        onNext={onNext}
+                        onPageSizeChange={onPageSizeChange}
                         defaultsLine={defaultsLine}
                       />
                     </EuiResizablePanel>

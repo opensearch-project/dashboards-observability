@@ -16,6 +16,7 @@ import type { PaginatedResponse } from '../types/alerting';
 import type {
   Dimension,
   SloDocument,
+  SloHealthState,
   SloListFilters,
   SloLiveStatus,
   SloSummary,
@@ -24,6 +25,35 @@ import { resolveDatasourceRefs } from './slo_datasource_ref';
 import type { SloStatusAggregationContext } from './slo_service_types';
 import type { SloServiceCore } from './slo_service_core';
 import type { SloStatusService } from './slo_status_service';
+import { decodeCursor, encodeCursor, hashFilters } from './slo_pagination_cursor';
+import type { PaginationCursorState } from './slo_pagination_cursor';
+import { writeBackChangedStates } from './slo_status_cached_writeback';
+
+const DEFAULT_PAGE_SIZE = 20;
+const MAX_PAGE_SIZE = 100;
+/**
+ * Hard ceiling for synthetic cursor pagination. The OSD saved-objects layer
+ * sits on top of the standard OpenSearch `from + size` window
+ * (`index.max_result_window`, default 10K). Past the ceiling, deep
+ * pagination starts to fail with a search-context error rather than degrade
+ * gracefully. A workspace tenant fleet of 5K SLOs is well above any
+ * realistic upper bound; once we approach it the right answer is to either
+ * narrow filters or invest in true searchAfter (requires an OSD core
+ * change). Stop early with a clear message rather than passing the
+ * underlying error through.
+ */
+const MAX_CURSOR_PAGE = 500;
+
+export interface PaginatedListResult {
+  results: SloSummary[];
+  total: number;
+  pageSize: number;
+  hasMore: boolean;
+  /** Opaque cursor for the next page; null on the final page. */
+  nextCursor: string | null;
+  /** Opaque cursor for the previous page; null on page 1. */
+  prevCursor: string | null;
+}
 
 export class SloQueryService {
   constructor(
@@ -125,13 +155,21 @@ export class SloQueryService {
     );
   }
 
+  /**
+   * Legacy offset-based pagination. Materializes every matching SLO before
+   * slicing, so it pays the variable-cardinality cost on state-filtered
+   * listings. Kept as a thin compatibility wrapper for clients that still
+   * send `page=N` instead of an opaque cursor; routes prefer `paginate`.
+   *
+   * @deprecated Prefer `paginate` for new callers.
+   */
   async getPaginated(
     filters?: SloListFilters,
     ctx?: SloStatusAggregationContext,
     request?: unknown
   ): Promise<PaginatedResponse<SloSummary>> {
     const page = filters?.page ?? 1;
-    const pageSize = Math.min(filters?.pageSize ?? 20, 100);
+    const pageSize = Math.min(filters?.pageSize ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
     const all = await this.list(filters, ctx, request);
     const start = (page - 1) * pageSize;
     const end = start + pageSize;
@@ -141,6 +179,240 @@ export class SloQueryService {
       page,
       pageSize,
       hasMore: end < all.length,
+    };
+  }
+
+  /**
+   * Cursor-based pagination. Pushes facet filters (including `state`, via
+   * the persisted `cachedState` projection) into the SO `filter` clause so
+   * a state-filtered listing doesn't need to materialize every matching
+   * SLO before slicing. Status fold-in then runs only over the visible
+   * page. Diffs in computed-vs-cached state trigger a best-effort
+   * writeback so the next request's filter pushdown stays honest.
+   *
+   * Falls back to the legacy `list()` path when the underlying store does
+   * not implement `paginate` (in-memory bootstrap stores in tests can opt
+   * out by leaving the method undefined; the bundled `InMemorySloStore`
+   * implements it).
+   */
+  async paginate(
+    filters: SloListFilters | undefined,
+    cursor: string | null,
+    ctx?: SloStatusAggregationContext,
+    request?: unknown
+  ): Promise<PaginatedListResult> {
+    const { sloStore } = this.core.resolveStores(request);
+
+    // Build the filter signature once. Used both for the cursor's drift
+    // detection and the SO-layer filter clause.
+    const normalizedDsIds = await this.normalizeDatasourceFilter(filters?.datasourceId, ctx);
+    if (filters?.datasourceId && filters.datasourceId.length > 0 && normalizedDsIds?.length === 0) {
+      return this.emptyResult(filters?.pageSize);
+    }
+    const filterFingerprint = hashFilters({
+      datasourceId: normalizedDsIds,
+      state: filters?.state,
+      sliBackend: filters?.sliBackend,
+      sliLeafType: filters?.sliLeafType,
+      service: filters?.service,
+      team: filters?.team,
+      tier: filters?.tier,
+      canonicalKind: filters?.canonicalKind,
+      enabled: filters?.enabled,
+      mode: filters?.mode,
+      search: filters?.search,
+    });
+
+    const requestedSize = filters?.pageSize ?? DEFAULT_PAGE_SIZE;
+    const pageSize = Math.max(1, Math.min(requestedSize, MAX_PAGE_SIZE));
+    const decoded = decodeCursor(cursor);
+    // Reset to page 1 when the cursor was malformed, missing, or its
+    // filter-fingerprint disagrees with the current request. Treating
+    // a stale cursor as an explicit reset is safer than silently
+    // returning rows that don't match the active filters.
+    const effectivePage =
+      decoded && decoded.fh === filterFingerprint ? Math.min(decoded.p, MAX_CURSOR_PAGE) : 1;
+    // Default to `_id` for stable cursor pagination. The visible row order is
+    // re-derived client-side over the page slice (worst-budget first); the
+    // server-side order only needs to be stable across cursor steps. Sorting
+    // by `name` directly fails on the existing text-typed mapping, and adding
+    // a keyword subfield would require a mapping migration the listing
+    // change shouldn't be coupled to. `_id` is a top-level keyword the OSD
+    // saved-objects layer always allows for sort.
+    const sortField = decoded?.sf || '_id';
+    const sortOrder = decoded?.so ?? 'asc';
+
+    if (!sloStore.paginate) {
+      // Bootstrap / test path: fall back to the materialize-and-slice
+      // approach. Cursor still drives the page index; filter pushdown
+      // is unavailable in this branch.
+      return this.legacyPaginate({
+        page: effectivePage,
+        pageSize,
+        sortField,
+        sortOrder,
+        filterFingerprint,
+        filters,
+        ctx,
+        request,
+      });
+    }
+
+    const paginated = await sloStore.paginate({
+      page: effectivePage,
+      perPage: pageSize,
+      sortField,
+      sortOrder,
+      search: filters?.search,
+      filters: {
+        datasourceId: normalizedDsIds,
+        state: filters?.state,
+        sliBackend: filters?.sliBackend,
+        sliLeafType: filters?.sliLeafType,
+        service: filters?.service,
+        team: filters?.team,
+        tier: filters?.tier,
+        canonicalKind: filters?.canonicalKind,
+        enabled: filters?.enabled,
+        mode: filters?.mode,
+      },
+    });
+
+    // canonicalKind is not projected on the SO yet (see slo_saved_object_store.buildFilterKuery)
+    // — re-apply post-fetch so the contract remains complete.
+    let docs = paginated.docs;
+    let cachedStates = paginated.cachedStates;
+    if (filters?.canonicalKind && filters.canonicalKind.length > 0) {
+      const kept: SloDocument[] = [];
+      const keptStates: Array<SloHealthState | null> = [];
+      for (let i = 0; i < docs.length; i++) {
+        const d = docs[i];
+        if (d.spec.canonicalKind && filters.canonicalKind.includes(d.spec.canonicalKind)) {
+          kept.push(d);
+          keptStates.push(cachedStates[i]);
+        }
+      }
+      docs = kept;
+      cachedStates = keptStates;
+    }
+
+    // Fold in live status only over the page slice.
+    const ids = docs.map((d) => d.id);
+    const statuses = ids.length ? await this.statusService.getStatuses(ids, ctx, request) : [];
+    const statusMap = new Map(statuses.map((s) => [s.sloId, s]));
+
+    // Best-effort writeback. Don't await — the writeback is idempotent and
+    // can land any time before the next read; we'd rather return the page
+    // sooner. Caught and logged inside the helper.
+    const writebackInputs = docs.map((d, i) => ({
+      sloId: d.id,
+      newState: (statusMap.get(d.id) ?? this.statusService.noDataStatus(d)).state,
+      oldState: cachedStates[i],
+    }));
+    void writeBackChangedStates(sloStore, writebackInputs, this.core.logger);
+
+    const results = docs.map((d) =>
+      this.toSummary(d, statusMap.get(d.id) ?? this.statusService.noDataStatus(d))
+    );
+
+    const total = paginated.total;
+    const hasMore = effectivePage * pageSize < total;
+    return {
+      results,
+      total,
+      pageSize,
+      hasMore,
+      nextCursor: hasMore
+        ? this.encodeCursorForPage({
+            page: effectivePage + 1,
+            pageSize,
+            sortField,
+            sortOrder,
+            filterFingerprint,
+          })
+        : null,
+      prevCursor:
+        effectivePage > 1
+          ? this.encodeCursorForPage({
+              page: effectivePage - 1,
+              pageSize,
+              sortField,
+              sortOrder,
+              filterFingerprint,
+            })
+          : null,
+    };
+  }
+
+  private encodeCursorForPage(args: {
+    page: number;
+    pageSize: number;
+    sortField: string;
+    sortOrder: 'asc' | 'desc';
+    filterFingerprint: string;
+  }): string {
+    const cursor: PaginationCursorState = {
+      v: 1,
+      p: args.page,
+      ps: args.pageSize,
+      sf: args.sortField,
+      so: args.sortOrder,
+      fh: args.filterFingerprint,
+    };
+    return encodeCursor(cursor);
+  }
+
+  private emptyResult(pageSize?: number): PaginatedListResult {
+    return {
+      results: [],
+      total: 0,
+      pageSize: Math.max(1, Math.min(pageSize ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE)),
+      hasMore: false,
+      nextCursor: null,
+      prevCursor: null,
+    };
+  }
+
+  private async legacyPaginate(args: {
+    page: number;
+    pageSize: number;
+    sortField: string;
+    sortOrder: 'asc' | 'desc';
+    filterFingerprint: string;
+    filters?: SloListFilters;
+    ctx?: SloStatusAggregationContext;
+    request?: unknown;
+  }): Promise<PaginatedListResult> {
+    const all = await this.list(args.filters, args.ctx, args.request);
+    const total = all.length;
+    const start = (args.page - 1) * args.pageSize;
+    const end = start + args.pageSize;
+    const results = all.slice(start, end);
+    const hasMore = end < total;
+    return {
+      results,
+      total,
+      pageSize: args.pageSize,
+      hasMore,
+      nextCursor: hasMore
+        ? this.encodeCursorForPage({
+            page: args.page + 1,
+            pageSize: args.pageSize,
+            sortField: args.sortField,
+            sortOrder: args.sortOrder,
+            filterFingerprint: args.filterFingerprint,
+          })
+        : null,
+      prevCursor:
+        args.page > 1
+          ? this.encodeCursorForPage({
+              page: args.page - 1,
+              pageSize: args.pageSize,
+              sortField: args.sortField,
+              sortOrder: args.sortOrder,
+              filterFingerprint: args.filterFingerprint,
+            })
+          : null,
     };
   }
 

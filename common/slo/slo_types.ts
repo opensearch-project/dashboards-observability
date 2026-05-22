@@ -412,11 +412,61 @@ export interface GeneratedRuleGroup {
 // Storage interface — service/store split
 // ============================================================================
 
+export interface SloPaginateOpts {
+  /** 1-indexed; the underlying SO `find()` accepts the same shape. */
+  page: number;
+  /** Per-page row count. Caller is expected to clamp before passing. */
+  perPage: number;
+  /** Optional sort field (must be a top-level keyword projection). */
+  sortField?: string;
+  /** Defaults to 'asc'. */
+  sortOrder?: 'asc' | 'desc';
+  /** All-of, applied at the index level. */
+  filters?: {
+    datasourceId?: string[];
+    state?: SloHealthState[];
+    sliBackend?: Array<'prometheus' | 'opensearch'>;
+    sliLeafType?: string[];
+    service?: string[];
+    team?: string[];
+    tier?: string[];
+    canonicalKind?: string[];
+    enabled?: boolean;
+    mode?: Array<'active' | 'shadow'>;
+  };
+  /** Free-text search; matches the SO `search` arg. */
+  search?: string;
+}
+
+export interface SloPaginateResult {
+  /** Page slice in store-native order. */
+  docs: SloDocument[];
+  /** Parallel array of last-known cachedState values; entry is null when unset. */
+  cachedStates: Array<SloHealthState | null>;
+  /** Total count across the matching set (cheap on the SO layer). */
+  total: number;
+}
+
 export interface ISloStore {
   get(id: string): Promise<SloDocument | null>;
   list(datasourceIds?: string[]): Promise<SloDocument[]>;
+  /**
+   * Index-level paginated read. Pushes facet filters into the SO `filter`
+   * clause so a state-filtered listing doesn't have to materialize every
+   * matching SLO and slice client-side. Optional — implementations that
+   * cannot push facets to the index throw `not implemented`, and the
+   * caller falls back to the in-memory list path.
+   */
+  paginate?(opts: SloPaginateOpts): Promise<SloPaginateResult>;
   /** Upsert — uses `id` as the key. */
   save(doc: SloDocument): Promise<void>;
+  /**
+   * Lightweight write of just the cachedState projection. Skips the full
+   * SO overwrite that `save` performs. Implementations MUST silently
+   * no-op when the SO has been deleted (404) or workspace-scoped away
+   * (403) — the caller treats this as a best-effort writeback.
+   */
+  updateCachedState?(id: string, state: SloHealthState): Promise<void>;
   /** Returns true if deleted, false if not found. */
   delete(id: string): Promise<boolean>;
 }

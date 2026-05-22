@@ -215,7 +215,19 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
    */
   private readonly loggedHealthCheckerFailures = new Set<string>();
 
-  constructor(private readonly logger: Logger) {}
+  constructor(
+    private readonly logger: Logger,
+    /**
+     * Per-datasource health tracker. Optional — tests can construct an
+     * aggregator without it and the per-DS fetch loop runs unprotected.
+     * When present, an open breaker degrades every SLO in the group to
+     * `no_data` without issuing the alerts fetch, the prefetch, or the
+     * per-SLO fallback queries. The aggregator already isolates
+     * single-failure datasources; the breaker is the second-and-beyond
+     * cost protection.
+     */
+    private readonly circuitBreaker?: import('./datasource_circuit_breaker').DatasourceCircuitBreaker
+  ) {}
 
   async aggregate(docs: SloDocument[], ctx: SloStatusAggregationContext): Promise<SloLiveStatus[]> {
     // Short-circuit: nothing to do.
@@ -233,10 +245,20 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
     const perSloStatus = new Map<string, SloLiveStatus>();
 
     for (const [dsId, group] of byDs.entries()) {
+      // Fast-fail: a known-broken datasource short-circuits to no_data
+      // without paying the resolve / alerts / prefetch cost on every
+      // listing call. The breaker auto-cools and retries after the
+      // configured cooldown.
+      if (this.circuitBreaker?.isOpen(dsId)) {
+        for (const d of group) perSloStatus.set(d.id, noDataOrDisabledStatus(d));
+        continue;
+      }
+
       let ds: Datasource | undefined;
       try {
         ds = await ctx.resolveDatasource(dsId);
       } catch (err) {
+        this.circuitBreaker?.recordFailure(dsId);
         this.logger.warn(
           `StatusAggregator: resolveDatasource threw for ${dsId}: ${errMsg(err)}. Degrading ${
             group.length
@@ -251,9 +273,12 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
 
       // Firing-alerts: one fetch per datasource, keyed by slo_id.
       let alertCountBySloId = new Map<string, number>();
+      let alertsFetchOk = true;
       try {
         alertCountBySloId = await this.fetchFiringAlertsBySlo(ctx.client, ds);
       } catch (err) {
+        alertsFetchOk = false;
+        this.circuitBreaker?.recordFailure(dsId);
         // Graceful: treat as zero firing alerts for this datasource and keep
         // computing attainment — a ruler that can't serve /alerts might still
         // serve /query.
@@ -263,6 +288,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
           }): ${errMsg(err)}. firingCount will be 0 for affected SLOs.`
         );
       }
+      if (alertsFetchOk) this.circuitBreaker?.recordSuccess(dsId);
 
       // Pre-fetch the long-window recording samples for every non-dedup SLO
       // on this datasource in a single PromQL call per (datasource ×

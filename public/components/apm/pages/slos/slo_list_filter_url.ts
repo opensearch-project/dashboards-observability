@@ -98,11 +98,37 @@ export function deserializeFiltersFromSearch(search: string): SloListFilters {
   const search_ = params.get('search');
   if (search_ && search_.length > 0) out.search = search_;
 
+  const pageSizeRaw = params.get('pageSize');
+  if (pageSizeRaw) {
+    const n = parseInt(pageSizeRaw, 10);
+    if (Number.isFinite(n) && n > 0) out.pageSize = n;
+  }
+
   return out;
 }
 
-/** Serialize listing filters into a stable URL query string (no leading ?). */
-export function serializeFiltersToSearch(filters: SloListFilters): string {
+/**
+ * Read the opaque cursor from a hash-query string. Cursors live alongside
+ * filters but are not part of `SloListFilters` itself — the listing page
+ * holds the cursor in component state and threads it to `SloApiClient.list`
+ * separately so that page-state stays out of the filter object's identity.
+ */
+export function deserializeCursorFromSearch(search: string): string | null {
+  const params = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search);
+  const c = params.get('cursor');
+  return c && c.length > 0 ? c : null;
+}
+
+/**
+ * Serialize listing filters + cursor into a stable URL query string (no
+ * leading ?). The cursor rides alongside filters so a copy-pasted URL
+ * lands on the same page — but it's emitted last so the filter portion
+ * round-trips identically with or without an active cursor.
+ */
+export function serializeFiltersToSearch(
+  filters: SloListFilters,
+  cursor: string | null = null
+): string {
   const params = new URLSearchParams();
   if (filters.datasourceId?.length) params.set('datasourceId', filters.datasourceId.join(','));
   if (filters.state?.length) params.set('state', filters.state.join(','));
@@ -117,6 +143,8 @@ export function serializeFiltersToSearch(filters: SloListFilters): string {
   if (filters.mode?.length) params.set('mode', filters.mode.join(','));
   if (filters.enabled !== undefined) params.set('enabled', String(filters.enabled));
   if (filters.search && filters.search.trim().length > 0) params.set('search', filters.search);
+  if (filters.pageSize !== undefined) params.set('pageSize', String(filters.pageSize));
+  if (cursor) params.set('cursor', cursor);
   return params.toString();
 }
 

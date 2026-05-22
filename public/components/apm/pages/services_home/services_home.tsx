@@ -369,7 +369,14 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     () =>
       (({
         list: () =>
-          Promise.resolve({ results: [], total: 0, page: 1, pageSize: 0, hasMore: false }),
+          Promise.resolve({
+            results: [],
+            total: 0,
+            pageSize: 0,
+            hasMore: false,
+            nextCursor: null,
+            prevCursor: null,
+          }),
       } as unknown) as SloApiClient),
     []
   );

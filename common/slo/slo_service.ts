@@ -258,4 +258,13 @@ export class SloService {
   ): Promise<PaginatedResponse<SloSummary>> {
     return this.queryService.getPaginated(filters, ctx, request);
   }
+
+  paginate(
+    filters: SloListFilters | undefined,
+    cursor: string | null,
+    ctx?: SloStatusAggregationContext,
+    request?: unknown
+  ) {
+    return this.queryService.paginate(filters, cursor, ctx, request);
+  }
 }

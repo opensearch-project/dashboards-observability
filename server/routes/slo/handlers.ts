@@ -113,10 +113,25 @@ export async function handleListSLOs(
   filters: SloListFilters,
   logger?: Logger,
   statusCtx?: SloStatusAggregationContext,
-  request?: unknown
+  request?: unknown,
+  cursor?: string | null
 ): Promise<HandlerResult> {
   try {
-    const result = await svc.getPaginated(filters, statusCtx, request);
+    // Cursor wins when present. The legacy `page=N` path stays for clients
+    // mid-upgrade — the cursor branch goes through the new `paginate` API
+    // which pushes facet filters into the SO and pays status fold-in only
+    // for the visible page.
+    if (cursor !== undefined && cursor !== null && cursor !== '') {
+      const result = await svc.paginate(filters, cursor, statusCtx, request);
+      return { status: 200, body: result };
+    }
+    if (filters.page !== undefined && filters.page !== null) {
+      const result = await svc.getPaginated(filters, statusCtx, request);
+      return { status: 200, body: result };
+    }
+    // Default new behavior: fresh listing call with no cursor and no
+    // explicit page → cursor pagination, page 1.
+    const result = await svc.paginate(filters, null, statusCtx, request);
     return { status: 200, body: result };
   } catch (e) {
     return toSloError(e, logger);
