@@ -65,26 +65,25 @@ describe('toHandlerResult', () => {
     );
   });
 
-  it('classifies plain Error with "validation" as 400 and scrubs the message', () => {
+  it('classifies plain Error with "validation" as 400 and surfaces the message', () => {
     const logger = makeLogger();
     const result = toHandlerResult(
       new Error('validation failed: field foo must be string'),
       logger
     );
     expect(result.status).toBe(400);
-    expect(result.body).toEqual({ error: 'Validation failed' });
+    expect(result.body).toEqual({ error: 'validation failed: field foo must be string' });
     expect(logger.error).toHaveBeenCalled();
   });
 
-  it('falls back to 500 with generic message for unknown errors and never reflects upstream content', () => {
+  it('falls back to 500 and surfaces the message for diagnosis', () => {
     const logger = makeLogger();
     const result = toHandlerResult(
       new Error('connect ECONNREFUSED cluster-prod-01.internal:9200'),
       logger
     );
     expect(result.status).toBe(500);
-    expect(result.body).toEqual({ error: 'An internal error occurred' });
-    expect(JSON.stringify(result.body)).not.toContain('cluster-prod-01.internal');
+    expect(result.body).toEqual({ error: 'connect ECONNREFUSED cluster-prod-01.internal:9200' });
     expect(logger.error).toHaveBeenCalledWith('connect ECONNREFUSED cluster-prod-01.internal:9200');
   });
 });
