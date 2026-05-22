@@ -4,7 +4,7 @@
  */
 
 /**
- * Custom PromQL editor (W2.2). Only rendered when the wizard is on the
+ * Custom PromQL editor. Only rendered when the wizard is on the
  * `custom` template. Two modes:
  *
  *   events  → user supplies `goodQuery` + `totalQuery`; generator derives

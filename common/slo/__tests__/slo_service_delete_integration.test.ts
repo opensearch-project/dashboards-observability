@@ -4,7 +4,7 @@
  */
 
 /**
- * SloService.delete — integration tests (W1.10).
+ * SloService.delete — integration tests.
  *
  * Wires the real `SloService` against:
  *   - `InMemorySloStore` (no SO-layer mocks)
@@ -12,7 +12,7 @@
  *   - Production `createRuleHealthChecker` for the delete → repair cross-check
  *
  * Unlike `slo_service_delete_404.test.ts` (which focuses on the 404-tolerant
- * contract in isolation), this suite exercises multiple workstreams together:
+ * contract in isolation), this suite exercises multiple subsystems together:
  * delete + repair consistency, the 500-then-heal retry path, and live store
  * preservation across failing delete attempts.
  */
@@ -166,8 +166,7 @@ function makeHarness() {
   const ruler = new FakeRulerClient();
   const logger = noopLogger();
   const svc = new SloService(logger, store);
-  // Pin Phase-1/2 (single-group) contract — Phase-3 dedup has its own
-  // integration test in W3.15.
+  // Pin the single-group contract — dedup has its own integration test.
   svc.setDedupEnabled(false);
   const health = createRuleHealthChecker(ruler, logger, { ttlMs: 0 });
 
@@ -198,7 +197,7 @@ function makeHarness() {
 // Tests
 // ============================================================================
 
-describe('SloService.delete — integration (W1.10)', () => {
+describe('SloService.delete — integration', () => {
   it('ruler 404-tolerant delete: group already gone → delete succeeds and SO is removed', async () => {
     // Real-world case: out-of-band delete removed the rule group from Cortex
     // *before* the user clicked Delete in the UI. The fake ruler's

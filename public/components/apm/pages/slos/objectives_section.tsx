@@ -4,7 +4,7 @@
  */
 
 /**
- * Multi-objective editor (W2.1). N rows; each row is {name, target%, latency
+ * Multi-objective editor. N rows; each row is {name, target%, latency
  * threshold if the template is latency_threshold}. The validator already
  * supports N objectives; the generator emits one rule-set per objective.
  */

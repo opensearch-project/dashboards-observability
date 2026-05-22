@@ -333,11 +333,10 @@ const previewBody = schema.object({
  * typo'd datasource ID produced a silent no-op: the SO saved, the UI
  * reported "N rules provisioned", but Cortex never received the rule group.
  *
- * TODO(W1.5): derive `workspaceId` from OSD's workspace scope once the SLO
- * spec carries a workspace reference. For now the datasource ID doubles as a
+ * TODO: derive `workspaceId` from OSD's workspace scope once the SLO spec
+ * carries a workspace reference. For now the datasource ID doubles as a
  * tenant discriminator — safe because `slo-generated-<ds>` is deterministic
- * and unique per Prometheus connection. Cross-ref memo §Workspace → Cortex
- * tenant mapping.
+ * and unique per Prometheus connection.
  */
 async function buildDeployContext(
   ctx: SloHandlerContext,
@@ -453,8 +452,8 @@ async function tryBuildDeployContext(
  * Returns undefined when the alerting datasource service isn't available
  * (e.g. offline dev) — SloService falls through to the stub.
  *
- * TODO(W3.1 follow-up): pull real workspaceId from OSD request scope once
- * plumbed. Today we use the alerting default workspace ('default').
+ * TODO: pull real workspaceId from OSD request scope once plumbed. Today
+ * we use the alerting default workspace ('default').
  */
 function buildStatusContext(
   ctx: SloHandlerContext,
@@ -486,13 +485,13 @@ function buildStatusContext(
       // works today (single scoped client per request).
       return ds as Datasource;
     },
-    // W1.6 priority merge: if the health checker is available, the
+    // Health-check overlay: if the health checker is available, the
     // aggregator overlays `rules_missing` / `ruler_unreachable` on top of
     // the sample-derived state. When absent (offline dev / tests), the
     // aggregator falls through to the existing derivation.
     healthChecker: ruleHealthChecker,
-    // Phase 3 (W3.6): propagate the dedup flag so the aggregator (W3.9) can
-    // pick fingerprint-keyed selectors when true.
+    // Propagate the dedup flag so the aggregator can pick fingerprint-keyed
+    // selectors when true.
     ruleDedupEnabled,
   };
 }
@@ -511,7 +510,7 @@ export interface RegisterSloRoutesOptions {
   discoveryService?: DatasourceDiscoveryService;
   prometheusBackend?: DirectQueryPrometheusBackend;
   ruleHealthChecker?: RuleHealthChecker;
-  /** Phase 3 (W3.6) — gates fingerprint-keyed selectors on the aggregator. */
+  /** Gates fingerprint-keyed selectors on the aggregator. */
   ruleDedupEnabled?: boolean;
 }
 
@@ -890,7 +889,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
   );
 
   // --------------------------------------------------------------------------
-  // W1.5 — Repair + rule_health
+  // Repair + rule_health
   //
   // Both routes require a resolved deploy context (a DirectQuery-Prometheus
   // datasource that exists in the registry) AND a `ruleHealthChecker`. When

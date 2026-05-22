@@ -109,7 +109,7 @@ export class SloService {
 
   // ---------- configuration / wiring ----------
 
-  /** Phase 3 (W3.6): update the dedup flag at runtime. See `plugin.ts`. */
+  /** Update the dedup flag at runtime. See `plugin.ts`. */
   setDedupEnabled(enabled: boolean): void {
     this.core.dedupEnabled = enabled;
     this.core.logger.info(`SloService: ruleDedup ${enabled ? 'enabled' : 'disabled'}`);
@@ -119,7 +119,7 @@ export class SloService {
     return this.core.dedupEnabled;
   }
 
-  /** Phase 3 (W3.8): wire the refcount registry. */
+  /** Wire the refcount registry. */
   setRuleRefStore(refStore: SloRuleRefStoreLite | undefined): void {
     this.core.refStore = refStore;
     this.core.logger.info(
@@ -127,7 +127,7 @@ export class SloService {
     );
   }
 
-  /** Phase 3 (W3.3 provenance): set plugin version stamped on annotations. */
+  /** Set plugin version stamped on provenance annotations. */
   setPluginVersion(version: string): void {
     this.core.pluginVersion = version;
   }

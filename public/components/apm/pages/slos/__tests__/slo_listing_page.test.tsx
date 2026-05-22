@@ -228,7 +228,7 @@ describe('SloListingPage — filter integration', () => {
   });
 });
 
-describe('SloListingPage — Rules column badge (W1.7)', () => {
+describe('SloListingPage — Rules column badge', () => {
   function renderWithSummaries(results: SloSummary[]) {
     const list = jest
       .fn<ReturnType<SloApiClient['list']>, Parameters<SloApiClient['list']>>()

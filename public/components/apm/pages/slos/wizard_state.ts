@@ -65,12 +65,12 @@ export interface FormState {
   annotations: KeyValueEntry[];
   shadow: boolean;
 
-  // Advanced (W2.5)
+  // Advanced
   burnRates: BurnRateConfig[];
   budgetWarnings: BudgetWarningThreshold[];
   alarms: SloAlarmConfig;
 
-  // Exclusion windows (W2.6) — shape-only; enforcement deferred post-GA.
+  // Exclusion windows — shape-only; enforcement deferred post-GA.
   exclusionWindows: ExclusionWindow[];
 
   // Flipped by the Submit handler so the wizard only reveals the top-level

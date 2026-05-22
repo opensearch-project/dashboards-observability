@@ -4,7 +4,7 @@
  */
 
 /**
- * SLO detail metadata panel (W4.2).
+ * SLO detail metadata panel.
  *
  * Surfaces everything the user configured so the detail page answers
  * "what will this SLO alert on, and under whose ownership?" without opening
@@ -16,7 +16,7 @@
  *
  * Labels render with a `slo_label_<key>` hint so operators know how the
  * label propagates onto generated rules; annotations render without a hint
- * since they're metadata-only (§10.3 of the SLO design doc).
+ * since they're metadata-only and never propagate onto rules.
  */
 
 import React from 'react';
@@ -229,9 +229,9 @@ interface AlarmChecklistProps {
 }
 
 const AlarmChecklist: React.FC<AlarmChecklistProps> = ({ alarms }) => {
-  // Ordered by default-on policy (design §13.1 commitments): budgetWarning
-  // defaults ON, everything else defaults OFF. Keeping this order means the
-  // top of the list shows the user's deliberate opt-outs.
+  // Ordered by default-on policy: budgetWarning defaults ON, everything else
+  // defaults OFF. Keeping this order means the top of the list shows the
+  // user's deliberate opt-outs.
   const rows: Array<{ key: string; label: string; enabled: boolean; detail?: string }> = [
     {
       key: 'budgetWarning',
@@ -347,8 +347,7 @@ const ExclusionWindowTable: React.FC<ExclusionWindowTableProps> = ({ windows }) 
       render: () => (
         <EuiToolTip
           content={i18n.translate('observability.apm.slo.metadataPanel.exclusion.deferredTooltip', {
-            defaultMessage:
-              'Exclusion windows are persisted but enforcement is deferred post-GA (design §3.5).',
+            defaultMessage: 'Exclusion windows are persisted but enforcement is deferred post-GA.',
           })}
         >
           <EuiBadge color="hollow" data-test-subj="slosDetailMetadataExclusionDeferred">

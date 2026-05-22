@@ -12,9 +12,7 @@
  * Used both server-side (for deployment) and client-side (for the wizard's
  * preview panel) so what the user sees is exactly what gets deployed.
  *
- * See docs/design/slo-sli-design.md §6.3 for the authoritative rule templates.
- *
- * Label contract (§10.1):
+ * Label contract:
  *   slo_severity, slo_alarm_type, slo_id, slo_name, slo_objective,
  *   slo_service, slo_owner_team, slo_owner_teams, slo_tier, slo_window,
  *   slo_burn_rate_multiplier, slo_window_approximated, slo_budget_threshold,
@@ -114,9 +112,9 @@ export function slugifySloObjective(sloName: string, objectiveName: string): str
  * Workspace-scoped so multi-tenant rulers don't collide; objective-scoped so
  * multi-objective SLOs don't collide within their own rule group.
  *
- * First 8 hex chars of sha256 over the concatenated tuple — commits to the
- * design §6.3 / §13.1 rule-name contract so external dashboards, Alertmanager
- * silences, and GitOps manifests that pin rule names stay stable across
+ * First 8 hex chars of sha256 over the concatenated tuple — commits to a
+ * stable rule-name contract so external dashboards, Alertmanager silences,
+ * and GitOps manifests that pin rule names stay stable across
  * implementations. Not a security primitive; chosen for collision-resistance
  * and portability (identical hex in any sha256 implementation).
  */
@@ -684,8 +682,7 @@ export function generateSloRuleGroup(
     if (noData) rules.push(noData);
   }
 
-  // Per-SLO group naming — one group per SLO keeps reconciliation simple
-  // (design §12 "open decision"; we ship per-SLO for P0).
+  // Per-SLO group naming — one group per SLO keeps reconciliation simple.
   const groupSlug = slugifySloObjective(spec.name, 'group');
   const firstSuffix = ruleSuffix(workspaceId, id, 'group');
   const groupName = `slo:${groupSlug}_${firstSuffix}`;
@@ -699,7 +696,7 @@ export function generateSloRuleGroup(
 }
 
 // ============================================================================
-// Phase 3 (W3.7) — dedup-era split generation
+// Dedup-mode split generation
 //
 // In dedup mode the service layer emits two kinds of ruler groups:
 //
@@ -715,7 +712,7 @@ export function generateSloRuleGroup(
 //     label any more). Alerts attach the full SLO identity labels
 //     themselves, so downstream routing still gets everything it needs.
 //
-// Shared with the legacy path:
+// Shared with the single-group path:
 //   - The alerting-rule templates (burn-rate MWMBR, sli_health, attainment,
 //     budget warnings, no_data). Only their recording-rule references are
 //     rewritten to use fingerprint-named rules.
@@ -731,7 +728,7 @@ export function generateSloRuleGroup(
 
 /**
  * Name of the recording rule for a given fingerprint + window.
- * Phase 3 dedup rules: `slo:sli_error:ratio_rate_<w>:sli_<fp>`.
+ * Dedup rules: `slo:sli_error:ratio_rate_<w>:sli_<fp>`.
  */
 export function dedupRecordingRuleName(fingerprint: string, window: string): string {
   return `slo:sli_error:ratio_rate_${window}:sli_${fingerprint}`;
@@ -814,8 +811,8 @@ export function generateRecordingGroupForFingerprint(input: {
  *
  * Shadow mode and `createAlarm: false` tiers still suppress their
  * alert bodies; the resulting group can be empty. The caller is
- * responsible for injecting a W3.3 sentinel alert when the group is
- * empty.
+ * responsible for injecting a sentinel alert when the group is empty so
+ * the provenance annotation has a home.
  */
 export function generateAlertGroupFor(
   doc: SloDocument,

@@ -4,13 +4,13 @@
  */
 
 /**
- * Live status aggregator — replaces the W1.2 stub in slo_service.ts with
- * real ruler queries (W3.1).
+ * Live status aggregator — replaces the offline stub in slo_service.ts with
+ * real ruler queries.
  *
  * For each SLO:
  *   1. Pick the "longest" recording-rule window — `findClosestRecordingWindow`
  *      maps the spec's rolling window (e.g. 28d) to the closest window we
- *      actually recorded (3d cap — the W2.4 approximation).
+ *      actually recorded (3d cap — the recording-window approximation).
  *   2. Run one PromQL instant query per SLO against the pre-computed error
  *      ratio for that window, matching on `slo_id` so we get one sample per
  *      objective in a single call:
@@ -120,18 +120,18 @@ export interface SloStatusAggregationContext {
   /**
    * Optional rule-health checker. When present, the aggregator calls it once
    * per enabled prometheus-backed SLO after ruler samples are collected and
-   * overlays the result onto the top-level SloLiveStatus.state per the W1.6
-   * priority rules:
+   * overlays the result onto the top-level SloLiveStatus.state per the
+   * rule-health priority rules:
    *   `disabled` > `rules_missing` > `ruler_unreachable` > existing derivation
    * Leave undefined in offline / tests that only exercise the sample-based
-   * derivation. See W1.6 in SLO_RULE_DEDUP_PLAN.md.
+   * derivation.
    */
   healthChecker?: SloRuleHealthChecker;
   /**
-   * Phase 3 W3.9 — when true, the aggregator queries fingerprint-named
-   * recording rules (e.g. `slo:sli_error:ratio_rate_3d:sli_<fp>`) and maps
-   * samples back to objectives via each SO's `recordingFingerprints`. When
-   * undefined/false, the legacy `{slo_id="X"}` selector is used.
+   * When true, the aggregator queries fingerprint-named recording rules
+   * (e.g. `slo:sli_error:ratio_rate_3d:sli_<fp>`) and maps samples back to
+   * objectives via each SO's `recordingFingerprints`. When undefined/false,
+   * the single-group `{slo_id="X"}` selector is used.
    */
   ruleDedupEnabled?: boolean;
 }
@@ -150,10 +150,10 @@ export interface SloStatusAggregator {
 // ============================================================================
 
 /**
- * Offline fallback. Mirrors the W1.2 stub semantics: `disabled` when
- * spec.enabled is false, `no_data` otherwise. The rule count is derived
- * from the spec's recording fingerprints + objective count so the listing
- * can still show "X rules provisioned".
+ * Offline fallback. Returns `disabled` when spec.enabled is false,
+ * `no_data` otherwise. The rule count is derived from the spec's recording
+ * fingerprints + objective count so the listing can still show "X rules
+ * provisioned".
  *
  * This is what `SloService` falls back to when no aggregator is configured
  * (or when the DirectQuery one catastrophically rejects).
@@ -264,15 +264,15 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
         );
       }
 
-      // Pre-fetch the long-window recording samples for every *legacy*
-      // (non-dedup) SLO on this datasource in a single PromQL call per
-      // (datasource × longWindow) instead of one per SLO. The aggregator
-      // selector matches on `slo_id=~"id1|id2|..."`, so each row of the
-      // response carries its own `slo_id` label and we route it back to the
-      // right SLO. Dedup-shape SLOs continue to query individually because
-      // their fingerprint regex isn't easily folded across SLOs (different
-      // SLOs may share fingerprints — collapsing them would force a second
-      // membership lookup per sample, with no win).
+      // Pre-fetch the long-window recording samples for every non-dedup SLO
+      // on this datasource in a single PromQL call per (datasource ×
+      // longWindow) instead of one per SLO. The aggregator selector matches
+      // on `slo_id=~"id1|id2|..."`, so each row of the response carries its
+      // own `slo_id` label and we route it back to the right SLO. Dedup-shape
+      // SLOs continue to query individually because their fingerprint regex
+      // isn't easily folded across SLOs (different SLOs may share
+      // fingerprints — collapsing them would force a second membership
+      // lookup per sample, with no win).
       const prefetchedByLongWindow = await this.prefetchLongWindowSamples(group, ds, ctx);
 
       // Per-SLO: one *fallback* instant query per SLO if the prefetch missed
@@ -283,7 +283,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       const PER_SLO_CONCURRENCY = 8;
       let cursor = 0;
       const runOne = async (doc: SloDocument): Promise<void> => {
-        // W1.6 priority 1: `disabled` beats everything — don't even call the
+        // Priority 1: `disabled` beats everything — don't even call the
         // ruler or the health checker for a disabled SLO.
         if (!doc.spec.enabled) {
           perSloStatus.set(doc.id, disabledStatus(doc));
@@ -307,7 +307,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
           );
           base = noDataStatus(doc);
         }
-        // W1.6 priority 2/3: overlay rule-health state on top of the sample
+        // Priority 2/3: overlay rule-health state on top of the sample
         // derivation. Health-checker errors never escape (see
         // applyRuleHealthMerge) — the listing must stay available.
         const merged = await this.applyRuleHealthMerge(doc, ds!, ctx, base);
@@ -330,11 +330,11 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
   }
 
   // --------------------------------------------------------------------------
-  // Rule-health priority merge (W1.6)
+  // Rule-health priority merge
   // --------------------------------------------------------------------------
 
   /**
-   * Apply the W1.6 rule-health priority rules to a previously-computed
+   * Apply the rule-health priority rules to a previously-computed
    * SloLiveStatus. The priority ladder (highest first):
    *   1. `disabled` (handled upstream — disabled SLOs never reach here)
    *   2. `rules_missing` — health-checker says `rules_missing` or `rules_partial`
@@ -409,8 +409,8 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
   // --------------------------------------------------------------------------
 
   /**
-   * Pre-fetch the long-window recording samples for every legacy SLO on the
-   * given datasource in a single PromQL call per longWindow group. Returns
+   * Pre-fetch the long-window recording samples for every non-dedup SLO on
+   * the given datasource in a single PromQL call per longWindow group. Returns
    * a per-sloId map of samples keyed by objective name plus the per-sloId
    * set of source-idle objectives. Dedup-shape SLOs and SLOs whose dedup
    * flag is on are skipped — `statusForSlo` handles them via its own
@@ -426,7 +426,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
   ): Promise<Map<string, PrefetchedSloSamples>> {
     const prefetched = new Map<string, PrefetchedSloSamples>();
 
-    // Group only legacy (non-dedup) SLOs by long window.
+    // Group only non-dedup SLOs by long window.
     const legacyByLongWindow = new Map<string, SloDocument[]>();
     for (const doc of group) {
       if (!doc.spec.enabled) continue;
@@ -517,8 +517,8 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       spec.window.type === 'rolling' ? spec.window.duration : '3d'; /* calendar: use cap */
     const longWindow = findClosestRecordingWindow(window);
 
-    // Phase 3 W3.9: branch on dedup flag. Dedup-keyed recording rules carry
-    // no `slo_objective` label (they're shared across SLOs), so we key
+    // Branch on dedup flag. Dedup-keyed recording rules carry no
+    // `slo_objective` label (they're shared across SLOs), so we key
     // samples by `__name__` and map back to objectives via the SO's
     // `recordingFingerprints` map.
     const recordingFingerprints =
@@ -606,7 +606,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
   }
 
   /**
-   * Phase 3 W3.9 — query each unique fingerprint's recording rule by exact
+   * Dedup path — query each unique fingerprint's recording rule by exact
    * `__name__` and map samples back to objectives via the provided
    * `recordingFingerprints`. One `__name__=~` query per call covers every
    * fingerprint this SLO references, so a multi-objective SLO with N unique
@@ -783,9 +783,9 @@ export function buildBatchedLongWindowQuery(sloIds: string[], longWindow: string
 }
 
 /**
- * Phase 3 W3.9 — build a single PromQL query matching every fingerprint-named
- * recording rule the SLO references. Anchored regex on `__name__` so we only
- * match our own rules. Names are hex-only (`sli_<16-hex>`) so no escaping is
+ * Build a single PromQL query matching every fingerprint-named recording
+ * rule the SLO references. Anchored regex on `__name__` so we only match
+ * our own rules. Names are hex-only (`sli_<16-hex>`) so no escaping is
  * required.
  */
 export function buildDedupObjectiveQuery(metricNames: string[]): string {
@@ -829,7 +829,7 @@ function sortThresholdsDesc(
 }
 
 /**
- * Top-level state per design §3.6 — `disabled` and `stale` pre-empt the
+ * Top-level state — `disabled` and `stale` pre-empt the
  * per-objective roll-up. For the worst-of we consider breached > warning >
  * no_data > ok: no_data sits *below* warning because "we don't know yet" is
  * less alarming than "we know the budget is burning" — but above ok because

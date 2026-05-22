@@ -36,7 +36,7 @@ import {
 } from './slo_rule_provenance';
 
 /**
- * Status cache TTL. Rationale (design §12.12 was open):
+ * Status cache TTL. Rationale:
  *   - Recording rules evaluate every 60s (DEFAULT_INTERVAL_SECONDS in the
  *     generator), so the freshest sample available is at most ~60s old. Any
  *     TTL shorter than the eval interval just wastes ruler calls on identical
@@ -112,8 +112,8 @@ const SLO_SPEC_KEYS: ReadonlyArray<keyof SloSpec> = [
  *     closes off `__proto__` / arbitrary SO-attribute injection even though
  *     the saved-objects client already filters via `projectAttributes`.
  *   - Each objective's `target` is clamped to 6 significant digits
- *     (design §3.2, §13.1: `target ∈ [0.5, 0.99999]`, clamped pre-rule-gen).
- *     Done here — not in the validator — because validators must stay pure.
+ *     (`target ∈ [0.5, 0.99999]`, clamped pre-rule-gen). Done here — not
+ *     in the validator — because validators must stay pure.
  *
  * Pure; safe to call more than once (idempotent on an already-clamped spec).
  */
@@ -169,10 +169,10 @@ export function normalizeSloSpec(raw: SloSpec): SloSpec {
 }
 
 /**
- * Phase 3 dedup predicate — mirrors the gate the `delete`/`update` paths use.
- * A dedup-shape SO has `recordingFingerprints` populated by `createDedup`.
- * Legacy (flag-off) SOs don't, and fall through to the single-group path
- * keyed on `alertGroupName` alone.
+ * Dedup predicate — mirrors the gate the `delete`/`update` paths use. A
+ * dedup-shape SO has `recordingFingerprints` populated by `createDedup`.
+ * Single-group SOs don't, and fall through to the single-group path keyed
+ * on `alertGroupName` alone.
  */
 export function isDedupSo(doc: SloDocument): boolean {
   if (doc.status.provisioning.backend !== 'prometheus') return false;
@@ -182,9 +182,9 @@ export function isDedupSo(doc: SloDocument): boolean {
 /**
  * Derive the list of ruler group names an SLO expects to see on the ruler.
  *
- * Phase 3 dedup: one shared recording group per unique fingerprint plus the
- * per-SLO `alertGroupName`. Legacy (flag-off) shape carries only
- * `alertGroupName` (populated with the monolithic group name at create time).
+ * Dedup shape: one shared recording group per unique fingerprint plus the
+ * per-SLO `alertGroupName`. Single-group shape carries only `alertGroupName`
+ * (populated with the monolithic group name at create time).
  *
  * Non-prometheus backends (reserved) return [] — nothing to probe.
  */
@@ -207,9 +207,9 @@ export function deriveExpectedGroups(doc: SloDocument): string[] {
  * Count of rules provisioned for this SLO. Derived from the SLI/objective
  * shape (not the ruler) so listing pages can render without a ruler round
  * trip. Dedup shape: unique recording fingerprints × recording windows, plus
- * one alert per objective. Legacy shape: one alert per objective (the
- * monolithic group is not fingerprint-sharded so we conservatively count
- * objectives only). Non-prometheus backends return 0.
+ * one alert per objective. Single-group shape: one alert per objective
+ * (the monolithic group is not fingerprint-sharded so we conservatively
+ * count objectives only). Non-prometheus backends return 0.
  */
 export function deriveRuleCount(doc: SloDocument): number {
   if (doc.status.provisioning.backend !== 'prometheus') return 0;
@@ -223,17 +223,17 @@ export function deriveRuleCount(doc: SloDocument): number {
 }
 
 /**
- * Phase 3 helper — unique set of values from a Record. Order stable across
- * calls because `new Set(Object.values(...))` preserves insertion order.
+ * Unique set of values from a Record. Order stable across calls because
+ * `new Set(Object.values(...))` preserves insertion order.
  */
 export function uniqueValues(map: Record<string, string>): string[] {
   return [...new Set(Object.values(map))];
 }
 
 /**
- * Phase 3 helper — pick any objective that maps to the given fingerprint, so
- * we have a representative `SingleSli` + optional `latencyThreshold` to hand
- * to `generateRecordingGroupForFingerprint`. Returns null when the SLI is
+ * Pick any objective that maps to the given fingerprint, so we have a
+ * representative `SingleSli` + optional `latencyThreshold` to hand to
+ * `generateRecordingGroupForFingerprint`. Returns null when the SLI is
  * composite / OpenSearch-backed (no fingerprint → no representative).
  */
 export function pickRepresentativeForFingerprint(
@@ -252,7 +252,7 @@ export function pickRepresentativeForFingerprint(
 
 /**
  * Build the per-SLO alert group with provenance annotations, inserting the
- * W3.3 sentinel alert when the group would otherwise be empty (shadow mode or
+ * sentinel alert when the group would otherwise be empty (shadow mode or
  * all burn-rate tiers disabled). Pure, apart from the clock — callers pass
  * `createdAt` and `updatedAt` explicitly so tests can pin provenance values.
  */

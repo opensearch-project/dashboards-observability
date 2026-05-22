@@ -79,11 +79,11 @@ export class SloLifecycleService {
   }
 
   /**
-   * Phase 3 (W3.12) — look up the current refcount for each recording
+   * Refcount lookup — return the current refcount for each recording
    * fingerprint the SLO references. Returns `{}` when the SLO doesn't carry
-   * dedup fields (legacy / pre-migration), when the ref store isn't wired
-   * (tests, offline), or when a fingerprint has no corresponding ref SO
-   * (drift; reconciler surfaces it separately).
+   * dedup fields (single-group / pre-migration), when the ref store isn't
+   * wired (tests, offline), or when a fingerprint has no corresponding ref
+   * SO (drift; reconciler surfaces it separately).
    *
    * The UI uses this for the "Shared with N other SLOs" pill: N = refcount
    * of the fingerprint − 1 (subtract the current SLO's own claim).
@@ -169,8 +169,8 @@ export class SloLifecycleService {
     // the saved-objects layer; the name check is best-effort here).
     await this.assertNameUnique(spec.datasourceId, spec.name, null);
 
-    // Phase 3 (W3.8): dedup path branches here. Legacy single-group path
-    // stays byte-identical to what it used to do.
+    // Dedup path branches here. Single-group path stays byte-identical to
+    // what it used to do.
     if (this.core.dedupEnabled && deploy) {
       return this.createDedup(id, spec, createdBy, deploy);
     }
@@ -202,9 +202,9 @@ export class SloLifecycleService {
       doc.status.provisioning.alertGroupName = group.groupName;
     }
 
-    // Ruler-first, SO-second (memo §Dual-write atomicity). An SloRulerError
-    // here propagates unchanged — the SO is never written and the wizard
-    // renders the raw upstream body so the user can self-service.
+    // Ruler-first, SO-second — preserves dual-write atomicity. An
+    // SloRulerError here propagates unchanged — the SO is never written and
+    // the wizard renders the raw upstream body so the user can self-service.
     if (deploy) {
       await deploy.ruler.upsertRuleGroup(deploy.client, deploy.datasource, namespace, group);
     }
@@ -213,7 +213,7 @@ export class SloLifecycleService {
       await this.core.store.save(doc);
     } catch (saveErr) {
       // Compensation: ruler wrote, SO didn't. One best-effort delete; swallow
-      // + warn on compensation failure. Reconciler (W3) sweeps danglers.
+      // + warn on compensation failure. Reconciler sweeps danglers.
       if (deploy) {
         await this.safeRollback(deploy, namespace, group.groupName);
       }
@@ -225,10 +225,10 @@ export class SloLifecycleService {
     return doc;
   }
 
-  // ---------- create (dedup path, W3.8) ----------
+  // ---------- create (dedup path) ----------
 
   /**
-   * Phase 3 dedup-aware create. Differences from the legacy path:
+   * Dedup-aware create. Differences from the single-group path:
    *
    *   1. Per-objective fingerprint via `computeSliFingerprint`. Objectives
    *      whose fingerprint is `null` (composite SLIs, OpenSearch backend)
@@ -238,13 +238,13 @@ export class SloLifecycleService {
    *      ruler (recording rules are byte-equal across SLOs that share a
    *      fingerprint — repeated upserts are safe no-ops but skipping them is
    *      cheaper).
-   *   3. Upsert the per-SLO alert group with a W3.3 provenance annotation on
+   *   3. Upsert the per-SLO alert group with a provenance annotation on
    *      its first rule. Shadow mode / all-createAlarm-false cases get a
    *      synthetic sentinel alert so the provenance annotation has a home.
    *   4. Rollback on SO save failure: decrement every ref we incremented; if
    *      any ref dropped back to zero, best-effort delete its recording
    *      group. Alert group is deleted too. Same "reconciler sweeps" tail as
-   *      the legacy path if rollback itself fails.
+   *      the single-group path if rollback itself fails.
    */
   private async createDedup(
     id: string,
@@ -267,8 +267,8 @@ export class SloLifecycleService {
     // concurrent peer create that already bumped the ref back up and
     // re-upserted the byte-equal group — our delete would then orphan the
     // peer's recording rules. Decrement the refcount; the reconciler's
-    // grace-period sweep (W3.11) handles the zero-ref cleanup safely.
-    // Alert groups are per-SLO and safe to delete synchronously.
+    // grace-period sweep handles the zero-ref cleanup safely. Alert groups
+    // are per-SLO and safe to delete synchronously.
     const incrementedFps: string[] = [];
     const createdRecordingGroups: string[] = [];
     const rollback = async (): Promise<void> => {
@@ -496,10 +496,10 @@ export class SloLifecycleService {
     return updated;
   }
 
-  // ---------- update (dedup path, W3.8) ----------
+  // ---------- update (dedup path) ----------
 
   /**
-   * Phase 3 dedup-aware update.
+   * Dedup-aware update.
    *
    * Diff-based: compute fingerprints for the merged spec, increment refs on
    * any fingerprint that wasn't already claimed by this SLO, upsert recording
@@ -662,8 +662,8 @@ export class SloLifecycleService {
 
     // Drop path: decrement refs for fps this SLO no longer references.
     // Recording-group deletion is deferred — the reconciler's grace-period
-    // sweep (W3.11) handles zero-ref cleanups. Synchronous delete here would
-    // race concurrent creates that bump the ref back up.
+    // sweep handles zero-ref cleanups. Synchronous delete here would race
+    // concurrent creates that bump the ref back up.
     if (this.core.refStore) {
       for (const fp of toDrop) {
         try {
@@ -692,21 +692,21 @@ export class SloLifecycleService {
   /**
    * Tear down an SLO.
    *
-   * W1.9 note: the ruler-side `deleteRuleGroup` is 404-tolerant (W1.1 made it
-   * so) — if the rule group was already removed out-of-band (someone DELETE'd
-   * it in Cortex directly, or the reconciler swept an orphan), the ruler call
-   * resolves successfully and we proceed to remove the SO. This keeps a live
-   * out-of-band delete from wedging the SO in an un-deletable state. Any
-   * other ruler failure (auth, 5xx, network) still propagates and leaves the
-   * SO intact so the user can retry.
+   * The ruler-side `deleteRuleGroup` is 404-tolerant — if the rule group was
+   * already removed out-of-band (someone DELETE'd it in Cortex directly, or
+   * the reconciler swept an orphan), the ruler call resolves successfully
+   * and we proceed to remove the SO. This keeps a live out-of-band delete
+   * from wedging the SO in an un-deletable state. Any other ruler failure
+   * (auth, 5xx, network) still propagates and leaves the SO intact so the
+   * user can retry.
    */
   async delete(id: string, deploy?: SloDeployContext): Promise<{ deleted: boolean }> {
     const existing = await this.core.store.get(id);
     if (!existing) return { deleted: false };
 
-    // Phase 3 dedup path: tear down the per-SLO alert group, decrement refs,
-    // but never synchronously delete a shared recording group — the
-    // reconciler's grace-period sweep (W3.11) owns recording-group cleanup.
+    // Dedup path: tear down the per-SLO alert group, decrement refs, but
+    // never synchronously delete a shared recording group — the reconciler's
+    // grace-period sweep owns recording-group cleanup.
     if (this.core.dedupEnabled && isDedupSo(existing)) {
       if (!deploy) {
         throw new SloRulerTeardownRequiredError(id, existing.spec.datasourceId);
@@ -724,8 +724,8 @@ export class SloLifecycleService {
     // a rule group that keeps evaluating dead alerts. The caller is required
     // to supply `deploy` whenever the SLO has a rule group; the route adapter
     // enforces this by surfacing an unresolvable-datasource error to the user.
-    // 404s from the ruler are swallowed by the RulerClient itself (W1.1 +
-    // W1.9), so an out-of-band group deletion never blocks SO teardown.
+    // 404s from the ruler are swallowed by the RulerClient itself, so an
+    // out-of-band group deletion never blocks SO teardown.
     if (needsRulerTeardown) {
       if (!deploy) {
         throw new SloRulerTeardownRequiredError(id, existing.spec.datasourceId);
@@ -748,10 +748,10 @@ export class SloLifecycleService {
     return { deleted: true };
   }
 
-  // ---------- delete (dedup path, W3.8) ----------
+  // ---------- delete (dedup path) ----------
 
   /**
-   * Phase 3 dedup delete.
+   * Dedup delete.
    *
    * Order of operations, chosen so a ruler or store failure leaves the
    * cluster in a recoverable state:
@@ -763,7 +763,7 @@ export class SloLifecycleService {
    *   3. Decrement every fingerprint ref the SLO claimed. Failures here are
    *      logged but do NOT throw — the SO is already gone; surfacing a ref-
    *      store error to the caller would be a worse UX than waiting for the
-   *      reconciler's dangling-ref sweep to reconcile eventually (W3.11).
+   *      reconciler's dangling-ref sweep to reconcile eventually.
    *
    * Recording groups are never deleted synchronously, even at refcount=0.
    * The reconciler's grace-period sweep owns that path so a concurrent
@@ -811,7 +811,7 @@ export class SloLifecycleService {
     return { deleted: true };
   }
 
-  // ---------- repair (W1.5) ----------
+  // ---------- repair ----------
 
   /**
    * Bring a drifted SLO back to parity with its expected rule groups.
@@ -820,8 +820,8 @@ export class SloLifecycleService {
    *   1. Load the SO; throw `SloNotFoundError` if missing (route → 404).
    *   2. Compute expected groups from `status.provisioning` via
    *      `deriveExpectedGroups` — dedup shape returns one recording group
-   *      per unique fingerprint plus the per-SLO alert group; legacy
-   *      (flag-off) shape returns just the alert group.
+   *      per unique fingerprint plus the per-SLO alert group; single-group
+   *      shape returns just the alert group.
    *   3. Probe current rule health via the injected checker.
    *   4. If healthy (`state === 'ok'`), return `{ repaired: false, health }`
    *      without touching the ruler. Idempotent — repeat calls are cheap.
@@ -860,10 +860,9 @@ export class SloLifecycleService {
     }
 
     if (pre.state === 'ruler_unreachable') {
-      // Surface via SloRulerError so the existing route mapping (toSloError in
-      // handlers.ts) translates to the right HTTP status. We prefer reusing
-      // the existing typed error rather than introducing a new one — the
-      // plan explicitly keeps `slo_errors.ts` out of scope for this WS.
+      // Surface via SloRulerError so the existing route mapping (toSloError
+      // in handlers.ts) translates to the right HTTP status. We prefer
+      // reusing the existing typed error rather than introducing a new one.
       const code = pre.rulerErrorCode ?? 'RULER_UNREACHABLE';
       const rawBody = `Rule-health probe reported ruler_unreachable for SLO ${doc.id}`;
       throw new SloRulerError(code, 0, rawBody);
@@ -900,16 +899,16 @@ export class SloLifecycleService {
   }
 
   /**
-   * Phase 3 dedup-aware repair (bug-fix for W1.5 gap).
+   * Dedup-aware repair.
    *
-   * The legacy `repair()` path above calls `generateSloRuleGroup`, which emits
-   * a single monolithic `slo:<slug>_<suffix>` group carrying identity labels
-   * on recording rules and no alert-group annotation. For dedup-shape SOs the
-   * expected ruler state is a split: one shared `slo:rec:<fp>` per unique
-   * fingerprint (label-free so it's reusable across SLOs) plus one per-SLO
-   * `slo:alerts:<slug>_<suffix>` carrying the provenance annotation. A legacy
-   * upsert here produces a third garbage group and leaves the real ones
-   * missing.
+   * The single-group `repair()` path above calls `generateSloRuleGroup`,
+   * which emits a single monolithic `slo:<slug>_<suffix>` group carrying
+   * identity labels on recording rules and no alert-group annotation. For
+   * dedup-shape SOs the expected ruler state is a split: one shared
+   * `slo:rec:<fp>` per unique fingerprint (label-free so it's reusable
+   * across SLOs) plus one per-SLO `slo:alerts:<slug>_<suffix>` carrying the
+   * provenance annotation. A single-group upsert here produces a third
+   * garbage group and leaves the real ones missing.
    *
    * This method mirrors the `createDedup` / `updateDedup` rule-shape path but
    * skips refcount bookkeeping — repair is recovering from ruler-side drift,
@@ -1033,8 +1032,8 @@ export class SloLifecycleService {
   // ---------- preview ----------
 
   previewRules(input: SloCreateInput): GeneratedRuleGroup {
-    // Preview and deploy must see the same normalized spec (design §9(5): what
-    // the user sees is what gets deployed). Clamp targets before validation.
+    // Preview and deploy must see the same normalized spec — what the user
+    // sees is what gets deployed. Clamp targets before validation.
     const spec = normalizeSpec(input.spec);
     const { errors } = validateSloSpec(spec);
     if (Object.keys(errors).length > 0) throw new SloValidationError(errors);
@@ -1064,7 +1063,7 @@ export class SloLifecycleService {
   /**
    * Compensation rollback for the ruler-OK / SO-fails edge case.
    * Best-effort: swallow errors so the original SO failure surfaces to the
-   * caller unchanged. Reconciler (W3) covers the case where this itself fails.
+   * caller unchanged. Reconciler covers the case where this itself fails.
    */
   private async safeRollback(
     deploy: SloDeployContext,

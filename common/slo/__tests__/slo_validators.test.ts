@@ -127,7 +127,7 @@ describe('validateSloSpec', () => {
     expect(result.errors['spec.labels["foo"]']).toBeDefined();
   });
 
-  // W1.3(a) — UUID cardinality guardrail (design §10.3).
+  // UUID cardinality guardrail.
   it('accepts non-UUID label values', () => {
     const result = validateSloSpec(minimalSpec({ labels: { env: 'prod' } }));
     expect(result.errors['spec.labels["env"]']).toBeUndefined();
@@ -149,7 +149,7 @@ describe('validateSloSpec', () => {
     expect(result.errors['spec.labels["trace_ids"]']).toContain('UUID');
   });
 
-  // W1.3(b) — 4 KiB annotation cap (design §10.3).
+  // 4 KiB annotation cap.
   it('accepts annotations just under the 4096-byte cap', () => {
     // `{"k":"<value>"}` → value length budget ≈ 4096 − len('{"k":""}') − 1
     // Use 4080-char string so JSON.stringify length lands just under 4096.

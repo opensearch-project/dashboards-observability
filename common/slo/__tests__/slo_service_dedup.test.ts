@@ -4,9 +4,9 @@
  */
 
 /**
- * Phase 3 W3.8 — SloService dedup-aware create/update/delete.
+ * SloService dedup-aware create/update/delete.
  *
- * Pins the registry+ruler contract the plan calls out:
+ * Pins the registry+ruler contract:
  *   - First create: increments ref from 0→1 and upserts the shared recording
  *     group; per-SLO alert group gets upserted too.
  *   - Second create sharing the same SLI fingerprint: ref goes 1→2, recording
@@ -17,7 +17,7 @@
  *     can change).
  *   - Update that moves one SLO to a new fingerprint: refcount for the old fp
  *     drops; refcount for the new fp rises; recording-group upserts track.
- *     The legacy recording group is NOT deleted synchronously.
+ *     The old recording group is NOT deleted synchronously.
  *   - Convergence: A edits to match B's fingerprint → refcount 1→2, no new
  *     recording group ever written.
  *   - Delete with shared fp: ref decrements, recording group preserved.
@@ -202,7 +202,7 @@ function makeHarness() {
 // Tests
 // ============================================================================
 
-describe('SloService dedup — create (W3.8)', () => {
+describe('SloService dedup — create', () => {
   it('first create with prometheus SLI upserts 1 recording group + 1 alert group; ref goes 0→1', async () => {
     const { svc, ruler, refStore, deploy, namespace } = makeHarness();
     const spec = validSpec();
@@ -281,7 +281,7 @@ describe('SloService dedup — create (W3.8)', () => {
   });
 });
 
-describe('SloService dedup — update (W3.8)', () => {
+describe('SloService dedup — update', () => {
   it('no-op update (same fingerprint): refs unchanged, recording group NOT re-upserted; alert group re-upserted', async () => {
     const { svc, ruler, refStore, deploy } = makeHarness();
     const spec = validSpec();
@@ -387,7 +387,7 @@ describe('SloService dedup — update (W3.8)', () => {
   });
 });
 
-describe('SloService dedup — delete (W3.8)', () => {
+describe('SloService dedup — delete', () => {
   it('delete with peer sharing fp: ref decrements, recording group preserved (never synchronously deleted)', async () => {
     const { svc, ruler, refStore, deploy } = makeHarness();
     const specA = validSpec({ name: 'A' });
@@ -417,7 +417,7 @@ describe('SloService dedup — delete (W3.8)', () => {
   });
 });
 
-describe('SloService dedup — rollback on SO save failure (W3.8)', () => {
+describe('SloService dedup — rollback on SO save failure', () => {
   it('create: SO save failure rolls back refs + alert group; recording group cleanup is deferred', async () => {
     const { ruler, refStore, deploy } = makeHarness();
     const store: ISloStore = {
@@ -439,8 +439,8 @@ describe('SloService dedup — rollback on SO save failure (W3.8)', () => {
     expect(refStore.refcount('ws-001', spec.datasourceId, fp)).toBe(0);
     // The shared recording group is NOT deleted synchronously: a concurrent
     // peer create could have just bumped the ref back up and re-upserted the
-    // byte-equal group. The reconciler's grace-period sweep (W3.11) handles
-    // zero-ref cleanup. Per-SLO alert group is safe to delete inline.
+    // byte-equal group. The reconciler's grace-period sweep handles zero-ref
+    // cleanup. Per-SLO alert group is safe to delete inline.
     const recGroup = dedupRecordingGroupName(fp);
     expect(ruler.deletes.some((d) => d.groupName === recGroup)).toBe(false);
   });

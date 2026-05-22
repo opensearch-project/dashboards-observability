@@ -4,7 +4,7 @@
  */
 
 /**
- * Ruler client tests — pins the DirectQuery contract for W1.5:
+ * Ruler client tests — pins the DirectQuery contract:
  *   - Path shape:  /_plugins/_directquery/_resources/{encoded-dqName}/api/v1/rules/{encoded-ns}[/{group}]
  *   - HTTP method: POST for upsert, DELETE for delete
  *   - Body shape:  POST body is YAML serializing the GeneratedRuleGroup
@@ -284,7 +284,7 @@ describe('DirectQueryRulerClient error classification', () => {
 });
 
 // ============================================================================
-// W1.1 — Ruler probe (getRuleGroup, listRuleGroups, 404-tolerant delete)
+// Ruler probe (getRuleGroup, listRuleGroups, 404-tolerant delete)
 // ============================================================================
 
 /**

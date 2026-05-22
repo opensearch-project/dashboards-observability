@@ -4,8 +4,8 @@
  */
 
 /**
- * Provenance annotation emitted alongside every SLO-generated alert group
- * (Phase 3 W3.3). The alert-group annotation is the sole provenance surface:
+ * Provenance annotation emitted alongside every SLO-generated alert group.
+ * The alert-group annotation is the sole provenance surface:
  *
  *   - `osd_slo_provenance` on the first rule of the alert group — carries the
  *     full SloSpec, the workspace/datasource/sloId tuple, and a `specSha256`

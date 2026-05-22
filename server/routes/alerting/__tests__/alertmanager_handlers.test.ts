@@ -4,7 +4,7 @@
  */
 
 /**
- * Phase-5 Alertmanager handler tests.
+ * Alertmanager handler tests.
  *
  * After the route reduction only `handleGetAlertmanagerConfig` and the
  * shared `extractReceiverIntegrations` helper remain in

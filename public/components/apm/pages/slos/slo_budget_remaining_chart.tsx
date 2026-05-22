@@ -4,7 +4,7 @@
  */
 
 /**
- * Error-budget-remaining chart (W4.1).
+ * Error-budget-remaining chart.
  *
  * Area chart of `errorBudgetRemaining(t) = 1 - errorRatio(t) / (1 - target)`
  * over the SLO's rolling window. When the chart line crosses below the first

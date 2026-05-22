@@ -41,10 +41,10 @@ export class SloVersionConflictError extends Error {
 }
 
 /**
- * Stable error codes for ruler dual-write failures (W1.5, design memo
- * "Error surface contract"). The wizard branches on `code` to render a
- * self-service message; the raw upstream body is preserved so the user
- * can read Cortex's own diagnostic (e.g. "invalid PromQL: parse error").
+ * Stable error codes for ruler dual-write failures. The wizard branches on
+ * `code` to render a self-service message; the raw upstream body is
+ * preserved so the user can read Cortex's own diagnostic (e.g. "invalid
+ * PromQL: parse error").
  */
 export type SloRulerErrorCode =
   | 'RULER_VALIDATION_FAILED'
@@ -57,7 +57,7 @@ export type SloRulerErrorCode =
  * HTTP status and raw body verbatim so the wizard can show a self-service
  * diagnostic without needing a separate lookup.
  *
- * Fail-loud semantics (memo): no retry, no backoff, one call only. If this
+ * Fail-loud semantics: no retry, no backoff, one call only. If this
  * escapes `SloService.create/update`, the SO was never written.
  */
 export class SloRulerError extends Error {

@@ -21,8 +21,8 @@ import { InMemorySloStore } from './slo_store';
 import type { SloRuleRefStoreLite, SloStatusAggregator } from './slo_service_types';
 
 /**
- * Phase 3 (W3.6) default for `ruleDedup.enabled`. Matches the schema default.
- * The plugin's `start()` flips it to whatever the operator configured.
+ * Default for `ruleDedup.enabled`. Matches the schema default. The plugin's
+ * `start()` flips it to whatever the operator configured.
  */
 const DEFAULT_DEDUP_ENABLED = true;
 
@@ -30,8 +30,8 @@ export class SloServiceCore {
   store: ISloStore;
   readonly statusCache = new Map<string, { status: SloLiveStatus; expiresAt: number }>();
   /**
-   * Aggregator is optional — when unset, getStatuses falls back to the W1.2
-   * stub (disabled/no_data). Request-scoped state (client, workspace,
+   * Aggregator is optional — when unset, getStatuses falls back to the
+   * offline stub (disabled/no_data). Request-scoped state (client, workspace,
    * datasource resolver) is passed per-call via `SloStatusAggregationContext`.
    */
   aggregator?: SloStatusAggregator;
@@ -43,26 +43,26 @@ export class SloServiceCore {
   readonly loggedAggregatorFailures = new Set<string>();
 
   /**
-   * Phase 3 (W3.6) — reflects `observability.slo.ruleDedup.enabled`. Flipped
-   * by `server/plugin.ts` at boot. Batch 2 workstreams (W3.8 service dedup,
-   * W3.9 aggregator) branch on this via `isDedupEnabled()`. Default `true`
-   * matches the schema default.
+   * Reflects `observability.slo.ruleDedup.enabled`. Flipped by
+   * `server/plugin.ts` at boot. The service-dedup write path and the
+   * aggregator branch on this via `isDedupEnabled()`. Default `true` matches
+   * the schema default.
    */
   dedupEnabled = DEFAULT_DEDUP_ENABLED;
 
   /**
-   * Phase 3 (W3.8) — refcount registry. Optional. When absent and
-   * `dedupEnabled` is true the service still runs the dedup codepath but
-   * skips the refcount bookkeeping — useful for tests that want to exercise
-   * the generator split without wiring a saved-objects client. Plugin wires
-   * the real `SloRuleRefStore` in `start()`.
+   * Refcount registry. Optional. When absent and `dedupEnabled` is true the
+   * service still runs the dedup codepath but skips the refcount
+   * bookkeeping — useful for tests that want to exercise the generator split
+   * without wiring a saved-objects client. Plugin wires the real
+   * `SloRuleRefStore` in `start()`.
    */
   refStore?: SloRuleRefStoreLite;
 
   /**
-   * Plugin version stamped into provenance annotations (W3.3). Defaults to
-   * '0.0.0' — production wires the real `kibana.version` from the plugin
-   * initializer context.
+   * Plugin version stamped into provenance annotations. Defaults to '0.0.0'
+   * — production wires the real `kibana.version` from the plugin initializer
+   * context.
    */
   pluginVersion = '0.0.0';
 

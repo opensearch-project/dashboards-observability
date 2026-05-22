@@ -7,7 +7,7 @@
  * Route handlers — pure functions that work with any HTTP framework.
  * Exposes backend-native API shapes + unified views.
  *
- * Post-Phase-3: datasource CRUD handlers and their helpers were removed —
+ * Datasource CRUD handlers and their helpers have been removed —
  * datasource discovery + mutation moved to the client via saved-object
  * services (`useDatasources`, `SavedObjectDatasourceService`).
  */

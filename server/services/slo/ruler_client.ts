@@ -18,7 +18,7 @@
  *   (the SQL plugin's PrometheusClientImpl sets that header on the upstream call;
  *    the OSD transport does not expose per-request headers so we rely on that).
  *
- * Semantics (memo §Dual-write atomicity):
+ * Dual-write atomicity:
  *   - Synchronous, fail-loud. One call. No retry, no backoff.
  *   - Errors surface as SloRulerError with a stable code, preserving upstream
  *     HTTP status + raw body so the wizard can render a self-service message.

@@ -4,7 +4,7 @@
  */
 
 /**
- * SloService.repair tests (W1.5).
+ * SloService.repair tests.
  *
  * Pins the repair algorithm:
  *   1. Healthy SLO → no ruler upsert, { repaired: false }.
@@ -75,7 +75,7 @@ function validSpec(overrides: Partial<SloSpec> = {}): SloSpec {
 /**
  * Build ruler + store + health-probe mocks. The store/ruler doubles match
  * `slo_service_ruler.test.ts` so test behavior stays consistent across the
- * W1.5 test surface.
+ * repair test surface.
  */
 function makeDeps() {
   const saved = new Map<string, SloDocument>();
@@ -193,7 +193,7 @@ function unreachableReport(
   };
 }
 
-describe('SloService.repair (W1.5)', () => {
+describe('SloService.repair', () => {
   it('returns { repaired: false } and issues no upsert when the probe reports ok', async () => {
     const { ruler, store, deploy } = makeDeps();
     const svc = new SloService(noopLogger(), store);

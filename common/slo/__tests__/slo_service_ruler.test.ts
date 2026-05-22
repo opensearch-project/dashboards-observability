@@ -4,13 +4,13 @@
  */
 
 /**
- * SloService ruler-integration tests (W1.5).
+ * SloService ruler-integration tests.
  *
- * Pins the dual-write contract from the memo (legacy/flag-off path — Phase 3
- * W3.6 introduces a parallel dedup-aware path that emits two groups per
- * create; covered by `slo_service_dedup.test.ts`). These tests call
- * `svc.setDedupEnabled(false)` so they stay pointed at the single-group
- * contract regardless of the default-on flag.
+ * Pins the dual-write contract for the single-group path. The dedup path
+ * emits two groups per create and is covered separately by
+ * `slo_service_dedup.test.ts`. These tests call `svc.setDedupEnabled(false)`
+ * so they stay pointed at the single-group contract regardless of the
+ * default-on flag.
  *
  *   - create/update: ruler-first, then SO
  *   - delete: ruler-first, then SO
@@ -150,7 +150,7 @@ function makeDeps() {
   return { callLog, ruler, store, deploy };
 }
 
-describe('SloService.create with deploy (W1.5 dual-write)', () => {
+describe('SloService.create with deploy (dual-write)', () => {
   it('calls ruler.upsertRuleGroup BEFORE store.save', async () => {
     const logger = makeLogger();
     const { callLog, ruler, store, deploy } = makeDeps();

@@ -61,9 +61,9 @@ export interface SloRulerClient {
  * paths without a real DirectQuery backend, or legacy callers that haven't
  * been plumbed through yet.
  *
- * Design choice (memo §Dual-write): methods take `deploy?`, rather than the
- * constructor taking a RulerClient, because the OS client / datasource / ws
- * are all request-scoped and can't live on the service instance.
+ * Design choice: methods take `deploy?`, rather than the constructor taking
+ * a RulerClient, because the OS client / datasource / ws are all
+ * request-scoped and can't live on the service instance.
  */
 export interface SloDeployContext {
   ruler: SloRulerClient;
@@ -79,18 +79,18 @@ export interface SloDeployContext {
 }
 
 // ============================================================================
-// Phase 3 dedup: refcount registry surface (W3.2 / W3.8)
+// Dedup: refcount registry surface
 // ============================================================================
 
 /**
- * Minimal shape the W3.8 dedup path consumes. The real implementation lives in
- * `server/services/slo/slo_rule_ref_store.ts` — declared here structurally so
- * the SLO service (common/) does not reach into the server tree.
+ * Minimal shape the dedup write path consumes. The real implementation lives
+ * in `server/services/slo/slo_rule_ref_store.ts` — declared here structurally
+ * so the SLO service (common/) does not reach into the server tree.
  *
  * `incrementRef` returns `wasZero: true` iff the refcount transitioned from 0
  * (or was newly created). The service uses that to decide whether the shared
  * recording group must be upserted this call — repeated upserts are byte-equal
- * no-ops, but skipping them is still the right call (design §3 dedup intent).
+ * no-ops, but skipping them is still the right call.
  */
 export interface SloRuleRefStoreLite {
   get(
@@ -114,7 +114,7 @@ export interface SloRuleRefStoreLite {
 }
 
 // ============================================================================
-// Live-status aggregator context (W3.1)
+// Live-status aggregator context
 // ============================================================================
 
 /**
@@ -142,16 +142,16 @@ export interface SloStatusAggregationContext {
    */
   requestContext?: unknown;
   /**
-   * Phase 3 (W3.6) — propagates the `observability.slo.ruleDedup.enabled`
-   * flag so the aggregator can pick fingerprint-keyed selectors (W3.9) when
-   * true, or fall back to the legacy `{slo_id="X"}` selectors when false.
-   * Undefined → legacy behavior (pre-Phase-3).
+   * Propagates the `observability.slo.ruleDedup.enabled` flag so the
+   * aggregator can pick fingerprint-keyed selectors when true, or fall back
+   * to the single-group `{slo_id="X"}` selectors when false. Undefined →
+   * single-group behavior.
    */
   ruleDedupEnabled?: boolean;
   /**
-   * Optional pass-through for the aggregator's W1.6 priority-merge step.
-   * Typed as `unknown` at this layer because the real checker interface
-   * lives in the server tree; the server aggregator narrows it to
+   * Optional pass-through for the aggregator's rule-health priority-merge
+   * step. Typed as `unknown` at this layer because the real checker
+   * interface lives in the server tree; the server aggregator narrows it to
    * `SloRuleHealthChecker`. When undefined the aggregator leaves the
    * sample-derived state alone.
    */
@@ -199,7 +199,7 @@ export function sloRulerNamespaceFor(workspaceId: string): string {
 }
 
 // ============================================================================
-// Rule-health + repair context (W1.5)
+// Rule-health + repair context
 // ============================================================================
 
 /**

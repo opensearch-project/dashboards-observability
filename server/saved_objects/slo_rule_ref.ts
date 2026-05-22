@@ -4,18 +4,18 @@
  */
 
 /**
- * Saved-object type definition for the `slo-rule-ref` registry (Phase 3 W3.2).
+ * Saved-object type definition for the `slo-rule-ref` registry.
  *
  * One SO per distinct (workspaceId, datasourceId, fingerprint) tuple. The SO
  * tracks how many active SLOs currently reference a given fingerprint — when
  * the refcount hits zero the recording group is eligible for deletion after
- * the 24h grace period (enforced by the reconciler in W3.11).
+ * the 24h grace period (enforced by the reconciler).
  *
- * FIXME (workspaceId plumbing): Phase 3 uses `datasourceId` as the workspace
- * discriminator (`workspaceId === datasourceId`). A future phase will thread a
- * real workspace id through the deploy context; when that happens the SO id
- * format `rule-ref:<ws>:<ds>:<fp>` already separates the two so only the
- * caller of `sloRuleRefId(...)` has to change.
+ * FIXME (workspaceId plumbing): currently `datasourceId` doubles as the
+ * workspace discriminator (`workspaceId === datasourceId`). A future change
+ * will thread a real workspace id through the deploy context; when that
+ * happens the SO id format `rule-ref:<ws>:<ds>:<fp>` already separates the
+ * two so only the caller of `sloRuleRefId(...)` has to change.
  */
 
 import type { SavedObjectsType } from '../../../../src/core/server';

@@ -10,8 +10,8 @@
  *   1. Per-objective selector      — surfaced only when > 1 objective
  *   2. Error-budget panel          — attainment / budget remaining / time-to-exhaustion
  *   3. Burn-rate panel             — MWMBR tier matrix (short × long windows)
- *   4. Error-budget-remaining      — rolling-window area chart with warning threshold (W4.1)
- *   5. Burn rate by tier           — one line per MWMBR tier with threshold markLine (W4.1)
+ *   4. Error-budget-remaining      — rolling-window area chart with warning threshold
+ *   5. Burn rate by tier           — one line per MWMBR tier with threshold markLine
  *   6. Latency overlay (latency SLIs only) — p50/p90/p99 vs the objective bound
  *   7. Request volume              — context for correlating burn to traffic
  *

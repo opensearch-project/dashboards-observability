@@ -4,9 +4,9 @@
  */
 
 /**
- * W3.7 — dedup-mode generator split.
+ * Dedup-mode generator split.
  *
- * Exercises the new fingerprint-keyed recording-group builder and the
+ * Exercises the fingerprint-keyed recording-group builder and the
  * per-SLO alert-group builder. The critical invariants:
  *
  *   - Recording rules carry NO SLO-identity labels (only `slo_window`).

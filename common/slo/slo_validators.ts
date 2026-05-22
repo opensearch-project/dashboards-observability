@@ -125,13 +125,13 @@ function validateGoodEventsFilter(filter: string): string | null {
 }
 
 /**
- * Cardinality guardrail (design §10.3): UUID-shaped label values explode
- * per-series metric storage. Rejected on create/update; users should tag
- * workloads with stable labels (service, env, route) instead.
+ * Cardinality guardrail: UUID-shaped label values explode per-series metric
+ * storage. Rejected on create/update; users should tag workloads with stable
+ * labels (service, env, route) instead.
  */
 const UUID_LABEL_VALUE_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/** Annotation payload cap (design §10.3). Keeps saved-object size bounded. */
+/** Annotation payload cap. Keeps saved-object size bounded. */
 const ANNOTATIONS_BYTE_CAP = 4096;
 
 /**

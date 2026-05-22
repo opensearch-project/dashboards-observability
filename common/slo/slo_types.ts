@@ -271,23 +271,21 @@ export interface SloSpec {
 }
 
 // ============================================================================
-// SloPersistedStatus — server-computed (§3.2)
+// SloPersistedStatus — server-computed
 // ============================================================================
 
 export interface PrometheusProvisioning {
   backend: 'prometheus';
   rulerNamespace: string;
   /**
-   * Phase 3 (W3.4) — map from objective name to the recording-rule
-   * fingerprint that's written for that objective. Shared across SLOs that
-   * carry equivalent SLI shapes. The recording group on the ruler is named
-   * `slo:rec:<fingerprint>`.
+   * Map from objective name to the recording-rule fingerprint that's written
+   * for that objective. Shared across SLOs that carry equivalent SLI shapes.
+   * The recording group on the ruler is named `slo:rec:<fingerprint>`.
    */
   recordingFingerprints?: Record<string, string>;
   /**
-   * Phase 3 (W3.4) — per-SLO alert group name. Alerts retain full SLO
-   * identity labels; recording rules do not. Format:
-   * `slo:alerts:<slug>_<suffix>`.
+   * Per-SLO alert group name. Alerts retain full SLO identity labels;
+   * recording rules do not. Format: `slo:alerts:<slug>_<suffix>`.
    */
   alertGroupName?: string;
 }

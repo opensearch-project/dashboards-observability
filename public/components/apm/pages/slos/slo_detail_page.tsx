@@ -65,8 +65,7 @@ export interface SloDetailPageProps {
 type FullDoc = SloDocument & {
   liveStatus: SloLiveStatus;
   /**
-   * Phase 3 W3.12 — refcount per recording fingerprint. `{}` for legacy /
-   * non-dedup SLOs.
+   * Refcount per recording fingerprint. `{}` for non-dedup SLOs.
    */
   recordingFingerprintRefcounts?: Record<string, number>;
 };
@@ -686,7 +685,7 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
   const prov = doc.status.provisioning.backend === 'prometheus' ? doc.status.provisioning : null;
 
   // Derive the callout mode from whichever signal is strongest. The fresh
-  // rule-health probe (W1.4) is preferred when available; fall back to the
+  // rule-health probe is preferred when available; fall back to the
   // persisted live-status flag so the callout still shows when the probe
   // hasn't returned yet.
   const ruleHealthState = ruleHealth?.state;
@@ -711,11 +710,11 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
       )
     : [];
 
-  // Phase 3 W3.12 — "Shared with N other SLOs" pill. Refcount includes the
-  // current SLO's own claim, so N others = max(refcount-1, 0). We pick the
-  // highest other-count across fingerprints the SLO references; a single
-  // number conveys the signal without listing per-fingerprint specifics.
-  // Falls back to 0 when the server didn't return refcounts (legacy docs /
+  // "Shared with N other SLOs" pill. Refcount includes the current SLO's
+  // own claim, so N others = max(refcount-1, 0). We pick the highest
+  // other-count across fingerprints the SLO references; a single number
+  // conveys the signal without listing per-fingerprint specifics. Falls
+  // back to 0 when the server didn't return refcounts (legacy docs /
   // refstore not wired).
   const refcounts = doc.recordingFingerprintRefcounts ?? {};
   const sharedOtherCount = dedupFingerprints

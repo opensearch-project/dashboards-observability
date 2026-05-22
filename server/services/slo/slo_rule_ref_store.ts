@@ -4,7 +4,7 @@
  */
 
 /**
- * SavedObject-backed registry for the Phase 3 recording-rule dedup layer.
+ * SavedObject-backed registry for the recording-rule dedup layer.
  *
  * One SO per (workspaceId, datasourceId, fingerprint) tuple. The SO carries a
  * non-negative refcount: every SLO that references a fingerprint contributes

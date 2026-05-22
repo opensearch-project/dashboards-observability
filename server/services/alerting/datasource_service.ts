@@ -182,12 +182,12 @@ export class InMemoryDatasourceService implements DatasourceService {
           message: status ? `Connected. Cluster health: ${status}` : 'Connected.',
         };
       } else if (datasource.type === 'prometheus') {
-        // Phase 1: skip active probe. The first real query will surface any
+        // Skip active probe. The first real query will surface any
         // connection issue naturally, and Prometheus endpoints are reached via
         // the OSD DirectQuery resource proxy (no direct Prom connectivity to
         // test from here). Keep the UI "Test connection" button working by
         // succeeding with a note.
-        return { success: true, message: 'Prometheus (skipped-in-phase1)' };
+        return { success: true, message: 'Prometheus (no active probe)' };
       }
       return { success: false, message: `Unknown datasource type: ${datasource.type}` };
     } catch (err) {

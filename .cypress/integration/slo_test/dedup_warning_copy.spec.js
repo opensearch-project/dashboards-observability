@@ -6,7 +6,7 @@
 /// <reference types="cypress" />
 
 /*
- * SLO dedup warning copy — Phase 3 W3.14.
+ * SLO dedup warning copy.
  *
  * Run locally with:
  *   yarn cypress:run-without-security --spec \
@@ -17,8 +17,8 @@
  *   1. The modal mentions the per-SLO alert group by name, the 24h grace
  *      period, and the "shared recording rules" language — so operators
  *      understand what is removed immediately vs. what is reference-counted.
- *   2. The modal's DOM contains no "Grafana" string (plan constraint —
- *      dashboards must be spoken of generically).
+ *   2. The modal's DOM contains no "Grafana" string — dashboards must be
+ *      spoken of generically.
  *
  * Creates one SLO live and asserts the modal DOM; does not actually confirm
  * the delete until cleanup.
@@ -79,7 +79,7 @@ function buildMinimalSloSpec(datasourceId, name) {
   };
 }
 
-describe('SLO dedup warning copy — Phase 3 W3.14', () => {
+describe('SLO dedup warning copy', () => {
   const datasourceId = Cypress.env('sloDatasourceId') || 'prom_integ_test';
   const sloName = randomId('cypress-dedup-copy');
   let sloId = null;

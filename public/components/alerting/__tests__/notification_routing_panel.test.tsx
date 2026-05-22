@@ -18,7 +18,7 @@ const mockConfig = {
   },
 };
 
-// Post-Phase 4: NotificationRoutingPanel instantiates AlertmanagerAdminService
+// NotificationRoutingPanel instantiates AlertmanagerAdminService
 // internally via `useMemo(() => new AlertmanagerAdminService(), [])` and
 // calls `getConfig(dsId)` on the selected datasource. Each test re-configures
 // the mock constructor below so success/error paths can be exercised

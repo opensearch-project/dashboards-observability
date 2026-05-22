@@ -4,7 +4,7 @@
  */
 
 /**
- * Burn-rate-per-tier chart (W4.1).
+ * Burn-rate-per-tier chart.
  *
  * Overlaid line chart showing `burnRate(t) = errorRatio(t, longWindow) / (1 - target)`
  * for each MWMBR tier the user configured. A horizontal markLine per tier shows
@@ -282,9 +282,9 @@ export const SloBurnRateChart: React.FC<SloBurnRateChartProps> = ({
   const tiers = slo.spec.alerting.strategy === 'mwmbr' ? slo.spec.alerting.burnRates : [];
   const errorBudget = 1 - objective.target;
 
-  // Cap at 4 tiers. W4.1 guidance: "if >3, stack or use the legend pattern" —
-  // overlay-with-legend reads cleanly up to 4. Surface the overflow count
-  // rather than silently dropping tiers.
+  // Cap at 4 tiers. Chart-density guidance: "if >3, stack or use the legend
+  // pattern" — overlay-with-legend reads cleanly up to 4. Surface the
+  // overflow count rather than silently dropping tiers.
   const visible = tiers.slice(0, 4);
   const overflow = tiers.length - visible.length;
 

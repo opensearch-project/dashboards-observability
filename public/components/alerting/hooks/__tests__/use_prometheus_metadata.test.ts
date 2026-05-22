@@ -5,7 +5,7 @@
 
 import { renderHook, act, waitFor } from '@testing-library/react';
 
-// Post-Phase-4: the hook instantiates `AlertingPromResourcesService` internally
+// The hook instantiates `AlertingPromResourcesService` internally
 // via `useMemo(() => new AlertingPromResourcesService(datasourceId), [datasourceId])`
 // and calls list/get methods on it. We mock the constructor so each test can
 // reconfigure its resolved values per-case.

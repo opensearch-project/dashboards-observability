@@ -8,7 +8,7 @@
  * Runtime classes and error helpers only. Types live in `common/types/alerting`;
  * framework-agnostic helpers live in `common/services/alerting`.
  *
- * Post-Phase-5 state:
+ * Current state:
  *   - `MonitorMutationService` — 4 OS write paths (create/update/delete/ack)
  *     used by the mutation routes in `server/routes/alerting/mutations/`.
  *   - `MultiBackendAlertService` — routing layer for the 13 read routes +

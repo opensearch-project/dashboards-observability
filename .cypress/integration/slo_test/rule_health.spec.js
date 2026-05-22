@@ -6,13 +6,13 @@
 /// <reference types="cypress" />
 
 /*
- * SLO rule-health Phase 1 recovery flow.
+ * SLO rule-health recovery flow.
  *
  * Run locally with:
  *   yarn cypress:run-without-security --spec \
  *     .cypress/integration/slo_test/rule_health.spec.js
  *
- * This spec exercises the Phase 1 rule-health detection + recovery UI:
+ * This spec exercises the rule-health detection + recovery UI:
  *
  *   1. A healthy SLO shows a "healthy" rule badge on the listing.
  *   2. When the ruler loses the rule group out-of-band, the listing badge
@@ -23,13 +23,13 @@
  *   4. Delete-from-callout on a broken SLO confirms and then routes the
  *      user back to the listing.
  *
- * "Out-of-band deletion" — per the Phase 1 plan — is any ruler-level
- * removal of a rule group that leaves the SLO saved object intact. Our
- * SDK doesn't expose a direct-query ruler DELETE without also dropping
- * the saved object, so this spec emulates the desynchronised state via
- * `cy.intercept` on the read paths (list, get, rule_health). The UI
- * contract under test — badge colour, callout presence, button wiring,
- * confirm-modal behaviour — is fully covered by those stubs.
+ * "Out-of-band deletion" is any ruler-level removal of a rule group that
+ * leaves the SLO saved object intact. Our SDK doesn't expose a direct-query
+ * ruler DELETE without also dropping the saved object, so this spec
+ * emulates the desynchronised state via `cy.intercept` on the read paths
+ * (list, get, rule_health). The UI contract under test — badge colour,
+ * callout presence, button wiring, confirm-modal behaviour — is fully
+ * covered by those stubs.
  *
  * The one live API call is creation in `before`; all UI-state-dependent
  * responses are stubbed so the spec is deterministic regardless of the
@@ -41,7 +41,7 @@ const SLO_BASE = '/api/observability/v1/slos';
 const APP_ID = 'observability-apm-slo';
 
 // ---------------------------------------------------------------------------
-// Fixture builders — inlined per workstream rules (no shared helpers touched)
+// Fixture builders — inlined to keep the spec self-contained.
 // ---------------------------------------------------------------------------
 
 const randomId = (prefix) =>
@@ -198,7 +198,7 @@ function buildRuleHealth({ id, state, ruleGroupName }) {
 // Spec
 // ---------------------------------------------------------------------------
 
-describe('SLO rule health — Phase 1 recovery', () => {
+describe('SLO rule health — recovery flow', () => {
   const datasourceId = Cypress.env('sloDatasourceId') || 'prom_integ_test';
   const sloName = randomId('cypress-slo');
   let sloId = null;
@@ -279,7 +279,7 @@ describe('SLO rule health — Phase 1 recovery', () => {
     // state is therefore not reachable from a browser without a
     // test-only debug endpoint. We emulate it by swapping the listing
     // and detail responses to describe the desynchronised state — that
-    // is exactly the input the Phase 1 UI is designed to react to.
+    // is exactly the input the rule-health UI is designed to react to.
     // -----------------------------------------------------------------------
     cy.intercept('GET', `${SLO_BASE}*`, (req) => {
       if (/\/slos(?:\?|$)/.test(req.url)) {

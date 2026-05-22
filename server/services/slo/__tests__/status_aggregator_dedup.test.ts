@@ -4,7 +4,7 @@
  */
 
 /**
- * Phase 3 W3.9 — status aggregator fingerprint-keyed queries.
+ * Status aggregator fingerprint-keyed queries.
  *
  * Pins:
  *   - When `ctx.ruleDedupEnabled === true` AND the SO carries
@@ -14,10 +14,10 @@
  *   - A shared fingerprint across SLOs: the aggregator still makes its own
  *     per-SLO query, but the PromQL string is identical — demonstrates Cortex
  *     can serve both from the same underlying recording series.
- *   - `rules_missing` from the health checker still wins (W1.6 priority).
+ *   - `rules_missing` from the health checker still wins (priority merge).
  *   - `expectedRuleGroupsFor` returns the dedup recording-group names + the
- *     per-SLO alert-group name (Phase 1 fallback kicks in only when neither
- *     dedup field is set).
+ *     per-SLO alert-group name (single-group fallback kicks in only when
+ *     neither dedup field is set).
  */
 
 import {
@@ -224,7 +224,7 @@ describe('buildDedupObjectiveQuery', () => {
   });
 });
 
-describe('DirectQueryStatusAggregator — dedup path (W3.9)', () => {
+describe('DirectQueryStatusAggregator — dedup path', () => {
   it('queries by fingerprint-named rules and maps samples back to objectives', async () => {
     const doc = dedupDoc('slo-a', { 'availability-99-9': 'abcdef0123456789' });
     const { client, searcher } = mockClient((body) => {
@@ -312,7 +312,7 @@ describe('DirectQueryStatusAggregator — dedup path (W3.9)', () => {
   });
 });
 
-describe('expectedRuleGroupsFor — dedup fields (W3.9)', () => {
+describe('expectedRuleGroupsFor — dedup fields', () => {
   it('returns unique recording-group names + per-SLO alert group', () => {
     const doc = dedupDoc('slo-multi', {
       'availability-99-9': 'aaaaaaaaaaaaaaaa',

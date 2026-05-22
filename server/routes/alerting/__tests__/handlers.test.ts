@@ -4,7 +4,7 @@
  */
 
 /**
- * Post-Phase-3/5 handler tests. The 6 datasource-CRUD handlers
+ * Handler tests for the surviving alerting routes. The 6 datasource-CRUD handlers
  * (`handleListDatasources`, `handleGet/Create/Update/Delete/TestDatasource`)
  * are no longer exercised — datasource discovery moved to the client via
  * `useDatasources` and direct saved-object queries. The handlers may still

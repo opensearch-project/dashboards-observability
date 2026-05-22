@@ -159,9 +159,8 @@ export class SloApiClient {
     SloDocument & {
       liveStatus: SloLiveStatus;
       /**
-       * Phase 3 W3.12 — refcount per recording fingerprint, so the detail
-       * page can render "Shared with N other SLOs". `{}` for legacy / non-
-       * dedup SLOs.
+       * Refcount per recording fingerprint, so the detail page can render
+       * "Shared with N other SLOs". `{}` for non-dedup SLOs.
        */
       recordingFingerprintRefcounts?: Record<string, number>;
     }

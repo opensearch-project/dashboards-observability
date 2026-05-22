@@ -9,19 +9,19 @@
  * Plots one line: the mean of every SLO's 3d error-ratio recording rule on
  * the page's datasource, sampled across a fixed 7d window. Trending up =
  * worse. The sparkline is deliberately time-picker-independent — SLO
- * health on this page evaluates against each SLO's own rolling window
- * (plan §7 decision), and a 7d rolling view gives the operator a "is our
- * SLO posture getting better or worse this week?" read that doesn't change
- * when they zoom the rest of the page.
+ * health on this page evaluates against each SLO's own rolling window,
+ * and a 7d rolling view gives the operator a "is our SLO posture getting
+ * better or worse this week?" read that doesn't change when they zoom
+ * the rest of the page.
  *
- * Scope note: the plan §7 spec called for averaging across *this page's
+ * Scope note: ideally the aggregate would average across *this page's
  * service set*. That isn't computable from the current recording rules —
- * Phase 3 fingerprint dedup deliberately strips SLO identity labels from
- * the recording-rule side (service / name / objective live on the alert-
+ * fingerprint dedup deliberately strips SLO identity labels from the
+ * recording-rule side (service / name / objective live on the alert-
  * rule side instead). So the sparkline shows the datasource-wide aggregate
  * rather than a page-services subset. It still answers "is SLO posture
  * trending?"; a truer per-service aggregate would require relabeling or
- * a join against a label-carrying metric and is out of scope for F3.
+ * a join against a label-carrying metric and is out of scope here.
  *
  * Why error ratio and not true budget-remaining? Each SLO has its own
  * target, and the recording rules don't stamp a `slo_target` label today,
@@ -65,7 +65,7 @@ const CHART_HEIGHT = 60;
  * range-query step. Returns null when the page has no services showing
  * (we still don't render the chart then).
  *
- * The filter is just the `__name__` regex — phase-3 dedup strips SLO
+ * The filter is just the `__name__` regex — fingerprint dedup strips SLO
  * identity labels from recording rules, so we can't narrow to this page's
  * service set here; see the module header for the scope note.
  */

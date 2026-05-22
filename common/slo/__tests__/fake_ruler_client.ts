@@ -6,7 +6,7 @@
 /**
  * Shared FakeRulerClient for integration tests.
  *
- * Prior to Phase 3 W3.15, two near-identical copies existed in
+ * Earlier, two near-identical copies existed in
  * `slo_service_repair_integration.test.ts` and `reconciler_integration.test.ts`.
  * Each had slightly different error-injection knobs; this module DRYs the
  * union so the dedup integration suite (and anyone new) pulls one shape.

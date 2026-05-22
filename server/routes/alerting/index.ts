@@ -194,7 +194,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
 
   /**
    * Construct the per-request stateful alerting services bound to this
-   * request's scoped SavedObjects client. Replaces the pre-Phase-5 mutable
+   * request's scoped SavedObjects client. Replaces an earlier mutable
    * `setDatasourceService` singleton pattern, which leaked SavedObjects
    * clients across concurrent requests at every `await` boundary.
    *

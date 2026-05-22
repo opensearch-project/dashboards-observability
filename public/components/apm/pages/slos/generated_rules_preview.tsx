@@ -8,8 +8,8 @@
  *
  * Calls the server `/preview` endpoint with a debounced input so typing in the
  * wizard doesn't generate a request per keystroke. The server runs the same
- * `generateSloRuleGroup` as the deploy path (memo §9 decision 5) — what the
- * preview shows is what will land in the ruler.
+ * `generateSloRuleGroup` as the deploy path — what the preview shows is
+ * what will land in the ruler.
  *
  * The server response carries the rendered YAML on `yaml`; this component
  * renders it verbatim rather than recomputing client-side.

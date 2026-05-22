@@ -4,7 +4,7 @@
  */
 
 /**
- * Status aggregator tests (W3.1).
+ * Status aggregator tests.
  *
  * Pins:
  *   - Per-objective state ladder (ok / warning / breached) with pinned
@@ -14,7 +14,7 @@
  *   - Disabled SLO short-circuit.
  *   - Partial failure — 2 of 3 objectives return samples, one doesn't; the
  *     missing one degrades to per-objective no_data without poisoning the rest.
- *   - NoopStatusAggregator preserves the W1.2 stub contract.
+ *   - NoopStatusAggregator preserves the offline-stub contract.
  *   - Wire-level: recording-rule path is the query-execution endpoint; alerts
  *     path is the resource-proxy endpoint, GET verb.
  */
@@ -696,7 +696,7 @@ describe('NoopStatusAggregator', () => {
 });
 
 // ============================================================================
-// W1.6 rule-health priority merge
+// rule-health priority merge
 // ============================================================================
 
 describe('expectedRuleGroupsFor', () => {
@@ -714,7 +714,7 @@ describe('expectedRuleGroupsFor', () => {
   });
 });
 
-describe('W1.6 rule-health priority merge', () => {
+describe('rule-health priority merge', () => {
   /** Build a checker mock that returns the given fixed result. */
   function checkerReturning(
     result:

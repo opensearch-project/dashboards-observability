@@ -6,7 +6,7 @@
 /// <reference types="cypress" />
 
 /*
- * SLO rule-dedup Phase 3 end-to-end.
+ * SLO rule-dedup end-to-end.
  *
  * Run locally with:
  *   yarn cypress:run-without-security --spec \
@@ -88,7 +88,7 @@ function buildSharedSloSpec(datasourceId, name) {
   };
 }
 
-describe('SLO rule dedup — Phase 3 detail UX', () => {
+describe('SLO rule dedup — detail UX', () => {
   const datasourceId = Cypress.env('sloDatasourceId') || 'prom_integ_test';
   const nameA = randomId('cypress-dedup-a');
   const nameB = randomId('cypress-dedup-b');

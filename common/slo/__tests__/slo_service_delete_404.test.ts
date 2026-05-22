@@ -4,12 +4,12 @@
  */
 
 /**
- * SloService.delete — 404 tolerance regression coverage (W1.9).
+ * SloService.delete — 404 tolerance regression coverage.
  *
  * Pins the contract:
  *   - Happy path: ruler group present → deleteRuleGroup called, SO removed.
- *   - 404 path: ruler `deleteRuleGroup` resolves successfully (W1.1 made it
- *     404-tolerant) → SO still deletes cleanly, callers see
+ *   - 404 path: ruler `deleteRuleGroup` resolves successfully (the ruler
+ *     client is 404-tolerant) → SO still deletes cleanly, callers see
  *     `{ deleted: true, generatedRuleNames }`.
  *   - 5xx / unreachable: ruler throws SloRulerError → SO stays, user retries.
  *
@@ -111,7 +111,7 @@ function makeDeps() {
   return { ruler, store, deploy, saved };
 }
 
-describe('SloService.delete — ruler 404 tolerance (W1.9)', () => {
+describe('SloService.delete — ruler 404 tolerance', () => {
   it('happy path: rule group present → deleteRuleGroup called once, SO removed', async () => {
     const { ruler, store, deploy, saved } = makeDeps();
     const svc = new SloService(noopLogger(), store);
@@ -128,7 +128,7 @@ describe('SloService.delete — ruler 404 tolerance (W1.9)', () => {
   it('ruler already succeeded on 404 (mock resolves undefined) → SO still deletes and generatedRuleNames surface', async () => {
     // Simulates the real-world case: somebody DELETE'd the rule group in
     // Cortex out-of-band. DirectQueryRulerClient.deleteRuleGroup sees the
-    // 404 and resolves (W1.1). The service must NOT treat this as a
+    // 404 and resolves cleanly. The service must NOT treat this as a
     // failure; the SO tear-down continues, and the caller gets a clean
     // { deleted: true, generatedRuleNames } envelope.
     const { ruler, store, deploy, saved } = makeDeps();

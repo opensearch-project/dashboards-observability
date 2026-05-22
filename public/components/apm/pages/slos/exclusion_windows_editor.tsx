@@ -4,10 +4,9 @@
  */
 
 /**
- * W2.6 — Exclusion-window editor. Shape-only in P0: the definition is
- * persisted on the SLO document but attainment exclusion is deferred (design
- * §3.5). The editor captures the spec so data-gathering can start before
- * enforcement ships.
+ * Exclusion-window editor. Shape-only in P0: the definition is persisted
+ * on the SLO document but attainment exclusion is deferred. The editor
+ * captures the spec so data-gathering can start before enforcement ships.
  *
  * Two schedule modes:
  *   cron    — recurring (expression + timezone + duration-per-occurrence)

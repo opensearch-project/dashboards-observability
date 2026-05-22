@@ -4,7 +4,7 @@
  */
 
 /**
- * SloService.repair — integration tests (W1.10).
+ * SloService.repair — integration tests.
  *
  * Wires the real `SloService` against:
  *   - `InMemorySloStore` (no SO-layer mocks)
@@ -14,7 +14,7 @@
  *     fake ruler
  *
  * Unlike the unit-level `slo_service_repair.test.ts`, these tests exercise
- * multiple workstreams stitched together: the probe actually runs against the
+ * multiple subsystems stitched together: the probe actually runs against the
  * fake ruler's state, and repair's upsert flips the probe's next answer. That
  * lets us pin end-to-end semantics (restore after out-of-band delete,
  * idempotence, error-propagation) that no single unit test covers.
@@ -97,8 +97,7 @@ function makeHarness() {
   const ruler = new FakeRulerClient();
   const logger = noopLogger();
   const svc = new SloService(logger, store);
-  // Pin Phase-1/2 (single-group) contract — Phase-3 dedup behavior has its
-  // own integration test in W3.15.
+  // Pin the single-group contract — dedup behavior has its own integration test.
   svc.setDedupEnabled(false);
   const health = createRuleHealthChecker(ruler, logger, { ttlMs: 0 });
 
@@ -130,7 +129,7 @@ function makeHarness() {
 // Tests
 // ============================================================================
 
-describe('SloService.repair — integration (W1.10)', () => {
+describe('SloService.repair — integration', () => {
   it('restores an out-of-band deleted rule group: repaired=true, state=ok, two upserts total, group back on ruler', async () => {
     const { svc, ruler, deploy, repairCtx, namespace } = makeHarness();
     const doc = await svc.create({ spec: validSpec() }, 'alice', deploy);
@@ -244,15 +243,16 @@ describe('SloService.repair — integration (W1.10)', () => {
   });
 
   it('rules_partial branch: probe first returns null then the group; repair upserts once and re-probes to ok', async () => {
-    // Phase 1 SLOs persist a single rule group, so the on-disk partial case
-    // and the all-missing case collapse to the same `expectedGroups` set of
-    // size 1. We exercise the `rules_partial`-style wiring by scripting the
+    // Single-group SLOs persist exactly one rule group, so the on-disk partial
+    // case and the all-missing case collapse to the same `expectedGroups` set
+    // of size 1. We exercise the `rules_partial`-style wiring by scripting the
     // fake ruler's `getRuleGroup` to return null on the *first* call for the
     // SLO's group and the real stored group on subsequent calls — which makes
     // the pre-repair probe see 'missing' (1 of 1 absent) and the post-repair
     // probe see 'ok'. The branch under test is "repair upserts, then the
     // post-probe re-reads as healthy"; whether the pre-state was
-    // rules_missing or rules_partial is structurally equivalent for Phase 1.
+    // rules_missing or rules_partial is structurally equivalent for the
+    // single-group shape.
     const { svc, ruler, deploy, repairCtx, namespace } = makeHarness();
     const doc = await svc.create({ spec: validSpec() }, 'alice', deploy);
 
@@ -280,16 +280,16 @@ describe('SloService.repair — integration (W1.10)', () => {
 });
 
 // ============================================================================
-// Phase 3 dedup-shape repair (W1.5-fix)
+// Dedup-shape repair
 //
-// Pins the shape contract a dedup-shape `repair()` must honor. The pre-fix
+// Pins the shape contract a dedup-shape `repair()` must honor. An earlier
 // `repair()` called `generateSloRuleGroup` unconditionally and emitted a
-// legacy `slo:<slug>_<suffix>` group carrying identity labels on recording
-// rules. These tests fail against that code: (a) exact-shape assertion rejects
-// the wrong group name, (b) recording-rule annotation assertion rejects the
-// legacy identity labels bundled with no-annotation invariant, (c) the alert
-// group provenance assertion rejects the fact the legacy path never calls
-// `annotateAlertGroup`.
+// single-group `slo:<slug>_<suffix>` group carrying identity labels on
+// recording rules. These tests fail against that code: (a) exact-shape
+// assertion rejects the wrong group name, (b) recording-rule annotation
+// assertion rejects the identity labels bundled with no-annotation invariant,
+// (c) the alert group provenance assertion rejects the fact the single-group
+// path never calls `annotateAlertGroup`.
 // ============================================================================
 
 class FakeRefStore implements SloRuleRefStoreLite {
@@ -357,8 +357,8 @@ function makeDedupHarness() {
   return { store, ruler, svc, deploy, repairCtx, namespace, health };
 }
 
-describe('SloService.repair — dedup integration (W1.5-fix)', () => {
-  it('restores a dropped recording group with the dedup shape: slo:rec:<fp> + slo:alerts:<...>, no legacy slo:<slug>_<suffix> garbage group', async () => {
+describe('SloService.repair — dedup integration', () => {
+  it('restores a dropped recording group with the dedup shape: slo:rec:<fp> + slo:alerts:<...>, no single-group slo:<slug>_<suffix> garbage group', async () => {
     const { svc, ruler, deploy, repairCtx, namespace } = makeDedupHarness();
     const spec = validSpec();
     const doc = await svc.create({ spec }, 'alice', deploy);
@@ -387,7 +387,7 @@ describe('SloService.repair — dedup integration (W1.5-fix)', () => {
     expect(ruler.hasGroup(namespace, alertGroup)).toBe(true);
 
     // Recording group: rules are recording-only, no identity labels (slo_id,
-    // slo_name, etc.), and no annotations. Phase 3 invariant — if the rules
+    // slo_name, etc.), and no annotations. Dedup invariant — if the rules
     // carried identity labels the group wouldn't be reusable across SLOs
     // sharing a fingerprint.
     const rec = ruler.groupByName(namespace, recGroup)!;
@@ -400,8 +400,8 @@ describe('SloService.repair — dedup integration (W1.5-fix)', () => {
       expect(rule.annotations ? Object.keys(rule.annotations).length : 0).toBe(0);
     }
 
-    // Alert group: first rule carries the provenance annotation so Phase 4
-    // adoption can re-classify this group after the SO gets lost.
+    // Alert group: first rule carries the provenance annotation so the
+    // adoption path can re-classify this group after the SO gets lost.
     const alert = ruler.groupByName(namespace, alertGroup)!;
     expect(alert.rules[0].annotations?.[ALERT_PROVENANCE_ANNOTATION_KEY]).toBeDefined();
   });

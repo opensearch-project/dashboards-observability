@@ -4,7 +4,7 @@
  */
 
 /**
- * W2.5 — Advanced section. Collapsed by default so the common path stays
+ * Advanced section. Collapsed by default so the common path stays
  * minimal. Exposes the three knobs that were previously hard-coded:
  *
  *   1. MWMBR burn-rate tiers — short/long windows, multiplier, severity.

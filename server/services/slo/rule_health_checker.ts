@@ -15,14 +15,14 @@
  * listing page, detail page, and aggregator can all poll per-SLO health without
  * fanning out a ruler call on every request.
  *
- * Cache invalidation is deliberately narrow: the Phase 2 reconciler is
- * responsible for pushing `invalidate()` whenever its sweep detects a
- * diff for an SLO, so the next probe recomputes instead of waiting for the
- * TTL to elapse. UI code paths should rely on the TTL.
+ * Cache invalidation is deliberately narrow: the reconciler is responsible
+ * for pushing `invalidate()` whenever its sweep detects a diff for an SLO,
+ * so the next probe recomputes instead of waiting for the TTL to elapse. UI
+ * code paths should rely on the TTL.
  *
  * This file does not import or instantiate any real RulerClient — it operates
  * against a structural contract (`{ getRuleGroup }`). The production wiring
- * lives elsewhere and W1.1 provides that method on the concrete client.
+ * lives elsewhere and the concrete client provides that method.
  */
 
 import type { AlertingOSClient, Datasource, Logger } from '../../../common/types/alerting';
@@ -74,9 +74,9 @@ export interface RuleHealthCheckInput {
   /** Ruler namespace (typically `slo-generated-<workspaceId>`). */
   namespace: string;
   /**
-   * Group names the SLO expects to exist. Phase 3 dedup SLOs carry one
-   * shared recording group per fingerprint plus one per-SLO alert group;
-   * legacy (flag-off) SLOs carry just the per-SLO alert group.
+   * Group names the SLO expects to exist. Dedup SLOs carry one shared
+   * recording group per fingerprint plus one per-SLO alert group;
+   * single-group SLOs carry just the per-SLO alert group.
    */
   expectedGroups: string[];
 }
@@ -89,9 +89,9 @@ export interface RuleHealthChecker {
   check(input: RuleHealthCheckInput): Promise<RuleHealthReport>;
   /**
    * Drop the cached entry for the given (workspace, datasource, slo) tuple.
-   * The Phase 2 reconciler calls this when its sweep observes a diff for an
-   * SLO, so the next `check()` recomputes instead of returning a stale TTL
-   * result. Non-existent keys are a no-op.
+   * The reconciler calls this when its sweep observes a diff for an SLO, so
+   * the next `check()` recomputes instead of returning a stale TTL result.
+   * Non-existent keys are a no-op.
    */
   invalidate(workspaceId: string, datasourceId: string, sloId: string): void;
 }
@@ -100,9 +100,9 @@ export interface RuleHealthChecker {
 interface RuleGroupProbe {
   /**
    * Returns the rule group if present on the ruler, `null` on 404, or throws
-   * `SloRulerError` for any other failure. W1.1 provides this method on the
-   * real `RulerClient`; the structural type keeps this module testable
-   * without a real ruler implementation.
+   * `SloRulerError` for any other failure. The real `RulerClient` provides
+   * this method; the structural type keeps this module testable without a
+   * real ruler implementation.
    */
   getRuleGroup(
     client: AlertingOSClient,
