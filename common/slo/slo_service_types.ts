@@ -70,12 +70,34 @@ export interface SloDeployContext {
   client: AlertingOSClient;
   datasource: Datasource;
   /**
-   * Workspace identifier for namespace scoping. Pass `'default'` if the
-   * caller has no workspace concept (standalone, tests). The namespace is
+   * Namespace key for the ruler. The value lands in
    * `slo-generated-<workspaceId>` — hyphen (not slash) because the SQL
    * plugin's REST router treats `{namespace}` as a single path segment.
+   *
+   * In production this is the canonical datasource id (`ds.id`), so the
+   * recording-rule namespace is shared by every OSD workspace that targets
+   * the same Cortex tenant. The shared namespace is the deduplication unit
+   * — two workspaces creating SLOs over the same SLI fingerprint share
+   * one rule group on the ruler. The slo-rule-ref refcount is what
+   * partitions per workspace; see `OSDWorkspaceId`.
+   *
+   * Pass `'default'` when there's no workspace concept (standalone, tests).
    */
   workspaceId: string;
+  /**
+   * Real OSD workspace id derived from the request via
+   * `getWorkspaceState(request).requestWorkspaceId`. Used by the dedup
+   * write path to partition slo-rule-ref bookkeeping per workspace and to
+   * scope per-SLO alert-group naming. Falls back to `'default'` on
+   * non-workspace-enabled clusters or when no request scope is in flight
+   * (tests, reconciler).
+   *
+   * Distinct from `workspaceId` (the namespace key) by design: under A.4
+   * the ruler namespace is shared across workspaces but slo-rule-ref SOs
+   * are workspace-scoped, so the GC pass can sum aggregate refcount
+   * cross-workspace while CRUD reads see only the caller's own SOs.
+   */
+  OSDWorkspaceId?: string;
 }
 
 // ============================================================================
@@ -111,6 +133,62 @@ export interface SloRuleRefStoreLite {
     datasourceId: string;
     fingerprint: string;
   }): Promise<{ droppedToZero: boolean; underflow: boolean }>;
+}
+
+/**
+ * Cross-workspace aggregate-refcount surface used by the GC pass.
+ *
+ * Under A.4 the ruler namespace is shared across workspaces, so the
+ * grace-GC decision for a (datasourceId, fingerprint) requires summing
+ * refcounts across every workspace's slo-rule-ref SO. This read is the
+ * one path that legitimately bypasses the WorkspaceIdConsumerWrapper —
+ * the caller wires it from `forReconciler()` (internal repo), never from
+ * `forRequest()` (per-request scoped client).
+ *
+ * The lite shape matches `SloRuleRefStoreLite` so production callers can
+ * pass the real `SloRuleRefStore` instance which implements both. Tests
+ * that don't exercise the GC path can keep using the existing fake.
+ */
+export interface SloRuleAggregateStoreLite {
+  /**
+   * Sum refcount across every workspace for a (datasourceId, fingerprint)
+   * tuple. Returns 0 when no slo-rule-ref SO exists for the tuple. Used by
+   * the reconciler to decide whether the ruler group is eligible for
+   * grace-GC.
+   */
+  aggregateRefcount(datasourceId: string, fingerprint: string): Promise<number>;
+}
+
+/**
+ * Per-request store handles. The lifecycle / query / status services
+ * compose these through `SloServiceCore.storeFactory` when set; otherwise
+ * they fall back to the singleton `core.store` / `core.refStore`.
+ *
+ * Structural shape — the real implementation lives in
+ * `server/services/slo/slo_store_factory.ts`. Declared here so the common
+ * service surface does not reach into the server tree.
+ */
+export interface SloStoresLite {
+  sloStore: import('./slo_types').ISloStore;
+  /**
+   * Optional because the dedup refcount registry is feature-flagged
+   * (`observability.slo.ruleDedup.enabled`) and may legitimately be
+   * absent in tests / offline-dev wiring. Production always carries it.
+   */
+  ruleRefStore?: SloRuleRefStoreLite;
+}
+
+/**
+ * Factory the lifecycle / query / status services consult to obtain
+ * per-request store handles. Wired by `server/plugin.ts` at start; never
+ * by tests (tests set the singleton stores directly).
+ */
+export interface SloStoreFactoryLite {
+  /**
+   * Workspace-scoped store pair. The returned client routes through every
+   * saved-objects wrapper, including `WorkspaceIdConsumerWrapper`.
+   */
+  forRequest(request: unknown): SloStoresLite;
 }
 
 // ============================================================================

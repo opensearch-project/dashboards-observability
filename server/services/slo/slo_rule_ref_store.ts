@@ -18,6 +18,31 @@
  * the store just tracks "do we still need this recording group?". When a
  * decrement takes refcount to zero the store records `zeroSinceAt` so the
  * reconciler can enforce a grace period before deletion.
+ *
+ * Reconciler contract (future work — not yet implemented):
+ *
+ *   Under A.4 the ruler recording-rule namespace is shared across OSD
+ *   workspaces — workspace A and workspace B both targeting the same
+ *   datasource land their slo-rule-ref SOs in distinct partitions but
+ *   share one rule group on the ruler. The grace-GC pass MUST therefore
+ *   consult the cross-workspace aggregate refcount before deleting a
+ *   recording group:
+ *
+ *     1. Use a saved-objects client built from `createInternalRepository`
+ *        — never a request-scoped one — so the WorkspaceIdConsumerWrapper
+ *        does not auto-filter the find. The `SloStoreFactory.forReconciler`
+ *        helper wires this correctly.
+ *     2. For each candidate (datasourceId, fingerprint) tuple, sum
+ *        refcount across every workspace's slo-rule-ref SO via
+ *        `aggregateRefcount(datasourceId, fingerprint)`.
+ *     3. Eligible-for-GC iff aggregate === 0 AND every contributing SO's
+ *        `zeroSinceAt` lies before (now − graceMs).
+ *     4. Only after deletion of the ruler group: drop the corresponding
+ *        slo-rule-ref SOs.
+ *
+ *   A workspace-scoped client cannot satisfy step 2 by definition, which
+ *   is why the reconciler diverges from the CRUD path's per-request
+ *   client model.
  */
 
 /* eslint-disable max-classes-per-file */
@@ -93,7 +118,14 @@ export interface DecrementRefResult {
  */
 function isNotFound(err: unknown): boolean {
   const e = err as { output?: { statusCode?: number }; statusCode?: number } | undefined;
-  return e?.output?.statusCode === 404 || e?.statusCode === 404;
+  const code = e?.output?.statusCode ?? e?.statusCode;
+  // 404 — SO genuinely missing.
+  // 403 — `WorkspaceIdConsumerWrapper` rejected the read because the SO
+  // belongs to a different workspace. From the caller's perspective the
+  // ref does not exist in their workspace; surface as missing so the
+  // ref-bookkeeping code paths (increment, decrement, lookup) treat the
+  // foreign-workspace ref as absent rather than 500ing.
+  return code === 404 || code === 403;
 }
 
 function isConflict(err: unknown): boolean {
@@ -177,6 +209,48 @@ export class SloRuleRefStore {
       page++;
     }
     return results;
+  }
+
+  /**
+   * Sum refcount across every workspace's slo-rule-ref SO for a single
+   * (datasourceId, fingerprint) tuple.
+   *
+   * Under A.4 the ruler namespace is shared across workspaces, so the
+   * grace-GC decision needs the cross-workspace aggregate — a fingerprint
+   * is eligible for cleanup only when no workspace still references it.
+   * This read deliberately ignores workspace scoping; callers must pass an
+   * internal-repository-backed client (see `SloStoreFactory.forReconciler`)
+   * so the WorkspaceIdConsumerWrapper does not auto-filter the find().
+   *
+   * Read-time aggregation (vs. a materialized aggregate SO): the GC pass
+   * fires on a slow timer, the per-fingerprint cardinality is bounded by
+   * the number of workspaces a single Cortex tenant serves, and the
+   * matching slo-rule-ref docs all live behind the wrapper anyway — paying
+   * one O(workspaces) find here is cheaper than coordinating writes to a
+   * second SO on every increment/decrement.
+   */
+  async aggregateRefcount(datasourceId: string, fingerprint: string): Promise<number> {
+    let total = 0;
+    let page = 1;
+    const perPage = 1000;
+    const esc = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const filter =
+      `(${SLO_RULE_REF_SO_TYPE}.attributes.datasourceId: "${esc(datasourceId)}"` +
+      ` AND ${SLO_RULE_REF_SO_TYPE}.attributes.fingerprint: "${esc(fingerprint)}")`;
+    while (true) {
+      const response = await this.client.find<SloRuleRefAttributes>({
+        type: SLO_RULE_REF_SO_TYPE,
+        page,
+        perPage,
+        filter,
+      });
+      for (const obj of response.saved_objects) {
+        total += Math.max(0, obj.attributes.refcount ?? 0);
+      }
+      if (response.saved_objects.length === 0 || page * perPage >= response.total) break;
+      page++;
+    }
+    return total;
   }
 
   async remove(workspaceId: string, datasourceId: string, fingerprint: string): Promise<boolean> {

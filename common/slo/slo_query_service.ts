@@ -31,7 +31,12 @@ export class SloQueryService {
     private readonly statusService: SloStatusService
   ) {}
 
-  async list(filters?: SloListFilters, ctx?: SloStatusAggregationContext): Promise<SloSummary[]> {
+  async list(
+    filters?: SloListFilters,
+    ctx?: SloStatusAggregationContext,
+    request?: unknown
+  ): Promise<SloSummary[]> {
+    const { sloStore } = this.core.resolveStores(request);
     // Filter input arrives as either the internal ds-N id (from URL params)
     // or the user-facing datasource name (from some legacy chip-paste paths).
     // `spec.datasourceId` is persisted as the name, so resolve ids → names
@@ -43,7 +48,7 @@ export class SloQueryService {
     if (filters?.datasourceId && filters.datasourceId.length > 0 && normalizedDsIds?.length === 0) {
       return [];
     }
-    const all = await this.core.store.list(normalizedDsIds);
+    const all = await sloStore.list(normalizedDsIds);
     // `store.list` already OR-filtered by normalizedDsIds — if for any reason
     // the store ignored it (test doubles, future backends), belt-and-braces
     // filter again in memory so the contract stays consistent.
@@ -104,7 +109,7 @@ export class SloQueryService {
 
     // Get statuses for all filtered SLOs
     const ids = filtered.map((d) => d.id);
-    const statuses = await this.statusService.getStatuses(ids, ctx);
+    const statuses = await this.statusService.getStatuses(ids, ctx, request);
     const statusMap = new Map(statuses.map((s) => [s.sloId, s]));
 
     // State filter applied last so we don't pay for status computation on filtered-out rows.
@@ -122,11 +127,12 @@ export class SloQueryService {
 
   async getPaginated(
     filters?: SloListFilters,
-    ctx?: SloStatusAggregationContext
+    ctx?: SloStatusAggregationContext,
+    request?: unknown
   ): Promise<PaginatedResponse<SloSummary>> {
     const page = filters?.page ?? 1;
     const pageSize = Math.min(filters?.pageSize ?? 20, 100);
-    const all = await this.list(filters, ctx);
+    const all = await this.list(filters, ctx, request);
     const start = (page - 1) * pageSize;
     const end = start + pageSize;
     return {

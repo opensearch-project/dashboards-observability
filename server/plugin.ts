@@ -38,6 +38,7 @@ import type { ISloStore } from '../common/slo/slo_types';
 import { SavedObjectSloStore } from './services/slo/slo_saved_object_store';
 import { DirectQueryRulerClient } from './services/slo/ruler_client';
 import { SloRuleRefStore } from './services/slo/slo_rule_ref_store';
+import { SloStoreFactory } from './services/slo/slo_store_factory';
 import { DirectQueryStatusAggregator } from './services/slo/status_aggregator';
 import { createRuleHealthChecker } from './services/slo/rule_health_checker';
 import { InMemoryDatasourceService } from './services/alerting/datasource_service';
@@ -333,19 +334,21 @@ export class ObservabilityPlugin
     if (sloEnabled) {
       core.savedObjects.registerType(sloDefinitionType);
       core.savedObjects.registerType(sloRuleRefType);
-      // SLO storage is single-namespace and reads through an internal SO
-      // repository (see `start()`), which bypasses the workspace ID consumer
-      // wrapper. That means SLO documents are not partitioned by workspace —
-      // workspace A can list/read/write/delete workspace B's SLOs. Hardening
-      // the store to use request-scoped clients is tracked separately. For
-      // now, warn loudly when the operator opts into SLOs on a workspace-
-      // enabled cluster so they understand the multi-tenant gap.
       if (core.workspace.isWorkspaceEnabled()) {
-        this.logger.warn(
+        // SLO documents and slo-rule-ref refcount registry are partitioned
+        // per OSD workspace via the saved-objects workspace wrapper. The
+        // ruler recording-rule namespace (`slo-generated-<datasourceId>`)
+        // is shared across workspaces that target the same Cortex tenant —
+        // two workspaces creating SLOs over the same SLI fingerprint share
+        // one rule group on the ruler, with refcount tracked separately
+        // per workspace. The grace-GC pass owns recording-group cleanup
+        // and fires only when the cross-workspace aggregate refcount for a
+        // (datasourceId, fingerprint) tuple hits zero past the grace window.
+        this.logger.info(
           'Observability: SLO is enabled on a workspace-enabled cluster. ' +
-            'SLO storage is currently NOT partitioned by workspace — every ' +
-            'workspace will see the same SLO list. Disable observability.slo.enabled ' +
-            'until workspace-scoped storage lands.'
+            'SLO documents and dedup refcounts are scoped per workspace; ' +
+            'ruler recording rules are shared per datasource and GC-ed only ' +
+            'when no workspace references them past the grace period.'
         );
       }
     }
@@ -500,6 +503,15 @@ export class ObservabilityPlugin
         (repository as unknown) as import('../../../src/core/server').SavedObjectsClientContract
       );
       this.sloService.setRuleRefStore(refStore);
+      // Per-request store factory. Methods that receive an OSD `request`
+      // (every route handler does) route through the workspace-scoped
+      // saved-objects client so the WorkspaceIdConsumerWrapper engages and
+      // partitions slo-definition + slo-rule-ref reads/writes per
+      // workspace. The singleton stores above continue to back any path
+      // that doesn't carry a request — currently nothing in production,
+      // and tests that exercise the offline path.
+      const storeFactory = new SloStoreFactory(core.savedObjects);
+      this.sloService.setStoreFactory(storeFactory);
       this.logger.info('Observability: SLO storage upgraded to SavedObjects');
     }
 

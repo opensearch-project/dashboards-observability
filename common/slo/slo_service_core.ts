@@ -18,7 +18,12 @@
 import type { ISloStore, SloLiveStatus } from './slo_types';
 import type { Logger } from '../types/alerting';
 import { InMemorySloStore } from './slo_store';
-import type { SloRuleRefStoreLite, SloStatusAggregator } from './slo_service_types';
+import type {
+  SloRuleRefStoreLite,
+  SloStatusAggregator,
+  SloStoreFactoryLite,
+  SloStoresLite,
+} from './slo_service_types';
 
 /**
  * Default for `ruleDedup.enabled`. Matches the schema default. The plugin's
@@ -65,6 +70,28 @@ export class SloServiceCore {
    * context.
    */
   pluginVersion = '0.0.0';
+
+  /**
+   * Per-request store factory. When set, lifecycle/query/status methods that
+   * receive a `request` route SO operations through `factory.forRequest(request)`
+   * so the saved-objects workspace wrapper engages. When unset (tests, offline
+   * dev), the singleton `store` / `refStore` continue to back every call —
+   * matching pre-A.4 behavior.
+   */
+  storeFactory?: SloStoreFactoryLite;
+
+  /**
+   * Resolve the (sloStore, ruleRefStore) pair for one call. When the factory
+   * is wired AND the caller passed a request, return per-request stores
+   * scoped to the workspace wrapper. Otherwise fall back to the singletons
+   * the facade configured (used by tests + the in-memory bootstrap path).
+   */
+  resolveStores(request?: unknown): SloStoresLite {
+    if (this.storeFactory && request !== undefined && request !== null) {
+      return this.storeFactory.forRequest(request);
+    }
+    return { sloStore: this.store, ruleRefStore: this.refStore };
+  }
 
   constructor(public readonly logger: Logger, store?: ISloStore) {
     this.store = store ?? new InMemorySloStore();

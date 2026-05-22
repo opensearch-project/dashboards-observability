@@ -31,8 +31,12 @@ import {
 export class SloStatusService {
   constructor(private readonly core: SloServiceCore) {}
 
-  async getStatus(id: string, ctx?: SloStatusAggregationContext): Promise<SloLiveStatus> {
-    const [s] = await this.getStatuses([id], ctx);
+  async getStatus(
+    id: string,
+    ctx?: SloStatusAggregationContext,
+    request?: unknown
+  ): Promise<SloLiveStatus> {
+    const [s] = await this.getStatuses([id], ctx, request);
     return s;
   }
 
@@ -45,7 +49,12 @@ export class SloStatusService {
    *
    * Call order is preserved: `out[i]` corresponds to `ids[i]`.
    */
-  async getStatuses(ids: string[], ctx?: SloStatusAggregationContext): Promise<SloLiveStatus[]> {
+  async getStatuses(
+    ids: string[],
+    ctx?: SloStatusAggregationContext,
+    request?: unknown
+  ): Promise<SloLiveStatus[]> {
+    const { sloStore } = this.core.resolveStores(request);
     const now = Date.now();
     const result = new Map<string, SloLiveStatus>();
     const uncached: string[] = [];
@@ -64,7 +73,7 @@ export class SloStatusService {
     // Bound the SO read fan-out — `ids` is caller-controlled (the listing
     // page or aggregate endpoint), and a 500-id batch issuing 500 concurrent
     // `client.get` calls puts unnecessary pressure on the saved-objects layer.
-    const docs = await mapWithConcurrency(uncached, 16, (id) => this.core.store.get(id));
+    const docs = await mapWithConcurrency(uncached, 16, (id) => sloStore.get(id));
     const presentDocs: SloDocument[] = [];
     const missing: string[] = [];
     for (let i = 0; i < uncached.length; i++) {

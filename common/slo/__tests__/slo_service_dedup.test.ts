@@ -194,7 +194,20 @@ function makeHarness() {
   const client = ({
     transport: { request: () => Promise.resolve({}) },
   } as unknown) as AlertingOSClient;
-  const deploy: SloDeployContext = { ruler, client, datasource, workspaceId: 'ws-001' };
+  // `OSDWorkspaceId` mirrors `workspaceId` here so the test's per-tuple
+  // refcount assertions (`refStore.refcount('ws-001', ds, fp)`) line up
+  // with the partition the service writes to under A.4. In production
+  // the two values are distinct (workspaceId = datasource id; OSDWorkspaceId
+  // = real OSD workspace id) — the dedup invariants this test pins are
+  // invariant under that change as long as the test asserts on the same
+  // partition the service writes to.
+  const deploy: SloDeployContext = {
+    ruler,
+    client,
+    datasource,
+    workspaceId: 'ws-001',
+    OSDWorkspaceId: 'ws-001',
+  };
   return { store, ruler, refStore, svc, deploy, namespace: 'slo-generated-ws-001' };
 }
 

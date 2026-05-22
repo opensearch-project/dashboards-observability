@@ -112,10 +112,11 @@ export async function handleListSLOs(
   svc: SloService,
   filters: SloListFilters,
   logger?: Logger,
-  statusCtx?: SloStatusAggregationContext
+  statusCtx?: SloStatusAggregationContext,
+  request?: unknown
 ): Promise<HandlerResult> {
   try {
-    const result = await svc.getPaginated(filters, statusCtx);
+    const result = await svc.getPaginated(filters, statusCtx, request);
     return { status: 200, body: result };
   } catch (e) {
     return toSloError(e, logger);
@@ -127,10 +128,11 @@ export async function handleCreateSLO(
   input: SloCreateInput,
   createdBy: string,
   logger?: Logger,
-  deploy?: SloDeployContext
+  deploy?: SloDeployContext,
+  request?: unknown
 ): Promise<HandlerResult> {
   try {
-    const doc = await svc.create(input, createdBy, deploy);
+    const doc = await svc.create(input, createdBy, deploy, request);
     return { status: 201, body: doc };
   } catch (e) {
     return toSloError(e, logger);
@@ -141,21 +143,25 @@ export async function handleGetSLO(
   svc: SloService,
   id: string,
   logger?: Logger,
-  statusCtx?: SloStatusAggregationContext
+  statusCtx?: SloStatusAggregationContext,
+  request?: unknown
 ): Promise<HandlerResult> {
   try {
-    const doc = await svc.get(id);
+    const doc = await svc.get(id, request);
     if (!doc) return { status: 404, body: { error: 'SLO not found' } };
-    const liveStatus = await svc.getStatus(id, statusCtx);
+    const liveStatus = await svc.getStatus(id, statusCtx, request);
     // Include the refcount per recording fingerprint so the detail page
-    // can render "Shared with N other SLOs". When no ref store is wired
-    // (offline / tests / legacy docs) the map is `{}` and the UI treats
-    // every fingerprint as unshared.
+    // can render "Shared with N other SLOs". Under A.4 this read is
+    // workspace-local: the wrapper auto-filters slo-rule-ref SOs to the
+    // caller's workspace, so N reflects "other SLOs in your workspace
+    // sharing this fingerprint" — never information about other
+    // workspaces' SLOs.
     const workspaceId = statusCtx?.workspaceId ?? 'default';
     const recordingFingerprintRefcounts = await svc.getFingerprintRefcounts(
       doc,
       workspaceId,
-      statusCtx?.resolveDatasource
+      statusCtx?.resolveDatasource,
+      request
     );
     return {
       status: 200,
@@ -172,10 +178,11 @@ export async function handleUpdateSLO(
   input: SloUpdateInput,
   updatedBy: string,
   logger?: Logger,
-  deploy?: SloDeployContext
+  deploy?: SloDeployContext,
+  request?: unknown
 ): Promise<HandlerResult> {
   try {
-    const doc = await svc.update(id, input, updatedBy, deploy);
+    const doc = await svc.update(id, input, updatedBy, deploy, request);
     return { status: 200, body: doc };
   } catch (e) {
     return toSloError(e, logger);
@@ -186,10 +193,11 @@ export async function handleDeleteSLO(
   svc: SloService,
   id: string,
   logger?: Logger,
-  deploy?: SloDeployContext
+  deploy?: SloDeployContext,
+  request?: unknown
 ): Promise<HandlerResult> {
   try {
-    const result = await svc.delete(id, deploy);
+    const result = await svc.delete(id, deploy, request);
     if (!result.deleted) return { status: 404, body: { error: 'SLO not found' } };
     return { status: 200, body: { deleted: true } };
   } catch (e) {
@@ -202,10 +210,11 @@ export async function handleEnableSLO(
   id: string,
   updatedBy: string,
   logger?: Logger,
-  deploy?: SloDeployContext
+  deploy?: SloDeployContext,
+  request?: unknown
 ): Promise<HandlerResult> {
   try {
-    const doc = await svc.setEnabled(id, true, updatedBy, deploy);
+    const doc = await svc.setEnabled(id, true, updatedBy, deploy, request);
     return { status: 200, body: doc };
   } catch (e) {
     return toSloError(e, logger);
@@ -217,10 +226,11 @@ export async function handleDisableSLO(
   id: string,
   updatedBy: string,
   logger?: Logger,
-  deploy?: SloDeployContext
+  deploy?: SloDeployContext,
+  request?: unknown
 ): Promise<HandlerResult> {
   try {
-    const doc = await svc.setEnabled(id, false, updatedBy, deploy);
+    const doc = await svc.setEnabled(id, false, updatedBy, deploy, request);
     return { status: 200, body: doc };
   } catch (e) {
     return toSloError(e, logger);
@@ -244,13 +254,14 @@ export async function handleGetSLOStatuses(
   svc: SloService,
   ids: string[],
   logger?: Logger,
-  statusCtx?: SloStatusAggregationContext
+  statusCtx?: SloStatusAggregationContext,
+  request?: unknown
 ): Promise<HandlerResult> {
   try {
     if (!ids || ids.length === 0) {
       return { status: 400, body: { error: 'ids parameter is required' } };
     }
-    const statuses = await svc.getStatuses(ids, statusCtx);
+    const statuses = await svc.getStatuses(ids, statusCtx, request);
     return { status: 200, body: { statuses } };
   } catch (e) {
     return toSloError(e, logger);
@@ -284,7 +295,8 @@ export async function handleRepairSLO(
   svc: SloService,
   id: string,
   logger?: Logger,
-  ctx?: SloRepairHandlerContext
+  ctx?: SloRepairHandlerContext,
+  request?: unknown
 ): Promise<HandlerResult> {
   try {
     if (!ctx?.health) {
@@ -303,7 +315,7 @@ export async function handleRepairSLO(
       };
     }
     const repairCtx: SloRepairContext = { health: ctx.health, deploy: ctx.deploy };
-    const result = await svc.repair(id, repairCtx);
+    const result = await svc.repair(id, repairCtx, request);
     return { status: 200, body: result };
   } catch (e) {
     return toSloError(e, logger);
@@ -319,7 +331,8 @@ export async function handleGetRuleHealth(
   svc: SloService,
   id: string,
   logger?: Logger,
-  ctx?: SloRepairHandlerContext
+  ctx?: SloRepairHandlerContext,
+  request?: unknown
 ): Promise<HandlerResult> {
   try {
     if (!ctx?.health) {
@@ -328,7 +341,7 @@ export async function handleGetRuleHealth(
         body: { error: 'Rule health checker not configured in this environment' },
       };
     }
-    const doc = await svc.get(id);
+    const doc = await svc.get(id, request);
     if (!doc) throw new SloNotFoundError(id);
 
     if (!ctx.deploy) {

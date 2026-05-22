@@ -51,6 +51,7 @@ import {
   SloRuleRefStoreLite,
   SloStatusAggregationContext,
   SloStatusAggregator,
+  SloStoreFactoryLite,
 } from './slo_service_types';
 import { SloServiceCore } from './slo_service_core';
 import { SloLifecycleService } from './slo_lifecycle_service';
@@ -139,6 +140,22 @@ export class SloService {
     this.core.logger.info('SloService: storage backend replaced');
   }
 
+  /**
+   * Wire a per-request store factory. When set, lifecycle / query / status
+   * methods that receive a `request` route SO operations through the
+   * factory's `forRequest(request)` so the saved-objects workspace wrapper
+   * engages. When unset, all methods use the singleton `store` /
+   * `refStore` configured via `setStore` / `setRuleRefStore` (test path).
+   */
+  setStoreFactory(factory: SloStoreFactoryLite | undefined): void {
+    this.core.storeFactory = factory;
+    this.core.logger.info(
+      factory
+        ? 'SloService: per-request store factory configured'
+        : 'SloService: per-request store factory cleared'
+    );
+  }
+
   setStatusAggregator(aggregator: SloStatusAggregator | undefined): void {
     this.core.aggregator = aggregator;
     this.core.statusCache.clear();
@@ -155,39 +172,42 @@ export class SloService {
   create(
     input: SloCreateInput,
     createdBy: string = 'system',
-    deploy?: SloDeployContext
+    deploy?: SloDeployContext,
+    request?: unknown
   ): Promise<SloDocument> {
-    return this.lifecycle.create(input, createdBy, deploy);
+    return this.lifecycle.create(input, createdBy, deploy, request);
   }
 
-  get(id: string): Promise<SloDocument | null> {
-    return this.lifecycle.get(id);
+  get(id: string, request?: unknown): Promise<SloDocument | null> {
+    return this.lifecycle.get(id, request);
   }
 
   update(
     id: string,
     input: SloUpdateInput,
     updatedBy: string = 'system',
-    deploy?: SloDeployContext
+    deploy?: SloDeployContext,
+    request?: unknown
   ): Promise<SloDocument> {
-    return this.lifecycle.update(id, input, updatedBy, deploy);
+    return this.lifecycle.update(id, input, updatedBy, deploy, request);
   }
 
-  delete(id: string, deploy?: SloDeployContext): Promise<{ deleted: boolean }> {
-    return this.lifecycle.delete(id, deploy);
+  delete(id: string, deploy?: SloDeployContext, request?: unknown): Promise<{ deleted: boolean }> {
+    return this.lifecycle.delete(id, deploy, request);
   }
 
-  repair(id: string, ctx: SloRepairContext): Promise<SloRepairResult> {
-    return this.lifecycle.repair(id, ctx);
+  repair(id: string, ctx: SloRepairContext, request?: unknown): Promise<SloRepairResult> {
+    return this.lifecycle.repair(id, ctx, request);
   }
 
   setEnabled(
     id: string,
     enabled: boolean,
     updatedBy: string = 'system',
-    deploy?: SloDeployContext
+    deploy?: SloDeployContext,
+    request?: unknown
   ): Promise<SloDocument> {
-    return this.lifecycle.setEnabled(id, enabled, updatedBy, deploy);
+    return this.lifecycle.setEnabled(id, enabled, updatedBy, deploy, request);
   }
 
   previewRules(input: SloCreateInput): GeneratedRuleGroup {
@@ -197,31 +217,45 @@ export class SloService {
   getFingerprintRefcounts(
     doc: SloDocument,
     workspaceId: string,
-    resolveDatasource?: (datasourceId: string) => Promise<Datasource | undefined>
+    resolveDatasource?: (datasourceId: string) => Promise<Datasource | undefined>,
+    request?: unknown
   ): Promise<Record<string, number>> {
-    return this.lifecycle.getFingerprintRefcounts(doc, workspaceId, resolveDatasource);
+    return this.lifecycle.getFingerprintRefcounts(doc, workspaceId, resolveDatasource, request);
   }
 
   // ---------- status ----------
 
-  getStatus(id: string, ctx?: SloStatusAggregationContext): Promise<SloLiveStatus> {
-    return this.statusService.getStatus(id, ctx);
+  getStatus(
+    id: string,
+    ctx?: SloStatusAggregationContext,
+    request?: unknown
+  ): Promise<SloLiveStatus> {
+    return this.statusService.getStatus(id, ctx, request);
   }
 
-  getStatuses(ids: string[], ctx?: SloStatusAggregationContext): Promise<SloLiveStatus[]> {
-    return this.statusService.getStatuses(ids, ctx);
+  getStatuses(
+    ids: string[],
+    ctx?: SloStatusAggregationContext,
+    request?: unknown
+  ): Promise<SloLiveStatus[]> {
+    return this.statusService.getStatuses(ids, ctx, request);
   }
 
   // ---------- listing ----------
 
-  list(filters?: SloListFilters, ctx?: SloStatusAggregationContext): Promise<SloSummary[]> {
-    return this.queryService.list(filters, ctx);
+  list(
+    filters?: SloListFilters,
+    ctx?: SloStatusAggregationContext,
+    request?: unknown
+  ): Promise<SloSummary[]> {
+    return this.queryService.list(filters, ctx, request);
   }
 
   getPaginated(
     filters?: SloListFilters,
-    ctx?: SloStatusAggregationContext
+    ctx?: SloStatusAggregationContext,
+    request?: unknown
   ): Promise<PaginatedResponse<SloSummary>> {
-    return this.queryService.getPaginated(filters, ctx);
+    return this.queryService.getPaginated(filters, ctx, request);
   }
 }

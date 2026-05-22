@@ -23,7 +23,14 @@ interface SavedObjectEnvelope {
 
 function isSavedObjectNotFound(err: unknown): boolean {
   const e = err as { output?: { statusCode?: number }; statusCode?: number } | undefined;
-  return e?.output?.statusCode === 404 || e?.statusCode === 404;
+  const code = e?.output?.statusCode ?? e?.statusCode;
+  // 404 — SO genuinely missing.
+  // 403 — `WorkspaceIdConsumerWrapper` rejected the read because the SO
+  // belongs to a different workspace. From the caller's perspective the
+  // object does not exist in their workspace; surfacing the wrapper's
+  // forbidden error verbatim would leak the existence of an SLO in
+  // another workspace via a 403/404 distinguisher.
+  return code === 404 || code === 403;
 }
 
 /**

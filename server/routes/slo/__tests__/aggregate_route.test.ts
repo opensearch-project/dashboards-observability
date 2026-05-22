@@ -200,7 +200,8 @@ describe('registerSloAggregateRoute', () => {
     expect(body.bySvc.bar.total).toBe(0);
     expect(list).toHaveBeenCalledWith(
       expect.objectContaining({ service: ['foo', 'bar'], datasourceId: ['ds-1'] }),
-      undefined
+      undefined,
+      expect.anything()
     );
   });
 
@@ -291,7 +292,8 @@ describe('registerSloAggregateRoute', () => {
       await handler(makeCtx(), { query: { services: 'foo', datasourceId: 'ds-1' } }, res);
       expect(list).toHaveBeenCalledWith(
         expect.objectContaining({ datasourceId: ['prom-prod'] }),
-        undefined
+        undefined,
+        expect.anything()
       );
     });
   });

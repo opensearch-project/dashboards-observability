@@ -68,8 +68,9 @@ export class SloLifecycleService {
 
   // ---------- read (single) ----------
 
-  async get(id: string): Promise<SloDocument | null> {
-    const doc = await this.core.store.get(id);
+  async get(id: string, request?: unknown): Promise<SloDocument | null> {
+    const { sloStore } = this.core.resolveStores(request);
+    const doc = await sloStore.get(id);
     if (!doc) return null;
     // Read-boundary defaulting: legacy SOs that pre-date later `alarms.*`
     // additions land here without those keys. `normalizeSloSpec` fills in
@@ -91,9 +92,11 @@ export class SloLifecycleService {
   async getFingerprintRefcounts(
     doc: SloDocument,
     workspaceId: string,
-    resolveDatasource?: (datasourceId: string) => Promise<Datasource | undefined>
+    resolveDatasource?: (datasourceId: string) => Promise<Datasource | undefined>,
+    request?: unknown
   ): Promise<Record<string, number>> {
-    if (!this.core.refStore) return {};
+    const { ruleRefStore } = this.core.resolveStores(request);
+    if (!ruleRefStore) return {};
     if (doc.status.provisioning.backend !== 'prometheus') return {};
     const fps = doc.status.provisioning.recordingFingerprints;
     if (!fps) return {};
@@ -119,7 +122,7 @@ export class SloLifecycleService {
       unique.map(async (fp) => {
         for (const key of candidateKeys) {
           try {
-            const entry = await this.core.refStore!.get(workspaceId, key, fp);
+            const entry = await ruleRefStore.get(workspaceId, key, fp);
             if (entry) {
               out[fp] = entry.attributes.refcount;
               return;
@@ -142,8 +145,10 @@ export class SloLifecycleService {
   async create(
     input: SloCreateInput,
     createdBy = 'system',
-    deploy?: SloDeployContext
+    deploy?: SloDeployContext,
+    request?: unknown
   ): Promise<SloDocument> {
+    const { sloStore } = this.core.resolveStores(request);
     // Normalize (clamp target precision, etc.) BEFORE validation so the
     // range check and rule generation both see the canonical value.
     // Validators stay pure — never mutate — so normalization lives here.
@@ -167,12 +172,12 @@ export class SloLifecycleService {
 
     // Name uniqueness within the datasource (workspace scoping is handled by
     // the saved-objects layer; the name check is best-effort here).
-    await this.assertNameUnique(spec.datasourceId, spec.name, null);
+    await this.assertNameUnique(spec.datasourceId, spec.name, null, request);
 
     // Dedup path branches here. Single-group path stays byte-identical to
     // what it used to do.
     if (this.core.dedupEnabled && deploy) {
-      return this.createDedup(id, spec, createdBy, deploy);
+      return this.createDedup(id, spec, createdBy, deploy, request);
     }
 
     const now = new Date().toISOString();
@@ -210,7 +215,7 @@ export class SloLifecycleService {
     }
 
     try {
-      await this.core.store.save(doc);
+      await sloStore.save(doc);
     } catch (saveErr) {
       // Compensation: ruler wrote, SO didn't. One best-effort delete; swallow
       // + warn on compensation failure. Reconciler sweeps danglers.
@@ -250,16 +255,23 @@ export class SloLifecycleService {
     id: string,
     spec: SloSpec,
     createdBy: string,
-    deploy: SloDeployContext
+    deploy: SloDeployContext,
+    request?: unknown
   ): Promise<SloDocument> {
+    const { sloStore, ruleRefStore } = this.core.resolveStores(request);
     const now = new Date().toISOString();
     const namespace = sloRulerNamespaceFor(deploy.workspaceId);
     const recordingFingerprints = this.computeObjectiveFingerprints(spec);
     const uniqueFps = uniqueValues(recordingFingerprints);
+    // Refcount + alert-group naming key. Distinct from the namespace key
+    // (`deploy.workspaceId` = datasource id in prod): workspaces share the
+    // ruler namespace but allocate independent slo-rule-ref SOs. See
+    // `SloDeployContext.OSDWorkspaceId` for the derivation.
+    const refWorkspaceId = deploy.OSDWorkspaceId ?? 'default';
 
     // Pre-compute the per-SLO alert group name so rollback can find it even
     // if the caller never persists the SO.
-    const alertGroupName = dedupAlertGroupName(spec.name, deploy.workspaceId, id);
+    const alertGroupName = dedupAlertGroupName(spec.name, refWorkspaceId, id);
 
     // Step 1: refcount bookkeeping + recording-group upserts. Track what we
     // touched so rollback can undo it. Recording groups are *shared* across
@@ -273,10 +285,10 @@ export class SloLifecycleService {
     const createdRecordingGroups: string[] = [];
     const rollback = async (): Promise<void> => {
       for (const fp of incrementedFps) {
-        if (this.core.refStore) {
+        if (ruleRefStore) {
           try {
-            await this.core.refStore.decrementRef({
-              workspaceId: deploy.workspaceId,
+            await ruleRefStore.decrementRef({
+              workspaceId: refWorkspaceId,
               datasourceId: deploy.datasource.name,
               fingerprint: fp,
             });
@@ -301,17 +313,16 @@ export class SloLifecycleService {
       if (!representative) continue;
       const groupName = dedupRecordingGroupName(fp);
       let wasZero = true;
-      if (this.core.refStore) {
+      if (ruleRefStore) {
         try {
-          // Refcount keys must use the canonical datasource `name` rather than
-          // the in-memory `ds-N` id. The id is allocated by an in-process
-          // counter that resets when the plugin process restarts; persistent
-          // SOs keyed on it would silently divorce from `getFingerprintRefcounts`,
-          // which reads keyed on `doc.spec.datasourceId`. `create()` pins
-          // `spec.datasourceId = deploy.datasource.name` before reaching
-          // here, so writer + reader land on the same key.
-          const r = await this.core.refStore.incrementRef({
-            workspaceId: deploy.workspaceId,
+          // Refcount keys: workspace partition is the OSD workspace id (so
+          // workspace A's refs and workspace B's refs are distinct SOs),
+          // datasource is pinned to `deploy.datasource.name` (canonical
+          // across plugin restarts; `create()` rewrites
+          // `spec.datasourceId = deploy.datasource.name` so writer + reader
+          // land on the same key).
+          const r = await ruleRefStore.incrementRef({
+            workspaceId: refWorkspaceId,
             datasourceId: deploy.datasource.name,
             fingerprint: fp,
             fingerprintVersion: FINGERPRINT_VERSION,
@@ -370,7 +381,7 @@ export class SloLifecycleService {
     const alertGroup = buildAlertGroupWithProvenance(
       doc,
       recordingFingerprints,
-      deploy.workspaceId,
+      refWorkspaceId,
       deploy.datasource.name,
       this.core.pluginVersion,
       now
@@ -383,7 +394,7 @@ export class SloLifecycleService {
     }
 
     try {
-      await this.core.store.save(doc);
+      await sloStore.save(doc);
     } catch (saveErr) {
       await rollback();
       throw saveErr;
@@ -409,9 +420,11 @@ export class SloLifecycleService {
     id: string,
     input: SloUpdateInput,
     updatedBy = 'system',
-    deploy?: SloDeployContext
+    deploy?: SloDeployContext,
+    request?: unknown
   ): Promise<SloDocument> {
-    const existing = await this.core.store.get(id);
+    const { sloStore } = this.core.resolveStores(request);
+    const existing = await sloStore.get(id);
     if (!existing) throw new SloNotFoundError(id);
 
     if (input.version !== existing.status.version) {
@@ -436,11 +449,11 @@ export class SloLifecycleService {
     if (deploy) merged.datasourceId = deploy.datasource.name;
 
     if (merged.name !== existing.spec.name) {
-      await this.assertNameUnique(merged.datasourceId, merged.name, id);
+      await this.assertNameUnique(merged.datasourceId, merged.name, id, request);
     }
 
     if (this.core.dedupEnabled && deploy) {
-      return this.updateDedup(existing, merged, updatedBy, deploy);
+      return this.updateDedup(existing, merged, updatedBy, deploy, request);
     }
 
     // Prefer the namespace stamped on the SO at create time. Falling back to
@@ -484,7 +497,7 @@ export class SloLifecycleService {
     }
 
     try {
-      await this.core.store.save(updated);
+      await sloStore.save(updated);
     } catch (saveErr) {
       if (deploy) {
         await this.safeRollback(deploy, namespace, group.groupName);
@@ -518,8 +531,11 @@ export class SloLifecycleService {
     existing: SloDocument,
     merged: SloSpec,
     updatedBy: string,
-    deploy: SloDeployContext
+    deploy: SloDeployContext,
+    request?: unknown
   ): Promise<SloDocument> {
+    const { sloStore, ruleRefStore } = this.core.resolveStores(request);
+    const refWorkspaceId = deploy.OSDWorkspaceId ?? 'default';
     const now = new Date().toISOString();
     // Prefer the namespace stamped on the SO at create time (matches
     // `deleteDedup` and `repair`). Falls back to the deploy-derived value
@@ -539,7 +555,7 @@ export class SloLifecycleService {
     const toAdd = [...newUnique].filter((fp) => !oldUnique.has(fp));
     const toDrop = [...oldUnique].filter((fp) => !newUnique.has(fp));
 
-    const alertGroupName = dedupAlertGroupName(merged.name, deploy.workspaceId, existing.id);
+    const alertGroupName = dedupAlertGroupName(merged.name, refWorkspaceId, existing.id);
 
     // Bookkeeping for rollback.
     const incrementedFps: string[] = [];
@@ -550,10 +566,10 @@ export class SloLifecycleService {
       // synchronously here — they're shared across SLOs by fingerprint and
       // the reconciler's grace-period sweep handles zero-ref cleanup.
       for (const fp of incrementedFps) {
-        if (this.core.refStore) {
+        if (ruleRefStore) {
           try {
-            await this.core.refStore.decrementRef({
-              workspaceId: deploy.workspaceId,
+            await ruleRefStore.decrementRef({
+              workspaceId: refWorkspaceId,
               datasourceId: deploy.datasource.name,
               fingerprint: fp,
             });
@@ -576,10 +592,10 @@ export class SloLifecycleService {
       if (!representative) continue;
       const groupName = dedupRecordingGroupName(fp);
       let wasZero = true;
-      if (this.core.refStore) {
+      if (ruleRefStore) {
         try {
-          const r = await this.core.refStore.incrementRef({
-            workspaceId: deploy.workspaceId,
+          const r = await ruleRefStore.incrementRef({
+            workspaceId: refWorkspaceId,
             datasourceId: deploy.datasource.name,
             fingerprint: fp,
             fingerprintVersion: FINGERPRINT_VERSION,
@@ -640,7 +656,7 @@ export class SloLifecycleService {
     const alertGroup = buildAlertGroupWithProvenance(
       updated,
       newFingerprints,
-      deploy.workspaceId,
+      refWorkspaceId,
       deploy.datasource.name,
       this.core.pluginVersion,
       existing.status.createdAt,
@@ -654,7 +670,7 @@ export class SloLifecycleService {
     }
 
     try {
-      await this.core.store.save(updated);
+      await sloStore.save(updated);
     } catch (saveErr) {
       await rollback();
       throw saveErr;
@@ -664,11 +680,11 @@ export class SloLifecycleService {
     // Recording-group deletion is deferred — the reconciler's grace-period
     // sweep handles zero-ref cleanups. Synchronous delete here would race
     // concurrent creates that bump the ref back up.
-    if (this.core.refStore) {
+    if (ruleRefStore) {
       for (const fp of toDrop) {
         try {
-          await this.core.refStore.decrementRef({
-            workspaceId: deploy.workspaceId,
+          await ruleRefStore.decrementRef({
+            workspaceId: refWorkspaceId,
             datasourceId: deploy.datasource.name,
             fingerprint: fp,
           });
@@ -700,8 +716,13 @@ export class SloLifecycleService {
    * (auth, 5xx, network) still propagates and leaves the SO intact so the
    * user can retry.
    */
-  async delete(id: string, deploy?: SloDeployContext): Promise<{ deleted: boolean }> {
-    const existing = await this.core.store.get(id);
+  async delete(
+    id: string,
+    deploy?: SloDeployContext,
+    request?: unknown
+  ): Promise<{ deleted: boolean }> {
+    const { sloStore } = this.core.resolveStores(request);
+    const existing = await sloStore.get(id);
     if (!existing) return { deleted: false };
 
     // Dedup path: tear down the per-SLO alert group, decrement refs, but
@@ -711,7 +732,7 @@ export class SloLifecycleService {
       if (!deploy) {
         throw new SloRulerTeardownRequiredError(id, existing.spec.datasourceId);
       }
-      return this.deleteDedup(existing, deploy);
+      return this.deleteDedup(existing, deploy, request);
     }
 
     const provisioning = existing.status.provisioning;
@@ -741,7 +762,7 @@ export class SloLifecycleService {
       }
     }
 
-    await this.core.store.delete(id);
+    await sloStore.delete(id);
     this.statusService.invalidate(id);
 
     this.core.logger.info(`Deleted SLO: ${id}`);
@@ -771,29 +792,32 @@ export class SloLifecycleService {
    */
   private async deleteDedup(
     existing: SloDocument,
-    deploy: SloDeployContext
+    deploy: SloDeployContext,
+    request?: unknown
   ): Promise<{ deleted: boolean }> {
     if (existing.status.provisioning.backend !== 'prometheus') {
       return { deleted: false };
     }
+    const { sloStore, ruleRefStore } = this.core.resolveStores(request);
+    const refWorkspaceId = deploy.OSDWorkspaceId ?? 'default';
     const provisioning = existing.status.provisioning;
     const namespace = provisioning.rulerNamespace || sloRulerNamespaceFor(deploy.workspaceId);
     const alertGroupName =
       provisioning.alertGroupName ||
-      dedupAlertGroupName(existing.spec.name, deploy.workspaceId, existing.id);
+      dedupAlertGroupName(existing.spec.name, refWorkspaceId, existing.id);
 
     await deploy.ruler.deleteRuleGroup(deploy.client, deploy.datasource, namespace, alertGroupName);
 
-    await this.core.store.delete(existing.id);
+    await sloStore.delete(existing.id);
     this.statusService.invalidate(existing.id);
 
     const fingerprints = provisioning.recordingFingerprints ?? {};
     const uniqueFps = uniqueValues(fingerprints);
-    if (this.core.refStore) {
+    if (ruleRefStore) {
       for (const fp of uniqueFps) {
         try {
-          await this.core.refStore.decrementRef({
-            workspaceId: deploy.workspaceId,
+          await ruleRefStore.decrementRef({
+            workspaceId: refWorkspaceId,
             datasourceId: deploy.datasource.name,
             fingerprint: fp,
           });
@@ -832,8 +856,9 @@ export class SloLifecycleService {
    *      from the doc, upsert via the ruler, invalidate the health cache,
    *      re-probe, and return the post-repair snapshot with `repaired: true`.
    */
-  async repair(id: string, ctx: SloRepairContext): Promise<SloRepairResult> {
-    const doc = await this.core.store.get(id);
+  async repair(id: string, ctx: SloRepairContext, request?: unknown): Promise<SloRepairResult> {
+    const { sloStore } = this.core.resolveStores(request);
+    const doc = await sloStore.get(id);
     if (!doc) throw new SloNotFoundError(id);
 
     if (this.core.dedupEnabled && isDedupSo(doc)) {
@@ -978,10 +1003,11 @@ export class SloLifecycleService {
     // `buildAlertGroupWithProvenance` when burn-rate tiers resolve to zero
     // alerts, so the provenance annotation always has a home.
     const now = new Date().toISOString();
+    const refWorkspaceId = ctx.deploy.OSDWorkspaceId ?? 'default';
     const alertGroup = buildAlertGroupWithProvenance(
       doc,
       recordingFingerprints,
-      ctx.deploy.workspaceId,
+      refWorkspaceId,
       ctx.deploy.datasource.name,
       this.core.pluginVersion,
       doc.status.createdAt,
@@ -1017,15 +1043,18 @@ export class SloLifecycleService {
     id: string,
     enabled: boolean,
     updatedBy = 'system',
-    deploy?: SloDeployContext
+    deploy?: SloDeployContext,
+    request?: unknown
   ): Promise<SloDocument> {
-    const existing = await this.core.store.get(id);
+    const { sloStore } = this.core.resolveStores(request);
+    const existing = await sloStore.get(id);
     if (!existing) throw new SloNotFoundError(id);
     return this.update(
       id,
       { spec: { enabled }, version: existing.status.version },
       updatedBy,
-      deploy
+      deploy,
+      request
     );
   }
 
@@ -1087,9 +1116,11 @@ export class SloLifecycleService {
   private async assertNameUnique(
     datasourceId: string,
     name: string,
-    excludeId: string | null
+    excludeId: string | null,
+    request?: unknown
   ): Promise<void> {
-    const peers = await this.core.store.list([datasourceId]);
+    const { sloStore } = this.core.resolveStores(request);
+    const peers = await sloStore.list([datasourceId]);
     const conflict = peers.find(
       (p) => p.spec.name === name && (excludeId === null || p.id !== excludeId)
     );

@@ -10,7 +10,13 @@
  */
 
 import { schema } from '@osd/config-schema';
-import type { IRouter, Logger, RequestHandlerContext } from '../../../../../src/core/server';
+import type {
+  IRouter,
+  Logger,
+  OpenSearchDashboardsRequest,
+  RequestHandlerContext,
+} from '../../../../../src/core/server';
+import { getWorkspaceState } from '../../../../../src/core/server/utils';
 import { OBSERVABILITY_BASE } from '../../../common/constants/shared';
 import type {
   SloDeployContext,
@@ -340,6 +346,7 @@ const previewBody = schema.object({
  */
 async function buildDeployContext(
   ctx: SloHandlerContext,
+  request: OpenSearchDashboardsRequest,
   datasourceId: string | undefined,
   rulerClient: RulerClient | undefined,
   datasourceService: InMemoryDatasourceService | undefined,
@@ -395,12 +402,26 @@ async function buildDeployContext(
     });
   }
 
+  // Real OSD workspace id, distinct from the namespace key (`workspaceId`
+  // = datasource id). Drives slo-rule-ref refcount partitioning + per-SLO
+  // alert-group naming under A.4. Falls back to 'default' on
+  // non-workspace-enabled clusters (`getWorkspaceState` returns an empty
+  // record) and on synthetic test requests that don't carry a Hapi `.app`
+  // bag — `getWorkspaceState` then throws, which we trap here so the
+  // route stays valid in test wiring.
+  let OSDWorkspaceId = 'default';
+  try {
+    OSDWorkspaceId = getWorkspaceState(request).requestWorkspaceId ?? 'default';
+  } catch {
+    // Synthetic test request without `.app`. Keep the default fallback.
+  }
+
   return {
     ruler: rulerClient,
     client,
     datasource: ds as Datasource,
-    // TODO: pull real workspaceId from OSD request scope once plumbed.
     workspaceId,
+    OSDWorkspaceId,
   };
 }
 
@@ -412,6 +433,7 @@ async function buildDeployContext(
  */
 async function tryBuildDeployContext(
   ctx: SloHandlerContext,
+  request: OpenSearchDashboardsRequest,
   datasourceId: string | undefined,
   rulerClient: RulerClient | undefined,
   datasourceService: InMemoryDatasourceService | undefined,
@@ -424,6 +446,7 @@ async function tryBuildDeployContext(
   try {
     const deploy = await buildDeployContext(
       ctx,
+      request,
       datasourceId,
       rulerClient,
       datasourceService,
@@ -611,7 +634,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         ruleHealthChecker,
         ruleDedupEnabled
       );
-      const result = await handleListSLOs(sloService, filters, logger, statusCtx);
+      const result = await handleListSLOs(sloService, filters, logger, statusCtx, req);
       if (result.status >= 400) {
         return res.customError({
           statusCode: result.status,
@@ -626,6 +649,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
     // TODO: once request auth context is wired, pull from req.auth.
     const built = await tryBuildDeployContext(
       ctx as SloHandlerContext,
+      req,
       req.body?.spec?.datasourceId,
       rulerClient,
       datasourceService,
@@ -643,7 +667,14 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         },
       });
     }
-    const result = await handleCreateSLO(sloService, req.body, 'osd-user', logger, built.deploy);
+    const result = await handleCreateSLO(
+      sloService,
+      req.body,
+      'osd-user',
+      logger,
+      built.deploy,
+      req
+    );
     if (result.status === 201) return res.ok({ body: result.body });
     return res.customError({
       statusCode: result.status,
@@ -682,7 +713,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         ruleHealthChecker,
         ruleDedupEnabled
       );
-      const result = await handleGetSLOStatuses(sloService, req.body.ids, logger, statusCtx);
+      const result = await handleGetSLOStatuses(sloService, req.body.ids, logger, statusCtx, req);
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({
         statusCode: result.status,
@@ -704,7 +735,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         ruleHealthChecker,
         ruleDedupEnabled
       );
-      const result = await handleGetSLO(sloService, req.params.id, logger, statusCtx);
+      const result = await handleGetSLO(sloService, req.params.id, logger, statusCtx, req);
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({
         statusCode: result.status,
@@ -724,9 +755,10 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
     async (ctx, req, res) => {
       // The update body may not carry datasourceId (partial spec); fetch the
       // existing doc to resolve the datasource for the deploy context.
-      const existing = await sloService.get(req.params.id);
+      const existing = await sloService.get(req.params.id, req);
       const built = await tryBuildDeployContext(
         ctx as SloHandlerContext,
+        req,
         existing?.spec.datasourceId,
         rulerClient,
         datasourceService,
@@ -750,7 +782,8 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         req.body,
         'osd-user',
         logger,
-        built.deploy
+        built.deploy,
+        req
       );
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({
@@ -769,7 +802,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       validate: { params: schema.object({ id: schema.string() }) },
     },
     async (ctx, req, res) => {
-      const existing = await sloService.get(req.params.id);
+      const existing = await sloService.get(req.params.id, req);
       // Delete is ruler-first, SO-second — if there's a rule group to remove,
       // we need a working deploy context (i.e. a resolvable datasource). An
       // unresolvable datasource here surfaces to the user as a 409: dropping
@@ -777,6 +810,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       // alerts evaluating against the cluster.
       const built = await tryBuildDeployContext(
         ctx as SloHandlerContext,
+        req,
         existing?.spec.datasourceId,
         rulerClient,
         datasourceService,
@@ -794,7 +828,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
           },
         });
       }
-      const result = await handleDeleteSLO(sloService, req.params.id, logger, built.deploy);
+      const result = await handleDeleteSLO(sloService, req.params.id, logger, built.deploy, req);
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({
         statusCode: result.status,
@@ -812,9 +846,10 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       validate: { params: schema.object({ id: schema.string() }) },
     },
     async (ctx, req, res) => {
-      const existing = await sloService.get(req.params.id);
+      const existing = await sloService.get(req.params.id, req);
       const built = await tryBuildDeployContext(
         ctx as SloHandlerContext,
+        req,
         existing?.spec.datasourceId,
         rulerClient,
         datasourceService,
@@ -837,7 +872,8 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         req.params.id,
         'osd-user',
         logger,
-        built.deploy
+        built.deploy,
+        req
       );
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({
@@ -853,9 +889,10 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       validate: { params: schema.object({ id: schema.string() }) },
     },
     async (ctx, req, res) => {
-      const existing = await sloService.get(req.params.id);
+      const existing = await sloService.get(req.params.id, req);
       const built = await tryBuildDeployContext(
         ctx as SloHandlerContext,
+        req,
         existing?.spec.datasourceId,
         rulerClient,
         datasourceService,
@@ -878,7 +915,8 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         req.params.id,
         'osd-user',
         logger,
-        built.deploy
+        built.deploy,
+        req
       );
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({
@@ -902,7 +940,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       validate: { params: schema.object({ id: schema.string() }) },
     },
     async (ctx, req, res) => {
-      const existing = await sloService.get(req.params.id);
+      const existing = await sloService.get(req.params.id, req);
       if (!existing) {
         return res.customError({
           statusCode: 404,
@@ -911,6 +949,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       }
       const built = await tryBuildDeployContext(
         ctx as SloHandlerContext,
+        req,
         existing.spec.datasourceId,
         rulerClient,
         datasourceService,
@@ -928,10 +967,16 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
           },
         });
       }
-      const result = await handleRepairSLO(sloService, req.params.id, logger, {
-        health: ruleHealthChecker,
-        deploy: built.deploy,
-      });
+      const result = await handleRepairSLO(
+        sloService,
+        req.params.id,
+        logger,
+        {
+          health: ruleHealthChecker,
+          deploy: built.deploy,
+        },
+        req
+      );
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({
         statusCode: result.status,
@@ -949,7 +994,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       validate: { params: schema.object({ id: schema.string() }) },
     },
     async (ctx, req, res) => {
-      const existing = await sloService.get(req.params.id);
+      const existing = await sloService.get(req.params.id, req);
       if (!existing) {
         return res.customError({
           statusCode: 404,
@@ -958,6 +1003,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       }
       const built = await tryBuildDeployContext(
         ctx as SloHandlerContext,
+        req,
         existing.spec.datasourceId,
         rulerClient,
         datasourceService,
@@ -975,10 +1021,16 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
           },
         });
       }
-      const result = await handleGetRuleHealth(sloService, req.params.id, logger, {
-        health: ruleHealthChecker,
-        deploy: built.deploy,
-      });
+      const result = await handleGetRuleHealth(
+        sloService,
+        req.params.id,
+        logger,
+        {
+          health: ruleHealthChecker,
+          deploy: built.deploy,
+        },
+        req
+      );
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({
         statusCode: result.status,

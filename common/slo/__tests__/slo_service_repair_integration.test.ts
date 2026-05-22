@@ -118,6 +118,7 @@ function makeHarness() {
     client,
     datasource,
     workspaceId: 'ws-int',
+    OSDWorkspaceId: 'ws-int',
   };
   const repairCtx: SloRepairContext = { health, deploy };
   const namespace = sloRulerNamespaceFor(deploy.workspaceId);
@@ -351,7 +352,13 @@ function makeDedupHarness() {
   const client = ({
     transport: { request: () => Promise.resolve({}) },
   } as unknown) as AlertingOSClient;
-  const deploy: SloDeployContext = { ruler, client, datasource, workspaceId: 'ws-dedup' };
+  const deploy: SloDeployContext = {
+    ruler,
+    client,
+    datasource,
+    workspaceId: 'ws-dedup',
+    OSDWorkspaceId: 'ws-dedup',
+  };
   const repairCtx: SloRepairContext = { health, deploy };
   const namespace = sloRulerNamespaceFor(deploy.workspaceId);
   return { store, ruler, svc, deploy, repairCtx, namespace, health };

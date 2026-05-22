@@ -161,7 +161,7 @@ export function registerSloAggregateRoute(
         // service stay well within a single sweep (see `classifier.ts` —
         // canonical pair is 2 availability + 2 latency per service, so even
         // at 200 services we're under 800 rows).
-        const summaries = await sloService.list(filters, statusCtx);
+        const summaries = await sloService.list(filters, statusCtx, req);
         const body = buildAggregateResponse(services, summaries);
         return res.ok({ body });
       } catch (e) {

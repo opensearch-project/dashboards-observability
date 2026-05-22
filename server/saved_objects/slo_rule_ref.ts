@@ -9,13 +9,19 @@
  * One SO per distinct (workspaceId, datasourceId, fingerprint) tuple. The SO
  * tracks how many active SLOs currently reference a given fingerprint — when
  * the refcount hits zero the recording group is eligible for deletion after
- * the 24h grace period (enforced by the reconciler).
+ * the grace period (enforced by the reconciler).
  *
- * FIXME (workspaceId plumbing): currently `datasourceId` doubles as the
- * workspace discriminator (`workspaceId === datasourceId`). A future change
- * will thread a real workspace id through the deploy context; when that
- * happens the SO id format `rule-ref:<ws>:<ds>:<fp>` already separates the
- * two so only the caller of `sloRuleRefId(...)` has to change.
+ * Workspace partitioning under A.4: `workspaceId` is the real OSD workspace
+ * id (`getWorkspaceState(request).requestWorkspaceId`, or `'default'` on
+ * non-workspace-enabled clusters). Two workspaces over the same datasource
+ * + fingerprint allocate separate slo-rule-ref SOs, each refcounted
+ * independently. `datasourceId` continues to identify the Cortex tenant
+ * (and the ruler namespace via `slo-generated-<datasourceId>`) — the ruler
+ * namespace is shared, the slo-rule-refs are not. Grace-GC fires only when
+ * the cross-workspace aggregate refcount for a (datasourceId, fingerprint)
+ * tuple hits zero past the grace window; see
+ * `SloRuleRefStore.aggregateRefcount` and the GC contract documented in
+ * that file.
  */
 
 import type { SavedObjectsType } from '../../../../src/core/server';
