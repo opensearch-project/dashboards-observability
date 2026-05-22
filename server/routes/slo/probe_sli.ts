@@ -189,7 +189,7 @@ export function registerProbeSliRoute(
         },
       });
     }
-    const { ds, client } = resolved;
+    const { ds } = resolved;
 
     const windowSeconds = LOOKBACK_SECONDS[lookback];
     const endSec = Math.floor(Date.now() / 1000);
@@ -204,11 +204,12 @@ export function registerProbeSliRoute(
     // timeout-guarded and any throw becomes a per-query error string. The
     // `time` argument is required by the SQL plugin's PrometheusQueryHandler
     // (it rejects instant requests without one), so pass endSec explicitly.
-    // `requestTimeoutMs` plumbs into the OS client so the upstream HTTP
-    // request is aborted on the wire, not just abandoned locally.
+    // `requestTimeoutMs` is forwarded to the search strategy as a per-query
+    // timeout hint; the local `withTimeout` race remains the safety net for
+    // the upstream socket.
     const [goodInstant, totalInstant] = await Promise.all([
       withTimeout(
-        prometheusBackend.queryInstant(client, ds, goodQuery, endSec, {
+        prometheusBackend.queryInstant(ctx, ds, goodQuery, endSec, {
           requestTimeoutMs: QUERY_TIMEOUT_MS,
         }),
         QUERY_TIMEOUT_MS,
@@ -219,7 +220,7 @@ export function registerProbeSliRoute(
         return null;
       }),
       withTimeout(
-        prometheusBackend.queryInstant(client, ds, totalQuery, endSec, {
+        prometheusBackend.queryInstant(ctx, ds, totalQuery, endSec, {
           requestTimeoutMs: QUERY_TIMEOUT_MS,
         }),
         QUERY_TIMEOUT_MS,
@@ -236,7 +237,7 @@ export function registerProbeSliRoute(
     // rather than good alone so the chart reflects what the SLO records.
     const ratioRangeQuery = `(${goodQuery}) / (${totalQuery})`;
     const rangePoints = await withTimeout(
-      prometheusBackend.queryRange(client, ds, ratioRangeQuery, startSec, endSec, stepSec, {
+      prometheusBackend.queryRange(ctx, ds, ratioRangeQuery, startSec, endSec, stepSec, {
         requestTimeoutMs: QUERY_TIMEOUT_MS,
       }),
       QUERY_TIMEOUT_MS,

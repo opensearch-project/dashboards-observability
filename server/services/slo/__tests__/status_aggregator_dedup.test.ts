@@ -26,6 +26,8 @@ import {
   expectedRuleGroupsFor,
 } from '../status_aggregator';
 import type { SloRuleHealthChecker, SloStatusAggregationContext } from '../status_aggregator';
+import { resetPromQLSearcherForTests, setPromQLSearcher } from '../../alerting/promql_search';
+import type { PromQLSearcher } from '../../alerting/promql_search';
 import type { AlertingOSClient, Datasource, Logger } from '../../../../common/types/alerting';
 import type { SloDocument, SloSpec } from '../../../../common/slo/slo_types';
 
@@ -113,23 +115,88 @@ function instantForMetrics(
   };
 }
 
+/**
+ * Translate a `{resultType, result}` envelope into the IDataFrame our
+ * PromQL adapter expects from the search strategy. Mirrors the shape
+ * `createDataFrame` produces for a single PROMQL request.
+ */
+function envelopeToDataFrame(envelope: {
+  resultType: string;
+  result: Array<{ metric?: Record<string, string>; value?: [number, string] }>;
+}) {
+  const Time: number[] = [];
+  const Series: string[] = [];
+  const Labels: Array<Record<string, string>> = [];
+  const Value: number[] = [];
+  for (const entry of envelope.result) {
+    const metric = entry.metric ?? {};
+    const labelsWithoutName = { ...metric };
+    delete labelsWithoutName.__name__;
+    const seriesParts = Object.entries(metric)
+      .filter(([, v]) => v !== undefined && v !== '')
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([k, v]) => `${k}="${v}"`);
+    const seriesName = `{${seriesParts.join(', ')}}`;
+    if (entry.value) {
+      Time.push(entry.value[0] * 1000);
+      Series.push(seriesName);
+      Labels.push(labelsWithoutName);
+      Value.push(Number(entry.value[1]));
+    }
+  }
+  return {
+    type: 'data_frame',
+    body: {
+      type: 'data_frame',
+      name: 'cortex',
+      schema: [],
+      fields: [
+        { name: 'Time', type: 'time', values: Time },
+        { name: 'Series', type: 'string', values: Series },
+        { name: 'Labels', type: 'object', values: Labels },
+        { name: 'Value', type: 'number', values: Value },
+      ],
+      size: Time.length,
+      meta: {},
+    },
+    took: 1,
+  };
+}
+
+/**
+ * Mock setup: PromQL goes through the search strategy (jest.fn), alerts
+ * stay on the resource transport.
+ */
 function mockClient(
   queryHandler: (body: unknown) => unknown,
   alertsHandler: () => unknown = () => ({ data: { alerts: [] } })
-): { client: AlertingOSClient; request: jest.Mock } {
+): {
+  client: AlertingOSClient;
+  request: jest.Mock;
+  searcher: jest.MockedFunction<PromQLSearcher>;
+} {
   const request = jest.fn(async (params: unknown) => {
-    const p = params as { method: string; path: string; body?: unknown };
-    if (p.path.includes('/_directquery/_query/')) {
-      return { statusCode: 200, body: queryHandler(p.body) };
-    }
+    const p = params as { method: string; path: string };
     if (p.path.endsWith('/api/v1/alerts')) return { statusCode: 200, body: alertsHandler() };
-    throw new Error(`Unexpected path: ${p.path}`);
+    throw new Error(`Unexpected transport path: ${p.path}`);
   });
+  const searcher = (jest.fn(async (_ctx, req, _options) => {
+    const reqBody = (req as { body?: unknown }).body;
+    return envelopeToDataFrame(
+      queryHandler(reqBody) as Parameters<typeof envelopeToDataFrame>[0]
+    ) as never;
+  }) as unknown) as jest.MockedFunction<PromQLSearcher>;
+  setPromQLSearcher(searcher as PromQLSearcher);
   return {
     client: ({ transport: { request } } as unknown) as AlertingOSClient,
     request,
+    searcher,
   };
 }
+
+afterEach(() => {
+  resetPromQLSearcherForTests();
+});
 
 function ctxDedup(
   client: AlertingOSClient,
@@ -137,6 +204,7 @@ function ctxDedup(
 ): SloStatusAggregationContext {
   return {
     client,
+    requestContext: {} as never,
     workspaceId: 'default',
     resolveDatasource: async () => ds(),
     ruleDedupEnabled: true,
@@ -159,12 +227,14 @@ describe('buildDedupObjectiveQuery', () => {
 describe('DirectQueryStatusAggregator — dedup path (W3.9)', () => {
   it('queries by fingerprint-named rules and maps samples back to objectives', async () => {
     const doc = dedupDoc('slo-a', { 'availability-99-9': 'abcdef0123456789' });
-    const { client, request } = mockClient((body) => {
-      const b = body as { query: string };
-      // Must query by __name__, NOT `slo_id=`.
-      expect(b.query).toContain('__name__=~');
-      expect(b.query).not.toContain('slo_id');
-      expect(b.query).toContain('sli_abcdef0123456789');
+    const { client, searcher } = mockClient((body) => {
+      // The strategy receives the query inside body.query.query (the strategy
+      // pulls dataset/language out of body.query, so the PromQL string lives
+      // one nesting level deeper than the legacy transport body).
+      const b = body as { query: { query: string } };
+      expect(b.query.query).toContain('__name__=~');
+      expect(b.query.query).not.toContain('slo_id');
+      expect(b.query.query).toContain('sli_abcdef0123456789');
       return instantForMetrics([
         { name: 'slo:sli_error:ratio_rate_3d:sli_abcdef0123456789', ratio: 0.0002 },
       ]);
@@ -174,11 +244,10 @@ describe('DirectQueryStatusAggregator — dedup path (W3.9)', () => {
     expect(status.state).toBe('ok');
     expect(status.objectives[0].state).toBe('ok');
     expect(status.objectives[0].currentValue).toBeCloseTo(0.0002, 6);
-    // One query-instant call + one /alerts call per datasource.
-    const queryCalls = request.mock.calls.filter((c) =>
-      (c[0] as { path: string }).path.includes('/_directquery/_query/')
-    );
-    expect(queryCalls).toHaveLength(1);
+    // One PromQL strategy call per dedup-fp set.
+    expect(searcher).toHaveBeenCalledTimes(1);
+    const [, , options] = searcher.mock.calls[0];
+    expect(options).toEqual({ strategy: 'promql' });
   });
 
   it('two SLOs sharing a fingerprint: each produces an identical query (Cortex can serve from one series)', async () => {
@@ -186,7 +255,7 @@ describe('DirectQueryStatusAggregator — dedup path (W3.9)', () => {
     const docB = dedupDoc('slo-b', { 'availability-99-9': 'abcdef0123456789' }, { name: 'B' });
     const queries: string[] = [];
     const { client } = mockClient((body) => {
-      queries.push((body as { query: string }).query);
+      queries.push((body as { query: { query: string } }).query.query);
       return instantForMetrics([
         { name: 'slo:sli_error:ratio_rate_3d:sli_abcdef0123456789', ratio: 0.0003 },
       ]);

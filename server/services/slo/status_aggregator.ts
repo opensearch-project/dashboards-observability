@@ -26,19 +26,23 @@
  * `no_data`; catastrophic failures (programmer error, malformed spec) are
  * the only things allowed to reject.
  *
- * Query path: `POST /_plugins/_directquery/_query/{dqName}` — the SQL plugin's
- * query execution API. Reused from `DirectQueryPrometheusBackend.queryInstant`
- * so we know this path is wired through the SQL plugin to Cortex. The
- * resource-proxy path (`.../api/v1/query`) would also work (verified 2026-04-23
- * — GET/POST/DELETE are registered on the resource router), but reusing the
- * proven query-execution path keeps us on the same code path we already test.
+ * Query path: PromQL execution routes through the data plugin's search
+ * service (`strategy: 'PROMQL'`, registered by query-enhancements). The
+ * strategy converges on the same SQL-plugin endpoint the legacy transport
+ * call used to hit, but going through the search-strategy registry gives
+ * us multi-query splitting, telemetry, and a single canonical OSD entry
+ * point. See `server/services/alerting/promql_search.ts` for the adapter
+ * that rebuilds the `{ resultType, result }` envelope our parsers consume.
  *
  * Alerts: `GET /_plugins/_directquery/_resources/{dqName}/api/v1/alerts` —
- * same path as `DirectQueryPrometheusBackend.getAlerts`.
+ * same path as `DirectQueryPrometheusBackend.getAlerts`. The strategy is
+ * query-only, so the alerts read path keeps the resource-proxy transport
+ * call.
  */
 
 /* eslint-disable max-classes-per-file */
 
+import type { RequestHandlerContext } from '../../../../../src/core/server';
 import type {
   AlertingOSClient,
   Datasource,
@@ -59,6 +63,7 @@ import {
   parseDurationToMs,
 } from '../../../common/slo/slo_promql_generator';
 import { deriveExpectedGroups, deriveRuleCount } from '../../../common/slo/slo_service';
+import { runPromQLInstant } from '../alerting/promql_search';
 
 /**
  * Expected ruler group names for an SLO. Re-exported alias of the canonical
@@ -450,7 +455,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
         const query = buildBatchedLongWindowQuery(sloIds, longWindow);
         if (!query) return;
         try {
-          const { samples, nonFinite } = await this.queryInstant(ctx.client, ds, query);
+          const { samples, nonFinite } = await this.queryInstant(ctx, ds, query);
 
           // Initialize empty maps for every SLO in the batch so a missing
           // sample on a particular SLO still distinguishes "ruler returned
@@ -526,7 +531,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
     let sourceIdleObjectives: Set<string>;
     if (dedup) {
       const result = await this.queryDedupObjectiveSamples(
-        ctx.client,
+        ctx,
         ds,
         recordingFingerprints!,
         longWindow
@@ -542,7 +547,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       byObjective = new Map();
       sourceIdleObjectives = new Set();
       const query = buildLongWindowQuery(doc.id, longWindow);
-      const { samples, nonFinite } = await this.queryInstant(ctx.client, ds, query);
+      const { samples, nonFinite } = await this.queryInstant(ctx, ds, query);
       for (const s of samples) {
         const name = s.labels.slo_objective;
         if (name) byObjective.set(name, s);
@@ -612,7 +617,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
    * continues to work unchanged.
    */
   private async queryDedupObjectiveSamples(
-    client: AlertingOSClient,
+    ctx: SloStatusAggregationContext,
     ds: Datasource,
     recordingFingerprints: Record<string, string>,
     longWindow: string
@@ -626,7 +631,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
     }
     const expectedNames = uniqueFps.map((fp) => dedupRecordingRuleName(fp, longWindow));
     const query = buildDedupObjectiveQuery(expectedNames);
-    const { samples, nonFinite } = await this.queryInstant(client, ds, query);
+    const { samples, nonFinite } = await this.queryInstant(ctx, ds, query);
     // Index by __name__ (or fallback label). Prometheus returns __name__
     // inside the sample's `metric` map by default.
     const byName = new Map<string, InstantSample>();
@@ -686,37 +691,40 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
   }
 
   /**
-   * Run a PromQL instant query through the SQL plugin's query execution
-   * endpoint. Response is unwrapped to the `{resultType, result}` Prometheus
-   * shape and mapped to `InstantSample[]`.
+   * Run a PromQL instant query through the data plugin's search service
+   * (`strategy: 'PROMQL'`). The strategy's underlying executor converges on
+   * the same SQL-plugin endpoint the legacy transport call hit, so the
+   * `{resultType, result}` envelope rebuilt by `runPromQLInstant` is
+   * compatible with `parseInstantResponseWithNonFinite` byte-for-byte —
+   * including NaN / Inf values that `source_idle` differentiation depends
+   * on.
    *
-   * The SQL plugin's `PrometheusQueryHandler` requires `options.time` for
-   * instant queries — it rejects the request with
-   * `"Time parameter is required for instant queries"` otherwise. We pass
-   * "now" in epoch seconds; Prometheus returns the most recent sample at
-   * that wall-clock moment.
+   * `ctx.requestContext` is required at runtime: the search strategy reads
+   * the OSD scoped client off it (matching MDS data-source resolution).
+   * When tests only exercise non-query branches and don't supply it, this
+   * method throws before the strategy call — `aggregate` already wraps
+   * `statusForSlo` in a try/catch that degrades to `no_data`, so a missing
+   * context does not 500 the listing.
    */
   private async queryInstant(
-    client: AlertingOSClient,
+    ctx: SloStatusAggregationContext,
     ds: Datasource,
     query: string
   ): Promise<ParsedInstantResponse> {
-    const dqName = ds.directQueryName as string;
-    const path = `/_plugins/_directquery/_query/${encodeURIComponent(dqName)}`;
-    const resp = await client.transport.request({
-      method: 'POST',
-      path,
-      body: {
-        datasource: dqName,
-        query,
-        language: 'PROMQL',
-        options: {
-          queryType: 'instant',
-          time: Math.floor(Date.now() / 1000).toString(),
-        },
-      },
+    const requestContext = ctx.requestContext as RequestHandlerContext | undefined;
+    if (!requestContext) {
+      throw new Error(
+        'StatusAggregator.queryInstant: requestContext is missing on the aggregation ' +
+          'context. Plumb a RequestHandlerContext from the route layer.'
+      );
+    }
+    const envelope = await runPromQLInstant(requestContext, {
+      dqName: ds.directQueryName as string,
+      query,
+      timeSec: Math.floor(Date.now() / 1000),
+      dataSourceId: ds.mdsId,
     });
-    return parseInstantResponseWithNonFinite(resp.body as Record<string, unknown>);
+    return parseInstantResponseWithNonFinite((envelope as unknown) as Record<string, unknown>);
   }
 }
 

@@ -191,6 +191,16 @@ export interface SloStatusAggregationContext {
   resolveDatasource: (datasourceId: string) => Promise<Datasource | undefined>;
   workspaceId: string;
   /**
+   * OSD `RequestHandlerContext` — typed as `unknown` here because the real
+   * type lives in `src/core/server` and pulling it in would force this
+   * common file to compile against server-only types. The status aggregator
+   * narrows it back to `RequestHandlerContext` before invoking
+   * `data.search.search` for PromQL execution. Required at runtime when
+   * `data.search` is wired (production path); optional for offline tests
+   * that only exercise non-query branches.
+   */
+  requestContext?: unknown;
+  /**
    * Phase 3 (W3.6) — propagates the `observability.slo.ruleDedup.enabled`
    * flag so the aggregator can pick fingerprint-keyed selectors (W3.9) when
    * true, or fall back to the legacy `{slo_id="X"}` selectors when false.

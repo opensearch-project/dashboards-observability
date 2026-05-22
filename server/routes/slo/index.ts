@@ -467,6 +467,11 @@ function buildStatusContext(
   const client = ctx.core.opensearch.client.asCurrentUser;
   return {
     client,
+    // The aggregator routes PromQL queries through the data plugin's
+    // search service (`strategy: 'PROMQL'`), which needs an OSD
+    // RequestHandlerContext to resolve scoped clients (including MDS).
+    // `ctx` here is exactly that context — pass it through.
+    requestContext: ctx,
     workspaceId: 'default',
     resolveDatasource: async (datasourceId: string) => {
       if (discoveryService) {

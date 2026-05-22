@@ -85,7 +85,11 @@ describe('handlers', () => {
         dsIds: ['a', 'b'],
         timeoutMs: undefined,
         maxResults: 10,
-      })
+      }),
+      // Third positional arg is the optional RequestHandlerContext threaded
+      // for prom-historical's strategy call; this handler test doesn't pass
+      // one, so expect undefined.
+      undefined
     );
   });
 
@@ -118,7 +122,8 @@ describe('handlers', () => {
       expect.objectContaining({
         startTime: 'now-1h',
         endTime: 'now',
-      })
+      }),
+      undefined
     );
   });
 

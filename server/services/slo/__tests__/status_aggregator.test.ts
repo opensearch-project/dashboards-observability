@@ -31,6 +31,8 @@ import {
   parseInstantResponseWithNonFinite,
 } from '../status_aggregator';
 import type { SloRuleHealthChecker, SloStatusAggregationContext } from '../status_aggregator';
+import { resetPromQLSearcherForTests, setPromQLSearcher } from '../../alerting/promql_search';
+import type { PromQLSearcher } from '../../alerting/promql_search';
 import type { AlertingOSClient, Datasource, Logger } from '../../../../common/types/alerting';
 import type { ObjectiveStatus, SloDocument, SloSpec } from '../../../../common/slo/slo_types';
 
@@ -147,34 +149,112 @@ function alertsResponse(
 }
 
 /**
- * Build a mock client that dispatches based on the request path. POST to
- * `/_query/` routes to `queryHandler`; GET to `/alerts` routes to `alertsHandler`.
+ * Translate a Prometheus-style `{resultType, result}` envelope into the
+ * IDataFrame our PromQL adapter expects from the search strategy. Mirrors
+ * what `createDataFrame` in
+ * `src/plugins/query_enhancements/server/search/promql_search_strategy.ts`
+ * emits for a single PROMQL query.
+ */
+function envelopeToDataFrame(envelope: {
+  resultType: string;
+  result: Array<{
+    metric?: Record<string, string>;
+    value?: [number, string];
+    values?: Array<[number, string]>;
+  }>;
+}) {
+  const Time: number[] = [];
+  const Series: string[] = [];
+  const Labels: Array<Record<string, string>> = [];
+  const Value: number[] = [];
+  for (const entry of envelope.result) {
+    const metric = entry.metric ?? {};
+    const labelsWithoutName = { ...metric };
+    delete labelsWithoutName.__name__;
+    const seriesParts = Object.entries(metric)
+      .filter(([, v]) => v !== undefined && v !== '')
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([k, v]) => `${k}="${v}"`);
+    const seriesName = `{${seriesParts.join(', ')}}`;
+    const points = entry.values ?? (entry.value ? [entry.value] : []);
+    for (const [tsSec, raw] of points) {
+      Time.push(tsSec * 1000);
+      Series.push(seriesName);
+      Labels.push(labelsWithoutName);
+      Value.push(Number(raw));
+    }
+  }
+  return {
+    type: 'data_frame',
+    body: {
+      type: 'data_frame',
+      name: 'cortex',
+      schema: [
+        { name: 'Time', type: 'time', values: [] },
+        { name: 'Series', type: 'string', values: [] },
+        { name: 'Labels', type: 'object', values: [] },
+        { name: 'Value', type: 'number', values: [] },
+      ],
+      fields: [
+        { name: 'Time', type: 'time', values: Time },
+        { name: 'Series', type: 'string', values: Series },
+        { name: 'Labels', type: 'object', values: Labels },
+        { name: 'Value', type: 'number', values: Value },
+      ],
+      size: Time.length,
+      meta: {},
+    },
+    took: 1,
+  };
+}
+
+/**
+ * Build a mock setup that:
+ *   - installs a PromQL searcher returning the data-frame translation of
+ *     each query handler's `{resultType, result}` envelope, and
+ *   - returns a transport client that handles the alerts (`/api/v1/alerts`)
+ *     resource call. PromQL execution no longer rides the transport; this
+ *     helper used to multiplex both paths through a single mock — now it
+ *     splits them so the wire-contract assertions match the migration.
  */
 function mockClient(handlers: {
   query?: (body: unknown) => unknown;
   alerts?: () => unknown;
-}): { client: AlertingOSClient; requestMock: jest.Mock } {
+}): {
+  client: AlertingOSClient;
+  requestMock: jest.Mock;
+  searcherMock: jest.MockedFunction<PromQLSearcher>;
+} {
   const requestMock = jest.fn(async (params: unknown) => {
     const p = params as { method: string; path: string; body?: unknown };
-    if (p.path.includes('/_directquery/_query/')) {
-      const body = handlers.query ? handlers.query(p.body) : { resultType: 'vector', result: [] };
-      return { statusCode: 200, body };
-    }
     if (p.path.endsWith('/api/v1/alerts')) {
       const body = handlers.alerts ? handlers.alerts() : { data: { alerts: [] } };
       return { statusCode: 200, body };
     }
-    throw new Error(`Unexpected path: ${p.path}`);
+    throw new Error(`Unexpected transport path: ${p.path}`);
   });
+  const searcherMock = (jest.fn(async (_ctx, request, _options) => {
+    const body = handlers.query
+      ? handlers.query((request as { body?: unknown }).body)
+      : { resultType: 'vector', result: [] };
+    return envelopeToDataFrame(body as Parameters<typeof envelopeToDataFrame>[0]) as never;
+  }) as unknown) as jest.MockedFunction<PromQLSearcher>;
+  setPromQLSearcher(searcherMock as PromQLSearcher);
   return {
     client: ({ transport: { request: requestMock } } as unknown) as AlertingOSClient,
     requestMock,
+    searcherMock,
   };
 }
+
+afterEach(() => {
+  resetPromQLSearcherForTests();
+});
 
 function ctxFor(ds: Datasource | undefined, client: AlertingOSClient): SloStatusAggregationContext {
   return {
     client,
+    requestContext: {} as never,
     workspaceId: 'default',
     resolveDatasource: async () => ds,
   };
@@ -377,7 +457,7 @@ describe('parseInstantResponseWithNonFinite', () => {
 describe('DirectQueryStatusAggregator.aggregate — happy paths', () => {
   it('healthy SLO (errorRatio=0.0002) → ok, attainment=0.9998, full budget', async () => {
     const doc = makeDoc();
-    const { client, requestMock } = mockClient({
+    const { client, requestMock, searcherMock } = mockClient({
       query: () =>
         instantResponse([{ objective: 'availability-99-9', sloId: 'slo-1', ratio: 0.0002 }]),
       alerts: () => alertsResponse([]),
@@ -391,15 +471,20 @@ describe('DirectQueryStatusAggregator.aggregate — happy paths', () => {
     expect(status.objectives[0].attainment).toBeCloseTo(0.9998, 5);
     expect(status.objectives[0].errorBudgetRemaining).toBeCloseTo(0.8, 3);
 
-    // Verify wire contract
-    const calls = requestMock.mock.calls.map((c) => c[0] as { method: string; path: string });
-    expect(calls).toContainEqual(
-      expect.objectContaining({
-        method: 'POST',
-        path: expect.stringContaining('/_plugins/_directquery/_query/'),
-      })
+    // Wire contract: PromQL goes through the search strategy with
+    // `strategy: 'PROMQL'`; the alerts endpoint stays on the resource client.
+    expect(searcherMock).toHaveBeenCalled();
+    const [, request, options] = searcherMock.mock.calls[0];
+    expect(options).toEqual({ strategy: 'promql' });
+    const reqBody = (request as { body: Record<string, Record<string, unknown>> }).body;
+    expect(reqBody.query.language).toBe('PROMQL');
+    expect(reqBody.query.dataset).toEqual({ id: 'my-cortex-connection', type: 'PROMETHEUS' });
+    expect(reqBody.options.queryType).toBe('INSTANT');
+
+    const transportCalls = requestMock.mock.calls.map(
+      (c) => c[0] as { method: string; path: string }
     );
-    expect(calls).toContainEqual(
+    expect(transportCalls).toContainEqual(
       expect.objectContaining({
         method: 'GET',
         path: expect.stringContaining('/api/v1/alerts'),
@@ -459,18 +544,16 @@ describe('DirectQueryStatusAggregator.aggregate — happy paths', () => {
 describe('DirectQueryStatusAggregator.aggregate — disabled / missing data', () => {
   it('disabled SLO short-circuits — no ruler queries issued', async () => {
     const doc = makeDoc({ enabled: false });
-    const { client, requestMock } = mockClient({});
+    const { client, searcherMock } = mockClient({});
     const agg = new DirectQueryStatusAggregator(noopLogger());
     const [status] = await agg.aggregate([doc], ctxFor(promDatasource(), client));
 
     expect(status.state).toBe('disabled');
     expect(status.objectives.every((o) => o.state === 'disabled')).toBe(true);
-    // Alerts call still happens (shared per datasource); recording-rule instant
-    // query must NOT happen for a disabled SLO.
-    const queryCalls = requestMock.mock.calls.filter((c) =>
-      ((c[0] as { path: string }).path as string).includes('/_directquery/_query/')
-    );
-    expect(queryCalls).toHaveLength(0);
+    // Alerts call still happens via the resource client (shared per
+    // datasource); the PromQL search strategy must NOT be invoked for a
+    // disabled SLO.
+    expect(searcherMock).not.toHaveBeenCalled();
   });
 
   it('datasource not resolvable → no_data (does not throw)', async () => {
@@ -552,23 +635,13 @@ describe('DirectQueryStatusAggregator.aggregate — partial failure', () => {
 
   it('alerts endpoint fails but query succeeds → firingCount=0, attainment still computed', async () => {
     const doc = makeDoc();
-    const client: AlertingOSClient = ({
-      transport: {
-        request: jest.fn(async (params: unknown) => {
-          const p = params as { path: string; method: string };
-          if (p.path.includes('/_directquery/_query/')) {
-            return {
-              statusCode: 200,
-              body: instantResponse([
-                { objective: 'availability-99-9', sloId: 'slo-1', ratio: 0.0002 },
-              ]),
-            };
-          }
-          // alerts endpoint blows up
-          throw new Error('alerts endpoint 500');
-        }),
+    const { client } = mockClient({
+      query: () =>
+        instantResponse([{ objective: 'availability-99-9', sloId: 'slo-1', ratio: 0.0002 }]),
+      alerts: () => {
+        throw new Error('alerts endpoint 500');
       },
-    } as unknown) as AlertingOSClient;
+    });
     const agg = new DirectQueryStatusAggregator(noopLogger());
     const [status] = await agg.aggregate([doc], ctxFor(promDatasource(), client));
 
@@ -580,35 +653,21 @@ describe('DirectQueryStatusAggregator.aggregate — partial failure', () => {
   it('SLOs missing from the batched response degrade to no_data while siblings stay ok', async () => {
     const doc1 = makeDoc({}, 'slo-1');
     const doc2 = makeDoc({}, 'slo-2');
-    let queryCalls = 0;
-    const client: AlertingOSClient = ({
-      transport: {
-        request: jest.fn(async (params: unknown) => {
-          const p = params as { path: string; method: string; body: unknown };
-          if (p.path.includes('/_directquery/_query/')) {
-            queryCalls++;
-            // The aggregator now batches by (datasource × longWindow), so
-            // both SLOs share a single query. We respond with a sample for
-            // slo-1 only; slo-2 is silently absent and should degrade to
-            // no_data.
-            return {
-              statusCode: 200,
-              body: instantResponse([
-                { objective: 'availability-99-9', sloId: 'slo-1', ratio: 0.0002 },
-              ]),
-            };
-          }
-          return { statusCode: 200, body: alertsResponse([]) };
-        }),
-      },
-    } as unknown) as AlertingOSClient;
+    const { client, searcherMock } = mockClient({
+      // The aggregator batches by (datasource × longWindow), so both SLOs
+      // share a single query. We respond with a sample for slo-1 only;
+      // slo-2 is silently absent and should degrade to no_data.
+      query: () =>
+        instantResponse([{ objective: 'availability-99-9', sloId: 'slo-1', ratio: 0.0002 }]),
+      alerts: () => alertsResponse([]),
+    });
     const agg = new DirectQueryStatusAggregator(noopLogger());
     const [s1, s2] = await agg.aggregate([doc1, doc2], ctxFor(promDatasource(), client));
 
     expect(s1.state).toBe('ok');
     expect(s2.state).toBe('no_data');
-    // Single batched query covers both SLOs — used to be 2 (one per SLO).
-    expect(queryCalls).toBe(1);
+    // Single batched search-strategy call covers both SLOs.
+    expect(searcherMock).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -692,6 +751,7 @@ describe('W1.6 rule-health priority merge', () => {
   ): SloStatusAggregationContext {
     return {
       client,
+      requestContext: {} as never,
       workspaceId: 'default',
       resolveDatasource: async () => ds,
       healthChecker: checker,

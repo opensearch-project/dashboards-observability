@@ -43,7 +43,9 @@ import { createRuleHealthChecker } from './services/slo/rule_health_checker';
 import { InMemoryDatasourceService } from './services/alerting/datasource_service';
 import { DatasourceDiscoveryService } from './services/alerting/datasource_discovery';
 import { DirectQueryPrometheusBackend } from './services/alerting/directquery_prometheus_backend';
+import { bindPromQLSearcherFromStartServices } from './services/alerting/promql_search';
 import { AssistantPluginSetup, ObservabilityPluginSetup, ObservabilityPluginStart } from './types';
+import type { DataPluginStart } from '../../../src/plugins/data/server';
 
 export interface ObservabilityPluginSetupDependencies {
   dataSourceManagement: ReturnType<DataSourceManagementPlugin['setup']>;
@@ -70,6 +72,20 @@ export class ObservabilityPlugin
     const { assistantDashboards, dataSource } = deps;
     this.logger.debug('Observability: Setup');
     const router = core.http.createRouter();
+
+    // Wire the PromQL searcher so server-initiated PromQL queries
+    // (probe-sli, status aggregator, alert preview) all route through the
+    // data plugin's search service with `strategy: 'PROMQL'` instead of
+    // crafting their own transport calls. Deferred via `getStartServices`
+    // so plugin setup doesn't block on the data plugin's start; the
+    // searcher is only invoked from request handlers, which run after
+    // both plugins have started.
+    bindPromQLSearcherFromStartServices(
+      (core.getStartServices as unknown) as import('opensearch-dashboards/server').StartServicesAccessor<
+        {},
+        { data: { search: DataPluginStart['search'] } }
+      >
+    );
 
     const dataSourceEnabled = !!dataSource;
     const openSearchObservabilityClient: ILegacyClusterClient = core.opensearch.legacy.createClient(

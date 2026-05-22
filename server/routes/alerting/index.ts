@@ -300,7 +300,8 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
           maxResults: req.query.maxResults,
           startTime: req.query.startTime,
           endTime: req.query.endTime,
-        }
+        },
+        ctx
       );
       return res.ok({ body: result.body });
     }
@@ -453,7 +454,8 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
         alertService,
         await getAlertingClient(ctx, req.params.dsId),
         req.params.dsId,
-        req.params.ruleId
+        req.params.ruleId,
+        ctx
       );
       return sendResult(res, result);
     }

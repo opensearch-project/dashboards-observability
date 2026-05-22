@@ -226,9 +226,15 @@ export interface PrometheusBackend {
   // Workspace discovery
   listWorkspaces(client: AlertingOSClient, ds: Datasource): Promise<PrometheusWorkspace[]>;
 
-  /** Execute a PromQL range query and return time-series data points. */
+  /**
+   * Execute a PromQL range query and return time-series data points. The
+   * first argument is OSD's `RequestHandlerContext`, declared as `unknown`
+   * here so the common types stay browser-importable; the implementation
+   * narrows it back to the real type before invoking
+   * `data.search.search(...)`.
+   */
   queryRange?(
-    client: AlertingOSClient,
+    ctx: unknown,
     ds: Datasource,
     query: string,
     start: number,
@@ -238,7 +244,7 @@ export interface PrometheusBackend {
 
   /** Execute a PromQL instant query and return point-in-time values. */
   queryInstant?(
-    client: AlertingOSClient,
+    ctx: unknown,
     ds: Datasource,
     query: string,
     time?: number
@@ -272,6 +278,13 @@ export interface PrometheusBackend {
    *   - `error`:    transport / parse error; `alerts` is empty in this case.
    */
   getHistoricalAlerts?(
+    /**
+     * OSD `RequestHandlerContext` (declared as `unknown` to keep the common
+     * types browser-importable). Required because the matrix scan inside
+     * the implementation routes PromQL through the data plugin's search
+     * strategy, which reads MDS / scoped clients off the request context.
+     */
+    ctx: unknown,
     client: AlertingOSClient,
     ds: Datasource,
     startEpochSec: number,
