@@ -130,7 +130,7 @@ describe('CreateMonitor', () => {
 });
 
 describe('CreateMonitor — PPL form', () => {
-  it('renders a default PPL trigger with the number-of-results controls', () => {
+  it('renders a default PPL trigger with the custom-condition controls', () => {
     render(
       <CreateMonitor
         onSave={jest.fn()}
@@ -141,11 +141,12 @@ describe('CreateMonitor — PPL form', () => {
     );
 
     expect(screen.getByText(/Triggers \(1\)/i)).toBeTruthy();
-    expect(screen.getByLabelText('Threshold value')).toBeTruthy();
-    expect(screen.queryByLabelText('Custom PPL where clause')).toBeNull();
+    // Default trigger type is now `custom` (better for stats-based queries).
+    expect(screen.getByLabelText('Custom PPL where clause')).toBeTruthy();
+    expect(screen.queryByLabelText('Threshold value')).toBeNull();
   });
 
-  it('toggling to Custom condition swaps the controls', () => {
+  it('toggling to Number of results swaps the controls', () => {
     render(
       <CreateMonitor
         onSave={jest.fn()}
@@ -155,11 +156,14 @@ describe('CreateMonitor — PPL form', () => {
       />
     );
 
-    const customRadio = screen.getByLabelText('Custom condition') as HTMLInputElement;
-    fireEvent.click(customRadio);
+    // Default is custom; switch to number_of_results.
+    const numResultsRadio = screen.getByRole('radio', {
+      name: /number of results/i,
+    }) as HTMLInputElement;
+    fireEvent.click(numResultsRadio);
 
-    expect(screen.getByLabelText('Custom PPL where clause')).toBeTruthy();
-    expect(screen.queryByLabelText('Threshold value')).toBeNull();
+    expect(screen.getByLabelText('Threshold value')).toBeTruthy();
+    expect(screen.queryByLabelText('Custom PPL where clause')).toBeNull();
   });
 
   it('save dispatches onSave with PPL fields populated', () => {
@@ -191,6 +195,6 @@ describe('CreateMonitor — PPL form', () => {
     expect(arg.name).toBe('monitor-1');
     expect(arg.query).toContain('source = logs-*');
     expect(arg.pplTriggers).toHaveLength(1);
-    expect(arg.pplTriggers[0].type).toBe('number_of_results');
+    expect(arg.pplTriggers[0].type).toBe('custom');
   });
 });

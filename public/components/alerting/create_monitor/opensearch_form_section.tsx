@@ -12,8 +12,6 @@
  */
 import React, { useCallback } from 'react';
 import {
-  EuiAccordion,
-  EuiBadge,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,13 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { AnnotationEditor, LabelEditor } from '../monitor_form_components';
-import {
-  DURATION_OPTIONS,
-  INTERVAL_OPTIONS,
-  OpenSearchFormState,
-  OS_SCHEDULE_UNIT_OPTIONS,
-} from './create_monitor_types';
+import { OpenSearchFormState, OS_SCHEDULE_UNIT_OPTIONS } from './create_monitor_types';
 import { IndexPicker } from './sections/index_picker';
 import { PplQueryEditor } from './sections/ppl_query_editor';
 import { PplTriggersSection } from './sections/ppl_triggers';
@@ -77,8 +69,7 @@ export const OpenSearchFormSection: React.FC<{
   onUpdate: <K extends keyof OpenSearchFormState>(key: K, value: OpenSearchFormState[K]) => void;
   validationErrors: Record<string, string>;
   hasSubmitted: boolean;
-  context?: { service?: string; team?: string };
-}> = ({ form, onUpdate, validationErrors, hasSubmitted, context }) => {
+}> = ({ form, onUpdate, validationErrors, hasSubmitted }) => {
   // Rewrite the leading `source = ...` clause whenever the picker changes,
   // preserving any later pipes the user has authored. Prevents stranding
   // the user with `source = old-index | ...` after they swap indices.
@@ -241,136 +232,6 @@ export const OpenSearchFormSection: React.FC<{
           onChange={(next) => onUpdate('pplTriggers', next)}
           hasSubmitted={hasSubmitted}
         />
-      </EuiPanel>
-
-      <EuiSpacer size="m" />
-
-      {/* Evaluation Settings */}
-      <EuiPanel paddingSize="m" color="subdued">
-        <EuiTitle size="xs">
-          <h3>
-            {i18n.translate(
-              'observability.alerting.opensearchFormSection.evaluationSettingsTitle',
-              { defaultMessage: 'Evaluation Settings' }
-            )}
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="s" wrap>
-          <EuiFlexItem style={{ minWidth: 160 }}>
-            <EuiFormRow
-              label={i18n.translate(
-                'observability.alerting.opensearchFormSection.evalIntervalLabel',
-                { defaultMessage: 'Eval Interval' }
-              )}
-              helpText={i18n.translate(
-                'observability.alerting.opensearchFormSection.evalIntervalHelpText',
-                { defaultMessage: 'How often evaluated' }
-              )}
-              display="rowCompressed"
-            >
-              <EuiSelect
-                options={INTERVAL_OPTIONS}
-                value={form.evaluationInterval}
-                onChange={(e) => onUpdate('evaluationInterval', e.target.value)}
-                compressed
-                aria-label={i18n.translate(
-                  'observability.alerting.opensearchFormSection.evaluationIntervalAriaLabel',
-                  { defaultMessage: 'Evaluation interval' }
-                )}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem style={{ minWidth: 160 }}>
-            <EuiFormRow
-              label={i18n.translate(
-                'observability.alerting.opensearchFormSection.pendingPeriodLabel',
-                { defaultMessage: 'Pending Period' }
-              )}
-              helpText={i18n.translate(
-                'observability.alerting.opensearchFormSection.pendingPeriodHelpText',
-                { defaultMessage: 'Before firing' }
-              )}
-              display="rowCompressed"
-            >
-              <EuiSelect
-                options={DURATION_OPTIONS}
-                value={form.pendingPeriod}
-                onChange={(e) => onUpdate('pendingPeriod', e.target.value)}
-                compressed
-                aria-label={i18n.translate(
-                  'observability.alerting.opensearchFormSection.pendingPeriodAriaLabel',
-                  { defaultMessage: 'Pending period' }
-                )}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-
-      <EuiSpacer size="m" />
-
-      {/* Labels */}
-      <EuiPanel paddingSize="m" color="subdued">
-        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h3>
-                {i18n.translate('observability.alerting.opensearchFormSection.labelsTitle', {
-                  defaultMessage: 'Labels',
-                })}
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('observability.alerting.opensearchFormSection.labelsDescription', {
-                defaultMessage: 'Categorize and route alerts',
-              })}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <LabelEditor
-          labels={form.labels}
-          onChange={(l) => onUpdate('labels', l)}
-          context={context}
-        />
-      </EuiPanel>
-
-      <EuiSpacer size="m" />
-
-      {/* Annotations */}
-      <EuiPanel paddingSize="m" color="subdued">
-        <EuiAccordion
-          id="os-ppl-annotations"
-          buttonContent={
-            <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <strong>
-                  {i18n.translate('observability.alerting.opensearchFormSection.annotationsTitle', {
-                    defaultMessage: 'Annotations',
-                  })}
-                </strong>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">
-                  {i18n.translate('observability.alerting.opensearchFormSection.optionalBadge', {
-                    defaultMessage: 'Optional',
-                  })}
-                </EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-          initialIsOpen={true}
-          paddingSize="none"
-        >
-          <EuiSpacer size="s" />
-          <AnnotationEditor
-            annotations={form.annotations}
-            onChange={(a) => onUpdate('annotations', a)}
-          />
-        </EuiAccordion>
       </EuiPanel>
     </>
   );

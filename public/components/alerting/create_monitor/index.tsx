@@ -465,7 +465,6 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
             onUpdate={updateOs}
             validationErrors={validationErrors}
             hasSubmitted={hasSubmitted}
-            context={context}
           />
         )}
       </EuiFlyoutBody>
