@@ -35,17 +35,28 @@ export function toHandlerResult(e: unknown, logger?: Logger): HandlerResult {
   }
   const msg = e instanceof Error ? e.message : String(e);
   if (logger) logger.error(msg);
-  if (msg.toLowerCase().includes('not found')) {
+  const lower = msg.toLowerCase();
+
+  // Only classify as 404 when the error is specifically about a monitor or
+  // resource not being found — NOT when an upstream PPL/index validation
+  // error happens to contain "not found" (e.g. "index_not_found_exception").
+  if (
+    lower.includes("can't find monitor") ||
+    lower.includes('monitor not found') ||
+    lower.includes('destination not found')
+  ) {
     return { status: 404, body: { error: 'Resource not found' } };
   }
   if (
-    msg.toLowerCase().includes('validation') ||
+    lower.includes('validation') ||
     msg.includes('required') ||
-    msg.includes('must be')
+    msg.includes('must be') ||
+    lower.includes('illegal') ||
+    lower.includes('alerting_exception')
   ) {
-    return { status: 400, body: { error: 'Validation failed' } };
+    return { status: 400, body: { error: msg } };
   }
-  return { status: 500, body: { error: 'An internal error occurred' } };
+  return { status: 500, body: { error: msg } };
 }
 
 /**

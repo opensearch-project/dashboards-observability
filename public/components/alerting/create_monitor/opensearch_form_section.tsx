@@ -39,7 +39,7 @@ const SOURCE_LINE_RE = /^\s*source\s*=\s*[^|\n]*/i;
 
 function defaultPplQueryFor(indices: string[]): string {
   if (indices.length === 0) return '';
-  return `source = ${indices.join(', ')}\n| where 1=1\n| stats count() as cnt`;
+  return `source = ${indices.join(', ')}\n| stats count() as error_count`;
 }
 
 function rewriteSourceClause(query: string, indices: string[]): string {
@@ -149,7 +149,8 @@ export const OpenSearchFormSection: React.FC<{
             values={{
               example: (
                 <code>
-                  source = logs-* | where status {'>'} 500 | stats count() as error_count by host
+                  source = my-index | where status.code = 2 | stats count() as error_count by
+                  serviceName
                 </code>
               ),
             }}

@@ -136,6 +136,9 @@ export const DEFAULT_PROM_FORM: PrometheusFormState = {
 // `number_of_results` (which counts rows, not column values) would rarely
 // fire as expected. `custom` with `where <column> > threshold` evaluates
 // the actual aggregated value, which is what users intend.
+//
+// The default condition references `error_count` to match the example query
+// shown in the flyout. Users must update this when they change the alias.
 export const createDefaultPplTrigger = (): PplTriggerForm => ({
   id: `ppl-trigger-${Date.now()}`,
   name: 'trigger-1',
@@ -143,7 +146,7 @@ export const createDefaultPplTrigger = (): PplTriggerForm => ({
   type: 'custom',
   numResultsCondition: '>',
   numResultsValue: 1,
-  customCondition: 'where cnt > 0',
+  customCondition: 'where error_count > 0',
   actions: [],
 });
 
