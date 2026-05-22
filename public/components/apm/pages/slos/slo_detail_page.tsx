@@ -33,6 +33,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
+import { i18n } from '@osd/i18n';
 import { useHistory, useParams } from 'react-router-dom';
 import { ChromeStart, NotificationsStart } from '../../../../../../../src/core/public';
 import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/plugin_headerControl';
@@ -72,8 +73,14 @@ type FullDoc = SloDocument & {
 
 function describeWindow(slo: SloDocument): string {
   return slo.spec.window.type === 'rolling'
-    ? `rolling ${slo.spec.window.duration}`
-    : `calendar (${slo.spec.window.period})`;
+    ? i18n.translate('observability.apm.slo.detail.window.rolling', {
+        defaultMessage: 'rolling {duration}',
+        values: { duration: slo.spec.window.duration },
+      })
+    : i18n.translate('observability.apm.slo.detail.window.calendar', {
+        defaultMessage: 'calendar ({period})',
+        values: { period: slo.spec.window.period },
+      });
 }
 
 /** Build the listing's SloSummary shape just far enough to drive templateIconFor. */
@@ -161,7 +168,10 @@ const DetailHeader: React.FC<DetailHeaderProps> = ({
           <EuiHealth
             color={healthColor}
             data-test-subj="slosDetailHealthDot"
-            aria-label={`Health: ${healthLabel}`}
+            aria-label={i18n.translate('observability.apm.slo.detail.healthAriaLabel', {
+              defaultMessage: 'Health: {label}',
+              values: { label: healthLabel },
+            })}
           >
             <span style={{ fontWeight: 600 }}>{healthLabel}</span>
           </EuiHealth>
@@ -212,14 +222,18 @@ const DetailHeader: React.FC<DetailHeaderProps> = ({
         {!doc.spec.enabled && (
           <EuiFlexItem grow={false}>
             <EuiBadge color="subdued" data-test-subj="slosDetailDisabledBadge">
-              Disabled
+              {i18n.translate('observability.apm.slo.detail.disabledBadge', {
+                defaultMessage: 'Disabled',
+              })}
             </EuiBadge>
           </EuiFlexItem>
         )}
         {doc.spec.mode === 'shadow' && (
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow" data-test-subj="slosDetailModeBadge">
-              shadow
+              {i18n.translate('observability.apm.slo.detail.shadowBadge', {
+                defaultMessage: 'shadow',
+              })}
             </EuiBadge>
           </EuiFlexItem>
         )}
@@ -229,7 +243,9 @@ const DetailHeader: React.FC<DetailHeaderProps> = ({
               title={<span style={TABULAR_NUMS_STYLE}>{attainmentLabel}</span>}
               titleSize="l"
               titleColor={attainmentStatColor}
-              description="Attainment"
+              description={i18n.translate('observability.apm.slo.detail.attainmentLabel', {
+                defaultMessage: 'Attainment',
+              })}
               reverse
               textAlign="right"
               data-test-subj="slosDetailAttainmentHero"
@@ -240,7 +256,12 @@ const DetailHeader: React.FC<DetailHeaderProps> = ({
               textAlign="right"
               data-test-subj="slosDetailAttainmentTargetDelta"
             >
-              <span style={TABULAR_NUMS_STYLE}>Target {targetLabel}</span>
+              <span style={TABULAR_NUMS_STYLE}>
+                {i18n.translate('observability.apm.slo.detail.targetLabel', {
+                  defaultMessage: 'Target {targetLabel}',
+                  values: { targetLabel },
+                })}
+              </span>
               {attainmentDelta !== null && (
                 <>
                   {' · '}
@@ -262,7 +283,10 @@ const DetailHeader: React.FC<DetailHeaderProps> = ({
         buttonContent={
           <EuiText size="s">
             <strong>
-              <EuiIcon type="iInCircle" size="s" /> Summary & SLI details
+              <EuiIcon type="iInCircle" size="s" />{' '}
+              {i18n.translate('observability.apm.slo.detail.summaryAccordion.label', {
+                defaultMessage: 'Summary & SLI details',
+              })}
             </strong>
           </EuiText>
         }
@@ -273,7 +297,11 @@ const DetailHeader: React.FC<DetailHeaderProps> = ({
         <EuiFlexGroup gutterSize="l" wrap>
           <EuiFlexItem>
             <EuiText size="s">
-              <strong>Summary</strong>
+              <strong>
+                {i18n.translate('observability.apm.slo.detail.summaryHeading', {
+                  defaultMessage: 'Summary',
+                })}
+              </strong>
             </EuiText>
             <EuiSpacer size="xs" />
             <EuiDescriptionList
@@ -286,7 +314,11 @@ const DetailHeader: React.FC<DetailHeaderProps> = ({
           {sliListItems.length > 0 && (
             <EuiFlexItem>
               <EuiText size="s">
-                <strong>SLI</strong>
+                <strong>
+                  {i18n.translate('observability.apm.slo.detail.sliHeading', {
+                    defaultMessage: 'SLI',
+                  })}
+                </strong>
               </EuiText>
               <EuiSpacer size="xs" />
               <EuiDescriptionList
@@ -313,18 +345,44 @@ interface ObjectiveRow {
 }
 
 const OBJECTIVE_COLUMNS: Array<EuiBasicTableColumn<ObjectiveRow>> = [
-  { field: 'displayName', name: 'Name', width: '30%' },
+  {
+    field: 'displayName',
+    name: i18n.translate('observability.apm.slo.detail.objectivesColumn.name', {
+      defaultMessage: 'Name',
+    }),
+    width: '30%',
+  },
   {
     field: 'target',
-    name: 'Target',
+    name: i18n.translate('observability.apm.slo.detail.objectivesColumn.target', {
+      defaultMessage: 'Target',
+    }),
     width: '15%',
     render: (t: number) => (
       <span style={TABULAR_NUMS_STYLE}>{formatPct(t, { decimals: SLO_PRECISION.target })}</span>
     ),
   },
-  { field: 'threshold', name: 'Threshold', width: '20%' },
-  { field: 'alertsEnabled', name: 'Alerts enabled', width: '20%' },
-  { field: 'rules', name: 'Rules', width: '15%' },
+  {
+    field: 'threshold',
+    name: i18n.translate('observability.apm.slo.detail.objectivesColumn.threshold', {
+      defaultMessage: 'Threshold',
+    }),
+    width: '20%',
+  },
+  {
+    field: 'alertsEnabled',
+    name: i18n.translate('observability.apm.slo.detail.objectivesColumn.alertsEnabled', {
+      defaultMessage: 'Alerts enabled',
+    }),
+    width: '20%',
+  },
+  {
+    field: 'rules',
+    name: i18n.translate('observability.apm.slo.detail.objectivesColumn.rules', {
+      defaultMessage: 'Rules',
+    }),
+    width: '15%',
+  },
 ];
 
 function buildObjectiveRow(
@@ -355,7 +413,14 @@ function buildObjectiveRow(
     alarms.attainmentBreach.enabled ||
     alarms.budgetWarning.enabled ||
     alarms.noData.enabled;
-  const alertsEnabled = doc.spec.enabled && (anyBurnRateAlarm || anySupplemental) ? 'Yes' : 'No';
+  const alertsEnabled =
+    doc.spec.enabled && (anyBurnRateAlarm || anySupplemental)
+      ? i18n.translate('observability.apm.slo.detail.alertsEnabled.yes', {
+          defaultMessage: 'Yes',
+        })
+      : i18n.translate('observability.apm.slo.detail.alertsEnabled.no', {
+          defaultMessage: 'No',
+        });
 
   // Persisted rule names don't carry an objective tag we can filter on. Show
   // the live total only when there's a single objective (unambiguous); show
@@ -443,7 +508,9 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
         // live-status-derived state. Surface the fetch error as a neutral toast
         // so users have a breadcrumb if they want to investigate.
         notifications.toasts.addDanger({
-          title: 'Could not load rule health',
+          title: i18n.translate('observability.apm.slo.detail.ruleHealthLoadFailed', {
+            defaultMessage: 'Could not load rule health',
+          }),
           text: err.message,
         });
         setRuleHealth(null);
@@ -468,11 +535,17 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
       if (response.repaired) {
         const restoredCount = response.health.expectedGroups.length;
         notifications.toasts.addSuccess({
-          title: `Restored ${restoredCount} rule group${restoredCount === 1 ? '' : 's'}`,
+          title: i18n.translate('observability.apm.slo.detail.restoreSuccess', {
+            defaultMessage:
+              '{restoredCount, plural, one {Restored # rule group} other {Restored # rule groups}}',
+            values: { restoredCount },
+          }),
         });
       } else {
         notifications.toasts.addInfo({
-          title: 'Rules are already present — nothing to restore',
+          title: i18n.translate('observability.apm.slo.detail.restoreNothingToDo', {
+            defaultMessage: 'Rules are already present — nothing to restore',
+          }),
         });
       }
       setRuleHealth(response.health);
@@ -480,14 +553,24 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
       await load();
     } catch (e) {
       const err = e instanceof Error ? e : new Error(String(e));
-      notifications.toasts.addDanger({ title: 'Restore failed', text: err.message });
+      notifications.toasts.addDanger({
+        title: i18n.translate('observability.apm.slo.detail.restoreFailed', {
+          defaultMessage: 'Restore failed',
+        }),
+        text: err.message,
+      });
     }
   }, [apiClient, id, load, notifications]);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
       parentBreadcrumb,
-      { text: 'SLO/SLI', href: '#/slos' },
+      {
+        text: i18n.translate('observability.apm.slo.detail.breadcrumb.slos', {
+          defaultMessage: 'SLO/SLI',
+        }),
+        href: '#/slos',
+      },
       { text: doc?.spec.name ?? id },
     ]);
   }, [chrome, parentBreadcrumb, doc, id]);
@@ -497,13 +580,22 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
     try {
       await apiClient.delete(id);
       notifications.toasts.addSuccess({
-        title: 'SLO deleted',
-        text: 'Generated rules were removed.',
+        title: i18n.translate('observability.apm.slo.detail.deleteSuccess.title', {
+          defaultMessage: 'SLO deleted',
+        }),
+        text: i18n.translate('observability.apm.slo.detail.deleteSuccess.text', {
+          defaultMessage: 'Generated rules were removed.',
+        }),
       });
       history.push('/slos');
     } catch (e) {
       const err = e instanceof Error ? e : new Error(String(e));
-      notifications.toasts.addDanger({ title: 'Delete failed', text: err.message });
+      notifications.toasts.addDanger({
+        title: i18n.translate('observability.apm.slo.detail.deleteFailed', {
+          defaultMessage: 'Delete failed',
+        }),
+        text: err.message,
+      });
     }
   }, [apiClient, history, id, notifications]);
 
@@ -512,12 +604,23 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
     try {
       const updated = doc.spec.enabled ? await apiClient.disable(id) : await apiClient.enable(id);
       notifications.toasts.addSuccess({
-        title: updated.spec.enabled ? 'SLO enabled' : 'SLO disabled',
+        title: updated.spec.enabled
+          ? i18n.translate('observability.apm.slo.detail.toggleEnabled', {
+              defaultMessage: 'SLO enabled',
+            })
+          : i18n.translate('observability.apm.slo.detail.toggleDisabled', {
+              defaultMessage: 'SLO disabled',
+            }),
       });
       load();
     } catch (e) {
       const err = e instanceof Error ? e : new Error(String(e));
-      notifications.toasts.addDanger({ title: 'Toggle failed', text: err.message });
+      notifications.toasts.addDanger({
+        title: i18n.translate('observability.apm.slo.detail.toggleFailed', {
+          defaultMessage: 'Toggle failed',
+        }),
+        text: err.message,
+      });
     }
   }, [apiClient, doc, id, load, notifications]);
 
@@ -553,9 +656,21 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
             <EuiEmptyPrompt
               iconType="alert"
               color="danger"
-              title={<h2>Unable to load SLO</h2>}
+              title={
+                <h2>
+                  {i18n.translate('observability.apm.slo.detail.errorState.title', {
+                    defaultMessage: 'Unable to load SLO',
+                  })}
+                </h2>
+              }
               body={<p>{error.message}</p>}
-              actions={<EuiButton onClick={() => load()}>Retry</EuiButton>}
+              actions={
+                <EuiButton onClick={() => load()}>
+                  {i18n.translate('observability.apm.slo.detail.errorState.retry', {
+                    defaultMessage: 'Retry',
+                  })}
+                </EuiButton>
+              }
             />
           </EuiPanel>
         </EuiPageBody>
@@ -612,23 +727,77 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
     : 0;
 
   const summaryListItems: NonNullable<EuiDescriptionListProps['listItems']> = [
-    { title: 'ID', description: doc.id },
-    { title: 'Datasource', description: doc.spec.datasourceId },
-    { title: 'Service', description: doc.spec.service },
-    { title: 'Owner team (primary)', description: doc.spec.owner.teams[0] ?? '—' },
-    { title: 'Tier', description: doc.spec.tier ?? '—' },
-    { title: 'Window', description: describeWindow(doc) },
+    {
+      title: i18n.translate('observability.apm.slo.detail.summary.id', { defaultMessage: 'ID' }),
+      description: doc.id,
+    },
+    {
+      title: i18n.translate('observability.apm.slo.detail.summary.datasource', {
+        defaultMessage: 'Datasource',
+      }),
+      description: doc.spec.datasourceId,
+    },
+    {
+      title: i18n.translate('observability.apm.slo.detail.summary.service', {
+        defaultMessage: 'Service',
+      }),
+      description: doc.spec.service,
+    },
+    {
+      title: i18n.translate('observability.apm.slo.detail.summary.ownerTeam', {
+        defaultMessage: 'Owner team (primary)',
+      }),
+      description: doc.spec.owner.teams[0] ?? '—',
+    },
+    {
+      title: i18n.translate('observability.apm.slo.detail.summary.tier', {
+        defaultMessage: 'Tier',
+      }),
+      description: doc.spec.tier ?? '—',
+    },
+    {
+      title: i18n.translate('observability.apm.slo.detail.summary.window', {
+        defaultMessage: 'Window',
+      }),
+      description: describeWindow(doc),
+    },
   ];
 
   const sliListItems: NonNullable<EuiDescriptionListProps['listItems']> =
     sli && sli.definition.backend === 'prometheus'
       ? [
-          { title: 'Backend', description: sli.definition.backend },
-          { title: 'Type', description: sli.definition.type },
-          { title: 'Metric', description: sli.definition.metric ?? 'custom' },
-          { title: 'Good events filter', description: sli.definition.goodEventsFilter ?? '—' },
           {
-            title: 'Dimensions',
+            title: i18n.translate('observability.apm.slo.detail.sli.backend', {
+              defaultMessage: 'Backend',
+            }),
+            description: sli.definition.backend,
+          },
+          {
+            title: i18n.translate('observability.apm.slo.detail.sli.type', {
+              defaultMessage: 'Type',
+            }),
+            description: sli.definition.type,
+          },
+          {
+            title: i18n.translate('observability.apm.slo.detail.sli.metric', {
+              defaultMessage: 'Metric',
+            }),
+            description:
+              sli.definition.metric ??
+              i18n.translate('observability.apm.slo.detail.sli.metricCustom', {
+                defaultMessage: 'custom',
+              }),
+          },
+          {
+            title: i18n.translate('observability.apm.slo.detail.sli.goodEventsFilter', {
+              defaultMessage: 'Good events filter',
+            }),
+            description: sli.definition.goodEventsFilter ?? '—',
+          },
+          {
+            title: i18n.translate('observability.apm.slo.detail.sli.dimensions', {
+              defaultMessage: 'Dimensions',
+            }),
             description: sli.dimensions.map((d) => `${d.name}=${d.value}`).join(', ') || '—',
           },
         ]
@@ -642,7 +811,9 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
       size="s"
       data-test-subj="slosBack"
     >
-      Back to SLOs
+      {i18n.translate('observability.apm.slo.detail.backButton', {
+        defaultMessage: 'Back to SLOs',
+      })}
     </EuiButtonEmpty>,
     <TimeRangePicker
       key="time"
@@ -673,10 +844,18 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
         window.dispatchEvent(new HashChangeEvent('hashchange'));
       }}
     >
-      View alert rules
+      {i18n.translate('observability.apm.slo.detail.viewAlertRulesButton', {
+        defaultMessage: 'View alert rules',
+      })}
     </EuiButtonEmpty>,
     <EuiButton key="toggle" size="s" onClick={onToggleEnabled} data-test-subj="slosDetailToggle">
-      {doc.spec.enabled ? 'Disable' : 'Enable'}
+      {doc.spec.enabled
+        ? i18n.translate('observability.apm.slo.detail.disableButton', {
+            defaultMessage: 'Disable',
+          })
+        : i18n.translate('observability.apm.slo.detail.enableButton', {
+            defaultMessage: 'Enable',
+          })}
     </EuiButton>,
     <EuiButton
       key="delete"
@@ -685,7 +864,9 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
       onClick={() => setConfirmDelete(true)}
       data-test-subj="slosDetailDelete"
     >
-      Delete
+      {i18n.translate('observability.apm.slo.detail.deleteButton', {
+        defaultMessage: 'Delete',
+      })}
     </EuiButton>,
   ];
 
@@ -709,7 +890,9 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
                 <EuiCallOut
                   color="danger"
                   iconType="alert"
-                  title="Rule groups missing in Cortex"
+                  title={i18n.translate('observability.apm.slo.detail.rulesMissingCallout.title', {
+                    defaultMessage: 'Rule groups missing in Cortex',
+                  })}
                   data-test-subj="slosDetailRuleHealthCallout"
                 >
                   <p>
@@ -718,7 +901,14 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
                       const missing =
                         ruleHealth?.missingGroups.length ??
                         (derivedCalloutState === 'rules_missing' ? expected : 0);
-                      return `${missing} of ${expected} expected rule groups for this SLO are not present in the ruler. Alerts and status updates will not fire until the rules are restored. You can restore them from this SLO's persisted spec, or delete the SLO if it is no longer needed.`;
+                      return i18n.translate(
+                        'observability.apm.slo.detail.rulesMissingCallout.body',
+                        {
+                          defaultMessage:
+                            "{missing} of {expected} expected rule groups for this SLO are not present in the ruler. Alerts and status updates will not fire until the rules are restored. You can restore them from this SLO's persisted spec, or delete the SLO if it is no longer needed.",
+                          values: { missing, expected },
+                        }
+                      );
                     })()}
                   </p>
                   <EuiFlexGroup gutterSize="s" responsive={false}>
@@ -731,7 +921,9 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
                         data-test-subj="slosDetailRestore"
                         isLoading={ruleHealthLoading}
                       >
-                        Restore
+                        {i18n.translate('observability.apm.slo.detail.restoreButton', {
+                          defaultMessage: 'Restore',
+                        })}
                       </EuiButton>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
@@ -741,7 +933,9 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
                         onClick={() => setConfirmDelete(true)}
                         data-test-subj="slosDetailBrokenDelete"
                       >
-                        Delete
+                        {i18n.translate('observability.apm.slo.detail.brokenDeleteButton', {
+                          defaultMessage: 'Delete',
+                        })}
                       </EuiButton>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -753,13 +947,20 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
                 <EuiCallOut
                   color="warning"
                   iconType="alert"
-                  title="Ruler unreachable"
+                  title={i18n.translate(
+                    'observability.apm.slo.detail.rulerUnreachableCallout.title',
+                    { defaultMessage: 'Ruler unreachable' }
+                  )}
                   data-test-subj="slosDetailRuleHealthCallout"
                 >
                   <p>
-                    {`Couldn't reach the Prometheus-compatible ruler (${
-                      ruleHealth?.rulerErrorCode ?? 'RULER_UNREACHABLE'
-                    }). Rule health cannot be verified right now. Retry once the ruler is back.`}
+                    {i18n.translate('observability.apm.slo.detail.rulerUnreachableCallout.body', {
+                      defaultMessage:
+                        "Couldn't reach the Prometheus-compatible ruler ({code}). Rule health cannot be verified right now. Retry once the ruler is back.",
+                      values: {
+                        code: ruleHealth?.rulerErrorCode ?? 'RULER_UNREACHABLE',
+                      },
+                    })}
                   </p>
                   <EuiButton
                     size="s"
@@ -768,7 +969,9 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
                     data-test-subj="slosDetailRuleHealthRetry"
                     isLoading={ruleHealthLoading}
                   >
-                    Retry
+                    {i18n.translate('observability.apm.slo.detail.rulerUnreachableRetry', {
+                      defaultMessage: 'Retry',
+                    })}
                   </EuiButton>
                 </EuiCallOut>
                 <EuiSpacer size="m" />
@@ -789,11 +992,17 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
 
             <EuiPanel>
               <EuiText size="m">
-                <h4>Objectives</h4>
+                <h4>
+                  {i18n.translate('observability.apm.slo.detail.objectivesHeading', {
+                    defaultMessage: 'Objectives',
+                  })}
+                </h4>
               </EuiText>
               <EuiSpacer size="s" />
               <EuiBasicTable<ObjectiveRow>
-                tableCaption="Objectives"
+                tableCaption={i18n.translate('observability.apm.slo.detail.objectivesCaption', {
+                  defaultMessage: 'Objectives',
+                })}
                 items={objectiveRows}
                 columns={OBJECTIVE_COLUMNS}
                 compressed
@@ -816,7 +1025,10 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
                   buttonContent={
                     <EuiText size="s">
                       <strong>
-                        <EuiIcon type="advancedSettingsApp" size="s" /> Advanced details
+                        <EuiIcon type="advancedSettingsApp" size="s" />{' '}
+                        {i18n.translate('observability.apm.slo.detail.advancedAccordion.label', {
+                          defaultMessage: 'Advanced details',
+                        })}
                       </strong>
                     </EuiText>
                   }
@@ -831,36 +1043,77 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
                     data-test-subj="slosDetailAdvancedOps"
                     listItems={[
                       {
-                        title: 'Rules provisioned',
+                        title: i18n.translate(
+                          'observability.apm.slo.detail.advancedOps.rulesProvisioned',
+                          { defaultMessage: 'Rules provisioned' }
+                        ),
                         description: `${doc.liveStatus.ruleCount ?? 0}${
                           doc.liveStatus.firingCount > 0
-                            ? ` · ${doc.liveStatus.firingCount} firing`
+                            ? ` · ${i18n.translate(
+                                'observability.apm.slo.detail.advancedOps.firingSuffix',
+                                {
+                                  defaultMessage: '{count} firing',
+                                  values: { count: doc.liveStatus.firingCount },
+                                }
+                              )}`
                             : ''
                         }`,
                       },
                       {
-                        title: 'Last evaluated',
+                        title: i18n.translate(
+                          'observability.apm.slo.detail.advancedOps.lastEvaluated',
+                          { defaultMessage: 'Last evaluated' }
+                        ),
                         description: doc.liveStatus.lastEvaluatedAt ?? '—',
                       },
-                      { title: 'Computed at', description: doc.liveStatus.computedAt },
-                      { title: 'Version', description: String(doc.status.version) },
+                      {
+                        title: i18n.translate(
+                          'observability.apm.slo.detail.advancedOps.computedAt',
+                          { defaultMessage: 'Computed at' }
+                        ),
+                        description: doc.liveStatus.computedAt,
+                      },
+                      {
+                        title: i18n.translate('observability.apm.slo.detail.advancedOps.version', {
+                          defaultMessage: 'Version',
+                        }),
+                        description: String(doc.status.version),
+                      },
                       ...(prov
                         ? [
                             {
-                              title: 'Alert group',
+                              title: i18n.translate(
+                                'observability.apm.slo.detail.advancedOps.alertGroup',
+                                { defaultMessage: 'Alert group' }
+                              ),
                               description: prov.alertGroupName || '—',
                             },
                             ...(dedupFingerprints
                               ? [
                                   {
-                                    title: 'Recording groups',
-                                    description: `${
-                                      new Set(Object.values(dedupFingerprints)).size
-                                    } shared`,
+                                    title: i18n.translate(
+                                      'observability.apm.slo.detail.advancedOps.recordingGroups',
+                                      { defaultMessage: 'Recording groups' }
+                                    ),
+                                    description: i18n.translate(
+                                      'observability.apm.slo.detail.advancedOps.recordingGroupsValue',
+                                      {
+                                        defaultMessage: '{count} shared',
+                                        values: {
+                                          count: new Set(Object.values(dedupFingerprints)).size,
+                                        },
+                                      }
+                                    ),
                                   },
                                 ]
                               : []),
-                            { title: 'Ruler namespace', description: prov.rulerNamespace },
+                            {
+                              title: i18n.translate(
+                                'observability.apm.slo.detail.advancedOps.rulerNamespace',
+                                { defaultMessage: 'Ruler namespace' }
+                              ),
+                              description: prov.rulerNamespace,
+                            },
                           ]
                         : []),
                     ]}
@@ -878,7 +1131,11 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
                         buttonContent={
                           <EuiText size="s">
                             <strong>
-                              <EuiIcon type="indexRuntime" size="s" /> Recording rules
+                              <EuiIcon type="indexRuntime" size="s" />{' '}
+                              {i18n.translate(
+                                'observability.apm.slo.detail.recordingRulesAccordion.label',
+                                { defaultMessage: 'Recording rules' }
+                              )}
                             </strong>
                           </EuiText>
                         }
@@ -888,8 +1145,13 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
                       >
                         <EuiText size="s" color="subdued">
                           <p>
-                            Bind external dashboards or visualizations to these recording rule names
-                            to chart SLI error ratios.
+                            {i18n.translate(
+                              'observability.apm.slo.detail.recordingRulesDescription',
+                              {
+                                defaultMessage:
+                                  'Bind external dashboards or visualizations to these recording rule names to chart SLI error ratios.',
+                              }
+                            )}
                           </p>
                         </EuiText>
                         {sharedOtherCount > 0 && (
@@ -899,13 +1161,20 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
                               color="hollow"
                               iconType="link"
                               data-test-subj="slosDetailSharedWithPill"
-                              title={`These recording rules are also referenced by ${sharedOtherCount} other SLO${
-                                sharedOtherCount === 1 ? '' : 's'
-                              } sharing the same SLI shape.`}
+                              title={i18n.translate(
+                                'observability.apm.slo.detail.sharedWithPill.title',
+                                {
+                                  defaultMessage:
+                                    'These recording rules are also referenced by {count, plural, one {# other SLO} other {# other SLOs}} sharing the same SLI shape.',
+                                  values: { count: sharedOtherCount },
+                                }
+                              )}
                             >
-                              {`Shared with ${sharedOtherCount} other SLO${
-                                sharedOtherCount === 1 ? '' : 's'
-                              }`}
+                              {i18n.translate('observability.apm.slo.detail.sharedWithPill.label', {
+                                defaultMessage:
+                                  'Shared with {count, plural, one {# other SLO} other {# other SLOs}}',
+                                values: { count: sharedOtherCount },
+                              })}
                             </EuiBadge>
                           </>
                         )}
@@ -937,7 +1206,10 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
                                     onClick={copy}
                                     data-test-subj={`slosDetailRecordingRuleCopy-${idx}`}
                                   >
-                                    Copy
+                                    {i18n.translate(
+                                      'observability.apm.slo.detail.recordingRuleCopy',
+                                      { defaultMessage: 'Copy' }
+                                    )}
                                   </EuiButtonEmpty>
                                 )}
                               </EuiCopy>
@@ -955,30 +1227,48 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
 
         {confirmDelete && (
           <EuiConfirmModal
-            title={`Delete SLO "${doc.spec.name}"?`}
+            title={i18n.translate('observability.apm.slo.detail.confirmDelete.title', {
+              defaultMessage: 'Delete SLO "{name}"?',
+              values: { name: doc.spec.name },
+            })}
             onCancel={() => setConfirmDelete(false)}
             onConfirm={onDelete}
-            cancelButtonText="Cancel"
-            confirmButtonText="Delete"
+            cancelButtonText={i18n.translate('observability.apm.slo.detail.confirmDelete.cancel', {
+              defaultMessage: 'Cancel',
+            })}
+            confirmButtonText={i18n.translate(
+              'observability.apm.slo.detail.confirmDelete.confirm',
+              { defaultMessage: 'Delete' }
+            )}
             buttonColor="danger"
             data-test-subj="slosDetailDeleteModal"
           >
             {dedupFingerprints ? (
               <>
                 <p>
-                  The per-SLO alert group (<code>{prov?.alertGroupName}</code>) is removed
-                  immediately. Shared recording rules are reference-counted: if no other SLO
-                  references the same SLI shape the recording group is queued for deletion, with a
-                  24h grace period in case you re-create the SLO.
+                  {i18n.translate('observability.apm.slo.detail.confirmDelete.dedupBody1Prefix', {
+                    defaultMessage: 'The per-SLO alert group (',
+                  })}
+                  <code>{prov?.alertGroupName}</code>
+                  {i18n.translate('observability.apm.slo.detail.confirmDelete.dedupBody1Suffix', {
+                    defaultMessage:
+                      ') is removed immediately. Shared recording rules are reference-counted: if no other SLO references the same SLI shape the recording group is queued for deletion, with a 24h grace period in case you re-create the SLO.',
+                  })}
                 </p>
                 <p>
-                  External dashboards or visualizations pinned to these recording-rule names will
-                  keep working as long as at least one SLO still references them. This action cannot
-                  be undone.
+                  {i18n.translate('observability.apm.slo.detail.confirmDelete.dedupBody2', {
+                    defaultMessage:
+                      'External dashboards or visualizations pinned to these recording-rule names will keep working as long as at least one SLO still references them. This action cannot be undone.',
+                  })}
                 </p>
               </>
             ) : (
-              <p>This tears down all generated Prometheus rules. The action cannot be undone.</p>
+              <p>
+                {i18n.translate('observability.apm.slo.detail.confirmDelete.simpleBody', {
+                  defaultMessage:
+                    'This tears down all generated Prometheus rules. The action cannot be undone.',
+                })}
+              </p>
             )}
           </EuiConfirmModal>
         )}

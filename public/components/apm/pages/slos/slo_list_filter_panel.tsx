@@ -30,6 +30,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
+import { i18n } from '@osd/i18n';
 import type { Datasource } from '../../../../../common/types/alerting';
 import type {
   SloHealthState,
@@ -50,19 +51,39 @@ export const DATASOURCE_SELECTION_CAP = 5;
 type SloMode = 'active' | 'shadow';
 
 const STATE_LABEL: Record<SloHealthState, string> = {
-  breached: 'Breached',
-  warning: 'Warning',
-  ok: 'Healthy',
-  no_data: 'No data',
-  source_idle: 'Source idle',
-  stale: 'Stale',
-  disabled: 'Disabled',
-  rules_missing: 'Rules missing',
+  breached: i18n.translate('observability.apm.slo.listFilterPanel.state.breached', {
+    defaultMessage: 'Breached',
+  }),
+  warning: i18n.translate('observability.apm.slo.listFilterPanel.state.warning', {
+    defaultMessage: 'Warning',
+  }),
+  ok: i18n.translate('observability.apm.slo.listFilterPanel.state.ok', {
+    defaultMessage: 'Healthy',
+  }),
+  no_data: i18n.translate('observability.apm.slo.listFilterPanel.state.noData', {
+    defaultMessage: 'No data',
+  }),
+  source_idle: i18n.translate('observability.apm.slo.listFilterPanel.state.sourceIdle', {
+    defaultMessage: 'Source idle',
+  }),
+  stale: i18n.translate('observability.apm.slo.listFilterPanel.state.stale', {
+    defaultMessage: 'Stale',
+  }),
+  disabled: i18n.translate('observability.apm.slo.listFilterPanel.state.disabled', {
+    defaultMessage: 'Disabled',
+  }),
+  rules_missing: i18n.translate('observability.apm.slo.listFilterPanel.state.rulesMissing', {
+    defaultMessage: 'Rules missing',
+  }),
 };
 
 const MODE_LABEL: Record<SloMode, string> = {
-  active: 'Active',
-  shadow: 'Shadow',
+  active: i18n.translate('observability.apm.slo.listFilterPanel.mode.active', {
+    defaultMessage: 'Active',
+  }),
+  shadow: i18n.translate('observability.apm.slo.listFilterPanel.mode.shadow', {
+    defaultMessage: 'Shadow',
+  }),
 };
 
 /**
@@ -172,7 +193,10 @@ const FacetAccordion: React.FC<FacetAccordionProps> = ({
       {searchable ? (
         <>
           <EuiFieldSearch
-            placeholder={`Search ${label.toLowerCase()}`}
+            placeholder={i18n.translate('observability.apm.slo.listFilterPanel.searchPlaceholder', {
+              defaultMessage: 'Search {label}',
+              values: { label: label.toLowerCase() },
+            })}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             isClearable
@@ -185,7 +209,9 @@ const FacetAccordion: React.FC<FacetAccordionProps> = ({
       ) : null}
       {filtered.length === 0 ? (
         <EuiText size="xs" color="subdued">
-          No values
+          {i18n.translate('observability.apm.slo.listFilterPanel.noValues', {
+            defaultMessage: 'No values',
+          })}
         </EuiText>
       ) : (
         <EuiCheckboxGroup
@@ -254,7 +280,11 @@ const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiText size="xs">
-          <strong>Prometheus datasources</strong>
+          <strong>
+            {i18n.translate('observability.apm.slo.listFilterPanel.datasourceFacet.label', {
+              defaultMessage: 'Prometheus datasources',
+            })}
+          </strong>
           {selectedSet.size > 0 ? (
             <span style={{ fontWeight: 400, marginLeft: 4 }}>
               ({selectedSet.size}/{cap})
@@ -274,7 +304,10 @@ const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
     >
       <EuiSpacer size="xs" />
       <EuiText size="xs" color="subdued">
-        Scope the catalog to up to {cap} datasources.
+        {i18n.translate('observability.apm.slo.listFilterPanel.datasourceFacet.scopeHint', {
+          defaultMessage: 'Scope the catalog to up to {cap} datasources.',
+          values: { cap },
+        })}
       </EuiText>
       <EuiSpacer size="xs" />
 
@@ -285,7 +318,9 @@ const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
-              Loading datasources…
+              {i18n.translate('observability.apm.slo.listFilterPanel.datasourceFacet.loading', {
+                defaultMessage: 'Loading datasources…',
+              })}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -296,18 +331,25 @@ const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="danger">
-              Failed to load datasources
+              {i18n.translate('observability.apm.slo.listFilterPanel.datasourceFacet.loadFailed', {
+                defaultMessage: 'Failed to load datasources',
+              })}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : datasources.length === 0 ? (
         <EuiText size="xs" color="subdued">
-          No Prometheus datasources registered.
+          {i18n.translate('observability.apm.slo.listFilterPanel.datasourceFacet.empty', {
+            defaultMessage: 'No Prometheus datasources registered.',
+          })}
         </EuiText>
       ) : (
         <>
           <EuiFieldSearch
-            placeholder="Search datasources"
+            placeholder={i18n.translate(
+              'observability.apm.slo.listFilterPanel.datasourceFacet.searchPlaceholder',
+              { defaultMessage: 'Search datasources' }
+            )}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             isClearable
@@ -324,7 +366,14 @@ const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText size="xs" color="warning">
-                    Cap reached ({cap} of {cap}). Deselect one to pick another.
+                    {i18n.translate(
+                      'observability.apm.slo.listFilterPanel.datasourceFacet.capReached',
+                      {
+                        defaultMessage:
+                          'Cap reached ({cap} of {cap}). Deselect one to pick another.',
+                        values: { cap },
+                      }
+                    )}
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -368,7 +417,15 @@ const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
                   }}
                 >
                   {disabled ? (
-                    <EuiToolTip content={`Max ${cap} datasources; deselect one first.`}>
+                    <EuiToolTip
+                      content={i18n.translate(
+                        'observability.apm.slo.listFilterPanel.datasourceFacet.maxTooltip',
+                        {
+                          defaultMessage: 'Max {cap} datasources; deselect one first.',
+                          values: { cap },
+                        }
+                      )}
+                    >
                       <span>{checkbox}</span>
                     </EuiToolTip>
                   ) : (
@@ -379,7 +436,10 @@ const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
             })}
             {visible.length === 0 && (
               <EuiText size="xs" color="subdued">
-                No datasources match &quot;{query}&quot;.
+                {i18n.translate('observability.apm.slo.listFilterPanel.datasourceFacet.noMatch', {
+                  defaultMessage: 'No datasources match "{query}".',
+                  values: { query },
+                })}
               </EuiText>
             )}
           </div>
@@ -420,7 +480,9 @@ export const SloListFilterPanel: React.FC<SloListFilterPanelProps> = ({
 
       <FacetAccordion
         id="slosFilterAccordionState"
-        label="State"
+        label={i18n.translate('observability.apm.slo.listFilterPanel.facet.state', {
+          defaultMessage: 'State',
+        })}
         dataTestSubj="slosFilterAccordionState"
         options={SLO_HEALTH_ORDER.map((s) => ({
           id: s,
@@ -437,7 +499,9 @@ export const SloListFilterPanel: React.FC<SloListFilterPanelProps> = ({
 
       <FacetAccordion
         id="slosFilterAccordionSliType"
-        label="SLI type"
+        label={i18n.translate('observability.apm.slo.listFilterPanel.facet.sliType', {
+          defaultMessage: 'SLI type',
+        })}
         dataTestSubj="slosFilterAccordionSliType"
         options={allLeafTypes.map((v) => ({ id: v, label: v }))}
         selected={filters.sliLeafType}
@@ -447,7 +511,9 @@ export const SloListFilterPanel: React.FC<SloListFilterPanelProps> = ({
 
       <FacetAccordion
         id="slosFilterAccordionCanonicalKind"
-        label="Canonical kind"
+        label={i18n.translate('observability.apm.slo.listFilterPanel.facet.canonicalKind', {
+          defaultMessage: 'Canonical kind',
+        })}
         dataTestSubj="slosFilterAccordionCanonicalKind"
         options={CANONICAL_KIND_ORDER.map((k) => ({ id: k, label: KIND_LABEL[k] }))}
         selected={filters.canonicalKind}
@@ -461,7 +527,9 @@ export const SloListFilterPanel: React.FC<SloListFilterPanelProps> = ({
 
       <FacetAccordion
         id="slosFilterAccordionService"
-        label="Service"
+        label={i18n.translate('observability.apm.slo.listFilterPanel.facet.service', {
+          defaultMessage: 'Service',
+        })}
         dataTestSubj="slosFilterAccordionService"
         options={allServices.map((v) => ({ id: v, label: v }))}
         selected={filters.service}
@@ -472,7 +540,9 @@ export const SloListFilterPanel: React.FC<SloListFilterPanelProps> = ({
 
       <FacetAccordion
         id="slosFilterAccordionTeam"
-        label="Team"
+        label={i18n.translate('observability.apm.slo.listFilterPanel.facet.team', {
+          defaultMessage: 'Team',
+        })}
         dataTestSubj="slosFilterAccordionTeam"
         options={allTeams.map((v) => ({ id: v, label: v }))}
         selected={filters.team}
@@ -483,7 +553,9 @@ export const SloListFilterPanel: React.FC<SloListFilterPanelProps> = ({
 
       <FacetAccordion
         id="slosFilterAccordionTier"
-        label="Tier"
+        label={i18n.translate('observability.apm.slo.listFilterPanel.facet.tier', {
+          defaultMessage: 'Tier',
+        })}
         dataTestSubj="slosFilterAccordionTier"
         options={allTiers.map((v) => ({ id: v, label: v }))}
         selected={filters.tier}
@@ -493,7 +565,9 @@ export const SloListFilterPanel: React.FC<SloListFilterPanelProps> = ({
 
       <FacetAccordion
         id="slosFilterAccordionMode"
-        label="Mode"
+        label={i18n.translate('observability.apm.slo.listFilterPanel.facet.mode', {
+          defaultMessage: 'Mode',
+        })}
         dataTestSubj="slosFilterAccordionMode"
         options={(['active', 'shadow'] as const).map((v) => ({ id: v, label: MODE_LABEL[v] }))}
         selected={filters.mode}
@@ -505,10 +579,22 @@ export const SloListFilterPanel: React.FC<SloListFilterPanelProps> = ({
         id="slosFilterAccordionEnabled"
         buttonContent={
           <EuiText size="xs">
-            <strong>Enabled</strong>
+            <strong>
+              {i18n.translate('observability.apm.slo.listFilterPanel.facet.enabled', {
+                defaultMessage: 'Enabled',
+              })}
+            </strong>
             {filters.enabled !== undefined ? (
               <span style={{ fontWeight: 400, marginLeft: 4 }}>
-                ({filters.enabled ? 'yes' : 'no'})
+                (
+                {filters.enabled
+                  ? i18n.translate('observability.apm.slo.listFilterPanel.enabledIndicator.yes', {
+                      defaultMessage: 'yes',
+                    })
+                  : i18n.translate('observability.apm.slo.listFilterPanel.enabledIndicator.no', {
+                      defaultMessage: 'no',
+                    })}
+                )
               </span>
             ) : null}
           </EuiText>
@@ -518,12 +604,29 @@ export const SloListFilterPanel: React.FC<SloListFilterPanelProps> = ({
       >
         <EuiSpacer size="xs" />
         <EuiButtonGroup
-          legend="Filter by enabled"
+          legend={i18n.translate('observability.apm.slo.listFilterPanel.enabledLegend', {
+            defaultMessage: 'Filter by enabled',
+          })}
           buttonSize="compressed"
           options={[
-            { id: 'any', label: 'Any' },
-            { id: 'yes', label: 'Yes' },
-            { id: 'no', label: 'No' },
+            {
+              id: 'any',
+              label: i18n.translate('observability.apm.slo.listFilterPanel.enabled.any', {
+                defaultMessage: 'Any',
+              }),
+            },
+            {
+              id: 'yes',
+              label: i18n.translate('observability.apm.slo.listFilterPanel.enabled.yes', {
+                defaultMessage: 'Yes',
+              }),
+            },
+            {
+              id: 'no',
+              label: i18n.translate('observability.apm.slo.listFilterPanel.enabled.no', {
+                defaultMessage: 'No',
+              }),
+            },
           ]}
           idSelected={filters.enabled === undefined ? 'any' : filters.enabled ? 'yes' : 'no'}
           onChange={(id) => patch({ enabled: id === 'any' ? undefined : id === 'yes' })}

@@ -27,6 +27,7 @@ import {
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import type { Action, FormState } from './wizard_state';
 
 export interface CustomPromqlEditorProps {
@@ -36,8 +37,18 @@ export interface CustomPromqlEditorProps {
 }
 
 const MODE_OPTIONS = [
-  { id: 'events', label: 'Events (good + total)' },
-  { id: 'raw', label: 'Raw error-ratio' },
+  {
+    id: 'events',
+    label: i18n.translate('observability.apm.slo.wizard.customPromql.modeEvents', {
+      defaultMessage: 'Events (good + total)',
+    }),
+  },
+  {
+    id: 'raw',
+    label: i18n.translate('observability.apm.slo.wizard.customPromql.modeRaw', {
+      defaultMessage: 'Raw error-ratio',
+    }),
+  },
 ];
 
 const MONO_STYLE: React.CSSProperties = { fontFamily: 'monospace' };
@@ -55,14 +66,23 @@ export const CustomPromqlEditor: React.FC<CustomPromqlEditorProps> = ({
   return (
     <EuiPanel data-test-subj="slosWizardCustomPromql">
       <EuiText size="m">
-        <h4>Custom PromQL</h4>
+        <h4>
+          {i18n.translate('observability.apm.slo.wizard.customPromql.heading', {
+            defaultMessage: 'Custom PromQL',
+          })}
+        </h4>
       </EuiText>
       <EuiText size="s" color="subdued">
-        Supply your own PromQL. Preview below shows the exact rule group that will be deployed.
+        {i18n.translate('observability.apm.slo.wizard.customPromql.description', {
+          defaultMessage:
+            'Supply your own PromQL. Preview below shows the exact rule group that will be deployed.',
+        })}
       </EuiText>
       <EuiSpacer size="s" />
       <EuiButtonGroup
-        legend="PromQL mode"
+        legend={i18n.translate('observability.apm.slo.wizard.customPromql.modeLegend', {
+          defaultMessage: 'PromQL mode',
+        })}
         idSelected={value.mode}
         onChange={(id) =>
           dispatch({
@@ -88,10 +108,14 @@ export const CustomPromqlEditor: React.FC<CustomPromqlEditorProps> = ({
       {value.mode === 'events' ? (
         <>
           <EuiFormRow
-            label="Good events query"
+            label={i18n.translate('observability.apm.slo.wizard.customPromql.goodLabel', {
+              defaultMessage: 'Good events query',
+            })}
             isInvalid={!!goodError}
             error={goodError}
-            helpText="PromQL returning the count of good events (non-errors)."
+            helpText={i18n.translate('observability.apm.slo.wizard.customPromql.goodHelp', {
+              defaultMessage: 'PromQL returning the count of good events (non-errors).',
+            })}
             fullWidth
           >
             <EuiTextArea
@@ -107,10 +131,14 @@ export const CustomPromqlEditor: React.FC<CustomPromqlEditorProps> = ({
             />
           </EuiFormRow>
           <EuiFormRow
-            label="Total events query"
+            label={i18n.translate('observability.apm.slo.wizard.customPromql.totalLabel', {
+              defaultMessage: 'Total events query',
+            })}
             isInvalid={!!totalError}
             error={totalError}
-            helpText="PromQL returning the count of total events."
+            helpText={i18n.translate('observability.apm.slo.wizard.customPromql.totalHelp', {
+              defaultMessage: 'PromQL returning the count of total events.',
+            })}
             fullWidth
           >
             <EuiTextArea
@@ -128,10 +156,14 @@ export const CustomPromqlEditor: React.FC<CustomPromqlEditorProps> = ({
         </>
       ) : (
         <EuiFormRow
-          label="Error-ratio query"
+          label={i18n.translate('observability.apm.slo.wizard.customPromql.rawLabel', {
+            defaultMessage: 'Error-ratio query',
+          })}
           isInvalid={!!rawError}
           error={rawError}
-          helpText="PromQL returning a pre-computed error ratio in [0, 1]."
+          helpText={i18n.translate('observability.apm.slo.wizard.customPromql.rawHelp', {
+            defaultMessage: 'PromQL returning a pre-computed error ratio in [0, 1].',
+          })}
           fullWidth
         >
           <EuiTextArea

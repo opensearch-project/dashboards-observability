@@ -29,6 +29,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
+import { i18n } from '@osd/i18n';
 import type {
   ProbeSliLookback,
   ProbeSliRequest,
@@ -39,9 +40,24 @@ import type { SloApiClient } from './slo_api_client';
 import { MetricSparkline, MetricDataPoint } from '../../shared/components/metric_sparkline';
 
 const LOOKBACK_OPTIONS: Array<{ value: ProbeSliLookback; text: string }> = [
-  { value: '1h', text: 'Last 1h' },
-  { value: '24h', text: 'Last 24h' },
-  { value: '7d', text: 'Last 7d' },
+  {
+    value: '1h',
+    text: i18n.translate('observability.apm.slo.wizard.probeSli.lookback1h', {
+      defaultMessage: 'Last 1h',
+    }),
+  },
+  {
+    value: '24h',
+    text: i18n.translate('observability.apm.slo.wizard.probeSli.lookback24h', {
+      defaultMessage: 'Last 24h',
+    }),
+  },
+  {
+    value: '7d',
+    text: i18n.translate('observability.apm.slo.wizard.probeSli.lookback7d', {
+      defaultMessage: 'Last 7d',
+    }),
+  },
 ];
 
 /** Minimum ms between successive probe clicks — shields the cluster from a
@@ -132,10 +148,16 @@ export const ProbeSliPanel: React.FC<ProbeSliPanelProps> = ({
   return (
     <EuiPanel paddingSize="m" hasShadow={false} hasBorder data-test-subj="slosWizardProbePanel">
       <EuiText size="s">
-        <h4>Probe SLI</h4>
+        <h4>
+          {i18n.translate('observability.apm.slo.wizard.probeSli.heading', {
+            defaultMessage: 'Probe SLI',
+          })}
+        </h4>
         <p>
-          Run this SLI against the target Prometheus backend to verify your queries match data
-          before you create the SLO.
+          {i18n.translate('observability.apm.slo.wizard.probeSli.description', {
+            defaultMessage:
+              'Run this SLI against the target Prometheus backend to verify your queries match data before you create the SLO.',
+          })}
         </p>
       </EuiText>
       <EuiSpacer size="s" />
@@ -150,7 +172,9 @@ export const ProbeSliPanel: React.FC<ProbeSliPanelProps> = ({
             onClick={onProbe}
             data-test-subj="slosWizardProbeButton"
           >
-            Probe SLI
+            {i18n.translate('observability.apm.slo.wizard.probeSli.button', {
+              defaultMessage: 'Probe SLI',
+            })}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -159,7 +183,9 @@ export const ProbeSliPanel: React.FC<ProbeSliPanelProps> = ({
             value={lookback}
             onChange={(e) => setLookback(e.target.value as ProbeSliLookback)}
             compressed
-            aria-label="Probe lookback window"
+            aria-label={i18n.translate('observability.apm.slo.wizard.probeSli.lookbackAriaLabel', {
+              defaultMessage: 'Probe lookback window',
+            })}
             data-test-subj="slosWizardProbeLookback"
           />
         </EuiFlexItem>
@@ -189,11 +215,18 @@ const ProbeResult: React.FC<ProbeResultProps> = ({ state }) => {
         <EuiCallOut
           color="danger"
           iconType="alert"
-          title="Probe failed"
+          title={i18n.translate('observability.apm.slo.wizard.probeSli.requestErrorTitle', {
+            defaultMessage: 'Probe failed',
+          })}
           size="s"
           data-test-subj="slosWizardProbeRequestError"
         >
-          <EuiText size="s">{state.error ?? 'Unknown error.'}</EuiText>
+          <EuiText size="s">
+            {state.error ??
+              i18n.translate('observability.apm.slo.wizard.probeSli.unknownError', {
+                defaultMessage: 'Unknown error.',
+              })}
+          </EuiText>
         </EuiCallOut>
       </>
     );
@@ -226,7 +259,9 @@ const ProbeResult: React.FC<ProbeResultProps> = ({ state }) => {
           <EuiFlexItem grow={false}>
             <EuiStat
               title={formatCount(goodCount)}
-              description="Good"
+              description={i18n.translate('observability.apm.slo.wizard.probeSli.goodLabel', {
+                defaultMessage: 'Good',
+              })}
               titleSize="s"
               data-test-subj="slosWizardProbeGoodStat"
             />
@@ -234,7 +269,9 @@ const ProbeResult: React.FC<ProbeResultProps> = ({ state }) => {
           <EuiFlexItem grow={false}>
             <EuiStat
               title={formatCount(totalCount)}
-              description="Total"
+              description={i18n.translate('observability.apm.slo.wizard.probeSli.totalLabel', {
+                defaultMessage: 'Total',
+              })}
               titleSize="s"
               data-test-subj="slosWizardProbeTotalStat"
             />
@@ -242,7 +279,10 @@ const ProbeResult: React.FC<ProbeResultProps> = ({ state }) => {
           <EuiFlexItem grow={false}>
             <EuiStat
               title={sliRatio !== undefined ? formatPct(sliRatio, { decimals: 2 }) : '—'}
-              description={`SLI ratio (${state.lookback ?? '1h'})`}
+              description={i18n.translate('observability.apm.slo.wizard.probeSli.ratioLabel', {
+                defaultMessage: 'SLI ratio ({lookback})',
+                values: { lookback: state.lookback ?? '1h' },
+              })}
               titleSize="s"
               titleColor={ratioColor(sliRatio)}
               data-test-subj="slosWizardProbeRatioStat"
@@ -263,7 +303,9 @@ const ProbeResult: React.FC<ProbeResultProps> = ({ state }) => {
             color="warning"
             iconType="alert"
             size="s"
-            title="Good query returned an error"
+            title={i18n.translate('observability.apm.slo.wizard.probeSli.goodErrorTitle', {
+              defaultMessage: 'Good query returned an error',
+            })}
             data-test-subj="slosWizardProbeErrorGood"
           >
             <EuiText size="s">
@@ -279,7 +321,9 @@ const ProbeResult: React.FC<ProbeResultProps> = ({ state }) => {
             color="warning"
             iconType="alert"
             size="s"
-            title="Total query returned an error"
+            title={i18n.translate('observability.apm.slo.wizard.probeSli.totalErrorTitle', {
+              defaultMessage: 'Total query returned an error',
+            })}
             data-test-subj="slosWizardProbeErrorTotal"
           >
             <EuiText size="s">
@@ -296,21 +340,38 @@ const ProbeResult: React.FC<ProbeResultProps> = ({ state }) => {
             color="danger"
             iconType="alert"
             size="s"
-            title="No samples match this query"
+            title={i18n.translate('observability.apm.slo.wizard.probeSli.emptyVectorTitle', {
+              defaultMessage: 'No samples match this query',
+            })}
             data-test-subj="slosWizardProbeEmptyVector"
           >
             <EuiText size="s">
               {zeroDenominator && !emptyVector ? (
                 <p>
-                  The total-events query returned <strong>0</strong> — the SLO will record
-                  <EuiCode>no_data</EuiCode> once deployed. Broaden the selector or check that the
-                  target service is emitting the metric.
+                  {i18n.translate('observability.apm.slo.wizard.probeSli.zeroDenominator.prefix', {
+                    defaultMessage: 'The total-events query returned ',
+                  })}
+                  <strong>0</strong>
+                  {i18n.translate('observability.apm.slo.wizard.probeSli.zeroDenominator.middle', {
+                    defaultMessage: ' — the SLO will record',
+                  })}
+                  <EuiCode>no_data</EuiCode>
+                  {i18n.translate('observability.apm.slo.wizard.probeSli.zeroDenominator.suffix', {
+                    defaultMessage:
+                      ' once deployed. Broaden the selector or check that the target service is emitting the metric.',
+                  })}
                 </p>
               ) : (
                 <p>
-                  At least one of the two queries returned no series against this datasource over
-                  the {state.lookback ?? '1h'} window. The SLO will show <EuiCode>no_data</EuiCode>{' '}
-                  until data appears.
+                  {i18n.translate('observability.apm.slo.wizard.probeSli.noSeries.prefix', {
+                    defaultMessage:
+                      'At least one of the two queries returned no series against this datasource over the {lookback} window. The SLO will show ',
+                    values: { lookback: state.lookback ?? '1h' },
+                  })}
+                  <EuiCode>no_data</EuiCode>{' '}
+                  {i18n.translate('observability.apm.slo.wizard.probeSli.noSeries.suffix', {
+                    defaultMessage: 'until data appears.',
+                  })}
                 </p>
               )}
             </EuiText>

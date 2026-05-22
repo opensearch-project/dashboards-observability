@@ -12,6 +12,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import type { History } from 'history';
 import type { NotificationsStart } from '../../../../../../../src/core/public';
 import { toMountPoint } from '../../../../../../../src/plugins/opensearch_dashboards_react/public';
@@ -101,28 +102,53 @@ export function useBatchCreate({
       const failures = results.filter((r) => !r.ok);
       if (failures.length === 0) {
         notifications.toasts.addSuccess({
-          title: `Created ${results.length} SLO${results.length === 1 ? '' : 's'}`,
+          title: i18n.translate('observability.apm.slo.suggest.batchCreate.successToast', {
+            defaultMessage: '{count, plural, one {Created # SLO} other {Created # SLOs}}',
+            values: { count: results.length },
+          }),
           // A mount-point so the "View in listing" action stays clickable;
           // auto-redirect is removed so the user keeps the row feedback they
           // just earned and can inspect any partial failure before leaving.
           text: toMountPoint(
             <EuiText size="s">
               <p>
-                Alerting rules are provisioned and will begin evaluating on the next ruler cycle.
+                {i18n.translate('observability.apm.slo.suggest.batchCreate.successToastBody', {
+                  defaultMessage:
+                    'Alerting rules are provisioned and will begin evaluating on the next ruler cycle.',
+                })}
               </p>
               <EuiLink
                 onClick={() => history.push('/slos')}
                 data-test-subj="slosSuggestCreateViewListing"
               >
-                View in listing
+                {i18n.translate('observability.apm.slo.suggest.batchCreate.viewInListingLink', {
+                  defaultMessage: 'View in listing',
+                })}
               </EuiLink>
             </EuiText>
           ),
         });
       } else {
         notifications.toasts.addDanger({
-          title: `${failures.length} of ${results.length} failed`,
-          text: failures.map((f) => `• ${f.key}: ${f.message ?? 'unknown error'}`).join('\n'),
+          title: i18n.translate('observability.apm.slo.suggest.batchCreate.failureToastTitle', {
+            defaultMessage: '{failed} of {total} failed',
+            values: { failed: failures.length, total: results.length },
+          }),
+          text: failures
+            .map((f) =>
+              i18n.translate('observability.apm.slo.suggest.batchCreate.failureLine', {
+                defaultMessage: '• {key}: {message}',
+                values: {
+                  key: f.key,
+                  message:
+                    f.message ??
+                    i18n.translate('observability.apm.slo.suggest.batchCreate.unknownError', {
+                      defaultMessage: 'unknown error',
+                    }),
+                },
+              })
+            )
+            .join('\n'),
         });
       }
     },

@@ -31,6 +31,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
+import { i18n } from '@osd/i18n';
 import { PromQLLineChart } from '../../shared/components/promql_line_chart';
 import { useApmConfig } from '../../config/apm_config_context';
 import { TimeRange } from '../../common/types/service_types';
@@ -120,10 +121,15 @@ export const SloVisualizations: React.FC<SloVisualizationsProps> = ({
         size="s"
         color="warning"
         iconType="iInCircle"
-        title="Prometheus datasource not configured in APM"
+        title={i18n.translate('observability.apm.slo.visualizations.noDatasource.title', {
+          defaultMessage: 'Prometheus datasource not configured in APM',
+        })}
       >
         <EuiText size="s">
-          Configure a Prometheus datasource in APM Settings to render live SLO visualizations.
+          {i18n.translate('observability.apm.slo.visualizations.noDatasource.body', {
+            defaultMessage:
+              'Configure a Prometheus datasource in APM Settings to render live SLO visualizations.',
+          })}
         </EuiText>
       </EuiCallOut>
     );
@@ -131,8 +137,19 @@ export const SloVisualizations: React.FC<SloVisualizationsProps> = ({
 
   if (slo.spec.sli.type !== 'single') {
     return (
-      <EuiCallOut size="s" color="warning" iconType="iInCircle" title="Composite SLO">
-        <EuiText size="s">Composite SLOs don&apos;t support pre-canned charts yet.</EuiText>
+      <EuiCallOut
+        size="s"
+        color="warning"
+        iconType="iInCircle"
+        title={i18n.translate('observability.apm.slo.visualizations.composite.title', {
+          defaultMessage: 'Composite SLO',
+        })}
+      >
+        <EuiText size="s">
+          {i18n.translate('observability.apm.slo.visualizations.composite.body', {
+            defaultMessage: "Composite SLOs don't support pre-canned charts yet.",
+          })}
+        </EuiText>
       </EuiCallOut>
     );
   }
@@ -143,10 +160,15 @@ export const SloVisualizations: React.FC<SloVisualizationsProps> = ({
         size="s"
         color="warning"
         iconType="iInCircle"
-        title="Cannot build a chart for this SLI"
+        title={i18n.translate('observability.apm.slo.visualizations.noChart.title', {
+          defaultMessage: 'Cannot build a chart for this SLI',
+        })}
       >
         <EuiText size="s">
-          The SLI is missing the metric or custom expression needed to produce a query.
+          {i18n.translate('observability.apm.slo.visualizations.noChart.body', {
+            defaultMessage:
+              'The SLI is missing the metric or custom expression needed to produce a query.',
+          })}
         </EuiText>
       </EuiCallOut>
     );
@@ -161,12 +183,18 @@ export const SloVisualizations: React.FC<SloVisualizationsProps> = ({
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
-                  <strong>Objective</strong>
+                  <strong>
+                    {i18n.translate('observability.apm.slo.visualizations.objectiveLabel', {
+                      defaultMessage: 'Objective',
+                    })}
+                  </strong>
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiButtonGroup
-                  legend="Select objective"
+                  legend={i18n.translate('observability.apm.slo.visualizations.objectiveLegend', {
+                    defaultMessage: 'Select objective',
+                  })}
                   name="objective"
                   idSelected={activeObjectiveName}
                   onChange={(id) => setActiveObjectiveName(id)}
@@ -247,11 +275,17 @@ export const SloVisualizations: React.FC<SloVisualizationsProps> = ({
             <EuiFlexItem>
               <EuiPanel>
                 <EuiText size="m">
-                  <h4>Latency distribution</h4>
+                  <h4>
+                    {i18n.translate('observability.apm.slo.visualizations.latency.heading', {
+                      defaultMessage: 'Latency distribution',
+                    })}
+                  </h4>
                 </EuiText>
                 <EuiText size="xs" color="subdued">
-                  p50 / p90 / p99 from the histogram buckets. Objective bound marks the tier where
-                  requests are considered &quot;bad&quot;.
+                  {i18n.translate('observability.apm.slo.visualizations.latency.description', {
+                    defaultMessage:
+                      'p50 / p90 / p99 from the histogram buckets. Objective bound marks the tier where requests are considered "bad".',
+                  })}
                 </EuiText>
                 <EuiSpacer size="s" />
                 <PromQLLineChart
@@ -294,7 +328,10 @@ export const SloVisualizations: React.FC<SloVisualizationsProps> = ({
                   <>
                     <EuiSpacer size="xs" />
                     <EuiText size="xs" color="subdued">
-                      objective bound:{' '}
+                      {i18n.translate(
+                        'observability.apm.slo.visualizations.latency.objectiveBoundLabel',
+                        { defaultMessage: 'objective bound: ' }
+                      )}
                       <strong>
                         {formatSeconds(
                           (slo.spec.sli.type === 'single' &&
@@ -321,11 +358,17 @@ export const SloVisualizations: React.FC<SloVisualizationsProps> = ({
       {requestRateQuery && (
         <EuiPanel>
           <EuiText size="m">
-            <h4>Request volume</h4>
+            <h4>
+              {i18n.translate('observability.apm.slo.visualizations.requestVolume.heading', {
+                defaultMessage: 'Request volume',
+              })}
+            </h4>
           </EuiText>
           <EuiText size="xs" color="subdued">
-            Total requests per second observed by the SLI. Spikes here usually explain bursts in the
-            error-ratio chart above.
+            {i18n.translate('observability.apm.slo.visualizations.requestVolume.description', {
+              defaultMessage:
+                'Total requests per second observed by the SLI. Spikes here usually explain bursts in the error-ratio chart above.',
+            })}
           </EuiText>
           <EuiSpacer size="s" />
           <PromQLLineChart

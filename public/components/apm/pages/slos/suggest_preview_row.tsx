@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import type { LiveSli, PerPreview } from './suggest_use_live_preview';
 import type { WindowOption } from './suggest_live_queries';
 import { formatSamples } from './suggest_live_queries';
@@ -73,11 +74,17 @@ export const SuggestPreviewRow: React.FC<{
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
-                {spec.objectives[0]?.name} · target{' '}
-                {(spec.objectives[0]?.target * 100).toFixed(2).replace(/\.?0+$/, '')}%
-                {spec.objectives[0]?.latencyThreshold !== undefined
-                  ? ` · ≤ ${spec.objectives[0].latencyThreshold}s`
-                  : ''}
+                {i18n.translate('observability.apm.slo.suggest.previewRow.objectiveSummary', {
+                  defaultMessage: '{name} · target {target}%{latencySuffix}',
+                  values: {
+                    name: spec.objectives[0]?.name,
+                    target: (spec.objectives[0]?.target * 100).toFixed(2).replace(/\.?0+$/, ''),
+                    latencySuffix:
+                      spec.objectives[0]?.latencyThreshold !== undefined
+                        ? ` · ≤ ${spec.objectives[0].latencyThreshold}s`
+                        : '',
+                  },
+                })}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -86,10 +93,19 @@ export const SuggestPreviewRow: React.FC<{
           {status === 'loading' && <EuiLoadingSpinner size="m" />}
           {status === 'success' && group && (
             <EuiBadge color="primary">
-              {group.rules.length} {group.rules.length === 1 ? 'rule' : 'rules'}
+              {i18n.translate('observability.apm.slo.suggest.previewRow.ruleCountBadge', {
+                defaultMessage: '{count, plural, one {# rule} other {# rules}}',
+                values: { count: group.rules.length },
+              })}
             </EuiBadge>
           )}
-          {status === 'error' && <EuiBadge color="danger">preview failed</EuiBadge>}
+          {status === 'error' && (
+            <EuiBadge color="danger">
+              {i18n.translate('observability.apm.slo.suggest.previewRow.previewFailedBadge', {
+                defaultMessage: 'preview failed',
+              })}
+            </EuiBadge>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -106,7 +122,10 @@ export const SuggestPreviewRow: React.FC<{
           >
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
-                Over last {windowChoice}:
+                {i18n.translate('observability.apm.slo.suggest.previewRow.overLastLabel', {
+                  defaultMessage: 'Over last {windowChoice}:',
+                  values: { windowChoice },
+                })}
               </EuiText>
             </EuiFlexItem>
             {live.status === 'loading' && (
@@ -122,7 +141,12 @@ export const SuggestPreviewRow: React.FC<{
                 {!isLatencyObjective && hasSli && (
                   <EuiFlexItem grow={false}>
                     <EuiBadge color={breaching ? 'danger' : 'success'}>
-                      SLI {(live.sliRatio! * 100).toFixed(2).replace(/\.?0+$/, '')}%
+                      {i18n.translate('observability.apm.slo.suggest.previewRow.sliBadge', {
+                        defaultMessage: 'SLI {value}%',
+                        values: {
+                          value: (live.sliRatio! * 100).toFixed(2).replace(/\.?0+$/, ''),
+                        },
+                      })}
                     </EuiBadge>
                   </EuiFlexItem>
                 )}
@@ -131,23 +155,35 @@ export const SuggestPreviewRow: React.FC<{
                     <EuiBadge
                       color={isLatencyObjective ? (breaching ? 'danger' : 'success') : 'hollow'}
                     >
-                      p99 {live.p99Ms.toFixed(0)} ms
-                      {isLatencyObjective
-                        ? ` vs ${((latencyBoundSec as number) * 1000).toFixed(0)} ms`
-                        : ''}
+                      {i18n.translate('observability.apm.slo.suggest.previewRow.p99Badge', {
+                        defaultMessage: 'p99 {value} ms{vsSuffix}',
+                        values: {
+                          value: live.p99Ms.toFixed(0),
+                          vsSuffix: isLatencyObjective
+                            ? ` vs ${((latencyBoundSec as number) * 1000).toFixed(0)} ms`
+                            : '',
+                        },
+                      })}
                     </EuiBadge>
                   </EuiFlexItem>
                 )}
                 {breaching && (
                   <EuiFlexItem grow={false}>
                     <EuiBadge color="danger" iconType="alert">
-                      breaching
+                      {i18n.translate('observability.apm.slo.suggest.previewRow.breachingBadge', {
+                        defaultMessage: 'breaching',
+                      })}
                     </EuiBadge>
                   </EuiFlexItem>
                 )}
                 {typeof live.totalSamples === 'number' && (
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">{formatSamples(live.totalSamples)} samples</EuiBadge>
+                    <EuiBadge color="hollow">
+                      {i18n.translate('observability.apm.slo.suggest.previewRow.samplesBadge', {
+                        defaultMessage: '{value} samples',
+                        values: { value: formatSamples(live.totalSamples) },
+                      })}
+                    </EuiBadge>
                   </EuiFlexItem>
                 )}
                 {!hasSli &&
@@ -155,7 +191,9 @@ export const SuggestPreviewRow: React.FC<{
                   typeof live.totalSamples !== 'number' && (
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs" color="subdued">
-                        no data in window
+                        {i18n.translate('observability.apm.slo.suggest.previewRow.noDataInWindow', {
+                          defaultMessage: 'no data in window',
+                        })}
                       </EuiText>
                     </EuiFlexItem>
                   )}
@@ -164,7 +202,10 @@ export const SuggestPreviewRow: React.FC<{
             {live.status === 'error' && (
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
-                  live metrics unavailable
+                  {i18n.translate(
+                    'observability.apm.slo.suggest.previewRow.liveMetricsUnavailable',
+                    { defaultMessage: 'live metrics unavailable' }
+                  )}
                 </EuiText>
               </EuiFlexItem>
             )}
@@ -179,10 +220,17 @@ export const SuggestPreviewRow: React.FC<{
             size="s"
             color="warning"
             iconType="alert"
-            title="Preview unavailable"
+            title={i18n.translate('observability.apm.slo.suggest.previewRow.errorTitle', {
+              defaultMessage: 'Preview unavailable',
+            })}
             data-test-subj={`slosSuggestPreviewError-${suggestion.key}`}
           >
-            <EuiText size="xs">{error ?? 'Unable to generate preview.'}</EuiText>
+            <EuiText size="xs">
+              {error ??
+                i18n.translate('observability.apm.slo.suggest.previewRow.errorFallback', {
+                  defaultMessage: 'Unable to generate preview.',
+                })}
+            </EuiText>
           </EuiCallOut>
         </>
       )}
@@ -193,8 +241,14 @@ export const SuggestPreviewRow: React.FC<{
             id={`slosSuggestPreviewYaml-${suggestion.key}`}
             buttonContent={
               <EuiText size="xs">
-                Show rule group <EuiCode>{group.groupName}</EuiCode> (eval interval {group.interval}
-                s)
+                {i18n.translate('observability.apm.slo.suggest.previewRow.yamlAccordion.prefix', {
+                  defaultMessage: 'Show rule group ',
+                })}
+                <EuiCode>{group.groupName}</EuiCode>
+                {i18n.translate('observability.apm.slo.suggest.previewRow.yamlAccordion.suffix', {
+                  defaultMessage: ' (eval interval {interval}s)',
+                  values: { interval: group.interval },
+                })}
               </EuiText>
             }
             paddingSize="s"

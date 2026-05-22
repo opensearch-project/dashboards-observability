@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
+
 /**
  * Shared color maps, formatting utilities, and style constants
  * used across alert-manager components.
@@ -148,10 +150,18 @@ export function formatDatasourceType(type: string): string {
  * Human-readable labels for SLI types.
  */
 export const SLI_TYPE_LABELS: Record<string, string> = {
-  availability: 'Availability',
-  latency_p99: 'Latency (p99)',
-  latency_p90: 'Latency (p90)',
-  latency_p50: 'Latency (p50)',
+  availability: i18n.translate('observability.alerting.sliTypeLabel.availability', {
+    defaultMessage: 'Availability',
+  }),
+  latency_p99: i18n.translate('observability.alerting.sliTypeLabel.latencyP99', {
+    defaultMessage: 'Latency (p99)',
+  }),
+  latency_p90: i18n.translate('observability.alerting.sliTypeLabel.latencyP90', {
+    defaultMessage: 'Latency (p90)',
+  }),
+  latency_p50: i18n.translate('observability.alerting.sliTypeLabel.latencyP50', {
+    defaultMessage: 'Latency (p50)',
+  }),
 };
 
 /**

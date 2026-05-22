@@ -28,6 +28,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import type { ExclusionWindow } from '../../../../../common/slo/slo_types';
 import type { Action } from './wizard_state';
 
@@ -37,8 +38,18 @@ export interface ExclusionWindowsEditorProps {
 }
 
 const SCHEDULE_OPTIONS = [
-  { id: 'cron', label: 'Recurring (cron)' },
-  { id: 'oneoff', label: 'One-off window' },
+  {
+    id: 'cron',
+    label: i18n.translate('observability.apm.slo.wizard.exclusionWindows.scheduleCron', {
+      defaultMessage: 'Recurring (cron)',
+    }),
+  },
+  {
+    id: 'oneoff',
+    label: i18n.translate('observability.apm.slo.wizard.exclusionWindows.scheduleOneoff', {
+      defaultMessage: 'One-off window',
+    }),
+  },
 ];
 
 export const ExclusionWindowsEditor: React.FC<ExclusionWindowsEditorProps> = ({
@@ -48,7 +59,10 @@ export const ExclusionWindowsEditor: React.FC<ExclusionWindowsEditorProps> = ({
   <EuiPanel>
     <EuiAccordion
       id="slosWizardExclusionWindows"
-      buttonContent="Exclusion windows (maintenance / deploy freezes)"
+      buttonContent={i18n.translate(
+        'observability.apm.slo.wizard.exclusionWindows.accordionLabel',
+        { defaultMessage: 'Exclusion windows (maintenance / deploy freezes)' }
+      )}
       paddingSize="s"
       data-test-subj="slosWizardExclusionWindowsToggle"
     >
@@ -56,13 +70,17 @@ export const ExclusionWindowsEditor: React.FC<ExclusionWindowsEditorProps> = ({
         color="primary"
         size="s"
         iconType="iInCircle"
-        title="Saved with the SLO; attainment exclusion enforcement ships post-GA."
+        title={i18n.translate('observability.apm.slo.wizard.exclusionWindows.notice', {
+          defaultMessage: 'Saved with the SLO; attainment exclusion enforcement ships post-GA.',
+        })}
         data-test-subj="slosWizardExclusionWindowsNotice"
       />
       <EuiSpacer size="s" />
       {exclusionWindows.length === 0 && (
         <EuiText size="s" color="subdued" data-test-subj="slosWizardExclusionWindowsEmpty">
-          No exclusion windows configured.
+          {i18n.translate('observability.apm.slo.wizard.exclusionWindows.emptyMessage', {
+            defaultMessage: 'No exclusion windows configured.',
+          })}
         </EuiText>
       )}
       {exclusionWindows.map((ew, i) => (
@@ -74,7 +92,11 @@ export const ExclusionWindowsEditor: React.FC<ExclusionWindowsEditorProps> = ({
         >
           <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
             <EuiFlexItem>
-              <EuiFormRow label="Name">
+              <EuiFormRow
+                label={i18n.translate('observability.apm.slo.wizard.exclusionWindows.nameLabel', {
+                  defaultMessage: 'Name',
+                })}
+              >
                 <EuiFieldText
                   value={ew.name}
                   onChange={(e) =>
@@ -91,7 +113,11 @@ export const ExclusionWindowsEditor: React.FC<ExclusionWindowsEditorProps> = ({
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFormRow label="Reason (optional)">
+              <EuiFormRow
+                label={i18n.translate('observability.apm.slo.wizard.exclusionWindows.reasonLabel', {
+                  defaultMessage: 'Reason (optional)',
+                })}
+              >
                 <EuiFieldText
                   value={ew.reason ?? ''}
                   onChange={(e) =>
@@ -112,7 +138,13 @@ export const ExclusionWindowsEditor: React.FC<ExclusionWindowsEditorProps> = ({
                 color="danger"
                 onClick={() => dispatch({ kind: 'removeExclusionWindow', index: i })}
                 iconType="trash"
-                aria-label={`Remove exclusion window ${i}`}
+                aria-label={i18n.translate(
+                  'observability.apm.slo.wizard.exclusionWindows.removeAriaLabel',
+                  {
+                    defaultMessage: 'Remove exclusion window {index}',
+                    values: { index: i },
+                  }
+                )}
                 size="s"
                 data-test-subj={`slosWizardExclusionRemove-${i}`}
               />
@@ -120,7 +152,10 @@ export const ExclusionWindowsEditor: React.FC<ExclusionWindowsEditorProps> = ({
           </EuiFlexGroup>
           <EuiSpacer size="xs" />
           <EuiButtonGroup
-            legend="Schedule type"
+            legend={i18n.translate(
+              'observability.apm.slo.wizard.exclusionWindows.scheduleTypeLegend',
+              { defaultMessage: 'Schedule type' }
+            )}
             idSelected={ew.schedule.type}
             onChange={(id) =>
               dispatch({
@@ -136,7 +171,12 @@ export const ExclusionWindowsEditor: React.FC<ExclusionWindowsEditorProps> = ({
           {ew.schedule.type === 'cron' ? (
             <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
               <EuiFlexItem>
-                <EuiFormRow label="Cron expression">
+                <EuiFormRow
+                  label={i18n.translate(
+                    'observability.apm.slo.wizard.exclusionWindows.cronExpressionLabel',
+                    { defaultMessage: 'Cron expression' }
+                  )}
+                >
                   <EuiFieldText
                     value={ew.schedule.expression}
                     onChange={(e) =>
@@ -153,7 +193,12 @@ export const ExclusionWindowsEditor: React.FC<ExclusionWindowsEditorProps> = ({
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFormRow label="Timezone">
+                <EuiFormRow
+                  label={i18n.translate(
+                    'observability.apm.slo.wizard.exclusionWindows.cronTimezoneLabel',
+                    { defaultMessage: 'Timezone' }
+                  )}
+                >
                   <EuiFieldText
                     value={ew.schedule.timezone}
                     onChange={(e) =>
@@ -170,7 +215,12 @@ export const ExclusionWindowsEditor: React.FC<ExclusionWindowsEditorProps> = ({
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFormRow label="Duration (per occurrence)">
+                <EuiFormRow
+                  label={i18n.translate(
+                    'observability.apm.slo.wizard.exclusionWindows.cronDurationLabel',
+                    { defaultMessage: 'Duration (per occurrence)' }
+                  )}
+                >
                   <EuiFieldText
                     value={ew.schedule.duration}
                     onChange={(e) =>
@@ -190,7 +240,12 @@ export const ExclusionWindowsEditor: React.FC<ExclusionWindowsEditorProps> = ({
           ) : (
             <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
               <EuiFlexItem>
-                <EuiFormRow label="Start (ISO-8601)">
+                <EuiFormRow
+                  label={i18n.translate(
+                    'observability.apm.slo.wizard.exclusionWindows.oneoffStartLabel',
+                    { defaultMessage: 'Start (ISO-8601)' }
+                  )}
+                >
                   <EuiFieldText
                     value={ew.schedule.start}
                     onChange={(e) =>
@@ -207,7 +262,12 @@ export const ExclusionWindowsEditor: React.FC<ExclusionWindowsEditorProps> = ({
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFormRow label="End (ISO-8601)">
+                <EuiFormRow
+                  label={i18n.translate(
+                    'observability.apm.slo.wizard.exclusionWindows.oneoffEndLabel',
+                    { defaultMessage: 'End (ISO-8601)' }
+                  )}
+                >
                   <EuiFieldText
                     value={ew.schedule.end}
                     onChange={(e) =>
@@ -233,7 +293,9 @@ export const ExclusionWindowsEditor: React.FC<ExclusionWindowsEditorProps> = ({
         onClick={() => dispatch({ kind: 'addExclusionWindow' })}
         data-test-subj="slosWizardExclusionAdd"
       >
-        Add exclusion window
+        {i18n.translate('observability.apm.slo.wizard.exclusionWindows.addButton', {
+          defaultMessage: 'Add exclusion window',
+        })}
       </EuiButtonEmpty>
     </EuiAccordion>
   </EuiPanel>

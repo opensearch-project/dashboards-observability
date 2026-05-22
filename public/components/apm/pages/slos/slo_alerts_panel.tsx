@@ -28,6 +28,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { coreRefs } from '../../../../framework/core_refs';
 import { observabilityAlertingID } from '../../../../../common/constants/shared';
 import type { RuleHealthResponse } from './slo_api_client';
@@ -84,13 +85,19 @@ export const SloAlertsPanel: React.FC<SloAlertsPanelProps> = ({ doc, ruleHealth 
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem>
             <EuiText size="m">
-              <h4>Alerts</h4>
+              <h4>
+                {i18n.translate('observability.apm.slo.alertsPanel.heading', {
+                  defaultMessage: 'Alerts',
+                })}
+              </h4>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
-          Alert listings require a Prometheus-compatible datasource.
+          {i18n.translate('observability.apm.slo.alertsPanel.unsupportedDatasource', {
+            defaultMessage: 'Alert listings require a Prometheus-compatible datasource.',
+          })}
         </EuiText>
       </EuiPanel>
     );
@@ -112,10 +119,21 @@ export const SloAlertsPanel: React.FC<SloAlertsPanelProps> = ({ doc, ruleHealth 
   const groupCount = expectedGroups.length;
 
   const subtitle = isShadow
-    ? 'Shadow mode — alerts suppressed; recording rules only.'
-    : `${ruleCount} rule${ruleCount === 1 ? '' : 's'} across ${groupCount} group${
-        groupCount === 1 ? '' : 's'
-      }${firingCount > 0 ? ` · ${firingCount} firing` : ''}`;
+    ? i18n.translate('observability.apm.slo.alertsPanel.shadowSubtitle', {
+        defaultMessage: 'Shadow mode — alerts suppressed; recording rules only.',
+      })
+    : `${i18n.translate('observability.apm.slo.alertsPanel.ruleSubtitle', {
+        defaultMessage:
+          '{ruleCount, plural, one {# rule} other {# rules}} across {groupCount, plural, one {# group} other {# groups}}',
+        values: { ruleCount, groupCount },
+      })}${
+        firingCount > 0
+          ? ` · ${i18n.translate('observability.apm.slo.alertsPanel.firingSuffix', {
+              defaultMessage: '{firingCount} firing',
+              values: { firingCount },
+            })}`
+          : ''
+      }`;
 
   return (
     <EuiPanel data-test-subj="slosDetailAlertsPanel">
@@ -124,7 +142,11 @@ export const SloAlertsPanel: React.FC<SloAlertsPanelProps> = ({ doc, ruleHealth 
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiText size="m">
-                <h4>Alerts</h4>
+                <h4>
+                  {i18n.translate('observability.apm.slo.alertsPanel.heading', {
+                    defaultMessage: 'Alerts',
+                  })}
+                </h4>
               </EuiText>
             </EuiFlexItem>
             {hasHealthIssue && (
@@ -134,7 +156,9 @@ export const SloAlertsPanel: React.FC<SloAlertsPanelProps> = ({ doc, ruleHealth 
                   iconType="alert"
                   data-test-subj="slosDetailAlertsPanelHealthBadge"
                 >
-                  Rule groups missing
+                  {i18n.translate('observability.apm.slo.alertsPanel.healthBadge', {
+                    defaultMessage: 'Rule groups missing',
+                  })}
                 </EuiBadge>
               </EuiFlexItem>
             )}
@@ -153,7 +177,9 @@ export const SloAlertsPanel: React.FC<SloAlertsPanelProps> = ({ doc, ruleHealth 
               data-test-subj="slosDetailAlertsPanelViewAll"
               onClick={() => navigateToAlertManager(doc.id)}
             >
-              View all in Alert Manager
+              {i18n.translate('observability.apm.slo.alertsPanel.viewAllLink', {
+                defaultMessage: 'View all in Alert Manager',
+              })}
             </EuiLink>
           </EuiFlexItem>
         )}
@@ -163,7 +189,9 @@ export const SloAlertsPanel: React.FC<SloAlertsPanelProps> = ({ doc, ruleHealth 
 
       {expectedGroups.length === 0 ? (
         <EuiText size="s" color="subdued">
-          No alert rule groups deployed.
+          {i18n.translate('observability.apm.slo.alertsPanel.noGroupsDeployed', {
+            defaultMessage: 'No alert rule groups deployed.',
+          })}
         </EuiText>
       ) : (
         <div data-test-subj="slosDetailAlertsPanelGroupList">
@@ -199,7 +227,13 @@ export const SloAlertsPanel: React.FC<SloAlertsPanelProps> = ({ doc, ruleHealth 
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiBadge color={present ? 'success' : 'danger'}>
-                    {present ? 'present' : 'missing'}
+                    {present
+                      ? i18n.translate('observability.apm.slo.alertsPanel.groupPresentBadge', {
+                          defaultMessage: 'present',
+                        })
+                      : i18n.translate('observability.apm.slo.alertsPanel.groupMissingBadge', {
+                          defaultMessage: 'missing',
+                        })}
                   </EuiBadge>
                 </EuiFlexItem>
                 {!isShadow && isAlertGroup && (
@@ -208,7 +242,9 @@ export const SloAlertsPanel: React.FC<SloAlertsPanelProps> = ({ doc, ruleHealth 
                       data-test-subj={`slosDetailAlertsPanelGroupView-${groupName}`}
                       onClick={() => navigateToAlertManager(doc.id)}
                     >
-                      View
+                      {i18n.translate('observability.apm.slo.alertsPanel.viewGroupLink', {
+                        defaultMessage: 'View',
+                      })}
                     </EuiLink>
                   </EuiFlexItem>
                 )}

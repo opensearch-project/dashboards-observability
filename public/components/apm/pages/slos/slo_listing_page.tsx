@@ -140,7 +140,9 @@ const SloHealthCell: React.FC<{ row: SloSummary }> = ({ row }) => {
   const remaining = worstBudgetRemaining(row);
   const overBudget = remaining < 0;
   const budgetLabel = overBudget
-    ? 'over budget'
+    ? i18n.translate('observability.apm.slo.listing.budgetOver', {
+        defaultMessage: 'over budget',
+      })
     : formatPct(Math.max(0, remaining), { decimals: 0 });
   const budgetColor: 'danger' | 'warning' | 'default' = overBudget
     ? 'danger'
@@ -157,7 +159,12 @@ const SloHealthCell: React.FC<{ row: SloSummary }> = ({ row }) => {
         justifyContent="flexStart"
       >
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={`State: ${state}`}>
+          <EuiToolTip
+            content={i18n.translate('observability.apm.slo.listing.stateTooltip', {
+              defaultMessage: 'State: {state}',
+              values: { state },
+            })}
+          >
             <EuiHealth color={getSloHealthColor(state)}>
               <span style={{ fontSize: 12 }}>{state}</span>
             </EuiHealth>
@@ -165,7 +172,11 @@ const SloHealthCell: React.FC<{ row: SloSummary }> = ({ row }) => {
         </EuiFlexItem>
         {isReporting ? (
           <EuiFlexItem grow={true} style={{ textAlign: 'right' }}>
-            <EuiToolTip content="Remaining error budget (worst objective).">
+            <EuiToolTip
+              content={i18n.translate('observability.apm.slo.listing.budgetRemainingTooltip', {
+                defaultMessage: 'Remaining error budget (worst objective).',
+              })}
+            >
               <EuiText
                 size="s"
                 color={budgetColor === 'default' ? 'default' : budgetColor}
@@ -178,7 +189,12 @@ const SloHealthCell: React.FC<{ row: SloSummary }> = ({ row }) => {
         ) : null}
         {firing > 0 ? (
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={`${firing} alert${firing === 1 ? '' : 's'} firing`}>
+            <EuiToolTip
+              content={i18n.translate('observability.apm.slo.listing.firingTooltip', {
+                defaultMessage: '{firing, plural, one {# alert firing} other {# alerts firing}}',
+                values: { firing },
+              })}
+            >
               <EuiBadge color="danger" iconType="bell" data-test-subj={`slosFiringBadge-${row.id}`}>
                 {firing}
               </EuiBadge>
@@ -215,14 +231,30 @@ function filterStateToTile(state: SloHealthState[] | undefined): SloHealthState 
 }
 
 const STATE_LABEL: Record<SloHealthState, string> = {
-  breached: 'Breached',
-  warning: 'Warning',
-  ok: 'Healthy',
-  no_data: 'No data',
-  source_idle: 'Source idle',
-  stale: 'Stale',
-  disabled: 'Disabled',
-  rules_missing: 'Rules missing',
+  breached: i18n.translate('observability.apm.slo.listing.stateLabel.breached', {
+    defaultMessage: 'Breached',
+  }),
+  warning: i18n.translate('observability.apm.slo.listing.stateLabel.warning', {
+    defaultMessage: 'Warning',
+  }),
+  ok: i18n.translate('observability.apm.slo.listing.stateLabel.ok', {
+    defaultMessage: 'Healthy',
+  }),
+  no_data: i18n.translate('observability.apm.slo.listing.stateLabel.noData', {
+    defaultMessage: 'No data',
+  }),
+  source_idle: i18n.translate('observability.apm.slo.listing.stateLabel.sourceIdle', {
+    defaultMessage: 'Source idle',
+  }),
+  stale: i18n.translate('observability.apm.slo.listing.stateLabel.stale', {
+    defaultMessage: 'Stale',
+  }),
+  disabled: i18n.translate('observability.apm.slo.listing.stateLabel.disabled', {
+    defaultMessage: 'Disabled',
+  }),
+  rules_missing: i18n.translate('observability.apm.slo.listing.stateLabel.rulesMissing', {
+    defaultMessage: 'Rules missing',
+  }),
 };
 
 /**
@@ -246,43 +278,63 @@ function ruleBadgeSpecFor(state: SloHealthState): RuleBadgeSpec {
   if (state === 'rules_missing') {
     return {
       kind: 'missing',
-      label: 'Missing',
+      label: i18n.translate('observability.apm.slo.listing.rulesBadge.missing.label', {
+        defaultMessage: 'Missing',
+      }),
       color: 'danger',
       iconType: 'alert',
-      tooltip:
-        'One or more Prometheus rule groups for this SLO are missing from the ruler. Visit the detail page to restore or delete.',
+      tooltip: i18n.translate('observability.apm.slo.listing.rulesBadge.missing.tooltip', {
+        defaultMessage:
+          'One or more Prometheus rule groups for this SLO are missing from the ruler. Visit the detail page to restore or delete.',
+      }),
     };
   }
   if (state === 'disabled') {
     return {
       kind: 'disabled',
-      label: 'Disabled',
+      label: i18n.translate('observability.apm.slo.listing.rulesBadge.disabled.label', {
+        defaultMessage: 'Disabled',
+      }),
       color: 'hollow',
-      tooltip: 'SLO is paused; rule groups are intentionally absent.',
+      tooltip: i18n.translate('observability.apm.slo.listing.rulesBadge.disabled.tooltip', {
+        defaultMessage: 'SLO is paused; rule groups are intentionally absent.',
+      }),
     };
   }
   if (state === 'no_data' || state === 'stale') {
     return {
       kind: 'no-data',
-      label: 'No data',
+      label: i18n.translate('observability.apm.slo.listing.rulesBadge.noData.label', {
+        defaultMessage: 'No data',
+      }),
       color: 'warning',
-      tooltip: 'Rule groups exist but no samples have arrived yet.',
+      tooltip: i18n.translate('observability.apm.slo.listing.rulesBadge.noData.tooltip', {
+        defaultMessage: 'Rule groups exist but no samples have arrived yet.',
+      }),
     };
   }
   if (state === 'source_idle') {
     return {
       kind: 'no-data',
-      label: 'Source idle',
+      label: i18n.translate('observability.apm.slo.listing.rulesBadge.sourceIdle.label', {
+        defaultMessage: 'Source idle',
+      }),
       color: 'warning',
-      tooltip:
-        'Rule groups are evaluating but the source metric has no traffic in the window. Check the upstream metric pipeline.',
+      tooltip: i18n.translate('observability.apm.slo.listing.rulesBadge.sourceIdle.tooltip', {
+        defaultMessage:
+          'Rule groups are evaluating but the source metric has no traffic in the window. Check the upstream metric pipeline.',
+      }),
     };
   }
   return {
     kind: 'healthy',
-    label: 'Active',
+    label: i18n.translate('observability.apm.slo.listing.rulesBadge.active.label', {
+      defaultMessage: 'Active',
+    }),
     color: 'success',
-    tooltip: 'Rule groups deployed and actively evaluating samples.',
+    tooltip: i18n.translate('observability.apm.slo.listing.rulesBadge.active.tooltip', {
+      defaultMessage: 'Rule groups deployed and actively evaluating samples.',
+    }),
   };
 }
 
@@ -303,8 +355,12 @@ const SloRulesBadge: React.FC<{ row: SloSummary }> = ({ row }) => {
 };
 
 const MODE_LABEL: Record<'active' | 'shadow', string> = {
-  active: 'Active',
-  shadow: 'Shadow',
+  active: i18n.translate('observability.apm.slo.listing.modeLabel.active', {
+    defaultMessage: 'Active',
+  }),
+  shadow: i18n.translate('observability.apm.slo.listing.modeLabel.shadow', {
+    defaultMessage: 'Shadow',
+  }),
 };
 
 /**
@@ -375,7 +431,13 @@ const SloTraitsCell: React.FC<SloTraitsCellProps> = ({ row, majorities }) => {
   if (!(majorities.enabled.isDominant && majorities.enabled.value === enabledValue)) {
     badges.push(
       <EuiBadge key="enabled" color={row.enabled ? 'hollow' : 'warning'}>
-        {row.enabled ? 'enabled' : 'disabled'}
+        {row.enabled
+          ? i18n.translate('observability.apm.slo.listing.traitsCell.enabled', {
+              defaultMessage: 'enabled',
+            })
+          : i18n.translate('observability.apm.slo.listing.traitsCell.disabled', {
+              defaultMessage: 'disabled',
+            })}
       </EuiBadge>
     );
   }
@@ -433,11 +495,26 @@ const SlosTablePanelUI: React.FC<SlosTablePanelProps> = ({
       <EuiPanel data-test-subj="slosEmptyFilteredZero">
         <EuiEmptyPrompt
           iconType="search"
-          title={<h2>No SLOs match your filters</h2>}
-          body={<p>Try widening the filters, or clear them to see every SLO in this workspace.</p>}
+          title={
+            <h2>
+              {i18n.translate('observability.apm.slo.listing.emptyFiltered.title', {
+                defaultMessage: 'No SLOs match your filters',
+              })}
+            </h2>
+          }
+          body={
+            <p>
+              {i18n.translate('observability.apm.slo.listing.emptyFiltered.body', {
+                defaultMessage:
+                  'Try widening the filters, or clear them to see every SLO in this workspace.',
+              })}
+            </p>
+          }
           actions={
             <EuiButton onClick={onClearAllFilters} data-test-subj="slosEmptyFilteredClear">
-              Clear filters
+              {i18n.translate('observability.apm.slo.listing.emptyFiltered.clearButton', {
+                defaultMessage: 'Clear filters',
+              })}
             </EuiButton>
           }
         />
@@ -449,7 +526,11 @@ const SlosTablePanelUI: React.FC<SlosTablePanelProps> = ({
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiText size="m">
-            <h4>SLO catalog</h4>
+            <h4>
+              {i18n.translate('observability.apm.slo.listing.catalogTitle', {
+                defaultMessage: 'SLO catalog',
+              })}
+            </h4>
           </EuiText>
           {defaultsLine ? (
             <EuiText size="xs" color="subdued" data-test-subj="slosListingDefaults">
@@ -459,7 +540,10 @@ const SlosTablePanelUI: React.FC<SlosTablePanelProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued" data-test-subj="slosListingResultCount">
-            {resultCount} SLO{resultCount === 1 ? '' : 's'}
+            {i18n.translate('observability.apm.slo.listing.resultCount', {
+              defaultMessage: '{resultCount, plural, one {# SLO} other {# SLOs}}',
+              values: { resultCount },
+            })}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -470,7 +554,11 @@ const SlosTablePanelUI: React.FC<SlosTablePanelProps> = ({
             size="s"
             color="warning"
             iconType="alert"
-            title={`Showing ${resultCount} of ${truncatedTotal} SLOs — narrow the filters to see the rest.`}
+            title={i18n.translate('observability.apm.slo.listing.truncatedCallout', {
+              defaultMessage:
+                'Showing {resultCount} of {truncatedTotal} SLOs — narrow the filters to see the rest.',
+              values: { resultCount, truncatedTotal },
+            })}
             data-test-subj="slosListingTruncated"
           />
           <EuiSpacer size="s" />
@@ -524,7 +612,14 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    chrome.setBreadcrumbs([parentBreadcrumb, { text: 'SLO/SLI' }]);
+    chrome.setBreadcrumbs([
+      parentBreadcrumb,
+      {
+        text: i18n.translate('observability.apm.slo.listing.breadcrumb', {
+          defaultMessage: 'SLO/SLI',
+        }),
+      },
+    ]);
   }, [chrome, parentBreadcrumb]);
 
   // Filter ↔ URL sync. Single effect, guarded by a ref that stores the last
@@ -584,7 +679,9 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
         const err = e instanceof Error ? e : new Error(String(e));
         setError(err);
         notifications.toasts.addDanger({
-          title: 'Failed to load SLOs',
+          title: i18n.translate('observability.apm.slo.listing.loadFailedToast', {
+            defaultMessage: 'Failed to load SLOs',
+          }),
           text: err.message,
         });
       } finally {
@@ -644,15 +741,35 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
   const defaultsLine = useMemo(() => {
     const parts: string[] = [];
     if (traitMajorities.tier.isDominant && traitMajorities.tier.value) {
-      parts.push(`tier: ${traitMajorities.tier.value}`);
+      parts.push(
+        i18n.translate('observability.apm.slo.listing.defaults.tier', {
+          defaultMessage: 'tier: {value}',
+          values: { value: traitMajorities.tier.value },
+        })
+      );
     }
     if (traitMajorities.mode.isDominant && traitMajorities.mode.value) {
-      parts.push(`mode: ${traitMajorities.mode.value}`);
+      parts.push(
+        i18n.translate('observability.apm.slo.listing.defaults.mode', {
+          defaultMessage: 'mode: {value}',
+          values: { value: traitMajorities.mode.value },
+        })
+      );
     }
     if (traitMajorities.enabled.isDominant && traitMajorities.enabled.value) {
-      parts.push(`enabled: ${traitMajorities.enabled.value}`);
+      parts.push(
+        i18n.translate('observability.apm.slo.listing.defaults.enabled', {
+          defaultMessage: 'enabled: {value}',
+          values: { value: traitMajorities.enabled.value },
+        })
+      );
     }
-    return parts.length > 0 ? `Defaults — ${parts.join(' · ')}` : null;
+    return parts.length > 0
+      ? i18n.translate('observability.apm.slo.listing.defaults.prefix', {
+          defaultMessage: 'Defaults — {parts}',
+          values: { parts: parts.join(' · ') },
+        })
+      : null;
   }, [traitMajorities]);
 
   // EuiBasicTable render signature:
@@ -662,7 +779,9 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
   const columns = useMemo<Array<EuiBasicTableColumn<SloSummary>>>(
     () => [
       {
-        name: 'Name',
+        name: i18n.translate('observability.apm.slo.listing.column.name', {
+          defaultMessage: 'Name',
+        }),
         render: (row: SloSummary) => (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -687,17 +806,23 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
         ),
       },
       {
-        name: 'Service',
+        name: i18n.translate('observability.apm.slo.listing.column.service', {
+          defaultMessage: 'Service',
+        }),
         render: (row: SloSummary) => <EuiText size="s">{row.service}</EuiText>,
       },
       {
-        name: 'Owner',
+        name: i18n.translate('observability.apm.slo.listing.column.owner', {
+          defaultMessage: 'Owner',
+        }),
         render: (row: SloSummary) => (
           <EuiText size="s">{row.owner.teams.join(', ') || '—'}</EuiText>
         ),
       },
       {
-        name: 'Objectives',
+        name: i18n.translate('observability.apm.slo.listing.column.objectives', {
+          defaultMessage: 'Objectives',
+        }),
         render: (row: SloSummary) => (
           <EuiText size="s">
             {row.objectiveCount} • {formatTargetPct(row.worstTarget)}
@@ -705,17 +830,23 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
         ),
       },
       {
-        name: 'Traits',
+        name: i18n.translate('observability.apm.slo.listing.column.traits', {
+          defaultMessage: 'Traits',
+        }),
         width: '140px',
         render: (row: SloSummary) => <SloTraitsCell row={row} majorities={traitMajorities} />,
       },
       {
-        name: 'Rules',
+        name: i18n.translate('observability.apm.slo.listing.column.rules', {
+          defaultMessage: 'Rules',
+        }),
         width: '110px',
         render: (row: SloSummary) => <SloRulesBadge row={row} />,
       },
       {
-        name: 'Health',
+        name: i18n.translate('observability.apm.slo.listing.column.health', {
+          defaultMessage: 'Health',
+        }),
         width: '200px',
         render: (row: SloSummary) => <SloHealthCell row={row} />,
       },
@@ -749,7 +880,9 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
       const nameById = new Map(promDatasources.map((d) => [d.id, d.name]));
       badges.push({
         key: 'datasourceId',
-        category: 'Datasource',
+        category: i18n.translate('observability.apm.slo.listing.activeFilter.datasource', {
+          defaultMessage: 'Datasource',
+        }),
         values: filters.datasourceId.map((id) => nameById.get(id) ?? id),
         onRemove: () => clearKey('datasourceId'),
       });
@@ -757,7 +890,9 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
     if (filters.state?.length) {
       badges.push({
         key: 'state',
-        category: 'State',
+        category: i18n.translate('observability.apm.slo.listing.activeFilter.state', {
+          defaultMessage: 'State',
+        }),
         values: filters.state.map((v) => STATE_LABEL[v] ?? v),
         onRemove: () => clearKey('state'),
       });
@@ -765,7 +900,9 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
     if (filters.sliLeafType?.length) {
       badges.push({
         key: 'sliLeafType',
-        category: 'SLI type',
+        category: i18n.translate('observability.apm.slo.listing.activeFilter.sliType', {
+          defaultMessage: 'SLI type',
+        }),
         values: filters.sliLeafType,
         onRemove: () => clearKey('sliLeafType'),
       });
@@ -773,7 +910,9 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
     if (filters.service?.length) {
       badges.push({
         key: 'service',
-        category: 'Service',
+        category: i18n.translate('observability.apm.slo.listing.activeFilter.service', {
+          defaultMessage: 'Service',
+        }),
         values: filters.service,
         onRemove: () => clearKey('service'),
       });
@@ -781,7 +920,9 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
     if (filters.team?.length) {
       badges.push({
         key: 'team',
-        category: 'Team',
+        category: i18n.translate('observability.apm.slo.listing.activeFilter.team', {
+          defaultMessage: 'Team',
+        }),
         values: filters.team,
         onRemove: () => clearKey('team'),
       });
@@ -789,7 +930,9 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
     if (filters.tier?.length) {
       badges.push({
         key: 'tier',
-        category: 'Tier',
+        category: i18n.translate('observability.apm.slo.listing.activeFilter.tier', {
+          defaultMessage: 'Tier',
+        }),
         values: filters.tier,
         onRemove: () => clearKey('tier'),
       });
@@ -797,7 +940,9 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
     if (filters.canonicalKind?.length) {
       badges.push({
         key: 'canonicalKind',
-        category: 'Canonical kind',
+        category: i18n.translate('observability.apm.slo.listing.activeFilter.canonicalKind', {
+          defaultMessage: 'Canonical kind',
+        }),
         values: filters.canonicalKind.map((k) => KIND_LABEL[k] ?? k),
         onRemove: () => clearKey('canonicalKind'),
       });
@@ -805,7 +950,9 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
     if (filters.mode?.length) {
       badges.push({
         key: 'mode',
-        category: 'Mode',
+        category: i18n.translate('observability.apm.slo.listing.activeFilter.mode', {
+          defaultMessage: 'Mode',
+        }),
         values: filters.mode.map((v) => MODE_LABEL[v] ?? v),
         onRemove: () => clearKey('mode'),
       });
@@ -813,15 +960,27 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
     if (filters.enabled !== undefined) {
       badges.push({
         key: 'enabled',
-        category: 'Enabled',
-        values: [filters.enabled ? 'Yes' : 'No'],
+        category: i18n.translate('observability.apm.slo.listing.activeFilter.enabled', {
+          defaultMessage: 'Enabled',
+        }),
+        values: [
+          filters.enabled
+            ? i18n.translate('observability.apm.slo.listing.activeFilter.enabledYes', {
+                defaultMessage: 'Yes',
+              })
+            : i18n.translate('observability.apm.slo.listing.activeFilter.enabledNo', {
+                defaultMessage: 'No',
+              }),
+        ],
         onRemove: () => clearKey('enabled'),
       });
     }
     if (filters.search && filters.search.trim().length > 0) {
       badges.push({
         key: 'search',
-        category: 'Search',
+        category: i18n.translate('observability.apm.slo.listing.activeFilter.search', {
+          defaultMessage: 'Search',
+        }),
         values: [`"${filters.search}"`],
         onRemove: () => clearKey('search'),
       });
@@ -837,7 +996,9 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
       size="s"
       iconType="plusInCircle"
     >
-      Create SLO
+      {i18n.translate('observability.apm.slo.listing.createButton', {
+        defaultMessage: 'Create SLO',
+      })}
     </EuiButton>
   );
 
@@ -849,7 +1010,9 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
       iconType="refresh"
       isLoading={loading}
     >
-      Refresh
+      {i18n.translate('observability.apm.slo.listing.refreshButton', {
+        defaultMessage: 'Refresh',
+      })}
     </EuiButtonEmpty>
   );
 
@@ -887,9 +1050,21 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
                 <EuiEmptyPrompt
                   iconType="alert"
                   color="danger"
-                  title={<h2>Unable to load SLOs</h2>}
+                  title={
+                    <h2>
+                      {i18n.translate('observability.apm.slo.listing.errorState.title', {
+                        defaultMessage: 'Unable to load SLOs',
+                      })}
+                    </h2>
+                  }
                   body={<p>{error.message}</p>}
-                  actions={<EuiButton onClick={refresh}>Retry</EuiButton>}
+                  actions={
+                    <EuiButton onClick={refresh}>
+                      {i18n.translate('observability.apm.slo.listing.errorState.retry', {
+                        defaultMessage: 'Retry',
+                      })}
+                    </EuiButton>
+                  }
                 />
               </EuiPanel>
             ) : noSlosExist ? (
@@ -947,7 +1122,11 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
                     >
                       <EuiPanel style={{ height: '100%', overflowY: 'auto' }} paddingSize="s">
                         <EuiText size="xs">
-                          <strong>Filters</strong>
+                          <strong>
+                            {i18n.translate('observability.apm.slo.listing.filtersTitle', {
+                              defaultMessage: 'Filters',
+                            })}
+                          </strong>
                         </EuiText>
                         <EuiSpacer size="xs" />
                         <SloListFilterPanel
@@ -959,8 +1138,18 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
                           datasourcesError={promDatasourcesError}
                           onDatasourceCapReached={() =>
                             notifications.toasts.addWarning({
-                              title: 'Datasource selection limit reached',
-                              text: `You can select at most ${DATASOURCE_SELECTION_CAP} datasources at a time.`,
+                              title: i18n.translate(
+                                'observability.apm.slo.listing.datasourceCapToast.title',
+                                { defaultMessage: 'Datasource selection limit reached' }
+                              ),
+                              text: i18n.translate(
+                                'observability.apm.slo.listing.datasourceCapToast.text',
+                                {
+                                  defaultMessage:
+                                    'You can select at most {cap} datasources at a time.',
+                                  values: { cap: DATASOURCE_SELECTION_CAP },
+                                }
+                              ),
                             })
                           }
                         />
@@ -990,7 +1179,10 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
                       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                         <EuiFlexItem>
                           <EuiFieldSearch
-                            placeholder="Filter by name, service, or description"
+                            placeholder={i18n.translate(
+                              'observability.apm.slo.listing.searchPlaceholder',
+                              { defaultMessage: 'Filter by name, service, or description' }
+                            )}
                             value={filters.search ?? ''}
                             onChange={(e) => onSearchChange(e.target.value)}
                             isClearable

@@ -35,6 +35,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import type {
   BudgetWarningThreshold,
   BurnRateConfig,
@@ -80,14 +81,32 @@ function annotationRows(
 }
 
 const LABEL_COLUMNS: Array<EuiBasicTableColumn<LabelRow>> = [
-  { field: 'key', name: 'Key', width: '25%' },
-  { field: 'raw', name: 'Value', width: '40%' },
+  {
+    field: 'key',
+    name: i18n.translate('observability.apm.slo.metadataPanel.labels.column.key', {
+      defaultMessage: 'Key',
+    }),
+    width: '25%',
+  },
+  {
+    field: 'raw',
+    name: i18n.translate('observability.apm.slo.metadataPanel.labels.column.value', {
+      defaultMessage: 'Value',
+    }),
+    width: '40%',
+  },
   {
     field: 'propagatedAs',
-    name: 'Propagates as',
+    name: i18n.translate('observability.apm.slo.metadataPanel.labels.column.propagatesAs', {
+      defaultMessage: 'Propagates as',
+    }),
     width: '35%',
     render: (value: string) => (
-      <EuiToolTip content="User labels are re-emitted on every generated rule under this key.">
+      <EuiToolTip
+        content={i18n.translate('observability.apm.slo.metadataPanel.labels.propagatesTooltip', {
+          defaultMessage: 'User labels are re-emitted on every generated rule under this key.',
+        })}
+      >
         <EuiBadge color="hollow" data-test-subj="slosDetailMetadataLabelPropagation">
           {value}
         </EuiBadge>
@@ -97,14 +116,28 @@ const LABEL_COLUMNS: Array<EuiBasicTableColumn<LabelRow>> = [
 ];
 
 const ANNOTATION_COLUMNS: Array<EuiBasicTableColumn<{ key: string; value: string }>> = [
-  { field: 'key', name: 'Key', width: '30%' },
-  { field: 'value', name: 'Value', width: '70%' },
+  {
+    field: 'key',
+    name: i18n.translate('observability.apm.slo.metadataPanel.annotations.column.key', {
+      defaultMessage: 'Key',
+    }),
+    width: '30%',
+  },
+  {
+    field: 'value',
+    name: i18n.translate('observability.apm.slo.metadataPanel.annotations.column.value', {
+      defaultMessage: 'Value',
+    }),
+    width: '70%',
+  },
 ];
 
 const BURN_RATE_COLUMNS: Array<EuiBasicTableColumn<BurnRateConfig>> = [
   {
     field: 'severity',
-    name: 'Severity',
+    name: i18n.translate('observability.apm.slo.metadataPanel.burnRates.column.severity', {
+      defaultMessage: 'Severity',
+    }),
     width: '20%',
     render: (severity: string, row: BurnRateConfig) => (
       <EuiHealth
@@ -115,24 +148,54 @@ const BURN_RATE_COLUMNS: Array<EuiBasicTableColumn<BurnRateConfig>> = [
       </EuiHealth>
     ),
   },
-  { field: 'shortWindow', name: 'Short', width: '15%' },
-  { field: 'longWindow', name: 'Long', width: '15%' },
+  {
+    field: 'shortWindow',
+    name: i18n.translate('observability.apm.slo.metadataPanel.burnRates.column.short', {
+      defaultMessage: 'Short',
+    }),
+    width: '15%',
+  },
+  {
+    field: 'longWindow',
+    name: i18n.translate('observability.apm.slo.metadataPanel.burnRates.column.long', {
+      defaultMessage: 'Long',
+    }),
+    width: '15%',
+  },
   {
     field: 'burnRateMultiplier',
-    name: 'Burn',
+    name: i18n.translate('observability.apm.slo.metadataPanel.burnRates.column.burn', {
+      defaultMessage: 'Burn',
+    }),
     width: '15%',
     render: (n: number) => `${n.toFixed(1)}x`,
   },
-  { field: 'forDuration', name: 'For', width: '15%' },
+  {
+    field: 'forDuration',
+    name: i18n.translate('observability.apm.slo.metadataPanel.burnRates.column.for', {
+      defaultMessage: 'For',
+    }),
+    width: '15%',
+  },
   {
     field: 'createAlarm',
-    name: 'Alarm',
+    name: i18n.translate('observability.apm.slo.metadataPanel.burnRates.column.alarm', {
+      defaultMessage: 'Alarm',
+    }),
     width: '20%',
     render: (on: boolean) =>
       on ? (
-        <EuiBadge color="success">enabled</EuiBadge>
+        <EuiBadge color="success">
+          {i18n.translate('observability.apm.slo.metadataPanel.burnRates.alarmEnabled', {
+            defaultMessage: 'enabled',
+          })}
+        </EuiBadge>
       ) : (
-        <EuiBadge color="hollow">recording only</EuiBadge>
+        <EuiBadge color="hollow">
+          {i18n.translate('observability.apm.slo.metadataPanel.burnRates.alarmRecordingOnly', {
+            defaultMessage: 'recording only',
+          })}
+        </EuiBadge>
       ),
   },
 ];
@@ -140,12 +203,17 @@ const BURN_RATE_COLUMNS: Array<EuiBasicTableColumn<BurnRateConfig>> = [
 const BUDGET_WARNING_COLUMNS: Array<EuiBasicTableColumn<BudgetWarningThreshold>> = [
   {
     field: 'severity',
-    name: 'Severity',
+    name: i18n.translate('observability.apm.slo.metadataPanel.budgetWarnings.column.severity', {
+      defaultMessage: 'Severity',
+    }),
     render: (severity: string) => <EuiBadge color="warning">{severity}</EuiBadge>,
   },
   {
     field: 'threshold',
-    name: 'Remaining threshold',
+    name: i18n.translate(
+      'observability.apm.slo.metadataPanel.budgetWarnings.column.remainingThreshold',
+      { defaultMessage: 'Remaining threshold' }
+    ),
     render: (t: number) => `${(t * 100).toFixed(0)}%`,
   },
 ];
@@ -165,20 +233,47 @@ const AlarmChecklist: React.FC<AlarmChecklistProps> = ({ alarms }) => {
   // defaults ON, everything else defaults OFF. Keeping this order means the
   // top of the list shows the user's deliberate opt-outs.
   const rows: Array<{ key: string; label: string; enabled: boolean; detail?: string }> = [
-    { key: 'budgetWarning', label: 'Budget warning', enabled: alarms.budgetWarning.enabled },
-    { key: 'sliHealth', label: 'SLI health', enabled: alarms.sliHealth.enabled },
+    {
+      key: 'budgetWarning',
+      label: i18n.translate('observability.apm.slo.metadataPanel.alarm.budgetWarning', {
+        defaultMessage: 'Budget warning',
+      }),
+      enabled: alarms.budgetWarning.enabled,
+    },
+    {
+      key: 'sliHealth',
+      label: i18n.translate('observability.apm.slo.metadataPanel.alarm.sliHealth', {
+        defaultMessage: 'SLI health',
+      }),
+      enabled: alarms.sliHealth.enabled,
+    },
     {
       key: 'attainmentBreach',
-      label: 'Attainment breach',
+      label: i18n.translate('observability.apm.slo.metadataPanel.alarm.attainmentBreach', {
+        defaultMessage: 'Attainment breach',
+      }),
       enabled: alarms.attainmentBreach.enabled,
     },
     {
       key: 'noData',
-      label: 'No data',
+      label: i18n.translate('observability.apm.slo.metadataPanel.alarm.noData', {
+        defaultMessage: 'No data',
+      }),
       enabled: alarms.noData.enabled,
-      detail: alarms.noData.enabled ? `for ${alarms.noData.forDuration}` : undefined,
+      detail: alarms.noData.enabled
+        ? i18n.translate('observability.apm.slo.metadataPanel.alarm.noDataDetail', {
+            defaultMessage: 'for {duration}',
+            values: { duration: alarms.noData.forDuration },
+          })
+        : undefined,
     },
-    { key: 'resolved', label: 'Resolved', enabled: alarms.resolved.enabled },
+    {
+      key: 'resolved',
+      label: i18n.translate('observability.apm.slo.metadataPanel.alarm.resolved', {
+        defaultMessage: 'Resolved',
+      }),
+      enabled: alarms.resolved.enabled,
+    },
   ];
 
   return (
@@ -201,9 +296,19 @@ const AlarmChecklist: React.FC<AlarmChecklistProps> = ({ alarms }) => {
 
 function describeSchedule(w: ExclusionWindow): string {
   if (w.schedule.type === 'cron') {
-    return `cron "${w.schedule.expression}" · ${w.schedule.duration} · ${w.schedule.timezone}`;
+    return i18n.translate('observability.apm.slo.metadataPanel.exclusion.cronSchedule', {
+      defaultMessage: 'cron "{expression}" · {duration} · {timezone}',
+      values: {
+        expression: w.schedule.expression,
+        duration: w.schedule.duration,
+        timezone: w.schedule.timezone,
+      },
+    });
   }
-  return `one-off ${w.schedule.start} → ${w.schedule.end}`;
+  return i18n.translate('observability.apm.slo.metadataPanel.exclusion.oneoffSchedule', {
+    defaultMessage: 'one-off {start} → {end}',
+    values: { start: w.schedule.start, end: w.schedule.end },
+  });
 }
 
 interface ExclusionWindowTableProps {
@@ -212,20 +317,44 @@ interface ExclusionWindowTableProps {
 
 const ExclusionWindowTable: React.FC<ExclusionWindowTableProps> = ({ windows }) => {
   const columns: Array<EuiBasicTableColumn<ExclusionWindow>> = [
-    { field: 'name', name: 'Name', width: '20%' },
     {
-      name: 'Schedule',
+      field: 'name',
+      name: i18n.translate('observability.apm.slo.metadataPanel.exclusion.column.name', {
+        defaultMessage: 'Name',
+      }),
+      width: '20%',
+    },
+    {
+      name: i18n.translate('observability.apm.slo.metadataPanel.exclusion.column.schedule', {
+        defaultMessage: 'Schedule',
+      }),
       width: '45%',
       render: (row: ExclusionWindow) => <code>{describeSchedule(row)}</code>,
     },
-    { field: 'reason', name: 'Reason', width: '25%', render: (r?: string) => r ?? '—' },
     {
-      name: 'Status',
+      field: 'reason',
+      name: i18n.translate('observability.apm.slo.metadataPanel.exclusion.column.reason', {
+        defaultMessage: 'Reason',
+      }),
+      width: '25%',
+      render: (r?: string) => r ?? '—',
+    },
+    {
+      name: i18n.translate('observability.apm.slo.metadataPanel.exclusion.column.status', {
+        defaultMessage: 'Status',
+      }),
       width: '10%',
       render: () => (
-        <EuiToolTip content="Exclusion windows are persisted but enforcement is deferred post-GA (design §3.5).">
+        <EuiToolTip
+          content={i18n.translate('observability.apm.slo.metadataPanel.exclusion.deferredTooltip', {
+            defaultMessage:
+              'Exclusion windows are persisted but enforcement is deferred post-GA (design §3.5).',
+          })}
+        >
           <EuiBadge color="hollow" data-test-subj="slosDetailMetadataExclusionDeferred">
-            deferred
+            {i18n.translate('observability.apm.slo.metadataPanel.exclusion.deferredBadge', {
+              defaultMessage: 'deferred',
+            })}
           </EuiBadge>
         </EuiToolTip>
       ),
@@ -233,7 +362,9 @@ const ExclusionWindowTable: React.FC<ExclusionWindowTableProps> = ({ windows }) 
   ];
   return (
     <EuiBasicTable<ExclusionWindow>
-      tableCaption="Exclusion windows"
+      tableCaption={i18n.translate('observability.apm.slo.metadataPanel.exclusion.tableCaption', {
+        defaultMessage: 'Exclusion windows',
+      })}
       items={windows}
       columns={columns}
       data-test-subj="slosDetailMetadataExclusionWindows"
@@ -254,11 +385,30 @@ const ProvisioningBlock: React.FC<ProvisioningBlockProps> = ({ provisioning }) =
       compressed
       type="column"
       listItems={[
-        { title: 'Alert group', description: provisioning.alertGroupName ?? '—' },
-        { title: 'Namespace', description: provisioning.rulerNamespace },
         {
-          title: 'Recording groups',
-          description: `${uniqueRecordingGroups} shared`,
+          title: i18n.translate('observability.apm.slo.metadataPanel.provisioning.alertGroup', {
+            defaultMessage: 'Alert group',
+          }),
+          description: provisioning.alertGroupName ?? '—',
+        },
+        {
+          title: i18n.translate('observability.apm.slo.metadataPanel.provisioning.namespace', {
+            defaultMessage: 'Namespace',
+          }),
+          description: provisioning.rulerNamespace,
+        },
+        {
+          title: i18n.translate(
+            'observability.apm.slo.metadataPanel.provisioning.recordingGroups',
+            { defaultMessage: 'Recording groups' }
+          ),
+          description: i18n.translate(
+            'observability.apm.slo.metadataPanel.provisioning.recordingGroupsValue',
+            {
+              defaultMessage: '{count} shared',
+              values: { count: uniqueRecordingGroups },
+            }
+          ),
         },
       ]}
     />
@@ -278,19 +428,34 @@ export const SloMetadataPanel: React.FC<SloMetadataPanelProps> = ({ slo, inline 
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiText size="m">
-            <h4>Labels</h4>
+            <h4>
+              {i18n.translate('observability.apm.slo.metadataPanel.labels.heading', {
+                defaultMessage: 'Labels',
+              })}
+            </h4>
           </EuiText>
           <EuiText size="xs" color="subdued">
-            Propagated onto every generated rule as <code>slo_label_&lt;key&gt;</code>.
+            {i18n.translate('observability.apm.slo.metadataPanel.labels.descriptionPrefix', {
+              defaultMessage: 'Propagated onto every generated rule as ',
+            })}
+            <code>slo_label_&lt;key&gt;</code>
+            {i18n.translate('observability.apm.slo.metadataPanel.labels.descriptionSuffix', {
+              defaultMessage: '.',
+            })}
           </EuiText>
           <EuiSpacer size="s" />
           {labels.length === 0 ? (
             <EuiText size="s" color="subdued" data-test-subj="slosDetailMetadataLabelsEmpty">
-              No labels configured.
+              {i18n.translate('observability.apm.slo.metadataPanel.labels.empty', {
+                defaultMessage: 'No labels configured.',
+              })}
             </EuiText>
           ) : (
             <EuiBasicTable<LabelRow>
-              tableCaption="Labels"
+              tableCaption={i18n.translate(
+                'observability.apm.slo.metadataPanel.labels.tableCaption',
+                { defaultMessage: 'Labels' }
+              )}
               items={labels}
               columns={LABEL_COLUMNS}
               data-test-subj="slosDetailMetadataLabels"
@@ -299,19 +464,30 @@ export const SloMetadataPanel: React.FC<SloMetadataPanelProps> = ({ slo, inline 
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="m">
-            <h4>Annotations</h4>
+            <h4>
+              {i18n.translate('observability.apm.slo.metadataPanel.annotations.heading', {
+                defaultMessage: 'Annotations',
+              })}
+            </h4>
           </EuiText>
           <EuiText size="xs" color="subdued">
-            Metadata only — does not propagate to rule labels.
+            {i18n.translate('observability.apm.slo.metadataPanel.annotations.description', {
+              defaultMessage: 'Metadata only — does not propagate to rule labels.',
+            })}
           </EuiText>
           <EuiSpacer size="s" />
           {annotations.length === 0 ? (
             <EuiText size="s" color="subdued" data-test-subj="slosDetailMetadataAnnotationsEmpty">
-              No annotations configured.
+              {i18n.translate('observability.apm.slo.metadataPanel.annotations.empty', {
+                defaultMessage: 'No annotations configured.',
+              })}
             </EuiText>
           ) : (
             <EuiBasicTable
-              tableCaption="Annotations"
+              tableCaption={i18n.translate(
+                'observability.apm.slo.metadataPanel.annotations.tableCaption',
+                { defaultMessage: 'Annotations' }
+              )}
               items={annotations}
               columns={ANNOTATION_COLUMNS}
               data-test-subj="slosDetailMetadataAnnotations"
@@ -325,19 +501,31 @@ export const SloMetadataPanel: React.FC<SloMetadataPanelProps> = ({ slo, inline 
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiText size="m">
-            <h4>Burn-rate tiers</h4>
+            <h4>
+              {i18n.translate('observability.apm.slo.metadataPanel.burnRates.heading', {
+                defaultMessage: 'Burn-rate tiers',
+              })}
+            </h4>
           </EuiText>
           <EuiText size="xs" color="subdued">
-            Tiers with alarming disabled still emit recording rules (shown dimmed).
+            {i18n.translate('observability.apm.slo.metadataPanel.burnRates.description', {
+              defaultMessage:
+                'Tiers with alarming disabled still emit recording rules (shown dimmed).',
+            })}
           </EuiText>
           <EuiSpacer size="s" />
           {burnRates.length === 0 ? (
             <EuiText size="s" color="subdued" data-test-subj="slosDetailMetadataBurnRatesEmpty">
-              No burn-rate tiers configured.
+              {i18n.translate('observability.apm.slo.metadataPanel.burnRates.empty', {
+                defaultMessage: 'No burn-rate tiers configured.',
+              })}
             </EuiText>
           ) : (
             <EuiBasicTable<BurnRateConfig>
-              tableCaption="Burn-rate tiers"
+              tableCaption={i18n.translate(
+                'observability.apm.slo.metadataPanel.burnRates.tableCaption',
+                { defaultMessage: 'Burn-rate tiers' }
+              )}
               items={burnRates}
               columns={BURN_RATE_COLUMNS}
               rowProps={rowPropsForDisabledBurnRate}
@@ -347,10 +535,16 @@ export const SloMetadataPanel: React.FC<SloMetadataPanelProps> = ({ slo, inline 
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="m">
-            <h4>Budget-warning thresholds</h4>
+            <h4>
+              {i18n.translate('observability.apm.slo.metadataPanel.budgetWarnings.heading', {
+                defaultMessage: 'Budget-warning thresholds',
+              })}
+            </h4>
           </EuiText>
           <EuiText size="xs" color="subdued">
-            Fires when budget remaining drops below the threshold.
+            {i18n.translate('observability.apm.slo.metadataPanel.budgetWarnings.description', {
+              defaultMessage: 'Fires when budget remaining drops below the threshold.',
+            })}
           </EuiText>
           <EuiSpacer size="s" />
           {budgetWarnings.length === 0 ? (
@@ -359,11 +553,16 @@ export const SloMetadataPanel: React.FC<SloMetadataPanelProps> = ({ slo, inline 
               color="subdued"
               data-test-subj="slosDetailMetadataBudgetWarningsEmpty"
             >
-              No budget-warning thresholds configured.
+              {i18n.translate('observability.apm.slo.metadataPanel.budgetWarnings.empty', {
+                defaultMessage: 'No budget-warning thresholds configured.',
+              })}
             </EuiText>
           ) : (
             <EuiBasicTable<BudgetWarningThreshold>
-              tableCaption="Budget warning thresholds"
+              tableCaption={i18n.translate(
+                'observability.apm.slo.metadataPanel.budgetWarnings.tableCaption',
+                { defaultMessage: 'Budget warning thresholds' }
+              )}
               items={budgetWarnings}
               columns={BUDGET_WARNING_COLUMNS}
               data-test-subj="slosDetailMetadataBudgetWarnings"
@@ -377,7 +576,11 @@ export const SloMetadataPanel: React.FC<SloMetadataPanelProps> = ({ slo, inline 
   const supplementalBody = (
     <>
       <EuiText size="s">
-        <strong>Supplemental alarms</strong>
+        <strong>
+          {i18n.translate('observability.apm.slo.metadataPanel.supplementalAlarmsHeading', {
+            defaultMessage: 'Supplemental alarms',
+          })}
+        </strong>
       </EuiText>
       <EuiSpacer size="xs" />
       <AlarmChecklist alarms={slo.spec.alarms} />
@@ -385,12 +588,18 @@ export const SloMetadataPanel: React.FC<SloMetadataPanelProps> = ({ slo, inline 
       <EuiSpacer size="m" />
 
       <EuiText size="s">
-        <strong>Exclusion windows</strong>
+        <strong>
+          {i18n.translate('observability.apm.slo.metadataPanel.exclusionWindowsHeading', {
+            defaultMessage: 'Exclusion windows',
+          })}
+        </strong>
       </EuiText>
       <EuiSpacer size="xs" />
       {exclusionWindows.length === 0 ? (
         <EuiText size="s" color="subdued" data-test-subj="slosDetailMetadataExclusionEmpty">
-          No exclusion windows configured.
+          {i18n.translate('observability.apm.slo.metadataPanel.exclusion.empty', {
+            defaultMessage: 'No exclusion windows configured.',
+          })}
         </EuiText>
       ) : (
         <ExclusionWindowTable windows={exclusionWindows} />
@@ -399,14 +608,20 @@ export const SloMetadataPanel: React.FC<SloMetadataPanelProps> = ({ slo, inline 
       <EuiSpacer size="m" />
 
       <EuiText size="s">
-        <strong>Provisioning</strong>
+        <strong>
+          {i18n.translate('observability.apm.slo.metadataPanel.provisioningHeading', {
+            defaultMessage: 'Provisioning',
+          })}
+        </strong>
       </EuiText>
       <EuiSpacer size="xs" />
       {prov ? (
         <ProvisioningBlock provisioning={prov} />
       ) : (
         <EuiText size="s" color="subdued" data-test-subj="slosDetailMetadataProvisioningEmpty">
-          Non-Prometheus provisioning — no rule names available.
+          {i18n.translate('observability.apm.slo.metadataPanel.provisioning.unsupported', {
+            defaultMessage: 'Non-Prometheus provisioning — no rule names available.',
+          })}
         </EuiText>
       )}
     </>
@@ -434,7 +649,10 @@ export const SloMetadataPanel: React.FC<SloMetadataPanelProps> = ({ slo, inline 
         buttonContent={
           <EuiText size="s">
             <strong>
-              <EuiIcon type="advancedSettingsApp" size="s" /> Advanced details
+              <EuiIcon type="advancedSettingsApp" size="s" />{' '}
+              {i18n.translate('observability.apm.slo.metadataPanel.advancedAccordion', {
+                defaultMessage: 'Advanced details',
+              })}
             </strong>
           </EuiText>
         }

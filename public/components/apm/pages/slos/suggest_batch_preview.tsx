@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import type { SloApiClient } from './slo_api_client';
 import type { Suggestion } from './suggest_engine';
 import { WindowOption } from './suggest_live_queries';
@@ -83,20 +84,34 @@ export const SuggestBatchPreview: React.FC<SuggestBatchPreviewProps> = ({
   return (
     <div data-test-subj="slosSuggestPreview">
       <EuiText size="s" color="subdued">
-        Rule groups that will be deployed on Create — plus the current SLI evaluated against the APM
-        Prometheus datasource. A red <strong>breaching</strong> badge means the draft would already
-        be firing, making it a good candidate to create and investigate.
+        {i18n.translate('observability.apm.slo.suggest.batchPreview.descriptionPrefix', {
+          defaultMessage:
+            'Rule groups that will be deployed on Create — plus the current SLI evaluated against the APM Prometheus datasource. A red ',
+        })}
+        <strong>
+          {i18n.translate('observability.apm.slo.suggest.batchPreview.breachingTerm', {
+            defaultMessage: 'breaching',
+          })}
+        </strong>
+        {i18n.translate('observability.apm.slo.suggest.batchPreview.descriptionSuffix', {
+          defaultMessage:
+            ' badge means the draft would already be firing, making it a good candidate to create and investigate.',
+        })}
       </EuiText>
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            Evaluate over
+            {i18n.translate('observability.apm.slo.suggest.batchPreview.evaluateOver', {
+              defaultMessage: 'Evaluate over',
+            })}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
-            legend="SLI evaluation window"
+            legend={i18n.translate('observability.apm.slo.suggest.batchPreview.windowLegend', {
+              defaultMessage: 'SLI evaluation window',
+            })}
             idSelected={windowChoice}
             onChange={(id) => setWindowChoice(id as WindowOption)}
             options={[...WINDOW_OPTIONS]}
@@ -109,30 +124,57 @@ export const SuggestBatchPreview: React.FC<SuggestBatchPreviewProps> = ({
       <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
         {loadingCount > 0 && (
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{loadingCount} loading</EuiBadge>
+            <EuiBadge color="hollow">
+              {i18n.translate('observability.apm.slo.suggest.batchPreview.loadingBadge', {
+                defaultMessage: '{count} loading',
+                values: { count: loadingCount },
+              })}
+            </EuiBadge>
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
-          <EuiBadge color="primary">{successCount} previewed</EuiBadge>
+          <EuiBadge color="primary">
+            {i18n.translate('observability.apm.slo.suggest.batchPreview.previewedBadge', {
+              defaultMessage: '{count} previewed',
+              values: { count: successCount },
+            })}
+          </EuiBadge>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color="primary">{totalRuleCount} rules total</EuiBadge>
+          <EuiBadge color="primary">
+            {i18n.translate('observability.apm.slo.suggest.batchPreview.totalRulesBadge', {
+              defaultMessage: '{count} rules total',
+              values: { count: totalRuleCount },
+            })}
+          </EuiBadge>
         </EuiFlexItem>
         {breachCount > 0 && (
           <EuiFlexItem grow={false}>
-            <EuiBadge color="danger">{breachCount} breaching</EuiBadge>
+            <EuiBadge color="danger">
+              {i18n.translate('observability.apm.slo.suggest.batchPreview.breachingBadge', {
+                defaultMessage: '{count} breaching',
+                values: { count: breachCount },
+              })}
+            </EuiBadge>
           </EuiFlexItem>
         )}
         {errorCount > 0 && (
           <EuiFlexItem grow={false}>
-            <EuiBadge color="danger">{errorCount} failed</EuiBadge>
+            <EuiBadge color="danger">
+              {i18n.translate('observability.apm.slo.suggest.batchPreview.failedBadge', {
+                defaultMessage: '{count} failed',
+                values: { count: errorCount },
+              })}
+            </EuiBadge>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       {previews.length === 0 ? (
         <EuiText size="s" color="subdued">
-          Select at least one draft to preview.
+          {i18n.translate('observability.apm.slo.suggest.batchPreview.selectAtLeastOne', {
+            defaultMessage: 'Select at least one draft to preview.',
+          })}
         </EuiText>
       ) : (
         previews.map((p) => (

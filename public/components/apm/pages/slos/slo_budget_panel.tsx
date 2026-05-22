@@ -35,6 +35,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
+import { i18n } from '@osd/i18n';
 import { usePromQLChartData } from '../../shared/hooks/use_promql_chart_data';
 import { TimeRange } from '../../common/types/service_types';
 import type {
@@ -267,7 +268,9 @@ const BudgetBar: React.FC<{
               color: euiThemeVars.euiColorDangerText,
             }}
             data-test-subj="slosBudgetBarOverflow"
-            aria-label="budget consumed far exceeds 100%"
+            aria-label={i18n.translate('observability.apm.slo.budgetPanel.overflowAriaLabel', {
+              defaultMessage: 'budget consumed far exceeds 100%',
+            })}
           >
             ▶
           </div>
@@ -443,18 +446,28 @@ export const SloBudgetPanel: React.FC<SloBudgetPanelProps> = ({
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <EuiText size="m">
-            <h4>Error budget</h4>
+            <h4>
+              {i18n.translate('observability.apm.slo.budgetPanel.heading', {
+                defaultMessage: 'Error budget',
+              })}
+            </h4>
           </EuiText>
           <EuiText size="xs" color="subdued">
             {slo.spec.window.type === 'rolling' ? (
               <>
-                Rolling {slo.spec.window.duration} window — target{' '}
+                {i18n.translate('observability.apm.slo.budgetPanel.rollingPrefix', {
+                  defaultMessage: 'Rolling {duration} window — target ',
+                  values: { duration: slo.spec.window.duration },
+                })}
                 <span style={TABULAR_NUMS_STYLE}>
                   {formatPct(target, { decimals: SLO_PRECISION.target })}
                 </span>
               </>
             ) : (
-              `Calendar ${slo.spec.window.period} window`
+              i18n.translate('observability.apm.slo.budgetPanel.calendarLabel', {
+                defaultMessage: 'Calendar {period} window',
+                values: { period: slo.spec.window.period },
+              })
             )}
           </EuiText>
         </EuiFlexItem>
@@ -469,8 +482,17 @@ export const SloBudgetPanel: React.FC<SloBudgetPanelProps> = ({
             reverse
             titleColor={remainingColor as 'success' | 'accent' | 'danger'}
             description={
-              <EuiToolTip content="Fraction of the error budget still available. Negative means the SLO has been exceeded.">
-                <span>Budget remaining</span>
+              <EuiToolTip
+                content={i18n.translate('observability.apm.slo.budgetPanel.remaining.tooltip', {
+                  defaultMessage:
+                    'Fraction of the error budget still available. Negative means the SLO has been exceeded.',
+                })}
+              >
+                <span>
+                  {i18n.translate('observability.apm.slo.budgetPanel.remaining.label', {
+                    defaultMessage: 'Budget remaining',
+                  })}
+                </span>
               </EuiToolTip>
             }
             title={
@@ -481,11 +503,15 @@ export const SloBudgetPanel: React.FC<SloBudgetPanelProps> = ({
             data-test-subj="slosBudgetRemaining"
           />
           <EuiText size="xs" color="subdued">
-            budget{' '}
+            {i18n.translate('observability.apm.slo.budgetPanel.budgetTotalPrefix', {
+              defaultMessage: 'budget ',
+            })}
             <span style={TABULAR_NUMS_STYLE}>
               {formatPct(errorBudget, { decimals: SLO_PRECISION.budget })}
-            </span>{' '}
-            total
+            </span>
+            {i18n.translate('observability.apm.slo.budgetPanel.budgetTotalSuffix', {
+              defaultMessage: ' total',
+            })}
           </EuiText>
         </EuiFlexItem>
 
@@ -494,8 +520,17 @@ export const SloBudgetPanel: React.FC<SloBudgetPanelProps> = ({
             titleSize="m"
             reverse
             description={
-              <EuiToolTip content="Linear forecast at the current 1h burn rate. '—' means burn is at or below the sustainable rate.">
-                <span>Time to exhaustion</span>
+              <EuiToolTip
+                content={i18n.translate('observability.apm.slo.budgetPanel.exhaustion.tooltip', {
+                  defaultMessage:
+                    "Linear forecast at the current 1h burn rate. '—' means burn is at or below the sustainable rate.",
+                })}
+              >
+                <span>
+                  {i18n.translate('observability.apm.slo.budgetPanel.exhaustion.label', {
+                    defaultMessage: 'Time to exhaustion',
+                  })}
+                </span>
               </EuiToolTip>
             }
             title={
@@ -503,7 +538,9 @@ export const SloBudgetPanel: React.FC<SloBudgetPanelProps> = ({
                 {timeLeftMs === null
                   ? '—'
                   : timeLeftMs === 0
-                  ? 'exhausted'
+                  ? i18n.translate('observability.apm.slo.budgetPanel.exhausted', {
+                      defaultMessage: 'exhausted',
+                    })
                   : formatDurationMs(timeLeftMs)}
               </span>
             }
@@ -517,7 +554,9 @@ export const SloBudgetPanel: React.FC<SloBudgetPanelProps> = ({
             data-test-subj="slosBudgetExhaustion"
           />
           <EuiText size="xs" color="subdued">
-            based on 1h burn
+            {i18n.translate('observability.apm.slo.budgetPanel.basedOn1hBurn', {
+              defaultMessage: 'based on 1h burn',
+            })}
           </EuiText>
         </EuiFlexItem>
 
@@ -526,8 +565,17 @@ export const SloBudgetPanel: React.FC<SloBudgetPanelProps> = ({
             titleSize="m"
             reverse
             description={
-              <EuiToolTip content="Current SLI value over the SLO's window, compared to the target.">
-                <span>Attainment</span>
+              <EuiToolTip
+                content={i18n.translate('observability.apm.slo.budgetPanel.attainment.tooltip', {
+                  defaultMessage:
+                    "Current SLI value over the SLO's window, compared to the target.",
+                })}
+              >
+                <span>
+                  {i18n.translate('observability.apm.slo.budgetPanel.attainment.label', {
+                    defaultMessage: 'Attainment',
+                  })}
+                </span>
               </EuiToolTip>
             }
             title={
@@ -538,7 +586,9 @@ export const SloBudgetPanel: React.FC<SloBudgetPanelProps> = ({
             data-test-subj="slosBudgetAttainment"
           />
           <EuiText size="xs" color="subdued">
-            target{' '}
+            {i18n.translate('observability.apm.slo.budgetPanel.attainment.targetPrefix', {
+              defaultMessage: 'target ',
+            })}
             <span style={TABULAR_NUMS_STYLE}>
               {formatPct(target, { decimals: SLO_PRECISION.target })}
             </span>
@@ -550,8 +600,17 @@ export const SloBudgetPanel: React.FC<SloBudgetPanelProps> = ({
             titleSize="m"
             reverse
             description={
-              <EuiToolTip content="Good vs total events observed in the last hour. Colour tracks the attainment thresholds — green at/above target, warning below target but within the error budget, danger once below.">
-                <span>Events (1h)</span>
+              <EuiToolTip
+                content={i18n.translate('observability.apm.slo.budgetPanel.events.tooltip', {
+                  defaultMessage:
+                    'Good vs total events observed in the last hour. Colour tracks the attainment thresholds — green at/above target, warning below target but within the error budget, danger once below.',
+                })}
+              >
+                <span>
+                  {i18n.translate('observability.apm.slo.budgetPanel.events.label', {
+                    defaultMessage: 'Events (1h)',
+                  })}
+                </span>
               </EuiToolTip>
             }
             title={
@@ -573,7 +632,9 @@ export const SloBudgetPanel: React.FC<SloBudgetPanelProps> = ({
                 {formatPct(eventsRatio as number, { decimals: SLO_PRECISION.eventsRatio })}
               </span>
             ) : (
-              'waiting for samples'
+              i18n.translate('observability.apm.slo.budgetPanel.waitingForSamples', {
+                defaultMessage: 'waiting for samples',
+              })
             )}
           </EuiText>
         </EuiFlexItem>
@@ -582,11 +643,20 @@ export const SloBudgetPanel: React.FC<SloBudgetPanelProps> = ({
       <EuiSpacer size="m" />
 
       <EuiText size="xs" color="subdued">
-        <strong>Budget consumed</strong> —{' '}
+        <strong>
+          {i18n.translate('observability.apm.slo.budgetPanel.consumed.label', {
+            defaultMessage: 'Budget consumed',
+          })}
+        </strong>
+        {i18n.translate('observability.apm.slo.budgetPanel.consumed.dash', {
+          defaultMessage: ' — ',
+        })}
         <span style={TABULAR_NUMS_STYLE}>
           {formatPct(Math.max(0, 1 - remaining), { decimals: SLO_PRECISION.budget })}
-        </span>{' '}
-        of allowed
+        </span>
+        {i18n.translate('observability.apm.slo.budgetPanel.consumed.suffix', {
+          defaultMessage: ' of allowed',
+        })}
       </EuiText>
       <EuiSpacer size="xs" />
       <BudgetBar

@@ -44,6 +44,7 @@ import {
   EuiTitle,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { useHistory, useLocation } from 'react-router-dom';
 import { ChromeStart, HttpStart, NotificationsStart } from '../../../../../../../src/core/public';
 import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/plugin_headerControl';
@@ -90,8 +91,17 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   useEffect(() => {
     chrome.setBreadcrumbs([
       parentBreadcrumb,
-      { text: 'SLO/SLI', href: '#/slos' },
-      { text: 'Suggest' },
+      {
+        text: i18n.translate('observability.apm.slo.suggest.breadcrumb.slos', {
+          defaultMessage: 'SLO/SLI',
+        }),
+        href: '#/slos',
+      },
+      {
+        text: i18n.translate('observability.apm.slo.suggest.breadcrumb.suggest', {
+          defaultMessage: 'Suggest',
+        }),
+      },
     ]);
   }, [chrome, parentBreadcrumb]);
 
@@ -319,7 +329,9 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
 
   const headerActions = [
     <EuiButtonEmpty key="back" iconType="arrowLeft" href="#/slos" size="s">
-      Back to SLOs
+      {i18n.translate('observability.apm.slo.suggest.backButton', {
+        defaultMessage: 'Back to SLOs',
+      })}
     </EuiButtonEmpty>,
     <EuiButton
       key="discover"
@@ -332,7 +344,9 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
       isLoading={loading}
       data-test-subj="slosSuggestDiscover"
     >
-      Rediscover
+      {i18n.translate('observability.apm.slo.suggest.rediscoverButton', {
+        defaultMessage: 'Rediscover',
+      })}
     </EuiButton>,
     <EuiButton
       key="create"
@@ -345,7 +359,10 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
       isDisabled={selectedCount === 0 || loading}
       data-test-subj="slosSuggestCreate"
     >
-      Create {selectedCount} selected
+      {i18n.translate('observability.apm.slo.suggest.createSelectedButton', {
+        defaultMessage: 'Create {selectedCount} selected',
+        values: { selectedCount },
+      })}
     </EuiButton>,
   ];
 
@@ -357,12 +374,18 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
           <EuiPageContentBody>
             {/* Intro — one-line summary; the verbose copy belongs in docs. */}
             <EuiText size="m">
-              <h4>Suggest SLOs from APM services</h4>
+              <h4>
+                {i18n.translate('observability.apm.slo.suggest.heading', {
+                  defaultMessage: 'Suggest SLOs from APM services',
+                })}
+              </h4>
             </EuiText>
             <EuiSpacer size="xs" />
             <EuiText size="xs" color="subdued">
-              Drafts availability + latency SLOs per service from span-derived RED metrics, plus
-              OTel semconv add-ons where present.
+              {i18n.translate('observability.apm.slo.suggest.subheading', {
+                defaultMessage:
+                  'Drafts availability + latency SLOs per service from span-derived RED metrics, plus OTel semconv add-ons where present.',
+              })}
             </EuiText>
             {scope.services && !scopeFellThrough && (
               <>
@@ -375,8 +398,14 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                 >
                   <EuiFlexItem grow={false}>
                     <EuiText size="xs" color="subdued">
-                      Scoped to {scope.services.length} service
-                      {scope.services.length === 1 ? '' : 's'}: {scope.services.join(', ')}
+                      {i18n.translate('observability.apm.slo.suggest.scopeSubline', {
+                        defaultMessage:
+                          'Scoped to {count, plural, one {# service} other {# services}}: {names}',
+                        values: {
+                          count: scope.services.length,
+                          names: scope.services.join(', '),
+                        },
+                      })}
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
@@ -385,7 +414,9 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                       onClick={() => history.push('#/slos/suggest')}
                       data-test-subj="slosSuggestClearScope"
                     >
-                      Clear scope
+                      {i18n.translate('observability.apm.slo.suggest.clearScope', {
+                        defaultMessage: 'Clear scope',
+                      })}
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -398,12 +429,16 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                   size="s"
                   iconType="iInCircle"
                   color="warning"
-                  title="Scoped services not found"
+                  title={i18n.translate('observability.apm.slo.suggest.scopeFellThrough.title', {
+                    defaultMessage: 'Scoped services not found',
+                  })}
                   data-test-subj="slosSuggestScopeFellThrough"
                 >
                   <EuiText size="s">
-                    These services aren&apos;t in the current APM discovery result. Showing all
-                    discovered services instead.
+                    {i18n.translate('observability.apm.slo.suggest.scopeFellThrough.body', {
+                      defaultMessage:
+                        "These services aren't in the current APM discovery result. Showing all discovered services instead.",
+                    })}
                   </EuiText>
                   <EuiSpacer size="xs" />
                   <EuiButtonEmpty
@@ -411,7 +446,9 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                     onClick={() => history.push('#/slos/suggest')}
                     data-test-subj="slosSuggestClearScope"
                   >
-                    Clear scope
+                    {i18n.translate('observability.apm.slo.suggest.clearScope', {
+                      defaultMessage: 'Clear scope',
+                    })}
                   </EuiButtonEmpty>
                 </EuiCallOut>
               </>
@@ -423,7 +460,9 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                 <EuiCallOut
                   color="danger"
                   iconType="alert"
-                  title="Failed to load services"
+                  title={i18n.translate('observability.apm.slo.suggest.servicesErrorTitle', {
+                    defaultMessage: 'Failed to load services',
+                  })}
                   size="s"
                 >
                   <EuiText size="s">{servicesError.message}</EuiText>
@@ -444,20 +483,33 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
               <EuiCallOut
                 size="s"
                 iconType="iInCircle"
-                title="No Prometheus datasource configured"
+                title={i18n.translate('observability.apm.slo.suggest.noDatasource.title', {
+                  defaultMessage: 'No Prometheus datasource configured',
+                })}
                 color="warning"
               >
                 <EuiText size="s">
-                  Configure a Prometheus datasource under APM configuration before suggesting SLOs.
+                  {i18n.translate('observability.apm.slo.suggest.noDatasource.body', {
+                    defaultMessage:
+                      'Configure a Prometheus datasource under APM configuration before suggesting SLOs.',
+                  })}
                 </EuiText>
               </EuiCallOut>
             )}
 
             {!loading && datasourceId && uniqueServices.length === 0 && !servicesError && (
-              <EuiCallOut size="s" iconType="iInCircle" title="No APM services were discovered">
+              <EuiCallOut
+                size="s"
+                iconType="iInCircle"
+                title={i18n.translate('observability.apm.slo.suggest.noServices.title', {
+                  defaultMessage: 'No APM services were discovered',
+                })}
+              >
                 <EuiText size="s">
-                  No services appear to be sending OTel traces right now. If you expect services
-                  here, verify the APM trace dataset and window duration under APM configuration.
+                  {i18n.translate('observability.apm.slo.suggest.noServices.body', {
+                    defaultMessage:
+                      'No services appear to be sending OTel traces right now. If you expect services here, verify the APM trace dataset and window duration under APM configuration.',
+                  })}
                 </EuiText>
               </EuiCallOut>
             )}
@@ -468,13 +520,16 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                   size="s"
                   iconType="alert"
                   color="warning"
-                  title="Could not verify existing recording rules"
+                  title={i18n.translate('observability.apm.slo.suggest.rulerFetchFailed.title', {
+                    defaultMessage: 'Could not verify existing recording rules',
+                  })}
                   data-test-subj="slosSuggestRulerFetchFailed"
                 >
                   <EuiText size="s">
-                    The Prometheus ruler did not respond when this page tried to list its current
-                    recording groups. Suggestions and bulk-create still work, but duplicate
-                    recording groups may be created if rules already exist for these SLIs.
+                    {i18n.translate('observability.apm.slo.suggest.rulerFetchFailed.body', {
+                      defaultMessage:
+                        'The Prometheus ruler did not respond when this page tried to list its current recording groups. Suggestions and bulk-create still work, but duplicate recording groups may be created if rules already exist for these SLIs.',
+                    })}
                   </EuiText>
                 </EuiCallOut>
                 <EuiSpacer size="m" />
@@ -488,7 +543,10 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                     <EuiFlexItem grow={false}>
                       <EuiStat
                         title={`${selectedCount}`}
-                        description={`of ${decoratedSuggestions.length} SLOs`}
+                        description={i18n.translate('observability.apm.slo.suggest.stat.ofSlos', {
+                          defaultMessage: 'of {total} SLOs',
+                          values: { total: decoratedSuggestions.length },
+                        })}
                         titleSize="m"
                         reverse
                         data-test-subj="slosSuggestStatSlos"
@@ -497,7 +555,10 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                     <EuiFlexItem grow={false}>
                       <EuiStat
                         title={`${uniqueServices.length}`}
-                        description={`service${uniqueServices.length === 1 ? '' : 's'}`}
+                        description={i18n.translate('observability.apm.slo.suggest.stat.services', {
+                          defaultMessage: '{count, plural, one {service} other {services}}',
+                          values: { count: uniqueServices.length },
+                        })}
                         titleSize="m"
                         reverse
                         data-test-subj="slosSuggestStatServices"
@@ -506,7 +567,10 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                     <EuiFlexItem grow={false}>
                       <EuiStat
                         title={`${totalRules}`}
-                        description="rules to provision"
+                        description={i18n.translate(
+                          'observability.apm.slo.suggest.stat.rulesToProvision',
+                          { defaultMessage: 'rules to provision' }
+                        )}
                         titleSize="m"
                         titleColor="subdued"
                         reverse
@@ -523,12 +587,16 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                               setSelected(new Set(decoratedSuggestions.map((s) => s.key)))
                             }
                           >
-                            Select all
+                            {i18n.translate('observability.apm.slo.suggest.selectAll', {
+                              defaultMessage: 'Select all',
+                            })}
                           </EuiButtonEmpty>
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           <EuiButtonEmpty size="s" onClick={() => setSelected(new Set())}>
-                            Clear
+                            {i18n.translate('observability.apm.slo.suggest.clearSelection', {
+                              defaultMessage: 'Clear',
+                            })}
                           </EuiButtonEmpty>
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
@@ -539,7 +607,14 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                             isDisabled={selectedCount === 0}
                             data-test-subj="slosSuggestPreviewToggle"
                           >
-                            {showPreview ? 'Hide preview' : `Preview ${selectedCount} selected`}
+                            {showPreview
+                              ? i18n.translate('observability.apm.slo.suggest.previewToggle.hide', {
+                                  defaultMessage: 'Hide preview',
+                                })
+                              : i18n.translate('observability.apm.slo.suggest.previewToggle.show', {
+                                  defaultMessage: 'Preview {selectedCount} selected',
+                                  values: { selectedCount },
+                                })}
                           </EuiButton>
                         </EuiFlexItem>
                       </EuiFlexGroup>
@@ -550,12 +625,20 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                 <EuiText size="xs" color="subdued" data-test-subj="slosSuggestHeaderSubline">
                   {coveredCount > 0 ? (
                     <>
-                      {coveredCount} draft{coveredCount === 1 ? '' : 's'} already covered by
-                      existing rules · Namespace: <EuiCode>slo-generated</EuiCode>
+                      {i18n.translate('observability.apm.slo.suggest.headerSubline.covered', {
+                        defaultMessage:
+                          '{count, plural, one {# draft} other {# drafts}} already covered by existing rules · Namespace: ',
+                        values: { count: coveredCount },
+                      })}
+                      <EuiCode>slo-generated</EuiCode>
                     </>
                   ) : (
                     <>
-                      Namespace: <EuiCode>slo-generated</EuiCode>
+                      {i18n.translate(
+                        'observability.apm.slo.suggest.headerSubline.namespacePrefix',
+                        { defaultMessage: 'Namespace: ' }
+                      )}
+                      <EuiCode>slo-generated</EuiCode>
                     </>
                   )}
                 </EuiText>
@@ -567,8 +650,14 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                         <EuiFlexItem grow={false}>
                           <EuiText size="xs">
-                            Creating SLO {progress.done}/{progress.total} ·{' '}
-                            <strong>{progress.failed}</strong> failed so far
+                            {i18n.translate('observability.apm.slo.suggest.progressPrefix', {
+                              defaultMessage: 'Creating SLO {done}/{total} · ',
+                              values: { done: progress.done, total: progress.total },
+                            })}
+                            <strong>{progress.failed}</strong>
+                            {i18n.translate('observability.apm.slo.suggest.progressSuffix', {
+                              defaultMessage: ' failed so far',
+                            })}
                           </EuiText>
                         </EuiFlexItem>
                         <EuiFlexItem>
@@ -620,7 +709,10 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
           <EuiFlyoutHeader hasBorder data-test-subj="slosSuggestPreviewFlyoutHeader">
             <EuiTitle size="s">
               <h3>
-                Rule preview · {selectedCount} SLO{selectedCount === 1 ? '' : 's'}
+                {i18n.translate('observability.apm.slo.suggest.flyoutTitle', {
+                  defaultMessage: 'Rule preview · {count, plural, one {# SLO} other {# SLOs}}',
+                  values: { count: selectedCount },
+                })}
               </h3>
             </EuiTitle>
           </EuiFlyoutHeader>
@@ -636,22 +728,38 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
       )}
       {confirmOpen && (
         <EuiConfirmModal
-          title={`Create ${selectedCount} SLO${selectedCount === 1 ? '' : 's'}?`}
+          title={i18n.translate('observability.apm.slo.suggest.confirmModal.title', {
+            defaultMessage: 'Create {count, plural, one {# SLO} other {# SLOs}}?',
+            values: { count: selectedCount },
+          })}
           onCancel={() => setConfirmOpen(false)}
           onConfirm={() => {
             setConfirmOpen(false);
             runCreateSelected();
           }}
-          cancelButtonText="Cancel"
-          confirmButtonText="Create"
+          cancelButtonText={i18n.translate('observability.apm.slo.suggest.confirmModal.cancel', {
+            defaultMessage: 'Cancel',
+          })}
+          confirmButtonText={i18n.translate('observability.apm.slo.suggest.confirmModal.confirm', {
+            defaultMessage: 'Create',
+          })}
           defaultFocusedButton="confirm"
           data-test-subj="slosSuggestConfirmModal"
         >
           <EuiText size="s">
             <p>
-              This provisions <strong>{totalRules}</strong> Prometheus rules in namespace{' '}
-              <EuiCode>slo-generated</EuiCode>. Rules begin evaluating on the next ruler cycle;
-              alerts do not fire until data accumulates.
+              {i18n.translate('observability.apm.slo.suggest.confirmModal.bodyPrefix', {
+                defaultMessage: 'This provisions ',
+              })}
+              <strong>{totalRules}</strong>
+              {i18n.translate('observability.apm.slo.suggest.confirmModal.bodyMiddle', {
+                defaultMessage: ' Prometheus rules in namespace ',
+              })}
+              <EuiCode>slo-generated</EuiCode>
+              {i18n.translate('observability.apm.slo.suggest.confirmModal.bodySuffix', {
+                defaultMessage:
+                  '. Rules begin evaluating on the next ruler cycle; alerts do not fire until data accumulates.',
+              })}
             </p>
           </EuiText>
         </EuiConfirmModal>

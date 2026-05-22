@@ -28,6 +28,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
+import { i18n } from '@osd/i18n';
 import { usePromQLChartData } from '../../shared/hooks/use_promql_chart_data';
 import { TimeRange } from '../../common/types/service_types';
 import type { BurnRateConfig, Objective, SloDocument } from '../../../../../common/slo/slo_types';
@@ -51,7 +52,20 @@ export interface SloBurnRatePanelProps {
 }
 
 /** Friendly labels for the four default MWMBR tiers, in index order. */
-const TIER_LABELS = ['Page · Quick', 'Page · Slow', 'Ticket · Quick', 'Ticket · Slow'] as const;
+const TIER_LABELS = [
+  i18n.translate('observability.apm.slo.burnRatePanel.tier.pageQuick', {
+    defaultMessage: 'Page · Quick',
+  }),
+  i18n.translate('observability.apm.slo.burnRatePanel.tier.pageSlow', {
+    defaultMessage: 'Page · Slow',
+  }),
+  i18n.translate('observability.apm.slo.burnRatePanel.tier.ticketQuick', {
+    defaultMessage: 'Ticket · Quick',
+  }),
+  i18n.translate('observability.apm.slo.burnRatePanel.tier.ticketSlow', {
+    defaultMessage: 'Ticket · Slow',
+  }),
+] as const;
 
 function formatPct(value: number | null): string {
   if (value === null || !Number.isFinite(value)) return '—';
@@ -96,13 +110,21 @@ function healthColor(h: TierHealth): string {
 function healthLabel(h: TierHealth): string {
   switch (h) {
     case 'firing':
-      return 'firing';
+      return i18n.translate('observability.apm.slo.burnRatePanel.health.firing', {
+        defaultMessage: 'firing',
+      });
     case 'warming':
-      return 'warming';
+      return i18n.translate('observability.apm.slo.burnRatePanel.health.warming', {
+        defaultMessage: 'warming',
+      });
     case 'ok':
-      return 'healthy';
+      return i18n.translate('observability.apm.slo.burnRatePanel.health.healthy', {
+        defaultMessage: 'healthy',
+      });
     default:
-      return 'no data';
+      return i18n.translate('observability.apm.slo.burnRatePanel.health.noData', {
+        defaultMessage: 'no data',
+      });
   }
 }
 
@@ -274,7 +296,13 @@ const TierCard: React.FC<TierCardProps> = ({
             <strong>{label}</strong>
           </EuiText>
           <EuiText size="xs" color="subdued">
-            {formatMultiplier(tier.burnRateMultiplier)} burn · {tier.severity}
+            {i18n.translate('observability.apm.slo.burnRatePanel.tierSubtitle', {
+              defaultMessage: '{multiplier} burn · {severity}',
+              values: {
+                multiplier: formatMultiplier(tier.burnRateMultiplier),
+                severity: tier.severity,
+              },
+            })}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -287,7 +315,9 @@ const TierCard: React.FC<TierCardProps> = ({
       {waiting ? (
         <div data-test-subj="slosBurnrateTierWaiting">
           <EuiText size="xs" color="subdued">
-            Waiting for Prometheus samples · evaluates every 1m.
+            {i18n.translate('observability.apm.slo.burnRatePanel.waitingForSamples', {
+              defaultMessage: 'Waiting for Prometheus samples · evaluates every 1m.',
+            })}
           </EuiText>
           {onViewRulesRequest && (
             <>
@@ -296,7 +326,9 @@ const TierCard: React.FC<TierCardProps> = ({
                 onClick={onViewRulesRequest}
                 data-test-subj="slosBurnrateTierWaitingViewRules"
               >
-                View generated rules
+                {i18n.translate('observability.apm.slo.burnRatePanel.viewGeneratedRules', {
+                  defaultMessage: 'View generated rules',
+                })}
               </EuiLink>
             </>
           )}
@@ -306,7 +338,10 @@ const TierCard: React.FC<TierCardProps> = ({
           <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
             <EuiFlexItem>
               <EuiText size="xs" color="subdued">
-                short ({tier.shortWindow})
+                {i18n.translate('observability.apm.slo.burnRatePanel.shortWindow', {
+                  defaultMessage: 'short ({window})',
+                  values: { window: tier.shortWindow },
+                })}
               </EuiText>
               <EuiText size="s">
                 <strong
@@ -323,7 +358,10 @@ const TierCard: React.FC<TierCardProps> = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="xs" color="subdued">
-                long ({tier.longWindow})
+                {i18n.translate('observability.apm.slo.burnRatePanel.longWindow', {
+                  defaultMessage: 'long ({window})',
+                  values: { window: tier.longWindow },
+                })}
               </EuiText>
               <EuiText size="s">
                 <strong
@@ -342,12 +380,23 @@ const TierCard: React.FC<TierCardProps> = ({
 
           <EuiSpacer size="xs" />
           <EuiToolTip
-            content={`Fires when BOTH windows exceed ${formatPct(
-              threshold
-            )} (burn rate × error budget). For: ${tier.forDuration}.`}
+            content={i18n.translate('observability.apm.slo.burnRatePanel.thresholdTooltip', {
+              defaultMessage:
+                'Fires when BOTH windows exceed {threshold} (burn rate × error budget). For: {forDuration}.',
+              values: {
+                threshold: formatPct(threshold),
+                forDuration: tier.forDuration,
+              },
+            })}
           >
             <EuiText size="xs" color="subdued">
-              threshold {formatPct(threshold)} · for {tier.forDuration}
+              {i18n.translate('observability.apm.slo.burnRatePanel.thresholdSummary', {
+                defaultMessage: 'threshold {threshold} · for {forDuration}',
+                values: {
+                  threshold: formatPct(threshold),
+                  forDuration: tier.forDuration,
+                },
+              })}
             </EuiText>
           </EuiToolTip>
           {deployAlarm && (
@@ -357,7 +406,9 @@ const TierCard: React.FC<TierCardProps> = ({
                 onClick={handleViewInAlertManager}
                 data-test-subj={`slosBurnrateTierViewInAlertManager-${tier.shortWindow}-${tier.longWindow}`}
               >
-                View in Alert Manager ↗
+                {i18n.translate('observability.apm.slo.burnRatePanel.viewInAlertManager', {
+                  defaultMessage: 'View in Alert Manager ↗',
+                })}
               </EuiLink>
             </>
           )}
@@ -399,11 +450,18 @@ export const SloBurnRatePanel: React.FC<SloBurnRatePanelProps> = ({
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem>
           <EuiText size="m">
-            <h4>Burn-rate alerts</h4>
+            <h4>
+              {i18n.translate('observability.apm.slo.burnRatePanel.heading', {
+                defaultMessage: 'Burn-rate alerts',
+              })}
+            </h4>
           </EuiText>
           <EuiText size="xs" color="subdued">
-            Each tier fires when its short- and long-window error ratios both exceed
-            {` burn × budget (= ${formatPct(errorBudget)}).`} Mirrors the deployed MWMBR rules.
+            {i18n.translate('observability.apm.slo.burnRatePanel.description', {
+              defaultMessage:
+                'Each tier fires when its short- and long-window error ratios both exceed burn × budget (= {budget}). Mirrors the deployed MWMBR rules.',
+              values: { budget: formatPct(errorBudget) },
+            })}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -413,7 +471,12 @@ export const SloBurnRatePanel: React.FC<SloBurnRatePanelProps> = ({
       <EuiFlexGroup gutterSize="s" wrap>
         {tiers.map((tier, i) => {
           const threshold = tier.burnRateMultiplier * errorBudget;
-          const label = TIER_LABELS[i] ?? `Tier ${i + 1}`;
+          const label =
+            TIER_LABELS[i] ??
+            i18n.translate('observability.apm.slo.burnRatePanel.tierFallback', {
+              defaultMessage: 'Tier {index}',
+              values: { index: i + 1 },
+            });
           const key = `${tier.shortWindow}-${tier.longWindow}`;
           return (
             <EuiFlexItem key={key} style={{ minWidth: 260 }}>

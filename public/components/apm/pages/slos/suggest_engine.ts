@@ -41,6 +41,7 @@
  * No I/O. All HTTP/fetch lives in the page component.
  */
 
+import { i18n } from '@osd/i18n';
 import { DEFAULT_MWMBR_TIERS } from '../../../../../common/slo/slo_promql_generator';
 import type { PromRule, PromRuleGroup } from '../../../../../common/types/alerting';
 import type {
@@ -102,15 +103,34 @@ export interface ServiceDiscoveryInput {
 
 /** Display-friendly label shown in the card badge. */
 export const KIND_LABEL: Record<SuggestionKind, string> = {
-  'apm-availability': 'APM availability',
-  'apm-latency': 'APM latency',
-  'http-availability': 'HTTP availability',
-  'http-latency': 'HTTP latency',
-  'rpc-availability': 'RPC availability',
-  'rpc-latency': 'RPC latency',
-  'db-latency': 'DB client latency',
-  'messaging-latency': 'Messaging latency',
-  'genai-availability': 'GenAI availability',
+  'apm-availability': i18n.translate('observability.apm.slo.suggest.kindLabel.apmAvailability', {
+    defaultMessage: 'APM availability',
+  }),
+  'apm-latency': i18n.translate('observability.apm.slo.suggest.kindLabel.apmLatency', {
+    defaultMessage: 'APM latency',
+  }),
+  'http-availability': i18n.translate('observability.apm.slo.suggest.kindLabel.httpAvailability', {
+    defaultMessage: 'HTTP availability',
+  }),
+  'http-latency': i18n.translate('observability.apm.slo.suggest.kindLabel.httpLatency', {
+    defaultMessage: 'HTTP latency',
+  }),
+  'rpc-availability': i18n.translate('observability.apm.slo.suggest.kindLabel.rpcAvailability', {
+    defaultMessage: 'RPC availability',
+  }),
+  'rpc-latency': i18n.translate('observability.apm.slo.suggest.kindLabel.rpcLatency', {
+    defaultMessage: 'RPC latency',
+  }),
+  'db-latency': i18n.translate('observability.apm.slo.suggest.kindLabel.dbLatency', {
+    defaultMessage: 'DB client latency',
+  }),
+  'messaging-latency': i18n.translate('observability.apm.slo.suggest.kindLabel.messagingLatency', {
+    defaultMessage: 'Messaging latency',
+  }),
+  'genai-availability': i18n.translate(
+    'observability.apm.slo.suggest.kindLabel.genaiAvailability',
+    { defaultMessage: 'GenAI availability' }
+  ),
 };
 
 /** One draft SLO the user can accept / tweak / discard. */
@@ -394,7 +414,11 @@ function apmDrafts(input: ServiceDiscoveryInput, out: Suggestion[]): void {
       key: `apm-avail:${service}`,
       kindId: 'apm-availability',
       kind: KIND_LABEL['apm-availability'],
-      reason: `span-derived request+fault observed for service="${service}". Non-fault ratio ≥ 99% is a sensible starting point.`,
+      reason: i18n.translate('observability.apm.slo.suggest.engine.apmAvailability', {
+        defaultMessage:
+          'span-derived request+fault observed for service="{service}". Non-fault ratio ≥ 99% is a sensible starting point.',
+        values: { service },
+      }),
       sourceMetric: 'request',
       detected,
       estimatedRuleCount: estimatedRules(1),
@@ -424,7 +448,11 @@ function apmDrafts(input: ServiceDiscoveryInput, out: Suggestion[]): void {
       key: `apm-lat:${service}`,
       kindId: 'apm-latency',
       kind: KIND_LABEL['apm-latency'],
-      reason: `Draft targets ≥ 95% of requests under 500 ms for service="${service}" using span-derived latency_seconds_bucket.`,
+      reason: i18n.translate('observability.apm.slo.suggest.engine.apmLatency', {
+        defaultMessage:
+          'Draft targets ≥ 95% of requests under 500 ms for service="{service}" using span-derived latency_seconds_bucket.',
+        values: { service },
+      }),
       sourceMetric: 'latency_seconds_bucket',
       detected,
       estimatedRuleCount: estimatedRules(1),
@@ -518,7 +546,15 @@ function httpDrafts(input: ServiceDiscoveryInput, out: Suggestion[]): void {
         key: `http-avail:${service}`,
         kindId: 'http-availability',
         kind: KIND_LABEL['http-availability'],
-        reason: `OTel ${countMetric} observed for ${resolved.dimension.name}="${resolved.dimension.value}"; non-5xx responses ≥ 99% is a common default.`,
+        reason: i18n.translate('observability.apm.slo.suggest.engine.httpAvailability', {
+          defaultMessage:
+            'OTel {countMetric} observed for {labelName}="{labelValue}"; non-5xx responses ≥ 99% is a common default.',
+          values: {
+            countMetric,
+            labelName: resolved.dimension.name,
+            labelValue: resolved.dimension.value,
+          },
+        }),
         sourceMetric: countMetric,
         detected: { [resolved.dimension.name]: resolved.dimension.value },
         estimatedRuleCount: estimatedRules(1),
@@ -547,7 +583,11 @@ function httpDrafts(input: ServiceDiscoveryInput, out: Suggestion[]): void {
         key: `http-lat:${service}`,
         kindId: 'http-latency',
         kind: KIND_LABEL['http-latency'],
-        reason: `OTel ${bucketMetric} present; 95% of HTTP requests under 500 ms is a sensible default.`,
+        reason: i18n.translate('observability.apm.slo.suggest.engine.httpLatency', {
+          defaultMessage:
+            'OTel {bucketMetric} present; 95% of HTTP requests under 500 ms is a sensible default.',
+          values: { bucketMetric },
+        }),
         sourceMetric: bucketMetric,
         detected: { [resolved.dimension.name]: resolved.dimension.value },
         estimatedRuleCount: estimatedRules(1),
@@ -607,7 +647,11 @@ function rpcDrafts(input: ServiceDiscoveryInput, out: Suggestion[]): void {
         key: `rpc-avail:${service}`,
         kindId: 'rpc-availability',
         kind: KIND_LABEL['rpc-availability'],
-        reason: `OTel ${countMetric} observed for rpc_service="${service}"; non-error (gRPC 0 = OK) ≥ 99% is a common default.`,
+        reason: i18n.translate('observability.apm.slo.suggest.engine.rpcAvailability', {
+          defaultMessage:
+            'OTel {countMetric} observed for rpc_service="{service}"; non-error (gRPC 0 = OK) ≥ 99% is a common default.',
+          values: { countMetric, service },
+        }),
         sourceMetric: countMetric,
         detected: { rpc_service: service },
         estimatedRuleCount: estimatedRules(1),
@@ -636,7 +680,11 @@ function rpcDrafts(input: ServiceDiscoveryInput, out: Suggestion[]): void {
         key: `rpc-lat:${service}`,
         kindId: 'rpc-latency',
         kind: KIND_LABEL['rpc-latency'],
-        reason: `OTel ${bucketMetric} present; 95% of RPC calls under 500 ms is a sensible default.`,
+        reason: i18n.translate('observability.apm.slo.suggest.engine.rpcLatency', {
+          defaultMessage:
+            'OTel {bucketMetric} present; 95% of RPC calls under 500 ms is a sensible default.',
+          values: { bucketMetric },
+        }),
         sourceMetric: bucketMetric,
         detected: { rpc_service: service },
         estimatedRuleCount: estimatedRules(1),
@@ -682,7 +730,15 @@ function dbDrafts(input: ServiceDiscoveryInput, out: Suggestion[]): void {
       key: `db-lat:${service}`,
       kindId: 'db-latency',
       kind: KIND_LABEL['db-latency'],
-      reason: `OTel ${bucketMetric} present for ${resolved.dimension.name}="${resolved.dimension.value}"; 95% of DB calls under 100 ms is a sensible default.`,
+      reason: i18n.translate('observability.apm.slo.suggest.engine.dbLatency', {
+        defaultMessage:
+          'OTel {bucketMetric} present for {labelName}="{labelValue}"; 95% of DB calls under 100 ms is a sensible default.',
+        values: {
+          bucketMetric,
+          labelName: resolved.dimension.name,
+          labelValue: resolved.dimension.value,
+        },
+      }),
       sourceMetric: bucketMetric,
       detected: { [resolved.dimension.name]: resolved.dimension.value },
       estimatedRuleCount: estimatedRules(1),
@@ -727,7 +783,15 @@ function messagingDrafts(input: ServiceDiscoveryInput, out: Suggestion[]): void 
       key: `msg-lat:${service}`,
       kindId: 'messaging-latency',
       kind: KIND_LABEL['messaging-latency'],
-      reason: `OTel ${bucketMetric} present for ${resolved.dimension.name}="${resolved.dimension.value}"; 95% of messages processed under 1 s is a sensible default.`,
+      reason: i18n.translate('observability.apm.slo.suggest.engine.messagingLatency', {
+        defaultMessage:
+          'OTel {bucketMetric} present for {labelName}="{labelValue}"; 95% of messages processed under 1 s is a sensible default.',
+        values: {
+          bucketMetric,
+          labelName: resolved.dimension.name,
+          labelValue: resolved.dimension.value,
+        },
+      }),
       sourceMetric: bucketMetric,
       detected: { [resolved.dimension.name]: resolved.dimension.value },
       estimatedRuleCount: estimatedRules(1),
@@ -772,7 +836,15 @@ function genAiDrafts(input: ServiceDiscoveryInput, out: Suggestion[]): void {
       key: `genai-avail:${service}`,
       kindId: 'genai-availability',
       kind: KIND_LABEL['genai-availability'],
-      reason: `OTel ${countMetric} observed for ${resolved.dimension.name}="${resolved.dimension.value}". error_type="" is the convention for successful GenAI operations.`,
+      reason: i18n.translate('observability.apm.slo.suggest.engine.genaiAvailability', {
+        defaultMessage:
+          'OTel {countMetric} observed for {labelName}="{labelValue}". error_type="" is the convention for successful GenAI operations.',
+        values: {
+          countMetric,
+          labelName: resolved.dimension.name,
+          labelValue: resolved.dimension.value,
+        },
+      }),
       sourceMetric: countMetric,
       detected: { [resolved.dimension.name]: resolved.dimension.value },
       estimatedRuleCount: estimatedRules(1),

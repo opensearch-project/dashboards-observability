@@ -27,6 +27,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import type { Suggestion } from './suggest_engine';
 import { suggestionIconType } from './suggest_icon';
 import type { RowStatus } from './suggest_use_batch_create';
@@ -79,11 +80,20 @@ export const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
   const disableCheckbox = rowStatus === 'creating' || rowStatus === 'success';
 
   const coveredTooltip = suggestion.existingRuleMatch
-    ? `Matched: ${suggestion.existingRuleMatch.groupName} / ${
-        suggestion.existingRuleMatch.ruleName
-      }${
-        suggestion.existingRuleMatch.sloId ? ` (SLO ${suggestion.existingRuleMatch.sloId})` : ''
-      }. Unchecked to avoid dual-writing.`
+    ? i18n.translate('observability.apm.slo.suggest.inlineRow.coveredTooltip', {
+        defaultMessage:
+          'Matched: {groupName} / {ruleName}{sloSuffix}. Unchecked to avoid dual-writing.',
+        values: {
+          groupName: suggestion.existingRuleMatch.groupName,
+          ruleName: suggestion.existingRuleMatch.ruleName,
+          sloSuffix: suggestion.existingRuleMatch.sloId
+            ? i18n.translate('observability.apm.slo.suggest.inlineRow.coveredSloSuffix', {
+                defaultMessage: ' (SLO {sloId})',
+                values: { sloId: suggestion.existingRuleMatch.sloId },
+              })
+            : '',
+        },
+      })
     : '';
 
   return (
@@ -114,7 +124,12 @@ export const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
             <EuiIconTip
               type="alert"
               color="danger"
-              content={rowStatusMessage ?? 'Create failed.'}
+              content={
+                rowStatusMessage ??
+                i18n.translate('observability.apm.slo.suggest.inlineRow.createFailedFallback', {
+                  defaultMessage: 'Create failed.',
+                })
+              }
               data-test-subj={`slosSuggestRowStatus-${suggestion.key}-error`}
             />
           ) : (
@@ -143,7 +158,12 @@ export const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
               <EuiBadge color="hollow">{suggestion.kind}</EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{suggestion.estimatedRuleCount} rules</EuiBadge>
+              <EuiBadge color="hollow">
+                {i18n.translate('observability.apm.slo.suggest.inlineRow.rulesBadge', {
+                  defaultMessage: '{count} rules',
+                  values: { count: suggestion.estimatedRuleCount },
+                })}
+              </EuiBadge>
             </EuiFlexItem>
             {isCovered && (
               <EuiFlexItem grow={false}>
@@ -153,7 +173,9 @@ export const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
                     iconType="check"
                     data-test-subj={`slosSuggestCovered-${suggestion.key}`}
                   >
-                    covered by existing rule
+                    {i18n.translate('observability.apm.slo.suggest.inlineRow.coveredBadge', {
+                      defaultMessage: 'covered by existing rule',
+                    })}
                   </EuiBadge>
                 </EuiToolTip>
               </EuiFlexItem>
@@ -169,27 +191,42 @@ export const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
         <EuiFlexItem style={{ minWidth: 160 }}>
           <EuiFieldText
             compressed
-            prepend="Owner"
+            prepend={i18n.translate('observability.apm.slo.suggest.inlineRow.ownerPrepend', {
+              defaultMessage: 'Owner',
+            })}
             value={overrides.ownerTeam ?? spec.owner.teams[0] ?? ''}
             onChange={(e) => onOverrideChange({ ownerTeam: e.target.value })}
-            placeholder="team"
-            aria-label="Owner team"
+            placeholder={i18n.translate(
+              'observability.apm.slo.suggest.inlineRow.ownerPlaceholder',
+              {
+                defaultMessage: 'team',
+              }
+            )}
+            aria-label={i18n.translate('observability.apm.slo.suggest.inlineRow.ownerAriaLabel', {
+              defaultMessage: 'Owner team',
+            })}
           />
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 120 }}>
           <EuiFieldText
             compressed
-            prepend="Tier"
+            prepend={i18n.translate('observability.apm.slo.suggest.inlineRow.tierPrepend', {
+              defaultMessage: 'Tier',
+            })}
             value={overrides.tier ?? spec.tier ?? ''}
             onChange={(e) => onOverrideChange({ tier: e.target.value })}
             placeholder="tier-1"
-            aria-label="Tier"
+            aria-label={i18n.translate('observability.apm.slo.suggest.inlineRow.tierAriaLabel', {
+              defaultMessage: 'Tier',
+            })}
           />
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 120 }}>
           <EuiFieldNumber
             compressed
-            prepend="Target"
+            prepend={i18n.translate('observability.apm.slo.suggest.inlineRow.targetPrepend', {
+              defaultMessage: 'Target',
+            })}
             append="%"
             value={
               overrides.target ??
@@ -199,7 +236,9 @@ export const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
             min={50}
             max={99.999}
             step={0.01}
-            aria-label="Target percentage"
+            aria-label={i18n.translate('observability.apm.slo.suggest.inlineRow.targetAriaLabel', {
+              defaultMessage: 'Target percentage',
+            })}
           />
         </EuiFlexItem>
         {isLatency && (
@@ -212,7 +251,10 @@ export const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
               onChange={(e) => onOverrideChange({ latencyThreshold: e.target.value })}
               min={0}
               step={unit === 'milliseconds' ? 10 : 0.01}
-              aria-label="Latency threshold"
+              aria-label={i18n.translate(
+                'observability.apm.slo.suggest.inlineRow.latencyAriaLabel',
+                { defaultMessage: 'Latency threshold' }
+              )}
             />
           </EuiFlexItem>
         )}

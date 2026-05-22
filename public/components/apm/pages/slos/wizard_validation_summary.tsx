@@ -16,6 +16,7 @@
 
 import React from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import {
   WIZARD_SECTIONS,
   WizardSection,
@@ -49,9 +50,11 @@ export const WizardValidationSummary: React.FC<WizardValidationSummaryProps> = (
       <EuiCallOut
         color="danger"
         iconType="alert"
-        title={`Fix ${keys.length} ${
-          keys.length === 1 ? 'error' : 'errors'
-        } before creating the SLO`}
+        title={i18n.translate('observability.apm.slo.wizard.validationSummary.title', {
+          defaultMessage:
+            'Fix {count, plural, one {# error} other {# errors}} before creating the SLO',
+          values: { count: keys.length },
+        })}
         data-test-subj="slosWizardValidationSummary"
       >
         <EuiText size="s">

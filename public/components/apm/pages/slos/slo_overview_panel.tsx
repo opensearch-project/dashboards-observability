@@ -31,6 +31,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
+import { i18n } from '@osd/i18n';
 import type { SloHealthState, SloSummary } from '../../../../../common/slo/slo_types';
 import { formatPct, SLO_PRECISION, TABULAR_NUMS_STYLE } from '../../../../../common/slo/format';
 
@@ -43,14 +44,54 @@ export interface SloOverviewPanelProps {
 }
 
 const STATE_DISPLAY: Record<SloHealthState, { label: string; color: string }> = {
-  breached: { label: 'Breached', color: euiThemeVars.euiColorDanger },
-  warning: { label: 'Warning', color: euiThemeVars.euiColorWarning },
-  ok: { label: 'Healthy', color: euiThemeVars.euiColorSuccess },
-  no_data: { label: 'No data', color: euiThemeVars.euiColorMediumShade },
-  source_idle: { label: 'Source idle', color: euiThemeVars.euiColorMediumShade },
-  stale: { label: 'Stale', color: euiThemeVars.euiColorLightShade },
-  disabled: { label: 'Disabled', color: euiThemeVars.euiColorDarkShade },
-  rules_missing: { label: 'Rules missing', color: euiThemeVars.euiColorDanger },
+  breached: {
+    label: i18n.translate('observability.apm.slo.overviewPanel.state.breached', {
+      defaultMessage: 'Breached',
+    }),
+    color: euiThemeVars.euiColorDanger,
+  },
+  warning: {
+    label: i18n.translate('observability.apm.slo.overviewPanel.state.warning', {
+      defaultMessage: 'Warning',
+    }),
+    color: euiThemeVars.euiColorWarning,
+  },
+  ok: {
+    label: i18n.translate('observability.apm.slo.overviewPanel.state.ok', {
+      defaultMessage: 'Healthy',
+    }),
+    color: euiThemeVars.euiColorSuccess,
+  },
+  no_data: {
+    label: i18n.translate('observability.apm.slo.overviewPanel.state.noData', {
+      defaultMessage: 'No data',
+    }),
+    color: euiThemeVars.euiColorMediumShade,
+  },
+  source_idle: {
+    label: i18n.translate('observability.apm.slo.overviewPanel.state.sourceIdle', {
+      defaultMessage: 'Source idle',
+    }),
+    color: euiThemeVars.euiColorMediumShade,
+  },
+  stale: {
+    label: i18n.translate('observability.apm.slo.overviewPanel.state.stale', {
+      defaultMessage: 'Stale',
+    }),
+    color: euiThemeVars.euiColorLightShade,
+  },
+  disabled: {
+    label: i18n.translate('observability.apm.slo.overviewPanel.state.disabled', {
+      defaultMessage: 'Disabled',
+    }),
+    color: euiThemeVars.euiColorDarkShade,
+  },
+  rules_missing: {
+    label: i18n.translate('observability.apm.slo.overviewPanel.state.rulesMissing', {
+      defaultMessage: 'Rules missing',
+    }),
+    color: euiThemeVars.euiColorDanger,
+  },
 };
 
 /** Pick the worst objective's error-budget remaining for leaderboard ranking. */
@@ -225,7 +266,10 @@ const HealthRail: React.FC<{
           color: euiThemeVars.euiColorDarkShade,
         }}
       >
-        Health mix · {total} {total === 1 ? 'SLO' : 'SLOs'}
+        {i18n.translate('observability.apm.slo.overviewPanel.healthMixLabel', {
+          defaultMessage: 'Health mix · {total, plural, one {# SLO} other {# SLOs}}',
+          values: { total },
+        })}
       </span>
       <div
         style={{
@@ -241,7 +285,17 @@ const HealthRail: React.FC<{
           const pct = (s.value / denom) * 100;
           const active = activeStateFilter === s.key;
           const dimmed = activeStateFilter && !active;
-          const label = `${STATE_DISPLAY[s.key].label}: ${s.value} (${Math.round(pct)}%)`;
+          const label = i18n.translate(
+            'observability.apm.slo.overviewPanel.healthRailSegmentLabel',
+            {
+              defaultMessage: '{state}: {value} ({pct}%)',
+              values: {
+                state: STATE_DISPLAY[s.key].label,
+                value: s.value,
+                pct: Math.round(pct),
+              },
+            }
+          );
           // Native title rather than EuiToolTip — the tooltip's inline-block
           // wrapper becomes the flex child and eats the `flex-grow: pct` we
           // set on the button, so segment widths collapse to the button
@@ -410,7 +464,11 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <EuiText size="s">
-            <h4 style={{ margin: 0 }}>SLO health overview</h4>
+            <h4 style={{ margin: 0 }}>
+              {i18n.translate('observability.apm.slo.overviewPanel.heading', {
+                defaultMessage: 'SLO health overview',
+              })}
+            </h4>
           </EuiText>
         </EuiFlexItem>
         {activeStateFilter && onStateFilterChange && (
@@ -421,7 +479,9 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
               onClick={() => onStateFilterChange(null)}
               data-test-subj="slosOverviewClearFilter"
             >
-              Clear filter
+              {i18n.translate('observability.apm.slo.overviewPanel.clearFilter', {
+                defaultMessage: 'Clear filter',
+              })}
             </EuiButtonEmpty>
           </EuiFlexItem>
         )}
@@ -461,58 +521,91 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
                 '—'
               )
             }
-            label={stats.reportingCount > 0 ? 'Aggregate budget' : 'No reporting SLOs'}
+            label={
+              stats.reportingCount > 0
+                ? i18n.translate('observability.apm.slo.overviewPanel.kpi.aggregateBudget', {
+                    defaultMessage: 'Aggregate budget',
+                  })
+                : i18n.translate('observability.apm.slo.overviewPanel.kpi.noReportingSlos', {
+                    defaultMessage: 'No reporting SLOs',
+                  })
+            }
             accent={
               stats.reportingCount > 0
                 ? aggregateBudgetAccent(stats.avgBudgetRemaining)
                 : euiThemeVars.euiColorMediumShade
             }
-            tooltip={`Weighted-average error budget remaining across SLOs that are reporting samples (${stats.reportingCount} of ${stats.total}).`}
+            tooltip={i18n.translate('observability.apm.slo.overviewPanel.kpi.aggregateTooltip', {
+              defaultMessage:
+                'Weighted-average error budget remaining across SLOs that are reporting samples ({reporting} of {total}).',
+              values: { reporting: stats.reportingCount, total: stats.total },
+            })}
             dataTestSubj="slosOverviewBudget"
           />
           <KpiCell
             value={stats.breached}
-            label="Breached"
+            label={i18n.translate('observability.apm.slo.overviewPanel.kpi.breachedLabel', {
+              defaultMessage: 'Breached',
+            })}
             accent={STATE_DISPLAY.breached.color}
-            tooltip="SLOs where error ratio exceeded the budget"
+            tooltip={i18n.translate('observability.apm.slo.overviewPanel.kpi.breachedTooltip', {
+              defaultMessage: 'SLOs where error ratio exceeded the budget',
+            })}
             onClick={toggle('breached')}
             active={activeStateFilter === 'breached'}
             dataTestSubj="slosOverviewBreached"
           />
           <KpiCell
             value={stats.warning}
-            label="Warning"
+            label={i18n.translate('observability.apm.slo.overviewPanel.kpi.warningLabel', {
+              defaultMessage: 'Warning',
+            })}
             accent={STATE_DISPLAY.warning.color}
-            tooltip="SLOs where short-window burn has tripped a warning tier"
+            tooltip={i18n.translate('observability.apm.slo.overviewPanel.kpi.warningTooltip', {
+              defaultMessage: 'SLOs where short-window burn has tripped a warning tier',
+            })}
             onClick={toggle('warning')}
             active={activeStateFilter === 'warning'}
             dataTestSubj="slosOverviewWarning"
           />
           <KpiCell
             value={stats.ok}
-            label="Healthy"
+            label={i18n.translate('observability.apm.slo.overviewPanel.kpi.healthyLabel', {
+              defaultMessage: 'Healthy',
+            })}
             accent={STATE_DISPLAY.ok.color}
-            tooltip="SLOs meeting their objective"
+            tooltip={i18n.translate('observability.apm.slo.overviewPanel.kpi.healthyTooltip', {
+              defaultMessage: 'SLOs meeting their objective',
+            })}
             onClick={toggle('ok')}
             active={activeStateFilter === 'ok'}
             dataTestSubj="slosOverviewOk"
           />
           <KpiCell
             value={stats.firing}
-            label="Firing"
+            label={i18n.translate('observability.apm.slo.overviewPanel.kpi.firingLabel', {
+              defaultMessage: 'Firing',
+            })}
             accent={
               stats.firing > 0 ? euiThemeVars.euiColorDanger : euiThemeVars.euiColorMediumShade
             }
-            tooltip="Total MWMBR burn-rate alerts currently firing"
+            tooltip={i18n.translate('observability.apm.slo.overviewPanel.kpi.firingTooltip', {
+              defaultMessage: 'Total MWMBR burn-rate alerts currently firing',
+            })}
             onClick={toggle('firing')}
             active={activeStateFilter === 'firing'}
             dataTestSubj="slosOverviewFiring"
           />
           <KpiCell
             value={stats.noData + stats.disabled}
-            label="No data / disabled"
+            label={i18n.translate('observability.apm.slo.overviewPanel.kpi.noDataDisabledLabel', {
+              defaultMessage: 'No data / disabled',
+            })}
             accent={euiThemeVars.euiColorMediumShade}
-            tooltip="SLOs with no recent samples or explicitly disabled"
+            tooltip={i18n.translate(
+              'observability.apm.slo.overviewPanel.kpi.noDataDisabledTooltip',
+              { defaultMessage: 'SLOs with no recent samples or explicitly disabled' }
+            )}
             onClick={toggle('no_data')}
             active={activeStateFilter === 'no_data'}
             dataTestSubj="slosOverviewNoData"
@@ -557,12 +650,18 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
             }}
           >
             {atRisk.hasReporting && !atRisk.anyAtRisk
-              ? 'Error budget'
-              : 'At risk · worst error budget first'}
+              ? i18n.translate('observability.apm.slo.overviewPanel.atRisk.titleAllGreen', {
+                  defaultMessage: 'Error budget',
+                })
+              : i18n.translate('observability.apm.slo.overviewPanel.atRisk.titleAtRisk', {
+                  defaultMessage: 'At risk · worst error budget first',
+                })}
           </span>
           {atRisk.shown.length === 0 ? (
             <EuiText size="xs" color="subdued">
-              No reporting SLOs.
+              {i18n.translate('observability.apm.slo.overviewPanel.atRisk.noReporting', {
+                defaultMessage: 'No reporting SLOs.',
+              })}
             </EuiText>
           ) : !atRisk.anyAtRisk ? (
             // Fallback when every reporting SLO has ≥75% budget — otherwise the
@@ -573,7 +672,9 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
               data-test-subj="slosOverviewAtRiskAllGreen"
             >
               <EuiText size="xs" color="subdued">
-                All reporting SLOs have &gt;75% budget remaining.
+                {i18n.translate('observability.apm.slo.overviewPanel.atRisk.allGreen', {
+                  defaultMessage: 'All reporting SLOs have >75% budget remaining.',
+                })}
               </EuiText>
               {/*
                 Lands on `#/slos` which now defaults to worst-budget-first
@@ -586,7 +687,9 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
                 style={{ fontSize: 11, alignSelf: 'flex-start' }}
                 data-test-subj="slosOverviewAtRiskViewByBudget"
               >
-                View by remaining budget
+                {i18n.translate('observability.apm.slo.overviewPanel.atRisk.viewByBudget', {
+                  defaultMessage: 'View by remaining budget',
+                })}
               </EuiLink>
             </div>
           ) : (
@@ -628,7 +731,16 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
                         {s.name}
                       </EuiLink>
                       {s.status.firingCount > 0 && (
-                        <EuiToolTip content={`${s.status.firingCount} alert(s) firing`}>
+                        <EuiToolTip
+                          content={i18n.translate(
+                            'observability.apm.slo.overviewPanel.atRisk.firingTooltip',
+                            {
+                              defaultMessage:
+                                '{count, plural, one {# alert firing} other {# alerts firing}}',
+                              values: { count: s.status.firingCount },
+                            }
+                          )}
+                        >
                           <span
                             style={{
                               display: 'inline-flex',
@@ -652,7 +764,11 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
                           fontVariantNumeric: 'tabular-nums',
                         }}
                       >
-                        {overBudget ? 'over' : `${Math.round(Math.max(0, remaining) * 100)}%`}
+                        {overBudget
+                          ? i18n.translate('observability.apm.slo.overviewPanel.atRisk.over', {
+                              defaultMessage: 'over',
+                            })
+                          : `${Math.round(Math.max(0, remaining) * 100)}%`}
                       </span>
                     </div>
                     <MiniBudgetBar remaining={remaining} />
@@ -665,7 +781,10 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
                   data-test-subj="slosOverviewAtRiskMore"
                   style={{ fontSize: 11, alignSelf: 'flex-start' }}
                 >
-                  +{atRisk.totalBurning - atRisk.shown.length} more burning budget
+                  {i18n.translate('observability.apm.slo.overviewPanel.atRisk.moreBurning', {
+                    defaultMessage: '+{count} more burning budget',
+                    values: { count: atRisk.totalBurning - atRisk.shown.length },
+                  })}
                 </EuiLink>
               )}
             </div>

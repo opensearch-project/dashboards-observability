@@ -24,6 +24,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import * as echarts from 'echarts';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
+import { i18n } from '@osd/i18n';
 import { EchartsRender } from '../../../alerting/echarts_render';
 import { usePromQLChartData } from '../../shared/hooks/use_promql_chart_data';
 import { TimeRange } from '../../common/types/service_types';
@@ -40,7 +41,20 @@ export interface SloBurnRateChartProps {
 }
 
 /** Friendly labels for the four default MWMBR tiers, in index order. */
-const TIER_LABELS = ['Page · Quick', 'Page · Slow', 'Ticket · Quick', 'Ticket · Slow'] as const;
+const TIER_LABELS = [
+  i18n.translate('observability.apm.slo.burnRateChart.tier.pageQuick', {
+    defaultMessage: 'Page · Quick',
+  }),
+  i18n.translate('observability.apm.slo.burnRateChart.tier.pageSlow', {
+    defaultMessage: 'Page · Slow',
+  }),
+  i18n.translate('observability.apm.slo.burnRateChart.tier.ticketQuick', {
+    defaultMessage: 'Ticket · Quick',
+  }),
+  i18n.translate('observability.apm.slo.burnRateChart.tier.ticketSlow', {
+    defaultMessage: 'Ticket · Slow',
+  }),
+] as const;
 
 function formatMultiplier(n: number): string {
   const rounded = Math.round(n * 10) / 10;
@@ -127,7 +141,9 @@ export function buildBurnRateOption(inputs: BurnRateOptionInputs): echarts.EChar
     yAxis: {
       type: 'log',
       logBase: 10,
-      name: 'burn rate',
+      name: i18n.translate('observability.apm.slo.burnRateChart.yAxisName', {
+        defaultMessage: 'burn rate',
+      }),
       nameGap: 25,
       nameTextStyle: { color: euiThemeVars.euiColorDarkShade, fontSize: 11 },
       min: Y_AXIS_FLOOR,
@@ -308,7 +324,12 @@ export const SloBurnRateChart: React.FC<SloBurnRateChartProps> = ({
     () =>
       buildBurnRateOption({
         tiers: tierResults.map((r, idx) => ({
-          label: TIER_LABELS[idx] ?? `Tier ${idx + 1}`,
+          label:
+            TIER_LABELS[idx] ??
+            i18n.translate('observability.apm.slo.burnRateChart.tierFallback', {
+              defaultMessage: 'Tier {index}',
+              values: { index: idx + 1 },
+            }),
           severity: r.tier.severity,
           multiplier: r.tier.burnRateMultiplier,
           color: r.color,
@@ -321,11 +342,21 @@ export const SloBurnRateChart: React.FC<SloBurnRateChartProps> = ({
   return (
     <EuiPanel data-test-subj="slosBurnRateChart">
       <EuiText size="m">
-        <h4>Burn rate by tier</h4>
+        <h4>
+          {i18n.translate('observability.apm.slo.burnRateChart.heading', {
+            defaultMessage: 'Burn rate by tier',
+          })}
+        </h4>
       </EuiText>
       <EuiText size="xs" color="subdued">
-        Each tier&apos;s long-window burn rate plotted against its threshold. An alert fires when
-        the line stays above the dashed threshold for the tier&apos;s <code>for</code> duration.
+        {i18n.translate('observability.apm.slo.burnRateChart.descriptionPrefix', {
+          defaultMessage:
+            "Each tier's long-window burn rate plotted against its threshold. An alert fires when the line stays above the dashed threshold for the tier's ",
+        })}
+        <code>for</code>
+        {i18n.translate('observability.apm.slo.burnRateChart.descriptionSuffix', {
+          defaultMessage: ' duration.',
+        })}
       </EuiText>
       <EuiSpacer size="s" />
 
@@ -349,11 +380,16 @@ export const SloBurnRateChart: React.FC<SloBurnRateChartProps> = ({
           size="s"
           color="warning"
           iconType="iInCircle"
-          title="No burn-rate tiers configured"
+          title={i18n.translate('observability.apm.slo.burnRateChart.noTiers.title', {
+            defaultMessage: 'No burn-rate tiers configured',
+          })}
           data-test-subj="slosBurnRateEmptyTiers"
         >
           <EuiText size="s">
-            Configure MWMBR tiers in the Advanced section of the SLO wizard to populate this chart.
+            {i18n.translate('observability.apm.slo.burnRateChart.noTiers.body', {
+              defaultMessage:
+                'Configure MWMBR tiers in the Advanced section of the SLO wizard to populate this chart.',
+            })}
           </EuiText>
         </EuiCallOut>
       )}
@@ -362,7 +398,9 @@ export const SloBurnRateChart: React.FC<SloBurnRateChartProps> = ({
           size="s"
           color="danger"
           iconType="alert"
-          title="Failed to load burn-rate series"
+          title={i18n.translate('observability.apm.slo.burnRateChart.error.title', {
+            defaultMessage: 'Failed to load burn-rate series',
+          })}
           data-test-subj="slosBurnRateError"
         >
           <EuiText size="s">{firstError.message}</EuiText>
@@ -373,14 +411,20 @@ export const SloBurnRateChart: React.FC<SloBurnRateChartProps> = ({
           size="s"
           color="warning"
           iconType="alert"
-          title="SLI source metric not found in this datasource"
+          title={i18n.translate('observability.apm.slo.burnRateChart.missingMetric.title', {
+            defaultMessage: 'SLI source metric not found in this datasource',
+          })}
           data-test-subj="slosBurnRateMissingMetric"
         >
           <EuiText size="s">
-            No samples exist for the metric this SLI queries on
-            <strong> {prometheusConnectionId}</strong>. Burn rate is derived from the same error
-            ratio as the budget chart — if that metric is absent, burn rate can&apos;t populate.
-            Waiting won&apos;t help; re-check the SLI&apos;s metric / selectors.
+            {i18n.translate('observability.apm.slo.burnRateChart.missingMetric.bodyPrefix', {
+              defaultMessage: 'No samples exist for the metric this SLI queries on',
+            })}
+            <strong> {prometheusConnectionId}</strong>
+            {i18n.translate('observability.apm.slo.burnRateChart.missingMetric.bodySuffix', {
+              defaultMessage:
+                ". Burn rate is derived from the same error ratio as the budget chart — if that metric is absent, burn rate can't populate. Waiting won't help; re-check the SLI's metric / selectors.",
+            })}
           </EuiText>
         </EuiCallOut>
       )}
@@ -389,12 +433,16 @@ export const SloBurnRateChart: React.FC<SloBurnRateChartProps> = ({
           size="s"
           color="primary"
           iconType="iInCircle"
-          title="No samples in the selected time range"
+          title={i18n.translate('observability.apm.slo.burnRateChart.emptyRange.title', {
+            defaultMessage: 'No samples in the selected time range',
+          })}
           data-test-subj="slosBurnRateEmpty"
         >
           <EuiText size="s">
-            The metric exists in this datasource but the current range returned no burn-rate
-            samples. Widen the time range, or wait for the next Prometheus scrape + rule evaluation.
+            {i18n.translate('observability.apm.slo.burnRateChart.emptyRange.body', {
+              defaultMessage:
+                'The metric exists in this datasource but the current range returned no burn-rate samples. Widen the time range, or wait for the next Prometheus scrape + rule evaluation.',
+            })}
           </EuiText>
         </EuiCallOut>
       )}
@@ -403,8 +451,11 @@ export const SloBurnRateChart: React.FC<SloBurnRateChartProps> = ({
         <>
           <EuiSpacer size="xs" />
           <EuiText size="xs" color="subdued">
-            {overflow} additional tier{overflow === 1 ? '' : 's'} hidden for legibility. See the
-            burn-rate alerts panel below for the full matrix.
+            {i18n.translate('observability.apm.slo.burnRateChart.overflow', {
+              defaultMessage:
+                '{overflow, plural, one {# additional tier} other {# additional tiers}} hidden for legibility. See the burn-rate alerts panel below for the full matrix.',
+              values: { overflow },
+            })}
           </EuiText>
         </>
       )}

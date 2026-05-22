@@ -14,6 +14,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiCallOut, EuiCode, EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
 import { ChromeStart, HttpStart, NotificationsStart } from '../../../../../../../src/core/public';
 import { SloListingPage } from './slo_listing_page';
@@ -58,12 +59,16 @@ class SloRouterErrorBoundary extends React.Component<
           <EuiCallOut
             color="danger"
             iconType="alert"
-            title="The SLO/SLI page hit an unexpected error"
+            title={i18n.translate('observability.apm.slo.router.errorBoundaryTitle', {
+              defaultMessage: 'The SLO/SLI page hit an unexpected error',
+            })}
             data-test-subj="sloRouterErrorBoundary"
           >
             <EuiText size="s">
-              Reloading the page typically clears this. If it persists, file an issue with the error
-              message below.
+              {i18n.translate('observability.apm.slo.router.errorBoundaryBody', {
+                defaultMessage:
+                  'Reloading the page typically clears this. If it persists, file an issue with the error message below.',
+              })}
             </EuiText>
             <EuiSpacer size="s" />
             <EuiCode language="text">

@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
+
 /**
  * Section metadata shared between the anchor nav, the top-level validation
  * summary, and the rule-preview empty state. Keeping it in one place means
@@ -43,7 +45,9 @@ export interface WizardSection {
 export const WIZARD_SECTIONS: readonly WizardSection[] = [
   {
     id: 'identity',
-    label: 'Identity',
+    label: i18n.translate('observability.apm.slo.wizard.section.identity', {
+      defaultMessage: 'Identity',
+    }),
     anchorId: 'slosWizardSection-identity',
     errorPrefixes: ['spec.name', 'spec.datasourceId', 'spec.enabled', 'spec.mode'],
     fieldIds: {
@@ -55,13 +59,17 @@ export const WIZARD_SECTIONS: readonly WizardSection[] = [
   // conditions the SLI shape (audit cite S5).
   {
     id: 'window',
-    label: 'Window & mode',
+    label: i18n.translate('observability.apm.slo.wizard.section.window', {
+      defaultMessage: 'Window & mode',
+    }),
     anchorId: 'slosWizardSection-window',
     errorPrefixes: ['spec.window'],
   },
   {
     id: 'owner',
-    label: 'Service & owner',
+    label: i18n.translate('observability.apm.slo.wizard.section.owner', {
+      defaultMessage: 'Service & owner',
+    }),
     anchorId: 'slosWizardSection-owner',
     errorPrefixes: ['spec.service', 'spec.owner'],
     fieldIds: {
@@ -71,43 +79,57 @@ export const WIZARD_SECTIONS: readonly WizardSection[] = [
   },
   {
     id: 'sli',
-    label: 'SLI',
+    label: i18n.translate('observability.apm.slo.wizard.section.sli', {
+      defaultMessage: 'SLI',
+    }),
     anchorId: 'slosWizardSection-sli',
     errorPrefixes: ['spec.sli'],
   },
   {
     id: 'promql',
-    label: 'Custom PromQL',
+    label: i18n.translate('observability.apm.slo.wizard.section.promql', {
+      defaultMessage: 'Custom PromQL',
+    }),
     anchorId: 'slosWizardSection-promql',
     errorPrefixes: ['spec.sli.definition.customExpr'],
   },
   {
     id: 'objectives',
-    label: 'Objectives',
+    label: i18n.translate('observability.apm.slo.wizard.section.objectives', {
+      defaultMessage: 'Objectives',
+    }),
     anchorId: 'slosWizardSection-objectives',
     errorPrefixes: ['spec.objectives'],
   },
   {
     id: 'advanced',
-    label: 'Advanced',
+    label: i18n.translate('observability.apm.slo.wizard.section.advanced', {
+      defaultMessage: 'Advanced',
+    }),
     anchorId: 'slosWizardSection-advanced',
     errorPrefixes: ['spec.alerting', 'spec.budgetWarningThresholds', 'spec.alarms'],
   },
   {
     id: 'exclusions',
-    label: 'Exclusion windows',
+    label: i18n.translate('observability.apm.slo.wizard.section.exclusions', {
+      defaultMessage: 'Exclusion windows',
+    }),
     anchorId: 'slosWizardSection-exclusions',
     errorPrefixes: ['spec.exclusionWindows'],
   },
   {
     id: 'labels',
-    label: 'Labels & annotations',
+    label: i18n.translate('observability.apm.slo.wizard.section.labels', {
+      defaultMessage: 'Labels & annotations',
+    }),
     anchorId: 'slosWizardSection-labels',
     errorPrefixes: ['spec.labels', 'spec.annotations'],
   },
   {
     id: 'rulesPreview',
-    label: 'Rule preview',
+    label: i18n.translate('observability.apm.slo.wizard.section.rulesPreview', {
+      defaultMessage: 'Rule preview',
+    }),
     anchorId: 'slosWizardSection-rulesPreview',
     errorPrefixes: [],
   },

@@ -27,6 +27,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import type { Suggestion } from './suggest_engine';
 import { suggestionIconType } from './suggest_icon';
 import { OverridePatch, OverrideValues, SuggestionInlineRow } from './suggest_inline_row';
@@ -114,8 +115,17 @@ export const ServiceTreeTable: React.FC<ServiceTreeTableProps> = ({
           <EuiButtonIcon
             aria-label={
               expandedMap[row.serviceName]
-                ? `Collapse ${row.serviceName}`
-                : `Expand ${row.serviceName}`
+                ? i18n.translate(
+                    'observability.apm.slo.suggest.serviceTreeTable.collapseAriaLabel',
+                    {
+                      defaultMessage: 'Collapse {serviceName}',
+                      values: { serviceName: row.serviceName },
+                    }
+                  )
+                : i18n.translate('observability.apm.slo.suggest.serviceTreeTable.expandAriaLabel', {
+                    defaultMessage: 'Expand {serviceName}',
+                    values: { serviceName: row.serviceName },
+                  })
             }
             iconType={expandedMap[row.serviceName] ? 'arrowDown' : 'arrowRight'}
             onClick={() => onToggleExpand(row.serviceName)}
@@ -135,13 +145,21 @@ export const ServiceTreeTable: React.FC<ServiceTreeTableProps> = ({
               checked={allSelected}
               indeterminate={someSelected}
               onChange={() => onToggleServiceSelection(row)}
-              aria-label={`Select all drafts for ${row.serviceName}`}
+              aria-label={i18n.translate(
+                'observability.apm.slo.suggest.serviceTreeTable.selectAllAriaLabel',
+                {
+                  defaultMessage: 'Select all drafts for {serviceName}',
+                  values: { serviceName: row.serviceName },
+                }
+              )}
             />
           );
         },
       },
       {
-        name: 'Service',
+        name: i18n.translate('observability.apm.slo.suggest.serviceTreeTable.column.service', {
+          defaultMessage: 'Service',
+        }),
         field: 'serviceName',
         render: (_value: string, row: ServiceRowShape) => {
           const allSelected = row.selectedCount === row.drafts.length && row.drafts.length > 0;
@@ -167,7 +185,10 @@ export const ServiceTreeTable: React.FC<ServiceTreeTableProps> = ({
                   color={selectionColor}
                   data-test-subj={`slosSuggestSelectionBadge-${row.serviceName}`}
                 >
-                  {row.selectedCount} / {row.drafts.length} selected
+                  {i18n.translate('observability.apm.slo.suggest.serviceTreeTable.selectionBadge', {
+                    defaultMessage: '{selected} / {total} selected',
+                    values: { selected: row.selectedCount, total: row.drafts.length },
+                  })}
                 </EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -175,7 +196,9 @@ export const ServiceTreeTable: React.FC<ServiceTreeTableProps> = ({
         },
       },
       {
-        name: 'SLI mix',
+        name: i18n.translate('observability.apm.slo.suggest.serviceTreeTable.column.sliMix', {
+          defaultMessage: 'SLI mix',
+        }),
         render: (row: ServiceRowShape) => {
           const visible = row.kinds.slice(0, SLI_MIX_VISIBLE_CAP);
           const overflow = row.kinds.length - visible.length;
@@ -198,7 +221,15 @@ export const ServiceTreeTable: React.FC<ServiceTreeTableProps> = ({
                     content={row.kinds.slice(SLI_MIX_VISIBLE_CAP).join(', ')}
                     position="top"
                   >
-                    <EuiBadge color="hollow">+{overflow} more</EuiBadge>
+                    <EuiBadge color="hollow">
+                      {i18n.translate(
+                        'observability.apm.slo.suggest.serviceTreeTable.overflowMore',
+                        {
+                          defaultMessage: '+{count} more',
+                          values: { count: overflow },
+                        }
+                      )}
+                    </EuiBadge>
                   </EuiToolTip>
                 </EuiFlexItem>
               )}
@@ -207,15 +238,22 @@ export const ServiceTreeTable: React.FC<ServiceTreeTableProps> = ({
         },
       },
       {
-        name: 'Drafts',
+        name: i18n.translate('observability.apm.slo.suggest.serviceTreeTable.column.drafts', {
+          defaultMessage: 'Drafts',
+        }),
         render: (row: ServiceRowShape) => (
           <EuiText size="xs" color="subdued">
-            {row.drafts.length} draft{row.drafts.length === 1 ? '' : 's'} · ~{row.totalRules} rules
+            {i18n.translate('observability.apm.slo.suggest.serviceTreeTable.draftsCell', {
+              defaultMessage: '{count, plural, one {# draft} other {# drafts}} · ~{rules} rules',
+              values: { count: row.drafts.length, rules: row.totalRules },
+            })}
           </EuiText>
         ),
       },
       {
-        name: 'Covered',
+        name: i18n.translate('observability.apm.slo.suggest.serviceTreeTable.column.covered', {
+          defaultMessage: 'Covered',
+        }),
         render: (row: ServiceRowShape) =>
           row.coveredCount > 0 ? (
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -229,11 +267,14 @@ export const ServiceTreeTable: React.FC<ServiceTreeTableProps> = ({
                   type="questionInCircle"
                   color="subdued"
                   position="top"
-                  content={`${row.coveredCount} draft${
-                    row.coveredCount === 1 ? '' : 's'
-                  } for this service ${
-                    row.coveredCount === 1 ? 'is' : 'are'
-                  } already provisioned by existing recording rules. They're unchecked by default to avoid dual-writing.`}
+                  content={i18n.translate(
+                    'observability.apm.slo.suggest.serviceTreeTable.coveredTooltip',
+                    {
+                      defaultMessage:
+                        "{count, plural, one {# draft for this service is} other {# drafts for this service are}} already provisioned by existing recording rules. They're unchecked by default to avoid dual-writing.",
+                      values: { count: row.coveredCount },
+                    }
+                  )}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

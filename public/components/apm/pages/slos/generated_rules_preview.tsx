@@ -30,6 +30,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import type { GeneratedRuleGroup, SloCreateInput } from '../../../../../common/slo/slo_types';
 import { SLO_RULER_NAMESPACE } from '../../../../../common/slo/slo_promql_generator';
 import type { SloApiClient } from './slo_api_client';
@@ -116,10 +117,16 @@ export const GeneratedRulesPreview: React.FC<GeneratedRulesPreviewProps> = ({
   return (
     <EuiPanel data-test-subj="slosWizardPreview">
       <EuiText size="m">
-        <h4>Rule preview</h4>
+        <h4>
+          {i18n.translate('observability.apm.slo.wizard.rulesPreview.heading', {
+            defaultMessage: 'Rule preview',
+          })}
+        </h4>
       </EuiText>
       <EuiText size="s" color="subdued">
-        The Prometheus rule group that will be deployed when you click Create.
+        {i18n.translate('observability.apm.slo.wizard.rulesPreview.description', {
+          defaultMessage: 'The Prometheus rule group that will be deployed when you click Create.',
+        })}
       </EuiText>
       <EuiSpacer size="s" />
       {renderBody(state, input, errors ?? {})}
@@ -143,7 +150,9 @@ function renderBody(
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued">
-            Generating preview…
+            {i18n.translate('observability.apm.slo.wizard.rulesPreview.generating', {
+              defaultMessage: 'Generating preview…',
+            })}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -158,13 +167,20 @@ function renderBody(
     }
     return (
       <EuiCallOut
-        title="Preview unavailable"
+        title={i18n.translate('observability.apm.slo.wizard.rulesPreview.errorTitle', {
+          defaultMessage: 'Preview unavailable',
+        })}
         color="warning"
         iconType="alert"
         size="s"
         data-test-subj="slosWizardPreviewError"
       >
-        <EuiText size="s">{state.error ?? 'Unable to generate preview.'}</EuiText>
+        <EuiText size="s">
+          {state.error ??
+            i18n.translate('observability.apm.slo.wizard.rulesPreview.errorFallback', {
+              defaultMessage: 'Unable to generate preview.',
+            })}
+        </EuiText>
       </EuiCallOut>
     );
   }
@@ -174,7 +190,10 @@ function renderBody(
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <EuiBadge color="primary" data-test-subj="slosWizardPreviewRuleCount">
-            {group.rules.length} {group.rules.length === 1 ? 'rule' : 'rules'}
+            {i18n.translate('observability.apm.slo.wizard.rulesPreview.ruleCount', {
+              defaultMessage: '{count, plural, one {# rule} other {# rules}}',
+              values: { count: group.rules.length },
+            })}
           </EuiBadge>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -184,19 +203,27 @@ function renderBody(
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued" data-test-subj="slosWizardPreviewNamespace">
-            namespace <code>{SLO_RULER_NAMESPACE}</code>
+            {i18n.translate('observability.apm.slo.wizard.rulesPreview.namespacePrefix', {
+              defaultMessage: 'namespace ',
+            })}
+            <code>{SLO_RULER_NAMESPACE}</code>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            eval interval {group.interval}s
+            {i18n.translate('observability.apm.slo.wizard.rulesPreview.evalInterval', {
+              defaultMessage: 'eval interval {interval}s',
+              values: { interval: group.interval },
+            })}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiAccordion
         id="slosWizardPreviewYaml"
-        buttonContent="Show rule-group YAML"
+        buttonContent={i18n.translate('observability.apm.slo.wizard.rulesPreview.showYamlButton', {
+          defaultMessage: 'Show rule-group YAML',
+        })}
         paddingSize="s"
         data-test-subj="slosWizardPreviewYamlToggle"
       >
@@ -255,7 +282,9 @@ function renderEmptyPrompt(
     missingEntries.length > 0 ? (
       <>
         <EuiText size="s" color="subdued">
-          Missing or invalid fields:
+          {i18n.translate('observability.apm.slo.wizard.rulesPreview.missingFieldsLabel', {
+            defaultMessage: 'Missing or invalid fields:',
+          })}
         </EuiText>
         <ul data-test-subj="slosWizardPreviewMissingList">
           {missingEntries.map(([key, msg]) => {
@@ -276,15 +305,25 @@ function renderEmptyPrompt(
     ) : (
       <EuiText size="s" color="subdued">
         {input === null
-          ? 'Pick a template to start building the rule set.'
-          : 'Fill in the required fields to see the generated rules.'}
+          ? i18n.translate('observability.apm.slo.wizard.rulesPreview.pickTemplate', {
+              defaultMessage: 'Pick a template to start building the rule set.',
+            })
+          : i18n.translate('observability.apm.slo.wizard.rulesPreview.fillFields', {
+              defaultMessage: 'Fill in the required fields to see the generated rules.',
+            })}
       </EuiText>
     );
   return (
     <EuiEmptyPrompt
       iconType="inspect"
       titleSize="xs"
-      title={<h4>Preview renders once the form is valid</h4>}
+      title={
+        <h4>
+          {i18n.translate('observability.apm.slo.wizard.rulesPreview.emptyTitle', {
+            defaultMessage: 'Preview renders once the form is valid',
+          })}
+        </h4>
+      }
       body={
         <>
           {body}
@@ -292,7 +331,10 @@ function renderEmptyPrompt(
             <>
               <EuiSpacer size="s" />
               <EuiText size="xs" color="subdued" data-test-subj="slosWizardPreviewServerMsg">
-                Server message: {serverMessage}
+                {i18n.translate('observability.apm.slo.wizard.rulesPreview.serverMessage', {
+                  defaultMessage: 'Server message: {message}',
+                  values: { message: serverMessage },
+                })}
               </EuiText>
             </>
           )}

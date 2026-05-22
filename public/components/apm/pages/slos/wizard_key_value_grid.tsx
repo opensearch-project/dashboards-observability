@@ -24,6 +24,7 @@ import {
   EuiFormRow,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 
 export interface KeyValueEntry {
   key: string;
@@ -54,15 +55,32 @@ export const WizardKeyValueGrid: React.FC<KeyValueGridProps> = ({
   onRemove,
   rowErrors,
   testSubjPrefix,
-  addLabel = 'Add row',
-  keyPlaceholder = 'key',
-  valuePlaceholder = 'value',
+  addLabel,
+  keyPlaceholder,
+  valuePlaceholder,
 }) => {
+  const resolvedAddLabel =
+    addLabel ??
+    i18n.translate('observability.apm.slo.wizard.keyValueGrid.addRowDefault', {
+      defaultMessage: 'Add row',
+    });
+  const resolvedKeyPlaceholder =
+    keyPlaceholder ??
+    i18n.translate('observability.apm.slo.wizard.keyValueGrid.keyPlaceholderDefault', {
+      defaultMessage: 'key',
+    });
+  const resolvedValuePlaceholder =
+    valuePlaceholder ??
+    i18n.translate('observability.apm.slo.wizard.keyValueGrid.valuePlaceholderDefault', {
+      defaultMessage: 'value',
+    });
   return (
     <div data-test-subj={`${testSubjPrefix}sGrid`}>
       {entries.length === 0 && (
         <EuiText size="xs" color="subdued" data-test-subj={`${testSubjPrefix}sEmpty`}>
-          No rows yet.
+          {i18n.translate('observability.apm.slo.wizard.keyValueGrid.empty', {
+            defaultMessage: 'No rows yet.',
+          })}
         </EuiText>
       )}
       {entries.map((entry, i) => {
@@ -87,7 +105,7 @@ export const WizardKeyValueGrid: React.FC<KeyValueGridProps> = ({
               <EuiFlexItem>
                 <EuiFieldText
                   compressed
-                  placeholder={keyPlaceholder}
+                  placeholder={resolvedKeyPlaceholder}
                   value={entry.key}
                   onChange={(e) => onChange(i, 'key', e.target.value)}
                   isInvalid={!!rowError}
@@ -97,7 +115,7 @@ export const WizardKeyValueGrid: React.FC<KeyValueGridProps> = ({
               <EuiFlexItem>
                 <EuiFieldText
                   compressed
-                  placeholder={valuePlaceholder}
+                  placeholder={resolvedValuePlaceholder}
                   value={entry.value}
                   onChange={(e) => onChange(i, 'value', e.target.value)}
                   isInvalid={!!rowError}
@@ -108,7 +126,13 @@ export const WizardKeyValueGrid: React.FC<KeyValueGridProps> = ({
                 <EuiButtonIcon
                   color="danger"
                   iconType="trash"
-                  aria-label={`Remove ${testSubjPrefix} ${i}`}
+                  aria-label={i18n.translate(
+                    'observability.apm.slo.wizard.keyValueGrid.removeAriaLabel',
+                    {
+                      defaultMessage: 'Remove {prefix} {index}',
+                      values: { prefix: testSubjPrefix, index: i },
+                    }
+                  )}
                   onClick={() => onRemove(i)}
                   data-test-subj={`${testSubjPrefix}Remove-${i}`}
                 />
@@ -123,7 +147,7 @@ export const WizardKeyValueGrid: React.FC<KeyValueGridProps> = ({
         onClick={onAdd}
         data-test-subj={`${testSubjPrefix}Add`}
       >
-        {addLabel}
+        {resolvedAddLabel}
       </EuiButtonEmpty>
     </div>
   );

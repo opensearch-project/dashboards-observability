@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import type { SloTemplate } from '../../../../../common/slo/slo_templates';
 import type { Action, FormState } from './wizard_state';
 
@@ -101,11 +102,17 @@ export const ObjectivesSection: React.FC<ObjectivesSectionProps> = ({
   return (
     <EuiPanel data-test-subj="slosWizardObjectives">
       <EuiText size="m">
-        <h4>Objectives</h4>
+        <h4>
+          {i18n.translate('observability.apm.slo.wizard.objectives.heading', {
+            defaultMessage: 'Objectives',
+          })}
+        </h4>
       </EuiText>
       <EuiText size="s" color="subdued">
-        Each objective produces its own set of recording and alerting rules. Common pattern: a
-        strict page target (p99) plus a looser ticket target (p90).
+        {i18n.translate('observability.apm.slo.wizard.objectives.description', {
+          defaultMessage:
+            'Each objective produces its own set of recording and alerting rules. Common pattern: a strict page target (p99) plus a looser ticket target (p90).',
+        })}
       </EuiText>
       <EuiSpacer size="s" />
       {objectives.map((row, i) => {
@@ -115,7 +122,11 @@ export const ObjectivesSection: React.FC<ObjectivesSectionProps> = ({
         const preview = computePreview(row.target, windowDuration);
         const targetHelpText = (
           <>
-            <span>99.9% = 0.999 decimal</span>
+            <span>
+              {i18n.translate('observability.apm.slo.wizard.objectives.targetHelpHint', {
+                defaultMessage: '99.9% = 0.999 decimal',
+              })}
+            </span>
             {preview && (
               <>
                 <br />
@@ -123,7 +134,14 @@ export const ObjectivesSection: React.FC<ObjectivesSectionProps> = ({
                   style={{ color: '#69707D' }}
                   data-test-subj={`slosWizardObjectiveTargetDowntime-${i}`}
                 >
-                  {row.target}% over {windowDuration} &rarr; {preview.downtime} of error budget
+                  {i18n.translate('observability.apm.slo.wizard.objectives.targetDowntimePreview', {
+                    defaultMessage: '{target}% over {windowDuration} → {downtime} of error budget',
+                    values: {
+                      target: row.target,
+                      windowDuration,
+                      downtime: preview.downtime,
+                    },
+                  })}
                 </span>
               </>
             )}
@@ -143,7 +161,13 @@ export const ObjectivesSection: React.FC<ObjectivesSectionProps> = ({
               data-test-subj={`slosWizardObjectiveRow-${i}`}
             >
               <EuiFlexItem>
-                <EuiFormRow label="Objective name" isInvalid={!!nameError} error={nameError}>
+                <EuiFormRow
+                  label={i18n.translate('observability.apm.slo.wizard.objectives.nameLabel', {
+                    defaultMessage: 'Objective name',
+                  })}
+                  isInvalid={!!nameError}
+                  error={nameError}
+                >
                   <EuiFieldText
                     value={row.name}
                     onChange={(e) =>
@@ -161,7 +185,9 @@ export const ObjectivesSection: React.FC<ObjectivesSectionProps> = ({
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFormRow
-                  label="Target (%)"
+                  label={i18n.translate('observability.apm.slo.wizard.objectives.targetLabel', {
+                    defaultMessage: 'Target (%)',
+                  })}
                   isInvalid={!!targetError}
                   error={targetError}
                   helpText={targetHelpText}
@@ -187,7 +213,10 @@ export const ObjectivesSection: React.FC<ObjectivesSectionProps> = ({
               {showLatency && (
                 <EuiFlexItem>
                   <EuiFormRow
-                    label={`Latency (${latencyThresholdUnit})`}
+                    label={i18n.translate('observability.apm.slo.wizard.objectives.latencyLabel', {
+                      defaultMessage: 'Latency ({unit})',
+                      values: { unit: latencyThresholdUnit },
+                    })}
                     isInvalid={!!latencyError}
                     error={latencyError}
                   >
@@ -215,7 +244,13 @@ export const ObjectivesSection: React.FC<ObjectivesSectionProps> = ({
                   onClick={() => dispatch({ kind: 'removeObjective', index: i })}
                   disabled={objectives.length <= 1}
                   iconType="trash"
-                  aria-label={`Remove objective ${i}`}
+                  aria-label={i18n.translate(
+                    'observability.apm.slo.wizard.objectives.removeAriaLabel',
+                    {
+                      defaultMessage: 'Remove objective {index}',
+                      values: { index: i },
+                    }
+                  )}
                   size="s"
                   data-test-subj={`slosWizardObjectiveRemove-${i}`}
                 />
@@ -230,10 +265,10 @@ export const ObjectivesSection: React.FC<ObjectivesSectionProps> = ({
                   data-test-subj={`slosWizardObjectiveTargetHighCallout-${i}`}
                 >
                   <EuiText size="s">
-                    A target above 99.99% leaves almost no error budget — about 4 minutes per 28
-                    days. Consider whether your users can actually distinguish 99.99% from 99.9%,
-                    and whether your monitoring stack can measure that level of reliability without
-                    false positives.
+                    {i18n.translate('observability.apm.slo.wizard.objectives.highTargetWarning', {
+                      defaultMessage:
+                        'A target above 99.99% leaves almost no error budget — about 4 minutes per 28 days. Consider whether your users can actually distinguish 99.99% from 99.9%, and whether your monitoring stack can measure that level of reliability without false positives.',
+                    })}
                   </EuiText>
                 </EuiCallOut>
                 <EuiSpacer size="s" />
@@ -248,7 +283,9 @@ export const ObjectivesSection: React.FC<ObjectivesSectionProps> = ({
         onClick={() => dispatch({ kind: 'addObjective' })}
         data-test-subj="slosWizardObjectiveAdd"
       >
-        Add objective
+        {i18n.translate('observability.apm.slo.wizard.objectives.addButton', {
+          defaultMessage: 'Add objective',
+        })}
       </EuiButtonEmpty>
     </EuiPanel>
   );

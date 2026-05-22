@@ -23,6 +23,7 @@ import React, { useMemo } from 'react';
 import { EuiCallOut, EuiIcon, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import * as echarts from 'echarts';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
+import { i18n } from '@osd/i18n';
 import { EchartsRender } from '../../../alerting/echarts_render';
 import { usePromQLChartData } from '../../shared/hooks/use_promql_chart_data';
 import { TimeRange } from '../../common/types/service_types';
@@ -89,7 +90,9 @@ export function buildBudgetRemainingOption(
       yAxis: 0,
       lineStyle: { color: euiThemeVars.euiColorDanger, type: 'solid', width: 1 },
       label: {
-        formatter: 'exhausted',
+        formatter: i18n.translate('observability.apm.slo.budgetRemainingChart.exhaustedMarkLabel', {
+          defaultMessage: 'exhausted',
+        }),
         position: 'insideStartTop',
         color: euiThemeVars.euiColorDanger,
         fontSize: 10,
@@ -244,12 +247,26 @@ export const SloBudgetRemainingChart: React.FC<SloBudgetRemainingChartProps> = (
     return (
       <EuiPanel data-test-subj="slosBudgetRemainingChart">
         <EuiText size="m">
-          <h4>Error budget remaining</h4>
+          <h4>
+            {i18n.translate('observability.apm.slo.budgetRemainingChart.heading', {
+              defaultMessage: 'Error budget remaining',
+            })}
+          </h4>
         </EuiText>
         <EuiSpacer size="s" />
-        <EuiCallOut size="s" color="warning" iconType="iInCircle" title="Budget chart unavailable">
+        <EuiCallOut
+          size="s"
+          color="warning"
+          iconType="iInCircle"
+          title={i18n.translate('observability.apm.slo.budgetRemainingChart.unavailable.title', {
+            defaultMessage: 'Budget chart unavailable',
+          })}
+        >
           <EuiText size="s">
-            The SLI is missing the metric or custom expression required to compute the budget.
+            {i18n.translate('observability.apm.slo.budgetRemainingChart.unavailable.body', {
+              defaultMessage:
+                'The SLI is missing the metric or custom expression required to compute the budget.',
+            })}
           </EuiText>
         </EuiCallOut>
       </EuiPanel>
@@ -259,11 +276,18 @@ export const SloBudgetRemainingChart: React.FC<SloBudgetRemainingChartProps> = (
   return (
     <EuiPanel data-test-subj="slosBudgetRemainingChart">
       <EuiText size="m">
-        <h4>Error budget remaining</h4>
+        <h4>
+          {i18n.translate('observability.apm.slo.budgetRemainingChart.heading', {
+            defaultMessage: 'Error budget remaining',
+          })}
+        </h4>
       </EuiText>
       <EuiText size="xs" color="subdued">
-        Fraction of the {window} error budget still available. Starts at 100% and trends toward 0 as
-        bad events accumulate. Crossing the warning threshold means an escalation is close.
+        {i18n.translate('observability.apm.slo.budgetRemainingChart.description', {
+          defaultMessage:
+            'Fraction of the {window} error budget still available. Starts at 100% and trends toward 0 as bad events accumulate. Crossing the warning threshold means an escalation is close.',
+          values: { window },
+        })}
       </EuiText>
       <EuiSpacer size="s" />
       {error && (
@@ -271,7 +295,9 @@ export const SloBudgetRemainingChart: React.FC<SloBudgetRemainingChartProps> = (
           size="s"
           color="danger"
           iconType="alert"
-          title="Failed to load budget series"
+          title={i18n.translate('observability.apm.slo.budgetRemainingChart.error.title', {
+            defaultMessage: 'Failed to load budget series',
+          })}
           data-test-subj="slosBudgetRemainingError"
         >
           <EuiText size="s">{error.message}</EuiText>
@@ -282,15 +308,20 @@ export const SloBudgetRemainingChart: React.FC<SloBudgetRemainingChartProps> = (
           size="s"
           color="warning"
           iconType="alert"
-          title="SLI source metric not found in this datasource"
+          title={i18n.translate('observability.apm.slo.budgetRemainingChart.missingMetric.title', {
+            defaultMessage: 'SLI source metric not found in this datasource',
+          })}
           data-test-subj="slosBudgetRemainingMissingMetric"
         >
           <EuiText size="s">
-            No samples exist for the metric this SLI queries on
-            <strong> {prometheusConnectionId}</strong>. This usually means the SLI was configured
-            against a metric name or label set that the datasource has never scraped — waiting
-            won&apos;t populate the chart. Check the SLI&apos;s metric / selectors, or point the SLO
-            at a datasource that has them.
+            {i18n.translate('observability.apm.slo.budgetRemainingChart.missingMetric.bodyPrefix', {
+              defaultMessage: 'No samples exist for the metric this SLI queries on',
+            })}
+            <strong> {prometheusConnectionId}</strong>
+            {i18n.translate('observability.apm.slo.budgetRemainingChart.missingMetric.bodySuffix', {
+              defaultMessage:
+                ". This usually means the SLI was configured against a metric name or label set that the datasource has never scraped — waiting won't populate the chart. Check the SLI's metric / selectors, or point the SLO at a datasource that has them.",
+            })}
           </EuiText>
         </EuiCallOut>
       )}
@@ -299,12 +330,16 @@ export const SloBudgetRemainingChart: React.FC<SloBudgetRemainingChartProps> = (
           size="s"
           color="primary"
           iconType="iInCircle"
-          title="No samples in the selected time range"
+          title={i18n.translate('observability.apm.slo.budgetRemainingChart.emptyRange.title', {
+            defaultMessage: 'No samples in the selected time range',
+          })}
           data-test-subj="slosBudgetRemainingEmpty"
         >
           <EuiText size="s">
-            The metric exists in this datasource but the current range has no data. Widen the time
-            range, or wait for the next Prometheus scrape + rule evaluation.
+            {i18n.translate('observability.apm.slo.budgetRemainingChart.emptyRange.body', {
+              defaultMessage:
+                'The metric exists in this datasource but the current range has no data. Widen the time range, or wait for the next Prometheus scrape + rule evaluation.',
+            })}
           </EuiText>
         </EuiCallOut>
       )}
@@ -313,8 +348,11 @@ export const SloBudgetRemainingChart: React.FC<SloBudgetRemainingChartProps> = (
         <>
           <EuiSpacer size="xs" />
           <EuiText size="xs" color="danger" data-test-subj="slosBudgetRemainingExhausted">
-            <EuiIcon type="alert" size="s" /> Budget exhausted — any further bad events push the SLO
-            further into breach.
+            <EuiIcon type="alert" size="s" />{' '}
+            {i18n.translate('observability.apm.slo.budgetRemainingChart.exhaustedNote', {
+              defaultMessage:
+                'Budget exhausted — any further bad events push the SLO further into breach.',
+            })}
           </EuiText>
         </>
       )}
