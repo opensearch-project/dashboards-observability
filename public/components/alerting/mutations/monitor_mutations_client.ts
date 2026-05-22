@@ -66,13 +66,15 @@ export class MonitorMutationsClient {
     datasourceId?: string,
     monitorId?: string
   ): Promise<AcknowledgeAlertResponse> {
+    if (!datasourceId || !monitorId) {
+      throw new Error('datasourceId and monitorId are required to acknowledge an alert');
+    }
     return (await this.requireHttp().post(
-      `/api/alerting/alerts/${encodeURIComponent(alertId)}/acknowledge`,
+      `/api/alerting/opensearch/${encodeURIComponent(datasourceId)}/monitors/${encodeURIComponent(
+        monitorId
+      )}/acknowledge`,
       {
-        body: JSON.stringify({
-          ...(datasourceId ? { datasourceId } : {}),
-          ...(monitorId ? { monitorId } : {}),
-        }),
+        body: JSON.stringify({ alerts: [alertId] }),
       }
     )) as AcknowledgeAlertResponse;
   }

@@ -390,6 +390,23 @@ describe('transformPplFormToPayload', () => {
     expect(payload.triggers[1].ppl_trigger.id).toBe('t-2');
   });
 
+  it('drops client-generated trigger ids (ppl-trigger-* / >=20 chars) so the backend assigns a UUID', () => {
+    const form = baseForm();
+    form.pplTriggers = [
+      // Looks exactly like createDefaultPplTrigger() output.
+      { ...numResultsTrigger, id: `ppl-trigger-${Date.now()}` },
+    ];
+    const payload = (transformPplFormToPayload(form) as unknown) as PplPayload;
+    expect(payload.triggers[0].ppl_trigger.id).toBeUndefined();
+  });
+
+  it('keeps backend-issued trigger ids (short, no client prefix) for round-trip on edit', () => {
+    const form = baseForm();
+    form.pplTriggers = [{ ...numResultsTrigger, id: 'aBc123XyZ' }];
+    const payload = (transformPplFormToPayload(form) as unknown) as PplPayload;
+    expect(payload.triggers[0].ppl_trigger.id).toBe('aBc123XyZ');
+  });
+
   it('encodes actions with subject template only when subject is non-empty', () => {
     const form = baseForm();
     form.pplTriggers = [

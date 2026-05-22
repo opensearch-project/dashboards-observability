@@ -54,6 +54,7 @@ import {
   ALERT_MANAGER_SELECTED_DS_STORAGE_KEY,
 } from '../../../common/constants/alerting_settings';
 import { transformPplFormToPayload } from '../../../common/services/alerting/form_transforms';
+import { PPL_MONITOR_NAME_MAX } from '../../../common/services/alerting/validators';
 import { parseDateMathMs } from '../../../common/services/alerting/time_range';
 import './alerting.scss';
 import type { OpenSearchFormState } from './create_monitor/create_monitor_types';
@@ -678,25 +679,54 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   };
 
   const handleCloneRule = async (monitor: UnifiedRuleSummary) => {
-    const clone: UnifiedRuleSummary = {
-      ...monitor,
-      id: `clone-${Date.now()}`,
-      name: `${monitor.name} (Copy)`,
-      createdAt: new Date().toISOString(),
-      lastModified: new Date().toISOString(),
-      createdBy: 'current-user',
-    };
     try {
-      await mutations.createMonitor(
-        (clone as unknown) as Record<string, unknown>,
-        clone.datasourceId
-      );
+      // Fetch the full rule detail to get the raw backend payload — the
+      // summary shape doesn't carry the wire format needed for re-creation.
+      const detail = await osService.getRuleDetail(monitor.datasourceId, monitor.id);
+      const raw = (detail.raw ?? {}) as Record<string, unknown>;
+      // Strip server-assigned fields that aren't valid on create.
+      const {
+        id: _id,
+        last_update_time: _t,
+        enabled_time: _et,
+        schema_version: _sv,
+        owner: _ow,
+        data_sources: _ds,
+        ...rest
+      } = raw;
+      // Strip trigger IDs so the backend assigns fresh ones. Triggers live
+      // inside wrapper keys like `ppl_trigger`, `query_level_trigger`, etc.
+      const triggers = (rest.triggers as Array<Record<string, unknown>> | undefined) ?? [];
+      const cleanTriggers = triggers.map((t) => {
+        const cleaned: Record<string, unknown> = {};
+        for (const [key, val] of Object.entries(t)) {
+          if (val && typeof val === 'object' && !Array.isArray(val)) {
+            const { id: _tid, ...trigBody } = val as Record<string, unknown>;
+            cleaned[key] = trigBody;
+          } else {
+            cleaned[key] = val;
+          }
+        }
+        return cleaned;
+      });
+      const suffix = ' (Copy)';
+      const baseName =
+        monitor.name.length + suffix.length > PPL_MONITOR_NAME_MAX
+          ? monitor.name.slice(0, PPL_MONITOR_NAME_MAX - suffix.length)
+          : monitor.name;
+      const payload: Record<string, unknown> = {
+        ...rest,
+        triggers: cleanTriggers,
+        name: `${baseName}${suffix}`,
+        type: 'monitor',
+      };
+      await mutations.createMonitor(payload, monitor.datasourceId);
       addToast(
         i18n.translate('observability.alerting.alarmsPage.toast.monitorCloned', {
           defaultMessage: 'Monitor cloned',
         })
       );
-      setRules((prev) => [clone, ...prev]);
+      fetchRules(selectedDsIds, rulesPage, rulesPageSize);
     } catch (e: unknown) {
       addToast(
         i18n.translate('observability.alerting.alarmsPage.toast.cloneMonitorFailed', {

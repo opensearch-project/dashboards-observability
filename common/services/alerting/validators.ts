@@ -172,6 +172,11 @@ export function validateMonitorForm(form: MonitorFormState): ValidationResult {
 // `plugins.alerting.notification_subject_source_max_length`,
 // `plugins.alerting.notification_message_source_max_length`).
 // The server is authoritative; these caps just prevent obvious round-trips.
+// PPL monitors enforce a name-length cap in common-utils (Monitor class,
+// only for monitor_type = ppl_monitor). The custom alerting backend is
+// raising this from 30 → 100 in an upcoming PR; set to 100 pre-emptively
+// so the UI doesn't block valid names once the backend ships.
+export const PPL_MONITOR_NAME_MAX = 100;
 export const PPL_QUERY_MAX_LENGTH = 2000;
 export const PPL_NUM_RESULTS_MIN = 1;
 export const PPL_NUM_RESULTS_MAX = 10000;
@@ -208,8 +213,8 @@ export function validatePplForm(form: PplFormShape): ValidationResult {
 
   if (!form.name || !form.name.trim()) {
     errors.name = 'Name is required';
-  } else if (form.name.length > 256) {
-    errors.name = 'Name must be 256 characters or fewer';
+  } else if (form.name.length > PPL_MONITOR_NAME_MAX) {
+    errors.name = `Name must be ${PPL_MONITOR_NAME_MAX} characters or fewer`;
   } else if (CONTROL_CHAR_RE.test(form.name)) {
     errors.name = 'Name must not contain control characters';
   }

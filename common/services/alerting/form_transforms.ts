@@ -202,7 +202,14 @@ function buildPplTriggerPayload(trigger: PplTriggerForm): Record<string, unknown
     actions: trigger.actions.map(buildPplActionPayload),
     type: trigger.type,
   };
-  if (trigger.id) body.id = trigger.id;
+  // The alerting plugin caps `ppl_trigger.id` at 20 characters and rejects
+  // anything longer with "Validation failed". Our client-generated ids
+  // (`ppl-trigger-<Date.now()>`) blow that limit, so only forward an id
+  // that came from the backend on edit — recognized by the *absence* of
+  // our local prefix and a length the backend will accept.
+  if (trigger.id && !trigger.id.startsWith('ppl-trigger-') && trigger.id.length < 20) {
+    body.id = trigger.id;
+  }
   if (trigger.type === 'number_of_results') {
     const op = VALID_NUM_RESULTS_OPERATORS.has(trigger.numResultsCondition)
       ? trigger.numResultsCondition

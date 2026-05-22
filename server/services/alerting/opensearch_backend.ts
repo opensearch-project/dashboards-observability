@@ -98,14 +98,13 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
     client: AlertingOSClient,
     monitor: Omit<OSMonitor, 'id'>
   ): Promise<OSMonitor> {
+    // Pass the body as-is (already has `type: "monitor"` from the client).
+    // Don't re-spread — preserves the exact shape the alerting plugin expects.
     const resp = await this.req<OSCreateMonitorResponse>(
       client,
       'POST',
       '/_plugins/_alerting/monitors',
-      {
-        ...monitor,
-        type: 'monitor',
-      }
+      monitor
     );
     return this.mapMonitor(resp.body._id, resp.body.monitor);
   }

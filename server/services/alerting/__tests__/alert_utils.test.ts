@@ -14,7 +14,7 @@
  *     real alerts rather than below them).
  *   - `truncatedStart` flag ⇒ `annotations.truncatedStart = 'true'`.
  */
-import { promEpisodeToUnified } from '../alert_utils';
+import { osAlertToUnified, promEpisodeToUnified } from '../alert_utils';
 
 describe('promEpisodeToUnified', () => {
   const START = Date.UTC(2024, 0, 15, 12, 0, 0);
@@ -169,5 +169,35 @@ describe('promEpisodeToUnified', () => {
       'ds-prom'
     );
     expect(u1.id).toBe(u2.id);
+  });
+});
+
+describe('osAlertToUnified', () => {
+  const baseAlert = {
+    id: 'alert-1',
+    monitor_id: 'mon-abc',
+    monitor_name: 'My Monitor',
+    trigger_name: 'trig-1',
+    state: 'ACTIVE',
+    severity: '2',
+    error_message: null,
+    start_time: Date.UTC(2024, 0, 15, 12, 0, 0),
+    last_notification_time: Date.UTC(2024, 0, 15, 12, 5, 0),
+    end_time: null,
+    acknowledged_time: null,
+    action_execution_results: [],
+  };
+
+  it('includes monitor_id in labels for acknowledge support', () => {
+    const u = osAlertToUnified(baseAlert as never, 'ds-os');
+    expect(u.labels.monitor_id).toBe('mon-abc');
+    expect(u.labels.monitor_name).toBe('My Monitor');
+    expect(u.labels.trigger_name).toBe('trig-1');
+  });
+
+  it('maps datasourceId from the passed dsId', () => {
+    const u = osAlertToUnified(baseAlert as never, 'ds-os');
+    expect(u.datasourceId).toBe('ds-os');
+    expect(u.datasourceType).toBe('opensearch');
   });
 });

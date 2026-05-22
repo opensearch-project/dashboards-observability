@@ -131,14 +131,19 @@ export const DEFAULT_PROM_FORM: PrometheusFormState = {
   enabled: true,
 };
 
+// Default to `custom` trigger type. PPL alerting queries almost always use
+// `stats` (aggregation), which returns exactly 1 row per group — so
+// `number_of_results` (which counts rows, not column values) would rarely
+// fire as expected. `custom` with `where <column> > threshold` evaluates
+// the actual aggregated value, which is what users intend.
 export const createDefaultPplTrigger = (): PplTriggerForm => ({
   id: `ppl-trigger-${Date.now()}`,
   name: 'trigger-1',
   severity: '3',
-  type: 'number_of_results',
+  type: 'custom',
   numResultsCondition: '>',
   numResultsValue: 1,
-  customCondition: 'where ',
+  customCondition: 'where cnt > 0',
   actions: [],
 });
 

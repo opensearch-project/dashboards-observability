@@ -6,6 +6,7 @@
 import {
   parseDuration,
   formatDuration,
+  PPL_MONITOR_NAME_MAX,
   PPL_NOTIFICATION_MESSAGE_MAX,
   PPL_NOTIFICATION_SUBJECT_MAX,
   PPL_NUM_RESULTS_MAX,
@@ -126,6 +127,20 @@ describe('validatePplForm', () => {
     const f = validPplForm();
     f.name = '';
     expect(validatePplForm(f).errors.name).toMatch(/required/i);
+  });
+
+  it(`rejects name exceeding PPL_MONITOR_NAME_MAX (${PPL_MONITOR_NAME_MAX} chars)`, () => {
+    const f = validPplForm();
+    f.name = 'x'.repeat(PPL_MONITOR_NAME_MAX + 1);
+    const result = validatePplForm(f);
+    expect(result.valid).toBe(false);
+    expect(result.errors.name).toMatch(new RegExp(String(PPL_MONITOR_NAME_MAX)));
+  });
+
+  it('accepts name at exactly PPL_MONITOR_NAME_MAX', () => {
+    const f = validPplForm();
+    f.name = 'x'.repeat(PPL_MONITOR_NAME_MAX);
+    expect(validatePplForm(f).valid).toBe(true);
   });
 
   it('rejects empty query', () => {
