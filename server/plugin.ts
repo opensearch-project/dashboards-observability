@@ -39,6 +39,7 @@ import { SavedObjectSloStore } from './services/slo/slo_saved_object_store';
 import { DirectQueryRulerClient } from './services/slo/ruler_client';
 import { SloRuleRefStore } from './services/slo/slo_rule_ref_store';
 import { SloStoreFactory } from './services/slo/slo_store_factory';
+import { SloReconciler } from './services/slo/slo_reconciler';
 import { DirectQueryStatusAggregator } from './services/slo/status_aggregator';
 import { createRuleHealthChecker } from './services/slo/rule_health_checker';
 import { InMemoryDatasourceService } from './services/alerting/datasource_service';
@@ -57,6 +58,15 @@ export class ObservabilityPlugin
   implements Plugin<ObservabilityPluginSetup, ObservabilityPluginStart> {
   private readonly logger: Logger;
   private sloService?: SloService;
+  /**
+   * Held over from `setup()` so `start()` can stand the reconciler up
+   * with the same RulerClient the routes use. Reconciler config also
+   * captured at `setup()` time because the config is read with
+   * `first()` and replays don't refresh on reload.
+   */
+  private sloRulerClient?: DirectQueryRulerClient;
+  private sloReconcilerOpts?: { enabled: boolean; intervalMs: number; graceMs: number };
+  private sloReconciler?: SloReconciler;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -312,7 +322,11 @@ export class ObservabilityPlugin
     const observabilityConfig = await this.initializerContext.config
       .create<{
         alertManager: { enabled: boolean };
-        slo?: { enabled?: boolean; ruleDedup?: { enabled: boolean } };
+        slo?: {
+          enabled?: boolean;
+          ruleDedup?: { enabled: boolean };
+          reconciler?: { enabled?: boolean; intervalMs?: number; graceMs?: number };
+        };
       }>()
       .pipe(first())
       .toPromise();
@@ -330,6 +344,11 @@ export class ObservabilityPlugin
     // which is not supported.
     const sloEnabled = observabilityConfig.slo?.enabled ?? false;
     const ruleDedupEnabled = observabilityConfig.slo?.ruleDedup?.enabled ?? true;
+    this.sloReconcilerOpts = {
+      enabled: observabilityConfig.slo?.reconciler?.enabled ?? true,
+      intervalMs: observabilityConfig.slo?.reconciler?.intervalMs ?? 300_000,
+      graceMs: observabilityConfig.slo?.reconciler?.graceMs ?? 24 * 3600 * 1000,
+    };
 
     if (sloEnabled) {
       core.savedObjects.registerType(sloDefinitionType);
@@ -389,6 +408,11 @@ export class ObservabilityPlugin
       this.sloService = sloService;
 
       const rulerClient = new DirectQueryRulerClient(this.logger);
+      // Stash for `start()` so the reconciler can reuse the same ruler
+      // transport the routes use. Avoids constructing a second client +
+      // ensures any future configuration on the ruler client is applied
+      // consistently across CRUD and GC paths.
+      this.sloRulerClient = rulerClient;
       // Followups' SLO routes need an InMemoryDatasourceService + a
       // DatasourceDiscoveryService to resolve free-text Datasource IDs at
       // create/update/delete time. Without these, buildDeployContext returns
@@ -513,10 +537,28 @@ export class ObservabilityPlugin
       const storeFactory = new SloStoreFactory(core.savedObjects);
       this.sloService.setStoreFactory(storeFactory);
       this.logger.info('Observability: SLO storage upgraded to SavedObjects');
+
+      // Reconciler: grace-GC for shared recording rules. Disabled via
+      // `observability.slo.reconciler.enabled: false` in environments that
+      // don't want the sweep (e.g. CI, where ruler reachability is mocked
+      // and the timer would just churn warnings).
+      const reconcilerOpts = this.sloReconcilerOpts;
+      if (reconcilerOpts?.enabled && this.sloRulerClient) {
+        this.sloReconciler = new SloReconciler(
+          this.logger,
+          core.savedObjects,
+          core.opensearch,
+          this.sloRulerClient,
+          { intervalMs: reconcilerOpts.intervalMs, graceMs: reconcilerOpts.graceMs }
+        );
+        this.sloReconciler.start();
+      }
     }
 
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.sloReconciler?.stop();
+  }
 }

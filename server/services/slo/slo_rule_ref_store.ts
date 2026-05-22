@@ -76,6 +76,13 @@ export interface IncrementRefInput {
   fingerprintVersion: string;
   groupName: string;
   namespace: string;
+  /**
+   * Datasource `directQueryName`. Persisted on the SO so the reconciler
+   * can build a ruler-delete payload without resolving data-source SOs
+   * at sweep time. Optional in the type to keep the test surface compact;
+   * production wiring always supplies it.
+   */
+  directQueryName?: string;
   now?: () => Date;
 }
 
@@ -291,6 +298,7 @@ export class SloRuleRefStore {
           refcount: 1,
           groupName: input.groupName,
           namespace: input.namespace,
+          directQueryName: input.directQueryName,
           createdAt: nowIso,
           updatedAt: nowIso,
         };
@@ -325,6 +333,9 @@ export class SloRuleRefStore {
         groupName: input.groupName,
         namespace: input.namespace,
         fingerprintVersion: input.fingerprintVersion,
+        // Refresh `directQueryName` too — covers a datasource rename
+        // between the original increment and this resurrection.
+        directQueryName: input.directQueryName ?? prior.directQueryName,
       };
       try {
         const updated = await this.client.update<SloRuleRefAttributes>(

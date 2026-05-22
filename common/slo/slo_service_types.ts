@@ -127,6 +127,13 @@ export interface SloRuleRefStoreLite {
     fingerprintVersion: string;
     groupName: string;
     namespace: string;
+    /**
+     * Datasource `directQueryName`. Persisted on the slo-rule-ref SO so the
+     * reconciler can issue ruler deletes without resolving data-source SOs
+     * at sweep time. Optional in the lite shape so existing test fakes
+     * continue to compile; production callers always supply it.
+     */
+    directQueryName?: string;
   }): Promise<{ wasZero: boolean }>;
   decrementRef(input: {
     workspaceId: string;

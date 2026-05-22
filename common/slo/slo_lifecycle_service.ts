@@ -328,6 +328,7 @@ export class SloLifecycleService {
             fingerprintVersion: FINGERPRINT_VERSION,
             groupName,
             namespace,
+            directQueryName: deploy.datasource.directQueryName,
           });
           wasZero = r.wasZero;
           incrementedFps.push(fp);
@@ -601,6 +602,7 @@ export class SloLifecycleService {
             fingerprintVersion: FINGERPRINT_VERSION,
             groupName,
             namespace,
+            directQueryName: deploy.datasource.directQueryName,
           });
           wasZero = r.wasZero;
           incrementedFps.push(fp);

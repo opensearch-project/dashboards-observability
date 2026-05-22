@@ -44,6 +44,15 @@ export interface SloRuleRefAttributes {
   refcount: number;
   groupName: string;
   namespace: string;
+  /**
+   * `directQueryName` of the datasource the increment originated against.
+   * Persisted at increment time so the reconciler can build a `Datasource`
+   * shape sufficient for `RulerClient.deleteRuleGroup` without re-resolving
+   * data-source SOs at sweep time. Optional because legacy SOs that
+   * pre-date this field still exist in dev environments — the reconciler
+   * skips tuples without it and logs.
+   */
+  directQueryName?: string;
   zeroSinceAt?: string;
   createdAt: string;
   updatedAt: string;
@@ -81,6 +90,7 @@ export const sloRuleRefType: SavedObjectsType = {
       refcount: { type: 'integer' },
       groupName: { type: 'keyword' },
       namespace: { type: 'keyword' },
+      directQueryName: { type: 'keyword' },
       zeroSinceAt: { type: 'date' },
       createdAt: { type: 'date' },
       updatedAt: { type: 'date' },
