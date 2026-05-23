@@ -93,7 +93,10 @@ export function registerSloAggregateRoute(
   router: IRouter,
   sloService: SloService,
   logger: Logger,
-  buildStatusContext: (ctx: AggregateHandlerContext) => SloStatusAggregationContext | undefined,
+  buildStatusContext: (
+    ctx: AggregateHandlerContext,
+    req?: import('../../../../../src/core/server').OpenSearchDashboardsRequest
+  ) => SloStatusAggregationContext | undefined,
   datasourceService?: InMemoryDatasourceService,
   discoveryService?: DatasourceDiscoveryService
 ): void {
@@ -155,7 +158,7 @@ export function registerSloAggregateRoute(
           service: services,
           datasourceId: [resolvedDsName],
         };
-        const statusCtx = buildStatusContext(ctx as AggregateHandlerContext);
+        const statusCtx = buildStatusContext(ctx as AggregateHandlerContext, req);
         // Use `list` (not `getPaginated`) so the server's 100-row pageSize
         // cap doesn't silently truncate the rollup. Customer SLO counts per
         // service stay well within a single sweep (see `classifier.ts` —

@@ -121,6 +121,7 @@ export const SloVisualizations: React.FC<SloVisualizationsProps> = ({
         size="s"
         color="warning"
         iconType="iInCircle"
+        data-test-subj="slosVisualizationsNoDatasource"
         title={i18n.translate('observability.apm.slo.visualizations.noDatasource.title', {
           defaultMessage: 'Prometheus datasource not configured in APM',
         })}

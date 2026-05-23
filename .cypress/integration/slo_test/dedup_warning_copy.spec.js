@@ -24,8 +24,9 @@
  * the delete until cleanup.
  */
 
-const SLO_BASE = '/api/observability/v1/slos';
 const APP_ID = 'observability-apm-slo';
+const WORKSPACE_PREFIX = Cypress.env('workspaceId') ? `/w/${Cypress.env('workspaceId')}` : '';
+const SLO_BASE = `${WORKSPACE_PREFIX}/api/observability/v1/slos`;
 
 const randomId = (prefix) =>
   `${prefix}-${Math.random().toString(36).slice(2, 8)}-${Date.now().toString(36)}`;
@@ -48,7 +49,7 @@ function buildMinimalSloSpec(datasourceId, name) {
         metric: 'http_requests_total',
         goodEventsFilter: 'status_code!~"5.."',
       },
-      dimensions: [],
+      dimensions: [{ name: 'service', value: 'cypress-svc' }],
     },
     objectives: [{ name: 'primary', target: 0.99 }],
     budgetWarningThresholds: [],
@@ -114,7 +115,7 @@ describe('SLO dedup warning copy', () => {
       return;
     }
 
-    cy.visit(`/app/${APP_ID}#/slos/${encodeURIComponent(sloId)}`);
+    cy.visit(`${WORKSPACE_PREFIX}/app/${APP_ID}#/slos/${encodeURIComponent(sloId)}`);
     cy.get('[data-test-subj="sloDetailPage"]', { timeout: 30000 }).should('be.visible');
 
     cy.get('[data-test-subj="slosDetailDelete"]').click();
@@ -142,8 +143,11 @@ describe('SLO dedup warning copy', () => {
       return;
     }
 
-    cy.visit(`/app/${APP_ID}#/slos/${encodeURIComponent(sloId)}`);
+    cy.visit(`${WORKSPACE_PREFIX}/app/${APP_ID}#/slos/${encodeURIComponent(sloId)}`);
     cy.get('[data-test-subj="sloDetailPage"]', { timeout: 30000 }).should('be.visible');
+    // Recording-rule accordion is nested inside Advanced details (collapsed
+    // by default).
+    cy.get('[data-test-subj="slosDetailAdvancedAccordion"]').click();
     cy.get('[data-test-subj="slosDetailRecordingRulesAccordion"]').click();
     cy.get('[data-test-subj="slosDetailRecordingRulesAccordion"]')
       .invoke('text')

@@ -1265,7 +1265,7 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
                           <EuiFieldSearch
                             placeholder={i18n.translate(
                               'observability.apm.slo.listing.searchPlaceholder',
-                              { defaultMessage: 'Filter by name, service, or description' }
+                              { defaultMessage: 'Filter by name or description' }
                             )}
                             value={filters.search ?? ''}
                             onChange={(e) => onSearchChange(e.target.value)}

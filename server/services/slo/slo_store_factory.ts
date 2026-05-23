@@ -57,9 +57,15 @@ export class SloStoreFactory {
    * Per-request store pair scoped to the caller. Reads/writes route
    * through `WorkspaceIdConsumerWrapper` so a workspace can never see
    * another workspace's slo-rule-ref or slo-definition SOs.
+   *
+   * `slo-rule-ref` is a hidden SO type — by default scoped clients filter
+   * hidden types out, which causes writes to fail with "Unsupported saved
+   * object type: 'slo-rule-ref'". Opt the scoped client into seeing it.
    */
   forRequest(request: OpenSearchDashboardsRequest): SloStores {
-    const client = this.savedObjects.getScopedClient(request);
+    const client = this.savedObjects.getScopedClient(request, {
+      includedHiddenTypes: [SLO_RULE_REF_SO_TYPE],
+    });
     return this.fromClient(client);
   }
 

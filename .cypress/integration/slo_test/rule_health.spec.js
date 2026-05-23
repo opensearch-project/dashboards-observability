@@ -6,43 +6,41 @@
 /// <reference types="cypress" />
 
 /*
- * SLO rule-health recovery flow.
+ * SLO rule-health recovery flow — real Cortex backend.
  *
  * Run locally with:
  *   yarn cypress:run-without-security --spec \
  *     .cypress/integration/slo_test/rule_health.spec.js
  *
- * This spec exercises the rule-health detection + recovery UI:
+ * Exercises the rule-health detection + recovery UI end-to-end against a real
+ * ruler:
  *
  *   1. A healthy SLO shows a "healthy" rule badge on the listing.
  *   2. When the ruler loses the rule group out-of-band, the listing badge
  *      flips to "missing" and the detail page surfaces a red callout with
  *      Restore / Delete buttons.
- *   3. Restore re-asserts the rule group and the callout disappears once
- *      the follow-up rule_health probe reports `state: 'ok'`.
- *   4. Delete-from-callout on a broken SLO confirms and then routes the
- *      user back to the listing.
+ *   3. Restore re-asserts the rule group and the callout disappears.
+ *   4. Delete-from-callout on a broken SLO confirms and routes back to the
+ *      listing.
  *
- * "Out-of-band deletion" is any ruler-level removal of a rule group that
- * leaves the SLO saved object intact. Our SDK doesn't expose a direct-query
- * ruler DELETE without also dropping the saved object, so this spec
- * emulates the desynchronised state via `cy.intercept` on the read paths
- * (list, get, rule_health). The UI contract under test — badge colour,
- * callout presence, button wiring, confirm-modal behaviour — is fully
- * covered by those stubs.
+ * The "out-of-band deletion" — a ruler-level removal that leaves the SLO saved
+ * object intact — is produced via `cy.task('cortex:deleteRuleGroup')`. The task
+ * issues a direct DELETE against the OS SQL plugin's DirectQuery resource path,
+ * bypassing the SLO routes that would otherwise keep the saved object in
+ * lockstep with the ruler. Plugin code paths under test are otherwise hit
+ * directly with no intercepts.
  *
- * The one live API call is creation in `before`; all UI-state-dependent
- * responses are stubbed so the spec is deterministic regardless of the
- * cluster's actual rule evaluation state. Cleanup DELETEs the real SLO
- * via the plugin API in `after`.
+ * RuleHealthChecker has a TTL so the listing badge doesn't flip immediately;
+ * the spec issues `?refresh=true` reads to bypass the cache.
  */
 
-const SLO_BASE = '/api/observability/v1/slos';
 const APP_ID = 'observability-apm-slo';
-
-// ---------------------------------------------------------------------------
-// Fixture builders — inlined to keep the spec self-contained.
-// ---------------------------------------------------------------------------
+// Local dev uses workspace.enabled=true and the spec must navigate via
+// /w/<id>/app/<id>; CI runs workspace-disabled and uses the bare /app prefix.
+// API requests need the same prefix so writes/reads target the same OSD
+// workspace as the UI visits.
+const WORKSPACE_PREFIX = Cypress.env('workspaceId') ? `/w/${Cypress.env('workspaceId')}` : '';
+const SLO_BASE = `${WORKSPACE_PREFIX}/api/observability/v1/slos`;
 
 const randomId = (prefix) =>
   `${prefix}-${Math.random().toString(36).slice(2, 8)}-${Date.now().toString(36)}`;
@@ -65,14 +63,9 @@ function buildMinimalSloSpec(datasourceId, name) {
         metric: 'http_requests_total',
         goodEventsFilter: 'status_code!~"5.."',
       },
-      dimensions: [],
+      dimensions: [{ name: 'service', value: 'cypress-svc' }],
     },
-    objectives: [
-      {
-        name: 'primary',
-        target: 0.99,
-      },
-    ],
+    objectives: [{ name: 'primary', target: 0.99 }],
     budgetWarningThresholds: [],
     window: { type: 'rolling', duration: '28d' },
     alerting: {
@@ -101,114 +94,14 @@ function buildMinimalSloSpec(datasourceId, name) {
   };
 }
 
-/** Minimal summary projection matching SloSummary in common/slo/slo_types.ts. */
-function buildSummary({ id, datasourceId, name, state }) {
-  return {
-    id,
-    datasourceId,
-    datasourceType: 'prometheus',
-    name,
-    description: '',
-    enabled: true,
-    mode: 'active',
-    service: 'cypress-svc',
-    owner: { teams: ['cypress-team'] },
-    sliNodeType: 'single',
-    sliBackend: 'prometheus',
-    sliLeafType: 'availability',
-    dimensions: [],
-    objectiveCount: 1,
-    worstTarget: 0.99,
-    window: { type: 'rolling', duration: '28d' },
-    labels: {},
-    status: {
-      sloId: id,
-      objectives: [],
-      state,
-      firingCount: 0,
-      ruleCount: state === 'rules_missing' ? 0 : 3,
-      computedAt: new Date().toISOString(),
-    },
-  };
-}
-
-/** Minimal doc + liveStatus projection for GET /slos/{id}. */
-function buildDoc({ id, datasourceId, name, ruleGroupName, rulerNamespace, state }) {
-  const spec = buildMinimalSloSpec(datasourceId, name);
-  return {
-    id,
-    spec,
-    status: {
-      version: 1,
-      createdAt: new Date().toISOString(),
-      createdBy: 'cypress',
-      updatedAt: new Date().toISOString(),
-      updatedBy: 'cypress',
-      provisioning: {
-        backend: 'prometheus',
-        ruleGroupName,
-        rulerNamespace,
-        generatedRuleNames: [`${ruleGroupName}:slo:sli_error:ratio_rate5m`],
-      },
-    },
-    liveStatus: {
-      sloId: id,
-      objectives: [],
-      state,
-      firingCount: 0,
-      ruleCount: state === 'rules_missing' ? 0 : 3,
-      computedAt: new Date().toISOString(),
-    },
-  };
-}
-
-function buildRuleHealth({ id, state, ruleGroupName }) {
-  const expected = [ruleGroupName];
-  if (state === 'ok') {
-    return {
-      sloId: id,
-      state: 'ok',
-      expectedGroups: expected,
-      presentGroups: expected,
-      missingGroups: [],
-      computedAt: new Date().toISOString(),
-    };
-  }
-  if (state === 'rules_missing') {
-    return {
-      sloId: id,
-      state: 'rules_missing',
-      expectedGroups: expected,
-      presentGroups: [],
-      missingGroups: expected,
-      computedAt: new Date().toISOString(),
-    };
-  }
-  return {
-    sloId: id,
-    state,
-    expectedGroups: expected,
-    presentGroups: [],
-    missingGroups: expected,
-    computedAt: new Date().toISOString(),
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Spec
-// ---------------------------------------------------------------------------
-
-describe('SLO rule health — recovery flow', () => {
+describe('SLO rule health — recovery flow (real Cortex)', () => {
   const datasourceId = Cypress.env('sloDatasourceId') || 'prom_integ_test';
   const sloName = randomId('cypress-slo');
   let sloId = null;
   let ruleGroupName = null;
   let rulerNamespace = null;
 
-  before(() => {
-    // Create a real SLO. If creation fails (e.g. no ruler-capable datasource
-    // in this environment), fall back to a synthetic id so the rest of the
-    // spec can still exercise the UI via intercepts.
+  before(function () {
     cy.request({
       method: 'POST',
       url: SLO_BASE,
@@ -216,19 +109,38 @@ describe('SLO rule health — recovery flow', () => {
       body: { spec: buildMinimalSloSpec(datasourceId, sloName) },
       failOnStatusCode: false,
     }).then((resp) => {
-      if (resp.status === 200 || resp.status === 201) {
-        sloId = resp.body.id;
-        const prov = resp.body.status && resp.body.status.provisioning;
-        if (prov && prov.backend === 'prometheus') {
-          ruleGroupName = prov.ruleGroupName;
-          rulerNamespace = prov.rulerNamespace;
-        }
+      // If the datasource isn't ruler-capable in this environment, skip rather
+      // than fail — keeps offline-dev runs green.
+      if (resp.status !== 200 && resp.status !== 201) {
+        Cypress.log({
+          name: 'rule_health',
+          message: `SLO create failed (status ${resp.status}); skipping spec`,
+        });
+        this.skip();
+        return;
       }
-      if (!sloId) {
-        // Fallback synthetic state so UI-contract assertions still run.
-        sloId = randomId('cypress-slo-id');
-        ruleGroupName = `slo_${sloId}_primary`;
-        rulerNamespace = 'slos';
+      sloId = resp.body.id;
+      const prov = resp.body.status && resp.body.status.provisioning;
+      if (!prov || prov.backend !== 'prometheus') {
+        Cypress.log({
+          name: 'rule_health',
+          message: 'SLO created but not ruler-backed; skipping',
+        });
+        this.skip();
+        return;
+      }
+      // Per-SLO alert group is the simplest target for an out-of-band
+      // delete: recording groups are shared by fingerprint, the alert group
+      // is owned by exactly this SLO. Deleting it makes rule_health flip
+      // to `rules_missing`.
+      ruleGroupName = prov.alertGroupName;
+      rulerNamespace = prov.rulerNamespace;
+      if (!ruleGroupName || !rulerNamespace) {
+        Cypress.log({
+          name: 'rule_health',
+          message: `Provisioning missing alertGroupName or rulerNamespace: ${JSON.stringify(prov)}`,
+        });
+        this.skip();
       }
     });
   });
@@ -245,184 +157,110 @@ describe('SLO rule health — recovery flow', () => {
 
   it('surfaces a healthy badge, flips to missing after ruler loss, restores, and lets users delete a broken SLO', () => {
     // -----------------------------------------------------------------------
-    // Step A — Healthy baseline
+    // Step A — Baseline: rules exist (badge is healthy or no-data depending
+    // on whether the source metric has traffic; CI has neither so it sits at
+    // no-data — but crucially NOT 'missing').
     // -----------------------------------------------------------------------
-    cy.intercept('GET', `${SLO_BASE}*`, (req) => {
-      // Match the listing endpoint (no trailing id segment).
-      if (/\/slos(?:\?|$)/.test(req.url)) {
-        req.reply({
-          statusCode: 200,
-          body: {
-            items: [
-              buildSummary({ id: sloId, datasourceId, name: sloName, state: 'ok' }),
-            ],
-            total: 1,
-            page: 1,
-            pageSize: 25,
-          },
-        });
-      }
-    }).as('listHealthy');
-
-    cy.visit(`/app/${APP_ID}#/slos`);
+    cy.visit(`${WORKSPACE_PREFIX}/app/${APP_ID}#/slos`);
     cy.get('[data-test-subj="slosPage"]', { timeout: 30000 }).should('be.visible');
-
     cy.get(`[data-test-subj="slosRulesBadge-${sloId}"]`, { timeout: 20000 })
-      .should('have.attr', 'data-test-rule-state', 'healthy');
+      .should('have.attr', 'data-test-rule-state')
+      .and('match', /^(healthy|no-data)$/);
 
     // -----------------------------------------------------------------------
-    // Step B — Out-of-band deletion (simulated via cy.intercept).
+    // Step B — Out-of-band deletion against the real ruler
     //
-    // The plugin's only authoring path for the ruler is wrapped by the
-    // SLO routes, which keep the saved object and the rule group in
-    // lockstep. A true "operator nuked the rule group behind our back"
-    // state is therefore not reachable from a browser without a
-    // test-only debug endpoint. We emulate it by swapping the listing
-    // and detail responses to describe the desynchronised state — that
-    // is exactly the input the rule-health UI is designed to react to.
+    // cy.task hits the SQL plugin's DirectQuery resource path, dropping the
+    // rule group server-side without touching the SLO saved object. The
+    // listing badge flip is gated by the rule-health checker's 30s TTL —
+    // step C waits it out before re-loading.
     // -----------------------------------------------------------------------
-    cy.intercept('GET', `${SLO_BASE}*`, (req) => {
-      if (/\/slos(?:\?|$)/.test(req.url)) {
-        req.reply({
-          statusCode: 200,
-          body: {
-            items: [
-              buildSummary({
-                id: sloId,
-                datasourceId,
-                name: sloName,
-                state: 'rules_missing',
-              }),
-            ],
-            total: 1,
-            page: 1,
-            pageSize: 25,
-          },
-        });
+    cy.task('cortex:deleteRuleGroup', {
+      datasourceId,
+      namespace: rulerNamespace,
+      groupName: ruleGroupName,
+    }).then((res) => {
+      if (!res || (res.status >= 400 && res.status !== 404)) {
+        throw new Error(`cortex:deleteRuleGroup failed: ${JSON.stringify(res)}`);
       }
-    }).as('listMissing');
-
-    cy.intercept('GET', `${SLO_BASE}/${encodeURIComponent(sloId)}`, {
-      statusCode: 200,
-      body: buildDoc({
-        id: sloId,
-        datasourceId,
-        name: sloName,
-        ruleGroupName,
-        rulerNamespace,
-        state: 'rules_missing',
-      }),
-    }).as('getBroken');
-
-    cy.intercept('GET', `${SLO_BASE}/${encodeURIComponent(sloId)}/rule_health`, {
-      statusCode: 200,
-      body: buildRuleHealth({ id: sloId, state: 'rules_missing', ruleGroupName }),
-    }).as('ruleHealthMissing');
+    });
 
     // -----------------------------------------------------------------------
     // Step C — Red badge on the listing
+    //
+    // The listing badge is driven by the rule-health checker's cache, which
+    // has a 30s TTL. Wait it out so the next probe re-checks the ruler and
+    // sees the missing rule group.
     // -----------------------------------------------------------------------
-    cy.visit(`/app/${APP_ID}#/slos`);
+    // Two caches in series: rule_health checker (30s TTL) + SLO status
+    // service (60s TTL). cy.task bypasses the SLO routes so neither gets
+    // invalidate()'d. Wait past both, then explicitly re-fetch via the
+    // listing's Refresh button — cy.get retry only re-checks the DOM,
+    // React doesn't re-fetch without a navigation or refresh trigger.
+    cy.wait(75000);
+    cy.visit(`${WORKSPACE_PREFIX}/app/${APP_ID}#/slos`);
     cy.get('[data-test-subj="slosPage"]', { timeout: 30000 }).should('be.visible');
-
-    cy.get(`[data-test-subj="slosRulesBadge-${sloId}"]`, { timeout: 20000 })
+    // Loop: click Refresh, give the fetch ~3s, check the badge. Up to 10
+    // tries (≈30s of polling) — the cache should expire mid-loop.
+    const recheck = (attempt) => {
+      if (attempt >= 10) return;
+      cy.get('[data-test-subj="slosRefresh"]').click();
+      cy.wait(3000);
+      cy.get(`[data-test-subj="slosRulesBadge-${sloId}"]`).then(($el) => {
+        if ($el.attr('data-test-rule-state') === 'missing') return;
+        recheck(attempt + 1);
+      });
+    };
+    recheck(0);
+    cy.get(`[data-test-subj="slosRulesBadge-${sloId}"]`)
       .should('have.attr', 'data-test-rule-state', 'missing');
 
     // -----------------------------------------------------------------------
     // Step D — Restore flow
     // -----------------------------------------------------------------------
-    cy.visit(`/app/${APP_ID}#/slos/${encodeURIComponent(sloId)}`);
+    cy.visit(`${WORKSPACE_PREFIX}/app/${APP_ID}#/slos/${encodeURIComponent(sloId)}`);
     cy.get('[data-test-subj="sloDetailPage"]', { timeout: 30000 }).should('be.visible');
-
     cy.get('[data-test-subj="slosDetailRuleHealthCallout"]', { timeout: 20000 }).should(
       'be.visible'
     );
 
-    // After Restore, the server re-asserts the rule group; stub the
-    // follow-up reads to return a healthy state so the callout clears.
-    cy.intercept('POST', `${SLO_BASE}/${encodeURIComponent(sloId)}/repair`, {
-      statusCode: 200,
-      body: {
-        sloId,
-        repaired: true,
-        health: buildRuleHealth({ id: sloId, state: 'ok', ruleGroupName }),
-      },
-    }).as('repair');
-
-    // Swap the rule_health stub to healthy — any re-probe after repair
-    // must see `ok` for the callout to disappear.
-    cy.intercept('GET', `${SLO_BASE}/${encodeURIComponent(sloId)}/rule_health`, {
-      statusCode: 200,
-      body: buildRuleHealth({ id: sloId, state: 'ok', ruleGroupName }),
-    }).as('ruleHealthOk');
-
-    cy.intercept('GET', `${SLO_BASE}/${encodeURIComponent(sloId)}`, {
-      statusCode: 200,
-      body: buildDoc({
-        id: sloId,
-        datasourceId,
-        name: sloName,
-        ruleGroupName,
-        rulerNamespace,
-        state: 'ok',
-      }),
-    }).as('getHealthy');
-
     cy.get('[data-test-subj="slosDetailRestore"]').click();
-    cy.wait('@repair');
 
-    cy.get('[data-test-subj="slosDetailRuleHealthCallout"]', { timeout: 20000 }).should(
+    // Restore re-asserts the group and the next probe should report 'ok'.
+    cy.get('[data-test-subj="slosDetailRuleHealthCallout"]', { timeout: 30000 }).should(
       'not.exist'
     );
 
     // -----------------------------------------------------------------------
-    // Step E — Delete a broken SLO from the callout
+    // Step E — Re-break and delete from the callout
     //
-    // Re-break the state so the callout is present, then click
-    // slosDetailBrokenDelete, confirm, and assert the app routes back
-    // to the listing.
+    // Same 30s TTL applies — wait it out before navigating so the detail
+    // page's first probe sees the freshly-missing group.
     // -----------------------------------------------------------------------
-    cy.intercept('GET', `${SLO_BASE}/${encodeURIComponent(sloId)}`, {
-      statusCode: 200,
-      body: buildDoc({
-        id: sloId,
-        datasourceId,
-        name: sloName,
-        ruleGroupName,
-        rulerNamespace,
-        state: 'rules_missing',
-      }),
-    }).as('getBrokenAgain');
+    cy.task('cortex:deleteRuleGroup', {
+      datasourceId,
+      namespace: rulerNamespace,
+      groupName: ruleGroupName,
+    });
+    // Same 90s wait so the rule_health/status caches expire before the
+    // detail page revisits.
+    cy.wait(90000);
 
-    cy.intercept('GET', `${SLO_BASE}/${encodeURIComponent(sloId)}/rule_health`, {
-      statusCode: 200,
-      body: buildRuleHealth({ id: sloId, state: 'rules_missing', ruleGroupName }),
-    }).as('ruleHealthMissingAgain');
-
-    cy.intercept('DELETE', `${SLO_BASE}/${encodeURIComponent(sloId)}`, {
-      statusCode: 200,
-      body: { deleted: true, generatedRuleNames: [] },
-    }).as('deleteBroken');
-
-    cy.visit(`/app/${APP_ID}#/slos/${encodeURIComponent(sloId)}`);
+    cy.visit(`${WORKSPACE_PREFIX}/app/${APP_ID}#/slos/${encodeURIComponent(sloId)}`);
     cy.get('[data-test-subj="sloDetailPage"]', { timeout: 30000 }).should('be.visible');
     cy.get('[data-test-subj="slosDetailRuleHealthCallout"]', { timeout: 20000 }).should(
       'be.visible'
     );
 
     cy.get('[data-test-subj="slosDetailBrokenDelete"]').click();
-
-    // EuiConfirmModal exposes its own data-test-subj on the wrapper plus
-    // `confirmModalConfirmButton` / `confirmModalCancelButton` on the buttons.
-    // Prefer those over EUI class selectors so an EUI version bump doesn't
-    // silently break the spec.
     cy.get('[data-test-subj="slosDetailDeleteModal"]', { timeout: 10000 }).should('be.visible');
     cy.get('[data-test-subj="confirmModalConfirmButton"]').click();
 
-    cy.wait('@deleteBroken');
-
-    // After delete we expect to land back on the listing route.
     cy.location('hash', { timeout: 20000 }).should('match', /#\/slos$/);
     cy.get('[data-test-subj="slosPage"]', { timeout: 30000 }).should('be.visible');
+
+    // The SLO is gone (delete-from-callout went through the regular API);
+    // null out so `after` doesn't double-DELETE.
+    sloId = null;
   });
 });

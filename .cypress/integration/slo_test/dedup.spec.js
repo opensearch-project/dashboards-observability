@@ -31,8 +31,9 @@
  * Cleanup runs the live DELETE in `after` so no SLOs leak between runs.
  */
 
-const SLO_BASE = '/api/observability/v1/slos';
 const APP_ID = 'observability-apm-slo';
+const WORKSPACE_PREFIX = Cypress.env('workspaceId') ? `/w/${Cypress.env('workspaceId')}` : '';
+const SLO_BASE = `${WORKSPACE_PREFIX}/api/observability/v1/slos`;
 
 const randomId = (prefix) =>
   `${prefix}-${Math.random().toString(36).slice(2, 8)}-${Date.now().toString(36)}`;
@@ -145,10 +146,12 @@ describe('SLO rule dedup — detail UX', () => {
       return;
     }
 
-    cy.visit(`/app/${APP_ID}#/slos/${encodeURIComponent(sloIdA)}`);
+    cy.visit(`${WORKSPACE_PREFIX}/app/${APP_ID}#/slos/${encodeURIComponent(sloIdA)}`);
     cy.get('[data-test-subj="sloDetailPage"]', { timeout: 30000 }).should('be.visible');
 
-    // Recording-rule accordion exists and holds fingerprint-prefixed names.
+    // Recording-rule accordion is nested inside the (collapsed-by-default)
+    // "Advanced details" accordion — expand the parent first.
+    cy.get('[data-test-subj="slosDetailAdvancedAccordion"]').click();
     cy.get('[data-test-subj="slosDetailRecordingRulesAccordion"]').click();
     cy.get('[data-test-subj^="slosDetailRecordingRule-"]')
       .should('have.length.greaterThan', 0)
@@ -180,7 +183,7 @@ describe('SLO rule dedup — detail UX', () => {
       failOnStatusCode: false,
     });
 
-    cy.visit(`/app/${APP_ID}#/slos/${encodeURIComponent(sloIdA)}`);
+    cy.visit(`${WORKSPACE_PREFIX}/app/${APP_ID}#/slos/${encodeURIComponent(sloIdA)}`);
     cy.get('[data-test-subj="sloDetailPage"]', { timeout: 30000 }).should('be.visible');
     cy.get('[data-test-subj="slosDetailSharedWithPill"]').should('contain.text', 'Shared with 1 other SLO');
   });
@@ -196,15 +199,25 @@ describe('SLO rule dedup — detail UX', () => {
       url: `${SLO_BASE}/${encodeURIComponent(sloIdB)}`,
       headers: { 'osd-xsrf': 'true' },
       failOnStatusCode: false,
+    }).then((resp) => {
+      expect(resp.status, `DELETE B response: ${JSON.stringify(resp.body)}`).to.be.oneOf([
+        200,
+        201,
+        204,
+      ]);
     });
     // Clear so the after-hook doesn't double-delete.
     sloIdB = null;
 
-    cy.visit(`/app/${APP_ID}#/slos/${encodeURIComponent(sloIdA)}`);
+    // Refresh A's detail page, then force a hard reload to bypass any
+    // browser-side caches before checking the pill state.
+    cy.visit(`${WORKSPACE_PREFIX}/app/${APP_ID}#/slos/${encodeURIComponent(sloIdA)}`);
+    cy.reload(true);
     cy.get('[data-test-subj="sloDetailPage"]', { timeout: 30000 }).should('be.visible');
     // Pill is hidden once we're the only SLO referencing the fingerprint.
-    cy.get('[data-test-subj="slosDetailSharedWithPill"]').should('not.exist');
+    cy.get('[data-test-subj="slosDetailSharedWithPill"]', { timeout: 30000 }).should('not.exist');
     // Recording rule names still render — the group lives on.
+    cy.get('[data-test-subj="slosDetailAdvancedAccordion"]').click();
     cy.get('[data-test-subj="slosDetailRecordingRulesAccordion"]').click();
     cy.get('[data-test-subj^="slosDetailRecordingRule-"]').should('have.length.greaterThan', 0);
   });

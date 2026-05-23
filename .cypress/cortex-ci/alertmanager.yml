@@ -1,0 +1,12 @@
+# CI-only Alertmanager config for Cortex ruler smoke tests.
+# Minimal config: accepts alerts from Cortex ruler and discards them via
+# the 'null' receiver. The upstream observability-stack template routes
+# to an OpenSearch webhook with sed-substituted credentials; in CI we
+# don't need persistence — we just need a healthy alertmanager target so
+# Cortex ruler doesn't fail with delivery errors or retry storms.
+global:
+  resolve_timeout: 5m
+route:
+  receiver: 'null'
+receivers:
+  - name: 'null'

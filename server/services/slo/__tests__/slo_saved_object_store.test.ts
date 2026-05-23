@@ -31,6 +31,16 @@ interface FakeStored {
 function makeFakeClient() {
   const byId = new Map<string, FakeStored>();
   let lastFindFilter: string | undefined;
+  let lastFindOpts:
+    | {
+        type: string;
+        perPage: number;
+        page: number;
+        filter?: string;
+        search?: string;
+        searchFields?: string[];
+      }
+    | undefined;
 
   const client = ({
     async get(_type: string, id: string) {
@@ -47,8 +57,16 @@ function makeFakeClient() {
       byId.delete(id);
       return {};
     },
-    async find(opts: { type: string; perPage: number; page: number; filter?: string }) {
+    async find(opts: {
+      type: string;
+      perPage: number;
+      page: number;
+      filter?: string;
+      search?: string;
+      searchFields?: string[];
+    }) {
       lastFindFilter = opts.filter;
+      lastFindOpts = opts;
       const all = Array.from(byId.values()).map((s) => ({
         id: s.id,
         type: SO_TYPE,
@@ -66,6 +84,7 @@ function makeFakeClient() {
     client,
     byId,
     getLastFindFilter: () => lastFindFilter,
+    getLastFindOpts: () => lastFindOpts,
     /** Inject a malformed entry the listing should skip rather than throw on. */
     addRaw(id: string, attributes: Record<string, unknown>) {
       byId.set(id, { id, attributes });
@@ -254,6 +273,43 @@ describe('SavedObjectSloStore.list', () => {
     expect(fake.getLastFindFilter()).toBeUndefined();
     await store.list([]);
     expect(fake.getLastFindFilter()).toBeUndefined();
+  });
+});
+
+describe('SavedObjectSloStore.paginate — search', () => {
+  // Regression: `service` was previously included in `searchFields`, which
+  // made OpenSearch reject every non-empty `?search=` query with
+  // "Can only use phrase prefix queries on text fields - not on
+  // [slo-definition.service] which is of type [keyword]". Service-name
+  // filtering is exposed through the structured `service` filter facet, so
+  // the free-text search restricts to text-mapped fields (`name`,
+  // `description`).
+  it('omits the keyword-mapped `service` field from searchFields', async () => {
+    const fake = makeFakeClient();
+    const store = new SavedObjectSloStore(fake.client);
+
+    await store.paginate({
+      page: 1,
+      perPage: 20,
+      search: 'unicorn',
+    });
+
+    const opts = fake.getLastFindOpts();
+    expect(opts).toBeDefined();
+    expect(opts!.search).toBe('unicorn*');
+    expect(opts!.searchFields).toEqual(['name', 'description']);
+    expect(opts!.searchFields).not.toContain('service');
+  });
+
+  it('does not pass search/searchFields when search is omitted', async () => {
+    const fake = makeFakeClient();
+    const store = new SavedObjectSloStore(fake.client);
+
+    await store.paginate({ page: 1, perPage: 20 });
+
+    const opts = fake.getLastFindOpts();
+    expect(opts!.search).toBeUndefined();
+    expect(opts!.searchFields).toBeUndefined();
   });
 });
 

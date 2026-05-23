@@ -483,10 +483,25 @@ function buildStatusContext(
   datasourceService: InMemoryDatasourceService | undefined,
   discoveryService: DatasourceDiscoveryService | undefined,
   ruleHealthChecker: RuleHealthChecker | undefined,
-  ruleDedupEnabled?: boolean
+  ruleDedupEnabled?: boolean,
+  request?: OpenSearchDashboardsRequest
 ): SloStatusAggregationContext | undefined {
   if (!datasourceService) return undefined;
   const client = ctx.core.opensearch.client.asCurrentUser;
+  // Derive the OSD workspace from the request URL prefix so refcount /
+  // status reads target the same partition as the caller's writes. The
+  // wrappers tag SOs by this id; mismatched lookups silently return the
+  // wrong tenant's data (the `default` workspace's row when the caller is
+  // actually in `Z6xlzn`, etc.). Falls back to 'default' when workspace is
+  // disabled or the request has no `.app` bag (synthetic test wiring).
+  let workspaceId = 'default';
+  if (request) {
+    try {
+      workspaceId = getWorkspaceState(request).requestWorkspaceId ?? 'default';
+    } catch {
+      // No-op: keep the 'default' fallback for non-workspace clusters.
+    }
+  }
   return {
     client,
     // The aggregator routes PromQL queries through the data plugin's
@@ -494,7 +509,7 @@ function buildStatusContext(
     // RequestHandlerContext to resolve scoped clients (including MDS).
     // `ctx` here is exactly that context — pass it through.
     requestContext: ctx,
-    workspaceId: 'default',
+    workspaceId,
     resolveDatasource: async (datasourceId: string) => {
       if (discoveryService) {
         await discoveryService.ensure(ctx);
@@ -559,13 +574,14 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
     router,
     sloService,
     logger,
-    (ctx) =>
+    (ctx, req) =>
       buildStatusContext(
         ctx,
         datasourceService,
         discoveryService,
         ruleHealthChecker,
-        ruleDedupEnabled
+        ruleDedupEnabled,
+        req
       ),
     datasourceService,
     discoveryService
@@ -639,7 +655,8 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         datasourceService,
         discoveryService,
         ruleHealthChecker,
-        ruleDedupEnabled
+        ruleDedupEnabled,
+        req
       );
       const result = await handleListSLOs(sloService, filters, logger, statusCtx, req, q.cursor);
       if (result.status >= 400) {
@@ -718,7 +735,8 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         datasourceService,
         discoveryService,
         ruleHealthChecker,
-        ruleDedupEnabled
+        ruleDedupEnabled,
+        req
       );
       const result = await handleGetSLOStatuses(sloService, req.body.ids, logger, statusCtx, req);
       if (result.status === 200) return res.ok({ body: result.body });
@@ -740,7 +758,8 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         datasourceService,
         discoveryService,
         ruleHealthChecker,
-        ruleDedupEnabled
+        ruleDedupEnabled,
+        req
       );
       const result = await handleGetSLO(sloService, req.params.id, logger, statusCtx, req);
       if (result.status === 200) return res.ok({ body: result.body });

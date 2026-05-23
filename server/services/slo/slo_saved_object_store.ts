@@ -253,8 +253,17 @@ export class SavedObjectSloStore implements ISloStore {
       findOpts.sortOrder = opts.sortOrder ?? 'asc';
     }
     if (opts.search) {
+      // OSD's saved-object `find` translates `searchFields` into a
+      // simple_query_string with phrase-prefix matching, which OpenSearch
+      // requires to land on `text`-typed fields. The SLO mapping registers
+      // `service` as `keyword` (so the listing's structured Service filter
+      // can push exact-match terms to the index) — including `service` here
+      // produced "Can only use phrase prefix queries on text fields" 500s
+      // for any non-empty `?search=` value. Service-name filtering is
+      // already exposed through the dedicated `Service` filter facet, so
+      // free-text search remains scoped to the text-mapped fields.
       findOpts.search = `${opts.search}*`;
-      findOpts.searchFields = ['name', 'description', 'service'];
+      findOpts.searchFields = ['name', 'description'];
     }
     if (filterClauses) findOpts.filter = filterClauses;
     const response = await this.client.find(findOpts);
