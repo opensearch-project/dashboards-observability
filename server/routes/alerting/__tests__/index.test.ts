@@ -6,7 +6,7 @@
 /**
  * Route-registration smoke tests for `registerAlertingRoutes`.
  *
- * Post-Phase-5 + concurrency-fix state the registrar wires:
+ * The registrar wires:
  *   - 4 mutation routes (delegated to `registerAlertingMutationRoutes` —
  *     still observable on the mock router because the delegate uses the
  *     same router instance):
@@ -20,8 +20,8 @@
  *   - 1 mappings POST route (POSTs index list in body to avoid URL limits)
  *   - 4 Prometheus metadata routes inside `if (enableMetadataRoutes)` (4 GETs)
  *
- * Datasource CRUD routes were deleted in Phase 3 — these tests also assert
- * none of them sneak back in.
+ * Datasource CRUD routes have been deleted — these tests also assert none
+ * of them sneak back in.
  *
  * The stateful alerting services are no longer passed in as pre-built
  * singletons; they're constructed per-request inside the registrar, so the
@@ -163,7 +163,7 @@ describe('registerAlertingRoutes', () => {
       ...mockRouter.delete.mock.calls.map(([c]: [RouteConfig]) => c.path),
     ];
 
-    // Paths that were intentionally moved to the client in Phase 3.
+    // Paths that were intentionally moved to the client.
     const shouldNotExist = [
       '/api/alerting/datasources',
       '/api/alerting/datasources/{id}',

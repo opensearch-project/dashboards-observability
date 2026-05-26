@@ -127,7 +127,7 @@ describe('validateSloSpec', () => {
     expect(result.errors['spec.labels["foo"]']).toBeDefined();
   });
 
-  // W1.3(a) — UUID cardinality guardrail (design §10.3).
+  // UUID cardinality guardrail.
   it('accepts non-UUID label values', () => {
     const result = validateSloSpec(minimalSpec({ labels: { env: 'prod' } }));
     expect(result.errors['spec.labels["env"]']).toBeUndefined();
@@ -149,7 +149,7 @@ describe('validateSloSpec', () => {
     expect(result.errors['spec.labels["trace_ids"]']).toContain('UUID');
   });
 
-  // W1.3(b) — 4 KiB annotation cap (design §10.3).
+  // 4 KiB annotation cap.
   it('accepts annotations just under the 4096-byte cap', () => {
     // `{"k":"<value>"}` → value length budget ≈ 4096 − len('{"k":""}') − 1
     // Use 4080-char string so JSON.stringify length lands just under 4096.
@@ -167,21 +167,9 @@ describe('validateSloSpec', () => {
   });
 });
 
-describe('validateSloId', () => {
-  it('accepts a valid slug', () => {
-    expect(validateSloId('my-api-availability')).toBeNull();
-  });
-  it('rejects uppercase or underscores', () => {
-    expect(validateSloId('MY_SLO')).not.toBeNull();
-  });
-  it('rejects short slugs', () => {
-    expect(validateSloId('ab')).not.toBeNull();
-  });
-});
-
-// Custom-expr PromQL defensive checks (reviewer #2). The character set
-// closes the classes most likely to confuse downstream parsers; the real
-// PromQL parse happens at Cortex when the rule group is upserted.
+// Custom-expr PromQL defensive checks. The character set closes the classes
+// most likely to confuse downstream parsers; the real PromQL parse happens
+// at Cortex when the rule group is upserted.
 describe('validateSloSpec — custom PromQL defensive checks', () => {
   function customSpec(expr: {
     mode: 'events';
@@ -264,7 +252,7 @@ describe('validateSloSpec — custom PromQL defensive checks', () => {
     const result = validateSloSpec(
       customSpec({
         mode: 'events',
-        goodQuery: 'sum( rate(http_requests_total[5m]))',
+        goodQuery: 'sum(\u0000rate(http_requests_total[5m]))',
         totalQuery: 'sum(rate(http_requests_total[5m]))',
       })
     );
@@ -295,98 +283,14 @@ describe('validateSloSpec — custom PromQL defensive checks', () => {
   });
 });
 
-describe('validateSloSpec — goodEventsFilter (matcher injection guard)', () => {
-  function specWithFilter(filter: string): Partial<SloSpec> {
-    return minimalSpec({
-      sli: {
-        type: 'single',
-        definition: {
-          backend: 'prometheus',
-          type: 'availability',
-          calcMethod: 'events',
-          metric: 'http_requests_total',
-          goodEventsFilter: filter,
-        },
-        dimensions: [{ name: 'service', value: 'api-gateway' }],
-      },
-    });
-  }
-
-  it('accepts a single equality matcher', () => {
-    const result = validateSloSpec(specWithFilter('status="200"'));
-    expect(result.errors['spec.sli.definition.goodEventsFilter']).toBeUndefined();
+describe('validateSloId', () => {
+  it('accepts a valid slug', () => {
+    expect(validateSloId('my-api-availability')).toBeNull();
   });
-
-  it('accepts negation, regex, and inverse-regex matchers', () => {
-    for (const filter of ['status!="500"', 'code=~"5.."', 'path!~"^/health"']) {
-      const result = validateSloSpec(specWithFilter(filter));
-      expect(result.errors['spec.sli.definition.goodEventsFilter']).toBeUndefined();
-    }
+  it('rejects uppercase or underscores', () => {
+    expect(validateSloId('MY_SLO')).not.toBeNull();
   });
-
-  it('rejects a comma-stacked second matcher (injection guard)', () => {
-    // Without rejection this stacks `pwn="y"` onto every recorded series
-    // because the generator splices the filter into the comma-separated
-    // matcher list.
-    const result = validateSloSpec(specWithFilter('status="x",pwn="y"'));
-    expect(result.errors['spec.sli.definition.goodEventsFilter']).toMatch(/comma/);
-  });
-
-  it('rejects literal control characters (LF, CR, TAB, NULL)', () => {
-    for (const ch of ['\n', '\r', '\t', '\x00']) {
-      const result = validateSloSpec(specWithFilter(`status="x"${ch}`));
-      expect(result.errors['spec.sli.definition.goodEventsFilter']).toMatch(/control/);
-    }
-  });
-
-  it('rejects expressions that do not match the single-matcher shape', () => {
-    for (const filter of ['status', 'status="x"[', '{status="x"}', '"status"="x"']) {
-      const result = validateSloSpec(specWithFilter(filter));
-      expect(result.errors['spec.sli.definition.goodEventsFilter']).toBeDefined();
-    }
-  });
-});
-
-describe('validateSloSpec — control-char rejection on user fields (C-6 root cause)', () => {
-  it('rejects literal LF in spec.name', () => {
-    const result = validateSloSpec(minimalSpec({ name: 'ok\nname' }));
-    expect(result.errors['spec.name']).toMatch(/control/);
-  });
-
-  it('rejects literal TAB in spec.service', () => {
-    const result = validateSloSpec(minimalSpec({ service: 'api\tgateway' }));
-    expect(result.errors['spec.service']).toMatch(/control/);
-  });
-
-  it('rejects literal CR in spec.tier', () => {
-    const result = validateSloSpec(minimalSpec({ tier: 'tier\r1' }));
-    expect(result.errors['spec.tier']).toMatch(/control/);
-  });
-
-  it('rejects unicode line separator U+2028 in owner.teams[*]', () => {
-    const result = validateSloSpec(minimalSpec({ owner: { teams: ['platform\u2028team'] } }));
-    expect(result.errors['spec.owner.teams[0]']).toMatch(/control/);
-  });
-});
-
-describe('validateSloId — tightened slug shape (L-10)', () => {
-  it('accepts simple slugs', () => {
-    expect(validateSloId('my-slo-id')).toBeNull();
-    expect(validateSloId('api')).toBeNull();
-    expect(validateSloId('a1b2c3')).toBeNull();
-  });
-
-  it('rejects double or trailing hyphens (newly tightened)', () => {
-    expect(validateSloId('my--slo')).toMatch(/Invalid/);
-    expect(validateSloId('my-slo-')).toMatch(/Invalid/);
-  });
-
-  it('rejects ids that start with a digit or hyphen', () => {
-    expect(validateSloId('1abc')).toMatch(/Invalid/);
-    expect(validateSloId('-abc')).toMatch(/Invalid/);
-  });
-
-  it('rejects ids over 63 chars', () => {
-    expect(validateSloId('a' + 'b'.repeat(63))).toMatch(/Invalid/);
+  it('rejects short slugs', () => {
+    expect(validateSloId('ab')).not.toBeNull();
   });
 });

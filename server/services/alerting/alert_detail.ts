@@ -15,6 +15,7 @@
  *   - `getPromRuleDetail` — full Prometheus rule detail
  *   - `getAlertDetail` — full alert detail with raw backend data
  */
+import type { RequestHandlerContext } from '../../../../../src/core/server';
 import {
   AlertHistoryEntry,
   AlertingOSClient,
@@ -53,7 +54,8 @@ export async function getRuleDetail(
   promBackend: PrometheusBackend | undefined,
   client: AlertingOSClient,
   dsId: string,
-  ruleId: string
+  ruleId: string,
+  ctx?: RequestHandlerContext
 ): Promise<UnifiedRule | null> {
   const ds = await datasourceService.get(dsId);
   if (!ds) return null;
@@ -61,7 +63,7 @@ export async function getRuleDetail(
   if (ds.type === 'opensearch' && osBackend) {
     return getOSRuleDetail(osBackend, client, ds, ruleId);
   } else if (ds.type === 'prometheus' && promBackend) {
-    return getPromRuleDetail(promBackend, client, ds, ruleId);
+    return getPromRuleDetail(promBackend, client, ds, ruleId, ctx);
   }
   return null;
 }
@@ -177,7 +179,8 @@ export async function getPromRuleDetail(
   promBackend: PrometheusBackend,
   client: AlertingOSClient,
   ds: Datasource,
-  ruleId: string
+  ruleId: string,
+  ctx?: RequestHandlerContext
 ): Promise<UnifiedRule | null> {
   const groups = await promBackend.getRuleGroups(client, ds);
 
@@ -213,7 +216,7 @@ export async function getPromRuleDetail(
         alertHistory,
         conditionPreviewData: await fetchPromPreviewData(
           promBackend,
-          client,
+          ctx,
           ds,
           alertingRule.query,
           alertingRule

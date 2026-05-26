@@ -7,8 +7,9 @@ import { TimeRange } from '../../common/types/service_types';
 import { TimeRange as ServiceDetailsTimeRange } from '../../common/types/service_details_types';
 import { EXPLORE_APP_ID } from '../../common/constants';
 import {
-  observabilityApmServicesID,
   observabilityApmApplicationMapID,
+  observabilityApmServicesID,
+  observabilityApmSloID,
 } from '../../../../../common/constants/apm';
 import { coreRefs } from '../../../../framework/core_refs';
 
@@ -128,6 +129,31 @@ export function navigateToServicesList(): void {
   coreRefs?.application?.navigateToApp(observabilityApmServicesID, { path: '#/services' });
 
   // Dispatch hashchange event for HashRouter to detect the URL change
+  window.dispatchEvent(new HashChangeEvent('hashchange'));
+}
+
+/**
+ * Navigates to the SLO suggest page scoped to the given services.
+ * `#/slos/suggest?source=apm&services=<csv>` inside the apm-slo app — we
+ * cross a HashRouter boundary, so go through `application.navigateToApp`.
+ */
+export function navigateToSloSuggest(services: string[]): void {
+  const qs = new URLSearchParams({ source: 'apm' });
+  if (services.length > 0) qs.set('services', services.join(','));
+  const path = `#/slos/suggest?${qs.toString()}`;
+  coreRefs?.application?.navigateToApp(observabilityApmSloID, { path });
+  window.dispatchEvent(new HashChangeEvent('hashchange'));
+}
+
+/**
+ * Navigates to the SLO listing filtered to the given services.
+ * `#/slos?service=<csv>` inside the apm-slo app. Omit the `service` param
+ * when the service list is empty so the listing shows the full datasource.
+ */
+export function navigateToSloListing(services: string[]): void {
+  const path =
+    services.length > 0 ? `#/slos?service=${encodeURIComponent(services.join(','))}` : '#/slos';
+  coreRefs?.application?.navigateToApp(observabilityApmSloID, { path });
   window.dispatchEvent(new HashChangeEvent('hashchange'));
 }
 

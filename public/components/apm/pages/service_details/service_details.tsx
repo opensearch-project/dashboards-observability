@@ -21,6 +21,10 @@ import { useApmConfig } from '../../config/apm_config_context';
 import { ServiceOverview } from './service_overview';
 import { ServiceOperations } from './service_operations';
 import { ServiceDependencies } from './service_dependencies';
+import { ServiceSloTab, SloTabLabel } from './service_slo_tab';
+import { SloApiClient } from '../slos/slo_api_client';
+import { toSloHealthAccessError, useServiceSloHealth } from '../slos/slo_health_summary';
+import { coreRefs } from '../../../../framework/core_refs';
 import {
   TimeRange,
   ServiceDetailsTabId,
@@ -155,6 +159,43 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
     return config?.serviceMapDataset?.id || '';
   }, [config]);
 
+  // SLO health for both the tab-label breach badge and the SLOs tab content.
+  // Parent-owned so the page issues one `list()` instead of two (M5B).
+  const sloApiClient = useMemo(() => {
+    const http = coreRefs.http;
+    return http ? new SloApiClient(http) : undefined;
+  }, []);
+  const sloApiClientStub = useMemo(
+    () =>
+      (({
+        list: () =>
+          Promise.resolve({
+            results: [],
+            total: 0,
+            pageSize: 0,
+            hasMore: false,
+            nextCursor: null,
+            prevCursor: null,
+          }),
+      } as unknown) as SloApiClient),
+    []
+  );
+  // Feature flag: when `observability.slo.enabled` is false the SLOs tab is
+  // hidden entirely and the rollup hook short-circuits. Mirrors the existing
+  // "no datasource → disabled" path.
+  const sloFeatureEnabled = !!coreRefs.sloEnabled;
+  const sloHealthDisabled = !sloFeatureEnabled || !sloApiClient || !prometheusConnectionId;
+  const tabSloHealth = useServiceSloHealth({
+    serviceNames: sloHealthDisabled ? [] : [serviceName],
+    datasourceId: sloHealthDisabled ? '' : prometheusConnectionId,
+    apiClient: sloApiClient ?? sloApiClientStub,
+  });
+  const sloBucket = tabSloHealth.bySvc.get(serviceName);
+  const breachedCount = sloBucket?.breached ?? 0;
+  const sloAccessError = useMemo(() => toSloHealthAccessError(tabSloHealth.error), [
+    tabSloHealth.error,
+  ]);
+
   // Define tabs
   const tabs: EuiTabbedContentTab[] = useMemo(
     () => [
@@ -206,8 +247,45 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
           />
         ),
       },
+      ...(sloFeatureEnabled
+        ? [
+            {
+              id: SERVICE_DETAILS_CONSTANTS.TABS.SLOS,
+              // The tab label carries the breached-count badge so users spot an
+              // active breach without opening the tab. Badge is suppressed at zero.
+              name: (
+                <span data-test-subj="serviceDetailsTabSlos">
+                  <SloTabLabel breached={breachedCount} />
+                </span>
+              ),
+              content: (
+                <ServiceSloTab
+                  serviceName={serviceName}
+                  bucket={sloBucket}
+                  isLoading={tabSloHealth.isLoading}
+                  error={sloAccessError}
+                  refetch={tabSloHealth.refetch}
+                  timeRange={timeRange}
+                />
+              ),
+            },
+          ]
+        : []),
     ],
-    [serviceName, environment, timeRange, prometheusConnectionId, serviceMapDataset, refreshTrigger]
+    [
+      serviceName,
+      environment,
+      timeRange,
+      prometheusConnectionId,
+      serviceMapDataset,
+      refreshTrigger,
+      breachedCount,
+      sloBucket,
+      sloAccessError,
+      tabSloHealth.isLoading,
+      tabSloHealth.refetch,
+      sloFeatureEnabled,
+    ]
   );
 
   // Get selected tab

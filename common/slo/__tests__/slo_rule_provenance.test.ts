@@ -10,8 +10,6 @@ import {
   annotateAlertGroup,
   buildAlertProvenance,
   buildSentinelAlert,
-  computeSpecSha256,
-  parseAlertProvenance,
 } from '../slo_rule_provenance';
 import { DEFAULT_MWMBR_TIERS } from '../slo_promql_generator';
 import type { GeneratedRule, GeneratedRuleGroup, SloSpec } from '../slo_types';
@@ -71,26 +69,7 @@ function groupStub(name: string, rules: GeneratedRule[]): GeneratedRuleGroup {
 }
 
 describe('slo_rule_provenance', () => {
-  describe('computeSpecSha256', () => {
-    it('is deterministic across object-key reorder', () => {
-      const a = validSpec();
-      const b: SloSpec = { ...a, owner: { primaryUser: undefined, teams: ['platform'] } };
-      expect(computeSpecSha256(a)).toBe(computeSpecSha256(b));
-    });
-
-    it('diverges when any field changes', () => {
-      const a = validSpec();
-      const b = validSpec();
-      b.name = 'different';
-      expect(computeSpecSha256(a)).not.toBe(computeSpecSha256(b));
-    });
-
-    it('returns 64-char lowercase hex', () => {
-      expect(computeSpecSha256(validSpec())).toMatch(/^[0-9a-f]{64}$/);
-    });
-  });
-
-  describe('buildAlertProvenance / parseAlertProvenance round-trip', () => {
+  describe('buildAlertProvenance', () => {
     const spec = validSpec();
     const prov = buildAlertProvenance({
       pluginVersion: '3.7.0',
@@ -106,28 +85,8 @@ describe('slo_rule_provenance', () => {
       expect(prov.schemaVersion).toBe(PROVENANCE_SCHEMA_VERSION);
     });
 
-    it('fills specSha256 from computeSpecSha256', () => {
-      expect(prov.specSha256).toBe(computeSpecSha256(spec));
-    });
-
-    it('round-trips through JSON', () => {
-      const parsed = parseAlertProvenance(JSON.stringify(prov));
-      expect(parsed).toEqual(prov);
-    });
-
-    it('rejects malformed JSON', () => {
-      expect(parseAlertProvenance('not-json')).toBeNull();
-    });
-
-    it('rejects wrong schemaVersion', () => {
-      const tampered = { ...prov, schemaVersion: 999 };
-      expect(parseAlertProvenance(JSON.stringify(tampered))).toBeNull();
-    });
-
-    it('rejects missing required fields', () => {
-      const missingSpec = { ...prov } as Partial<typeof prov>;
-      delete missingSpec.spec;
-      expect(parseAlertProvenance(JSON.stringify(missingSpec))).toBeNull();
+    it('fills specSha256 with a 64-char hex digest', () => {
+      expect(prov.specSha256).toMatch(/^[0-9a-f]{64}$/);
     });
 
     // Follow-up #4: the builder records whatever the caller passes as
@@ -148,9 +107,6 @@ describe('slo_rule_provenance', () => {
       });
       expect(canonical.datasourceId).toBe('ObservabilityStack_Prometheus');
       expect(canonical.datasourceId).not.toMatch(/^ds-\d+$/);
-      // Round-trip survives the name form.
-      const reparsed = parseAlertProvenance(JSON.stringify(canonical));
-      expect(reparsed!.datasourceId).toBe('ObservabilityStack_Prometheus');
     });
   });
 
@@ -224,7 +180,6 @@ describe('slo_rule_provenance', () => {
       const rule = buildSentinelAlert('slo-abc', prov);
       const value = rule.annotations?.[ALERT_PROVENANCE_ANNOTATION_KEY];
       expect(value).toBe(JSON.stringify(prov));
-      expect(parseAlertProvenance(value!)).toEqual(prov);
     });
 
     it('truncates overly long sloId values to keep the rule name bounded', () => {

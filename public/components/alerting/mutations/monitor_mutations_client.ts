@@ -6,9 +6,8 @@
 /**
  * MonitorMutationsClient — thin HTTP wrapper around the surviving mutation
  * routes. Mutations do not have a query-enhancements equivalent, so these
- * stay as custom routes; Phase 5 relocates them under `/api/alerting/
- * mutations/*` and gates registration on `observabilityConfig.alertManager.
- * enabled`.
+ * stay as custom routes under `/api/alerting/mutations/*`; registration is
+ * gated on `observabilityConfig.alertManager.enabled`.
  *
  * Replaces the mutation surface of the deleted `alarms_client.ts`.
  */

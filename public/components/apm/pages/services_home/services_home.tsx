@@ -32,6 +32,22 @@ import get from 'lodash/get';
 import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
 import { useServices } from '../../shared/hooks/use_services';
 import { useServicesRedMetrics } from '../../shared/hooks/use_services_red_metrics';
+import { useApmConfig } from '../../config/apm_config_context';
+import { SloApiClient } from '../slos/slo_api_client';
+import {
+  SloHealthCell,
+  SloHealthPanel,
+  SLO_HEALTH_COLUMN_HEADER,
+  SLO_HEALTH_COLUMN_HEADER_TIP,
+  SLO_HEALTH_COLUMN_WIDTH,
+} from './slo_health_panel';
+import {
+  SloHealthAccessError,
+  SloHealthBucket,
+  toSloHealthAccessError,
+  useServiceSloHealth,
+} from '../slos/slo_health_summary';
+import { coreRefs } from '../../../../framework/core_refs';
 import { ApmPageHeader } from '../../shared/components/apm_page_header';
 import { EmptyState } from '../../shared/components/empty_state';
 import { LanguageIcon } from '../../shared/components/language_icon';
@@ -84,6 +100,28 @@ interface ServicesTablePanelProps {
     language?: string,
     timeRange?: TimeRange
   ) => void;
+  sloAggregate: SloHealthBucket;
+  sloBySvc: Map<string, SloHealthBucket>;
+  sloAllServices: string[];
+  sloIsLoading: boolean;
+  sloError: SloHealthAccessError | undefined;
+  sloRefetch: () => void;
+  /** Prometheus datasource id used by SLO-rule queries. Empty string disables the sparkline. */
+  sloDatasourceId: string;
+  /** Feature flag — when false the SLO health panel is omitted entirely. */
+  sloFeatureEnabled: boolean;
+}
+
+/**
+ * Shape of the per-row SLO accessor. Returning a fresh object is OK — the
+ * cell is `React.memo`-wrapped and compares by `serviceName` + `isLoading` +
+ * `error` + `bucket` identity (`bucket` identity is stable as long as `bySvc`
+ * is).
+ */
+interface SloHealthAccessorResult {
+  bucket: SloHealthBucket | undefined;
+  isLoading: boolean;
+  error: SloHealthAccessError | undefined;
 }
 
 const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
@@ -96,6 +134,14 @@ const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
   latencyPercentile,
   setLatencyPercentile,
   onServiceClick,
+  sloAggregate,
+  sloBySvc,
+  sloAllServices,
+  sloIsLoading,
+  sloError,
+  sloRefetch,
+  sloDatasourceId,
+  sloFeatureEnabled,
 }) => (
   <>
     {/* Top Widgets Row */}
@@ -130,6 +176,20 @@ const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
     </EuiFlexGroup>
 
     <EuiSpacer size="s" />
+
+    {/* SLO health summary — independent of the time picker on purpose.
+        Suppressed when the SLO feature flag is off. */}
+    {sloFeatureEnabled && (
+      <SloHealthPanel
+        aggregate={sloAggregate}
+        bySvc={sloBySvc}
+        allServices={sloAllServices}
+        isLoading={sloIsLoading}
+        error={sloError}
+        onRetry={sloRefetch}
+        prometheusConnectionId={sloDatasourceId}
+      />
+    )}
 
     {/* Services Table */}
     <EuiPanel>
@@ -288,6 +348,79 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     endTime: parsedTimeRange.endTime,
     refreshTrigger,
   });
+
+  // --- SLO health rollup ---------------------------------------------------
+  // We want the hook to fetch once per service-set change, *not* on every
+  // `useServices` refresh (which fires on time-picker changes). Deriving the
+  // list from a sorted-joined key means a stable memo identity as long as the
+  // service names are the same.
+  const apmConfig = useApmConfig();
+  const sloDatasourceId = apmConfig.config?.prometheusDataSource?.name ?? '';
+
+  const sloApiClient = useMemo(() => {
+    const http = coreRefs.http;
+    return http ? new SloApiClient(http) : undefined;
+  }, []);
+
+  // Stable stub so the hook's `apiClient` dep doesn't change between renders
+  // when SLOs aren't configured (no http, no datasource). The hook short-
+  // circuits on empty serviceNames / datasourceId, so `.list` never runs.
+  const sloApiClientStub = useMemo(
+    () =>
+      (({
+        list: () =>
+          Promise.resolve({
+            results: [],
+            total: 0,
+            pageSize: 0,
+            hasMore: false,
+            nextCursor: null,
+            prevCursor: null,
+          }),
+      } as unknown) as SloApiClient),
+    []
+  );
+
+  const serviceNamesKey = useMemo(() => {
+    const names = (services || []).map((s) => s.serviceName);
+    names.sort();
+    return names.join('\n');
+  }, [services]);
+
+  const stableServiceNames = useMemo(
+    () => (serviceNamesKey.length === 0 ? [] : serviceNamesKey.split('\n')),
+    [serviceNamesKey]
+  );
+
+  // Feature flag: when `observability.slo.enabled` is false the SLO panel,
+  // table column, and rollup hook all short-circuit. Mirrors the
+  // `!sloApiClient || !sloDatasourceId` "not configured" path so the page
+  // renders without SLO surfaces at all.
+  const sloFeatureEnabled = !!coreRefs.sloEnabled;
+  const sloHealthDisabled = !sloFeatureEnabled || !sloApiClient || !sloDatasourceId;
+  const sloHealth = useServiceSloHealth({
+    // Passing an empty array when SLOs aren't configured keeps the hook
+    // side-effect-free without having to branch in the consumer components.
+    serviceNames: sloHealthDisabled ? [] : stableServiceNames,
+    datasourceId: sloHealthDisabled ? '' : sloDatasourceId,
+    apiClient: sloApiClient ?? sloApiClientStub,
+  });
+
+  const sloHealthError: SloHealthAccessError | undefined = useMemo(
+    () => toSloHealthAccessError(sloHealth.error),
+    [sloHealth.error]
+  );
+
+  // Stable accessor used by the per-row cell. Only changes when the hook's
+  // Map identity changes — which happens on refetch, not on every mousemove.
+  const getSloHealth = useCallback(
+    (serviceName: string): SloHealthAccessorResult => ({
+      bucket: sloHealth.bySvc.get(serviceName),
+      isLoading: sloHealth.isLoading,
+      error: sloHealthError,
+    }),
+    [sloHealth.bySvc, sloHealth.isLoading, sloHealthError]
+  );
 
   const handleTimeChange = useCallback((newTimeRange: TimeRange) => {
     setTimeRange(newTimeRange);
@@ -678,7 +811,15 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         field: 'serviceName',
         name: i18nTexts.table.serviceName,
         sortable: true,
-        width: '20%',
+        // Column widths sum to 100% so EuiBasicTable doesn't overflow its
+        // container — the prior mix of %s + fixed-px columns added up to
+        // ~110%, and at typical table widths (~720px once the left filter
+        // sidebar claims its share) the failure-ratio header truncated
+        // mid-word and the throughput sparkline visibly bled into the
+        // failure-rate cell. Metric columns (latency / throughput /
+        // failure rate) need ~130px to fit `<value>` + the 60px sparkline;
+        // budget the remaining width proportionally.
+        width: '15%',
         render: (serviceName: string, item: ServiceTableItem) => {
           const language = item.groupByAttributes?.telemetry?.sdk?.language;
 
@@ -709,7 +850,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             <EuiFlexItem grow={false}>{i18nTexts.table.actions}</EuiFlexItem>
           </EuiFlexGroup>
         ),
-        width: '10%',
+        width: '8%',
         align: 'center',
         render: (item: ServiceTableItem) => (
           <EuiFlexGroup
@@ -780,7 +921,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
-        width: '21%',
+        width: '19%',
         align: 'center',
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
@@ -801,16 +942,19 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               justifyContent="center"
               responsive={false}
             >
-              <EuiFlexItem grow={false} style={{ minWidth: '60px' }}>
+              <EuiFlexItem grow={false} style={{ minWidth: '50px' }}>
                 <EuiText size="s">{latencyMs} ms</EuiText>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              {/* Sparkline grows to fill the cell so wide screens get a
+                  longer trend; minWidth keeps it readable when the column
+                  shrinks; maxWidth keeps it from looking absurdly stretched
+                  on a 4K display. */}
+              <EuiFlexItem grow={1} style={{ minWidth: 60, maxWidth: 200 }}>
                 <MetricSparkline
                   data={latencyData}
                   isLoading={metricsLoading}
                   color={APM_CONSTANTS.COLORS.LATENCY}
                   height={APM_CONSTANTS.SPARKLINE_HEIGHT}
-                  width={APM_CONSTANTS.SPARKLINE_WIDTH}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -829,7 +973,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
-        width: '21%',
+        width: '19%',
         align: 'center',
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
@@ -851,16 +995,15 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               justifyContent="center"
               responsive={false}
             >
-              <EuiFlexItem grow={false} style={{ minWidth: '90px' }}>
+              <EuiFlexItem grow={false} style={{ minWidth: '70px' }}>
                 <EuiText size="s">{throughputFormatted}</EuiText>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={1} style={{ minWidth: 60, maxWidth: 200 }}>
                 <MetricSparkline
                   data={throughputData}
                   isLoading={metricsLoading}
                   color={APM_CONSTANTS.COLORS.THROUGHPUT}
                   height={APM_CONSTANTS.SPARKLINE_HEIGHT}
-                  width={APM_CONSTANTS.SPARKLINE_WIDTH}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -879,7 +1022,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
-        width: '100px',
+        width: '13%',
         align: 'center',
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
@@ -900,16 +1043,15 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               justifyContent="center"
               responsive={false}
             >
-              <EuiFlexItem grow={false} style={{ minWidth: '50px' }}>
+              <EuiFlexItem grow={false} style={{ minWidth: '40px' }}>
                 <EuiText size="s">{failureFormatted}%</EuiText>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={1} style={{ minWidth: 60, maxWidth: 200 }}>
                 <MetricSparkline
                   data={failureData}
                   isLoading={metricsLoading}
                   color={APM_CONSTANTS.COLORS.FAILURE_RATE}
                   height={APM_CONSTANTS.SPARKLINE_HEIGHT}
-                  width={APM_CONSTANTS.SPARKLINE_WIDTH}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -925,13 +1067,57 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         ),
         sortable: true,
         align: 'center',
-        width: '10%',
+        width: '8%',
+        // Widths: 15 + 8 + 19 + 19 + 13 + 8 + 18 = 100% (SLO health column
+        // adds 18% only when sloFeatureEnabled; without it the others
+        // distribute the remainder via EuiBasicTable's flex rules).
         render: (environment: string) => {
           return <EuiText size="s">{getEnvironmentDisplayName(environment)}</EuiText>;
         },
       },
+      ...(sloFeatureEnabled
+        ? [
+            {
+              field: 'serviceName' as any,
+              name: (
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>{SLO_HEALTH_COLUMN_HEADER}</EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip content={SLO_HEALTH_COLUMN_HEADER_TIP}>
+                      <EuiIcon type="questionInCircle" size="s" color="subdued" />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ),
+              width: SLO_HEALTH_COLUMN_WIDTH,
+              align: 'left' as const,
+              // Do NOT read the cell value from `item` here — we go through the
+              // stable accessor so the cell re-renders only when the hook's Map
+              // actually changes, not on every EuiResizableContainer mousemove.
+              render: (_value: unknown, item: ServiceTableItem) => {
+                const accessed = getSloHealth(item.serviceName);
+                return (
+                  <SloHealthCell
+                    serviceName={item.serviceName}
+                    bucket={accessed.bucket}
+                    isLoading={accessed.isLoading}
+                    error={accessed.error}
+                  />
+                );
+              },
+            },
+          ]
+        : []),
     ],
-    [onServiceClick, metricsMap, metricsLoading, timeRange, latencyPercentile]
+    [
+      onServiceClick,
+      metricsMap,
+      metricsLoading,
+      timeRange,
+      latencyPercentile,
+      getSloHealth,
+      sloFeatureEnabled,
+    ]
   );
 
   if (error) {
@@ -1035,7 +1221,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                                 idToSelectedMap={selectedEnvironments}
                                 onChange={onEnvironmentChange}
                                 compressed
-                                data-test-subj="environment-checkboxGroup"
+                                data-test-subj="environmentCheckboxGroup"
                               />
                             ) : (
                               <EuiText size="s" color="subdued">
@@ -1289,6 +1475,14 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                           latencyPercentile={latencyPercentile}
                           setLatencyPercentile={setLatencyPercentile}
                           onServiceClick={onServiceClick}
+                          sloAggregate={sloHealth.aggregate}
+                          sloBySvc={sloHealth.bySvc}
+                          sloAllServices={stableServiceNames}
+                          sloIsLoading={sloHealth.isLoading}
+                          sloError={sloHealthError}
+                          sloRefetch={sloHealth.refetch}
+                          sloDatasourceId={sloDatasourceId}
+                          sloFeatureEnabled={sloFeatureEnabled}
                         />
                       </EuiResizablePanel>
                     </>

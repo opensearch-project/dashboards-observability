@@ -6,21 +6,22 @@
 /**
  * Framework-agnostic SLO handlers. Route adapters translate the returned
  * { status, body } into OSD response shapes.
- *
- * PR 1 exposes the CRUD-plus-preview surface only. Repair, rule_health,
- * reconcile, aggregate, adoption, and probe-sli endpoints land in later PRs.
  */
 
-import type { Logger } from '../../../../../src/core/server';
+import type { Logger } from '../../../common/types/alerting';
 import {
+  deriveExpectedGroups,
   SloDeployContext,
   SloNotFoundError,
+  SloRepairContext,
+  SloRuleHealthProbe,
   SloRulerError,
   SloRulerTeardownRequiredError,
   SloStatusAggregationContext,
   SloValidationError,
   SloVersionConflictError,
   SloService,
+  sloRulerNamespaceFor,
 } from '../../../common/slo/slo_service';
 import type { SloCreateInput, SloListFilters, SloUpdateInput } from '../../../common/slo/slo_types';
 import type { HandlerResult } from '../alerting/route_utils';
@@ -38,9 +39,11 @@ const RULER_RAW_BODY_MAX_LEN = 256;
 function sanitizeRulerRawBody(body: string): string {
   if (!body) return '';
   // Strip ANSI/VT escape sequences that some Cortex builds embed.
+
   const stripped = body.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '');
   // Collapse all remaining control chars (incl. CR/LF/TAB) to spaces so
   // the toast renders as a single line.
+
   const flattened = stripped.replace(/[\x00-\x1F\x7F]+/g, ' ').trim();
   if (flattened.length <= RULER_RAW_BODY_MAX_LEN) return flattened;
   return `${flattened.slice(0, RULER_RAW_BODY_MAX_LEN - 1)}…`;
@@ -89,6 +92,9 @@ function toSloError(e: unknown, logger?: Logger): HandlerResult {
   }
   if (e instanceof SloRulerTeardownRequiredError) {
     if (logger) logger.warn(e.message);
+    // 409 Conflict — the client's request is valid, but the current state
+    // (unresolved datasource, live rule group) prevents completion. UI can
+    // point the user at fixing the datasource before retrying.
     return {
       status: 409,
       body: {
@@ -106,10 +112,26 @@ export async function handleListSLOs(
   svc: SloService,
   filters: SloListFilters,
   logger?: Logger,
-  statusCtx?: SloStatusAggregationContext
+  statusCtx?: SloStatusAggregationContext,
+  request?: unknown,
+  cursor?: string | null
 ): Promise<HandlerResult> {
   try {
-    const result = await svc.getPaginated(filters, statusCtx);
+    // Cursor wins when present. The legacy `page=N` path stays for clients
+    // mid-upgrade — the cursor branch goes through the new `paginate` API
+    // which pushes facet filters into the SO and pays status fold-in only
+    // for the visible page.
+    if (cursor !== undefined && cursor !== null && cursor !== '') {
+      const result = await svc.paginate(filters, cursor, statusCtx, request);
+      return { status: 200, body: result };
+    }
+    if (filters.page !== undefined && filters.page !== null) {
+      const result = await svc.getPaginated(filters, statusCtx, request);
+      return { status: 200, body: result };
+    }
+    // Default new behavior: fresh listing call with no cursor and no
+    // explicit page → cursor pagination, page 1.
+    const result = await svc.paginate(filters, null, statusCtx, request);
     return { status: 200, body: result };
   } catch (e) {
     return toSloError(e, logger);
@@ -121,10 +143,11 @@ export async function handleCreateSLO(
   input: SloCreateInput,
   createdBy: string,
   logger?: Logger,
-  deploy?: SloDeployContext
+  deploy?: SloDeployContext,
+  request?: unknown
 ): Promise<HandlerResult> {
   try {
-    const doc = await svc.create(input, createdBy, deploy);
+    const doc = await svc.create(input, createdBy, deploy, request);
     return { status: 201, body: doc };
   } catch (e) {
     return toSloError(e, logger);
@@ -135,13 +158,30 @@ export async function handleGetSLO(
   svc: SloService,
   id: string,
   logger?: Logger,
-  statusCtx?: SloStatusAggregationContext
+  statusCtx?: SloStatusAggregationContext,
+  request?: unknown
 ): Promise<HandlerResult> {
   try {
-    const doc = await svc.get(id);
+    const doc = await svc.get(id, request);
     if (!doc) return { status: 404, body: { error: 'SLO not found' } };
-    const liveStatus = await svc.getStatus(id, statusCtx);
-    return { status: 200, body: { ...doc, liveStatus } };
+    const liveStatus = await svc.getStatus(id, statusCtx, request);
+    // Include the refcount per recording fingerprint so the detail page
+    // can render "Shared with N other SLOs". Under A.4 this read is
+    // workspace-local: the wrapper auto-filters slo-rule-ref SOs to the
+    // caller's workspace, so N reflects "other SLOs in your workspace
+    // sharing this fingerprint" — never information about other
+    // workspaces' SLOs.
+    const workspaceId = statusCtx?.workspaceId ?? 'default';
+    const recordingFingerprintRefcounts = await svc.getFingerprintRefcounts(
+      doc,
+      workspaceId,
+      statusCtx?.resolveDatasource,
+      request
+    );
+    return {
+      status: 200,
+      body: { ...doc, liveStatus, recordingFingerprintRefcounts },
+    };
   } catch (e) {
     return toSloError(e, logger);
   }
@@ -153,10 +193,11 @@ export async function handleUpdateSLO(
   input: SloUpdateInput,
   updatedBy: string,
   logger?: Logger,
-  deploy?: SloDeployContext
+  deploy?: SloDeployContext,
+  request?: unknown
 ): Promise<HandlerResult> {
   try {
-    const doc = await svc.update(id, input, updatedBy, deploy);
+    const doc = await svc.update(id, input, updatedBy, deploy, request);
     return { status: 200, body: doc };
   } catch (e) {
     return toSloError(e, logger);
@@ -167,10 +208,11 @@ export async function handleDeleteSLO(
   svc: SloService,
   id: string,
   logger?: Logger,
-  deploy?: SloDeployContext
+  deploy?: SloDeployContext,
+  request?: unknown
 ): Promise<HandlerResult> {
   try {
-    const result = await svc.delete(id, deploy);
+    const result = await svc.delete(id, deploy, request);
     if (!result.deleted) return { status: 404, body: { error: 'SLO not found' } };
     return { status: 200, body: { deleted: true } };
   } catch (e) {
@@ -183,10 +225,11 @@ export async function handleEnableSLO(
   id: string,
   updatedBy: string,
   logger?: Logger,
-  deploy?: SloDeployContext
+  deploy?: SloDeployContext,
+  request?: unknown
 ): Promise<HandlerResult> {
   try {
-    const doc = await svc.setEnabled(id, true, updatedBy, deploy);
+    const doc = await svc.setEnabled(id, true, updatedBy, deploy, request);
     return { status: 200, body: doc };
   } catch (e) {
     return toSloError(e, logger);
@@ -198,10 +241,11 @@ export async function handleDisableSLO(
   id: string,
   updatedBy: string,
   logger?: Logger,
-  deploy?: SloDeployContext
+  deploy?: SloDeployContext,
+  request?: unknown
 ): Promise<HandlerResult> {
   try {
-    const doc = await svc.setEnabled(id, false, updatedBy, deploy);
+    const doc = await svc.setEnabled(id, false, updatedBy, deploy, request);
     return { status: 200, body: doc };
   } catch (e) {
     return toSloError(e, logger);
@@ -225,14 +269,126 @@ export async function handleGetSLOStatuses(
   svc: SloService,
   ids: string[],
   logger?: Logger,
-  statusCtx?: SloStatusAggregationContext
+  statusCtx?: SloStatusAggregationContext,
+  request?: unknown
 ): Promise<HandlerResult> {
   try {
     if (!ids || ids.length === 0) {
       return { status: 400, body: { error: 'ids parameter is required' } };
     }
-    const statuses = await svc.getStatuses(ids, statusCtx);
+    const statuses = await svc.getStatuses(ids, statusCtx, request);
     return { status: 200, body: { statuses } };
+  } catch (e) {
+    return toSloError(e, logger);
+  }
+}
+
+// ============================================================================
+// Repair + Rule health endpoints
+// ============================================================================
+
+/**
+ * Context accepted by the repair / rule_health handlers. The health probe is
+ * a structural subset of `RuleHealthChecker` and the deploy context is the
+ * same one create/update/delete take — both come from `registerSloRoutes`'
+ * closure.
+ *
+ * When `health` is missing we return 501 instead of silently falling back:
+ * the UI already has its own "rule health checker not configured" affordance,
+ * and a 200 with a synthetic `ok` would mask genuine rollout regressions.
+ */
+interface SloRepairHandlerContext {
+  health?: SloRuleHealthProbe;
+  deploy?: SloDeployContext;
+}
+
+/**
+ * `POST /api/observability/v1/slos/{id}/repair` — re-asserts the expected
+ * rule groups for an SLO. See `SloService.repair`.
+ */
+export async function handleRepairSLO(
+  svc: SloService,
+  id: string,
+  logger?: Logger,
+  ctx?: SloRepairHandlerContext,
+  request?: unknown
+): Promise<HandlerResult> {
+  try {
+    if (!ctx?.health) {
+      return {
+        status: 501,
+        body: { error: 'Rule health checker not configured in this environment' },
+      };
+    }
+    if (!ctx.deploy) {
+      return {
+        status: 400,
+        body: {
+          error:
+            'Cannot repair SLO: deploy context unavailable (datasource not registered or not a DirectQuery Prometheus connection)',
+        },
+      };
+    }
+    const repairCtx: SloRepairContext = { health: ctx.health, deploy: ctx.deploy };
+    const result = await svc.repair(id, repairCtx, request);
+    return { status: 200, body: result };
+  } catch (e) {
+    return toSloError(e, logger);
+  }
+}
+
+/**
+ * `GET /api/observability/v1/slos/{id}/rule_health` — probes the ruler for
+ * the SLO's expected rule groups and returns a `RuleHealthResponse`-shaped
+ * body (sloId + the rule-health report fields inlined).
+ */
+export async function handleGetRuleHealth(
+  svc: SloService,
+  id: string,
+  logger?: Logger,
+  ctx?: SloRepairHandlerContext,
+  request?: unknown
+): Promise<HandlerResult> {
+  try {
+    if (!ctx?.health) {
+      return {
+        status: 501,
+        body: { error: 'Rule health checker not configured in this environment' },
+      };
+    }
+    const doc = await svc.get(id, request);
+    if (!doc) throw new SloNotFoundError(id);
+
+    if (!ctx.deploy) {
+      return {
+        status: 400,
+        body: {
+          error:
+            'Cannot probe rule health: deploy context unavailable (datasource not registered or not a DirectQuery Prometheus connection)',
+        },
+      };
+    }
+
+    const expectedGroups = deriveExpectedGroups(doc);
+    const namespace =
+      doc.status.provisioning.backend === 'prometheus'
+        ? doc.status.provisioning.rulerNamespace || sloRulerNamespaceFor(ctx.deploy.workspaceId)
+        : sloRulerNamespaceFor(ctx.deploy.workspaceId);
+
+    const report = await ctx.health.check({
+      workspaceId: ctx.deploy.workspaceId,
+      datasource: ctx.deploy.datasource,
+      client: ctx.deploy.client,
+      sloId: doc.id,
+      namespace,
+      expectedGroups,
+    });
+
+    // Shape matches the public `RuleHealthResponse` in `slo_api_client.ts`:
+    // { sloId, state, expectedGroups, presentGroups, missingGroups,
+    //   rulerErrorCode?, computedAt }. We spread the report first so the
+    // route is a thin pass-through — no hidden field mutation.
+    return { status: 200, body: { sloId: doc.id, ...report } };
   } catch (e) {
     return toSloError(e, logger);
   }

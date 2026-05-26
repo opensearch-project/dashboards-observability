@@ -52,7 +52,7 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
           text: `Schema conflicts detected while fetching default timestamp, ${defaultTimestamp.message}`,
         });
       }
-    } catch (error) {
+    } catch (_error) {
       /* this.notifications.toasts.addError(error, {
         title: 'Unable to get default timestamp',
       }); */
@@ -143,12 +143,15 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
       );
     }
     // still need all fields when query contains stats
-    if (finalQuery.match(PPL_STATS_REGEX)) getAvailableFields(`search source=${this.queryIndex}`);
-    getCountVisualizations(selectedInterval.current.value.replace(/^auto_/, ''));
-    // patterns
-    this.setLogPattern(this.query, this.queryIndex, finalQuery);
-    if (!finalQuery.match(PATTERNS_REGEX)) {
-      getPatterns(selectedInterval.current.value.replace(/^auto_/, ''));
+    const hasStats = finalQuery.match(PPL_STATS_REGEX);
+    if (hasStats) getAvailableFields(`search source=${this.queryIndex}`);
+    if (!hasStats) {
+      getCountVisualizations(selectedInterval.current.value.replace(/^auto_/, ''));
+      // patterns
+      this.setLogPattern(this.query, this.queryIndex, finalQuery);
+      if (!finalQuery.match(PATTERNS_REGEX)) {
+        getPatterns(selectedInterval.current.value.replace(/^auto_/, ''));
+      }
     }
 
     // live tail - for comparing usage if for the same tab, user changed index from one to another

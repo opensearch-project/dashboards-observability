@@ -4,7 +4,7 @@
  */
 
 /**
- * Post-Phase-3/5 handler tests. The 6 datasource-CRUD handlers
+ * Handler tests for the surviving alerting routes. The 6 datasource-CRUD handlers
  * (`handleListDatasources`, `handleGet/Create/Update/Delete/TestDatasource`)
  * are no longer exercised — datasource discovery moved to the client via
  * `useDatasources` and direct saved-object queries. The handlers may still
@@ -85,7 +85,11 @@ describe('handlers', () => {
         dsIds: ['a', 'b'],
         timeoutMs: undefined,
         maxResults: 10,
-      })
+      }),
+      // Third positional arg is the optional RequestHandlerContext threaded
+      // for prom-historical's strategy call; this handler test doesn't pass
+      // one, so expect undefined.
+      undefined
     );
   });
 
@@ -118,7 +122,8 @@ describe('handlers', () => {
       expect.objectContaining({
         startTime: 'now-1h',
         endTime: 'now',
-      })
+      }),
+      undefined
     );
   });
 

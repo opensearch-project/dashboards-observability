@@ -53,6 +53,12 @@ interface MonitorsTableProps {
   maxDatasources: number;
   /** Callback fired when user tries to exceed `maxDatasources`. */
   onDatasourceCapReached: () => void;
+  /**
+   * Optional pre-fill for the search box. Used by deep links from the SLO
+   * detail page so users can jump straight to a specific recording rule
+   * without typing it. Empty / undefined leaves the box blank.
+   */
+  initialSearchQuery?: string;
 }
 
 // ============================================================================
@@ -71,8 +77,9 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   onDatasourceChange,
   maxDatasources,
   onDatasourceCapReached,
+  initialSearchQuery,
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery ?? '');
   const [filters, setFilters] = useState<FilterState>(emptyFilters());
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);

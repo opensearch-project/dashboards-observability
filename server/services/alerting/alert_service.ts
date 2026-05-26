@@ -15,6 +15,7 @@
  * Preview time-series helpers live in `alert_preview.ts`.
  * Pure utilities and unified-shape mappers live in `alert_utils.ts`.
  */
+import type { RequestHandlerContext } from '../../../../../src/core/server';
 import {
   AlertingOSClient,
   Datasource,
@@ -295,7 +296,8 @@ export class MultiBackendAlertService {
 
   async getUnifiedAlerts(
     clientOrResolver: AlertingOSClient | ((dsId: string) => Promise<AlertingOSClient>),
-    options?: UnifiedFetchOptions
+    options?: UnifiedFetchOptions,
+    ctx?: RequestHandlerContext
   ): Promise<ProgressiveResponse<UnifiedAlertSummary>> {
     const datasources = await this.resolveDatasources(options?.dsIds);
     const timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
@@ -317,7 +319,8 @@ export class MultiBackendAlertService {
           ds,
           timeoutMs,
           resolvedRange,
-          options?.onProgress
+          options?.onProgress,
+          ctx
         );
       })
     );
@@ -527,11 +530,17 @@ export class MultiBackendAlertService {
    * Get full detail for a single rule/monitor. Delegates to the standalone
    * resolver in `alert_detail.ts` so the detail logic (history, routing,
    * preview) lives outside this class but is still reachable from the routes.
+   *
+   * `ctx` is forwarded so the Prom branch can route the condition-preview
+   * range query through the data plugin's search service (`strategy:
+   * 'PROMQL'`). When omitted (legacy callers), the preview falls back to
+   * the embedded-alert extractor inside `fetchPromPreviewData`.
    */
   async getRuleDetail(
     client: AlertingOSClient,
     dsId: string,
-    ruleId: string
+    ruleId: string,
+    ctx?: RequestHandlerContext
   ): Promise<UnifiedRule | null> {
     return getRuleDetailImpl(
       this.datasourceService,
@@ -539,7 +548,8 @@ export class MultiBackendAlertService {
       this.promBackend,
       client,
       dsId,
-      ruleId
+      ruleId,
+      ctx
     );
   }
 
@@ -569,7 +579,8 @@ export class MultiBackendAlertService {
     ds: Datasource,
     timeoutMs: number,
     range: ResolvedRange | undefined,
-    onProgress?: (result: DatasourceFetchResult<UnifiedAlertSummary>) => void
+    onProgress?: (result: DatasourceFetchResult<UnifiedAlertSummary>) => void,
+    ctx?: RequestHandlerContext
   ): Promise<DatasourceFetchResult<UnifiedAlertSummary>> {
     const start = Date.now();
     const makeResult = (
@@ -591,7 +602,7 @@ export class MultiBackendAlertService {
 
     try {
       const raw = await this.withTimeout(
-        this.fetchAlertsRaw(client, ds, range),
+        this.fetchAlertsRaw(client, ds, range, ctx),
         timeoutMs,
         `Datasource ${ds.name} timed out after ${timeoutMs}ms`
       );
@@ -670,7 +681,8 @@ export class MultiBackendAlertService {
   private async fetchAlertsRaw(
     client: AlertingOSClient,
     ds: Datasource,
-    range?: ResolvedRange
+    range?: ResolvedRange,
+    ctx?: RequestHandlerContext
   ): Promise<FetchAlertsRawResult> {
     if (ds.type === 'opensearch' && this.osBackend) {
       if (range) {
@@ -691,15 +703,16 @@ export class MultiBackendAlertService {
       if (range) {
         // Historical reconstruction — only available on backends that
         // implement the optional `getHistoricalAlerts` method
-        // (`DirectQueryPrometheusBackend` today). The check is type-safe
-        // because `getHistoricalAlerts?` is declared on the
-        // `PrometheusBackend` interface — a rename or signature change
-        // now produces a compile error rather than a silent duck-type miss.
-        if (typeof this.promBackend.getHistoricalAlerts === 'function') {
+        // (`DirectQueryPrometheusBackend` today) AND when we have an OSD
+        // request context (the matrix scan routes through the data plugin's
+        // search strategy). Without `ctx` we fall back to the legacy
+        // current-only path with a banner rather than throwing.
+        if (typeof this.promBackend.getHistoricalAlerts === 'function' && ctx) {
           const startSec = Math.floor(range.startMs / 1000);
           const endSec = Math.floor(range.endMs / 1000);
           const step = computeStep(startSec, endSec);
           const historical = await this.promBackend.getHistoricalAlerts(
+            ctx,
             client,
             ds,
             startSec,

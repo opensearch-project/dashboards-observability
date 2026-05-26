@@ -4,8 +4,9 @@
  */
 
 /**
- * Prometheus backend that routes all API calls through OpenSearch Direct Query
- * resource APIs instead of connecting to Prometheus directly.
+ * Prometheus backend that routes resource-style API calls through OpenSearch
+ * Direct Query resource APIs and PromQL execution through the data plugin's
+ * search service (`strategy: 'PROMQL'`, registered by query-enhancements).
  *
  * Each Datasource object carries a `directQueryName` field that identifies which
  * Prometheus datasource (registered in the OpenSearch SQL plugin) to target.
@@ -13,14 +14,21 @@
  *   GET /_plugins/_query/_datasources
  * and seeds one Datasource per registered PROMETHEUS connector.
  *
- * API calls are routed through the OSD scoped cluster client (auth, TLS handled
- * automatically by OSD):
+ * Resource calls (rules / alerts / metadata / Alertmanager) still go through
+ * the OSD scoped cluster client because the search strategy is query-only:
  *   GET/POST/DELETE /_plugins/_directquery/_resources/{directQueryName}/...
+ *
+ * PromQL evaluation (`queryInstant`, `queryRange`, `queryRangeMatrix`, and the
+ * matrix used by `getHistoricalAlerts`) routes through `data.search.search`
+ * with `strategy: SEARCH_STRATEGY.PROMQL`. Callers thread a
+ * `RequestHandlerContext` down so the search strategy can read the same
+ * MDS-aware client the rest of OSD uses.
  *
  * Reference (OpenSearch SQL plugin):
  *   - RestDirectQueryResourcesManagementAction.java
  *   - PrometheusQueryHandler.java / PrometheusClient.java
  */
+import type { RequestHandlerContext } from '../../../../../src/core/server';
 import {
   AlertingOSClient,
   Datasource,
@@ -50,6 +58,7 @@ import {
 } from '../../../common/types/alerting';
 import { hashRuleIdentity, promAlertToUnified, promEpisodeToUnified } from './alert_utils';
 import type { PromAlertEpisode } from './alert_utils';
+import { runPromQLInstant, runPromQLRange } from './promql_search';
 
 export interface PromSeriesMatrix {
   metric: Record<string, string>;
@@ -550,49 +559,42 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
   }
 
   /**
-   * Execute a PromQL range query via the DirectQuery query execution API.
+   * Execute a PromQL range query through the data plugin's search service
+   * (`strategy: 'PROMQL'`, registered by query-enhancements). Convergence
+   * note: the strategy ultimately POSTs to
+   * `/_plugins/_directquery/_query/{dqName}` via the SQL plugin, so the
+   * wire result is unchanged — we get DataFrame normalization, multi-query
+   * splitting, and telemetry for free, and stay on the canonical OSD
+   * abstraction the reviewer asked for.
    *
-   * Uses: POST /_plugins/_directquery/_query/{dataSources}
-   * This is the query EXECUTION endpoint (separate from the resource proxy).
-   * The SQL plugin's PrometheusQueryHandler routes to PrometheusClient.queryRange()
-   * which calls Prometheus /api/v1/query_range.
-   *
-   * Request body: { datasource, query, language: "PROMQL", options: { queryType: "range", start, end, step } }
-   * Response: Prometheus matrix result with time-series values.
+   * `requestTimeoutMs` is preserved as a hint: it's mapped to the strategy
+   * `timeout` (seconds) field, with the local `withTimeout` race in
+   * probe-sli still acting as the safety net for slow upstreams.
    */
   async queryRange(
-    client: AlertingOSClient,
+    ctx: RequestHandlerContext,
     ds: Datasource,
     query: string,
     start: number,
     end: number,
-    step: number
+    step: number,
+    opts: { requestTimeoutMs?: number } = {}
   ): Promise<PromTimeSeriesPoint[]> {
     try {
       const dqName = this.resolveDqName(ds);
-      const path = `/_plugins/_directquery/_query/${encodeURIComponent(dqName)}`;
-
-      this.logger.debug(`DirectQuery range query: ${query.substring(0, 80)}...`);
-
-      const resp = await client.transport.request({
-        method: 'POST',
-        path,
-        body: {
-          datasource: dqName,
-          query,
-          language: 'PROMQL',
-          options: {
-            queryType: 'range',
-            start: start.toString(),
-            end: end.toString(),
-            step: step.toString(),
-          },
-        },
+      this.logger.debug(`PromQL range query (strategy=PROMQL): ${query.substring(0, 80)}...`);
+      const envelope = await runPromQLRange(ctx, {
+        dqName,
+        query,
+        startSec: start,
+        endSec: end,
+        stepSec: step,
+        dataSourceId: ds.mdsId,
+        timeoutSeconds: timeoutSeconds(opts.requestTimeoutMs),
       });
-
-      return this.parseRangeQueryResponse(resp.body as Record<string, unknown>);
+      return this.parseRangeQueryResponse((envelope as unknown) as Record<string, unknown>);
     } catch (err) {
-      this.logger.warn(`Failed to execute DirectQuery range query: ${err}`);
+      this.logger.warn(`Failed to execute PromQL range query: ${err}`);
       return [];
     }
   }
@@ -601,7 +603,7 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
   // flattens to a single series and swallows errors to `[]` — behavior that
   // would silently hide a bad query in the episode-reconstruction path.
   async queryRangeMatrix(
-    client: AlertingOSClient,
+    ctx: RequestHandlerContext,
     ds: Datasource,
     query: string,
     startSec: number,
@@ -609,27 +611,20 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     stepSec: number
   ): Promise<PromSeriesMatrix[]> {
     const dqName = this.resolveDqName(ds);
-    const path = `/_plugins/_directquery/_query/${encodeURIComponent(dqName)}`;
+    this.logger.debug(`PromQL range matrix query (strategy=PROMQL): ${query.substring(0, 80)}...`);
 
-    this.logger.debug(`DirectQuery range matrix query: ${query.substring(0, 80)}...`);
-
-    const resp = await client.transport.request({
-      method: 'POST',
-      path,
-      body: {
-        datasource: dqName,
-        query,
-        language: 'PROMQL',
-        options: {
-          queryType: 'range',
-          start: startSec.toString(),
-          end: endSec.toString(),
-          step: stepSec.toString(),
-        },
-      },
+    const envelope = await runPromQLRange(ctx, {
+      dqName,
+      query,
+      startSec,
+      endSec,
+      stepSec,
+      dataSourceId: ds.mdsId,
     });
 
-    const promResult = this.extractPrometheusResult(resp.body as Record<string, unknown>);
+    const promResult = this.extractPrometheusResult(
+      (envelope as unknown) as Record<string, unknown>
+    );
     if (!promResult) return [];
 
     const rawSeries = (promResult.result ?? []) as Array<{
@@ -680,6 +675,7 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
   // for the full algorithm; the inline notes below cover only the
   // non-obvious invariants (edge tolerance, dedupe key, error isolation).
   async getHistoricalAlerts(
+    ctx: RequestHandlerContext,
     client: AlertingOSClient,
     ds: Datasource,
     startEpochSec: number,
@@ -698,7 +694,7 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     // `/api/v1/alerts` is already firing-or-inactive on most Prom versions,
     // so this aligns the two sources.
     const matrixPromise = this.queryRangeMatrix(
-      client,
+      ctx,
       ds,
       'ALERTS{alertstate="firing"}',
       startEpochSec,
@@ -836,43 +832,34 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
   }
 
   /**
-   * Execute a PromQL instant query via the DirectQuery query execution API.
-   *
-   * Uses: POST /_plugins/_directquery/_query/{dataSources}
-   * Request body: { datasource, query, language: "PROMQL", options: { queryType: "instant", time } }
-   * Response: Prometheus vector result with point-in-time values.
+   * Execute a PromQL instant query through the data plugin's search service
+   * (`strategy: 'PROMQL'`). The `time` argument is forwarded as the
+   * strategy's `options.time` (epoch seconds, required by the SQL plugin's
+   * PrometheusQueryHandler — it rejects instant requests without one).
+   * When `time` is omitted we default to "now"; the strategy itself will
+   * reject the request if both are missing, so passing `now` here matches
+   * the legacy backend semantics that callers already rely on.
    */
   async queryInstant(
-    client: AlertingOSClient,
+    ctx: RequestHandlerContext,
     ds: Datasource,
     query: string,
-    time?: number
+    time?: number,
+    opts: { requestTimeoutMs?: number } = {}
   ): Promise<PromTimeSeriesPoint[]> {
     try {
       const dqName = this.resolveDqName(ds);
-      const path = `/_plugins/_directquery/_query/${encodeURIComponent(dqName)}`;
-
-      this.logger.debug(`DirectQuery instant query: ${query.substring(0, 80)}...`);
-
-      const options: Record<string, string> = { queryType: 'instant' };
-      if (time !== undefined) {
-        options.time = time.toString();
-      }
-
-      const resp = await client.transport.request({
-        method: 'POST',
-        path,
-        body: {
-          datasource: dqName,
-          query,
-          language: 'PROMQL',
-          options,
-        },
+      this.logger.debug(`PromQL instant query (strategy=PROMQL): ${query.substring(0, 80)}...`);
+      const envelope = await runPromQLInstant(ctx, {
+        dqName,
+        query,
+        timeSec: time ?? Math.floor(Date.now() / 1000),
+        dataSourceId: ds.mdsId,
+        timeoutSeconds: timeoutSeconds(opts.requestTimeoutMs),
       });
-
-      return this.parseInstantQueryResponse(resp.body as Record<string, unknown>);
+      return this.parseInstantQueryResponse((envelope as unknown) as Record<string, unknown>);
     } catch (err) {
-      this.logger.warn(`Failed to execute DirectQuery instant query: ${err}`);
+      this.logger.warn(`Failed to execute PromQL instant query: ${err}`);
       return [];
     }
   }
@@ -1001,4 +988,12 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
       value: a.value != null ? String(a.value) : '',
     };
   }
+}
+
+// Convert a millisecond budget to the seconds-granularity hint the search
+// strategy plumbs as its `timeout` field. Round up so we never hand the
+// upstream a budget shorter than the caller asked for.
+function timeoutSeconds(ms: number | undefined): number | undefined {
+  if (ms === undefined || !Number.isFinite(ms) || ms <= 0) return undefined;
+  return Math.ceil(ms / 1000);
 }

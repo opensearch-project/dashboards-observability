@@ -67,7 +67,6 @@ function baseSlo(overrides: Partial<SloDocument['spec']> = {}): SloDocument {
         backend: 'prometheus',
         alertGroupName: 'slo:api_availability_abcd1234',
         rulerNamespace: 'slo-generated',
-        recordingFingerprints: {},
       },
     },
   };
@@ -92,7 +91,7 @@ describe('findClosestRecordingWindow', () => {
     expect(findClosestRecordingWindow('45m')).toBe('1h');
     expect(findClosestRecordingWindow('1d')).toBe('1d');
   });
-  it('returns the longest recording window when the target exceeds all windows (design §6.4)', () => {
+  it('returns the longest recording window when the target exceeds all windows', () => {
     expect(findClosestRecordingWindow('30d')).toBe('3d');
     expect(findClosestRecordingWindow('7d')).toBe('3d');
   });
@@ -116,14 +115,14 @@ describe('ruleSuffix', () => {
     expect(s).toMatch(/^[0-9a-f]{8}$/);
   });
 
-  // Pinned-hash guard: design §6.3 / §13.1 commits to sha256(workspace:sloId:objective).slice(0,8).
-  // Value computed with:
+  // Pinned-hash guard: rule-name contract commits to
+  // sha256(workspace:sloId:objective).slice(0,8). Value computed with:
   //   node -e "console.log(require('crypto').createHash('sha256')
   //     .update('ws-1:slo-abc:availability').digest('hex').slice(0,8))"
   // If this value changes, external dashboards / Alertmanager silences /
   // GitOps manifests pinning rule names will break. Coordinate a migration
   // before touching this.
-  it('matches the pinned sha256 prefix for a known triple (§13.1 commitment)', () => {
+  it('matches the pinned sha256 prefix for a known triple', () => {
     expect(ruleSuffix('ws-1', 'slo-abc', 'availability')).toBe('3e048ec6');
   });
 });
@@ -137,7 +136,7 @@ describe('slugifySloObjective', () => {
 });
 
 describe('generateSloRuleGroup — availability, single objective', () => {
-  it('generates 7 recording + 4 burn-rate + 2 budget warnings = 13 rules (design §6.4)', () => {
+  it('generates 7 recording + 4 burn-rate + 2 budget warnings = 13 rules', () => {
     const group = generateSloRuleGroup(baseSlo());
     expect(group.rules).toHaveLength(13);
 
@@ -172,7 +171,7 @@ describe('generateSloRuleGroup — availability, single objective', () => {
     }
   });
 
-  it('propagates spec.labels as slo_label_<key> (design §10.1)', () => {
+  it('propagates spec.labels as slo_label_<key>', () => {
     const doc = baseSlo({ labels: { compliance: 'pci', region: ['us-west-2', 'us-east-1'] } });
     const group = generateSloRuleGroup(doc);
     const rule = group.rules[0];
@@ -180,7 +179,7 @@ describe('generateSloRuleGroup — availability, single objective', () => {
     expect(rule.labels.slo_label_region).toBe('us-west-2,us-east-1');
   });
 
-  it('does not propagate spec.annotations (design §10.3)', () => {
+  it('does not propagate spec.annotations', () => {
     const doc = baseSlo({ annotations: { runbook: 'https://wiki/slo/api' } });
     const group = generateSloRuleGroup(doc);
     for (const rule of group.rules) {
@@ -200,6 +199,37 @@ describe('generateSloRuleGroup — availability, single objective', () => {
     expect(pageQuick.expr).toContain('> 0.0144');
     const pageSlow = burnRates.find((r) => r.labels.slo_burn_rate_multiplier === '6')!;
     expect(pageSlow.expr).toContain('> 0.006');
+  });
+
+  // Regression: target=0.99999 with multiplier=0.001 yields threshold=1e-8.
+  // Earlier impl emitted toFixed(6).trim() = "0", so the alert expr collapsed
+  // to `... > 0` and fired on any non-zero error.
+  it('preserves sub-decimal thresholds via exponential notation', () => {
+    const doc = baseSlo({
+      objectives: [{ name: 'extreme-target', target: 0.99999 }],
+      alerting: {
+        strategy: 'mwmbr',
+        burnRates: [
+          {
+            shortWindow: '5m',
+            longWindow: '1h',
+            burnRateMultiplier: 0.001,
+            severity: 'page',
+            createAlarm: true,
+            forDuration: '2m',
+          },
+        ],
+      },
+    });
+    const group = generateSloRuleGroup(doc);
+    const burnRate = group.rules.find(
+      (r) => r.type === 'alerting' && r.labels.slo_alarm_type === 'burn_rate'
+    );
+    expect(burnRate).toBeDefined();
+    // Threshold is non-zero (would otherwise produce a false-alarm storm).
+    expect(burnRate!.expr).not.toMatch(/>\s*0(\D|$)/);
+    // Sub-decimal threshold renders in exponential notation.
+    expect(burnRate!.expr).toMatch(/>\s*\d(\.\d+)?e-\d/);
   });
 
   // Guards against #S5-burnrate-label-mismatch. Recording rules emit different

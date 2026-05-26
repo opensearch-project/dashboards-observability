@@ -444,6 +444,13 @@ const RULE_IDENTITY_STRIP_LABELS = new Set(['__name__', 'alertstate']);
  * the schema list is greppable, testable, and obvious. Adding a new schema
  * means adding one row; previously the convention was buried in a
  * 60-line function.
+ *
+ * Callers that have access to a request-scoped `uiSettings` client should
+ * prefer the user-configurable `observability:traceAnalyticsSpanIndices` /
+ * `observability:traceAnalyticsCorrelatedLogsIndices` settings when
+ * classifying. `osMonitorToUnifiedRuleSummary` runs in code paths that
+ * don't yet plumb the request, so it falls back to the static defaults
+ * below.
  */
 const LOG_INDEX_PREFIXES = ['logs-', 'ss4o_logs'] as const;
 const APM_INDEX_PREFIXES = ['otel-v1-apm', 'ss4o_traces'] as const;

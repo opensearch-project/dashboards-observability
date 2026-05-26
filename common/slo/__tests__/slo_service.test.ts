@@ -5,12 +5,12 @@
 
 /**
  * SloService tests — pins regression surfaces for:
- *   - W1.2 removal of the `_demoState` annotation back-door. Anyone who can
- *     set an SLO annotation must NOT be able to override the computed health
+ *   - Removal of the `_demoState` annotation back-door. Anyone who can set
+ *     an SLO annotation must NOT be able to override the computed health
  *     state. The stub returns 'disabled' when `spec.enabled === false` and
  *     'no_data' otherwise, full stop.
- *   - W1.3(c) 6-significant-figure target clamp in `normalizeSpec` (happens
- *     in the service layer, not the validator — validators stay pure).
+ *   - 6-significant-figure target clamp in `normalizeSpec` (happens in the
+ *     service layer, not the validator — validators stay pure).
  */
 
 import { SloService, SloValidationError } from '../slo_service';
@@ -65,10 +65,10 @@ function validSpec(overrides: Partial<SloSpec> = {}): SloSpec {
 }
 
 // ============================================================================
-// W1.2 — computeStatus / getStatus contract + no `_demoState` back-door
+// computeStatus / getStatus contract + no `_demoState` back-door
 // ============================================================================
 
-describe('SloService.getStatus — stub contract (W1.2)', () => {
+describe('SloService.getStatus — stub contract', () => {
   it('returns state=disabled when spec.enabled is false', async () => {
     const svc = new SloService(noopLogger());
     const doc = await svc.create({ spec: validSpec({ enabled: false }) });
@@ -85,9 +85,9 @@ describe('SloService.getStatus — stub contract (W1.2)', () => {
     expect(status.objectives.every((o) => o.state === 'no_data')).toBe(true);
   });
 
-  // Regression: before W1.2 landed, `spec.annotations._demoState` could flip
-  // reported state to 'ok' / 'breached' / anything the attacker chose. The
-  // demo hook is gone. Annotations are metadata and MUST NOT leak into status.
+  // Regression: previously `spec.annotations._demoState` could flip reported
+  // state to 'ok' / 'breached' / anything the attacker chose. The demo hook
+  // is gone. Annotations are metadata and MUST NOT leak into status.
   it('ignores the removed _demoState annotation back-door (annotations do not affect status)', async () => {
     const svc = new SloService(noopLogger());
     const doc = await svc.create({
@@ -117,10 +117,10 @@ describe('SloService.getStatus — stub contract (W1.2)', () => {
 });
 
 // ============================================================================
-// W1.3(c) — 6-sig-fig target clamp in normalizeSpec
+// 6-sig-fig target clamp in normalizeSpec
 // ============================================================================
 
-describe('SloService.create — target precision clamp (W1.3c)', () => {
+describe('SloService.create — target precision clamp', () => {
   it('clamps a 7th-digit target down to 6 significant figures', async () => {
     const svc = new SloService(noopLogger());
     // 0.9876543 * 1e6 = 987654.3 → Math.round → 987654 → 0.987654
@@ -148,7 +148,7 @@ describe('SloService.create — target precision clamp (W1.3c)', () => {
 });
 
 // ============================================================================
-// W3.1 — live-status aggregator integration (mocked)
+// Live-status aggregator integration (mocked)
 // ============================================================================
 
 function mkCtx(): SloStatusAggregationContext {
@@ -176,7 +176,7 @@ function mkAgg(
   };
 }
 
-describe('SloService — aggregator routing (W3.1)', () => {
+describe('SloService — aggregator routing', () => {
   it('routes getStatus through the aggregator when one is configured', async () => {
     const svc = new SloService(noopLogger());
     const { agg } = mkAgg(async (docs) =>
@@ -335,7 +335,7 @@ describe('SloService — aggregator routing (W3.1)', () => {
   });
 });
 
-describe('SloService dedup flag (Phase 3 W3.6)', () => {
+describe('SloService dedup flag', () => {
   it('defaults to enabled', () => {
     const svc = new SloService(noopLogger());
     expect(svc.isDedupEnabled()).toBe(true);
