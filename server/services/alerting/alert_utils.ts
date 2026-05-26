@@ -428,6 +428,35 @@ function hashLabels(labels: Record<string, string>): string {
 const RULE_IDENTITY_STRIP_LABELS = new Set(['__name__', 'alertstate']);
 
 /**
+ * Index-name prefixes used to derive a `MonitorType` for query-level OS
+ * monitors that don't carry an explicit `kind` hint. These mirror the
+ * well-known OSD schemas:
+ *
+ *   - `logs-*`, `ss4o_logs*` — Simple Schema for Observability (SS4O) logs
+ *     and the legacy `logs-*` convention used by the Logs app.
+ *   - `otel-v1-apm-*`, `ss4o_traces*` — OTel-derived APM/trace indices
+ *     (legacy `otel-v1-apm-*` data prepper output and SS4O traces).
+ *
+ * Anything that doesn't match either family falls through to `'metric'` —
+ * the catch-all bucket for Prometheus / cluster-metrics-style monitors.
+ *
+ * Hoisted to module scope (rather than inlined in the derivation site) so
+ * the schema list is greppable, testable, and obvious. Adding a new schema
+ * means adding one row; previously the convention was buried in a
+ * 60-line function.
+ */
+const LOG_INDEX_PREFIXES = ['logs-', 'ss4o_logs'] as const;
+const APM_INDEX_PREFIXES = ['otel-v1-apm', 'ss4o_traces'] as const;
+
+function inferMonitorTypeFromIndices(indices: string[]): MonitorType {
+  const startsWithAny = (prefixes: readonly string[]): boolean =>
+    indices.some((idx) => prefixes.some((p) => idx.startsWith(p)));
+  if (startsWithAny(LOG_INDEX_PREFIXES)) return 'log';
+  if (startsWithAny(APM_INDEX_PREFIXES)) return 'apm';
+  return 'metric';
+}
+
+/**
  * Hash of the labels that identify a Prometheus rule instance — the full
  * label set minus transport metadata (see `RULE_IDENTITY_STRIP_LABELS`).
  * Used as a dedupe key when merging historical episodes with live
@@ -554,15 +583,10 @@ export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): Unifi
   } else if (kind === 'bucket') {
     monitorType = 'infrastructure';
   } else {
-    // query-level: derive from index patterns
+    // query-level: derive from index patterns. See LOG_INDEX_PREFIXES /
+    // APM_INDEX_PREFIXES at module scope for the schema list.
     const indices = input && 'search' in input ? input.search.indices ?? [] : [];
-    if (indices.some((i) => i.startsWith('logs-') || i.startsWith('ss4o_logs'))) {
-      monitorType = 'log';
-    } else if (indices.some((i) => i.startsWith('otel-v1-apm') || i.startsWith('ss4o_traces'))) {
-      monitorType = 'apm';
-    } else {
-      monitorType = 'metric';
-    }
+    monitorType = inferMonitorTypeFromIndices(indices);
   }
 
   const destNames = triggerActions.map((a) => a.name);
