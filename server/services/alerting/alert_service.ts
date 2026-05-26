@@ -54,6 +54,52 @@ import {
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const DEFAULT_MAX_RESULTS = 5_000;
+/**
+ * Concurrency cap on per-datasource fan-outs. The unified views fan a
+ * single OSD request out to up to `ALERT_MANAGER_MAX_DATASOURCES_LIMIT`
+ * datasources. Without a cap we'd issue N concurrent transport requests,
+ * which can exhaust the HTTP agent pool (Node's default `maxSockets` is
+ * lazy-allocated per host but each datasource is potentially a different
+ * host, and concurrent reuse of a single host's pool is also sensitive
+ * to keep-alive limits). Batching at 5 keeps tail latency comparable to
+ * the unbounded version on healthy clusters and prevents one slow
+ * datasource from blocking the whole batch via timeout pile-up.
+ */
+export const FANOUT_CONCURRENCY = 5;
+
+/**
+ * Run `tasks` in parallel batches of at most `concurrency` at a time,
+ * preserving input order in the output. Returns Promise.allSettled-shape
+ * results so callers can keep their existing fulfilled/rejected branching.
+ *
+ * Implementation note: the simplest correct shape is "fixed-size worker
+ * pool that pulls the next pending index off a cursor". Pure batched
+ * `Promise.allSettled` (chunk → await → next chunk) is half the size but
+ * has worse worst-case latency: a slow datasource in chunk[0] blocks all
+ * of chunk[1] from even starting. Workers consume the queue independently
+ * so a fast datasource doesn't wait on a slow one in the same batch.
+ */
+export async function runWithConcurrencyLimit<T>(
+  tasks: Array<() => Promise<T>>,
+  concurrency: number = FANOUT_CONCURRENCY
+): Promise<Array<PromiseSettledResult<T>>> {
+  const results: Array<PromiseSettledResult<T>> = new Array(tasks.length);
+  const workerCount = Math.max(1, Math.min(concurrency, tasks.length));
+  let cursor = 0;
+  async function worker() {
+    while (cursor < tasks.length) {
+      const i = cursor++;
+      try {
+        const value = await tasks[i]();
+        results[i] = { status: 'fulfilled', value };
+      } catch (reason) {
+        results[i] = { status: 'rejected', reason };
+      }
+    }
+  }
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
+  return results;
+}
 
 /**
  * Resolved time window in epoch milliseconds — product of calling
@@ -263,8 +309,8 @@ export class MultiBackendAlertService {
     const resolvedRange = resolveRangeMsFromOptions(options);
 
     const isResolver = typeof clientOrResolver === 'function';
-    const dsResults = await Promise.allSettled(
-      datasources.map(async (ds) => {
+    const dsResults = await runWithConcurrencyLimit(
+      datasources.map((ds) => async () => {
         const client = isResolver ? await clientOrResolver(ds.id) : clientOrResolver;
         return this.fetchAlertsFromDatasource(
           client,
@@ -317,8 +363,8 @@ export class MultiBackendAlertService {
     const fetchedAt = new Date().toISOString();
 
     const isResolver = typeof clientOrResolver === 'function';
-    const dsResults = await Promise.allSettled(
-      datasources.map(async (ds) => {
+    const dsResults = await runWithConcurrencyLimit(
+      datasources.map((ds) => async () => {
         const client = isResolver ? await clientOrResolver(ds.id) : clientOrResolver;
         return this.fetchRulesFromDatasource(client, ds, timeoutMs, options?.onProgress);
       })
@@ -370,9 +416,9 @@ export class MultiBackendAlertService {
     const allRules: UnifiedRuleSummary[] = [];
     const warnings: DatasourceWarning[] = [];
 
-    // Fetch from all datasources in parallel
-    const dsResults = await Promise.allSettled(
-      datasources.map((ds) => this.fetchRulesRaw(client, ds))
+    // Fetch from all datasources in batches (FANOUT_CONCURRENCY)
+    const dsResults = await runWithConcurrencyLimit(
+      datasources.map((ds) => () => this.fetchRulesRaw(client, ds))
     );
 
     for (let i = 0; i < datasources.length; i++) {
@@ -425,9 +471,9 @@ export class MultiBackendAlertService {
     const allAlerts: UnifiedAlertSummary[] = [];
     const warnings: DatasourceWarning[] = [];
 
-    // Fetch from all datasources in parallel
-    const dsResults = await Promise.allSettled(
-      datasources.map((ds) => this.fetchAlertsRaw(client, ds))
+    // Fetch from all datasources in batches (FANOUT_CONCURRENCY)
+    const dsResults = await runWithConcurrencyLimit(
+      datasources.map((ds) => () => this.fetchAlertsRaw(client, ds))
     );
 
     for (let i = 0; i < datasources.length; i++) {
