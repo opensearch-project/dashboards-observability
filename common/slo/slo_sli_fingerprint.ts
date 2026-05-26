@@ -52,13 +52,13 @@ export function computeSliFingerprint(
     goodEventsFilter: normalizeGoodEventsFilter(prom.goodEventsFilter),
     latencyThresholdUnit:
       prom.type === 'latency_threshold' ? prom.latencyThresholdUnit ?? null : null,
-    // Normalize through the same decimal formatter the rule generator
-    // uses (`formatLatencyBoundLe`) so floating-point noise like
-    // `0.1 + 0.2 = 0.30000000000000004` doesn't fingerprint differently
-    // from a literal `0.3` — both produce the same `le="0.3"` bucket
-    // label and would generate byte-equal recording rules.
+    // Hash the *formatted* latency bound (the same `le=` string the
+    // recording-rule generator emits) rather than the raw number. Two
+    // semantically identical thresholds that differ only in float
+    // representation (e.g. `0.1+0.2` vs `0.3`) would otherwise fingerprint
+    // differently and defeat shared-recording-group dedup.
     latencyThreshold:
-      prom.type === 'latency_threshold' && objective.latencyThreshold !== undefined
+      prom.type === 'latency_threshold' && typeof objective.latencyThreshold === 'number'
         ? formatLatencyBoundLe(objective.latencyThreshold, prom.latencyThresholdUnit ?? 'seconds')
         : null,
     periodLength: prom.periodLength ?? null,
@@ -80,65 +80,65 @@ function normalizeMetric(metric: string | undefined): string | null {
 }
 
 /**
- * Trim and collapse whitespace runs *outside* string literals to a single
- * space, then strip a single pair of wrapping `{` / `}` if the entire
- * trimmed string is wrapped. Whitespace inside double-, single-, or
- * backtick-quoted spans is preserved verbatim — `status=" 5xx "` and
- * `status="5xx"` are different matchers in PromQL and must fingerprint
- * differently.
+ * Trim, collapse whitespace runs *outside PromQL string literals* to a single
+ * space, then strip a single pair of wrapping `{` / `}` if the entire trimmed
+ * string is wrapped. Inner braces are preserved.
+ *
+ * Whitespace inside double-quoted matcher values (e.g. `status=" 5xx "`) is
+ * preserved verbatim — it changes which series the matcher selects, so two
+ * filters that differ only in literal whitespace must fingerprint differently.
  */
 function normalizeGoodEventsFilter(filter: string | undefined): string | null {
   if (filter === undefined || filter === null) return null;
-  const collapsed = collapseWhitespaceOutsideStrings(filter.trim());
+  const collapsed = collapseWhitespaceOutsideLiterals(filter.trim());
   if (collapsed.length === 0) return null;
   if (collapsed.startsWith('{') && collapsed.endsWith('}')) {
-    const inner = collapseWhitespaceOutsideStrings(collapsed.slice(1, -1).trim());
+    const inner = collapseWhitespaceOutsideLiterals(collapsed.slice(1, -1).trim());
     return inner.length === 0 ? null : inner;
   }
   return collapsed;
 }
 
 /**
- * Collapse runs of whitespace to a single space, but only outside string
- * literals. Tracks a quote-state machine character-by-character so a
- * value like `status=" 5xx "` keeps its inner spaces while `service =
- * "x"` collapses to `service="x"`.
+ * Collapse whitespace runs only outside double-quoted string literals.
+ * PromQL matcher values use double quotes with `\"` escapes; backslashes
+ * inside the literal escape the next character. Anything outside a literal
+ * is plain syntax and safe to collapse.
  */
-function collapseWhitespaceOutsideStrings(input: string): string {
+function collapseWhitespaceOutsideLiterals(input: string): string {
   let out = '';
-  let inQuote: '"' | "'" | '`' | null = null;
-  let escape = false;
-  let pendingSpace = false;
-  for (const ch of input) {
-    if (inQuote) {
+  let inLiteral = false;
+  let lastWasSpaceOutside = false;
+  for (let i = 0; i < input.length; i++) {
+    const ch = input[i];
+    if (inLiteral) {
       out += ch;
-      if (escape) {
-        escape = false;
-      } else if (ch === '\\' && inQuote !== '`') {
-        escape = true;
-      } else if (ch === inQuote) {
-        inQuote = null;
+      if (ch === '\\' && i + 1 < input.length) {
+        out += input[i + 1];
+        i++;
+      } else if (ch === '"') {
+        inLiteral = false;
       }
+      lastWasSpaceOutside = false;
       continue;
     }
-    if (ch === '"' || ch === "'" || ch === '`') {
-      if (pendingSpace && out.length > 0) out += ' ';
-      pendingSpace = false;
+    if (ch === '"') {
       out += ch;
-      inQuote = ch;
+      inLiteral = true;
+      lastWasSpaceOutside = false;
       continue;
     }
     if (/\s/.test(ch)) {
-      pendingSpace = out.length > 0;
+      if (!lastWasSpaceOutside) {
+        out += ' ';
+        lastWasSpaceOutside = true;
+      }
       continue;
     }
-    if (pendingSpace) {
-      out += ' ';
-      pendingSpace = false;
-    }
     out += ch;
+    lastWasSpaceOutside = false;
   }
-  return out;
+  return out.trim();
 }
 
 function normalizeCustomExpr(expr: CustomPromQLExpr | undefined): CustomPromQLExpr | null {

@@ -22,7 +22,7 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   unobserve: jest.fn(),
 }));
 
-// Post-Phase 4: AlertDetailFlyout instantiates AlertingOpenSearchService
+// AlertDetailFlyout instantiates AlertingOpenSearchService
 // internally via `useMemo(() => new AlertingOpenSearchService(), [])` and
 // calls `getAlertDetail(dsId, alertId)` on mount. Mock the class so the
 // constructor returns a stubbed instance with `getAlertDetail` resolving to

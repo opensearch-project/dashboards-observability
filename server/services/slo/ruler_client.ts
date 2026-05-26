@@ -18,7 +18,7 @@
  *   (the SQL plugin's PrometheusClientImpl sets that header on the upstream call;
  *    the OSD transport does not expose per-request headers so we rely on that).
  *
- * Semantics (memo §Dual-write atomicity):
+ * Dual-write atomicity:
  *   - Synchronous, fail-loud. One call. No retry, no backoff.
  *   - Errors surface as SloRulerError with a stable code, preserving upstream
  *     HTTP status + raw body so the wizard can render a self-service message.
@@ -330,86 +330,33 @@ function stringifyBody(body: unknown): string {
  * Cortex's ruler returns HTTP 404 with body `no rule groups found` when a
  * namespace exists but holds nothing (or hasn't yet been created). The
  * OpenSearch SQL plugin's DirectQuery proxy does not forward that status —
- * it wraps the response as HTTP 400 with a
- * `DataSourceClientException` / `PrometheusClientException` envelope whose
- * `details` string carries the original upstream status.
+ * it wraps the response as HTTP 400 with a structured envelope:
  *
- * We sniff for the exact wrapped-404 fingerprint so a genuinely empty
- * namespace lines up with the HTTP-404 path (return `[]`) instead of
- * escalating to `SloRulerError('RULER_VALIDATION_FAILED', 400, …)`.
+ *   { error: { type: '<...>ClientException',
+ *              details: 'Ruler request failed with code: 404. ...' } }
  *
- * Anything else at 400 is still treated as a real validation failure.
+ * We pin to the envelope's `error.type` plus the upstream-code field inside
+ * `details` so the classifier doesn't fire on a free-text 400 body that
+ * happens to mention the strings — e.g. a user-supplied PromQL field
+ * reflected back in an error. Anything else at 400 stays as a real
+ * validation failure.
  */
 function isWrappedEmptyNamespaceError(err: unknown): boolean {
   if (extractHttpStatus(err) !== 400) return false;
-  const raw = err as { body?: unknown; meta?: { body?: unknown }; message?: string };
-  const bodyCandidates: unknown[] = [raw?.body, raw?.meta?.body, raw?.message];
-  for (const candidate of bodyCandidates) {
-    if (matchesEmptyNamespaceEnvelope(candidate)) return true;
+  const raw = err as { body?: unknown; meta?: { body?: unknown } };
+  const candidates: unknown[] = [raw?.body, raw?.meta?.body];
+  for (const candidate of candidates) {
+    if (!candidate || typeof candidate !== 'object') continue;
+    const error = (candidate as { error?: unknown }).error;
+    if (!error || typeof error !== 'object') continue;
+    const { type, details } = error as { type?: unknown; details?: unknown };
+    if (typeof type !== 'string' || !/ClientException$/.test(type)) continue;
+    if (typeof details !== 'string') continue;
+    // Upstream Cortex status is embedded as `code: <N>` inside details.
+    const match = /\bcode:\s*(\d{3})\b/.exec(details);
+    if (match && match[1] === '404') return true;
   }
   return false;
-}
-
-/**
- * Parse the SQL plugin's wrapped-error envelope and look for the exact
- * `details` field that carries the upstream ruler status. Cortex returns
- * HTTP 404 with body `no rule groups found` when a namespace exists but
- * holds nothing; the SQL plugin re-wraps that as HTTP 400 with
- * `{ "type": "DataSourceClientException", "details": "Ruler request
- *   failed with code: 404. Error details: no rule groups found", ... }`.
- *
- * Pin to the typed `details` field rather than substring-sniffing the
- * full response so verbose stack traces or generic 404 templates that
- * happen to contain similar phrases don't reclassify a real validation
- * failure as "empty namespace".
- */
-function matchesEmptyNamespaceEnvelope(candidate: unknown): boolean {
-  let parsed: unknown = candidate;
-  if (typeof candidate === 'string') {
-    const trimmed = candidate.trim();
-    if (trimmed.length === 0) return false;
-    try {
-      parsed = JSON.parse(trimmed);
-    } catch {
-      // Fall back to substring-sniff on the original string so a
-      // non-JSON error envelope still benefits from the legacy heuristic.
-      const normalized = trimmed.toLowerCase();
-      return (
-        normalized.includes('no rule groups found') &&
-        normalized.includes('code: 404') &&
-        normalized.includes('ruler request failed')
-      );
-    }
-  }
-  if (!parsed || typeof parsed !== 'object') return false;
-  const details = extractWrappedDetails(parsed as Record<string, unknown>);
-  if (!details) return false;
-  const normalized = details.toLowerCase();
-  return (
-    normalized.includes('no rule groups found') &&
-    normalized.includes('code: 404') &&
-    normalized.includes('ruler request failed')
-  );
-}
-
-/**
- * Pull the `details` string out of either the flat or nested SQL plugin
- * error envelope. Real production responses are
- * `{ "status": 400, "error": { "type": "...", "details": "..." } }`;
- * some test fixtures collapse to `{ "details": "..." }`. Pin to the
- * typed `details` field — reading `message`/`error` (string) too would
- * let any 400 whose message mentions "no rule groups found" reclassify
- * as an empty namespace, which is the failure mode the JSON-envelope
- * check exists to prevent.
- */
-function extractWrappedDetails(record: Record<string, unknown>): string | null {
-  if (typeof record.details === 'string') return record.details;
-  const error = record.error;
-  if (error && typeof error === 'object' && !Array.isArray(error)) {
-    const inner = error as Record<string, unknown>;
-    if (typeof inner.details === 'string') return inner.details;
-  }
-  return null;
 }
 
 function extractHttpStatus(err: unknown): number {
@@ -486,11 +433,6 @@ function isGeneratedRule(rule: GeneratedRule | null): rule is GeneratedRule {
  * interval, rules, ... }, ... ] } }`. Cortex's ruler CRUD admin surface also
  * accepts `{ "<ns>": [ { name, interval, rules }, ... ] }`; some tests feed a
  * top-level array or a single group. Accept all four shapes.
- *
- * Throws `SloRulerError` when the body is a Prometheus error envelope
- * (`{ status: "error", errorType: "...", error: "..." }`). Otherwise the
- * reconciler (PR 5) would coerce the error to `[]` and start tearing
- * down rules it incorrectly thinks the ruler dropped.
  */
 function coerceRuleGroupList(doc: unknown): GeneratedRuleGroup[] {
   if (!doc) return [];
@@ -499,8 +441,10 @@ function coerceRuleGroupList(doc: unknown): GeneratedRuleGroup[] {
   }
   if (typeof doc === 'object') {
     const record = doc as Record<string, unknown>;
-    // Prometheus response envelope. `status === 'error'` => failure;
-    // throw rather than silently coercing to empty.
+    // Prometheus response envelope. `status === 'error'` on a 200 body must
+    // not coerce to `[]` — the caller (reconciler / probe) cannot otherwise
+    // distinguish "ruler reported an error" from "namespace is empty" and
+    // would happily proceed to tear down rules that still exist.
     if (record.status === 'error') {
       const errorType = typeof record.errorType === 'string' ? record.errorType : 'unknown_error';
       const errorMsg = typeof record.error === 'string' ? record.error : '';

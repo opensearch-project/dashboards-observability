@@ -44,12 +44,21 @@ export type DatasourceFetchFallback = 'prometheus-alerts-current-only';
  */
 export interface AlertingOSClient {
   transport: {
-    request: <TBody = unknown>(params: {
-      method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD';
-      path: string;
-      body?: unknown;
-      querystring?: Record<string, string | number | boolean>;
-    }) => Promise<{ statusCode: number; body: TBody; headers?: Record<string, string> }>;
+    request: <TBody = unknown>(
+      params: {
+        method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD';
+        path: string;
+        body?: unknown;
+        querystring?: Record<string, string | number | boolean>;
+      },
+      options?: {
+        // opensearch-js client honors `requestTimeout` and aborts the
+        // underlying HTTP request when it elapses. Plumbed through as a
+        // second-arg pass-through so callers (probe-sli, status aggregator)
+        // can bound how long an upstream Prometheus query holds a socket.
+        requestTimeout?: number;
+      }
+    ) => Promise<{ statusCode: number; body: TBody; headers?: Record<string, string> }>;
   };
 }
 

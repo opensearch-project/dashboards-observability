@@ -50,6 +50,7 @@ function makeFakeClient(opts: FakeClientOpts = {}) {
   let versionCounter = 0;
   let remainingUpdateConflicts = opts.conflictCount ?? 0;
   let remainingCreateConflicts = opts.throwConflictOnCreate ?? 0;
+  let lastFindFilter: string | undefined;
 
   const client = ({
     async get<T>(type: string, id: string): Promise<SavedObject<T>> {
@@ -110,25 +111,35 @@ function makeFakeClient(opts: FakeClientOpts = {}) {
       byId.delete(id);
       return {};
     },
-    async find<T>(_findOpts: {
+    async find<T>(findOpts: {
       type: string;
+      filter?: string;
     }): Promise<{
       saved_objects: Array<SavedObject<T>>;
       total: number;
       page: number;
       per_page: number;
     }> {
+      lastFindFilter = findOpts.filter;
       const all = (Array.from(byId.values()) as unknown) as Array<SavedObject<T>>;
       return { saved_objects: all, total: all.length, page: 1, per_page: all.length };
     },
   } as unknown) as SavedObjectsClientContract;
 
-  return { client, byId };
+  return {
+    client,
+    byId,
+    getLastFindFilter: () => lastFindFilter,
+  };
 }
 
 function makeStore(opts: FakeClientOpts = {}) {
   const fake = makeFakeClient(opts);
-  return { store: new SloRuleRefStore(fake.client), byId: fake.byId };
+  return {
+    store: new SloRuleRefStore(fake.client),
+    byId: fake.byId,
+    getLastFindFilter: fake.getLastFindFilter,
+  };
 }
 
 const FIXED_NOW = new Date('2026-04-28T10:00:00.000Z');
@@ -147,7 +158,6 @@ const BASE_INPUT = {
 const expectedId = sloRuleRefId(
   BASE_INPUT.workspaceId,
   BASE_INPUT.datasourceId,
-  BASE_INPUT.fingerprintVersion,
   BASE_INPUT.fingerprint
 );
 
@@ -192,9 +202,8 @@ describe('SloRuleRefStore', () => {
       expect(doc.attributes.refcount).toBe(2);
     });
 
-    it('throws SloRuleRefConflictError after the retry budget is exhausted', async () => {
-      // MAX_RETRIES = 5; a conflictCount of 5 saturates every attempt.
-      const { store } = makeStore({ conflictCount: 5 });
+    it('throws SloRuleRefConflictError after 3 exhausted retries', async () => {
+      const { store } = makeStore({ conflictCount: 3 });
       await store.incrementRef(BASE_INPUT); // create ok
       await expect(store.incrementRef(BASE_INPUT)).rejects.toBeInstanceOf(SloRuleRefConflictError);
     });
@@ -255,7 +264,6 @@ describe('SloRuleRefStore', () => {
       const ok = await store.remove(
         BASE_INPUT.workspaceId,
         BASE_INPUT.datasourceId,
-        BASE_INPUT.fingerprintVersion,
         BASE_INPUT.fingerprint
       );
       expect(ok).toBe(true);
@@ -267,7 +275,6 @@ describe('SloRuleRefStore', () => {
       const ok = await store.remove(
         BASE_INPUT.workspaceId,
         BASE_INPUT.datasourceId,
-        BASE_INPUT.fingerprintVersion,
         BASE_INPUT.fingerprint
       );
       expect(ok).toBe(false);
@@ -302,7 +309,7 @@ describe('SloRuleRefStore', () => {
   describe('get / listByDatasource', () => {
     it('get returns null when the ref is absent', async () => {
       const { store } = makeStore();
-      const res = await store.get('ws-x', 'ds-x', 'v1', 'abcdef0123456789');
+      const res = await store.get('ws-x', 'ds-x', 'abcdef0123456789');
       expect(res).toBeNull();
     });
 
@@ -312,10 +319,48 @@ describe('SloRuleRefStore', () => {
       const res = await store.get(
         BASE_INPUT.workspaceId,
         BASE_INPUT.datasourceId,
-        BASE_INPUT.fingerprintVersion,
         BASE_INPUT.fingerprint
       );
       expect(res?.attributes.refcount).toBe(1);
+    });
+
+    it('listByDatasource returns all refs the fake stored (find ignores filter)', async () => {
+      const { store } = makeStore();
+      await store.incrementRef(BASE_INPUT);
+      await store.incrementRef({ ...BASE_INPUT, fingerprint: 'cafef00dc0ffee01' });
+      const all = await store.listByDatasource(BASE_INPUT.workspaceId, BASE_INPUT.datasourceId);
+      expect(all).toHaveLength(2);
+    });
+
+    it('listByDatasource builds a quoted KQL filter on workspaceId and datasourceId', async () => {
+      const { store, getLastFindFilter } = makeStore();
+      await store.listByDatasource('ws-1', 'prom-ds-001');
+      const filter = getLastFindFilter();
+      expect(filter).toContain(`${SLO_RULE_REF_SO_TYPE}.attributes.workspaceId: "ws-1"`);
+      expect(filter).toContain(`${SLO_RULE_REF_SO_TYPE}.attributes.datasourceId: "prom-ds-001"`);
+    });
+
+    it('listByDatasource escapes embedded backslashes and quotes in id values', async () => {
+      const { store, getLastFindFilter } = makeStore();
+      // Hostile but legal: a workspace or datasource id containing characters
+      // that would terminate or smuggle out of the KQL quoted string.
+      await store.listByDatasource('ws"crafty', 'ds\\evil"id');
+      const filter = getLastFindFilter() ?? '';
+
+      // Backslashes in the source are doubled; literal quotes are escaped.
+      // Expressed via JSON literals for readability.
+      expect(filter).toContain(`${SLO_RULE_REF_SO_TYPE}.attributes.workspaceId: "ws\\"crafty"`);
+      expect(filter).toContain(
+        `${SLO_RULE_REF_SO_TYPE}.attributes.datasourceId: "ds\\\\evil\\"id"`
+      );
+
+      // The filter must remain a single balanced clause group; an
+      // unescaped quote in the value would close the string mid-clause and
+      // turn the filter into a syntactically valid but semantically wider
+      // query.
+      const openParens = (filter.match(/\(/g) ?? []).length;
+      const closeParens = (filter.match(/\)/g) ?? []).length;
+      expect(openParens).toBe(closeParens);
     });
   });
 });

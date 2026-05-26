@@ -10,10 +10,12 @@
  */
 
 import type { HttpStart } from '../../../../../../../src/core/public';
-import type { PaginatedResponse } from '../../../../../common/types/alerting';
 import { OBSERVABILITY_BASE } from '../../../../../common/constants/shared';
 import type {
   GeneratedRuleGroup,
+  ProbeSliRequest,
+  ProbeSliResponse,
+  SloAggregateResponse,
   SloCreateInput,
   SloDocument,
   SloLiveStatus,
@@ -21,19 +23,20 @@ import type {
   SloSummary,
   SloUpdateInput,
 } from '../../../../../common/slo/slo_types';
+import type { SloRulerErrorCode } from '../../../../../common/slo/slo_errors';
+import type { SloRuleHealthState } from '../../../../../common/slo/slo_service';
+
+export type { SloRulerErrorCode, SloRuleHealthState };
 
 const SLO_BASE = `${OBSERVABILITY_BASE}/v1/slos`;
 
 /**
- * Ruler dual-write envelope mirrored from the server's SloRulerError mapping.
- * The wizard renders `rawBody` verbatim so the user sees Cortex's own
- * diagnostic, not a generic create-failed toast.
+ * Ruler dual-write envelope mirrored from the server's SloRulerError mapping
+ * (see server/routes/slo/handlers.ts:toSloError). The wizard renders
+ * `rawBody` verbatim so the user sees Cortex's own diagnostic (e.g.
+ * "invalid PromQL: parse error at char 42"), not a generic create-failed
+ * toast. `code` lets the wizard branch on coarse failure mode.
  */
-export type SloRulerErrorCode =
-  | 'RULER_VALIDATION_FAILED'
-  | 'RULER_AUTH_FAILED'
-  | 'RULER_UNREACHABLE';
-
 export interface SloRulerErrorEnvelope {
   error: string;
   code: SloRulerErrorCode;
@@ -42,29 +45,49 @@ export interface SloRulerErrorEnvelope {
 }
 
 /**
- * Best-effort extractor for the server-side error message so toasts don't
- * collapse an opaque `"Not Found"` when the OSD http error envelope carries
- * a richer `body.message`. Falls back to `err.message` when the envelope
- * is absent. Symmetric with how the wizard surfaces ruler diagnostics via
- * `extractRulerErrorEnvelope` — extends the same unwrap to generic errors.
+ * Rule-health state returned by `GET ${SLO_BASE}/{id}/rule_health`.
+ *
+ * - `ok`: every expected ruler group is present.
+ * - `rules_partial`: some (but not all) expected groups are present — typically
+ *   a half-finished create or a partial ruler purge.
+ * - `rules_missing`: ruler is reachable but no expected groups are present.
+ * - `ruler_unreachable`: the health probe could not contact the ruler; the
+ *   `rulerErrorCode` field carries the coarse failure mode for the UI to
+ *   surface a retry hint vs. a config-fix hint.
+ *
+ * @deprecated alias of `SloRuleHealthState`. New callers should import the
+ * canonical name from `common/slo/slo_service`.
  */
-export function extractServerMessage(err: unknown): string {
-  if (err && typeof err === 'object') {
-    const body = (err as { body?: unknown }).body;
-    if (body && typeof body === 'object') {
-      const msg = (body as { message?: unknown }).message;
-      if (typeof msg === 'string' && msg.length > 0) return msg;
-    }
-    const msg = (err as { message?: unknown }).message;
-    if (typeof msg === 'string' && msg.length > 0) return msg;
-  }
-  return String(err);
+export type RuleHealthState = SloRuleHealthState;
+
+export interface RuleHealthResponse {
+  sloId: string;
+  state: SloRuleHealthState;
+  expectedGroups: string[];
+  presentGroups: string[];
+  missingGroups: string[];
+  rulerErrorCode?: SloRulerErrorCode;
+  computedAt: string;
+}
+
+export interface RepairResponse {
+  sloId: string;
+  /** Whether a ruler upsert actually happened this call (false = already healthy, no-op). */
+  repaired: boolean;
+  /** Post-repair rule-health snapshot so the UI can re-render in one round-trip. */
+  health: RuleHealthResponse;
 }
 
 /**
  * Extracts the ruler envelope from an OSD http error, if one is present.
- * OSD wraps `res.customError({ body: { message, attributes } })` into an
- * `IHttpFetchError` whose `.body` is `{ message, attributes }`.
+ *
+ * OSD's router wraps `res.customError({ body: { message, attributes } })`
+ * into an `IHttpFetchError` whose `.body` is `{ message, attributes }`.
+ * Our SLO route places the full ruler envelope into `attributes`, so the
+ * client walks `err.body.attributes` rather than `err.body` directly.
+ *
+ * Returns null for non-ruler failures (plain validation, network, etc.) —
+ * callers fall back to the generic error message in that case.
  */
 export function extractRulerErrorEnvelope(err: unknown): SloRulerErrorEnvelope | null {
   if (!err || typeof err !== 'object') return null;
@@ -88,9 +111,13 @@ export function extractRulerErrorEnvelope(err: unknown): SloRulerErrorEnvelope |
   return null;
 }
 
-function serializeFilters(filters: SloListFilters): Record<string, string | number | boolean> {
+/** Convert filter array/boolean fields to the string form the server expects. */
+function serializeFilters(
+  filters: SloListFilters,
+  cursor: string | null
+): Record<string, string | number | boolean> {
   const query: Record<string, string | number | boolean> = {};
-  if (filters.page !== undefined) query.page = filters.page;
+  if (cursor) query.cursor = cursor;
   if (filters.pageSize !== undefined) query.pageSize = filters.pageSize;
   if (filters.datasourceId?.length) query.datasourceId = filters.datasourceId.join(',');
   if (filters.state?.length) query.state = filters.state.join(',');
@@ -106,14 +133,51 @@ function serializeFilters(filters: SloListFilters): Record<string, string | numb
   return query;
 }
 
+export interface ListSlosResponse {
+  results: SloSummary[];
+  total: number;
+  pageSize: number;
+  hasMore: boolean;
+  /** Opaque cursor for the next page; null on the final page. */
+  nextCursor: string | null;
+  /** Opaque cursor for the previous page; null on page 1. */
+  prevCursor: string | null;
+}
+
 export class SloApiClient {
   constructor(private readonly http: HttpStart) {}
 
-  list(filters: SloListFilters = {}): Promise<PaginatedResponse<SloSummary>> {
-    return this.http.get(SLO_BASE, { query: serializeFilters(filters) });
+  list(filters: SloListFilters = {}, cursor: string | null = null): Promise<ListSlosResponse> {
+    return this.http.get(SLO_BASE, { query: serializeFilters(filters, cursor) });
   }
 
-  get(id: string): Promise<SloDocument & { liveStatus: SloLiveStatus }> {
+  /**
+   * Server-side per-service SLO health rollup. Preferred over fanning out
+   * `list(...)` on the client — one round-trip, one JSON parse, regardless
+   * of service count. Server caps `services` at 200; callers should truncate
+   * before calling.
+   */
+  aggregate(params: { services: string[]; datasourceId: string }): Promise<SloAggregateResponse> {
+    return this.http.get(`${SLO_BASE}/_aggregate`, {
+      query: {
+        services: params.services.join(','),
+        datasourceId: params.datasourceId,
+      },
+    });
+  }
+
+  get(
+    id: string
+  ): Promise<
+    SloDocument & {
+      liveStatus: SloLiveStatus;
+      /**
+       * Refcount per recording fingerprint, so the detail page can render
+       * "Shared with N other SLOs". `{}` for non-dedup SLOs.
+       */
+      recordingFingerprintRefcounts?: Record<string, number>;
+    }
+  > {
     return this.http.get(`${SLO_BASE}/${encodeURIComponent(id)}`);
   }
 
@@ -131,7 +195,31 @@ export class SloApiClient {
     return this.http.delete(`${SLO_BASE}/${encodeURIComponent(id)}`);
   }
 
+  enable(id: string): Promise<SloDocument> {
+    return this.http.post(`${SLO_BASE}/${encodeURIComponent(id)}/enable`);
+  }
+
+  disable(id: string): Promise<SloDocument> {
+    return this.http.post(`${SLO_BASE}/${encodeURIComponent(id)}/disable`);
+  }
+
   preview(input: SloCreateInput): Promise<GeneratedRuleGroup> {
     return this.http.post(`${SLO_BASE}/preview`, { body: JSON.stringify(input) });
+  }
+
+  statuses(ids: string[]): Promise<{ statuses: SloLiveStatus[] }> {
+    return this.http.post(`${SLO_BASE}/statuses`, { body: JSON.stringify({ ids }) });
+  }
+
+  probeSli(body: ProbeSliRequest): Promise<ProbeSliResponse> {
+    return this.http.post(`${SLO_BASE}/probe-sli`, { body: JSON.stringify(body) });
+  }
+
+  repair(id: string): Promise<RepairResponse> {
+    return this.http.post(`${SLO_BASE}/${encodeURIComponent(id)}/repair`);
+  }
+
+  getRuleHealth(id: string): Promise<RuleHealthResponse> {
+    return this.http.get(`${SLO_BASE}/${encodeURIComponent(id)}/rule_health`);
   }
 }

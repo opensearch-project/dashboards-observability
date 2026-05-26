@@ -4,7 +4,7 @@
  */
 
 /**
- * SavedObject-backed registry for the Phase 3 recording-rule dedup layer.
+ * SavedObject-backed registry for the recording-rule dedup layer.
  *
  * One SO per (workspaceId, datasourceId, fingerprint) tuple. The SO carries a
  * non-negative refcount: every SLO that references a fingerprint contributes
@@ -18,6 +18,31 @@
  * the store just tracks "do we still need this recording group?". When a
  * decrement takes refcount to zero the store records `zeroSinceAt` so the
  * reconciler can enforce a grace period before deletion.
+ *
+ * Reconciler contract (future work — not yet implemented):
+ *
+ *   Under A.4 the ruler recording-rule namespace is shared across OSD
+ *   workspaces — workspace A and workspace B both targeting the same
+ *   datasource land their slo-rule-ref SOs in distinct partitions but
+ *   share one rule group on the ruler. The grace-GC pass MUST therefore
+ *   consult the cross-workspace aggregate refcount before deleting a
+ *   recording group:
+ *
+ *     1. Use a saved-objects client built from `createInternalRepository`
+ *        — never a request-scoped one — so the WorkspaceIdConsumerWrapper
+ *        does not auto-filter the find. The `SloStoreFactory.forReconciler`
+ *        helper wires this correctly.
+ *     2. For each candidate (datasourceId, fingerprint) tuple, sum
+ *        refcount across every workspace's slo-rule-ref SO via
+ *        `aggregateRefcount(datasourceId, fingerprint)`.
+ *     3. Eligible-for-GC iff aggregate === 0 AND every contributing SO's
+ *        `zeroSinceAt` lies before (now − graceMs).
+ *     4. Only after deletion of the ruler group: drop the corresponding
+ *        slo-rule-ref SOs.
+ *
+ *   A workspace-scoped client cannot satisfy step 2 by definition, which
+ *   is why the reconciler diverges from the CRUD path's per-request
+ *   client model.
  */
 
 /* eslint-disable max-classes-per-file */
@@ -28,22 +53,8 @@ import {
   SloRuleRefAttributes,
   sloRuleRefId,
 } from '../../saved_objects/slo_rule_ref';
-import { isSavedObjectConflict, isSavedObjectNotFound } from './saved_object_helpers';
 
-const MAX_RETRIES = 5;
-/**
- * Upper bound on the randomized backoff between optimistic-concurrency
- * retries. With back-to-back retries every contender lands the same stale
- * version on every attempt; even a 50ms cap of jitter is enough to break
- * up the lockstep without noticeably slowing single-tenant throughput.
- * The bulk-create path (PR 6 adoption flow) is where this matters most.
- */
-const RETRY_JITTER_MS = 50;
-async function delayWithJitter(): Promise<void> {
-  const ms = Math.floor(Math.random() * RETRY_JITTER_MS);
-  if (ms === 0) return;
-  await new Promise((resolve) => setTimeout(resolve, ms));
-}
+const MAX_RETRIES = 3;
 
 export class SloRuleRefConflictError extends Error {
   constructor(public readonly id: string) {
@@ -65,6 +76,13 @@ export interface IncrementRefInput {
   fingerprintVersion: string;
   groupName: string;
   namespace: string;
+  /**
+   * Datasource `directQueryName`. Persisted on the SO so the reconciler
+   * can build a ruler-delete payload without resolving data-source SOs
+   * at sweep time. Optional in the type to keep the test surface compact;
+   * production wiring always supplies it.
+   */
+  directQueryName?: string;
   now?: () => Date;
 }
 
@@ -72,13 +90,6 @@ export interface DecrementRefInput {
   workspaceId: string;
   datasourceId: string;
   fingerprint: string;
-  /**
-   * Fingerprint algorithm version. Required so the SO id is fully determined
-   * — future FINGERPRINT_VERSION bumps create a disjoint id namespace, and
-   * the caller always knows which version the SLO's own provisioning record
-   * was written at.
-   */
-  fingerprintVersion: string;
   now?: () => Date;
 }
 
@@ -107,13 +118,27 @@ export interface DecrementRefResult {
 }
 
 /**
- * Re-export under local names so the existing call sites stay readable.
- * Logic lives in `saved_object_helpers.ts` so both this store and the
- * SLO definition store share one definition. Mocks that simulate the
- * SavedObjects 404 / 409 error shape work against either name.
+ * Detect a SavedObject 404 by inspecting the statusCode on the thrown error
+ * the same way `slo_saved_object_store.ts` does. This keeps us off the
+ * `SavedObjectsErrorHelpers` API surface, which depends on Boom internals
+ * that are awkward to construct in unit-test mocks.
  */
-const isNotFound = isSavedObjectNotFound;
-const isConflict = isSavedObjectConflict;
+function isNotFound(err: unknown): boolean {
+  const e = err as { output?: { statusCode?: number }; statusCode?: number } | undefined;
+  const code = e?.output?.statusCode ?? e?.statusCode;
+  // 404 — SO genuinely missing.
+  // 403 — `WorkspaceIdConsumerWrapper` rejected the read because the SO
+  // belongs to a different workspace. From the caller's perspective the
+  // ref does not exist in their workspace; surface as missing so the
+  // ref-bookkeeping code paths (increment, decrement, lookup) treat the
+  // foreign-workspace ref as absent rather than 500ing.
+  return code === 404 || code === 403;
+}
+
+function isConflict(err: unknown): boolean {
+  const e = err as { output?: { statusCode?: number }; statusCode?: number } | undefined;
+  return e?.output?.statusCode === 409 || e?.statusCode === 409;
+}
 
 function toDoc(obj: SavedObject<SloRuleRefAttributes>): SloRuleRefDoc {
   return { id: obj.id, attributes: obj.attributes, version: obj.version };
@@ -125,10 +150,9 @@ export class SloRuleRefStore {
   async get(
     workspaceId: string,
     datasourceId: string,
-    fingerprintVersion: string,
     fingerprint: string
   ): Promise<SloRuleRefDoc | null> {
-    const id = sloRuleRefId(workspaceId, datasourceId, fingerprintVersion, fingerprint);
+    const id = sloRuleRefId(workspaceId, datasourceId, fingerprint);
     try {
       const obj = await this.client.get<SloRuleRefAttributes>(SLO_RULE_REF_SO_TYPE, id);
       return toDoc(obj);
@@ -166,13 +190,6 @@ export class SloRuleRefStore {
     const now = input.now ?? (() => new Date());
     const cutoff = now().getTime() - input.graceMs;
     const results: SloRuleRefDoc[] = [];
-    // Track how many refs we've seen before the `zeroSinceAt + cutoff`
-    // filter — `results` only includes refs that pass the secondary check,
-    // so mixing it with `response.total` (which counts ALL `refcount: 0`
-    // refs, regardless of grace state) would terminate the loop early
-    // and silently drop stale refs past the cross-page boundary. The
-    // reconciler depends on this returning everything past grace.
-    let processed = 0;
     let page = 1;
     const perPage = 1000;
     const filter = `${SLO_RULE_REF_SO_TYPE}.attributes.refcount: 0`;
@@ -191,20 +208,60 @@ export class SloRuleRefStore {
           results.push(toDoc(obj as SavedObject<SloRuleRefAttributes>));
         }
       }
-      processed += response.saved_objects.length;
-      if (response.saved_objects.length === 0 || processed >= response.total) break;
+      if (
+        response.saved_objects.length === 0 ||
+        results.length + (page - 1) * perPage >= response.total
+      )
+        break;
       page++;
     }
     return results;
   }
 
-  async remove(
-    workspaceId: string,
-    datasourceId: string,
-    fingerprintVersion: string,
-    fingerprint: string
-  ): Promise<boolean> {
-    const id = sloRuleRefId(workspaceId, datasourceId, fingerprintVersion, fingerprint);
+  /**
+   * Sum refcount across every workspace's slo-rule-ref SO for a single
+   * (datasourceId, fingerprint) tuple.
+   *
+   * Under A.4 the ruler namespace is shared across workspaces, so the
+   * grace-GC decision needs the cross-workspace aggregate — a fingerprint
+   * is eligible for cleanup only when no workspace still references it.
+   * This read deliberately ignores workspace scoping; callers must pass an
+   * internal-repository-backed client (see `SloStoreFactory.forReconciler`)
+   * so the WorkspaceIdConsumerWrapper does not auto-filter the find().
+   *
+   * Read-time aggregation (vs. a materialized aggregate SO): the GC pass
+   * fires on a slow timer, the per-fingerprint cardinality is bounded by
+   * the number of workspaces a single Cortex tenant serves, and the
+   * matching slo-rule-ref docs all live behind the wrapper anyway — paying
+   * one O(workspaces) find here is cheaper than coordinating writes to a
+   * second SO on every increment/decrement.
+   */
+  async aggregateRefcount(datasourceId: string, fingerprint: string): Promise<number> {
+    let total = 0;
+    let page = 1;
+    const perPage = 1000;
+    const esc = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const filter =
+      `(${SLO_RULE_REF_SO_TYPE}.attributes.datasourceId: "${esc(datasourceId)}"` +
+      ` AND ${SLO_RULE_REF_SO_TYPE}.attributes.fingerprint: "${esc(fingerprint)}")`;
+    while (true) {
+      const response = await this.client.find<SloRuleRefAttributes>({
+        type: SLO_RULE_REF_SO_TYPE,
+        page,
+        perPage,
+        filter,
+      });
+      for (const obj of response.saved_objects) {
+        total += Math.max(0, obj.attributes.refcount ?? 0);
+      }
+      if (response.saved_objects.length === 0 || page * perPage >= response.total) break;
+      page++;
+    }
+    return total;
+  }
+
+  async remove(workspaceId: string, datasourceId: string, fingerprint: string): Promise<boolean> {
+    const id = sloRuleRefId(workspaceId, datasourceId, fingerprint);
     try {
       await this.client.delete(SLO_RULE_REF_SO_TYPE, id);
       return true;
@@ -216,18 +273,10 @@ export class SloRuleRefStore {
 
   async incrementRef(input: IncrementRefInput): Promise<IncrementRefResult> {
     const now = input.now ?? (() => new Date());
-    const id = sloRuleRefId(
-      input.workspaceId,
-      input.datasourceId,
-      input.fingerprintVersion,
-      input.fingerprint
-    );
+    const id = sloRuleRefId(input.workspaceId, input.datasourceId, input.fingerprint);
     let lastErr: unknown = null;
 
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      // Jitter between retries so contenders fan out instead of all
-      // re-reading the same stale version in lockstep.
-      if (attempt > 0) await delayWithJitter();
       let existing: SavedObject<SloRuleRefAttributes> | null;
       try {
         existing = await this.client.get<SloRuleRefAttributes>(SLO_RULE_REF_SO_TYPE, id);
@@ -249,6 +298,7 @@ export class SloRuleRefStore {
           refcount: 1,
           groupName: input.groupName,
           namespace: input.namespace,
+          directQueryName: input.directQueryName,
           createdAt: nowIso,
           updatedAt: nowIso,
         };
@@ -283,6 +333,9 @@ export class SloRuleRefStore {
         groupName: input.groupName,
         namespace: input.namespace,
         fingerprintVersion: input.fingerprintVersion,
+        // Refresh `directQueryName` too — covers a datasource rename
+        // between the original increment and this resurrection.
+        directQueryName: input.directQueryName ?? prior.directQueryName,
       };
       try {
         const updated = await this.client.update<SloRuleRefAttributes>(
@@ -291,19 +344,10 @@ export class SloRuleRefStore {
           nextAttrs,
           { version: existing.version }
         );
-        // Layer the SO client's response over `prior`, not over `nextAttrs`.
-        // `SavedObjectsClientContract.update` types `attributes` as
-        // `Partial<T>` — today's repository echoes the request body so
-        // either base would work, but a future wrapper (or refetch-on-write
-        // impl that picks up a concurrent reconciler edit to `zeroSinceAt`)
-        // could legitimately return a partial. Re-spreading our pre-write
-        // `nextAttrs` here would let stale values clobber any such field
-        // the SO server actually returned; spreading `prior` only fills
-        // gaps the response left out.
         return {
           doc: {
             id,
-            attributes: { ...prior, ...updated.attributes },
+            attributes: { ...prior, ...updated.attributes, ...nextAttrs },
             version: updated.version,
           },
           wasZero,
@@ -324,15 +368,9 @@ export class SloRuleRefStore {
 
   async decrementRef(input: DecrementRefInput): Promise<DecrementRefResult> {
     const now = input.now ?? (() => new Date());
-    const id = sloRuleRefId(
-      input.workspaceId,
-      input.datasourceId,
-      input.fingerprintVersion,
-      input.fingerprint
-    );
+    const id = sloRuleRefId(input.workspaceId, input.datasourceId, input.fingerprint);
 
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      if (attempt > 0) await delayWithJitter();
       let existing: SavedObject<SloRuleRefAttributes> | null;
       try {
         existing = await this.client.get<SloRuleRefAttributes>(SLO_RULE_REF_SO_TYPE, id);
@@ -368,13 +406,10 @@ export class SloRuleRefStore {
           nextAttrs,
           { version: existing.version }
         );
-        // See `incrementRef` — trust the SO client's response, don't
-        // re-spread our pre-write `nextAttrs` over the post-write
-        // attributes.
         return {
           doc: {
             id,
-            attributes: { ...prior, ...updated.attributes },
+            attributes: { ...prior, ...updated.attributes, ...nextAttrs },
             version: updated.version,
           },
           droppedToZero,

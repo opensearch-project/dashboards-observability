@@ -4,13 +4,21 @@
  */
 
 import { DirectQueryPrometheusBackend } from '../directquery_prometheus_backend';
+import { resetPromQLSearcherForTests, setPromQLSearcher } from '../promql_search';
+import type { PromQLSearcher } from '../promql_search';
 import type { Datasource, Logger } from '../../../../common/types/alerting';
 
 const mockLogger: Logger = { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() };
 
+// Resource calls (rules / alerts / metadata / Alertmanager) still ride the
+// scoped OS client. PromQL execution rides the search strategy via
+// `runPromQLInstant` / `runPromQLRange` — captured below as a `jest.fn()`
+// installed via `setPromQLSearcher`.
 const mockClient = {
   transport: { request: jest.fn() },
 };
+
+const searcher = (jest.fn() as unknown) as jest.MockedFunction<PromQLSearcher>;
 
 const ds: Datasource = {
   id: 'ds-1',
@@ -21,11 +29,92 @@ const ds: Datasource = {
   directQueryName: 'my-prom',
 };
 
+// Stand-in for `RequestHandlerContext`. The PromQL adapter passes it
+// straight to `data.search.search`, which our `searcher` mock captures.
+const ctx = {} as never;
+
 let backend: DirectQueryPrometheusBackend;
 
 beforeEach(() => {
   backend = new DirectQueryPrometheusBackend(mockLogger);
+  searcher.mockReset();
+  setPromQLSearcher(searcher as PromQLSearcher);
 });
+
+afterAll(() => {
+  resetPromQLSearcherForTests();
+});
+
+// ---------------------------------------------------------------------------
+// Helpers — translate Prometheus-style matrix/vector fixtures into the
+// `IDataFrameResponse` shape `runPromQLRange` / `runPromQLInstant` decode.
+// Matches what `createDataFrame` in
+// `src/plugins/query_enhancements/server/search/promql_search_strategy.ts`
+// emits for a single PROMQL query: one row per (timestamp × series), with
+// `Series` carrying the formatted metric label set including `__name__`.
+// ---------------------------------------------------------------------------
+
+interface SeriesFixture {
+  metric: Record<string, string>;
+  // Range-mode points; instant-mode fixtures use `value` instead.
+  points?: Array<[number, string]>;
+  value?: [number, string];
+}
+
+function formatMetric(metric: Record<string, string>): string {
+  const parts = Object.entries(metric)
+    .filter(([, v]) => v !== undefined && v !== '')
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => `${k}="${v}"`);
+  return `{${parts.join(', ')}}`;
+}
+
+function buildDataFrame(series: SeriesFixture[], isRange: boolean) {
+  const Time: number[] = [];
+  const Series: string[] = [];
+  const Labels: Array<Record<string, string>> = [];
+  const Value: number[] = [];
+  for (const s of series) {
+    const seriesName = formatMetric(s.metric);
+    const labelsWithoutName = { ...s.metric };
+    delete labelsWithoutName.__name__;
+    const points = isRange ? s.points ?? [] : s.value ? [s.value] : [];
+    for (const [tsSec, raw] of points) {
+      Time.push(tsSec * 1000);
+      Series.push(seriesName);
+      Labels.push(labelsWithoutName);
+      // Match the strategy: `Number(value)` so 'NaN' / '+Inf' arrive as
+      // JS NaN / Infinity that our adapter translates back to 'NaN' / '+Inf'.
+      Value.push(Number(raw));
+    }
+  }
+  return {
+    type: 'data_frame',
+    body: {
+      type: 'data_frame',
+      name: 'my-prom',
+      schema: [
+        { name: 'Time', type: 'time', values: [] },
+        { name: 'Series', type: 'string', values: [] },
+        { name: 'Labels', type: 'object', values: [] },
+        { name: 'Value', type: 'number', values: [] },
+      ],
+      fields: [
+        { name: 'Time', type: 'time', values: Time },
+        { name: 'Series', type: 'string', values: Series },
+        { name: 'Labels', type: 'object', values: Labels },
+        { name: 'Value', type: 'number', values: Value },
+      ],
+      size: Time.length,
+      meta: {},
+    },
+    took: 1,
+  };
+}
+
+const matrixDF = (
+  series: Array<{ metric: Record<string, string>; points: Array<[number, string]> }>
+) => buildDataFrame(series, /* isRange */ true);
 
 describe('DirectQueryPrometheusBackend', () => {
   // ---- discoverDatasources ----
@@ -119,20 +208,29 @@ describe('DirectQueryPrometheusBackend', () => {
   });
 
   // ---- queryRange ----
-  it('queryRange posts to DirectQuery execution endpoint', async () => {
-    mockClient.transport.request.mockResolvedValueOnce({
-      body: {
-        results: { 'my-prom': { resultType: 'matrix', result: [{ values: [[1000, '42']] }] } },
-      },
-    });
-    const points = await backend.queryRange(mockClient as never, ds, 'up', 100, 200, 15);
-    expect(mockClient.transport.request).toHaveBeenCalledWith(
-      expect.objectContaining({
-        method: 'POST',
-        path: '/_plugins/_directquery/_query/my-prom',
-      })
+  it('queryRange routes through the PROMQL search strategy', async () => {
+    searcher.mockResolvedValueOnce(
+      matrixDF([{ metric: { __name__: 'up' }, points: [[1000, '42']] }])
     );
+    const points = await backend.queryRange(ctx, ds, 'up', 100, 200, 15);
+    expect(searcher).toHaveBeenCalledTimes(1);
+    const [, request, options] = searcher.mock.calls[0];
+    expect(options).toEqual({ strategy: 'promql' });
+    const body = (request as { body: Record<string, unknown> }).body;
+    expect(body.query).toMatchObject({
+      query: 'up',
+      language: 'PROMQL',
+      dataset: { id: 'my-prom', type: 'PROMETHEUS' },
+    });
     expect(points).toEqual([{ timestamp: 1000000, value: 42 }]);
+  });
+
+  it('queryRange threads ds.mdsId as request.dataSourceId', async () => {
+    searcher.mockResolvedValueOnce(matrixDF([]));
+    const mdsDs: Datasource = { ...ds, mdsId: 'mds-saved-object-id' };
+    await backend.queryRange(ctx, mdsDs, 'up', 100, 200, 15);
+    const [, request] = searcher.mock.calls[0];
+    expect((request as { dataSourceId?: string }).dataSourceId).toBe('mds-saved-object-id');
   });
 
   // ---- resolveDqName guard ----
@@ -149,85 +247,53 @@ describe('DirectQueryPrometheusBackend', () => {
 
   describe('queryRangeMatrix', () => {
     it('parses a fixture with multiple series correctly', async () => {
-      mockClient.transport.request.mockResolvedValueOnce({
-        body: {
-          results: {
-            'my-prom': {
-              resultType: 'matrix',
-              result: [
-                {
-                  metric: { alertname: 'HighCPU', instance: 'a' },
-                  values: [
-                    [100, '1'],
-                    [200, '1'],
-                  ],
-                },
-                {
-                  metric: { alertname: 'HighCPU', instance: 'b' },
-                  values: [
-                    [100, '0'],
-                    [200, '1'],
-                  ],
-                },
-                {
-                  metric: { alertname: 'LowDisk' },
-                  values: [[200, '1']],
-                },
-              ],
-            },
+      searcher.mockResolvedValueOnce(
+        matrixDF([
+          {
+            metric: { __name__: 'ALERTS', alertname: 'HighCPU', instance: 'a' },
+            points: [
+              [100, '1'],
+              [200, '1'],
+            ],
           },
-        },
-      });
-      const series = await backend.queryRangeMatrix(
-        mockClient as never,
-        ds,
-        'ALERTS',
-        100,
-        300,
-        60
+          {
+            metric: { __name__: 'ALERTS', alertname: 'HighCPU', instance: 'b' },
+            points: [
+              [100, '0'],
+              [200, '1'],
+            ],
+          },
+          {
+            metric: { __name__: 'ALERTS', alertname: 'LowDisk' },
+            points: [[200, '1']],
+          },
+        ])
       );
+      const series = await backend.queryRangeMatrix(ctx, ds, 'ALERTS', 100, 300, 60);
       expect(series).toHaveLength(3);
-      expect(series[0].metric).toEqual({ alertname: 'HighCPU', instance: 'a' });
-      expect(series[0].values).toEqual([
+      // Order is determined by the bucket key; assert by alertname/instance.
+      const byKey = Object.fromEntries(
+        series.map((s) => [`${s.metric.alertname}|${s.metric.instance ?? ''}`, s])
+      );
+      expect(byKey['HighCPU|a'].values).toEqual([
         { timestamp: 100_000, value: 1 },
         { timestamp: 200_000, value: 1 },
       ]);
-      // Second series — mixed 0 and 1 preserved
-      expect(series[1].values.map((v) => v.value)).toEqual([0, 1]);
+      expect(byKey['HighCPU|b'].values.map((v) => v.value)).toEqual([0, 1]);
     });
   });
 
   describe('getHistoricalAlerts', () => {
-    // The "empty matrix + range fully past" test asserts `toHaveBeenCalledTimes(1)`
-    // on `mockClient.transport.request`. Without a per-describe clear, prior
-    // tests in this file (or the sibling `queryRangeMatrix` describe) leave
-    // call counts that break the assertion in full-suite runs while passing
-    // in isolation.
     beforeEach(() => {
       mockClient.transport.request.mockClear();
-    });
-
-    // Build a matrix response envelope matching the DirectQuery shape.
-    const matrix = (
-      series: Array<{ metric: Record<string, string>; points: Array<[number, string]> }>
-    ) => ({
-      body: {
-        results: {
-          'my-prom': {
-            resultType: 'matrix',
-            result: series.map((s) => ({ metric: s.metric, values: s.points })),
-          },
-        },
-      },
+      searcher.mockReset();
     });
 
     it('reconstructs a single contiguous firing block into one episode', async () => {
-      // Series with 5 points, firing only in the middle 3.
-      // step 60s, window 100..400
-      mockClient.transport.request.mockResolvedValueOnce(
-        matrix([
+      searcher.mockResolvedValueOnce(
+        matrixDF([
           {
-            metric: { alertname: 'X' },
+            metric: { __name__: 'ALERTS', alertname: 'X', alertstate: 'firing' },
             points: [
               [100, '0'],
               [160, '1'],
@@ -239,6 +305,7 @@ describe('DirectQueryPrometheusBackend', () => {
         ])
       );
       const result = await backend.getHistoricalAlerts(
+        ctx,
         mockClient as never,
         ds,
         100,
@@ -256,23 +323,24 @@ describe('DirectQueryPrometheusBackend', () => {
     });
 
     it('reconstructs two runs separated by a gap as separate episodes', async () => {
-      mockClient.transport.request.mockResolvedValueOnce(
-        matrix([
+      searcher.mockResolvedValueOnce(
+        matrixDF([
           {
-            metric: { alertname: 'Y' },
+            metric: { __name__: 'ALERTS', alertname: 'Y', alertstate: 'firing' },
             points: [
               [100, '0'],
-              [160, '1'], // run 1 start
-              [220, '1'], // run 1 end
-              [280, '0'], // gap
-              [340, '1'], // run 2 start
-              [400, '1'], // run 2 end
+              [160, '1'],
+              [220, '1'],
+              [280, '0'],
+              [340, '1'],
+              [400, '1'],
               [460, '0'],
             ],
           },
         ])
       );
       const result = await backend.getHistoricalAlerts(
+        ctx,
         mockClient as never,
         ds,
         100,
@@ -284,22 +352,19 @@ describe('DirectQueryPrometheusBackend', () => {
     });
 
     it('series still firing at the window end ⇒ stillActiveAtRangeEnd ⇒ state "active"', async () => {
-      mockClient.transport.request.mockResolvedValueOnce(
-        matrix([
+      searcher.mockResolvedValueOnce(
+        matrixDF([
           {
-            metric: { alertname: 'Z' },
+            metric: { __name__: 'ALERTS', alertname: 'Z', alertstate: 'firing' },
             points: [
               [100, '0'],
               [160, '1'],
-              [220, '1'], // last sample, still firing
+              [220, '1'],
             ],
           },
         ])
       );
-      // Live-alerts fetch (Option A: always runs when endIsNow=true). This
-      // particular live alert matches the historical episode above — the
-      // dedupe on rule-identity hash should suppress it so only one row
-      // comes back.
+      // Live alerts call goes via the resource client, not the strategy.
       mockClient.transport.request.mockResolvedValueOnce({
         body: {
           data: {
@@ -315,6 +380,7 @@ describe('DirectQueryPrometheusBackend', () => {
         },
       });
       const result = await backend.getHistoricalAlerts(
+        ctx,
         mockClient as never,
         ds,
         100,
@@ -324,17 +390,16 @@ describe('DirectQueryPrometheusBackend', () => {
       );
       expect(result.alerts).toHaveLength(1);
       expect(result.alerts[0].state).toBe('active');
-      // endMs clamps to windowEnd (220s → 220_000ms)
       expect(result.alerts[0].lastUpdated).toBe(new Date(220_000).toISOString());
     });
 
     it('series firing from the window start ⇒ truncatedStart annotation', async () => {
-      mockClient.transport.request.mockResolvedValueOnce(
-        matrix([
+      searcher.mockResolvedValueOnce(
+        matrixDF([
           {
-            metric: { alertname: 'W' },
+            metric: { __name__: 'ALERTS', alertname: 'W', alertstate: 'firing' },
             points: [
-              [100, '1'], // already firing at left edge
+              [100, '1'],
               [160, '1'],
               [220, '0'],
             ],
@@ -342,6 +407,7 @@ describe('DirectQueryPrometheusBackend', () => {
         ])
       );
       const result = await backend.getHistoricalAlerts(
+        ctx,
         mockClient as never,
         ds,
         100,
@@ -355,19 +421,10 @@ describe('DirectQueryPrometheusBackend', () => {
     });
 
     it('first sample mid-window (not at left edge) ⇒ startTime uses the sample, no truncatedStart', async () => {
-      // Regression guard for the "every alert starts at windowStart" bug.
-      // A rule added recently emits its first ALERTS sample well inside the
-      // window — that first sample is STILL at index 0 of the returned
-      // matrix (Prometheus only returns samples that exist), but the sample
-      // timestamp is far from windowStart, so we must NOT clamp.
-      //
-      // Window 100..1000, step 60 → tolerance 90s. The first (and only
-      // firing) sample is at 700s — 600s after windowStart, well outside
-      // the 90s tolerance. Expect `startTime = 700_000` and no truncation.
-      mockClient.transport.request.mockResolvedValueOnce(
-        matrix([
+      searcher.mockResolvedValueOnce(
+        matrixDF([
           {
-            metric: { alertname: 'Recent' },
+            metric: { __name__: 'ALERTS', alertname: 'Recent', alertstate: 'firing' },
             points: [
               [700, '1'],
               [760, '1'],
@@ -377,6 +434,7 @@ describe('DirectQueryPrometheusBackend', () => {
         ])
       );
       const result = await backend.getHistoricalAlerts(
+        ctx,
         mockClient as never,
         ds,
         100,
@@ -390,18 +448,10 @@ describe('DirectQueryPrometheusBackend', () => {
     });
 
     it('last firing sample far from window end ⇒ state resolved, lastUpdated uses the sample', async () => {
-      // Regression guard for the "always clamp endMs to windowEnd" bug.
-      // If the final firing sample is more than ~1.5 steps before
-      // windowEnd, the alert resolved mid-window (the series just ends
-      // because the rule stopped firing). Report the actual resolution
-      // time and mark `resolved`.
-      //
-      // Window 100..1000, step 60 → tolerance 90s. Last firing sample at
-      // 300s — 700s before windowEnd, well outside tolerance.
-      mockClient.transport.request.mockResolvedValueOnce(
-        matrix([
+      searcher.mockResolvedValueOnce(
+        matrixDF([
           {
-            metric: { alertname: 'ResolvedMid' },
+            metric: { __name__: 'ALERTS', alertname: 'ResolvedMid', alertstate: 'firing' },
             points: [
               [200, '1'],
               [260, '1'],
@@ -411,6 +461,7 @@ describe('DirectQueryPrometheusBackend', () => {
         ])
       );
       const result = await backend.getHistoricalAlerts(
+        ctx,
         mockClient as never,
         ds,
         100,
@@ -424,15 +475,15 @@ describe('DirectQueryPrometheusBackend', () => {
     });
 
     it('labels produce distinct ids for same alertname across different services', async () => {
-      // Regression guard for the duplicate-id bug: two series with the
-      // same alertname + alertstate but different `service_name` labels
-      // must produce distinct UnifiedAlertSummary ids. Pre-fix, both
-      // would collide on `${dsId}-${name}-${instance}-${alertstate}-${startMs}`
-      // because `instance` is empty on these series.
-      mockClient.transport.request.mockResolvedValueOnce(
-        matrix([
+      searcher.mockResolvedValueOnce(
+        matrixDF([
           {
-            metric: { alertname: 'ServiceError', service_name: 'cart', alertstate: 'firing' },
+            metric: {
+              __name__: 'ALERTS',
+              alertname: 'ServiceError',
+              service_name: 'cart',
+              alertstate: 'firing',
+            },
             points: [
               [160, '1'],
               [220, '0'],
@@ -440,6 +491,7 @@ describe('DirectQueryPrometheusBackend', () => {
           },
           {
             metric: {
+              __name__: 'ALERTS',
               alertname: 'ServiceError',
               service_name: 'checkout',
               alertstate: 'firing',
@@ -452,6 +504,7 @@ describe('DirectQueryPrometheusBackend', () => {
         ])
       );
       const result = await backend.getHistoricalAlerts(
+        ctx,
         mockClient as never,
         ds,
         100,
@@ -464,13 +517,9 @@ describe('DirectQueryPrometheusBackend', () => {
     });
 
     it('matrix query is scoped to alertstate="firing" (pending filtered upstream)', async () => {
-      // We filter `alertstate="firing"` at the PromQL level so Cortex
-      // never returns `alertstate="pending"` series in the first place.
-      // This keeps row counts step-independent (pending samples are more
-      // likely to be caught at fine step, missed at coarse step). The
-      // test asserts the exact PromQL sent on the wire.
-      mockClient.transport.request.mockResolvedValueOnce(matrix([]));
+      searcher.mockResolvedValueOnce(matrixDF([]));
       await backend.getHistoricalAlerts(
+        ctx,
         mockClient as never,
         ds,
         100,
@@ -478,19 +527,13 @@ describe('DirectQueryPrometheusBackend', () => {
         60,
         /* endIsNow */ false
       );
-      const calls = mockClient.transport.request.mock.calls as Array<
-        [{ body?: { query?: string } }]
-      >;
-      expect(calls[0][0].body?.query).toBe('ALERTS{alertstate="firing"}');
+      const [, request] = searcher.mock.calls[0];
+      const reqBody = (request as { body: { query: { query: string } } }).body;
+      expect(reqBody.query.query).toBe('ALERTS{alertstate="firing"}');
     });
 
     it('live alerts in pending state are surfaced (matches the Rules tab status)', async () => {
-      // Pending alerts from `/api/v1/alerts` are point-in-time, so they
-      // can't flap with the matrix step. Including them lets the Alerts
-      // tab match the Rules tab when a rule is currently in its
-      // pending-period before promoting to firing. Historical pending
-      // samples remain filtered at the matrix-query level.
-      mockClient.transport.request.mockResolvedValueOnce(matrix([]));
+      searcher.mockResolvedValueOnce(matrixDF([]));
       mockClient.transport.request.mockResolvedValueOnce({
         body: {
           data: {
@@ -512,6 +555,7 @@ describe('DirectQueryPrometheusBackend', () => {
         },
       });
       const result = await backend.getHistoricalAlerts(
+        ctx,
         mockClient as never,
         ds,
         100,
@@ -526,8 +570,9 @@ describe('DirectQueryPrometheusBackend', () => {
     });
 
     it('empty matrix + endIsNow=false ⇒ { alerts: [], no fallback }', async () => {
-      mockClient.transport.request.mockResolvedValueOnce(matrix([]));
+      searcher.mockResolvedValueOnce(matrixDF([]));
       const result = await backend.getHistoricalAlerts(
+        ctx,
         mockClient as never,
         ds,
         /* startEpochSec */ 100,
@@ -538,15 +583,13 @@ describe('DirectQueryPrometheusBackend', () => {
       expect(result.alerts).toEqual([]);
       expect(result.fallback).toBeUndefined();
       expect(result.error).toBeUndefined();
-      // Only the matrix query was made — no fallback call to /api/v1/alerts.
-      expect(mockClient.transport.request).toHaveBeenCalledTimes(1);
+      // Strategy was called once; resource client was never called.
+      expect(searcher).toHaveBeenCalledTimes(1);
+      expect(mockClient.transport.request).not.toHaveBeenCalled();
     });
 
     it('empty matrix + endIsNow=true ⇒ surfaces live alerts with fallback flag', async () => {
-      // Option A: matrix empty (retention gap) → we still run the live
-      // /api/v1/alerts fetch in parallel and surface whatever it returns.
-      // `fallback` flags the coverage gap so the UI can banner it.
-      mockClient.transport.request.mockResolvedValueOnce(matrix([]));
+      searcher.mockResolvedValueOnce(matrixDF([]));
       mockClient.transport.request.mockResolvedValueOnce({
         body: {
           data: {
@@ -562,6 +605,7 @@ describe('DirectQueryPrometheusBackend', () => {
         },
       });
       const result = await backend.getHistoricalAlerts(
+        ctx,
         mockClient as never,
         ds,
         100,
@@ -575,14 +619,15 @@ describe('DirectQueryPrometheusBackend', () => {
     });
 
     it('live alerts merged with historical episodes; active episodes dedupe the live duplicate', async () => {
-      // Window 100..400, step 60. One episode still firing at the right
-      // edge (Active) and one that resolved mid-window (Resolved). Live
-      // endpoint returns the same Active alert (which must dedupe) plus
-      // a NEW Emerging alert not seen in the matrix (which must appear).
-      mockClient.transport.request.mockResolvedValueOnce(
-        matrix([
+      searcher.mockResolvedValueOnce(
+        matrixDF([
           {
-            metric: { alertname: 'Active', service: 'cart', alertstate: 'firing' },
+            metric: {
+              __name__: 'ALERTS',
+              alertname: 'Active',
+              service: 'cart',
+              alertstate: 'firing',
+            },
             points: [
               [220, '1'],
               [280, '1'],
@@ -591,7 +636,12 @@ describe('DirectQueryPrometheusBackend', () => {
             ],
           },
           {
-            metric: { alertname: 'Resolved', service: 'ad', alertstate: 'firing' },
+            metric: {
+              __name__: 'ALERTS',
+              alertname: 'Resolved',
+              service: 'ad',
+              alertstate: 'firing',
+            },
             points: [
               [160, '1'],
               [220, '1'],
@@ -605,15 +655,12 @@ describe('DirectQueryPrometheusBackend', () => {
           data: {
             alerts: [
               {
-                // Same rule identity as the Active historical episode —
-                // stripping alertstate, labels match. Expect dedupe.
                 labels: { alertname: 'Active', service: 'cart' },
                 state: 'firing',
                 annotations: {},
                 activeAt: '2024-01-15T12:00:00Z',
               },
               {
-                // No matching historical episode — expect this to show up.
                 labels: { alertname: 'Emerging', service: 'checkout' },
                 state: 'firing',
                 annotations: {},
@@ -624,6 +671,7 @@ describe('DirectQueryPrometheusBackend', () => {
         },
       });
       const result = await backend.getHistoricalAlerts(
+        ctx,
         mockClient as never,
         ds,
         100,
@@ -631,27 +679,26 @@ describe('DirectQueryPrometheusBackend', () => {
         60,
         /* endIsNow */ true
       );
-      // 2 historical + 1 live (the dup'd "Active" was suppressed by dedupe).
       expect(result.alerts).toHaveLength(3);
       const names = result.alerts.map((a) => a.name).sort();
       expect(names).toEqual(['Active', 'Emerging', 'Resolved']);
-      // Because the matrix had data, no fallback banner.
       expect(result.fallback).toBeUndefined();
     });
 
     it('resolved historical episode does NOT dedupe a re-firing live alert', async () => {
-      // Rule fired and resolved mid-window, then fired again. Live
-      // /api/v1/alerts surfaces the current firing; the historical
-      // resolved episode must NOT suppress it (dedupe only fires on
-      // episodes flagged `stillActiveAtRangeEnd`).
-      mockClient.transport.request.mockResolvedValueOnce(
-        matrix([
+      searcher.mockResolvedValueOnce(
+        matrixDF([
           {
-            metric: { alertname: 'Flap', service: 'x', alertstate: 'firing' },
+            metric: {
+              __name__: 'ALERTS',
+              alertname: 'Flap',
+              service: 'x',
+              alertstate: 'firing',
+            },
             points: [
               [160, '1'],
               [220, '1'],
-              [280, '0'], // resolved mid-window
+              [280, '0'],
             ],
           },
         ])
@@ -671,6 +718,7 @@ describe('DirectQueryPrometheusBackend', () => {
         },
       });
       const result = await backend.getHistoricalAlerts(
+        ctx,
         mockClient as never,
         ds,
         100,
@@ -685,12 +733,10 @@ describe('DirectQueryPrometheusBackend', () => {
     });
 
     it('endIsNow=false ⇒ live /api/v1/alerts NOT called', async () => {
-      // Past-only window: the live endpoint has nothing to offer, so
-      // we should make exactly one request (the matrix) and no fallback.
-      mockClient.transport.request.mockResolvedValueOnce(
-        matrix([
+      searcher.mockResolvedValueOnce(
+        matrixDF([
           {
-            metric: { alertname: 'Past' },
+            metric: { __name__: 'ALERTS', alertname: 'Past', alertstate: 'firing' },
             points: [
               [160, '1'],
               [220, '0'],
@@ -699,6 +745,7 @@ describe('DirectQueryPrometheusBackend', () => {
         ])
       );
       const result = await backend.getHistoricalAlerts(
+        ctx,
         mockClient as never,
         ds,
         100,
@@ -707,17 +754,18 @@ describe('DirectQueryPrometheusBackend', () => {
         /* endIsNow */ false
       );
       expect(result.alerts).toHaveLength(1);
-      expect(mockClient.transport.request).toHaveBeenCalledTimes(1);
+      expect(searcher).toHaveBeenCalledTimes(1);
+      expect(mockClient.transport.request).not.toHaveBeenCalled();
       expect(result.fallback).toBeUndefined();
     });
 
     it('empty matrix + endIsNow=true + live /api/v1/alerts fails ⇒ { alerts: [], error }', async () => {
-      // Matrix is empty AND live fetch rejects + rule-extraction fallback
-      // also rejects. Nothing to surface; propagate the live-side error.
-      mockClient.transport.request.mockResolvedValueOnce(matrix([]));
+      searcher.mockResolvedValueOnce(matrixDF([]));
+      // First live fetch (/api/v1/alerts) and the rule-extraction fallback both fail.
       mockClient.transport.request.mockRejectedValueOnce(new Error('upstream unauthorized'));
       mockClient.transport.request.mockRejectedValueOnce(new Error('upstream unauthorized'));
       const result = await backend.getHistoricalAlerts(
+        ctx,
         mockClient as never,
         ds,
         100,
@@ -730,8 +778,9 @@ describe('DirectQueryPrometheusBackend', () => {
     });
 
     it('queryRangeMatrix throws + no live fallback ⇒ { alerts: [], error }', async () => {
-      mockClient.transport.request.mockRejectedValueOnce(new Error('workspace offline'));
+      searcher.mockRejectedValueOnce(new Error('workspace offline'));
       const result = await backend.getHistoricalAlerts(
+        ctx,
         mockClient as never,
         ds,
         100,

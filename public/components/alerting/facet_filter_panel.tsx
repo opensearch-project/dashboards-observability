@@ -47,8 +47,8 @@ export interface FacetGroupConfig {
   showCounts?: boolean;
   /**
    * Render the number of distinct options as a subdued count next to the
-   * facet header (Grafana-style: `instance 9`). Useful for label-key facets
-   * where the value cardinality is the most informative thing about the key.
+   * facet header (e.g. `instance 9`). Useful for label-key facets where
+   * the value cardinality is the most informative thing about the key.
    * Defaults to false — non-label facets (Severity, State, …) read better
    * without it because their option set is small and stable.
    */

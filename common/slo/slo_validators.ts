@@ -10,26 +10,34 @@
  */
 
 import type { BurnRateConfig, SloSpec, Objective } from './slo_types';
-import { parseDurationToMs, RECORDING_WINDOWS } from './slo_promql_generator';
+import { MWMBR_MAX_TIERS, parseDurationToMs, RECORDING_WINDOWS } from './slo_promql_generator';
 
 const METRIC_NAME_RE = /^[a-zA-Z_:][a-zA-Z0-9_:]*$/;
 const LABEL_NAME_RE = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
 const UNSAFE_LABEL_VALUE_RE = /["\\\n{}()]/;
-// Slug shape — leading lowercase letter, internal alphanumerics with
-// single hyphens between segments, total length 3–63. Trailing/double
-// hyphens forbidden (cosmetic for URLs; tightens the prior pattern that
-// allowed `a--b` and `a-`).
+// Slug shape — leading lowercase letter, internal alphanumerics with single
+// hyphens between segments, total length 3–63. Trailing/double hyphens
+// forbidden (cosmetic for URLs; tightens the prior pattern that allowed
+// `a--b` and `a-`).
 const SLUG_ID_RE = /^(?=.{3,63}$)[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 
 /**
- * Cardinality guardrail (design §10.3): UUID-shaped label values explode
- * per-series metric storage. Rejected on create/update; users should tag
- * workloads with stable labels (service, env, route) instead.
+ * Reject character classes that break the YAML emitter's double-quoted
+ * scalars: literal LF / CR / TAB / NULL / DEL and the unicode line/
+ * paragraph separators the spec also forbids inside flow scalars. js-yaml
+ * escapes most of these correctly, but we block at the validator layer
+ * too so the rejection lands locally in the wizard rather than as a
+ * surprising-looking ruler error toast.
  */
-const UUID_LABEL_VALUE_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/** Annotation payload cap (design §10.3). Keeps saved-object size bounded. */
-const ANNOTATIONS_BYTE_CAP = 4096;
+const UNSAFE_USER_FIELD_RE = /[\x00-\x1F\x7F\u2028\u2029]/;
+function validateUserField(label: string, value: string | undefined): string | null {
+  if (value === undefined) return null;
+  if (UNSAFE_USER_FIELD_RE.test(value)) {
+    return `${label} must not contain control characters or unicode line/paragraph separators`;
+  }
+  return null;
+}
 
 /**
  * Defensive sanity checks on user-supplied PromQL expressions
@@ -37,28 +45,25 @@ const ANNOTATIONS_BYTE_CAP = 4096;
  * is interpolated verbatim into emitted rule YAML wrapped in `(...)` paren
  * groups. YAML injection is closed by the literal-block indent discipline
  * in the generator (every line is prefixed with 6 spaces, so the user
- * cannot terminate the block), but unbalanced parens or trailing
- * backslashes escape the generator's wrapping parens and produce malformed
- * PromQL that Cortex rejects at deploy time. This keeps the error local
- * (wizard rejects at save, not later at ruler-write) and forbids the class
- * of input most likely to confuse downstream parsers.
- *
- * Returns `null` when the expression is shaped reasonably, or an error
- * string to surface at `spec.sli.definition.customExpr.*`.
+ * cannot terminate the block), but unbalanced parens or trailing backslashes
+ * escape the generator's wrapping parens and produce malformed PromQL that
+ * Cortex rejects only at deploy time. Validating here keeps the error local
+ * (wizard rejects at save) and forbids the class of input most likely to
+ * confuse downstream parsers. Returns `null` when shaped reasonably, or an
+ * error string to surface at `spec.sli.definition.customExpr.*`.
  */
-const PROMQL_SIZE_CAP = 8192;
-function validateCustomPromQL(expr: string): string | null {
+export const PROMQL_SIZE_CAP = 8192;
+export function validateCustomPromQL(expr: string): string | null {
   if (expr.length > PROMQL_SIZE_CAP) {
     return `PromQL expression exceeds ${PROMQL_SIZE_CAP} characters`;
   }
   // Strip string literals before counting delimiters so a matcher like
   // `{status!~"5[0-9](}"}` isn't flagged as unbalanced. PromQL string
-  // literals use double quotes, single quotes, or backticks (the latter
-  // are raw — escapes don't apply). The regex consumes `\\` (escaped
-  // backslash) and `\"` / `\'` inside double/single-quoted spans so a
-  // legitimate matcher like `"a\"b"` isn't truncated mid-literal. Line
-  // comments (`# ...`) are also stripped so a `# ))` doesn't trip the
-  // balance check.
+  // literals use double quotes, single quotes, or backticks (the latter are
+  // raw \u2014 escapes don't apply). The regex consumes `\\` (escaped backslash)
+  // and `\"`/`\'` inside double/single-quoted spans so a legitimate matcher
+  // like `"a\"b"` isn't truncated mid-literal. Line comments (`# ...`) are
+  // stripped so a `# ))` doesn't trip the balance check.
   const stripped = expr
     .replace(/`[^`]*`/g, '')
     .replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g, '')
@@ -80,14 +85,12 @@ function validateCustomPromQL(expr: string): string | null {
   if (parens !== 0) return 'Unbalanced parentheses';
   if (braces !== 0) return 'Unbalanced braces';
   if (brackets !== 0) return 'Unbalanced brackets';
-  // Trailing backslash escapes the wrapping paren group if unquoted —
-  // forbid it outright.
+  // Trailing backslash escapes the wrapping paren group if unquoted.
   if (/\\\s*$/.test(stripped)) return 'PromQL expression must not end with a backslash';
-  // Control chars (other than tab/newline) have no legitimate use in
-  // PromQL; reject them so a paste from a rich-text editor doesn't smuggle
-  // zero-width or bidi-override chars into emitted YAML. CR is rejected
-  // explicitly because YAML parsers behave inconsistently when a literal
-  // CR lands inside a literal-block scalar (`expr: |`).
+  // Reject control chars (other than tab/newline) so a paste from a rich-text
+  // editor doesn't smuggle zero-width / bidi-override chars into the YAML.
+  // CR is rejected explicitly because YAML parsers behave inconsistently on
+  // a literal CR inside a literal-block scalar.
   if (/[\x00-\x08\x0B\x0C\x0D\x0E-\x1F\x7F]/.test(stripped)) {
     return 'PromQL expression contains control characters';
   }
@@ -104,7 +107,7 @@ function validateCustomPromQL(expr: string): string | null {
  * the matcher value to prevent escape-sequence smuggling into the YAML
  * mapping line.
  *
- * Allowed: `status="200"`, `code=~"5..", `path!="/healthz"`.
+ * Allowed: `status="200"`, `code=~"5.."`, `path!="/healthz"`.
  * Rejected: `status="x",pwn="y"`, `path="\nfoo"`, `code=~"5.."[`.
  */
 const GOOD_EVENTS_FILTER_RE = /^[a-zA-Z_][a-zA-Z_0-9]*\s*(=|!=|=~|!~)\s*"([^"\\\n\r\t\x00-\x1F\x7F]|\\.)*"$/;
@@ -112,8 +115,6 @@ function validateGoodEventsFilter(filter: string): string | null {
   if (/[\n\r\t\x00-\x1F\x7F]/.test(filter)) {
     return 'Good events filter must not contain control characters';
   }
-  // Disallow comma so a filter cannot stack additional matchers via the
-  // generator's label-list join. Requires exactly one matcher per filter.
   if (filter.includes(',')) {
     return 'Good events filter must contain exactly one matcher (comma not allowed)';
   }
@@ -122,6 +123,29 @@ function validateGoodEventsFilter(filter: string): string | null {
   }
   return null;
 }
+
+/**
+ * Cardinality guardrail: UUID-shaped label values explode per-series metric
+ * storage. Rejected on create/update; users should tag workloads with stable
+ * labels (service, env, route) instead.
+ */
+const UUID_LABEL_VALUE_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Annotation payload cap. Keeps saved-object size bounded. */
+const ANNOTATIONS_BYTE_CAP = 4096;
+
+/**
+ * Cardinality caps on user-controlled arrays. These bound the saved-object
+ * size and the search index footprint — without them, a single SLO can blow up
+ * the keyword-mapped projection arrays and slow down listing-page filtering
+ * for the entire workspace. Values picked to leave significant headroom over
+ * realistic usage (an SLO for an internal API rarely needs more than 5
+ * dimensions, 10 labels, or 5 owner teams).
+ */
+const MAX_LABEL_ENTRIES = 50;
+const MAX_LABEL_VALUES_PER_KEY = 50;
+const MAX_DIMENSIONS = 20;
+const MAX_OWNER_TEAMS = 10;
 
 /** Reserved keys in `spec.labels` — reject these so we don't clobber emitted labels. */
 const RESERVED_LABEL_KEYS = new Set([
@@ -138,13 +162,11 @@ const RESERVED_LABEL_KEYS = new Set([
   'slo_burn_rate_multiplier',
   'slo_window_approximated',
   'slo_budget_threshold',
-  // Prototype-pollution guard. `LABEL_NAME_RE` allows
-  // `[a-zA-Z_][a-zA-Z_0-9]*`, which matches `__proto__` /
+  // Prototype-pollution guard. `LABEL_NAME_RE` matches `__proto__` /
   // `constructor` / `prototype`. Cortex would reject the resulting rule
   // (`slo_label___proto__: "x"`) at deploy time, so blocking earlier
   // gives the user a clear validation error instead of an opaque ruler
-  // 400. Belt-and-braces — `normalizeSpec` already strips top-level
-  // unknowns from the SO attrs, but a label key is preserved verbatim.
+  // 400.
   '__proto__',
   'constructor',
   'prototype',
@@ -159,23 +181,6 @@ export interface SloValidationResult {
 export function validateSloId(id: string): string | null {
   if (!SLUG_ID_RE.test(id)) {
     return 'Invalid SLO id. 3–63 characters; lowercase letters, digits, single hyphens between segments; must start with a letter.';
-  }
-  return null;
-}
-
-/**
- * Reject character classes that break the YAML emitter's double-quoted
- * scalars: literal LF / CR / TAB / NULL / DEL and the unicode line/
- * paragraph separators the spec also forbids inside flow scalars. js-yaml
- * escapes most of these correctly, but we block at the validator layer
- * too so the rejection lands locally in the wizard rather than as a
- * surprising-looking ruler error toast.
- */
-const UNSAFE_USER_FIELD_RE = /[\x00-\x1F\x7F\u2028\u2029]/;
-function validateUserField(label: string, value: string | undefined): string | null {
-  if (value === undefined) return null;
-  if (UNSAFE_USER_FIELD_RE.test(value)) {
-    return `${label} must not contain control characters or unicode line/paragraph separators`;
   }
   return null;
 }
@@ -217,6 +222,8 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
 
   if (!input.owner || !Array.isArray(input.owner.teams) || input.owner.teams.length === 0) {
     errors['spec.owner.teams'] = 'At least one team is required';
+  } else if (input.owner.teams.length > MAX_OWNER_TEAMS) {
+    errors['spec.owner.teams'] = `At most ${MAX_OWNER_TEAMS} owner teams are allowed`;
   } else {
     for (let i = 0; i < input.owner.teams.length; i++) {
       const teamErr = validateUserField('Owner team', input.owner.teams[i]);
@@ -258,23 +265,23 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
         if (!prom.customExpr) {
           errors['spec.sli.definition.customExpr'] = 'customExpr is required for custom SLIs';
         } else if (prom.customExpr.mode === 'events') {
-          if (!prom.customExpr.goodQuery)
+          if (!prom.customExpr.goodQuery) {
             errors['spec.sli.definition.customExpr.goodQuery'] = 'goodQuery is required';
-          else {
+          } else {
             const err = validateCustomPromQL(prom.customExpr.goodQuery);
             if (err) errors['spec.sli.definition.customExpr.goodQuery'] = err;
           }
-          if (!prom.customExpr.totalQuery)
+          if (!prom.customExpr.totalQuery) {
             errors['spec.sli.definition.customExpr.totalQuery'] = 'totalQuery is required';
-          else {
+          } else {
             const err = validateCustomPromQL(prom.customExpr.totalQuery);
             if (err) errors['spec.sli.definition.customExpr.totalQuery'] = err;
           }
         } else if (prom.customExpr.mode === 'raw') {
-          if (!prom.customExpr.errorRatioQuery)
+          if (!prom.customExpr.errorRatioQuery) {
             errors['spec.sli.definition.customExpr.errorRatioQuery'] =
               'errorRatioQuery is required';
-          else {
+          } else {
             const err = validateCustomPromQL(prom.customExpr.errorRatioQuery);
             if (err) errors['spec.sli.definition.customExpr.errorRatioQuery'] = err;
           }
@@ -289,13 +296,20 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
     if (!isCustom) {
       if (!Array.isArray(dimensions) || dimensions.length === 0) {
         errors['spec.sli.dimensions'] = 'At least one dimension is required';
+      } else if (dimensions.length > MAX_DIMENSIONS) {
+        errors['spec.sli.dimensions'] = `At most ${MAX_DIMENSIONS} dimensions are allowed`;
       } else {
         for (let i = 0; i < dimensions.length; i++) {
           const d = dimensions[i];
           if (!d.name || !LABEL_NAME_RE.test(d.name))
             errors[`spec.sli.dimensions[${i}].name`] = 'Invalid Prometheus label name';
-          if (!d.value) errors[`spec.sli.dimensions[${i}].value`] = 'Dimension value is required';
-          else if (UNSAFE_LABEL_VALUE_RE.test(d.value))
+          // An empty-string value is a legitimate Prometheus matcher
+          // (`label=""` matches series where the label is absent or empty),
+          // which Data Prepper relies on to scope to server-side spans
+          // (`remoteService=""`). Reject `undefined`/`null` but allow `""`.
+          if (d.value === undefined || d.value === null) {
+            errors[`spec.sli.dimensions[${i}].value`] = 'Dimension value is required';
+          } else if (UNSAFE_LABEL_VALUE_RE.test(d.value))
             errors[`spec.sli.dimensions[${i}].value`] =
               'Label value must not contain double quotes, backslashes, newlines, or braces';
         }
@@ -351,6 +365,11 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
       warnings['spec.alerting.burnRates'] =
         'No burn-rate tiers configured — no MWMBR alerts will be generated';
     } else {
+      if (input.alerting.burnRates.length > MWMBR_MAX_TIERS) {
+        errors[
+          'spec.alerting.burnRates'
+        ] = `At most ${MWMBR_MAX_TIERS} burn-rate tiers are supported; received ${input.alerting.burnRates.length}.`;
+      }
       const firstObjTarget = input.objectives?.[0]?.target;
       const errorBudget = firstObjTarget !== undefined ? 1 - firstObjTarget : undefined;
       for (let i = 0; i < input.alerting.burnRates.length; i++) {
@@ -394,35 +413,34 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
 
   // --- Labels / annotations ---
   if (input.labels) {
-    for (const [k, v] of Object.entries(input.labels)) {
+    const labelEntries = Object.entries(input.labels);
+    if (labelEntries.length > MAX_LABEL_ENTRIES) {
+      errors['spec.labels'] = `At most ${MAX_LABEL_ENTRIES} label keys are allowed`;
+    }
+    for (const [k, v] of labelEntries) {
       if (!LABEL_NAME_RE.test(k)) {
         errors[`spec.labels["${k}"]`] = 'Label key must match [a-zA-Z_][a-zA-Z0-9_]*';
       }
-      if (RESERVED_LABEL_KEYS.has(k)) {
+      if (RESERVED_LABEL_KEYS.has(`slo_label_${k}`) || RESERVED_LABEL_KEYS.has(k)) {
         errors[`spec.labels["${k}"]`] = `"${k}" collides with a reserved slo_* label`;
       }
       const values = Array.isArray(v) ? v : [v];
-      // Collect all per-value errors into one message so a user fixing the
-      // first value doesn't have to resubmit to discover others. Mirrors
-      // the per-index dimension reporting elsewhere in the validator.
-      const valueErrors: string[] = [];
-      for (let i = 0; i < values.length; i++) {
-        const val = values[i];
-        const tag = values.length > 1 ? `[${i}] ` : '';
-        if (typeof val !== 'string') {
-          valueErrors.push(`${tag}must be a string`);
-        } else if (val.length > 256) {
-          valueErrors.push(`${tag}must be 256 characters or fewer`);
-        } else if (UNSAFE_LABEL_VALUE_RE.test(val)) {
-          valueErrors.push(
-            `${tag}must not contain double quotes, backslashes, newlines, or braces`
-          );
-        } else if (UUID_LABEL_VALUE_RE.test(val)) {
-          valueErrors.push(`${tag}must not be a UUID (cardinality guardrail)`);
-        }
+      if (values.length > MAX_LABEL_VALUES_PER_KEY) {
+        errors[
+          `spec.labels["${k}"]`
+        ] = `At most ${MAX_LABEL_VALUES_PER_KEY} values per label key are allowed`;
       }
-      if (valueErrors.length > 0) {
-        errors[`spec.labels["${k}"]`] = `Label value: ${valueErrors.join('; ')}`;
+      for (const val of values) {
+        if (typeof val !== 'string') {
+          errors[`spec.labels["${k}"]`] = 'Label values must be strings';
+        } else if (val.length > 256) {
+          errors[`spec.labels["${k}"]`] = 'Label values must be 256 characters or fewer';
+        } else if (UNSAFE_LABEL_VALUE_RE.test(val)) {
+          errors[`spec.labels["${k}"]`] =
+            'Label value must not contain double quotes, backslashes, newlines, or braces';
+        } else if (UUID_LABEL_VALUE_RE.test(val)) {
+          errors[`spec.labels["${k}"]`] = 'Label values must not be UUIDs (cardinality guardrail)';
+        }
       }
     }
   }

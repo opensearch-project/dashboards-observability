@@ -280,7 +280,7 @@ export const AnnotationEditor: React.FC<{
       }
     ),
     runbook_url: 'https://wiki.example.com/runbooks/...',
-    dashboard_url: 'https://grafana.example.com/d/...',
+    dashboard_url: 'https://dashboards.example.com/d/...',
   };
 
   const valuePlaceholder = i18n.translate(

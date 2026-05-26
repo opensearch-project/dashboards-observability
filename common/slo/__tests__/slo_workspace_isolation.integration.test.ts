@@ -4,21 +4,24 @@
  */
 
 /**
- * AMP-compat integration check.
+ * AMP-compat integration check (per-datasource namespace isolation).
  *
- * Rule groups for SLOs in workspace W must live in the namespace
- * `slo-generated-<W>`, never mixed with other workspaces'. This is the
- * single non-negotiable invariant of the SLO/SLI feature — Amazon Managed
- * Prometheus can only modify rules at the namespace level, so two
- * workspaces sharing a namespace would let one workspace's write overwrite
- * another's.
+ * Under A.4 the SLO ruler namespace is keyed on the datasource id
+ * (`deploy.workspaceId` carries the canonical datasource id in production —
+ * see `server/routes/slo/index.ts`'s `buildDeployContext`). Two SLOs
+ * targeting the same datasource share a ruler namespace; SLOs targeting
+ * different datasources must NEVER mix groups. This is the
+ * non-negotiable AMP invariant — Amazon Managed Prometheus modifies rules
+ * at the namespace level, so two datasources sharing a namespace would let
+ * one datasource's write overwrite another's.
  *
- * We exercise the service with two workspaces writing three SLOs (two in
- * ws-alpha, one in ws-beta). When the two ws-alpha SLOs share an SLI
- * fingerprint, they must dedup into a single shared recording group in
- * ws-alpha's namespace, while ws-beta's identical-fingerprint SLO gets its
- * own recording group in ws-beta's namespace. Alert groups remain per-SLO
- * in each workspace.
+ * We exercise the service with two namespace keys (`ds-alpha` /
+ * `ds-beta`), each carrying its own OSD workspace id, writing three SLOs
+ * (two on ds-alpha, one on ds-beta). When the two ds-alpha SLOs share an
+ * SLI fingerprint, they dedup into a single shared recording group in
+ * ds-alpha's namespace, while ds-beta's identical-fingerprint SLO gets its
+ * own recording group in ds-beta's namespace. Alert groups remain
+ * per-SLO and carry the OSD workspace id in their name.
  */
 
 /* eslint-disable max-classes-per-file */
@@ -80,7 +83,6 @@ class FakeRefStore implements SloRuleRefStoreLite {
   async get(
     ws: string,
     ds: string,
-    _fpv: string,
     fp: string
   ): Promise<{ attributes: { refcount: number } } | null> {
     const entry = this.byId.get(this.key(ws, ds, fp));
@@ -107,7 +109,6 @@ class FakeRefStore implements SloRuleRefStoreLite {
     workspaceId: string;
     datasourceId: string;
     fingerprint: string;
-    fingerprintVersion: string;
   }): Promise<{ droppedToZero: boolean; underflow: boolean }> {
     const k = this.key(input.workspaceId, input.datasourceId, input.fingerprint);
     const entry = this.byId.get(k);
@@ -121,10 +122,18 @@ class FakeRefStore implements SloRuleRefStoreLite {
   }
 }
 
-function buildDeploy(ruler: FakeRuler, workspaceId: string): SloDeployContext {
+function buildDeploy(
+  ruler: FakeRuler,
+  namespaceKey: string,
+  osdWorkspaceId: string
+): SloDeployContext {
+  // Use the namespaceKey as both `id` and `name` so the deploy context
+  // pins `spec.datasourceId = ds.name = namespaceKey`. That keeps the test
+  // store-key invariant aligned with production where the SO writer pins
+  // to the canonical datasource name.
   const datasource: Datasource = {
-    id: 'prom-ds-001',
-    name: 'prom',
+    id: namespaceKey,
+    name: namespaceKey,
     type: 'prometheus',
     url: '',
     enabled: true,
@@ -133,12 +142,18 @@ function buildDeploy(ruler: FakeRuler, workspaceId: string): SloDeployContext {
   const client = ({
     transport: { request: () => Promise.resolve({}) },
   } as unknown) as AlertingOSClient;
-  return { ruler, client, datasource, workspaceId };
+  return {
+    ruler,
+    client,
+    datasource,
+    workspaceId: namespaceKey,
+    OSDWorkspaceId: osdWorkspaceId,
+  };
 }
 
-function validSpec(name: string): SloSpec {
+function validSpec(name: string, datasourceId: string): SloSpec {
   return {
-    datasourceId: 'prom-ds-001',
+    datasourceId,
     name,
     enabled: true,
     mode: 'active',
@@ -173,8 +188,8 @@ function validSpec(name: string): SloSpec {
 
 // ------------------------------------------------------------------- integration
 
-describe('AMP-compat cross-workspace namespace isolation', () => {
-  it('two workspaces writing the same-fingerprint SLI land in disjoint namespaces, each with its own recording group', async () => {
+describe('AMP-compat cross-datasource namespace isolation', () => {
+  it('two datasources writing the same-fingerprint SLI land in disjoint namespaces, each with its own recording group', async () => {
     const ruler = new FakeRuler();
     const refStore = new FakeRefStore();
 
@@ -182,62 +197,66 @@ describe('AMP-compat cross-workspace namespace isolation', () => {
     svc.setDedupEnabled(true);
     svc.setRuleRefStore(refStore);
 
-    const deployAlpha = buildDeploy(ruler, 'ws-alpha');
-    const deployBeta = buildDeploy(ruler, 'ws-beta');
+    const deployAlpha = buildDeploy(ruler, 'ds-alpha', 'ws-alpha');
+    const deployBeta = buildDeploy(ruler, 'ds-beta', 'ws-beta');
 
-    // Three SLOs sharing a single SLI fingerprint: two in ws-alpha, one in ws-beta.
-    const specA1 = validSpec('API Availability Alpha 1');
-    const specA2 = validSpec('API Availability Alpha 2');
-    const specB1 = validSpec('API Availability Beta 1');
+    // Three SLOs sharing the same SLI fingerprint shape, distributed across
+    // two distinct datasources: two on ds-alpha (under ws-alpha), one on
+    // ds-beta (under ws-beta). The fingerprint depends on
+    // (datasourceId, sli, objective) so ds-alpha's pair shares a fingerprint
+    // with each other but NOT with ds-beta's SLO.
+    const specA1 = validSpec('API Availability Alpha 1', 'ds-alpha');
+    const specA2 = validSpec('API Availability Alpha 2', 'ds-alpha');
+    const specB1 = validSpec('API Availability Beta 1', 'ds-beta');
 
     const docA1 = await svc.create({ spec: specA1 }, 'a', deployAlpha);
     const docA2 = await svc.create({ spec: specA2 }, 'a', deployAlpha);
     const docB1 = await svc.create({ spec: specB1 }, 'a', deployBeta);
 
-    const fp = computeSliFingerprint(specA1.datasourceId, specA1.sli, specA1.objectives[0]);
-    expect(fp).not.toBeNull();
-    const recName = dedupRecordingGroupName(fp!);
+    const fpA = computeSliFingerprint('ds-alpha', specA1.sli, specA1.objectives[0]);
+    const fpB = computeSliFingerprint('ds-beta', specB1.sli, specB1.objectives[0]);
+    expect(fpA).not.toBeNull();
+    expect(fpB).not.toBeNull();
+    const recNameA = dedupRecordingGroupName(fpA!);
+    const recNameB = dedupRecordingGroupName(fpB!);
 
-    // Refcount is workspace-scoped: ws-alpha claims the fp twice, ws-beta once.
-    expect(refStore.refcount('ws-alpha', specA1.datasourceId, fp!)).toBe(2);
-    expect(refStore.refcount('ws-beta', specB1.datasourceId, fp!)).toBe(1);
+    // Refcount is workspace-partitioned (per A.4) and datasource-keyed.
+    // ws-alpha's two SLOs increment ds-alpha's slot to 2; ws-beta's single
+    // SLO increments ds-beta's slot to 1. Cross-cells stay at 0.
+    expect(refStore.refcount('ws-alpha', 'ds-alpha', fpA!)).toBe(2);
+    expect(refStore.refcount('ws-beta', 'ds-beta', fpB!)).toBe(1);
+    expect(refStore.refcount('ws-alpha', 'ds-beta', fpA!)).toBe(0);
+    expect(refStore.refcount('ws-beta', 'ds-alpha', fpB!)).toBe(0);
 
-    // Each workspace writes the shared recording group exactly once — into
-    // its own namespace. The recording-group names are identical (fingerprint
-    // is global), but the namespace separator keeps them disjoint on the
-    // ruler and therefore in AMP's rule-group surface.
-    const namespacesUsed = ruler.namespacesFor(recName);
-    expect(namespacesUsed.sort()).toEqual(['slo-generated-ws-alpha', 'slo-generated-ws-beta']);
+    // AMP invariant: each datasource's recording group lives in its own
+    // namespace, never crossing.
+    expect(ruler.hasGroup('slo-generated-ds-alpha', recNameA)).toBe(true);
+    expect(ruler.hasGroup('slo-generated-ds-beta', recNameB)).toBe(true);
+    expect(ruler.hasGroup('slo-generated-ds-alpha', 'bogus')).toBe(false);
 
-    // AMP invariant: ws-alpha's recording group lives in slo-generated-ws-alpha,
-    // ws-beta's in slo-generated-ws-beta — and neither touches the other.
-    expect(ruler.hasGroup('slo-generated-ws-alpha', recName)).toBe(true);
-    expect(ruler.hasGroup('slo-generated-ws-beta', recName)).toBe(true);
-    expect(ruler.hasGroup('slo-generated-ws-alpha', 'bogus')).toBe(false);
-
-    // Each SLO's alert group carries workspace-scoped naming, lands in its
-    // own workspace namespace.
+    // Each SLO's alert group carries the OSD workspace id in its name
+    // (under A.4 the alert-group name is keyed on `OSDWorkspaceId`, not the
+    // namespace key) and lands in its datasource's namespace.
     const alertA1 = dedupAlertGroupName(specA1.name, 'ws-alpha', docA1.id);
     const alertA2 = dedupAlertGroupName(specA2.name, 'ws-alpha', docA2.id);
     const alertB1 = dedupAlertGroupName(specB1.name, 'ws-beta', docB1.id);
-    expect(ruler.hasGroup('slo-generated-ws-alpha', alertA1)).toBe(true);
-    expect(ruler.hasGroup('slo-generated-ws-alpha', alertA2)).toBe(true);
-    expect(ruler.hasGroup('slo-generated-ws-beta', alertB1)).toBe(true);
-    // Crossed pairs must NOT exist (alerts never leak across workspaces):
-    expect(ruler.hasGroup('slo-generated-ws-beta', alertA1)).toBe(false);
-    expect(ruler.hasGroup('slo-generated-ws-alpha', alertB1)).toBe(false);
+    expect(ruler.hasGroup('slo-generated-ds-alpha', alertA1)).toBe(true);
+    expect(ruler.hasGroup('slo-generated-ds-alpha', alertA2)).toBe(true);
+    expect(ruler.hasGroup('slo-generated-ds-beta', alertB1)).toBe(true);
+    // Crossed pairs must NOT exist (alerts never leak across datasources):
+    expect(ruler.hasGroup('slo-generated-ds-beta', alertA1)).toBe(false);
+    expect(ruler.hasGroup('slo-generated-ds-alpha', alertB1)).toBe(false);
 
-    // Every ruler upsert that ever ran for a workspace targeted its own
-    // namespace. Scanning the full upsert history is the strongest audit —
-    // if any future change to the service layer regresses the AMP invariant,
-    // this assertion flags it.
+    // Every ruler upsert that ever ran targeted its own namespace. Scanning
+    // the full upsert history is the strongest audit — any future change to
+    // the service layer that regresses the AMP invariant trips this.
     for (const { namespace, group } of ruler.upserts) {
       const expected =
-        group.groupName === alertA1 || group.groupName === alertA2
-          ? 'slo-generated-ws-alpha'
-          : group.groupName === alertB1
-          ? 'slo-generated-ws-beta'
-          : namespace; // recording group — allowed in either
+        group.groupName === alertA1 || group.groupName === alertA2 || group.groupName === recNameA
+          ? 'slo-generated-ds-alpha'
+          : group.groupName === alertB1 || group.groupName === recNameB
+          ? 'slo-generated-ds-beta'
+          : namespace;
       if (expected !== namespace) {
         throw new Error(`group ${group.groupName} landed in ${namespace}, expected ${expected}`);
       }

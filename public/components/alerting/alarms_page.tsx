@@ -41,10 +41,9 @@ import { CreateMonitor, MonitorFormState } from './create_monitor';
 import { AlertsDashboard } from './alerts_dashboard';
 import { AlertDetailFlyout } from './alert_detail_flyout';
 import { NotificationRoutingPanel } from './notification_routing_panel';
-// Phase 2: import { SuppressionRulesPanel } from './suppression_rules_panel';
+// Future: import { SuppressionRulesPanel } from './suppression_rules_panel';
 import { CreateLogsMonitor, LogsMonitorFormState } from './create_logs_monitor';
 import { CreateMetricsMonitor, MetricsMonitorFormState } from './create_metrics_monitor';
-// Phase 2: import SloListing from './slo_listing';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { useAlerts } from './hooks/use_alerts';
 import { useMonitorMutations } from './hooks/use_monitor_mutations';
@@ -175,6 +174,36 @@ function resolveDatasourceTokens(tokens: string[], datasources: Datasource[]): s
 
 type TabId = 'alerts' | 'rules' | 'routing';
 
+/**
+ * Parse a hash-route deep link of the form `#/rules?q=<query>` into the
+ * tab to land on plus an optional initial search query. Returns
+ * `{ tab: undefined, q: undefined }` on any unknown shape so the caller
+ * keeps its default state (Alerts tab, empty search). Tested implicitly
+ * through `<AlarmsPage>` mount tests.
+ */
+export function parseAlarmsHashRoute(hash: string): { tab?: TabId; q?: string } {
+  if (!hash) return {};
+  // Strip leading `#` then `/`. The hash router's URLs are
+  // `#/rules?q=…` or `#/routing` etc.
+  const stripped = hash.replace(/^#\/?/, '');
+  if (stripped.length === 0) return {};
+  const [pathPart, queryPart = ''] = stripped.split('?', 2);
+  const segment = pathPart.split('/')[0];
+  const tab: TabId | undefined =
+    segment === 'rules' || segment === 'alerts' || segment === 'routing' ? segment : undefined;
+  let q: string | undefined;
+  if (queryPart) {
+    try {
+      const params = new URLSearchParams(queryPart);
+      const raw = params.get('q');
+      if (raw && raw.trim()) q = raw;
+    } catch {
+      // Malformed query string — treat as no params rather than throwing.
+    }
+  }
+  return { tab, q };
+}
+
 const TAB_LABELS: Record<TabId, string> = {
   alerts: i18n.translate('observability.alerting.alarmsPage.tabLabel.alerts', {
     defaultMessage: 'Alerts',
@@ -216,7 +245,15 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
 }) => {
   const osService = useMemo(() => new AlertingOpenSearchService(), []);
   const mutations = useMonitorMutations();
-  const [activeTab, setActiveTab] = useState<TabId>('alerts');
+
+  // Deep-link parsing — when SLO detail (or any other surface) navigates to
+  // `#/rules?q=<rulename>` we want to land on the Rules tab with the search
+  // box pre-filled. Read once on mount via `useState` initializer so we don't
+  // re-trigger the tab switch every time the user types in the search box.
+  // The hash-router lives at `/<basepath>/app/observability-alerting#/rules?q=…`,
+  // so the `?q=…` is a tail of `location.hash`, not `location.search`.
+  const initialDeepLink = useMemo(() => parseAlarmsHashRoute(window.location.hash), []);
+  const [activeTab, setActiveTab] = useState<TabId>(initialDeepLink.tab ?? 'alerts');
   const [selectedDsIds, setSelectedDsIds] = useState<string[]>([]);
   // `dataLoading` / `error` / `rulesWarnings` only drive the Rules flow now —
   // the Alerts path reads loading/error/warnings from `useAlerts` below.
@@ -1137,6 +1174,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           onDatasourceChange={handleDatasourceChange}
           maxDatasources={maxDatasources}
           onDatasourceCapReached={handleDatasourceCapReached}
+          initialSearchQuery={initialDeepLink.q}
         />
       );
     }

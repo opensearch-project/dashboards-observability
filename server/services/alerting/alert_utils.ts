@@ -43,6 +43,20 @@ import {
 } from '../../../common/types/alerting';
 
 // ============================================================================
+// Index-pattern prefixes used to classify a query-level monitor as log vs apm
+// vs generic metric. Captures the conventions the observability plugin's data
+// pipelines emit (`logs-*`, `ss4o_logs*`, `otel-v1-apm*`, `ss4o_traces*`).
+// Callers that have access to a request-scoped `uiSettings` client should
+// prefer the user-configurable `observability:traceAnalyticsSpanIndices` /
+// `observability:traceAnalyticsCorrelatedLogsIndices` settings when classifying;
+// `osMonitorToUnifiedRuleSummary` runs in code paths that don't yet plumb the
+// request, so it falls back to the static defaults below.
+// ============================================================================
+
+const LOG_MONITOR_INDEX_PREFIXES = ['logs-', 'ss4o_logs'] as const;
+const APM_MONITOR_INDEX_PREFIXES = ['otel-v1-apm', 'ss4o_traces'] as const;
+
+// ============================================================================
 // Preview helper functions (exported for testing)
 // ============================================================================
 
@@ -512,9 +526,11 @@ export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): Unifi
   } else {
     // query-level: derive from index patterns
     const indices = input && 'search' in input ? input.search.indices ?? [] : [];
-    if (indices.some((i) => i.startsWith('logs-') || i.startsWith('ss4o_logs'))) {
+    const matchesAnyPrefix = (prefixes: readonly string[]) =>
+      indices.some((i) => prefixes.some((p) => i.startsWith(p)));
+    if (matchesAnyPrefix(LOG_MONITOR_INDEX_PREFIXES)) {
       monitorType = 'log';
-    } else if (indices.some((i) => i.startsWith('otel-v1-apm') || i.startsWith('ss4o_traces'))) {
+    } else if (matchesAnyPrefix(APM_MONITOR_INDEX_PREFIXES)) {
       monitorType = 'apm';
     } else {
       monitorType = 'metric';

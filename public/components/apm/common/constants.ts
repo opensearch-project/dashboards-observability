@@ -44,9 +44,13 @@ export const APM_CONSTANTS = {
   DEFAULT_PAGE_SIZE: 10,
   PAGE_SIZE_OPTIONS: [10, 25, 50] as const,
 
-  // Sparklines
+  // Sparkline height is fixed; width is now fluid (sparkline cells in the
+  // Service Catalog table use a min/max-bounded flex slot so the chart
+  // expands on wide screens and contracts on narrow ones). The
+  // SPARKLINE_WIDTH constant is retained at 60 only as a fallback for
+  // any consumer that still passes it — services-home no longer does.
   SPARKLINE_HEIGHT: 20,
-  SPARKLINE_WIDTH: 100,
+  SPARKLINE_WIDTH: 60,
 
   // Colors for metrics (using EUI theme variables for dark/light mode support)
   COLORS: {
@@ -146,6 +150,7 @@ export const SERVICE_DETAILS_CONSTANTS = {
     OVERVIEW: 'overview',
     OPERATIONS: 'operations',
     DEPENDENCIES: 'dependencies',
+    SLOS: 'slos',
   } as const,
 
   // Table pagination

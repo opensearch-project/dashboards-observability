@@ -42,7 +42,7 @@ import { collectLabelValues, FilterState } from './monitors_table_filters';
 import { INTERNAL_LABEL_KEYS, SavedSearch } from './monitors_table_helpers';
 
 // Cap on label-key facets rendered before the user expands the section.
-// Mirrors the Alerts panel and Grafana's label browser pattern.
+// Mirrors the Alerts panel.
 const LABEL_KEY_INITIAL_VISIBLE = 10;
 
 export interface MonitorsFiltersPanelProps {
@@ -129,8 +129,8 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
   const [showAllLabels, setShowAllLabels] = useState(false);
 
   // Per-name icon map so the datasource facet renders a leading
-  // OpenSearch / Prometheus glyph next to each option (Grafana-style).
-  // Keyed by name because that's the option key passed to FacetFilterGroup.
+  // OpenSearch / Prometheus glyph next to each option. Keyed by name
+  // because that's the option key passed to FacetFilterGroup.
   const datasourceIconMap = useMemo(() => {
     const map: Record<string, string> = {};
     for (const ds of datasources) {

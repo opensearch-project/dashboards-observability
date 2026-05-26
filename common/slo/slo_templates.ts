@@ -20,6 +20,7 @@
  * the picker useful when the metadata API is unavailable.
  */
 
+import { i18n } from '@osd/i18n';
 import type { PrometheusSliType, SliCalcMethod } from './slo_types';
 import type { PrometheusMetricMetadata } from '../types/alerting';
 
@@ -145,62 +146,86 @@ export const SLO_TEMPLATES: readonly SloTemplate[] = [
   // --------------------------------------------------------------------------
   {
     id: 'apm-service-availability',
-    name: 'APM service availability',
-    description:
-      'Non-fault request ratio for a service, computed from span-derived RED metrics ' +
-      '(request/fault with namespace="span_derived"). Best for services emitting OTel ' +
-      'traces through Data Prepper.',
+    name: i18n.translate('observability.apm.slo.template.apmServiceAvailability.name', {
+      defaultMessage: 'APM service availability',
+    }),
+    description: i18n.translate(
+      'observability.apm.slo.template.apmServiceAvailability.description',
+      {
+        defaultMessage:
+          'Non-fault request ratio for a service, computed from span-derived RED metrics (request/fault with namespace="span_derived"). Best for services emitting OTel traces through Data Prepper.',
+      }
+    ),
     icon: 'apmTrace',
     category: 'apm',
     sli: { type: 'custom', calcMethod: 'events' },
     dimensionHints: { serviceLabel: 'service', operationLabel: 'operation' },
     expectedMetricType: 'counter',
     detectionPattern: null,
-    note:
-      'Span-derived samples are gauge-style; all 7 MWMBR recording windows will record the ' +
-      'same instantaneous ratio. Use attainment-breach alarms if burn-rate alerts are essential.',
+    note: i18n.translate('observability.apm.slo.template.apmServiceAvailability.note', {
+      defaultMessage:
+        'Span-derived samples are gauge-style; all 7 MWMBR recording windows will record the same instantaneous ratio. Use attainment-breach alarms if burn-rate alerts are essential.',
+    }),
     customPromqlDefaults: apmServiceAvailabilityDefaults(),
   },
   {
     id: 'apm-service-latency',
-    name: 'APM service latency',
-    description:
-      "Fraction of a service's requests completing under a latency bound, from span-derived " +
-      'latency_seconds_bucket. Default bound 500 ms; edit the query to change it.',
+    name: i18n.translate('observability.apm.slo.template.apmServiceLatency.name', {
+      defaultMessage: 'APM service latency',
+    }),
+    description: i18n.translate('observability.apm.slo.template.apmServiceLatency.description', {
+      defaultMessage:
+        "Fraction of a service's requests completing under a latency bound, from span-derived latency_seconds_bucket. Default bound 500 ms; edit the query to change it.",
+    }),
     icon: 'clock',
     category: 'apm',
     sli: { type: 'custom', calcMethod: 'events' },
     dimensionHints: { serviceLabel: 'service', operationLabel: 'operation' },
     expectedMetricType: 'histogram',
     detectionPattern: null,
-    note:
-      'Latency bound lives inside the PromQL `le` label value — update the query to change it ' +
-      '(e.g. le="0.25" for 250 ms).',
+    note: i18n.translate('observability.apm.slo.template.apmServiceLatency.note', {
+      defaultMessage:
+        'Latency bound lives inside the PromQL `le` label value — update the query to change it (e.g. le="0.25" for 250 ms).',
+    }),
     customPromqlDefaults: apmServiceLatencyDefaults(),
   },
   {
     id: 'apm-dependency-availability',
-    name: 'APM dependency availability',
-    description:
-      'Non-fault ratio for calls a service makes to a downstream dependency, from ' +
-      'span-derived client-span metrics (remoteService="<target>").',
+    name: i18n.translate('observability.apm.slo.template.apmDependencyAvailability.name', {
+      defaultMessage: 'APM dependency availability',
+    }),
+    description: i18n.translate(
+      'observability.apm.slo.template.apmDependencyAvailability.description',
+      {
+        defaultMessage:
+          'Non-fault ratio for calls a service makes to a downstream dependency, from span-derived client-span metrics (remoteService="<target>").',
+      }
+    ),
     icon: 'graphApp',
     category: 'apm',
     sli: { type: 'custom', calcMethod: 'events' },
     dimensionHints: { serviceLabel: 'service', operationLabel: 'remoteOperation' },
     expectedMetricType: 'counter',
     detectionPattern: null,
-    note:
-      'Fill in both `${service}` (caller) and `${remoteService}` (dependency) in the PromQL ' +
-      'before submitting.',
+    note: i18n.translate('observability.apm.slo.template.apmDependencyAvailability.note', {
+      defaultMessage:
+        'Fill in both `{servicePh}` (caller) and `{remoteServicePh}` (dependency) in the PromQL before submitting.',
+      values: {
+        servicePh: '${service}',
+        remoteServicePh: '${remoteService}',
+      },
+    }),
     customPromqlDefaults: apmDependencyAvailabilityDefaults(),
   },
   {
     id: 'apm-dependency-latency',
-    name: 'APM dependency latency',
-    description:
-      "Fraction of a service's calls to a downstream dependency under a latency bound, " +
-      'from span-derived client-span latency histograms.',
+    name: i18n.translate('observability.apm.slo.template.apmDependencyLatency.name', {
+      defaultMessage: 'APM dependency latency',
+    }),
+    description: i18n.translate('observability.apm.slo.template.apmDependencyLatency.description', {
+      defaultMessage:
+        "Fraction of a service's calls to a downstream dependency under a latency bound, from span-derived client-span latency histograms.",
+    }),
     icon: 'clock',
     category: 'apm',
     sli: { type: 'custom', calcMethod: 'events' },
@@ -215,10 +240,13 @@ export const SLO_TEMPLATES: readonly SloTemplate[] = [
   // --------------------------------------------------------------------------
   {
     id: 'http-availability',
-    name: 'HTTP server availability',
-    description:
-      'Ratio of non-5xx HTTP requests to total. Targets the OTel semconv v1.23+ metric ' +
-      'http_server_request_duration_seconds_count with label http_response_status_code.',
+    name: i18n.translate('observability.apm.slo.template.httpAvailability.name', {
+      defaultMessage: 'HTTP server availability',
+    }),
+    description: i18n.translate('observability.apm.slo.template.httpAvailability.description', {
+      defaultMessage:
+        'Ratio of non-5xx HTTP requests to total. Targets the OTel semconv v1.23+ metric http_server_request_duration_seconds_count with label http_response_status_code.',
+    }),
     icon: 'globe',
     category: 'otel',
     sli: {
@@ -233,10 +261,13 @@ export const SLO_TEMPLATES: readonly SloTemplate[] = [
   },
   {
     id: 'http-latency',
-    name: 'HTTP server latency',
-    description:
-      'Fraction of HTTP requests completing under a latency bound. Reads ' +
-      'http_server_request_duration_seconds_bucket (OTel semconv v1.23+).',
+    name: i18n.translate('observability.apm.slo.template.httpLatency.name', {
+      defaultMessage: 'HTTP server latency',
+    }),
+    description: i18n.translate('observability.apm.slo.template.httpLatency.description', {
+      defaultMessage:
+        'Fraction of HTTP requests completing under a latency bound. Reads http_server_request_duration_seconds_bucket (OTel semconv v1.23+).',
+    }),
     icon: 'clock',
     category: 'otel',
     sli: {
@@ -252,10 +283,13 @@ export const SLO_TEMPLATES: readonly SloTemplate[] = [
   },
   {
     id: 'rpc-availability',
-    name: 'RPC / gRPC availability',
-    description:
-      'Non-error RPC call ratio. Targets rpc_server_duration_seconds_count (OTel semconv); ' +
-      'good events = rpc_grpc_status_code="0" (OK).',
+    name: i18n.translate('observability.apm.slo.template.rpcAvailability.name', {
+      defaultMessage: 'RPC / gRPC availability',
+    }),
+    description: i18n.translate('observability.apm.slo.template.rpcAvailability.description', {
+      defaultMessage:
+        'Non-error RPC call ratio. Targets rpc_server_duration_seconds_count (OTel semconv); good events = rpc_grpc_status_code="0" (OK).',
+    }),
     icon: 'visBarVertical',
     category: 'otel',
     sli: {
@@ -270,9 +304,13 @@ export const SLO_TEMPLATES: readonly SloTemplate[] = [
   },
   {
     id: 'rpc-latency',
-    name: 'RPC / gRPC latency',
-    description:
-      'Fraction of RPC calls under a latency bound. Reads rpc_server_duration_seconds_bucket.',
+    name: i18n.translate('observability.apm.slo.template.rpcLatency.name', {
+      defaultMessage: 'RPC / gRPC latency',
+    }),
+    description: i18n.translate('observability.apm.slo.template.rpcLatency.description', {
+      defaultMessage:
+        'Fraction of RPC calls under a latency bound. Reads rpc_server_duration_seconds_bucket.',
+    }),
     icon: 'clock',
     category: 'otel',
     sli: {
@@ -288,10 +326,13 @@ export const SLO_TEMPLATES: readonly SloTemplate[] = [
   },
   {
     id: 'db-client-latency',
-    name: 'Database client latency',
-    description:
-      'Fraction of outgoing DB client calls under a latency bound. Reads ' +
-      'db_client_operation_duration_seconds_bucket (OTel database semconv).',
+    name: i18n.translate('observability.apm.slo.template.dbClientLatency.name', {
+      defaultMessage: 'Database client latency',
+    }),
+    description: i18n.translate('observability.apm.slo.template.dbClientLatency.description', {
+      defaultMessage:
+        'Fraction of outgoing DB client calls under a latency bound. Reads db_client_operation_duration_seconds_bucket (OTel database semconv).',
+    }),
     icon: 'database',
     category: 'otel',
     sli: {
@@ -307,10 +348,13 @@ export const SLO_TEMPLATES: readonly SloTemplate[] = [
   },
   {
     id: 'messaging-latency',
-    name: 'Messaging processing latency',
-    description:
-      'Fraction of messaging-consumer processing under a latency bound. Reads ' +
-      'messaging_process_duration_seconds_bucket (OTel messaging semconv).',
+    name: i18n.translate('observability.apm.slo.template.messagingLatency.name', {
+      defaultMessage: 'Messaging processing latency',
+    }),
+    description: i18n.translate('observability.apm.slo.template.messagingLatency.description', {
+      defaultMessage:
+        'Fraction of messaging-consumer processing under a latency bound. Reads messaging_process_duration_seconds_bucket (OTel messaging semconv).',
+    }),
     icon: 'email',
     category: 'otel',
     sli: {
@@ -326,10 +370,13 @@ export const SLO_TEMPLATES: readonly SloTemplate[] = [
   },
   {
     id: 'genai-availability',
-    name: 'GenAI invocation availability',
-    description:
-      'Ratio of successful GenAI invocations. Reads ' +
-      'gen_ai_client_operation_duration_seconds_count; good events have error_type="".',
+    name: i18n.translate('observability.apm.slo.template.genaiAvailability.name', {
+      defaultMessage: 'GenAI invocation availability',
+    }),
+    description: i18n.translate('observability.apm.slo.template.genaiAvailability.description', {
+      defaultMessage:
+        'Ratio of successful GenAI invocations. Reads gen_ai_client_operation_duration_seconds_count; good events have error_type="".',
+    }),
     icon: 'inspect',
     category: 'otel',
     sli: {
@@ -348,10 +395,13 @@ export const SLO_TEMPLATES: readonly SloTemplate[] = [
   // --------------------------------------------------------------------------
   {
     id: 'custom',
-    name: 'Custom PromQL',
-    description:
-      'Start from a blank slate. Supply your own PromQL — either good + total queries, ' +
-      'or a single pre-computed error-ratio query.',
+    name: i18n.translate('observability.apm.slo.template.custom.name', {
+      defaultMessage: 'Custom PromQL',
+    }),
+    description: i18n.translate('observability.apm.slo.template.custom.description', {
+      defaultMessage:
+        'Start from a blank slate. Supply your own PromQL — either good + total queries, or a single pre-computed error-ratio query.',
+    }),
     icon: 'wrench',
     category: 'custom',
     sli: { type: 'custom', calcMethod: 'events' },
@@ -430,14 +480,11 @@ export function substituteCustomPromqlDefaults(
   defaults: SloTemplateCustomDefaults,
   vars: { service?: string; remoteService?: string; environment?: string }
 ): SloTemplateCustomDefaults {
-  // Use the function form of `replace` so a `vars.service` value containing
-  // regex-replacement special tokens (`$&`, `$1`, `$$`, ...) is treated as a
-  // literal substitution rather than a backreference.
   const replace = (s: string) =>
     s
-      .replace(/\$\{service\}/g, () => vars.service || '${service}')
-      .replace(/\$\{remoteService\}/g, () => vars.remoteService || '${remoteService}')
-      .replace(/\$\{environment\}/g, () => vars.environment || '${environment}');
+      .replace(/\$\{service\}/g, vars.service || '${service}')
+      .replace(/\$\{remoteService\}/g, vars.remoteService || '${remoteService}')
+      .replace(/\$\{environment\}/g, vars.environment || '${environment}');
   if (defaults.mode === 'events') {
     return {
       mode: 'events',
