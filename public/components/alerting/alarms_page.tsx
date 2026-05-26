@@ -59,6 +59,18 @@ import { PPL_MONITOR_NAME_MAX } from '../../../common/services/alerting/validato
 import { parseDateMathMs } from '../../../common/services/alerting/time_range';
 import './alerting.scss';
 import type { OpenSearchFormState } from './create_monitor/create_monitor_types';
+import {
+  DEFAULT_END_TIME,
+  DEFAULT_START_TIME,
+  formStateToRule,
+  isAlertingConfigMissingError,
+  loadPersistedEndTime,
+  loadPersistedSelection as loadPersistedSelectionRaw,
+  loadPersistedStartTime,
+  persistSelection as persistSelectionRaw,
+  persistTimeRange,
+  resolveDatasourceTokens,
+} from './alarms_page_helpers';
 
 // ============================================================================
 // Main Page Component
@@ -79,97 +91,10 @@ interface AlarmsPageProps {
 // ids to Prometheus datasources on every discovery pass, so caching by id
 // goes stale on every server restart. Names are stable across restarts and
 // match how the Routing tab's source selector resolves its stored choice.
-function loadPersistedSelection(): string[] {
-  try {
-    const raw = window.localStorage.getItem(ALERT_MANAGER_SELECTED_DS_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((v): v is string => typeof v === 'string');
-  } catch (_e) {
-    return [];
-  }
-}
-
-function persistSelection(names: string[]) {
-  try {
-    window.localStorage.setItem(ALERT_MANAGER_SELECTED_DS_STORAGE_KEY, JSON.stringify(names));
-  } catch (_e) {
-    // localStorage can be unavailable (private mode / quota). Not fatal.
-  }
-}
-
-// ---- Time-range persistence ----
-//
-// Keyed in sessionStorage (not localStorage) so each tab keeps its own
-// picked range — mirrors APM's precedent. Falls back to the default
-// (`now-24h` → `now`) when the key is absent or the underlying storage
-// throws (SSR, private mode, quota exceeded).
-const ALERT_MANAGER_START_TIME_KEY = 'AlertManagerStartTime';
-const ALERT_MANAGER_END_TIME_KEY = 'AlertManagerEndTime';
-const DEFAULT_START_TIME = 'now-24h';
-const DEFAULT_END_TIME = 'now';
-
-function loadPersistedStartTime(): string {
-  try {
-    return window.sessionStorage.getItem(ALERT_MANAGER_START_TIME_KEY) || DEFAULT_START_TIME;
-  } catch (_e) {
-    return DEFAULT_START_TIME;
-  }
-}
-
-function loadPersistedEndTime(): string {
-  try {
-    return window.sessionStorage.getItem(ALERT_MANAGER_END_TIME_KEY) || DEFAULT_END_TIME;
-  } catch (_e) {
-    return DEFAULT_END_TIME;
-  }
-}
-
-function persistTimeRange(start: string, end: string) {
-  try {
-    window.sessionStorage.setItem(ALERT_MANAGER_START_TIME_KEY, start);
-    window.sessionStorage.setItem(ALERT_MANAGER_END_TIME_KEY, end);
-  } catch (_e) {
-    // sessionStorage can be unavailable (SSR / private mode / quota). Not fatal.
-  }
-}
-
-// Resolve an array of user-supplied tokens (names or ids) against the loaded
-// datasource list, returning the matched datasource ids in input order, with
-// duplicates removed. Unknown tokens are dropped silently — the setting
-// accepts free strings, so typos shouldn't block the page.
-//
-// Matching is case-insensitive and probes every stable handle we expose
-// on a Datasource: id (ds-N, churns across discovery passes — accepted
-// for in-session compatibility but not reliable across restarts), name,
-// directQueryName (stable SQL-plugin connection name for Prom), and
-// mdsId (stable saved-object id for MDS OpenSearch datasources).
-function resolveDatasourceTokens(tokens: string[], datasources: Datasource[]): string[] {
-  const lookup = new Map<string, string>();
-  const add = (key: string | undefined, id: string) => {
-    if (!key) return;
-    const k = key.toLowerCase();
-    if (!lookup.has(k)) lookup.set(k, id);
-  };
-  for (const d of datasources) {
-    add(d.id, d.id);
-    add(d.name, d.id);
-    add(d.directQueryName, d.id);
-    add(d.mdsId, d.id);
-  }
-  const seen = new Set<string>();
-  const out: string[] = [];
-  for (const t of tokens) {
-    if (typeof t !== 'string') continue;
-    const id = lookup.get(t.trim().toLowerCase());
-    if (id && !seen.has(id)) {
-      seen.add(id);
-      out.push(id);
-    }
-  }
-  return out;
-}
+const loadPersistedSelection = () =>
+  loadPersistedSelectionRaw(ALERT_MANAGER_SELECTED_DS_STORAGE_KEY);
+const persistSelection = (names: string[]) =>
+  persistSelectionRaw(ALERT_MANAGER_SELECTED_DS_STORAGE_KEY, names);
 
 type TabId = 'alerts' | 'rules' | 'routing';
 
@@ -189,22 +114,6 @@ const TAB_LABELS: Record<TabId, string> = {
 // The child components (AlertsDashboard, MonitorsTable) handle their own
 // page-size controls (10/20/50/100 rows per page) over this full dataset.
 const DEFAULT_PAGE_SIZE = 1000;
-
-// The OpenSearch Alerting plugin creates the `.opendistro-alerting-config`
-// index lazily, on first monitor/destination creation. Until then, list calls
-// return a 404 `alerting_exception` / `IndexNotFoundException`. That's the same
-// signal our "No rules have been created" empty state already conveys, so we
-// suppress the warning banner for this specific case — the user is about to
-// see the CTA to create their first rule, which will auto-create the index.
-const isAlertingConfigMissingError = (err: string | undefined): boolean => {
-  if (!err) return false;
-  return (
-    err.includes('.opendistro-alerting-config') &&
-    (err.includes('index_not_found') ||
-      err.includes('IndexNotFoundException') ||
-      err.includes('alerting_exception'))
-  );
-};
 
 export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   datasources,
@@ -763,105 +672,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     }
   };
 
-  const formStateToRule = (formState: MonitorFormState, index = 0): UnifiedRule => {
-    const now = new Date().toISOString();
-
-    if (formState.datasourceType === 'prometheus') {
-      const labelsObj: Record<string, string> = {};
-      for (const l of formState.labels) {
-        if (l.key && l.value) labelsObj[l.key] = l.value;
-      }
-      const annotationsObj: Record<string, string> = {};
-      for (const a of formState.annotations) {
-        if (a.key && a.value) annotationsObj[a.key] = a.value;
-      }
-      return {
-        id: `new-${Date.now()}-${index}`,
-        datasourceId: formState.datasourceId || selectedDsIds[0],
-        datasourceType: 'prometheus',
-        name: formState.name,
-        enabled: formState.enabled,
-        severity: formState.severity,
-        query: formState.query,
-        condition: `${formState.threshold.operator} ${formState.threshold.value}${formState.threshold.unit}`,
-        labels: labelsObj,
-        annotations: annotationsObj,
-        monitorType: 'metric',
-        status: formState.enabled ? 'active' : 'disabled',
-        healthStatus: 'healthy',
-        createdBy: 'current-user',
-        createdAt: now,
-        lastModified: now,
-        notificationDestinations: [],
-        description: annotationsObj.description || '',
-        evaluationInterval: formState.evaluationInterval,
-        pendingPeriod: formState.pendingPeriod,
-        firingPeriod: formState.firingPeriod,
-        threshold: {
-          operator: formState.threshold.operator,
-          value: formState.threshold.value,
-          unit: formState.threshold.unit,
-        },
-        alertHistory: [],
-        conditionPreviewData: [],
-        notificationRouting: [],
-        suppressionRules: [],
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- raw field is empty for new monitors
-        raw: {} as any,
-      };
-    } else {
-      // OpenSearch PPL monitor — DSL/cluster-metrics aren't authored in this UI.
-      const indices = formState.indices.map((s) => s.trim()).filter(Boolean);
-
-      const labelsObj: Record<string, string> = {};
-      const annotationsObj: Record<string, string> = {};
-      for (const l of formState.labels) {
-        if (l.key && l.value) labelsObj[l.key] = l.value;
-      }
-      for (const a of formState.annotations) {
-        if (a.key && a.value) annotationsObj[a.key] = a.value;
-      }
-      if (indices.length > 0) labelsObj.indices = indices.join(', ');
-      // monitorType already lives on UnifiedRule as a top-level field — emitting
-      // it as a label too would leak into the Labels facet.
-
-      return {
-        id: `new-${Date.now()}-${index}`,
-        datasourceId: formState.datasourceId || selectedDsIds[0],
-        datasourceType: 'opensearch',
-        name: formState.name,
-        enabled: formState.enabled,
-        severity: formState.severity,
-        query: formState.query,
-        condition: `${formState.threshold.operator} ${formState.threshold.value}${formState.threshold.unit}`,
-        labels: labelsObj,
-        annotations: annotationsObj,
-        monitorType: 'ppl',
-        status: formState.enabled ? 'active' : 'disabled',
-        healthStatus: 'healthy',
-        createdBy: 'current-user',
-        createdAt: now,
-        lastModified: now,
-        notificationDestinations: [],
-        description: `OpenSearch PPL monitor${
-          indices.length > 0 ? ` on ${indices.join(', ')}` : ''
-        }`,
-        evaluationInterval: formState.evaluationInterval,
-        pendingPeriod: formState.pendingPeriod,
-        threshold: {
-          operator: formState.threshold.operator,
-          value: formState.threshold.value,
-          unit: formState.threshold.unit,
-        },
-        alertHistory: [],
-        conditionPreviewData: [],
-        notificationRouting: [],
-        suppressionRules: [],
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- raw field is empty for new monitors
-        raw: {} as any,
-      };
-    }
-  };
+  const buildOptimisticRule = (formState: MonitorFormState, index = 0): UnifiedRule =>
+    formStateToRule(formState, selectedDsIds[0], index);
 
   const resolveDatasourceId = (formState: MonitorFormState): string | null => {
     const dsId = formState.datasourceId || selectedDsIds[0];
@@ -896,7 +708,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   const handleCreateMonitor = async (formState: MonitorFormState) => {
     const dsId = resolveDatasourceId(formState);
     if (!dsId) return;
-    const newRule = formStateToRule(formState);
+    const newRule = buildOptimisticRule(formState);
     try {
       await mutations.createMonitor(buildPayload(formState), dsId);
       addToast(
@@ -953,7 +765,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       if (!dsId) continue;
       try {
         await mutations.createMonitor(buildPayload(forms[i]), dsId);
-        succeededRules.push(formStateToRule(forms[i], i));
+        succeededRules.push(buildOptimisticRule(forms[i], i));
       } catch (e: unknown) {
         addToast(
           i18n.translate('observability.alerting.alarmsPage.toast.createMonitorFailed', {
