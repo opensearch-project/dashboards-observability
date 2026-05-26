@@ -20,6 +20,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@osd/i18n/react';
 import { Datasource, UnifiedRule } from '../../../../common/types/alerting';
 import { useRuleDetail } from '../hooks/use_rule_detail';
 import { unifiedRuleToOsForm } from '../../../../common/services/alerting/form_transforms';
@@ -162,7 +163,12 @@ export const EditMonitor: React.FC<EditMonitorProps> = ({
       <EuiFlyout onClose={onCancel} size="l" ownFocus aria-labelledby="editMonitorErrorTitle">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 id="editMonitorErrorTitle">Failed to load monitor</h2>
+            <h2 id="editMonitorErrorTitle">
+              <FormattedMessage
+                id="observability.alerting.editMonitor.failedToLoadTitle"
+                defaultMessage="Failed to load monitor"
+              />
+            </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
@@ -179,7 +185,12 @@ export const EditMonitor: React.FC<EditMonitorProps> = ({
       <EuiFlyout onClose={onCancel} size="l" ownFocus aria-labelledby="editMonitorUnsupportedTitle">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 id="editMonitorUnsupportedTitle">Edit not supported</h2>
+            <h2 id="editMonitorUnsupportedTitle">
+              <FormattedMessage
+                id="observability.alerting.editMonitor.unsupportedTitle"
+                defaultMessage="Edit not supported"
+              />
+            </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>

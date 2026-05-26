@@ -9,6 +9,8 @@
  */
 import React, { useMemo } from 'react';
 import { EuiFormRow, EuiLink, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { useDestinations } from '../../hooks/use_destinations';
 import { coreRefs } from '../../../../framework/core_refs';
 
@@ -32,11 +34,15 @@ export const DestinationPicker: React.FC<DestinationPickerProps> = ({
   dsId,
   value,
   onChange,
-  ariaLabel = 'Notification destination',
+  ariaLabel,
   isInvalid,
   errorMessage,
 }) => {
   const { destinations, isLoading, error } = useDestinations({ dsId });
+
+  const placeholderText = i18n.translate('observability.alerting.destinationPicker.placeholder', {
+    defaultMessage: 'Select a destination',
+  });
 
   const options = useMemo(() => {
     const opts = destinations.map((d) => ({
@@ -54,11 +60,11 @@ export const DestinationPicker: React.FC<DestinationPickerProps> = ({
     return [
       {
         value: NONE_OPTION_VALUE,
-        inputDisplay: <em>Select a destination</em>,
+        inputDisplay: <em>{placeholderText}</em>,
       },
       ...opts,
     ];
-  }, [destinations]);
+  }, [destinations, placeholderText]);
 
   const destinationsHref = useMemo(() => {
     const base = coreRefs.http?.basePath?.get?.() ?? '';
@@ -67,24 +73,45 @@ export const DestinationPicker: React.FC<DestinationPickerProps> = ({
 
   const selectedValue = value || NONE_OPTION_VALUE;
 
+  const resolvedAriaLabel =
+    ariaLabel ??
+    i18n.translate('observability.alerting.destinationPicker.defaultAriaLabel', {
+      defaultMessage: 'Notification destination',
+    });
+
   return (
     <EuiFormRow
-      label="Destination"
+      label={i18n.translate('observability.alerting.destinationPicker.label', {
+        defaultMessage: 'Destination',
+      })}
       isInvalid={isInvalid}
       error={errorMessage}
       fullWidth
       helpText={
         !isLoading && destinations.length === 0 ? (
           <span>
-            No destinations configured for this datasource.{' '}
-            <EuiLink href={destinationsHref} target="_blank">
-              Open Destinations
-            </EuiLink>
+            <FormattedMessage
+              id="observability.alerting.destinationPicker.noneConfigured"
+              defaultMessage="No destinations configured for this datasource. {openLink}"
+              values={{
+                openLink: (
+                  <EuiLink href={destinationsHref} target="_blank">
+                    <FormattedMessage
+                      id="observability.alerting.destinationPicker.openDestinations"
+                      defaultMessage="Open Destinations"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
           </span>
         ) : (
           <span>
             <EuiLink href={destinationsHref} target="_blank">
-              Manage destinations
+              <FormattedMessage
+                id="observability.alerting.destinationPicker.manageDestinations"
+                defaultMessage="Manage destinations"
+              />
             </EuiLink>
           </span>
         )
@@ -97,14 +124,18 @@ export const DestinationPicker: React.FC<DestinationPickerProps> = ({
           onChange={(v) => onChange(v === NONE_OPTION_VALUE ? '' : v)}
           fullWidth
           isLoading={isLoading}
-          aria-label={ariaLabel}
-          data-test-subj="alertManager-pplDestinationPicker"
+          aria-label={resolvedAriaLabel}
+          data-test-subj="alertManagerPplDestinationPicker"
         />
         {error && (
           <>
             <EuiSpacer size="xs" />
             <EuiText size="xs" color="danger">
-              Failed to load destinations: {error.message}
+              <FormattedMessage
+                id="observability.alerting.destinationPicker.loadError"
+                defaultMessage="Failed to load destinations: {message}"
+                values={{ message: error.message }}
+              />
             </EuiText>
           </>
         )}

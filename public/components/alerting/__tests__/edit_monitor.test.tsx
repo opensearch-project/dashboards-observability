@@ -20,7 +20,7 @@ jest.mock('../create_monitor', () => ({
       | undefined;
     return (
       <div
-        data-test-subj="create-monitor-mock"
+        data-test-subj="createMonitorMock"
         data-mode={String(props.mode)}
         data-indices={(init?.indices ?? []).join(',')}
       >
@@ -128,7 +128,7 @@ describe('EditMonitor', () => {
         datasources={[osDs]}
       />
     );
-    const mock = screen.getByTestId('create-monitor-mock');
+    const mock = screen.getByTestId('createMonitorMock');
     expect(mock.getAttribute('data-mode')).toBe('edit');
     expect(mock.textContent).toContain('name=monitor-1');
     // The seeder parses `source = logs-*` out of the PPL query so the picker

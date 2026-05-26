@@ -271,7 +271,7 @@ export const PplQueryEditor: React.FC<PplQueryEditorProps> = ({
           languageConfiguration={LANGUAGE_CONFIGURATION}
           options={EDITOR_OPTIONS}
           editorDidMount={editorDidMount}
-          data-test-subj="alertManager-pplQueryEditor"
+          data-test-subj="alertManagerPplQueryEditor"
         />
       </div>
     </OpenSearchDashboardsContextProvider>

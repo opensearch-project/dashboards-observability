@@ -97,7 +97,7 @@ export const TimeFieldSelector: React.FC<TimeFieldSelectorProps> = ({
             if (trimmed) onChange(trimmed);
           }}
           fullWidth
-          data-test-subj="alertManager-timeFieldSelector"
+          data-test-subj="alertManagerTimeFieldSelector"
           aria-label={i18n.translate('observability.alerting.timeFieldSelector.ariaLabel', {
             defaultMessage: 'Timestamp field',
           })}

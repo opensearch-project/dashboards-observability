@@ -8,20 +8,20 @@ import { fireEvent, render, screen } from '@testing-library/react';
 
 jest.mock('../promql_editor', () => ({
   PromQLEditor: ({ value }: { value: string }) => (
-    <textarea data-test-subj="promql-mock" defaultValue={value} />
+    <textarea data-test-subj="promqlMock" defaultValue={value} />
   ),
   validatePromQL: () => [],
 }));
 
 jest.mock('../metric_browser', () => ({
-  MetricBrowser: () => <div data-test-subj="metric-browser-mock" />,
+  MetricBrowser: () => <div data-test-subj="metricBrowserMock" />,
 }));
 
 jest.mock('../monitor_form_components', () => ({
   LabelEditor: () => <div />,
   AnnotationEditor: () => <div />,
   DatasourceTargetSelector: ({ onChange }: { onChange: (id: string, type: string) => void }) => (
-    <button data-test-subj="ds-selector" onClick={() => onChange('ds-os', 'opensearch')}>
+    <button data-test-subj="dsSelector" onClick={() => onChange('ds-os', 'opensearch')}>
       Select DS
     </button>
   ),
@@ -34,7 +34,7 @@ jest.mock('../monitor_template_wizard', () => ({
 jest.mock('../create_monitor/sections/destination_picker', () => ({
   DestinationPicker: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
     <input
-      data-test-subj="ppl-destination-picker"
+      data-test-subj="pplDestinationPicker"
       value={value}
       onChange={(e) => onChange(e.target.value)}
     />
@@ -50,7 +50,7 @@ jest.mock('../create_monitor/sections/index_picker', () => ({
     onChange: (next: string[]) => void;
   }) => (
     <input
-      data-test-subj="index-picker-mock"
+      data-test-subj="indexPickerMock"
       value={selected.join(',')}
       onChange={(e) =>
         onChange(
@@ -67,7 +67,7 @@ jest.mock('../create_monitor/sections/index_picker', () => ({
 jest.mock('../create_monitor/sections/time_field_selector', () => ({
   TimeFieldSelector: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
     <input
-      data-test-subj="time-field-selector-mock"
+      data-test-subj="timeFieldSelectorMock"
       value={value}
       onChange={(e) => onChange(e.target.value)}
     />
@@ -77,7 +77,7 @@ jest.mock('../create_monitor/sections/time_field_selector', () => ({
 jest.mock('../create_monitor/sections/ppl_query_editor', () => ({
   PplQueryEditor: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
     <textarea
-      data-test-subj="ppl-query-editor-mock"
+      data-test-subj="pplQueryEditorMock"
       aria-label="PPL query"
       value={value}
       onChange={(e) => onChange(e.target.value)}

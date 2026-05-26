@@ -27,7 +27,7 @@ const mockTimeline = jest.fn();
 jest.mock('../alerts_charts', () => ({
   AlertTimeline: (props: { alerts: unknown[]; startMs: number; endMs: number }) => {
     mockTimeline(props);
-    return <div data-test-subj="alert-timeline-stub" />;
+    return <div data-test-subj="alertTimelineStub" />;
   },
 }));
 
@@ -124,12 +124,12 @@ describe('AlertsDashboard', () => {
     const { getByTestId } = render(
       <AlertsDashboard {...baseProps} alerts={[sampleAlert]} truncated />
     );
-    expect(getByTestId('alerts-truncated-callout')).toBeInTheDocument();
+    expect(getByTestId('alertsTruncatedCallout')).toBeInTheDocument();
   });
 
   it('does not render the truncated callout when `truncated` is false/undefined', () => {
     const { queryByTestId } = render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
-    expect(queryByTestId('alerts-truncated-callout')).not.toBeInTheDocument();
+    expect(queryByTestId('alertsTruncatedCallout')).not.toBeInTheDocument();
   });
 
   it('renders the fallback callout listing each fallback datasource', () => {
@@ -142,7 +142,7 @@ describe('AlertsDashboard', () => {
         ]}
       />
     );
-    expect(getByTestId('alerts-fallback-callout')).toBeInTheDocument();
+    expect(getByTestId('alertsFallbackCallout')).toBeInTheDocument();
     expect(getByText('prom-prod')).toBeInTheDocument();
   });
 
@@ -150,7 +150,7 @@ describe('AlertsDashboard', () => {
     const { queryByTestId } = render(
       <AlertsDashboard {...baseProps} alerts={[sampleAlert]} fallbackHints={[]} />
     );
-    expect(queryByTestId('alerts-fallback-callout')).not.toBeInTheDocument();
+    expect(queryByTestId('alertsFallbackCallout')).not.toBeInTheDocument();
   });
 
   // Regression: deselecting all datasources must wipe both the dependent

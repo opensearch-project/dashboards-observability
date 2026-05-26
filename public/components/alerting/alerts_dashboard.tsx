@@ -777,7 +777,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                       color="warning"
                       iconType="alert"
                       size="s"
-                      data-test-subj="alerts-truncated-callout"
+                      data-test-subj="alertsTruncatedCallout"
                     >
                       <p>
                         <FormattedMessage
@@ -801,7 +801,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                       color="warning"
                       iconType="alert"
                       size="s"
-                      data-test-subj="alerts-fallback-callout"
+                      data-test-subj="alertsFallbackCallout"
                     >
                       {fallbackHints.map((h, i) => (
                         <p key={i}>
@@ -850,7 +850,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                             end={pickerEnd}
                             onTimeChange={onTimeChange}
                             onRefresh={onRefresh}
-                            data-test-subj="alertManager-datePicker"
+                            data-test-subj="alertManagerDatePicker"
                           />
                         </EuiFlexItem>
                       </EuiFlexGroup>

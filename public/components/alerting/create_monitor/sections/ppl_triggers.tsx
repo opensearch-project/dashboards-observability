@@ -27,6 +27,8 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import {
   PplActionForm,
   PplNumResultsOperator,
@@ -46,13 +48,31 @@ const SUBJECT_MAX = 1000;
 const MESSAGE_MAX = 5000;
 
 const SEVERITY_OPTIONS: Array<{ value: PplTriggerSeverity; text: string }> = [
-  { value: '1', text: '1 (highest)' },
+  {
+    value: '1',
+    text: i18n.translate('observability.alerting.pplTriggers.severityOption1', {
+      defaultMessage: '1 (highest)',
+    }),
+  },
   { value: '2', text: '2' },
-  { value: '3', text: '3 (default)' },
+  {
+    value: '3',
+    text: i18n.translate('observability.alerting.pplTriggers.severityOption3', {
+      defaultMessage: '3 (default)',
+    }),
+  },
   { value: '4', text: '4' },
-  { value: '5', text: '5 (lowest)' },
+  {
+    value: '5',
+    text: i18n.translate('observability.alerting.pplTriggers.severityOption5', {
+      defaultMessage: '5 (lowest)',
+    }),
+  },
 ];
 
+// Operator glyphs (>, >=, <, etc.) are language-neutral so we don't translate
+// the `text` here; localizing the symbol would risk producing strings that
+// don't round-trip through PPL.
 const NUM_RESULTS_OPERATOR_OPTIONS: Array<{ value: PplNumResultsOperator; text: string }> = [
   { value: '>', text: '>' },
   { value: '>=', text: '>=' },
@@ -63,8 +83,18 @@ const NUM_RESULTS_OPERATOR_OPTIONS: Array<{ value: PplNumResultsOperator; text: 
 ];
 
 const TRIGGER_TYPE_RADIOS = [
-  { id: 'number_of_results', label: 'Number of results' },
-  { id: 'custom', label: 'Custom condition' },
+  {
+    id: 'number_of_results',
+    label: i18n.translate('observability.alerting.pplTriggers.triggerTypeNumberOfResults', {
+      defaultMessage: 'Number of results',
+    }),
+  },
+  {
+    id: 'custom',
+    label: i18n.translate('observability.alerting.pplTriggers.triggerTypeCustom', {
+      defaultMessage: 'Custom condition',
+    }),
+  },
 ];
 
 const CUSTOM_CONDITION_REGEX = /^\s*where\s+.+/i;
@@ -169,7 +199,7 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
   );
 
   return (
-    <section aria-label="PPL triggers" data-test-subj="alertManager-pplTriggersSection">
+    <section aria-label="PPL triggers" data-test-subj="alertManagerPplTriggersSection">
       <EuiTitle size="xs">
         <h3>Triggers ({triggers.length})</h3>
       </EuiTitle>
@@ -195,7 +225,7 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
             {idx > 0 && <EuiSpacer size="m" />}
             <EuiPanel paddingSize="s" hasBorder>
               <EuiAccordion
-                id={`ppl-trigger-${trigger.id}`}
+                id={`pplTrigger-${trigger.id}`}
                 buttonContent={<strong>{trigger.name || `Trigger ${idx + 1}`}</strong>}
                 initialIsOpen
                 paddingSize="s"
@@ -205,31 +235,57 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                     color="danger"
                     isDisabled={triggers.length <= 1}
                     onClick={() => removeTrigger(trigger.id)}
-                    aria-label={`Delete ${trigger.name}`}
+                    aria-label={i18n.translate(
+                      'observability.alerting.pplTriggers.deleteTriggerAriaLabel',
+                      {
+                        defaultMessage: 'Delete {name}',
+                        values: { name: trigger.name },
+                      }
+                    )}
                   >
-                    Delete
+                    <FormattedMessage
+                      id="observability.alerting.pplTriggers.deleteTrigger"
+                      defaultMessage="Delete"
+                    />
                   </EuiButtonEmpty>
                 }
               >
                 <EuiFormRow
-                  label="Trigger name"
+                  label={i18n.translate('observability.alerting.pplTriggers.triggerNameLabel', {
+                    defaultMessage: 'Trigger name',
+                  })}
                   fullWidth
                   isInvalid={nameInvalid}
-                  error={nameInvalid ? 'Name is required' : undefined}
+                  error={
+                    nameInvalid
+                      ? i18n.translate(
+                          'observability.alerting.pplTriggers.triggerNameRequiredError',
+                          { defaultMessage: 'Name is required' }
+                        )
+                      : undefined
+                  }
                 >
                   <EuiFieldText
                     value={trigger.name}
                     onChange={(e) => updateTrigger(trigger.id, { name: e.target.value })}
                     fullWidth
                     compressed
-                    aria-label="Trigger name"
+                    aria-label={i18n.translate(
+                      'observability.alerting.pplTriggers.triggerNameAriaLabel',
+                      { defaultMessage: 'Trigger name' }
+                    )}
                   />
                 </EuiFormRow>
                 <EuiSpacer size="s" />
 
                 <EuiFlexGroup gutterSize="m">
                   <EuiFlexItem>
-                    <EuiFormRow label="Severity" display="rowCompressed">
+                    <EuiFormRow
+                      label={i18n.translate('observability.alerting.pplTriggers.severityLabel', {
+                        defaultMessage: 'Severity',
+                      })}
+                      display="rowCompressed"
+                    >
                       <EuiSelect
                         options={SEVERITY_OPTIONS}
                         value={trigger.severity}
@@ -239,31 +295,55 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                           })
                         }
                         compressed
-                        aria-label="Severity"
+                        aria-label={i18n.translate(
+                          'observability.alerting.pplTriggers.severityAriaLabel',
+                          { defaultMessage: 'Severity' }
+                        )}
                       />
                     </EuiFormRow>
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="s" />
 
-                <EuiFormRow label="Condition type" fullWidth>
+                <EuiFormRow
+                  label={i18n.translate('observability.alerting.pplTriggers.conditionTypeLabel', {
+                    defaultMessage: 'Condition type',
+                  })}
+                  fullWidth
+                >
                   <EuiRadioGroup
                     options={TRIGGER_TYPE_RADIOS}
                     idSelected={trigger.type}
                     onChange={(id) => updateTrigger(trigger.id, { type: id as PplTriggerType })}
-                    name={`ppl-trigger-type-${trigger.id}`}
+                    name={`pplTriggerType-${trigger.id}`}
                   />
                 </EuiFormRow>
                 <EuiSpacer size="s" />
 
                 {trigger.type === 'number_of_results' ? (
                   <EuiFormRow
-                    label="Trigger condition"
-                    helpText={`Threshold (1–${NUM_RESULTS_MAX}). Backend cap from plugins.alerting.ppl_query_results_max_datarows.`}
+                    label={i18n.translate(
+                      'observability.alerting.pplTriggers.triggerConditionLabel',
+                      { defaultMessage: 'Trigger condition' }
+                    )}
+                    helpText={i18n.translate(
+                      'observability.alerting.pplTriggers.triggerConditionHelpText',
+                      {
+                        defaultMessage:
+                          'Threshold (1–{max}). Backend cap from plugins.alerting.ppl_query_results_max_datarows.',
+                        values: { max: NUM_RESULTS_MAX },
+                      }
+                    )}
                     isInvalid={numResultsInvalid}
                     error={
                       numResultsInvalid
-                        ? `Value must be an integer between ${NUM_RESULTS_MIN} and ${NUM_RESULTS_MAX}`
+                        ? i18n.translate(
+                            'observability.alerting.pplTriggers.triggerConditionError',
+                            {
+                              defaultMessage: 'Value must be an integer between {min} and {max}',
+                              values: { min: NUM_RESULTS_MIN, max: NUM_RESULTS_MAX },
+                            }
+                          )
                         : undefined
                     }
                   >
@@ -278,7 +358,10 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                             })
                           }
                           compressed
-                          aria-label="Condition operator"
+                          aria-label={i18n.translate(
+                            'observability.alerting.pplTriggers.conditionOperatorAriaLabel',
+                            { defaultMessage: 'Condition operator' }
+                          )}
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false} style={{ minWidth: 120 }}>
@@ -293,28 +376,46 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                             })
                           }
                           compressed
-                          aria-label="Threshold value"
+                          aria-label={i18n.translate(
+                            'observability.alerting.pplTriggers.thresholdValueAriaLabel',
+                            { defaultMessage: 'Threshold value' }
+                          )}
                         />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiText size="xs" color="subdued">
-                          When the query returns {trigger.numResultsCondition}{' '}
-                          {trigger.numResultsValue} datarows, this trigger fires.
+                          <FormattedMessage
+                            id="observability.alerting.pplTriggers.triggerConditionPreview"
+                            defaultMessage="When the query returns {operator} {value} datarows, this trigger fires."
+                            values={{
+                              operator: trigger.numResultsCondition,
+                              value: trigger.numResultsValue,
+                            }}
+                          />
                         </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFormRow>
                 ) : (
                   <EuiFormRow
-                    label="Custom condition"
-                    helpText={
-                      'A PPL `where` clause appended to the base query. Must start with `where`. ' +
-                      'Example: where avg_latency > 300'
-                    }
+                    label={i18n.translate(
+                      'observability.alerting.pplTriggers.customConditionLabel',
+                      { defaultMessage: 'Custom condition' }
+                    )}
+                    helpText={i18n.translate(
+                      'observability.alerting.pplTriggers.customConditionHelpText',
+                      {
+                        defaultMessage:
+                          'A PPL `where` clause appended to the base query. Must start with `where`. Example: where avg_latency > 300',
+                      }
+                    )}
                     isInvalid={customConditionInvalid}
                     error={
                       customConditionInvalid
-                        ? 'Custom condition must start with `where`'
+                        ? i18n.translate(
+                            'observability.alerting.pplTriggers.customConditionError',
+                            { defaultMessage: 'Custom condition must start with `where`' }
+                          )
                         : undefined
                     }
                     fullWidth
@@ -327,7 +428,10 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                       rows={2}
                       fullWidth
                       compressed
-                      aria-label="Custom PPL where clause"
+                      aria-label={i18n.translate(
+                        'observability.alerting.pplTriggers.customConditionAriaLabel',
+                        { defaultMessage: 'Custom PPL where clause' }
+                      )}
                     />
                   </EuiFormRow>
                 )}
@@ -335,13 +439,22 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                 <EuiHorizontalRule margin="m" />
 
                 <EuiTitle size="xxs">
-                  <h4>Notification actions ({trigger.actions.length})</h4>
+                  <h4>
+                    <FormattedMessage
+                      id="observability.alerting.pplTriggers.notificationActionsHeader"
+                      defaultMessage="Notification actions ({count})"
+                      values={{ count: trigger.actions.length }}
+                    />
+                  </h4>
                 </EuiTitle>
                 <EuiSpacer size="xs" />
                 {!dsId && trigger.actions.length > 0 && (
                   <EuiCallOut size="s" color="warning" iconType="iInCircle">
                     <EuiText size="xs">
-                      Pick a datasource first to load notification destinations.
+                      <FormattedMessage
+                        id="observability.alerting.pplTriggers.pickDatasourceFirst"
+                        defaultMessage="Pick a datasource first to load notification destinations."
+                      />
                     </EuiText>
                   </EuiCallOut>
                 )}
@@ -357,7 +470,7 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                       {actionIdx > 0 && <EuiSpacer size="xs" />}
                       <EuiPanel paddingSize="s" hasBorder>
                         <EuiAccordion
-                          id={`ppl-action-${action.id}`}
+                          id={`pplAction-${action.id}`}
                           buttonContent={<span>{action.name}</span>}
                           initialIsOpen
                           paddingSize="s"
@@ -366,13 +479,28 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                               size="xs"
                               color="danger"
                               onClick={() => removeAction(trigger.id, action.id)}
-                              aria-label={`Delete action ${action.name}`}
+                              aria-label={i18n.translate(
+                                'observability.alerting.pplTriggers.deleteActionAriaLabel',
+                                {
+                                  defaultMessage: 'Delete action {name}',
+                                  values: { name: action.name },
+                                }
+                              )}
                             >
-                              Delete
+                              <FormattedMessage
+                                id="observability.alerting.pplTriggers.deleteAction"
+                                defaultMessage="Delete"
+                              />
                             </EuiButtonEmpty>
                           }
                         >
-                          <EuiFormRow label="Action name" fullWidth>
+                          <EuiFormRow
+                            label={i18n.translate(
+                              'observability.alerting.pplTriggers.actionNameLabel',
+                              { defaultMessage: 'Action name' }
+                            )}
+                            fullWidth
+                          >
                             <EuiFieldText
                               value={action.name}
                               onChange={(e) =>
@@ -380,7 +508,10 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                               }
                               fullWidth
                               compressed
-                              aria-label="Action name"
+                              aria-label={i18n.translate(
+                                'observability.alerting.pplTriggers.actionNameAriaLabel',
+                                { defaultMessage: 'Action name' }
+                              )}
                             />
                           </EuiFormRow>
                           <EuiSpacer size="s" />
@@ -390,21 +521,47 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                             onChange={(id) =>
                               updateAction(trigger.id, action.id, { destinationId: id })
                             }
-                            ariaLabel={`Destination for ${action.name}`}
+                            ariaLabel={i18n.translate(
+                              'observability.alerting.pplTriggers.destinationAriaLabel',
+                              {
+                                defaultMessage: 'Destination for {name}',
+                                values: { name: action.name },
+                              }
+                            )}
                             isInvalid={destinationInvalid}
                             errorMessage={
-                              destinationInvalid ? 'Destination is required' : undefined
+                              destinationInvalid
+                                ? i18n.translate(
+                                    'observability.alerting.pplTriggers.destinationRequiredError',
+                                    { defaultMessage: 'Destination is required' }
+                                  )
+                                : undefined
                             }
                           />
                           <EuiSpacer size="s" />
                           <EuiFormRow
-                            label="Subject"
+                            label={i18n.translate(
+                              'observability.alerting.pplTriggers.subjectLabel',
+                              { defaultMessage: 'Subject' }
+                            )}
                             fullWidth
-                            helpText={`Max ${SUBJECT_MAX} chars.`}
+                            helpText={i18n.translate(
+                              'observability.alerting.pplTriggers.subjectHelpText',
+                              {
+                                defaultMessage: 'Max {max} chars.',
+                                values: { max: SUBJECT_MAX },
+                              }
+                            )}
                             isInvalid={subjectInvalid}
                             error={
                               subjectInvalid
-                                ? `Subject must be ≤ ${SUBJECT_MAX} characters`
+                                ? i18n.translate(
+                                    'observability.alerting.pplTriggers.subjectTooLongError',
+                                    {
+                                      defaultMessage: 'Subject must be ≤ {max} characters',
+                                      values: { max: SUBJECT_MAX },
+                                    }
+                                  )
                                 : undefined
                             }
                           >
@@ -415,20 +572,41 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                               }
                               fullWidth
                               compressed
-                              aria-label="Action subject"
+                              aria-label={i18n.translate(
+                                'observability.alerting.pplTriggers.subjectAriaLabel',
+                                { defaultMessage: 'Action subject' }
+                              )}
                             />
                           </EuiFormRow>
                           <EuiSpacer size="s" />
                           <EuiFormRow
-                            label="Message"
+                            label={i18n.translate(
+                              'observability.alerting.pplTriggers.messageLabel',
+                              { defaultMessage: 'Message' }
+                            )}
                             fullWidth
-                            helpText={`Mustache templates supported. Max ${MESSAGE_MAX} chars.`}
+                            helpText={i18n.translate(
+                              'observability.alerting.pplTriggers.messageHelpText',
+                              {
+                                defaultMessage: 'Mustache templates supported. Max {max} chars.',
+                                values: { max: MESSAGE_MAX },
+                              }
+                            )}
                             isInvalid={messageInvalid}
                             error={
                               messageInvalid
                                 ? action.message.length === 0
-                                  ? 'Message is required'
-                                  : `Message must be ≤ ${MESSAGE_MAX} characters`
+                                  ? i18n.translate(
+                                      'observability.alerting.pplTriggers.messageRequiredError',
+                                      { defaultMessage: 'Message is required' }
+                                    )
+                                  : i18n.translate(
+                                      'observability.alerting.pplTriggers.messageTooLongError',
+                                      {
+                                        defaultMessage: 'Message must be ≤ {max} characters',
+                                        values: { max: MESSAGE_MAX },
+                                      }
+                                    )
                                 : undefined
                             }
                           >
@@ -440,7 +618,10 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                               rows={4}
                               fullWidth
                               compressed
-                              aria-label="Action message"
+                              aria-label={i18n.translate(
+                                'observability.alerting.pplTriggers.messageAriaLabel',
+                                { defaultMessage: 'Action message' }
+                              )}
                             />
                           </EuiFormRow>
                         </EuiAccordion>
@@ -453,9 +634,15 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                   size="xs"
                   iconType="plusInCircle"
                   onClick={() => addAction(trigger.id)}
-                  aria-label="Add another action"
+                  aria-label={i18n.translate(
+                    'observability.alerting.pplTriggers.addAnotherActionAriaLabel',
+                    { defaultMessage: 'Add another action' }
+                  )}
                 >
-                  Add another action
+                  <FormattedMessage
+                    id="observability.alerting.pplTriggers.addAnotherAction"
+                    defaultMessage="Add another action"
+                  />
                 </EuiButtonEmpty>
               </EuiAccordion>
             </EuiPanel>
@@ -467,10 +654,16 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
         size="s"
         iconType="plusInCircle"
         onClick={addTrigger}
-        aria-label="Add another trigger"
-        data-test-subj="alertManager-addPplTrigger"
+        aria-label={i18n.translate(
+          'observability.alerting.pplTriggers.addAnotherTriggerAriaLabel',
+          { defaultMessage: 'Add another trigger' }
+        )}
+        data-test-subj="alertManagerAddPplTrigger"
       >
-        Add another trigger
+        <FormattedMessage
+          id="observability.alerting.pplTriggers.addAnotherTrigger"
+          defaultMessage="Add another trigger"
+        />
       </EuiButtonEmpty>
     </section>
   );

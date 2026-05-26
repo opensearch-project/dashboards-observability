@@ -133,7 +133,7 @@ export const IndexPicker: React.FC<IndexPickerProps> = ({
         onCreateOption={handleCreate}
         onSearchChange={setSearch}
         fullWidth
-        data-test-subj="alertManager-indexPicker"
+        data-test-subj="alertManagerIndexPicker"
         aria-label={i18n.translate('observability.alerting.indexPicker.ariaLabel', {
           defaultMessage: 'Indices to query',
         })}
