@@ -17,7 +17,7 @@
  * Re-exports `MonitorFormState` so existing consumers importing from
  * `'./create_monitor'` continue to work unchanged.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -162,15 +162,18 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  const updateProm = <K extends keyof PrometheusFormState>(
-    key: K,
-    value: PrometheusFormState[K]
-  ) => {
-    setPromForm((prev) => ({ ...prev, [key]: value }));
-  };
-  const updateOs = <K extends keyof OpenSearchFormState>(key: K, value: OpenSearchFormState[K]) => {
-    setOsForm((prev) => ({ ...prev, [key]: value }));
-  };
+  const updateProm = useCallback(
+    <K extends keyof PrometheusFormState>(key: K, value: PrometheusFormState[K]) => {
+      setPromForm((prev) => ({ ...prev, [key]: value }));
+    },
+    []
+  );
+  const updateOs = useCallback(
+    <K extends keyof OpenSearchFormState>(key: K, value: OpenSearchFormState[K]) => {
+      setOsForm((prev) => ({ ...prev, [key]: value }));
+    },
+    []
+  );
 
   const handleDatasourceChange = (id: string, type: MonitorBackendType) => {
     setBackendType(type);
@@ -210,7 +213,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
       ? promForm.query.trim() !== '' && !hasQueryErrors
       : osForm.query.trim() !== '');
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     setHasSubmitted(true);
     if (backendType === 'prometheus') {
       const result = validateMonitorForm(promForm as ValidatorFormState);
@@ -233,7 +236,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
       setValidationErrors({});
       onSave(osForm);
     }
-  };
+  }, [backendType, promForm, osForm, onSave]);
 
   // When AI wizard is active and user is on a Prometheus datasource, delegate to MonitorTemplateWizard
   if (creationMode === 'ai' && backendType === 'prometheus') {

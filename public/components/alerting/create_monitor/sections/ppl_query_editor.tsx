@@ -17,6 +17,8 @@
  * data model matches the rest of the alerting UI.
  */
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { EuiText } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { monaco, PPLLang } from '@osd/monaco';
 import {
   CodeEditor,
@@ -147,7 +149,7 @@ export const PplQueryEditor: React.FC<PplQueryEditorProps> = ({
   onChange,
   height = 140,
 }) => {
-  const { fieldsByType } = useIndexMappings({ dsId, indices });
+  const { fieldsByType, error: mappingsError } = useIndexMappings({ dsId, indices });
 
   // Flatten field paths once per mappings change. Keeping leaf type alongside
   // the path lets the suggestion list render `field — date` style detail.
@@ -274,6 +276,14 @@ export const PplQueryEditor: React.FC<PplQueryEditorProps> = ({
           data-test-subj="alertManagerPplQueryEditor"
         />
       </div>
+      {mappingsError && (
+        <EuiText color="danger" size="xs" data-test-subj="alertManagerPplQueryEditorMappingsError">
+          {i18n.translate('observability.alerting.pplQueryEditor.mappingsErrorMessage', {
+            defaultMessage: 'Could not load field suggestions for the selected indices: {message}',
+            values: { message: mappingsError.message },
+          })}
+        </EuiText>
+      )}
     </OpenSearchDashboardsContextProvider>
   );
 };

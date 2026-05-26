@@ -60,7 +60,7 @@ export const AlarmsPageCallouts: React.FC<AlarmsPageCalloutsProps> = ({
           color="warning"
           iconType="alert"
           size="s"
-          style={{ marginBottom: 12 }}
+          className="altCalloutSpaced"
           data-test-subj="alertManagerAlertingPluginMissing"
         >
           <p>
@@ -81,7 +81,7 @@ export const AlarmsPageCallouts: React.FC<AlarmsPageCalloutsProps> = ({
           color="danger"
           iconType="alert"
           size="s"
-          style={{ marginBottom: 12 }}
+          className="altCalloutSpaced"
           data-test-subj="alertManagerAlertsError"
         >
           <p>{alertsErrorMessage}</p>
@@ -96,7 +96,7 @@ export const AlarmsPageCallouts: React.FC<AlarmsPageCalloutsProps> = ({
           color="danger"
           iconType="alert"
           size="s"
-          style={{ marginBottom: 12 }}
+          className="altCalloutSpaced"
         >
           <p>{generalError}</p>
         </EuiCallOut>
@@ -110,7 +110,7 @@ export const AlarmsPageCallouts: React.FC<AlarmsPageCalloutsProps> = ({
           color="warning"
           iconType="alert"
           size="s"
-          style={{ marginBottom: 12 }}
+          className="altCalloutSpaced"
         >
           {warnings.map((w, i) => (
             <p key={i}>

@@ -8,7 +8,7 @@
  * either a row-count threshold (`number_of_results`) or a custom PPL
  * `where ...` clause appended to the base query.
  */
-import React, { useCallback } from 'react';
+import React from 'react';
 import {
   EuiAccordion,
   EuiButtonEmpty,
@@ -140,63 +140,48 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
   onChange,
   hasSubmitted,
 }) => {
-  const updateTrigger = useCallback(
-    (id: string, patch: Partial<PplTriggerForm>) => {
-      onChange(triggers.map((t) => (t.id === id ? { ...t, ...patch } : t)));
-    },
-    [triggers, onChange]
-  );
+  const updateTrigger = (id: string, patch: Partial<PplTriggerForm>) => {
+    onChange(triggers.map((t) => (t.id === id ? { ...t, ...patch } : t)));
+  };
 
-  const removeTrigger = useCallback(
-    (id: string) => {
-      onChange(triggers.filter((t) => t.id !== id));
-    },
-    [triggers, onChange]
-  );
+  const removeTrigger = (id: string) => {
+    onChange(triggers.filter((t) => t.id !== id));
+  };
 
-  const addTrigger = useCallback(() => {
+  const addTrigger = () => {
     onChange([...triggers, createDefaultTrigger(triggers.length)]);
-  }, [triggers, onChange]);
+  };
 
-  const updateAction = useCallback(
-    (triggerId: string, actionId: string, patch: Partial<PplActionForm>) => {
-      onChange(
-        triggers.map((t) =>
-          t.id === triggerId
-            ? {
-                ...t,
-                actions: t.actions.map((a) => (a.id === actionId ? { ...a, ...patch } : a)),
-              }
-            : t
-        )
-      );
-    },
-    [triggers, onChange]
-  );
+  const updateAction = (triggerId: string, actionId: string, patch: Partial<PplActionForm>) => {
+    onChange(
+      triggers.map((t) =>
+        t.id === triggerId
+          ? {
+              ...t,
+              actions: t.actions.map((a) => (a.id === actionId ? { ...a, ...patch } : a)),
+            }
+          : t
+      )
+    );
+  };
 
-  const removeAction = useCallback(
-    (triggerId: string, actionId: string) => {
-      onChange(
-        triggers.map((t) =>
-          t.id === triggerId ? { ...t, actions: t.actions.filter((a) => a.id !== actionId) } : t
-        )
-      );
-    },
-    [triggers, onChange]
-  );
+  const removeAction = (triggerId: string, actionId: string) => {
+    onChange(
+      triggers.map((t) =>
+        t.id === triggerId ? { ...t, actions: t.actions.filter((a) => a.id !== actionId) } : t
+      )
+    );
+  };
 
-  const addAction = useCallback(
-    (triggerId: string) => {
-      onChange(
-        triggers.map((t) =>
-          t.id === triggerId
-            ? { ...t, actions: [...t.actions, createDefaultAction(t.actions.length)] }
-            : t
-        )
-      );
-    },
-    [triggers, onChange]
-  );
+  const addAction = (triggerId: string) => {
+    onChange(
+      triggers.map((t) =>
+        t.id === triggerId
+          ? { ...t, actions: [...t.actions, createDefaultAction(t.actions.length)] }
+          : t
+      )
+    );
+  };
 
   return (
     <section aria-label="PPL triggers" data-test-subj="alertManagerPplTriggersSection">

@@ -66,10 +66,7 @@ export const DestinationPicker: React.FC<DestinationPickerProps> = ({
     ];
   }, [destinations, placeholderText]);
 
-  const destinationsHref = useMemo(() => {
-    const base = coreRefs.http?.basePath?.get?.() ?? '';
-    return `${base}/app/alerting#/destinations`;
-  }, []);
+  const destinationsHref = `${coreRefs.http?.basePath?.get?.() ?? ''}/app/alerting#/destinations`;
 
   const selectedValue = value || NONE_OPTION_VALUE;
 

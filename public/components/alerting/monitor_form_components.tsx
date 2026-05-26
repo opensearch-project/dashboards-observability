@@ -29,7 +29,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { Datasource } from '../../../common/types/alerting';
+import { Datasource, DatasourceType } from '../../../common/types/alerting';
 
 // ============================================================================
 // Types — re-exported from `common/services/alerting/validators.ts` so the
@@ -40,7 +40,9 @@ import { Datasource } from '../../../common/types/alerting';
 
 export type { LabelEntry, AnnotationEntry } from '../../../common/services/alerting/validators';
 
-export type MonitorBackendType = 'prometheus' | 'opensearch';
+// Public-side import name kept stable; canonical shape lives in common
+// (`DatasourceType` in unified_types.ts).
+export type MonitorBackendType = DatasourceType;
 
 // ============================================================================
 // Constants

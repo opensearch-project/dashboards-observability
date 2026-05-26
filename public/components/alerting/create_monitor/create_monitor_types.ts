@@ -19,13 +19,17 @@
  *     `SEVERITY_OPTIONS`, `OS_SCHEDULE_UNIT_OPTIONS`
  */
 import { i18n } from '@osd/i18n';
-import { UnifiedAlertSeverity } from '../../../../common/types/alerting';
+import { OSPPLNumResultsOperator, UnifiedAlertSeverity } from '../../../../common/types/alerting';
 import type { AnnotationEntry, LabelEntry, MonitorBackendType } from '../monitor_form_components';
 
 // `ThresholdCondition` originally lived here AND in
 // `common/services/alerting/validators.ts`. The duplication caused drift
 // risk; re-export the canonical shape from common.
 export type { ThresholdCondition } from '../../../../common/services/alerting/validators';
+
+// Public-side import name kept stable; canonical type lives in common
+// (`OSPPLNumResultsOperator` in opensearch_types.ts).
+export type PplNumResultsOperator = OSPPLNumResultsOperator;
 
 /** Shared fields across both backend types */
 export interface BaseMonitorForm {
@@ -50,7 +54,6 @@ export interface PrometheusFormState extends BaseMonitorForm {
 
 /** Severity ordinal mapped to the alerting plugin's `1`–`5` codes. */
 export type PplTriggerSeverity = '1' | '2' | '3' | '4' | '5';
-export type PplNumResultsOperator = '>' | '>=' | '<' | '<=' | '==' | '!=';
 export type PplTriggerType = 'number_of_results' | 'custom';
 
 export interface PplActionForm {
