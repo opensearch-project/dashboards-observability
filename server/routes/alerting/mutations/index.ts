@@ -20,10 +20,11 @@
  */
 import { schema } from '@osd/config-schema';
 import { IRouter, RequestHandlerContext } from '../../../../../../src/core/server';
-import type { AlertingOSClient, OSMonitor } from '../../../../common/types/alerting';
+import type { AlertingOSClient, Logger, OSMonitor } from '../../../../common/types/alerting';
 import { MonitorMutationService } from '../../../services/alerting/monitor_mutation_service';
 import { toErrorBody, toHandlerResult } from '../route_utils';
 import { alertingIdSchema } from '../schema_helpers';
+import { monitorAcknowledgeBodySchema, monitorMutationBodySchema } from './body_schema';
 
 // Context resolver for the scoped client. Mutations never need datasource
 // metadata beyond what the caller's resolver already handles.
@@ -39,22 +40,29 @@ export type AlertingClientResolver = (
 export function registerAlertingMutationRoutes(
   router: IRouter,
   mutationSvc: MonitorMutationService,
-  getClient: AlertingClientResolver
+  getClient: AlertingClientResolver,
+  logger?: Logger
 ): void {
   // POST /api/alerting/opensearch/{dsId}/monitors — create monitor
   router.post(
     {
       path: '/api/alerting/opensearch/{dsId}/monitors',
-      validate: { params: schema.object({ dsId: alertingIdSchema }), body: schema.any() },
+      validate: {
+        params: schema.object({ dsId: alertingIdSchema }),
+        body: monitorMutationBodySchema,
+      },
     },
     async (ctx, req, res) => {
       try {
         const client = await getClient(ctx, req.params.dsId);
         const monitor = (req.body as unknown) as Omit<OSMonitor, 'id'>;
         const created = await mutationSvc.createMonitor(client, monitor);
+        logger?.info(
+          `alerting: createMonitor success — dsId=${req.params.dsId} monitorId=${created.id}`
+        );
         return res.ok({ body: created });
       } catch (e: unknown) {
-        const result = toHandlerResult(e);
+        const result = toHandlerResult(e, logger);
         return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
       }
     }
@@ -66,7 +74,7 @@ export function registerAlertingMutationRoutes(
       path: '/api/alerting/opensearch/{dsId}/monitors/{monitorId}',
       validate: {
         params: schema.object({ dsId: alertingIdSchema, monitorId: alertingIdSchema }),
-        body: schema.any(),
+        body: monitorMutationBodySchema,
       },
     },
     async (ctx, req, res) => {
@@ -75,9 +83,12 @@ export function registerAlertingMutationRoutes(
         const input = (req.body as unknown) as Partial<OSMonitor>;
         const updated = await mutationSvc.updateMonitor(client, req.params.monitorId, input);
         if (!updated) return res.notFound({ body: { message: 'Monitor not found' } });
+        logger?.info(
+          `alerting: updateMonitor success — dsId=${req.params.dsId} monitorId=${req.params.monitorId}`
+        );
         return res.ok({ body: updated });
       } catch (e: unknown) {
-        const result = toHandlerResult(e);
+        const result = toHandlerResult(e, logger);
         if (result.status === 409) return res.conflict({ body: toErrorBody(result.body) });
         return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
       }
@@ -95,9 +106,12 @@ export function registerAlertingMutationRoutes(
         const client = await getClient(ctx, req.params.dsId);
         const deleted = await mutationSvc.deleteMonitor(client, req.params.monitorId);
         if (!deleted) return res.notFound({ body: { message: 'Monitor not found' } });
+        logger?.info(
+          `alerting: deleteMonitor success — dsId=${req.params.dsId} monitorId=${req.params.monitorId}`
+        );
         return res.ok({ body: { success: true } });
       } catch (e: unknown) {
-        const result = toHandlerResult(e);
+        const result = toHandlerResult(e, logger);
         return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
       }
     }
@@ -109,7 +123,7 @@ export function registerAlertingMutationRoutes(
       path: '/api/alerting/opensearch/{dsId}/monitors/{monitorId}/acknowledge',
       validate: {
         params: schema.object({ dsId: alertingIdSchema, monitorId: alertingIdSchema }),
-        body: schema.object({ alerts: schema.arrayOf(schema.string(), { maxSize: 1000 }) }),
+        body: monitorAcknowledgeBodySchema,
       },
     },
     async (ctx, req, res) => {
@@ -120,9 +134,12 @@ export function registerAlertingMutationRoutes(
           req.params.monitorId,
           req.body.alerts
         );
+        logger?.info(
+          `alerting: acknowledgeAlerts success — dsId=${req.params.dsId} monitorId=${req.params.monitorId} alertCount=${req.body.alerts.length}`
+        );
         return res.ok({ body: { result: acked } });
       } catch (e: unknown) {
-        const result = toHandlerResult(e);
+        const result = toHandlerResult(e, logger);
         return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
       }
     }

@@ -56,6 +56,14 @@ import {
   escapeHtml,
 } from './shared_constants';
 
+// Per-table caps for the detail flyout. `EuiBasicTable` doesn't paginate by
+// default; without these caps a monitor that has accumulated thousands of
+// historical alerts would render every row, freezing the flyout. The Alerts
+// tab is the right place to drill into the full history — the flyout's
+// table is intentionally a quick overview.
+const MAX_ALERT_HISTORY_ROWS = 50;
+const MAX_ROUTING_ROWS = 50;
+
 // ============================================================================
 // Condition humanizer — translates Painless scripts into readable text
 // ============================================================================
@@ -769,7 +777,23 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                 initialIsOpen={false}
                 paddingSize="m"
               >
-                <EuiBasicTable items={alertHistory} columns={historyColumns} compressed />
+                <EuiBasicTable
+                  items={alertHistory.slice(0, MAX_ALERT_HISTORY_ROWS)}
+                  columns={historyColumns}
+                  compressed
+                />
+                {alertHistory.length > MAX_ALERT_HISTORY_ROWS && (
+                  <EuiText size="xs" color="subdued">
+                    <FormattedMessage
+                      id="observability.alerting.monitorDetailFlyout.alertHistoryTruncated"
+                      defaultMessage="Showing the {shown} most recent of {total} alerts. Use the Alerts tab to filter by time."
+                      values={{
+                        shown: MAX_ALERT_HISTORY_ROWS,
+                        total: alertHistory.length,
+                      }}
+                    />
+                  </EuiText>
+                )}
               </EuiAccordion>
 
               <EuiSpacer size="m" />
@@ -790,7 +814,11 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                 paddingSize="m"
               >
                 {notificationRouting.length > 0 ? (
-                  <EuiBasicTable items={notificationRouting} columns={routingColumns} compressed />
+                  <EuiBasicTable
+                    items={notificationRouting.slice(0, MAX_ROUTING_ROWS)}
+                    columns={routingColumns}
+                    compressed
+                  />
                 ) : (
                   <EuiText size="s" color="subdued">
                     <FormattedMessage

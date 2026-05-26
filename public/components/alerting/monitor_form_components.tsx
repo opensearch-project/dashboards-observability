@@ -32,19 +32,13 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { Datasource } from '../../../common/types/alerting';
 
 // ============================================================================
-// Types
+// Types — re-exported from `common/services/alerting/validators.ts` so the
+// public-side component layer and the validator share a single canonical
+// definition. Earlier the same shapes were declared twice; deduping prevents
+// drift when one side adds a field (e.g. `isDynamic` on `LabelEntry`).
 // ============================================================================
 
-export interface LabelEntry {
-  key: string;
-  value: string;
-  isDynamic?: boolean;
-}
-
-export interface AnnotationEntry {
-  key: string;
-  value: string;
-}
+export type { LabelEntry, AnnotationEntry } from '../../../common/services/alerting/validators';
 
 export type MonitorBackendType = 'prometheus' | 'opensearch';
 

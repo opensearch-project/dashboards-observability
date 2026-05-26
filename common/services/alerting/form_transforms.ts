@@ -190,6 +190,25 @@ function buildPplActionPayload(action: PplActionForm): Record<string, unknown> {
   return out;
 }
 
+/**
+ * Marker prefix every locally-generated trigger id starts with. We need a
+ * marker (rather than the older `length < 20` heuristic) because:
+ *   - The alerting plugin assigns trigger ids that are typically 20–22
+ *     characters (NanoID/UUID-shaped). The old heuristic dropped them on
+ *     edit, breaking alert-history continuity by re-creating the trigger.
+ *   - A future backend id starting with the local prefix would silently be
+ *     re-created. Using a marker the backend cannot emit fixes both ends.
+ *
+ * Keep this in sync with the id generators in
+ * `public/components/alerting/create_monitor/create_monitor_types.ts` and
+ * `public/components/alerting/create_monitor/sections/ppl_triggers.tsx`.
+ */
+export const CLIENT_TRIGGER_ID_PREFIX = 'ppl-trigger-';
+
+export function isClientGeneratedTriggerId(id: string | undefined): boolean {
+  return !!id && id.startsWith(CLIENT_TRIGGER_ID_PREFIX);
+}
+
 // Build a PPL trigger body matching `PPLTrigger.toXContent` from the
 // alerting plugin's common-utils library. `type` selects between
 // `number_of_results` (uses `num_results_*`) and `custom` (uses
@@ -202,12 +221,11 @@ function buildPplTriggerPayload(trigger: PplTriggerForm): Record<string, unknown
     actions: trigger.actions.map(buildPplActionPayload),
     type: trigger.type,
   };
-  // The alerting plugin caps `ppl_trigger.id` at 20 characters and rejects
-  // anything longer with "Validation failed". Our client-generated ids
-  // (`ppl-trigger-<Date.now()>`) blow that limit, so only forward an id
-  // that came from the backend on edit — recognized by the *absence* of
-  // our local prefix and a length the backend will accept.
-  if (trigger.id && !trigger.id.startsWith('ppl-trigger-') && trigger.id.length < 20) {
+  // Only forward ids the backend assigned (recognized by the absence of our
+  // marker prefix). Client-generated ids would either fail the alerting
+  // plugin's id-length validation or — worse — silently collide with an
+  // unrelated backend trigger.
+  if (trigger.id && !isClientGeneratedTriggerId(trigger.id)) {
     body.id = trigger.id;
   }
   if (trigger.type === 'number_of_results') {

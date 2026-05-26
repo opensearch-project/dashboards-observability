@@ -35,6 +35,16 @@ import {
 } from '../../../common/types/alerting';
 import { createConflictError, createInternalError, isStatusCode } from './errors';
 
+/**
+ * Cap on `_cat/indices` and `_cat/aliases` discovery responses. The combobox
+ * uses an async typeahead so the user filters by typing — anything beyond
+ * the first page-worth of suggestions is unreachable in the UI anyway, and
+ * a cluster with tens of thousands of matches would otherwise freeze the
+ * browser tab while parsing the JSON. Mirrors the `MAX_RESULTS = 200`
+ * pattern in `metadata_handlers.ts`.
+ */
+const MAX_DISCOVERY_RESULTS = 200;
+
 export class HttpOpenSearchBackend implements OpenSearchBackend {
   readonly type = 'opensearch' as const;
 
@@ -142,9 +152,18 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
       );
     }
 
-    const current = this.mapMonitor(getResp.body._id, getResp.body.monitor);
-    const { id: _id, ...currentFields } = current;
-    const merged = { ...currentFields, ...input, last_update_time: Date.now() };
+    // Merge into the RAW upstream document, not the typed-and-narrowed
+    // `mapMonitor` projection. `mapMonitor` only emits the fields modelled
+    // in `OSMonitor`; merging onto its output would silently strip plugin
+    // fields the OSD layer doesn't know about (e.g. `data_sources`,
+    // `last_run_context`, `owner`, `enabled_time`, future schema additions),
+    // and the round-trip PUT would lose them.
+    const rawUpstream = (getResp.body.monitor as unknown) as Record<string, unknown>;
+    const merged = {
+      ...rawUpstream,
+      ...input,
+      last_update_time: Date.now(),
+    };
 
     const putPath =
       `/_plugins/_alerting/monitors/${encodedMonitorId}` +
@@ -389,7 +408,11 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
         'GET',
         `/_cat/indices/${safe}?format=json&h=health,index,status`
       );
-      return resp.body ?? [];
+      // Cap the list before it reaches the combobox. A cluster with tens of
+      // thousands of indices matching `*` would freeze the UI thread; the
+      // combobox surfaces a typeahead anyway, so trimming the discovery
+      // page costs nothing UX-wise.
+      return (resp.body ?? []).slice(0, MAX_DISCOVERY_RESULTS);
     } catch (err) {
       // Treat index-not-found as empty so partial wildcards return cleanly.
       if (this.is404(err)) return [];
@@ -409,7 +432,7 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
         'GET',
         `/_cat/aliases/${safe}?format=json&h=alias,index`
       );
-      return resp.body ?? [];
+      return (resp.body ?? []).slice(0, MAX_DISCOVERY_RESULTS);
     } catch (err) {
       if (this.is404(err)) return [];
       throw err;

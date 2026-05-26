@@ -483,3 +483,60 @@ describe('HttpOpenSearchBackend — PPL monitor mapping', () => {
     expect(m.monitor_type).toBe('query_level_monitor');
   });
 });
+
+// ============================================================================
+// updateMonitor — round-trip preservation of plugin-internal fields
+// ============================================================================
+//
+// Regression coverage for F5: prior to merging the user input onto the raw
+// upstream document, `updateMonitor` merged onto `mapMonitor(...)`, which only
+// modeled the OSD-known fields. Anything the alerting plugin attached that we
+// don't model — `data_sources`, `last_run_context`, `owner`, `enabled_time`,
+// future fields — was silently stripped on every PUT.
+describe('HttpOpenSearchBackend — updateMonitor round-trip', () => {
+  const backend = new HttpOpenSearchBackend(mockLogger);
+
+  function captureBody(request: jest.Mock, callIndex: number): Record<string, unknown> {
+    const call = request.mock.calls[callIndex];
+    if (!call) throw new Error(`no request at index ${callIndex}`);
+    return (call[0] as { body?: Record<string, unknown> }).body ?? {};
+  }
+
+  it('preserves plugin-internal fields the OSD layer does not model', async () => {
+    const upstreamSource = {
+      type: 'monitor',
+      monitor_type: 'ppl_monitor',
+      name: 'mon-1',
+      enabled: true,
+      schedule: { period: { interval: 5, unit: 'MINUTES' } },
+      inputs: [
+        {
+          ppl_input: { query: 'source = logs-*', query_language: 'ppl' },
+        },
+      ],
+      triggers: [],
+      last_update_time: 1700000000000,
+      // These four are present on real upstream documents but not on the
+      // typed `OSMonitor` projection. They MUST round-trip on PUT.
+      data_sources: { foo: 'bar' },
+      last_run_context: { lastFiredAt: 1700000000000 },
+      owner: 'alerting',
+      enabled_time: 1690000000000,
+    };
+
+    const { client, request } = makeClient([
+      { body: { _id: 'mon-1', _seq_no: 5, _primary_term: 2, monitor: upstreamSource } },
+      { body: { _id: 'mon-1', monitor: upstreamSource } },
+    ]);
+
+    await backend.updateMonitor(client, 'mon-1', { name: 'renamed' });
+
+    const putBody = captureBody(request, 1);
+    expect(putBody.data_sources).toEqual({ foo: 'bar' });
+    expect(putBody.last_run_context).toEqual({ lastFiredAt: 1700000000000 });
+    expect(putBody.owner).toBe('alerting');
+    expect(putBody.enabled_time).toBe(1690000000000);
+    // user-supplied input is still applied
+    expect(putBody.name).toBe('renamed');
+  });
+});

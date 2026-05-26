@@ -24,11 +24,13 @@ import {
   MultiBackendAlertService,
   PrometheusMetadataService,
   SavedObjectDatasourceService,
+  createNotFoundError,
 } from '../../services/alerting';
 import { DirectQueryPrometheusBackend } from '../../services/alerting/directquery_prometheus_backend';
 import { MonitorMutationService } from '../../services/alerting/monitor_mutation_service';
 import { registerAlertingMutationRoutes } from './mutations';
-import { toErrorBody } from './route_utils';
+import { toErrorBody, toHandlerResult } from './route_utils';
+import { isAlertManagerError } from '../../services/alerting';
 import { alertingIdSchema, prometheusLabelNameSchema } from './schema_helpers';
 
 /**
@@ -172,8 +174,13 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
 
   /**
    * Get the right OpenSearch client for a datasource.
-   * MDS data sources use context.dataSource.opensearch.getClient(id).
-   * Local cluster uses context.core.opensearch.client.asCurrentUser.
+   * - MDS data sources use context.dataSource.opensearch.getClient(id).
+   * - The local cluster (no `dsId` supplied, OR an MDS-disabled deployment)
+   *   uses context.core.opensearch.client.asCurrentUser.
+   *
+   * In an MDS deployment a non-empty `dsId` MUST resolve to an existing
+   * `data-source` saved object; falling back to the local cluster on a
+   * typoed/stale id would silently mix data across tenants.
    */
   async function getAlertingClient(
     ctx: AlertingHandlerContext,
@@ -181,13 +188,15 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
   ): Promise<AlertingOSClient> {
     if (dsId && dsId.includes('::')) {
       logger?.warn(`alerting: Rejecting workspace-scoped datasource ID: ${dsId}`);
-      throw new Error(`Unsupported workspace-scoped datasource ID: ${dsId}`);
+      throw createNotFoundError(`Unsupported workspace-scoped datasource ID: ${dsId}`);
     }
     if (dsId && ctx.dataSource) {
       const ds = await resolveOpenSearchDatasource(ctx, dsId);
-      if (ds?.mdsId) {
-        return await ctx.dataSource.opensearch.getClient(ds.mdsId);
+      if (!ds?.mdsId) {
+        logger?.warn(`alerting: Datasource not found: ${dsId}`);
+        throw createNotFoundError(`Datasource not found: ${dsId}`);
       }
+      return await ctx.dataSource.opensearch.getClient(ds.mdsId);
     }
     return ctx.core.opensearch.client.asCurrentUser;
   }
@@ -269,8 +278,11 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
   // Mutation routes (create/update/delete monitor + acknowledge alert) live
   // in `./mutations/` — register them via the dedicated registrar so the split
   // stays clean.
-  registerAlertingMutationRoutes(router, mutationSvc, (ctx, dsId) =>
-    getAlertingClient(ctx as AlertingHandlerContext, dsId)
+  registerAlertingMutationRoutes(
+    router,
+    mutationSvc,
+    (ctx, dsId) => getAlertingClient(ctx as AlertingHandlerContext, dsId),
+    logger
   );
 
   // Unified view routes
@@ -408,11 +420,15 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
           },
         });
       } catch (err) {
+        if (isAlertManagerError(err)) {
+          const result = toHandlerResult(err, logger);
+          return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
+        }
         const message = err instanceof Error ? err.message : String(err);
         logger.warn(`getDestinations failed for ds ${req.params.dsId}: ${message}`);
         return res.customError({
           statusCode: 502,
-          body: toErrorBody({ message: `Failed to list destinations: ${message}` }),
+          body: toErrorBody({ message: 'Failed to list destinations' }),
         });
       }
     }
@@ -439,11 +455,15 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
         const indices = await osBackend.getIndices(client, req.query.search ?? '');
         return res.ok({ body: { indices } });
       } catch (err) {
+        if (isAlertManagerError(err)) {
+          const result = toHandlerResult(err, logger);
+          return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
+        }
         const message = err instanceof Error ? err.message : String(err);
         logger.warn(`getIndices failed for ds ${req.params.dsId}: ${message}`);
         return res.customError({
           statusCode: 502,
-          body: toErrorBody({ message: `Failed to list indices: ${message}` }),
+          body: toErrorBody({ message: 'Failed to list indices' }),
         });
       }
     }
@@ -465,11 +485,15 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
         const aliases = await osBackend.getAliases(client, req.query.search ?? '');
         return res.ok({ body: { aliases } });
       } catch (err) {
+        if (isAlertManagerError(err)) {
+          const result = toHandlerResult(err, logger);
+          return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
+        }
         const message = err instanceof Error ? err.message : String(err);
         logger.warn(`getAliases failed for ds ${req.params.dsId}: ${message}`);
         return res.customError({
           statusCode: 502,
-          body: toErrorBody({ message: `Failed to list aliases: ${message}` }),
+          body: toErrorBody({ message: 'Failed to list aliases' }),
         });
       }
     }
@@ -497,11 +521,15 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
         const fieldsByType = await osBackend.getFieldsByType(client, req.body.indices);
         return res.ok({ body: { fieldsByType } });
       } catch (err) {
+        if (isAlertManagerError(err)) {
+          const result = toHandlerResult(err, logger);
+          return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
+        }
         const message = err instanceof Error ? err.message : String(err);
         logger.warn(`getFieldsByType failed for ds ${req.params.dsId}: ${message}`);
         return res.customError({
           statusCode: 502,
-          body: toErrorBody({ message: `Failed to fetch mappings: ${message}` }),
+          body: toErrorBody({ message: 'Failed to fetch mappings' }),
         });
       }
     }

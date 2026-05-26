@@ -45,6 +45,7 @@ import { NotificationRoutingPanel } from './notification_routing_panel';
 import type { MonitorBackendType } from './monitor_form_components';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { useAlerts } from './hooks/use_alerts';
+import { useAlertingPluginAvailability } from './hooks/use_alerting_plugin_availability';
 import { useMonitorMutations } from './hooks/use_monitor_mutations';
 import { coreRefs } from '../../framework/core_refs';
 import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
@@ -215,6 +216,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   const mutations = useMonitorMutations();
   const [activeTab, setActiveTab] = useState<TabId>('alerts');
   const [selectedDsIds, setSelectedDsIds] = useState<string[]>([]);
+  // Probe each OS datasource once on mount to confirm `opensearch-alerting`
+  // is installed. Without this check, users with the OSD feature flag on
+  // but a vanilla cluster see cryptic transport errors at every interaction.
+  const alertingAvailability = useAlertingPluginAvailability(datasources);
   // `dataLoading` / `error` / `rulesWarnings` only drive the Rules flow now —
   // the Alerts path reads loading/error/warnings from `useAlerts` below.
   const [dataLoading, setDataLoading] = useState(false);
@@ -569,28 +574,39 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   //
   // Stable identities (`useCallback`) so passing them down to `AlertsDashboard`
   // doesn't invalidate that subtree's React.memo / dependent memos on every
-  // page-level re-render. Logic is identical to the previous inline handlers.
-  const handleTimeChange = useCallback(
-    ({ start, end }: { start: string; end: string }) => {
-      if (start === startTime && end === endTime) return;
-      setStartTime(start);
-      setEndTime(end);
-      persistTimeRange(start, end);
-    },
-    [startTime, endTime]
-  );
+  // page-level re-render. Functional `setState` lets us read the current
+  // value without listing it in deps, so the callback identity stays stable
+  // across time-range changes too.
+  const handleTimeChange = useCallback(({ start, end }: { start: string; end: string }) => {
+    let didChange = false;
+    setStartTime((prev) => {
+      if (prev === start) return prev;
+      didChange = true;
+      return start;
+    });
+    setEndTime((prev) => {
+      if (prev === end) return prev;
+      didChange = true;
+      return end;
+    });
+    if (didChange) persistTimeRange(start, end);
+  }, []);
 
-  const handleRefreshTime = useCallback(
-    ({ start, end }: { start: string; end: string }) => {
-      if (start !== startTime || end !== endTime) {
-        setStartTime(start);
-        setEndTime(end);
-        persistTimeRange(start, end);
-      }
-      setRefreshToken((t) => t + 1);
-    },
-    [startTime, endTime]
-  );
+  const handleRefreshTime = useCallback(({ start, end }: { start: string; end: string }) => {
+    let didChange = false;
+    setStartTime((prev) => {
+      if (prev === start) return prev;
+      didChange = true;
+      return start;
+    });
+    setEndTime((prev) => {
+      if (prev === end) return prev;
+      didChange = true;
+      return end;
+    });
+    if (didChange) persistTimeRange(start, end);
+    setRefreshToken((t) => t + 1);
+  }, []);
 
   // ---- Handlers ----
 
@@ -695,14 +711,23 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         ...rest
       } = raw;
       // Strip trigger IDs so the backend assigns fresh ones. Triggers live
-      // inside wrapper keys like `ppl_trigger`, `query_level_trigger`, etc.
+      // inside wrapper keys like `ppl_trigger`, `query_level_trigger`, etc.,
+      // and EACH wrapper carries an `actions[]` whose entries also have ids
+      // — the backend rejects duplicate action ids on create, so we have to
+      // strip those nested ids too. (F13.)
       const triggers = (rest.triggers as Array<Record<string, unknown>> | undefined) ?? [];
       const cleanTriggers = triggers.map((t) => {
         const cleaned: Record<string, unknown> = {};
         for (const [key, val] of Object.entries(t)) {
           if (val && typeof val === 'object' && !Array.isArray(val)) {
-            const { id: _tid, ...trigBody } = val as Record<string, unknown>;
-            cleaned[key] = trigBody;
+            const { id: _tid, actions: actionsRaw, ...trigBody } = val as Record<string, unknown>;
+            const cleanedActions = Array.isArray(actionsRaw)
+              ? (actionsRaw as Array<Record<string, unknown>>).map(
+                  ({ id: _aid, ...actionBody }) => actionBody
+                )
+              : actionsRaw;
+            cleaned[key] =
+              cleanedActions !== undefined ? { ...trigBody, actions: cleanedActions } : trigBody;
           } else {
             cleaned[key] = val;
           }
@@ -1054,6 +1079,26 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     <div data-test-subj="alertManager-page" className="altPageRoot">
       {/* Tab bar — picker now lives inside the Alert Timeline panel header */}
       {/* so it's adjacent to the chart it controls.                       */}
+      {alertingAvailability.unavailable && !alertingAvailability.isLoading && (
+        <EuiCallOut
+          title={i18n.translate('observability.alerting.alarmsPage.alertingPluginMissing.title', {
+            defaultMessage: 'Alerting plugin not detected',
+          })}
+          color="warning"
+          iconType="alert"
+          size="s"
+          style={{ marginBottom: 12 }}
+          data-test-subj="alertManager-alertingPluginMissing"
+        >
+          <p>
+            <FormattedMessage
+              id="observability.alerting.alarmsPage.alertingPluginMissing.body"
+              defaultMessage="None of the selected OpenSearch clusters returned a successful response from the alerting API. Install the {pluginName} plugin on each cluster to use Alert Manager features."
+              values={{ pluginName: <code>opensearch-alerting</code> }}
+            />
+          </p>
+        </EuiCallOut>
+      )}
       <EuiTabs data-test-subj="alertManager-tabs">
         {tabs.map((t) => (
           <EuiTab

@@ -40,8 +40,18 @@ export function useIndexMappings({
   const cacheKey = useMemo(() => `${dsId}::${[...indices].sort().join(',')}`, [dsId, indices]);
   const lastKeyRef = useRef<string>('');
 
+  // The `indices` array is captured as part of `cacheKey` (sorted-stable
+  // join), so listing the array directly in deps would re-fire the effect
+  // on every parent render due to array-reference churn — even though the
+  // body short-circuits on cache hit, the effect cleanup/setup still runs
+  // wastefully. Pin the deps to the stable string instead.
+  // We still need `indices` at call-time, so a ref captures the latest
+  // value without forcing the effect to re-run.
+  const indicesRef = useRef<string[]>(indices);
+  indicesRef.current = indices;
+
   useEffect(() => {
-    if (!dsId || indices.length === 0) {
+    if (!dsId || indicesRef.current.length === 0) {
       setFieldsByType({});
       return;
     }
@@ -53,7 +63,7 @@ export function useIndexMappings({
     setError(null);
     (async () => {
       try {
-        const result = await service.getFieldsByType(dsId, indices);
+        const result = await service.getFieldsByType(dsId, indicesRef.current);
         if (!cancelled) setFieldsByType(result);
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e : new Error(String(e)));
@@ -64,7 +74,7 @@ export function useIndexMappings({
     return () => {
       cancelled = true;
     };
-  }, [service, dsId, indices, cacheKey]);
+  }, [service, dsId, cacheKey]);
 
   return { fieldsByType, isLoading, error };
 }

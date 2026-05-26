@@ -22,16 +22,10 @@ import { i18n } from '@osd/i18n';
 import { UnifiedAlertSeverity } from '../../../../common/types/alerting';
 import type { AnnotationEntry, LabelEntry, MonitorBackendType } from '../monitor_form_components';
 
-// ============================================================================
-// Types
-// ============================================================================
-
-export interface ThresholdCondition {
-  operator: '>' | '>=' | '<' | '<=' | '==' | '!=';
-  value: number;
-  unit: string;
-  forDuration: string;
-}
+// `ThresholdCondition` originally lived here AND in
+// `common/services/alerting/validators.ts`. The duplication caused drift
+// risk; re-export the canonical shape from common.
+export type { ThresholdCondition } from '../../../../common/services/alerting/validators';
 
 /** Shared fields across both backend types */
 export interface BaseMonitorForm {

@@ -39,7 +39,7 @@ export const IndexPicker: React.FC<IndexPickerProps> = ({
   disabled,
 }) => {
   const [search, setSearch] = useState('');
-  const { options: discovered, isLoading } = useIndices({ dsId, search });
+  const { options: discovered, isLoading, error: discoveryError } = useIndices({ dsId, search });
 
   const selectedOptions: Option[] = selected.map((label) => ({ label }));
 
@@ -89,6 +89,22 @@ export const IndexPicker: React.FC<IndexPickerProps> = ({
     onChange([...selected, trimmed]);
   };
 
+  // Surface a discovery failure (e.g. alerting plugin missing, transport
+  // error) directly on the form row so the user understands why the
+  // dropdown is empty. Free-text wildcards still work — the input itself
+  // stays enabled.
+  const discoveryErrorMessage = discoveryError
+    ? i18n.translate('observability.alerting.indexPicker.discoveryError', {
+        defaultMessage: 'Could not load indices: {message}',
+        values: {
+          message: discoveryError.message || 'unknown error',
+        },
+      })
+    : undefined;
+
+  const combinedError = error ?? discoveryErrorMessage;
+  const combinedInvalid = isInvalid || !!discoveryErrorMessage;
+
   return (
     <EuiFormRow
       label={i18n.translate('observability.alerting.indexPicker.label', {
@@ -98,8 +114,8 @@ export const IndexPicker: React.FC<IndexPickerProps> = ({
         defaultMessage:
           'Pick one or more indices, aliases, or patterns. Wildcards (e.g. logs-*) are kept verbatim.',
       })}
-      isInvalid={isInvalid}
-      error={error}
+      isInvalid={combinedInvalid}
+      error={combinedError}
       fullWidth
     >
       <EuiComboBox
@@ -107,7 +123,7 @@ export const IndexPicker: React.FC<IndexPickerProps> = ({
         isClearable
         isDisabled={disabled || !dsId}
         isLoading={isLoading}
-        isInvalid={isInvalid}
+        isInvalid={combinedInvalid}
         placeholder={i18n.translate('observability.alerting.indexPicker.placeholder', {
           defaultMessage: 'logs-*, metrics-*',
         })}

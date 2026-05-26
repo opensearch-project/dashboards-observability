@@ -390,7 +390,7 @@ describe('transformPplFormToPayload', () => {
     expect(payload.triggers[1].ppl_trigger.id).toBe('t-2');
   });
 
-  it('drops client-generated trigger ids (ppl-trigger-* / >=20 chars) so the backend assigns a UUID', () => {
+  it('drops client-generated trigger ids (ppl-trigger-* prefix) so the backend assigns a fresh id', () => {
     const form = baseForm();
     form.pplTriggers = [
       // Looks exactly like createDefaultPplTrigger() output.
@@ -405,6 +405,21 @@ describe('transformPplFormToPayload', () => {
     form.pplTriggers = [{ ...numResultsTrigger, id: 'aBc123XyZ' }];
     const payload = (transformPplFormToPayload(form) as unknown) as PplPayload;
     expect(payload.triggers[0].ppl_trigger.id).toBe('aBc123XyZ');
+  });
+
+  it('keeps backend-issued NanoID/UUID-shaped trigger ids (>= 20 characters) — regression for F9', () => {
+    // Backend Alerting trigger IDs are typically 20–22 character NanoIDs. The
+    // earlier `length < 20` heuristic stripped them, breaking alert-history
+    // continuity by re-creating the trigger.
+    const form = baseForm();
+    form.pplTriggers = [{ ...numResultsTrigger, id: 'aB1cD2eF3gH4iJ5kL6mN' }]; // 20 chars
+    const payload = (transformPplFormToPayload(form) as unknown) as PplPayload;
+    expect(payload.triggers[0].ppl_trigger.id).toBe('aB1cD2eF3gH4iJ5kL6mN');
+
+    // 22-char shape too
+    form.pplTriggers = [{ ...numResultsTrigger, id: 'aB1cD2eF3gH4iJ5kL6mNoP' }]; // 22
+    const p2 = (transformPplFormToPayload(form) as unknown) as PplPayload;
+    expect(p2.triggers[0].ppl_trigger.id).toBe('aB1cD2eF3gH4iJ5kL6mNoP');
   });
 
   it('encodes actions with subject template only when subject is non-empty', () => {

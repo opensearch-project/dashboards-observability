@@ -76,14 +76,30 @@ describe('toHandlerResult', () => {
     expect(logger.error).toHaveBeenCalled();
   });
 
-  it('falls back to 500 and surfaces the message for diagnosis', () => {
+  it('falls back to 500 and emits a generic message — never reflects upstream content', () => {
     const logger = makeLogger();
     const result = toHandlerResult(
       new Error('connect ECONNREFUSED cluster-prod-01.internal:9200'),
       logger
     );
     expect(result.status).toBe(500);
-    expect(result.body).toEqual({ error: 'connect ECONNREFUSED cluster-prod-01.internal:9200' });
+    // Body must be generic: leaking ECONNREFUSED + cluster hostname would aid
+    // reconnaissance against the OS cluster.
+    expect(result.body).toEqual({ error: 'An internal error occurred' });
+    expect(JSON.stringify(result.body)).not.toContain('cluster-prod-01.internal');
+    expect(JSON.stringify(result.body)).not.toContain('9200');
+    // Full upstream message is logged server-side for diagnosis.
     expect(logger.error).toHaveBeenCalledWith('connect ECONNREFUSED cluster-prod-01.internal:9200');
+  });
+
+  it('strips upstream class-wrapper prefixes from validation messages but keeps the user-actionable reason', () => {
+    const logger = makeLogger();
+    const result = toHandlerResult(
+      new Error('IllegalArgumentException: trigger.id must be ≤ 20 characters'),
+      logger
+    );
+    expect(result.status).toBe(400);
+    expect(result.body).toEqual({ error: 'trigger.id must be ≤ 20 characters' });
+    expect(logger.error).toHaveBeenCalled();
   });
 });
