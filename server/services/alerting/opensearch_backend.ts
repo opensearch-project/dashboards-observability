@@ -32,6 +32,7 @@ import {
   OSRawAction,
   OSDestinationRaw,
   OSDestinationsApiResponse,
+  OSDestinationsResult,
 } from '../../../common/types/alerting';
 import { createConflictError, createInternalError, isStatusCode } from './errors';
 
@@ -353,13 +354,26 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
   // Destinations
   // =========================================================================
 
-  async getDestinations(client: AlertingOSClient): Promise<OSDestination[]> {
+  async getDestinations(client: AlertingOSClient): Promise<OSDestinationsResult> {
+    // The alerting `destinations` endpoint isn't paginated — we cap at
+    // size=200 so a cluster with thousands of destinations doesn't freeze
+    // the tab. `totalDestinations` from the upstream response lets us tell
+    // the user when entries beyond the cap exist.
+    const SIZE_CAP = 200;
     const resp = await this.req<OSDestinationsApiResponse>(
       client,
       'GET',
-      '/_plugins/_alerting/destinations?size=200'
+      `/_plugins/_alerting/destinations?size=${SIZE_CAP}`
     );
-    return (resp.body.destinations ?? []).map((d: OSDestinationRaw) => this.mapDestination(d));
+    const destinations = (resp.body.destinations ?? []).map((d: OSDestinationRaw) =>
+      this.mapDestination(d)
+    );
+    const totalDestinations = resp.body.totalDestinations ?? destinations.length;
+    return {
+      destinations,
+      totalDestinations,
+      truncated: totalDestinations > destinations.length,
+    };
   }
 
   async createDestination(

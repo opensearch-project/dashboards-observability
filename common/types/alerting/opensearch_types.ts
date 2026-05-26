@@ -253,6 +253,19 @@ export interface OSDestinationRaw {
 
 export interface OSDestinationsApiResponse {
   destinations?: OSDestinationRaw[];
+  totalDestinations?: number;
+}
+
+/**
+ * Mapped result of the alerting `_plugins/_alerting/destinations` call. The
+ * upstream API doesn't paginate, so we cap at `size=200` and surface
+ * `truncated` so callers can hint to the user that older destinations may
+ * be missing.
+ */
+export interface OSDestinationsResult {
+  destinations: OSDestination[];
+  totalDestinations: number;
+  truncated: boolean;
 }
 
 // ============================================================================
@@ -303,7 +316,7 @@ export interface OpenSearchBackend {
   ): Promise<unknown>;
 
   // Destinations
-  getDestinations(client: AlertingOSClient): Promise<OSDestination[]>;
+  getDestinations(client: AlertingOSClient): Promise<OSDestinationsResult>;
   createDestination(
     client: AlertingOSClient,
     dest: Omit<OSDestination, 'id'>

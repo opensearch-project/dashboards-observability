@@ -38,7 +38,9 @@ export const DestinationPicker: React.FC<DestinationPickerProps> = ({
   isInvalid,
   errorMessage,
 }) => {
-  const { destinations, isLoading, error } = useDestinations({ dsId });
+  const { destinations, isLoading, error, truncated, totalDestinations } = useDestinations({
+    dsId,
+  });
 
   const placeholderText = i18n.translate('observability.alerting.destinationPicker.placeholder', {
     defaultMessage: 'Select a destination',
@@ -132,6 +134,18 @@ export const DestinationPicker: React.FC<DestinationPickerProps> = ({
                 id="observability.alerting.destinationPicker.loadError"
                 defaultMessage="Failed to load destinations: {message}"
                 values={{ message: error.message }}
+              />
+            </EuiText>
+          </>
+        )}
+        {truncated && (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiText size="xs" color="subdued" data-test-subj="alertManagerDestinationsTruncated">
+              <FormattedMessage
+                id="observability.alerting.destinationPicker.truncated"
+                defaultMessage="Showing the first {shown} of {total} destinations. Manage older entries from the Alerting plugin."
+                values={{ shown: destinations.length, total: totalDestinations }}
               />
             </EuiText>
           </>

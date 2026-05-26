@@ -95,7 +95,7 @@ export async function getOSRuleDetail(
   // Build notification routing from trigger actions + destinations.
   const notificationRouting: NotificationRouting[] = [];
   try {
-    const destinations = await osBackend.getDestinations(client);
+    const { destinations } = await osBackend.getDestinations(client);
     const destMap = new Map(destinations.map((d) => [d.id, d]));
     for (const trigger of monitor.triggers) {
       const actions = 'ppl_trigger' in trigger ? trigger.ppl_trigger.actions : trigger.actions;

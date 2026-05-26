@@ -99,12 +99,25 @@ export class AlertingOpenSearchService {
    * List notification destinations for a datasource. Used by the create/edit
    * flyout to populate the action destination picker. Returns a thin
    * summary — id, name, and type are all the picker needs.
+   *
+   * The upstream alerting API isn't paginated; the server caps at size=200
+   * and surfaces `truncated`/`totalDestinations` so the UI can hint when
+   * older entries are unreachable.
    */
-  async listDestinations(dsId: string): Promise<DestinationSummary[]> {
+  async listDestinations(dsId: string): Promise<DestinationsListResult> {
     const resp = (await this.requireHttp().get(
       `/api/alerting/opensearch/${encodeURIComponent(dsId)}/destinations`
-    )) as { destinations: DestinationSummary[] };
-    return resp.destinations || [];
+    )) as {
+      destinations: DestinationSummary[];
+      totalDestinations?: number;
+      truncated?: boolean;
+    };
+    const destinations = resp.destinations || [];
+    return {
+      destinations,
+      totalDestinations: resp.totalDestinations ?? destinations.length,
+      truncated: resp.truncated ?? false,
+    };
   }
 
   /**
@@ -148,6 +161,12 @@ export interface DestinationSummary {
   id: string;
   name: string;
   type: string;
+}
+
+export interface DestinationsListResult {
+  destinations: DestinationSummary[];
+  totalDestinations: number;
+  truncated: boolean;
 }
 
 export interface IndexSummary {

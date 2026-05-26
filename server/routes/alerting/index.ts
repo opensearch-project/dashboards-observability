@@ -413,10 +413,16 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     async (ctx, req, res) => {
       try {
         const client = await getAlertingClient(ctx as AlertingHandlerContext, req.params.dsId);
-        const destinations = await osBackend.getDestinations(client);
+        const result = await osBackend.getDestinations(client);
         return res.ok({
           body: {
-            destinations: destinations.map((d) => ({ id: d.id, name: d.name, type: d.type })),
+            destinations: result.destinations.map((d) => ({
+              id: d.id,
+              name: d.name,
+              type: d.type,
+            })),
+            totalDestinations: result.totalDestinations,
+            truncated: result.truncated,
           },
         });
       } catch (err) {

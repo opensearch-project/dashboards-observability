@@ -368,11 +368,12 @@ describe('HttpOpenSearchBackend', () => {
                 last_update_time: 100,
               },
             ],
+            totalDestinations: 1,
           },
         },
       ]);
       const result = await backend.getDestinations(client);
-      expect(result).toEqual([
+      expect(result.destinations).toEqual([
         {
           id: 'd-1',
           type: 'slack',
@@ -384,6 +385,32 @@ describe('HttpOpenSearchBackend', () => {
           schema_version: undefined,
         },
       ]);
+      expect(result.totalDestinations).toBe(1);
+      expect(result.truncated).toBe(false);
+    });
+
+    it('flags truncated when upstream total exceeds returned page', async () => {
+      // Upstream returns 200 entries while the cluster holds 350 — the
+      // response cap means the picker is missing entries.
+      const destinations = Array.from({ length: 200 }, (_, i) => ({
+        id: `d-${i}`,
+        type: 'slack',
+        name: `ops-${i}`,
+      }));
+      const { client } = makeClient([{ body: { destinations, totalDestinations: 350 } }]);
+      const result = await backend.getDestinations(client);
+      expect(result.destinations).toHaveLength(200);
+      expect(result.totalDestinations).toBe(350);
+      expect(result.truncated).toBe(true);
+    });
+
+    it('falls back to mapped length when upstream omits totalDestinations', async () => {
+      const { client } = makeClient([
+        { body: { destinations: [{ id: 'd-1', type: 'slack', name: 'ops' }] } },
+      ]);
+      const result = await backend.getDestinations(client);
+      expect(result.totalDestinations).toBe(1);
+      expect(result.truncated).toBe(false);
     });
   });
 

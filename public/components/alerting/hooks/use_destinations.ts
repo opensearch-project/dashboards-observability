@@ -17,6 +17,13 @@ export interface UseDestinationsParams {
 
 export interface UseDestinationsResult {
   destinations: DestinationSummary[];
+  /**
+   * Cluster-side total reported by the alerting API. When the result is
+   * truncated this exceeds `destinations.length`; otherwise it equals it.
+   */
+  totalDestinations: number;
+  /** True when entries beyond the server-side size cap (200) were not returned. */
+  truncated: boolean;
   isLoading: boolean;
   error: Error | null;
   refetch: () => void;
@@ -28,6 +35,8 @@ export function useDestinations({
 }: UseDestinationsParams): UseDestinationsResult {
   const service = useMemo(() => new AlertingOpenSearchService(), []);
   const [destinations, setDestinations] = useState<DestinationSummary[]>([]);
+  const [totalDestinations, setTotalDestinations] = useState(0);
+  const [truncated, setTruncated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [localRefresh, setLocalRefresh] = useState(0);
@@ -36,6 +45,8 @@ export function useDestinations({
   useEffect(() => {
     if (!dsId) {
       setDestinations([]);
+      setTotalDestinations(0);
+      setTruncated(false);
       return;
     }
     let cancelled = false;
@@ -43,8 +54,12 @@ export function useDestinations({
     setError(null);
     (async () => {
       try {
-        const list = await service.listDestinations(dsId);
-        if (!cancelled) setDestinations(list);
+        const result = await service.listDestinations(dsId);
+        if (!cancelled) {
+          setDestinations(result.destinations);
+          setTotalDestinations(result.totalDestinations);
+          setTruncated(result.truncated);
+        }
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e : new Error(String(e)));
       } finally {
@@ -56,5 +71,5 @@ export function useDestinations({
     };
   }, [service, dsId, refreshToken, localRefresh]);
 
-  return { destinations, isLoading, error, refetch };
+  return { destinations, totalDestinations, truncated, isLoading, error, refetch };
 }
