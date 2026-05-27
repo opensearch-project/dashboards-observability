@@ -287,4 +287,133 @@ describe('registerAlertingRoutes', () => {
       );
     });
   });
+
+  // =========================================================================
+  // Route error-handling: getAlertingClient throws AlertManagerError outside
+  // the handler's own try/catch.
+  //
+  // Regression: before the runHandler wrapper, an unknown OS dsId caused
+  // `getAlertingClient` to throw a plain `{kind:'not_found', message}` object
+  // straight up to OSD's framework, which crashed with
+  // "text.replace is not a function" when stringifying the non-Error value.
+  // The route surfaced 500 with a redacted body, but the server log filled
+  // with TypeErrors and the typed status (404) was lost.
+  //
+  // Each captured handler is invoked with a context whose savedObjects.get
+  // throws (= unknown OS data-source) and find returns no Prometheus
+  // connections (= unknown overall). The handler should resolve to a
+  // properly-typed 404 ResponseError, not throw.
+  // =========================================================================
+
+  describe('runHandler error funneling', () => {
+    interface Route {
+      path: string;
+      handler: (ctx: unknown, req: unknown, res: unknown) => Promise<unknown>;
+    }
+
+    const buildCtx = () => ({
+      core: {
+        savedObjects: {
+          client: {
+            get: jest.fn().mockRejectedValue(new Error('not found')),
+            find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+          },
+        },
+        opensearch: { client: { asCurrentUser: { transport: { request: jest.fn() } } } },
+      },
+      // Crucially, MDS *is* configured. Without this, getAlertingClient
+      // short-circuits to local-cluster and never throws — the regression
+      // path requires the OS-data-source resolution to fail explicitly.
+      dataSource: {
+        opensearch: {
+          getClient: jest.fn().mockResolvedValue({ transport: { request: jest.fn() } }),
+        },
+      },
+    });
+
+    const buildRes = () => {
+      const calls: Record<string, unknown[]> = {};
+      const make = (key: string) => (arg: unknown) => {
+        calls[key] = calls[key] || [];
+        calls[key].push(arg);
+        return { key, arg };
+      };
+      return {
+        ok: make('ok'),
+        customError: make('customError'),
+        notFound: make('notFound'),
+        badRequest: make('badRequest'),
+        unauthorized: make('unauthorized'),
+        forbidden: make('forbidden'),
+        conflict: make('conflict'),
+        _calls: calls,
+      };
+    };
+
+    const findRoute = (path: string): Route => {
+      const all: Array<[unknown, unknown]> = [
+        ...mockRouter.get.mock.calls,
+        ...mockRouter.post.mock.calls,
+        ...mockRouter.put.mock.calls,
+        ...mockRouter.delete.mock.calls,
+      ];
+      const match = all.find(([cfg]) => (cfg as { path: string }).path === path);
+      if (!match) throw new Error(`Route ${path} not registered`);
+      return { path, handler: match[1] as Route['handler'] };
+    };
+
+    const register = () => {
+      mockRouter.get.mockClear();
+      mockRouter.post.mockClear();
+      mockRouter.put.mockClear();
+      mockRouter.delete.mockClear();
+      registerAlertingRoutes(mockRouter as never, {
+        osBackend: mockOsBackend,
+        promBackend: mockPromBackend,
+        mutationSvc: mockMutationSvc,
+        logger: mockLogger,
+        enableMetadataRoutes: true,
+      });
+    };
+
+    // Each of these routes calls `getAlertingClientCtx` *outside* of any
+    // handler-local try/catch. Without runHandler wrapping, the throw
+    // would propagate to OSD and produce the "text.replace" 500.
+    it.each([
+      '/api/alerting/opensearch/{dsId}/monitors',
+      '/api/alerting/opensearch/{dsId}/monitors/{monitorId}',
+      '/api/alerting/opensearch/{dsId}/alerts',
+      '/api/alerting/prometheus/{dsId}/rules',
+      '/api/alerting/prometheus/{dsId}/alerts',
+      '/api/alerting/rules/{dsId}/{ruleId}',
+      '/api/alerting/alerts/{dsId}/{alertId}',
+      '/api/alerting/prometheus/{dsId}/metadata/metrics',
+      '/api/alerting/prometheus/{dsId}/metadata/labels',
+      '/api/alerting/prometheus/{dsId}/metadata/label-values/{label}',
+      '/api/alerting/prometheus/{dsId}/metadata/metric-metadata',
+    ])('%s returns a typed 404 (not 500) when the dsId is unknown', async (path: string) => {
+      register();
+      const route = findRoute(path);
+      const ctx = buildCtx();
+      const res = buildRes();
+      const req = {
+        params: {
+          dsId: 'unknown',
+          monitorId: 'm1',
+          ruleId: 'r1',
+          alertId: 'a1',
+          label: 'instance',
+        },
+        query: { search: '', metric: '', selector: '' },
+      };
+
+      // Must not throw — the wrapper should funnel the AlertManagerError
+      // through toHandlerResult and emit res.customError(404, ...).
+      await expect(route.handler(ctx, req, res)).resolves.toBeDefined();
+      const errorCalls = res._calls.customError as Array<{ statusCode: number; body: unknown }>;
+      expect(errorCalls).toBeDefined();
+      expect(errorCalls.length).toBeGreaterThan(0);
+      expect(errorCalls[0].statusCode).toBe(404);
+    });
+  });
 });

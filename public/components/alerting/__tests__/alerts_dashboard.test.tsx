@@ -132,6 +132,20 @@ describe('AlertsDashboard', () => {
     expect(queryByTestId('alertsTruncatedCallout')).not.toBeInTheDocument();
   });
 
+  it('anchors alertManagerDatePicker on a real DOM element (regression: EuiSuperDatePicker drops data-test-subj)', () => {
+    // EuiSuperDatePicker doesn't forward arbitrary DOM attributes to its
+    // rendered control, so a `data-test-subj` prop on the picker itself is
+    // silently discarded. The wrapper div lives one level above the picker
+    // so Cypress / functional selectors resolve regardless of EUI's prop
+    // forwarding behavior.
+    const { container } = render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
+    const anchor = container.querySelector('[data-test-subj="alertManagerDatePicker"]');
+    expect(anchor).not.toBeNull();
+    expect(anchor!.tagName).toBe('DIV');
+    // The picker control itself should be a descendant of the anchor.
+    expect(anchor!.querySelector('.euiSuperDatePicker')).not.toBeNull();
+  });
+
   it('renders the fallback callout listing each fallback datasource', () => {
     const { getByTestId, getByText } = render(
       <AlertsDashboard
