@@ -263,6 +263,38 @@ describe('monitorMutationBodySchema', () => {
       } as any)
     ).toThrow();
   });
+
+  it('rejects bodies whose ppl_input.query exceeds the PPL query cap', () => {
+    expect(() =>
+      monitorMutationBodySchema.validate({
+        name: 'm',
+        inputs: [
+          {
+            ppl_input: {
+              query: 'x'.repeat(SCHEMA_LIMITS.PPL_QUERY_MAX + 1),
+              query_language: 'ppl',
+            },
+          },
+        ],
+      } as any)
+    ).toThrow();
+  });
+
+  it('accepts bodies whose ppl_input.query is at exactly the PPL query cap', () => {
+    expect(() =>
+      monitorMutationBodySchema.validate({
+        name: 'm',
+        inputs: [
+          {
+            ppl_input: {
+              query: 'x'.repeat(SCHEMA_LIMITS.PPL_QUERY_MAX),
+              query_language: 'ppl',
+            },
+          },
+        ],
+      } as any)
+    ).not.toThrow();
+  });
 });
 
 describe('monitorAcknowledgeBodySchema', () => {

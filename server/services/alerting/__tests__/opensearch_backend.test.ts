@@ -566,4 +566,48 @@ describe('HttpOpenSearchBackend — updateMonitor round-trip', () => {
     // user-supplied input is still applied
     expect(putBody.name).toBe('renamed');
   });
+
+  // Sister regression to F5: protect against the *clobber* path. The body
+  // schema uses `unknowns: 'allow'`, so a client request can carry any of
+  // the plugin-owned keys; the spread `{ ...rawUpstream, ...input }` would
+  // then let the client's value win. We re-spread the originals after
+  // `input` so the caller cannot edit those fields through this route.
+  it('rejects caller attempts to clobber plugin-internal fields via the request body', async () => {
+    const upstreamSource = {
+      type: 'monitor',
+      monitor_type: 'ppl_monitor',
+      name: 'mon-1',
+      enabled: true,
+      schedule: { period: { interval: 5, unit: 'MINUTES' } },
+      inputs: [{ ppl_input: { query: 'source = logs-*', query_language: 'ppl' } }],
+      triggers: [],
+      last_update_time: 1700000000000,
+      data_sources: { tenant: 'tenant-a' },
+      last_run_context: { lastFiredAt: 1700000000000 },
+      owner: 'alerting',
+      enabled_time: 1690000000000,
+    };
+
+    const { client, request } = makeClient([
+      { body: { _id: 'mon-1', _seq_no: 5, _primary_term: 2, monitor: upstreamSource } },
+      { body: { _id: 'mon-1', monitor: upstreamSource } },
+    ]);
+
+    await backend.updateMonitor(client, 'mon-1', ({
+      name: 'renamed',
+      // Hostile input: try to clobber tenant scoping + ownership + state.
+      data_sources: { tenant: 'evil-tenant' },
+      last_run_context: { lastFiredAt: 0 },
+      owner: 'attacker',
+      enabled_time: 0,
+    } as unknown) as Parameters<typeof backend.updateMonitor>[2]);
+
+    const putBody = captureBody(request, 1);
+    expect(putBody.data_sources).toEqual({ tenant: 'tenant-a' });
+    expect(putBody.last_run_context).toEqual({ lastFiredAt: 1700000000000 });
+    expect(putBody.owner).toBe('alerting');
+    expect(putBody.enabled_time).toBe(1690000000000);
+    // The harmless field still passes through.
+    expect(putBody.name).toBe('renamed');
+  });
 });

@@ -28,6 +28,7 @@ import {
   EuiBasicTableColumn,
   EuiAccordion,
   EuiToolTip,
+  EuiCallOut,
   EuiCodeBlock,
   EuiLoadingContent,
 } from '@elastic/eui';
@@ -85,7 +86,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   onEdit,
 }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const { detail, isLoading: detailLoading } = useMonitorDetail({
+  const { detail, isLoading: detailLoading, error: detailError } = useMonitorDetail({
     dsId: monitor.datasourceId,
     ruleId: monitor.id,
   });
@@ -284,6 +285,30 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
             <EuiLoadingContent lines={10} />
           ) : (
             <>
+              {detailError && (
+                <>
+                  <EuiCallOut
+                    size="s"
+                    color="warning"
+                    iconType="alert"
+                    title={i18n.translate(
+                      'observability.alerting.monitorDetailFlyout.detailLoadError.title',
+                      {
+                        defaultMessage: 'Some monitor details could not be loaded',
+                      }
+                    )}
+                    data-test-subj="alertManagerMonitorDetailLoadError"
+                  >
+                    <p>
+                      <FormattedMessage
+                        id="observability.alerting.monitorDetailFlyout.detailLoadError.body"
+                        defaultMessage="Showing summary information only. Try reopening the flyout to retry."
+                      />
+                    </p>
+                  </EuiCallOut>
+                  <EuiSpacer size="m" />
+                </>
+              )}
               {/* Description */}
               <EuiText size="s">
                 <p>{description}</p>

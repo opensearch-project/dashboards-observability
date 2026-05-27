@@ -46,6 +46,18 @@ import { createConflictError, createInternalError, isStatusCode } from './errors
  */
 const MAX_DISCOVERY_RESULTS = 200;
 
+/**
+ * Plugin-owned monitor keys whose values OSD MUST preserve verbatim across
+ * an update, regardless of what the caller's request body contains. These
+ * are the alerting plugin's internal bookkeeping fields — tenant scoping
+ * (`data_sources`), execution state (`last_run_context`, `enabled_time`),
+ * and ownership (`owner`). The OSD UI never edits any of them; allowing a
+ * client to clobber them via PUT would re-introduce the same class of
+ * regression that F5 (the typed-projection strip) fixed, just through a
+ * different door.
+ */
+const PLUGIN_OWNED_KEYS = ['data_sources', 'last_run_context', 'owner', 'enabled_time'] as const;
+
 export class HttpOpenSearchBackend implements OpenSearchBackend {
   readonly type = 'opensearch' as const;
 
@@ -159,10 +171,23 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
     // fields the OSD layer doesn't know about (e.g. `data_sources`,
     // `last_run_context`, `owner`, `enabled_time`, future schema additions),
     // and the round-trip PUT would lose them.
+    //
+    // We also have to *preserve* those plugin-owned keys against the
+    // caller's input — `monitorMutationBodySchema` uses `unknowns: 'allow'`
+    // so a hostile (or just confused) client could PUT
+    // `{ data_sources: [...] }` and clobber the upstream value via the
+    // `...input` spread. Re-spreading the originals from `rawUpstream`
+    // after `input` makes the precedence explicit: client cannot edit
+    // these fields through this route.
     const rawUpstream = (getResp.body.monitor as unknown) as Record<string, unknown>;
+    const preserved: Record<string, unknown> = {};
+    for (const key of PLUGIN_OWNED_KEYS) {
+      if (key in rawUpstream) preserved[key] = rawUpstream[key];
+    }
     const merged = {
       ...rawUpstream,
       ...input,
+      ...preserved,
       last_update_time: Date.now(),
     };
 

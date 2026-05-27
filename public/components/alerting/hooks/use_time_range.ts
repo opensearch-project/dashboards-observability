@@ -77,34 +77,21 @@ export function useTimeRange(): UseTimeRangeResult {
     persistTimeRange(DEFAULT_START_TIME, DEFAULT_END_TIME);
   }, [rangeParseFailed]);
 
+  // Always persist on the picker callbacks. sessionStorage writes are cheap
+  // and idempotent, so unconditionally calling `persistTimeRange` is simpler
+  // and safer than tracking a `didChange` flag inside the functional setState
+  // updaters (which would rely on React 18's synchronous batching of those
+  // updaters within the callback — fragile across React major versions).
   const onTimeChange = useCallback(({ start, end }: { start: string; end: string }) => {
-    let didChange = false;
-    setStartTime((prev) => {
-      if (prev === start) return prev;
-      didChange = true;
-      return start;
-    });
-    setEndTime((prev) => {
-      if (prev === end) return prev;
-      didChange = true;
-      return end;
-    });
-    if (didChange) persistTimeRange(start, end);
+    setStartTime(start);
+    setEndTime(end);
+    persistTimeRange(start, end);
   }, []);
 
   const onRefresh = useCallback(({ start, end }: { start: string; end: string }) => {
-    let didChange = false;
-    setStartTime((prev) => {
-      if (prev === start) return prev;
-      didChange = true;
-      return start;
-    });
-    setEndTime((prev) => {
-      if (prev === end) return prev;
-      didChange = true;
-      return end;
-    });
-    if (didChange) persistTimeRange(start, end);
+    setStartTime(start);
+    setEndTime(end);
+    persistTimeRange(start, end);
     setRefreshToken((t) => t + 1);
   }, []);
 

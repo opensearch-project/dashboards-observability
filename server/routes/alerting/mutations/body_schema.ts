@@ -36,13 +36,29 @@ export const monitorMutationBodySchema = schema.object(
     enabled: schema.maybe(schema.boolean()),
     schedule: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     inputs: schema.maybe(
-      schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: INPUTS_MAX })
+      schema.arrayOf(
+        schema.object(
+          {
+            // PPL inputs carry the query string; bound it here so an
+            // oversize body can't reach the alerting plugin. Other input
+            // shapes (search_input, etc.) round-trip via `unknowns: 'allow'`.
+            ppl_input: schema.maybe(
+              schema.object(
+                {
+                  query: schema.maybe(schema.string({ maxLength: PPL_QUERY_MAX })),
+                },
+                { unknowns: 'allow' }
+              )
+            ),
+          },
+          { unknowns: 'allow' }
+        ),
+        { maxSize: INPUTS_MAX }
+      )
     ),
     triggers: schema.maybe(
       schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { maxSize: TRIGGERS_MAX })
     ),
-    // PPL inputs carry the query string; we cap the total here so an oversize
-    // body can't reach the alerting plugin.
     ui_metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   },
   { unknowns: 'allow' }

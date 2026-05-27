@@ -55,6 +55,10 @@ export function useAlertingPluginAvailability(
       return;
     }
     let cancelled = false;
+    // Track active probe controllers so the cleanup can abort in-flight
+    // requests on unmount or `osIdsKey` change — otherwise the probes
+    // complete uselessly in the background.
+    const activeControllers: AbortController[] = [];
     setIsLoading(true);
 
     (async () => {
@@ -62,6 +66,7 @@ export function useAlertingPluginAvailability(
       await Promise.all(
         osIds.map(async (dsId) => {
           const ctrl = new AbortController();
+          activeControllers.push(ctrl);
           const timer = setTimeout(() => ctrl.abort(), PROBE_TIMEOUT_MS);
           try {
             await http.get(`/api/alerting/opensearch/${encodeURIComponent(dsId)}/destinations`, {
@@ -81,6 +86,7 @@ export function useAlertingPluginAvailability(
 
     return () => {
       cancelled = true;
+      activeControllers.forEach((c) => c.abort());
     };
     // osIdsKey memoizes the array contents — including osIds directly would
     // re-fire on every parent render due to array-reference churn.
@@ -90,9 +96,19 @@ export function useAlertingPluginAvailability(
   return useMemo(
     () => ({
       isLoading,
-      unavailable: osIds.length > 0 && unavailableDsIds.length === osIds.length,
+      // Tighten the predicate so the failed-set must be a *subset* of the
+      // current `osIds` before we flip the callout. Otherwise, when
+      // `osIds` shrinks between probes (datasource disabled / removed),
+      // the stale `unavailableDsIds` from the previous probe can briefly
+      // satisfy `length === osIds.length` against the new shorter list,
+      // falsely flipping `unavailable` to `true` until the new probe
+      // resolves.
+      unavailable:
+        osIds.length > 0 &&
+        unavailableDsIds.length === osIds.length &&
+        unavailableDsIds.every((id) => osIds.includes(id)),
       unavailableDsIds,
     }),
-    [isLoading, osIds.length, unavailableDsIds]
+    [isLoading, osIds, unavailableDsIds]
   );
 }

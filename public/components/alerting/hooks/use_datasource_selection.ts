@@ -92,8 +92,15 @@ export function useDatasourceSelection({
 
   // Persist the selection (by name) whenever it changes and we know the
   // datasource list. Names survive server restarts; ids don't.
+  //
+  // Skip the empty case: `selectedDsIds` starts as `[]` before the init
+  // effect resolves a real selection, and both effects depend on
+  // `datasources` — so on the first datasources-loaded render this effect
+  // can fire with the still-empty initial state and clobber a valid
+  // persisted selection.
   useEffect(() => {
     if (datasources.length === 0) return;
+    if (selectedDsIds.length === 0) return;
     const names = selectedDsIds
       .map((id) => datasources.find((d) => d.id === id)?.name)
       .filter((n): n is string => typeof n === 'string');

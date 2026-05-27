@@ -13,9 +13,10 @@
  * Behaviour preserved verbatim from the inline implementation:
  *   - Re-runs when `dsId` or `ruleId` change.
  *   - `cancelled` flag prevents stale-closure state writes after unmount.
- *   - Errors are logged via console.error (the flyout doesn't surface
- *     them to the user — partial detail still renders against the summary
- *     props).
+ *   - Errors are surfaced both via `console.error` (server-side debugging)
+ *     and an `error` field in the result so the flyout can render an
+ *     inline callout / degraded-state hint when the detail fetch fails.
+ *     Partial detail still renders against the summary props.
  */
 import { useEffect, useMemo, useState } from 'react';
 import type { UnifiedRule } from '../../../../common/types/alerting';
@@ -29,16 +30,19 @@ export interface UseMonitorDetailParams {
 export interface UseMonitorDetailResult {
   detail: UnifiedRule | null;
   isLoading: boolean;
+  error: Error | null;
 }
 
 export function useMonitorDetail({ dsId, ruleId }: UseMonitorDetailParams): UseMonitorDetailResult {
   const osService = useMemo(() => new AlertingOpenSearchService(), []);
   const [detail, setDetail] = useState<UnifiedRule | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     setIsLoading(true);
+    setError(null);
     osService
       .getRuleDetail(dsId, ruleId)
       .then((data: UnifiedRule) => {
@@ -46,6 +50,9 @@ export function useMonitorDetail({ dsId, ruleId }: UseMonitorDetailParams): UseM
       })
       .catch((err: unknown) => {
         console.error('Failed to load monitor details:', err);
+        if (!cancelled) {
+          setError(err instanceof Error ? err : new Error(String(err)));
+        }
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
@@ -55,5 +62,5 @@ export function useMonitorDetail({ dsId, ruleId }: UseMonitorDetailParams): UseM
     };
   }, [dsId, ruleId, osService]);
 
-  return { detail, isLoading };
+  return { detail, isLoading, error };
 }
