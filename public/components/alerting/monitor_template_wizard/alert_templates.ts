@@ -16,6 +16,7 @@
  * reviewer feedback (Comment 14) — the previous `runbooks.example.com`
  * URLs were placeholder links and confused users.
  */
+import { i18n } from '@osd/i18n';
 import { UnifiedAlertSeverity } from '../../../../common/types/alerting';
 
 // ============================================================================
@@ -53,18 +54,37 @@ export interface ApplicationCategory {
 export const APPLICATION_CATALOG: Array<Omit<ApplicationCategory, 'discoveredMetrics'>> = [
   {
     id: 'host',
-    name: 'Host / Node',
+    name: i18n.translate(
+      'observability.alerting.monitorTemplateWizard.templates.category.host.name',
+      {
+        defaultMessage: 'Host / Node',
+      }
+    ),
     icon: 'compute',
-    description: 'System-level metrics from node_exporter following OTEL system.* conventions',
+    description: i18n.translate(
+      'observability.alerting.monitorTemplateWizard.templates.category.host.description',
+      {
+        defaultMessage:
+          'System-level metrics from node_exporter following OTEL system.* conventions',
+      }
+    ),
     otelNamespace: 'system',
     metricPrefixes: ['node_', 'system_'],
     color: '#0077CC',
     templates: [
       {
         id: 'host-cpu-high',
-        name: 'High CPU Usage',
-        description:
-          'CPU utilization exceeds 85% for sustained period, indicating potential resource exhaustion',
+        name: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.host.cpuHigh.name',
+          { defaultMessage: 'High CPU Usage' }
+        ),
+        description: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.host.cpuHigh.description',
+          {
+            defaultMessage:
+              'CPU utilization exceeds 85% for sustained period, indicating potential resource exhaustion',
+          }
+        ),
         query: '100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)',
         condition: '> 85',
         severity: 'high',
@@ -81,8 +101,16 @@ export const APPLICATION_CATALOG: Array<Omit<ApplicationCategory, 'discoveredMet
       },
       {
         id: 'host-memory-high',
-        name: 'High Memory Usage',
-        description: 'Available memory drops below 15% of total, risk of OOM kills',
+        name: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.host.memoryHigh.name',
+          { defaultMessage: 'High Memory Usage' }
+        ),
+        description: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.host.memoryHigh.description',
+          {
+            defaultMessage: 'Available memory drops below 15% of total, risk of OOM kills',
+          }
+        ),
         query: '(1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100',
         condition: '> 85',
         severity: 'high',
@@ -99,8 +127,16 @@ export const APPLICATION_CATALOG: Array<Omit<ApplicationCategory, 'discoveredMet
       },
       {
         id: 'host-disk-space',
-        name: 'Disk Space Low',
-        description: 'Filesystem usage exceeds 90%, risk of disk full',
+        name: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.host.diskSpace.name',
+          { defaultMessage: 'Disk Space Low' }
+        ),
+        description: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.host.diskSpace.description',
+          {
+            defaultMessage: 'Filesystem usage exceeds 90%, risk of disk full',
+          }
+        ),
         query: '(1 - node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100',
         condition: '> 90',
         severity: 'critical',
@@ -117,8 +153,16 @@ export const APPLICATION_CATALOG: Array<Omit<ApplicationCategory, 'discoveredMet
       },
       {
         id: 'host-load-high',
-        name: 'High System Load',
-        description: 'System load average (15m) exceeds number of CPUs',
+        name: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.host.loadHigh.name',
+          { defaultMessage: 'High System Load' }
+        ),
+        description: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.host.loadHigh.description',
+          {
+            defaultMessage: 'System load average (15m) exceeds number of CPUs',
+          }
+        ),
         query: 'node_load15',
         condition: '> 4',
         severity: 'medium',
@@ -134,8 +178,16 @@ export const APPLICATION_CATALOG: Array<Omit<ApplicationCategory, 'discoveredMet
       },
       {
         id: 'host-network-errors',
-        name: 'Network Receive Drops',
-        description: 'Network interface dropping incoming packets, possible saturation',
+        name: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.host.networkErrors.name',
+          { defaultMessage: 'Network Receive Drops' }
+        ),
+        description: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.host.networkErrors.description',
+          {
+            defaultMessage: 'Network interface dropping incoming packets, possible saturation',
+          }
+        ),
         query: 'rate(node_network_receive_drop_total[5m])',
         condition: '> 0',
         severity: 'medium',
@@ -154,17 +206,35 @@ export const APPLICATION_CATALOG: Array<Omit<ApplicationCategory, 'discoveredMet
   },
   {
     id: 'http',
-    name: 'HTTP / API',
+    name: i18n.translate(
+      'observability.alerting.monitorTemplateWizard.templates.category.http.name',
+      {
+        defaultMessage: 'HTTP / API',
+      }
+    ),
     icon: 'globe',
-    description: 'HTTP server metrics following OTEL http.server.* semantic conventions',
+    description: i18n.translate(
+      'observability.alerting.monitorTemplateWizard.templates.category.http.description',
+      {
+        defaultMessage: 'HTTP server metrics following OTEL http.server.* semantic conventions',
+      }
+    ),
     otelNamespace: 'http.server',
     metricPrefixes: ['http_'],
     color: '#00BFB3',
     templates: [
       {
         id: 'http-error-rate',
-        name: 'High Error Rate (5xx)',
-        description: 'Server error rate exceeds 5% of total requests',
+        name: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.http.errorRate.name',
+          { defaultMessage: 'High Error Rate (5xx)' }
+        ),
+        description: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.http.errorRate.description',
+          {
+            defaultMessage: 'Server error rate exceeds 5% of total requests',
+          }
+        ),
         query:
           'sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) * 100',
         condition: '> 5',
@@ -181,8 +251,16 @@ export const APPLICATION_CATALOG: Array<Omit<ApplicationCategory, 'discoveredMet
       },
       {
         id: 'http-latency-p99',
-        name: 'High P99 Latency',
-        description: '99th percentile request latency exceeds 2 seconds',
+        name: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.http.latencyP99.name',
+          { defaultMessage: 'High P99 Latency' }
+        ),
+        description: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.http.latencyP99.description',
+          {
+            defaultMessage: '99th percentile request latency exceeds 2 seconds',
+          }
+        ),
         query:
           'histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))',
         condition: '> 2',
@@ -199,8 +277,16 @@ export const APPLICATION_CATALOG: Array<Omit<ApplicationCategory, 'discoveredMet
       },
       {
         id: 'http-request-spike',
-        name: 'Request Rate Spike',
-        description: 'Request rate increased by more than 3x compared to 1-hour average',
+        name: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.http.requestSpike.name',
+          { defaultMessage: 'Request Rate Spike' }
+        ),
+        description: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.http.requestSpike.description',
+          {
+            defaultMessage: 'Request rate increased by more than 3x compared to 1-hour average',
+          }
+        ),
         query: 'sum(rate(http_requests_total[5m])) / sum(rate(http_requests_total[1h]))',
         condition: '> 3',
         severity: 'medium',
@@ -218,18 +304,34 @@ export const APPLICATION_CATALOG: Array<Omit<ApplicationCategory, 'discoveredMet
   },
   {
     id: 'kubernetes',
-    name: 'Kubernetes',
+    name: i18n.translate(
+      'observability.alerting.monitorTemplateWizard.templates.category.kubernetes.name',
+      { defaultMessage: 'Kubernetes' }
+    ),
     icon: 'logoKubernetes',
-    description:
-      'Kubernetes cluster metrics from kube-state-metrics following OTEL k8s.* conventions',
+    description: i18n.translate(
+      'observability.alerting.monitorTemplateWizard.templates.category.kubernetes.description',
+      {
+        defaultMessage:
+          'Kubernetes cluster metrics from kube-state-metrics following OTEL k8s.* conventions',
+      }
+    ),
     otelNamespace: 'k8s',
     metricPrefixes: ['kube_'],
     color: '#326CE5',
     templates: [
       {
         id: 'k8s-pod-restarts',
-        name: 'Pod Crash Looping',
-        description: 'Pod has restarted more than 5 times in the last hour',
+        name: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.k8s.podRestarts.name',
+          { defaultMessage: 'Pod Crash Looping' }
+        ),
+        description: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.k8s.podRestarts.description',
+          {
+            defaultMessage: 'Pod has restarted more than 5 times in the last hour',
+          }
+        ),
         query: 'increase(kube_pod_container_status_restarts_total[1h])',
         condition: '> 5',
         severity: 'critical',
@@ -246,8 +348,16 @@ export const APPLICATION_CATALOG: Array<Omit<ApplicationCategory, 'discoveredMet
       },
       {
         id: 'k8s-deployment-replicas',
-        name: 'Deployment Replica Mismatch',
-        description: 'Deployment has fewer ready replicas than desired',
+        name: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.k8s.deploymentReplicas.name',
+          { defaultMessage: 'Deployment Replica Mismatch' }
+        ),
+        description: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.k8s.deploymentReplicas.description',
+          {
+            defaultMessage: 'Deployment has fewer ready replicas than desired',
+          }
+        ),
         query: 'kube_deployment_status_replicas',
         condition: '< 1',
         severity: 'high',
@@ -266,17 +376,33 @@ export const APPLICATION_CATALOG: Array<Omit<ApplicationCategory, 'discoveredMet
   },
   {
     id: 'container',
-    name: 'Container Runtime',
+    name: i18n.translate(
+      'observability.alerting.monitorTemplateWizard.templates.category.container.name',
+      { defaultMessage: 'Container Runtime' }
+    ),
     icon: 'package',
-    description: 'Container-level resource metrics following OTEL container.* conventions',
+    description: i18n.translate(
+      'observability.alerting.monitorTemplateWizard.templates.category.container.description',
+      {
+        defaultMessage: 'Container-level resource metrics following OTEL container.* conventions',
+      }
+    ),
     otelNamespace: 'container',
     metricPrefixes: ['container_'],
     color: '#9B59B6',
     templates: [
       {
         id: 'container-cpu-throttle',
-        name: 'Container CPU High',
-        description: 'Container CPU usage exceeds 80% of its limit',
+        name: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.container.cpuThrottle.name',
+          { defaultMessage: 'Container CPU High' }
+        ),
+        description: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.container.cpuThrottle.description',
+          {
+            defaultMessage: 'Container CPU usage exceeds 80% of its limit',
+          }
+        ),
         query: 'rate(container_cpu_usage_seconds_total[5m]) * 100',
         condition: '> 80',
         severity: 'high',
@@ -293,8 +419,16 @@ export const APPLICATION_CATALOG: Array<Omit<ApplicationCategory, 'discoveredMet
       },
       {
         id: 'container-memory-high',
-        name: 'Container Memory High',
-        description: 'Container memory usage exceeds 1GB',
+        name: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.container.memoryHigh.name',
+          { defaultMessage: 'Container Memory High' }
+        ),
+        description: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.container.memoryHigh.description',
+          {
+            defaultMessage: 'Container memory usage exceeds 1GB',
+          }
+        ),
         query: 'container_memory_usage_bytes / 1024 / 1024 / 1024',
         condition: '> 1',
         severity: 'medium',
@@ -312,17 +446,33 @@ export const APPLICATION_CATALOG: Array<Omit<ApplicationCategory, 'discoveredMet
   },
   {
     id: 'database',
-    name: 'Database',
+    name: i18n.translate(
+      'observability.alerting.monitorTemplateWizard.templates.category.database.name',
+      { defaultMessage: 'Database' }
+    ),
     icon: 'database',
-    description: 'Database connection and query metrics following OTEL db.* conventions',
+    description: i18n.translate(
+      'observability.alerting.monitorTemplateWizard.templates.category.database.description',
+      {
+        defaultMessage: 'Database connection and query metrics following OTEL db.* conventions',
+      }
+    ),
     otelNamespace: 'db',
     metricPrefixes: ['db_'],
     color: '#E67E22',
     templates: [
       {
         id: 'db-connection-pool-exhaustion',
-        name: 'Connection Pool Exhaustion',
-        description: 'Available database connections below 10% of pool size',
+        name: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.db.connectionPool.name',
+          { defaultMessage: 'Connection Pool Exhaustion' }
+        ),
+        description: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.db.connectionPool.description',
+          {
+            defaultMessage: 'Available database connections below 10% of pool size',
+          }
+        ),
         query: '(db_connection_pool_available / db_connection_pool_total) * 100',
         condition: '< 10',
         severity: 'critical',
@@ -338,8 +488,16 @@ export const APPLICATION_CATALOG: Array<Omit<ApplicationCategory, 'discoveredMet
       },
       {
         id: 'db-slow-queries',
-        name: 'Slow Database Queries',
-        description: 'Average query duration exceeds 500ms',
+        name: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.db.slowQueries.name',
+          { defaultMessage: 'Slow Database Queries' }
+        ),
+        description: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.db.slowQueries.description',
+          {
+            defaultMessage: 'Average query duration exceeds 500ms',
+          }
+        ),
         query: 'rate(db_query_duration_seconds[5m])',
         condition: '> 0.5',
         severity: 'medium',
@@ -357,17 +515,33 @@ export const APPLICATION_CATALOG: Array<Omit<ApplicationCategory, 'discoveredMet
   },
   {
     id: 'process',
-    name: 'Process / Runtime',
+    name: i18n.translate(
+      'observability.alerting.monitorTemplateWizard.templates.category.process.name',
+      { defaultMessage: 'Process / Runtime' }
+    ),
     icon: 'gear',
-    description: 'Process-level metrics following OTEL process.runtime.* conventions',
+    description: i18n.translate(
+      'observability.alerting.monitorTemplateWizard.templates.category.process.description',
+      {
+        defaultMessage: 'Process-level metrics following OTEL process.runtime.* conventions',
+      }
+    ),
     otelNamespace: 'process.runtime',
     metricPrefixes: ['process_', 'go_'],
     color: '#2ECC71',
     templates: [
       {
         id: 'process-high-fds',
-        name: 'High File Descriptor Usage',
-        description: 'Process has more than 1000 open file descriptors',
+        name: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.process.highFds.name',
+          { defaultMessage: 'High File Descriptor Usage' }
+        ),
+        description: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.process.highFds.description',
+          {
+            defaultMessage: 'Process has more than 1000 open file descriptors',
+          }
+        ),
         query: 'process_open_fds',
         condition: '> 1000',
         severity: 'medium',
@@ -383,8 +557,16 @@ export const APPLICATION_CATALOG: Array<Omit<ApplicationCategory, 'discoveredMet
       },
       {
         id: 'go-goroutine-leak',
-        name: 'Goroutine Leak',
-        description: 'Go goroutine count exceeds 5000, possible leak',
+        name: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.process.goroutineLeak.name',
+          { defaultMessage: 'Goroutine Leak' }
+        ),
+        description: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.process.goroutineLeak.description',
+          {
+            defaultMessage: 'Go goroutine count exceeds 5000, possible leak',
+          }
+        ),
         query: 'go_goroutines',
         condition: '> 5000',
         severity: 'high',
@@ -402,18 +584,34 @@ export const APPLICATION_CATALOG: Array<Omit<ApplicationCategory, 'discoveredMet
   },
   {
     id: 'probes',
-    name: 'Synthetic / Probes',
+    name: i18n.translate(
+      'observability.alerting.monitorTemplateWizard.templates.category.probes.name',
+      { defaultMessage: 'Synthetic / Probes' }
+    ),
     icon: 'heartbeatFill',
-    description:
-      'Blackbox exporter probes for endpoint availability and SSL certificate monitoring',
+    description: i18n.translate(
+      'observability.alerting.monitorTemplateWizard.templates.category.probes.description',
+      {
+        defaultMessage:
+          'Blackbox exporter probes for endpoint availability and SSL certificate monitoring',
+      }
+    ),
     otelNamespace: 'probe',
     metricPrefixes: ['probe_'],
     color: '#E74C3C',
     templates: [
       {
         id: 'probe-endpoint-down',
-        name: 'Endpoint Down',
-        description: 'Probe target is unreachable',
+        name: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.probes.endpointDown.name',
+          { defaultMessage: 'Endpoint Down' }
+        ),
+        description: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.probes.endpointDown.description',
+          {
+            defaultMessage: 'Probe target is unreachable',
+          }
+        ),
         query: 'probe_success',
         condition: '== 0',
         severity: 'critical',
@@ -429,8 +627,16 @@ export const APPLICATION_CATALOG: Array<Omit<ApplicationCategory, 'discoveredMet
       },
       {
         id: 'probe-ssl-expiry',
-        name: 'SSL Certificate Expiring',
-        description: 'SSL certificate expires within 30 days',
+        name: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.probes.sslExpiry.name',
+          { defaultMessage: 'SSL Certificate Expiring' }
+        ),
+        description: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.probes.sslExpiry.description',
+          {
+            defaultMessage: 'SSL certificate expires within 30 days',
+          }
+        ),
         query: '(probe_ssl_earliest_cert_expiry - time()) / 86400',
         condition: '< 30',
         severity: 'high',
@@ -448,17 +654,34 @@ export const APPLICATION_CATALOG: Array<Omit<ApplicationCategory, 'discoveredMet
   },
   {
     id: 'scrape',
-    name: 'Prometheus Internals',
+    name: i18n.translate(
+      'observability.alerting.monitorTemplateWizard.templates.category.scrape.name',
+      { defaultMessage: 'Prometheus Internals' }
+    ),
     icon: 'monitoringApp',
-    description: 'Prometheus self-monitoring: target health, scrape performance, and up status',
+    description: i18n.translate(
+      'observability.alerting.monitorTemplateWizard.templates.category.scrape.description',
+      {
+        defaultMessage:
+          'Prometheus self-monitoring: target health, scrape performance, and up status',
+      }
+    ),
     otelNamespace: 'prometheus',
     metricPrefixes: ['up', 'scrape_'],
     color: '#95A5A6',
     templates: [
       {
         id: 'target-down',
-        name: 'Scrape Target Down',
-        description: 'Prometheus scrape target is unreachable',
+        name: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.scrape.targetDown.name',
+          { defaultMessage: 'Scrape Target Down' }
+        ),
+        description: i18n.translate(
+          'observability.alerting.monitorTemplateWizard.templates.scrape.targetDown.description',
+          {
+            defaultMessage: 'Prometheus scrape target is unreachable',
+          }
+        ),
         query: 'up',
         condition: '== 0',
         severity: 'critical',

@@ -25,7 +25,6 @@ export const DEFAULT_WIDTHS: Record<string, number> = {
   monitorType: 110,
   healthStatus: 90,
   labels: 260,
-  backend: 110,
   datasource: 150,
   createdBy: 110,
   createdAt: 130,

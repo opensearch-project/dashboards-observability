@@ -1,0 +1,148 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* 3-letter prefix `alt` scopes these rules to the Alert Manager UI. */
+
+.altPageRoot {
+  display: flex;
+  flex-direction: column;
+}
+
+.altResizableContainer {
+  min-height: calc(100vh - 140px);
+}
+
+.altFiltersPanel {
+  padding-top: 8px;
+  padding-right: 8px;
+}
+
+.altFiltersInner {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.altFiltersBody {
+  margin-top: 8px;
+}
+
+.altContentPanel {
+  padding-top: 8px;
+  padding-left: 4px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.altTablePanel {
+  flex: 1;
+}
+
+.altVizRow {
+  min-width: 0;
+  flex: 0 0 auto !important;
+}
+
+.altVizItem {
+  min-width: 0;
+}
+
+.altVizPanel {
+  min-width: 0;
+  overflow: hidden;
+}
+
+/*
+ * Scope: checkbox rows inside a facet filter group. EuiCheckbox's internal
+ * <label> is `display: inline-block`, which shrink-wraps to the intrinsic
+ * width of its content — that prevents any `min-width: 0` / ellipsis logic
+ * in the label's descendants from kicking in, so long datasource names
+ * overflow the filter panel. Forcing the label to `block + overflow: hidden`
+ * gives the inner TruncatedLabel an ancestor with a bounded width so the
+ * `text-overflow: ellipsis` can apply.
+ */
+.altFacetCheckboxRow {
+  min-width: 0;
+  overflow: hidden;
+  margin-bottom: 2px;
+
+  // EuiCheckbox renders as `.euiCheckbox { display: flex }` around an input
+  // + label. The label is `inline-block` and flex children default to
+  // `min-width: auto`, so long text blows out the row width. Constrain both.
+  .euiCheckbox {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .euiCheckbox__label {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+}
+
+// TruncatedLabel — single-line ellipsis with a custom hover tooltip.
+// The wrap sets up the positioning context for the absolute tooltip child.
+.altTruncatedLabelWrap {
+  display: block;
+  min-width: 0;
+  width: 100%;
+  position: relative;
+}
+
+.altTruncatedLabel {
+  display: block;
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Custom tooltip — appears instantly on hover. Styled to match EUI's
+// dark tooltip via OUI vars, but manually positioned with `position: fixed`
+// so it escapes the filter panel's `overflow: hidden` clipping. Top/left
+// are set inline by the component from `getBoundingClientRect()`.
+.altTruncatedLabelTooltip {
+  @include euiBottomShadowSmall;
+  position: fixed;
+  z-index: 9000;
+  background: $euiColorFullShade;
+  color: $euiColorEmptyShade;
+  font-size: $euiFontSizeXS;
+  line-height: 1.4;
+  padding: $euiSizeXS $euiSizeS;
+  border-radius: $euiBorderRadius;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+// Per-row count badge after each facet option label. EuiText "subdued"
+// + "xs" handles theming; the inline-block keeps it on the same line as
+// the truncated label without expanding the row height.
+.altFacetCount {
+  display: inline-block;
+  line-height: 18px;
+}
+
+// Monitors table wrapper — keeps the table content scrollable horizontally
+// inside the resizable panel and removes the trailing header-cell border so
+// the right edge sits flush with the panel edge.
+.monitors-table-wrapper {
+  .euiTable {
+    table-layout: auto;
+    min-width: 100%;
+  }
+
+  .euiTableHeaderCell {
+    position: relative;
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+}

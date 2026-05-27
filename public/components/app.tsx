@@ -5,7 +5,7 @@
 
 import { I18nProvider } from '@osd/i18n/react';
 import { QueryManager } from 'common/query_manager';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Provider } from 'react-redux';
 import { CoreStart, MountPoint } from '../../../../src/core/public';
 import { DataSourceManagementPluginSetup } from '../../../../src/plugins/data_source_management/public';
@@ -39,6 +39,7 @@ import {
   ApplicationMapPageProps as ApmApplicationMapProps,
 } from './apm/pages/application_map';
 import { ApmConfigProvider } from './apm/config/apm_config_context';
+import { SlosPage, SlosPageProps } from './apm/pages/slos';
 
 interface ObservabilityAppDeps {
   CoreStartProp: CoreStart;
@@ -75,6 +76,12 @@ const ApmApplicationMapWithProvider = (props: ApmApplicationMapProps) => (
   </ApmConfigProvider>
 );
 
+const SlosPageWithProvider = (props: SlosPageProps) => (
+  <ApmConfigProvider dataService={props.DepsStart?.data}>
+    <SlosPage {...props} />
+  </ApmConfigProvider>
+);
+
 const pages = {
   applications: ApplicationAnalyticsHome,
   logs: EventAnalytics,
@@ -89,6 +96,7 @@ const pages = {
   alerting: AlertingHome,
   'apm-services': ApmServicesWithProvider,
   'apm-application-map': ApmApplicationMapWithProvider,
+  'apm-slo': SlosPageWithProvider,
 };
 
 export const App = ({
@@ -109,10 +117,16 @@ export const App = ({
   defaultRoute,
 }: ObservabilityAppDeps) => {
   const { chrome, http, notifications, savedObjects: _coreSavedObjects } = CoreStartProp;
-  const parentBreadcrumb = {
-    text: observabilityTitle,
-    href: `${observabilityID}#/`,
-  };
+  // Memoize so downstream effects keyed on `parentBreadcrumb` (e.g. SLO
+  // pages calling `chrome.setBreadcrumbs([parentBreadcrumb, ...])`) aren't
+  // re-fired on every render.
+  const parentBreadcrumb = useMemo(
+    () => ({
+      text: observabilityTitle,
+      href: `${observabilityID}#/`,
+    }),
+    []
+  );
 
   const ModuleComponent = pages[startPage];
 

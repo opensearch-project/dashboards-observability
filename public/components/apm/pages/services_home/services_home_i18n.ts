@@ -25,8 +25,12 @@ export const servicesI18nTexts = {
     throughput: i18n.translate('observability.apm.services.table.throughput', {
       defaultMessage: 'Throughput',
     }),
+    // Short header so the column header fits a single line at the
+    // now-percentage column width without truncating mid-word; the
+    // tooltip on the column header still describes "average failure
+    // ratio over the time period" for users who need the long form.
     failureRatio: i18n.translate('observability.apm.services.table.failureRatio', {
-      defaultMessage: 'Avg. failure ratio',
+      defaultMessage: 'Failure rate',
     }),
     actions: i18n.translate('observability.apm.services.table.actions', {
       defaultMessage: 'Correlations',

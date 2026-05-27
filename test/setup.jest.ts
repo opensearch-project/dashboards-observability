@@ -15,26 +15,19 @@ import { coreStartMock } from './__mocks__/coreMocks';
 configure({ testIdAttribute: 'data-test-subj' });
 
 window.URL.createObjectURL = () => '';
-HTMLCanvasElement.prototype.getContext = () => '' as any;
-window.IntersectionObserver = class IntersectionObserver {
-  constructor() {}
+HTMLCanvasElement.prototype.getContext = () => ('' as unknown) as RenderingContext;
+window.IntersectionObserver = (jest.fn().mockImplementation(() => ({
+  disconnect: () => null,
+  observe: () => null,
+  takeRecords: () => null,
+  unobserve: () => null,
+})) as unknown) as typeof IntersectionObserver;
 
-  disconnect() {
-    return null;
-  }
-
-  observe() {
-    return null;
-  }
-
-  takeRecords() {
-    return null;
-  }
-
-  unobserve() {
-    return null;
-  }
-} as any;
+window.ResizeObserver = (jest.fn().mockImplementation(() => ({
+  disconnect: () => null,
+  observe: () => null,
+  unobserve: () => null,
+})) as unknown) as typeof ResizeObserver;
 
 jest.mock('@elastic/eui/lib/components/form/form_row/make_id', () => () => 'random-id');
 

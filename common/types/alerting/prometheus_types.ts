@@ -14,6 +14,7 @@
  */
 
 import type { AlertingOSClient, Datasource } from './unified_types';
+import type { UnifiedAlertSummary } from './unified_types';
 
 // ============================================================================
 // Prometheus Workspace
@@ -225,9 +226,15 @@ export interface PrometheusBackend {
   // Workspace discovery
   listWorkspaces(client: AlertingOSClient, ds: Datasource): Promise<PrometheusWorkspace[]>;
 
-  /** Execute a PromQL range query and return time-series data points. */
+  /**
+   * Execute a PromQL range query and return time-series data points. The
+   * first argument is OSD's `RequestHandlerContext`, declared as `unknown`
+   * here so the common types stay browser-importable; the implementation
+   * narrows it back to the real type before invoking
+   * `data.search.search(...)`.
+   */
   queryRange?(
-    client: AlertingOSClient,
+    ctx: unknown,
     ds: Datasource,
     query: string,
     start: number,
@@ -237,11 +244,58 @@ export interface PrometheusBackend {
 
   /** Execute a PromQL instant query and return point-in-time values. */
   queryInstant?(
-    client: AlertingOSClient,
+    ctx: unknown,
     ds: Datasource,
     query: string,
     time?: number
   ): Promise<PromTimeSeriesPoint[]>;
+
+  /**
+   * Reconstruct historical alert episodes from the `ALERTS` metric's range
+   * matrix. Optional on the interface because only backends that can route
+   * PromQL range queries (today: `DirectQueryPrometheusBackend`) support it.
+   * `MultiBackendAlertService.fetchAlertsRaw` checks for the method before
+   * calling, so alternate backends can omit it and degrade cleanly to the
+   * legacy `getAlerts` path.
+   *
+   * Parameters:
+   *   - `endIsNow`: the caller (service layer) indicates whether the
+   *                 request's `endTime` was date-math relative to `now`
+   *                 (e.g. `'now'`, `'now-5m'`). When `true` AND the matrix
+   *                 is empty, the backend falls back to `/api/v1/alerts`
+   *                 (current-active only) and sets `fallback`. When `false`
+   *                 the empty matrix is treated as a legitimate "no alerts
+   *                 fired in this past window" result. Passing this
+   *                 explicitly avoids ambiguity with wall-clock-based
+   *                 heuristics.
+   *
+   * Returns:
+   *   - `alerts`:   unified alert summaries, one per firing-run episode
+   *                 (runs of `value === 1` in the ALERTS matrix).
+   *   - `fallback`: set to `'prometheus-alerts-current-only'` when the
+   *                 matrix was empty AND `endIsNow === true`, causing
+   *                 the backend to fall back to legacy `/api/v1/alerts`.
+   *   - `error`:    transport / parse error; `alerts` is empty in this case.
+   */
+  getHistoricalAlerts?(
+    /**
+     * OSD `RequestHandlerContext` (declared as `unknown` to keep the common
+     * types browser-importable). Required because the matrix scan inside
+     * the implementation routes PromQL through the data plugin's search
+     * strategy, which reads MDS / scoped clients off the request context.
+     */
+    ctx: unknown,
+    client: AlertingOSClient,
+    ds: Datasource,
+    startEpochSec: number,
+    endEpochSec: number,
+    stepSec: number,
+    endIsNow: boolean
+  ): Promise<{
+    alerts: UnifiedAlertSummary[];
+    fallback?: 'prometheus-alerts-current-only';
+    error?: string;
+  }>;
 
   // ---- Alertmanager operations (optional — only available when alertmanagerUrl is set) ----
   // Alertmanager is a global endpoint reached through any Prometheus datasource,

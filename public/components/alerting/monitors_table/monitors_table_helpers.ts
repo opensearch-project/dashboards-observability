@@ -11,7 +11,6 @@
  *
  * Contents:
  *   - `INTERNAL_LABEL_KEYS` — label keys hidden from the Labels facet UI
- *   - `BACKEND_DISPLAY` — datasource-type → display-name map
  *   - `SavedSearch` — persisted search + filter snapshot
  */
 import type { FilterState } from './monitors_table_filters';
@@ -29,11 +28,6 @@ export const INTERNAL_LABEL_KEYS = new Set([
   'trigger_id',
   'trigger_name',
 ]);
-
-export const BACKEND_DISPLAY: Record<string, string> = {
-  opensearch: 'OpenSearch',
-  prometheus: 'Prometheus',
-};
 
 // ============================================================================
 // Types

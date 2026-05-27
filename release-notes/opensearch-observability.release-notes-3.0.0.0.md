@@ -9,7 +9,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.0.0
 ### Bug Fixes
 
 - Traces - Custom Traces mode pagination reset ([#2437](https://github.com/opensearch-project/dashboards-observability/pull/2437))
-- fix(notebook): fix set_paragraphs API ([#2417](https://github.com/opensearch-project/dashboards-observability/pull/2417))
+- fix(notebook): fix set_paragraphs API ([b2c8ca3](https://github.com/opensearch-project/dashboards-observability/commit/b2c8ca31d712caf9ebb7cd553233861a81c71780))
 - [Bug] Notebooks - Action popover ([#2418](https://github.com/opensearch-project/dashboards-observability/pull/2418))
 - Fix link checker 404 and update the table of content in README ([#2413](https://github.com/opensearch-project/dashboards-observability/pull/2413))
 - Cypress - Config fix ([#2408](https://github.com/opensearch-project/dashboards-observability/pull/2408))

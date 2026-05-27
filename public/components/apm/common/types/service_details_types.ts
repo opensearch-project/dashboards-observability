@@ -115,7 +115,7 @@ export interface PromQLChartData {
 /**
  * Tab IDs for service details page
  */
-export type ServiceDetailsTabId = 'overview' | 'operations' | 'dependencies';
+export type ServiceDetailsTabId = 'overview' | 'operations' | 'dependencies' | 'slos';
 
 /**
  * URL parameters for service details page

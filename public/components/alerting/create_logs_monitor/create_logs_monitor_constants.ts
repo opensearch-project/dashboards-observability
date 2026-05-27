@@ -20,28 +20,92 @@
  *   - Chart helpers: `PREVIEW_CHART_OPTION`, `buildTriggerChartOption`
  *   - Factory: `createDefaultTrigger`
  */
+import { i18n } from '@osd/i18n';
 import { LogsMonitorType, TriggerState } from './create_logs_monitor_types';
 
 export const MONITOR_TYPE_OPTIONS = [
-  { id: 'query_level', label: 'Query level' },
-  { id: 'bucket_level', label: 'Bucket level' },
-  { id: 'document_level', label: 'Document level' },
-  { id: 'cluster_metrics', label: 'Cluster metrics' },
+  {
+    id: 'query_level',
+    label: i18n.translate(
+      'observability.alerting.createLogsMonitorConstants.monitorTypeQueryLevel',
+      {
+        defaultMessage: 'Query level',
+      }
+    ),
+  },
+  {
+    id: 'bucket_level',
+    label: i18n.translate(
+      'observability.alerting.createLogsMonitorConstants.monitorTypeBucketLevel',
+      { defaultMessage: 'Bucket level' }
+    ),
+  },
+  {
+    id: 'document_level',
+    label: i18n.translate(
+      'observability.alerting.createLogsMonitorConstants.monitorTypeDocumentLevel',
+      { defaultMessage: 'Document level' }
+    ),
+  },
+  {
+    id: 'cluster_metrics',
+    label: i18n.translate(
+      'observability.alerting.createLogsMonitorConstants.monitorTypeClusterMetrics',
+      { defaultMessage: 'Cluster metrics' }
+    ),
+  },
 ];
 
 export const MONITOR_TYPE_DESCRIPTIONS: Record<LogsMonitorType, string> = {
-  query_level: 'Run a query and check the results against a threshold.',
-  bucket_level: 'Aggregate data into buckets and check each bucket against a condition.',
-  document_level: 'Match individual documents and fire per-document alerts.',
-  cluster_metrics: 'Monitor OpenSearch cluster health, stats, and node information.',
+  query_level: i18n.translate(
+    'observability.alerting.createLogsMonitorConstants.descriptionQueryLevel',
+    { defaultMessage: 'Run a query and check the results against a threshold.' }
+  ),
+  bucket_level: i18n.translate(
+    'observability.alerting.createLogsMonitorConstants.descriptionBucketLevel',
+    { defaultMessage: 'Aggregate data into buckets and check each bucket against a condition.' }
+  ),
+  document_level: i18n.translate(
+    'observability.alerting.createLogsMonitorConstants.descriptionDocumentLevel',
+    { defaultMessage: 'Match individual documents and fire per-document alerts.' }
+  ),
+  cluster_metrics: i18n.translate(
+    'observability.alerting.createLogsMonitorConstants.descriptionClusterMetrics',
+    { defaultMessage: 'Monitor OpenSearch cluster health, stats, and node information.' }
+  ),
 };
 
 export const SEVERITY_OPTIONS = [
-  { value: 'critical', text: 'Critical' },
-  { value: 'high', text: 'High' },
-  { value: 'medium', text: 'Medium' },
-  { value: 'low', text: 'Low' },
-  { value: 'info', text: 'Info' },
+  {
+    value: 'critical',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.severityCritical', {
+      defaultMessage: 'Critical',
+    }),
+  },
+  {
+    value: 'high',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.severityHigh', {
+      defaultMessage: 'High',
+    }),
+  },
+  {
+    value: 'medium',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.severityMedium', {
+      defaultMessage: 'Medium',
+    }),
+  },
+  {
+    value: 'low',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.severityLow', {
+      defaultMessage: 'Low',
+    }),
+  },
+  {
+    value: 'info',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.severityInfo', {
+      defaultMessage: 'Info',
+    }),
+  },
 ];
 
 export const TRIGGER_TYPE_OPTIONS_BY_MONITOR: Record<
@@ -49,62 +113,251 @@ export const TRIGGER_TYPE_OPTIONS_BY_MONITOR: Record<
   Array<{ value: string; text: string }>
 > = {
   query_level: [
-    { value: 'extraction_query_response', text: 'Extraction query response' },
-    { value: 'document_count', text: 'Document count' },
+    {
+      value: 'extraction_query_response',
+      text: i18n.translate(
+        'observability.alerting.createLogsMonitorConstants.triggerTypeExtractionQueryResponse',
+        { defaultMessage: 'Extraction query response' }
+      ),
+    },
+    {
+      value: 'document_count',
+      text: i18n.translate(
+        'observability.alerting.createLogsMonitorConstants.triggerTypeDocumentCount',
+        { defaultMessage: 'Document count' }
+      ),
+    },
   ],
-  bucket_level: [{ value: 'bucket_level_trigger', text: 'Bucket level trigger' }],
-  document_level: [{ value: 'document_level_trigger', text: 'Document level trigger' }],
-  cluster_metrics: [{ value: 'extraction_query_response', text: 'Extraction query response' }],
+  bucket_level: [
+    {
+      value: 'bucket_level_trigger',
+      text: i18n.translate(
+        'observability.alerting.createLogsMonitorConstants.triggerTypeBucketLevel',
+        { defaultMessage: 'Bucket level trigger' }
+      ),
+    },
+  ],
+  document_level: [
+    {
+      value: 'document_level_trigger',
+      text: i18n.translate(
+        'observability.alerting.createLogsMonitorConstants.triggerTypeDocumentLevel',
+        { defaultMessage: 'Document level trigger' }
+      ),
+    },
+  ],
+  cluster_metrics: [
+    {
+      value: 'extraction_query_response',
+      text: i18n.translate(
+        'observability.alerting.createLogsMonitorConstants.triggerTypeExtractionQueryResponseCm',
+        { defaultMessage: 'Extraction query response' }
+      ),
+    },
+  ],
 };
 
 export const CONDITION_OPERATOR_OPTIONS = [
-  { value: 'is_greater_than', text: 'is greater than' },
-  { value: 'is_less_than', text: 'is less than' },
-  { value: 'is_equal_to', text: 'is equal to' },
-  { value: 'is_not_equal_to', text: 'is not equal to' },
-  { value: 'is_greater_or_equal', text: 'is greater than or equal' },
-  { value: 'is_less_or_equal', text: 'is less than or equal' },
+  {
+    value: 'is_greater_than',
+    text: i18n.translate(
+      'observability.alerting.createLogsMonitorConstants.operatorIsGreaterThan',
+      { defaultMessage: 'is greater than' }
+    ),
+  },
+  {
+    value: 'is_less_than',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.operatorIsLessThan', {
+      defaultMessage: 'is less than',
+    }),
+  },
+  {
+    value: 'is_equal_to',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.operatorIsEqualTo', {
+      defaultMessage: 'is equal to',
+    }),
+  },
+  {
+    value: 'is_not_equal_to',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.operatorIsNotEqualTo', {
+      defaultMessage: 'is not equal to',
+    }),
+  },
+  {
+    value: 'is_greater_or_equal',
+    text: i18n.translate(
+      'observability.alerting.createLogsMonitorConstants.operatorIsGreaterOrEqual',
+      { defaultMessage: 'is greater than or equal' }
+    ),
+  },
+  {
+    value: 'is_less_or_equal',
+    text: i18n.translate(
+      'observability.alerting.createLogsMonitorConstants.operatorIsLessOrEqual',
+      { defaultMessage: 'is less than or equal' }
+    ),
+  },
 ];
 
 export const FREQUENCY_OPTIONS = [
-  { value: 'by_interval', text: 'By interval' },
-  { value: 'daily', text: 'Daily' },
-  { value: 'weekly', text: 'Weekly' },
-  { value: 'monthly', text: 'Monthly' },
-  { value: 'custom_cron', text: 'Custom cron expression' },
+  {
+    value: 'by_interval',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.frequencyByInterval', {
+      defaultMessage: 'By interval',
+    }),
+  },
+  {
+    value: 'daily',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.frequencyDaily', {
+      defaultMessage: 'Daily',
+    }),
+  },
+  {
+    value: 'weekly',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.frequencyWeekly', {
+      defaultMessage: 'Weekly',
+    }),
+  },
+  {
+    value: 'monthly',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.frequencyMonthly', {
+      defaultMessage: 'Monthly',
+    }),
+  },
+  {
+    value: 'custom_cron',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.frequencyCustomCron', {
+      defaultMessage: 'Custom cron expression',
+    }),
+  },
 ];
 
 export const TIME_UNIT_OPTIONS = [
-  { value: 'minute(s)', text: 'minute(s)' },
-  { value: 'hour(s)', text: 'hour(s)' },
-  { value: 'day(s)', text: 'day(s)' },
+  {
+    value: 'minute(s)',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.timeUnitMinutes', {
+      defaultMessage: 'minute(s)',
+    }),
+  },
+  {
+    value: 'hour(s)',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.timeUnitHours', {
+      defaultMessage: 'hour(s)',
+    }),
+  },
+  {
+    value: 'day(s)',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.timeUnitDays', {
+      defaultMessage: 'day(s)',
+    }),
+  },
 ];
 
 export const DATASOURCE_OPTIONS = ['OpenSearch', 'OpenSearch-logs', 'OpenSearch-metrics'];
 
 export const NOTIFICATION_CHANNEL_OPTIONS = [
-  { value: 'oncall_slack', text: 'Oncall (Slack)' },
-  { value: 'pagerduty', text: 'PagerDuty' },
-  { value: 'email', text: 'Email' },
-  { value: 'webhook', text: 'Webhook' },
+  {
+    value: 'oncall_slack',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.channelOncallSlack', {
+      defaultMessage: 'Oncall (Slack)',
+    }),
+  },
+  {
+    value: 'pagerduty',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.channelPagerDuty', {
+      defaultMessage: 'PagerDuty',
+    }),
+  },
+  {
+    value: 'email',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.channelEmail', {
+      defaultMessage: 'Email',
+    }),
+  },
+  {
+    value: 'webhook',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.channelWebhook', {
+      defaultMessage: 'Webhook',
+    }),
+  },
 ];
 
 export const CLUSTER_METRICS_API_OPTIONS = [
-  { value: '_cluster/health', text: 'Cluster health' },
-  { value: '_cluster/stats', text: 'Cluster stats' },
-  { value: '_nodes/stats', text: 'Node stats' },
-  { value: '_cat/pending_tasks', text: 'CAT pending tasks' },
-  { value: '_cat/recovery', text: 'CAT recovery' },
-  { value: '_cat/snapshots', text: 'CAT snapshots' },
-  { value: '_cat/tasks', text: 'CAT tasks' },
+  {
+    value: '_cluster/health',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.apiClusterHealth', {
+      defaultMessage: 'Cluster health',
+    }),
+  },
+  {
+    value: '_cluster/stats',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.apiClusterStats', {
+      defaultMessage: 'Cluster stats',
+    }),
+  },
+  {
+    value: '_nodes/stats',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.apiNodeStats', {
+      defaultMessage: 'Node stats',
+    }),
+  },
+  {
+    value: '_cat/pending_tasks',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.apiCatPendingTasks', {
+      defaultMessage: 'CAT pending tasks',
+    }),
+  },
+  {
+    value: '_cat/recovery',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.apiCatRecovery', {
+      defaultMessage: 'CAT recovery',
+    }),
+  },
+  {
+    value: '_cat/snapshots',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.apiCatSnapshots', {
+      defaultMessage: 'CAT snapshots',
+    }),
+  },
+  {
+    value: '_cat/tasks',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.apiCatTasks', {
+      defaultMessage: 'CAT tasks',
+    }),
+  },
 ];
 
 export const BUCKET_AGGREGATION_OPTIONS = [
-  { value: 'count', text: 'Count' },
-  { value: 'sum', text: 'Sum' },
-  { value: 'avg', text: 'Average' },
-  { value: 'min', text: 'Min' },
-  { value: 'max', text: 'Max' },
+  {
+    value: 'count',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.aggregationCount', {
+      defaultMessage: 'Count',
+    }),
+  },
+  {
+    value: 'sum',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.aggregationSum', {
+      defaultMessage: 'Sum',
+    }),
+  },
+  {
+    value: 'avg',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.aggregationAvg', {
+      defaultMessage: 'Average',
+    }),
+  },
+  {
+    value: 'min',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.aggregationMin', {
+      defaultMessage: 'Min',
+    }),
+  },
+  {
+    value: 'max',
+    text: i18n.translate('observability.alerting.createLogsMonitorConstants.aggregationMax', {
+      defaultMessage: 'Max',
+    }),
+  },
 ];
 
 export const DEFAULT_ACTION_MESSAGE = `Monitor {{ctx.monitor.name}} just entered alert status. Please investigate the issue.
@@ -143,15 +396,24 @@ export const DEFAULT_QUERIES: Record<LogsMonitorType, string> = {
 
 export const SAMPLE_PPL_QUERIES = [
   {
-    label: 'Events last hour',
+    label: i18n.translate(
+      'observability.alerting.createLogsMonitorConstants.sampleQueryEventsLastHour',
+      { defaultMessage: 'Events last hour' }
+    ),
     query: `source = logs-* | where @timestamp > NOW() - INTERVAL 1 HOUR\n| stats count() as EVENTS_LAST_HOUR by span(@timestamp, 1h)`,
   },
   {
-    label: 'Error count by service',
+    label: i18n.translate(
+      'observability.alerting.createLogsMonitorConstants.sampleQueryErrorCountByService',
+      { defaultMessage: 'Error count by service' }
+    ),
     query: `source = logs-* | where level = 'ERROR'\n| stats count() as error_count by service`,
   },
   {
-    label: 'Login failures',
+    label: i18n.translate(
+      'observability.alerting.createLogsMonitorConstants.sampleQueryLoginFailures',
+      { defaultMessage: 'Login failures' }
+    ),
     query: `source = logs-* | where eventType = 'login' AND status = 'false'\n| stats count() as failed_logins by span(@timestamp, 1h)`,
   },
 ];
@@ -160,7 +422,10 @@ export function createDefaultTrigger(index: number, monitorType: LogsMonitorType
   const triggerTypeOpts = TRIGGER_TYPE_OPTIONS_BY_MONITOR[monitorType];
   return {
     id: `trigger-${Date.now()}-${index}`,
-    name: `Trigger ${index + 1}`,
+    name: i18n.translate('observability.alerting.createLogsMonitor.defaultTriggerName', {
+      defaultMessage: 'Trigger {index}',
+      values: { index: index + 1 },
+    }),
     severityLevel: 'critical',
     type: triggerTypeOpts[0]?.value || 'extraction_query_response',
     conditionOperator: 'is_greater_than',

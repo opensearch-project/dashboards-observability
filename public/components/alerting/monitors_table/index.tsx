@@ -4,12 +4,12 @@
  */
 
 /**
- * Enhanced Monitors Table — search, filter, sort, column customization,
- * saved searches, bulk delete, and JSON export.
+ * Enhanced Monitors Table — search, filter, sort, saved searches, and bulk
+ * delete.
  *
  * This file is the top-level component and state owner. Sub-files in this
  * folder:
- *   - `monitors_table_columns.tsx`  — ColumnDef, BASE_COLUMNS, cell renderers
+ *   - `monitors_table_columns.tsx`  — ColumnId, DEFAULT_VISIBLE, cell renderers
  *   - `monitors_table_filters.tsx`  — FilterState + search/filter/label helpers
  *   - `monitors_table_helpers.ts`   — constants + SavedSearch type
  *   - `resizable_columns.ts`        — DEFAULT_WIDTHS + `useResizableColumns`
@@ -20,14 +20,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiResizableContainer } from '@elastic/eui';
 import { Datasource, UnifiedRuleSummary } from '../../../../common/types/alerting';
-import { serializeMonitors } from '../../../../common/services/alerting/serializer';
 import { useFacetCollapse } from '../facet_filter_panel';
-import {
-  BASE_COLUMNS,
-  buildTableColumns,
-  ColumnId,
-  DEFAULT_VISIBLE,
-} from './monitors_table_columns';
+import { buildTableColumns, DEFAULT_VISIBLE } from './monitors_table_columns';
 import {
   buildSuggestions,
   collectLabelKeys,
@@ -41,6 +35,7 @@ import { SavedSearch } from './monitors_table_helpers';
 import { DEFAULT_WIDTHS, useResizableColumns } from './resizable_columns';
 import { MonitorsFiltersPanel } from './monitors_filters_panel';
 import { MonitorsMainPanel } from './monitors_main_panel';
+import '../alerting.scss';
 
 interface MonitorsTableProps {
   rules: UnifiedRuleSummary[];
@@ -48,8 +43,7 @@ interface MonitorsTableProps {
   loading: boolean;
   onDelete: (ids: string[]) => void;
   onClone?: (monitor: UnifiedRuleSummary) => void;
-  onImport?: (configs: Array<Record<string, unknown>>) => void;
-  onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics' | 'slo') => void;
+  onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics') => void;
   /** Currently selected datasource IDs */
   selectedDsIds: string[];
   /** Callback when datasource selection changes */
@@ -58,6 +52,12 @@ interface MonitorsTableProps {
   maxDatasources: number;
   /** Callback fired when user tries to exceed `maxDatasources`. */
   onDatasourceCapReached: () => void;
+  /**
+   * Optional pre-fill for the search box. Used by deep links from the SLO
+   * detail page so users can jump straight to a specific recording rule
+   * without typing it. Empty / undefined leaves the box blank.
+   */
+  initialSearchQuery?: string;
 }
 
 // ============================================================================
@@ -70,20 +70,18 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   loading,
   onDelete,
   onClone,
-  onImport,
   onCreateMonitor,
   selectedDsIds,
   onDatasourceChange,
   maxDatasources,
   onDatasourceCapReached,
+  initialSearchQuery,
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery ?? '');
   const [filters, setFilters] = useState<FilterState>(emptyFilters());
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [visibleColumns, setVisibleColumns] = useState<Set<ColumnId>>(new Set(DEFAULT_VISIBLE));
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showColumnPicker, setShowColumnPicker] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
@@ -94,6 +92,9 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   const [saveSearchName, setSaveSearchName] = useState('');
   const searchRef = useRef<HTMLDivElement>(null);
   const tableWrapperRef = useRef<HTMLDivElement>(null);
+
+  // Column-customization UI was removed — render the default visible set.
+  const visibleColumns = useMemo(() => new Set(DEFAULT_VISIBLE), []);
 
   const rowProps = useCallback(
     (item: UnifiedRuleSummary) => ({
@@ -115,15 +116,6 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
 
   const allSuggestions = useMemo(() => buildSuggestions(rules), [rules]);
   const labelKeys = useMemo(() => collectLabelKeys(rules), [rules]);
-
-  // Build available columns including dynamic label columns
-  const allColumns = useMemo(() => {
-    const cols = [...BASE_COLUMNS];
-    for (const key of labelKeys) {
-      cols.push({ id: `label:${key}`, label: `Label: ${key}`, isLabelColumn: true });
-    }
-    return cols;
-  }, [labelKeys]);
 
   // Update suggestions as user types
   useEffect(() => {
@@ -161,7 +153,6 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     count += filters.healthStatus.length;
     count += filters.createdBy.length;
     count += filters.destinations.length;
-    count += filters.backend.length;
     for (const vals of Object.values(filters.labels)) count += vals.length;
     return count;
   }, [filters]);
@@ -188,42 +179,6 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   };
   const deleteSavedSearch = (id: string) => {
     setSavedSearches((prev) => prev.filter((s) => s.id !== id));
-  };
-
-  // Export
-  const exportJson = () => {
-    const configs = serializeMonitors(filtered);
-    const blob = new Blob([JSON.stringify(configs, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'monitors-export.json';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  // Import
-  const handleImportFile = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = (e: Event) => {
-      const file = (e.target as HTMLInputElement)?.files?.[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        try {
-          const data = JSON.parse(ev.target?.result as string);
-          const configs = Array.isArray(data) ? data : data.monitors;
-          if (onImport && Array.isArray(configs))
-            onImport(configs as Array<Record<string, unknown>>);
-        } catch (_err) {
-          alert('Invalid JSON file');
-        }
-      };
-      reader.readAsText(file);
-    };
-    input.click();
   };
 
   // Bulk delete
@@ -261,9 +216,6 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   const uniqueTypes = useMemo(() => collectUniqueValues(rules, (r) => r.monitorType), [rules]);
   const uniqueHealth = useMemo(() => collectUniqueValues(rules, (r) => r.healthStatus), [rules]);
   const uniqueCreators = useMemo(() => collectUniqueValues(rules, (r) => r.createdBy), [rules]);
-  const uniqueBackends = useMemo(() => collectUniqueValues(rules, (r) => r.datasourceType), [
-    rules,
-  ]);
 
   const updateFilter = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -307,7 +259,6 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
       severity: {},
       monitorType: {},
       healthStatus: {},
-      backend: {},
       createdBy: {},
     };
     for (const r of searchMatched) {
@@ -315,7 +266,6 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
       counts.severity[r.severity] = (counts.severity[r.severity] || 0) + 1;
       counts.monitorType[r.monitorType] = (counts.monitorType[r.monitorType] || 0) + 1;
       counts.healthStatus[r.healthStatus] = (counts.healthStatus[r.healthStatus] || 0) + 1;
-      counts.backend[r.datasourceType] = (counts.backend[r.datasourceType] || 0) + 1;
       counts.createdBy[r.createdBy] = (counts.createdBy[r.createdBy] || 0) + 1;
     }
     // Label counts
@@ -334,18 +284,18 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   const { toggleFacetCollapse, isCollapsed: isFacetCollapsed } = useFacetCollapse();
 
   return (
-    <EuiResizableContainer style={{ flex: 1, minHeight: 0 }}>
-      {(EuiResizablePanel, EuiResizableButton) => {
+    <EuiResizableContainer className="altResizableContainer">
+      {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
         return (
           <>
             <EuiResizablePanel
               id="filters-panel"
-              initialSize={20}
-              minSize="200px"
-              mode={['collapsible', { position: 'top' }]}
-              onToggleCollapsed={() => {}}
+              initialSize={15}
+              minSize="10%"
+              mode={['custom', { position: 'top' }]}
               paddingSize="none"
-              style={{ overflow: 'auto', paddingRight: '4px' }}
+              scrollable={false}
+              className="altFiltersPanel"
             >
               <MonitorsFiltersPanel
                 rules={rules}
@@ -365,11 +315,11 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 uniqueSeverities={uniqueSeverities}
                 uniqueTypes={uniqueTypes}
                 uniqueHealth={uniqueHealth}
-                uniqueBackends={uniqueBackends}
                 uniqueCreators={uniqueCreators}
                 facetCounts={facetCounts}
                 isFacetCollapsed={isFacetCollapsed}
                 toggleFacetCollapse={toggleFacetCollapse}
+                onToggleOpen={() => togglePanel?.('filters-panel', { direction: 'left' })}
                 savedSearches={savedSearches}
                 setSavedSearches={setSavedSearches}
                 loadSavedSearch={loadSavedSearch}
@@ -386,11 +336,11 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
             <EuiResizableButton />
 
             <EuiResizablePanel
-              initialSize={80}
+              initialSize={85}
               minSize="400px"
-              mode="main"
               paddingSize="none"
-              style={{ paddingLeft: '4px', overflow: 'auto' }}
+              scrollable={false}
+              className="altContentPanel"
             >
               <MonitorsMainPanel
                 rules={rules}
@@ -412,17 +362,9 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 clearAllFilters={clearAllFilters}
                 selectedIds={selectedIds}
                 setSelectedIds={setSelectedIds}
-                allColumns={allColumns}
-                visibleColumns={visibleColumns}
-                setVisibleColumns={setVisibleColumns}
-                showColumnPicker={showColumnPicker}
-                setShowColumnPicker={setShowColumnPicker}
                 onCreateMonitor={onCreateMonitor}
                 showCreatePopover={showCreatePopover}
                 setShowCreatePopover={setShowCreatePopover}
-                exportJson={exportJson}
-                onImport={onImport}
-                handleImportFile={handleImportFile}
                 showDeleteConfirm={showDeleteConfirm}
                 setShowDeleteConfirm={setShowDeleteConfirm}
                 handleBulkDelete={handleBulkDelete}

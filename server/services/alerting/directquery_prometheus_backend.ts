@@ -4,8 +4,9 @@
  */
 
 /**
- * Prometheus backend that routes all API calls through OpenSearch Direct Query
- * resource APIs instead of connecting to Prometheus directly.
+ * Prometheus backend that routes resource-style API calls through OpenSearch
+ * Direct Query resource APIs and PromQL execution through the data plugin's
+ * search service (`strategy: 'PROMQL'`, registered by query-enhancements).
  *
  * Each Datasource object carries a `directQueryName` field that identifies which
  * Prometheus datasource (registered in the OpenSearch SQL plugin) to target.
@@ -13,14 +14,21 @@
  *   GET /_plugins/_query/_datasources
  * and seeds one Datasource per registered PROMETHEUS connector.
  *
- * API calls are routed through the OSD scoped cluster client (auth, TLS handled
- * automatically by OSD):
+ * Resource calls (rules / alerts / metadata / Alertmanager) still go through
+ * the OSD scoped cluster client because the search strategy is query-only:
  *   GET/POST/DELETE /_plugins/_directquery/_resources/{directQueryName}/...
+ *
+ * PromQL evaluation (`queryInstant`, `queryRange`, `queryRangeMatrix`, and the
+ * matrix used by `getHistoricalAlerts`) routes through `data.search.search`
+ * with `strategy: SEARCH_STRATEGY.PROMQL`. Callers thread a
+ * `RequestHandlerContext` down so the search strategy can read the same
+ * MDS-aware client the rest of OSD uses.
  *
  * Reference (OpenSearch SQL plugin):
  *   - RestDirectQueryResourcesManagementAction.java
  *   - PrometheusQueryHandler.java / PrometheusClient.java
  */
+import type { RequestHandlerContext } from '../../../../../src/core/server';
 import {
   AlertingOSClient,
   Datasource,
@@ -46,7 +54,16 @@ import {
   PromAlertsApiResponse,
   DatasourceDefinition,
   PromTimeSeriesPoint,
+  UnifiedAlertSummary,
 } from '../../../common/types/alerting';
+import { hashRuleIdentity, promAlertToUnified, promEpisodeToUnified } from './alert_utils';
+import type { PromAlertEpisode } from './alert_utils';
+import { runPromQLInstant, runPromQLRange } from './promql_search';
+
+export interface PromSeriesMatrix {
+  metric: Record<string, string>;
+  values: PromTimeSeriesPoint[];
+}
 
 export class DirectQueryPrometheusBackend implements PrometheusBackend, PrometheusMetadataProvider {
   readonly type = 'prometheus' as const;
@@ -542,91 +559,307 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
   }
 
   /**
-   * Execute a PromQL range query via the DirectQuery query execution API.
+   * Execute a PromQL range query through the data plugin's search service
+   * (`strategy: 'PROMQL'`, registered by query-enhancements). Convergence
+   * note: the strategy ultimately POSTs to
+   * `/_plugins/_directquery/_query/{dqName}` via the SQL plugin, so the
+   * wire result is unchanged — we get DataFrame normalization, multi-query
+   * splitting, and telemetry for free, and stay on the canonical OSD
+   * abstraction the reviewer asked for.
    *
-   * Uses: POST /_plugins/_directquery/_query/{dataSources}
-   * This is the query EXECUTION endpoint (separate from the resource proxy).
-   * The SQL plugin's PrometheusQueryHandler routes to PrometheusClient.queryRange()
-   * which calls Prometheus /api/v1/query_range.
-   *
-   * Request body: { datasource, query, language: "PROMQL", options: { queryType: "range", start, end, step } }
-   * Response: Prometheus matrix result with time-series values.
+   * `requestTimeoutMs` is preserved as a hint: it's mapped to the strategy
+   * `timeout` (seconds) field, with the local `withTimeout` race in
+   * probe-sli still acting as the safety net for slow upstreams.
    */
   async queryRange(
-    client: AlertingOSClient,
+    ctx: RequestHandlerContext,
     ds: Datasource,
     query: string,
     start: number,
     end: number,
-    step: number
+    step: number,
+    opts: { requestTimeoutMs?: number } = {}
   ): Promise<PromTimeSeriesPoint[]> {
     try {
       const dqName = this.resolveDqName(ds);
-      const path = `/_plugins/_directquery/_query/${encodeURIComponent(dqName)}`;
-
-      this.logger.debug(`DirectQuery range query: ${query.substring(0, 80)}...`);
-
-      const resp = await client.transport.request({
-        method: 'POST',
-        path,
-        body: {
-          datasource: dqName,
-          query,
-          language: 'PROMQL',
-          options: {
-            queryType: 'range',
-            start: start.toString(),
-            end: end.toString(),
-            step: step.toString(),
-          },
-        },
+      this.logger.debug(`PromQL range query (strategy=PROMQL): ${query.substring(0, 80)}...`);
+      const envelope = await runPromQLRange(ctx, {
+        dqName,
+        query,
+        startSec: start,
+        endSec: end,
+        stepSec: step,
+        dataSourceId: ds.mdsId,
+        timeoutSeconds: timeoutSeconds(opts.requestTimeoutMs),
       });
-
-      return this.parseRangeQueryResponse(resp.body as Record<string, unknown>);
+      return this.parseRangeQueryResponse((envelope as unknown) as Record<string, unknown>);
     } catch (err) {
-      this.logger.warn(`Failed to execute DirectQuery range query: ${err}`);
+      this.logger.warn(`Failed to execute PromQL range query: ${err}`);
       return [];
     }
   }
 
-  /**
-   * Execute a PromQL instant query via the DirectQuery query execution API.
-   *
-   * Uses: POST /_plugins/_directquery/_query/{dataSources}
-   * Request body: { datasource, query, language: "PROMQL", options: { queryType: "instant", time } }
-   * Response: Prometheus vector result with point-in-time values.
-   */
-  async queryInstant(
-    client: AlertingOSClient,
+  // Multi-series variant of `queryRange`. Kept separate because `queryRange`
+  // flattens to a single series and swallows errors to `[]` — behavior that
+  // would silently hide a bad query in the episode-reconstruction path.
+  async queryRangeMatrix(
+    ctx: RequestHandlerContext,
     ds: Datasource,
     query: string,
-    time?: number
+    startSec: number,
+    endSec: number,
+    stepSec: number
+  ): Promise<PromSeriesMatrix[]> {
+    const dqName = this.resolveDqName(ds);
+    this.logger.debug(`PromQL range matrix query (strategy=PROMQL): ${query.substring(0, 80)}...`);
+
+    const envelope = await runPromQLRange(ctx, {
+      dqName,
+      query,
+      startSec,
+      endSec,
+      stepSec,
+      dataSourceId: ds.mdsId,
+    });
+
+    const promResult = this.extractPrometheusResult(
+      (envelope as unknown) as Record<string, unknown>
+    );
+    if (!promResult) return [];
+
+    const rawSeries = (promResult.result ?? []) as Array<{
+      metric?: Record<string, string>;
+      values?: unknown[][];
+    }>;
+
+    // Defensive cap on parsed sample count per series. `computeStep` in the
+    // shared helper should keep steps coarse enough that a well-behaved
+    // Prometheus response stays well under this, but an exporter returning
+    // a fine step on a multi-day range could otherwise allocate unbounded
+    // memory here. ~50k points per series accommodates a 30-day range at a
+    // 60s step with headroom; anything larger is almost certainly misuse.
+    const MAX_POINTS_PER_SERIES = 50_000;
+
+    const series: PromSeriesMatrix[] = [];
+    for (const s of rawSeries) {
+      const metric = s.metric || {};
+      const values: PromTimeSeriesPoint[] = [];
+      const rawValues = s.values || [];
+      for (const pair of rawValues) {
+        if (values.length >= MAX_POINTS_PER_SERIES) {
+          this.logger.warn(
+            `queryRangeMatrix: series truncated at ${MAX_POINTS_PER_SERIES} points for query "${query.substring(
+              0,
+              80
+            )}..."`
+          );
+          break;
+        }
+        if (Array.isArray(pair) && pair.length >= 2) {
+          const ts = Number(pair[0]);
+          const numVal = parseFloat(String(pair[1]));
+          if (!isNaN(ts) && !isNaN(numVal)) {
+            values.push({ timestamp: ts * 1000, value: numVal });
+          }
+        }
+      }
+      series.push({ metric, values });
+    }
+
+    return series;
+  }
+
+  // Unified alert list for a Prometheus datasource over a window. Merges
+  // historical episodes reconstructed from `ALERTS{}` matrix samples with
+  // currently-firing alerts from `/api/v1/alerts`. See the PR description
+  // for the full algorithm; the inline notes below cover only the
+  // non-obvious invariants (edge tolerance, dedupe key, error isolation).
+  async getHistoricalAlerts(
+    ctx: RequestHandlerContext,
+    client: AlertingOSClient,
+    ds: Datasource,
+    startEpochSec: number,
+    endEpochSec: number,
+    stepSec: number,
+    endIsNow: boolean
+  ): Promise<{
+    alerts: UnifiedAlertSummary[];
+    fallback?: 'prometheus-alerts-current-only';
+    error?: string;
+  }> {
+    // Filter `alertstate="firing"` at the PromQL level. Pending samples
+    // flap with the query step (fine step on a short window catches them,
+    // coarse step on a long window misses them), so leaving them in
+    // produces row counts that change just from picker changes. Live
+    // `/api/v1/alerts` is already firing-or-inactive on most Prom versions,
+    // so this aligns the two sources.
+    const matrixPromise = this.queryRangeMatrix(
+      ctx,
+      ds,
+      'ALERTS{alertstate="firing"}',
+      startEpochSec,
+      endEpochSec,
+      stepSec
+    );
+    const liveSettled: Promise<
+      { ok: true; alerts: PromAlert[] } | { ok: false; error: string }
+    > = endIsNow
+      ? this.getAlerts(client, ds).then(
+          (alerts) => ({ ok: true, alerts } as const),
+          (err) => ({ ok: false, error: String(err) } as const)
+        )
+      : Promise.resolve({ ok: true, alerts: [] as PromAlert[] } as const);
+
+    let series: PromSeriesMatrix[];
+    try {
+      series = await matrixPromise;
+    } catch (err) {
+      // Matrix failed — still surface live alerts when window ends at now,
+      // so a transient Cortex error doesn't blank the UI for what's firing
+      // RIGHT NOW.
+      const live = await liveSettled;
+      if (!live.ok || live.alerts.length === 0) {
+        return { alerts: [], error: String(err) };
+      }
+      return {
+        alerts: live.alerts.map((a) => promAlertToUnified(a, ds.id)),
+        fallback: 'prometheus-alerts-current-only',
+        error: String(err),
+      };
+    }
+
+    const windowStartMs = startEpochSec * 1000;
+    const windowEndMs = endEpochSec * 1000;
+    const stepMs = stepSec * 1000;
+    // 1.5× step tolerance for "this run was already firing at the edge".
+    // Tighter than 1× over-clamps (every series looks pre-window because
+    // its first sample is at index 0); looser than 2× under-clamps
+    // (genuine pre-window alerts get reported as starting inside).
+    const edgeToleranceMs = Math.round(stepMs * 1.5);
+    const episodes: PromAlertEpisode[] = [];
+
+    for (const s of series) {
+      const values = s.values;
+      if (values.length === 0) continue;
+
+      let runStart: number | null = null;
+      let lastSampleTsInRun: number | null = null;
+      let truncatedStart = false;
+
+      const closeRun = (endTsMs: number, stillActive: boolean) => {
+        if (runStart === null) return;
+        episodes.push({
+          labels: { ...s.metric },
+          startMs: runStart,
+          endMs: endTsMs,
+          truncatedStart: truncatedStart ? true : undefined,
+          stillActiveAtRangeEnd: stillActive ? true : undefined,
+        });
+        runStart = null;
+        lastSampleTsInRun = null;
+        truncatedStart = false;
+      };
+
+      for (let i = 0; i < values.length; i++) {
+        const point = values[i];
+        const isFiring = point.value === 1;
+        if (isFiring) {
+          if (runStart === null) {
+            if (i === 0 && point.timestamp - windowStartMs <= edgeToleranceMs) {
+              runStart = windowStartMs;
+              truncatedStart = true;
+            } else {
+              runStart = point.timestamp;
+            }
+          }
+          lastSampleTsInRun = point.timestamp;
+        } else if (runStart !== null) {
+          closeRun(lastSampleTsInRun ?? runStart, false);
+        }
+      }
+      if (runStart !== null && lastSampleTsInRun !== null) {
+        const stillActive = windowEndMs - lastSampleTsInRun <= edgeToleranceMs;
+        closeRun(stillActive ? windowEndMs : lastSampleTsInRun, stillActive);
+      }
+    }
+
+    const historicalAlerts = episodes.map((ep) => promEpisodeToUnified(ep, ds.id));
+
+    // Dedupe live alerts against historical episodes still active at the
+    // window's right edge — keyed by rule-identity hash (labels minus
+    // `__name__`/`alertstate`, which differ between the two sources).
+    const activeEpisodeHashes = new Set<string>();
+    for (const ep of episodes) {
+      if (ep.stillActiveAtRangeEnd) {
+        activeEpisodeHashes.add(hashRuleIdentity(ep.labels));
+      }
+    }
+
+    const live = await liveSettled;
+    const liveAlerts = live.ok ? live.alerts : [];
+    const liveError = live.ok ? undefined : live.error;
+
+    const liveAdditions: UnifiedAlertSummary[] = [];
+    for (const la of liveAlerts) {
+      // Pending alerts come straight from the live `/api/v1/alerts` endpoint
+      // (only available when the window ends at `now`), so they can't flap
+      // with the matrix step. Include them so the Alerts tab matches the
+      // Rules tab's pending count for currently-pending rules. Historical
+      // pending samples stay filtered at the matrix-query level — point-in-
+      // time pending isn't reliably reconstructible from a coarse step.
+      if (!activeEpisodeHashes.has(hashRuleIdentity(la.labels))) {
+        liveAdditions.push(promAlertToUnified(la, ds.id));
+      }
+    }
+
+    // Flag the "current alerts only" banner when the matrix returned
+    // nothing but live alerts exist — tells the UI that coverage is
+    // limited to "now" rather than the picked window.
+    const fallback =
+      historicalAlerts.length === 0 && liveAdditions.length > 0
+        ? ('prometheus-alerts-current-only' as const)
+        : undefined;
+
+    return {
+      alerts: [...historicalAlerts, ...liveAdditions],
+      ...(fallback ? { fallback } : {}),
+      // Only surface the live-side error when it's the only signal the
+      // user gets — otherwise it's noise on top of a successful matrix.
+      ...(liveError && historicalAlerts.length === 0 && liveAdditions.length === 0
+        ? { error: liveError }
+        : {}),
+    };
+  }
+
+  /**
+   * Execute a PromQL instant query through the data plugin's search service
+   * (`strategy: 'PROMQL'`). The `time` argument is forwarded as the
+   * strategy's `options.time` (epoch seconds, required by the SQL plugin's
+   * PrometheusQueryHandler — it rejects instant requests without one).
+   * When `time` is omitted we default to "now"; the strategy itself will
+   * reject the request if both are missing, so passing `now` here matches
+   * the legacy backend semantics that callers already rely on.
+   */
+  async queryInstant(
+    ctx: RequestHandlerContext,
+    ds: Datasource,
+    query: string,
+    time?: number,
+    opts: { requestTimeoutMs?: number } = {}
   ): Promise<PromTimeSeriesPoint[]> {
     try {
       const dqName = this.resolveDqName(ds);
-      const path = `/_plugins/_directquery/_query/${encodeURIComponent(dqName)}`;
-
-      this.logger.debug(`DirectQuery instant query: ${query.substring(0, 80)}...`);
-
-      const options: Record<string, string> = { queryType: 'instant' };
-      if (time !== undefined) {
-        options.time = time.toString();
-      }
-
-      const resp = await client.transport.request({
-        method: 'POST',
-        path,
-        body: {
-          datasource: dqName,
-          query,
-          language: 'PROMQL',
-          options,
-        },
+      this.logger.debug(`PromQL instant query (strategy=PROMQL): ${query.substring(0, 80)}...`);
+      const envelope = await runPromQLInstant(ctx, {
+        dqName,
+        query,
+        timeSec: time ?? Math.floor(Date.now() / 1000),
+        dataSourceId: ds.mdsId,
+        timeoutSeconds: timeoutSeconds(opts.requestTimeoutMs),
       });
-
-      return this.parseInstantQueryResponse(resp.body as Record<string, unknown>);
+      return this.parseInstantQueryResponse((envelope as unknown) as Record<string, unknown>);
     } catch (err) {
-      this.logger.warn(`Failed to execute DirectQuery instant query: ${err}`);
+      this.logger.warn(`Failed to execute PromQL instant query: ${err}`);
       return [];
     }
   }
@@ -755,4 +988,12 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
       value: a.value != null ? String(a.value) : '',
     };
   }
+}
+
+// Convert a millisecond budget to the seconds-granularity hint the search
+// strategy plumbs as its `timeout` field. Round up so we never hand the
+// upstream a budget shorter than the caller asked for.
+function timeoutSeconds(ms: number | undefined): number | undefined {
+  if (ms === undefined || !Number.isFinite(ms) || ms <= 0) return undefined;
+  return Math.ceil(ms / 1000);
 }

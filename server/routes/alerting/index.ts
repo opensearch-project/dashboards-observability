@@ -18,6 +18,7 @@
 import { schema } from '@osd/config-schema';
 import { IRouter, RequestHandlerContext, SavedObject } from '../../../../../src/core/server';
 import type { AlertingOSClient, Datasource, Logger } from '../../../common/types/alerting';
+import { validateDateMath, validateTimeRangeQuery } from '../../../common/services/alerting';
 import {
   HttpOpenSearchBackend,
   MultiBackendAlertService,
@@ -193,7 +194,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
 
   /**
    * Construct the per-request stateful alerting services bound to this
-   * request's scoped SavedObjects client. Replaces the pre-Phase-5 mutable
+   * request's scoped SavedObjects client. Replaces an earlier mutable
    * `setDatasourceService` singleton pattern, which leaked SavedObjects
    * clients across concurrent requests at every `await` boundary.
    *
@@ -234,6 +235,37 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
   }
 
+  /**
+   * Shared partial merged into the query schemas of all three alerts routes
+   * (`/api/alerting/unified/alerts`, `/api/alerting/opensearch/{dsId}/alerts`,
+   * `/api/alerting/prometheus/{dsId}/alerts`). Both fields are optional; when
+   * omitted, the handler falls through to legacy "no range" behavior on the
+   * downstream service. Values are validated by `validateDateMath` so
+   * malformed input is rejected with a 400 before it reaches the handler.
+   */
+  const timeRangeQuery = {
+    startTime: schema.maybe(
+      schema.string({
+        validate: (v: string) => (validateDateMath(v) ? undefined : `invalid date-math: ${v}`),
+      })
+    ),
+    endTime: schema.maybe(
+      schema.string({
+        validate: (v: string) => (validateDateMath(v) ? undefined : `invalid date-math: ${v}`),
+      })
+    ),
+  };
+
+  /**
+   * Cross-field validator options for any `schema.object(...)` that carries
+   * the `timeRangeQuery` pair. Rejects one-sided ranges and inverted ranges
+   * (`endTime < startTime`) with a 400 before the handler sees them. See
+   * `validateTimeRangeQuery` for the exact rules and rationale.
+   */
+  const timeRangeObjectOptions = {
+    validate: (value: { startTime?: string; endTime?: string }) => validateTimeRangeQuery(value),
+  };
+
   // Mutation routes (create/update/delete monitor + acknowledge alert) live
   // in `./mutations/` — register them via the dedicated registrar so the split
   // stays clean.
@@ -246,11 +278,15 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     {
       path: '/api/alerting/unified/alerts',
       validate: {
-        query: schema.object({
-          dsIds: schema.maybe(schema.string()),
-          timeout: schema.maybe(schema.string()),
-          maxResults: schema.maybe(schema.string()),
-        }),
+        query: schema.object(
+          {
+            dsIds: schema.maybe(schema.string()),
+            timeout: schema.maybe(schema.string()),
+            maxResults: schema.maybe(schema.string()),
+            ...timeRangeQuery,
+          },
+          timeRangeObjectOptions
+        ),
       },
     },
     async (ctx, req, res) => {
@@ -262,7 +298,10 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
           dsIds: req.query.dsIds,
           timeout: req.query.timeout,
           maxResults: req.query.maxResults,
-        }
+          startTime: req.query.startTime,
+          endTime: req.query.endTime,
+        },
+        ctx
       );
       return res.ok({ body: result.body });
     }
@@ -336,14 +375,18 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
   router.get(
     {
       path: '/api/alerting/opensearch/{dsId}/alerts',
-      validate: { params: schema.object({ dsId: alertingIdSchema }) },
+      validate: {
+        params: schema.object({ dsId: alertingIdSchema }),
+        query: schema.object(timeRangeQuery, timeRangeObjectOptions),
+      },
     },
     async (ctx, req, res) => {
       const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
       const result = await handleGetOSAlerts(
         alertService,
         await getAlertingClient(ctx, req.params.dsId),
-        req.params.dsId
+        req.params.dsId,
+        { startTime: req.query.startTime, endTime: req.query.endTime }
       );
       return sendResult(res, result);
     }
@@ -371,14 +414,27 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
   router.get(
     {
       path: '/api/alerting/prometheus/{dsId}/alerts',
-      validate: { params: schema.object({ dsId: alertingIdSchema }) },
+      validate: {
+        params: schema.object({ dsId: alertingIdSchema }),
+        // NOTE: `timeRangeQuery` is validated here for forward-compatibility
+        // and schema-shape uniformity with the other two alerts routes, but
+        // it is a **no-op** on this endpoint. This route returns the raw
+        // `PromAlert[]` shape (current-active alerts only); historical
+        // episode reconstruction emits `UnifiedAlertSummary[]` (a different
+        // shape) and is surfaced exclusively through
+        // `/api/alerting/unified/alerts` via `MultiBackendAlertService.fetchAlertsRaw`.
+        // A future revision that reshapes this endpoint to return unified
+        // summaries can start honoring the range without a schema change.
+        query: schema.object(timeRangeQuery, timeRangeObjectOptions),
+      },
     },
     async (ctx, req, res) => {
       const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
       const result = await handleGetPromAlerts(
         alertService,
         await getAlertingClient(ctx, req.params.dsId),
-        req.params.dsId
+        req.params.dsId,
+        { startTime: req.query.startTime, endTime: req.query.endTime }
       );
       return sendResult(res, result);
     }
@@ -398,7 +454,8 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
         alertService,
         await getAlertingClient(ctx, req.params.dsId),
         req.params.dsId,
-        req.params.ruleId
+        req.params.ruleId,
+        ctx
       );
       return sendResult(res, result);
     }

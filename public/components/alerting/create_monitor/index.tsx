@@ -37,6 +37,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { Datasource, UnifiedAlertSeverity } from '../../../../common/types/alerting';
 import {
   MonitorFormState as ValidatorFormState,
@@ -176,14 +177,33 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
     } else {
       const errors: Record<string, string> = {};
       if (osForm.monitorType === 'ppl_monitor') {
-        if (!osForm.query.trim()) errors.query = 'PPL query is required';
+        if (!osForm.query.trim())
+          errors.query = i18n.translate('observability.alerting.createMonitor.pplQueryRequired', {
+            defaultMessage: 'PPL query is required',
+          });
       } else if (osForm.monitorType === 'cluster_metrics_monitor') {
         if (!osForm.clusterMetricsApiType.trim())
-          errors.clusterMetricsApiType = 'API type is required';
+          errors.clusterMetricsApiType = i18n.translate(
+            'observability.alerting.createMonitor.apiTypeRequired',
+            {
+              defaultMessage: 'API type is required',
+            }
+          );
       } else {
-        if (!osForm.indices.trim()) errors.indices = 'At least one index pattern is required';
+        if (!osForm.indices.trim())
+          errors.indices = i18n.translate(
+            'observability.alerting.createMonitor.indexPatternRequired',
+            {
+              defaultMessage: 'At least one index pattern is required',
+            }
+          );
         if (!osForm.triggerCondition.trim())
-          errors.triggerCondition = 'Trigger condition is required';
+          errors.triggerCondition = i18n.translate(
+            'observability.alerting.createMonitor.triggerConditionRequired',
+            {
+              defaultMessage: 'Trigger condition is required',
+            }
+          );
       }
       if (Object.keys(errors).length > 0) {
         setValidationErrors(errors);
@@ -231,14 +251,24 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="createMonitorFlyoutTitle">
-            Create {backendType === 'prometheus' ? 'Metrics' : 'Logs'} Monitor
+            {backendType === 'prometheus'
+              ? i18n.translate('observability.alerting.createMonitor.titleMetrics', {
+                  defaultMessage: 'Create Metrics Monitor',
+                })
+              : i18n.translate('observability.alerting.createMonitor.titleLogs', {
+                  defaultMessage: 'Create Logs Monitor',
+                })}
           </h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="xs" color="subdued">
           {backendType === 'prometheus'
-            ? 'PromQL-based alerting rule'
-            : 'Query-level monitor with triggers'}
+            ? i18n.translate('observability.alerting.createMonitor.subtitlePromql', {
+                defaultMessage: 'PromQL-based alerting rule',
+              })
+            : i18n.translate('observability.alerting.createMonitor.subtitleQueryLevel', {
+                defaultMessage: 'Query-level monitor with triggers',
+              })}
         </EuiText>
       </EuiFlyoutHeader>
 
@@ -259,7 +289,11 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
               <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs">
-                    <strong>Creation method</strong>
+                    <strong>
+                      {i18n.translate('observability.alerting.createMonitor.creationMethodLabel', {
+                        defaultMessage: 'Creation method',
+                      })}
+                    </strong>
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -268,19 +302,29 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
                       <EuiBadge
                         color={creationMode === 'manual' ? 'primary' : 'hollow'}
                         onClick={() => setCreationMode('manual')}
-                        onClickAriaLabel="Manual creation"
+                        onClickAriaLabel={i18n.translate(
+                          'observability.alerting.createMonitor.manualCreationAriaLabel',
+                          { defaultMessage: 'Manual creation' }
+                        )}
                       >
-                        Manual
+                        {i18n.translate('observability.alerting.createMonitor.manualBadge', {
+                          defaultMessage: 'Manual',
+                        })}
                       </EuiBadge>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiBadge
                         color={creationMode === 'ai' ? 'secondary' : 'hollow'}
                         onClick={() => setCreationMode('ai')}
-                        onClickAriaLabel="Create from template"
+                        onClickAriaLabel={i18n.translate(
+                          'observability.alerting.createMonitor.fromTemplateAriaLabel',
+                          { defaultMessage: 'Create from template' }
+                        )}
                         iconType="sparkles"
                       >
-                        From template
+                        {i18n.translate('observability.alerting.createMonitor.fromTemplateBadge', {
+                          defaultMessage: 'From template',
+                        })}
                       </EuiBadge>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -293,26 +337,43 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
 
         {/* Monitor Name */}
         <EuiFormRow
-          label="Monitor Name"
+          label={i18n.translate('observability.alerting.createMonitor.monitorNameLabel', {
+            defaultMessage: 'Monitor Name',
+          })}
           fullWidth
           isInvalid={hasSubmitted && (!!validationErrors.name || activeForm.name.trim() === '')}
           error={
             hasSubmitted
               ? validationErrors.name ||
-                (activeForm.name.trim() === '' ? 'Name is required' : undefined)
+                (activeForm.name.trim() === ''
+                  ? i18n.translate('observability.alerting.createMonitor.nameRequired', {
+                      defaultMessage: 'Name is required',
+                    })
+                  : undefined)
               : undefined
           }
         >
           <EuiFieldText
             placeholder={
               backendType === 'prometheus'
-                ? 'e.g. HighCpuUsage, PaymentErrorRate'
-                : 'e.g. High Error Rate, Disk Usage Alert'
+                ? i18n.translate(
+                    'observability.alerting.createMonitor.monitorNamePlaceholderPrometheus',
+                    { defaultMessage: 'e.g. HighCpuUsage, PaymentErrorRate' }
+                  )
+                : i18n.translate(
+                    'observability.alerting.createMonitor.monitorNamePlaceholderOpensearch',
+                    { defaultMessage: 'e.g. High Error Rate, Disk Usage Alert' }
+                  )
             }
             value={activeForm.name}
             onChange={(e) => updateName(e.target.value)}
             fullWidth
-            aria-label="Monitor name"
+            aria-label={i18n.translate(
+              'observability.alerting.createMonitor.monitorNameAriaLabel',
+              {
+                defaultMessage: 'Monitor name',
+              }
+            )}
           />
         </EuiFormRow>
 
@@ -321,18 +382,31 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
         {/* Severity + Enabled */}
         <EuiFlexGroup gutterSize="m" alignItems="center">
           <EuiFlexItem grow={3}>
-            <EuiFormRow label="Severity" display="rowCompressed">
+            <EuiFormRow
+              label={i18n.translate('observability.alerting.createMonitor.severityLabel', {
+                defaultMessage: 'Severity',
+              })}
+              display="rowCompressed"
+            >
               <EuiSelect
                 options={SEVERITY_OPTIONS}
                 value={activeForm.severity}
                 onChange={(e) => updateSeverity(e.target.value as UnifiedAlertSeverity)}
                 compressed
-                aria-label="Severity"
+                aria-label={i18n.translate(
+                  'observability.alerting.createMonitor.severityAriaLabel',
+                  { defaultMessage: 'Severity' }
+                )}
               />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
-            <EuiFormRow label="Enabled" display="rowCompressed">
+            <EuiFormRow
+              label={i18n.translate('observability.alerting.createMonitor.enabledLabel', {
+                defaultMessage: 'Enabled',
+              })}
+              display="rowCompressed"
+            >
               <EuiSwitch
                 label=""
                 checked={activeForm.enabled}
@@ -367,18 +441,26 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCancel}>Cancel</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={onCancel}>
+              {i18n.translate('observability.alerting.createMonitor.cancelButton', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButton onClick={handleSave} isDisabled={!isValid}>
-                  Save Monitor
+                  {i18n.translate('observability.alerting.createMonitor.saveMonitorButton', {
+                    defaultMessage: 'Save Monitor',
+                  })}
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton fill onClick={handleSave} isDisabled={!isValid}>
-                  Save &amp; Enable
+                  {i18n.translate('observability.alerting.createMonitor.saveAndEnableButton', {
+                    defaultMessage: 'Save & Enable',
+                  })}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>

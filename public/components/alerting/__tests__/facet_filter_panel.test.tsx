@@ -4,8 +4,8 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
-import { FacetFilterGroup, FacetFilterGroupProps } from '../facet_filter_panel';
+import { act, render, fireEvent } from '@testing-library/react';
+import { FacetFilterGroup, FacetFilterGroupProps, useFacetCollapse } from '../facet_filter_panel';
 
 const defaultProps: FacetFilterGroupProps = {
   id: 'status',
@@ -53,5 +53,62 @@ describe('FacetFilterGroup', () => {
     expect(onChange).not.toHaveBeenCalled();
     // "Maximum N" helper text should be suppressed when onCapReached is provided
     expect(queryByTestId('facetGroup-status-cap-helper')).not.toBeInTheDocument();
+  });
+
+  it('renders a per-facet Clear link when there is an active selection and clears on click', () => {
+    const onChange = jest.fn();
+    const { getByTestId, queryByTestId, rerender } = render(
+      <FacetFilterGroup {...defaultProps} selected={['active']} onChange={onChange} />
+    );
+    const clearLink = getByTestId('facetGroup-status-clear');
+    expect(clearLink).toBeInTheDocument();
+    fireEvent.click(clearLink);
+    expect(onChange).toHaveBeenCalledWith([]);
+    // After the parent applies the empty selection, the link disappears
+    rerender(<FacetFilterGroup {...defaultProps} selected={[]} onChange={onChange} />);
+    expect(queryByTestId('facetGroup-status-clear')).not.toBeInTheDocument();
+  });
+
+  it('caps rendered options at initialVisible and toggles "+N more" / "Show less"', () => {
+    const props: FacetFilterGroupProps = {
+      ...defaultProps,
+      options: ['a', 'b', 'c', 'd', 'e'],
+      counts: { a: 1, b: 2, c: 3, d: 4, e: 5 },
+      initialVisible: 2,
+    };
+    const { getByTestId, getByText, queryByText } = render(<FacetFilterGroup {...props} />);
+    // Only first 2 rendered
+    expect(getByText('a')).toBeInTheDocument();
+    expect(getByText('b')).toBeInTheDocument();
+    expect(queryByText('c')).not.toBeInTheDocument();
+    // "+3 more" toggle visible
+    const toggle = getByTestId('facetGroup-status-showMore');
+    expect(toggle).toHaveTextContent('+3 more');
+    fireEvent.click(toggle);
+    expect(getByText('c')).toBeInTheDocument();
+    expect(getByTestId('facetGroup-status-showMore')).toHaveTextContent('Show less');
+  });
+});
+
+describe('useFacetCollapse', () => {
+  it('honors per-call defaultCollapsed when no override is set, then persists toggles', () => {
+    let snapshot: ReturnType<typeof useFacetCollapse> | null = null;
+    const Probe: React.FC = () => {
+      snapshot = useFacetCollapse();
+      return null;
+    };
+    render(<Probe />);
+
+    // No override yet → both reads honor their per-call defaults
+    expect(snapshot!.isCollapsed('static-facet')).toBe(false);
+    expect(snapshot!.isCollapsed('dynamic-facet', true)).toBe(true);
+
+    // Toggling a dynamic-default-collapsed facet flips it to expanded (override = false)
+    act(() => snapshot!.toggleFacetCollapse('dynamic-facet', true));
+    expect(snapshot!.isCollapsed('dynamic-facet', true)).toBe(false);
+
+    // Toggling again returns to collapsed
+    act(() => snapshot!.toggleFacetCollapse('dynamic-facet', true));
+    expect(snapshot!.isCollapsed('dynamic-facet', true)).toBe(true);
   });
 });

@@ -4,7 +4,7 @@
  */
 
 import { MultiBackendAlertService } from '../alert_service';
-import type { Datasource, Logger } from '../../../../common/types/alerting/types';
+import type { Datasource, Logger } from '../../../../common/types/alerting';
 import {
   sampleOSMonitor,
   sampleOSAlert,

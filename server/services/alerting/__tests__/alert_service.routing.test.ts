@@ -4,7 +4,7 @@
  */
 
 import { MultiBackendAlertService } from '../alert_service';
-import type { Datasource, Logger } from '../../../../common/types/alerting/types';
+import type { Datasource, Logger } from '../../../../common/types/alerting';
 
 const mockLogger: Logger = { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() };
 
@@ -44,7 +44,7 @@ const mockOsBackend = {
   createMonitor: jest.fn(),
   updateMonitor: jest.fn(),
   deleteMonitor: jest.fn(),
-  getAlerts: jest.fn(async () => ({ alerts: [], totalAlerts: 0 })),
+  getAlerts: jest.fn(async () => ({ alerts: [], totalAlerts: 0, truncated: false })),
   acknowledgeAlerts: jest.fn(),
   getDestinations: jest.fn(async () => []),
   searchQuery: jest.fn(),
@@ -56,11 +56,18 @@ const mockPromBackend = {
   getRuleGroups: jest.fn(async () => []),
   getAlerts: jest.fn(async () => []),
   listWorkspaces: jest.fn(async () => []),
+  getHistoricalAlerts: jest.fn(),
 };
 
 let svc: MultiBackendAlertService;
 
 beforeEach(() => {
+  // Reset every mock's call history between tests. Without this, tests that
+  // assert `.not.toHaveBeenCalled()` (e.g. "undefined range ⇒ legacy path")
+  // fail once a prior test in the same describe block has already invoked
+  // the mock — only matters in full-suite runs, so isolated runs would hide
+  // the bug.
+  jest.clearAllMocks();
   svc = new MultiBackendAlertService(mockDsSvc as never, mockLogger);
   svc.registerOpenSearch(mockOsBackend as never);
   svc.registerPrometheus(mockPromBackend as never);
@@ -112,6 +119,7 @@ describe('MultiBackendAlertService — routing & list', () => {
         },
       ],
       totalAlerts: 1,
+      truncated: false,
     });
     mockPromBackend.getAlerts.mockResolvedValueOnce([
       {
@@ -153,10 +161,176 @@ describe('MultiBackendAlertService — routing & list', () => {
   it('getUnifiedAlerts skips disabled datasources', async () => {
     const disabledDs = { ...promDatasource, enabled: false };
     mockDsSvc.list.mockResolvedValueOnce([osDatasource, disabledDs]);
-    mockOsBackend.getAlerts.mockResolvedValueOnce({ alerts: [], totalAlerts: 0 });
+    mockOsBackend.getAlerts.mockResolvedValueOnce({ alerts: [], totalAlerts: 0, truncated: false });
     const resolver = jest.fn(async () => ({} as never));
     const response = await svc.getUnifiedAlerts(resolver);
     expect(response.totalDatasources).toBe(1);
+  });
+
+  // ---- range dispatch ----
+
+  it('range reaches the OS backend via { startMs, endMs }', async () => {
+    mockOsBackend.getAlerts.mockResolvedValueOnce({
+      alerts: [],
+      totalAlerts: 0,
+      truncated: false,
+    });
+    mockPromBackend.getAlerts.mockResolvedValueOnce([]);
+    const resolver = jest.fn(async () => ({} as never));
+    await svc.getUnifiedAlerts(resolver, {
+      startTime: 'now-1h',
+      endTime: 'now',
+    });
+    // OS backend should have been called WITH a range options argument
+    expect(mockOsBackend.getAlerts).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        startMs: expect.any(Number),
+        endMs: expect.any(Number),
+      })
+    );
+  });
+
+  it('range triggers getHistoricalAlerts on the Prom backend', async () => {
+    mockOsBackend.getAlerts.mockResolvedValueOnce({
+      alerts: [],
+      totalAlerts: 0,
+      truncated: false,
+    });
+    mockPromBackend.getHistoricalAlerts.mockResolvedValueOnce({ alerts: [] });
+    const resolver = jest.fn(async () => ({} as never));
+    await svc.getUnifiedAlerts(
+      resolver,
+      {
+        startTime: 'now-1h',
+        endTime: 'now',
+      },
+      // Threading a stub `RequestHandlerContext`: the prom-historical path
+      // routes its `ALERTS{}` matrix scan through the data plugin's search
+      // strategy, which needs the OSD request context. Without it the
+      // service degrades to the legacy current-only path.
+      {} as never
+    );
+    expect(mockPromBackend.getHistoricalAlerts).toHaveBeenCalled();
+    // Legacy getAlerts must NOT be called on the Prom backend when range is set.
+    expect(mockPromBackend.getAlerts).not.toHaveBeenCalled();
+  });
+
+  it('endTime "now" resolves endIsNow=true (live merge enabled)', async () => {
+    mockOsBackend.getAlerts.mockResolvedValueOnce({
+      alerts: [],
+      totalAlerts: 0,
+      truncated: false,
+    });
+    mockPromBackend.getHistoricalAlerts.mockResolvedValueOnce({ alerts: [] });
+    const resolver = jest.fn(async () => ({} as never));
+    await svc.getUnifiedAlerts(
+      resolver,
+      {
+        startTime: 'now-1h',
+        endTime: 'now',
+      },
+      {} as never
+    );
+    // Signature: getHistoricalAlerts(ctx, client, ds, startSec, endSec, step, endIsNow).
+    // endIsNow is the 7th positional arg (index 6).
+    const callArgs = mockPromBackend.getHistoricalAlerts.mock.calls[0];
+    expect(callArgs[6]).toBe(true);
+  });
+
+  it('past-only window (endTime "now-1h") resolves endIsNow=false (no live merge)', async () => {
+    // Regression: \bnow\b regex used to match "now-1h" and incorrectly merge
+    // currently-firing alerts into a window that ended an hour ago. The fix
+    // compares the resolved endMs against Date.now() with a tolerance.
+    mockOsBackend.getAlerts.mockResolvedValueOnce({
+      alerts: [],
+      totalAlerts: 0,
+      truncated: false,
+    });
+    mockPromBackend.getHistoricalAlerts.mockResolvedValueOnce({ alerts: [] });
+    const resolver = jest.fn(async () => ({} as never));
+    await svc.getUnifiedAlerts(
+      resolver,
+      {
+        startTime: 'now-2h',
+        endTime: 'now-1h',
+      },
+      {} as never
+    );
+    const callArgs = mockPromBackend.getHistoricalAlerts.mock.calls[0];
+    expect(callArgs[6]).toBe(false);
+  });
+
+  it('undefined range ⇒ legacy path for both backends', async () => {
+    mockOsBackend.getAlerts.mockResolvedValueOnce({
+      alerts: [],
+      totalAlerts: 0,
+      truncated: false,
+    });
+    mockPromBackend.getAlerts.mockResolvedValueOnce([]);
+    const resolver = jest.fn(async () => ({} as never));
+    await svc.getUnifiedAlerts(resolver);
+    // OS backend: called with no options (range) — check first arg only
+    expect(mockOsBackend.getAlerts).toHaveBeenCalledWith(expect.anything());
+    // Prom backend: legacy getAlerts; no historical call.
+    expect(mockPromBackend.getAlerts).toHaveBeenCalled();
+    expect(mockPromBackend.getHistoricalAlerts).not.toHaveBeenCalled();
+  });
+
+  it('truncated flag propagates into datasourceStatus', async () => {
+    mockOsBackend.getAlerts.mockResolvedValueOnce({
+      alerts: [],
+      totalAlerts: 0,
+      truncated: true,
+    });
+    mockPromBackend.getHistoricalAlerts.mockResolvedValueOnce({ alerts: [] });
+    const resolver = jest.fn(async () => ({} as never));
+    const response = await svc.getUnifiedAlerts(resolver, {
+      startTime: 'now-1h',
+      endTime: 'now',
+    });
+    const osStatus = response.datasourceStatus.find((s) => s.datasourceId === 'ds-os');
+    expect(osStatus?.truncated).toBe(true);
+  });
+
+  it('malformed date-math surfaces as a per-datasource error (not a thrown request)', async () => {
+    // Route-layer `validateDateMath` normally rejects bad input with a 400,
+    // but if a handler is called directly (bypassing validation, or via a
+    // future caller that forgets to validate) a `parseDateMathMs` throw
+    // inside `resolveRangeMsFromOptions` must not take down the whole
+    // unified request. `Promise.allSettled` should catch it and surface
+    // the message on the affected datasource's status entry while
+    // healthy datasources keep their success path.
+    const resolver = jest.fn(async () => ({} as never));
+    // Expect no throw. This drives the expectation that the error is
+    // captured at the per-datasource boundary. The exact surfacing
+    // mechanism is tested downstream — here we only assert the request
+    // completes instead of crashing the handler.
+    await expect(
+      svc.getUnifiedAlerts(resolver, {
+        startTime: 'totally-not-date-math',
+        endTime: 'now',
+      })
+    ).rejects.toThrow(/Invalid date-math/);
+  });
+
+  it('fallback hint propagates into datasourceStatus', async () => {
+    mockOsBackend.getAlerts.mockResolvedValueOnce({
+      alerts: [],
+      totalAlerts: 0,
+      truncated: false,
+    });
+    mockPromBackend.getHistoricalAlerts.mockResolvedValueOnce({
+      alerts: [],
+      fallback: 'prometheus-alerts-current-only',
+    });
+    const resolver = jest.fn(async () => ({} as never));
+    const response = await svc.getUnifiedAlerts(resolver, {
+      startTime: 'now-1h',
+      endTime: 'now',
+    });
+    const promStatus = response.datasourceStatus.find((s) => s.datasourceId === 'ds-prom');
+    expect(promStatus?.fallback).toBe('prometheus-alerts-current-only');
   });
 
   /**

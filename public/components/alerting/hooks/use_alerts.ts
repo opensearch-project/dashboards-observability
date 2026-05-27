@@ -11,13 +11,21 @@
  * status). The server does not implement page/pageSize pagination on the
  * unified endpoint; consumers that need pagination should slice
  * `data.results` client-side.
+ *
+ * Time range (`startTime`/`endTime`) is forwarded as-is (date-math strings)
+ * to the transport, which appends them to the request query object. Changing
+ * either value triggers a refetch through the effect dependencies below.
  */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ProgressiveResponse, UnifiedAlertSummary } from '../../../../common/types/alerting';
 import { AlertingOpenSearchService } from '../query_services/alerting_opensearch_service';
 
 export interface UseAlertsParams {
   dsIds: string[];
+  /** Date-math string (e.g. "now-1h"). */
+  startTime?: string;
+  /** Date-math string (e.g. "now"). */
+  endTime?: string;
   refreshToken?: unknown;
 }
 
@@ -28,13 +36,29 @@ export interface UseAlertsResult {
   refetch: () => void;
 }
 
-export function useAlerts({ dsIds, refreshToken }: UseAlertsParams): UseAlertsResult {
+export function useAlerts({
+  dsIds,
+  startTime,
+  endTime,
+  refreshToken,
+}: UseAlertsParams): UseAlertsResult {
   const service = useMemo(() => new AlertingOpenSearchService(), []);
   const [data, setData] = useState<ProgressiveResponse<UnifiedAlertSummary> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [localRefresh, setLocalRefresh] = useState(0);
   const refetch = useCallback(() => setLocalRefresh((t) => t + 1), []);
+
+  // Monotonic request id — guards against stale responses overwriting newer
+  // ones when the user changes the picker faster than the network responds.
+  // Each effect run captures its request id at dispatch; when the response
+  // resolves we check the ref, and only commit state if no later request has
+  // started in the meantime. Closure-scoped `cancelled` flags alone do not
+  // prevent this because the older effect's `cancelled = true` happens
+  // during cleanup (before the new effect body), which is fine for the
+  // common case but fails if the older request resolves after the newer
+  // one has already committed its result.
+  const lastRequestIdRef = useRef(0);
 
   const dsIdsKey = dsIds.join(',');
 
@@ -43,25 +67,44 @@ export function useAlerts({ dsIds, refreshToken }: UseAlertsParams): UseAlertsRe
       setData(null);
       return;
     }
-    let cancelled = false;
+    const requestId = ++lastRequestIdRef.current;
+    // Abort the in-flight request when the effect re-runs (deps change) or
+    // the component unmounts. The historical-reconstruction path can be
+    // expensive; without this the backend keeps doing work for an already-
+    // abandoned request even though the monotonic `requestId` would prevent
+    // its result from being committed to state.
+    const controller = new AbortController();
     setIsLoading(true);
     setError(null);
     (async () => {
       try {
-        const res = await service.listAlerts({ dsIds });
-        if (!cancelled) setData(res);
+        const res = await service.listAlerts({
+          dsIds,
+          startTime,
+          endTime,
+          signal: controller.signal,
+        });
+        if (requestId !== lastRequestIdRef.current) return;
+        setData(res);
       } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e : new Error(String(e)));
+        if (requestId !== lastRequestIdRef.current) return;
+        // Aborts surface as DOMException("AbortError") — they're expected
+        // bookkeeping, not a user-facing failure. Skip the error commit so
+        // the UI doesn't flash a callout when the user just changed pickers.
+        if (e instanceof DOMException && e.name === 'AbortError') return;
+        setError(e instanceof Error ? e : new Error(String(e)));
       } finally {
-        if (!cancelled) setIsLoading(false);
+        if (requestId === lastRequestIdRef.current) setIsLoading(false);
       }
     })();
     return () => {
-      cancelled = true;
+      controller.abort();
     };
-    // `dsIds` is a new array reference each render; `dsIdsKey` is its stable projection.
+    // `dsIds` is a new array reference each render; `dsIdsKey` is its stable
+    // projection. `startTime`/`endTime` are primitive strings — safe to list
+    // directly (equivalent to a stable-string key for a single value).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [service, dsIdsKey, refreshToken, localRefresh]);
+  }, [service, dsIdsKey, startTime, endTime, refreshToken, localRefresh]);
 
   return { data, isLoading, error, refetch };
 }

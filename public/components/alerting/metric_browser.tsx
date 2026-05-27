@@ -22,6 +22,8 @@ import {
   EuiIcon,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { MOCK_METRICS, MOCK_LABEL_NAMES } from './promql_editor';
 
 // ============================================================================
@@ -81,9 +83,17 @@ function cardinalityColor(c: number): string {
 }
 
 function cardinalityLabel(c: number): string {
-  if (c > 3000) return 'High';
-  if (c > 1000) return 'Medium';
-  return 'Low';
+  if (c > 3000)
+    return i18n.translate('observability.alerting.metricBrowser.cardinality.high', {
+      defaultMessage: 'High',
+    });
+  if (c > 1000)
+    return i18n.translate('observability.alerting.metricBrowser.cardinality.medium', {
+      defaultMessage: 'Medium',
+    });
+  return i18n.translate('observability.alerting.metricBrowser.cardinality.low', {
+    defaultMessage: 'Low',
+  });
 }
 
 function estimateQueryTime(cardinality: number): string {
@@ -96,7 +106,11 @@ function getOptimizations(metric: MetricMeta, query?: string): string[] {
   const tips: string[] = [];
   if (metric.cardinality > 3000) {
     tips.push(
-      `High cardinality (${metric.cardinality} series). Add label filters to reduce query scope.`
+      i18n.translate('observability.alerting.metricBrowser.tip.highCardinality', {
+        defaultMessage:
+          'High cardinality ({count} series). Add label filters to reduce query scope.',
+        values: { count: metric.cardinality },
+      })
     );
   }
   if (
@@ -105,14 +119,25 @@ function getOptimizations(metric: MetricMeta, query?: string): string[] {
     !query.includes('rate') &&
     !query.includes('increase')
   ) {
-    tips.push('Counter metrics should typically be wrapped in rate() or increase().');
+    tips.push(
+      i18n.translate('observability.alerting.metricBrowser.tip.counterRate', {
+        defaultMessage: 'Counter metrics should typically be wrapped in rate() or increase().',
+      })
+    );
   }
   if (metric.type === 'histogram' && query && !query.includes('histogram_quantile')) {
-    tips.push('Use histogram_quantile() to compute percentiles from histogram buckets.');
+    tips.push(
+      i18n.translate('observability.alerting.metricBrowser.tip.histogramQuantile', {
+        defaultMessage: 'Use histogram_quantile() to compute percentiles from histogram buckets.',
+      })
+    );
   }
   if (metric.labels.length > 6) {
     tips.push(
-      `This metric has ${metric.labels.length} labels. Use by() or without() to aggregate.`
+      i18n.translate('observability.alerting.metricBrowser.tip.manyLabels', {
+        defaultMessage: 'This metric has {count} labels. Use by() or without() to aggregate.',
+        values: { count: metric.labels.length },
+      })
     );
   }
   return tips;
@@ -149,7 +174,9 @@ export const MetricBrowser: React.FC<MetricBrowserProps> = ({ onSelectMetric, cu
   const columns = [
     {
       field: 'name',
-      name: 'Metric',
+      name: i18n.translate('observability.alerting.metricBrowser.column.metric', {
+        defaultMessage: 'Metric',
+      }),
       sortable: true,
       width: '280px',
       render: (name: string, item: MetricMeta) => (
@@ -168,13 +195,17 @@ export const MetricBrowser: React.FC<MetricBrowserProps> = ({ onSelectMetric, cu
     },
     {
       field: 'type',
-      name: 'Type',
+      name: i18n.translate('observability.alerting.metricBrowser.column.type', {
+        defaultMessage: 'Type',
+      }),
       width: '100px',
       render: (t: string) => <EuiBadge color={typeColors[t] || 'default'}>{t}</EuiBadge>,
     },
     {
       field: 'cardinality',
-      name: 'Cardinality',
+      name: i18n.translate('observability.alerting.metricBrowser.column.cardinality', {
+        defaultMessage: 'Cardinality',
+      }),
       width: '120px',
       sortable: true,
       render: (c: number) => (
@@ -184,7 +215,12 @@ export const MetricBrowser: React.FC<MetricBrowserProps> = ({ onSelectMetric, cu
           </EuiFlexItem>
           {c > 3000 && (
             <EuiFlexItem grow={false}>
-              <EuiToolTip content="High cardinality — may impact query performance">
+              <EuiToolTip
+                content={i18n.translate(
+                  'observability.alerting.metricBrowser.highCardinalityTooltip',
+                  { defaultMessage: 'High cardinality — may impact query performance' }
+                )}
+              >
                 <EuiIcon type="alert" color="warning" size="s" />
               </EuiToolTip>
             </EuiFlexItem>
@@ -194,7 +230,9 @@ export const MetricBrowser: React.FC<MetricBrowserProps> = ({ onSelectMetric, cu
     },
     {
       field: 'cardinality',
-      name: 'Est. Query Time',
+      name: i18n.translate('observability.alerting.metricBrowser.column.estQueryTime', {
+        defaultMessage: 'Est. Query Time',
+      }),
       width: '120px',
       render: (c: number) => (
         <EuiText size="xs" color="subdued">
@@ -204,7 +242,9 @@ export const MetricBrowser: React.FC<MetricBrowserProps> = ({ onSelectMetric, cu
     },
     {
       field: 'labels',
-      name: 'Labels',
+      name: i18n.translate('observability.alerting.metricBrowser.column.labels', {
+        defaultMessage: 'Labels',
+      }),
       width: '200px',
       render: (labels: string[]) => (
         <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
@@ -228,12 +268,16 @@ export const MetricBrowser: React.FC<MetricBrowserProps> = ({ onSelectMetric, cu
   return (
     <div>
       <EuiFieldSearch
-        placeholder="Search metrics by name..."
+        placeholder={i18n.translate('observability.alerting.metricBrowser.searchPlaceholder', {
+          defaultMessage: 'Search metrics by name...',
+        })}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         isClearable
         fullWidth
-        aria-label="Search metrics"
+        aria-label={i18n.translate('observability.alerting.metricBrowser.searchAriaLabel', {
+          defaultMessage: 'Search metrics',
+        })}
       />
       <EuiSpacer size="s" />
 
@@ -257,16 +301,32 @@ export const MetricBrowser: React.FC<MetricBrowserProps> = ({ onSelectMetric, cu
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiHealth color={cardinalityColor(selectedMetric.cardinality)}>
-                      {selectedMetric.cardinality.toLocaleString()} series (
-                      {cardinalityLabel(selectedMetric.cardinality)})
+                      <FormattedMessage
+                        id="observability.alerting.metricBrowser.seriesCount"
+                        defaultMessage="{count} series ({label})"
+                        values={{
+                          count: selectedMetric.cardinality.toLocaleString(),
+                          label: cardinalityLabel(selectedMetric.cardinality),
+                        }}
+                      />
                     </EuiHealth>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiText size="xs">Scrape: {selectedMetric.scrapeInterval}</EuiText>
+                    <EuiText size="xs">
+                      <FormattedMessage
+                        id="observability.alerting.metricBrowser.scrape"
+                        defaultMessage="Scrape: {interval}"
+                        values={{ interval: selectedMetric.scrapeInterval }}
+                      />
+                    </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText size="xs">
-                      Est: {estimateQueryTime(selectedMetric.cardinality)}
+                      <FormattedMessage
+                        id="observability.alerting.metricBrowser.estTime"
+                        defaultMessage="Est: {time}"
+                        values={{ time: estimateQueryTime(selectedMetric.cardinality) }}
+                      />
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -294,7 +354,10 @@ export const MetricBrowser: React.FC<MetricBrowserProps> = ({ onSelectMetric, cu
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty size="xs" iconType="cross" onClick={() => setSelectedMetric(null)}>
-                  Close
+                  <FormattedMessage
+                    id="observability.alerting.metricBrowser.closeButton"
+                    defaultMessage="Close"
+                  />
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -308,7 +371,11 @@ export const MetricBrowser: React.FC<MetricBrowserProps> = ({ onSelectMetric, cu
       </div>
       {filtered.length > 50 && (
         <EuiText size="xs" color="subdued" textAlign="center" style={{ padding: 8 }}>
-          Showing 50 of {filtered.length} metrics. Refine your search.
+          <FormattedMessage
+            id="observability.alerting.metricBrowser.showingMetrics"
+            defaultMessage="Showing 50 of {total} metrics. Refine your search."
+            values={{ total: filtered.length }}
+          />
         </EuiText>
       )}
     </div>

@@ -15,12 +15,14 @@
  * Preview time-series helpers live in `alert_preview.ts`.
  * Pure utilities and unified-shape mappers live in `alert_utils.ts`.
  */
+import type { RequestHandlerContext } from '../../../../../src/core/server';
 import {
   AlertingOSClient,
   Datasource,
-  DatasourceService,
+  DatasourceFetchFallback,
   DatasourceFetchResult,
   DatasourceFetchStatus,
+  DatasourceService,
   DatasourceWarning,
   Logger,
   OpenSearchBackend,
@@ -37,6 +39,7 @@ import {
   UnifiedRule,
   UnifiedRuleSummary,
 } from '../../../common/types/alerting';
+import { parseDateMathMs, computeStep } from '../../../common/services/alerting';
 import { TimeoutError } from './timeout_error';
 import {
   getAlertDetail as getAlertDetailImpl,
@@ -52,6 +55,69 @@ import {
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const DEFAULT_MAX_RESULTS = 5_000;
+
+/**
+ * Resolved time window in epoch milliseconds — product of calling
+ * `parseDateMathMs` once on the incoming `startTime`/`endTime` date-math
+ * strings. Threaded through `fetchAlertsRaw` so each backend gets a
+ * numeric window instead of re-parsing date-math at every hop.
+ *
+ * `endIsNow` records whether the original `endTime` string was relative
+ * to `now` (e.g. `"now"`, `"now-5m"`). Backends use this signal to decide
+ * whether an empty historical response should fall back to current-only
+ * data; a past-only range should not. Kept on the resolved object so we
+ * don't pass two values around.
+ */
+interface ResolvedRange {
+  startMs: number;
+  endMs: number;
+  endIsNow: boolean;
+}
+
+/**
+ * Per-datasource shape returned by `fetchAlertsRaw`. Carries the mapped
+ * `UnifiedAlertSummary[]` plus optional envelope hints (truncation,
+ * Prometheus fallback, error) that propagate up into
+ * `DatasourceFetchResult`.
+ */
+interface FetchAlertsRawResult {
+  alerts: UnifiedAlertSummary[];
+  truncated?: boolean;
+  fallback?: DatasourceFetchFallback;
+  error?: string;
+}
+
+/**
+ * Parse `startTime`/`endTime` date-math strings from a fetch options object
+ * into a numeric `{ startMs, endMs, endIsNow }` triple. Returns `undefined`
+ * when either side is missing so callers can use the legacy "no range"
+ * path via a simple nullish check. Throws if either string is present but
+ * unparseable — route-layer `validateDateMath` validators should already
+ * have rejected that case with a 400, so a throw here is a genuine bug.
+ *
+ * `endIsNow` is true when the resolved end timestamp is at or near the
+ * current wall-clock instant. The Prometheus historical path uses this to
+ * decide whether an empty matrix should fall back to the current-only API
+ * — that fallback only makes sense for windows that include "right now".
+ * `"now-1h"` is `now`-relative but its window ENDS an hour ago, so it must
+ * resolve to `endIsNow: false` (otherwise we'd merge `/api/v1/alerts`
+ * results — which ignore time entirely — into a window they don't belong to).
+ */
+const NOW_TOLERANCE_MS = 60_000;
+
+function resolveRangeMsFromOptions(options?: {
+  startTime?: string;
+  endTime?: string;
+}): ResolvedRange | undefined {
+  if (!options?.startTime || !options.endTime) return undefined;
+  const startMs = parseDateMathMs(options.startTime, /* isEndTime */ false);
+  const endMs = parseDateMathMs(options.endTime, /* isEndTime */ true);
+  return {
+    startMs,
+    endMs,
+    endIsNow: Math.abs(endMs - Date.now()) <= NOW_TOLERANCE_MS,
+  };
+}
 
 export class MultiBackendAlertService {
   private osBackend?: OpenSearchBackend;
@@ -128,10 +194,12 @@ export class MultiBackendAlertService {
 
   async getOSAlerts(
     client: AlertingOSClient,
-    dsId: string
-  ): Promise<{ alerts: OSAlert[]; totalAlerts: number }> {
+    dsId: string,
+    options?: { startTime?: string; endTime?: string }
+  ): Promise<{ alerts: OSAlert[]; totalAlerts: number; truncated: boolean }> {
     await this.requireDatasource(dsId, 'opensearch');
-    return this.osBackend!.getAlerts(client);
+    const range = resolveRangeMsFromOptions(options);
+    return this.osBackend!.getAlerts(client, range);
   }
 
   async acknowledgeOSAlerts(
@@ -153,8 +221,26 @@ export class MultiBackendAlertService {
     return this.promBackend!.getRuleGroups(client, ds);
   }
 
-  async getPromAlerts(client: AlertingOSClient, dsId: string): Promise<PromAlert[]> {
+  async getPromAlerts(
+    client: AlertingOSClient,
+    dsId: string,
+    // Range is accepted for signature parity with the per-backend route, but
+    // the per-backend `/api/alerting/prometheus/{dsId}/alerts` endpoint
+    // returns raw `PromAlert[]` (not `UnifiedAlertSummary[]`), and the
+    // historical-reconstruction path emits unified episodes. Per-backend
+    // consumers therefore still see current-active alerts; historical
+    // reconstruction is only surfaced through `getUnifiedAlerts`.
+    options?: { startTime?: string; endTime?: string }
+  ): Promise<PromAlert[]> {
     const ds = await this.requireDatasource(dsId, 'prometheus');
+    if (options?.startTime || options?.endTime) {
+      // Callers that specifically want a filtered view must go through the
+      // unified endpoint; leaving this as a silent discard hides client
+      // bugs (e.g. a UI assuming the per-backend route respects range).
+      this.logger.debug(
+        `getPromAlerts: ignoring startTime/endTime on per-backend route (ds=${dsId}); use /api/alerting/unified/alerts for historical range support`
+      );
+    }
     return this.promBackend!.getAlerts(client, ds);
   }
 
@@ -164,18 +250,32 @@ export class MultiBackendAlertService {
 
   async getUnifiedAlerts(
     clientOrResolver: AlertingOSClient | ((dsId: string) => Promise<AlertingOSClient>),
-    options?: UnifiedFetchOptions
+    options?: UnifiedFetchOptions,
+    ctx?: RequestHandlerContext
   ): Promise<ProgressiveResponse<UnifiedAlertSummary>> {
     const datasources = await this.resolveDatasources(options?.dsIds);
     const timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     const maxResults = options?.maxResults ?? DEFAULT_MAX_RESULTS;
     const fetchedAt = new Date().toISOString();
 
+    // Resolve date-math once at the top — downstream hops (backend dispatch,
+    // filter, post-fetch cap) take numeric epoch-ms instead of re-parsing
+    // strings per-datasource. Falls back to `undefined` when either field is
+    // missing so the legacy "no range" path stays unchanged.
+    const resolvedRange = resolveRangeMsFromOptions(options);
+
     const isResolver = typeof clientOrResolver === 'function';
     const dsResults = await Promise.allSettled(
       datasources.map(async (ds) => {
         const client = isResolver ? await clientOrResolver(ds.id) : clientOrResolver;
-        return this.fetchAlertsFromDatasource(client, ds, timeoutMs, options?.onProgress);
+        return this.fetchAlertsFromDatasource(
+          client,
+          ds,
+          timeoutMs,
+          resolvedRange,
+          options?.onProgress,
+          ctx
+        );
       })
     );
 
@@ -336,7 +436,7 @@ export class MultiBackendAlertService {
     for (let i = 0; i < datasources.length; i++) {
       const settled = dsResults[i];
       if (settled.status === 'fulfilled') {
-        allAlerts.push(...settled.value);
+        allAlerts.push(...settled.value.alerts);
       } else {
         this.logger.error(
           `Failed to fetch alerts from ${datasources[i].name} (${datasources[i].id}): ${settled.reason}`
@@ -384,11 +484,17 @@ export class MultiBackendAlertService {
    * Get full detail for a single rule/monitor. Delegates to the standalone
    * resolver in `alert_detail.ts` so the detail logic (history, routing,
    * preview) lives outside this class but is still reachable from the routes.
+   *
+   * `ctx` is forwarded so the Prom branch can route the condition-preview
+   * range query through the data plugin's search service (`strategy:
+   * 'PROMQL'`). When omitted (legacy callers), the preview falls back to
+   * the embedded-alert extractor inside `fetchPromPreviewData`.
    */
   async getRuleDetail(
     client: AlertingOSClient,
     dsId: string,
-    ruleId: string
+    ruleId: string,
+    ctx?: RequestHandlerContext
   ): Promise<UnifiedRule | null> {
     return getRuleDetailImpl(
       this.datasourceService,
@@ -396,7 +502,8 @@ export class MultiBackendAlertService {
       this.promBackend,
       client,
       dsId,
-      ruleId
+      ruleId,
+      ctx
     );
   }
 
@@ -425,13 +532,16 @@ export class MultiBackendAlertService {
     client: AlertingOSClient,
     ds: Datasource,
     timeoutMs: number,
-    onProgress?: (result: DatasourceFetchResult<UnifiedAlertSummary>) => void
+    range: ResolvedRange | undefined,
+    onProgress?: (result: DatasourceFetchResult<UnifiedAlertSummary>) => void,
+    ctx?: RequestHandlerContext
   ): Promise<DatasourceFetchResult<UnifiedAlertSummary>> {
     const start = Date.now();
     const makeResult = (
       status: DatasourceFetchStatus,
       data: UnifiedAlertSummary[],
-      error?: string
+      error?: string,
+      extra?: { truncated?: boolean; fallback?: DatasourceFetchFallback }
     ): DatasourceFetchResult<UnifiedAlertSummary> => ({
       datasourceId: ds.id,
       datasourceName: ds.name,
@@ -440,15 +550,20 @@ export class MultiBackendAlertService {
       data,
       error,
       durationMs: Date.now() - start,
+      ...(extra?.truncated !== undefined ? { truncated: extra.truncated } : {}),
+      ...(extra?.fallback !== undefined ? { fallback: extra.fallback } : {}),
     });
 
     try {
-      const data = await this.withTimeout(
-        this.fetchAlertsRaw(client, ds),
+      const raw = await this.withTimeout(
+        this.fetchAlertsRaw(client, ds, range, ctx),
         timeoutMs,
         `Datasource ${ds.name} timed out after ${timeoutMs}ms`
       );
-      const result = makeResult('success', data);
+      const result = makeResult('success', raw.alerts, raw.error, {
+        truncated: raw.truncated,
+        fallback: raw.fallback,
+      });
       if (onProgress) onProgress(result);
       return result;
     } catch (err) {
@@ -499,19 +614,84 @@ export class MultiBackendAlertService {
     }
   }
 
+  /**
+   * Fetch alerts from a single datasource, mapping raw backend shape to
+   * `UnifiedAlertSummary[]`. Dispatches on `ds.type` AND on whether a
+   * resolved range was passed:
+   *
+   *   - OpenSearch + range   ⇒ `osBackend.getAlerts(client, { startMs, endMs })`
+   *                            with interval-overlap filter + 1000-alert cap.
+   *                            Propagates `truncated` for the UI callout.
+   *   - OpenSearch + no range⇒ legacy `osBackend.getAlerts(client)` (no filter).
+   *   - Prometheus + range   ⇒ `promBackend.getHistoricalAlerts(...)` which
+   *                            reconstructs episodes via range queries against
+   *                            the `ALERTS` metric. Propagates `fallback` when
+   *                            the matrix is empty AND the range includes `now`
+   *                            (in which case the backend falls back to the
+   *                            legacy current-only API).
+   *   - Prometheus + no range⇒ legacy `promBackend.getAlerts(...)`
+   *                            (current-active only).
+   */
   private async fetchAlertsRaw(
     client: AlertingOSClient,
-    ds: Datasource
-  ): Promise<UnifiedAlertSummary[]> {
-    const results: UnifiedAlertSummary[] = [];
+    ds: Datasource,
+    range?: ResolvedRange,
+    ctx?: RequestHandlerContext
+  ): Promise<FetchAlertsRawResult> {
     if (ds.type === 'opensearch' && this.osBackend) {
+      if (range) {
+        const { alerts, truncated } = await this.osBackend.getAlerts(client, {
+          startMs: range.startMs,
+          endMs: range.endMs,
+        });
+        return {
+          alerts: alerts.map((a) => osAlertToUnified(a, ds.id)),
+          truncated,
+        };
+      }
       const { alerts } = await this.osBackend.getAlerts(client);
-      for (const a of alerts) results.push(osAlertToUnified(a, ds.id));
-    } else if (ds.type === 'prometheus' && this.promBackend) {
-      const alerts = await this.promBackend.getAlerts(client, ds);
-      for (const a of alerts) results.push(promAlertToUnified(a, ds.id));
+      return { alerts: alerts.map((a) => osAlertToUnified(a, ds.id)) };
     }
-    return results;
+
+    if (ds.type === 'prometheus' && this.promBackend) {
+      if (range) {
+        // Historical reconstruction — only available on backends that
+        // implement the optional `getHistoricalAlerts` method
+        // (`DirectQueryPrometheusBackend` today) AND when we have an OSD
+        // request context (the matrix scan routes through the data plugin's
+        // search strategy). Without `ctx` we fall back to the legacy
+        // current-only path with a banner rather than throwing.
+        if (typeof this.promBackend.getHistoricalAlerts === 'function' && ctx) {
+          const startSec = Math.floor(range.startMs / 1000);
+          const endSec = Math.floor(range.endMs / 1000);
+          const step = computeStep(startSec, endSec);
+          const historical = await this.promBackend.getHistoricalAlerts(
+            ctx,
+            client,
+            ds,
+            startSec,
+            endSec,
+            step,
+            range.endIsNow
+          );
+          return {
+            alerts: historical.alerts,
+            fallback: historical.fallback,
+            error: historical.error,
+          };
+        }
+        // No historical support ⇒ emulate by falling back to legacy with a banner.
+        const alerts = await this.promBackend.getAlerts(client, ds);
+        return {
+          alerts: alerts.map((a) => promAlertToUnified(a, ds.id)),
+          fallback: 'prometheus-alerts-current-only',
+        };
+      }
+      const alerts = await this.promBackend.getAlerts(client, ds);
+      return { alerts: alerts.map((a) => promAlertToUnified(a, ds.id)) };
+    }
+
+    return { alerts: [] };
   }
 
   private async fetchRulesRaw(

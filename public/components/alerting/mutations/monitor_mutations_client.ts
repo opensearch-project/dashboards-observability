@@ -6,9 +6,8 @@
 /**
  * MonitorMutationsClient — thin HTTP wrapper around the surviving mutation
  * routes. Mutations do not have a query-enhancements equivalent, so these
- * stay as custom routes; Phase 5 relocates them under `/api/alerting/
- * mutations/*` and gates registration on `observabilityConfig.alertManager.
- * enabled`.
+ * stay as custom routes under `/api/alerting/mutations/*`; registration is
+ * gated on `observabilityConfig.alertManager.enabled`.
  *
  * Replaces the mutation surface of the deleted `alarms_client.ts`.
  */
@@ -18,16 +17,6 @@ export interface MonitorResponse {
   id: string;
   monitor: Record<string, unknown>;
   message: string;
-}
-
-export interface MonitorImportResponse {
-  created: number;
-  failed: number;
-  errors: Array<{ name?: string; error: string }>;
-}
-
-export interface MonitorExportResponse {
-  monitors: Array<Record<string, unknown>>;
 }
 
 export interface MonitorDeleteResponse {
@@ -69,22 +58,6 @@ export class MonitorMutationsClient {
     return (await this.requireHttp().delete(
       `/api/alerting/opensearch/${encodeURIComponent(dsId)}/monitors/${encodeURIComponent(id)}`
     )) as MonitorDeleteResponse;
-  }
-
-  async importMonitors(
-    json: { monitors: Array<Record<string, unknown>> },
-    dsId: string
-  ): Promise<MonitorImportResponse> {
-    return (await this.requireHttp().post(
-      `/api/alerting/opensearch/${encodeURIComponent(dsId)}/monitors/import`,
-      { body: JSON.stringify(json) }
-    )) as MonitorImportResponse;
-  }
-
-  async exportMonitors(dsId: string): Promise<MonitorExportResponse> {
-    return (await this.requireHttp().get(
-      `/api/alerting/opensearch/${encodeURIComponent(dsId)}/monitors/export`
-    )) as MonitorExportResponse;
   }
 
   async acknowledgeAlert(

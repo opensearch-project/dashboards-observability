@@ -28,6 +28,8 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { EchartsRender } from '../../echarts_render';
 import { ActionState, LogsMonitorType, TriggerState } from '../create_logs_monitor_types';
 import {
@@ -64,10 +66,14 @@ export const TriggerItem = React.memo<{
     onAddAction,
   }) => {
     const triggerTypeOptions = TRIGGER_TYPE_OPTIONS_BY_MONITOR[monitorType];
+    const fallbackName = i18n.translate(
+      'observability.alerting.createLogsMonitor.triggerItem.fallbackName',
+      { defaultMessage: 'Trigger {index}', values: { index: index + 1 } }
+    );
     return (
       <EuiAccordion
         id={`trigger-${trigger.id}`}
-        buttonContent={<strong>{trigger.name || `Trigger ${index + 1}`}</strong>}
+        buttonContent={<strong>{trigger.name || fallbackName}</strong>}
         initialIsOpen
         paddingSize="m"
         extraAction={
@@ -76,43 +82,75 @@ export const TriggerItem = React.memo<{
             color="danger"
             onClick={() => onDelete(trigger.id)}
             isDisabled={totalTriggers <= 1}
-            aria-label={`Delete ${trigger.name}`}
+            aria-label={i18n.translate(
+              'observability.alerting.createLogsMonitor.triggerItem.deleteTriggerAriaLabel',
+              { defaultMessage: 'Delete {name}', values: { name: trigger.name } }
+            )}
           >
-            Delete
+            {i18n.translate('observability.alerting.createLogsMonitor.triggerItem.deleteButton', {
+              defaultMessage: 'Delete',
+            })}
           </EuiButtonEmpty>
         }
       >
-        <EuiFormRow label="Trigger name" fullWidth>
+        <EuiFormRow
+          label={i18n.translate(
+            'observability.alerting.createLogsMonitor.triggerItem.triggerNameLabel',
+            { defaultMessage: 'Trigger name' }
+          )}
+          fullWidth
+        >
           <EuiFieldText
             value={trigger.name}
             onChange={(e) => onUpdate(trigger.id, { name: e.target.value })}
             fullWidth
             compressed
-            aria-label="Trigger name"
+            aria-label={i18n.translate(
+              'observability.alerting.createLogsMonitor.triggerItem.triggerNameAriaLabel',
+              { defaultMessage: 'Trigger name' }
+            )}
           />
         </EuiFormRow>
         <EuiSpacer size="s" />
 
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
-            <EuiFormRow label="Severity level" display="rowCompressed">
+            <EuiFormRow
+              label={i18n.translate(
+                'observability.alerting.createLogsMonitor.triggerItem.severityLevelLabel',
+                { defaultMessage: 'Severity level' }
+              )}
+              display="rowCompressed"
+            >
               <EuiSelect
                 options={SEVERITY_OPTIONS}
                 value={trigger.severityLevel}
                 onChange={(e) => onUpdate(trigger.id, { severityLevel: e.target.value })}
                 compressed
-                aria-label="Severity level"
+                aria-label={i18n.translate(
+                  'observability.alerting.createLogsMonitor.triggerItem.severityLevelAriaLabel',
+                  { defaultMessage: 'Severity level' }
+                )}
               />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow label="Type" display="rowCompressed">
+            <EuiFormRow
+              label={i18n.translate(
+                'observability.alerting.createLogsMonitor.triggerItem.typeLabel',
+                { defaultMessage: 'Type' }
+              )}
+              display="rowCompressed"
+            >
               <EuiSelect
                 options={triggerTypeOptions}
                 value={trigger.type}
                 onChange={(e) => onUpdate(trigger.id, { type: e.target.value })}
                 compressed
-                aria-label="Trigger type"
+                aria-label={i18n.translate(
+                  'observability.alerting.createLogsMonitor.triggerItem.triggerTypeAriaLabel',
+                  { defaultMessage: 'Trigger type' }
+                )}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -120,7 +158,12 @@ export const TriggerItem = React.memo<{
         <EuiSpacer size="s" />
 
         {/* Trigger condition */}
-        <EuiFormRow label="Trigger condition">
+        <EuiFormRow
+          label={i18n.translate(
+            'observability.alerting.createLogsMonitor.triggerItem.triggerConditionLabel',
+            { defaultMessage: 'Trigger condition' }
+          )}
+        >
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem>
               <EuiSelect
@@ -128,7 +171,10 @@ export const TriggerItem = React.memo<{
                 value={trigger.conditionOperator}
                 onChange={(e) => onUpdate(trigger.id, { conditionOperator: e.target.value })}
                 compressed
-                aria-label="Condition operator"
+                aria-label={i18n.translate(
+                  'observability.alerting.createLogsMonitor.triggerItem.conditionOperatorAriaLabel',
+                  { defaultMessage: 'Condition operator' }
+                )}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false} style={{ minWidth: 100 }}>
@@ -138,7 +184,10 @@ export const TriggerItem = React.memo<{
                   onUpdate(trigger.id, { conditionValue: parseFloat(e.target.value) || 0 })
                 }
                 compressed
-                aria-label="Condition value"
+                aria-label={i18n.translate(
+                  'observability.alerting.createLogsMonitor.triggerItem.conditionValueAriaLabel',
+                  { defaultMessage: 'Condition value' }
+                )}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -148,11 +197,20 @@ export const TriggerItem = React.memo<{
         {/* Threshold visualization */}
         <EuiPanel paddingSize="s" color="subdued">
           <EuiCallOut size="s" color="warning" iconType="iInCircle">
-            <EuiText size="xs">Sample data — run the monitor to see real results</EuiText>
+            <EuiText size="xs">
+              {i18n.translate(
+                'observability.alerting.createLogsMonitor.triggerItem.sampleDataCallout',
+                { defaultMessage: 'Sample data — run the monitor to see real results' }
+              )}
+            </EuiText>
           </EuiCallOut>
           <EuiSpacer size="xs" />
           <EuiText size="xs">
-            <strong>Results</strong>
+            <strong>
+              {i18n.translate('observability.alerting.createLogsMonitor.triggerItem.resultsLabel', {
+                defaultMessage: 'Results',
+              })}
+            </strong>
           </EuiText>
           <EuiText size="xs" color="subdued">
             EVENTS_LAST_HOUR_v2
@@ -165,10 +223,21 @@ export const TriggerItem = React.memo<{
         {/* Suppress */}
         <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiToolTip content="Suppress repeat notifications for this trigger for the specified duration after the first alert fires.">
+            <EuiToolTip
+              content={i18n.translate(
+                'observability.alerting.createLogsMonitor.triggerItem.suppressTooltip',
+                {
+                  defaultMessage:
+                    'Suppress repeat notifications for this trigger for the specified duration after the first alert fires.',
+                }
+              )}
+            >
               <EuiCheckbox
                 id={`suppress-${trigger.id}`}
-                label="Suppress"
+                label={i18n.translate(
+                  'observability.alerting.createLogsMonitor.triggerItem.suppressLabel',
+                  { defaultMessage: 'Suppress' }
+                )}
                 checked={trigger.suppressEnabled}
                 onChange={(e) => onUpdate(trigger.id, { suppressEnabled: e.target.checked })}
               />
@@ -177,7 +246,13 @@ export const TriggerItem = React.memo<{
           {trigger.suppressEnabled && (
             <>
               <EuiFlexItem grow={false}>
-                <EuiFormRow label="Expires" display="rowCompressed">
+                <EuiFormRow
+                  label={i18n.translate(
+                    'observability.alerting.createLogsMonitor.triggerItem.expiresLabel',
+                    { defaultMessage: 'Expires' }
+                  )}
+                  display="rowCompressed"
+                >
                   <EuiFlexGroup gutterSize="xs" responsive={false}>
                     <EuiFlexItem style={{ minWidth: 60 }}>
                       <EuiFieldNumber
@@ -189,7 +264,10 @@ export const TriggerItem = React.memo<{
                         }
                         min={1}
                         compressed
-                        aria-label="Suppress expiry value"
+                        aria-label={i18n.translate(
+                          'observability.alerting.createLogsMonitor.triggerItem.suppressExpiryValueAriaLabel',
+                          { defaultMessage: 'Suppress expiry value' }
+                        )}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
@@ -200,7 +278,10 @@ export const TriggerItem = React.memo<{
                           onUpdate(trigger.id, { suppressExpiryUnit: e.target.value })
                         }
                         compressed
-                        aria-label="Suppress expiry unit"
+                        aria-label={i18n.translate(
+                          'observability.alerting.createLogsMonitor.triggerItem.suppressExpiryUnitAriaLabel',
+                          { defaultMessage: 'Suppress expiry unit' }
+                        )}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -213,7 +294,13 @@ export const TriggerItem = React.memo<{
 
         {/* Notification actions */}
         <EuiTitle size="xxs">
-          <h4>Notification actions ({trigger.actions.length})</h4>
+          <h4>
+            <FormattedMessage
+              id="observability.alerting.createLogsMonitor.triggerItem.notificationActionsTitle"
+              defaultMessage="Notification actions ({count})"
+              values={{ count: trigger.actions.length }}
+            />
+          </h4>
         </EuiTitle>
         <EuiSpacer size="s" />
         {trigger.actions.map((action, actionIdx) => (
@@ -229,13 +316,26 @@ export const TriggerItem = React.memo<{
                     size="xs"
                     color="danger"
                     onClick={() => onDeleteAction(trigger.id, action.id)}
-                    aria-label={`Delete action ${action.name}`}
+                    aria-label={i18n.translate(
+                      'observability.alerting.createLogsMonitor.triggerItem.deleteActionAriaLabel',
+                      { defaultMessage: 'Delete action {name}', values: { name: action.name } }
+                    )}
                   >
-                    Delete
+                    {i18n.translate(
+                      'observability.alerting.createLogsMonitor.triggerItem.deleteActionButton',
+                      { defaultMessage: 'Delete' }
+                    )}
                   </EuiButtonEmpty>
                 }
               >
-                <EuiFormRow label="Notification channel" display="rowCompressed" fullWidth>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'observability.alerting.createLogsMonitor.triggerItem.notificationChannelLabel',
+                    { defaultMessage: 'Notification channel' }
+                  )}
+                  display="rowCompressed"
+                  fullWidth
+                >
                   <EuiSelect
                     options={NOTIFICATION_CHANNEL_OPTIONS}
                     value={action.notificationChannel}
@@ -244,26 +344,51 @@ export const TriggerItem = React.memo<{
                     }
                     compressed
                     fullWidth
-                    aria-label="Notification channel"
+                    aria-label={i18n.translate(
+                      'observability.alerting.createLogsMonitor.triggerItem.notificationChannelAriaLabel',
+                      { defaultMessage: 'Notification channel' }
+                    )}
                   />
                 </EuiFormRow>
                 <EuiSpacer size="s" />
-                <EuiFormRow label="Subject" display="rowCompressed" fullWidth>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'observability.alerting.createLogsMonitor.triggerItem.subjectLabel',
+                    { defaultMessage: 'Subject' }
+                  )}
+                  display="rowCompressed"
+                  fullWidth
+                >
                   <EuiFieldText
-                    placeholder="Enter a subject"
+                    placeholder={i18n.translate(
+                      'observability.alerting.createLogsMonitor.triggerItem.subjectPlaceholder',
+                      { defaultMessage: 'Enter a subject' }
+                    )}
                     value={action.subject}
                     onChange={(e) =>
                       onUpdateAction(trigger.id, action.id, { subject: e.target.value })
                     }
                     compressed
                     fullWidth
-                    aria-label="Action subject"
+                    aria-label={i18n.translate(
+                      'observability.alerting.createLogsMonitor.triggerItem.actionSubjectAriaLabel',
+                      { defaultMessage: 'Action subject' }
+                    )}
                   />
                 </EuiFormRow>
                 <EuiSpacer size="s" />
                 <EuiFormRow
-                  label="Message"
-                  helpText="Embed variables in your message using Mustache templates. Learn more"
+                  label={i18n.translate(
+                    'observability.alerting.createLogsMonitor.triggerItem.messageLabel',
+                    { defaultMessage: 'Message' }
+                  )}
+                  helpText={i18n.translate(
+                    'observability.alerting.createLogsMonitor.triggerItem.messageHelpText',
+                    {
+                      defaultMessage:
+                        'Embed variables in your message using Mustache templates. Learn more',
+                    }
+                  )}
                   display="rowCompressed"
                   fullWidth
                 >
@@ -276,7 +401,10 @@ export const TriggerItem = React.memo<{
                     rows={6}
                     fullWidth
                     compressed
-                    aria-label="Action message"
+                    aria-label={i18n.translate(
+                      'observability.alerting.createLogsMonitor.triggerItem.actionMessageAriaLabel',
+                      { defaultMessage: 'Action message' }
+                    )}
                   />
                 </EuiFormRow>
               </EuiAccordion>
@@ -288,9 +416,14 @@ export const TriggerItem = React.memo<{
           size="s"
           iconType="plusInCircle"
           onClick={() => onAddAction(trigger.id)}
-          aria-label="Add another action"
+          aria-label={i18n.translate(
+            'observability.alerting.createLogsMonitor.triggerItem.addActionAriaLabel',
+            { defaultMessage: 'Add another action' }
+          )}
         >
-          Add another action
+          {i18n.translate('observability.alerting.createLogsMonitor.triggerItem.addActionButton', {
+            defaultMessage: 'Add another action',
+          })}
         </EuiButtonEmpty>
       </EuiAccordion>
     );

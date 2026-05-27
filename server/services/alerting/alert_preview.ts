@@ -16,6 +16,7 @@
  *   - `extractOSPreviewData` — fallback extraction from an OS monitor `_execute` dry-run
  *   - `fetchPromPreviewData` — queryRange (preferred) or fallback to embedded alert data
  */
+import type { RequestHandlerContext } from '../../../../../src/core/server';
 import {
   AlertingOSClient,
   Datasource,
@@ -317,32 +318,29 @@ export function extractOSPreviewData(
 /**
  * Fetch condition preview data for Prometheus rules.
  *
- * Uses the DirectQuery query execution API (POST /_plugins/_directquery/_query)
- * which supports both instant and range PromQL queries via PrometheusQueryHandler.
- * This is separate from the resource proxy (/_plugins/_directquery/_resources)
- * which only supports metadata lookups.
- *
- * Falls back to extracting evaluation data from rule.alerts[].value if
- * queryRange is not available or fails.
+ * Routes the range query through the data plugin's search service
+ * (`strategy: 'PROMQL'`) — same path as the rest of the PromQL surface in
+ * this plugin. When the request context is missing (e.g. legacy callers
+ * not yet plumbed) or the strategy throws, falls back to extracting
+ * evaluation data from `rule.alerts[].value`.
  */
 export async function fetchPromPreviewData(
   promBackend: PrometheusBackend | undefined,
-  client: AlertingOSClient,
+  ctx: RequestHandlerContext | undefined,
   ds: Datasource,
   query: string,
   rule: PromAlertingRule
 ): Promise<Array<{ timestamp: number; value: number }>> {
-  // Try queryRange first (works with direct Prometheus, not via DirectQuery)
-  if (promBackend?.queryRange) {
+  if (promBackend?.queryRange && ctx) {
     try {
       const metricQuery = query.replace(/\s*(>|<|>=|<=|==|!=)\s*[\d.]+\s*$/, '').trim();
       const now = Math.floor(Date.now() / 1000);
       const oneHourAgo = now - 3600;
       const step = 60;
-      const points = await promBackend.queryRange(client, ds, metricQuery, oneHourAgo, now, step);
+      const points = await promBackend.queryRange(ctx, ds, metricQuery, oneHourAgo, now, step);
       if (points.length > 0) return points;
     } catch {
-      // queryRange not supported (e.g., DirectQuery) — fall through to extraction
+      // Strategy threw or returned no data — fall through to embedded-alert extraction
     }
   }
 

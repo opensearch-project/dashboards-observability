@@ -11,7 +11,7 @@ jest.mock('../monitor_detail_flyout', () => ({
   MonitorDetailFlyout: () => <div data-test-subj="monitor-flyout" />,
 }));
 
-// Phase 6b moved monitors_table.tsx → monitors_table/index.tsx;
+// monitors_table.tsx was moved to monitors_table/index.tsx;
 // `../monitors_table` still resolves via TS's implicit index.tsx resolution.
 import { MonitorsTable } from '../monitors_table';
 import { Datasource } from '../../../../common/types/alerting';
@@ -39,7 +39,7 @@ const sampleRule = (overrides = {}) => ({
   ...overrides,
 });
 
-// Post-Phase 4: MonitorsTable no longer takes an apiClient prop — mutation
+// MonitorsTable no longer takes an apiClient prop — mutation
 // dispatch happens inside the page via hooks. Props kept here are the
 // display-and-interaction ones the component currently accepts.
 const defaultProps = {
@@ -66,5 +66,23 @@ describe('MonitorsTable', () => {
     fireEvent.click(checkbox);
     // After selecting, the Delete button should appear
     expect(screen.getByText(/Delete/)).toBeInTheDocument();
+  });
+
+  // Regression: deselecting all datasources must wipe both the dependent
+  // facet selections AND the search box, mirroring the cascade-clear in
+  // alerts_dashboard.tsx. Keep the two tabs aligned.
+  it('clears the search box when all datasources are deselected', () => {
+    const onDatasourceChange = jest.fn();
+    render(<MonitorsTable {...defaultProps} onDatasourceChange={onDatasourceChange} />);
+
+    const searchInput = screen.getByPlaceholderText(/Search monitors/i) as HTMLInputElement;
+    fireEvent.change(searchInput, { target: { value: 'HighCPU' } });
+    expect(searchInput.value).toBe('HighCPU');
+
+    // Uncheck the only selected datasource in the filter panel.
+    fireEvent.click(screen.getByLabelText(/prom1/));
+
+    expect(onDatasourceChange).toHaveBeenCalledWith([]);
+    expect(searchInput.value).toBe('');
   });
 });

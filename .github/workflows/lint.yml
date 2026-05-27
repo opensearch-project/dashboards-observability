@@ -13,14 +13,14 @@ jobs:
 
     steps:
       - name: Checkout OpenSearch Dashboards
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           repository: opensearch-project/Opensearch-Dashboards
           ref: ${{ env.OPENSEARCH_DASHBOARDS_VERSION }}
           path: OpenSearch-Dashboards
 
       - name: Checkout dashboards observability
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           path: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}
           fetch-depth: 0
@@ -33,7 +33,7 @@ jobs:
           echo "::set-output name=yarn_version::$(node -p "(require('./OpenSearch-Dashboards/package.json').engines.yarn).match(/[.0-9]+/)[0]")"
 
       - name: Setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@f1f314fca9dfce2769ece7d933488f076716723e # v1
         with:
           node-version: ${{ steps.versions_step.outputs.node_version }}
           registry-url: 'https://registry.npmjs.org'
@@ -49,7 +49,7 @@ jobs:
         run: yarn osd bootstrap --single-version=loose
 
       - name: Get list of changed files using GitHub Action
-        uses: lots0logs/gh-action-get-changed-files@2.2.2
+        uses: lots0logs/gh-action-get-changed-files@6cb5164a823dbf3318b7c8032a333b4b7ed425b2 # 2.2.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 

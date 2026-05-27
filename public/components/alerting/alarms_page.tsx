@@ -4,11 +4,30 @@
  */
 
 /**
- * Alert Manager UI — single-datasource selection with server-side pagination.
- * Prometheus datasources are decomposed into selectable workspaces.
+ * Alert Manager UI — top-level container.
+ *
+ * Owns:
+ *   - Datasource selection (persisted per-tab in `localStorage` by name).
+ *   - Time-range picker state (persisted per-tab in `sessionStorage` as
+ *     date-math strings, defaulting to `now-24h` → `now`). Pagination of the
+ *     in-memory alerts list stays local.
+ *   - `refreshToken` state bumped by the refresh button next to the picker;
+ *     `useAlerts` treats it as an effect dependency so bumping it refetches
+ *     without changing the range.
+ *
+ * Alerts data flows via `useAlerts` — the hook wraps the APM-pattern
+ * `AlertingOpenSearchService.listAlerts` transport (no `alarms_client.ts`).
+ * Rules data still uses the inline `fetchRules` callback; migrating Rules
+ * onto `useRules` is tracked as a follow-up.
+ *
+ * sessionStorage keys:
+ *   - `AlertManagerStartTime` — date-math string for picker start.
+ *   - `AlertManagerEndTime`   — date-math string for picker end.
  */
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { EuiLink, EuiSpacer, EuiTab, EuiTabs, EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiTab, EuiTabs } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { toMountPoint } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 import { useToast } from '../common/toast';
 import {
@@ -22,11 +41,11 @@ import { CreateMonitor, MonitorFormState } from './create_monitor';
 import { AlertsDashboard } from './alerts_dashboard';
 import { AlertDetailFlyout } from './alert_detail_flyout';
 import { NotificationRoutingPanel } from './notification_routing_panel';
-// Phase 2: import { SuppressionRulesPanel } from './suppression_rules_panel';
+// Future: import { SuppressionRulesPanel } from './suppression_rules_panel';
 import { CreateLogsMonitor, LogsMonitorFormState } from './create_logs_monitor';
 import { CreateMetricsMonitor, MetricsMonitorFormState } from './create_metrics_monitor';
-// Phase 2: import SloListing from './slo_listing';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
+import { useAlerts } from './hooks/use_alerts';
 import { useMonitorMutations } from './hooks/use_monitor_mutations';
 import { coreRefs } from '../../framework/core_refs';
 import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
@@ -39,6 +58,8 @@ import {
   transformLogsFormToPayload,
   transformMetricsFormToPayload,
 } from '../../../common/services/alerting/form_transforms';
+import { parseDateMathMs } from '../../../common/services/alerting/time_range';
+import './alerting.scss';
 
 // ============================================================================
 // Main Page Component
@@ -76,6 +97,42 @@ function persistSelection(names: string[]) {
     window.localStorage.setItem(ALERT_MANAGER_SELECTED_DS_STORAGE_KEY, JSON.stringify(names));
   } catch (_e) {
     // localStorage can be unavailable (private mode / quota). Not fatal.
+  }
+}
+
+// ---- Time-range persistence ----
+//
+// Keyed in sessionStorage (not localStorage) so each tab keeps its own
+// picked range — mirrors APM's precedent. Falls back to the default
+// (`now-24h` → `now`) when the key is absent or the underlying storage
+// throws (SSR, private mode, quota exceeded).
+const ALERT_MANAGER_START_TIME_KEY = 'AlertManagerStartTime';
+const ALERT_MANAGER_END_TIME_KEY = 'AlertManagerEndTime';
+const DEFAULT_START_TIME = 'now-24h';
+const DEFAULT_END_TIME = 'now';
+
+function loadPersistedStartTime(): string {
+  try {
+    return window.sessionStorage.getItem(ALERT_MANAGER_START_TIME_KEY) || DEFAULT_START_TIME;
+  } catch (_e) {
+    return DEFAULT_START_TIME;
+  }
+}
+
+function loadPersistedEndTime(): string {
+  try {
+    return window.sessionStorage.getItem(ALERT_MANAGER_END_TIME_KEY) || DEFAULT_END_TIME;
+  } catch (_e) {
+    return DEFAULT_END_TIME;
+  }
+}
+
+function persistTimeRange(start: string, end: string) {
+  try {
+    window.sessionStorage.setItem(ALERT_MANAGER_START_TIME_KEY, start);
+    window.sessionStorage.setItem(ALERT_MANAGER_END_TIME_KEY, end);
+  } catch (_e) {
+    // sessionStorage can be unavailable (SSR / private mode / quota). Not fatal.
   }
 }
 
@@ -117,16 +174,68 @@ function resolveDatasourceTokens(tokens: string[], datasources: Datasource[]): s
 
 type TabId = 'alerts' | 'rules' | 'routing';
 
+/**
+ * Parse a hash-route deep link of the form `#/rules?q=<query>` into the
+ * tab to land on plus an optional initial search query. Returns
+ * `{ tab: undefined, q: undefined }` on any unknown shape so the caller
+ * keeps its default state (Alerts tab, empty search). Tested implicitly
+ * through `<AlarmsPage>` mount tests.
+ */
+export function parseAlarmsHashRoute(hash: string): { tab?: TabId; q?: string } {
+  if (!hash) return {};
+  // Strip leading `#` then `/`. The hash router's URLs are
+  // `#/rules?q=…` or `#/routing` etc.
+  const stripped = hash.replace(/^#\/?/, '');
+  if (stripped.length === 0) return {};
+  const [pathPart, queryPart = ''] = stripped.split('?', 2);
+  const segment = pathPart.split('/')[0];
+  const tab: TabId | undefined =
+    segment === 'rules' || segment === 'alerts' || segment === 'routing' ? segment : undefined;
+  let q: string | undefined;
+  if (queryPart) {
+    try {
+      const params = new URLSearchParams(queryPart);
+      const raw = params.get('q');
+      if (raw && raw.trim()) q = raw;
+    } catch {
+      // Malformed query string — treat as no params rather than throwing.
+    }
+  }
+  return { tab, q };
+}
+
 const TAB_LABELS: Record<TabId, string> = {
-  alerts: 'Alerts',
-  rules: 'Rules',
-  routing: 'Routing',
+  alerts: i18n.translate('observability.alerting.alarmsPage.tabLabel.alerts', {
+    defaultMessage: 'Alerts',
+  }),
+  rules: i18n.translate('observability.alerting.alarmsPage.tabLabel.rules', {
+    defaultMessage: 'Rules',
+  }),
+  routing: i18n.translate('observability.alerting.alarmsPage.tabLabel.routing', {
+    defaultMessage: 'Routing',
+  }),
 };
 
 // Fetch a large page from the server so child tables can paginate client-side.
 // The child components (AlertsDashboard, MonitorsTable) handle their own
 // page-size controls (10/20/50/100 rows per page) over this full dataset.
 const DEFAULT_PAGE_SIZE = 1000;
+
+// The OpenSearch Alerting plugin creates the `.opendistro-alerting-config`
+// index lazily, on first monitor/destination creation. Until then, list calls
+// return a 404 `alerting_exception` / `IndexNotFoundException`. That's the same
+// signal our "No rules have been created" empty state already conveys, so we
+// suppress the warning banner for this specific case — the user is about to
+// see the CTA to create their first rule, which will auto-create the index.
+const isAlertingConfigMissingError = (err: string | undefined): boolean => {
+  if (!err) return false;
+  return (
+    err.includes('.opendistro-alerting-config') &&
+    (err.includes('index_not_found') ||
+      err.includes('IndexNotFoundException') ||
+      err.includes('alerting_exception'))
+  );
+};
 
 export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   datasources,
@@ -136,18 +245,155 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
 }) => {
   const osService = useMemo(() => new AlertingOpenSearchService(), []);
   const mutations = useMonitorMutations();
-  const [activeTab, setActiveTab] = useState<TabId>('alerts');
+
+  // Deep-link parsing — when SLO detail (or any other surface) navigates to
+  // `#/rules?q=<rulename>` we want to land on the Rules tab with the search
+  // box pre-filled. Read once on mount via `useState` initializer so we don't
+  // re-trigger the tab switch every time the user types in the search box.
+  // The hash-router lives at `/<basepath>/app/observability-alerting#/rules?q=…`,
+  // so the `?q=…` is a tail of `location.hash`, not `location.search`.
+  const initialDeepLink = useMemo(() => parseAlarmsHashRoute(window.location.hash), []);
+  const [activeTab, setActiveTab] = useState<TabId>(initialDeepLink.tab ?? 'alerts');
   const [selectedDsIds, setSelectedDsIds] = useState<string[]>([]);
+  // `dataLoading` / `error` / `rulesWarnings` only drive the Rules flow now —
+  // the Alerts path reads loading/error/warnings from `useAlerts` below.
   const [dataLoading, setDataLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [warnings, setWarnings] = useState<Array<{ datasourceName: string; error: string }>>([]);
+  const [rulesWarnings, setRulesWarnings] = useState<
+    Array<{ datasourceName: string; error: string }>
+  >([]);
 
-  // Paginated data — list endpoints return summary shapes.
-  // Detail flyouts re-fetch the full UnifiedAlert / UnifiedRule on demand.
-  const [alerts, setAlerts] = useState<UnifiedAlertSummary[]>([]);
-  const [alertsTotal, setAlertsTotal] = useState(0);
-  const [alertsPage, setAlertsPage] = useState(1);
-  const [alertsPageSize] = useState(DEFAULT_PAGE_SIZE);
+  // ---- Time-range state ----
+  //
+  // Initialized lazily from sessionStorage so SSR / JSDOM first-render is
+  // still stable when storage access throws. Writes happen eagerly via
+  // `onTimeChange` (picker) and `onRefresh` (refresh button).
+  const [startTime, setStartTime] = useState<string>(loadPersistedStartTime);
+  const [endTime, setEndTime] = useState<string>(loadPersistedEndTime);
+  const [refreshToken, setRefreshToken] = useState(0);
+
+  // Resolve once per render, guarded.
+  //
+  // `parseDateMathMs` throws on malformed input (invalid date-math). If a
+  // user or a browser extension corrupts the sessionStorage-hydrated
+  // `startTime`/`endTime`, resolving at module top-level would crash the
+  // page on mount. `useMemo` lets us swallow the error and fall back to
+  // the known-good defaults (`now-24h` -> `now`), which ALSO parse through
+  // `parseDateMathMs` so we never ship hard-coded epoch numbers. The
+  // recovery is self-healing: the effect below resets state and
+  // sessionStorage to the defaults so the hook stops forwarding garbage.
+  //
+  // `refreshToken` is in the deps so that clicking Refresh while the range
+  // is relative-to-`now` (e.g. `now-24h` → `now`) re-resolves `now` to the
+  // current wall clock. Without it the chart window would stay pinned to
+  // the mount-time snapshot even though the hook refetches new data, which
+  // would misalign bars at the right edge of the chart.
+  const [startMs, endMs, rangeParseFailed] = useMemo(() => {
+    try {
+      return [parseDateMathMs(startTime, false), parseDateMathMs(endTime, true), false];
+    } catch {
+      return [
+        parseDateMathMs(DEFAULT_START_TIME, false),
+        parseDateMathMs(DEFAULT_END_TIME, true),
+        true,
+      ];
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startTime, endTime, refreshToken]);
+
+  // When parse failed (corrupted sessionStorage, manual DevTools edit),
+  // heal the stored values back to defaults. Without this, `startTime` /
+  // `endTime` keep leaking garbage into `useAlerts` → the backend route,
+  // which rejects it with a 400 and surfaces as `alertsError`. Resetting
+  // state + persistence both (a) stops the 400 loop and (b) means the
+  // next render sees a clean, good range.
+  useEffect(() => {
+    if (!rangeParseFailed) return;
+    setStartTime(DEFAULT_START_TIME);
+    setEndTime(DEFAULT_END_TIME);
+    persistTimeRange(DEFAULT_START_TIME, DEFAULT_END_TIME);
+  }, [rangeParseFailed]);
+
+  // ---- Alerts data (migrated off inline fetchAlerts onto useAlerts) ----
+  const { data: alertsData, isLoading: alertsLoading, error: alertsError } = useAlerts({
+    dsIds: selectedDsIds,
+    startTime,
+    endTime,
+    refreshToken,
+  });
+
+  // Optimistic ack overrides — keyed by alertId. The hook owns the alerts
+  // array (single source of truth), so we layer the user's pending acks
+  // on top in render rather than mutating the hook's data. Cleared per-id
+  // once a refetch confirms the ack landed (or the id disappears from the
+  // list, e.g. retention drop). Without this, clicking Acknowledge feels
+  // unresponsive because the Prometheus historical-reconstruction refetch
+  // can take seconds before the row state visibly flips.
+  const [ackOverrides, setAckOverrides] = useState<
+    Record<string, { state: 'acknowledged'; lastUpdated: string }>
+  >({});
+
+  // Public-facing projections. Kept in the same shape the rest of this
+  // component consumed before the migration so the downstream code didn't
+  // have to change. Behaviorally identical to the old `alerts`/`alertsTotal`
+  // state but now driven by the hook.
+  const rawAlerts: UnifiedAlertSummary[] = useMemo(() => alertsData?.results || [], [alertsData]);
+  const alerts: UnifiedAlertSummary[] = useMemo(() => {
+    if (Object.keys(ackOverrides).length === 0) return rawAlerts;
+    return rawAlerts.map((a) => {
+      const ov = ackOverrides[a.id];
+      return ov ? { ...a, state: ov.state, lastUpdated: ov.lastUpdated } : a;
+    });
+  }, [rawAlerts, ackOverrides]);
+  const alertsTotal = alerts.length;
+
+  // Drop overrides whose target alert is now acknowledged on the server
+  // (or has fallen out of the result set entirely). Runs after every hook
+  // refetch — keeps the override map from leaking memory across many acks.
+  useEffect(() => {
+    setAckOverrides((prev) => {
+      if (Object.keys(prev).length === 0) return prev;
+      let changed = false;
+      const next = { ...prev };
+      const byId = new Map(rawAlerts.map((a) => [a.id, a]));
+      for (const id of Object.keys(prev)) {
+        const live = byId.get(id);
+        if (!live || live.state === 'acknowledged') {
+          delete next[id];
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [rawAlerts]);
+  const alertsWarnings = useMemo(() => {
+    const failed = (alertsData?.datasourceStatus || []).filter((s) => s.status === 'error');
+    return failed.map((s) => ({
+      datasourceName: s.datasourceName,
+      error:
+        s.error ||
+        i18n.translate('observability.alerting.alarmsPage.unknownError', {
+          defaultMessage: 'Unknown error',
+        }),
+    }));
+  }, [alertsData]);
+  // Backend hints surfaced through the dashboard banner props.
+  const alertsTruncated = (alertsData?.datasourceStatus || []).some((s) => s.truncated);
+  const alertsFallbackHints = useMemo(
+    () =>
+      (alertsData?.datasourceStatus || [])
+        .filter((s) => s.fallback)
+        .map((s) => ({ datasourceName: s.datasourceName, fallback: s.fallback! })),
+    [alertsData]
+  );
+  const alertsErrorMessage =
+    alertsError instanceof Error ? alertsError.message : alertsError ? String(alertsError) : null;
+
+  // Pagination state: previously `alertsPage` / `alertsPageSize` lived here
+  // to feed the old inline `fetchAlerts` callback. `useAlerts` returns the
+  // full dataset (server doesn't paginate the unified endpoint), so local
+  // alerts pagination state is no longer needed — `AlertsDashboard` slices
+  // the results client-side via `EuiInMemoryTable`.
 
   const [rules, setRules] = useState<UnifiedRuleSummary[]>([]);
   const [rulesTotal, setRulesTotal] = useState(-1); // -1 = not yet loaded
@@ -187,13 +433,35 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       http?.basePath.get() ?? ''
     }/app/settings#${ALERT_MANAGER_MAX_DATASOURCES_SETTING}-group`;
     toasts.addWarning({
-      title: `Maximum ${maxDatasources} datasources can be selected`,
+      title: i18n.translate('observability.alerting.alarmsPage.maxDatasourcesToast.title', {
+        defaultMessage: 'Maximum {maxDatasources} datasources can be selected',
+        values: { maxDatasources },
+      }),
       text: toMountPoint(
-        <>
-          Adjust the <strong>Alert Manager maximum selected datasources</strong> setting in Advanced
-          Settings to raise this cap.{' '}
-          <EuiLink onClick={() => window.location.assign(settingsHref)}>Open setting</EuiLink>
-        </>
+        <FormattedMessage
+          id="observability.alerting.alarmsPage.maxDatasourcesToast.text"
+          defaultMessage="Adjust the {settingName} setting in Advanced Settings to raise this cap. {openLink}"
+          values={{
+            settingName: (
+              <strong>
+                <FormattedMessage
+                  id="observability.alerting.alarmsPage.maxDatasourcesToast.settingName"
+                  defaultMessage="Alerts maximum selected datasources"
+                />
+              </strong>
+            ),
+            openLink: (
+              <EuiLink onClick={() => window.location.assign(settingsHref)}>
+                {i18n.translate(
+                  'observability.alerting.alarmsPage.maxDatasourcesToast.openSetting',
+                  {
+                    defaultMessage: 'Open setting',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
       ),
     });
   }, [maxDatasources]);
@@ -201,10 +469,15 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // ---- Breadcrumbs ----
 
   useEffect(() => {
-    setNavBreadCrumbs(
-      [{ text: observabilityTitle, href: `${observabilityID}#/` }],
-      [{ text: 'Alert Manager' }, { text: TAB_LABELS[activeTab] }]
-    );
+    const pageLabel = i18n.translate('observability.alerting.alarmsPage.breadcrumb.alerts', {
+      defaultMessage: 'Alerts',
+    });
+    const tabLabel = TAB_LABELS[activeTab];
+    // Suppress the tab segment when it duplicates the page-level segment
+    // (the "Alerts" tab and the page name are both "Alerts").
+    const trail =
+      tabLabel === pageLabel ? [{ text: pageLabel }] : [{ text: pageLabel }, { text: tabLabel }];
+    setNavBreadCrumbs([{ text: observabilityTitle, href: `${observabilityID}#/` }], trail);
   }, [activeTab]);
 
   // ---- Resolve initial selection once datasources are available ----
@@ -260,40 +533,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   }, [selectedDsIds, datasources]);
 
   // ---- Fetch data when datasource selection or page changes ----
-
-  const fetchAlerts = useCallback(
-    async (dsIds: string[], _page: number, _pageSize: number) => {
-      if (dsIds.length === 0) {
-        setAlerts([]);
-        setAlertsTotal(0);
-        return;
-      }
-      setDataLoading(true);
-      setError(null);
-      setWarnings([]);
-      try {
-        const res = await osService.listAlerts({ dsIds });
-        setAlerts(res.results || []);
-        setAlertsTotal((res.results || []).length);
-        // Convert per-datasource failure entries from the progressive response
-        // into the UI's warning shape.
-        const failedStatuses = (res.datasourceStatus || []).filter((s) => s.status === 'error');
-        if (failedStatuses.length > 0) {
-          setWarnings(
-            failedStatuses.map((s) => ({
-              datasourceName: s.datasourceName,
-              error: s.error || 'Unknown error',
-            }))
-          );
-        }
-      } catch (e: unknown) {
-        setError(e instanceof Error ? e.message : 'Failed to fetch alerts');
-      } finally {
-        setDataLoading(false);
-      }
-    },
-    [osService]
-  );
+  //
+  // Alerts: now driven by `useAlerts` above — no inline callback needed.
+  // Changing `selectedDsIds`, `startTime`, `endTime`, or `refreshToken`
+  // triggers a refetch through the hook's effect.
 
   const fetchRules = useCallback(
     async (dsIds: string[], _page: number, _pageSize: number) => {
@@ -304,22 +547,34 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       }
       setDataLoading(true);
       setError(null);
-      setWarnings([]);
+      setRulesWarnings([]);
       try {
         const res = await osService.listRules({ dsIds });
         setRules(res.results || []);
         setRulesTotal((res.results || []).length);
-        const failedStatuses = (res.datasourceStatus || []).filter((s) => s.status === 'error');
+        const failedStatuses = (res.datasourceStatus || [])
+          .filter((s) => s.status === 'error')
+          .filter((s) => !isAlertingConfigMissingError(s.error));
         if (failedStatuses.length > 0) {
-          setWarnings(
+          setRulesWarnings(
             failedStatuses.map((s) => ({
               datasourceName: s.datasourceName,
-              error: s.error || 'Unknown error',
+              error:
+                s.error ||
+                i18n.translate('observability.alerting.alarmsPage.unknownError', {
+                  defaultMessage: 'Unknown error',
+                }),
             }))
           );
         }
       } catch (e: unknown) {
-        setError(e instanceof Error ? e.message : 'Failed to fetch rules');
+        setError(
+          e instanceof Error
+            ? e.message
+            : i18n.translate('observability.alerting.alarmsPage.fetchRulesError', {
+                defaultMessage: 'Failed to fetch rules',
+              })
+        );
       } finally {
         setDataLoading(false);
       }
@@ -327,19 +582,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     [osService]
   );
 
-  // Fetch when selection or pagination changes
-  useEffect(() => {
-    if (selectedDsIds.length === 0) {
-      setAlerts([]);
-      setAlertsTotal(0);
-      return;
-    }
-    // Fetch alerts regardless of active tab so the "Alerts (N)" tab label
-    // stays in sync when the user changes filters (e.g., datasource) while
-    // on a different tab. Mirrors the Rules-fetch effect below.
-    fetchAlerts(selectedDsIds, alertsPage, alertsPageSize);
-  }, [selectedDsIds, alertsPage, alertsPageSize, fetchAlerts]);
-
+  // Rules fetch effect (alerts effect removed — `useAlerts` hook drives that flow).
   useEffect(() => {
     if (selectedDsIds.length === 0) {
       setRules([]);
@@ -351,13 +594,40 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     fetchRules(selectedDsIds, rulesPage, rulesPageSize);
   }, [selectedDsIds, rulesPage, rulesPageSize, fetchRules]);
 
-  // Reset pages when datasource selection changes
+  // Reset pages when datasource selection changes. `useAlerts` refetches
+  // automatically on `selectedDsIds` change, so no alerts-page reset here.
   const handleDatasourceChange = useCallback((ids: string[]) => {
     setSelectedDsIds(ids);
-    setAlertsPage(1);
     setRulesPage(1);
     setDeletedRuleIds(new Set());
   }, []);
+
+  // ---- Time-picker callbacks ----
+  //
+  // Stable identities (`useCallback`) so passing them down to `AlertsDashboard`
+  // doesn't invalidate that subtree's React.memo / dependent memos on every
+  // page-level re-render. Logic is identical to the previous inline handlers.
+  const handleTimeChange = useCallback(
+    ({ start, end }: { start: string; end: string }) => {
+      if (start === startTime && end === endTime) return;
+      setStartTime(start);
+      setEndTime(end);
+      persistTimeRange(start, end);
+    },
+    [startTime, endTime]
+  );
+
+  const handleRefreshTime = useCallback(
+    ({ start, end }: { start: string; end: string }) => {
+      if (start !== startTime || end !== endTime) {
+        setStartTime(start);
+        setEndTime(end);
+        persistTimeRange(start, end);
+      }
+      setRefreshToken((t) => t + 1);
+    },
+    [startTime, endTime]
+  );
 
   // ---- Handlers ----
 
@@ -365,22 +635,33 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     const alert = alerts.find((a) => a.id === alertId);
     try {
       await mutations.acknowledgeAlert(alertId, alert?.datasourceId, alert?.labels?.monitor_id);
-      addToast('Alert acknowledged');
-      setAlerts((prev) =>
-        prev.map((a) =>
-          a.id === alertId
-            ? { ...a, state: 'acknowledged' as const, lastUpdated: new Date().toISOString() }
-            : a
-        )
+      addToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.alertAcknowledged', {
+          defaultMessage: 'Alert acknowledged',
+        })
       );
+      // Layer an optimistic override so the row flips to "acknowledged"
+      // immediately. The override is dropped once the refetch's response
+      // either confirms the ack or removes the row.
+      const lastUpdated = new Date().toISOString();
+      setAckOverrides((prev) => ({ ...prev, [alertId]: { state: 'acknowledged', lastUpdated } }));
+      // Bump the refresh token so the hook refetches and the override can
+      // be reconciled / cleared once the backend agrees.
+      setRefreshToken((t) => t + 1);
       // Update the flyout's selected alert inline so it stays open with fresh state
       setSelectedAlert((prev) =>
         prev && prev.id === alertId
-          ? { ...prev, state: 'acknowledged' as const, lastUpdated: new Date().toISOString() }
+          ? { ...prev, state: 'acknowledged' as const, lastUpdated }
           : prev
       );
     } catch (e: unknown) {
-      addToast('Failed to acknowledge alert', 'danger', e instanceof Error ? e.message : String(e));
+      addToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.acknowledgeAlertFailed', {
+          defaultMessage: 'Failed to acknowledge alert',
+        }),
+        'danger',
+        e instanceof Error ? e.message : String(e)
+      );
     }
   };
 
@@ -390,19 +671,39 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       const rule = rules.find((r) => r.id === id);
       if (!rule) {
         failed.push(id);
-        addToast('Failed to delete monitor', 'danger', `Monitor ${id} not found in cache`);
+        addToast(
+          i18n.translate('observability.alerting.alarmsPage.toast.deleteMonitorFailed', {
+            defaultMessage: 'Failed to delete monitor',
+          }),
+          'danger',
+          i18n.translate('observability.alerting.alarmsPage.toast.monitorNotFoundInCache', {
+            defaultMessage: 'Monitor {id} not found in cache',
+            values: { id },
+          })
+        );
         continue;
       }
       try {
         await mutations.deleteMonitor(id, rule.datasourceId);
       } catch (e: unknown) {
         failed.push(id);
-        addToast('Failed to delete monitor', 'danger', e instanceof Error ? e.message : String(e));
+        addToast(
+          i18n.translate('observability.alerting.alarmsPage.toast.deleteMonitorFailed', {
+            defaultMessage: 'Failed to delete monitor',
+          }),
+          'danger',
+          e instanceof Error ? e.message : String(e)
+        );
       }
     }
     const succeeded = ids.filter((id) => !failed.includes(id));
     if (succeeded.length > 0) {
-      addToast(succeeded.length + ' monitor(s) deleted');
+      addToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.monitorsDeleted', {
+          defaultMessage: '{count} monitor(s) deleted',
+          values: { count: succeeded.length },
+        })
+      );
     }
     setDeletedRuleIds((prev) => {
       const next = new Set(prev);
@@ -428,25 +729,20 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         (clone as unknown) as Record<string, unknown>,
         clone.datasourceId
       );
-      addToast('Monitor cloned');
+      addToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.monitorCloned', {
+          defaultMessage: 'Monitor cloned',
+        })
+      );
       setRules((prev) => [clone, ...prev]);
     } catch (e: unknown) {
-      addToast('Failed to clone monitor', 'danger', e instanceof Error ? e.message : String(e));
-    }
-  };
-
-  const handleImportMonitors = async (configs: Array<Record<string, unknown>>) => {
-    const dsId = selectedDsIds[0];
-    if (!dsId) {
-      addToast('Select a datasource before importing monitors', 'warning');
-      return;
-    }
-    try {
-      await mutations.importMonitors({ monitors: configs }, dsId);
-      addToast('Monitors imported successfully');
-      fetchRules(selectedDsIds, rulesPage, rulesPageSize);
-    } catch (e: unknown) {
-      addToast('Failed to import monitors', 'danger', e instanceof Error ? e.message : String(e));
+      addToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.cloneMonitorFailed', {
+          defaultMessage: 'Failed to clone monitor',
+        }),
+        'danger',
+        e instanceof Error ? e.message : String(e)
+      );
     }
   };
 
@@ -525,7 +821,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         }
       }
       if (indices.length > 0) labelsObj.indices = indices.join(', ');
-      labelsObj.monitorType = formState.monitorType;
+      // monitorType already lives on UnifiedRule as a top-level field — emitting
+      // it as a label too would leak into the Labels facet.
 
       return {
         id: `new-${Date.now()}-${index}`,
@@ -575,7 +872,12 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   const resolveDatasourceId = (formState: MonitorFormState): string | null => {
     const dsId = formState.datasourceId || selectedDsIds[0];
     if (!dsId) {
-      addToast('Select a datasource before creating a monitor', 'warning');
+      addToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.selectDatasourceForCreate', {
+          defaultMessage: 'Select a datasource before creating a monitor',
+        }),
+        'warning'
+      );
       return null;
     }
     return dsId;
@@ -591,12 +893,22 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     const newRule = formStateToRule(formState);
     try {
       await mutations.createMonitor((formState as unknown) as Record<string, unknown>, dsId);
-      addToast('Monitor created successfully');
+      addToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.monitorCreated', {
+          defaultMessage: 'Monitor created successfully',
+        })
+      );
       setRules((prev) => [newRule, ...prev]);
       setRulesTotal((prev) => prev + 1);
       setShowCreateMonitor(false);
     } catch (e: unknown) {
-      addToast('Failed to create monitor', 'danger', e instanceof Error ? e.message : String(e));
+      addToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.createMonitorFailed', {
+          defaultMessage: 'Failed to create monitor',
+        }),
+        'danger',
+        e instanceof Error ? e.message : String(e)
+      );
     }
   };
 
@@ -609,11 +921,22 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         await mutations.createMonitor((forms[i] as unknown) as Record<string, unknown>, dsId);
         succeededRules.push(formStateToRule(forms[i], i));
       } catch (e: unknown) {
-        addToast('Failed to create monitor', 'danger', e instanceof Error ? e.message : String(e));
+        addToast(
+          i18n.translate('observability.alerting.alarmsPage.toast.createMonitorFailed', {
+            defaultMessage: 'Failed to create monitor',
+          }),
+          'danger',
+          e instanceof Error ? e.message : String(e)
+        );
       }
     }
     if (succeededRules.length > 0) {
-      addToast(succeededRules.length + ' monitor(s) created successfully');
+      addToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.monitorsCreated', {
+          defaultMessage: '{count} monitor(s) created successfully',
+          values: { count: succeededRules.length },
+        })
+      );
       setRules((prev) => [...succeededRules, ...prev]);
       setRulesTotal((prev) => prev + succeededRules.length);
     }
@@ -639,7 +962,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       condition: logsForm.triggers
         .map((t) => `${t.conditionOperator} ${t.conditionValue}`)
         .join(', '),
-      labels: { monitorType: logsForm.monitorType },
+      labels: {},
       annotations: { description: logsForm.description },
       monitorType: 'log',
       status: 'active',
@@ -668,18 +991,29 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     };
     const dsId = selectedDsIds[0];
     if (!dsId) {
-      addToast('Select a datasource before creating a monitor', 'warning');
+      addToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.selectDatasourceForCreate', {
+          defaultMessage: 'Select a datasource before creating a monitor',
+        }),
+        'warning'
+      );
       return;
     }
     try {
       await mutations.createMonitor(transformLogsFormToPayload(logsForm), dsId);
-      addToast('Logs monitor created successfully');
+      addToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.logsMonitorCreated', {
+          defaultMessage: 'Logs monitor created successfully',
+        })
+      );
       setRules((prev) => [newRule, ...prev]);
       setRulesTotal((prev) => prev + 1);
       setCreateMonitorType(null);
     } catch (e: unknown) {
       addToast(
-        'Failed to create logs monitor',
+        i18n.translate('observability.alerting.alarmsPage.toast.createLogsMonitorFailed', {
+          defaultMessage: 'Failed to create logs monitor',
+        }),
         'danger',
         e instanceof Error ? e.message : String(e)
       );
@@ -737,13 +1071,19 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         transformMetricsFormToPayload(metricsForm),
         metricsForm.datasourceId
       );
-      addToast('Metrics monitor created successfully');
+      addToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.metricsMonitorCreated', {
+          defaultMessage: 'Metrics monitor created successfully',
+        })
+      );
       setRules((prev) => [newRule, ...prev]);
       setRulesTotal((prev) => prev + 1);
       setCreateMonitorType(null);
     } catch (e: unknown) {
       addToast(
-        'Failed to create metrics monitor',
+        i18n.translate('observability.alerting.alarmsPage.toast.createMetricsMonitorFailed', {
+          defaultMessage: 'Failed to create metrics monitor',
+        }),
         'danger',
         e instanceof Error ? e.message : String(e)
       );
@@ -753,9 +1093,31 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // ---- Render ----
 
   const tabs = [
-    { id: 'alerts' as TabId, name: `Alerts (${alertsTotal})` },
-    { id: 'rules' as TabId, name: rulesTotal >= 0 ? `Rules (${rulesTotal})` : 'Rules' },
-    { id: 'routing' as TabId, name: 'Routing' },
+    {
+      id: 'alerts' as TabId,
+      name: i18n.translate('observability.alerting.alarmsPage.tabs.alertsCount', {
+        defaultMessage: 'Alerts ({count})',
+        values: { count: alertsTotal },
+      }),
+    },
+    {
+      id: 'rules' as TabId,
+      name:
+        rulesTotal >= 0
+          ? i18n.translate('observability.alerting.alarmsPage.tabs.rulesCount', {
+              defaultMessage: 'Rules ({count})',
+              values: { count: rulesTotal },
+            })
+          : i18n.translate('observability.alerting.alarmsPage.tabs.rules', {
+              defaultMessage: 'Rules',
+            }),
+    },
+    {
+      id: 'routing' as TabId,
+      name: i18n.translate('observability.alerting.alarmsPage.tabs.routing', {
+        defaultMessage: 'Routing',
+      }),
+    },
   ];
 
   const renderTable = () => {
@@ -765,13 +1127,27 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           <AlertsDashboard
             alerts={alerts}
             datasources={datasources}
-            loading={dataLoading}
+            loading={alertsLoading}
             onViewDetail={(alert) => setSelectedAlert(alert)}
             onAcknowledge={handleAcknowledgeAlert}
             selectedDsIds={selectedDsIds}
             onDatasourceChange={handleDatasourceChange}
             maxDatasources={maxDatasources}
             onDatasourceCapReached={handleDatasourceCapReached}
+            rulesTotal={rulesTotal}
+            defaultDatasources={resolveDatasourceTokens(defaultDatasources, datasources).slice(
+              0,
+              maxDatasources
+            )}
+            onGoToRules={() => setActiveTab('rules')}
+            startMs={startMs}
+            endMs={endMs}
+            pickerStart={startTime}
+            pickerEnd={endTime}
+            onTimeChange={handleTimeChange}
+            onRefresh={handleRefreshTime}
+            truncated={alertsTruncated}
+            fallbackHints={alertsFallbackHints}
           />
         </>
       );
@@ -784,7 +1160,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           loading={dataLoading}
           onDelete={handleDeleteRules}
           onClone={handleCloneRule}
-          onImport={handleImportMonitors}
           // TODO(alert-manager): Restore Create Monitor button once creation flow is ready
           /* onCreateMonitor={(type) => {
             if (type === 'logs') {
@@ -799,6 +1174,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           onDatasourceChange={handleDatasourceChange}
           maxDatasources={maxDatasources}
           onDatasourceCapReached={handleDatasourceCapReached}
+          initialSearchQuery={initialDeepLink.q}
         />
       );
     }
@@ -809,10 +1185,9 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   };
 
   return (
-    <div
-      data-test-subj="alertManager-page"
-      style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
-    >
+    <div data-test-subj="alertManager-page" className="altPageRoot">
+      {/* Tab bar — picker now lives inside the Alert Timeline panel header */}
+      {/* so it's adjacent to the chart it controls.                       */}
       <EuiTabs data-test-subj="alertManager-tabs">
         {tabs.map((t) => (
           <EuiTab
@@ -825,13 +1200,29 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           </EuiTab>
         ))}
       </EuiTabs>
-      <EuiSpacer size="s" />
 
-      {/* Datasource selector removed — now integrated into filter panels */}
+      {/* Surface the hook's error if alerts fetch failed. Mirrors the       */}
+      {/* existing `error` callout pattern used for the Rules path.          */}
+      {alertsErrorMessage && activeTab === 'alerts' && (
+        <EuiCallOut
+          title={i18n.translate('observability.alerting.alarmsPage.alertsError.title', {
+            defaultMessage: 'Error loading alerts',
+          })}
+          color="danger"
+          iconType="alert"
+          size="s"
+          style={{ marginBottom: 12 }}
+          data-test-subj="alertManager-alertsError"
+        >
+          <p>{alertsErrorMessage}</p>
+        </EuiCallOut>
+      )}
 
       {error && (
         <EuiCallOut
-          title="Error loading data"
+          title={i18n.translate('observability.alerting.alarmsPage.errorCallout.title', {
+            defaultMessage: 'Error loading data',
+          })}
           color="danger"
           iconType="alert"
           size="s"
@@ -841,24 +1232,39 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         </EuiCallOut>
       )}
 
-      {warnings.length > 0 && (
-        <EuiCallOut
-          title="Some datasources could not be reached"
-          color="warning"
-          iconType="alert"
-          size="s"
-          style={{ marginBottom: 12 }}
-        >
-          {warnings.map((w, i) => (
-            <p key={i}>
-              <strong>{w.datasourceName}</strong>: {w.error}
-            </p>
-          ))}
-        </EuiCallOut>
-      )}
+      {(() => {
+        // Merge Rules-path `rulesWarnings` with the hook-driven `alertsWarnings`
+        // so we render a single callout regardless of which tab is active.
+        // Keyed by datasource name to dedupe when both paths report the
+        // same backend (possible if the user flips tabs rapidly while
+        // a slow datasource is still timing out on both flows).
+        const combined = activeTab === 'alerts' ? alertsWarnings : rulesWarnings;
+        if (combined.length === 0) return null;
+        return (
+          <EuiCallOut
+            title={i18n.translate('observability.alerting.alarmsPage.warningCallout.title', {
+              defaultMessage: 'Some datasources could not be reached',
+            })}
+            color="warning"
+            iconType="alert"
+            size="s"
+            style={{ marginBottom: 12 }}
+          >
+            {combined.map((w, i) => (
+              <p key={i}>
+                <strong>{w.datasourceName}</strong>: {w.error}
+              </p>
+            ))}
+          </EuiCallOut>
+        );
+      })()}
 
       <div aria-live="polite" className="euiScreenReaderOnly">
-        {`Showing ${tabs.find((t) => t.id === activeTab)?.name ?? activeTab} tab`}
+        <FormattedMessage
+          id="observability.alerting.alarmsPage.ariaLive.showingTab"
+          defaultMessage="Showing {tabName} tab"
+          values={{ tabName: tabs.find((t) => t.id === activeTab)?.name ?? activeTab }}
+        />
       </div>
       {renderTable()}
       {showCreateMonitor && (

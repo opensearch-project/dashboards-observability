@@ -48,6 +48,8 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { MOCK_METRICS } from '../promql_editor';
 import { UnifiedAlertSeverity } from '../../../../common/types/alerting';
 import { SEVERITY_COLORS } from '../shared_constants';
@@ -188,29 +190,80 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
       <EuiLoadingSpinner size="xl" />
       <EuiSpacer size="l" />
       <EuiTitle size="s">
-        <h3>Scanning Prometheus Metrics</h3>
+        <h3>
+          <FormattedMessage
+            id="observability.alerting.monitorTemplateWizard.scanningTitle"
+            defaultMessage="Scanning Prometheus Metrics"
+          />
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
-        Discovering OTEL-compatible metrics and matching against known application patterns...
+        <FormattedMessage
+          id="observability.alerting.monitorTemplateWizard.scanningDescription"
+          defaultMessage="Discovering OTEL-compatible metrics and matching against known application patterns..."
+        />
       </EuiText>
       <EuiSpacer size="l" />
       <EuiProgress value={scanProgress} max={100} size="l" color="primary" />
       <EuiSpacer size="s" />
       <EuiText size="xs" color="subdued">
-        {Math.round(scanProgress)}% — Analyzing metric namespaces
+        <FormattedMessage
+          id="observability.alerting.monitorTemplateWizard.scanningProgress"
+          defaultMessage="{progress}% — Analyzing metric namespaces"
+          values={{ progress: Math.round(scanProgress) }}
+        />
       </EuiText>
     </div>
   );
 
   const renderReview = () => (
     <div>
-      <EuiCallOut title="Metrics Discovery Complete" color="success" iconType="check" size="s">
+      <EuiCallOut
+        title={i18n.translate(
+          'observability.alerting.monitorTemplateWizard.discoveryCompleteTitle',
+          {
+            defaultMessage: 'Metrics Discovery Complete',
+          }
+        )}
+        color="success"
+        iconType="check"
+        size="s"
+      >
         <EuiText size="xs">
-          Found <strong>{totalDiscoveredMetrics} metrics</strong> across{' '}
-          <strong>{applications.length} application categories</strong>.{' '}
-          <strong>{totalAvailableAlerts} preconfigured alerts</strong> are available based on your
-          metrics.
+          <FormattedMessage
+            id="observability.alerting.monitorTemplateWizard.discoveryCompleteBody"
+            defaultMessage="Found {metrics} across {categories}. {alerts} are available based on your metrics."
+            values={{
+              metrics: (
+                <strong>
+                  <FormattedMessage
+                    id="observability.alerting.monitorTemplateWizard.metricsCount"
+                    defaultMessage="{count} metrics"
+                    values={{ count: totalDiscoveredMetrics }}
+                  />
+                </strong>
+              ),
+              categories: (
+                <strong>
+                  <FormattedMessage
+                    id="observability.alerting.monitorTemplateWizard.categoriesCount"
+                    defaultMessage="{count} application categories"
+                    values={{ count: applications.length }}
+                  />
+                </strong>
+              ),
+              alerts: (
+                <strong>
+                  <FormattedMessage
+                    id="observability.alerting.monitorTemplateWizard.alertsCount"
+                    defaultMessage="{count} preconfigured alerts"
+                    values={{ count: totalAvailableAlerts }}
+                  />
+                </strong>
+              ),
+            }}
+          />
         </EuiText>
       </EuiCallOut>
       <EuiSpacer size="m" />
@@ -230,7 +283,13 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
                     checked={fullySelected}
                     indeterminate={partiallySelected}
                     onChange={() => toggleCategory(cat, !fullySelected)}
-                    aria-label={`Select all ${cat.name} alerts`}
+                    aria-label={i18n.translate(
+                      'observability.alerting.monitorTemplateWizard.selectAllInCategoryAriaLabel',
+                      {
+                        defaultMessage: 'Select all {category} alerts',
+                        values: { category: cat.name },
+                      }
+                    )}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -247,15 +306,33 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="xs" responsive={false}>
                     <EuiFlexItem grow={false}>
-                      <EuiBadge color="hollow">{cat.discoveredMetrics.length} metrics</EuiBadge>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color={available === total ? 'success' : 'warning'}>
-                        {available}/{total} alerts ready
+                      <EuiBadge color="hollow">
+                        <FormattedMessage
+                          id="observability.alerting.monitorTemplateWizard.metricsBadge"
+                          defaultMessage="{count} metrics"
+                          values={{ count: cat.discoveredMetrics.length }}
+                        />
                       </EuiBadge>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiToolTip content={`OTEL namespace: ${cat.otelNamespace}`}>
+                      <EuiBadge color={available === total ? 'success' : 'warning'}>
+                        <FormattedMessage
+                          id="observability.alerting.monitorTemplateWizard.alertsReadyBadge"
+                          defaultMessage="{available}/{total} alerts ready"
+                          values={{ available, total }}
+                        />
+                      </EuiBadge>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        content={i18n.translate(
+                          'observability.alerting.monitorTemplateWizard.otelNamespaceTooltip',
+                          {
+                            defaultMessage: 'OTEL namespace: {namespace}',
+                            values: { namespace: cat.otelNamespace },
+                          }
+                        )}
+                      >
                         <EuiBadge color="primary">OTEL</EuiBadge>
                       </EuiToolTip>
                     </EuiFlexItem>
@@ -277,7 +354,11 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
                 {cat.discoveredMetrics.length > 6 && (
                   <EuiFlexItem grow={false}>
                     <EuiText size="xs" color="subdued">
-                      +{cat.discoveredMetrics.length - 6} more
+                      <FormattedMessage
+                        id="observability.alerting.monitorTemplateWizard.moreMetrics"
+                        defaultMessage="+{count} more"
+                        values={{ count: cat.discoveredMetrics.length - 6 }}
+                      />
                     </EuiText>
                   </EuiFlexItem>
                 )}
@@ -308,7 +389,13 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
                         checked={selectedTemplates.has(t.id)}
                         onChange={() => toggleTemplate(t.id)}
                         disabled={!metricsAvailable}
-                        aria-label={`Select ${t.name}`}
+                        aria-label={i18n.translate(
+                          'observability.alerting.monitorTemplateWizard.selectTemplateAriaLabel',
+                          {
+                            defaultMessage: 'Select {name}',
+                            values: { name: t.name },
+                          }
+                        )}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
@@ -323,16 +410,41 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
                       <EuiBadge color={SEVERITY_COLORS[t.severity]}>{t.severity}</EuiBadge>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiToolTip content={`Query: ${t.query} ${t.condition}`}>
+                      <EuiToolTip
+                        content={i18n.translate(
+                          'observability.alerting.monitorTemplateWizard.queryTooltip',
+                          {
+                            defaultMessage: 'Query: {query} {condition}',
+                            values: { query: t.query, condition: t.condition },
+                          }
+                        )}
+                      >
                         <EuiBadge color="hollow" style={{ fontSize: 10 }}>
-                          {t.condition} for {t.forDuration}
+                          <FormattedMessage
+                            id="observability.alerting.monitorTemplateWizard.conditionForDuration"
+                            defaultMessage="{condition} for {duration}"
+                            values={{ condition: t.condition, duration: t.forDuration }}
+                          />
                         </EuiBadge>
                       </EuiToolTip>
                     </EuiFlexItem>
                     {!metricsAvailable && (
                       <EuiFlexItem grow={false}>
-                        <EuiToolTip content={`Missing: ${missingMetrics.join(', ')}`}>
-                          <EuiBadge color="danger">missing metrics</EuiBadge>
+                        <EuiToolTip
+                          content={i18n.translate(
+                            'observability.alerting.monitorTemplateWizard.missingMetricsTooltip',
+                            {
+                              defaultMessage: 'Missing: {metrics}',
+                              values: { metrics: missingMetrics.join(', ') },
+                            }
+                          )}
+                        >
+                          <EuiBadge color="danger">
+                            <FormattedMessage
+                              id="observability.alerting.monitorTemplateWizard.missingMetricsBadge"
+                              defaultMessage="missing metrics"
+                            />
+                          </EuiBadge>
                         </EuiToolTip>
                       </EuiFlexItem>
                     )}
@@ -358,28 +470,53 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
     return (
       <div>
         <EuiCallOut
-          title={`${selectedList.length} monitors selected`}
+          title={i18n.translate(
+            'observability.alerting.monitorTemplateWizard.monitorsSelectedTitle',
+            {
+              defaultMessage: '{count} monitors selected',
+              values: { count: selectedList.length },
+            }
+          )}
           color="primary"
           iconType="check"
           size="s"
         >
           <EuiText size="xs">
-            Review and customize severity levels before creating. You can also add a label prefix to
-            group these monitors.
+            <FormattedMessage
+              id="observability.alerting.monitorTemplateWizard.configureBody"
+              defaultMessage="Review and customize severity levels before creating. You can also add a label prefix to group these monitors."
+            />
           </EuiText>
         </EuiCallOut>
         <EuiSpacer size="m" />
 
         <EuiFormRow
-          label="Label Prefix (optional)"
-          helpText="Added as a label to all generated monitors for easy filtering"
+          label={i18n.translate('observability.alerting.monitorTemplateWizard.labelPrefixLabel', {
+            defaultMessage: 'Label Prefix (optional)',
+          })}
+          helpText={i18n.translate(
+            'observability.alerting.monitorTemplateWizard.labelPrefixHelpText',
+            {
+              defaultMessage: 'Added as a label to all generated monitors for easy filtering',
+            }
+          )}
         >
           <EuiFieldText
-            placeholder="e.g. my-team, production"
+            placeholder={i18n.translate(
+              'observability.alerting.monitorTemplateWizard.labelPrefixPlaceholder',
+              {
+                defaultMessage: 'e.g. my-team, production',
+              }
+            )}
             value={labelPrefix}
             onChange={(e) => setLabelPrefix(e.target.value)}
             compressed
-            aria-label="Label prefix"
+            aria-label={i18n.translate(
+              'observability.alerting.monitorTemplateWizard.labelPrefixAriaLabel',
+              {
+                defaultMessage: 'Label prefix',
+              }
+            )}
           />
         </EuiFormRow>
 
@@ -406,11 +543,41 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
                 <EuiFlexItem grow={false} style={{ width: 130 }}>
                   <EuiSelect
                     options={[
-                      { value: 'critical', text: 'Critical' },
-                      { value: 'high', text: 'High' },
-                      { value: 'medium', text: 'Medium' },
-                      { value: 'low', text: 'Low' },
-                      { value: 'info', text: 'Info' },
+                      {
+                        value: 'critical',
+                        text: i18n.translate(
+                          'observability.alerting.monitorTemplateWizard.severityOption.critical',
+                          { defaultMessage: 'Critical' }
+                        ),
+                      },
+                      {
+                        value: 'high',
+                        text: i18n.translate(
+                          'observability.alerting.monitorTemplateWizard.severityOption.high',
+                          { defaultMessage: 'High' }
+                        ),
+                      },
+                      {
+                        value: 'medium',
+                        text: i18n.translate(
+                          'observability.alerting.monitorTemplateWizard.severityOption.medium',
+                          { defaultMessage: 'Medium' }
+                        ),
+                      },
+                      {
+                        value: 'low',
+                        text: i18n.translate(
+                          'observability.alerting.monitorTemplateWizard.severityOption.low',
+                          { defaultMessage: 'Low' }
+                        ),
+                      },
+                      {
+                        value: 'info',
+                        text: i18n.translate(
+                          'observability.alerting.monitorTemplateWizard.severityOption.info',
+                          { defaultMessage: 'Info' }
+                        ),
+                      },
                     ]}
                     value={severityOverrides[t.id] || t.severity}
                     onChange={(e) =>
@@ -420,7 +587,13 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
                       }))
                     }
                     compressed
-                    aria-label={`Severity for ${t.name}`}
+                    aria-label={i18n.translate(
+                      'observability.alerting.monitorTemplateWizard.severityForAriaLabel',
+                      {
+                        defaultMessage: 'Severity for {name}',
+                        values: { name: t.name },
+                      }
+                    )}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -453,12 +626,20 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
         <EuiIcon type="check" size="xxl" color="success" />
         <EuiSpacer size="m" />
         <EuiTitle size="m">
-          <h2>{count} Monitors Created</h2>
+          <h2>
+            <FormattedMessage
+              id="observability.alerting.monitorTemplateWizard.summaryTitle"
+              defaultMessage="{count} Monitors Created"
+              values={{ count }}
+            />
+          </h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
-          All monitors have been created and are now active. They will begin evaluating on their
-          configured intervals.
+          <FormattedMessage
+            id="observability.alerting.monitorTemplateWizard.summaryDescription"
+            defaultMessage="All monitors have been created and are now active. They will begin evaluating on their configured intervals."
+          />
         </EuiText>
         <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="center" gutterSize="s" wrap>
@@ -476,8 +657,14 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
           <>
             <EuiSpacer size="s" />
             <EuiText size="xs" color="subdued">
-              All monitors labeled with <EuiBadge color="hollow">prefix:{labelPrefix}</EuiBadge> and{' '}
-              <EuiBadge color="hollow">monitor_source:ai-wizard</EuiBadge>
+              <FormattedMessage
+                id="observability.alerting.monitorTemplateWizard.labeledWith"
+                defaultMessage="All monitors labeled with {prefixBadge} and {sourceBadge}"
+                values={{
+                  prefixBadge: <EuiBadge color="hollow">prefix:{labelPrefix}</EuiBadge>,
+                  sourceBadge: <EuiBadge color="hollow">monitor_source:ai-wizard</EuiBadge>,
+                }}
+              />
             </EuiText>
           </>
         )}
@@ -521,13 +708,21 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
   const stepTitle = () => {
     switch (step) {
       case 'scanning':
-        return 'Scanning Metrics';
+        return i18n.translate('observability.alerting.monitorTemplateWizard.step.scanning', {
+          defaultMessage: 'Scanning Metrics',
+        });
       case 'review':
-        return 'Select Monitors';
+        return i18n.translate('observability.alerting.monitorTemplateWizard.step.review', {
+          defaultMessage: 'Select Monitors',
+        });
       case 'configure':
-        return 'Configure';
+        return i18n.translate('observability.alerting.monitorTemplateWizard.step.configure', {
+          defaultMessage: 'Configure',
+        });
       case 'summary':
-        return 'Complete';
+        return i18n.translate('observability.alerting.monitorTemplateWizard.step.summary', {
+          defaultMessage: 'Complete',
+        });
     }
   };
 
@@ -553,16 +748,30 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="m">
-              <h2 id="monitorTemplateWizardTitle">Monitor Template Setup</h2>
+              <h2 id="monitorTemplateWizardTitle">
+                <FormattedMessage
+                  id="observability.alerting.monitorTemplateWizard.headerTitle"
+                  defaultMessage="Monitor Template Setup"
+                />
+              </h2>
             </EuiTitle>
             <EuiText size="xs" color="subdued">
-              Auto-generate monitors from discovered OTEL metrics — Step {stepNumber()} of 4:{' '}
-              {stepTitle()}
+              <FormattedMessage
+                id="observability.alerting.monitorTemplateWizard.headerSubtitle"
+                defaultMessage="Auto-generate monitors from discovered OTEL metrics — Step {step} of 4: {title}"
+                values={{ step: stepNumber(), title: stepTitle() }}
+              />
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {step !== 'scanning' && step !== 'summary' && (
-              <EuiBadge color="primary">{selectedTemplates.size} selected</EuiBadge>
+              <EuiBadge color="primary">
+                <FormattedMessage
+                  id="observability.alerting.monitorTemplateWizard.selectedBadge"
+                  defaultMessage="{count} selected"
+                  values={{ count: selectedTemplates.size }}
+                />
+              </EuiBadge>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -574,24 +783,50 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             {step === 'summary' ? (
-              <EuiButton onClick={onClose}>Done</EuiButton>
+              <EuiButton onClick={onClose}>
+                <FormattedMessage
+                  id="observability.alerting.monitorTemplateWizard.doneButton"
+                  defaultMessage="Done"
+                />
+              </EuiButton>
             ) : (
-              <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
+              <EuiButtonEmpty onClick={onClose}>
+                <FormattedMessage
+                  id="observability.alerting.monitorTemplateWizard.cancelButton"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" responsive={false}>
               {step === 'configure' && (
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={handleBack}>Back</EuiButtonEmpty>
+                  <EuiButtonEmpty onClick={handleBack}>
+                    <FormattedMessage
+                      id="observability.alerting.monitorTemplateWizard.backButton"
+                      defaultMessage="Back"
+                    />
+                  </EuiButtonEmpty>
                 </EuiFlexItem>
               )}
               {step !== 'scanning' && step !== 'summary' && (
                 <EuiFlexItem grow={false}>
                   <EuiButton fill onClick={handleNext} isDisabled={!canGoNext()}>
                     {step === 'configure'
-                      ? `Create ${selectedTemplates.size} Monitors`
-                      : 'Next: Configure'}
+                      ? i18n.translate(
+                          'observability.alerting.monitorTemplateWizard.createMonitorsButton',
+                          {
+                            defaultMessage: 'Create {count} Monitors',
+                            values: { count: selectedTemplates.size },
+                          }
+                        )
+                      : i18n.translate(
+                          'observability.alerting.monitorTemplateWizard.nextConfigureButton',
+                          {
+                            defaultMessage: 'Next: Configure',
+                          }
+                        )}
                   </EuiButton>
                 </EuiFlexItem>
               )}

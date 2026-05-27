@@ -9,10 +9,10 @@
  * resources` in the final architecture (Q1 verified the existing
  * `query_enhancements` plugin already proxies these paths to DirectQuery).
  *
- * Phase 4 scope: points at the existing custom routes so migrations land
- * cleanly ahead of Phase 5's route swap. Consumers (hooks) are agnostic to
- * which underlying endpoint is in play — only this service needs to change
- * when the swap happens.
+ * Currently points at the existing custom routes so migrations land cleanly
+ * ahead of the eventual route swap. Consumers (hooks) are agnostic to which
+ * underlying endpoint is in play — only this service needs to change when
+ * the swap happens.
  */
 import { coreRefs } from '../../../framework/core_refs';
 import type { PrometheusMetricMetadata } from '../../../../common/types/alerting';
