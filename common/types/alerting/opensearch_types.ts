@@ -128,15 +128,23 @@ export interface OSAlert {
   }>;
 }
 
+/**
+ * Notification channel projection — populated from the OpenSearch
+ * Notifications plugin's `_notifications/channels` endpoint, which replaces
+ * the deprecated `_alerting/destinations` API. The picker only consumes
+ * the lightweight identity/type triple; the full per-config payload (slack
+ * url, smtp host, etc.) lives behind the Notifications plugin's own UI.
+ *
+ * `type` is widened to `string` because the Notifications plugin supports
+ * a broader set of channel types than the legacy alerting destinations
+ * (slack, chime, webhook, email, sns, ses_account, smtp_account,
+ * email_group, microsoft_teams, ...) and the picker only needs to render
+ * the value as a label.
+ */
 export interface OSDestination {
   id: string;
-  type: 'slack' | 'email' | 'custom_webhook' | 'chime';
+  type: string;
   name: string;
-  last_update_time: number;
-  schema_version?: number;
-  slack?: { url: string };
-  custom_webhook?: Record<string, unknown>;
-  email?: Record<string, unknown>;
 }
 
 // ============================================================================
@@ -240,27 +248,41 @@ export interface OSAlertsApiResponse {
   alerts?: OSAlertRaw[];
 }
 
-export interface OSDestinationRaw {
-  id?: string;
-  type?: string;
+/**
+ * One entry from `GET /_plugins/_notifications/channels.channel_list[]`.
+ * The endpoint is a lightweight, picker-friendly projection of the full
+ * Notifications config — only id/name/type/description/is_enabled.
+ *
+ * Reference: https://docs.opensearch.org/latest/observing-your-data/notifications/api/
+ *   "List all notification channels: GET /_plugins/_notifications/channels"
+ */
+export interface OSNotificationChannelRaw {
+  config_id?: string;
   name?: string;
-  last_update_time?: number;
-  schema_version?: number;
-  slack?: { url: string };
-  custom_webhook?: Record<string, unknown>;
-  email?: Record<string, unknown>;
+  description?: string;
+  /**
+   * Notifications config_type, e.g. `slack` | `chime` | `webhook` | `email`
+   * | `sns` | `ses_account` | `smtp_account` | `email_group` |
+   * `microsoft_teams`. Kept as a string so a future channel type doesn't
+   * break the picker.
+   */
+  config_type?: string;
+  is_enabled?: boolean;
 }
 
-export interface OSDestinationsApiResponse {
-  destinations?: OSDestinationRaw[];
-  totalDestinations?: number;
+export interface OSNotificationChannelsApiResponse {
+  start_index?: number;
+  total_hits?: number;
+  total_hit_relation?: 'eq' | 'gte';
+  channel_list?: OSNotificationChannelRaw[];
 }
 
 /**
- * Mapped result of the alerting `_plugins/_alerting/destinations` call. The
- * upstream API doesn't paginate, so we cap at `size=200` and surface
- * `truncated` so callers can hint to the user that older destinations may
- * be missing.
+ * Mapped result of the notifications `_plugins/_notifications/channels`
+ * call. The endpoint returns up to its own server-side default page (no
+ * client-controllable size on `/channels`), so we surface `total_hits` as
+ * `totalDestinations` and set `truncated` when the returned list is
+ * shorter than the upstream total.
  */
 export interface OSDestinationsResult {
   destinations: OSDestination[];
@@ -315,11 +337,7 @@ export interface OpenSearchBackend {
     alertIds: string[]
   ): Promise<unknown>;
 
-  // Destinations
+  // Notification channels (read-only projection — destination CRUD lives in
+  // the OpenSearch Notifications plugin's own UI; we only feed the picker).
   getDestinations(client: AlertingOSClient): Promise<OSDestinationsResult>;
-  createDestination(
-    client: AlertingOSClient,
-    dest: Omit<OSDestination, 'id'>
-  ): Promise<OSDestination>;
-  deleteDestination(client: AlertingOSClient, destId: string): Promise<boolean>;
 }

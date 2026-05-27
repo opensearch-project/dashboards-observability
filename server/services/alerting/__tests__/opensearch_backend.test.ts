@@ -355,62 +355,101 @@ describe('HttpOpenSearchBackend', () => {
   });
 
   describe('getDestinations', () => {
-    it('maps raw destinations to OSDestination shape', async () => {
+    it('hits the /_plugins/_notifications/channels endpoint', async () => {
+      const { client, request } = makeClient([{ body: { total_hits: 0, channel_list: [] } }]);
+      await backend.getDestinations(client);
+      expect(request).toHaveBeenCalledWith({
+        method: 'GET',
+        path: '/_plugins/_notifications/channels',
+        body: undefined,
+      });
+    });
+
+    it('maps channel_list entries to the OSDestination picker shape', async () => {
+      // Verbatim shape from
+      // https://docs.opensearch.org/latest/observing-your-data/notifications/api/
+      // — `channel_list[]` carries config_id / name / description / config_type / is_enabled.
       const { client } = makeClient([
         {
           body: {
-            destinations: [
+            start_index: 0,
+            total_hits: 2,
+            total_hit_relation: 'eq',
+            channel_list: [
               {
-                id: 'd-1',
-                type: 'slack',
-                name: 'ops',
-                slack: { url: 'https://hooks' },
-                last_update_time: 100,
+                config_id: 'sample-id',
+                name: 'Sample Slack Channel',
+                description: 'This is a Slack channel',
+                config_type: 'slack',
+                is_enabled: true,
+              },
+              {
+                config_id: 'wh-1',
+                name: 'pager',
+                config_type: 'webhook',
+                is_enabled: true,
               },
             ],
-            totalDestinations: 1,
           },
         },
       ]);
       const result = await backend.getDestinations(client);
       expect(result.destinations).toEqual([
-        {
-          id: 'd-1',
-          type: 'slack',
-          name: 'ops',
-          slack: { url: 'https://hooks' },
-          custom_webhook: undefined,
-          email: undefined,
-          last_update_time: 100,
-          schema_version: undefined,
-        },
+        { id: 'sample-id', type: 'slack', name: 'Sample Slack Channel' },
+        { id: 'wh-1', type: 'webhook', name: 'pager' },
       ]);
-      expect(result.totalDestinations).toBe(1);
+      expect(result.totalDestinations).toBe(2);
       expect(result.truncated).toBe(false);
     });
 
-    it('flags truncated when upstream total exceeds returned page', async () => {
-      // Upstream returns 200 entries while the cluster holds 350 — the
-      // response cap means the picker is missing entries.
-      const destinations = Array.from({ length: 200 }, (_, i) => ({
-        id: `d-${i}`,
-        type: 'slack',
-        name: `ops-${i}`,
+    it('flags truncated when total_hits exceeds the returned channel_list', async () => {
+      // The `/channels` endpoint doesn't accept a client-supplied size
+      // parameter — the upstream applies its own cap. When `total_hits`
+      // exceeds the page we got back, we hint to the user that older
+      // channels may be missing from the picker.
+      const channelList = Array.from({ length: 100 }, (_, i) => ({
+        config_id: `c-${i}`,
+        name: `chan-${i}`,
+        config_type: 'slack',
+        is_enabled: true,
       }));
-      const { client } = makeClient([{ body: { destinations, totalDestinations: 350 } }]);
+      const { client } = makeClient([{ body: { total_hits: 350, channel_list: channelList } }]);
       const result = await backend.getDestinations(client);
-      expect(result.destinations).toHaveLength(200);
+      expect(result.destinations).toHaveLength(100);
       expect(result.totalDestinations).toBe(350);
       expect(result.truncated).toBe(true);
     });
 
-    it('falls back to mapped length when upstream omits totalDestinations', async () => {
+    it('falls back to mapped length when upstream omits total_hits', async () => {
       const { client } = makeClient([
-        { body: { destinations: [{ id: 'd-1', type: 'slack', name: 'ops' }] } },
+        {
+          body: {
+            channel_list: [
+              { config_id: 'c-1', name: 'ops', config_type: 'slack', is_enabled: true },
+            ],
+          },
+        },
       ]);
       const result = await backend.getDestinations(client);
       expect(result.totalDestinations).toBe(1);
       expect(result.truncated).toBe(false);
+    });
+
+    it('returns an empty list when channel_list is missing', async () => {
+      // Defense-in-depth: if upstream changes shape (e.g. error returning
+      // an empty body), the picker should render "no destinations" — not
+      // crash on the `.map`.
+      const { client } = makeClient([{ body: {} }]);
+      const result = await backend.getDestinations(client);
+      expect(result.destinations).toEqual([]);
+      expect(result.totalDestinations).toBe(0);
+      expect(result.truncated).toBe(false);
+    });
+
+    it('emits empty strings rather than throwing when fields are missing', async () => {
+      const { client } = makeClient([{ body: { channel_list: [{ config_type: 'slack' }] } }]);
+      const result = await backend.getDestinations(client);
+      expect(result.destinations).toEqual([{ id: '', name: '', type: 'slack' }]);
     });
   });
 

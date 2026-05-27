@@ -30,9 +30,9 @@ import {
   OSRawPPLTrigger,
   OSRawTrigger,
   OSRawAction,
-  OSDestinationRaw,
-  OSDestinationsApiResponse,
   OSDestinationsResult,
+  OSNotificationChannelRaw,
+  OSNotificationChannelsApiResponse,
 } from '../../../common/types/alerting';
 import { createConflictError, createInternalError, isStatusCode } from './errors';
 
@@ -376,56 +376,35 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
   }
 
   // =========================================================================
-  // Destinations
+  // Notification channels
   // =========================================================================
+  //
+  // The legacy `_plugins/_alerting/destinations` API is deprecated; the
+  // OpenSearch Notifications plugin's `_plugins/_notifications/channels`
+  // endpoint is the canonical source for the picker. The IDs returned here
+  // are interchangeable with the `actions[].destination_id` field the
+  // alerting plugin still consumes when sending alerts.
+  //
+  // We use `/channels` (not `/configs`) because it returns the lightweight
+  // identity/type triple the picker needs — `/configs` wraps each item in
+  // a per-type config payload (slack url, smtp host, etc.) the OSD layer
+  // doesn't render.
 
   async getDestinations(client: AlertingOSClient): Promise<OSDestinationsResult> {
-    // The alerting `destinations` endpoint isn't paginated — we cap at
-    // size=200 so a cluster with thousands of destinations doesn't freeze
-    // the tab. `totalDestinations` from the upstream response lets us tell
-    // the user when entries beyond the cap exist.
-    const SIZE_CAP = 200;
-    const resp = await this.req<OSDestinationsApiResponse>(
+    const resp = await this.req<OSNotificationChannelsApiResponse>(
       client,
       'GET',
-      `/_plugins/_alerting/destinations?size=${SIZE_CAP}`
+      '/_plugins/_notifications/channels'
     );
-    const destinations = (resp.body.destinations ?? []).map((d: OSDestinationRaw) =>
-      this.mapDestination(d)
+    const destinations = (resp.body.channel_list ?? []).map((c: OSNotificationChannelRaw) =>
+      this.mapChannel(c)
     );
-    const totalDestinations = resp.body.totalDestinations ?? destinations.length;
+    const totalDestinations = resp.body.total_hits ?? destinations.length;
     return {
       destinations,
       totalDestinations,
       truncated: totalDestinations > destinations.length,
     };
-  }
-
-  async createDestination(
-    client: AlertingOSClient,
-    dest: Omit<OSDestination, 'id'>
-  ): Promise<OSDestination> {
-    const resp = await this.req<{ _id: string; destination: OSDestinationRaw }>(
-      client,
-      'POST',
-      '/_plugins/_alerting/destinations',
-      dest
-    );
-    return this.mapDestination({ id: resp.body._id, ...resp.body.destination });
-  }
-
-  async deleteDestination(client: AlertingOSClient, destId: string): Promise<boolean> {
-    try {
-      await this.req(
-        client,
-        'DELETE',
-        `/_plugins/_alerting/destinations/${encodeURIComponent(destId)}`
-      );
-      return true;
-    } catch (err) {
-      if (this.is404(err)) return false;
-      throw err;
-    }
   }
 
   // =========================================================================
@@ -631,16 +610,11 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
     };
   }
 
-  private mapDestination(d: OSDestinationRaw): OSDestination {
+  private mapChannel(c: OSNotificationChannelRaw): OSDestination {
     return {
-      id: d.id || '',
-      type: (d.type || 'custom_webhook') as OSDestination['type'],
-      name: d.name || '',
-      last_update_time: d.last_update_time || Date.now(),
-      schema_version: d.schema_version,
-      slack: d.slack,
-      custom_webhook: d.custom_webhook,
-      email: d.email,
+      id: c.config_id || '',
+      type: c.config_type || 'custom_webhook',
+      name: c.name || '',
     };
   }
 
