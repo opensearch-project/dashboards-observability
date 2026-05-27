@@ -27,7 +27,7 @@ const mockTimeline = jest.fn();
 jest.mock('../alerts_charts', () => ({
   AlertTimeline: (props: { alerts: unknown[]; startMs: number; endMs: number }) => {
     mockTimeline(props);
-    return <div data-test-subj="alert-timeline-stub" />;
+    return <div data-test-subj="alertTimelineStub" />;
   },
 }));
 
@@ -124,12 +124,26 @@ describe('AlertsDashboard', () => {
     const { getByTestId } = render(
       <AlertsDashboard {...baseProps} alerts={[sampleAlert]} truncated />
     );
-    expect(getByTestId('alerts-truncated-callout')).toBeInTheDocument();
+    expect(getByTestId('alertsTruncatedCallout')).toBeInTheDocument();
   });
 
   it('does not render the truncated callout when `truncated` is false/undefined', () => {
     const { queryByTestId } = render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
-    expect(queryByTestId('alerts-truncated-callout')).not.toBeInTheDocument();
+    expect(queryByTestId('alertsTruncatedCallout')).not.toBeInTheDocument();
+  });
+
+  it('anchors alertManagerDatePicker on a real DOM element (regression: EuiSuperDatePicker drops data-test-subj)', () => {
+    // EuiSuperDatePicker doesn't forward arbitrary DOM attributes to its
+    // rendered control, so a `data-test-subj` prop on the picker itself is
+    // silently discarded. The wrapper div lives one level above the picker
+    // so Cypress / functional selectors resolve regardless of EUI's prop
+    // forwarding behavior.
+    const { container } = render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
+    const anchor = container.querySelector('[data-test-subj="alertManagerDatePicker"]');
+    expect(anchor).not.toBeNull();
+    expect(anchor!.tagName).toBe('DIV');
+    // The picker control itself should be a descendant of the anchor.
+    expect(anchor!.querySelector('.euiSuperDatePicker')).not.toBeNull();
   });
 
   it('renders the fallback callout listing each fallback datasource', () => {
@@ -142,7 +156,7 @@ describe('AlertsDashboard', () => {
         ]}
       />
     );
-    expect(getByTestId('alerts-fallback-callout')).toBeInTheDocument();
+    expect(getByTestId('alertsFallbackCallout')).toBeInTheDocument();
     expect(getByText('prom-prod')).toBeInTheDocument();
   });
 
@@ -150,7 +164,7 @@ describe('AlertsDashboard', () => {
     const { queryByTestId } = render(
       <AlertsDashboard {...baseProps} alerts={[sampleAlert]} fallbackHints={[]} />
     );
-    expect(queryByTestId('alerts-fallback-callout')).not.toBeInTheDocument();
+    expect(queryByTestId('alertsFallbackCallout')).not.toBeInTheDocument();
   });
 
   // Regression: deselecting all datasources must wipe both the dependent

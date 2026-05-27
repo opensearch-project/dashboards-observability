@@ -238,7 +238,7 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
           'observability.alerting.notificationRoutingPanel.sourceAriaLabel',
           { defaultMessage: 'Prometheus datasource' }
         )}
-        data-test-subj="alertManager-routing-datasourceSelect"
+        data-test-subj="alertManagerRoutingDatasourceSelect"
         style={{ minWidth: 220 }}
       />
     ) : null;

@@ -4,21 +4,15 @@
  */
 
 /**
- * OpenSearch form section of the Create Monitor flyout. Handles all five
- * OpenSearch monitor variants (PPL, per-query DSL, per-bucket DSL,
- * per-document DSL, cluster metrics) — showing the appropriate query input,
- * schedule, trigger, and labels/annotations UI based on `monitorType`.
+ * OpenSearch form section of the Create Monitor flyout. Authors PPL monitors
+ * only — DSL / cluster-metrics monitors are read-only in the Rules table.
  *
  * Split out of the original `create_monitor.tsx` so the flyout shell in
  * `index.tsx` stays focused on orchestration + shared form fields.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
-  EuiAccordion,
-  EuiBadge,
-  EuiCallOut,
   EuiFieldNumber,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -26,22 +20,45 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
-  EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { AnnotationEditor, LabelEditor } from '../monitor_form_components';
-import {
-  CLUSTER_METRICS_API_OPTIONS,
-  DURATION_OPTIONS,
-  INTERVAL_OPTIONS,
-  OPERATOR_OPTIONS,
-  OpenSearchFormState,
-  OS_MONITOR_TYPE_OPTIONS,
-  OS_SCHEDULE_UNIT_OPTIONS,
-  ThresholdCondition,
-} from './create_monitor_types';
+import { OpenSearchFormState, OS_SCHEDULE_UNIT_OPTIONS } from './create_monitor_types';
+import { IndexPicker } from './sections/index_picker';
+import { PplQueryEditor } from './sections/ppl_query_editor';
+import { PplTriggersSection } from './sections/ppl_triggers';
+import { TimeFieldSelector } from './sections/time_field_selector';
+
+// Rewrite the leading `source = ...` clause to reflect the picker's index
+// list, preserving the rest of the query (everything from the first `|`
+// onward). When the query is empty we fall back to a starter template so
+// the user has something to edit; when the picker is empty we strip the
+// source clause but keep the body so the user doesn't lose work.
+const SOURCE_LINE_RE = /^\s*source\s*=\s*[^|\n]*/i;
+
+function defaultPplQueryFor(indices: string[]): string {
+  if (indices.length === 0) return '';
+  return `source = ${indices.join(', ')}\n| stats count() as error_count`;
+}
+
+function rewriteSourceClause(query: string, indices: string[]): string {
+  const trimmed = query.trim();
+  if (!trimmed) return defaultPplQueryFor(indices);
+
+  if (SOURCE_LINE_RE.test(trimmed)) {
+    if (indices.length === 0) {
+      // Drop the source clause; keep the body so the user doesn't lose work.
+      const stripped = trimmed.replace(SOURCE_LINE_RE, '').replace(/^\s*\|\s*/, '');
+      return stripped;
+    }
+    return trimmed.replace(SOURCE_LINE_RE, `source = ${indices.join(', ')}`);
+  }
+
+  // No leading source clause yet — prepend one if we have indices.
+  if (indices.length === 0) return query;
+  return `source = ${indices.join(', ')}\n${trimmed.startsWith('|') ? '' : '| '}${trimmed}`;
+}
 
 // ============================================================================
 // OpenSearch Form Section
@@ -52,254 +69,94 @@ export const OpenSearchFormSection: React.FC<{
   onUpdate: <K extends keyof OpenSearchFormState>(key: K, value: OpenSearchFormState[K]) => void;
   validationErrors: Record<string, string>;
   hasSubmitted: boolean;
-  context?: { service?: string; team?: string };
-}> = ({ form, onUpdate, validationErrors, hasSubmitted, context }) => {
-  const isPPL = form.monitorType === 'ppl_monitor';
-  const isClusterMetrics = form.monitorType === 'cluster_metrics_monitor';
-
-  const handleMonitorTypeChange = (type: OpenSearchFormState['monitorType']) => {
-    onUpdate('monitorType', type);
-    // Reset query to appropriate default when switching between PPL and DSL types
-    const wasPPL = form.monitorType === 'ppl_monitor';
-    const nowPPL = type === 'ppl_monitor';
-    if (wasPPL !== nowPPL && type !== 'cluster_metrics_monitor') {
-      const defaultPPL =
-        'source = logs-* | where @timestamp > NOW() - INTERVAL 5 MINUTE | stats count() as cnt';
-      const defaultDSL =
-        '{\n  "size": 0,\n  "query": {\n    "bool": {\n      "filter": [\n        { "range": { "@timestamp": { "gte": "now-5m" } } }\n      ]\n    }\n  }\n}';
-      const isDefault =
-        form.query.trim() === defaultPPL.trim() ||
-        form.query.trim() === defaultDSL.trim() ||
-        form.query.trim() === '';
-      if (isDefault) {
-        onUpdate('query', nowPPL ? defaultPPL : defaultDSL);
+}> = ({ form, onUpdate, validationErrors, hasSubmitted }) => {
+  // Rewrite the leading `source = ...` clause whenever the picker changes,
+  // preserving any later pipes the user has authored. Prevents stranding
+  // the user with `source = old-index | ...` after they swap indices.
+  const handleIndicesChange = useCallback(
+    (next: string[]) => {
+      onUpdate('indices', next);
+      onUpdate('query', rewriteSourceClause(form.query, next));
+      // Clear timeField if the user dropped all indices — the field choices
+      // are now empty and a stale value would surface invalid validation.
+      if (next.length === 0 && form.timeField) {
+        onUpdate('timeField', '');
       }
-    }
-  };
-
-  const updateThreshold = <K extends keyof ThresholdCondition>(
-    key: K,
-    value: ThresholdCondition[K]
-  ) => {
-    onUpdate('threshold', { ...form.threshold, [key]: value });
-  };
+    },
+    [form.query, form.timeField, onUpdate]
+  );
 
   return (
     <>
-      {/* Monitor Type */}
-      <EuiFormRow
-        label={i18n.translate('observability.alerting.opensearchFormSection.monitorTypeLabel', {
-          defaultMessage: 'Monitor Type',
-        })}
-        fullWidth
-      >
-        <EuiSelect
-          options={OS_MONITOR_TYPE_OPTIONS}
-          value={form.monitorType}
-          onChange={(e) =>
-            handleMonitorTypeChange(e.target.value as OpenSearchFormState['monitorType'])
-          }
-          fullWidth
-          aria-label={i18n.translate(
-            'observability.alerting.opensearchFormSection.monitorTypeAriaLabel',
-            { defaultMessage: 'Monitor type' }
-          )}
+      {/* Define index — picker + timestamp field. Mirrors the alerting plugin's
+          "Define monitor → Data source" step. */}
+      <EuiPanel paddingSize="m" color="subdued">
+        <EuiTitle size="xs">
+          <h3>
+            {i18n.translate('observability.alerting.opensearchFormSection.defineIndexTitle', {
+              defaultMessage: 'Define index',
+            })}
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <IndexPicker
+          dsId={form.datasourceId}
+          selected={form.indices}
+          onChange={handleIndicesChange}
+          isInvalid={hasSubmitted && !!validationErrors.indices}
+          error={hasSubmitted ? validationErrors.indices : undefined}
         />
-      </EuiFormRow>
+        <EuiSpacer size="s" />
+        <TimeFieldSelector
+          dsId={form.datasourceId}
+          indices={form.indices}
+          value={form.timeField}
+          onChange={(v) => onUpdate('timeField', v)}
+          isInvalid={hasSubmitted && !!validationErrors.timeField}
+          error={hasSubmitted ? validationErrors.timeField : undefined}
+        />
+      </EuiPanel>
 
       <EuiSpacer size="m" />
 
-      {/* Data Source — index pattern or cluster metrics API */}
-      {isClusterMetrics ? (
-        <EuiPanel paddingSize="m" color="subdued">
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate(
-                'observability.alerting.opensearchFormSection.clusterMetricsApiTitle',
-                { defaultMessage: 'Cluster Metrics API' }
-              )}
-            </h3>
-          </EuiTitle>
-          <EuiText size="xs" color="subdued">
-            {i18n.translate(
-              'observability.alerting.opensearchFormSection.clusterMetricsApiDescription',
-              {
-                defaultMessage:
-                  'Select a cluster API to monitor. The monitor will call this API on the configured schedule and evaluate the trigger condition against the response.',
-              }
-            )}
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiFormRow
-            label={i18n.translate('observability.alerting.opensearchFormSection.apiTypeLabel', {
-              defaultMessage: 'API Type',
+      {/* PPL Query — Monaco-backed editor with field-aware autocomplete. */}
+      <EuiPanel paddingSize="m" color="subdued">
+        <EuiTitle size="xs">
+          <h3>
+            {i18n.translate('observability.alerting.opensearchFormSection.queryTitle', {
+              defaultMessage: 'Query',
             })}
-            fullWidth
-          >
-            <EuiSelect
-              options={CLUSTER_METRICS_API_OPTIONS}
-              value={form.clusterMetricsApiType}
-              onChange={(e) => onUpdate('clusterMetricsApiType', e.target.value)}
-              fullWidth
-              aria-label={i18n.translate(
-                'observability.alerting.opensearchFormSection.clusterMetricsApiTypeAriaLabel',
-                { defaultMessage: 'Cluster metrics API type' }
-              )}
-            />
-          </EuiFormRow>
-          <EuiSpacer size="s" />
-          <EuiFormRow
-            label={i18n.translate(
-              'observability.alerting.opensearchFormSection.pathParametersLabel',
-              { defaultMessage: 'Path Parameters' }
-            )}
-            helpText={i18n.translate(
-              'observability.alerting.opensearchFormSection.pathParametersHelpText',
-              { defaultMessage: 'Optional path parameters, e.g. index name for CAT indices' }
-            )}
-            fullWidth
-          >
-            <EuiFieldText
-              placeholder={i18n.translate(
-                'observability.alerting.opensearchFormSection.pathParametersPlaceholder',
-                { defaultMessage: 'e.g. my-index-*' }
-              )}
-              value={form.clusterMetricsPathParams}
-              onChange={(e) => onUpdate('clusterMetricsPathParams', e.target.value)}
-              fullWidth
-              aria-label={i18n.translate(
-                'observability.alerting.opensearchFormSection.clusterMetricsPathParamsAriaLabel',
-                { defaultMessage: 'Cluster metrics path parameters' }
-              )}
-            />
-          </EuiFormRow>
-        </EuiPanel>
-      ) : (
-        <>
-          <EuiPanel paddingSize="m" color="subdued">
-            <EuiTitle size="xs">
-              <h3>
-                {i18n.translate('observability.alerting.opensearchFormSection.dataSourceTitle', {
-                  defaultMessage: 'Data Source',
-                })}
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiFormRow
-              label={i18n.translate(
-                'observability.alerting.opensearchFormSection.indexPatternLabel',
-                { defaultMessage: 'Index Pattern' }
-              )}
-              helpText={
-                isPPL
-                  ? i18n.translate(
-                      'observability.alerting.opensearchFormSection.indexPatternHelpTextPpl',
-                      { defaultMessage: 'Used as the PPL source if not specified in the query' }
-                    )
-                  : i18n.translate(
-                      'observability.alerting.opensearchFormSection.indexPatternHelpTextDsl',
-                      { defaultMessage: 'Comma-separated index patterns, e.g. logs-*, metrics-*' }
-                    )
-              }
-              fullWidth
-              isInvalid={hasSubmitted && !!validationErrors.indices}
-              error={hasSubmitted ? validationErrors.indices : undefined}
-            >
-              <EuiFieldText
-                placeholder={i18n.translate(
-                  'observability.alerting.opensearchFormSection.indexPatternPlaceholder',
-                  { defaultMessage: 'logs-*, metrics-*' }
-                )}
-                value={form.indices}
-                onChange={(e) => onUpdate('indices', e.target.value)}
-                fullWidth
-                aria-label={i18n.translate(
-                  'observability.alerting.opensearchFormSection.indexPatternAriaLabel',
-                  { defaultMessage: 'Index pattern' }
-                )}
-              />
-            </EuiFormRow>
-          </EuiPanel>
-
-          <EuiSpacer size="m" />
-
-          {/* Query */}
-          <EuiPanel paddingSize="m" color="subdued">
-            <EuiTitle size="xs">
-              <h3>
-                {i18n.translate('observability.alerting.opensearchFormSection.queryTitle', {
-                  defaultMessage: 'Query',
-                })}
-              </h3>
-            </EuiTitle>
-            <EuiText size="xs" color="subdued">
-              {isPPL
-                ? i18n.translate(
-                    'observability.alerting.opensearchFormSection.queryDescriptionPpl',
-                    {
-                      defaultMessage: 'Piped Processing Language — pipe-delimited query syntax',
-                    }
-                  )
-                : i18n.translate(
-                    'observability.alerting.opensearchFormSection.queryDescriptionDsl',
-                    { defaultMessage: 'OpenSearch Query DSL (JSON)' }
-                  )}
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiTextArea
-              value={form.query}
-              onChange={(e) => onUpdate('query', e.target.value)}
-              rows={isPPL ? 4 : 8}
-              fullWidth
-              placeholder={
-                isPPL
-                  ? i18n.translate(
-                      'observability.alerting.opensearchFormSection.queryPlaceholderPpl',
-                      {
-                        defaultMessage:
-                          'source = logs-* | where status >= 500 | stats count() as error_count',
-                      }
-                    )
-                  : i18n.translate(
-                      'observability.alerting.opensearchFormSection.queryPlaceholderDsl',
-                      { defaultMessage: '{ "size": 0, "query": { ... } }' }
-                    )
-              }
-              style={{ fontFamily: 'monospace', fontSize: 12 }}
-              aria-label={
-                isPPL
-                  ? i18n.translate(
-                      'observability.alerting.opensearchFormSection.queryAriaLabelPpl',
-                      { defaultMessage: 'PPL query' }
-                    )
-                  : i18n.translate(
-                      'observability.alerting.opensearchFormSection.queryAriaLabelDsl',
-                      { defaultMessage: 'Query DSL' }
-                    )
-              }
-            />
-            {isPPL && (
-              <>
-                <EuiSpacer size="xs" />
-                <EuiText size="xs" color="subdued">
-                  <FormattedMessage
-                    id="observability.alerting.opensearchFormSection.pplExample"
-                    defaultMessage="Example: {example}"
-                    values={{
-                      example: (
-                        <code>
-                          source = logs-* | where status {'>'} 500 | stats count() as error_count by
-                          host
-                        </code>
-                      ),
-                    }}
-                  />
-                </EuiText>
-              </>
-            )}
-          </EuiPanel>
-        </>
-      )}
+          </h3>
+        </EuiTitle>
+        <EuiText size="xs" color="subdued">
+          {i18n.translate('observability.alerting.opensearchFormSection.queryDescriptionPpl', {
+            defaultMessage:
+              'Piped Processing Language. Press Ctrl+Space for field, command, and function suggestions.',
+          })}
+        </EuiText>
+        <EuiSpacer size="s" />
+        <PplQueryEditor
+          dsId={form.datasourceId}
+          indices={form.indices}
+          value={form.query}
+          onChange={(v) => onUpdate('query', v)}
+        />
+        <EuiSpacer size="xs" />
+        <EuiText size="xs" color="subdued">
+          <FormattedMessage
+            id="observability.alerting.opensearchFormSection.pplExample"
+            defaultMessage="Example: {example}"
+            values={{
+              example: (
+                <code>
+                  source = my-index | where status.code = 2 | stats count() as error_count by
+                  serviceName
+                </code>
+              ),
+            }}
+          />
+        </EuiText>
+      </EuiPanel>
 
       <EuiSpacer size="m" />
 
@@ -368,404 +225,14 @@ export const OpenSearchFormSection: React.FC<{
 
       <EuiSpacer size="m" />
 
-      {/* Trigger — PPL uses Prometheus-like threshold + labels/annotations; DSL uses Painless */}
-      {isPPL ? (
-        <>
-          {/* Threshold Condition */}
-          <EuiPanel paddingSize="m" color="subdued">
-            <EuiTitle size="xs">
-              <h3>
-                {i18n.translate(
-                  'observability.alerting.opensearchFormSection.alertConditionTitle',
-                  { defaultMessage: 'Alert Condition' }
-                )}
-              </h3>
-            </EuiTitle>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate(
-                'observability.alerting.opensearchFormSection.alertConditionDescription',
-                { defaultMessage: 'Define when this monitor should fire an alert' }
-              )}
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="s" wrap>
-              <EuiFlexItem style={{ minWidth: 160 }}>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'observability.alerting.opensearchFormSection.operatorLabel',
-                    { defaultMessage: 'Operator' }
-                  )}
-                  display="rowCompressed"
-                >
-                  <EuiSelect
-                    options={OPERATOR_OPTIONS}
-                    value={form.threshold.operator}
-                    onChange={(e) =>
-                      updateThreshold('operator', e.target.value as ThresholdCondition['operator'])
-                    }
-                    compressed
-                    aria-label={i18n.translate(
-                      'observability.alerting.opensearchFormSection.thresholdOperatorAriaLabel',
-                      { defaultMessage: 'Threshold operator' }
-                    )}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem style={{ minWidth: 100 }}>
-                <EuiFormRow
-                  label={i18n.translate('observability.alerting.opensearchFormSection.valueLabel', {
-                    defaultMessage: 'Value',
-                  })}
-                  display="rowCompressed"
-                >
-                  <EuiFieldNumber
-                    value={form.threshold.value}
-                    onChange={(e) => updateThreshold('value', parseFloat(e.target.value) || 0)}
-                    compressed
-                    aria-label={i18n.translate(
-                      'observability.alerting.opensearchFormSection.thresholdValueAriaLabel',
-                      { defaultMessage: 'Threshold value' }
-                    )}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem style={{ minWidth: 60 }}>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'observability.alerting.opensearchFormSection.thresholdUnitLabel',
-                    { defaultMessage: 'Unit' }
-                  )}
-                  display="rowCompressed"
-                >
-                  <EuiFieldText
-                    value={form.threshold.unit}
-                    onChange={(e) => updateThreshold('unit', e.target.value)}
-                    placeholder=""
-                    compressed
-                    aria-label={i18n.translate(
-                      'observability.alerting.opensearchFormSection.thresholdUnitAriaLabel',
-                      { defaultMessage: 'Threshold unit' }
-                    )}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem style={{ minWidth: 160 }}>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'observability.alerting.opensearchFormSection.forDurationLabel',
-                    { defaultMessage: 'For Duration' }
-                  )}
-                  display="rowCompressed"
-                >
-                  <EuiSelect
-                    options={DURATION_OPTIONS}
-                    value={form.threshold.forDuration}
-                    onChange={(e) => updateThreshold('forDuration', e.target.value)}
-                    compressed
-                    aria-label={i18n.translate(
-                      'observability.alerting.opensearchFormSection.forDurationAriaLabel',
-                      { defaultMessage: 'For duration' }
-                    )}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-            <EuiCallOut size="s" color="primary" iconType="iInCircle">
-              <EuiText size="xs">
-                <FormattedMessage
-                  id="observability.alerting.opensearchFormSection.alertFiresMessage"
-                  defaultMessage="Alert fires when query result {operator} {value}{unit} for {forDuration}"
-                  values={{
-                    operator: form.threshold.operator,
-                    value: form.threshold.value,
-                    unit: form.threshold.unit,
-                    forDuration: form.threshold.forDuration,
-                  }}
-                />
-              </EuiText>
-            </EuiCallOut>
-          </EuiPanel>
-
-          <EuiSpacer size="m" />
-
-          {/* Evaluation Settings */}
-          <EuiPanel paddingSize="m" color="subdued">
-            <EuiTitle size="xs">
-              <h3>
-                {i18n.translate(
-                  'observability.alerting.opensearchFormSection.evaluationSettingsTitle',
-                  { defaultMessage: 'Evaluation Settings' }
-                )}
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="s" wrap>
-              <EuiFlexItem style={{ minWidth: 160 }}>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'observability.alerting.opensearchFormSection.evalIntervalLabel',
-                    { defaultMessage: 'Eval Interval' }
-                  )}
-                  helpText={i18n.translate(
-                    'observability.alerting.opensearchFormSection.evalIntervalHelpText',
-                    { defaultMessage: 'How often evaluated' }
-                  )}
-                  display="rowCompressed"
-                >
-                  <EuiSelect
-                    options={INTERVAL_OPTIONS}
-                    value={form.evaluationInterval}
-                    onChange={(e) => onUpdate('evaluationInterval', e.target.value)}
-                    compressed
-                    aria-label={i18n.translate(
-                      'observability.alerting.opensearchFormSection.evaluationIntervalAriaLabel',
-                      { defaultMessage: 'Evaluation interval' }
-                    )}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem style={{ minWidth: 160 }}>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'observability.alerting.opensearchFormSection.pendingPeriodLabel',
-                    { defaultMessage: 'Pending Period' }
-                  )}
-                  helpText={i18n.translate(
-                    'observability.alerting.opensearchFormSection.pendingPeriodHelpText',
-                    { defaultMessage: 'Before firing' }
-                  )}
-                  display="rowCompressed"
-                >
-                  <EuiSelect
-                    options={DURATION_OPTIONS}
-                    value={form.pendingPeriod}
-                    onChange={(e) => onUpdate('pendingPeriod', e.target.value)}
-                    compressed
-                    aria-label={i18n.translate(
-                      'observability.alerting.opensearchFormSection.pendingPeriodAriaLabel',
-                      { defaultMessage: 'Pending period' }
-                    )}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-
-          <EuiSpacer size="m" />
-
-          {/* Labels */}
-          <EuiPanel paddingSize="m" color="subdued">
-            <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-              <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h3>
-                    {i18n.translate('observability.alerting.opensearchFormSection.labelsTitle', {
-                      defaultMessage: 'Labels',
-                    })}
-                  </h3>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {i18n.translate(
-                    'observability.alerting.opensearchFormSection.labelsDescription',
-                    { defaultMessage: 'Categorize and route alerts' }
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-            <LabelEditor
-              labels={form.labels}
-              onChange={(l) => onUpdate('labels', l)}
-              context={context}
-            />
-          </EuiPanel>
-
-          <EuiSpacer size="m" />
-
-          {/* Annotations */}
-          <EuiPanel paddingSize="m" color="subdued">
-            <EuiAccordion
-              id="os-ppl-annotations"
-              buttonContent={
-                <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <strong>
-                      {i18n.translate(
-                        'observability.alerting.opensearchFormSection.annotationsTitle',
-                        { defaultMessage: 'Annotations' }
-                      )}
-                    </strong>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">
-                      {i18n.translate(
-                        'observability.alerting.opensearchFormSection.optionalBadge',
-                        { defaultMessage: 'Optional' }
-                      )}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-              initialIsOpen={true}
-              paddingSize="none"
-            >
-              <EuiSpacer size="s" />
-              <AnnotationEditor
-                annotations={form.annotations}
-                onChange={(a) => onUpdate('annotations', a)}
-              />
-            </EuiAccordion>
-          </EuiPanel>
-        </>
-      ) : (
-        <>
-          {/* DSL Trigger */}
-          <EuiPanel paddingSize="m" color="subdued">
-            <EuiTitle size="xs">
-              <h3>
-                {i18n.translate('observability.alerting.opensearchFormSection.triggerTitle', {
-                  defaultMessage: 'Trigger',
-                })}
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiFormRow
-              label={i18n.translate(
-                'observability.alerting.opensearchFormSection.triggerNameLabel',
-                { defaultMessage: 'Trigger Name' }
-              )}
-              fullWidth
-            >
-              <EuiFieldText
-                placeholder={i18n.translate(
-                  'observability.alerting.opensearchFormSection.triggerNamePlaceholder',
-                  { defaultMessage: 'e.g. Error count threshold' }
-                )}
-                value={form.triggerName}
-                onChange={(e) => onUpdate('triggerName', e.target.value)}
-                fullWidth
-                aria-label={i18n.translate(
-                  'observability.alerting.opensearchFormSection.triggerNameAriaLabel',
-                  { defaultMessage: 'Trigger name' }
-                )}
-              />
-            </EuiFormRow>
-            <EuiSpacer size="s" />
-            <EuiFormRow
-              label={i18n.translate('observability.alerting.opensearchFormSection.conditionLabel', {
-                defaultMessage: 'Condition (Painless script)',
-              })}
-              helpText={i18n.translate(
-                'observability.alerting.opensearchFormSection.conditionHelpText',
-                { defaultMessage: 'e.g. ctx.results[0].hits.total.value > 100' }
-              )}
-              fullWidth
-            >
-              <EuiFieldText
-                placeholder="ctx.results[0].hits.total.value > 100"
-                value={form.triggerCondition}
-                onChange={(e) => onUpdate('triggerCondition', e.target.value)}
-                fullWidth
-                style={{ fontFamily: 'monospace' }}
-                aria-label={i18n.translate(
-                  'observability.alerting.opensearchFormSection.triggerConditionAriaLabel',
-                  { defaultMessage: 'Trigger condition' }
-                )}
-              />
-            </EuiFormRow>
-          </EuiPanel>
-        </>
-      )}
-
-      <EuiSpacer size="m" />
-
-      {/* Action (optional) */}
+      {/* PPL trigger list — multi-trigger editor with destination picker per action */}
       <EuiPanel paddingSize="m" color="subdued">
-        <EuiAccordion
-          id="os-action"
-          buttonContent={
-            <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <strong>
-                  {i18n.translate('observability.alerting.opensearchFormSection.actionTitle', {
-                    defaultMessage: 'Action',
-                  })}
-                </strong>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">
-                  {i18n.translate(
-                    'observability.alerting.opensearchFormSection.actionOptionalBadge',
-                    { defaultMessage: 'Optional' }
-                  )}
-                </EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-          initialIsOpen={false}
-          paddingSize="none"
-        >
-          <EuiSpacer size="s" />
-          <EuiFormRow
-            label={i18n.translate('observability.alerting.opensearchFormSection.actionNameLabel', {
-              defaultMessage: 'Action Name',
-            })}
-          >
-            <EuiFieldText
-              placeholder={i18n.translate(
-                'observability.alerting.opensearchFormSection.actionNamePlaceholder',
-                { defaultMessage: 'Notify Slack' }
-              )}
-              value={form.actionName}
-              onChange={(e) => onUpdate('actionName', e.target.value)}
-              aria-label={i18n.translate(
-                'observability.alerting.opensearchFormSection.actionNameAriaLabel',
-                { defaultMessage: 'Action name' }
-              )}
-            />
-          </EuiFormRow>
-          <EuiSpacer size="s" />
-          <EuiFormRow
-            label={i18n.translate(
-              'observability.alerting.opensearchFormSection.destinationIdLabel',
-              { defaultMessage: 'Destination ID' }
-            )}
-          >
-            <EuiFieldText
-              placeholder={i18n.translate(
-                'observability.alerting.opensearchFormSection.destinationIdPlaceholder',
-                { defaultMessage: 'Destination ID' }
-              )}
-              value={form.actionDestination}
-              onChange={(e) => onUpdate('actionDestination', e.target.value)}
-              aria-label={i18n.translate(
-                'observability.alerting.opensearchFormSection.destinationIdAriaLabel',
-                { defaultMessage: 'Destination ID' }
-              )}
-            />
-          </EuiFormRow>
-          <EuiSpacer size="s" />
-          <EuiFormRow
-            label={i18n.translate(
-              'observability.alerting.opensearchFormSection.messageTemplateLabel',
-              { defaultMessage: 'Message Template' }
-            )}
-          >
-            <EuiTextArea
-              placeholder="Alert: {{ctx.monitor.name}} triggered"
-              value={form.actionMessage}
-              onChange={(e) => onUpdate('actionMessage', e.target.value)}
-              rows={3}
-              aria-label={i18n.translate(
-                'observability.alerting.opensearchFormSection.messageTemplateAriaLabel',
-                { defaultMessage: 'Message template' }
-              )}
-            />
-          </EuiFormRow>
-        </EuiAccordion>
+        <PplTriggersSection
+          dsId={form.datasourceId}
+          triggers={form.pplTriggers}
+          onChange={(next) => onUpdate('pplTriggers', next)}
+          hasSubmitted={hasSubmitted}
+        />
       </EuiPanel>
     </>
   );

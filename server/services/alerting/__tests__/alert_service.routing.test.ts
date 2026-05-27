@@ -46,7 +46,11 @@ const mockOsBackend = {
   deleteMonitor: jest.fn(),
   getAlerts: jest.fn(async () => ({ alerts: [], totalAlerts: 0, truncated: false })),
   acknowledgeAlerts: jest.fn(),
-  getDestinations: jest.fn(async () => []),
+  getDestinations: jest.fn(async () => ({
+    destinations: [],
+    totalDestinations: 0,
+    truncated: false,
+  })),
   searchQuery: jest.fn(),
   runMonitor: jest.fn(),
 };

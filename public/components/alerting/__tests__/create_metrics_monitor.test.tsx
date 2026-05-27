@@ -12,12 +12,12 @@ jest.mock('echarts', () => ({
 
 jest.mock('../promql_editor', () => ({
   PromQLEditor: ({ value }: { value: string }) => (
-    <textarea data-test-subj="promql-mock" defaultValue={value} />
+    <textarea data-test-subj="promqlMock" defaultValue={value} />
   ),
 }));
 
 jest.mock('../metric_browser', () => ({
-  MetricBrowser: () => <div data-test-subj="metric-browser-mock" />,
+  MetricBrowser: () => <div data-test-subj="metricBrowserMock" />,
 }));
 
 global.ResizeObserver = jest.fn().mockImplementation(() => ({

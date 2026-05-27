@@ -41,6 +41,35 @@ export interface OSTrigger {
   actions: OSAction[];
 }
 
+export type OSPPLQueryLanguage = 'ppl' | 'sql';
+
+export interface OSPPLInput {
+  ppl_input: {
+    query: string;
+    query_language: OSPPLQueryLanguage;
+  };
+}
+
+export type OSPPLNumResultsOperator = '>' | '>=' | '<' | '<=' | '==' | '!=';
+export type OSPPLConditionType = 'number_of_results' | 'custom';
+
+/** Inner body of a `ppl_trigger`. The wire envelope is {@link OSPPLTrigger}. */
+export interface OSPPLTriggerBody {
+  id?: string;
+  name: string;
+  severity: '1' | '2' | '3' | '4' | '5';
+  actions: OSAction[];
+  type: OSPPLConditionType;
+  num_results_condition?: OSPPLNumResultsOperator;
+  num_results_value?: number;
+  custom_condition?: string;
+}
+
+/** Wire-shape PPL trigger as it appears in monitor payloads. */
+export interface OSPPLTrigger {
+  ppl_trigger: OSPPLTriggerBody;
+}
+
 export type OSMonitorInput =
   | { search: { indices: string[]; query: Record<string, unknown> } }
   | {
@@ -52,17 +81,25 @@ export type OSMonitorInput =
         indices: string[];
         queries: Array<{ id: string; name: string; query: string; tags: string[] }>;
       };
-    };
+    }
+  | OSPPLInput;
+
+export type OSMonitorType =
+  | 'query_level_monitor'
+  | 'bucket_level_monitor'
+  | 'doc_level_monitor'
+  | 'ppl_monitor';
 
 export interface OSMonitor {
   id: string;
   type: 'monitor';
-  monitor_type: 'query_level_monitor' | 'bucket_level_monitor' | 'doc_level_monitor';
+  monitor_type: OSMonitorType;
   name: string;
   enabled: boolean;
   schedule: OSSchedule;
   inputs: OSMonitorInput[];
-  triggers: OSTrigger[];
+  /** Wrapped `OSPPLTrigger` for `ppl_monitor`; flat `OSTrigger` otherwise. */
+  triggers: Array<OSTrigger | OSPPLTrigger>;
   last_update_time: number;
   schema_version?: number;
 }
@@ -91,15 +128,23 @@ export interface OSAlert {
   }>;
 }
 
+/**
+ * Notification channel projection — populated from the OpenSearch
+ * Notifications plugin's `_notifications/channels` endpoint, which replaces
+ * the deprecated `_alerting/destinations` API. The picker only consumes
+ * the lightweight identity/type triple; the full per-config payload (slack
+ * url, smtp host, etc.) lives behind the Notifications plugin's own UI.
+ *
+ * `type` is widened to `string` because the Notifications plugin supports
+ * a broader set of channel types than the legacy alerting destinations
+ * (slack, chime, webhook, email, sns, ses_account, smtp_account,
+ * email_group, microsoft_teams, ...) and the picker only needs to render
+ * the value as a label.
+ */
 export interface OSDestination {
   id: string;
-  type: 'slack' | 'email' | 'custom_webhook' | 'chime';
+  type: string;
   name: string;
-  last_update_time: number;
-  schema_version?: number;
-  slack?: { url: string };
-  custom_webhook?: Record<string, unknown>;
-  email?: Record<string, unknown>;
 }
 
 // ============================================================================
@@ -127,6 +172,19 @@ export interface OSRawTrigger {
   query_level_trigger?: Record<string, unknown>;
   bucket_level_trigger?: Record<string, unknown>;
   doc_level_trigger?: Record<string, unknown>;
+  ppl_trigger?: OSRawPPLTrigger;
+}
+
+/** Permissive read-side shape — the mapper fills defaults for missing fields. */
+export interface OSRawPPLTrigger {
+  id?: string;
+  name?: string;
+  severity?: string | number;
+  actions?: OSRawAction[];
+  type?: string;
+  num_results_condition?: string;
+  num_results_value?: number;
+  custom_condition?: string;
 }
 
 export interface OSRawAction {
@@ -190,19 +248,46 @@ export interface OSAlertsApiResponse {
   alerts?: OSAlertRaw[];
 }
 
-export interface OSDestinationRaw {
-  id?: string;
-  type?: string;
+/**
+ * One entry from `GET /_plugins/_notifications/channels.channel_list[]`.
+ * The endpoint is a lightweight, picker-friendly projection of the full
+ * Notifications config — only id/name/type/description/is_enabled.
+ *
+ * Reference: https://docs.opensearch.org/latest/observing-your-data/notifications/api/
+ *   "List all notification channels: GET /_plugins/_notifications/channels"
+ */
+export interface OSNotificationChannelRaw {
+  config_id?: string;
   name?: string;
-  last_update_time?: number;
-  schema_version?: number;
-  slack?: { url: string };
-  custom_webhook?: Record<string, unknown>;
-  email?: Record<string, unknown>;
+  description?: string;
+  /**
+   * Notifications config_type, e.g. `slack` | `chime` | `webhook` | `email`
+   * | `sns` | `ses_account` | `smtp_account` | `email_group` |
+   * `microsoft_teams`. Kept as a string so a future channel type doesn't
+   * break the picker.
+   */
+  config_type?: string;
+  is_enabled?: boolean;
 }
 
-export interface OSDestinationsApiResponse {
-  destinations?: OSDestinationRaw[];
+export interface OSNotificationChannelsApiResponse {
+  start_index?: number;
+  total_hits?: number;
+  total_hit_relation?: 'eq' | 'gte';
+  channel_list?: OSNotificationChannelRaw[];
+}
+
+/**
+ * Mapped result of the notifications `_plugins/_notifications/channels`
+ * call. The endpoint returns up to its own server-side default page (no
+ * client-controllable size on `/channels`), so we surface `total_hits` as
+ * `totalDestinations` and set `truncated` when the returned list is
+ * shorter than the upstream total.
+ */
+export interface OSDestinationsResult {
+  destinations: OSDestination[];
+  totalDestinations: number;
+  truncated: boolean;
 }
 
 // ============================================================================
@@ -252,11 +337,7 @@ export interface OpenSearchBackend {
     alertIds: string[]
   ): Promise<unknown>;
 
-  // Destinations
-  getDestinations(client: AlertingOSClient): Promise<OSDestination[]>;
-  createDestination(
-    client: AlertingOSClient,
-    dest: Omit<OSDestination, 'id'>
-  ): Promise<OSDestination>;
-  deleteDestination(client: AlertingOSClient, destId: string): Promise<boolean>;
+  // Notification channels (read-only projection — destination CRUD lives in
+  // the OpenSearch Notifications plugin's own UI; we only feed the picker).
+  getDestinations(client: AlertingOSClient): Promise<OSDestinationsResult>;
 }

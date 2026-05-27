@@ -7,8 +7,7 @@
  * Monitor Detail Flyout — comprehensive view of a single monitor's
  * configuration, behavior, and impact with quick actions.
  */
-import React, { useState, useEffect, useMemo } from 'react';
-import type { EChartsOption, SeriesOption } from 'echarts';
+import React, { useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -29,181 +28,34 @@ import {
   EuiBasicTableColumn,
   EuiAccordion,
   EuiToolTip,
+  EuiCallOut,
   EuiCodeBlock,
   EuiLoadingContent,
-  EuiStat,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EchartsRender } from './echarts_render';
 import {
   AlertHistoryEntry,
   NotificationRouting,
   OSMonitor,
   OSMonitorInput,
   UnifiedAlertSeverity,
-  UnifiedRule,
   UnifiedRuleSummary,
 } from '../../../common/types/alerting';
-import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { DeleteModal } from '../common/helpers/delete_modal';
+import { useMonitorDetail } from './hooks/use_monitor_detail';
+import { ConditionPreviewGraph } from './monitor_detail/condition_preview_graph';
+import { humanizeCondition } from './monitor_detail/humanize_condition';
 
-import {
-  SEVERITY_COLORS,
-  STATE_COLORS,
-  STATUS_COLORS,
-  HEALTH_COLORS,
-  escapeHtml,
-} from './shared_constants';
+import { SEVERITY_COLORS, STATE_COLORS, STATUS_COLORS, HEALTH_COLORS } from './shared_constants';
 
-// ============================================================================
-// Condition humanizer — translates Painless scripts into readable text
-// ============================================================================
-
-function humanizeCondition(condition: string): React.ReactNode {
-  const trimmed = condition.trim();
-
-  // "return true" → "Always trigger"
-  if (/^return\s+true\s*;?\s*$/.test(trimmed)) {
-    return i18n.translate('observability.alerting.monitorDetailFlyout.condition.alwaysTrigger', {
-      defaultMessage: 'Always trigger',
-    });
-  }
-
-  // ctx.results[0].hits.total.value <op> N → "Document count <op> N"
-  const docCountMatch = trimmed.match(
-    /ctx\.results\[0]\.hits\.total\.value\s*(>=|<=|!=|==|>|<)\s*([\d.]+)/
-  );
-  if (docCountMatch) {
-    return i18n.translate('observability.alerting.monitorDetailFlyout.condition.documentCount', {
-      defaultMessage: 'Document count {operator} {value}',
-      values: { operator: docCountMatch[1], value: docCountMatch[2] },
-    });
-  }
-
-  // Anything else: show the raw condition in a code style
-  return <code>{condition}</code>;
-}
-
-// ============================================================================
-// SVG Line Graph for condition preview
-// ============================================================================
-
-const ConditionPreviewGraph: React.FC<{
-  data: Array<{ timestamp: number; value: number }>;
-  threshold?: { operator: string; value: number; unit?: string };
-}> = ({ data, threshold }) => {
-  // Handle sparse data: show a stat card instead of a chart for 1-2 data points
-  const isSparse = data && data.length > 0 && data.length <= 2;
-
-  const spec = useMemo((): EChartsOption | null => {
-    if (!data || data.length === 0 || isSparse) return null;
-
-    const timestamps = data.map((d) =>
-      new Date(d.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    );
-    const values = data.map((d) => d.value);
-
-    const series: SeriesOption[] = [
-      {
-        type: 'line',
-        data: values,
-        smooth: true,
-        symbol: 'circle',
-        symbolSize: 4,
-        lineStyle: { color: '#006BB4', width: 2 },
-        itemStyle: { color: '#006BB4' },
-        areaStyle: { color: 'rgba(0, 107, 180, 0.08)' },
-      },
-    ];
-
-    // Threshold line as a markLine
-    if (threshold) {
-      (series[0] as Record<string, unknown>).markLine = {
-        silent: true,
-        symbol: 'none',
-        lineStyle: { color: '#BD271E', type: 'dashed', width: 1.5 },
-        label: {
-          formatter: `${threshold.value}${threshold.unit || ''}`,
-          position: 'end',
-          color: '#BD271E',
-          fontSize: 10,
-        },
-        data: [{ yAxis: threshold.value }],
-      };
-    }
-
-    return {
-      grid: { left: 45, right: 15, top: 15, bottom: 30 },
-      tooltip: {
-        trigger: 'axis',
-        formatter: (params: unknown) => {
-          const p = (params as Array<{ axisValue: string; value: number }>)[0];
-          // Escape user-derived strings before building tooltip HTML — ECharts
-          // renders the formatter's return value verbatim as HTML.
-          return `${escapeHtml(String(p.axisValue))}<br/>${escapeHtml(p.value.toFixed(2))}`;
-        },
-      },
-      xAxis: {
-        type: 'category',
-        data: timestamps,
-        axisLine: { lineStyle: { color: '#EDF0F5' } },
-        axisLabel: { color: '#98A2B3', fontSize: 9 },
-        axisTick: { show: false },
-      },
-      yAxis: {
-        type: 'value',
-        splitLine: { lineStyle: { color: '#EDF0F5' } },
-        axisLabel: { color: '#98A2B3', fontSize: 9 },
-      },
-      series,
-    };
-  }, [data, threshold, isSparse]);
-
-  if (!data || data.length === 0)
-    return (
-      <EuiText size="s" color="subdued">
-        <em>
-          <FormattedMessage
-            id="observability.alerting.monitorDetailFlyout.preview.noData"
-            defaultMessage="No recent evaluation data available. The condition preview populates after the monitor executes and records metric data."
-          />
-        </em>
-      </EuiText>
-    );
-
-  if (isSparse) {
-    const latestPoint = data[data.length - 1];
-    const formattedValue = Number.isInteger(latestPoint.value)
-      ? String(latestPoint.value)
-      : latestPoint.value.toFixed(2);
-    return (
-      <EuiPanel color="subdued" paddingSize="m">
-        <EuiStat
-          title={formattedValue}
-          description={i18n.translate(
-            'observability.alerting.monitorDetailFlyout.preview.latestEvaluatedValue',
-            {
-              defaultMessage: 'Latest evaluated value',
-            }
-          )}
-          titleSize="l"
-        />
-        <EuiSpacer size="xs" />
-        <EuiText size="xs" color="subdued">
-          <em>
-            <FormattedMessage
-              id="observability.alerting.monitorDetailFlyout.preview.limitedData"
-              defaultMessage="Limited evaluation data — showing latest value"
-            />
-          </em>
-        </EuiText>
-      </EuiPanel>
-    );
-  }
-
-  return <EchartsRender spec={spec!} height={180} />;
-};
+// Per-table caps for the detail flyout. `EuiBasicTable` doesn't paginate by
+// default; without these caps a monitor that has accumulated thousands of
+// historical alerts would render every row, freezing the flyout. The Alerts
+// tab is the right place to drill into the full history — the flyout's
+// table is intentionally a quick overview.
+const MAX_ALERT_HISTORY_ROWS = 50;
+const MAX_ROUTING_ROWS = 50;
 
 // ============================================================================
 // Props
@@ -214,6 +66,12 @@ export interface MonitorDetailFlyoutProps {
   onClose: () => void;
   onDelete: (id: string) => void;
   onClone: (monitor: UnifiedRuleSummary) => void;
+  /**
+   * Optional Edit handler. When omitted, the Edit button is hidden — keeps
+   * the flyout usable in contexts (e.g. AI wizard summary) that don't host
+   * an edit flyout.
+   */
+  onEdit?: (monitor: UnifiedRuleSummary) => void;
 }
 
 // ============================================================================
@@ -225,33 +83,13 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   onClose,
   onDelete,
   onClone,
+  onEdit,
 }) => {
-  const osService = useMemo(() => new AlertingOpenSearchService(), []);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [detail, setDetail] = useState<UnifiedRule | null>(null);
-  const [detailLoading, setDetailLoading] = useState(true);
-
-  // Fetch full detail from the API when flyout opens
-  useEffect(() => {
-    let cancelled = false;
-    setDetailLoading(true);
-    const dsId = monitor.datasourceId;
-    const ruleId = monitor.id;
-    osService
-      .getRuleDetail(dsId, ruleId)
-      .then((data: UnifiedRule) => {
-        if (!cancelled && data) setDetail(data);
-      })
-      .catch((err: unknown) => {
-        console.error('Failed to load monitor details:', err);
-      })
-      .finally(() => {
-        if (!cancelled) setDetailLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [monitor.datasourceId, monitor.id, osService]);
+  const { detail, isLoading: detailLoading, error: detailError } = useMonitorDetail({
+    dsId: monitor.datasourceId,
+    ruleId: monitor.id,
+  });
 
   // Use detail data when available, fall back to summary props.
   // `detail` has the full shape; `monitor` is only a summary, so
@@ -388,18 +226,35 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
           {/* Quick actions */}
           <EuiFlexGroup gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate('observability.alerting.monitorDetailFlyout.editTooltip', {
-                  defaultMessage: 'Editing not yet available',
-                })}
-              >
-                <EuiButtonEmpty size="s" iconType="pencil" isDisabled>
+              {onEdit && monitor.monitorType === 'ppl' ? (
+                <EuiButtonEmpty
+                  size="s"
+                  iconType="pencil"
+                  onClick={() => onEdit(monitor)}
+                  data-test-subj="alertManagerMonitorDetailEdit"
+                >
                   <FormattedMessage
                     id="observability.alerting.monitorDetailFlyout.editButton"
                     defaultMessage="Edit"
                   />
                 </EuiButtonEmpty>
-              </EuiToolTip>
+              ) : (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'observability.alerting.monitorDetailFlyout.editTooltip',
+                    {
+                      defaultMessage: 'Editing is only supported for PPL monitors',
+                    }
+                  )}
+                >
+                  <EuiButtonEmpty size="s" iconType="pencil" isDisabled>
+                    <FormattedMessage
+                      id="observability.alerting.monitorDetailFlyout.editButton"
+                      defaultMessage="Edit"
+                    />
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty size="s" iconType="copy" onClick={() => onClone(monitor)}>
@@ -430,6 +285,30 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
             <EuiLoadingContent lines={10} />
           ) : (
             <>
+              {detailError && (
+                <>
+                  <EuiCallOut
+                    size="s"
+                    color="warning"
+                    iconType="alert"
+                    title={i18n.translate(
+                      'observability.alerting.monitorDetailFlyout.detailLoadError.title',
+                      {
+                        defaultMessage: 'Some monitor details could not be loaded',
+                      }
+                    )}
+                    data-test-subj="alertManagerMonitorDetailLoadError"
+                  >
+                    <p>
+                      <FormattedMessage
+                        id="observability.alerting.monitorDetailFlyout.detailLoadError.body"
+                        defaultMessage="Showing summary information only. Try reopening the flyout to retry."
+                      />
+                    </p>
+                  </EuiCallOut>
+                  <EuiSpacer size="m" />
+                </>
+              )}
               {/* Description */}
               <EuiText size="s">
                 <p>{description}</p>
@@ -745,7 +624,23 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                 initialIsOpen={false}
                 paddingSize="m"
               >
-                <EuiBasicTable items={alertHistory} columns={historyColumns} compressed />
+                <EuiBasicTable
+                  items={alertHistory.slice(0, MAX_ALERT_HISTORY_ROWS)}
+                  columns={historyColumns}
+                  compressed
+                />
+                {alertHistory.length > MAX_ALERT_HISTORY_ROWS && (
+                  <EuiText size="xs" color="subdued">
+                    <FormattedMessage
+                      id="observability.alerting.monitorDetailFlyout.alertHistoryTruncated"
+                      defaultMessage="Showing the {shown} most recent of {total} alerts. Use the Alerts tab to filter by time."
+                      values={{
+                        shown: MAX_ALERT_HISTORY_ROWS,
+                        total: alertHistory.length,
+                      }}
+                    />
+                  </EuiText>
+                )}
               </EuiAccordion>
 
               <EuiSpacer size="m" />
@@ -766,7 +661,11 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                 paddingSize="m"
               >
                 {notificationRouting.length > 0 ? (
-                  <EuiBasicTable items={notificationRouting} columns={routingColumns} compressed />
+                  <EuiBasicTable
+                    items={notificationRouting.slice(0, MAX_ROUTING_ROWS)}
+                    columns={routingColumns}
+                    compressed
+                  />
                 ) : (
                   <EuiText size="s" color="subdued">
                     <FormattedMessage

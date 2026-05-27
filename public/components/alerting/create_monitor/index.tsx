@@ -17,7 +17,7 @@
  * Re-exports `MonitorFormState` so existing consumers importing from
  * `'./create_monitor'` continue to work unchanged.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -42,6 +42,7 @@ import { Datasource, UnifiedAlertSeverity } from '../../../../common/types/alert
 import {
   MonitorFormState as ValidatorFormState,
   validateMonitorForm,
+  validatePplForm,
 } from '../../../../common/services/alerting/validators';
 import { validatePromQL } from '../promql_editor';
 import { MonitorTemplateWizard, AlertTemplate } from '../monitor_template_wizard';
@@ -75,6 +76,25 @@ export interface CreateMonitorProps {
   /** Pre-selected datasource IDs from the parent page */
   selectedDsIds?: string[];
   context?: { service?: string; team?: string };
+  /**
+   * `'create'` (default) opens an empty form; `'edit'` pre-populates the
+   * form from `initialForm`. The "AI / from-template" mode is hidden in
+   * edit mode — Prometheus rule-group templates only make sense at create
+   * time.
+   */
+  mode?: 'create' | 'edit';
+  /**
+   * Pre-populated form state for edit mode. Producer is `EditMonitor`,
+   * which converts a `UnifiedRule` via `unifiedRuleToOsForm`.
+   */
+  initialForm?: MonitorFormState;
+  /**
+   * Override the initial backend type. When provided, takes precedence over
+   * the type derived from the parent-page datasource selection. Used by the
+   * Rules tab "Logs" / "Metrics" popover entries to force the matching form
+   * variant even if the user's selected datasource is the other type.
+   */
+  initialBackendType?: MonitorBackendType;
 }
 
 type CreationMode = 'manual' | 'ai';
@@ -86,41 +106,74 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
   datasources,
   selectedDsIds,
   context,
+  mode = 'create',
+  initialForm,
+  initialBackendType,
 }) => {
-  // Determine initial datasource from parent selection
+  const isEdit = mode === 'edit';
+
+  // Determine initial datasource from parent selection. When the caller
+  // pinned a backend type (e.g. "Logs" popover -> opensearch), only adopt
+  // the parent's datasource if it matches that type — otherwise fall back
+  // to picking the first datasource of the requested type.
   const initialDs = useMemo(() => {
     if (selectedDsIds && selectedDsIds.length > 0) {
       const ds = datasources.find((d) => d.id === selectedDsIds[0]);
-      if (ds) return ds;
+      if (ds && (!initialBackendType || ds.type === initialBackendType)) return ds;
+    }
+    if (initialBackendType) {
+      const fallback = datasources.find((d) => d.type === initialBackendType);
+      if (fallback) return fallback;
     }
     return null;
-  }, [datasources, selectedDsIds]);
+  }, [datasources, selectedDsIds, initialBackendType]);
 
-  const initialType: MonitorBackendType =
-    initialDs?.type === 'opensearch' ? 'opensearch' : 'prometheus';
+  // In edit mode the backend type is pinned by the existing monitor; an
+  // explicit `initialBackendType` (popover choice) wins next; otherwise it
+  // follows the parent-page datasource selection.
+  const initialType: MonitorBackendType = initialForm
+    ? initialForm.datasourceType === 'prometheus'
+      ? 'prometheus'
+      : 'opensearch'
+    : initialBackendType
+    ? initialBackendType
+    : initialDs?.type === 'opensearch'
+    ? 'opensearch'
+    : 'prometheus';
 
   const [creationMode, setCreationMode] = useState<CreationMode>('manual');
   const [backendType, setBackendType] = useState<MonitorBackendType>(initialType);
-  const [promForm, setPromForm] = useState<PrometheusFormState>({
-    ...DEFAULT_PROM_FORM,
-    datasourceId: initialType === 'prometheus' && initialDs ? initialDs.id : '',
-  });
-  const [osForm, setOsForm] = useState<OpenSearchFormState>({
-    ...DEFAULT_OS_FORM,
-    datasourceId: initialType === 'opensearch' && initialDs ? initialDs.id : '',
-  });
+  const [promForm, setPromForm] = useState<PrometheusFormState>(
+    initialForm && initialForm.datasourceType === 'prometheus'
+      ? initialForm
+      : {
+          ...DEFAULT_PROM_FORM,
+          datasourceId: initialType === 'prometheus' && initialDs ? initialDs.id : '',
+        }
+  );
+  const [osForm, setOsForm] = useState<OpenSearchFormState>(
+    initialForm && initialForm.datasourceType === 'opensearch'
+      ? initialForm
+      : {
+          ...DEFAULT_OS_FORM,
+          datasourceId: initialType === 'opensearch' && initialDs ? initialDs.id : '',
+        }
+  );
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  const updateProm = <K extends keyof PrometheusFormState>(
-    key: K,
-    value: PrometheusFormState[K]
-  ) => {
-    setPromForm((prev) => ({ ...prev, [key]: value }));
-  };
-  const updateOs = <K extends keyof OpenSearchFormState>(key: K, value: OpenSearchFormState[K]) => {
-    setOsForm((prev) => ({ ...prev, [key]: value }));
-  };
+  const updateProm = useCallback(
+    <K extends keyof PrometheusFormState>(key: K, value: PrometheusFormState[K]) => {
+      setPromForm((prev) => ({ ...prev, [key]: value }));
+    },
+    []
+  );
+  const updateOs = useCallback(
+    <K extends keyof OpenSearchFormState>(key: K, value: OpenSearchFormState[K]) => {
+      setOsForm((prev) => ({ ...prev, [key]: value }));
+    },
+    []
+  );
 
   const handleDatasourceChange = (id: string, type: MonitorBackendType) => {
     setBackendType(type);
@@ -158,13 +211,9 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
     activeForm.datasourceId !== '' &&
     (backendType === 'prometheus'
       ? promForm.query.trim() !== '' && !hasQueryErrors
-      : osForm.monitorType === 'ppl_monitor'
-      ? osForm.query.trim() !== ''
-      : osForm.monitorType === 'cluster_metrics_monitor'
-      ? osForm.clusterMetricsApiType.trim() !== ''
-      : osForm.indices.trim() !== '' && osForm.triggerCondition.trim() !== '');
+      : osForm.query.trim() !== '');
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     setHasSubmitted(true);
     if (backendType === 'prometheus') {
       const result = validateMonitorForm(promForm as ValidatorFormState);
@@ -175,44 +224,19 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
       setValidationErrors({});
       onSave(promForm);
     } else {
-      const errors: Record<string, string> = {};
-      if (osForm.monitorType === 'ppl_monitor') {
-        if (!osForm.query.trim())
-          errors.query = i18n.translate('observability.alerting.createMonitor.pplQueryRequired', {
-            defaultMessage: 'PPL query is required',
-          });
-      } else if (osForm.monitorType === 'cluster_metrics_monitor') {
-        if (!osForm.clusterMetricsApiType.trim())
-          errors.clusterMetricsApiType = i18n.translate(
-            'observability.alerting.createMonitor.apiTypeRequired',
-            {
-              defaultMessage: 'API type is required',
-            }
-          );
-      } else {
-        if (!osForm.indices.trim())
-          errors.indices = i18n.translate(
-            'observability.alerting.createMonitor.indexPatternRequired',
-            {
-              defaultMessage: 'At least one index pattern is required',
-            }
-          );
-        if (!osForm.triggerCondition.trim())
-          errors.triggerCondition = i18n.translate(
-            'observability.alerting.createMonitor.triggerConditionRequired',
-            {
-              defaultMessage: 'Trigger condition is required',
-            }
-          );
-      }
-      if (Object.keys(errors).length > 0) {
-        setValidationErrors(errors);
+      const result = validatePplForm({
+        name: osForm.name,
+        query: osForm.query,
+        pplTriggers: osForm.pplTriggers,
+      });
+      if (!result.valid) {
+        setValidationErrors(result.errors);
         return;
       }
       setValidationErrors({});
       onSave(osForm);
     }
-  };
+  }, [backendType, promForm, osForm, onSave]);
 
   // When AI wizard is active and user is on a Prometheus datasource, delegate to MonitorTemplateWizard
   if (creationMode === 'ai' && backendType === 'prometheus') {
@@ -252,8 +276,16 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
         <EuiTitle size="m">
           <h2 id="createMonitorFlyoutTitle">
             {backendType === 'prometheus'
-              ? i18n.translate('observability.alerting.createMonitor.titleMetrics', {
-                  defaultMessage: 'Create Metrics Monitor',
+              ? isEdit
+                ? i18n.translate('observability.alerting.createMonitor.editTitleMetrics', {
+                    defaultMessage: 'Edit Metrics Monitor',
+                  })
+                : i18n.translate('observability.alerting.createMonitor.titleMetrics', {
+                    defaultMessage: 'Create Metrics Monitor',
+                  })
+              : isEdit
+              ? i18n.translate('observability.alerting.createMonitor.editTitleLogs', {
+                  defaultMessage: 'Edit Logs Monitor',
                 })
               : i18n.translate('observability.alerting.createMonitor.titleLogs', {
                   defaultMessage: 'Create Logs Monitor',
@@ -273,17 +305,20 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {/* Target Datasource */}
+        {/* Target Datasource — locked in edit mode (the existing monitor
+            already binds a datasource; changing it would require re-creating).
+            Scoped to the active backend so a Logs flyout never shows
+            Prometheus datasources and vice versa. */}
         <DatasourceTargetSelector
-          datasources={datasources}
+          datasources={datasources.filter((d) => d.type === backendType)}
           selectedId={activeForm.datasourceId}
-          onChange={handleDatasourceChange}
+          onChange={isEdit ? () => undefined : handleDatasourceChange}
         />
 
         <EuiSpacer size="m" />
 
-        {/* Creation Mode Toggle — AI only available for Prometheus */}
-        {backendType === 'prometheus' && (
+        {/* Creation Mode Toggle — AI only available for Prometheus, hidden in edit mode */}
+        {!isEdit && backendType === 'prometheus' && (
           <>
             <EuiPanel paddingSize="s" hasBorder>
               <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
@@ -433,7 +468,6 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
             onUpdate={updateOs}
             validationErrors={validationErrors}
             hasSubmitted={hasSubmitted}
-            context={context}
           />
         )}
       </EuiFlyoutBody>
@@ -451,9 +485,13 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
             <EuiFlexGroup gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButton onClick={handleSave} isDisabled={!isValid}>
-                  {i18n.translate('observability.alerting.createMonitor.saveMonitorButton', {
-                    defaultMessage: 'Save Monitor',
-                  })}
+                  {isEdit
+                    ? i18n.translate('observability.alerting.createMonitor.saveChangesButton', {
+                        defaultMessage: 'Save Changes',
+                      })
+                    : i18n.translate('observability.alerting.createMonitor.saveMonitorButton', {
+                        defaultMessage: 'Save Monitor',
+                      })}
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

@@ -8,7 +8,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 
 // Stub flyout to avoid pulling in its dependency tree
 jest.mock('../monitor_detail_flyout', () => ({
-  MonitorDetailFlyout: () => <div data-test-subj="monitor-flyout" />,
+  MonitorDetailFlyout: () => <div data-test-subj="monitorFlyout" />,
 }));
 
 // monitors_table.tsx was moved to monitors_table/index.tsx;

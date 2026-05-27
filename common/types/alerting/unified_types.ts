@@ -180,7 +180,8 @@ export type MonitorType =
   | 'composite'
   | 'infrastructure'
   | 'synthetics'
-  | 'cluster_metrics';
+  | 'cluster_metrics'
+  | 'ppl';
 export type MonitorStatus = 'active' | 'pending' | 'muted' | 'disabled';
 export type MonitorHealthStatus = 'healthy' | 'failing' | 'no_data';
 
@@ -236,7 +237,6 @@ export interface UnifiedRuleSummary {
 /** Full rule with detail-view fields. Use for single-item detail views only. */
 export interface UnifiedRule extends UnifiedRuleSummary {
   description: string;
-  aiSummary: string;
   firingPeriod?: string;
   lookbackPeriod?: string;
   alertHistory: AlertHistoryEntry[];

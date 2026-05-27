@@ -12,9 +12,14 @@ import {
   AlertingOSClient,
   Logger,
   OpenSearchBackend,
+  OSAction,
   OSMonitor,
   OSAlert,
   OSDestination,
+  OSPPLConditionType,
+  OSPPLNumResultsOperator,
+  OSPPLTrigger,
+  OSPPLTriggerBody,
   OSTrigger,
   OSSearchResponse,
   OSGetMonitorResponse,
@@ -22,12 +27,46 @@ import {
   OSAlertsApiResponse,
   OSAlertRaw,
   OSMonitorSource,
+  OSRawPPLTrigger,
   OSRawTrigger,
   OSRawAction,
-  OSDestinationRaw,
-  OSDestinationsApiResponse,
+  OSDestinationsResult,
+  OSNotificationChannelRaw,
+  OSNotificationChannelsApiResponse,
 } from '../../../common/types/alerting';
 import { createConflictError, createInternalError, isStatusCode } from './errors';
+
+/**
+ * Tail-cap on `_cat/indices` and `_cat/aliases` discovery responses fed to
+ * the index-picker combobox.
+ *
+ * The picker already pushes the user's input to the cluster — the typeahead
+ * sends `_cat/indices/{prefix}*` so the cluster does the filtering, not the
+ * browser. This cap is a safety net for the case where that prefix still
+ * matches a very large slice (e.g. a user types `l` against a cluster with
+ * tens of thousands of `logs-*` indices): without it, parsing a 50k-row
+ * `_cat/indices` JSON response on the main thread would freeze the picker
+ * for seconds. The combobox doesn't paginate — items past the cap are
+ * unreachable until the user narrows their prefix further.
+ *
+ * Mirrors the `MAX_RESULTS = 200` pattern in `metadata_handlers.ts`. The
+ * value is conservative on purpose; OSD's typical non-paginated cap is
+ * 10000 (e.g. `getRuleGroups`) but for an interactive picker, more
+ * suggestions don't help — they just slow down rendering.
+ */
+const MAX_DISCOVERY_RESULTS = 200;
+
+/**
+ * Plugin-owned monitor keys whose values OSD MUST preserve verbatim across
+ * an update, regardless of what the caller's request body contains. These
+ * are the alerting plugin's internal bookkeeping fields — tenant scoping
+ * (`data_sources`), execution state (`last_run_context`, `enabled_time`),
+ * and ownership (`owner`). The OSD UI never edits any of them; allowing a
+ * client to clobber them via PUT would re-introduce the same class of
+ * regression that F5 (the typed-projection strip) fixed, just through a
+ * different door.
+ */
+const PLUGIN_OWNED_KEYS = ['data_sources', 'last_run_context', 'owner', 'enabled_time'] as const;
 
 export class HttpOpenSearchBackend implements OpenSearchBackend {
   readonly type = 'opensearch' as const;
@@ -92,14 +131,13 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
     client: AlertingOSClient,
     monitor: Omit<OSMonitor, 'id'>
   ): Promise<OSMonitor> {
+    // Pass the body as-is (already has `type: "monitor"` from the client).
+    // Don't re-spread — preserves the exact shape the alerting plugin expects.
     const resp = await this.req<OSCreateMonitorResponse>(
       client,
       'POST',
       '/_plugins/_alerting/monitors',
-      {
-        ...monitor,
-        type: 'monitor',
-      }
+      monitor
     );
     return this.mapMonitor(resp.body._id, resp.body.monitor);
   }
@@ -137,9 +175,31 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
       );
     }
 
-    const current = this.mapMonitor(getResp.body._id, getResp.body.monitor);
-    const { id: _id, ...currentFields } = current;
-    const merged = { ...currentFields, ...input, last_update_time: Date.now() };
+    // Merge into the RAW upstream document, not the typed-and-narrowed
+    // `mapMonitor` projection. `mapMonitor` only emits the fields modelled
+    // in `OSMonitor`; merging onto its output would silently strip plugin
+    // fields the OSD layer doesn't know about (e.g. `data_sources`,
+    // `last_run_context`, `owner`, `enabled_time`, future schema additions),
+    // and the round-trip PUT would lose them.
+    //
+    // We also have to *preserve* those plugin-owned keys against the
+    // caller's input — `monitorMutationBodySchema` uses `unknowns: 'allow'`
+    // so a hostile (or just confused) client could PUT
+    // `{ data_sources: [...] }` and clobber the upstream value via the
+    // `...input` spread. Re-spreading the originals from `rawUpstream`
+    // after `input` makes the precedence explicit: client cannot edit
+    // these fields through this route.
+    const rawUpstream = (getResp.body.monitor as unknown) as Record<string, unknown>;
+    const preserved: Record<string, unknown> = {};
+    for (const key of PLUGIN_OWNED_KEYS) {
+      if (key in rawUpstream) preserved[key] = rawUpstream[key];
+    }
+    const merged = {
+      ...rawUpstream,
+      ...input,
+      ...preserved,
+      last_update_time: Date.now(),
+    };
 
     const putPath =
       `/_plugins/_alerting/monitors/${encodedMonitorId}` +
@@ -326,43 +386,117 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
   }
 
   // =========================================================================
-  // Destinations
+  // Notification channels
   // =========================================================================
+  //
+  // The legacy `_plugins/_alerting/destinations` API is deprecated; the
+  // OpenSearch Notifications plugin's `_plugins/_notifications/channels`
+  // endpoint is the canonical source for the picker. The IDs returned here
+  // are interchangeable with the `actions[].destination_id` field the
+  // alerting plugin still consumes when sending alerts.
+  //
+  // We use `/channels` (not `/configs`) because it returns the lightweight
+  // identity/type triple the picker needs — `/configs` wraps each item in
+  // a per-type config payload (slack url, smtp host, etc.) the OSD layer
+  // doesn't render.
 
-  async getDestinations(client: AlertingOSClient): Promise<OSDestination[]> {
-    const resp = await this.req<OSDestinationsApiResponse>(
+  async getDestinations(client: AlertingOSClient): Promise<OSDestinationsResult> {
+    const resp = await this.req<OSNotificationChannelsApiResponse>(
       client,
       'GET',
-      '/_plugins/_alerting/destinations?size=200'
+      '/_plugins/_notifications/channels'
     );
-    return (resp.body.destinations ?? []).map((d: OSDestinationRaw) => this.mapDestination(d));
+    const destinations = (resp.body.channel_list ?? []).map((c: OSNotificationChannelRaw) =>
+      this.mapChannel(c)
+    );
+    const totalDestinations = resp.body.total_hits ?? destinations.length;
+    return {
+      destinations,
+      totalDestinations,
+      truncated: totalDestinations > destinations.length,
+    };
   }
 
-  async createDestination(
+  // =========================================================================
+  // Index discovery — feeds the Create/Edit flyout's "Define index" picker
+  // and the timestamp-field selector. Wraps `_cat/indices`, `_cat/aliases`,
+  // and `_mapping`. Mirrors alerting-dashboards-plugin's OpensearchService
+  // shapes so existing UX patterns transfer cleanly.
+  // =========================================================================
+
+  /** `GET /_cat/indices/{search}?format=json&h=health,index,status` */
+  async getIndices(
     client: AlertingOSClient,
-    dest: Omit<OSDestination, 'id'>
-  ): Promise<OSDestination> {
-    const resp = await this.req<{ _id: string; destination: OSDestinationRaw }>(
-      client,
-      'POST',
-      '/_plugins/_alerting/destinations',
-      dest
-    );
-    return this.mapDestination({ id: resp.body._id, ...resp.body.destination });
-  }
-
-  async deleteDestination(client: AlertingOSClient, destId: string): Promise<boolean> {
+    search: string
+  ): Promise<Array<{ index: string; status?: string; health?: string }>> {
+    const safe = encodeURIComponent(search.trim() || '*');
     try {
-      await this.req(
+      const resp = await this.req<Array<{ index: string; status?: string; health?: string }>>(
         client,
-        'DELETE',
-        `/_plugins/_alerting/destinations/${encodeURIComponent(destId)}`
+        'GET',
+        `/_cat/indices/${safe}?format=json&h=health,index,status`
       );
-      return true;
+      // Cap the list before it reaches the combobox. A cluster with tens of
+      // thousands of indices matching `*` would freeze the UI thread; the
+      // combobox surfaces a typeahead anyway, so trimming the discovery
+      // page costs nothing UX-wise.
+      return (resp.body ?? []).slice(0, MAX_DISCOVERY_RESULTS);
     } catch (err) {
-      if (this.is404(err)) return false;
+      // Treat index-not-found as empty so partial wildcards return cleanly.
+      if (this.is404(err)) return [];
       throw err;
     }
+  }
+
+  /** `GET /_cat/aliases/{search}?format=json&h=alias,index` */
+  async getAliases(
+    client: AlertingOSClient,
+    search: string
+  ): Promise<Array<{ alias: string; index: string }>> {
+    const safe = encodeURIComponent(search.trim() || '*');
+    try {
+      const resp = await this.req<Array<{ alias: string; index: string }>>(
+        client,
+        'GET',
+        `/_cat/aliases/${safe}?format=json&h=alias,index`
+      );
+      return (resp.body ?? []).slice(0, MAX_DISCOVERY_RESULTS);
+    } catch (err) {
+      if (this.is404(err)) return [];
+      throw err;
+    }
+  }
+
+  /**
+   * `GET /{indices}/_mapping` — flattens nested properties into dotted paths
+   * grouped by data type. Returns `{ date: ['@timestamp', ...], keyword: [...], ... }`
+   * matching alerting-dashboards-plugin's `getPathsPerDataType` shape.
+   */
+  async getFieldsByType(
+    client: AlertingOSClient,
+    indices: string[]
+  ): Promise<Record<string, string[]>> {
+    if (indices.length === 0) return {};
+    const path = `/${indices.map(encodeURIComponent).join(',')}/_mapping`;
+    let raw: Record<string, { mappings?: { properties?: Record<string, unknown> } }> = {};
+    try {
+      const resp = await this.req<typeof raw>(client, 'GET', path);
+      raw = resp.body ?? {};
+    } catch (err) {
+      if (this.is404(err)) return {};
+      throw err;
+    }
+    const acc: Record<string, Set<string>> = {};
+    for (const idxBlob of Object.values(raw)) {
+      const props = idxBlob?.mappings?.properties;
+      if (!props) continue;
+      collectFieldPaths(props, '', acc);
+    }
+    const out: Record<string, string[]> = {};
+    for (const [type, set] of Object.entries(acc)) {
+      out[type] = Array.from(set).sort();
+    }
+    return out;
   }
 
   // =========================================================================
@@ -384,15 +518,27 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
   }
 
   private mapMonitor(id: string, source: OSMonitorSource): OSMonitor {
+    const rawType = source.monitor_type;
+    const monitorType: OSMonitor['monitor_type'] =
+      rawType === 'query_level_monitor' ||
+      rawType === 'bucket_level_monitor' ||
+      rawType === 'doc_level_monitor' ||
+      rawType === 'ppl_monitor'
+        ? rawType
+        : 'query_level_monitor';
+
+    const isPpl = monitorType === 'ppl_monitor';
     return {
       id,
       type: (source.type as OSMonitor['type']) || 'monitor',
-      monitor_type: (source.monitor_type as OSMonitor['monitor_type']) || 'query_level_monitor',
+      monitor_type: monitorType,
       name: source.name || '',
       enabled: source.enabled ?? true,
       schedule: source.schedule || { period: { interval: 5, unit: 'MINUTES' } },
       inputs: source.inputs || [],
-      triggers: (source.triggers || []).map((t: OSRawTrigger) => this.mapTrigger(t)),
+      triggers: (source.triggers || []).map((t: OSRawTrigger) =>
+        isPpl || t.ppl_trigger ? this.mapPplTrigger(t) : this.mapTrigger(t)
+      ),
       last_update_time: source.last_update_time || Date.now(),
       schema_version: source.schema_version,
     };
@@ -417,17 +563,39 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
           lang: inner.condition?.script?.lang || 'painless',
         },
       },
-      actions: (inner.actions || []).map((a: OSRawAction) => ({
-        id: a.id || '',
-        name: a.name || '',
-        destination_id: a.destination_id || '',
-        message_template: { source: a.message_template?.source || '' },
-        subject_template: a.subject_template
-          ? { source: a.subject_template.source || '' }
-          : undefined,
-        throttle_enabled: a.throttle_enabled ?? false,
-        throttle: a.throttle as OSTrigger['actions'][0]['throttle'],
-      })),
+      actions: (inner.actions || []).map((a: OSRawAction) => this.mapAction(a)),
+    };
+  }
+
+  private mapPplTrigger(t: OSRawTrigger): OSPPLTrigger {
+    const inner = (t.ppl_trigger || t) as OSRawPPLTrigger;
+    const conditionType: OSPPLConditionType =
+      inner.type === 'custom' ? 'custom' : 'number_of_results';
+    return {
+      ppl_trigger: {
+        id: inner.id || '',
+        name: inner.name || '',
+        severity: String(inner.severity || '3') as OSPPLTriggerBody['severity'],
+        actions: (inner.actions || []).map((a: OSRawAction) => this.mapAction(a)),
+        type: conditionType,
+        num_results_condition: inner.num_results_condition as OSPPLNumResultsOperator | undefined,
+        num_results_value: inner.num_results_value,
+        custom_condition: inner.custom_condition,
+      },
+    };
+  }
+
+  private mapAction(a: OSRawAction): OSAction {
+    return {
+      id: a.id || '',
+      name: a.name || '',
+      destination_id: a.destination_id || '',
+      message_template: { source: a.message_template?.source || '' },
+      subject_template: a.subject_template
+        ? { source: a.subject_template.source || '' }
+        : undefined,
+      throttle_enabled: a.throttle_enabled ?? false,
+      throttle: a.throttle as OSAction['throttle'],
     };
   }
 
@@ -452,20 +620,64 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
     };
   }
 
-  private mapDestination(d: OSDestinationRaw): OSDestination {
+  private mapChannel(c: OSNotificationChannelRaw): OSDestination {
     return {
-      id: d.id || '',
-      type: (d.type || 'custom_webhook') as OSDestination['type'],
-      name: d.name || '',
-      last_update_time: d.last_update_time || Date.now(),
-      schema_version: d.schema_version,
-      slack: d.slack,
-      custom_webhook: d.custom_webhook,
-      email: d.email,
+      id: c.config_id || '',
+      type: c.config_type || 'custom_webhook',
+      name: c.name || '',
     };
   }
 
   private is404(err: unknown): boolean {
     return isStatusCode(err, 404);
+  }
+}
+
+// ============================================================================
+// Mapping flattener
+// ============================================================================
+
+interface MappingNode {
+  type?: string;
+  enabled?: boolean;
+  index?: boolean;
+  properties?: Record<string, unknown>;
+  fields?: Record<string, { type?: string }>;
+}
+
+/**
+ * Walk a `_mapping` properties object and collect dotted field paths grouped
+ * by leaf type. Mirrors alerting-dashboards-plugin's traversal:
+ *   - skips `enabled: false` and `index: false`
+ *   - skips `nested` types (UI doesn't surface them)
+ *   - emits `<path>.keyword` when a multifield keyword is declared
+ */
+function collectFieldPaths(
+  properties: Record<string, unknown>,
+  parentPath: string,
+  acc: Record<string, Set<string>>
+): void {
+  for (const [field, raw] of Object.entries(properties)) {
+    const node = raw as MappingNode;
+    if (!node || typeof node !== 'object') continue;
+    if (node.enabled === false || node.index === false || node.type === 'nested') continue;
+
+    const path = parentPath ? `${parentPath}.${field}` : field;
+
+    if (node.properties) {
+      collectFieldPaths(node.properties, path, acc);
+      continue;
+    }
+
+    const type = node.type;
+    if (type) {
+      if (!acc[type]) acc[type] = new Set();
+      acc[type].add(path);
+    }
+
+    if (node.fields?.keyword) {
+      if (!acc.keyword) acc.keyword = new Set();
+      acc.keyword.add(`${path}.keyword`);
+    }
   }
 }

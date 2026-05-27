@@ -43,20 +43,6 @@ import {
 } from '../../../common/types/alerting';
 
 // ============================================================================
-// Index-pattern prefixes used to classify a query-level monitor as log vs apm
-// vs generic metric. Captures the conventions the observability plugin's data
-// pipelines emit (`logs-*`, `ss4o_logs*`, `otel-v1-apm*`, `ss4o_traces*`).
-// Callers that have access to a request-scoped `uiSettings` client should
-// prefer the user-configurable `observability:traceAnalyticsSpanIndices` /
-// `observability:traceAnalyticsCorrelatedLogsIndices` settings when classifying;
-// `osMonitorToUnifiedRuleSummary` runs in code paths that don't yet plumb the
-// request, so it falls back to the static defaults below.
-// ============================================================================
-
-const LOG_MONITOR_INDEX_PREFIXES = ['logs-', 'ss4o_logs'] as const;
-const APM_MONITOR_INDEX_PREFIXES = ['otel-v1-apm', 'ss4o_traces'] as const;
-
-// ============================================================================
 // Preview helper functions (exported for testing)
 // ============================================================================
 
@@ -292,6 +278,7 @@ export function osAlertToUnified(a: OSAlert, dsId: string): UnifiedAlertSummary 
     startTime: new Date(a.start_time).toISOString(),
     lastUpdated: new Date(a.last_notification_time).toISOString(),
     labels: {
+      monitor_id: a.monitor_id,
       monitor_name: a.monitor_name,
       trigger_name: a.trigger_name,
     },
@@ -441,6 +428,42 @@ function hashLabels(labels: Record<string, string>): string {
 const RULE_IDENTITY_STRIP_LABELS = new Set(['__name__', 'alertstate']);
 
 /**
+ * Index-name prefixes used to derive a `MonitorType` for query-level OS
+ * monitors that don't carry an explicit `kind` hint. These mirror the
+ * well-known OSD schemas:
+ *
+ *   - `logs-*`, `ss4o_logs*` — Simple Schema for Observability (SS4O) logs
+ *     and the legacy `logs-*` convention used by the Logs app.
+ *   - `otel-v1-apm-*`, `ss4o_traces*` — OTel-derived APM/trace indices
+ *     (legacy `otel-v1-apm-*` data prepper output and SS4O traces).
+ *
+ * Anything that doesn't match either family falls through to `'metric'` —
+ * the catch-all bucket for Prometheus / cluster-metrics-style monitors.
+ *
+ * Hoisted to module scope (rather than inlined in the derivation site) so
+ * the schema list is greppable, testable, and obvious. Adding a new schema
+ * means adding one row; previously the convention was buried in a
+ * 60-line function.
+ *
+ * Callers that have access to a request-scoped `uiSettings` client should
+ * prefer the user-configurable `observability:traceAnalyticsSpanIndices` /
+ * `observability:traceAnalyticsCorrelatedLogsIndices` settings when
+ * classifying. `osMonitorToUnifiedRuleSummary` runs in code paths that
+ * don't yet plumb the request, so it falls back to the static defaults
+ * below.
+ */
+const LOG_INDEX_PREFIXES = ['logs-', 'ss4o_logs'] as const;
+const APM_INDEX_PREFIXES = ['otel-v1-apm', 'ss4o_traces'] as const;
+
+function inferMonitorTypeFromIndices(indices: string[]): MonitorType {
+  const startsWithAny = (prefixes: readonly string[]): boolean =>
+    indices.some((idx) => prefixes.some((p) => idx.startsWith(p)));
+  if (startsWithAny(LOG_INDEX_PREFIXES)) return 'log';
+  if (startsWithAny(APM_INDEX_PREFIXES)) return 'apm';
+  return 'metric';
+}
+
+/**
  * Hash of the labels that identify a Prometheus rule instance — the full
  * label set minus transport metadata (see `RULE_IDENTITY_STRIP_LABELS`).
  * Used as a dedupe key when merging historical episodes with live
@@ -458,11 +481,20 @@ export function hashRuleIdentity(labels: Record<string, string>): string {
  * Detect the actual monitor kind from the OS monitor's inputs,
  * since cluster metrics monitors share monitor_type 'query_level_monitor'.
  */
-export function detectMonitorKind(m: OSMonitor): 'query' | 'bucket' | 'doc' | 'cluster_metrics' {
+export function detectMonitorKind(
+  m: OSMonitor
+): 'query' | 'bucket' | 'doc' | 'cluster_metrics' | 'ppl' {
+  if (m.monitor_type === 'ppl_monitor') return 'ppl';
   if (m.monitor_type === 'bucket_level_monitor') return 'bucket';
   if (m.monitor_type === 'doc_level_monitor') return 'doc';
   if (m.inputs[0] && 'uri' in m.inputs[0]) return 'cluster_metrics';
   return 'query';
+}
+
+function isPplTrigger(
+  t: OSMonitor['triggers'][number]
+): t is Extract<OSMonitor['triggers'][number], { ppl_trigger: unknown }> {
+  return !!t && typeof t === 'object' && 'ppl_trigger' in t;
 }
 
 export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): UnifiedRuleSummary {
@@ -489,17 +521,47 @@ export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): Unifi
       labels.indices = indices.join(',');
     }
     labels.doc_queries = String(input.doc_level_input.queries?.length ?? 0);
+  } else if (input && 'ppl_input' in input) {
+    labels.query_language = input.ppl_input.query_language;
   }
   labels.monitor_type = m.monitor_type;
   labels.monitor_kind = kind;
   labels.datasource_id = dsId;
 
-  const annotations: Record<string, string> = {};
-  if (trigger?.actions?.[0]?.message_template?.source) {
-    annotations.summary = trigger.actions[0].message_template.source;
+  let triggerSeverity: string | number | undefined;
+  let conditionSource = '';
+  let triggerActions: Array<{ name: string; message_template?: { source: string } }> = [];
+  let pplBody:
+    | {
+        type?: 'number_of_results' | 'custom';
+        num_results_condition?: string;
+        num_results_value?: number;
+        custom_condition?: string;
+      }
+    | undefined;
+
+  if (trigger && isPplTrigger(trigger)) {
+    const body = trigger.ppl_trigger;
+    pplBody = body;
+    triggerSeverity = body.severity;
+    triggerActions = body.actions;
+    if (body.type === 'custom') {
+      conditionSource = body.custom_condition ?? '';
+    } else if (body.num_results_condition && body.num_results_value !== undefined) {
+      conditionSource = `count ${body.num_results_condition} ${body.num_results_value}`;
+    }
+  } else if (trigger) {
+    triggerSeverity = trigger.severity;
+    triggerActions = trigger.actions;
+    conditionSource = trigger.condition?.script?.source ?? '';
   }
 
-  const severity = trigger ? osSeverityToUnified(trigger.severity) : 'info';
+  const annotations: Record<string, string> = {};
+  if (triggerActions[0]?.message_template?.source) {
+    annotations.summary = triggerActions[0].message_template.source;
+  }
+
+  const severity = trigger ? osSeverityToUnified(String(triggerSeverity ?? '3')) : 'info';
   const status: MonitorStatus = !isEnabled ? 'disabled' : 'active';
 
   // Extract query string based on input type
@@ -511,36 +573,49 @@ export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): Unifi
     query = docQueries.map((q) => `${q.name}: ${q.query}`).join('; ') || '(no queries)';
   } else if (input && 'search' in input) {
     query = JSON.stringify(input.search.query ?? {});
+  } else if (input && 'ppl_input' in input) {
+    query = input.ppl_input.query;
   } else {
     query = '{}';
   }
 
   // Derive monitor type from kind and index patterns
   let monitorType: MonitorType;
-  if (kind === 'cluster_metrics') {
+  if (kind === 'ppl') {
+    monitorType = 'ppl';
+  } else if (kind === 'cluster_metrics') {
     monitorType = 'cluster_metrics';
   } else if (kind === 'doc') {
     monitorType = 'log';
   } else if (kind === 'bucket') {
     monitorType = 'infrastructure';
   } else {
-    // query-level: derive from index patterns
+    // query-level: derive from index patterns. See LOG_INDEX_PREFIXES /
+    // APM_INDEX_PREFIXES at module scope for the schema list.
     const indices = input && 'search' in input ? input.search.indices ?? [] : [];
-    const matchesAnyPrefix = (prefixes: readonly string[]) =>
-      indices.some((i) => prefixes.some((p) => i.startsWith(p)));
-    if (matchesAnyPrefix(LOG_MONITOR_INDEX_PREFIXES)) {
-      monitorType = 'log';
-    } else if (matchesAnyPrefix(APM_MONITOR_INDEX_PREFIXES)) {
-      monitorType = 'apm';
-    } else {
-      monitorType = 'metric';
-    }
+    monitorType = inferMonitorTypeFromIndices(indices);
   }
 
-  const destNames = trigger?.actions?.map((a) => a.name) ?? [];
+  const destNames = triggerActions.map((a) => a.name);
   const intervalUnit = m.schedule.period.unit;
   const intervalVal = m.schedule.period.interval;
   const evalInterval = `${intervalVal} ${intervalUnit.toLowerCase()}`;
+
+  let threshold: UnifiedRuleSummary['threshold'];
+  if (pplBody && pplBody.type === 'number_of_results') {
+    threshold = {
+      operator: pplBody.num_results_condition ?? '>',
+      value: pplBody.num_results_value ?? 0,
+      unit: '',
+    };
+  } else if (trigger && !isPplTrigger(trigger)) {
+    const parsed = parseThreshold(conditionSource);
+    threshold = {
+      operator: parsed.operator,
+      value: parsed.value,
+      unit: inferUnitFromExpression(query),
+    };
+  }
 
   return {
     id: m.id,
@@ -550,7 +625,7 @@ export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): Unifi
     enabled: isEnabled,
     severity,
     query,
-    condition: trigger?.condition?.script?.source ?? '',
+    condition: conditionSource,
     labels,
     annotations,
     monitorType,
@@ -563,16 +638,7 @@ export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): Unifi
     notificationDestinations: destNames,
     evaluationInterval: evalInterval,
     pendingPeriod: evalInterval,
-    threshold: trigger
-      ? (() => {
-          const parsed = parseThreshold(trigger.condition.script.source);
-          return {
-            operator: parsed.operator,
-            value: parsed.value,
-            unit: inferUnitFromExpression(query),
-          };
-        })()
-      : undefined,
+    threshold,
   };
 }
 

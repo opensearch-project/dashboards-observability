@@ -16,23 +16,20 @@
  *   - `PrometheusFormState` / `OpenSearchFormState` / `MonitorFormState`
  *   - `DEFAULT_PROM_FORM` / `DEFAULT_OS_FORM`
  *   - `INTERVAL_OPTIONS`, `DURATION_OPTIONS`, `OPERATOR_OPTIONS`,
- *     `SEVERITY_OPTIONS`, `OS_MONITOR_TYPE_OPTIONS`,
- *     `CLUSTER_METRICS_API_OPTIONS`, `OS_SCHEDULE_UNIT_OPTIONS`
+ *     `SEVERITY_OPTIONS`, `OS_SCHEDULE_UNIT_OPTIONS`
  */
 import { i18n } from '@osd/i18n';
-import { UnifiedAlertSeverity } from '../../../../common/types/alerting';
+import { OSPPLNumResultsOperator, UnifiedAlertSeverity } from '../../../../common/types/alerting';
 import type { AnnotationEntry, LabelEntry, MonitorBackendType } from '../monitor_form_components';
 
-// ============================================================================
-// Types
-// ============================================================================
+// `ThresholdCondition` originally lived here AND in
+// `common/services/alerting/validators.ts`. The duplication caused drift
+// risk; re-export the canonical shape from common.
+export type { ThresholdCondition } from '../../../../common/services/alerting/validators';
 
-export interface ThresholdCondition {
-  operator: '>' | '>=' | '<' | '<=' | '==' | '!=';
-  value: number;
-  unit: string;
-  forDuration: string;
-}
+// Public-side import name kept stable; canonical type lives in common
+// (`OSPPLNumResultsOperator` in opensearch_types.ts).
+export type PplNumResultsOperator = OSPPLNumResultsOperator;
 
 /** Shared fields across both backend types */
 export interface BaseMonitorForm {
@@ -55,33 +52,54 @@ export interface PrometheusFormState extends BaseMonitorForm {
   annotations: AnnotationEntry[];
 }
 
-/** OpenSearch-specific form state */
+/** Severity ordinal mapped to the alerting plugin's `1`–`5` codes. */
+export type PplTriggerSeverity = '1' | '2' | '3' | '4' | '5';
+export type PplTriggerType = 'number_of_results' | 'custom';
+
+export interface PplActionForm {
+  id: string;
+  name: string;
+  /** Empty when nothing has been selected; validators reject save in that state. */
+  destinationId: string;
+  subject: string;
+  message: string;
+}
+
+/** Form-state shape for one PPL trigger. Multiple per monitor are allowed. */
+export interface PplTriggerForm {
+  id: string;
+  name: string;
+  severity: PplTriggerSeverity;
+  type: PplTriggerType;
+  numResultsCondition: PplNumResultsOperator;
+  numResultsValue: number;
+  /** Required when `type === 'custom'`; must start with `where ...`. */
+  customCondition: string;
+  actions: PplActionForm[];
+}
+
+/** OpenSearch-specific form state. The Create flyout only authors PPL monitors;
+ * DSL / cluster-metrics monitors are read-only in the Rules table. */
 export interface OpenSearchFormState extends BaseMonitorForm {
   datasourceType: 'opensearch';
-  monitorType:
-    | 'ppl_monitor'
-    | 'query_level_monitor'
-    | 'bucket_level_monitor'
-    | 'doc_level_monitor'
-    | 'cluster_metrics_monitor';
-  indices: string;
+  monitorType: 'ppl_monitor';
+  /**
+   * Picked indices, aliases, or wildcard patterns. Drives PPL `source = ...`
+   * defaulting and field-level autocomplete in the editor; saved verbatim so
+   * cross-cluster patterns (`prod:logs-*`) round-trip cleanly.
+   */
+  indices: string[];
+  /** Index/alias mapping field used as the time-range pivot. May be empty. */
+  timeField: string;
   query: string;
-  // PPL monitor trigger fields (Prometheus-like)
+  pplTriggers: PplTriggerForm[];
+  /** Legacy threshold shape kept for the optimistic UnifiedRule projection. */
   threshold: ThresholdCondition;
   evaluationInterval: string;
   pendingPeriod: string;
   labels: LabelEntry[];
   annotations: AnnotationEntry[];
-  // DSL monitor trigger fields
-  triggerName: string;
-  triggerCondition: string;
-  actionName: string;
-  actionDestination: string;
-  actionMessage: string;
   schedule: { interval: number; unit: 'MINUTES' | 'HOURS' | 'DAYS' };
-  // Cluster metrics fields
-  clusterMetricsApiType: string;
-  clusterMetricsPathParams: string;
 }
 
 export type MonitorFormState = PrometheusFormState | OpenSearchFormState;
@@ -110,14 +128,36 @@ export const DEFAULT_PROM_FORM: PrometheusFormState = {
   enabled: true,
 };
 
+// Default to `custom` trigger type. PPL alerting queries almost always use
+// `stats` (aggregation), which returns exactly 1 row per group — so
+// `number_of_results` (which counts rows, not column values) would rarely
+// fire as expected. `custom` with `where <column> > threshold` evaluates
+// the actual aggregated value, which is what users intend.
+//
+// The default condition references `error_count` to match the example query
+// shown in the flyout. Users must update this when they change the alias.
+export const createDefaultPplTrigger = (): PplTriggerForm => ({
+  id: `ppl-trigger-${Date.now()}`,
+  name: 'trigger-1',
+  severity: '3',
+  type: 'custom',
+  numResultsCondition: '>',
+  numResultsValue: 1,
+  customCondition: 'where error_count > 0',
+  actions: [],
+});
+
 export const DEFAULT_OS_FORM: OpenSearchFormState = {
   name: '',
   datasourceId: '',
   datasourceType: 'opensearch',
   monitorType: 'ppl_monitor',
-  indices: '',
-  query: 'source = logs-* | where @timestamp > NOW() - INTERVAL 5 MINUTE | stats count() as cnt',
-  // PPL trigger defaults (Prometheus-like)
+  indices: [],
+  timeField: '',
+  // No `source = ...` default. The PPL editor pre-fills `source = <picked>`
+  // when the user adds an index, so defaulting here would clash with that.
+  query: '',
+  pplTriggers: [createDefaultPplTrigger()],
   threshold: { operator: '>', value: 100, unit: '', forDuration: '5m' },
   evaluationInterval: '1m',
   pendingPeriod: '5m',
@@ -126,16 +166,7 @@ export const DEFAULT_OS_FORM: OpenSearchFormState = {
     { key: 'summary', value: '' },
     { key: 'description', value: '' },
   ],
-  // DSL trigger defaults
-  triggerName: '',
-  triggerCondition: 'ctx.results[0].hits.total.value > 100',
-  actionName: '',
-  actionDestination: '',
-  actionMessage: '',
   schedule: { interval: 1, unit: 'MINUTES' },
-  // Cluster metrics defaults
-  clusterMetricsApiType: 'CLUSTER_HEALTH',
-  clusterMetricsPathParams: '',
   severity: 'medium',
   enabled: true,
 };
@@ -326,102 +357,6 @@ export const SEVERITY_OPTIONS = [
     value: 'info',
     text: i18n.translate('observability.alerting.createMonitorTypes.severityInfo', {
       defaultMessage: 'Info',
-    }),
-  },
-];
-
-export const OS_MONITOR_TYPE_OPTIONS = [
-  {
-    value: 'ppl_monitor',
-    text: i18n.translate('observability.alerting.createMonitorTypes.osMonitorTypePpl', {
-      defaultMessage: 'PPL (Piped Processing Language)',
-    }),
-  },
-  {
-    value: 'query_level_monitor',
-    text: i18n.translate('observability.alerting.createMonitorTypes.osMonitorTypeQueryLevel', {
-      defaultMessage: 'Per query (DSL)',
-    }),
-  },
-  {
-    value: 'bucket_level_monitor',
-    text: i18n.translate('observability.alerting.createMonitorTypes.osMonitorTypeBucketLevel', {
-      defaultMessage: 'Per bucket (DSL)',
-    }),
-  },
-  {
-    value: 'doc_level_monitor',
-    text: i18n.translate('observability.alerting.createMonitorTypes.osMonitorTypeDocLevel', {
-      defaultMessage: 'Per document (DSL)',
-    }),
-  },
-  {
-    value: 'cluster_metrics_monitor',
-    text: i18n.translate('observability.alerting.createMonitorTypes.osMonitorTypeClusterMetrics', {
-      defaultMessage: 'Cluster Metrics',
-    }),
-  },
-];
-
-export const CLUSTER_METRICS_API_OPTIONS = [
-  {
-    value: 'CLUSTER_HEALTH',
-    text: i18n.translate('observability.alerting.createMonitorTypes.apiClusterHealth', {
-      defaultMessage: 'Cluster Health',
-    }),
-  },
-  {
-    value: 'CLUSTER_STATS',
-    text: i18n.translate('observability.alerting.createMonitorTypes.apiClusterStats', {
-      defaultMessage: 'Cluster Stats',
-    }),
-  },
-  {
-    value: 'CLUSTER_SETTINGS',
-    text: i18n.translate('observability.alerting.createMonitorTypes.apiClusterSettings', {
-      defaultMessage: 'Cluster Settings',
-    }),
-  },
-  {
-    value: 'NODES_STATS',
-    text: i18n.translate('observability.alerting.createMonitorTypes.apiNodesStats', {
-      defaultMessage: 'Nodes Stats',
-    }),
-  },
-  {
-    value: 'CAT_INDICES',
-    text: i18n.translate('observability.alerting.createMonitorTypes.apiCatIndices', {
-      defaultMessage: 'CAT Indices',
-    }),
-  },
-  {
-    value: 'CAT_PENDING_TASKS',
-    text: i18n.translate('observability.alerting.createMonitorTypes.apiCatPendingTasks', {
-      defaultMessage: 'CAT Pending Tasks',
-    }),
-  },
-  {
-    value: 'CAT_RECOVERY',
-    text: i18n.translate('observability.alerting.createMonitorTypes.apiCatRecovery', {
-      defaultMessage: 'CAT Recovery',
-    }),
-  },
-  {
-    value: 'CAT_SHARDS',
-    text: i18n.translate('observability.alerting.createMonitorTypes.apiCatShards', {
-      defaultMessage: 'CAT Shards',
-    }),
-  },
-  {
-    value: 'CAT_SNAPSHOTS',
-    text: i18n.translate('observability.alerting.createMonitorTypes.apiCatSnapshots', {
-      defaultMessage: 'CAT Snapshots',
-    }),
-  },
-  {
-    value: 'CAT_TASKS',
-    text: i18n.translate('observability.alerting.createMonitorTypes.apiCatTasks', {
-      defaultMessage: 'CAT Tasks',
     }),
   },
 ];
