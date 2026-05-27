@@ -844,14 +844,18 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                           </EuiTitle>
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
-                          <EuiSuperDatePicker
-                            compressed
-                            start={pickerStart}
-                            end={pickerEnd}
-                            onTimeChange={onTimeChange}
-                            onRefresh={onRefresh}
-                            data-test-subj="alertManagerDatePicker"
-                          />
+                          {/* `EuiSuperDatePicker` doesn't forward `data-test-subj`
+                              to its rendered control, so anchor it on a wrapper
+                              div for stable Cypress / functional selectors. */}
+                          <div data-test-subj="alertManagerDatePicker">
+                            <EuiSuperDatePicker
+                              compressed
+                              start={pickerStart}
+                              end={pickerEnd}
+                              onTimeChange={onTimeChange}
+                              onRefresh={onRefresh}
+                            />
+                          </div>
                         </EuiFlexItem>
                       </EuiFlexGroup>
                       <EuiSpacer size="s" />

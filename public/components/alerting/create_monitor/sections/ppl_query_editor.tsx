@@ -263,7 +263,14 @@ export const PplQueryEditor: React.FC<PplQueryEditorProps> = ({
 
   return (
     <OpenSearchDashboardsContextProvider services={services}>
-      <div style={{ border: '1px solid var(--euiColorLightShade)', borderRadius: 4 }}>
+      {/* `CodeEditor` (osd-react/code_editor) is a typed wrapper that doesn't
+          forward arbitrary DOM attributes, so a `data-test-subj` prop on it is
+          silently dropped. Anchor the test-subj on the wrapper div instead so
+          Cypress / functional tests have a stable selector. */}
+      <div
+        data-test-subj="alertManagerPplQueryEditor"
+        style={{ border: '1px solid var(--euiColorLightShade)', borderRadius: 4 }}
+      >
         <CodeEditor
           languageId={PPLLang.ID}
           value={value}
@@ -273,7 +280,6 @@ export const PplQueryEditor: React.FC<PplQueryEditorProps> = ({
           languageConfiguration={LANGUAGE_CONFIGURATION}
           options={EDITOR_OPTIONS}
           editorDidMount={editorDidMount}
-          data-test-subj="alertManagerPplQueryEditor"
         />
       </div>
       {mappingsError && (
