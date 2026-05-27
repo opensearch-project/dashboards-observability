@@ -37,12 +37,22 @@ import {
 import { createConflictError, createInternalError, isStatusCode } from './errors';
 
 /**
- * Cap on `_cat/indices` and `_cat/aliases` discovery responses. The combobox
- * uses an async typeahead so the user filters by typing — anything beyond
- * the first page-worth of suggestions is unreachable in the UI anyway, and
- * a cluster with tens of thousands of matches would otherwise freeze the
- * browser tab while parsing the JSON. Mirrors the `MAX_RESULTS = 200`
- * pattern in `metadata_handlers.ts`.
+ * Tail-cap on `_cat/indices` and `_cat/aliases` discovery responses fed to
+ * the index-picker combobox.
+ *
+ * The picker already pushes the user's input to the cluster — the typeahead
+ * sends `_cat/indices/{prefix}*` so the cluster does the filtering, not the
+ * browser. This cap is a safety net for the case where that prefix still
+ * matches a very large slice (e.g. a user types `l` against a cluster with
+ * tens of thousands of `logs-*` indices): without it, parsing a 50k-row
+ * `_cat/indices` JSON response on the main thread would freeze the picker
+ * for seconds. The combobox doesn't paginate — items past the cap are
+ * unreachable until the user narrows their prefix further.
+ *
+ * Mirrors the `MAX_RESULTS = 200` pattern in `metadata_handlers.ts`. The
+ * value is conservative on purpose; OSD's typical non-paginated cap is
+ * 10000 (e.g. `getRuleGroups`) but for an interactive picker, more
+ * suggestions don't help — they just slow down rendering.
  */
 const MAX_DISCOVERY_RESULTS = 200;
 
