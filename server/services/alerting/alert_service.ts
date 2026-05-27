@@ -41,6 +41,7 @@ import {
 } from '../../../common/types/alerting';
 import { parseDateMathMs, computeStep } from '../../../common/services/alerting';
 import { TimeoutError } from './timeout_error';
+import { extractErrorMessage } from './errors';
 import {
   getAlertDetail as getAlertDetailImpl,
   getRuleDetail as getRuleDetailImpl,
@@ -340,7 +341,7 @@ export class MultiBackendAlertService {
           datasourceType: datasources[i].type,
           status: 'error',
           data: [],
-          error: String(settled.reason),
+          error: extractErrorMessage(settled.reason),
           durationMs: timeoutMs,
         };
         statusList.push(errResult);
@@ -388,7 +389,7 @@ export class MultiBackendAlertService {
           datasourceType: datasources[i].type,
           status: 'error',
           data: [],
-          error: String(settled.reason),
+          error: extractErrorMessage(settled.reason),
           durationMs: timeoutMs,
         };
         statusList.push(errResult);
@@ -430,13 +431,15 @@ export class MultiBackendAlertService {
         allRules.push(...settled.value);
       } else {
         this.logger.error(
-          `Failed to fetch rules from ${datasources[i].name} (${datasources[i].id}): ${settled.reason}`
+          `Failed to fetch rules from ${datasources[i].name} (${
+            datasources[i].id
+          }): ${extractErrorMessage(settled.reason)}`
         );
         warnings.push({
           datasourceId: datasources[i].id,
           datasourceName: datasources[i].name,
           datasourceType: datasources[i].type,
-          error: String(settled.reason),
+          error: extractErrorMessage(settled.reason),
         });
       }
     }
@@ -485,13 +488,15 @@ export class MultiBackendAlertService {
         allAlerts.push(...settled.value.alerts);
       } else {
         this.logger.error(
-          `Failed to fetch alerts from ${datasources[i].name} (${datasources[i].id}): ${settled.reason}`
+          `Failed to fetch alerts from ${datasources[i].name} (${
+            datasources[i].id
+          }): ${extractErrorMessage(settled.reason)}`
         );
         warnings.push({
           datasourceId: datasources[i].id,
           datasourceName: datasources[i].name,
           datasourceType: datasources[i].type,
-          error: String(settled.reason),
+          error: extractErrorMessage(settled.reason),
         });
       }
     }
@@ -614,8 +619,8 @@ export class MultiBackendAlertService {
       return result;
     } catch (err) {
       const isTimeout = err instanceof TimeoutError;
-      const result = makeResult(isTimeout ? 'timeout' : 'error', [], String(err));
-      this.logger.error(`Failed to fetch alerts from ${ds.name}: ${err}`);
+      const result = makeResult(isTimeout ? 'timeout' : 'error', [], extractErrorMessage(err));
+      this.logger.error(`Failed to fetch alerts from ${ds.name}: ${extractErrorMessage(err)}`);
       if (onProgress) onProgress(result);
       return result;
     }
@@ -653,8 +658,8 @@ export class MultiBackendAlertService {
       return result;
     } catch (err) {
       const isTimeout = err instanceof TimeoutError;
-      const result = makeResult(isTimeout ? 'timeout' : 'error', [], String(err));
-      this.logger.error(`Failed to fetch rules from ${ds.name}: ${err}`);
+      const result = makeResult(isTimeout ? 'timeout' : 'error', [], extractErrorMessage(err));
+      this.logger.error(`Failed to fetch rules from ${ds.name}: ${extractErrorMessage(err)}`);
       if (onProgress) onProgress(result);
       return result;
     }

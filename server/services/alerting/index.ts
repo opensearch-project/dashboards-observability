@@ -51,4 +51,5 @@ export {
   isAlertManagerError,
   isStatusCode,
   errorToStatus,
+  extractErrorMessage,
 } from './errors';

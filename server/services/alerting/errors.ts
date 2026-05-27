@@ -85,6 +85,35 @@ export function isStatusCode(value: unknown, statusCode: number): boolean {
 }
 
 /**
+ * Extract a human-readable message from an arbitrary thrown value.
+ *
+ * `String(reason)` is unsafe for plain objects: an `AlertManagerError`
+ * (`{ kind, message, ... }`) or an opensearch-js error shape that doesn't
+ * inherit from `Error` stringifies to `"[object Object]"`, which surfaces
+ * to users as a useless "[object Object]" message. This walks the common
+ * shapes — Error subclasses, AlertManagerError, plain `{ message }`
+ * objects, primitives — and falls back to `String()` only for shapes that
+ * carry no recognizable message field.
+ *
+ * Used at fanout boundaries where settled rejection reasons need to be
+ * stringified for client-visible status payloads (datasourceStatus[].error).
+ * Internal logging should keep using the raw value to preserve stack
+ * traces.
+ */
+export function extractErrorMessage(reason: unknown): string {
+  if (reason == null) return 'Unknown error';
+  if (typeof reason === 'string') return reason;
+  if (reason instanceof Error) return reason.message || reason.name || String(reason);
+  if (isAlertManagerError(reason)) return reason.message;
+  if (typeof reason === 'object') {
+    const maybe = reason as { message?: unknown; error?: unknown };
+    if (typeof maybe.message === 'string' && maybe.message.length > 0) return maybe.message;
+    if (typeof maybe.error === 'string' && maybe.error.length > 0) return maybe.error;
+  }
+  return String(reason);
+}
+
+/**
  * Map an AlertManagerError to an HTTP status code.
  */
 export function errorToStatus(error: AlertManagerError): number {
