@@ -353,6 +353,70 @@ describe('SloService.repair', () => {
     expect(health.invalidateCalls).not.toHaveBeenCalled();
   });
 
+  it('invalidates the SLO status cache after a successful repair', async () => {
+    // Regression for the rule_health.spec.js Cypress flake: after Restore,
+    // the danger callout stayed visible because `liveStatus.state =
+    // "rules_missing"` remained cached for 60s while the fresh rule-health
+    // probe already returned `ok`. Repair must drop the cached liveStatus
+    // alongside the rule-health cache so the next read re-aggregates.
+    const { ruler, store, deploy } = makeDeps();
+    const svc = new SloService(noopLogger(), store);
+    svc.setDedupEnabled(false);
+
+    let aggregateCalls = 0;
+    let aggregateState: 'rules_missing' | 'ok' = 'rules_missing';
+    svc.setStatusAggregator({
+      aggregate: async (docs) => {
+        aggregateCalls += 1;
+        return docs.map((d) => ({
+          sloId: d.id,
+          objectives: [],
+          state: aggregateState,
+          firingCount: 0,
+          ruleCount: 0,
+          computedAt: new Date().toISOString(),
+        }));
+      },
+    });
+
+    const statusCtx = {
+      client: ({} as unknown) as AlertingOSClient,
+      workspaceId: 'default',
+      resolveDatasource: async () => undefined as Datasource | undefined,
+    };
+
+    const doc = await svc.create({ spec: validSpec() }, 'alice', deploy);
+    ruler.upsertRuleGroup.mockClear();
+
+    // Warm the status cache with the broken state — this matches what the
+    // listing aggregator writes when the user lands on the detail page.
+    const first = await svc.getStatus(doc.id, statusCtx);
+    expect(first.state).toBe('rules_missing');
+    expect(aggregateCalls).toBe(1);
+
+    // Cache hit — same answer, no second aggregate call.
+    const cached = await svc.getStatus(doc.id, statusCtx);
+    expect(cached.state).toBe('rules_missing');
+    expect(aggregateCalls).toBe(1);
+
+    // Repair flips the ruler state. The next read of liveStatus must pick up
+    // the new world, not the cached `rules_missing`.
+    aggregateState = 'ok';
+    const expected = [
+      doc.status.provisioning.backend === 'prometheus' && doc.status.provisioning.alertGroupName
+        ? doc.status.provisioning.alertGroupName
+        : '',
+    ];
+    const health = makeHealthProbe([missingReport(expected), okReport(expected)]);
+    const result = await svc.repair(doc.id, { health, deploy });
+    expect(result.repaired).toBe(true);
+    expect(result.health.state).toBe('ok');
+
+    const after = await svc.getStatus(doc.id, statusCtx);
+    expect(after.state).toBe('ok');
+    expect(aggregateCalls).toBe(2);
+  });
+
   it('first repair flips a missing group to healthy; second repair is a no-op', async () => {
     const { ruler, store, deploy } = makeDeps();
     const svc = new SloService(noopLogger(), store);
