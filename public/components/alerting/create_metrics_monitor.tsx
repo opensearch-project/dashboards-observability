@@ -1227,7 +1227,7 @@ const ActionsSection = React.memo<{
                   'observability.alerting.createMetricsMonitor.comingSoonCalloutBody',
                   {
                     defaultMessage:
-                      'Full action configuration (destination, message template, throttling) will be available in a future update.',
+                      'Full action configuration (notification channel, message template, throttling) will be available in a future update.',
                   }
                 )}
               </EuiText>

@@ -438,7 +438,7 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                     <EuiText size="xs">
                       <FormattedMessage
                         id="observability.alerting.pplTriggers.pickDatasourceFirst"
-                        defaultMessage="Pick a datasource first to load notification destinations."
+                        defaultMessage="Pick a datasource first to load notification channels."
                       />
                     </EuiText>
                   </EuiCallOut>
@@ -509,7 +509,7 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                             ariaLabel={i18n.translate(
                               'observability.alerting.pplTriggers.destinationAriaLabel',
                               {
-                                defaultMessage: 'Destination for {name}',
+                                defaultMessage: 'Notification channel for {name}',
                                 values: { name: action.name },
                               }
                             )}
@@ -518,7 +518,7 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                               destinationInvalid
                                 ? i18n.translate(
                                     'observability.alerting.pplTriggers.destinationRequiredError',
-                                    { defaultMessage: 'Destination is required' }
+                                    { defaultMessage: 'Notification channel is required' }
                                   )
                                 : undefined
                             }

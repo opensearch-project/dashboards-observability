@@ -295,7 +295,7 @@ export function buildTableColumns({
       cols.push({
         field: 'notificationDestinations',
         name: i18n.translate('observability.alerting.monitorsTable.columns.destinations', {
-          defaultMessage: 'Destinations',
+          defaultMessage: 'Notification channels',
         }),
         width: w('destinations'),
         render: (dests: string[]) =>
