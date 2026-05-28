@@ -257,6 +257,70 @@ describe('AlertDetailFlyout', () => {
       expect(mockGetAlertDetail).toHaveBeenLastCalledWith('ds-prom', 'alert-99', 'mon-B');
     });
 
+    it('discards an in-flight A response when alert identity swaps to B mid-fetch', async () => {
+      // Race: user expands the Raw Alert Data accordion on alert A; A's
+      // fetch is in flight; parent swaps `selectedAlert` to B without
+      // unmounting; A's response resolves *after* the swap. The stale
+      // response must NOT write A's payload into B's `detailData`, and
+      // must NOT pin `detailFetched=true` for B (otherwise B's accordion
+      // re-expand would short-circuit the cache and never fetch B).
+      let resolveA: (value: unknown) => void = () => undefined;
+      const aPromise = new Promise((r) => {
+        resolveA = r;
+      });
+      mockGetAlertDetail.mockReturnValueOnce(aPromise);
+
+      const alertA: UnifiedAlertSummary = { ...baseAlert, monitorId: 'mon-A' };
+      const { getByText, rerender } = render(
+        <AlertDetailFlyout
+          alert={alertA}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      fireEvent.click(getByText('Raw Alert Data')); // expand on A — request fires for A, hangs
+      expect(mockGetAlertDetail).toHaveBeenCalledTimes(1);
+
+      // Parent swaps to B before A's request resolves. The reset effect
+      // updates `alertIdRef` synchronously so A's late `.then()`/`.finally()`
+      // can detect they're stale.
+      const alertB: UnifiedAlertSummary = {
+        ...baseAlert,
+        id: 'alert-99',
+        monitorId: 'mon-B',
+      };
+      rerender(
+        <AlertDetailFlyout
+          alert={alertB}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+
+      // Now A's response lands. Its `setDetailData`/`setDetailFetched`
+      // writes must be no-ops because the captured identity no longer
+      // matches the live alert.
+      resolveA({ ...alertA, raw: { id: 'alert-42' } });
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      // B's accordion is currently expanded from the first click. Toggle
+      // collapse + re-expand; B's fetch must fire, proving the stale A
+      // response did not pin `detailFetched=true` for B.
+      mockGetAlertDetail.mockResolvedValueOnce({ ...alertB, raw: { id: 'alert-99' } });
+      fireEvent.click(getByText('Raw Alert Data')); // collapse
+      fireEvent.click(getByText('Raw Alert Data')); // re-expand on B
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(mockGetAlertDetail).toHaveBeenCalledTimes(2);
+      expect(mockGetAlertDetail).toHaveBeenLastCalledWith('ds-prom', 'alert-99', 'mon-B');
+    });
+
     it('does not call getAlertDetail for Prometheus alerts when the Raw Alert Data accordion expands', () => {
       const promAlert: UnifiedAlertSummary = { ...baseAlert, datasourceType: 'prometheus' };
       const { getByText } = render(

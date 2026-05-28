@@ -542,24 +542,37 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
 
               <EuiSpacer size="m" />
 
-              {/* Condition Preview Graph */}
-              <EuiAccordion
-                id={`preview-${monitor.id}`}
-                buttonContent={
-                  <strong>
-                    <FormattedMessage
-                      id="observability.alerting.monitorDetailFlyout.conditionPreviewHeader"
-                      defaultMessage="Condition Preview"
+              {/* Condition Preview Graph — hidden for PPL monitors. The
+                  server-side preview pipeline (`fetchOSPreviewTimeSeries`)
+                  has no PPL branch: it routes by input shape and PPL
+                  monitors carry a `ppl_input` that isn't covered, so the
+                  data array would always be empty and the accordion would
+                  permanently render the "No recent evaluation data" copy.
+                  Skip rendering until a PPL preview pipeline ships. */}
+              {monitor.monitorType !== 'ppl' && (
+                <>
+                  <EuiAccordion
+                    id={`preview-${monitor.id}`}
+                    buttonContent={
+                      <strong>
+                        <FormattedMessage
+                          id="observability.alerting.monitorDetailFlyout.conditionPreviewHeader"
+                          defaultMessage="Condition Preview"
+                        />
+                      </strong>
+                    }
+                    initialIsOpen={true}
+                    paddingSize="m"
+                  >
+                    <ConditionPreviewGraph
+                      data={conditionPreviewData}
+                      threshold={monitor.threshold}
                     />
-                  </strong>
-                }
-                initialIsOpen={true}
-                paddingSize="m"
-              >
-                <ConditionPreviewGraph data={conditionPreviewData} threshold={monitor.threshold} />
-              </EuiAccordion>
+                  </EuiAccordion>
 
-              <EuiSpacer size="m" />
+                  <EuiSpacer size="m" />
+                </>
+              )}
 
               {/* Recent alerts (OS = mixed-state slice, Prom = currently firing/pending) */}
               <EuiAccordion

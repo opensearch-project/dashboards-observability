@@ -7,7 +7,7 @@
  * Alert Detail Flyout — drill-down view for a single alert
  * showing full context, labels, annotations, and actions.
  */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -64,10 +64,19 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailFetched, setDetailFetched] = useState(false);
 
+  // Mirror the current alert identity into a ref so an in-flight fetch
+  // can compare its captured-at-call-time identity against the latest
+  // mounted alert when the response resolves. Updated synchronously by
+  // the reset effect below before the response could possibly land.
+  const alertIdRef = useRef({ dsId: alert.datasourceId, id: alert.id });
+
   // Reset detail when the alert identity changes — guards against a parent
   // swapping `selectedAlert` from A to B without unmounting the flyout
   // (which would otherwise render B's summary on top of A's `raw`/labels).
+  // Updates `alertIdRef` first so any still-in-flight fetch from A bails
+  // in its `.then()`/`.finally()` instead of writing into B's state.
   useEffect(() => {
+    alertIdRef.current = { dsId: alert.datasourceId, id: alert.id };
     setDetailData(null);
     setDetailLoading(false);
     setDetailFetched(false);
@@ -81,19 +90,33 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
   // `detailFetched` pins the cache even when the upstream resolves with
   // `null` (e.g. alert no longer present), so collapse → re-expand does
   // not refire the request.
+  //
+  // Identity guard: capture `(datasourceId, alertId)` at call time and
+  // gate every state write on a match against the current alert. If the
+  // parent swaps `selectedAlert` mid-fetch, the in-flight response would
+  // otherwise write A's payload into B's `detailData` and pin
+  // `detailFetched=true` for B without ever fetching B.
   const fetchDetailIfNeeded = useCallback(() => {
     if (alert.datasourceType === 'prometheus') return;
     if (detailFetched || detailLoading) return;
+    const requestDsId = alert.datasourceId;
+    const requestAlertId = alert.id;
     setDetailLoading(true);
     osService
       .getAlertDetail(alert.datasourceId, alert.id, alert.monitorId)
       .then((data: UnifiedAlert) => {
+        if (alertIdRef.current.dsId !== requestDsId || alertIdRef.current.id !== requestAlertId) {
+          return;
+        }
         if (data) setDetailData(data);
       })
       .catch((err: unknown) => {
         console.error('Failed to load alert details:', err);
       })
       .finally(() => {
+        if (alertIdRef.current.dsId !== requestDsId || alertIdRef.current.id !== requestAlertId) {
+          return;
+        }
         setDetailLoading(false);
         setDetailFetched(true);
       });

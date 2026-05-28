@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
 
 jest.mock('echarts', () => ({
   init: jest.fn(() => ({
@@ -82,5 +82,41 @@ describe('MonitorDetailFlyout', () => {
     );
     fireEvent.click(getByLabelText('Close this dialog'));
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('renders the Condition Preview accordion for non-PPL monitors', async () => {
+    const { queryByText } = render(
+      <MonitorDetailFlyout
+        monitor={mockMonitor}
+        onClose={jest.fn()}
+        onDelete={jest.fn()}
+        onClone={jest.fn()}
+      />
+    );
+    // Body is gated on the detail-fetch promise; flush the queue so the
+    // accordion list renders.
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(queryByText('Condition Preview')).not.toBeNull();
+  });
+
+  it('hides the Condition Preview accordion for PPL monitors', async () => {
+    // The server-side preview pipeline has no PPL branch, so the
+    // accordion would otherwise render a permanent "no data" state for
+    // every PPL monitor. Hide until a PPL preview ships.
+    const pplMonitor: UnifiedRuleSummary = { ...mockMonitor, monitorType: 'ppl' };
+    const { queryByText } = render(
+      <MonitorDetailFlyout
+        monitor={pplMonitor}
+        onClose={jest.fn()}
+        onDelete={jest.fn()}
+        onClone={jest.fn()}
+      />
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(queryByText('Condition Preview')).toBeNull();
   });
 });
