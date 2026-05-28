@@ -25,6 +25,7 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -62,6 +63,18 @@ export interface MonitorsMainPanelProps {
 
   // Create
   onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics') => void;
+  /**
+   * When true, the "Logs" popover entry is disabled with a hint that an
+   * OpenSearch datasource is needed. Triggered when the parent's selection
+   * is non-empty and contains only Prometheus datasources.
+   */
+  logsCreateDisabled?: boolean;
+  /**
+   * Symmetric counterpart of `logsCreateDisabled`: true when the parent's
+   * selection is non-empty and contains only OpenSearch datasources, so a
+   * Metrics monitor can't be created without changing the selection.
+   */
+  metricsCreateDisabled?: boolean;
   showCreatePopover: boolean;
   setShowCreatePopover: React.Dispatch<React.SetStateAction<boolean>>;
 
@@ -75,6 +88,7 @@ export interface MonitorsMainPanelProps {
   setSelectedMonitor: React.Dispatch<React.SetStateAction<UnifiedRuleSummary | null>>;
   onDelete: (ids: string[]) => void;
   onClone?: (monitor: UnifiedRuleSummary) => void;
+  onEdit?: (monitor: UnifiedRuleSummary) => void;
 }
 
 export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
@@ -97,6 +111,8 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
   clearAllFilters,
   selectedIds,
   onCreateMonitor,
+  logsCreateDisabled = false,
+  metricsCreateDisabled = false,
   showCreatePopover,
   setShowCreatePopover,
   showDeleteConfirm,
@@ -106,6 +122,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
   setSelectedMonitor,
   onDelete,
   onClone,
+  onEdit,
 }) => {
   return (
     <>
@@ -144,42 +161,100 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                   anchorPosition="downRight"
                 >
                   <EuiListGroup flush style={{ width: 200 }}>
-                    <EuiListGroupItem
-                      label={i18n.translate(
-                        'observability.alerting.monitorsTable.mainPanel.logsOption',
-                        {
-                          defaultMessage: 'Logs',
-                        }
-                      )}
-                      onClick={() => {
-                        setShowCreatePopover(false);
-                        onCreateMonitor('logs');
-                      }}
-                      aria-label={i18n.translate(
-                        'observability.alerting.monitorsTable.mainPanel.createLogsAriaLabel',
-                        {
-                          defaultMessage: 'Create Logs monitor',
-                        }
-                      )}
-                    />
-                    <EuiListGroupItem
-                      label={i18n.translate(
-                        'observability.alerting.monitorsTable.mainPanel.metricsOption',
-                        {
-                          defaultMessage: 'Metrics',
-                        }
-                      )}
-                      onClick={() => {
-                        setShowCreatePopover(false);
-                        onCreateMonitor('metrics');
-                      }}
-                      aria-label={i18n.translate(
-                        'observability.alerting.monitorsTable.mainPanel.createMetricsAriaLabel',
-                        {
-                          defaultMessage: 'Create Metrics monitor',
-                        }
-                      )}
-                    />
+                    {logsCreateDisabled ? (
+                      <EuiToolTip
+                        position="left"
+                        content={i18n.translate(
+                          'observability.alerting.monitorsTable.mainPanel.logsDisabledTooltip',
+                          {
+                            defaultMessage:
+                              'Logs monitors require an OpenSearch datasource. Select one to enable.',
+                          }
+                        )}
+                      >
+                        <EuiListGroupItem
+                          label={i18n.translate(
+                            'observability.alerting.monitorsTable.mainPanel.logsOption',
+                            {
+                              defaultMessage: 'Logs',
+                            }
+                          )}
+                          isDisabled
+                          aria-label={i18n.translate(
+                            'observability.alerting.monitorsTable.mainPanel.createLogsAriaLabel',
+                            {
+                              defaultMessage: 'Create Logs monitor',
+                            }
+                          )}
+                        />
+                      </EuiToolTip>
+                    ) : (
+                      <EuiListGroupItem
+                        label={i18n.translate(
+                          'observability.alerting.monitorsTable.mainPanel.logsOption',
+                          {
+                            defaultMessage: 'Logs',
+                          }
+                        )}
+                        onClick={() => {
+                          setShowCreatePopover(false);
+                          onCreateMonitor('logs');
+                        }}
+                        aria-label={i18n.translate(
+                          'observability.alerting.monitorsTable.mainPanel.createLogsAriaLabel',
+                          {
+                            defaultMessage: 'Create Logs monitor',
+                          }
+                        )}
+                      />
+                    )}
+                    {metricsCreateDisabled ? (
+                      <EuiToolTip
+                        position="left"
+                        content={i18n.translate(
+                          'observability.alerting.monitorsTable.mainPanel.metricsDisabledTooltip',
+                          {
+                            defaultMessage:
+                              'Metrics monitors require a Prometheus datasource. Select one to enable.',
+                          }
+                        )}
+                      >
+                        <EuiListGroupItem
+                          label={i18n.translate(
+                            'observability.alerting.monitorsTable.mainPanel.metricsOption',
+                            {
+                              defaultMessage: 'Metrics',
+                            }
+                          )}
+                          isDisabled
+                          aria-label={i18n.translate(
+                            'observability.alerting.monitorsTable.mainPanel.createMetricsAriaLabel',
+                            {
+                              defaultMessage: 'Create Metrics monitor',
+                            }
+                          )}
+                        />
+                      </EuiToolTip>
+                    ) : (
+                      <EuiListGroupItem
+                        label={i18n.translate(
+                          'observability.alerting.monitorsTable.mainPanel.metricsOption',
+                          {
+                            defaultMessage: 'Metrics',
+                          }
+                        )}
+                        onClick={() => {
+                          setShowCreatePopover(false);
+                          onCreateMonitor('metrics');
+                        }}
+                        aria-label={i18n.translate(
+                          'observability.alerting.monitorsTable.mainPanel.createMetricsAriaLabel',
+                          {
+                            defaultMessage: 'Create Metrics monitor',
+                          }
+                        )}
+                      />
+                    )}
                   </EuiListGroup>
                 </EuiPopover>
               </EuiFlexItem>
@@ -400,6 +475,14 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
             if (onClone) onClone(monitor);
             setSelectedMonitor(null);
           }}
+          onEdit={
+            onEdit
+              ? (monitor) => {
+                  onEdit(monitor);
+                  setSelectedMonitor(null);
+                }
+              : undefined
+          }
         />
       )}
     </>

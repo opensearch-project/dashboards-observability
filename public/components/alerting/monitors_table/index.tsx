@@ -43,7 +43,8 @@ interface MonitorsTableProps {
   loading: boolean;
   onDelete: (ids: string[]) => void;
   onClone?: (monitor: UnifiedRuleSummary) => void;
-  onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics') => void;
+  onEdit?: (monitor: UnifiedRuleSummary) => void;
+  onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics' | 'slo') => void;
   /** Currently selected datasource IDs */
   selectedDsIds: string[];
   /** Callback when datasource selection changes */
@@ -52,6 +53,12 @@ interface MonitorsTableProps {
   maxDatasources: number;
   /** Callback fired when user tries to exceed `maxDatasources`. */
   onDatasourceCapReached: () => void;
+  /**
+   * Optional pre-fill for the search box. Used by deep links from the SLO
+   * detail page so users can jump straight to a specific recording rule
+   * without typing it. Empty / undefined leaves the box blank.
+   */
+  initialSearchQuery?: string;
 }
 
 // ============================================================================
@@ -64,13 +71,15 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   loading,
   onDelete,
   onClone,
+  onEdit,
   onCreateMonitor,
   selectedDsIds,
   onDatasourceChange,
   maxDatasources,
   onDatasourceCapReached,
+  initialSearchQuery,
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery ?? '');
   const [filters, setFilters] = useState<FilterState>(emptyFilters());
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
@@ -97,6 +106,22 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   );
 
   const dsNameMap = useMemo(() => new Map(datasources.map((d) => [d.id, d.name])), [datasources]);
+
+  // Logs / Metrics popover entries are grayed out when the parent's selection
+  // can't satisfy them: Logs needs at least one OpenSearch datasource, Metrics
+  // needs at least one Prometheus. With a mixed selection (or none) both stay
+  // enabled — the flyout's own dropdown will narrow further.
+  const [logsCreateDisabled, metricsCreateDisabled] = useMemo(() => {
+    if (selectedDsIds.length === 0) return [false, false];
+    const selected = selectedDsIds
+      .map((id) => datasources.find((d) => d.id === id))
+      .filter((d): d is Datasource => !!d);
+    if (selected.length === 0) return [false, false];
+    return [
+      selected.every((d) => d.type === 'prometheus'),
+      selected.every((d) => d.type === 'opensearch'),
+    ];
+  }, [datasources, selectedDsIds]);
 
   // Build selectable datasource entries for the filter facet — alpha by name
   const datasourceEntries = useMemo(
@@ -356,6 +381,8 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 selectedIds={selectedIds}
                 setSelectedIds={setSelectedIds}
                 onCreateMonitor={onCreateMonitor}
+                logsCreateDisabled={logsCreateDisabled}
+                metricsCreateDisabled={metricsCreateDisabled}
                 showCreatePopover={showCreatePopover}
                 setShowCreatePopover={setShowCreatePopover}
                 showDeleteConfirm={showDeleteConfirm}
@@ -365,6 +392,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 setSelectedMonitor={setSelectedMonitor}
                 onDelete={onDelete}
                 onClone={onClone}
+                onEdit={onEdit}
               />
             </EuiResizablePanel>
           </>

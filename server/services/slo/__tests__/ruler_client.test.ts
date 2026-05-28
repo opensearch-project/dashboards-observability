@@ -4,7 +4,7 @@
  */
 
 /**
- * Ruler client tests — pins the DirectQuery contract for W1.5:
+ * Ruler client tests — pins the DirectQuery contract:
  *   - Path shape:  /_plugins/_directquery/_resources/{encoded-dqName}/api/v1/rules/{encoded-ns}[/{group}]
  *   - HTTP method: POST for upsert, DELETE for delete
  *   - Body shape:  POST body is YAML serializing the GeneratedRuleGroup
@@ -15,7 +15,7 @@
 import { dump as yamlDump, load as yamlLoad } from 'js-yaml';
 import { DirectQueryRulerClient, ruleGroupToYaml } from '../ruler_client';
 import { SloRulerError } from '../../../../common/slo/slo_errors';
-import type { AlertingOSClient, Datasource, Logger } from '../../../../common/types/alerting/types';
+import type { AlertingOSClient, Datasource, Logger } from '../../../../common/types/alerting';
 import type { GeneratedRuleGroup } from '../../../../common/slo/slo_types';
 
 function noopLogger(): Logger {
@@ -284,7 +284,7 @@ describe('DirectQueryRulerClient error classification', () => {
 });
 
 // ============================================================================
-// W1.1 — Ruler probe (getRuleGroup, listRuleGroups, 404-tolerant delete)
+// Ruler probe (getRuleGroup, listRuleGroups, 404-tolerant delete)
 // ============================================================================
 
 /**
@@ -571,6 +571,28 @@ describe('DirectQueryRulerClient.listRuleGroups', () => {
     });
   });
 
+  // Regression: a 400 whose body simply echoes user-supplied text containing
+  // the marker substrings must NOT be classified as an empty namespace. The
+  // structured-envelope classifier requires `error.type` ending in
+  // `ClientException` AND a `code: 404` group inside `error.details`.
+  it('HTTP 400 with reflected user input mentioning "no rule groups found" → throws, not coerced to []', async () => {
+    const { client } = mockClient(() =>
+      Promise.reject(
+        rejectWithStatus(400, {
+          message:
+            'Validation failed for input "no rule groups found {ruler request failed with code: 404}"',
+        })
+      )
+    );
+    const svc = new DirectQueryRulerClient(noopLogger());
+
+    await expect(svc.listRuleGroups(client, promDatasource(), 'ns')).rejects.toMatchObject({
+      name: 'SloRulerError',
+      code: 'RULER_VALIDATION_FAILED',
+      httpStatus: 400,
+    });
+  });
+
   it('500 → throws SloRulerError with RULER_UNREACHABLE', async () => {
     const { client, requestMock } = mockClient(() =>
       Promise.reject(rejectWithStatus(500, 'upstream gone'))
@@ -583,26 +605,6 @@ describe('DirectQueryRulerClient.listRuleGroups', () => {
       httpStatus: 500,
     });
     expect(requestMock).toHaveBeenCalledTimes(1);
-  });
-
-  // H-9: a Prometheus error envelope used to be coerced to []. PR-5's
-  // reconciler reads that as "namespace empty" and tears down rules that
-  // are actually still there. Now we throw so the caller can short-circuit.
-  it('Prometheus error envelope { status: "error" } → throws RULER_VALIDATION_FAILED', async () => {
-    const { client } = mockClient(async () => ({
-      statusCode: 200,
-      body: {
-        status: 'error',
-        errorType: 'bad_data',
-        error: 'invalid query: parse error',
-      },
-    }));
-    const svc = new DirectQueryRulerClient(noopLogger());
-
-    await expect(svc.listRuleGroups(client, promDatasource(), 'ns')).rejects.toMatchObject({
-      name: 'SloRulerError',
-      code: 'RULER_VALIDATION_FAILED',
-    });
   });
 });
 

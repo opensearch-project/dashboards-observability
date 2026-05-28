@@ -34,6 +34,7 @@ class CoreRefs {
   public application?: ApplicationStart;
   public queryAssistEnabled?: boolean;
   public summarizeEnabled?: boolean;
+  public sloEnabled?: boolean;
   public dashboard?: DashboardStart;
   public dashboardProviders?: unknown;
   public overlays?: OverlayStart;

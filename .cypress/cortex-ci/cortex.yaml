@@ -1,0 +1,81 @@
+# CI-only Cortex config. Source: observability-stack docker-compose/cortex/cortex.yaml.
+# Single-binary mode (target: all) with filesystem storage and in-memory rings —
+# appropriate ONLY for ephemeral CI. If you change one, sync the other. Comments
+# trimmed and tsdb retention shortened to 1h since CI containers are throwaway.
+
+target: all
+auth_enabled: false
+
+server:
+  http_listen_port: 9090
+  grpc_listen_port: 9095
+
+distributor:
+  shard_by_all_labels: true
+  ring:
+    instance_addr: 127.0.0.1
+    kvstore:
+      store: inmemory
+
+ingester:
+  lifecycler:
+    ring:
+      kvstore:
+        store: inmemory
+      replication_factor: 1
+    address: 127.0.0.1
+    final_sleep: 0s
+
+storage:
+  engine: blocks
+
+blocks_storage:
+  backend: filesystem
+  filesystem:
+    dir: /data/blocks
+  tsdb:
+    dir: /data/tsdb
+    # CI-only: ephemeral retention — containers are torn down per run.
+    retention_period: 1h
+  bucket_store:
+    sync_dir: /data/tsdb-sync
+
+ruler:
+  enable_api: true
+  # Resolves to the alertmanager docker-compose service hostname.
+  alertmanager_url: http://alertmanager:9093
+  # Default poll interval is 1m: after an out-of-band rule-group delete the
+  # ruler keeps the group in memory until the next poll. CI specs assert on
+  # rule-health flips within a 30-60s window, so shorten to 5s.
+  poll_interval: 5s
+  ring:
+    kvstore:
+      store: inmemory
+    instance_addr: 127.0.0.1
+
+# 'filesystem' (not 'local') is required: 'local' is read-only and breaks ruler CRUD.
+ruler_storage:
+  backend: filesystem
+  filesystem:
+    dir: /data/ruler-storage
+
+compactor:
+  data_dir: /data/compactor
+  sharding_ring:
+    kvstore:
+      store: inmemory
+
+store_gateway:
+  sharding_ring:
+    replication_factor: 1
+    kvstore:
+      store: inmemory
+
+# Limits intentionally inflated for OTel resource attrs; lowering them silently
+# drops ingestion. Keep in sync with observability-stack.
+limits:
+  max_global_series_per_metric: 500000
+  max_global_series_per_user: 5000000
+  ingestion_rate: 100000
+  ingestion_burst_size: 200000
+  max_label_names_per_series: 50

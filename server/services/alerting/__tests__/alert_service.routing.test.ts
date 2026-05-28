@@ -4,7 +4,7 @@
  */
 
 import { MultiBackendAlertService } from '../alert_service';
-import type { Datasource, Logger } from '../../../../common/types/alerting/types';
+import type { Datasource, Logger } from '../../../../common/types/alerting';
 
 const mockLogger: Logger = { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() };
 
@@ -46,7 +46,11 @@ const mockOsBackend = {
   deleteMonitor: jest.fn(),
   getAlerts: jest.fn(async () => ({ alerts: [], totalAlerts: 0, truncated: false })),
   acknowledgeAlerts: jest.fn(),
-  getDestinations: jest.fn(async () => []),
+  getDestinations: jest.fn(async () => ({
+    destinations: [],
+    totalDestinations: 0,
+    truncated: false,
+  })),
   searchQuery: jest.fn(),
   runMonitor: jest.fn(),
 };
@@ -199,10 +203,18 @@ describe('MultiBackendAlertService — routing & list', () => {
     });
     mockPromBackend.getHistoricalAlerts.mockResolvedValueOnce({ alerts: [] });
     const resolver = jest.fn(async () => ({} as never));
-    await svc.getUnifiedAlerts(resolver, {
-      startTime: 'now-1h',
-      endTime: 'now',
-    });
+    await svc.getUnifiedAlerts(
+      resolver,
+      {
+        startTime: 'now-1h',
+        endTime: 'now',
+      },
+      // Threading a stub `RequestHandlerContext`: the prom-historical path
+      // routes its `ALERTS{}` matrix scan through the data plugin's search
+      // strategy, which needs the OSD request context. Without it the
+      // service degrades to the legacy current-only path.
+      {} as never
+    );
     expect(mockPromBackend.getHistoricalAlerts).toHaveBeenCalled();
     // Legacy getAlerts must NOT be called on the Prom backend when range is set.
     expect(mockPromBackend.getAlerts).not.toHaveBeenCalled();
@@ -216,13 +228,18 @@ describe('MultiBackendAlertService — routing & list', () => {
     });
     mockPromBackend.getHistoricalAlerts.mockResolvedValueOnce({ alerts: [] });
     const resolver = jest.fn(async () => ({} as never));
-    await svc.getUnifiedAlerts(resolver, {
-      startTime: 'now-1h',
-      endTime: 'now',
-    });
-    // endIsNow is the 6th positional arg (after client, ds, startSec, endSec, step).
+    await svc.getUnifiedAlerts(
+      resolver,
+      {
+        startTime: 'now-1h',
+        endTime: 'now',
+      },
+      {} as never
+    );
+    // Signature: getHistoricalAlerts(ctx, client, ds, startSec, endSec, step, endIsNow).
+    // endIsNow is the 7th positional arg (index 6).
     const callArgs = mockPromBackend.getHistoricalAlerts.mock.calls[0];
-    expect(callArgs[5]).toBe(true);
+    expect(callArgs[6]).toBe(true);
   });
 
   it('past-only window (endTime "now-1h") resolves endIsNow=false (no live merge)', async () => {
@@ -236,12 +253,16 @@ describe('MultiBackendAlertService — routing & list', () => {
     });
     mockPromBackend.getHistoricalAlerts.mockResolvedValueOnce({ alerts: [] });
     const resolver = jest.fn(async () => ({} as never));
-    await svc.getUnifiedAlerts(resolver, {
-      startTime: 'now-2h',
-      endTime: 'now-1h',
-    });
+    await svc.getUnifiedAlerts(
+      resolver,
+      {
+        startTime: 'now-2h',
+        endTime: 'now-1h',
+      },
+      {} as never
+    );
     const callArgs = mockPromBackend.getHistoricalAlerts.mock.calls[0];
-    expect(callArgs[5]).toBe(false);
+    expect(callArgs[6]).toBe(false);
   });
 
   it('undefined range ⇒ legacy path for both backends', async () => {

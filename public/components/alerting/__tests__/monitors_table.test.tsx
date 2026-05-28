@@ -8,10 +8,10 @@ import { render, screen, fireEvent } from '@testing-library/react';
 
 // Stub flyout to avoid pulling in its dependency tree
 jest.mock('../monitor_detail_flyout', () => ({
-  MonitorDetailFlyout: () => <div data-test-subj="monitor-flyout" />,
+  MonitorDetailFlyout: () => <div data-test-subj="monitorFlyout" />,
 }));
 
-// Phase 6b moved monitors_table.tsx → monitors_table/index.tsx;
+// monitors_table.tsx was moved to monitors_table/index.tsx;
 // `../monitors_table` still resolves via TS's implicit index.tsx resolution.
 import { MonitorsTable } from '../monitors_table';
 import { Datasource } from '../../../../common/types/alerting';
@@ -39,7 +39,7 @@ const sampleRule = (overrides = {}) => ({
   ...overrides,
 });
 
-// Post-Phase 4: MonitorsTable no longer takes an apiClient prop — mutation
+// MonitorsTable no longer takes an apiClient prop — mutation
 // dispatch happens inside the page via hooks. Props kept here are the
 // display-and-interaction ones the component currently accepts.
 const defaultProps = {

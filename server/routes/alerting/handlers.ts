@@ -7,10 +7,11 @@
  * Route handlers — pure functions that work with any HTTP framework.
  * Exposes backend-native API shapes + unified views.
  *
- * Post-Phase-3: datasource CRUD handlers and their helpers were removed —
+ * Datasource CRUD handlers and their helpers have been removed —
  * datasource discovery + mutation moved to the client via saved-object
  * services (`useDatasources`, `SavedObjectDatasourceService`).
  */
+import type { RequestHandlerContext } from '../../../../../src/core/server';
 import type { AlertingOSClient, OSMonitor } from '../../../common/types/alerting';
 import { MultiBackendAlertService } from '../../services/alerting';
 import { toHandlerResult } from './route_utils';
@@ -180,7 +181,8 @@ export async function handleGetUnifiedAlerts(
     maxResults?: string;
     startTime?: string;
     endTime?: string;
-  }
+  },
+  ctx?: RequestHandlerContext
 ): Promise<HandlerResult> {
   try {
     const dsIds = query?.dsIds ? query.dsIds.split(',').filter(Boolean) : undefined;
@@ -190,13 +192,17 @@ export async function handleGetUnifiedAlerts(
     const rawMaxResults = query?.maxResults ? parseInt(query.maxResults, 10) : undefined;
     const maxResults =
       rawMaxResults !== undefined && Number.isFinite(rawMaxResults) ? rawMaxResults : undefined;
-    const response = await alertSvc.getUnifiedAlerts(clientResolver, {
-      dsIds,
-      timeoutMs,
-      maxResults,
-      startTime: query?.startTime,
-      endTime: query?.endTime,
-    });
+    const response = await alertSvc.getUnifiedAlerts(
+      clientResolver,
+      {
+        dsIds,
+        timeoutMs,
+        maxResults,
+        startTime: query?.startTime,
+        endTime: query?.endTime,
+      },
+      ctx
+    );
     return { status: 200, body: response };
   } catch (e: unknown) {
     return toHandlerResult(e);
@@ -235,10 +241,11 @@ export async function handleGetRuleDetail(
   alertSvc: MultiBackendAlertService,
   client: AlertingOSClient,
   dsId: string,
-  ruleId: string
+  ruleId: string,
+  ctx?: RequestHandlerContext
 ): Promise<HandlerResult> {
   try {
-    const rule = await alertSvc.getRuleDetail(client, dsId, ruleId);
+    const rule = await alertSvc.getRuleDetail(client, dsId, ruleId, ctx);
     if (!rule) return { status: 404, body: { error: 'Rule not found' } };
     return { status: 200, body: rule };
   } catch (e: unknown) {

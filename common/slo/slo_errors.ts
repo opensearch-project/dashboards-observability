@@ -43,7 +43,8 @@ export class SloVersionConflictError extends Error {
 /**
  * Stable error codes for ruler dual-write failures. The wizard branches on
  * `code` to render a self-service message; the raw upstream body is
- * preserved so the user can read Cortex's own diagnostic.
+ * preserved so the user can read Cortex's own diagnostic (e.g. "invalid
+ * PromQL: parse error").
  */
 export type SloRulerErrorCode =
   | 'RULER_VALIDATION_FAILED'
@@ -53,9 +54,11 @@ export type SloRulerErrorCode =
 /**
  * Thrown when the ruler dual-write fails during SLO create / update / delete.
  * Wraps the underlying DirectQuery transport error, preserving the upstream
- * HTTP status and raw body verbatim. Fail-loud semantics: no retry, no
- * backoff, one call only. If this escapes create/update, the SO was never
- * written.
+ * HTTP status and raw body verbatim so the wizard can show a self-service
+ * diagnostic without needing a separate lookup.
+ *
+ * Fail-loud semantics: no retry, no backoff, one call only. If this
+ * escapes `SloService.create/update`, the SO was never written.
  */
 export class SloRulerError extends Error {
   constructor(
@@ -72,9 +75,11 @@ export class SloRulerError extends Error {
 /**
  * Thrown when `SloService.delete` is asked to tear down an SLO with a
  * provisioned rule group but has no deploy context — typically because the
- * SLO's `datasourceId` is no longer registered. Delete is ruler-first, so we
- * refuse to drop the SO: that would leave a dangling rule group in Cortex.
- * The user has to restore the datasource before the SLO can be removed.
+ * SLO's `datasourceId` is no longer registered (datasource was removed or
+ * renamed). Delete is ruler-first, so we refuse to drop the SO here: that
+ * would leave a dangling rule group in Cortex still evaluating against the
+ * live cluster. The user has to restore the datasource (or the operator has
+ * to force a ruler-side cleanup) before the SLO can be removed.
  */
 export class SloRulerTeardownRequiredError extends Error {
   constructor(public readonly sloId: string, public readonly datasourceId: string) {

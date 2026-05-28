@@ -19,7 +19,7 @@ jest.mock('../../../framework/core_refs', () => ({
 
 jest.mock('../alarms_page', () => ({
   AlarmsPage: (props: Record<string, unknown>) => (
-    <div data-test-subj="alarms-page" data-max={props.maxDatasources} />
+    <div data-test-subj="alarmsPage" data-max={props.maxDatasources} />
   ),
 }));
 
@@ -28,11 +28,11 @@ import { AlertingHome } from '../home';
 describe('AlertingHome', () => {
   it('renders without crashing', () => {
     const { getByTestId } = render(<AlertingHome />);
-    expect(getByTestId('alarms-page')).toBeInTheDocument();
+    expect(getByTestId('alarmsPage')).toBeInTheDocument();
   });
 
   it('passes maxDatasources clamped to default when uiSettings returns []', () => {
     const { getByTestId } = render(<AlertingHome />);
-    expect(getByTestId('alarms-page').getAttribute('data-max')).toBe('5');
+    expect(getByTestId('alarmsPage').getAttribute('data-max')).toBe('5');
   });
 });

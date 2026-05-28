@@ -20,16 +20,11 @@
  */
 import { schema } from '@osd/config-schema';
 import { IRouter, RequestHandlerContext } from '../../../../../../src/core/server';
-import type { AlertingOSClient, OSMonitor } from '../../../../common/types/alerting';
+import type { AlertingOSClient, Logger, OSMonitor } from '../../../../common/types/alerting';
 import { MonitorMutationService } from '../../../services/alerting/monitor_mutation_service';
-import { toErrorBody } from '../route_utils';
+import { toErrorBody, toHandlerResult } from '../route_utils';
 import { alertingIdSchema } from '../schema_helpers';
-import {
-  handleCreateOSMonitor,
-  handleUpdateOSMonitor,
-  handleDeleteOSMonitor,
-  handleAcknowledgeOSAlerts,
-} from './handlers';
+import { monitorAcknowledgeBodySchema, monitorMutationBodySchema } from './body_schema';
 
 // Context resolver for the scoped client. Mutations never need datasource
 // metadata beyond what the caller's resolver already handles.
@@ -39,106 +34,37 @@ export type AlertingClientResolver = (
 ) => Promise<AlertingOSClient>;
 
 // ---------------------------------------------------------------------------
-// Monitor body schema — structured to accept all monitor types while
-// rejecting unknown top-level keys and enforcing string types on critical
-// fields (script sources, index names). Copied verbatim from the pre-refactor
-// registrar so the request validation contract is unchanged.
-// ---------------------------------------------------------------------------
-
-const scriptSchema = schema.object(
-  { source: schema.string(), lang: schema.maybe(schema.string()) },
-  { unknowns: 'ignore' }
-);
-
-const triggerSchema = schema.object(
-  {
-    id: schema.maybe(schema.string()),
-    name: schema.maybe(schema.string()),
-    severity: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
-    condition: schema.maybe(schema.object({ script: scriptSchema }, { unknowns: 'ignore' })),
-    actions: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'ignore' }))),
-    // Type-specific trigger wrappers (OS returns different keys per monitor_type)
-    query_level_trigger: schema.maybe(schema.object({}, { unknowns: 'ignore' })),
-    bucket_level_trigger: schema.maybe(schema.object({}, { unknowns: 'ignore' })),
-    doc_level_trigger: schema.maybe(schema.object({}, { unknowns: 'ignore' })),
-  },
-  { unknowns: 'ignore' }
-);
-
-const inputSchema = schema.object(
-  {
-    search: schema.maybe(
-      schema.object(
-        {
-          indices: schema.maybe(schema.arrayOf(schema.string())),
-          query: schema.maybe(schema.any()),
-        },
-        { unknowns: 'ignore' }
-      )
-    ),
-    uri: schema.maybe(schema.object({}, { unknowns: 'ignore' })),
-    doc_level_input: schema.maybe(
-      schema.object(
-        {
-          description: schema.maybe(schema.string()),
-          indices: schema.maybe(schema.arrayOf(schema.string())),
-          queries: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'ignore' }))),
-        },
-        { unknowns: 'ignore' }
-      )
-    ),
-  },
-  { unknowns: 'ignore' }
-);
-
-const scheduleSchema = schema.object(
-  {
-    period: schema.maybe(
-      schema.object({ interval: schema.number(), unit: schema.string() }, { unknowns: 'ignore' })
-    ),
-    cron: schema.maybe(schema.object({}, { unknowns: 'ignore' })),
-  },
-  { unknowns: 'ignore' }
-);
-
-const monitorBodySchema = schema.object({
-  name: schema.string(),
-  type: schema.maybe(schema.string()),
-  monitor_type: schema.maybe(schema.string()),
-  enabled: schema.maybe(schema.boolean()),
-  schedule: schema.maybe(scheduleSchema),
-  inputs: schema.maybe(schema.arrayOf(inputSchema)),
-  triggers: schema.maybe(schema.arrayOf(triggerSchema)),
-  schema_version: schema.maybe(schema.number()),
-});
-
-// ---------------------------------------------------------------------------
 // Registrar
 // ---------------------------------------------------------------------------
 
 export function registerAlertingMutationRoutes(
   router: IRouter,
   mutationSvc: MonitorMutationService,
-  getClient: AlertingClientResolver
+  getClient: AlertingClientResolver,
+  logger?: Logger
 ): void {
   // POST /api/alerting/opensearch/{dsId}/monitors — create monitor
   router.post(
     {
       path: '/api/alerting/opensearch/{dsId}/monitors',
-      validate: { params: schema.object({ dsId: alertingIdSchema }), body: monitorBodySchema },
+      validate: {
+        params: schema.object({ dsId: alertingIdSchema }),
+        body: monitorMutationBodySchema,
+      },
     },
     async (ctx, req, res) => {
-      const result = await handleCreateOSMonitor(
-        mutationSvc,
-        await getClient(ctx, req.params.dsId),
-        // OSD schema validates loosely; narrow to the typed domain shape
-        (req.body as unknown) as Omit<OSMonitor, 'id'>
-      );
-      // Create success is 201; anything else is an error classified by
-      // `toHandlerResult`. Previously this unconditionally called res.ok,
-      // masking failures as HTTP 200 with an error body.
-      if (result.status === 201) return res.ok({ body: result.body });
-      return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
+      try {
+        const client = await getClient(ctx, req.params.dsId);
+        const monitor = (req.body as unknown) as Omit<OSMonitor, 'id'>;
+        const created = await mutationSvc.createMonitor(client, monitor);
+        logger?.info(
+          `alerting: createMonitor success — dsId=${req.params.dsId} monitorId=${created.id}`
+        );
+        return res.ok({ body: created });
+      } catch (e: unknown) {
+        const result = toHandlerResult(e, logger);
+        return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
+      }
     }
   );
 
@@ -148,23 +74,24 @@ export function registerAlertingMutationRoutes(
       path: '/api/alerting/opensearch/{dsId}/monitors/{monitorId}',
       validate: {
         params: schema.object({ dsId: alertingIdSchema, monitorId: alertingIdSchema }),
-        body: monitorBodySchema,
+        body: monitorMutationBodySchema,
       },
     },
     async (ctx, req, res) => {
-      const result = await handleUpdateOSMonitor(
-        mutationSvc,
-        await getClient(ctx, req.params.dsId),
-        req.params.monitorId,
-        // OSD schema validates loosely; narrow to the typed domain shape
-        (req.body as unknown) as Partial<OSMonitor>
-      );
-      if (result.status === 200) return res.ok({ body: result.body });
-      if (result.status === 404) return res.notFound({ body: toErrorBody(result.body) });
-      if (result.status === 409) {
-        return res.conflict({ body: toErrorBody(result.body) });
+      try {
+        const client = await getClient(ctx, req.params.dsId);
+        const input = (req.body as unknown) as Partial<OSMonitor>;
+        const updated = await mutationSvc.updateMonitor(client, req.params.monitorId, input);
+        if (!updated) return res.notFound({ body: { message: 'Monitor not found' } });
+        logger?.info(
+          `alerting: updateMonitor success — dsId=${req.params.dsId} monitorId=${req.params.monitorId}`
+        );
+        return res.ok({ body: updated });
+      } catch (e: unknown) {
+        const result = toHandlerResult(e, logger);
+        if (result.status === 409) return res.conflict({ body: toErrorBody(result.body) });
+        return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
       }
-      return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
     }
   );
 
@@ -177,12 +104,15 @@ export function registerAlertingMutationRoutes(
     async (ctx, req, res) => {
       try {
         const client = await getClient(ctx, req.params.dsId);
-        const result = await handleDeleteOSMonitor(mutationSvc, client, req.params.monitorId);
-        if (result.status === 200) return res.ok({ body: result.body });
-        if (result.status === 404) return res.notFound({ body: toErrorBody(result.body) });
+        const deleted = await mutationSvc.deleteMonitor(client, req.params.monitorId);
+        if (!deleted) return res.notFound({ body: { message: 'Monitor not found' } });
+        logger?.info(
+          `alerting: deleteMonitor success — dsId=${req.params.dsId} monitorId=${req.params.monitorId}`
+        );
+        return res.ok({ body: { success: true } });
+      } catch (e: unknown) {
+        const result = toHandlerResult(e, logger);
         return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
-      } catch (_e) {
-        return res.badRequest({ body: { message: `Invalid datasource: ${req.params.dsId}` } });
       }
     }
   );
@@ -193,18 +123,25 @@ export function registerAlertingMutationRoutes(
       path: '/api/alerting/opensearch/{dsId}/monitors/{monitorId}/acknowledge',
       validate: {
         params: schema.object({ dsId: alertingIdSchema, monitorId: alertingIdSchema }),
-        body: schema.object({ alerts: schema.arrayOf(schema.string(), { maxSize: 1000 }) }),
+        body: monitorAcknowledgeBodySchema,
       },
     },
     async (ctx, req, res) => {
-      const result = await handleAcknowledgeOSAlerts(
-        mutationSvc,
-        await getClient(ctx, req.params.dsId),
-        req.params.monitorId,
-        req.body
-      );
-      if (result.status === 200) return res.ok({ body: result.body });
-      return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
+      try {
+        const client = await getClient(ctx, req.params.dsId);
+        const acked = await mutationSvc.acknowledgeAlerts(
+          client,
+          req.params.monitorId,
+          req.body.alerts
+        );
+        logger?.info(
+          `alerting: acknowledgeAlerts success — dsId=${req.params.dsId} monitorId=${req.params.monitorId} alertCount=${req.body.alerts.length}`
+        );
+        return res.ok({ body: { result: acked } });
+      } catch (e: unknown) {
+        const result = toHandlerResult(e, logger);
+        return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
+      }
     }
   );
 }

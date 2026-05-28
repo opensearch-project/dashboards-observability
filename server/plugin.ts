@@ -38,7 +38,17 @@ import type { ISloStore } from '../common/slo/slo_types';
 import { SavedObjectSloStore } from './services/slo/slo_saved_object_store';
 import { DirectQueryRulerClient } from './services/slo/ruler_client';
 import { SloRuleRefStore } from './services/slo/slo_rule_ref_store';
+import { SloStoreFactory } from './services/slo/slo_store_factory';
+import { SloReconciler } from './services/slo/slo_reconciler';
+import { DirectQueryStatusAggregator } from './services/slo/status_aggregator';
+import { DatasourceCircuitBreaker } from './services/slo/datasource_circuit_breaker';
+import { createRuleHealthChecker } from './services/slo/rule_health_checker';
+import { InMemoryDatasourceService } from './services/alerting/datasource_service';
+import { DatasourceDiscoveryService } from './services/alerting/datasource_discovery';
+import { DirectQueryPrometheusBackend } from './services/alerting/directquery_prometheus_backend';
+import { bindPromQLSearcherFromStartServices } from './services/alerting/promql_search';
 import { AssistantPluginSetup, ObservabilityPluginSetup, ObservabilityPluginStart } from './types';
+import type { DataPluginStart } from '../../../src/plugins/data/server';
 
 export interface ObservabilityPluginSetupDependencies {
   dataSourceManagement: ReturnType<DataSourceManagementPlugin['setup']>;
@@ -49,6 +59,15 @@ export class ObservabilityPlugin
   implements Plugin<ObservabilityPluginSetup, ObservabilityPluginStart> {
   private readonly logger: Logger;
   private sloService?: SloService;
+  /**
+   * Held over from `setup()` so `start()` can stand the reconciler up
+   * with the same RulerClient the routes use. Reconciler config also
+   * captured at `setup()` time because the config is read with
+   * `first()` and replays don't refresh on reload.
+   */
+  private sloRulerClient?: DirectQueryRulerClient;
+  private sloReconcilerOpts?: { enabled: boolean; intervalMs: number; graceMs: number };
+  private sloReconciler?: SloReconciler;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -65,6 +84,20 @@ export class ObservabilityPlugin
     const { assistantDashboards, dataSource } = deps;
     this.logger.debug('Observability: Setup');
     const router = core.http.createRouter();
+
+    // Wire the PromQL searcher so server-initiated PromQL queries
+    // (probe-sli, status aggregator, alert preview) all route through the
+    // data plugin's search service with `strategy: 'PROMQL'` instead of
+    // crafting their own transport calls. Deferred via `getStartServices`
+    // so plugin setup doesn't block on the data plugin's start; the
+    // searcher is only invoked from request handlers, which run after
+    // both plugins have started.
+    bindPromQLSearcherFromStartServices(
+      (core.getStartServices as unknown) as import('opensearch-dashboards/server').StartServicesAccessor<
+        {},
+        { data: { search: DataPluginStart['search'] } }
+      >
+    );
 
     const dataSourceEnabled = !!dataSource;
     const openSearchObservabilityClient: ILegacyClusterClient = core.opensearch.legacy.createClient(
@@ -260,6 +293,13 @@ export class ObservabilityPlugin
           worstTarget: { type: 'float' },
           labelKeys: { type: 'keyword' },
           labelValues: { type: 'keyword' },
+          // Last-written live state, eagerly persisted by the status pipeline
+          // when the computed value diverges from this stored projection. Not
+          // a source of truth — `SloLiveStatus.state` is recomputed every
+          // listing call by the aggregator. Exists solely so the SO `filter`
+          // clause can push the `state` facet to the index instead of paying
+          // status fold-in for every matching SLO before slicing.
+          cachedState: { type: 'keyword' },
           version: { type: 'integer' },
           createdAt: { type: 'date' },
           createdBy: { type: 'keyword' },
@@ -290,7 +330,11 @@ export class ObservabilityPlugin
     const observabilityConfig = await this.initializerContext.config
       .create<{
         alertManager: { enabled: boolean };
-        slo?: { enabled?: boolean; ruleDedup?: { enabled: boolean } };
+        slo?: {
+          enabled?: boolean;
+          ruleDedup?: { enabled: boolean };
+          reconciler?: { enabled?: boolean; intervalMs?: number; graceMs?: number };
+        };
       }>()
       .pipe(first())
       .toPromise();
@@ -308,10 +352,32 @@ export class ObservabilityPlugin
     // which is not supported.
     const sloEnabled = observabilityConfig.slo?.enabled ?? false;
     const ruleDedupEnabled = observabilityConfig.slo?.ruleDedup?.enabled ?? true;
+    this.sloReconcilerOpts = {
+      enabled: observabilityConfig.slo?.reconciler?.enabled ?? true,
+      intervalMs: observabilityConfig.slo?.reconciler?.intervalMs ?? 300_000,
+      graceMs: observabilityConfig.slo?.reconciler?.graceMs ?? 24 * 3600 * 1000,
+    };
 
     if (sloEnabled) {
       core.savedObjects.registerType(sloDefinitionType);
       core.savedObjects.registerType(sloRuleRefType);
+      if (core.workspace.isWorkspaceEnabled()) {
+        // SLO documents and slo-rule-ref refcount registry are partitioned
+        // per OSD workspace via the saved-objects workspace wrapper. The
+        // ruler recording-rule namespace (`slo-generated-<datasourceId>`)
+        // is shared across workspaces that target the same Cortex tenant —
+        // two workspaces creating SLOs over the same SLI fingerprint share
+        // one rule group on the ruler, with refcount tracked separately
+        // per workspace. The grace-GC pass owns recording-group cleanup
+        // and fires only when the cross-workspace aggregate refcount for a
+        // (datasourceId, fingerprint) tuple hits zero past the grace window.
+        this.logger.info(
+          'Observability: SLO is enabled on a workspace-enabled cluster. ' +
+            'SLO documents and dedup refcounts are scoped per workspace; ' +
+            'ruler recording rules are shared per datasource and GC-ed only ' +
+            'when no workspace references them past the grace period.'
+        );
+      }
     }
 
     // Register server side APIs
@@ -343,15 +409,65 @@ export class ObservabilityPlugin
       const sloService = new SloService(sloLogger, initialStore);
       sloService.setDedupEnabled(ruleDedupEnabled);
       sloService.setPluginVersion(this.initializerContext.env.packageInfo.version);
+      // Wire the DirectQuery status aggregator so SLO list/detail responses
+      // surface real Cortex-derived state (healthy/breaching/warning) instead
+      // of the no-op stub that always returns no_data.
+      // Per-server datasource health tracker. One instance per plugin
+      // start; failure counts and cooldown are in-memory and reset on
+      // process restart. Logs once per open/close transition so an
+      // operator sees a flapping datasource without log spam every
+      // listing call.
+      const sloCircuitBreaker = new DatasourceCircuitBreaker({
+        onTransition: (datasourceId, transition) => {
+          if (transition === 'open') {
+            sloLogger.warn(
+              `SLO status aggregator: datasource ${datasourceId} circuit OPEN — fast-failing to no_data until cooldown elapses`
+            );
+          } else {
+            sloLogger.info(
+              `SLO status aggregator: datasource ${datasourceId} circuit CLOSED — resumed live status reads`
+            );
+          }
+        },
+      });
+      sloService.setStatusAggregator(new DirectQueryStatusAggregator(sloLogger, sloCircuitBreaker));
       this.sloService = sloService;
 
       const rulerClient = new DirectQueryRulerClient(this.logger);
+      // Stash for `start()` so the reconciler can reuse the same ruler
+      // transport the routes use. Avoids constructing a second client +
+      // ensures any future configuration on the ruler client is applied
+      // consistently across CRUD and GC paths.
+      this.sloRulerClient = rulerClient;
+      // Followups' SLO routes need an InMemoryDatasourceService + a
+      // DatasourceDiscoveryService to resolve free-text Datasource IDs at
+      // create/update/delete time. Without these, buildDeployContext returns
+      // undefined, the SO is saved, but the ruler dual-write silently no-ops
+      // (commit 4de0c0cf). Wired here to keep the SLO ruler write path live
+      // on this branch.
+      const sloDatasourceService = new InMemoryDatasourceService(sloLogger);
+      const sloDiscoveryService = new DatasourceDiscoveryService(sloDatasourceService, sloLogger);
+      // Rule-health checker probes the ruler for the SLO's expected rule
+      // groups. Without it the detail page's `GET /rule_health` returns 501
+      // and surfaces a "Could not load rule health: Not Implemented" toast
+      // every time a user opens an SLO. Backed by the same ruler client the
+      // SLO write path uses, with the default 30s in-memory cache.
+      const ruleHealthChecker = createRuleHealthChecker(rulerClient, sloLogger);
+      // Probe-SLI route is gated on a non-null prometheusBackend; without it
+      // the wizard's "Probe SLI" button always 404s. The backend is stateless
+      // (see comment in routes/index.ts beside the alerting promBackend) so
+      // the second instance is fine.
+      const sloPrometheusBackend = new DirectQueryPrometheusBackend(this.logger);
       registerSloRoutes({
         router,
         sloService,
         logger: this.logger,
         rulerClient,
         ruleDedupEnabled,
+        datasourceService: sloDatasourceService,
+        discoveryService: sloDiscoveryService,
+        ruleHealthChecker,
+        prometheusBackend: sloPrometheusBackend,
       });
     }
 
@@ -431,23 +547,44 @@ export class ObservabilityPlugin
         'slo-definition',
         SLO_RULE_REF_SO_TYPE,
       ]);
-      const sloStoreLogger = {
-        info: (msg: string) => this.logger.info(msg),
-        warn: (msg: string) => this.logger.warn(msg),
-        error: (msg: string) => this.logger.error(msg),
-        debug: (msg: string) => this.logger.debug(msg),
-      };
-      const soStore = new SavedObjectSloStore(repository, sloStoreLogger);
+      const soStore = new SavedObjectSloStore(repository);
       this.sloService.setStore(soStore);
       const refStore = new SloRuleRefStore(
         (repository as unknown) as import('../../../src/core/server').SavedObjectsClientContract
       );
       this.sloService.setRuleRefStore(refStore);
+      // Per-request store factory. Methods that receive an OSD `request`
+      // (every route handler does) route through the workspace-scoped
+      // saved-objects client so the WorkspaceIdConsumerWrapper engages and
+      // partitions slo-definition + slo-rule-ref reads/writes per
+      // workspace. The singleton stores above continue to back any path
+      // that doesn't carry a request — currently nothing in production,
+      // and tests that exercise the offline path.
+      const storeFactory = new SloStoreFactory(core.savedObjects);
+      this.sloService.setStoreFactory(storeFactory);
       this.logger.info('Observability: SLO storage upgraded to SavedObjects');
+
+      // Reconciler: grace-GC for shared recording rules. Disabled via
+      // `observability.slo.reconciler.enabled: false` in environments that
+      // don't want the sweep (e.g. CI, where ruler reachability is mocked
+      // and the timer would just churn warnings).
+      const reconcilerOpts = this.sloReconcilerOpts;
+      if (reconcilerOpts?.enabled && this.sloRulerClient) {
+        this.sloReconciler = new SloReconciler(
+          this.logger,
+          core.savedObjects,
+          core.opensearch,
+          this.sloRulerClient,
+          { intervalMs: reconcilerOpts.intervalMs, graceMs: reconcilerOpts.graceMs }
+        );
+        this.sloReconciler.start();
+      }
     }
 
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.sloReconciler?.stop();
+  }
 }

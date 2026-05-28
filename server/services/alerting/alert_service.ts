@@ -15,6 +15,7 @@
  * Preview time-series helpers live in `alert_preview.ts`.
  * Pure utilities and unified-shape mappers live in `alert_utils.ts`.
  */
+import type { RequestHandlerContext } from '../../../../../src/core/server';
 import {
   AlertingOSClient,
   Datasource,
@@ -40,6 +41,7 @@ import {
 } from '../../../common/types/alerting';
 import { parseDateMathMs, computeStep } from '../../../common/services/alerting';
 import { TimeoutError } from './timeout_error';
+import { extractErrorMessage } from './errors';
 import {
   getAlertDetail as getAlertDetailImpl,
   getRuleDetail as getRuleDetailImpl,
@@ -54,6 +56,52 @@ import {
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const DEFAULT_MAX_RESULTS = 5_000;
+/**
+ * Concurrency cap on per-datasource fan-outs. The unified views fan a
+ * single OSD request out to up to `ALERT_MANAGER_MAX_DATASOURCES_LIMIT`
+ * datasources. Without a cap we'd issue N concurrent transport requests,
+ * which can exhaust the HTTP agent pool (Node's default `maxSockets` is
+ * lazy-allocated per host but each datasource is potentially a different
+ * host, and concurrent reuse of a single host's pool is also sensitive
+ * to keep-alive limits). Batching at 5 keeps tail latency comparable to
+ * the unbounded version on healthy clusters and prevents one slow
+ * datasource from blocking the whole batch via timeout pile-up.
+ */
+export const FANOUT_CONCURRENCY = 5;
+
+/**
+ * Run `tasks` in parallel batches of at most `concurrency` at a time,
+ * preserving input order in the output. Returns Promise.allSettled-shape
+ * results so callers can keep their existing fulfilled/rejected branching.
+ *
+ * Implementation note: the simplest correct shape is "fixed-size worker
+ * pool that pulls the next pending index off a cursor". Pure batched
+ * `Promise.allSettled` (chunk → await → next chunk) is half the size but
+ * has worse worst-case latency: a slow datasource in chunk[0] blocks all
+ * of chunk[1] from even starting. Workers consume the queue independently
+ * so a fast datasource doesn't wait on a slow one in the same batch.
+ */
+export async function runWithConcurrencyLimit<T>(
+  tasks: Array<() => Promise<T>>,
+  concurrency: number = FANOUT_CONCURRENCY
+): Promise<Array<PromiseSettledResult<T>>> {
+  const results: Array<PromiseSettledResult<T>> = new Array(tasks.length);
+  const workerCount = Math.max(1, Math.min(concurrency, tasks.length));
+  let cursor = 0;
+  async function worker() {
+    while (cursor < tasks.length) {
+      const i = cursor++;
+      try {
+        const value = await tasks[i]();
+        results[i] = { status: 'fulfilled', value };
+      } catch (reason) {
+        results[i] = { status: 'rejected', reason };
+      }
+    }
+  }
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
+  return results;
+}
 
 /**
  * Resolved time window in epoch milliseconds — product of calling
@@ -249,7 +297,8 @@ export class MultiBackendAlertService {
 
   async getUnifiedAlerts(
     clientOrResolver: AlertingOSClient | ((dsId: string) => Promise<AlertingOSClient>),
-    options?: UnifiedFetchOptions
+    options?: UnifiedFetchOptions,
+    ctx?: RequestHandlerContext
   ): Promise<ProgressiveResponse<UnifiedAlertSummary>> {
     const datasources = await this.resolveDatasources(options?.dsIds);
     const timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
@@ -263,15 +312,16 @@ export class MultiBackendAlertService {
     const resolvedRange = resolveRangeMsFromOptions(options);
 
     const isResolver = typeof clientOrResolver === 'function';
-    const dsResults = await Promise.allSettled(
-      datasources.map(async (ds) => {
+    const dsResults = await runWithConcurrencyLimit(
+      datasources.map((ds) => async () => {
         const client = isResolver ? await clientOrResolver(ds.id) : clientOrResolver;
         return this.fetchAlertsFromDatasource(
           client,
           ds,
           timeoutMs,
           resolvedRange,
-          options?.onProgress
+          options?.onProgress,
+          ctx
         );
       })
     );
@@ -291,7 +341,7 @@ export class MultiBackendAlertService {
           datasourceType: datasources[i].type,
           status: 'error',
           data: [],
-          error: String(settled.reason),
+          error: extractErrorMessage(settled.reason),
           durationMs: timeoutMs,
         };
         statusList.push(errResult);
@@ -317,8 +367,8 @@ export class MultiBackendAlertService {
     const fetchedAt = new Date().toISOString();
 
     const isResolver = typeof clientOrResolver === 'function';
-    const dsResults = await Promise.allSettled(
-      datasources.map(async (ds) => {
+    const dsResults = await runWithConcurrencyLimit(
+      datasources.map((ds) => async () => {
         const client = isResolver ? await clientOrResolver(ds.id) : clientOrResolver;
         return this.fetchRulesFromDatasource(client, ds, timeoutMs, options?.onProgress);
       })
@@ -339,7 +389,7 @@ export class MultiBackendAlertService {
           datasourceType: datasources[i].type,
           status: 'error',
           data: [],
-          error: String(settled.reason),
+          error: extractErrorMessage(settled.reason),
           durationMs: timeoutMs,
         };
         statusList.push(errResult);
@@ -370,9 +420,9 @@ export class MultiBackendAlertService {
     const allRules: UnifiedRuleSummary[] = [];
     const warnings: DatasourceWarning[] = [];
 
-    // Fetch from all datasources in parallel
-    const dsResults = await Promise.allSettled(
-      datasources.map((ds) => this.fetchRulesRaw(client, ds))
+    // Fetch from all datasources in batches (FANOUT_CONCURRENCY)
+    const dsResults = await runWithConcurrencyLimit(
+      datasources.map((ds) => () => this.fetchRulesRaw(client, ds))
     );
 
     for (let i = 0; i < datasources.length; i++) {
@@ -381,13 +431,15 @@ export class MultiBackendAlertService {
         allRules.push(...settled.value);
       } else {
         this.logger.error(
-          `Failed to fetch rules from ${datasources[i].name} (${datasources[i].id}): ${settled.reason}`
+          `Failed to fetch rules from ${datasources[i].name} (${
+            datasources[i].id
+          }): ${extractErrorMessage(settled.reason)}`
         );
         warnings.push({
           datasourceId: datasources[i].id,
           datasourceName: datasources[i].name,
           datasourceType: datasources[i].type,
-          error: String(settled.reason),
+          error: extractErrorMessage(settled.reason),
         });
       }
     }
@@ -425,9 +477,9 @@ export class MultiBackendAlertService {
     const allAlerts: UnifiedAlertSummary[] = [];
     const warnings: DatasourceWarning[] = [];
 
-    // Fetch from all datasources in parallel
-    const dsResults = await Promise.allSettled(
-      datasources.map((ds) => this.fetchAlertsRaw(client, ds))
+    // Fetch from all datasources in batches (FANOUT_CONCURRENCY)
+    const dsResults = await runWithConcurrencyLimit(
+      datasources.map((ds) => () => this.fetchAlertsRaw(client, ds))
     );
 
     for (let i = 0; i < datasources.length; i++) {
@@ -436,13 +488,15 @@ export class MultiBackendAlertService {
         allAlerts.push(...settled.value.alerts);
       } else {
         this.logger.error(
-          `Failed to fetch alerts from ${datasources[i].name} (${datasources[i].id}): ${settled.reason}`
+          `Failed to fetch alerts from ${datasources[i].name} (${
+            datasources[i].id
+          }): ${extractErrorMessage(settled.reason)}`
         );
         warnings.push({
           datasourceId: datasources[i].id,
           datasourceName: datasources[i].name,
           datasourceType: datasources[i].type,
-          error: String(settled.reason),
+          error: extractErrorMessage(settled.reason),
         });
       }
     }
@@ -481,11 +535,17 @@ export class MultiBackendAlertService {
    * Get full detail for a single rule/monitor. Delegates to the standalone
    * resolver in `alert_detail.ts` so the detail logic (history, routing,
    * preview) lives outside this class but is still reachable from the routes.
+   *
+   * `ctx` is forwarded so the Prom branch can route the condition-preview
+   * range query through the data plugin's search service (`strategy:
+   * 'PROMQL'`). When omitted (legacy callers), the preview falls back to
+   * the embedded-alert extractor inside `fetchPromPreviewData`.
    */
   async getRuleDetail(
     client: AlertingOSClient,
     dsId: string,
-    ruleId: string
+    ruleId: string,
+    ctx?: RequestHandlerContext
   ): Promise<UnifiedRule | null> {
     return getRuleDetailImpl(
       this.datasourceService,
@@ -493,7 +553,8 @@ export class MultiBackendAlertService {
       this.promBackend,
       client,
       dsId,
-      ruleId
+      ruleId,
+      ctx
     );
   }
 
@@ -525,7 +586,8 @@ export class MultiBackendAlertService {
     ds: Datasource,
     timeoutMs: number,
     range: ResolvedRange | undefined,
-    onProgress?: (result: DatasourceFetchResult<UnifiedAlertSummary>) => void
+    onProgress?: (result: DatasourceFetchResult<UnifiedAlertSummary>) => void,
+    ctx?: RequestHandlerContext
   ): Promise<DatasourceFetchResult<UnifiedAlertSummary>> {
     const start = Date.now();
     const makeResult = (
@@ -547,7 +609,7 @@ export class MultiBackendAlertService {
 
     try {
       const raw = await this.withTimeout(
-        this.fetchAlertsRaw(client, ds, range),
+        this.fetchAlertsRaw(client, ds, range, ctx),
         timeoutMs,
         `Datasource ${ds.name} timed out after ${timeoutMs}ms`
       );
@@ -559,8 +621,8 @@ export class MultiBackendAlertService {
       return result;
     } catch (err) {
       const isTimeout = err instanceof TimeoutError;
-      const result = makeResult(isTimeout ? 'timeout' : 'error', [], String(err));
-      this.logger.error(`Failed to fetch alerts from ${ds.name}: ${err}`);
+      const result = makeResult(isTimeout ? 'timeout' : 'error', [], extractErrorMessage(err));
+      this.logger.error(`Failed to fetch alerts from ${ds.name}: ${extractErrorMessage(err)}`);
       if (onProgress) onProgress(result);
       return result;
     }
@@ -598,8 +660,8 @@ export class MultiBackendAlertService {
       return result;
     } catch (err) {
       const isTimeout = err instanceof TimeoutError;
-      const result = makeResult(isTimeout ? 'timeout' : 'error', [], String(err));
-      this.logger.error(`Failed to fetch rules from ${ds.name}: ${err}`);
+      const result = makeResult(isTimeout ? 'timeout' : 'error', [], extractErrorMessage(err));
+      this.logger.error(`Failed to fetch rules from ${ds.name}: ${extractErrorMessage(err)}`);
       if (onProgress) onProgress(result);
       return result;
     }
@@ -626,7 +688,8 @@ export class MultiBackendAlertService {
   private async fetchAlertsRaw(
     client: AlertingOSClient,
     ds: Datasource,
-    range?: ResolvedRange
+    range?: ResolvedRange,
+    ctx?: RequestHandlerContext
   ): Promise<FetchAlertsRawResult> {
     if (ds.type === 'opensearch' && this.osBackend) {
       if (range) {
@@ -647,15 +710,16 @@ export class MultiBackendAlertService {
       if (range) {
         // Historical reconstruction — only available on backends that
         // implement the optional `getHistoricalAlerts` method
-        // (`DirectQueryPrometheusBackend` today). The check is type-safe
-        // because `getHistoricalAlerts?` is declared on the
-        // `PrometheusBackend` interface — a rename or signature change
-        // now produces a compile error rather than a silent duck-type miss.
-        if (typeof this.promBackend.getHistoricalAlerts === 'function') {
+        // (`DirectQueryPrometheusBackend` today) AND when we have an OSD
+        // request context (the matrix scan routes through the data plugin's
+        // search strategy). Without `ctx` we fall back to the legacy
+        // current-only path with a banner rather than throwing.
+        if (typeof this.promBackend.getHistoricalAlerts === 'function' && ctx) {
           const startSec = Math.floor(range.startMs / 1000);
           const endSec = Math.floor(range.endMs / 1000);
           const step = computeStep(startSec, endSec);
           const historical = await this.promBackend.getHistoricalAlerts(
+            ctx,
             client,
             ds,
             startSec,

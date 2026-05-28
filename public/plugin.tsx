@@ -583,6 +583,7 @@ export class ObservabilityPlugin
     coreRefs.dashboard = startDeps.dashboard;
     coreRefs.queryAssistEnabled = this.config.query_assist.enabled;
     coreRefs.summarizeEnabled = this.config.summarize.enabled;
+    coreRefs.sloEnabled = !!this.config.slo?.enabled;
     coreRefs.overlays = core.overlays;
     coreRefs.dataSource = startDeps.dataSource;
     coreRefs.navigation = startDeps.navigation;

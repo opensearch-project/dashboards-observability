@@ -52,14 +52,14 @@ export function classifySloKind(slo: SloSummary): CanonicalKind | undefined {
   return undefined;
 }
 
-export function kindSide(kind: CanonicalKind | undefined): 'availability' | 'latency' | undefined {
+function kindSide(kind: CanonicalKind | undefined): 'availability' | 'latency' | undefined {
   if (!kind) return undefined;
   if (kind.endsWith('-availability')) return 'availability';
   if (kind.endsWith('-latency')) return 'latency';
   return undefined;
 }
 
-export function emptyBucket(): SloHealthBucket {
+function emptyBucket(): SloHealthBucket {
   return {
     total: 0,
     ok: 0,
@@ -88,6 +88,12 @@ function tallyState(bucket: SloHealthBucket, state: SloHealthState): void {
       bucket.breached += 1;
       break;
     case 'no_data':
+      bucket.noData += 1;
+      break;
+    case 'source_idle':
+      // Roll source_idle into the same bucket as no_data — both surface as
+      // "no signal" on services-home. Listing/detail surfaces still
+      // distinguish them via the badge label and color.
       bucket.noData += 1;
       break;
     case 'stale':

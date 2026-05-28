@@ -39,21 +39,20 @@ const mockDashboard = jest.fn();
 jest.mock('../alerts_dashboard', () => ({
   AlertsDashboard: (props: unknown) => {
     mockDashboard(props);
-    return <div data-test-subj="alerts-dashboard" />;
+    return <div data-test-subj="alertsDashboard" />;
   },
 }));
 jest.mock('../monitors_table', () => ({
-  MonitorsTable: () => <div data-test-subj="monitors-table" />,
+  MonitorsTable: () => <div data-test-subj="monitorsTable" />,
 }));
 jest.mock('../notification_routing_panel', () => ({
-  NotificationRoutingPanel: () => <div data-test-subj="routing-panel" />,
+  NotificationRoutingPanel: () => <div data-test-subj="routingPanel" />,
 }));
 jest.mock('../create_monitor', () => ({ CreateMonitor: () => null }));
-jest.mock('../create_logs_monitor', () => ({ CreateLogsMonitor: () => null }));
-jest.mock('../create_metrics_monitor', () => ({ CreateMetricsMonitor: () => null }));
+jest.mock('../create_monitor/edit_monitor', () => ({ EditMonitor: () => null }));
 jest.mock('../alert_detail_flyout', () => ({ AlertDetailFlyout: () => null }));
 
-import { AlarmsPage } from '../alarms_page';
+import { AlarmsPage, parseAlarmsHashRoute } from '../alarms_page';
 import type { Datasource } from '../../../../common/types/alerting';
 
 const defaultProps = {
@@ -86,18 +85,18 @@ describe('AlarmsPage', () => {
     await act(async () => {
       render(<AlarmsPage {...defaultProps} />);
     });
-    expect(screen.getByTestId('alerts-dashboard')).toBeInTheDocument();
-    expect(screen.getByTestId('alertManager-tabs-alerts')).toBeInTheDocument();
-    expect(screen.getByTestId('alertManager-tabs-rules')).toBeInTheDocument();
-    expect(screen.getByTestId('alertManager-tabs-routing')).toBeInTheDocument();
+    expect(screen.getByTestId('alertsDashboard')).toBeInTheDocument();
+    expect(screen.getByTestId('alertManagerTabs-alerts')).toBeInTheDocument();
+    expect(screen.getByTestId('alertManagerTabs-rules')).toBeInTheDocument();
+    expect(screen.getByTestId('alertManagerTabs-routing')).toBeInTheDocument();
   });
 
   it('switches to Rules tab on click', async () => {
     await act(async () => {
       render(<AlarmsPage {...defaultProps} />);
     });
-    fireEvent.click(screen.getByTestId('alertManager-tabs-rules'));
-    expect(screen.getByTestId('monitors-table')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+    expect(screen.getByTestId('monitorsTable')).toBeInTheDocument();
   });
 
   it('forwards picker state + handlers to the AlertsDashboard (picker now lives in the timeline panel)', async () => {
@@ -264,7 +263,7 @@ describe('AlarmsPage', () => {
     });
 
     // The page still mounted.
-    expect(screen.getByTestId('alerts-dashboard')).toBeInTheDocument();
+    expect(screen.getByTestId('alertsDashboard')).toBeInTheDocument();
 
     // The dashboard received numeric (valid) startMs/endMs derived from
     // the fallback defaults.
@@ -285,5 +284,37 @@ describe('AlarmsPage', () => {
     // sessionStorage has also been healed so a reload starts clean.
     expect(window.sessionStorage.getItem('AlertManagerStartTime')).toBe('now-24h');
     expect(window.sessionStorage.getItem('AlertManagerEndTime')).toBe('now');
+  });
+});
+
+describe('parseAlarmsHashRoute', () => {
+  it('returns empty when the hash is missing', () => {
+    expect(parseAlarmsHashRoute('')).toEqual({});
+    expect(parseAlarmsHashRoute('#')).toEqual({});
+  });
+
+  it('parses #/rules into the rules tab', () => {
+    expect(parseAlarmsHashRoute('#/rules')).toEqual({ tab: 'rules' });
+  });
+
+  it('parses #/rules?q=foo into the rules tab + query', () => {
+    expect(parseAlarmsHashRoute('#/rules?q=foo')).toEqual({ tab: 'rules', q: 'foo' });
+  });
+
+  it('decodes URL-encoded queries (label:value syntax for slo_id deep links)', () => {
+    const labelQuery = 'slo_id:b4ea5ed2-12bb-44ce-bb20-74dc3e464328';
+    expect(parseAlarmsHashRoute(`#/rules?q=${encodeURIComponent(labelQuery)}`)).toEqual({
+      tab: 'rules',
+      q: labelQuery,
+    });
+  });
+
+  it('drops empty / whitespace-only q', () => {
+    expect(parseAlarmsHashRoute('#/rules?q=')).toEqual({ tab: 'rules' });
+    expect(parseAlarmsHashRoute('#/rules?q=%20')).toEqual({ tab: 'rules' });
+  });
+
+  it('falls back when the path segment is unknown', () => {
+    expect(parseAlarmsHashRoute('#/something-else')).toEqual({});
   });
 });

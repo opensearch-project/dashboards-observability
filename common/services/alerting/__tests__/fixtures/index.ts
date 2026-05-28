@@ -28,12 +28,13 @@ export const sampleAlertLabels = {
 } as const;
 
 // ---------- OpenSearch Alerting ----------
+// Notification channel projection (post-`/_plugins/_notifications/channels`
+// migration). Only id/name/type are surfaced — the per-config payload lives
+// in the Notifications plugin's own UI.
 export const sampleOSDestination: OSDestination = {
   id: 'dest-slack-1',
   type: 'slack',
   name: 'ops-alerts-slack',
-  last_update_time: 1_700_000_000_000,
-  slack: { url: 'https://hooks.slack.com/services/xxx' },
 };
 
 /** Query-level monitor, one trigger, one Slack action. */

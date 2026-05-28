@@ -4,13 +4,13 @@
  */
 
 /**
- * Provenance annotation emitted alongside every SLO-generated alert group
- * (Phase 3 W3.3). The alert-group annotation is the sole provenance surface:
+ * Provenance annotation emitted alongside every SLO-generated alert group.
+ * The alert-group annotation is the sole provenance surface:
  *
  *   - `osd_slo_provenance` on the first rule of the alert group — carries the
  *     full SloSpec, the workspace/datasource/sloId tuple, and a `specSha256`
- *     that lets the adoption code verify the rule group hasn't been tampered
- *     with before restoring the SO.
+ *     that future readers can use to verify the rule group hasn't been
+ *     tampered with.
  *   - A synthetic "sentinel" alert is emitted when the alert group would
  *     otherwise be empty (shadow mode, or all burn-rate tiers have
  *     `createAlarm: false`). It carries the `osd_slo_provenance` annotation
@@ -21,13 +21,15 @@
  * on recording rules (only alerting rules may carry them), so any attempt to
  * upsert a recording group with an annotation fails ruler-side with
  * `RULER_VALIDATION_FAILED`. The alert-group provenance carries enough
- * information (full spec + fingerprints are re-derivable from the spec) for
- * the Phase 4 orphan-adoption path to operate; recording-group-level
- * provenance would be redundant.
+ * information (full spec + fingerprints are re-derivable from the spec) that
+ * recording-group-level provenance would be redundant.
  *
  * Prometheus annotations are string-valued. The object defined here is
  * JSON-stringified and assigned verbatim to the annotation value — readers
  * run `JSON.parse` to recover the structured payload.
+ *
+ * No reader currently consumes the provenance — it is forward-compat surface
+ * for future tooling. The schemaVersion field is the upgrade hinge.
  *
  * This module is pure. No I/O, no clock, no logging.
  */
@@ -36,13 +38,12 @@ import { createHash } from 'crypto';
 import type { GeneratedRule, GeneratedRuleGroup, SloSpec } from './slo_types';
 
 // ============================================================================
-// Constants (public contract — Phase 4 reads these)
+// Constants (public contract — readers should treat schemaVersion as a hinge)
 // ============================================================================
 
 /**
- * Schema version stamped into every provenance object. Phase 4 adoption
- * rejects provenance values whose `schemaVersion` it doesn't recognize
- * (surfaces as `unsupported_schema`).
+ * Schema version stamped into every provenance object. Future readers
+ * should reject provenance values whose `schemaVersion` they don't recognize.
  */
 export const PROVENANCE_SCHEMA_VERSION = 1;
 
@@ -53,7 +54,7 @@ export const SENTINEL_ALERT_NAME_PREFIX = 'SLO_ProvenanceSentinel_';
 const SENTINEL_NAME_MAX_LEN = 200;
 
 // ============================================================================
-// Provenance shapes (Phase 4 parses these — change only with a schema bump)
+// Provenance shapes (change only with a schema bump)
 // ============================================================================
 
 export interface AlertProvenance {
@@ -66,7 +67,7 @@ export interface AlertProvenance {
   updatedAt: string;
   /** SHA-256 hex of the canonical-JSON serialized spec. */
   specSha256: string;
-  /** Embedded for adoption — Phase 4 reconstructs the SO from this. */
+  /** Embedded so future tooling can reconstruct the SO from the rule group. */
   spec: SloSpec;
 }
 
@@ -78,15 +79,12 @@ export interface AlertProvenance {
  * Compute SHA-256 of a canonical-JSON stringification of the spec. Object
  * keys are sorted at every level; array order is preserved. Returned as
  * lowercase hex.
- *
- * The canonicalization MUST stay identical between `buildAlertProvenance`
- * time and Phase 4's integrity check — that's the point of exporting it.
  */
-export function computeSpecSha256(spec: SloSpec): string {
+function computeSpecSha256(spec: SloSpec): string {
   return createHash('sha256').update(canonicalJson(spec)).digest('hex');
 }
 
-export interface BuildAlertProvenanceInput {
+interface BuildAlertProvenanceInput {
   pluginVersion: string;
   sloId: string;
   workspaceId: string;
@@ -165,36 +163,8 @@ export function buildSentinelAlert(sloId: string, provenance: AlertProvenance): 
       summary: 'SLO provenance sentinel — never fires',
     },
     description:
-      'Sentinel alert carrying SLO provenance metadata for adoption. Expression never evaluates true.',
+      'Sentinel alert carrying SLO provenance metadata. Expression never evaluates true.',
   };
-}
-
-/**
- * Parse an alert-provenance annotation value back to a typed object.
- * Returns `null` on malformed JSON or on shape mismatch (wrong
- * schemaVersion, missing required field). Phase 4's adoption path treats a
- * `null` return as "this rule group wasn't emitted by us (or was emitted
- * by an unsupported schema version)".
- */
-export function parseAlertProvenance(annotationValue: string): AlertProvenance | null {
-  const parsed = safeJsonParse(annotationValue);
-  if (!parsed || typeof parsed !== 'object') return null;
-  const obj = parsed as Partial<AlertProvenance>;
-  if (obj.schemaVersion !== PROVENANCE_SCHEMA_VERSION) return null;
-  if (
-    typeof obj.pluginVersion !== 'string' ||
-    typeof obj.sloId !== 'string' ||
-    typeof obj.workspaceId !== 'string' ||
-    typeof obj.datasourceId !== 'string' ||
-    typeof obj.createdAt !== 'string' ||
-    typeof obj.updatedAt !== 'string' ||
-    typeof obj.specSha256 !== 'string' ||
-    !obj.spec ||
-    typeof obj.spec !== 'object'
-  ) {
-    return null;
-  }
-  return parsed as AlertProvenance;
 }
 
 // ============================================================================
@@ -216,18 +186,7 @@ function sortKeys(value: unknown): unknown {
   return out;
 }
 
-function safeJsonParse(input: string): unknown {
-  try {
-    return JSON.parse(input);
-  } catch {
-    return null;
-  }
-}
-
 function truncateName(input: string, max: number): string {
   if (input.length <= max) return input;
-  // Iterate code points so a multibyte / surrogate-pair character at the
-  // boundary doesn't get sliced in half. Rule names are ASCII-constrained
-  // upstream, but this stays safe if a future migration loosens that.
-  return Array.from(input).slice(0, max).join('');
+  return input.slice(0, max);
 }

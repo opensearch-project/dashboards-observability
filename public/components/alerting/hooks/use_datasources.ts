@@ -44,39 +44,35 @@ interface DataConnectionSOAttributes {
   meta?: Record<string, unknown>;
 }
 
-const LOCAL_ENDPOINT_PATTERN = /localhost|127\.0\.0\.1|0\.0\.0\.0|::1|opensearch:9200|opensearch-cluster-master|opensearch-master/i;
-
 /**
  * Map both saved-object types into the unified `Datasource` shape that
  * Alert Manager UI code already consumes. Mirrors server-side mapping in
- * `server/routes/alerting/index.ts::discoverOsdDatasources`.
+ * `server/services/alerting/datasource_discovery.ts`.
  */
 export function mapSavedObjectsToDatasources(
   osSavedObjects: Array<SavedObject<DataSourceSOAttributes>>,
   dcSavedObjects: Array<SavedObject<DataConnectionSOAttributes>>
 ): Datasource[] {
-  // Partition OS data-source saved objects into "points at local cluster"
-  // vs "remote". If the user has created an MDS entry that targets the
-  // local cluster, surface their entry (with their chosen title) instead
-  // of the hardcoded "Local Cluster" placeholder — avoids showing two rows
-  // for the same physical cluster.
-  const osLocal = osSavedObjects.filter((so) =>
-    LOCAL_ENDPOINT_PATTERN.test(so.attributes?.endpoint || '')
-  );
-  const osRemote = osSavedObjects.filter(
-    (so) => !LOCAL_ENDPOINT_PATTERN.test(so.attributes?.endpoint || '')
-  );
-
+  // Local-cluster representation:
+  //   - If the user registered any MDS data sources, surface them all with
+  //     their user-given names — including any that may point at the local
+  //     cluster. The MDS framework owns local-cluster identity; classifying
+  //     by endpoint substring is fragile (load balancers, VPNs, custom
+  //     hostnames) and produced false positives in practice.
+  //   - If no MDS rows exist, emit the default "Local Cluster" placeholder
+  //     so the alert-manager UI still has at least one OpenSearch target to
+  //     bind to on a non-MDS deployment.
+  const osDiscovered: Datasource[] = osSavedObjects.map((so) => ({
+    id: so.id,
+    name: so.attributes.title || so.id,
+    type: 'opensearch' as const,
+    url: so.id,
+    enabled: true,
+    mdsId: so.id,
+  }));
   const localRows: Datasource[] =
-    osLocal.length > 0
-      ? osLocal.map((so) => ({
-          id: so.id,
-          name: so.attributes.title || so.id,
-          type: 'opensearch' as const,
-          url: so.id,
-          enabled: true,
-          mdsId: so.id,
-        }))
+    osDiscovered.length > 0
+      ? []
       : [
           {
             id: 'local',
@@ -88,15 +84,6 @@ export function mapSavedObjectsToDatasources(
             enabled: true,
           },
         ];
-
-  const osRemoteRows: Datasource[] = osRemote.map((so) => ({
-    id: so.id,
-    name: so.attributes.title || so.id,
-    type: 'opensearch' as const,
-    url: so.id,
-    enabled: true,
-    mdsId: so.id,
-  }));
 
   const promRows: Datasource[] = dcSavedObjects
     .filter((so) => {
@@ -114,7 +101,7 @@ export function mapSavedObjectsToDatasources(
       directQueryName: so.attributes.connectionId,
     }));
 
-  return [...localRows, ...osRemoteRows, ...promRows];
+  return [...localRows, ...osDiscovered, ...promRows];
 }
 
 export interface UseDatasourcesResult {

@@ -4,7 +4,7 @@
  */
 
 import { MultiBackendAlertService } from '../alert_service';
-import type { Datasource, Logger } from '../../../../common/types/alerting/types';
+import type { Datasource, Logger } from '../../../../common/types/alerting';
 import {
   sampleOSMonitor,
   sampleOSAlert,
@@ -51,7 +51,11 @@ const mockOsBackend = {
   deleteMonitor: jest.fn(),
   getAlerts: jest.fn(async () => ({ alerts: [], totalAlerts: 0 })),
   acknowledgeAlerts: jest.fn(),
-  getDestinations: jest.fn(async () => []),
+  getDestinations: jest.fn(async () => ({
+    destinations: [],
+    totalDestinations: 0,
+    truncated: false,
+  })),
   searchQuery: jest.fn(),
   runMonitor: jest.fn(),
 };
@@ -124,7 +128,11 @@ describe('MultiBackendAlertService — mutations + detail', () => {
   it('getRuleDetail returns enriched OS rule with alertHistory', async () => {
     mockOsBackend.getMonitor.mockResolvedValueOnce(sampleOSMonitor);
     mockOsBackend.getAlerts.mockResolvedValueOnce({ alerts: [sampleOSAlert], totalAlerts: 1 });
-    mockOsBackend.getDestinations.mockResolvedValueOnce([sampleOSDestination]);
+    mockOsBackend.getDestinations.mockResolvedValueOnce({
+      destinations: [sampleOSDestination],
+      totalDestinations: 1,
+      truncated: false,
+    });
     mockOsBackend.searchQuery.mockResolvedValueOnce({
       aggregations: { time_buckets: { buckets: [] } },
     });

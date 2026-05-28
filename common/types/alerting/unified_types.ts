@@ -44,12 +44,21 @@ export type DatasourceFetchFallback = 'prometheus-alerts-current-only';
  */
 export interface AlertingOSClient {
   transport: {
-    request: <TBody = unknown>(params: {
-      method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD';
-      path: string;
-      body?: unknown;
-      querystring?: Record<string, string | number | boolean>;
-    }) => Promise<{ statusCode: number; body: TBody; headers?: Record<string, string> }>;
+    request: <TBody = unknown>(
+      params: {
+        method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD';
+        path: string;
+        body?: unknown;
+        querystring?: Record<string, string | number | boolean>;
+      },
+      options?: {
+        // opensearch-js client honors `requestTimeout` and aborts the
+        // underlying HTTP request when it elapses. Plumbed through as a
+        // second-arg pass-through so callers (probe-sli, status aggregator)
+        // can bound how long an upstream Prometheus query holds a socket.
+        requestTimeout?: number;
+      }
+    ) => Promise<{ statusCode: number; body: TBody; headers?: Record<string, string> }>;
   };
 }
 
@@ -177,7 +186,8 @@ export type MonitorType =
   | 'composite'
   | 'infrastructure'
   | 'synthetics'
-  | 'cluster_metrics';
+  | 'cluster_metrics'
+  | 'ppl';
 export type MonitorStatus = 'active' | 'pending' | 'muted' | 'disabled';
 export type MonitorHealthStatus = 'healthy' | 'failing' | 'no_data';
 
@@ -233,7 +243,6 @@ export interface UnifiedRuleSummary {
 /** Full rule with detail-view fields. Use for single-item detail views only. */
 export interface UnifiedRule extends UnifiedRuleSummary {
   description: string;
-  aiSummary: string;
   firingPeriod?: string;
   lookbackPeriod?: string;
   alertHistory: AlertHistoryEntry[];

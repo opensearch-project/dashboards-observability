@@ -1,0 +1,443 @@
+name: SLO Cortex-backed Cypress
+
+# Runs the SLO Cypress specs against a real Cortex + Alertmanager backend.
+# Sibling to integration-tests-workflow.yml — same triggers, same plugin
+# assembly steps. The novel part is the docker-compose stack under
+# .cypress/cortex-ci/ and the Prometheus DirectQuery datasource registration
+# step that wires OSD's SQL plugin to the Cortex sidecar.
+#
+# Why a sibling workflow rather than a new matrix entry on integration-tests:
+# isolation. A Cortex-image fetch failure shouldn't take down notebooks/panels
+# CI, and the SLO specs need different OSD flags than the rest of the matrix.
+
+on:
+  pull_request:
+  push:
+  # Manual trigger so iteration commits can ship with `[skip ci]` while still
+  # dispatching THIS workflow on demand via `gh workflow run`.
+  workflow_dispatch:
+
+env:
+  PLUGIN_NAME: dashboards-observability
+  OPENSEARCH_DASHBOARDS_VERSION: 'main'
+
+jobs:
+  cypress-slo-cortex:
+    name: Cypress SLO specs against Cortex sidecar
+    runs-on: ubuntu-latest
+    env:
+      CI: 1
+      TERM: xterm
+      # Image tags pinned to observability-stack/.env exactly. Sync these whenever
+      # observability-stack rolls a new pin.
+      CORTEX_VERSION: v1.18.1
+      ALERTMANAGER_VERSION: v0.27.0
+
+    steps:
+      # -----------------------------------------------------------------------
+      # 1. Source checkout + plugin assembly (mirrors integration-tests apm_test)
+      # -----------------------------------------------------------------------
+      - name: Set up Java 21
+        uses: actions/setup-java@17f84c3641ba7b8f6deff6309fc4c864478f5d62 # v3
+        with:
+          distribution: 'corretto'
+          java-version: '21'
+
+      - name: Checkout OpenSearch Dashboards
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          repository: opensearch-project/Opensearch-Dashboards
+          ref: ${{ env.OPENSEARCH_DASHBOARDS_VERSION }}
+          path: OpenSearch-Dashboards
+
+      - name: Get OpenSearch and plugin versions from package.json
+        id: versions
+        run: |
+          VERSION=$(node -p "require('./OpenSearch-Dashboards/package.json').version")
+          echo "OPENSEARCH_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "OPENSEARCH_PLUGIN_VERSION=${VERSION}.0-SNAPSHOT" >> $GITHUB_ENV
+          echo "OpenSearch version: $VERSION"
+          echo "Plugin version: ${VERSION}.0-SNAPSHOT"
+
+      - name: Checkout dashboards observability
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          path: OpenSearch-Dashboards/plugins/dashboards-observability
+
+      - name: Get latest Job Scheduler snapshot version
+        id: job-scheduler-snapshot
+        run: |
+          METADATA_URL="https://ci.opensearch.org/ci/dbc/snapshots/maven/org/opensearch/plugin/opensearch-job-scheduler/${{ env.OPENSEARCH_PLUGIN_VERSION }}/maven-metadata.xml"
+          SNAPSHOT_VERSION=$(curl -s $METADATA_URL | grep '<value>' | head -1 | sed 's/.*<value>\(.*\)<\/value>.*/\1/')
+          echo "version=$SNAPSHOT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Download Job Scheduler artifact
+        uses: suisei-cn/actions-download-file@15306412d2c75df56b46844362b86b65235b7db1 # v1.4.0
+        with:
+          url: https://ci.opensearch.org/ci/dbc/snapshots/maven/org/opensearch/plugin/opensearch-job-scheduler/${{ env.OPENSEARCH_PLUGIN_VERSION }}/opensearch-job-scheduler-${{ steps.job-scheduler-snapshot.outputs.version }}.zip
+          target: plugin-artifacts/
+          filename: opensearch-job-scheduler.zip
+
+      - name: Get latest Observability snapshot version
+        id: observability-snapshot
+        run: |
+          METADATA_URL="https://ci.opensearch.org/ci/dbc/snapshots/maven/org/opensearch/plugin/opensearch-observability/${{ env.OPENSEARCH_PLUGIN_VERSION }}/maven-metadata.xml"
+          SNAPSHOT_VERSION=$(curl -s $METADATA_URL | grep '<value>' | head -1 | sed 's/.*<value>\(.*\)<\/value>.*/\1/')
+          echo "version=$SNAPSHOT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Download observability artifact
+        uses: suisei-cn/actions-download-file@15306412d2c75df56b46844362b86b65235b7db1 # v1.4.0
+        with:
+          url: https://ci.opensearch.org/ci/dbc/snapshots/maven/org/opensearch/plugin/opensearch-observability/${{ env.OPENSEARCH_PLUGIN_VERSION }}/opensearch-observability-${{ steps.observability-snapshot.outputs.version }}.zip
+          target: plugin-artifacts/
+          filename: observability.zip
+
+      - name: Get latest SQL Plugin snapshot version
+        id: sql-snapshot
+        run: |
+          METADATA_URL="https://ci.opensearch.org/ci/dbc/snapshots/maven/org/opensearch/plugin/opensearch-sql-plugin/${{ env.OPENSEARCH_PLUGIN_VERSION }}/maven-metadata.xml"
+          SNAPSHOT_VERSION=$(curl -s $METADATA_URL | grep '<value>' | head -1 | sed 's/.*<value>\(.*\)<\/value>.*/\1/')
+          echo "version=$SNAPSHOT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Download SQL artifact
+        uses: suisei-cn/actions-download-file@15306412d2c75df56b46844362b86b65235b7db1 # v1.4.0
+        with:
+          url: https://ci.opensearch.org/ci/dbc/snapshots/maven/org/opensearch/plugin/opensearch-sql-plugin/${{ env.OPENSEARCH_PLUGIN_VERSION }}/opensearch-sql-plugin-${{ steps.sql-snapshot.outputs.version }}.zip
+          target: plugin-artifacts/
+          filename: sql.zip
+
+      - name: Download OpenSearch
+        uses: peternied/download-file@6a5025a112bb8811a2eb5ee6dd3417acf6d928e4 # v2
+        with:
+          url: https://artifacts.opensearch.org/snapshots/core/opensearch/${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/opensearch-min-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT-linux-x64-latest.tar.gz
+
+      - name: Extract OpenSearch
+        run: |
+          tar -xzf opensearch-*.tar.gz
+          rm -f opensearch-*.tar.gz
+
+      - name: Install job scheduler plugin
+        run: /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install file:$(pwd)/plugin-artifacts/opensearch-job-scheduler.zip"
+
+      - name: Install observability plugin
+        run: /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install file:$(pwd)/plugin-artifacts/observability.zip"
+
+      - name: Install SQL plugin
+        run: /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install file:$(pwd)/plugin-artifacts/sql.zip"
+
+      - name: Configure OpenSearch for auto index creation
+        run: |
+          cat << 'EOF' >> ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/config/opensearch.yml
+          action.auto_create_index: true
+          EOF
+
+      - name: Run OpenSearch
+        run: /bin/bash -c "./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch -Ecluster.routing.allocation.disk.threshold_enabled=false -Ecluster.routing.allocation.disk.watermark.low=1gb -Ecluster.routing.allocation.disk.watermark.high=500mb -Ecluster.routing.allocation.disk.watermark.flood_stage=100mb -Ecluster.blocks.read_only_allow_delete=false &"
+
+      - name: Get node and yarn versions
+        id: versions_step
+        run: |
+          echo "::set-output name=node_version::$(cat ./OpenSearch-Dashboards/.nvmrc | cut -d"." -f1)"
+          echo "::set-output name=yarn_version::$(node -p "(require('./OpenSearch-Dashboards/package.json').engines.yarn).match(/[.0-9]+/)[0]")"
+
+      - name: Setup node
+        uses: actions/setup-node@f1f314fca9dfce2769ece7d933488f076716723e # v1
+        with:
+          node-version: ${{ steps.versions_step.outputs.node_version }}
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Configure OpenSearch Dashboards
+        run: |
+          rm -rf ./config/opensearch_dashboards.yml
+          cat << 'EOT' > ./config/opensearch_dashboards.yml
+          server.host: "0.0.0.0"
+          home.disableWelcomeScreen: true
+          home.disableExperienceModal: true
+          observability.slo.enabled: true
+          EOT
+        working-directory: OpenSearch-Dashboards
+
+      - name: Install correct yarn version for OpenSearch Dashboards
+        id: setup-yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@${{ steps.versions_step.outputs.yarn_version }}
+
+      - name: Get Cypress version
+        id: cypress_version
+        run: |
+          cd ./OpenSearch-Dashboards/plugins/dashboards-observability
+          echo "::set-output name=cypress_version::$(cat ./package.json | jq '.dependencies.cypress' | tr -d '"')"
+
+      - name: Yarn Cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            OpenSearch-Dashboards/**/target
+            OpenSearch-Dashboards/**/node_modules
+          key: ${{ runner.OS }}-build-${{ hashFiles('OpenSearch-Dashboards/**/yarn.lock') }}
+
+      - name: Cache Cypress binary
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.cache/Cypress
+          key: ${{ runner.OS }}-cypress-${{ steps.cypress_version.outputs.cypress_version }}
+          restore-keys: |
+            ${{ runner.OS }}-cypress-
+
+      - name: Bootstrap OpenSearch Dashboards
+        run: |
+          cd OpenSearch-Dashboards
+          yarn osd bootstrap --single-version=loose
+
+      - name: Install/Verify Cypress binary
+        run: |
+          cd ./OpenSearch-Dashboards
+          npx cypress install
+          npx cypress verify
+
+      - name: Compile OpenSearch Dashboards
+        run: |
+          cd OpenSearch-Dashboards
+          node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers=10 --verbose
+
+      # -----------------------------------------------------------------------
+      # 2. Cortex sidecar stack — docker compose under .cypress/cortex-ci/
+      # -----------------------------------------------------------------------
+      # GH Actions services blocks can't mount repo files (services boot before
+      # actions/checkout), so we drive the stack via `docker compose up` from a
+      # workflow step.
+      - name: Start Cortex + Alertmanager
+        working-directory: OpenSearch-Dashboards/plugins/dashboards-observability/.cypress/cortex-ci
+        run: |
+          echo "Pulling images..."
+          docker compose -f docker-compose.ci.yml pull
+          echo "Starting Cortex stack..."
+          docker compose -f docker-compose.ci.yml up -d
+          docker compose -f docker-compose.ci.yml ps
+
+      - name: Wait for Cortex stack readiness
+        working-directory: OpenSearch-Dashboards/plugins/dashboards-observability/.cypress/cortex-ci
+        run: |
+          chmod +x ./wait-for-ready.sh
+          start=$(date +%s)
+          ./wait-for-ready.sh 60
+          elapsed=$(( $(date +%s) - start ))
+          echo "[stack-ready-in] ${elapsed}s"
+          if [ "$elapsed" -gt 30 ]; then
+            echo "::warning::Cortex stack took ${elapsed}s to become ready (target was 30s)"
+          fi
+
+      - name: Run OpenSearch Dashboards server
+        run: |
+          cd OpenSearch-Dashboards
+          # data_source.enabled=true is required for the Prometheus DirectQuery
+          # datasource registration step. workspace.enabled is left off:
+          # the SLO specs land on /app/observability-apm-slo without a /w/<id>/
+          # prefix, and the workspace plugin loops in a BehaviorSubject when
+          # the URL has no workspace id (Maximum call stack size exceeded).
+          #
+          # The SLO app is gated behind two preconditions in public/plugin.tsx:
+          #   1. core.chrome.navGroup.getNavGroupEnabled() — driven by
+          #      `home:useNewHomePage` UI setting
+          #   2. uiSettings.get('observability:apmEnabled') === true
+          # Both are forced on via --uiSettings.overrides so the SLO app
+          # registers and the Cypress specs can navigate to it.
+          nohup yarn start --no-base-path --no-watch \
+            --home.disableExperienceModal=true \
+            --uiSettings.overrides["query:enhancements:enabled"]=true \
+            --uiSettings.overrides["home:useNewHomePage"]=true \
+            --uiSettings.overrides["observability:apmEnabled"]=true \
+            --data_source.enabled=true | tee dashboard.log &
+
+      - name: Check If OpenSearch Dashboards Is Ready
+        run: |
+          cd ./OpenSearch-Dashboards
+          if timeout 1200 grep -q "http server running" <(tail -n +1 -f dashboard.log); then
+            echo "OpenSearch Dashboards started successfully."
+          else
+            echo "Timeout reached. Last 100 lines:"; tail -100 dashboard.log; exit 1
+          fi
+
+      # -----------------------------------------------------------------------
+      # 3. Register the Cortex Prometheus DirectQuery datasource in OSD
+      # -----------------------------------------------------------------------
+      # Mirrors observability-stack's init-opensearch-dashboards.py shape:
+      # `prometheus.uri` carries the /prometheus path-prefix (Cortex's PromQL
+      # endpoint), `prometheus.ruler.uri` is the unprefixed root (Ruler admin).
+      - name: Register Prometheus DirectQuery datasource
+        id: register-ds
+        run: |
+          DS_NAME="prom_ci"
+          PAYLOAD=$(cat <<JSON
+          {
+            "name": "${DS_NAME}",
+            "allowedRoles": [],
+            "connector": "prometheus",
+            "properties": {
+              "prometheus.uri": "http://localhost:9090/prometheus",
+              "prometheus.ruler.uri": "http://localhost:9090",
+              "alertmanager.uri": "http://localhost:9093"
+            }
+          }
+          JSON
+          )
+          for i in $(seq 1 30); do
+            HTTP=$(curl -sS -o /tmp/dsresp -w '%{http_code}' \
+              -X POST 'http://localhost:5601/api/directquery/dataconnections' \
+              -H 'osd-xsrf: true' \
+              -H 'Content-Type: application/json' \
+              --data "${PAYLOAD}" || echo 000)
+            if [ "$HTTP" = "200" ] || [ "$HTTP" = "201" ]; then
+              echo "✓ Registered ${DS_NAME}"; break
+            fi
+            if [ "$HTTP" = "400" ] && grep -q "already exists" /tmp/dsresp; then
+              echo "✓ ${DS_NAME} already exists"; break
+            fi
+            echo "Attempt $i: status=${HTTP}, body=$(cat /tmp/dsresp)"; sleep 2
+          done
+          echo "ds_name=${DS_NAME}" >> $GITHUB_OUTPUT
+
+      # -----------------------------------------------------------------------
+      # 3.5. Smoke-check: verify the SLO API can create+delete one SLO end-to-end
+      # -----------------------------------------------------------------------
+      # If this fails, Cypress specs that depend on a working backend will all
+      # skip via their `before()` hooks. Surface the failure clearly so we can
+      # see the actual server response rather than chasing skip-cascade.
+      - name: SLO API smoke (create + delete)
+        run: |
+          set -e
+          PAYLOAD=$(cat <<JSON
+          {
+            "spec": {
+              "datasourceId": "${{ steps.register-ds.outputs.ds_name }}",
+              "name": "ci-smoke-$(date +%s)",
+              "description": "ci pre-cypress smoke",
+              "enabled": true,
+              "mode": "active",
+              "service": "ci",
+              "owner": { "teams": ["ci"] },
+              "sli": {
+                "type": "single",
+                "definition": {
+                  "backend": "prometheus",
+                  "type": "availability",
+                  "calcMethod": "events",
+                  "metric": "http_requests_total",
+                  "goodEventsFilter": "status_code!~\"5..\""
+                },
+                "dimensions": [{ "name": "service", "value": "ci" }]
+              },
+              "objectives": [{ "name": "primary", "target": 0.99 }],
+              "budgetWarningThresholds": [],
+              "window": { "type": "rolling", "duration": "28d" },
+              "alerting": {
+                "strategy": "mwmbr",
+                "burnRates": [{
+                  "shortWindow": "5m",
+                  "longWindow": "1h",
+                  "burnRateMultiplier": 14.4,
+                  "severity": "critical",
+                  "createAlarm": true,
+                  "forDuration": "2m"
+                }]
+              },
+              "alarms": {
+                "sliHealth": { "enabled": false },
+                "attainmentBreach": { "enabled": false },
+                "budgetWarning": { "enabled": true },
+                "noData": { "enabled": false, "forDuration": "10m" },
+                "resolved": { "enabled": false }
+              },
+              "exclusionWindows": [],
+              "labels": {},
+              "annotations": {}
+            }
+          }
+          JSON
+          )
+          echo "POST /api/observability/v1/slos..."
+          HTTP=$(curl -sS -o /tmp/sloresp -w '%{http_code}' \
+            -X POST 'http://localhost:5601/api/observability/v1/slos' \
+            -H 'osd-xsrf: true' \
+            -H 'Content-Type: application/json' \
+            --data "${PAYLOAD}")
+          echo "status=${HTTP}"
+          echo "body=$(head -c 800 /tmp/sloresp)"
+          if [ "$HTTP" != "200" ] && [ "$HTTP" != "201" ]; then
+            echo "::error::SLO API smoke create failed (HTTP ${HTTP}). Cypress specs will skip."
+            exit 1
+          fi
+          SLO_ID=$(jq -r '.id' /tmp/sloresp)
+          echo "Created SLO id=${SLO_ID}; cleaning up..."
+          curl -sS -o /dev/null -X DELETE \
+            "http://localhost:5601/api/observability/v1/slos/${SLO_ID}" \
+            -H 'osd-xsrf: true'
+          echo "✓ SLO API smoke passed"
+
+      # Confirm the SLO app is registered in OSD chrome — without this the
+      # Cypress specs will hit "Application Not Found" before they can do
+      # anything useful. The capabilities endpoint reflects the public
+      # plugin's registration list.
+      - name: Verify SLO app is registered
+        run: |
+          BODY=$(curl -sS -X POST 'http://localhost:5601/api/core/capabilities' \
+            -H 'osd-xsrf: true' -H 'Content-Type: application/json' \
+            --data '{"applications":["observability-apm-slo"]}')
+          echo "${BODY}" | head -c 600
+          if echo "${BODY}" | grep -q '"observability-apm-slo"'; then
+            echo "\n✓ observability-apm-slo is registered"
+          else
+            echo "::error::observability-apm-slo NOT registered. Check observability:apmEnabled / home:useNewHomePage UI settings + observability.slo.enabled config."
+            exit 1
+          fi
+
+      # -----------------------------------------------------------------------
+      # 4. Run Cypress
+      # -----------------------------------------------------------------------
+      - name: Run Cypress SLO specs
+        run: |
+          cd ./OpenSearch-Dashboards/plugins/dashboards-observability
+          yarn cypress:run --headless --spec '.cypress/integration/slo_test/*.spec.js'
+        env:
+          CYPRESS_sloDatasourceId: ${{ steps.register-ds.outputs.ds_name }}
+          CYPRESS_cortexBaseUrl: 'http://localhost:9090'
+          # Used by .cypress/plugins/index.js's cortex:deleteRuleGroup task to
+          # hit the SQL plugin's DirectQuery resource path directly.
+          CYPRESS_opensearchUrl: 'http://localhost:9200'
+
+      # -----------------------------------------------------------------------
+      # 5. Diagnostics + artifact upload
+      # -----------------------------------------------------------------------
+      - name: Dump Cortex stack logs on failure
+        if: failure()
+        working-directory: OpenSearch-Dashboards/plugins/dashboards-observability/.cypress/cortex-ci
+        run: |
+          docker compose -f docker-compose.ci.yml ps || true
+          docker compose -f docker-compose.ci.yml logs --no-color --tail=400 || true
+
+      - name: Upload Dashboards logs
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: failure()
+        with:
+          name: dashboard.logs
+          path: OpenSearch-Dashboards/dashboard.log
+
+      - name: Capture failure screenshots
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: failure()
+        with:
+          name: cypress-screenshots-slo-cortex
+          path: OpenSearch-Dashboards/plugins/dashboards-observability/.cypress/screenshots
+
+      - name: Capture test video
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: cypress-videos-slo-cortex
+          path: OpenSearch-Dashboards/plugins/dashboards-observability/.cypress/videos
+
+      - name: Tear down Cortex stack
+        if: always()
+        working-directory: OpenSearch-Dashboards/plugins/dashboards-observability/.cypress/cortex-ci
+        run: docker compose -f docker-compose.ci.yml down -v --remove-orphans || true

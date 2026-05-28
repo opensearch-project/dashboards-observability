@@ -6,88 +6,97 @@
 /// <reference types="cypress" />
 
 /*
- * PR-1 SLO CRUD smoke — create → detail → listing row → delete → row gone.
+ * SLO CRUD smoke — pick template → fill identity + custom PromQL →
+ * submit → verify detail page → delete from detail → row gone.
  *
- * Prereqs:
- *   - Dev stack running with `observability.slo.enabled: true` in
- *     `opensearch_dashboards.yml`.
- *   - A registered Prometheus-backed DirectQuery datasource.
- *   - An OSD workspace in which the APM + SLO apps are visible. The spec
- *     picks up the workspace id from `workspaceId` env (see cypress.config).
+ * The wizard is template-driven; we use the `custom` template so the spec
+ * doesn't need any RED metrics actually flowing in Cortex (the placeholder
+ * PromQL queries are evaluated only when the rule fires).
  *
- * Run with (from plugin dir):
+ * Prereqs (CI sets these up via .github/workflows/cypress-slo-cortex.yml;
+ * locally, the observability-stack dev cluster covers them):
+ *   - `observability.slo.enabled: true` in opensearch_dashboards.yml
+ *   - A registered Prometheus-backed DirectQuery datasource. CI registers
+ *     `prom_ci` against the Cortex sidecar; locally pass --env sloDatasourceId
+ *
+ * Run locally with:
  *   yarn cypress:run \
  *     --spec .cypress/integration/slo_test/slo_crud_smoke.spec.js \
- *     --env workspaceId=<WS_ID>,sloDatasourceId=<DS_ID>,baseUrl=http://localhost:5602
- *
- * The baseUrl env overrides `cypress.config.js` for dev servers on :5602.
+ *     --env sloDatasourceId=<DS_ID>
  */
 
-const WORKSPACE_ID = Cypress.env('workspaceId');
-const DATASOURCE_ID = Cypress.env('sloDatasourceId') || 'prom';
+const APP_ID = 'observability-apm-slo';
+const DATASOURCE_ID = Cypress.env('sloDatasourceId') || 'prom_ci';
+const WORKSPACE_PREFIX = Cypress.env('workspaceId') ? `/w/${Cypress.env('workspaceId')}` : '';
 
 const uniqueSuffix = () => Math.random().toString(36).slice(2, 8);
-const prefix = WORKSPACE_ID ? `/w/${WORKSPACE_ID}` : '';
-const sloApp = `${prefix}/app/observability-apm-slo`;
 
-// FIXME(pr-5): wire this spec into the CI pipeline once the observability-
-// stack dev cluster ships as a CI prereq. Today it's operator-run only:
-// CI doesn't have a Prometheus-backed DirectQuery datasource available.
-// The `sloEnabled` env gate below lets anyone drop it in a CI run that
-// doesn't have the stack up without failing the whole suite.
-const SLO_ENABLED = Cypress.env('sloEnabled') !== false;
-
-describe('SLO — CRUD smoke (PR 1)', () => {
-  before(function () {
-    if (!SLO_ENABLED) this.skip();
-  });
-
-  it('creates, lists, and deletes an SLO through the wizard', () => {
+describe('SLO — CRUD smoke', () => {
+  it('creates an SLO via the custom-PromQL template, then deletes it', () => {
     const name = `Smoke SLO ${uniqueSuffix()}`;
-    const service = `smoke-svc-${uniqueSuffix()}`;
 
     // Land on the listing page.
-    cy.visit(`${sloApp}#/slos`);
-    // Wait for the listing to render — either an empty prompt or the table.
-    cy.get(
-      '[data-test-subj="sloCreateBtn"], [data-test-subj="sloCreateBtnEmpty"]'
-    )
-      .first()
-      .click();
+    cy.visit(`${WORKSPACE_PREFIX}/app/${APP_ID}#/slos`);
+    cy.get('[data-test-subj="slosPage"]', { timeout: 30000 }).should('be.visible');
 
-    // Fill the wizard.
-    cy.get('[data-test-subj="sloWizardName"]').type(name);
-    cy.get('[data-test-subj="sloWizardService"]').type(service);
-    cy.get('[data-test-subj="sloWizardTeam"]').type('platform');
-    cy.get('[data-test-subj="sloWizardDatasource"]').type(DATASOURCE_ID);
-    cy.get('[data-test-subj="sloWizardMetric"]').clear().type('http_requests_total');
-    cy.get('[data-test-subj="sloWizardTarget"]').clear().type('99.9');
-    cy.get('[data-test-subj="sloWizardSubmit"]').click();
+    // Open the create wizard. The header-bar create button (slosCreate) and
+    // the empty-state create button (slosCreateEmpty) live in different DOM
+    // subtrees; the empty-state one only renders when there are zero SLOs.
+    // Either path is fine — pick whichever is visible first.
+    cy.get('body').then(($body) => {
+      if ($body.find('[data-test-subj="slosCreateEmpty"]').length) {
+        cy.get('[data-test-subj="slosCreateEmpty"]').click();
+      } else {
+        // Header-bar create button: navigating directly to the wizard route
+        // is more reliable than clicking through the OSD chrome (which lives
+        // in a portal).
+        cy.visit(`${WORKSPACE_PREFIX}/app/${APP_ID}#/slos/create`);
+      }
+    });
+
+    // Pick the `custom` template — no RED metrics needed.
+    cy.get('[data-test-subj="slosTemplate-custom"]', { timeout: 20000 }).click();
+
+    // Identity panel
+    cy.get('[data-test-subj="slosWizardDatasourceId"]').clear().type(DATASOURCE_ID);
+    cy.get('[data-test-subj="slosWizardName"]').type(name);
+
+    // Service + owner team are both required.
+    cy.get('[data-test-subj="slosWizardService"]').type('ci-svc');
+    cy.get('[data-test-subj="slosWizardOwnerTeam"]').type('platform');
+
+    // Custom PromQL — events mode (good + total). Placeholder queries are
+    // syntactically valid PromQL; Cortex's ruler accepts them even if the
+    // metric series don't exist yet (it'll just record `NaN`).
+    // parseSpecialCharSequences:false because Cypress otherwise treats `{`
+    // as a special-char modifier prefix (matches cmd, alt, etc).
+    cy.get('[data-test-subj="slosWizardCustomPromqlGood"]').type(
+      'sum(rate(http_requests_total{status_code!~"5.."}[5m]))',
+      { parseSpecialCharSequences: false }
+    );
+    cy.get('[data-test-subj="slosWizardCustomPromqlTotal"]').type(
+      'sum(rate(http_requests_total[5m]))',
+      { parseSpecialCharSequences: false }
+    );
+
+    // Submit. The submit button lives in the OSD header chrome, controlled
+    // via HeaderControlledComponentsWrapper.
+    cy.get('[data-test-subj="slosWizardSubmit"]').click();
 
     // After create the wizard redirects to the detail page for the new SLO.
-    cy.location('hash', { timeout: 15000 }).should('match', /#\/slos\/[0-9a-f-]{36}/);
-    // Detail page shows the SLO name as the chrome h1 (via breadcrumb).
-    cy.contains('h1', name, { timeout: 15000 }).should('be.visible');
+    cy.location('hash', { timeout: 30000 }).should('match', /#\/slos\/[0-9a-f-]{36}/);
+    cy.get('[data-test-subj="sloDetailPage"]', { timeout: 30000 }).should('be.visible');
+    cy.contains('h1, h2', name, { timeout: 15000 }).should('be.visible');
 
-    // Navigate back to the listing and locate the new row. Tolerate either
-    // page (new SLOs sort last; pageSize=100 guarantees visibility even with
-    // a seeded cluster).
-    cy.visit(`${sloApp}#/slos`);
-    cy.get('[data-test-subj="tablePaginationPopoverButton"]').click();
-    cy.get('.euiContextMenuItem').contains('100 rows').click();
-    cy.contains('[data-test-subj="sloRowName"]', name, { timeout: 15000 })
-      .should('be.visible');
+    // Delete from the detail page.
+    cy.get('[data-test-subj="slosDetailDelete"]').click();
+    cy.get('[data-test-subj="slosDetailDeleteModal"]', { timeout: 10000 }).should('be.visible');
+    cy.get('[data-test-subj="confirmModalConfirmButton"]').click();
 
-    // Trigger delete via the row's trash action.
-    cy.contains('[data-test-subj="sloRowName"]', name)
-      .closest('tr')
-      .find('[data-test-subj="sloRowDelete"]')
-      .click();
-    cy.get('[data-test-subj="sloDeleteConfirm"]')
-      .find('button.euiButton--danger')
-      .click();
-
-    // Row is gone (toast confirms success; assert on the list for durability).
-    cy.contains('[data-test-subj="sloRowName"]', name).should('not.exist');
+    // After delete we land back on the listing.
+    cy.location('hash', { timeout: 20000 }).should('match', /#\/slos$/);
+    cy.get('[data-test-subj="slosPage"]', { timeout: 30000 }).should('be.visible');
+    // The deleted name should no longer appear as a row link.
+    cy.contains(`[data-test-subj^="slosLink-"]`, name).should('not.exist');
   });
 });

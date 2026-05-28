@@ -10,6 +10,11 @@
   flex-direction: column;
 }
 
+// Spacing below page-level callouts (alarms_page_callouts.tsx).
+.altCalloutSpaced {
+  margin-bottom: 12px;
+}
+
 .altResizableContainer {
   min-height: calc(100vh - 140px);
 }

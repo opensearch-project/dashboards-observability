@@ -12,9 +12,7 @@
  * Used both server-side (for deployment) and client-side (for the wizard's
  * preview panel) so what the user sees is exactly what gets deployed.
  *
- * See docs/design/slo-sli-design.md §6.3 for the authoritative rule templates.
- *
- * Label contract (§10.1):
+ * Label contract:
  *   slo_severity, slo_alarm_type, slo_id, slo_name, slo_objective,
  *   slo_service, slo_owner_team, slo_owner_teams, slo_tier, slo_window,
  *   slo_burn_rate_multiplier, slo_window_approximated, slo_budget_threshold,
@@ -89,6 +87,9 @@ export const DEFAULT_MWMBR_TIERS: readonly BurnRateConfig[] = [
 /** Burn-rate tier labels in index order. */
 const MWMBR_TIER_LABELS = ['PageQuick', 'PageSlow', 'TicketQuick', 'TicketSlow'] as const;
 
+/** Hard cap on burn-rate tiers — matches the canonical labels above. */
+export const MWMBR_MAX_TIERS = MWMBR_TIER_LABELS.length;
+
 // ============================================================================
 // Name helpers
 // ============================================================================
@@ -111,13 +112,17 @@ export function slugifySloObjective(sloName: string, objectiveName: string): str
  * Workspace-scoped so multi-tenant rulers don't collide; objective-scoped so
  * multi-objective SLOs don't collide within their own rule group.
  *
- * First 8 hex chars of sha256 over the concatenated tuple — commits to the
- * design §6.3 / §13.1 rule-name contract so external dashboards, Alertmanager
- * silences, and GitOps manifests that pin rule names stay stable across
+ * First 8 hex chars of sha256 over the concatenated tuple — commits to a
+ * stable rule-name contract so external dashboards, Alertmanager silences,
+ * and GitOps manifests that pin rule names stay stable across
  * implementations. Not a security primitive; chosen for collision-resistance
  * and portability (identical hex in any sha256 implementation).
  */
 export function ruleSuffix(workspaceId: string, sloId: string, objectiveName: string): string {
+  // The `:` separator assumes none of the inputs contains a literal colon.
+  // `workspaceId` is bounded by `WORKSPACE_ID_RE` and `sloId` by `SLO_ID_RE`,
+  // both of which forbid `:`. Today `objectiveName` is OSD-issued and
+  // colon-free; if it ever becomes user-controlled, escape before composing.
   const input = `${workspaceId}:${sloId}:${objectiveName}`;
   return createHash('sha256').update(input).digest('hex').slice(0, 8);
 }
@@ -402,13 +407,20 @@ function generateBurnRateAlerts(
 }
 
 function roundThreshold(n: number): string {
-  // `parseFloat(n.toPrecision(N))` produces scientific notation for very
-  // small/large values (e.g. `1e-7`); the same string also lands in label
-  // values like `slo_budget_threshold`, where consumer dashboards expect a
-  // plain decimal. Use `toFixed(6)` and trim trailing zeros for stable
-  // output across magnitudes.
-  if (!Number.isFinite(n)) return '0';
-  return trimTrailingZeros(n.toFixed(6));
+  // The threshold lands inside the alert expr (`... > <threshold>`) and as a
+  // label value on burn-rate alerts. PromQL accepts scientific notation for
+  // numeric literals, so for values that toFixed(6) would round to zero we
+  // fall back to `toExponential` to keep the threshold non-zero — otherwise a
+  // legal target=0.99999 + multiplier=0.001 underflows to "0" and the alert
+  // fires on any non-zero error ratio. Plain-decimal output is preserved for
+  // typical magnitudes so dashboards that scrape the label stay readable.
+  if (!Number.isFinite(n) || n <= 0) return '0';
+  const fixed = trimTrailingZeros(n.toFixed(6));
+  if (fixed !== '0') return fixed;
+  // 6-decimal print rounded to zero — fall back to exponential. Trim the
+  // exponential mantissa's trailing zeros (`1.000000e-8` → `1e-8`).
+  const exp = n.toExponential();
+  return exp.replace(/(\.\d*?)0+e/, '$1e').replace(/\.e/, 'e');
 }
 
 // ============================================================================
@@ -576,14 +588,15 @@ function formatInterval(seconds: number): string {
 
 /**
  * Serialize a Prometheus rule group via `js-yaml` so the same library both
- * the wizard preview and the ruler dual-write path use produces byte-equal
- * output. The previous handrolled emitter only escaped `\` and `"` and
- * passed control characters through verbatim, which let `\n`/`\r`/`\t`
- * inside a user-supplied label value (e.g. spec.name) terminate the
+ * the wizard preview AND the ruler dual-write share — the YAML the user
+ * sees in preview is the YAML Cortex receives.
+ *
+ * The homemade emitter previously open-coded escapeYaml() to handle
+ * backslash and double-quote, but a literal LF/CR/TAB in `rule.labels.*`
+ * (e.g. a `spec.name` containing `\n`) would terminate the YAML
  * double-quoted scalar mid-line. js-yaml emits a literal block (`expr: |`)
- * for multi-line strings automatically and properly escapes control chars
- * inside double-quoted scalars, so neither the YAML structure nor the
- * deployed expression can be smuggled through user fields.
+ * for multi-line strings and escapes control chars correctly inside flow
+ * scalars.
  */
 function rulesToYaml(groupName: string, interval: number, rules: GeneratedRule[]): string {
   const doc: Record<string, unknown> = {
@@ -591,11 +604,8 @@ function rulesToYaml(groupName: string, interval: number, rules: GeneratedRule[]
     interval: formatInterval(interval),
     rules: rules.map((rule) => {
       const out: Record<string, unknown> = {};
-      if (rule.type === 'recording') {
-        out.record = rule.name;
-      } else {
-        out.alert = rule.name;
-      }
+      if (rule.type === 'recording') out.record = rule.name;
+      else out.alert = rule.name;
       out.expr = rule.expr;
       if (rule.for) out.for = rule.for;
       if (rule.labels && Object.keys(rule.labels).length > 0) {
@@ -614,8 +624,9 @@ function rulesToYaml(groupName: string, interval: number, rules: GeneratedRule[]
  * Coerce label / annotation values to strings before handing them to
  * `js-yaml`. Defensive against callers passing through `undefined` or
  * non-string values via the caller-controlled provenance JSON-string
- * (`buildAlertProvenance`); the upstream emitter assumed string and
- * silently produced `"k: undefined"` which Cortex rejects.
+ * (`buildAlertProvenance`); without this the emitter passes the raw object
+ * to js-yaml, which serializes `undefined` as YAML `null` and Cortex
+ * rejects the rule.
  */
 function stringifyMap(map: Record<string, unknown>): Record<string, string> {
   const out: Record<string, string> = {};
@@ -671,8 +682,7 @@ export function generateSloRuleGroup(
     if (noData) rules.push(noData);
   }
 
-  // Per-SLO group naming — one group per SLO keeps reconciliation simple
-  // (design §12 "open decision"; we ship per-SLO for P0).
+  // Per-SLO group naming — one group per SLO keeps reconciliation simple.
   const groupSlug = slugifySloObjective(spec.name, 'group');
   const firstSuffix = ruleSuffix(workspaceId, id, 'group');
   const groupName = `slo:${groupSlug}_${firstSuffix}`;
@@ -686,7 +696,7 @@ export function generateSloRuleGroup(
 }
 
 // ============================================================================
-// Phase 3 (W3.7) — dedup-era split generation
+// Dedup-mode split generation
 //
 // In dedup mode the service layer emits two kinds of ruler groups:
 //
@@ -702,7 +712,7 @@ export function generateSloRuleGroup(
 //     label any more). Alerts attach the full SLO identity labels
 //     themselves, so downstream routing still gets everything it needs.
 //
-// Shared with the legacy path:
+// Shared with the single-group path:
 //   - The alerting-rule templates (burn-rate MWMBR, sli_health, attainment,
 //     budget warnings, no_data). Only their recording-rule references are
 //     rewritten to use fingerprint-named rules.
@@ -718,7 +728,7 @@ export function generateSloRuleGroup(
 
 /**
  * Name of the recording rule for a given fingerprint + window.
- * Phase 3 dedup rules: `slo:sli_error:ratio_rate_<w>:sli_<fp>`.
+ * Dedup rules: `slo:sli_error:ratio_rate_<w>:sli_<fp>`.
  */
 export function dedupRecordingRuleName(fingerprint: string, window: string): string {
   return `slo:sli_error:ratio_rate_${window}:sli_${fingerprint}`;
@@ -801,8 +811,8 @@ export function generateRecordingGroupForFingerprint(input: {
  *
  * Shadow mode and `createAlarm: false` tiers still suppress their
  * alert bodies; the resulting group can be empty. The caller is
- * responsible for injecting a W3.3 sentinel alert when the group is
- * empty.
+ * responsible for injecting a sentinel alert when the group is empty so
+ * the provenance annotation has a home.
  */
 export function generateAlertGroupFor(
   doc: SloDocument,

@@ -15,8 +15,8 @@
  *
  * `get()` and `list()` are the only methods the service layer actually uses
  * at runtime; `create`, `update`, `delete`, and `testConnection` throw if
- * called (they are no longer reachable — the client-facing CRUD routes were
- * removed in Phase 3).
+ * called (they are no longer reachable — the client-facing CRUD routes have
+ * been removed).
  *
  * Instantiate per-request with the request's `ctx.core.savedObjects.client`.
  */
@@ -155,19 +155,19 @@ export class SavedObjectDatasourceService implements DatasourceService {
 
   async create(_input: Omit<Datasource, 'id'>): Promise<Datasource> {
     throw new Error(
-      'SavedObjectDatasourceService.create is not supported — datasource CRUD removed in Phase 3'
+      'SavedObjectDatasourceService.create is not supported — datasource CRUD has been removed'
     );
   }
 
   async update(_id: string, _input: Partial<Datasource>): Promise<Datasource | null> {
     throw new Error(
-      'SavedObjectDatasourceService.update is not supported — datasource CRUD removed in Phase 3'
+      'SavedObjectDatasourceService.update is not supported — datasource CRUD has been removed'
     );
   }
 
   async delete(_id: string): Promise<boolean> {
     throw new Error(
-      'SavedObjectDatasourceService.delete is not supported — datasource CRUD removed in Phase 3'
+      'SavedObjectDatasourceService.delete is not supported — datasource CRUD has been removed'
     );
   }
 
@@ -176,13 +176,13 @@ export class SavedObjectDatasourceService implements DatasourceService {
     _id: string
   ): Promise<{ success: boolean; message: string }> {
     throw new Error(
-      'SavedObjectDatasourceService.testConnection is not supported — datasource CRUD removed in Phase 3'
+      'SavedObjectDatasourceService.testConnection is not supported — datasource CRUD has been removed'
     );
   }
 
   async listWorkspaces(_client: AlertingOSClient, _dsId: string): Promise<Datasource[]> {
     throw new Error(
-      'SavedObjectDatasourceService.listWorkspaces is not supported — datasource workspace discovery removed in Phase 3'
+      'SavedObjectDatasourceService.listWorkspaces is not supported — datasource workspace discovery has been removed'
     );
   }
 }

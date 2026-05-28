@@ -14,7 +14,12 @@
  *     real alerts rather than below them).
  *   - `truncatedStart` flag ⇒ `annotations.truncatedStart = 'true'`.
  */
-import { promEpisodeToUnified } from '../alert_utils';
+import {
+  osAlertToUnified,
+  osMonitorToUnifiedRuleSummary,
+  promEpisodeToUnified,
+} from '../alert_utils';
+import type { OSMonitor } from '../../../../common/types/alerting';
 
 describe('promEpisodeToUnified', () => {
   const START = Date.UTC(2024, 0, 15, 12, 0, 0);
@@ -169,5 +174,99 @@ describe('promEpisodeToUnified', () => {
       'ds-prom'
     );
     expect(u1.id).toBe(u2.id);
+  });
+});
+
+describe('osAlertToUnified', () => {
+  const baseAlert = {
+    id: 'alert-1',
+    monitor_id: 'mon-abc',
+    monitor_name: 'My Monitor',
+    trigger_name: 'trig-1',
+    state: 'ACTIVE',
+    severity: '2',
+    error_message: null,
+    start_time: Date.UTC(2024, 0, 15, 12, 0, 0),
+    last_notification_time: Date.UTC(2024, 0, 15, 12, 5, 0),
+    end_time: null,
+    acknowledged_time: null,
+    action_execution_results: [],
+  };
+
+  it('includes monitor_id in labels for acknowledge support', () => {
+    const u = osAlertToUnified(baseAlert as never, 'ds-os');
+    expect(u.labels.monitor_id).toBe('mon-abc');
+    expect(u.labels.monitor_name).toBe('My Monitor');
+    expect(u.labels.trigger_name).toBe('trig-1');
+  });
+
+  it('maps datasourceId from the passed dsId', () => {
+    const u = osAlertToUnified(baseAlert as never, 'ds-os');
+    expect(u.datasourceId).toBe('ds-os');
+    expect(u.datasourceType).toBe('opensearch');
+  });
+});
+
+// ============================================================================
+// osMonitorToUnifiedRuleSummary — monitorType derivation from index prefixes
+// ============================================================================
+//
+// Regression coverage for the L5 cleanup that hoisted the previously-inline
+// prefix list into named `LOG_INDEX_PREFIXES` / `APM_INDEX_PREFIXES`
+// constants. Encodes the schema list so adding a new well-known schema
+// (e.g. SS4O metrics) is a one-line constant change with a single test
+// case to follow.
+
+describe('osMonitorToUnifiedRuleSummary — monitorType derivation', () => {
+  function buildMonitor(indices: string[]): OSMonitor {
+    return ({
+      id: 'mon-1',
+      type: 'monitor',
+      monitor_type: 'query_level_monitor',
+      name: 'm',
+      enabled: true,
+      schedule: { period: { interval: 1, unit: 'MINUTES' } },
+      inputs: [
+        {
+          search: {
+            indices,
+            query: { size: 0, query: { match_all: {} } },
+          },
+        },
+      ],
+      triggers: [],
+      last_update_time: 1700000000000,
+    } as unknown) as OSMonitor;
+  }
+
+  it.each([['logs-2024.01.15'], ['logs-prod-app'], ['ss4o_logs-myapp'], ['ss4o_logs']])(
+    'classifies %s as a log monitor',
+    (idx) => {
+      expect(osMonitorToUnifiedRuleSummary(buildMonitor([idx]), 'ds').monitorType).toBe('log');
+    }
+  );
+
+  it.each([
+    ['otel-v1-apm-span'],
+    ['otel-v1-apm-service-map'],
+    ['ss4o_traces-myapp'],
+    ['ss4o_traces'],
+  ])('classifies %s as an apm monitor', (idx) => {
+    expect(osMonitorToUnifiedRuleSummary(buildMonitor([idx]), 'ds').monitorType).toBe('apm');
+  });
+
+  it('falls back to "metric" for indices that match no schema prefix', () => {
+    const r = osMonitorToUnifiedRuleSummary(buildMonitor(['my-custom-index', 'foo-*']), 'ds');
+    expect(r.monitorType).toBe('metric');
+  });
+
+  it('falls back to "metric" when no input indices are present', () => {
+    const r = osMonitorToUnifiedRuleSummary(buildMonitor([]), 'ds');
+    expect(r.monitorType).toBe('metric');
+  });
+
+  it('treats the first matching prefix as authoritative — log wins over apm when both are present', () => {
+    const r = osMonitorToUnifiedRuleSummary(buildMonitor(['logs-app', 'otel-v1-apm-span']), 'ds');
+    expect(r.monitorType).toBe('log');
   });
 });
