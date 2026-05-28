@@ -58,6 +58,7 @@ import { transformPplFormToPayload } from '../../../common/services/alerting/for
 import { PPL_MONITOR_NAME_MAX } from '../../../common/services/alerting/validators';
 import './alerting.scss';
 import type { OpenSearchFormState } from './create_monitor/create_monitor_types';
+import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { formStateToRule, resolveDatasourceTokens } from './alarms_page_helpers';
 
 // ============================================================================
@@ -126,6 +127,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   maxDatasources,
 }) => {
   const mutations = useMonitorMutations();
+  const osService = useMemo(() => new AlertingOpenSearchService(), []);
 
   // Deep-link parsing — when SLO detail (or any other surface) navigates to
   // `#/rules?q=<rulename>` we want to land on the Rules tab with the search
