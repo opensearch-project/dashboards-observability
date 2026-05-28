@@ -41,6 +41,10 @@ export function useMonitorDetail({ dsId, ruleId }: UseMonitorDetailParams): UseM
 
   useEffect(() => {
     let cancelled = false;
+    // Reset detail alongside error so a switch from rule A to rule B
+    // doesn't render A's history/preview behind the loading indicator
+    // until B's fetch resolves.
+    setDetail(null);
     setIsLoading(true);
     setError(null);
     osService

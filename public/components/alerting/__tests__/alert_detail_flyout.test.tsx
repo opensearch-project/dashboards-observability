@@ -187,6 +187,76 @@ describe('AlertDetailFlyout', () => {
       expect(mockGetAlertDetail).toHaveBeenCalledTimes(1);
     });
 
+    it('does not refetch when the upstream resolved with null on first expand', async () => {
+      // The lazy fetch caches the "we already asked" decision separately
+      // from the response. If `getAlertDetail` resolves null (alert no
+      // longer present, transient 404) we must still short-circuit the
+      // next accordion toggle — otherwise every collapse/re-expand cycle
+      // hammers the upstream.
+      mockGetAlertDetail.mockResolvedValueOnce(null);
+      const alertWithMonitor: UnifiedAlertSummary = { ...baseAlert, monitorId: 'mon-7' };
+      const { getByText } = render(
+        <AlertDetailFlyout
+          alert={alertWithMonitor}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      fireEvent.click(getByText('Raw Alert Data'));
+      await act(async () => {
+        await Promise.resolve();
+      });
+      fireEvent.click(getByText('Raw Alert Data'));
+      fireEvent.click(getByText('Raw Alert Data'));
+      expect(mockGetAlertDetail).toHaveBeenCalledTimes(1);
+    });
+
+    it('refetches when the alert identity changes within the same flyout instance', async () => {
+      const rawA = { ...baseAlert, raw: { id: 'alert-42', state: 'ACTIVE' } };
+      mockGetAlertDetail.mockResolvedValueOnce(rawA);
+      const { getByText, rerender } = render(
+        <AlertDetailFlyout
+          alert={{ ...baseAlert, monitorId: 'mon-A' }}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      fireEvent.click(getByText('Raw Alert Data'));
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(mockGetAlertDetail).toHaveBeenCalledTimes(1);
+      expect(mockGetAlertDetail).toHaveBeenLastCalledWith('ds-prom', 'alert-42', 'mon-A');
+
+      // Swap to a different alert without unmounting. The cache must
+      // reset so the next expand re-fires for the new id. The accordion
+      // is currently expanded from the first click, so toggle once to
+      // collapse and once to re-expand.
+      const alertB: UnifiedAlertSummary = {
+        ...baseAlert,
+        id: 'alert-99',
+        monitorId: 'mon-B',
+      };
+      mockGetAlertDetail.mockResolvedValueOnce({ ...alertB, raw: { id: 'alert-99' } });
+      rerender(
+        <AlertDetailFlyout
+          alert={alertB}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      fireEvent.click(getByText('Raw Alert Data')); // collapse
+      fireEvent.click(getByText('Raw Alert Data')); // re-expand on alert B
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(mockGetAlertDetail).toHaveBeenCalledTimes(2);
+      expect(mockGetAlertDetail).toHaveBeenLastCalledWith('ds-prom', 'alert-99', 'mon-B');
+    });
+
     it('does not call getAlertDetail for Prometheus alerts when the Raw Alert Data accordion expands', () => {
       const promAlert: UnifiedAlertSummary = { ...baseAlert, datasourceType: 'prometheus' };
       const { getByText } = render(

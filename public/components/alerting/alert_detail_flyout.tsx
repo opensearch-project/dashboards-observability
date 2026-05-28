@@ -7,7 +7,7 @@
  * Alert Detail Flyout — drill-down view for a single alert
  * showing full context, labels, annotations, and actions.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -62,15 +62,28 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
   const osService = useMemo(() => new AlertingOpenSearchService(), []);
   const [detailData, setDetailData] = useState<UnifiedAlert | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [detailFetched, setDetailFetched] = useState(false);
+
+  // Reset detail when the alert identity changes — guards against a parent
+  // swapping `selectedAlert` from A to B without unmounting the flyout
+  // (which would otherwise render B's summary on top of A's `raw`/labels).
+  useEffect(() => {
+    setDetailData(null);
+    setDetailLoading(false);
+    setDetailFetched(false);
+  }, [alert.datasourceId, alert.id]);
 
   // Detail (raw alert data) is fetched only when the user expands the
   // Raw Alert Data accordion. Opening the flyout fires zero network
   // calls; the visible accordions render from the summary on hand.
   // The Prom path returns null upstream (no per-alert API), so skip the
   // round-trip entirely — the summary already has labels/annotations.
+  // `detailFetched` pins the cache even when the upstream resolves with
+  // `null` (e.g. alert no longer present), so collapse → re-expand does
+  // not refire the request.
   const fetchDetailIfNeeded = useCallback(() => {
     if (alert.datasourceType === 'prometheus') return;
-    if (detailData || detailLoading) return;
+    if (detailFetched || detailLoading) return;
     setDetailLoading(true);
     osService
       .getAlertDetail(alert.datasourceId, alert.id, alert.monitorId)
@@ -80,13 +93,16 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
       .catch((err: unknown) => {
         console.error('Failed to load alert details:', err);
       })
-      .finally(() => setDetailLoading(false));
+      .finally(() => {
+        setDetailLoading(false);
+        setDetailFetched(true);
+      });
   }, [
     alert.datasourceId,
     alert.datasourceType,
     alert.id,
     alert.monitorId,
-    detailData,
+    detailFetched,
     detailLoading,
     osService,
   ]);
