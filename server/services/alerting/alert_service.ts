@@ -571,7 +571,6 @@ export class MultiBackendAlertService {
     return getAlertDetailImpl(
       this.datasourceService,
       this.osBackend,
-      this.promBackend,
       client,
       dsId,
       alertId,

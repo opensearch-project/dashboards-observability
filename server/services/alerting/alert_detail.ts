@@ -218,40 +218,37 @@ export async function getPromRuleDetail(
 /**
  * Get full detail for a single alert including raw backend data.
  *
- * The OS Alerting REST endpoint (`_plugins/_alerting/monitors/alerts`)
- * does not expose a per-id filter, so we paginate scoped by `monitorId`
- * and short-circuit pagination on the first page that contains the
- * target alert (`findAlertId`). With `monitorId` set, the upstream
- * scans one monitor's alerts; the early exit caps the work at the
- * page that holds the row.
+ * OpenSearch only. The OS Alerting REST endpoint
+ * (`_plugins/_alerting/monitors/alerts`) does not expose a per-id
+ * filter, so we paginate scoped by `monitorId` and short-circuit
+ * pagination on the first page that contains the target alert
+ * (`findAlertId`). With `monitorId` set, the upstream scans one
+ * monitor's alerts; the early exit caps the work at the page that
+ * holds the row.
+ *
+ * Prometheus has no per-alert lookup endpoint, and the flyout already
+ * has the summary's labels/annotations on hand — the UI short-circuits
+ * the round-trip on the client, so this function is never called for
+ * Prom datasources. Non-OS datasources resolve to `null` here as a
+ * defensive fallthrough.
  */
 export async function getAlertDetail(
   datasourceService: DatasourceService,
   osBackend: OpenSearchBackend | undefined,
-  promBackend: PrometheusBackend | undefined,
   client: AlertingOSClient,
   dsId: string,
   alertId: string,
   monitorId?: string
 ): Promise<UnifiedAlert | null> {
   const ds = await datasourceService.get(dsId);
-  if (!ds) return null;
+  if (!ds || ds.type !== 'opensearch' || !osBackend) return null;
 
-  if (ds.type === 'opensearch' && osBackend) {
-    const { alerts } = await osBackend.getAlerts(client, {
-      findAlertId: alertId,
-      ...(monitorId ? { monitorId } : {}),
-    });
-    const alert = alerts.find((a) => a.id === alertId);
-    if (!alert) return null;
-    const summary = osAlertToUnified(alert, ds!.id);
-    return { ...summary, raw: alert };
-  } else if (ds.type === 'prometheus' && promBackend) {
-    // Prom doesn't expose a per-alert lookup; the previous code scanned the
-    // entire firing-alerts list to find one row. The flyout already has the
-    // summary's labels/annotations on hand and falls back to rendering them
-    // when this returns null, so the scan is wasted work.
-    return null;
-  }
-  return null;
+  const { alerts } = await osBackend.getAlerts(client, {
+    findAlertId: alertId,
+    ...(monitorId ? { monitorId } : {}),
+  });
+  const alert = alerts.find((a) => a.id === alertId);
+  if (!alert) return null;
+  const summary = osAlertToUnified(alert, ds.id);
+  return { ...summary, raw: alert };
 }
