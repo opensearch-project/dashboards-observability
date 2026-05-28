@@ -133,6 +133,33 @@ describe('useIndices', () => {
     expect(result.current.isLoading).toBe(false);
   });
 
+  it('filters out hidden / system indices and aliases (names starting with `.`)', async () => {
+    mockListIndices.mockResolvedValueOnce([
+      { index: '.kibana' },
+      { index: '.kibana_1' },
+      { index: '.opendistro_security' },
+      { index: '.opendistro-alerting-alert-history-write' },
+      { index: 'logs-otel-v1' },
+      { index: 'metrics' },
+    ]);
+    mockListAliases.mockResolvedValueOnce([
+      { alias: '.hidden-alias', index: '.kibana' },
+      { alias: 'all-logs', index: 'logs-otel-v1' },
+    ]);
+
+    const { result } = renderHook(() => useIndices({ dsId: 'ds-1', search: '' }));
+    act(() => {
+      jest.advanceTimersByTime(250);
+    });
+    await waitFor(() => expect(result.current.options.length).toBeGreaterThan(0));
+
+    expect(result.current.options).toEqual([
+      { label: 'all-logs', aliasFor: 'logs-otel-v1' },
+      { label: 'logs-otel-v1' },
+      { label: 'metrics' },
+    ]);
+  });
+
   it('merges indices and aliases, de-duping and sorting alphabetically', async () => {
     mockListIndices.mockResolvedValueOnce([
       { index: 'logs-2026' },
