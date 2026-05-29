@@ -109,14 +109,16 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
 
   // Logs / Metrics popover entries are grayed out when the parent's selection
   // can't satisfy them: Logs needs at least one OpenSearch datasource, Metrics
-  // needs at least one Prometheus. With a mixed selection (or none) both stay
-  // enabled — the flyout's own dropdown will narrow further.
+  // needs at least one Prometheus. The empty-selection case used to fall
+  // through to "both enabled", but the spec is "no datasource selected → no
+  // create options viable" — Logs without an OS DS is undefined, Metrics
+  // without a Prometheus DS is undefined. Gate both so the user can't enter
+  // a flyout that will silently re-default the datasource on them.
   const [logsCreateDisabled, metricsCreateDisabled] = useMemo(() => {
-    if (selectedDsIds.length === 0) return [false, false];
     const selected = selectedDsIds
       .map((id) => datasources.find((d) => d.id === id))
       .filter((d): d is Datasource => !!d);
-    if (selected.length === 0) return [false, false];
+    if (selected.length === 0) return [true, true];
     return [
       selected.every((d) => d.type === 'prometheus'),
       selected.every((d) => d.type === 'opensearch'),
@@ -383,6 +385,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 onCreateMonitor={onCreateMonitor}
                 logsCreateDisabled={logsCreateDisabled}
                 metricsCreateDisabled={metricsCreateDisabled}
+                noDatasourceSelected={selectedDsIds.length === 0}
                 showCreatePopover={showCreatePopover}
                 setShowCreatePopover={setShowCreatePopover}
                 showDeleteConfirm={showDeleteConfirm}

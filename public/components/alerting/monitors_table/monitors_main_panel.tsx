@@ -66,15 +66,22 @@ export interface MonitorsMainPanelProps {
   /**
    * When true, the "Logs" popover entry is disabled with a hint that an
    * OpenSearch datasource is needed. Triggered when the parent's selection
-   * is non-empty and contains only Prometheus datasources.
+   * is empty or contains only Prometheus datasources.
    */
   logsCreateDisabled?: boolean;
   /**
    * Symmetric counterpart of `logsCreateDisabled`: true when the parent's
-   * selection is non-empty and contains only OpenSearch datasources, so a
+   * selection is empty or contains only OpenSearch datasources, so a
    * Metrics monitor can't be created without changing the selection.
    */
   metricsCreateDisabled?: boolean;
+  /**
+   * The parent's datasource filter is empty. Distinguishes the empty-state
+   * "No monitors configured yet" copy from "Select a datasource to see
+   * monitors" — the cluster could have plenty of monitors but the listing
+   * hits zero datasources to query against.
+   */
+  noDatasourceSelected?: boolean;
   showCreatePopover: boolean;
   setShowCreatePopover: React.Dispatch<React.SetStateAction<boolean>>;
 
@@ -113,6 +120,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
   onCreateMonitor,
   logsCreateDisabled = false,
   metricsCreateDisabled = false,
+  noDatasourceSelected = false,
   showCreatePopover,
   setShowCreatePopover,
   showDeleteConfirm,
@@ -399,15 +407,35 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
             <EuiEmptyPrompt
               title={
                 <h2>
-                  <FormattedMessage
-                    id="observability.alerting.monitorsTable.mainPanel.noMonitorsFoundTitle"
-                    defaultMessage="No Monitors Found"
-                  />
+                  {noDatasourceSelected ? (
+                    <FormattedMessage
+                      id="observability.alerting.monitorsTable.mainPanel.noDatasourceSelectedTitle"
+                      defaultMessage="No datasource selected"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="observability.alerting.monitorsTable.mainPanel.noMonitorsFoundTitle"
+                      defaultMessage="No Monitors Found"
+                    />
+                  )}
                 </h2>
               }
               body={
                 <p>
-                  {rules.length === 0 ? (
+                  {/* Three distinct cases ordered by precedence: (1) the
+                      datasource filter is empty so we have nothing to query;
+                      (2) the cluster genuinely has zero monitors across the
+                      selected datasources; (3) filters/search excluded all
+                      otherwise-present monitors. (1) used to fall through to
+                      (2)'s "No monitors configured yet" copy, which read as
+                      a flat lie when the workspace had monitors on a
+                      datasource the user just unchecked. */}
+                  {noDatasourceSelected ? (
+                    <FormattedMessage
+                      id="observability.alerting.monitorsTable.mainPanel.selectDatasourcePrompt"
+                      defaultMessage="Select a datasource in the filter panel to see monitors."
+                    />
+                  ) : rules.length === 0 ? (
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.noMonitorsConfigured"
                       defaultMessage="No monitors configured yet."
@@ -421,7 +449,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                 </p>
               }
               actions={
-                activeFilterCount > 0 || searchQuery ? (
+                !noDatasourceSelected && (activeFilterCount > 0 || searchQuery) ? (
                   <EuiButton onClick={clearAllFilters}>
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.clearFiltersButton"
