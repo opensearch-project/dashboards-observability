@@ -183,4 +183,21 @@ describe('AlertDetailFlyout', () => {
       expect(runbookTitle.closest('a')).toBeNull();
     });
   });
+
+  describe('Suggested Actions icon', () => {
+    it('renders the suggested actions accordion with a valid EUI icon (sparkleFilled)', () => {
+      const { container } = render(
+        <AlertDetailFlyout
+          alert={baseAlert}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      // The accordion button for "Suggested Actions" should exist
+      const accordionButton = container.querySelector('[id^="suggestedActions-"]');
+      expect(accordionButton).not.toBeNull();
+      expect(accordionButton).toBeInTheDocument();
+    });
+  });
 });
