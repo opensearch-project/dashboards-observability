@@ -59,8 +59,12 @@ import { transformPplFormToPayload } from '../../../common/services/alerting/for
 import { PPL_MONITOR_NAME_MAX } from '../../../common/services/alerting/validators';
 import './alerting.scss';
 import type { OpenSearchFormState } from './create_monitor/create_monitor_types';
-import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
-import { formStateToRule, resolveDatasourceTokens } from './alarms_page_helpers';
+import {
+  extractPplValidationError,
+  extractServerErrorMessage,
+  formStateToRule,
+  resolveDatasourceTokens,
+} from './alarms_page_helpers';
 
 // ============================================================================
 // Main Page Component
@@ -260,6 +264,55 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
 
   const [deletedRuleIds, setDeletedRuleIds] = useState<Set<string>>(new Set());
   const [showCreateMonitor, setShowCreateMonitor] = useState(false);
+
+  // Inline error surface for the PPL editor — set when the most recent
+  // create/update returns a `PPL Query validation failed: ...` 400 (BUG-4).
+  // Cleared as soon as the user edits the query, the flyout closes, or a
+  // subsequent save succeeds.
+  const [pplSubmitError, setPplSubmitError] = useState<string | null>(null);
+
+  // Build a (dsId, name) lookup over the currently-loaded rules, used by the
+  // create/edit flyouts to flag duplicates inline before submit (BUG-1).
+  // Comparison is case-insensitive against the trimmed candidate, matching
+  // how a human reads alert lists. Note: this only knows about rules the
+  // datasource filter has surfaced — saving against an unselected DS could
+  // still create a same-name monitor on that DS, but that's a much narrower
+  // footgun than the original "two identical names on the same cluster".
+  const rulesByDsName = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    rules.forEach((r) => {
+      if (deletedRuleIds.has(r.id)) return;
+      const dsKey = r.datasourceId;
+      const names = map.get(dsKey) ?? new Set<string>();
+      names.add(r.name.trim().toLowerCase());
+      map.set(dsKey, names);
+    });
+    return map;
+  }, [rules, deletedRuleIds]);
+
+  const isNameTakenForCreate = useCallback(
+    (name: string, dsId: string) => {
+      const set = rulesByDsName.get(dsId);
+      return !!set?.has(name.trim().toLowerCase());
+    },
+    [rulesByDsName]
+  );
+
+  const buildIsNameTakenForEdit = useCallback(
+    (excludeRuleId: string) => (name: string, dsId: string) => {
+      const trimmed = name.trim().toLowerCase();
+      // Walk the rule list directly so we can exclude the monitor being
+      // edited; the cached map doesn't carry id information.
+      return rules.some(
+        (r) =>
+          r.id !== excludeRuleId &&
+          !deletedRuleIds.has(r.id) &&
+          r.datasourceId === dsId &&
+          r.name.trim().toLowerCase() === trimmed
+      );
+    },
+    [rules, deletedRuleIds]
+  );
   // The popover's "Logs" entry maps to an OpenSearch monitor; "Metrics" toasts
   // "coming soon" until PR 2 lights up the Prom create flyout. When the user
   // picks Logs the flyout is forced to the OS variant via this override even
@@ -382,7 +435,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           defaultMessage: 'Failed to acknowledge alert',
         }),
         'danger',
-        e instanceof Error ? e.message : String(e)
+        extractServerErrorMessage(e)
       );
     }
   };
@@ -414,7 +467,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             defaultMessage: 'Failed to delete monitor',
           }),
           'danger',
-          e instanceof Error ? e.message : String(e)
+          extractServerErrorMessage(e)
         );
       }
     }
@@ -501,7 +554,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           defaultMessage: 'Failed to clone monitor',
         }),
         'danger',
-        e instanceof Error ? e.message : String(e)
+        extractServerErrorMessage(e)
       );
     }
   };
@@ -552,6 +605,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       );
       setShowCreateMonitor(false);
       setCreateBackendType(null);
+      setPplSubmitError(null);
       // Refetch rules so the new monitor (with backend-assigned id /
       // last_update_time) shows up in the list. Optimistic insert is kept
       // for the UI to feel instant; the refetch reconciles.
@@ -559,12 +613,15 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       setRulesTotal((prev) => prev + 1);
       refetchRules();
     } catch (e: unknown) {
+      const message = extractServerErrorMessage(e);
+      const pplError = extractPplValidationError(message);
+      if (pplError) setPplSubmitError(pplError);
       addToast(
         i18n.translate('observability.alerting.alarmsPage.toast.createMonitorFailed', {
           defaultMessage: 'Failed to create monitor',
         }),
         'danger',
-        e instanceof Error ? e.message : String(e)
+        message
       );
     }
   };
@@ -580,14 +637,18 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         })
       );
       setEditTarget(null);
+      setPplSubmitError(null);
       refetchRules();
     } catch (e: unknown) {
+      const message = extractServerErrorMessage(e);
+      const pplError = extractPplValidationError(message);
+      if (pplError) setPplSubmitError(pplError);
       addToast(
         i18n.translate('observability.alerting.alarmsPage.toast.updateMonitorFailed', {
           defaultMessage: 'Failed to update monitor',
         }),
         'danger',
-        e instanceof Error ? e.message : String(e)
+        message
       );
     }
   };
@@ -606,7 +667,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             defaultMessage: 'Failed to create monitor',
           }),
           'danger',
-          e instanceof Error ? e.message : String(e)
+          extractServerErrorMessage(e)
         );
       }
     }
@@ -767,20 +828,30 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           onCancel={() => {
             setShowCreateMonitor(false);
             setCreateBackendType(null);
+            setPplSubmitError(null);
           }}
           datasources={datasources}
           selectedDsIds={selectedDsIds}
           initialBackendType={createBackendType ?? undefined}
+          isNameTaken={isNameTakenForCreate}
+          submitError={pplSubmitError ? { pplMessage: pplSubmitError } : undefined}
+          onClearPplSubmitError={() => setPplSubmitError(null)}
         />
       )}
       {editTarget && (
         <EditMonitor
           dsId={editTarget.dsId}
           ruleId={editTarget.ruleId}
-          onCancel={() => setEditTarget(null)}
+          onCancel={() => {
+            setEditTarget(null);
+            setPplSubmitError(null);
+          }}
           onSave={handleEditMonitor}
           datasources={datasources}
           selectedDsIds={selectedDsIds}
+          isNameTaken={buildIsNameTakenForEdit(editTarget.ruleId)}
+          submitError={pplSubmitError ? { pplMessage: pplSubmitError } : undefined}
+          onClearPplSubmitError={() => setPplSubmitError(null)}
         />
       )}
       {selectedAlert && (

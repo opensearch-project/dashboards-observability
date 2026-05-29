@@ -8,6 +8,8 @@ import {
   ALERT_MANAGER_START_TIME_KEY,
   DEFAULT_END_TIME,
   DEFAULT_START_TIME,
+  extractPplValidationError,
+  extractServerErrorMessage,
   formStateToRule,
   isAlertingConfigMissingError,
   loadPersistedEndTime,
@@ -193,6 +195,70 @@ describe('alarms_page_helpers', () => {
       expect(rule.datasourceType).toBe('prometheus');
       expect(rule.monitorType).toBe('metric');
       expect(rule.firingPeriod).toBe('10m');
+    });
+  });
+
+  describe('extractServerErrorMessage', () => {
+    it('prefers `body.message` over `Error.message`', () => {
+      // Shape mirrors OSD core's IHttpFetchError: HTTP status text on the
+      // outer Error.message, actionable detail on body.message.
+      const err = Object.assign(new Error('Bad Request'), {
+        body: {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'alerting_exception: PPL Query validation failed: ...',
+        },
+      });
+      expect(extractServerErrorMessage(err)).toBe(
+        'alerting_exception: PPL Query validation failed: ...'
+      );
+    });
+
+    it('falls back to `body.error` when `body.message` is missing', () => {
+      const err = Object.assign(new Error('Bad Request'), {
+        body: { statusCode: 400, error: 'Validation failed' },
+      });
+      expect(extractServerErrorMessage(err)).toBe('Validation failed');
+    });
+
+    it('falls back to `Error.message` when no body is present', () => {
+      expect(extractServerErrorMessage(new Error('boom'))).toBe('boom');
+    });
+
+    it('handles plain strings and unknown shapes', () => {
+      expect(extractServerErrorMessage('a string')).toBe('a string');
+      expect(extractServerErrorMessage(null)).toBe('Unknown error');
+      expect(extractServerErrorMessage(undefined)).toBe('Unknown error');
+      expect(extractServerErrorMessage(42)).toBe('42');
+    });
+
+    it('ignores empty `body.message` and falls through', () => {
+      const err = Object.assign(new Error('Bad Request'), {
+        body: { message: '', error: 'Something else' },
+      });
+      expect(extractServerErrorMessage(err)).toBe('Something else');
+    });
+  });
+
+  describe('extractPplValidationError', () => {
+    it('extracts the validation message from a PPL parse error', () => {
+      const msg =
+        'alerting_exception: [alerting_exception] Reason: PPL Query validation failed: ' +
+        '[INVALID_KEYWORD] is not a valid term at this part of the query: ' +
+        "'...e = logs-otel-v1* | INVALID_KEYWORD' <-- HERE. Expecting one of 56 possible tokens.";
+      expect(extractPplValidationError(msg)).toBe(
+        'PPL Query validation failed: [INVALID_KEYWORD] is not a valid term at this part of the query: ' +
+          "'...e = logs-otel-v1* | INVALID_KEYWORD' <-- HERE. Expecting one of 56 possible tokens."
+      );
+    });
+
+    it('returns null when the message is not a PPL validation error', () => {
+      expect(extractPplValidationError('Bad Request')).toBeNull();
+      expect(extractPplValidationError('alerting_exception: monitor not found')).toBeNull();
+    });
+
+    it('returns null for empty input', () => {
+      expect(extractPplValidationError('')).toBeNull();
     });
   });
 });

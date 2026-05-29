@@ -95,6 +95,27 @@ export interface CreateMonitorProps {
    * variant even if the user's selected datasource is the other type.
    */
   initialBackendType?: MonitorBackendType;
+  /**
+   * Predicate the form uses to surface an inline "name already in use"
+   * error before submit. Receives the trimmed candidate name and the
+   * datasource id the form is currently bound to. Returning `true` flags
+   * the row as invalid. The OS alerting backend silently accepts duplicate
+   * monitor names, so this guard is purely client-side; the page wires it
+   * up against the loaded rules list (excluding `initialForm`'s own id in
+   * edit mode so renaming back to the current name passes).
+   */
+  isNameTaken?: (trimmedName: string, dsId: string) => boolean;
+  /**
+   * Server-side error from the most recent save attempt, routed by the
+   * parent to whichever form field it belongs under so the user sees it
+   * inline in addition to the toast. Currently only `pplMessage` is wired
+   * — set it from a `PPL Query validation failed: ...` 400 response and
+   * the OpenSearch form section will render it under the PPL editor. The
+   * error clears as soon as the user edits the query.
+   */
+  submitError?: { pplMessage?: string };
+  /** Called when the user edits the PPL query, so the parent can clear `submitError.pplMessage`. */
+  onClearPplSubmitError?: () => void;
 }
 
 type CreationMode = 'manual' | 'ai';
@@ -109,6 +130,9 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
   mode = 'create',
   initialForm,
   initialBackendType,
+  isNameTaken,
+  submitError,
+  onClearPplSubmitError,
 }) => {
   const isEdit = mode === 'edit';
 
@@ -171,8 +195,12 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
   const updateOs = useCallback(
     <K extends keyof OpenSearchFormState>(key: K, value: OpenSearchFormState[K]) => {
       setOsForm((prev) => ({ ...prev, [key]: value }));
+      // Clear the inline PPL submit error as soon as the user edits the
+      // query — keeping a stale error visible after the offending text has
+      // been changed is misleading. Other field edits don't dismiss it.
+      if (key === 'query' && onClearPplSubmitError) onClearPplSubmitError();
     },
-    []
+    [onClearPplSubmitError]
   );
 
   const handleDatasourceChange = (id: string, type: MonitorBackendType) => {
@@ -206,15 +234,37 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
   // Validation
   const queryErrors = backendType === 'prometheus' ? validatePromQL(promForm.query) : [];
   const hasQueryErrors = queryErrors.some((e) => e.severity === 'error');
+  // Live duplicate-name check (BUG-1). The OS alerting backend silently
+  // accepts duplicates, so we have to guard client-side. Skip when the field
+  // is empty (the "required" error handles that case) or when the parent
+  // page didn't supply a checker.
+  const trimmedName = activeForm.name.trim();
+  const dsForCheck = activeForm.datasourceId;
+  const duplicateName = !!(
+    isNameTaken &&
+    trimmedName !== '' &&
+    dsForCheck !== '' &&
+    isNameTaken(trimmedName, dsForCheck)
+  );
+  const duplicateNameError = duplicateName
+    ? i18n.translate('observability.alerting.createMonitor.nameDuplicate', {
+        defaultMessage: 'A monitor with this name already exists on the selected datasource.',
+      })
+    : undefined;
   const isValid =
-    activeForm.name.trim() !== '' &&
+    trimmedName !== '' &&
     activeForm.datasourceId !== '' &&
+    !duplicateName &&
     (backendType === 'prometheus'
       ? promForm.query.trim() !== '' && !hasQueryErrors
       : osForm.query.trim() !== '');
 
   const handleSave = useCallback(() => {
     setHasSubmitted(true);
+    // Guard against duplicate names client-side. The Save button is also
+    // disabled via `isValid`, but defending here too means programmatic
+    // submission paths (Enter key on a field) can't bypass the check.
+    if (duplicateName) return;
     if (backendType === 'prometheus') {
       const result = validateMonitorForm(promForm as ValidatorFormState);
       if (!result.valid) {
@@ -236,7 +286,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
       setValidationErrors({});
       onSave(osForm);
     }
-  }, [backendType, promForm, osForm, onSave]);
+  }, [backendType, promForm, osForm, onSave, duplicateName]);
 
   // When AI wizard is active and user is on a Prometheus datasource, delegate to MonitorTemplateWizard
   if (creationMode === 'ai' && backendType === 'prometheus') {
@@ -376,16 +426,20 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
             defaultMessage: 'Monitor Name',
           })}
           fullWidth
-          isInvalid={hasSubmitted && (!!validationErrors.name || activeForm.name.trim() === '')}
+          isInvalid={
+            duplicateName ||
+            (hasSubmitted && (!!validationErrors.name || activeForm.name.trim() === ''))
+          }
           error={
-            hasSubmitted
+            duplicateNameError ||
+            (hasSubmitted
               ? validationErrors.name ||
                 (activeForm.name.trim() === ''
                   ? i18n.translate('observability.alerting.createMonitor.nameRequired', {
                       defaultMessage: 'Name is required',
                     })
                   : undefined)
-              : undefined
+              : undefined)
           }
         >
           <EuiFieldText
@@ -468,6 +522,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
             onUpdate={updateOs}
             validationErrors={validationErrors}
             hasSubmitted={hasSubmitted}
+            pplServerError={submitError?.pplMessage}
           />
         )}
       </EuiFlyoutBody>

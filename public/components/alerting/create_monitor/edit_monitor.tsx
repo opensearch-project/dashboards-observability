@@ -39,6 +39,16 @@ export interface EditMonitorProps {
   onSave: (form: MonitorFormState, ruleId: string) => Promise<void> | void;
   datasources: Datasource[];
   selectedDsIds?: string[];
+  /**
+   * Forwarded to {@link CreateMonitor.isNameTaken}. Callers should already
+   * exclude this monitor's own ruleId so renaming back to the current value
+   * is allowed.
+   */
+  isNameTaken?: (trimmedName: string, dsId: string) => boolean;
+  /** Forwarded to {@link CreateMonitor.submitError}. */
+  submitError?: { pplMessage?: string };
+  /** Forwarded to {@link CreateMonitor.onClearPplSubmitError}. */
+  onClearPplSubmitError?: () => void;
 }
 
 /**
@@ -119,6 +129,9 @@ export const EditMonitor: React.FC<EditMonitorProps> = ({
   onSave,
   datasources,
   selectedDsIds,
+  isNameTaken,
+  submitError,
+  onClearPplSubmitError,
 }) => {
   const { data, isLoading, error } = useRuleDetail(dsId, ruleId);
   const [seededForm, setSeededForm] = useState<OpenSearchFormState | null>(null);
@@ -212,6 +225,9 @@ export const EditMonitor: React.FC<EditMonitorProps> = ({
       onCancel={onCancel}
       datasources={datasources}
       selectedDsIds={selectedDsIds}
+      isNameTaken={isNameTaken}
+      submitError={submitError}
+      onClearPplSubmitError={onClearPplSubmitError}
     />
   );
 };

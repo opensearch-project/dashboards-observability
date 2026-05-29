@@ -17,6 +17,10 @@
  *     `.opendistro-alerting-config` index-not-found error.
  *   - `formStateToRule` — pure transform from a create-monitor form state
  *     to a UnifiedRule, used for optimistic insertion into the rules list.
+ *   - `extractServerErrorMessage` — prefers the parsed response body's
+ *     `message` (where OSD/our route_utils place actionable text) over the
+ *     bare `Error.message` (which is the HTTP status text like "Bad
+ *     Request"). Used by toast handlers to surface real error detail.
  *
  * Constants are exported so the page can import them by name.
  */
@@ -264,4 +268,56 @@ export function formStateToRule(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- raw field is empty for new monitors
     raw: {} as any,
   };
+}
+
+// =========================================================================
+// Error message extraction
+// =========================================================================
+
+/**
+ * Substring fingerprint emitted by the OS alerting plugin when PPL fails
+ * to parse — e.g. "alerting_exception: ... Reason: PPL Query validation
+ * failed: [INVALID_KEYWORD] is not a valid term ... <-- HERE. Expecting
+ * one of N possible tokens. ...". The `Reason:` prefix is the same shape
+ * `route_utils.toHandlerResult` produces for any 400 PPL error, so a
+ * substring check is enough for routing the message to the inline editor
+ * surface (BUG-4). Returns the message stripped of the `alerting_exception`
+ * wrapper so the editor's small footprint shows just the actionable detail.
+ */
+export function extractPplValidationError(message: string): string | null {
+  if (!message) return null;
+  const match = message.match(/PPL Query validation failed:\s*(.*)$/);
+  if (!match) return null;
+  return `PPL Query validation failed: ${match[1].trim()}`;
+}
+
+/**
+ * OSD's `IHttpFetchError` has both `message` (HTTP status text, e.g. "Bad
+ * Request") and `body` (the parsed response payload). Our server route util
+ * `toHandlerResult` (and OSD core's CustomHttpResponseOptions) puts the
+ * actionable detail under `body.message` — e.g. "alerting_exception: PPL
+ * Query validation failed: [INVALID_KEYWORD] is not a valid term…".
+ *
+ * `Error.message` alone is useless for users when the real signal lives
+ * one level deeper. Prefer `body.message` and fall back through a few
+ * other shapes before settling on the bare message.
+ */
+export function extractServerErrorMessage(e: unknown): string {
+  if (e == null) return 'Unknown error';
+  if (typeof e === 'string') return e;
+  if (typeof e !== 'object') return String(e);
+  const errorish = e as {
+    body?: unknown;
+    message?: unknown;
+  };
+  const body = errorish.body;
+  if (body && typeof body === 'object') {
+    const b = body as { message?: unknown; error?: unknown };
+    if (typeof b.message === 'string' && b.message.length > 0) return b.message;
+    if (typeof b.error === 'string' && b.error.length > 0) return b.error;
+  }
+  if (typeof errorish.message === 'string' && errorish.message.length > 0) {
+    return errorish.message;
+  }
+  return String(e);
 }

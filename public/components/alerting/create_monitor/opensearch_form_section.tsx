@@ -69,7 +69,9 @@ export const OpenSearchFormSection: React.FC<{
   onUpdate: <K extends keyof OpenSearchFormState>(key: K, value: OpenSearchFormState[K]) => void;
   validationErrors: Record<string, string>;
   hasSubmitted: boolean;
-}> = ({ form, onUpdate, validationErrors, hasSubmitted }) => {
+  /** Server-reported PPL parse error from a failed save; rendered under the editor. */
+  pplServerError?: string;
+}> = ({ form, onUpdate, validationErrors, hasSubmitted, pplServerError }) => {
   // Rewrite the leading `source = ...` clause whenever the picker changes,
   // preserving any later pipes the user has authored. Prevents stranding
   // the user with `source = old-index | ...` after they swap indices.
@@ -140,6 +142,7 @@ export const OpenSearchFormSection: React.FC<{
           indices={form.indices}
           value={form.query}
           onChange={(v) => onUpdate('query', v)}
+          serverError={pplServerError}
         />
         <EuiSpacer size="xs" />
         <EuiText size="xs" color="subdued">
