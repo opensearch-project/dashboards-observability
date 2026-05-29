@@ -75,3 +75,27 @@ export const dataSourceFilterFn = (dataSource: SavedObject<DataSourceAttributes>
     pluginManifest.requiredOSDataSourcePlugins.every((plugin) => installedPlugins.includes(plugin))
   );
 };
+
+// Engine types this plugin declines via its manifest's `unsupportedOSDataSourceEngineTypes`.
+// Driven by the manifest declaration so changes flow from one source of truth.
+const UNSUPPORTED_ENGINE_TYPES: readonly string[] =
+  (pluginManifest as { unsupportedOSDataSourceEngineTypes?: readonly string[] })
+    .unsupportedOSDataSourceEngineTypes ?? [];
+
+// Slim filter: rejects only data sources whose engine type is in
+// `unsupportedOSDataSourceEngineTypes`. Use this where the existing picker had no
+// filter at all (e.g. trace analytics) — adding the chained version/plugin gates
+// would silently exclude data sources that used to work, including AOSS domains
+// (`OpenSearchServerless`) whose installed-plugin set differs from a managed OS
+// cluster's. Sub-apps that already enforce those gates pre-PR (metrics, integrations)
+// use `dataSourceFilterFnExcludeAnalyticEngine` instead.
+export const dataSourceFilterFnByEngineType = (dataSource: SavedObject<DataSourceAttributes>) => {
+  const engineType = dataSource?.attributes?.dataSourceEngineType;
+  return !(engineType && UNSUPPORTED_ENGINE_TYPES.includes(engineType));
+};
+
+// Same checks as dataSourceFilterFn (version + required plugins) plus the engine-type
+// exclusion. Use for sub-apps that already enforced version/plugin gates pre-PR.
+export const dataSourceFilterFnExcludeAnalyticEngine = (
+  dataSource: SavedObject<DataSourceAttributes>
+) => dataSourceFilterFnByEngineType(dataSource) && dataSourceFilterFn(dataSource);

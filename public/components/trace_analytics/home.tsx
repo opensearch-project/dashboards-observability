@@ -25,6 +25,7 @@ import { DataSourceAttributes } from '../../../../../src/plugins/data_source_man
 import { observabilityTracesNewNavID } from '../../../common/constants/shared';
 import { TRACE_TABLE_TYPE_KEY } from '../../../common/constants/trace_analytics';
 import { TraceAnalyticsMode, TraceQueryMode } from '../../../common/types/trace_analytics';
+import { dataSourceFilterFnByEngineType } from '../../../common/utils/shared';
 import { coreRefs } from '../../framework/core_refs';
 import { FilterType } from './components/common/filters/filters';
 import {
@@ -186,6 +187,7 @@ export const Home = (props: HomeProps) => {
         componentConfig={{
           ...sharedProps.componentConfig,
           onSelectedDataSources: onSelectedDataSource,
+          dataSourceFilter: dataSourceFilterFnByEngineType,
         }}
       />
     ) : (
