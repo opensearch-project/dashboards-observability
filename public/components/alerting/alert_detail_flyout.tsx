@@ -25,6 +25,7 @@ import {
   EuiDescriptionList,
   EuiAccordion,
   EuiCodeBlock,
+  EuiLink,
   EuiLoadingContent,
   EuiToolTip,
 } from '@elastic/eui';
@@ -33,6 +34,8 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { UnifiedAlert, UnifiedAlertSummary, Datasource } from '../../../common/types/alerting';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { SEVERITY_COLORS, STATE_COLORS } from './shared_constants';
+import { coreRefs } from '../../framework/core_refs';
+import { observabilityAlertingID } from '../../../common/constants/shared';
 
 /** Internal label keys filtered from the Labels accordion display. */
 const INTERNAL_LABEL_KEYS = new Set([
@@ -135,7 +138,69 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
 
   const dsName =
     datasources.find((d) => d.id === alert.datasourceId)?.name || alert.datasourceId || '\u2014';
-  const allLabels = alertData.labels || {};
+  // Memoize so `allLabels` keeps a stable reference between renders when
+  // `alertData.labels` is unchanged \u2014 the `useMemo` for `sourceLinkPath`
+  // below depends on it, and a fresh `{}` from the `||` fallback would
+  // otherwise re-run the dep-list check every render.
+  const allLabels = useMemo(() => alertData.labels || {}, [alertData.labels]);
+
+  // Source-rule deep-link computation (BUG-14). The unified alert shape
+  // doesn't carry a typed pointer to the originating monitor; we derive
+  // one from the labels available per-backend:
+  //   - OpenSearch alerts: `labels.monitor_id` is reliably populated.
+  //     Match on `monitor_id:<id>` so the Rules tab's `matchesSearch`
+  //     narrows to the originating monitor (rules carry the same id).
+  //   - Prometheus alerts: no `monitor_*` label exists; the closest
+  //     stable handle is `labels.alertname` (Prom convention) which
+  //     equals the rule's `name`. Match by name.
+  // SLO burn-rate alerts (Prometheus side) carry `slo_id` \u2014 match on
+  // that label so the Rules tab narrows to the burn-rate group rather
+  // than just the single firing tier.
+  // Falls back to undefined when no usable handle exists, in which case
+  // the source-link surfaces are simply not rendered. Includes the
+  // backing datasource id (`ds=\u2026`) so the Rules tab DS filter
+  // auto-selects the right cluster on landing \u2014 same mechanism as the
+  // SLO detail "View alert rules" deep-link (BUG-12).
+  const sourceLinkPath = useMemo(() => {
+    const dsId = alert.datasourceId;
+    if (!dsId) return undefined;
+    const labels = (allLabels as Record<string, string>) ?? {};
+    if (alert.datasourceType === 'opensearch') {
+      const monitorId = labels.monitor_id;
+      if (!monitorId) return undefined;
+      const params = new URLSearchParams({ q: `monitor_id:${monitorId}`, ds: dsId });
+      return `#/rules?${params.toString()}`;
+    }
+    if (alert.datasourceType === 'prometheus') {
+      const sloId = labels.slo_id;
+      if (sloId) {
+        const params = new URLSearchParams({ q: `slo_id:${sloId}`, ds: dsId });
+        return `#/rules?${params.toString()}`;
+      }
+      const alertname = labels.alertname;
+      if (!alertname) return undefined;
+      const params = new URLSearchParams({ q: alertname, ds: dsId });
+      return `#/rules?${params.toString()}`;
+    }
+    return undefined;
+  }, [alert.datasourceId, alert.datasourceType, allLabels]);
+
+  const monitorDisplayName = (allLabels as Record<string, string>)?.monitor_name;
+  const sourceLinkLabel = (allLabels as Record<string, string>)?.slo_id
+    ? i18n.translate('observability.alerting.alertDetailFlyout.openSlo', {
+        defaultMessage: 'Open SLO',
+      })
+    : i18n.translate('observability.alerting.alertDetailFlyout.openMonitor', {
+        defaultMessage: 'Open monitor',
+      });
+
+  const navigateToSource = () => {
+    if (!sourceLinkPath) return;
+    coreRefs?.application?.navigateToApp(observabilityAlertingID, { path: sourceLinkPath });
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    onClose();
+  };
+
   // Filter out internal/system labels for display (fix S-m2/6)
   const labels = Object.fromEntries(
     Object.entries(allLabels).filter(([k]) => !INTERNAL_LABEL_KEYS.has(k))
@@ -162,13 +227,26 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" responsive={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiHealth color={STATE_COLORS[alert.state]}>{alert.state}</EuiHealth>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiBadge color={SEVERITY_COLORS[alert.severity]}>{alert.severity}</EuiBadge>
               </EuiFlexItem>
+              {sourceLinkPath && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    size="s"
+                    iconType="popout"
+                    iconSide="right"
+                    onClick={navigateToSource}
+                    data-test-subj="alertDetailOpenSource"
+                  >
+                    {sourceLinkLabel}
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -258,6 +336,23 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
                 }),
                 description: getAlertDuration(alert.startTime),
               },
+              ...(sourceLinkPath
+                ? [
+                    {
+                      title: i18n.translate('observability.alerting.alertDetailFlyout.sourceRule', {
+                        defaultMessage: 'Source rule',
+                      }),
+                      description: (
+                        <EuiLink
+                          onClick={navigateToSource}
+                          data-test-subj="alertDetailSourceRuleLink"
+                        >
+                          {monitorDisplayName ?? sourceLinkLabel}
+                        </EuiLink>
+                      ),
+                    },
+                  ]
+                : []),
             ]}
           />
         </EuiAccordion>

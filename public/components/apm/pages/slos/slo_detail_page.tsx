@@ -836,7 +836,16 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
         // Recording rules don't surface in Alert Manager (they're
         // filtered to `type === 'alerting'` in alert_service.ts) — the
         // recording-rule list on this page is informational only.
-        const params = new URLSearchParams({ q: `slo_id:${doc.id}` });
+        //
+        // Also pass `ds=<spec.datasourceId>` so the alarms page can
+        // include the SLO's Prometheus datasource in `selectedDsIds`.
+        // Without this, the search filter narrows to zero rows whenever
+        // the user's last-used datasource selection didn't include the
+        // SLO's Prometheus DS — see BUG-12 in the bug report.
+        const params = new URLSearchParams({
+          q: `slo_id:${doc.id}`,
+          ds: doc.spec.datasourceId,
+        });
         coreRefs?.application?.navigateToApp(observabilityAlertingID, {
           path: `#/rules?${params.toString()}`,
         });

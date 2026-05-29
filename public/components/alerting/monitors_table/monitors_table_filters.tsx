@@ -80,6 +80,12 @@ export function matchesSearch(rule: UnifiedRuleSummary, query: string): boolean 
       if (labelVal && labelVal.toLowerCase().includes(val)) return true;
       const annoVal = rule.annotations[key];
       if (annoVal && annoVal.toLowerCase().includes(val)) return true;
+      // Deep-link convenience: alerts only carry `monitor_id` in labels,
+      // never the rule itself. The rule's stable handle is `rule.id`.
+      // Match `monitor_id:<id>` against `rule.id` so deep-links from the
+      // alert detail flyout (BUG-14) and any other surface that knows
+      // only the OpenSearch alerting `monitor_id` resolve to the rule.
+      if (key === 'monitor_id' && rule.id.toLowerCase().includes(val)) return true;
     }
     if (rule.name.toLowerCase().includes(term)) return true;
     for (const v of Object.values(rule.labels)) {
