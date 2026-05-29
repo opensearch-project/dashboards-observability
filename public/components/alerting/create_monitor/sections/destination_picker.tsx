@@ -68,7 +68,9 @@ export const DestinationPicker: React.FC<DestinationPickerProps> = ({
     ];
   }, [destinations, placeholderText]);
 
-  const destinationsHref = `${coreRefs.http?.basePath?.get?.() ?? ''}/app/alerting#/destinations`;
+  const destinationsHref = `${
+    coreRefs.http?.basePath?.get?.() ?? ''
+  }/app/notifications-dashboards#/channels`;
 
   const selectedValue = value || NONE_OPTION_VALUE;
 
@@ -97,7 +99,7 @@ export const DestinationPicker: React.FC<DestinationPickerProps> = ({
                   <EuiLink href={destinationsHref} target="_blank">
                     <FormattedMessage
                       id="observability.alerting.destinationPicker.openDestinations"
-                      defaultMessage="Open Destinations"
+                      defaultMessage="Open Notification Channels"
                     />
                   </EuiLink>
                 ),
@@ -109,7 +111,7 @@ export const DestinationPicker: React.FC<DestinationPickerProps> = ({
             <EuiLink href={destinationsHref} target="_blank">
               <FormattedMessage
                 id="observability.alerting.destinationPicker.manageDestinations"
-                defaultMessage="Manage destinations"
+                defaultMessage="Manage notification channels"
               />
             </EuiLink>
           </span>
