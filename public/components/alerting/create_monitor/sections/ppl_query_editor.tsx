@@ -140,6 +140,14 @@ export interface PplQueryEditorProps {
   onChange: (value: string) => void;
   /** Visual height. Defaults to a comfortable 5-line area. */
   height?: number | string;
+  /**
+   * Server-reported PPL parse / validation error to render below the editor
+   * (e.g. "PPL Query validation failed: [INVALID_KEYWORD] is not a valid
+   * term..."). Pulled from a failed Save and cleared when the user edits.
+   * Distinct from autocomplete `mappingsError`, which warns about field
+   * suggestions only.
+   */
+  serverError?: string;
 }
 
 export const PplQueryEditor: React.FC<PplQueryEditorProps> = ({
@@ -148,6 +156,7 @@ export const PplQueryEditor: React.FC<PplQueryEditorProps> = ({
   value,
   onChange,
   height = 140,
+  serverError,
 }) => {
   const { fieldsByType, error: mappingsError } = useIndexMappings({ dsId, indices });
 
@@ -269,7 +278,12 @@ export const PplQueryEditor: React.FC<PplQueryEditorProps> = ({
           Cypress / functional tests have a stable selector. */}
       <div
         data-test-subj="alertManagerPplQueryEditor"
-        style={{ border: '1px solid var(--euiColorLightShade)', borderRadius: 4 }}
+        style={{
+          border: serverError
+            ? '1px solid var(--euiColorDanger)'
+            : '1px solid var(--euiColorLightShade)',
+          borderRadius: 4,
+        }}
       >
         <CodeEditor
           languageId={PPLLang.ID}
@@ -282,6 +296,11 @@ export const PplQueryEditor: React.FC<PplQueryEditorProps> = ({
           editorDidMount={editorDidMount}
         />
       </div>
+      {serverError && (
+        <EuiText color="danger" size="xs" data-test-subj="alertManagerPplQueryEditorServerError">
+          {serverError}
+        </EuiText>
+      )}
       {mappingsError && (
         <EuiText color="danger" size="xs" data-test-subj="alertManagerPplQueryEditorMappingsError">
           {i18n.translate('observability.alerting.pplQueryEditor.mappingsErrorMessage', {
