@@ -90,16 +90,25 @@ export function useIndices({
   return { options, isLoading, error };
 }
 
+/**
+ * Hidden indices/aliases — those whose name starts with `.` — are noise for a
+ * log-monitor target picker (`.kibana*`, `.opendistro_security`, etc.) and
+ * selecting one by mistake can expose internal state. Free-text wildcards
+ * starting with `.` still pass through `onCreateOption`, so power users can
+ * still target them deliberately.
+ */
+const isHiddenName = (name: string): boolean => name.startsWith('.');
+
 function mergeOptions(indices: IndexSummary[], aliases: AliasSummary[]): IndexOption[] {
   const seen = new Set<string>();
   const out: IndexOption[] = [];
   for (const i of indices) {
-    if (!i.index || seen.has(i.index)) continue;
+    if (!i.index || seen.has(i.index) || isHiddenName(i.index)) continue;
     seen.add(i.index);
     out.push({ label: i.index });
   }
   for (const a of aliases) {
-    if (!a.alias || seen.has(a.alias)) continue;
+    if (!a.alias || seen.has(a.alias) || isHiddenName(a.alias)) continue;
     seen.add(a.alias);
     out.push({ label: a.alias, aliasFor: a.index });
   }

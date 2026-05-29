@@ -48,6 +48,7 @@ import { useAlertingPluginAvailability } from './hooks/use_alerting_plugin_avail
 import { useDatasourceSelection } from './hooks/use_datasource_selection';
 import { useMonitorMutations } from './hooks/use_monitor_mutations';
 import { useRulesData } from './hooks/use_rules_data';
+import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { useTimeRange } from './hooks/use_time_range';
 import { AlarmsPageCallouts } from './alarms_page_callouts';
 import { coreRefs } from '../../framework/core_refs';

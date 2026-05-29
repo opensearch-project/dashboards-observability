@@ -298,8 +298,8 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
             ? i18n.translate('observability.alerting.createMonitor.subtitlePromql', {
                 defaultMessage: 'PromQL-based alerting rule',
               })
-            : i18n.translate('observability.alerting.createMonitor.subtitleQueryLevel', {
-                defaultMessage: 'Query-level monitor with triggers',
+            : i18n.translate('observability.alerting.createMonitor.subtitlePpl', {
+                defaultMessage: 'PPL-based alerting rule',
               })}
         </EuiText>
       </EuiFlyoutHeader>

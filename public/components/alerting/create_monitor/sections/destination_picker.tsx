@@ -4,8 +4,13 @@
  */
 
 /**
- * Read-only destination picker for trigger actions. Destinations are
- * managed in the OpenSearch Alerting plugin's own Destinations page.
+ * Read-only notification-channel picker for trigger actions. Channels are
+ * managed in the OpenSearch Notifications plugin's Channels page.
+ *
+ * Note: this component is named `DestinationPicker` and the trigger action
+ * shape carries `destination_id` because that's the wire-format field name
+ * the OpenSearch Alerting backend accepts on its `actions[]` payload. We
+ * surface the user-facing concept as "notification channel" everywhere.
  */
 import React, { useMemo } from 'react';
 import { EuiFormRow, EuiLink, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
@@ -43,7 +48,7 @@ export const DestinationPicker: React.FC<DestinationPickerProps> = ({
   });
 
   const placeholderText = i18n.translate('observability.alerting.destinationPicker.placeholder', {
-    defaultMessage: 'Select a destination',
+    defaultMessage: 'Select a notification channel',
   });
 
   const options = useMemo(() => {
@@ -77,13 +82,13 @@ export const DestinationPicker: React.FC<DestinationPickerProps> = ({
   const resolvedAriaLabel =
     ariaLabel ??
     i18n.translate('observability.alerting.destinationPicker.defaultAriaLabel', {
-      defaultMessage: 'Notification destination',
+      defaultMessage: 'Notification channel',
     });
 
   return (
     <EuiFormRow
       label={i18n.translate('observability.alerting.destinationPicker.label', {
-        defaultMessage: 'Destination',
+        defaultMessage: 'Notification channel',
       })}
       isInvalid={isInvalid}
       error={errorMessage}
@@ -93,7 +98,7 @@ export const DestinationPicker: React.FC<DestinationPickerProps> = ({
           <span>
             <FormattedMessage
               id="observability.alerting.destinationPicker.noneConfigured"
-              defaultMessage="No destinations configured for this datasource. {openLink}"
+              defaultMessage="No notification channels configured for this datasource. {openLink}"
               values={{
                 openLink: (
                   <EuiLink href={destinationsHref} target="_blank">
@@ -134,7 +139,7 @@ export const DestinationPicker: React.FC<DestinationPickerProps> = ({
             <EuiText size="xs" color="danger">
               <FormattedMessage
                 id="observability.alerting.destinationPicker.loadError"
-                defaultMessage="Failed to load destinations: {message}"
+                defaultMessage="Failed to load notification channels: {message}"
                 values={{ message: error.message }}
               />
             </EuiText>
@@ -146,7 +151,7 @@ export const DestinationPicker: React.FC<DestinationPickerProps> = ({
             <EuiText size="xs" color="subdued" data-test-subj="alertManagerDestinationsTruncated">
               <FormattedMessage
                 id="observability.alerting.destinationPicker.truncated"
-                defaultMessage="Showing the first {shown} of {total} destinations. Manage older entries from the Alerting plugin."
+                defaultMessage="Showing the first {shown} of {total} notification channels. Manage older entries from the Alerting plugin."
                 values={{ shown: destinations.length, total: totalDestinations }}
               />
             </EuiText>
