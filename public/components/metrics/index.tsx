@@ -21,7 +21,7 @@ import {
 import { DataSourceOption } from '../../../../../src/plugins/data_source_management/public/components/data_source_menu/types';
 import { OptionType } from '../../../common/types/metrics';
 import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
-import { dataSourceFilterFn } from '../../../common/utils/shared';
+import { dataSourceFilterFnExcludeAnalyticEngine } from '../../../common/utils/shared';
 import PPLService from '../../services/requests/ppl';
 import SavedObjects from '../../services/saved_objects/event_analytics/saved_objects';
 import './index.scss';
@@ -96,7 +96,7 @@ export const Home = ({
           fullWidth: true,
           // activeOption: dataSourceMDSId,
           onSelectedDataSources: onSelectedDataSource,
-          dataSourceFilter: dataSourceFilterFn,
+          dataSourceFilter: dataSourceFilterFnExcludeAnalyticEngine,
         }}
       />
     );

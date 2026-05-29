@@ -23,7 +23,7 @@ import {
 import React, { ComponentType, useEffect, useState } from 'react';
 import { DataSourceSelectorProps } from '../../../../../../src/plugins/data_source_management/public/components/data_source_selector/data_source_selector';
 import { INTEGRATIONS_BASE } from '../../../../common/constants/shared';
-import { dataSourceFilterFn } from '../../../../common/utils/shared';
+import { dataSourceFilterFnExcludeAnalyticEngine } from '../../../../common/utils/shared';
 import { useToast } from '../../../../public/components/common/toast';
 import { coreRefs } from '../../../framework/core_refs';
 import { addIntegrationRequest } from './create_integration_helpers';
@@ -188,7 +188,7 @@ export function Integration(props: AvailableIntegrationProps) {
             fullWidth={false}
             removePrepend={true}
             onSelectedDataSource={onSelectedDataSource}
-            dataSourceFilter={dataSourceFilterFn}
+            dataSourceFilter={dataSourceFilterFnExcludeAnalyticEngine}
           />
           <EuiSpacer />
         </EuiModalBody>
