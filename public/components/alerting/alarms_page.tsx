@@ -24,7 +24,7 @@
  *   - `AlertManagerStartTime` — date-math string for picker start.
  *   - `AlertManagerEndTime`   — date-math string for picker end.
  */
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { EuiLink, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -84,13 +84,21 @@ interface AlarmsPageProps {
 type TabId = 'alerts' | 'rules' | 'routing';
 
 /**
- * Parse a hash-route deep link of the form `#/rules?q=<query>` into the
- * tab to land on plus an optional initial search query. Returns
- * `{ tab: undefined, q: undefined }` on any unknown shape so the caller
- * keeps its default state (Alerts tab, empty search). Tested implicitly
+ * Parse a hash-route deep link of the form `#/rules?q=<query>&ds=<dsId>`
+ * into the tab to land on, an optional initial search query, and an
+ * optional datasource id to add to the selection on mount. Returns an
+ * empty object on any unknown shape so the caller keeps its default
+ * state (Alerts tab, empty search, persisted DS selection). Tested
  * through `<AlarmsPage>` mount tests.
+ *
+ * The `ds` param exists because deep-links from SLO detail (BUG-12) and
+ * any future cross-app entry point need to land the user on a filter
+ * selection that *includes* the rules they came to look at — without
+ * `ds`, the persisted last-used selection wins and an SLO whose rules
+ * live on a Prometheus datasource the user just unchecked silently
+ * shows zero matches.
  */
-export function parseAlarmsHashRoute(hash: string): { tab?: TabId; q?: string } {
+export function parseAlarmsHashRoute(hash: string): { tab?: TabId; q?: string; ds?: string } {
   if (!hash) return {};
   // Strip leading `#` then `/`. The hash router's URLs are
   // `#/rules?q=…` or `#/routing` etc.
@@ -101,16 +109,19 @@ export function parseAlarmsHashRoute(hash: string): { tab?: TabId; q?: string } 
   const tab: TabId | undefined =
     segment === 'rules' || segment === 'alerts' || segment === 'routing' ? segment : undefined;
   let q: string | undefined;
+  let ds: string | undefined;
   if (queryPart) {
     try {
       const params = new URLSearchParams(queryPart);
-      const raw = params.get('q');
-      if (raw && raw.trim()) q = raw;
+      const rawQ = params.get('q');
+      if (rawQ && rawQ.trim()) q = rawQ;
+      const rawDs = params.get('ds');
+      if (rawDs && rawDs.trim()) ds = rawDs;
     } catch {
       // Malformed query string — treat as no params rather than throwing.
     }
   }
-  return { tab, q };
+  return { tab, q, ds };
 }
 
 const TAB_LABELS: Record<TabId, string> = {
@@ -135,14 +146,29 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   const osService = useMemo(() => new AlertingOpenSearchService(), []);
 
   // Deep-link parsing — when SLO detail (or any other surface) navigates to
-  // `#/rules?q=<rulename>` we want to land on the Rules tab with the search
-  // box pre-filled. Read once on mount via `useMemo` with empty deps so we
-  // don't re-trigger the tab switch every time the user types in the search
-  // box. The hash-router lives at
+  // `#/rules?q=<rulename>&ds=<dsId>` we want to land on the Rules tab with
+  // the search box pre-filled and the right datasource selected. Tracked as
+  // state with a `hashchange` listener so cross-tab deep-links from inside
+  // the alerting app itself (e.g. the alert-detail flyout's "Open monitor"
+  // button — BUG-14) re-apply the params; otherwise `navigateToApp` within
+  // the same app would change `window.location.hash` without re-mounting
+  // this component, and the static one-shot read would miss the update.
+  // The hash-router lives at
   // `/<basepath>/app/observability-alerting#/rules?q=…`, so the `?q=…` is a
   // tail of `location.hash`, not `location.search`.
-  const initialDeepLink = useMemo(() => parseAlarmsHashRoute(window.location.hash), []);
-  const [activeTab, setActiveTab] = useState<TabId>(initialDeepLink.tab ?? 'alerts');
+  const [deepLink, setDeepLink] = useState(() => parseAlarmsHashRoute(window.location.hash));
+  useEffect(() => {
+    const onHashChange = () => setDeepLink(parseAlarmsHashRoute(window.location.hash));
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+  const [activeTab, setActiveTab] = useState<TabId>(deepLink.tab ?? 'alerts');
+  // Switch tab whenever the deep-link tab updates. Guarded against the
+  // common case (no tab in the URL) so user-initiated tab clicks aren't
+  // immediately overridden by a stale URL state.
+  useEffect(() => {
+    if (deepLink.tab) setActiveTab(deepLink.tab);
+  }, [deepLink.tab]);
 
   // ---- Datasource selection (priority order + persistence) ----
   const { selectedDsIds, setSelectedDsIds } = useDatasourceSelection({
@@ -151,6 +177,42 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     defaultDatasources,
     maxDatasources,
   });
+
+  // Apply the deep-link `ds` once the datasource list is hydrated so the
+  // landing tab actually has rows to show. Without this, a deep-link from
+  // SLO detail (BUG-12) or the alert-detail flyout (BUG-14) lands on
+  // Rules tab with the persisted DS selection — and if the linked DS
+  // isn't in that selection the rules table renders zero matches even
+  // though the rules exist. We *augment* (not replace) the persisted
+  // selection so the user doesn't lose unrelated DS picks; if the cap
+  // would be exceeded we slice off the oldest entries.
+  //
+  // Tracked via a ref so a single deep-link applies once even though the
+  // effect's deps churn on every selection change. The ref is reset to
+  // the latest `deepLink.ds` whenever a new hashchange brings a fresh
+  // value — that way cross-tab deep-links inside the same app (alert
+  // flyout's "Open monitor") still re-apply.
+  const lastAppliedDsRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const dsId = deepLink.ds;
+    if (!dsId) return;
+    if (datasourcesLoading) return;
+    if (lastAppliedDsRef.current === dsId) return;
+    if (!datasources.some((d) => d.id === dsId)) return;
+    if (selectedDsIds.includes(dsId)) {
+      lastAppliedDsRef.current = dsId;
+      return;
+    }
+    setSelectedDsIds([...selectedDsIds, dsId].slice(0, maxDatasources));
+    lastAppliedDsRef.current = dsId;
+  }, [
+    deepLink.ds,
+    datasources,
+    datasourcesLoading,
+    selectedDsIds,
+    setSelectedDsIds,
+    maxDatasources,
+  ]);
 
   // Probe each OS datasource once on mount to confirm `opensearch-alerting`
   // is installed. Without this check, users with the OSD feature flag on
@@ -773,7 +835,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           onDatasourceChange={handleDatasourceChange}
           maxDatasources={maxDatasources}
           onDatasourceCapReached={handleDatasourceCapReached}
-          initialSearchQuery={initialDeepLink.q}
+          initialSearchQuery={deepLink.q}
         />
       );
     }

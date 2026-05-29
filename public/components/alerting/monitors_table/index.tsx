@@ -80,6 +80,17 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   initialSearchQuery,
 }) => {
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery ?? '');
+  // Re-seed the search box whenever the parent supplies a fresh
+  // `initialSearchQuery`. The page propagates a hashchange-driven
+  // `deepLink.q` into this prop so cross-tab deep-links from inside the
+  // alerting app (alert-flyout "Open monitor" — BUG-14) update the
+  // filter live. Falsy values (empty string / undefined) don't clobber
+  // the user's typed query — only an actual deep-link update overrides.
+  useEffect(() => {
+    if (initialSearchQuery && initialSearchQuery.trim() !== '') {
+      setSearchQuery(initialSearchQuery);
+    }
+  }, [initialSearchQuery]);
   const [filters, setFilters] = useState<FilterState>(emptyFilters());
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);

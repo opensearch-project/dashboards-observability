@@ -392,6 +392,28 @@ describe('parseAlarmsHashRoute', () => {
     expect(parseAlarmsHashRoute('#/rules?q=%20')).toEqual({ tab: 'rules' });
   });
 
+  it('parses the optional ds param alongside q (BUG-12 SLO deep-link)', () => {
+    expect(parseAlarmsHashRoute('#/rules?q=slo_id:abc&ds=ds-prom-1')).toEqual({
+      tab: 'rules',
+      q: 'slo_id:abc',
+      ds: 'ds-prom-1',
+    });
+  });
+
+  it('parses ds without q', () => {
+    expect(parseAlarmsHashRoute('#/rules?ds=ds-prom-1')).toEqual({
+      tab: 'rules',
+      ds: 'ds-prom-1',
+    });
+  });
+
+  it('drops empty ds', () => {
+    expect(parseAlarmsHashRoute('#/rules?q=slo_id:abc&ds=')).toEqual({
+      tab: 'rules',
+      q: 'slo_id:abc',
+    });
+  });
+
   it('falls back when the path segment is unknown', () => {
     expect(parseAlarmsHashRoute('#/something-else')).toEqual({});
   });
