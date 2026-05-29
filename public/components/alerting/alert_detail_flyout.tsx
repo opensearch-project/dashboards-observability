@@ -462,7 +462,7 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
           buttonContent={
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon type="sparkles" />
+                <EuiIcon type="sparkleFilled" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <strong>
