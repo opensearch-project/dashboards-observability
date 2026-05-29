@@ -89,6 +89,12 @@ export interface MonitorsMainPanelProps {
   onDelete: (ids: string[]) => void;
   onClone?: (monitor: UnifiedRuleSummary) => void;
   onEdit?: (monitor: UnifiedRuleSummary) => void;
+  /**
+   * Forwarded to {@link MonitorDetailFlyout.onToggleEnabled}. Page provides
+   * an awaitable handler that PUTs the monitor with `enabled` flipped; the
+   * flyout shows a loading spinner on the button until it resolves.
+   */
+  onToggleEnabled?: (monitor: UnifiedRuleSummary) => Promise<void> | void;
 }
 
 export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
@@ -123,6 +129,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
   onDelete,
   onClone,
   onEdit,
+  onToggleEnabled,
 }) => {
   return (
     <>
@@ -483,6 +490,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                 }
               : undefined
           }
+          onToggleEnabled={onToggleEnabled}
         />
       )}
     </>

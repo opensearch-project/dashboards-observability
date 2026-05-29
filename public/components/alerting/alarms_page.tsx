@@ -490,6 +490,66 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     }
   };
 
+  const handleToggleMonitorEnabled = async (monitor: UnifiedRuleSummary): Promise<void> => {
+    // The detail flyout only renders this for PPL monitors today; defend at
+    // the page boundary anyway so a wider rollout doesn't accidentally PUT
+    // against an unsupported monitor type.
+    if (monitor.monitorType !== 'ppl') {
+      addToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.toggleEnabledUnsupported', {
+          defaultMessage: 'Enabling/disabling is only supported for PPL monitors.',
+        }),
+        'warning'
+      );
+      return;
+    }
+    const nextEnabled = !monitor.enabled;
+    try {
+      // Server-side `updateMonitor` runs a GET-merge-PUT against the upstream
+      // alerting plugin and explicitly preserves plugin-owned keys against
+      // client overwrites, so a minimal partial body is sufficient. `name` is
+      // the only field the route schema requires; `enabled` is the only field
+      // we actually want to change.
+      await mutations.updateMonitor(
+        monitor.id,
+        { name: monitor.name, enabled: nextEnabled },
+        monitor.datasourceId
+      );
+      // Optimistically reflect the new state in the loaded rules list so the
+      // flyout footer button label / status badge flips immediately. The
+      // refetch reconciles whatever the backend ultimately persisted.
+      setRules((prev) =>
+        prev.map((r) =>
+          r.id === monitor.id
+            ? { ...r, enabled: nextEnabled, status: nextEnabled ? 'active' : 'disabled' }
+            : r
+        )
+      );
+      addToast(
+        nextEnabled
+          ? i18n.translate('observability.alerting.alarmsPage.toast.monitorEnabled', {
+              defaultMessage: 'Monitor enabled',
+            })
+          : i18n.translate('observability.alerting.alarmsPage.toast.monitorDisabled', {
+              defaultMessage: 'Monitor disabled',
+            })
+      );
+      refetchRules();
+    } catch (e: unknown) {
+      addToast(
+        nextEnabled
+          ? i18n.translate('observability.alerting.alarmsPage.toast.enableMonitorFailed', {
+              defaultMessage: 'Failed to enable monitor',
+            })
+          : i18n.translate('observability.alerting.alarmsPage.toast.disableMonitorFailed', {
+              defaultMessage: 'Failed to disable monitor',
+            }),
+        'danger',
+        e instanceof Error ? e.message : String(e)
+      );
+    }
+  };
+
   const handleCloneRule = async (monitor: UnifiedRuleSummary) => {
     try {
       // Fetch the full rule detail to get the raw backend payload — the
@@ -755,6 +815,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           onDelete={handleDeleteRules}
           onClone={handleCloneRule}
           onEdit={(monitor) => setEditTarget({ dsId: monitor.datasourceId, ruleId: monitor.id })}
+          onToggleEnabled={handleToggleMonitorEnabled}
           onCreateMonitor={(type) => {
             if (type === 'logs') {
               setCreateBackendType('opensearch');
