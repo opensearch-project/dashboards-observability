@@ -13,7 +13,6 @@
  *   - `fetchClusterMetricsPreview` — synthetic time series from a cluster-metrics snapshot
  *   - `fetchDocLevelPreview` — date_histogram over doc-level monitor indices
  *   - `extractDateHistogramPoints` — pull `{timestamp, value}` points from an agg response
- *   - `extractOSPreviewData` — fallback extraction from an OS monitor `_execute` dry-run
  *   - `fetchPromPreviewData` — queryRange (preferred) or fallback to embedded alert data
  */
 import type { RequestHandlerContext } from '../../../../../src/core/server';
@@ -30,7 +29,6 @@ import {
   extractTimestampField,
   stripRangeFilters,
   substituteMustacheTemplates,
-  toEpochMillis,
 } from './alert_utils';
 
 /**
@@ -256,63 +254,6 @@ export function extractDateHistogramPoints(
   }
 
   return points;
-}
-
-/**
- * Extract preview data from OS monitor dry-run result (fallback).
- * The _execute API returns input_results with the query response.
- */
-export function extractOSPreviewData(
-  execResult: unknown
-): Array<{ timestamp: number; value: number }> {
-  const points: Array<{ timestamp: number; value: number }> = [];
-  if (!execResult || typeof execResult !== 'object') return points;
-
-  const result = execResult as Record<string, unknown>;
-  const inputResults = result.input_results as Record<string, unknown> | undefined;
-  const triggerResults = result.trigger_results as Record<string, unknown> | undefined;
-
-  // Try to extract a meaningful numeric value from trigger results
-  if (triggerResults) {
-    const now = Date.now();
-    for (const [, triggerData] of Object.entries(triggerResults)) {
-      const td = triggerData as Record<string, unknown>;
-      // Trigger results contain the evaluated condition value
-      if (typeof td.triggered === 'boolean') {
-        // Use the period_start/period_end from the execution
-        // These may be ISO strings or epoch millis depending on the monitor type
-        const rawStart = result.period_start;
-        const rawEnd = result.period_end;
-        const periodStart = toEpochMillis(rawStart) || now - 300_000;
-        const periodEnd = toEpochMillis(rawEnd) || now;
-        points.push({
-          timestamp: periodEnd,
-          value: td.triggered ? 1 : 0,
-        });
-        // Also add start point for a basic range
-        points.push({
-          timestamp: periodStart,
-          value: td.triggered ? 1 : 0,
-        });
-      }
-    }
-  }
-
-  // Try to extract hit counts from input results (common for query-level monitors)
-  if (inputResults) {
-    const results = inputResults.results as Array<Record<string, unknown>> | undefined;
-    if (results && results.length > 0) {
-      const firstResult = results[0];
-      const hits = firstResult?.hits as Record<string, unknown> | undefined;
-      const total = hits?.total as { value?: number } | number | undefined;
-      const totalValue = typeof total === 'number' ? total : total?.value;
-      if (typeof totalValue === 'number') {
-        points.push({ timestamp: Date.now(), value: totalValue });
-      }
-    }
-  }
-
-  return points.sort((a, b) => a.timestamp - b.timestamp);
 }
 
 /**

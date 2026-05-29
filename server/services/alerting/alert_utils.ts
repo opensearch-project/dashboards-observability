@@ -13,7 +13,6 @@
  *   - `stripRangeFilters` — remove range filters on a given field from a query
  *   - `substituteMustacheTemplates` — replace Mustache template variables with concrete values
  *   - `extractClusterMetricValue` — pull a meaningful numeric value from a cluster-metrics result
- *   - `toEpochMillis` — coerce ISO strings or epoch millis to a numeric epoch-millis value
  *   - `requireDatasource` — validate a datasource id + type and backend registration
  *
  * Contents (mapping helpers — OS/Prom to unified shapes, moved here to break
@@ -182,18 +181,6 @@ export function extractClusterMetricValue(execResult: unknown): number {
 }
 
 /**
- * Convert a value that may be an ISO string or epoch millis to epoch millis.
- */
-export function toEpochMillis(val: unknown): number | undefined {
-  if (typeof val === 'number') return val;
-  if (typeof val === 'string') {
-    const parsed = new Date(val).getTime();
-    return isNaN(parsed) ? undefined : parsed;
-  }
-  return undefined;
-}
-
-/**
  * Validate a datasource id, its expected backend type, and that the matching
  * backend is registered. Returns the resolved `Datasource` on success, or
  * throws with a descriptive message. Standalone replacement for what was a
@@ -283,6 +270,7 @@ export function osAlertToUnified(a: OSAlert, dsId: string): UnifiedAlertSummary 
       trigger_name: a.trigger_name,
     },
     annotations: {},
+    monitorId: a.monitor_id || undefined,
   };
 }
 

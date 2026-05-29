@@ -565,15 +565,16 @@ export class MultiBackendAlertService {
   async getAlertDetail(
     client: AlertingOSClient,
     dsId: string,
-    alertId: string
+    alertId: string,
+    monitorId?: string
   ): Promise<UnifiedAlert | null> {
     return getAlertDetailImpl(
       this.datasourceService,
       this.osBackend,
-      this.promBackend,
       client,
       dsId,
-      alertId
+      alertId,
+      monitorId
     );
   }
 

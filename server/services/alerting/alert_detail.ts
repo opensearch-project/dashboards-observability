@@ -11,9 +11,13 @@
  *
  * Contents:
  *   - `getRuleDetail` — dispatches to OS or Prom based on the datasource type
- *   - `getOSRuleDetail` — full OS monitor detail (history, routing, preview)
+ *   - `getOSRuleDetail` — full OS monitor detail (history + preview)
  *   - `getPromRuleDetail` — full Prometheus rule detail
  *   - `getAlertDetail` — full alert detail with raw backend data
+ *
+ * Notification routing is intentionally not fetched here — the rule
+ * flyout no longer surfaces it inline. Alertmanager owns Prom routing
+ * and the standalone Routing tab is the canonical place for it.
  */
 import type { RequestHandlerContext } from '../../../../../src/core/server';
 import {
@@ -21,7 +25,6 @@ import {
   AlertingOSClient,
   Datasource,
   DatasourceService,
-  NotificationRouting,
   OpenSearchBackend,
   PromAlertingRule,
   PrometheusBackend,
@@ -33,20 +36,16 @@ import {
   osAlertToUnified,
   osMonitorToUnifiedRuleSummary,
   osStateToUnified,
-  promAlertToUnified,
   promRuleToUnified,
   promStateToUnified,
 } from './alert_utils';
-import {
-  extractOSPreviewData,
-  fetchOSPreviewTimeSeries,
-  fetchPromPreviewData,
-} from './alert_preview';
+import { fetchOSPreviewTimeSeries, fetchPromPreviewData } from './alert_preview';
 
 /**
- * Get full detail for a single rule/monitor. Fetches real metadata from
- * the backend (alert history, destinations, annotations). Fields that
- * cannot be fetched from the API are marked as mock placeholders.
+ * Get full detail for a single rule/monitor. Real metadata where the
+ * upstream API exposes it (alert history, monitor config, annotations);
+ * `aiSummary` and `suppressionRules` are intentionally empty — no API
+ * source today and the flyout treats them as optional.
  */
 export async function getRuleDetail(
   datasourceService: DatasourceService,
@@ -79,12 +78,20 @@ export async function getOSRuleDetail(
 
   const summary = osMonitorToUnifiedRuleSummary(monitor, ds.id);
 
-  // Fetch real alert history for this monitor
+  // Fetch real alert history for this monitor — scoped at the upstream
+  // via `monitorId`, bounded to 20 rows so the upstream returns one
+  // small page even on busy monitors with thousands of alerts, and
+  // sorted by `start_time desc` so the "Recent alerts" label is honest
+  // (default OS Alerting ordering is shard-order-dependent).
   let alertHistory: AlertHistoryEntry[] = [];
   try {
-    const { alerts } = await osBackend.getAlerts(client);
-    const monitorAlerts = alerts.filter((a) => a.monitor_id === monitorId).slice(0, 20);
-    alertHistory = monitorAlerts.map((a) => ({
+    const { alerts } = await osBackend.getAlerts(client, {
+      monitorId,
+      limit: 20,
+      sortString: 'start_time',
+      sortOrder: 'desc',
+    });
+    alertHistory = alerts.map((a) => ({
       timestamp: new Date(a.start_time).toISOString(),
       state: osStateToUnified(a.state),
       value: a.severity,
@@ -92,28 +99,6 @@ export async function getOSRuleDetail(
     }));
   } catch {
     // Alert history fetch is best-effort
-  }
-
-  // Build notification routing from trigger actions + destinations.
-  const notificationRouting: NotificationRouting[] = [];
-  try {
-    const { destinations } = await osBackend.getDestinations(client);
-    const destMap = new Map(destinations.map((d) => [d.id, d]));
-    for (const trigger of monitor.triggers) {
-      const actions = 'ppl_trigger' in trigger ? trigger.ppl_trigger.actions : trigger.actions;
-      for (const action of actions) {
-        const dest = destMap.get(action.destination_id);
-        notificationRouting.push({
-          channel: dest?.type || 'unknown',
-          destination: dest?.name || action.name || action.destination_id,
-          throttle: action.throttle
-            ? `${action.throttle.value} ${action.throttle.unit}`
-            : undefined,
-        });
-      }
-    }
-  } catch {
-    // Destination fetch is best-effort
   }
 
   // Build description from trigger message template or input type
@@ -144,21 +129,16 @@ export async function getOSRuleDetail(
       : trigger?.actions?.[0]?.message_template?.source;
   const description = firstActionMessage || descriptionFallback;
 
-  // Fetch condition preview: run the monitor's query as a date_histogram to build a time-series
+  // Fetch condition preview: run the monitor's query as a date_histogram to
+  // build a time-series. If extraction produces no points the flyout's
+  // `ConditionPreviewGraph` shows its own empty state — we deliberately do
+  // NOT fall back to `runMonitor(_, dryRun=true)`, which re-executes the
+  // customer's monitor against live data on every flyout open.
   let conditionPreviewData: Array<{ timestamp: number; value: number }> = [];
   try {
     conditionPreviewData = await fetchOSPreviewTimeSeries(osBackend, client, ds, monitor);
   } catch {
     // Preview data fetch is best-effort
-  }
-  // Fallback: try dry-run execution if time-series extraction produced nothing
-  if (conditionPreviewData.length === 0) {
-    try {
-      const execResult = await osBackend.runMonitor(client, monitorId, true);
-      conditionPreviewData = extractOSPreviewData(execResult);
-    } catch {
-      // Dry run is best-effort — some monitors may not support it
-    }
   }
 
   return {
@@ -168,7 +148,12 @@ export async function getOSRuleDetail(
     lookbackPeriod: undefined,
     alertHistory,
     conditionPreviewData,
-    notificationRouting,
+    // Notification routing is no longer surfaced inline on the rule
+    // flyout. The standalone Routing tab (Alertmanager-fed for Prom; OS
+    // destinations for OS) owns it. We keep the empty array on the
+    // response shape so existing UnifiedRule consumers don't need a
+    // type change.
+    notificationRouting: [],
     // Suppression rules from the in-memory service (not from OS API)
     suppressionRules: [],
     raw: monitor,
@@ -232,33 +217,38 @@ export async function getPromRuleDetail(
 
 /**
  * Get full detail for a single alert including raw backend data.
+ *
+ * OpenSearch only. The OS Alerting REST endpoint
+ * (`_plugins/_alerting/monitors/alerts`) does not expose a per-id
+ * filter, so we paginate scoped by `monitorId` and short-circuit
+ * pagination on the first page that contains the target alert
+ * (`findAlertId`). With `monitorId` set, the upstream scans one
+ * monitor's alerts; the early exit caps the work at the page that
+ * holds the row.
+ *
+ * Prometheus has no per-alert lookup endpoint, and the flyout already
+ * has the summary's labels/annotations on hand — the UI short-circuits
+ * the round-trip on the client, so this function is never called for
+ * Prom datasources. Non-OS datasources resolve to `null` here as a
+ * defensive fallthrough.
  */
 export async function getAlertDetail(
   datasourceService: DatasourceService,
   osBackend: OpenSearchBackend | undefined,
-  promBackend: PrometheusBackend | undefined,
   client: AlertingOSClient,
   dsId: string,
-  alertId: string
+  alertId: string,
+  monitorId?: string
 ): Promise<UnifiedAlert | null> {
   const ds = await datasourceService.get(dsId);
-  if (!ds) return null;
+  if (!ds || ds.type !== 'opensearch' || !osBackend) return null;
 
-  if (ds.type === 'opensearch' && osBackend) {
-    const { alerts } = await osBackend.getAlerts(client);
-    const alert = alerts.find((a) => a.id === alertId);
-    if (!alert) return null;
-    const summary = osAlertToUnified(alert, ds!.id);
-    return { ...summary, raw: alert };
-  } else if (ds.type === 'prometheus' && promBackend) {
-    const promAlerts = await promBackend.getAlerts(client, ds);
-    const resolvedId = ds!.id;
-    const alert = promAlerts.find(
-      (a) => `${resolvedId}-${a.labels.alertname}-${a.labels.instance || ''}` === alertId
-    );
-    if (!alert) return null;
-    const summary = promAlertToUnified(alert, resolvedId);
-    return { ...summary, raw: alert };
-  }
-  return null;
+  const { alerts } = await osBackend.getAlerts(client, {
+    findAlertId: alertId,
+    ...(monitorId ? { monitorId } : {}),
+  });
+  const alert = alerts.find((a) => a.id === alertId);
+  if (!alert) return null;
+  const summary = osAlertToUnified(alert, ds.id);
+  return { ...summary, raw: alert };
 }

@@ -257,10 +257,11 @@ export async function handleGetAlertDetail(
   alertSvc: MultiBackendAlertService,
   client: AlertingOSClient,
   dsId: string,
-  alertId: string
+  alertId: string,
+  monitorId?: string
 ): Promise<HandlerResult> {
   try {
-    const alert = await alertSvc.getAlertDetail(client, dsId, alertId);
+    const alert = await alertSvc.getAlertDetail(client, dsId, alertId, monitorId);
     if (!alert) return { status: 404, body: { error: 'Alert not found' } };
     return { status: 200, body: alert };
   } catch (e: unknown) {

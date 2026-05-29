@@ -673,6 +673,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
       path: '/api/alerting/alerts/{dsId}/{alertId}',
       validate: {
         params: schema.object({ dsId: alertingIdSchema, alertId: alertingIdSchema }),
+        query: schema.object({ monitorId: schema.maybe(alertingIdSchema) }),
       },
     },
     async (ctx, req, res) =>
@@ -682,7 +683,8 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
           alertService,
           await getAlertingClientCtx(ctx, req.params.dsId),
           req.params.dsId,
-          req.params.alertId
+          req.params.alertId,
+          req.query.monitorId
         );
       })
   );

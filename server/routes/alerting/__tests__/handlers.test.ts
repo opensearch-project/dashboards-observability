@@ -99,6 +99,14 @@ describe('handlers', () => {
     expect(result.status).toBe(404);
   });
 
+  it('handleGetAlertDetail forwards monitorId to the service in correct param order', async () => {
+    // Pins the new optional `monitorId` arg's position. Without this,
+    // reordering the param tuple would still pass the 404 case above.
+    mockAlertSvc.getAlertDetail.mockResolvedValueOnce({ id: 'a-1' } as never);
+    await handleGetAlertDetail(mockAlertSvc as never, mockClient, 'ds-1', 'a-1', 'mon-7');
+    expect(mockAlertSvc.getAlertDetail).toHaveBeenCalledWith(mockClient, 'ds-1', 'a-1', 'mon-7');
+  });
+
   it('handleGetRuleDetail returns 404 when not found', async () => {
     mockAlertSvc.getRuleDetail.mockResolvedValueOnce(null);
     const result = await handleGetRuleDetail(mockAlertSvc as never, mockClient, 'ds-1', 'nope');

@@ -82,9 +82,10 @@ export class AlertingOpenSearchService {
   }
 
   /** Single alert detail for the flyout. */
-  async getAlertDetail(dsId: string, alertId: string): Promise<UnifiedAlert> {
+  async getAlertDetail(dsId: string, alertId: string, monitorId?: string): Promise<UnifiedAlert> {
     return (await this.requireHttp().get(
-      `/api/alerting/alerts/${encodeURIComponent(dsId)}/${encodeURIComponent(alertId)}`
+      `/api/alerting/alerts/${encodeURIComponent(dsId)}/${encodeURIComponent(alertId)}`,
+      monitorId ? { query: { monitorId } } : undefined
     )) as UnifiedAlert;
   }
 

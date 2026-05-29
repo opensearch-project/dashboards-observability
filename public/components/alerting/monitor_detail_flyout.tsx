@@ -36,10 +36,8 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import {
   AlertHistoryEntry,
-  NotificationRouting,
   OSMonitor,
   OSMonitorInput,
-  UnifiedAlertSeverity,
   UnifiedRuleSummary,
 } from '../../../common/types/alerting';
 import { DeleteModal } from '../common/helpers/delete_modal';
@@ -49,13 +47,11 @@ import { humanizeCondition } from './monitor_detail/humanize_condition';
 
 import { SEVERITY_COLORS, STATE_COLORS, STATUS_COLORS, HEALTH_COLORS } from './shared_constants';
 
-// Per-table caps for the detail flyout. `EuiBasicTable` doesn't paginate by
-// default; without these caps a monitor that has accumulated thousands of
-// historical alerts would render every row, freezing the flyout. The Alerts
-// tab is the right place to drill into the full history — the flyout's
-// table is intentionally a quick overview.
+// Cap for the alert-history table in the flyout. `EuiBasicTable` doesn't
+// paginate by default; without this cap a monitor that has accumulated
+// thousands of historical alerts would render every row, freezing the
+// flyout. The Alerts tab is the right place to drill into the full history.
 const MAX_ALERT_HISTORY_ROWS = 50;
-const MAX_ROUTING_ROWS = 50;
 
 // ============================================================================
 // Props
@@ -96,8 +92,6 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   // detail-only fields are empty until the fetch resolves.
   const alertHistory = detail?.alertHistory ?? [];
   const conditionPreviewData = detail?.conditionPreviewData ?? [];
-  const notificationRouting = detail?.notificationRouting ?? [];
-  const suppressionRules = detail?.suppressionRules ?? [];
   const description = detail?.description ?? '';
   const evaluationInterval = detail?.evaluationInterval ?? monitor.evaluationInterval ?? '—';
   const pendingPeriod = detail?.pendingPeriod ?? monitor.pendingPeriod ?? '—';
@@ -151,48 +145,6 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
         defaultMessage: 'Message',
       }),
       truncateText: true,
-    },
-  ];
-
-  // Notification routing columns
-  const routingColumns: Array<EuiBasicTableColumn<NotificationRouting>> = [
-    {
-      field: 'channel',
-      name: i18n.translate('observability.alerting.monitorDetailFlyout.routing.channel', {
-        defaultMessage: 'Channel',
-      }),
-      width: '100px',
-    },
-    {
-      field: 'destination',
-      name: i18n.translate('observability.alerting.monitorDetailFlyout.routing.destination', {
-        defaultMessage: 'Destination',
-      }),
-    },
-    {
-      field: 'severity',
-      name: i18n.translate('observability.alerting.monitorDetailFlyout.routing.severities', {
-        defaultMessage: 'Severities',
-      }),
-      width: '160px',
-      render: (sevs: UnifiedAlertSeverity[] | undefined) =>
-        sevs
-          ? sevs.map((s) => (
-              <EuiBadge key={s} color={SEVERITY_COLORS[s]}>
-                {s}
-              </EuiBadge>
-            ))
-          : i18n.translate('observability.alerting.monitorDetailFlyout.routing.allSeverities', {
-              defaultMessage: 'All',
-            }),
-    },
-    {
-      field: 'throttle',
-      name: i18n.translate('observability.alerting.monitorDetailFlyout.routing.throttle', {
-        defaultMessage: 'Throttle',
-      }),
-      width: '100px',
-      render: (t: string) => t || '—',
     },
   ];
 
@@ -590,35 +542,56 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
 
               <EuiSpacer size="m" />
 
-              {/* Condition Preview Graph */}
-              <EuiAccordion
-                id={`preview-${monitor.id}`}
-                buttonContent={
-                  <strong>
-                    <FormattedMessage
-                      id="observability.alerting.monitorDetailFlyout.conditionPreviewHeader"
-                      defaultMessage="Condition Preview"
+              {/* Condition Preview Graph — hidden for PPL monitors. The
+                  server-side preview pipeline (`fetchOSPreviewTimeSeries`)
+                  has no PPL branch: it routes by input shape and PPL
+                  monitors carry a `ppl_input` that isn't covered, so the
+                  data array would always be empty and the accordion would
+                  permanently render the "No recent evaluation data" copy.
+                  Skip rendering until a PPL preview pipeline ships. */}
+              {monitor.monitorType !== 'ppl' && (
+                <>
+                  <EuiAccordion
+                    id={`preview-${monitor.id}`}
+                    buttonContent={
+                      <strong>
+                        <FormattedMessage
+                          id="observability.alerting.monitorDetailFlyout.conditionPreviewHeader"
+                          defaultMessage="Condition Preview"
+                        />
+                      </strong>
+                    }
+                    initialIsOpen={true}
+                    paddingSize="m"
+                  >
+                    <ConditionPreviewGraph
+                      data={conditionPreviewData}
+                      threshold={monitor.threshold}
                     />
-                  </strong>
-                }
-                initialIsOpen={true}
-                paddingSize="m"
-              >
-                <ConditionPreviewGraph data={conditionPreviewData} threshold={monitor.threshold} />
-              </EuiAccordion>
+                  </EuiAccordion>
 
-              <EuiSpacer size="m" />
+                  <EuiSpacer size="m" />
+                </>
+              )}
 
-              {/* Alert History */}
+              {/* Recent alerts (OS = mixed-state slice, Prom = currently firing/pending) */}
               <EuiAccordion
                 id={`alertHistory-${monitor.id}`}
                 buttonContent={
                   <strong>
-                    <FormattedMessage
-                      id="observability.alerting.monitorDetailFlyout.recentAlertHistoryHeader"
-                      defaultMessage="Recent Alert History ({count})"
-                      values={{ count: alertHistory.length }}
-                    />
+                    {monitor.datasourceType === 'prometheus' ? (
+                      <FormattedMessage
+                        id="observability.alerting.monitorDetailFlyout.firingPendingAlertsHeader"
+                        defaultMessage="Currently firing/pending alerts ({count})"
+                        values={{ count: alertHistory.length }}
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="observability.alerting.monitorDetailFlyout.recentAlertsHeader"
+                        defaultMessage="Recent alerts ({count})"
+                        values={{ count: alertHistory.length }}
+                      />
+                    )}
                   </strong>
                 }
                 initialIsOpen={false}
@@ -645,116 +618,14 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
 
               <EuiSpacer size="m" />
 
-              {/* Notification Routing */}
+              {/* Details — creation / modification metadata */}
               <EuiAccordion
-                id={`routing-${monitor.id}`}
+                id={`details-${monitor.id}`}
                 buttonContent={
                   <strong>
                     <FormattedMessage
-                      id="observability.alerting.monitorDetailFlyout.notificationRoutingHeader"
-                      defaultMessage="Notification Routing ({count})"
-                      values={{ count: notificationRouting.length }}
-                    />
-                  </strong>
-                }
-                initialIsOpen={false}
-                paddingSize="m"
-              >
-                {notificationRouting.length > 0 ? (
-                  <EuiBasicTable
-                    items={notificationRouting.slice(0, MAX_ROUTING_ROWS)}
-                    columns={routingColumns}
-                    compressed
-                  />
-                ) : (
-                  <EuiText size="s" color="subdued">
-                    <FormattedMessage
-                      id="observability.alerting.monitorDetailFlyout.noRouting"
-                      defaultMessage="No notification routing configured"
-                    />
-                  </EuiText>
-                )}
-              </EuiAccordion>
-
-              <EuiSpacer size="m" />
-
-              {/* Suppression Rules */}
-              <EuiAccordion
-                id={`suppression-${monitor.id}`}
-                buttonContent={
-                  <strong>
-                    <FormattedMessage
-                      id="observability.alerting.monitorDetailFlyout.suppressionRulesHeader"
-                      defaultMessage="Suppression Rules ({count})"
-                      values={{ count: suppressionRules.length }}
-                    />
-                  </strong>
-                }
-                initialIsOpen={false}
-                paddingSize="m"
-              >
-                {suppressionRules.length > 0 ? (
-                  suppressionRules.map((sr) => (
-                    <EuiPanel
-                      key={sr.id}
-                      paddingSize="s"
-                      color={sr.active ? 'plain' : 'subdued'}
-                      style={{ marginBottom: 8 }}
-                    >
-                      <EuiFlexGroup alignItems="center" responsive={false}>
-                        <EuiFlexItem>
-                          <EuiText size="s">
-                            <strong>{sr.name}</strong>
-                          </EuiText>
-                          <EuiText size="xs" color="subdued">
-                            {sr.reason}
-                          </EuiText>
-                          {sr.schedule && (
-                            <EuiText size="xs">
-                              <FormattedMessage
-                                id="observability.alerting.monitorDetailFlyout.scheduleLabel"
-                                defaultMessage="Schedule: {schedule}"
-                                values={{ schedule: sr.schedule }}
-                              />
-                            </EuiText>
-                          )}
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiBadge color={sr.active ? 'success' : 'default'}>
-                            {sr.active
-                              ? i18n.translate(
-                                  'observability.alerting.monitorDetailFlyout.suppressionActive',
-                                  { defaultMessage: 'Active' }
-                                )
-                              : i18n.translate(
-                                  'observability.alerting.monitorDetailFlyout.suppressionInactive',
-                                  { defaultMessage: 'Inactive' }
-                                )}
-                          </EuiBadge>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiPanel>
-                  ))
-                ) : (
-                  <EuiText size="s" color="subdued">
-                    <FormattedMessage
-                      id="observability.alerting.monitorDetailFlyout.noSuppression"
-                      defaultMessage="No suppression rules applied"
-                    />
-                  </EuiText>
-                )}
-              </EuiAccordion>
-
-              <EuiSpacer size="m" />
-
-              {/* Creation / Modification History */}
-              <EuiAccordion
-                id={`history-${monitor.id}`}
-                buttonContent={
-                  <strong>
-                    <FormattedMessage
-                      id="observability.alerting.monitorDetailFlyout.historyHeader"
-                      defaultMessage="History"
+                      id="observability.alerting.monitorDetailFlyout.detailsHeader"
+                      defaultMessage="Details"
                     />
                   </strong>
                 }

@@ -269,9 +269,24 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
 
   async getAlerts(
     client: AlertingOSClient,
-    options?: { startMs?: number; endMs?: number }
+    options?: {
+      startMs?: number;
+      endMs?: number;
+      monitorId?: string;
+      limit?: number;
+      sortString?: string;
+      sortOrder?: 'asc' | 'desc';
+      findAlertId?: string;
+    }
   ): Promise<{ alerts: OSAlert[]; totalAlerts: number; truncated: boolean }> {
-    const PAGE_SIZE = 100;
+    // When the caller asks for a bounded set (e.g. rule flyout's "last N
+    // alerts"), shrink page size to that cap so the upstream returns at
+    // most `limit` rows in one request. Without this, even a tiny
+    // `.slice(0, 20)` consumer pays for a full 100-row page and drives
+    // pagination loops on busy monitors.
+    const requestedLimit =
+      options?.limit !== undefined && options.limit > 0 ? options.limit : undefined;
+    const PAGE_SIZE = requestedLimit !== undefined ? Math.min(requestedLimit, 100) : 100;
     /**
      * Cap applied only when a time window is supplied. OpenSearch Alerting's
      * `GET monitors/alerts` endpoint has no documented server-side time
@@ -296,6 +311,23 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
     const hasRange = options?.startMs !== undefined && options?.endMs !== undefined;
     const windowStart = options?.startMs ?? 0;
     const windowEnd = options?.endMs ?? Number.POSITIVE_INFINITY;
+    const monitorIdParam = options?.monitorId
+      ? `&monitorId=${encodeURIComponent(options.monitorId)}`
+      : '';
+    // `sortString` / `sortOrder` are exposed by `RestGetAlertsAction` on
+    // the upstream and let bounded callers (e.g. rule flyout's "last N
+    // alerts") request a deterministic, semantically-correct slice
+    // instead of relying on shard-order-dependent default ordering.
+    //
+    // Note: the upstream REST handler does NOT accept `&alertIds=...` —
+    // only the internal transport-client API path does — so callers
+    // that want a single alert by id must paginate (`findAlertId` below
+    // short-circuits the loop on first match).
+    const sortStringParam = options?.sortString
+      ? `&sortString=${encodeURIComponent(options.sortString)}`
+      : '';
+    const sortOrderParam = options?.sortOrder ? `&sortOrder=${options.sortOrder}` : '';
+    const findAlertId = options?.findAlertId;
 
     const allAlerts: OSAlert[] = [];
     let startIndex = 0;
@@ -307,12 +339,24 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
       const resp = await this.req<OSAlertsApiResponse>(
         client,
         'GET',
-        `/_plugins/_alerting/monitors/alerts?size=${PAGE_SIZE}&startIndex=${startIndex}`
+        `/_plugins/_alerting/monitors/alerts?size=${PAGE_SIZE}&startIndex=${startIndex}${monitorIdParam}${sortStringParam}${sortOrderParam}`
       );
       totalAlerts = resp.body.totalAlerts ?? 0;
       const pageAlerts: OSAlert[] = (resp.body.alerts ?? []).map((a: OSAlertRaw) =>
         this.mapAlert(a)
       );
+
+      // Single-alert lookup: short-circuit as soon as the target id
+      // appears on a page, then trim the result to that one row. This
+      // is the path used by `getAlertDetail` — without the early exit
+      // we'd page through the entire monitor history just to `.find()`
+      // one row.
+      if (findAlertId) {
+        const hit = pageAlerts.find((a) => a.id === findAlertId);
+        if (hit) {
+          return { alerts: [hit], totalAlerts: totalAlerts || 1, truncated: false };
+        }
+      }
 
       if (hasRange) {
         for (const a of pageAlerts) {
@@ -342,6 +386,25 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
         allAlerts.push(...pageAlerts);
       }
 
+      if (requestedLimit !== undefined && allAlerts.length >= requestedLimit) {
+        // Hit the caller's cap before exhausting upstream pages. We only
+        // mark truncated when upstream genuinely has more rows than we
+        // collected — a page that happens to be exactly `limit` long with
+        // no further upstream rows is complete, not truncated.
+        //
+        //  - Non-range mode: `totalAlerts` from the upstream is the
+        //    authoritative count of rows the index would yield, so an
+        //    overshoot proves there's at least one row we didn't fetch.
+        //  - Range mode: there is no upstream filtered count, so a full
+        //    page is the only "more available" signal we have. Accept the
+        //    false positive on exact page-multiples.
+        if (!hasRange) {
+          if (allAlerts.length < totalAlerts) truncated = true;
+        } else if (pageAlerts.length === PAGE_SIZE) {
+          truncated = true;
+        }
+        break;
+      }
       if (pageAlerts.length < PAGE_SIZE) break;
       if (!hasRange && allAlerts.length >= totalAlerts) break;
       // We intentionally do NOT early-exit on `startIndex + PAGE_SIZE >=
@@ -360,13 +423,21 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
       }
     }
 
+    // findAlertId fell through every page without a match.
+    if (findAlertId) {
+      return { alerts: [], totalAlerts: 0, truncated: false };
+    }
+
+    const finalAlerts =
+      requestedLimit !== undefined ? allAlerts.slice(0, requestedLimit) : allAlerts;
+
     // When filtering, `totalAlerts` on the return object reflects the
     // filtered-and-capped count (what the caller actually received); the
     // raw index total is no longer a useful number for a post-filtered
     // payload and would confuse UI consumers.
     return {
-      alerts: allAlerts,
-      totalAlerts: hasRange ? allAlerts.length : totalAlerts,
+      alerts: finalAlerts,
+      totalAlerts: hasRange ? finalAlerts.length : totalAlerts,
       truncated,
     };
   }

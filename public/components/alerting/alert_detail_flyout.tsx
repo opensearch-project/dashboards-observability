@@ -7,7 +7,7 @@
  * Alert Detail Flyout — drill-down view for a single alert
  * showing full context, labels, annotations, and actions.
  */
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -22,19 +22,17 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  EuiPanel,
   EuiDescriptionList,
   EuiAccordion,
   EuiCodeBlock,
-  EuiIcon,
+  EuiLoadingContent,
   EuiToolTip,
-  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { UnifiedAlert, UnifiedAlertSummary, Datasource } from '../../../common/types/alerting';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
-import { SEVERITY_COLORS, STATE_COLORS, sanitizeExternalUrl } from './shared_constants';
+import { SEVERITY_COLORS, STATE_COLORS } from './shared_constants';
 
 /** Internal label keys filtered from the Labels accordion display. */
 const INTERNAL_LABEL_KEYS = new Set([
@@ -63,22 +61,74 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
 }) => {
   const osService = useMemo(() => new AlertingOpenSearchService(), []);
   const [detailData, setDetailData] = useState<UnifiedAlert | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailFetched, setDetailFetched] = useState(false);
 
-  // Fetch full detail (with raw data) from the API when flyout opens
+  // Mirror the current alert identity into a ref so an in-flight fetch
+  // can compare its captured-at-call-time identity against the latest
+  // mounted alert when the response resolves. Updated synchronously by
+  // the reset effect below before the response could possibly land.
+  const alertIdRef = useRef({ dsId: alert.datasourceId, id: alert.id });
+
+  // Reset detail when the alert identity changes — guards against a parent
+  // swapping `selectedAlert` from A to B without unmounting the flyout
+  // (which would otherwise render B's summary on top of A's `raw`/labels).
+  // Updates `alertIdRef` first so any still-in-flight fetch from A bails
+  // in its `.then()`/`.finally()` instead of writing into B's state.
   useEffect(() => {
-    let cancelled = false;
+    alertIdRef.current = { dsId: alert.datasourceId, id: alert.id };
+    setDetailData(null);
+    setDetailLoading(false);
+    setDetailFetched(false);
+  }, [alert.datasourceId, alert.id]);
+
+  // Detail (raw alert data) is fetched only when the user expands the
+  // Raw Alert Data accordion. Opening the flyout fires zero network
+  // calls; the visible accordions render from the summary on hand.
+  // The Prom path returns null upstream (no per-alert API), so skip the
+  // round-trip entirely — the summary already has labels/annotations.
+  // `detailFetched` pins the cache even when the upstream resolves with
+  // `null` (e.g. alert no longer present), so collapse → re-expand does
+  // not refire the request.
+  //
+  // Identity guard: capture `(datasourceId, alertId)` at call time and
+  // gate every state write on a match against the current alert. If the
+  // parent swaps `selectedAlert` mid-fetch, the in-flight response would
+  // otherwise write A's payload into B's `detailData` and pin
+  // `detailFetched=true` for B without ever fetching B.
+  const fetchDetailIfNeeded = useCallback(() => {
+    if (alert.datasourceType === 'prometheus') return;
+    if (detailFetched || detailLoading) return;
+    const requestDsId = alert.datasourceId;
+    const requestAlertId = alert.id;
+    setDetailLoading(true);
     osService
-      .getAlertDetail(alert.datasourceId, alert.id)
+      .getAlertDetail(alert.datasourceId, alert.id, alert.monitorId)
       .then((data: UnifiedAlert) => {
-        if (!cancelled && data) setDetailData(data);
+        if (alertIdRef.current.dsId !== requestDsId || alertIdRef.current.id !== requestAlertId) {
+          return;
+        }
+        if (data) setDetailData(data);
       })
       .catch((err: unknown) => {
         console.error('Failed to load alert details:', err);
+      })
+      .finally(() => {
+        if (alertIdRef.current.dsId !== requestDsId || alertIdRef.current.id !== requestAlertId) {
+          return;
+        }
+        setDetailLoading(false);
+        setDetailFetched(true);
       });
-    return () => {
-      cancelled = true;
-    };
-  }, [alert.datasourceId, alert.id, osService]);
+  }, [
+    alert.datasourceId,
+    alert.datasourceType,
+    alert.id,
+    alert.monitorId,
+    detailFetched,
+    detailLoading,
+    osService,
+  ]);
 
   // Merge detail data over summary — detail has `raw` and potentially richer labels
   const alertData = detailData ? { ...alert, ...detailData } : alert;
@@ -91,9 +141,6 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
     Object.entries(allLabels).filter(([k]) => !INTERNAL_LABEL_KEYS.has(k))
   );
   const annotations = alertData.annotations || {};
-
-  // Generate a mock AI analysis for the alert
-  const aiAnalysis = getAlertAiAnalysis(alert);
 
   return (
     <EuiFlyout onClose={onClose} size="m" ownFocus aria-labelledby="alertDetailTitle">
@@ -141,44 +188,6 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {/* AI Analysis */}
-        <EuiAccordion
-          id={`alertAiAnalysis-${alert.id}`}
-          buttonContent={
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="compute" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <strong>
-                  <FormattedMessage
-                    id="observability.alerting.alertDetailFlyout.aiAnalysis"
-                    defaultMessage="AI Analysis"
-                  />
-                </strong>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">
-                  <FormattedMessage
-                    id="observability.alerting.alertDetailFlyout.betaBadge"
-                    defaultMessage="Beta"
-                  />
-                </EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-          initialIsOpen={true}
-          paddingSize="m"
-        >
-          <EuiPanel color="subdued" paddingSize="m">
-            <EuiText size="s">
-              <p>{aiAnalysis}</p>
-            </EuiText>
-          </EuiPanel>
-        </EuiAccordion>
-
-        <EuiSpacer size="m" />
-
         {/* Alert Details */}
         <EuiAccordion
           id={`alertDetails-${alert.id}`}
@@ -328,114 +337,7 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
 
         <EuiSpacer size="m" />
 
-        {/* Suppression Status */}
-        <EuiAccordion
-          id={`suppressionStatus-${alert.id}`}
-          buttonContent={
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="bellSlash" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <strong>
-                  <FormattedMessage
-                    id="observability.alerting.alertDetailFlyout.suppressionStatus"
-                    defaultMessage="Suppression Status"
-                  />
-                </strong>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-          initialIsOpen={false}
-          paddingSize="m"
-        >
-          {alert.state === 'resolved' ? (
-            <EuiPanel color="subdued" paddingSize="s">
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="default">
-                    <FormattedMessage
-                      id="observability.alerting.alertDetailFlyout.silencedBadge"
-                      defaultMessage="Silenced"
-                    />
-                  </EuiBadge>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText size="xs" color="subdued">
-                    <FormattedMessage
-                      id="observability.alerting.alertDetailFlyout.silencedMessage"
-                      defaultMessage="This alert has been silenced or resolved."
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          ) : (
-            <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="observability.alerting.alertDetailFlyout.noSuppressionMessage"
-                defaultMessage="No active suppression rules affecting this alert."
-              />
-            </EuiText>
-          )}
-        </EuiAccordion>
-
-        <EuiSpacer size="m" />
-
-        {/* Routing Information */}
-        <EuiAccordion
-          id={`routingInfo-${alert.id}`}
-          buttonContent={
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="bell" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <strong>
-                  <FormattedMessage
-                    id="observability.alerting.alertDetailFlyout.notificationRouting"
-                    defaultMessage="Notification Routing"
-                  />
-                </strong>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-          initialIsOpen={false}
-          paddingSize="m"
-        >
-          <EuiText size="s" color="subdued">
-            <FormattedMessage
-              id="observability.alerting.alertDetailFlyout.routingDescription"
-              defaultMessage="Routing is determined by the monitor's notification configuration and matching routing rules. Check the associated monitor's detail view for full routing setup."
-            />
-          </EuiText>
-          {alert.labels.service && (
-            <EuiPanel color="subdued" paddingSize="s" style={{ marginTop: 8 }}>
-              <EuiText size="xs">
-                <FormattedMessage
-                  id="observability.alerting.alertDetailFlyout.serviceLabel"
-                  defaultMessage="Service:"
-                />{' '}
-                <EuiBadge color="hollow">{alert.labels.service}</EuiBadge>
-                {alert.labels.team && (
-                  <>
-                    {' '}
-                    |{' '}
-                    <FormattedMessage
-                      id="observability.alerting.alertDetailFlyout.teamLabel"
-                      defaultMessage="Team:"
-                    />{' '}
-                    <EuiBadge color="hollow">{alert.labels.team}</EuiBadge>
-                  </>
-                )}
-              </EuiText>
-            </EuiPanel>
-          )}
-        </EuiAccordion>
-
-        <EuiSpacer size="m" />
-
-        {/* Raw Data */}
+        {/* Raw Data — fetched lazily on accordion expand. */}
         <EuiAccordion
           id={`alertRaw-${alert.id}`}
           buttonContent={
@@ -448,96 +350,17 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
           }
           initialIsOpen={false}
           paddingSize="m"
+          onToggle={(isOpen) => {
+            if (isOpen) fetchDetailIfNeeded();
+          }}
         >
-          <EuiCodeBlock language="json" fontSize="s" paddingSize="m" isCopyable>
-            {JSON.stringify(detailData?.raw ?? alert, null, 2)}
-          </EuiCodeBlock>
-        </EuiAccordion>
-
-        <EuiSpacer size="m" />
-
-        {/* Suggested Actions (S-m4: interactive where possible) */}
-        <EuiAccordion
-          id={`suggestedActions-${alert.id}`}
-          buttonContent={
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="sparkles" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <strong>
-                  <FormattedMessage
-                    id="observability.alerting.alertDetailFlyout.suggestedActions"
-                    defaultMessage="Suggested Actions"
-                  />
-                </strong>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-          initialIsOpen={true}
-          paddingSize="m"
-        >
-          {getSuggestedActions(alert).map((action, i) => {
-            // Determine interactivity: acknowledge action is clickable,
-            // URL-containing actions link out, others are manual.
-            const isAcknowledge = action.actionType === 'acknowledge';
-            const hasUrl = action.url !== undefined;
-            const isClickable = isAcknowledge || hasUrl;
-
-            const handleClick = () => {
-              if (isAcknowledge) onAcknowledge(alert.id);
-            };
-
-            return (
-              <EuiPanel
-                key={i}
-                paddingSize="s"
-                color="subdued"
-                style={{
-                  marginBottom: 6,
-                  cursor: isClickable ? 'pointer' : 'default',
-                }}
-                onClick={isClickable && !hasUrl ? handleClick : undefined}
-              >
-                <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type={action.icon} color={action.color} />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    {hasUrl ? (
-                      <EuiLink href={action.url} target="_blank" rel="noopener noreferrer">
-                        <EuiText size="s">
-                          <strong>{action.title}</strong>
-                        </EuiText>
-                      </EuiLink>
-                    ) : (
-                      <EuiText size="s">
-                        <strong>{action.title}</strong>
-                      </EuiText>
-                    )}
-                    <EuiText size="xs" color="subdued">
-                      {action.description}
-                      {!isClickable && (
-                        <em style={{ marginLeft: 4 }}>
-                          {' '}
-                          &mdash;{' '}
-                          <FormattedMessage
-                            id="observability.alerting.alertDetailFlyout.manualActionRequired"
-                            defaultMessage="Manual action required"
-                          />
-                        </em>
-                      )}
-                    </EuiText>
-                  </EuiFlexItem>
-                  {isClickable && !hasUrl && (
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="arrowRight" size="s" />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              </EuiPanel>
-            );
-          })}
+          {detailLoading ? (
+            <EuiLoadingContent lines={6} />
+          ) : (
+            <EuiCodeBlock language="json" fontSize="s" paddingSize="m" isCopyable>
+              {JSON.stringify(detailData?.raw ?? alert, null, 2)}
+            </EuiCodeBlock>
+          )}
         </EuiAccordion>
       </EuiFlyoutBody>
 
@@ -604,121 +427,4 @@ function getAlertDuration(startTime: string): string {
   if (hours < 24) return `${hours}h ${minutes % 60}m`;
   const days = Math.floor(hours / 24);
   return `${days}d ${hours % 24}h`;
-}
-
-function getAlertAiAnalysis(alert: UnifiedAlertSummary): string {
-  const analyses: Record<string, string> = {
-    HighCpuUsage:
-      'This host (i-0abc123) has sustained CPU usage above 80% for the past 5 minutes, currently at 92.3%. The spike correlates with increased request traffic. Consider scaling horizontally or investigating the workload causing the spike. Historical data shows this host has been consistently hot for 2 days.',
-    HighMemoryUsage:
-      'Critical memory pressure detected on i-0def456 at 94.7%. This pattern is consistent with a memory leak — heap usage has been growing ~2% per hour. Immediate action recommended: restart the application and investigate the leak. OOM kill risk is high within the next 2 hours.',
-    DiskSpaceLow:
-      'Disk space on i-0ghi789 is at 12.1% available. This is a staging environment where test data accumulates. The weekly cleanup job should resolve this automatically. If urgent, manually trigger the cleanup or expand the volume.',
-    HighErrorRate:
-      'HTTP 5xx error rate is at 8.2%, well above the 5% threshold. The errors are concentrated in the api-gateway service and appear to be caused by connection pool exhaustion to the upstream backend. This started 5 minutes ago and is still climbing. Immediate investigation of the backend service health is recommended.',
-    PodCrashLooping:
-      'The order-service pod is crash looping with OOMKilled status. Current memory limit is 512Mi but the service requires ~600Mi under load. Recommend increasing the memory limit to 768Mi in the deployment spec. 3 restarts in the last 15 minutes.',
-    CertificateExpiringSoon:
-      'The TLS certificate for api.example.com expires in 22 days. Auto-renewal via cert-manager has failed twice. Check the DNS-01 challenge configuration and cert-manager logs. Manual renewal may be needed as a fallback.',
-  };
-  return (
-    analyses[alert.name] ||
-    `Alert "${alert.name}" is currently ${alert.state} with ${
-      alert.severity
-    } severity. Started ${getAlertDuration(
-      alert.startTime
-    )} ago. Review the labels and annotations for additional context on the root cause.`
-  );
-}
-
-interface SuggestedAction {
-  title: string;
-  description: string;
-  icon: string;
-  color: string;
-  /** Identifies the action type so the UI can make it interactive. */
-  actionType: 'acknowledge' | 'silence' | 'link' | 'manual';
-  /** Optional URL for link-type actions. */
-  url?: string;
-}
-
-function getSuggestedActions(alert: UnifiedAlertSummary): SuggestedAction[] {
-  const actions: SuggestedAction[] = [];
-
-  if (alert.state === 'active') {
-    actions.push({
-      title: i18n.translate('observability.alerting.alertDetailFlyout.action.acknowledge.title', {
-        defaultMessage: 'Acknowledge this alert',
-      }),
-      description: i18n.translate(
-        'observability.alerting.alertDetailFlyout.action.acknowledge.description',
-        {
-          defaultMessage:
-            'Mark as acknowledged to stop repeated notifications while you investigate.',
-        }
-      ),
-      icon: 'check',
-      color: 'primary',
-      actionType: alert.datasourceType === 'prometheus' ? 'manual' : 'acknowledge',
-    });
-  }
-
-  if (alert.severity === 'critical' || alert.severity === 'high') {
-    const safeRunbookUrl = sanitizeExternalUrl(alert.annotations?.runbook_url);
-    actions.push({
-      title: i18n.translate('observability.alerting.alertDetailFlyout.action.runbook.title', {
-        defaultMessage: 'Check related runbook',
-      }),
-      description:
-        safeRunbookUrl ||
-        i18n.translate('observability.alerting.alertDetailFlyout.action.runbook.noUrl', {
-          defaultMessage: 'No runbook URL configured \u2014 consider adding one.',
-        }),
-      icon: 'document',
-      color: 'warning',
-      actionType: safeRunbookUrl ? 'link' : 'manual',
-      url: safeRunbookUrl,
-    });
-  }
-
-  if (alert.labels?.instance) {
-    actions.push({
-      title: i18n.translate(
-        'observability.alerting.alertDetailFlyout.action.investigateHost.title',
-        {
-          defaultMessage: 'Investigate host {instance}',
-          values: { instance: alert.labels.instance },
-        }
-      ),
-      description: i18n.translate(
-        'observability.alerting.alertDetailFlyout.action.investigateHost.description',
-        {
-          defaultMessage: 'Open host metrics dashboard to correlate with other system indicators.',
-        }
-      ),
-      icon: 'compute',
-      color: 'default',
-      actionType: 'manual',
-    });
-  }
-
-  if (alert.labels?.service) {
-    actions.push({
-      title: i18n.translate('observability.alerting.alertDetailFlyout.action.reviewService.title', {
-        defaultMessage: 'Review {service} service health',
-        values: { service: alert.labels.service },
-      }),
-      description: i18n.translate(
-        'observability.alerting.alertDetailFlyout.action.reviewService.description',
-        {
-          defaultMessage: 'Check service-level metrics, recent deployments, and dependency health.',
-        }
-      ),
-      icon: 'apps',
-      color: 'default',
-      actionType: 'manual',
-    });
-  }
-
-  return actions;
 }
