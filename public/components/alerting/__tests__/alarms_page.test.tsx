@@ -42,8 +42,14 @@ jest.mock('../alerts_dashboard', () => ({
     return <div data-test-subj="alertsDashboard" />;
   },
 }));
+
+// Capture MonitorsTable props so we can invoke onClone in tests.
+const mockMonitorsTable = jest.fn();
 jest.mock('../monitors_table', () => ({
-  MonitorsTable: () => <div data-test-subj="monitorsTable" />,
+  MonitorsTable: (props: unknown) => {
+    mockMonitorsTable(props);
+    return <div data-test-subj="monitorsTable" />;
+  },
 }));
 jest.mock('../notification_routing_panel', () => ({
   NotificationRoutingPanel: () => <div data-test-subj="routingPanel" />,
@@ -51,6 +57,22 @@ jest.mock('../notification_routing_panel', () => ({
 jest.mock('../create_monitor', () => ({ CreateMonitor: () => null }));
 jest.mock('../create_monitor/edit_monitor', () => ({ EditMonitor: () => null }));
 jest.mock('../alert_detail_flyout', () => ({ AlertDetailFlyout: () => null }));
+
+const mockGetRuleDetail = jest.fn();
+jest.mock('../query_services/alerting_opensearch_service', () => ({
+  AlertingOpenSearchService: jest.fn().mockImplementation(() => ({
+    getRuleDetail: mockGetRuleDetail,
+  })),
+}));
+
+const mockCreateMonitor = jest.fn();
+jest.mock('../hooks/use_monitor_mutations', () => ({
+  useMonitorMutations: () => ({
+    createMonitor: mockCreateMonitor,
+    deleteMonitor: jest.fn(),
+    acknowledgeAlert: jest.fn(),
+  }),
+}));
 
 import { AlarmsPage, parseAlarmsHashRoute } from '../alarms_page';
 import type { Datasource } from '../../../../common/types/alerting';
@@ -73,6 +95,9 @@ beforeEach(() => {
   mockUseAlerts.mockReset();
   mockUseAlerts.mockReturnValue(emptyHookResult);
   mockDashboard.mockClear();
+  mockMonitorsTable.mockClear();
+  mockGetRuleDetail.mockReset();
+  mockCreateMonitor.mockReset();
   try {
     window.sessionStorage.clear();
   } catch (_e) {
@@ -284,6 +309,59 @@ describe('AlarmsPage', () => {
     // sessionStorage has also been healed so a reload starts clean.
     expect(window.sessionStorage.getItem('AlertManagerStartTime')).toBe('now-24h');
     expect(window.sessionStorage.getItem('AlertManagerEndTime')).toBe('now');
+  });
+
+  it('handleCloneRule calls getRuleDetail and createMonitor without throwing', async () => {
+    const fakeRaw = {
+      id: 'mon-1',
+      name: 'Test Monitor',
+      type: 'monitor',
+      last_update_time: 123,
+      enabled_time: 456,
+      schema_version: 1,
+      owner: 'alerting',
+      data_sources: {},
+      triggers: [
+        {
+          ppl_trigger: {
+            id: 'trig-1',
+            name: 'High errors',
+            actions: [{ id: 'act-1', name: 'notify' }],
+          },
+        },
+      ],
+    };
+    mockGetRuleDetail.mockResolvedValue({ raw: fakeRaw });
+    mockCreateMonitor.mockResolvedValue({ id: 'new-mon-1' });
+
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+
+    // Switch to Rules tab so MonitorsTable renders
+    fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+
+    // Get the onClone prop passed to MonitorsTable
+    const tableProps = mockMonitorsTable.mock.calls[mockMonitorsTable.mock.calls.length - 1][0] as {
+      onClone: (monitor: unknown) => Promise<void>;
+    };
+
+    expect(tableProps.onClone).toBeDefined();
+
+    // Invoke onClone — this would throw ReferenceError before the fix
+    await act(async () => {
+      await tableProps.onClone({
+        id: 'mon-1',
+        name: 'Test Monitor',
+        datasourceId: 'ds-1',
+      });
+    });
+
+    expect(mockGetRuleDetail).toHaveBeenCalledWith('ds-1', 'mon-1');
+    expect(mockCreateMonitor).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Test Monitor (Copy)' }),
+      'ds-1'
+    );
   });
 });
 
