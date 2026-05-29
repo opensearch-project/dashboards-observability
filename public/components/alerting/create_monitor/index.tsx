@@ -22,6 +22,7 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiConfirmModal,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,6 +31,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
+  EuiOverlayMask,
   EuiPanel,
   EuiSelect,
   EuiSpacer,
@@ -185,6 +187,51 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
   );
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+
+  // Snapshot the initial form so we can detect "dirty" against the value the
+  // user actually saw on open. Captured once via lazy initializer; never
+  // updated — even if the form's identity-of-state mutates, dirty is always
+  // measured against the original. JSON-stringify is fine for these small
+  // forms.
+  const [initialPromSnapshot] = useState(() =>
+    JSON.stringify(
+      initialForm && initialForm.datasourceType === 'prometheus'
+        ? initialForm
+        : {
+            ...DEFAULT_PROM_FORM,
+            datasourceId: initialType === 'prometheus' && initialDs ? initialDs.id : '',
+          }
+    )
+  );
+  const [initialOsSnapshot] = useState(() =>
+    JSON.stringify(
+      initialForm && initialForm.datasourceType === 'opensearch'
+        ? initialForm
+        : {
+            ...DEFAULT_OS_FORM,
+            datasourceId: initialType === 'opensearch' && initialDs ? initialDs.id : '',
+          }
+    )
+  );
+  // Compare only the active backend's form — switching backendType mid-edit
+  // doesn't itself constitute dirtiness; only typed changes within whichever
+  // form variant is currently rendered do.
+  const isDirty =
+    backendType === 'prometheus'
+      ? JSON.stringify(promForm) !== initialPromSnapshot
+      : JSON.stringify(osForm) !== initialOsSnapshot;
+  // Single entry point for "user wants to abandon edits". Bare onCancel
+  // discards immediately; the wrapped version asks first when dirty. Used
+  // by the footer Cancel button, the flyout's overlay-click / Esc handler,
+  // and any other affordance that closes the flyout without saving.
+  const requestCancel = useCallback(() => {
+    if (isDirty) {
+      setShowDiscardConfirm(true);
+      return;
+    }
+    onCancel();
+  }, [isDirty, onCancel]);
 
   const updateProm = useCallback(
     <K extends keyof PrometheusFormState>(key: K, value: PrometheusFormState[K]) => {
@@ -321,245 +368,290 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
   }
 
   return (
-    <EuiFlyout onClose={onCancel} size="l" ownFocus aria-labelledby="createMonitorFlyoutTitle">
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id="createMonitorFlyoutTitle">
+    <>
+      <EuiFlyout
+        onClose={requestCancel}
+        size="l"
+        ownFocus
+        aria-labelledby="createMonitorFlyoutTitle"
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2 id="createMonitorFlyoutTitle">
+              {backendType === 'prometheus'
+                ? isEdit
+                  ? i18n.translate('observability.alerting.createMonitor.editTitleMetrics', {
+                      defaultMessage: 'Edit Metrics Monitor',
+                    })
+                  : i18n.translate('observability.alerting.createMonitor.titleMetrics', {
+                      defaultMessage: 'Create Metrics Monitor',
+                    })
+                : isEdit
+                ? i18n.translate('observability.alerting.createMonitor.editTitleLogs', {
+                    defaultMessage: 'Edit Logs Monitor',
+                  })
+                : i18n.translate('observability.alerting.createMonitor.titleLogs', {
+                    defaultMessage: 'Create Logs Monitor',
+                  })}
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="subdued">
             {backendType === 'prometheus'
-              ? isEdit
-                ? i18n.translate('observability.alerting.createMonitor.editTitleMetrics', {
-                    defaultMessage: 'Edit Metrics Monitor',
-                  })
-                : i18n.translate('observability.alerting.createMonitor.titleMetrics', {
-                    defaultMessage: 'Create Metrics Monitor',
-                  })
-              : isEdit
-              ? i18n.translate('observability.alerting.createMonitor.editTitleLogs', {
-                  defaultMessage: 'Edit Logs Monitor',
+              ? i18n.translate('observability.alerting.createMonitor.subtitlePromql', {
+                  defaultMessage: 'PromQL-based alerting rule',
                 })
-              : i18n.translate('observability.alerting.createMonitor.titleLogs', {
-                  defaultMessage: 'Create Logs Monitor',
+              : i18n.translate('observability.alerting.createMonitor.subtitlePpl', {
+                  defaultMessage: 'PPL-based alerting rule',
                 })}
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued">
-          {backendType === 'prometheus'
-            ? i18n.translate('observability.alerting.createMonitor.subtitlePromql', {
-                defaultMessage: 'PromQL-based alerting rule',
-              })
-            : i18n.translate('observability.alerting.createMonitor.subtitlePpl', {
-                defaultMessage: 'PPL-based alerting rule',
-              })}
-        </EuiText>
-      </EuiFlyoutHeader>
+          </EuiText>
+        </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>
-        {/* Target Datasource — locked in edit mode (the existing monitor
+        <EuiFlyoutBody>
+          {/* Target Datasource — locked in edit mode (the existing monitor
             already binds a datasource; changing it would require re-creating).
             Scoped to the active backend so a Logs flyout never shows
             Prometheus datasources and vice versa. */}
-        <DatasourceTargetSelector
-          datasources={datasources.filter((d) => d.type === backendType)}
-          selectedId={activeForm.datasourceId}
-          onChange={isEdit ? () => undefined : handleDatasourceChange}
-        />
+          <DatasourceTargetSelector
+            datasources={datasources.filter((d) => d.type === backendType)}
+            selectedId={activeForm.datasourceId}
+            onChange={isEdit ? () => undefined : handleDatasourceChange}
+          />
 
-        <EuiSpacer size="m" />
+          <EuiSpacer size="m" />
 
-        {/* Creation Mode Toggle — AI only available for Prometheus, hidden in edit mode */}
-        {!isEdit && backendType === 'prometheus' && (
-          <>
-            <EuiPanel paddingSize="s" hasBorder>
-              <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+          {/* Creation Mode Toggle — AI only available for Prometheus, hidden in edit mode */}
+          {!isEdit && backendType === 'prometheus' && (
+            <>
+              <EuiPanel paddingSize="s" hasBorder>
+                <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs">
+                      <strong>
+                        {i18n.translate(
+                          'observability.alerting.createMonitor.creationMethodLabel',
+                          {
+                            defaultMessage: 'Creation method',
+                          }
+                        )}
+                      </strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup gutterSize="xs" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge
+                          color={creationMode === 'manual' ? 'primary' : 'hollow'}
+                          onClick={() => setCreationMode('manual')}
+                          onClickAriaLabel={i18n.translate(
+                            'observability.alerting.createMonitor.manualCreationAriaLabel',
+                            { defaultMessage: 'Manual creation' }
+                          )}
+                        >
+                          {i18n.translate('observability.alerting.createMonitor.manualBadge', {
+                            defaultMessage: 'Manual',
+                          })}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge
+                          color={creationMode === 'ai' ? 'secondary' : 'hollow'}
+                          onClick={() => setCreationMode('ai')}
+                          onClickAriaLabel={i18n.translate(
+                            'observability.alerting.createMonitor.fromTemplateAriaLabel',
+                            { defaultMessage: 'Create from template' }
+                          )}
+                          iconType="sparkles"
+                        >
+                          {i18n.translate(
+                            'observability.alerting.createMonitor.fromTemplateBadge',
+                            {
+                              defaultMessage: 'From template',
+                            }
+                          )}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+              <EuiSpacer size="m" />
+            </>
+          )}
+
+          {/* Monitor Name */}
+          <EuiFormRow
+            label={i18n.translate('observability.alerting.createMonitor.monitorNameLabel', {
+              defaultMessage: 'Monitor Name',
+            })}
+            fullWidth
+            isInvalid={
+              duplicateName ||
+              (hasSubmitted && (!!validationErrors.name || activeForm.name.trim() === ''))
+            }
+            error={
+              duplicateNameError ||
+              (hasSubmitted
+                ? validationErrors.name ||
+                  (activeForm.name.trim() === ''
+                    ? i18n.translate('observability.alerting.createMonitor.nameRequired', {
+                        defaultMessage: 'Name is required',
+                      })
+                    : undefined)
+                : undefined)
+            }
+          >
+            <EuiFieldText
+              placeholder={
+                backendType === 'prometheus'
+                  ? i18n.translate(
+                      'observability.alerting.createMonitor.monitorNamePlaceholderPrometheus',
+                      { defaultMessage: 'e.g. HighCpuUsage, PaymentErrorRate' }
+                    )
+                  : i18n.translate(
+                      'observability.alerting.createMonitor.monitorNamePlaceholderOpensearch',
+                      { defaultMessage: 'e.g. High Error Rate, Disk Usage Alert' }
+                    )
+              }
+              value={activeForm.name}
+              onChange={(e) => updateName(e.target.value)}
+              fullWidth
+              aria-label={i18n.translate(
+                'observability.alerting.createMonitor.monitorNameAriaLabel',
+                {
+                  defaultMessage: 'Monitor name',
+                }
+              )}
+            />
+          </EuiFormRow>
+
+          <EuiSpacer size="m" />
+
+          {/* Severity + Enabled */}
+          <EuiFlexGroup gutterSize="m" alignItems="center">
+            <EuiFlexItem grow={3}>
+              <EuiFormRow
+                label={i18n.translate('observability.alerting.createMonitor.severityLabel', {
+                  defaultMessage: 'Severity',
+                })}
+                display="rowCompressed"
+              >
+                <EuiSelect
+                  options={SEVERITY_OPTIONS}
+                  value={activeForm.severity}
+                  onChange={(e) => updateSeverity(e.target.value as UnifiedAlertSeverity)}
+                  compressed
+                  aria-label={i18n.translate(
+                    'observability.alerting.createMonitor.severityAriaLabel',
+                    { defaultMessage: 'Severity' }
+                  )}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem grow={1}>
+              <EuiFormRow
+                label={i18n.translate('observability.alerting.createMonitor.enabledLabel', {
+                  defaultMessage: 'Enabled',
+                })}
+                display="rowCompressed"
+              >
+                <EuiSwitch
+                  label=""
+                  checked={activeForm.enabled}
+                  onChange={(e) => updateEnabled(e.target.checked)}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer size="m" />
+
+          {/* Backend-specific form */}
+          {backendType === 'prometheus' ? (
+            <PrometheusFormSection
+              form={promForm}
+              onUpdate={updateProm}
+              validationErrors={validationErrors}
+              hasSubmitted={hasSubmitted}
+              context={context}
+            />
+          ) : (
+            <OpenSearchFormSection
+              form={osForm}
+              onUpdate={updateOs}
+              validationErrors={validationErrors}
+              hasSubmitted={hasSubmitted}
+              pplServerError={submitError?.pplMessage}
+            />
+          )}
+        </EuiFlyoutBody>
+
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={requestCancel}>
+                {i18n.translate('observability.alerting.createMonitor.cancelButton', {
+                  defaultMessage: 'Cancel',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs">
-                    <strong>
-                      {i18n.translate('observability.alerting.createMonitor.creationMethodLabel', {
-                        defaultMessage: 'Creation method',
-                      })}
-                    </strong>
-                  </EuiText>
+                  <EuiButton onClick={handleSave} isDisabled={!isValid}>
+                    {isEdit
+                      ? i18n.translate('observability.alerting.createMonitor.saveChangesButton', {
+                          defaultMessage: 'Save Changes',
+                        })
+                      : i18n.translate('observability.alerting.createMonitor.saveMonitorButton', {
+                          defaultMessage: 'Save Monitor',
+                        })}
+                  </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="xs" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge
-                        color={creationMode === 'manual' ? 'primary' : 'hollow'}
-                        onClick={() => setCreationMode('manual')}
-                        onClickAriaLabel={i18n.translate(
-                          'observability.alerting.createMonitor.manualCreationAriaLabel',
-                          { defaultMessage: 'Manual creation' }
-                        )}
-                      >
-                        {i18n.translate('observability.alerting.createMonitor.manualBadge', {
-                          defaultMessage: 'Manual',
-                        })}
-                      </EuiBadge>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge
-                        color={creationMode === 'ai' ? 'secondary' : 'hollow'}
-                        onClick={() => setCreationMode('ai')}
-                        onClickAriaLabel={i18n.translate(
-                          'observability.alerting.createMonitor.fromTemplateAriaLabel',
-                          { defaultMessage: 'Create from template' }
-                        )}
-                        iconType="sparkles"
-                      >
-                        {i18n.translate('observability.alerting.createMonitor.fromTemplateBadge', {
-                          defaultMessage: 'From template',
-                        })}
-                      </EuiBadge>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <EuiButton fill onClick={handleSave} isDisabled={!isValid}>
+                    {i18n.translate('observability.alerting.createMonitor.saveAndEnableButton', {
+                      defaultMessage: 'Save & Enable',
+                    })}
+                  </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiPanel>
-            <EuiSpacer size="m" />
-          </>
-        )}
-
-        {/* Monitor Name */}
-        <EuiFormRow
-          label={i18n.translate('observability.alerting.createMonitor.monitorNameLabel', {
-            defaultMessage: 'Monitor Name',
-          })}
-          fullWidth
-          isInvalid={
-            duplicateName ||
-            (hasSubmitted && (!!validationErrors.name || activeForm.name.trim() === ''))
-          }
-          error={
-            duplicateNameError ||
-            (hasSubmitted
-              ? validationErrors.name ||
-                (activeForm.name.trim() === ''
-                  ? i18n.translate('observability.alerting.createMonitor.nameRequired', {
-                      defaultMessage: 'Name is required',
-                    })
-                  : undefined)
-              : undefined)
-          }
-        >
-          <EuiFieldText
-            placeholder={
-              backendType === 'prometheus'
-                ? i18n.translate(
-                    'observability.alerting.createMonitor.monitorNamePlaceholderPrometheus',
-                    { defaultMessage: 'e.g. HighCpuUsage, PaymentErrorRate' }
-                  )
-                : i18n.translate(
-                    'observability.alerting.createMonitor.monitorNamePlaceholderOpensearch',
-                    { defaultMessage: 'e.g. High Error Rate, Disk Usage Alert' }
-                  )
-            }
-            value={activeForm.name}
-            onChange={(e) => updateName(e.target.value)}
-            fullWidth
-            aria-label={i18n.translate(
-              'observability.alerting.createMonitor.monitorNameAriaLabel',
-              {
-                defaultMessage: 'Monitor name',
-              }
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+      {showDiscardConfirm && (
+        <EuiOverlayMask>
+          <EuiConfirmModal
+            title={i18n.translate('observability.alerting.createMonitor.discardConfirmTitle', {
+              defaultMessage: 'Discard unsaved changes?',
+            })}
+            onCancel={() => setShowDiscardConfirm(false)}
+            onConfirm={() => {
+              setShowDiscardConfirm(false);
+              onCancel();
+            }}
+            cancelButtonText={i18n.translate(
+              'observability.alerting.createMonitor.discardConfirmCancel',
+              { defaultMessage: 'Keep editing' }
             )}
-          />
-        </EuiFormRow>
-
-        <EuiSpacer size="m" />
-
-        {/* Severity + Enabled */}
-        <EuiFlexGroup gutterSize="m" alignItems="center">
-          <EuiFlexItem grow={3}>
-            <EuiFormRow
-              label={i18n.translate('observability.alerting.createMonitor.severityLabel', {
-                defaultMessage: 'Severity',
+            confirmButtonText={i18n.translate(
+              'observability.alerting.createMonitor.discardConfirmConfirm',
+              { defaultMessage: 'Discard changes' }
+            )}
+            buttonColor="danger"
+            defaultFocusedButton="cancel"
+            data-test-subj="alertManagerDiscardChangesConfirm"
+          >
+            <p>
+              {i18n.translate('observability.alerting.createMonitor.discardConfirmBody', {
+                defaultMessage:
+                  "You've made changes to this monitor that haven't been saved. Discarding will lose them.",
               })}
-              display="rowCompressed"
-            >
-              <EuiSelect
-                options={SEVERITY_OPTIONS}
-                value={activeForm.severity}
-                onChange={(e) => updateSeverity(e.target.value as UnifiedAlertSeverity)}
-                compressed
-                aria-label={i18n.translate(
-                  'observability.alerting.createMonitor.severityAriaLabel',
-                  { defaultMessage: 'Severity' }
-                )}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            <EuiFormRow
-              label={i18n.translate('observability.alerting.createMonitor.enabledLabel', {
-                defaultMessage: 'Enabled',
-              })}
-              display="rowCompressed"
-            >
-              <EuiSwitch
-                label=""
-                checked={activeForm.enabled}
-                onChange={(e) => updateEnabled(e.target.checked)}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="m" />
-
-        {/* Backend-specific form */}
-        {backendType === 'prometheus' ? (
-          <PrometheusFormSection
-            form={promForm}
-            onUpdate={updateProm}
-            validationErrors={validationErrors}
-            hasSubmitted={hasSubmitted}
-            context={context}
-          />
-        ) : (
-          <OpenSearchFormSection
-            form={osForm}
-            onUpdate={updateOs}
-            validationErrors={validationErrors}
-            hasSubmitted={hasSubmitted}
-            pplServerError={submitError?.pplMessage}
-          />
-        )}
-      </EuiFlyoutBody>
-
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCancel}>
-              {i18n.translate('observability.alerting.createMonitor.cancelButton', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={handleSave} isDisabled={!isValid}>
-                  {isEdit
-                    ? i18n.translate('observability.alerting.createMonitor.saveChangesButton', {
-                        defaultMessage: 'Save Changes',
-                      })
-                    : i18n.translate('observability.alerting.createMonitor.saveMonitorButton', {
-                        defaultMessage: 'Save Monitor',
-                      })}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={handleSave} isDisabled={!isValid}>
-                  {i18n.translate('observability.alerting.createMonitor.saveAndEnableButton', {
-                    defaultMessage: 'Save & Enable',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+            </p>
+          </EuiConfirmModal>
+        </EuiOverlayMask>
+      )}
+    </>
   );
 };

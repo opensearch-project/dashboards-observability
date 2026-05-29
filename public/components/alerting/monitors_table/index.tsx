@@ -44,6 +44,11 @@ interface MonitorsTableProps {
   onDelete: (ids: string[]) => void;
   onClone?: (monitor: UnifiedRuleSummary) => void;
   onEdit?: (monitor: UnifiedRuleSummary) => void;
+  /**
+   * Optional Disable / Enable handler. Forwarded to the detail flyout.
+   * Wired only for PPL monitors at the page layer.
+   */
+  onToggleEnabled?: (monitor: UnifiedRuleSummary) => Promise<void> | void;
   onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics' | 'slo') => void;
   /** Currently selected datasource IDs */
   selectedDsIds: string[];
@@ -72,6 +77,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   onDelete,
   onClone,
   onEdit,
+  onToggleEnabled,
   onCreateMonitor,
   selectedDsIds,
   onDatasourceChange,
@@ -89,6 +95,17 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({ ...DEFAULT_WIDTHS });
   const [selectedMonitor, setSelectedMonitor] = useState<UnifiedRuleSummary | null>(null);
+  // Keep `selectedMonitor` in sync with the latest version of itself in the
+  // rules list. Without this, an optimistic update at the page level (e.g.
+  // toggling `enabled` from the detail flyout) wouldn't reflect back into
+  // the flyout's button label / status pill — the flyout would render off
+  // a stale snapshot until the user closes and reopens it.
+  useEffect(() => {
+    if (!selectedMonitor) return;
+    const fresh = rules.find((r) => r.id === selectedMonitor.id);
+    if (!fresh) return;
+    if (fresh !== selectedMonitor) setSelectedMonitor(fresh);
+  }, [rules, selectedMonitor]);
   const [showCreatePopover, setShowCreatePopover] = useState(false);
   const [showSaveSearchInput, setShowSaveSearchInput] = useState(false);
   const [saveSearchName, setSaveSearchName] = useState('');
@@ -396,6 +413,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 onDelete={onDelete}
                 onClone={onClone}
                 onEdit={onEdit}
+                onToggleEnabled={onToggleEnabled}
               />
             </EuiResizablePanel>
           </>

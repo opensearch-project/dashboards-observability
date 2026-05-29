@@ -68,6 +68,14 @@ export interface MonitorDetailFlyoutProps {
    * an edit flyout.
    */
   onEdit?: (monitor: UnifiedRuleSummary) => void;
+  /**
+   * Optional Disable / Enable handler. The page wires this only for PPL
+   * monitors, which is the surface where {@link onEdit} is also wired —
+   * the underlying transport (`PUT /monitors/{id}`) and trigger payload
+   * stripping are the same. Non-PPL monitor types stay disabled with an
+   * explanatory tooltip until their edit path is implemented.
+   */
+  onToggleEnabled?: (monitor: UnifiedRuleSummary) => Promise<void> | void;
 }
 
 // ============================================================================
@@ -80,8 +88,13 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   onDelete,
   onClone,
   onEdit,
+  onToggleEnabled,
 }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isTogglingEnabled, setIsTogglingEnabled] = useState(false);
+  // Mirror the Edit-button gate (PPL only). Non-PPL types stay read-only;
+  // the existing tooltip surfaces explains the limitation.
+  const canToggleEnabled = !!onToggleEnabled && monitor.monitorType === 'ppl';
   const { detail, isLoading: detailLoading, error: detailError } = useMonitorDetail({
     dsId: monitor.datasourceId,
     ruleId: monitor.id,
@@ -700,15 +713,21 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'observability.alerting.monitorDetailFlyout.enableDisableTooltip',
-                      {
-                        defaultMessage: 'Enable/disable is not yet wired to the backend API',
-                      }
-                    )}
-                  >
-                    <EuiButton size="s" isDisabled>
+                  {canToggleEnabled ? (
+                    <EuiButton
+                      size="s"
+                      isLoading={isTogglingEnabled}
+                      onClick={async () => {
+                        if (!onToggleEnabled || isTogglingEnabled) return;
+                        setIsTogglingEnabled(true);
+                        try {
+                          await onToggleEnabled(monitor);
+                        } finally {
+                          setIsTogglingEnabled(false);
+                        }
+                      }}
+                      data-test-subj="alertManagerMonitorDetailToggleEnabled"
+                    >
                       {monitor.enabled === false
                         ? i18n.translate(
                             'observability.alerting.monitorDetailFlyout.enableMonitor',
@@ -719,7 +738,28 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                             { defaultMessage: 'Disable Monitor' }
                           )}
                     </EuiButton>
-                  </EuiToolTip>
+                  ) : (
+                    <EuiToolTip
+                      content={i18n.translate(
+                        'observability.alerting.monitorDetailFlyout.enableDisableTooltip',
+                        {
+                          defaultMessage: 'Enable/disable is only supported for PPL monitors.',
+                        }
+                      )}
+                    >
+                      <EuiButton size="s" isDisabled>
+                        {monitor.enabled === false
+                          ? i18n.translate(
+                              'observability.alerting.monitorDetailFlyout.enableMonitor',
+                              { defaultMessage: 'Enable Monitor' }
+                            )
+                          : i18n.translate(
+                              'observability.alerting.monitorDetailFlyout.disableMonitor',
+                              { defaultMessage: 'Disable Monitor' }
+                            )}
+                      </EuiButton>
+                    </EuiToolTip>
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
