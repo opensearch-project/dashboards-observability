@@ -34,8 +34,6 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { UnifiedAlert, UnifiedAlertSummary, Datasource } from '../../../common/types/alerting';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { SEVERITY_COLORS, STATE_COLORS } from './shared_constants';
-import { coreRefs } from '../../framework/core_refs';
-import { observabilityAlertingID } from '../../../common/constants/shared';
 
 /** Internal label keys filtered from the Labels accordion display. */
 const INTERNAL_LABEL_KEYS = new Set([
@@ -196,9 +194,13 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
 
   const navigateToSource = () => {
     if (!sourceLinkPath) return;
-    coreRefs?.application?.navigateToApp(observabilityAlertingID, { path: sourceLinkPath });
-    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    // Same-app navigation: directly update the hash and dispatch a
+    // synthetic hashchange event so the AlarmsPage listener picks it up.
+    // Setting window.location.hash alone doesn't fire the event when
+    // called programmatically from within the same page.
     onClose();
+    window.location.hash = sourceLinkPath;
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
   };
 
   // Filter out internal/system labels for display (fix S-m2/6)
