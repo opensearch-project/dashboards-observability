@@ -112,3 +112,27 @@ describe('useFacetCollapse', () => {
     expect(snapshot!.isCollapsed('dynamic-facet', true)).toBe(true);
   });
 });
+
+describe('FacetFilterGroup — search matches both display label and raw value', () => {
+  it('filters by raw option value when displayMap provides a different label', () => {
+    const props: FacetFilterGroupProps = {
+      ...defaultProps,
+      options: ['field_a', 'field_b', 'field_c'],
+      counts: { field_a: 3, field_b: 2, field_c: 1 },
+      displayMap: { field_a: 'Alpha', field_b: 'Beta', field_c: 'Charlie' },
+      searchable: true,
+    };
+    const { getByRole, queryByText, getByText } = render(<FacetFilterGroup {...props} />);
+    const searchBox = getByRole('searchbox');
+
+    // Search by display label — should match
+    fireEvent.change(searchBox, { target: { value: 'Alpha' } });
+    expect(getByText('Alpha')).toBeInTheDocument();
+    expect(queryByText('Beta')).not.toBeInTheDocument();
+
+    // Search by raw field name — should also match (the fix)
+    fireEvent.change(searchBox, { target: { value: 'field_b' } });
+    expect(getByText('Beta')).toBeInTheDocument();
+    expect(queryByText('Alpha')).not.toBeInTheDocument();
+  });
+});

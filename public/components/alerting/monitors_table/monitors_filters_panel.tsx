@@ -304,7 +304,11 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
           if (visibleLabelKeys.length === 0) return null;
           const q = labelSearch.trim().toLowerCase();
           const matchedLabelKeys = q
-            ? visibleLabelKeys.filter((k) => k.toLowerCase().includes(q))
+            ? visibleLabelKeys.filter(
+                (k) =>
+                  k.toLowerCase().includes(q) ||
+                  collectLabelValues(rules, k).some((v) => v.toLowerCase().includes(q))
+              )
             : visibleLabelKeys;
           const cappedLabelKeys = showAllLabels
             ? matchedLabelKeys
