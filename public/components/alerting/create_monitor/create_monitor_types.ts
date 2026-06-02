@@ -128,22 +128,25 @@ export const DEFAULT_PROM_FORM: PrometheusFormState = {
   enabled: true,
 };
 
-// Default to `custom` trigger type. PPL alerting queries almost always use
-// `stats` (aggregation), which returns exactly 1 row per group — so
-// `number_of_results` (which counts rows, not column values) would rarely
-// fire as expected. `custom` with `where <column> > threshold` evaluates
-// the actual aggregated value, which is what users intend.
+// Default to `number_of_results >= 1` — "fire when the query returns any
+// rows." Works with every PPL shape (filter-only, stats, eval, …) and never
+// references a column the query may not produce. Switching back to `custom`
+// is one click in the trigger UI for users who want a threshold over an
+// aggregated column.
 //
-// The default condition references `error_count` to match the example query
-// shown in the flyout. Users must update this when they change the alias.
+// (Earlier versions defaulted to `custom + where error_count > 0`. That paired
+// nicely with a stats-aggregated example query, but rejected at save time
+// the moment a user wrote a filter-only query — `error_count` doesn't exist
+// in the result schema, so the OS alerting backend returns
+// "Field [error_count] not found.")
 export const createDefaultPplTrigger = (): PplTriggerForm => ({
   id: `ppl-trigger-${Date.now()}`,
   name: 'trigger-1',
   severity: '3',
-  type: 'custom',
-  numResultsCondition: '>',
+  type: 'number_of_results',
+  numResultsCondition: '>=',
   numResultsValue: 1,
-  customCondition: 'where error_count > 0',
+  customCondition: '',
   actions: [],
 });
 

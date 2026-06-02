@@ -411,14 +411,22 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
           {/* Target Datasource — locked in edit mode (the existing monitor
             already binds a datasource; changing it would require re-creating).
             Scoped to the active backend so a Logs flyout never shows
-            Prometheus datasources and vice versa. */}
-          <DatasourceTargetSelector
-            datasources={datasources.filter((d) => d.type === backendType)}
-            selectedId={activeForm.datasourceId}
-            onChange={isEdit ? () => undefined : handleDatasourceChange}
-          />
+            Prometheus datasources and vice versa.
 
-          <EuiSpacer size="m" />
+            Logs (PPL) form embeds its datasource picker inline in the query
+            toolbar, so we only render the standalone selector for the
+            Prometheus form. */}
+          {backendType === 'prometheus' && (
+            <>
+              <DatasourceTargetSelector
+                datasources={datasources.filter((d) => d.type === backendType)}
+                selectedId={activeForm.datasourceId}
+                onChange={isEdit ? () => undefined : handleDatasourceChange}
+              />
+
+              <EuiSpacer size="m" />
+            </>
+          )}
 
           {/* Creation Mode Toggle — AI only available for Prometheus, hidden in edit mode */}
           {!isEdit && backendType === 'prometheus' && (
@@ -581,6 +589,9 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
               onUpdate={updateOs}
               validationErrors={validationErrors}
               hasSubmitted={hasSubmitted}
+              datasources={datasources.filter((d) => d.type === 'opensearch')}
+              onDatasourceChange={(id) => handleDatasourceChange(id, 'opensearch')}
+              isEdit={isEdit}
               pplServerError={submitError?.pplMessage}
             />
           )}

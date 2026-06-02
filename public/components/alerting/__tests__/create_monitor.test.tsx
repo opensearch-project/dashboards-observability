@@ -41,36 +41,37 @@ jest.mock('../create_monitor/sections/destination_picker', () => ({
   ),
 }));
 
-jest.mock('../create_monitor/sections/index_picker', () => ({
-  IndexPicker: ({
-    selected,
-    onChange,
+jest.mock('../create_monitor/sections/query_toolbar', () => ({
+  QueryToolbar: ({
+    selectedIndices,
+    onIndicesChange,
+    selectedTimeField,
+    onTimeFieldChange,
   }: {
-    selected: string[];
-    onChange: (next: string[]) => void;
+    selectedIndices: string[];
+    onIndicesChange: (next: string[]) => void;
+    selectedTimeField: string;
+    onTimeFieldChange: (v: string) => void;
   }) => (
-    <input
-      data-test-subj="indexPickerMock"
-      value={selected.join(',')}
-      onChange={(e) =>
-        onChange(
-          e.target.value
-            .split(',')
-            .map((s) => s.trim())
-            .filter(Boolean)
-        )
-      }
-    />
-  ),
-}));
-
-jest.mock('../create_monitor/sections/time_field_selector', () => ({
-  TimeFieldSelector: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
-    <input
-      data-test-subj="timeFieldSelectorMock"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    />
+    <div data-test-subj="queryToolbarMock">
+      <input
+        data-test-subj="indexPickerMock"
+        value={selectedIndices.join(',')}
+        onChange={(e) =>
+          onIndicesChange(
+            e.target.value
+              .split(',')
+              .map((s) => s.trim())
+              .filter(Boolean)
+          )
+        }
+      />
+      <input
+        data-test-subj="timeFieldSelectorMock"
+        value={selectedTimeField}
+        onChange={(e) => onTimeFieldChange(e.target.value)}
+      />
+    </div>
   ),
 }));
 
@@ -130,7 +131,7 @@ describe('CreateMonitor', () => {
 });
 
 describe('CreateMonitor — PPL form', () => {
-  it('renders a default PPL trigger with the custom-condition controls', () => {
+  it('renders a default PPL trigger with the number-of-results controls', () => {
     render(
       <CreateMonitor
         onSave={jest.fn()}
@@ -141,12 +142,15 @@ describe('CreateMonitor — PPL form', () => {
     );
 
     expect(screen.getByText(/Triggers \(1\)/i)).toBeTruthy();
-    // Default trigger type is now `custom` (better for stats-based queries).
-    expect(screen.getByLabelText('Custom PPL where clause')).toBeTruthy();
-    expect(screen.queryByLabelText('Threshold value')).toBeNull();
+    // Default trigger type is `number_of_results` — fires on any matching
+    // row, regardless of the query's column shape. Replaces the previous
+    // `custom + where error_count > 0` default that broke filter-only
+    // queries with "Field [error_count] not found." at save time.
+    expect(screen.getByLabelText('Threshold value')).toBeTruthy();
+    expect(screen.queryByLabelText('Custom PPL where clause')).toBeNull();
   });
 
-  it('toggling to Number of results swaps the controls', () => {
+  it('toggling to Custom swaps to the where-clause control', () => {
     render(
       <CreateMonitor
         onSave={jest.fn()}
@@ -156,14 +160,14 @@ describe('CreateMonitor — PPL form', () => {
       />
     );
 
-    // Default is custom; switch to number_of_results.
-    const numResultsRadio = screen.getByRole('radio', {
-      name: /number of results/i,
+    // Default is number_of_results; switch to custom.
+    const customRadio = screen.getByRole('radio', {
+      name: /custom/i,
     }) as HTMLInputElement;
-    fireEvent.click(numResultsRadio);
+    fireEvent.click(customRadio);
 
-    expect(screen.getByLabelText('Threshold value')).toBeTruthy();
-    expect(screen.queryByLabelText('Custom PPL where clause')).toBeNull();
+    expect(screen.getByLabelText('Custom PPL where clause')).toBeTruthy();
+    expect(screen.queryByLabelText('Threshold value')).toBeNull();
   });
 
   it('save dispatches onSave with PPL fields populated', () => {
@@ -195,6 +199,6 @@ describe('CreateMonitor — PPL form', () => {
     expect(arg.name).toBe('monitor-1');
     expect(arg.query).toContain('source = logs-*');
     expect(arg.pplTriggers).toHaveLength(1);
-    expect(arg.pplTriggers[0].type).toBe('custom');
+    expect(arg.pplTriggers[0].type).toBe('number_of_results');
   });
 });

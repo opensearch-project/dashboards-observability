@@ -57,6 +57,7 @@ import { observabilityID, observabilityTitle } from '../../../common/constants/s
 import { ALERT_MANAGER_MAX_DATASOURCES_SETTING } from '../../../common/constants/alerting_settings';
 import { transformPplFormToPayload } from '../../../common/services/alerting/form_transforms';
 import { PPL_MONITOR_NAME_MAX } from '../../../common/services/alerting/validators';
+import { showMonitorCreatedToast } from './toast_helpers';
 import './alerting.scss';
 import type { OpenSearchFormState } from './create_monitor/create_monitor_types';
 import {
@@ -169,6 +170,28 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   useEffect(() => {
     if (deepLink.tab) setActiveTab(deepLink.tab);
   }, [deepLink.tab]);
+
+  // Mirror the active tab into the URL hash so reload / bookmark / back-button
+  // round-trip the user's selection. Skipped when the hash already matches
+  // (avoids redundant history entries on same-tab clicks).
+  //
+  // Deep-link query params (`q=…&ds=…`) are intentionally not preserved on
+  // user-initiated tab clicks — a stale filter from an inbound link
+  // shouldn't follow the user into the Alerts / Routing tabs they navigate
+  // to next.
+  //
+  // `replaceState` does NOT fire `hashchange`, which is exactly what we
+  // want here: we've already updated `activeTab` directly, and firing the
+  // event would round-trip back through the deep-link `useEffect` for no
+  // benefit. `navigateToApp` would force a remount; `replaceState` is the
+  // cheapest path that still updates the URL bar.
+  const handleTabClick = useCallback((next: TabId) => {
+    setActiveTab(next);
+    const desiredHash = `#/${next}`;
+    if (window.location.hash !== desiredHash) {
+      window.history.replaceState(null, '', desiredHash);
+    }
+  }, []);
 
   // ---- Datasource selection (priority order + persistence) ----
   const { selectedDsIds, setSelectedDsIds } = useDatasourceSelection({
@@ -720,11 +743,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     const newRule = buildOptimisticRule(formState);
     try {
       await mutations.createMonitor(buildPayload(formState), dsId);
-      addToast(
-        i18n.translate('observability.alerting.alarmsPage.toast.monitorCreated', {
-          defaultMessage: 'Monitor created successfully',
-        })
-      );
+      showMonitorCreatedToast({ monitorName: formState.name, dsId });
       setShowCreateMonitor(false);
       setCreateBackendType(null);
       setPplSubmitError(null);
@@ -855,7 +874,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
               0,
               maxDatasources
             )}
-            onGoToRules={() => setActiveTab('rules')}
+            onGoToRules={() => handleTabClick('rules')}
             startMs={startMs}
             endMs={endMs}
             pickerStart={startTime}
@@ -928,7 +947,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           <EuiTab
             key={t.id}
             isSelected={activeTab === t.id}
-            onClick={() => setActiveTab(t.id)}
+            onClick={() => handleTabClick(t.id)}
             data-test-subj={`alertManagerTabs-${t.id}`}
           >
             {t.name}
