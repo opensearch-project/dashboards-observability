@@ -15,6 +15,7 @@ import type {
   AcknowledgeAlertResponse,
   MonitorDeleteResponse,
   MonitorResponse,
+  PrometheusRuleResponse,
 } from '../mutations/monitor_mutations_client';
 
 export interface UseMonitorMutationsResult {
@@ -25,6 +26,11 @@ export interface UseMonitorMutationsResult {
     dsId: string
   ) => Promise<MonitorResponse>;
   deleteMonitor: (id: string, dsId: string) => Promise<MonitorDeleteResponse>;
+  createPrometheusRule: (
+    data: Record<string, unknown>,
+    dsId: string
+  ) => Promise<PrometheusRuleResponse>;
+  deletePrometheusRule: (dsId: string, groupName: string) => Promise<{ success: boolean }>;
   acknowledgeAlert: (
     alertId: string,
     datasourceId?: string,
@@ -39,6 +45,8 @@ export function useMonitorMutations(): UseMonitorMutationsResult {
       createMonitor: (data, dsId) => client.createMonitor(data, dsId),
       updateMonitor: (id, data, dsId) => client.updateMonitor(id, data, dsId),
       deleteMonitor: (id, dsId) => client.deleteMonitor(id, dsId),
+      createPrometheusRule: (data, dsId) => client.createPrometheusRule(data, dsId),
+      deletePrometheusRule: (dsId, groupName) => client.deletePrometheusRule(dsId, groupName),
       acknowledgeAlert: (alertId, datasourceId, monitorId) =>
         client.acknowledgeAlert(alertId, datasourceId, monitorId),
     }),

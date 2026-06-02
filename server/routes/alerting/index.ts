@@ -86,6 +86,11 @@ export interface AlertingRoutesDeps {
    * surface.
    */
   enableMetadataRoutes?: boolean;
+  /**
+   * Optional RulerClient for Prometheus rule CRUD. When provided,
+   * Prometheus rule mutation routes are registered.
+   */
+  rulerClient?: import('../../services/slo/ruler_client').RulerClient;
 }
 
 /**
@@ -349,6 +354,25 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     (ctx, dsId) => getAlertingClientCtx(ctx as AlertingHandlerContext, dsId),
     logger
   );
+
+  // Prometheus rule mutation routes (create/delete via Cortex ruler).
+  // Only registered when a RulerClient is provided (SLO feature enabled).
+  if (deps.rulerClient) {
+    const { registerPrometheusRuleRoutes } = require('./mutations/prometheus_routes');
+    registerPrometheusRuleRoutes(
+      router,
+      deps.rulerClient,
+      async (ctx: AlertingHandlerContext, dsId: string) => {
+        const client = await getAlertingClientCtx(ctx as AlertingHandlerContext, dsId);
+        const datasource = await resolvePrometheusDatasource(ctx as AlertingHandlerContext, dsId);
+        if (!datasource) {
+          throw createNotFoundError(`Prometheus datasource not found: ${dsId}`);
+        }
+        return { client, datasource };
+      },
+      logger
+    );
+  }
 
   // Unified view routes
   router.get(

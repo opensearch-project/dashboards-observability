@@ -149,7 +149,10 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     if (selected.length === 0) return [true, true];
     return [
       selected.every((d) => d.type === 'prometheus'),
-      selected.every((d) => d.type === 'opensearch'),
+      // Always allow Metrics creation when at least one datasource is selected —
+      // the Prometheus data-connection may exist on the cluster without a
+      // corresponding MDS saved object (discovered via SQL plugin API, not SO).
+      false,
     ];
   }, [datasources, selectedDsIds]);
 

@@ -94,7 +94,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   const [isTogglingEnabled, setIsTogglingEnabled] = useState(false);
   // Mirror the Edit-button gate (PPL only). Non-PPL types stay read-only;
   // the existing tooltip surfaces explains the limitation.
-  const canToggleEnabled = !!onToggleEnabled && monitor.monitorType === 'ppl';
+  const canToggleEnabled = !!onToggleEnabled && (monitor.monitorType === 'ppl' || monitor.monitorType === 'metric');
   const { detail, isLoading: detailLoading, error: detailError } = useMonitorDetail({
     dsId: monitor.datasourceId,
     ruleId: monitor.id,
@@ -191,7 +191,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
           {/* Quick actions */}
           <EuiFlexGroup gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              {onEdit && monitor.monitorType === 'ppl' ? (
+              {onEdit && (monitor.monitorType === 'ppl' || monitor.monitorType === 'metric') ? (
                 <EuiButtonEmpty
                   size="s"
                   iconType="pencil"

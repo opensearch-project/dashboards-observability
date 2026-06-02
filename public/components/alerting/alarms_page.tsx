@@ -744,7 +744,30 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     if (!dsId) return;
     const newRule = buildOptimisticRule(formState);
     try {
-      await mutations.createMonitor(buildPayload(formState), dsId);
+      if (formState.datasourceType === 'prometheus') {
+        // Prometheus rules go to the Cortex ruler API
+        const promForm = formState as import('./create_monitor/create_monitor_types').PrometheusFormState;
+        // Use pendingPeriod from Eval Settings if edited; fall back to threshold.forDuration
+        const resolvedForDuration = promForm.pendingPeriod || promForm.threshold.forDuration;
+        const payload = {
+          name: promForm.name,
+          query: promForm.query,
+          operator: promForm.threshold.operator,
+          threshold: promForm.threshold.value,
+          forDuration: resolvedForDuration,
+          evaluationInterval: promForm.evaluationInterval,
+          labels: Object.fromEntries(
+            promForm.labels.filter((l) => l.key && l.value).map((l) => [l.key, l.value])
+          ),
+          annotations: Object.fromEntries(
+            promForm.annotations.filter((a) => a.key && a.value).map((a) => [a.key, a.value])
+          ),
+          enabled: promForm.enabled,
+        };
+        await mutations.createPrometheusRule(payload, dsId);
+      } else {
+        await mutations.createMonitor(buildPayload(formState), dsId);
+      }
       showMonitorCreatedToast({ monitorName: formState.name, dsId });
       setShowCreateMonitor(false);
       setCreateBackendType(null);
@@ -773,7 +796,28 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     const dsId = resolveDatasourceId(formState);
     if (!dsId) return;
     try {
-      await mutations.updateMonitor(ruleId, buildPayload(formState), dsId);
+      if (formState.datasourceType === 'prometheus') {
+        // Prometheus rules use upsert semantics — same endpoint as create
+        const promForm = formState as import('./create_monitor/create_monitor_types').PrometheusFormState;
+        const payload = {
+          name: promForm.name,
+          query: promForm.query,
+          operator: promForm.threshold.operator,
+          threshold: promForm.threshold.value,
+          forDuration: promForm.threshold.forDuration,
+          evaluationInterval: promForm.evaluationInterval,
+          labels: Object.fromEntries(
+            promForm.labels.filter((l) => l.key && l.value).map((l) => [l.key, l.value])
+          ),
+          annotations: Object.fromEntries(
+            promForm.annotations.filter((a) => a.key && a.value).map((a) => [a.key, a.value])
+          ),
+          enabled: promForm.enabled,
+        };
+        await mutations.createPrometheusRule(payload, dsId);
+      } else {
+        await mutations.updateMonitor(ruleId, buildPayload(formState), dsId);
+      }
       addToast(
         i18n.translate('observability.alerting.alarmsPage.toast.monitorUpdated', {
           defaultMessage: 'Alert rule updated successfully',
@@ -904,12 +948,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
               setCreateBackendType('opensearch');
               setShowCreateMonitor(true);
             } else if (type === 'metrics') {
-              addToast(
-                i18n.translate('observability.alerting.alarmsPage.toast.metricsMonitorComingSoon', {
-                  defaultMessage: 'Metrics rule creation will be available in a follow-up release.',
-                }),
-                'primary'
-              );
+              setCreateBackendType('prometheus');
+              setShowCreateMonitor(true);
             }
           }}
           selectedDsIds={selectedDsIds}
