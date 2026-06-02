@@ -187,6 +187,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
   );
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
   // Snapshot the initial form so we can detect "dirty" against the value the
@@ -308,6 +309,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
 
   const handleSave = useCallback(() => {
     setHasSubmitted(true);
+    if (isSaving) return;
     // Guard against duplicate names client-side. The Save button is also
     // disabled via `isValid`, but defending here too means programmatic
     // submission paths (Enter key on a field) can't bypass the check.
@@ -319,6 +321,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
         return;
       }
       setValidationErrors({});
+      setIsSaving(true);
       onSave(promForm);
     } else {
       const result = validatePplForm({
@@ -331,9 +334,10 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
         return;
       }
       setValidationErrors({});
+      setIsSaving(true);
       onSave(osForm);
     }
-  }, [backendType, promForm, osForm, onSave, duplicateName]);
+  }, [backendType, promForm, osForm, onSave, duplicateName, isSaving]);
 
   // When AI wizard is active and user is on a Prometheus datasource, delegate to MonitorTemplateWizard
   if (creationMode === 'ai' && backendType === 'prometheus') {
@@ -598,7 +602,11 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiButton onClick={handleSave} isDisabled={!isValid}>
+                  <EuiButton
+                    onClick={handleSave}
+                    isDisabled={!isValid || isSaving}
+                    isLoading={isSaving}
+                  >
                     {isEdit
                       ? i18n.translate('observability.alerting.createMonitor.saveChangesButton', {
                           defaultMessage: 'Save Changes',
@@ -609,7 +617,12 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButton fill onClick={handleSave} isDisabled={!isValid}>
+                  <EuiButton
+                    fill
+                    onClick={handleSave}
+                    isDisabled={!isValid || isSaving}
+                    isLoading={isSaving}
+                  >
                     {i18n.translate('observability.alerting.createMonitor.saveAndEnableButton', {
                       defaultMessage: 'Save & Enable',
                     })}

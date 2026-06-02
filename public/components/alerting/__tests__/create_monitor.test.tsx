@@ -198,3 +198,33 @@ describe('CreateMonitor — PPL form', () => {
     expect(arg.pplTriggers[0].type).toBe('custom');
   });
 });
+
+describe('CreateMonitor — double-save prevention', () => {
+  it('disables save buttons after first click to prevent duplicate submissions', () => {
+    const onSave = jest.fn();
+    render(
+      <CreateMonitor
+        onSave={onSave}
+        onCancel={jest.fn()}
+        datasources={[osDs]}
+        selectedDsIds={['ds-os']}
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText('Monitor name'), {
+      target: { value: 'double-click-test' },
+    });
+    fireEvent.change(screen.getByLabelText('PPL query'), {
+      target: { value: 'source = logs-* | stats count() as cnt' },
+    });
+
+    const saveBtn = screen.getAllByText(/^Save Monitor$/i)[0];
+    // First click — should call onSave
+    fireEvent.click(saveBtn);
+    expect(onSave).toHaveBeenCalledTimes(1);
+
+    // Second click — should NOT call onSave again (isSaving guard)
+    fireEvent.click(saveBtn);
+    expect(onSave).toHaveBeenCalledTimes(1);
+  });
+});
