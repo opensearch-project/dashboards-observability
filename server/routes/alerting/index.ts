@@ -203,6 +203,14 @@ export async function getAlertingClient(
     logger?.warn(`alerting: Rejecting workspace-scoped datasource ID: ${dsId}`);
     throw createNotFoundError(`Unsupported workspace-scoped datasource ID: ${dsId}`);
   }
+  // The synthetic local-cluster id used when no MDS data sources are
+  // registered. Skip SO resolution so the local client is returned even
+  // when the data_source plugin is loaded (otherwise the lookup throws
+  // not_found and the UI sees "Datasource not found: local-cluster"
+  // for a probe that should just hit the local cluster).
+  if (dsId === 'local-cluster') {
+    return ctx.core.opensearch.client.asCurrentUser;
+  }
   if (dsId && ctx.dataSource) {
     const ds = await resolveOpenSearchDatasource(ctx, dsId);
     if (ds?.mdsId) {
@@ -459,6 +467,37 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
           { startTime: req.query.startTime, endTime: req.query.endTime }
         );
       })
+  );
+
+  // Cheap "is the alerting plugin installed?" probe. Used by the Alerts page
+  // on mount; falling back to one of the heavier read routes (e.g. monitors,
+  // destinations) would conflate alerting plugin presence with notifications
+  // plugin presence and would also surface noisy 502s on every page load
+  // when the plugin is genuinely missing. This route swallows the typed
+  // 400/404 from a missing handler into a single 502 the UI can match on.
+  router.get(
+    {
+      path: '/api/alerting/opensearch/{dsId}/probe',
+      validate: { params: schema.object({ dsId: alertingIdSchema }) },
+    },
+    async (ctx, req, res) => {
+      try {
+        const client = await getAlertingClientCtx(ctx as AlertingHandlerContext, req.params.dsId);
+        await osBackend.probe(client);
+        return res.ok({ body: { ok: true } });
+      } catch (err) {
+        if (isAlertManagerError(err)) {
+          const result = toHandlerResult(err, logger);
+          return res.customError({ statusCode: result.status, body: toErrorBody(result.body) });
+        }
+        const message = err instanceof Error ? err.message : String(err);
+        logger.warn(`alerting probe failed for ds ${req.params.dsId}: ${message}`);
+        return res.customError({
+          statusCode: 502,
+          body: toErrorBody({ message: 'Alerting plugin probe failed' }),
+        });
+      }
+    }
   );
 
   // Read-only destinations list. Destination CRUD lives in the OpenSearch

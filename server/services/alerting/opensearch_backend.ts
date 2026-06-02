@@ -74,6 +74,31 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
   constructor(private readonly logger: Logger) {}
 
   // =========================================================================
+  // Plugin probe
+  // =========================================================================
+  //
+  // Cheap "is the alerting plugin installed?" probe used by the Alerts page
+  // to render a single user-friendly callout instead of N noisy errors when
+  // a cluster doesn't have `opensearch-alerting`. We hit the alerting plugin's
+  // own `monitors/_search` endpoint so we exercise the exact REST handler the
+  // rest of the UI depends on — a probe against `_plugins/_notifications/...`
+  // would only confirm a different plugin (`opensearch-notifications`).
+  //
+  // `terminate_after: 1` lets a non-empty alerting index short-circuit on the
+  // first segment per shard; `size: 0` drops the response payload. A missing
+  // plugin returns `no handler found for uri ...` with status 400 from the
+  // HTTP layer, which surfaces as a transport error here — we let it
+  // propagate so the route can report 502 and the UI shows the callout.
+
+  async probe(client: AlertingOSClient): Promise<void> {
+    await this.req(client, 'POST', '/_plugins/_alerting/monitors/_search', {
+      size: 0,
+      terminate_after: 1,
+      query: { match_all: {} },
+    });
+  }
+
+  // =========================================================================
   // Monitors
   // =========================================================================
 
