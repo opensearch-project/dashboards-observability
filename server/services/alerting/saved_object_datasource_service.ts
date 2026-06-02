@@ -46,6 +46,7 @@ export class SavedObjectDatasourceService implements DatasourceService {
 
   async list(): Promise<Datasource[]> {
     const all: Datasource[] = [];
+    let osCount = 0;
     try {
       const osRes = await this.savedObjects.find<DataSourceSOAttributes>({
         type: 'data-source',
@@ -60,6 +61,7 @@ export class SavedObjectDatasourceService implements DatasourceService {
           enabled: true,
           mdsId: so.id,
         });
+        osCount++;
       }
     } catch (e) {
       this.logger?.debug(`SavedObjectDatasourceService: data-source lookup failed: ${e}`);
@@ -85,8 +87,14 @@ export class SavedObjectDatasourceService implements DatasourceService {
     } catch (e) {
       this.logger?.debug(`SavedObjectDatasourceService: data-connection lookup failed: ${e}`);
     }
-    // Fallback so unified-view routes can still respond on a bare cluster.
-    if (all.length === 0) {
+    // Synthetic local-cluster fallback so unified-view routes can read from
+    // the local OS when no MDS `data-source` saved objects exist. Gated on
+    // OS count, NOT total `all.length`: a Prometheus-only `data-connection`
+    // shouldn't suppress the local OS cluster — without this, registering
+    // any DirectQuery connection silently hides every OS monitor / alert
+    // from the unified endpoints. Mirrors the client-side gate in
+    // `mapSavedObjectsToDatasources`.
+    if (osCount === 0) {
       all.push({
         id: 'local-cluster',
         name: 'Local Cluster',

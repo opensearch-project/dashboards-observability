@@ -138,6 +138,18 @@ describe('getAlertingClient', () => {
     expect(client).toBe(localClient);
   });
 
+  it('short-circuits the synthetic local-cluster id to the local client even when MDS is loaded', async () => {
+    // The data_source plugin is loaded (`hasMds: true`) but no `data-source`
+    // saved objects exist — the client falls back to the synthetic
+    // "local-cluster" id. Without the short-circuit, both SO lookups miss
+    // and the route 404s with "Datasource not found: local-cluster".
+    const { ctx, soClient } = makeCtx({ hasMds: true, osSO: null, promSOs: [] });
+    const client = await getAlertingClient(ctx, 'local-cluster', mockLogger);
+    expect(client).toBe(localClient);
+    expect(soClient.get).not.toHaveBeenCalled();
+    expect(soClient.find).not.toHaveBeenCalled();
+  });
+
   it('returns an MDS client when the dsId resolves to a data-source SO', async () => {
     const { ctx } = makeCtx({
       hasMds: true,
