@@ -13,11 +13,14 @@
  * single "alerting plugin not detected" callout and avoid noisy errors
  * downstream.
  *
- * Probe target: `GET /destinations`. It's already part of the read surface
- * registered by this plugin and doesn't require write permissions, so it's
- * safe to issue at mount time. We treat any 404/502/transport failure as
- * "unavailable" — the destinations route only returns 200 when the alerting
- * plugin successfully proxied the request.
+ * Probe target: `GET /probe`, which on the server side issues a cheap
+ * `POST /_plugins/_alerting/monitors/_search` with `size:0,
+ * terminate_after:1`. Targeting the alerting plugin's own REST surface
+ * (rather than `/destinations`, which calls the *notifications* plugin)
+ * means a cluster missing `opensearch-alerting` is correctly flagged as
+ * unavailable and a cluster missing only `opensearch-notifications` no
+ * longer falsely flips the callout. Any 404/502/transport failure is
+ * treated as "unavailable".
  */
 import { useEffect, useMemo, useState } from 'react';
 import type { Datasource } from '../../../../common/types/alerting';
@@ -69,7 +72,7 @@ export function useAlertingPluginAvailability(
           activeControllers.push(ctrl);
           const timer = setTimeout(() => ctrl.abort(), PROBE_TIMEOUT_MS);
           try {
-            await http.get(`/api/alerting/opensearch/${encodeURIComponent(dsId)}/destinations`, {
+            await http.get(`/api/alerting/opensearch/${encodeURIComponent(dsId)}/probe`, {
               signal: ctrl.signal,
             });
           } catch {

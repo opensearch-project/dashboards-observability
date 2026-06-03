@@ -164,12 +164,14 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
   const [activeTab, setActiveTab] = useState<TabId>(deepLink.tab ?? 'alerts');
-  // Switch tab whenever the deep-link tab updates. Guarded against the
-  // common case (no tab in the URL) so user-initiated tab clicks aren't
-  // immediately overridden by a stale URL state.
+  // Switch tab whenever the deep-link updates with a valid tab. Uses the
+  // full `deepLink` object as the dependency (not just `.tab`) so that
+  // repeated navigations to the same tab (e.g. #/rules?q=A then #/rules?q=B)
+  // still re-apply the tab switch even when the user has manually clicked
+  // away to a different tab in between.
   useEffect(() => {
     if (deepLink.tab) setActiveTab(deepLink.tab);
-  }, [deepLink.tab]);
+  }, [deepLink]);
 
   // Mirror the active tab into the URL hash so reload / bookmark / back-button
   // round-trip the user's selection. Skipped when the hash already matches

@@ -194,6 +194,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
   );
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
   // Snapshot the initial form so we can detect "dirty" against the value the
@@ -311,6 +312,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
 
   const handleSave = useCallback(() => {
     setHasSubmitted(true);
+    if (isSaving) return;
     // Guard against duplicate names client-side. The Save button is also
     // disabled via `isValid`, but defending here too means programmatic
     // submission paths (Enter key on a field) can't bypass the check.
@@ -322,6 +324,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
         return;
       }
       setValidationErrors({});
+      setIsSaving(true);
       onSave(promForm);
     } else {
       const result = validatePplForm({
@@ -334,9 +337,10 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
         return;
       }
       setValidationErrors({});
+      setIsSaving(true);
       onSave(osForm);
     }
-  }, [backendType, promForm, osForm, onSave, duplicateName]);
+  }, [backendType, promForm, osForm, onSave, duplicateName, isSaving]);
 
   // When AI wizard is active and user is on a Prometheus datasource, delegate to MonitorTemplateWizard
   if (creationMode === 'ai' && backendType === 'prometheus') {
@@ -599,11 +603,19 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
               {/* Single save button whose label tracks the Enabled toggle in
                   the header. Edit mode keeps "Save Changes" (the toggle is
                   semantically separate from "save my edits"); create mode
-                  reads the toggle to pick "Save & Enable" vs "Save Monitor".
+                  reads the toggle to pick "Save & enable" vs "Save rule".
                   The form-state's `enabled` flag is what gets persisted, so
                   the button copy is purely affordance — clicking either
-                  variant saves the monitor in the state the toggle reflects. */}
-              <EuiButton fill onClick={handleSave} isDisabled={!isValid}>
+                  variant saves the rule in the state the toggle reflects.
+                  `isSaving` (from upstream's double-save guard) disables the
+                  button while a save is in flight; `isLoading` shows the
+                  spinner so the user knows their click registered. */}
+              <EuiButton
+                fill
+                onClick={handleSave}
+                isDisabled={!isValid || isSaving}
+                isLoading={isSaving}
+              >
                 {isEdit
                   ? i18n.translate('observability.alerting.createMonitor.saveChangesButton', {
                       defaultMessage: 'Save Changes',

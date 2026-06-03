@@ -172,13 +172,16 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [showAll, setShowAll] = useState(false);
 
-  // Apply case-insensitive search filter against the display label.
+  // Apply case-insensitive search filter against both the display label
+  // and the raw option value (field name). This ensures searching for
+  // either the human-readable label or the underlying field name returns
+  // matching results.
   const filteredOptions = useMemo(() => {
     if (!searchable || !searchTerm.trim()) return options;
     const q = searchTerm.trim().toLowerCase();
     return options.filter((opt) => {
       const display = displayMap?.[opt] || opt;
-      return display.toLowerCase().includes(q);
+      return display.toLowerCase().includes(q) || opt.toLowerCase().includes(q);
     });
   }, [options, displayMap, searchable, searchTerm]);
 

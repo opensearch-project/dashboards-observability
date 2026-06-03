@@ -141,10 +141,6 @@ describe('CreateMonitor — PPL form', () => {
     );
 
     expect(screen.getByText(/Triggers \(1\)/i)).toBeTruthy();
-    // Default trigger type is `number_of_results` — fires on any matching
-    // row, regardless of the query's column shape. Replaces the previous
-    // `custom + where error_count > 0` default that broke filter-only
-    // queries with "Field [error_count] not found." at save time.
     expect(screen.getByLabelText('Threshold value')).toBeTruthy();
     expect(screen.queryByLabelText('Custom PPL where clause')).toBeNull();
   });
@@ -199,5 +195,38 @@ describe('CreateMonitor — PPL form', () => {
     expect(arg.query).toContain('source = logs-*');
     expect(arg.pplTriggers).toHaveLength(1);
     expect(arg.pplTriggers[0].type).toBe('number_of_results');
+  });
+});
+
+describe('CreateMonitor — double-save prevention', () => {
+  it('disables save buttons after first click to prevent duplicate submissions', () => {
+    const onSave = jest.fn();
+    render(
+      <CreateMonitor
+        onSave={onSave}
+        onCancel={jest.fn()}
+        datasources={[osDs]}
+        selectedDsIds={['ds-os']}
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText('Rule name'), {
+      target: { value: 'double-click-test' },
+    });
+    fireEvent.change(screen.getByLabelText('PPL query'), {
+      target: { value: 'source = logs-* | stats count() as cnt' },
+    });
+
+    // Default form has `enabled: true`, so the single save button reads
+    // "Save & enable". The double-save guard (`isSaving`) is what we're
+    // exercising here — only the first click should reach `onSave`.
+    const saveBtn = screen.getByText(/^Save & enable$/i);
+    // First click — should call onSave
+    fireEvent.click(saveBtn);
+    expect(onSave).toHaveBeenCalledTimes(1);
+
+    // Second click — should NOT call onSave again (isSaving guard)
+    fireEvent.click(saveBtn);
+    expect(onSave).toHaveBeenCalledTimes(1);
   });
 });

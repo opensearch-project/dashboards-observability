@@ -522,6 +522,30 @@ describe('HttpOpenSearchBackend', () => {
     });
   });
 
+  describe('probe', () => {
+    it("hits the alerting plugin's monitors/_search with size=0 and terminate_after=1", async () => {
+      // Probe uses the alerting plugin's own REST surface (not notifications)
+      // so a missing `opensearch-alerting` install is correctly flagged.
+      // `terminate_after: 1` lets a non-empty alerting index short-circuit
+      // segment scanning; `size: 0` drops the response payload.
+      const { client, request } = makeClient([{ body: { took: 1, hits: { total: 0 } } }]);
+      await backend.probe(client);
+      expect(request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_plugins/_alerting/monitors/_search',
+        body: { size: 0, terminate_after: 1, query: { match_all: {} } },
+      });
+    });
+
+    it('propagates transport errors so the route layer can map them to 502', async () => {
+      // A missing alerting plugin returns "no handler found for uri ..."
+      // from the OS HTTP layer; the route's try/catch turns that into the
+      // 502 the UI hook treats as "unavailable".
+      const { client } = makeClient([new Error('no handler found for uri')]);
+      await expect(backend.probe(client)).rejects.toThrow('no handler found');
+    });
+  });
+
   describe('getDestinations', () => {
     it('hits the /_plugins/_notifications/channels endpoint', async () => {
       const { client, request } = makeClient([{ body: { total_hits: 0, channel_list: [] } }]);

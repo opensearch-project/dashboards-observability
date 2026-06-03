@@ -75,7 +75,12 @@ export function mapSavedObjectsToDatasources(
       ? []
       : [
           {
-            id: 'local',
+            // Matches the synthetic id the server-side resolvers use for the
+            // no-MDS local cluster (see `getAlertingClient` and
+            // `SavedObjectDatasourceService.get`). Keeping the two in sync
+            // means the per-dsId probe and read routes resolve cleanly when
+            // no `data-source` SOs exist.
+            id: 'local-cluster',
             name: i18n.translate('observability.alerting.hooks.useDatasources.localCluster', {
               defaultMessage: 'Local Cluster',
             }),
