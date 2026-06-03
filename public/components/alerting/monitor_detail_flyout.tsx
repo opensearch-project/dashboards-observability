@@ -411,7 +411,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                         <em>
                           <FormattedMessage
                             id="observability.alerting.monitorDetailFlyout.bucketLevelDescription"
-                            defaultMessage="Bucket-level monitor — triggers evaluate per aggregation bucket"
+                            defaultMessage="Bucket-level rule — triggers evaluate per aggregation bucket"
                           />
                         </em>
                       </EuiText>

@@ -57,7 +57,7 @@ describe('MonitorsTable', () => {
   it('renders the table with a rule row', () => {
     render(<MonitorsTable {...defaultProps} />);
     expect(screen.getByText('HighCPU')).toBeInTheDocument();
-    expect(screen.getByText(/monitors/)).toBeInTheDocument();
+    expect(screen.getByText(/rules/)).toBeInTheDocument();
   });
 
   it('selects a row checkbox', () => {
