@@ -180,7 +180,7 @@ export const ExploreCreateMonitor: React.FC<ExploreCreateMonitorProps> = ({
     if (!dsId) {
       setToast(
         i18n.translate('observability.alerting.exploreCreateMonitor.toast.selectDatasource', {
-          defaultMessage: 'Select a datasource before creating a monitor',
+          defaultMessage: 'Select a datasource before creating an alert rule',
         }),
         'warning'
       );
@@ -199,7 +199,7 @@ export const ExploreCreateMonitor: React.FC<ExploreCreateMonitorProps> = ({
       if (match) setPplSubmitError(match[0]);
       setToast(
         i18n.translate('observability.alerting.exploreCreateMonitor.toast.createFailed', {
-          defaultMessage: 'Failed to create monitor',
+          defaultMessage: 'Failed to create alert rule',
         }),
         'danger',
         message
@@ -224,7 +224,7 @@ export const ExploreCreateMonitor: React.FC<ExploreCreateMonitorProps> = ({
           <EuiTitle size="m">
             <h2 id="exploreCreateMonitorLoadingTitle">
               {i18n.translate('observability.alerting.exploreCreateMonitor.loadingTitle', {
-                defaultMessage: 'Create Logs Monitor',
+                defaultMessage: 'Create logs rule',
               })}
             </h2>
           </EuiTitle>
@@ -263,6 +263,10 @@ export const ExploreCreateMonitor: React.FC<ExploreCreateMonitorProps> = ({
       isNameTaken={isNameTaken}
       submitError={pplSubmitError ? { pplMessage: pplSubmitError } : undefined}
       onClearPplSubmitError={() => setPplSubmitError(null)}
+      // Launched from the Logs page itself — the "Build query in logs →"
+      // link would be a circular round-trip and lose the user's unsaved
+      // form state.
+      hideBuildInLogsLink
     />
   );
 };

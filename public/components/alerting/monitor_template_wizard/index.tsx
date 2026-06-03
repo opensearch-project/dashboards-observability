@@ -473,7 +473,7 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
           title={i18n.translate(
             'observability.alerting.monitorTemplateWizard.monitorsSelectedTitle',
             {
-              defaultMessage: '{count} monitors selected',
+              defaultMessage: '{count} rules selected',
               values: { count: selectedList.length },
             }
           )}
@@ -497,7 +497,7 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
           helpText={i18n.translate(
             'observability.alerting.monitorTemplateWizard.labelPrefixHelpText',
             {
-              defaultMessage: 'Added as a label to all generated monitors for easy filtering',
+              defaultMessage: 'Added as a label to all generated rules for easy filtering',
             }
           )}
         >
@@ -713,7 +713,7 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
         });
       case 'review':
         return i18n.translate('observability.alerting.monitorTemplateWizard.step.review', {
-          defaultMessage: 'Select Monitors',
+          defaultMessage: 'Select rules',
         });
       case 'configure':
         return i18n.translate('observability.alerting.monitorTemplateWizard.step.configure', {
@@ -817,7 +817,7 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
                       ? i18n.translate(
                           'observability.alerting.monitorTemplateWizard.createMonitorsButton',
                           {
-                            defaultMessage: 'Create {count} Monitors',
+                            defaultMessage: 'Create {count} rules',
                             values: { count: selectedTemplates.size },
                           }
                         )

@@ -592,7 +592,7 @@ export class ObservabilityPlugin
         actionType: 'flyout',
         getLabel: () =>
           i18n.translate('observability.alerting.exploreCreateMonitor.actionLabel', {
-            defaultMessage: 'Create monitor',
+            defaultMessage: 'Create alert rule',
           }),
         getIcon: () => 'bell',
         getIsEnabled: (deps) => {

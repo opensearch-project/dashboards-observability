@@ -75,7 +75,7 @@ describe('MonitorsTable', () => {
     const onDatasourceChange = jest.fn();
     render(<MonitorsTable {...defaultProps} onDatasourceChange={onDatasourceChange} />);
 
-    const searchInput = screen.getByPlaceholderText(/Search monitors/i) as HTMLInputElement;
+    const searchInput = screen.getByPlaceholderText(/Search rules/i) as HTMLInputElement;
     fireEvent.change(searchInput, { target: { value: 'HighCPU' } });
     expect(searchInput.value).toBe('HighCPU');
 

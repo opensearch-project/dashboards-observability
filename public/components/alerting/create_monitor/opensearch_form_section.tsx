@@ -88,19 +88,23 @@ export const OpenSearchFormSection: React.FC<{
   isEdit?: boolean;
   /** Server-reported PPL parse error from a failed save; rendered under the editor. */
   pplServerError?: string;
+  /**
+   * Hide the "Build query in logs →" link in the Query panel header.
+   * Set when the flyout is launched from the Logs page itself — the link
+   * would otherwise be a circular round-trip back to where the user came
+   * from (and lose their unsaved form state on the way).
+   */
+  hideBuildInLogsLink?: boolean;
 }> = ({
   form,
   onUpdate,
-  // Currently unused — toolbar pickers handle their own validation surfacing
-  // and the editor's `pplServerError` covers backend errors. Retained on the
-  // props contract so the parent flyout can keep passing it generically; if
-  // a future field needs render-time validation, drop the underscore.
   validationErrors: _validationErrors,
   hasSubmitted,
   datasources,
   onDatasourceChange,
   isEdit,
   pplServerError,
+  hideBuildInLogsLink,
 }) => {
   // Resolve the active datasource's MDS saved-object id once per render,
   // so the preview panel can scope its PPL call to the right cluster
@@ -159,24 +163,26 @@ export const OpenSearchFormSection: React.FC<{
               </h3>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="left"
-              content={i18n.translate(
-                'observability.alerting.opensearchFormSection.openInLogsTooltip',
-                {
-                  defaultMessage:
-                    'Build and validate your query against live data in logs, then click Create monitor to come back here pre-filled. Unsaved changes will be lost.',
-                }
-              )}
-            >
-              <EuiLink onClick={openLogsApp} data-test-subj="alertManagerOpenInLogsLink">
-                {i18n.translate('observability.alerting.opensearchFormSection.openInLogs', {
-                  defaultMessage: 'Build query in logs →',
-                })}
-              </EuiLink>
-            </EuiToolTip>
-          </EuiFlexItem>
+          {!hideBuildInLogsLink && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                position="left"
+                content={i18n.translate(
+                  'observability.alerting.opensearchFormSection.openInLogsTooltip',
+                  {
+                    defaultMessage:
+                      'Build and validate your query against live data in logs, then click Create alert rule to come back here pre-filled. Unsaved changes will be lost.',
+                  }
+                )}
+              >
+                <EuiLink onClick={openLogsApp} data-test-subj="alertManagerOpenInLogsLink">
+                  {i18n.translate('observability.alerting.opensearchFormSection.openInLogs', {
+                    defaultMessage: 'Build query in logs →',
+                  })}
+                </EuiLink>
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiSpacer size="s" />
 

@@ -198,7 +198,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                           aria-label={i18n.translate(
                             'observability.alerting.monitorsTable.mainPanel.createLogsAriaLabel',
                             {
-                              defaultMessage: 'Create Logs monitor',
+                              defaultMessage: 'Create logs rule',
                             }
                           )}
                         />
@@ -218,7 +218,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                         aria-label={i18n.translate(
                           'observability.alerting.monitorsTable.mainPanel.createLogsAriaLabel',
                           {
-                            defaultMessage: 'Create Logs monitor',
+                            defaultMessage: 'Create logs rule',
                           }
                         )}
                       />
@@ -230,7 +230,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                           'observability.alerting.monitorsTable.mainPanel.metricsDisabledTooltip',
                           {
                             defaultMessage:
-                              'Metrics monitors require a Prometheus datasource. Select one to enable.',
+                              'Metrics rules require a Prometheus datasource. Select one to enable.',
                           }
                         )}
                       >
@@ -245,7 +245,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                           aria-label={i18n.translate(
                             'observability.alerting.monitorsTable.mainPanel.createMetricsAriaLabel',
                             {
-                              defaultMessage: 'Create Metrics monitor',
+                              defaultMessage: 'Create metrics rule',
                             }
                           )}
                         />
@@ -265,7 +265,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                         aria-label={i18n.translate(
                           'observability.alerting.monitorsTable.mainPanel.createMetricsAriaLabel',
                           {
-                            defaultMessage: 'Create Metrics monitor',
+                            defaultMessage: 'Create metrics rule',
                           }
                         )}
                       />
@@ -282,7 +282,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
               placeholder={i18n.translate(
                 'observability.alerting.monitorsTable.mainPanel.searchPlaceholder',
                 {
-                  defaultMessage: 'Search monitors by name, labels (team:infra), annotations...',
+                  defaultMessage: 'Search rules by name, labels (team:infra), annotations...',
                 }
               )}
               value={searchQuery}
@@ -298,7 +298,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
               aria-label={i18n.translate(
                 'observability.alerting.monitorsTable.mainPanel.searchAriaLabel',
                 {
-                  defaultMessage: 'Search monitors',
+                  defaultMessage: 'Search rules',
                 }
               )}
             />
@@ -481,7 +481,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
       {showDeleteConfirm && (
         <DeleteModal
           title={i18n.translate('observability.alerting.monitorsTable.mainPanel.deleteModalTitle', {
-            defaultMessage: 'Delete {count} {count, plural, one {monitor} other {monitors}}?',
+            defaultMessage: 'Delete {count} {count, plural, one {rule} other {rules}}?',
             values: { count: selectedIds.size },
           })}
           message={i18n.translate(

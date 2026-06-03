@@ -109,8 +109,7 @@ describe('CreateMonitor', () => {
         selectedDsIds={['ds-prom']}
       />
     );
-    expect(document.body.textContent).toContain('Create');
-    expect(document.body.textContent).toContain('Monitor');
+    expect(document.body.textContent).toContain('Create metrics rule');
   });
 
   it('calls onCancel when flyout close is clicked', () => {
@@ -181,7 +180,7 @@ describe('CreateMonitor — PPL form', () => {
       />
     );
 
-    fireEvent.change(screen.getByLabelText('Monitor name'), {
+    fireEvent.change(screen.getByLabelText('Rule name'), {
       target: { value: 'monitor-1' },
     });
     // The default form starts with an empty query — the user types one.
@@ -189,7 +188,7 @@ describe('CreateMonitor — PPL form', () => {
       target: { value: 'source = logs-* | stats count() as cnt' },
     });
 
-    const saveBtn = screen.getAllByText(/^Save Monitor$/i)[0];
+    const saveBtn = screen.getByText(/^Save & enable$/i);
     fireEvent.click(saveBtn);
 
     expect(onSave).toHaveBeenCalledTimes(1);

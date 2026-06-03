@@ -191,7 +191,7 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
         defaultMessage: 'Open SLO',
       })
     : i18n.translate('observability.alerting.alertDetailFlyout.openMonitor', {
-        defaultMessage: 'Open monitor',
+        defaultMessage: 'Open rule',
       });
 
   const navigateToSource = () => {

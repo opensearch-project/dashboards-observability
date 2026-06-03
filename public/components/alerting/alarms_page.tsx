@@ -533,11 +533,11 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         failed.push(id);
         addToast(
           i18n.translate('observability.alerting.alarmsPage.toast.deleteMonitorFailed', {
-            defaultMessage: 'Failed to delete monitor',
+            defaultMessage: 'Failed to delete alert rule',
           }),
           'danger',
           i18n.translate('observability.alerting.alarmsPage.toast.monitorNotFoundInCache', {
-            defaultMessage: 'Monitor {id} not found in cache',
+            defaultMessage: 'Alert rule {id} not found in cache',
             values: { id },
           })
         );
@@ -549,7 +549,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         failed.push(id);
         addToast(
           i18n.translate('observability.alerting.alarmsPage.toast.deleteMonitorFailed', {
-            defaultMessage: 'Failed to delete monitor',
+            defaultMessage: 'Failed to delete alert rule',
           }),
           'danger',
           extractServerErrorMessage(e)
@@ -560,7 +560,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     if (succeeded.length > 0) {
       addToast(
         i18n.translate('observability.alerting.alarmsPage.toast.monitorsDeleted', {
-          defaultMessage: '{count} monitor(s) deleted',
+          defaultMessage: '{count} alert rule(s) deleted',
           values: { count: succeeded.length },
         })
       );
@@ -582,7 +582,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     if (monitor.monitorType !== 'ppl') {
       addToast(
         i18n.translate('observability.alerting.alarmsPage.toast.toggleEnabledUnsupported', {
-          defaultMessage: 'Enabling/disabling is only supported for PPL monitors.',
+          defaultMessage: 'Enabling/disabling is only supported for PPL alert rules.',
         }),
         'warning'
       );
@@ -613,10 +613,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       addToast(
         nextEnabled
           ? i18n.translate('observability.alerting.alarmsPage.toast.monitorEnabled', {
-              defaultMessage: 'Monitor enabled',
+              defaultMessage: 'Alert rule enabled',
             })
           : i18n.translate('observability.alerting.alarmsPage.toast.monitorDisabled', {
-              defaultMessage: 'Monitor disabled',
+              defaultMessage: 'Alert rule disabled',
             })
       );
       refetchRules();
@@ -624,10 +624,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       addToast(
         nextEnabled
           ? i18n.translate('observability.alerting.alarmsPage.toast.enableMonitorFailed', {
-              defaultMessage: 'Failed to enable monitor',
+              defaultMessage: 'Failed to enable alert rule',
             })
           : i18n.translate('observability.alerting.alarmsPage.toast.disableMonitorFailed', {
-              defaultMessage: 'Failed to disable monitor',
+              defaultMessage: 'Failed to disable alert rule',
             }),
         'danger',
         e instanceof Error ? e.message : String(e)
@@ -689,14 +689,14 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       await mutations.createMonitor(payload, monitor.datasourceId);
       addToast(
         i18n.translate('observability.alerting.alarmsPage.toast.monitorCloned', {
-          defaultMessage: 'Monitor cloned',
+          defaultMessage: 'Alert rule cloned',
         })
       );
       refetchRules();
     } catch (e: unknown) {
       addToast(
         i18n.translate('observability.alerting.alarmsPage.toast.cloneMonitorFailed', {
-          defaultMessage: 'Failed to clone monitor',
+          defaultMessage: 'Failed to clone alert rule',
         }),
         'danger',
         extractServerErrorMessage(e)
@@ -712,7 +712,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     if (!dsId) {
       addToast(
         i18n.translate('observability.alerting.alarmsPage.toast.selectDatasourceForCreate', {
-          defaultMessage: 'Select a datasource before creating a monitor',
+          defaultMessage: 'Select a datasource before creating an alert rule',
         }),
         'warning'
       );
@@ -759,7 +759,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       if (pplError) setPplSubmitError(pplError);
       addToast(
         i18n.translate('observability.alerting.alarmsPage.toast.createMonitorFailed', {
-          defaultMessage: 'Failed to create monitor',
+          defaultMessage: 'Failed to create alert rule',
         }),
         'danger',
         message
@@ -774,7 +774,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       await mutations.updateMonitor(ruleId, buildPayload(formState), dsId);
       addToast(
         i18n.translate('observability.alerting.alarmsPage.toast.monitorUpdated', {
-          defaultMessage: 'Monitor updated successfully',
+          defaultMessage: 'Alert rule updated successfully',
         })
       );
       setEditTarget(null);
@@ -786,7 +786,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       if (pplError) setPplSubmitError(pplError);
       addToast(
         i18n.translate('observability.alerting.alarmsPage.toast.updateMonitorFailed', {
-          defaultMessage: 'Failed to update monitor',
+          defaultMessage: 'Failed to update alert rule',
         }),
         'danger',
         message
@@ -805,7 +805,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       } catch (e: unknown) {
         addToast(
           i18n.translate('observability.alerting.alarmsPage.toast.createMonitorFailed', {
-            defaultMessage: 'Failed to create monitor',
+            defaultMessage: 'Failed to create alert rule',
           }),
           'danger',
           extractServerErrorMessage(e)
@@ -815,7 +815,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     if (succeededRules.length > 0) {
       addToast(
         i18n.translate('observability.alerting.alarmsPage.toast.monitorsCreated', {
-          defaultMessage: '{count} monitor(s) created successfully',
+          defaultMessage: '{count} alert rule(s) created successfully',
           values: { count: succeededRules.length },
         })
       );
@@ -904,8 +904,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             } else if (type === 'metrics') {
               addToast(
                 i18n.translate('observability.alerting.alarmsPage.toast.metricsMonitorComingSoon', {
-                  defaultMessage:
-                    'Metrics monitor creation will be available in a follow-up release.',
+                  defaultMessage: 'Metrics rule creation will be available in a follow-up release.',
                 }),
                 'primary'
               );

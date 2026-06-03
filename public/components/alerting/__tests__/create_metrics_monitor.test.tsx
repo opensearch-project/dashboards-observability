@@ -31,7 +31,7 @@ import { CreateMetricsMonitor } from '../create_metrics_monitor';
 describe('CreateMetricsMonitor', () => {
   it('renders flyout with form title', () => {
     render(<CreateMetricsMonitor onCancel={jest.fn()} onSave={jest.fn()} />);
-    expect(document.body.textContent).toContain('Monitor');
+    expect(document.body.textContent).toContain('Create metrics rule');
   });
 
   it('calls onCancel when flyout close is clicked', () => {

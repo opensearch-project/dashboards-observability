@@ -33,14 +33,13 @@ import {
   EuiFormRow,
   EuiOverlayMask,
   EuiPanel,
-  EuiSelect,
   EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { Datasource, UnifiedAlertSeverity } from '../../../../common/types/alerting';
+import { Datasource } from '../../../../common/types/alerting';
 import {
   MonitorFormState as ValidatorFormState,
   validateMonitorForm,
@@ -55,7 +54,6 @@ import {
   MonitorFormState,
   OpenSearchFormState,
   PrometheusFormState,
-  SEVERITY_OPTIONS,
 } from './create_monitor_types';
 import { PrometheusFormSection } from './prometheus_form_section';
 import { OpenSearchFormSection } from './opensearch_form_section';
@@ -118,6 +116,14 @@ export interface CreateMonitorProps {
   submitError?: { pplMessage?: string };
   /** Called when the user edits the PPL query, so the parent can clear `submitError.pplMessage`. */
   onClearPplSubmitError?: () => void;
+  /**
+   * Set when the flyout is launched from somewhere outside the alerting
+   * app — currently only the Explore Logs page. Hides the
+   * "Build query in logs →" link in the Query panel header (the user is
+   * already there, so the link would be a circular round-trip that loses
+   * unsaved form state).
+   */
+  hideBuildInLogsLink?: boolean;
 }
 
 type CreationMode = 'manual' | 'ai';
@@ -135,6 +141,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
   isNameTaken,
   submitError,
   onClearPplSubmitError,
+  hideBuildInLogsLink,
 }) => {
   const isEdit = mode === 'edit';
 
@@ -269,10 +276,6 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
     if (backendType === 'prometheus') updateProm('name', name);
     else updateOs('name', name);
   };
-  const updateSeverity = (sev: UnifiedAlertSeverity) => {
-    if (backendType === 'prometheus') updateProm('severity', sev);
-    else updateOs('severity', sev);
-  };
   const updateEnabled = (enabled: boolean) => {
     if (backendType === 'prometheus') updateProm('enabled', enabled);
     else updateOs('enabled', enabled);
@@ -295,7 +298,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
   );
   const duplicateNameError = duplicateName
     ? i18n.translate('observability.alerting.createMonitor.nameDuplicate', {
-        defaultMessage: 'A monitor with this name already exists on the selected datasource.',
+        defaultMessage: 'A rule with this name already exists on the selected datasource.',
       })
     : undefined;
   const isValid =
@@ -381,17 +384,17 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
               {backendType === 'prometheus'
                 ? isEdit
                   ? i18n.translate('observability.alerting.createMonitor.editTitleMetrics', {
-                      defaultMessage: 'Edit Metrics Monitor',
+                      defaultMessage: 'Edit metrics rule',
                     })
                   : i18n.translate('observability.alerting.createMonitor.titleMetrics', {
-                      defaultMessage: 'Create Metrics Monitor',
+                      defaultMessage: 'Create metrics rule',
                     })
                 : isEdit
                 ? i18n.translate('observability.alerting.createMonitor.editTitleLogs', {
-                    defaultMessage: 'Edit Logs Monitor',
+                    defaultMessage: 'Edit logs rule',
                   })
                 : i18n.translate('observability.alerting.createMonitor.titleLogs', {
-                    defaultMessage: 'Create Logs Monitor',
+                    defaultMessage: 'Create logs rule',
                   })}
             </h2>
           </EuiTitle>
@@ -487,10 +490,13 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
             </>
           )}
 
-          {/* Monitor Name */}
+          {/* Monitor Name. Severity is intentionally not exposed here — each
+              PPL trigger already carries its own severity, and the form-level
+              severity field was redundant (the saved monitor's severity is
+              derived from its triggers, not from this dropdown). */}
           <EuiFormRow
             label={i18n.translate('observability.alerting.createMonitor.monitorNameLabel', {
-              defaultMessage: 'Monitor Name',
+              defaultMessage: 'Rule name',
             })}
             fullWidth
             isInvalid={
@@ -527,7 +533,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
               aria-label={i18n.translate(
                 'observability.alerting.createMonitor.monitorNameAriaLabel',
                 {
-                  defaultMessage: 'Monitor name',
+                  defaultMessage: 'Rule name',
                 }
               )}
             />
@@ -535,42 +541,24 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
 
           <EuiSpacer size="m" />
 
-          {/* Severity + Enabled */}
-          <EuiFlexGroup gutterSize="m" alignItems="center">
-            <EuiFlexItem grow={3}>
-              <EuiFormRow
-                label={i18n.translate('observability.alerting.createMonitor.severityLabel', {
-                  defaultMessage: 'Severity',
-                })}
-                display="rowCompressed"
-              >
-                <EuiSelect
-                  options={SEVERITY_OPTIONS}
-                  value={activeForm.severity}
-                  onChange={(e) => updateSeverity(e.target.value as UnifiedAlertSeverity)}
-                  compressed
-                  aria-label={i18n.translate(
-                    'observability.alerting.createMonitor.severityAriaLabel',
-                    { defaultMessage: 'Severity' }
-                  )}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem grow={1}>
-              <EuiFormRow
-                label={i18n.translate('observability.alerting.createMonitor.enabledLabel', {
-                  defaultMessage: 'Enabled',
-                })}
-                display="rowCompressed"
-              >
-                <EuiSwitch
-                  label=""
-                  checked={activeForm.enabled}
-                  onChange={(e) => updateEnabled(e.target.checked)}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {/* Enabled toggle — full row directly under Monitor Name. The
+              footer save button reads this state to decide between
+              "Save & Enable" (checked) and "Save Monitor" (unchecked). */}
+          <EuiFormRow
+            label={i18n.translate('observability.alerting.createMonitor.enabledLabel', {
+              defaultMessage: 'Enabled',
+            })}
+          >
+            <EuiSwitch
+              label=""
+              checked={activeForm.enabled}
+              onChange={(e) => updateEnabled(e.target.checked)}
+              aria-label={i18n.translate('observability.alerting.createMonitor.enabledAriaLabel', {
+                defaultMessage: 'Enabled',
+              })}
+              data-test-subj="alertManagerEnabledSwitch"
+            />
+          </EuiFormRow>
 
           <EuiSpacer size="m" />
 
@@ -593,6 +581,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
               onDatasourceChange={(id) => handleDatasourceChange(id, 'opensearch')}
               isEdit={isEdit}
               pplServerError={submitError?.pplMessage}
+              hideBuildInLogsLink={hideBuildInLogsLink}
             />
           )}
         </EuiFlyoutBody>
@@ -607,26 +596,26 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiButton onClick={handleSave} isDisabled={!isValid}>
-                    {isEdit
-                      ? i18n.translate('observability.alerting.createMonitor.saveChangesButton', {
-                          defaultMessage: 'Save Changes',
-                        })
-                      : i18n.translate('observability.alerting.createMonitor.saveMonitorButton', {
-                          defaultMessage: 'Save Monitor',
-                        })}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton fill onClick={handleSave} isDisabled={!isValid}>
-                    {i18n.translate('observability.alerting.createMonitor.saveAndEnableButton', {
-                      defaultMessage: 'Save & Enable',
+              {/* Single save button whose label tracks the Enabled toggle in
+                  the header. Edit mode keeps "Save Changes" (the toggle is
+                  semantically separate from "save my edits"); create mode
+                  reads the toggle to pick "Save & Enable" vs "Save Monitor".
+                  The form-state's `enabled` flag is what gets persisted, so
+                  the button copy is purely affordance — clicking either
+                  variant saves the monitor in the state the toggle reflects. */}
+              <EuiButton fill onClick={handleSave} isDisabled={!isValid}>
+                {isEdit
+                  ? i18n.translate('observability.alerting.createMonitor.saveChangesButton', {
+                      defaultMessage: 'Save Changes',
+                    })
+                  : activeForm.enabled
+                  ? i18n.translate('observability.alerting.createMonitor.saveAndEnableButton', {
+                      defaultMessage: 'Save & enable',
+                    })
+                  : i18n.translate('observability.alerting.createMonitor.saveMonitorButton', {
+                      defaultMessage: 'Save rule',
                     })}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
@@ -657,7 +646,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
             <p>
               {i18n.translate('observability.alerting.createMonitor.discardConfirmBody', {
                 defaultMessage:
-                  "You've made changes to this monitor that haven't been saved. Discarding will lose them.",
+                  "You've made changes to this rule that haven't been saved. Discarding will lose them.",
               })}
             </p>
           </EuiConfirmModal>
