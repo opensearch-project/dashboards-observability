@@ -6,8 +6,10 @@
 import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
+  App,
   AppCategory,
   AppMountParameters,
   AppNavLinkStatus,
@@ -203,6 +205,11 @@ export class ObservabilityPlugin
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private apmAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private traceAnalyticsAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  // Updaters for dynamic feature-flag-controlled apps. Visibility is set in
+  // `start()` from `capabilities.observability.{alertManagerEnabled,sloEnabled}`,
+  // which the server-side switcher resolves from the DynamicConfigService.
+  private alertingAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private apmSloAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   public async setup(
     core: CoreSetup<AppPluginStartDependencies>,
@@ -457,7 +464,16 @@ export class ObservabilityPlugin
             category: APPLICATION_MONITORING_CATEGORY,
             order: observabilityApmSloPluginOrder,
             mount: appMountWithStartPage('apm-slo', '/slos'),
-            updater$: this.apmAppUpdater$,
+            // Two updaters merge: `apmAppUpdater$` for the APM-vs-Trace-Analytics
+            // visibility gate (driven by `explore.discoverTracesEnabled`), and
+            // `apmSloAppUpdater$` for the dynamic SLO feature flag. Either one
+            // hiding the link wins.
+            updater$: combineLatest([this.apmAppUpdater$, this.apmSloAppUpdater$]).pipe(
+              map(([apmUpdater, sloUpdater]) => (app: App) => ({
+                ...apmUpdater(app),
+                ...sloUpdater(app),
+              }))
+            ),
           });
         }
 
@@ -542,6 +558,11 @@ export class ObservabilityPlugin
         order: observabilityAlertingPluginOrder,
         euiIconType: 'beaker',
         mount: appMountWithStartPage('alerting'),
+        // Visibility flipped in `start()` from
+        // `capabilities.observability.alertManagerEnabled`. Yml still
+        // controls registration so the route only mounts where the
+        // server-side routes/SOs were registered.
+        updater$: this.alertingAppUpdater$,
       });
     }
 
@@ -606,8 +627,15 @@ export class ObservabilityPlugin
           // not declared in any shared type, so we can't import a stronger
           // shape without coupling this plugin to alerting's internals.
           const capabilities = coreRefs.application?.capabilities as
-            | { alertingDashboards?: { pplV2?: boolean } }
+            | {
+                alertingDashboards?: { pplV2?: boolean };
+                observability?: { alertManagerEnabled?: boolean };
+              }
             | undefined;
+          // Hide the action when the dynamic flag has alerting off, even if
+          // yml registered the app. Lets AppConfig dark this entry without
+          // an OSD restart.
+          if (!capabilities?.observability?.alertManagerEnabled) return false;
           // Reuse the alerting plugin's PPL capability — they own the agent
           // config + cluster gate; we just light up alongside theirs so users
           // see both options when PPL alerting is on.
@@ -673,7 +701,34 @@ export class ObservabilityPlugin
     coreRefs.dashboard = startDeps.dashboard;
     coreRefs.queryAssistEnabled = this.config.query_assist.enabled;
     coreRefs.summarizeEnabled = this.config.summarize.enabled;
-    coreRefs.sloEnabled = !!this.config.slo?.enabled;
+    // Resolved from the dynamic-config-backed capability so AppConfig flips
+    // take effect on the next page load. Falls back through the server-side
+    // switcher to yml when the dynamic store has no override. Components
+    // (`apm/pages/services_home`, `apm/pages/service_details`) read this ref;
+    // the switch from `this.config.slo?.enabled` is what makes them respond
+    // to dynamic flips without a restart.
+    const observabilityCapabilities = core.application.capabilities.observability as
+      | { alertManagerEnabled?: boolean; sloEnabled?: boolean }
+      | undefined;
+    const sloEnabledFromCapability = !!observabilityCapabilities?.sloEnabled;
+    const alertManagerEnabledFromCapability = !!observabilityCapabilities?.alertManagerEnabled;
+    coreRefs.sloEnabled = sloEnabledFromCapability;
+
+    // Hide the alerting nav link when the capability says the feature is off,
+    // even if yml registered the app. When yml has it off the app isn't
+    // registered at all and `next()` is a no-op against a dead BehaviorSubject.
+    if (!alertManagerEnabledFromCapability) {
+      this.alertingAppUpdater$.next(() => ({
+        navLinkStatus: AppNavLinkStatus.hidden,
+      }));
+    }
+    // Same pattern for the SLO app. Merged with `apmAppUpdater$` at register
+    // time so APM-vs-Trace-Analytics gating still applies.
+    if (!sloEnabledFromCapability) {
+      this.apmSloAppUpdater$.next(() => ({
+        navLinkStatus: AppNavLinkStatus.hidden,
+      }));
+    }
     coreRefs.overlays = core.overlays;
     coreRefs.dataSource = startDeps.dataSource;
     coreRefs.navigation = startDeps.navigation;

@@ -479,8 +479,56 @@ export class ObservabilityPlugin
     core.capabilities.registerProvider(() => ({
       observability: {
         show: true,
+        // Default to the yml values so dev/test environments without a
+        // configured dynamic-config source still see the flags they set in
+        // `opensearch_dashboards.yml`. The switcher below overrides these
+        // when the dynamic store has a value.
+        alertManagerEnabled,
+        sloEnabled,
       },
     }));
+
+    // Dynamic feature-flag switcher. Reads `observability.alertManager.enabled`
+    // and `observability.slo.enabled` from the DynamicConfigService at
+    // request time so AppConfig-driven flag flips take effect on the next
+    // page load without an OSD restart. Server-side route/SO/service
+    // registration still keys off yml at setup (see `sloEnabled` /
+    // `alertManagerEnabled` above) — this only governs UI visibility.
+    // Failures fall back to the yml-derived values rather than the schema
+    // default so a degraded dynamic-config path can't silently dark a feature
+    // that operators explicitly enabled in yml.
+    core.capabilities.registerSwitcher(async (_request, capabilities) => {
+      try {
+        const dynamicConfig = await core.dynamicConfigService.getStartService();
+        const client = dynamicConfig.getClient();
+        const store = dynamicConfig.getAsyncLocalStore();
+        const config = await client.getConfig(
+          { name: 'observability' },
+          { asyncLocalStorageContext: store! }
+        );
+        return {
+          ...capabilities,
+          observability: {
+            ...(capabilities.observability || {}),
+            alertManagerEnabled: config.alertManager?.enabled ?? alertManagerEnabled,
+            sloEnabled: config.slo?.enabled ?? sloEnabled,
+          },
+        };
+      } catch (error) {
+        this.logger.error(
+          'Observability: failed to resolve dynamic config flags, falling back to yml values',
+          error as Error
+        );
+        return {
+          ...capabilities,
+          observability: {
+            ...(capabilities.observability || {}),
+            alertManagerEnabled,
+            sloEnabled,
+          },
+        };
+      }
+    });
 
     assistantDashboards?.registerMessageParser(PPLParsers);
 
