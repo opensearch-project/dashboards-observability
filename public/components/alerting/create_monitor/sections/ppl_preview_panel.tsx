@@ -13,7 +13,7 @@
  * (or a friendly error). The panel is purely advisory — no save side
  * effects.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -67,18 +67,43 @@ export const PplPreviewPanel: React.FC<PplPreviewPanelProps> = ({
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<PplPreviewResult | null>(null);
 
+  // Race-condition guards. `runIdRef` is bumped per Run click so a
+  // late-arriving response from a stale request can detect it has been
+  // superseded and skip the `setResult`. `mountedRef` flips on unmount
+  // so a request still in flight when the parent flyout closes doesn't
+  // call setState on this unmounted component (React warns about that).
+  const runIdRef = useRef(0);
+  const mountedRef = useRef(true);
+  useEffect(
+    () => () => {
+      mountedRef.current = false;
+    },
+    []
+  );
+
   // Reset cached results when the query or target datasource changes —
   // otherwise the user could see "✓ Returned 21 rows" while the editor
   // shows a substantially different (or now-broken) query, which is
   // misleading. The reset trigger is intentionally aggressive: any
   // keystroke clears the panel; users re-run preview to refresh.
+  //
+  // Bumping `runIdRef` here too means a request still in flight when the
+  // user edits the query is invalidated, so its eventual response can't
+  // overwrite the freshly-cleared state.
   useEffect(() => {
+    runIdRef.current += 1;
     setResult(null);
   }, [query, mdsId]);
 
   const handleRun = async () => {
+    const id = ++runIdRef.current;
     setLoading(true);
     const r = await runPplPreview({ query, mdsId });
+    // Bail if a later Run has already started, the panel was unmounted,
+    // or the user edited the query since this request was dispatched
+    // (the reset effect bumped `result` to null and we don't want to
+    // overwrite that with stale data).
+    if (!mountedRef.current || runIdRef.current !== id) return;
     setResult(r);
     setLoading(false);
   };

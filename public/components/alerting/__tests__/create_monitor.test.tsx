@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 
 jest.mock('../promql_editor', () => ({
   PromQLEditor: ({ value }: { value: string }) => (
@@ -228,5 +228,54 @@ describe('CreateMonitor — double-save prevention', () => {
     // Second click — should NOT call onSave again (isSaving guard)
     fireEvent.click(saveBtn);
     expect(onSave).toHaveBeenCalledTimes(1);
+  });
+
+  it('re-enables the save button when an async onSave rejects', async () => {
+    // Regression for the H1 review finding: setIsSaving(true) was set before
+    // calling onSave but never reset on the error path, leaving the footer
+    // button stuck spinning after a backend rejection (e.g. PPL parse
+    // error). The fix awaits onSave and resets in `finally`.
+    // `<CreateMonitor>` swallows the rejection internally (production
+    // callers do their own try/catch + toast); this test only cares that
+    // `isSaving` flips back to false regardless.
+    let reject!: (err: Error) => void;
+    const onSave = jest.fn(
+      () =>
+        new Promise<void>((_, rej) => {
+          reject = rej;
+        })
+    );
+
+    render(
+      <CreateMonitor
+        onSave={onSave}
+        onCancel={jest.fn()}
+        datasources={[osDs]}
+        selectedDsIds={['ds-os']}
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText('Rule name'), {
+      target: { value: 'fail-test' },
+    });
+    fireEvent.change(screen.getByLabelText('PPL query'), {
+      target: { value: 'source = logs-* | stats count() as cnt' },
+    });
+
+    const saveBtn = screen.getByText(/^Save & enable$/i).closest('button')!;
+    fireEvent.click(saveBtn);
+    expect(onSave).toHaveBeenCalledTimes(1);
+
+    // While the promise is pending, the button is disabled (isSaving=true).
+    expect(saveBtn).toBeDisabled();
+
+    // Reject — the `finally` should flip isSaving back to false.
+    await act(async () => {
+      reject(new Error('backend rejected'));
+      // Let the microtask queue drain so the `finally` runs.
+      await Promise.resolve();
+    });
+
+    expect(saveBtn).not.toBeDisabled();
   });
 });

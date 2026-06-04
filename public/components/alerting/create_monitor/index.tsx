@@ -67,7 +67,14 @@ export type { MonitorFormState } from './create_monitor_types';
 // ============================================================================
 
 export interface CreateMonitorProps {
-  onSave: (monitor: MonitorFormState) => void;
+  /**
+   * Persists the form. May be sync or async — when async, this component
+   * awaits resolution and resets the in-flight `isSaving` state on either
+   * branch (success or rejection), so a failed save (PPL parse error,
+   * network blip, name-collision the server caught) re-enables the save
+   * button instead of leaving it permanently disabled.
+   */
+  onSave: (monitor: MonitorFormState) => void | Promise<void>;
   /** Batch save for AI-generated monitors (does not close the flyout) */
   onBatchSave?: (monitors: MonitorFormState[]) => void;
   onCancel: () => void;
@@ -310,22 +317,22 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
       ? promForm.query.trim() !== '' && !hasQueryErrors
       : osForm.query.trim() !== '');
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     setHasSubmitted(true);
     if (isSaving) return;
     // Guard against duplicate names client-side. The Save button is also
     // disabled via `isValid`, but defending here too means programmatic
     // submission paths (Enter key on a field) can't bypass the check.
     if (duplicateName) return;
+
+    let formToSave: MonitorFormState | null = null;
     if (backendType === 'prometheus') {
       const result = validateMonitorForm(promForm as ValidatorFormState);
       if (!result.valid) {
         setValidationErrors(result.errors);
         return;
       }
-      setValidationErrors({});
-      setIsSaving(true);
-      onSave(promForm);
+      formToSave = promForm;
     } else {
       const result = validatePplForm({
         name: osForm.name,
@@ -336,9 +343,22 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
         setValidationErrors(result.errors);
         return;
       }
-      setValidationErrors({});
-      setIsSaving(true);
-      onSave(osForm);
+      formToSave = osForm;
+    }
+    setValidationErrors({});
+    setIsSaving(true);
+    // `Promise.resolve` adapts both sync and async `onSave` callers. The
+    // try/catch ensures `isSaving` resets regardless of outcome — the
+    // parent's own try/catch (in `alarms_page.handleCreateMonitor` /
+    // `handleEditMonitor`) is what surfaces the error to the user via
+    // toast + inline PPL error; rethrowing here would just become an
+    // unhandled rejection at the React-event boundary.
+    try {
+      await Promise.resolve(onSave(formToSave));
+    } catch {
+      // Intentionally swallowed — see comment above.
+    } finally {
+      setIsSaving(false);
     }
   }, [backendType, promForm, osForm, onSave, duplicateName, isSaving]);
 

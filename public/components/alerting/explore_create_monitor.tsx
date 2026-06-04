@@ -115,13 +115,18 @@ export const ExploreCreateMonitor: React.FC<ExploreCreateMonitorProps> = ({
   // Pin the rules-data hook to the resolved datasource so the dupe-name
   // check has the right scope. When unresolved, pass an empty array and
   // the check naturally short-circuits.
+  //
+  // Depend on the scalar fields actually read — `exploreContext` is built
+  // inline by `plugin.tsx`'s action `component`, so the wrapping object
+  // is a fresh reference every parent render. Listing it as a dep would
+  // re-run the resolver on every render and defeat memoization entirely.
   const initialDsId = useMemo(
     () =>
       resolveAlertingDatasourceId(datasources, {
         dataSourceId: exploreContext.dataSourceId,
         dataSourceName: exploreContext.dataSourceName,
       }),
-    [datasources, exploreContext]
+    [datasources, exploreContext.dataSourceId, exploreContext.dataSourceName]
   );
 
   const selectedDsIds = useMemo(() => (initialDsId ? [initialDsId] : []), [initialDsId]);

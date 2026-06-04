@@ -247,9 +247,22 @@ function friendlyMessage(raw: string): string {
 }
 
 function extractRawMessage(err: unknown): string {
-  const e = err as { body?: { message?: string }; message?: string };
-  if (e?.body?.message) return e.body.message;
-  if (e?.message) return e.message;
+  if (typeof err !== 'object' || err === null) {
+    return typeof err === 'string' ? err : 'Unknown error';
+  }
+  // Narrow without a blanket `as` cast — the OS HTTP client wraps server
+  // payloads in `err.body`, plain `Error`s expose `.message`, and other
+  // shapes fall through to the JSON fallback.
+  const obj = err as Record<string, unknown>;
+  const body = obj.body;
+  if (
+    body &&
+    typeof body === 'object' &&
+    typeof (body as { message?: unknown }).message === 'string'
+  ) {
+    return (body as { message: string }).message;
+  }
+  if (typeof obj.message === 'string') return obj.message;
   try {
     return JSON.stringify(err);
   } catch {
