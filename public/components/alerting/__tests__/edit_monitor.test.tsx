@@ -113,7 +113,7 @@ describe('EditMonitor', () => {
         datasources={[osDs]}
       />
     );
-    expect(screen.getByText('Failed to load monitor')).toBeTruthy();
+    expect(screen.getByText('Failed to load rule')).toBeTruthy();
     expect(document.body.textContent).toContain('boom');
   });
 

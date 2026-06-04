@@ -473,7 +473,7 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
           title={i18n.translate(
             'observability.alerting.monitorTemplateWizard.monitorsSelectedTitle',
             {
-              defaultMessage: '{count} monitors selected',
+              defaultMessage: '{count} rules selected',
               values: { count: selectedList.length },
             }
           )}
@@ -484,7 +484,7 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
           <EuiText size="xs">
             <FormattedMessage
               id="observability.alerting.monitorTemplateWizard.configureBody"
-              defaultMessage="Review and customize severity levels before creating. You can also add a label prefix to group these monitors."
+              defaultMessage="Review and customize severity levels before creating. You can also add a label prefix to group these rules."
             />
           </EuiText>
         </EuiCallOut>
@@ -497,7 +497,7 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
           helpText={i18n.translate(
             'observability.alerting.monitorTemplateWizard.labelPrefixHelpText',
             {
-              defaultMessage: 'Added as a label to all generated monitors for easy filtering',
+              defaultMessage: 'Added as a label to all generated rules for easy filtering',
             }
           )}
         >
@@ -629,7 +629,7 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
           <h2>
             <FormattedMessage
               id="observability.alerting.monitorTemplateWizard.summaryTitle"
-              defaultMessage="{count} Monitors Created"
+              defaultMessage="{count} rules created"
               values={{ count }}
             />
           </h2>
@@ -638,7 +638,7 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
         <EuiText size="s" color="subdued">
           <FormattedMessage
             id="observability.alerting.monitorTemplateWizard.summaryDescription"
-            defaultMessage="All monitors have been created and are now active. They will begin evaluating on their configured intervals."
+            defaultMessage="All rules have been created and are now active. They will begin evaluating on their configured intervals."
           />
         </EuiText>
         <EuiSpacer size="m" />
@@ -659,7 +659,7 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
             <EuiText size="xs" color="subdued">
               <FormattedMessage
                 id="observability.alerting.monitorTemplateWizard.labeledWith"
-                defaultMessage="All monitors labeled with {prefixBadge} and {sourceBadge}"
+                defaultMessage="All rules labeled with {prefixBadge} and {sourceBadge}"
                 values={{
                   prefixBadge: <EuiBadge color="hollow">prefix:{labelPrefix}</EuiBadge>,
                   sourceBadge: <EuiBadge color="hollow">monitor_source:ai-wizard</EuiBadge>,
@@ -713,7 +713,7 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
         });
       case 'review':
         return i18n.translate('observability.alerting.monitorTemplateWizard.step.review', {
-          defaultMessage: 'Select Monitors',
+          defaultMessage: 'Select rules',
         });
       case 'configure':
         return i18n.translate('observability.alerting.monitorTemplateWizard.step.configure', {
@@ -751,14 +751,14 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
               <h2 id="monitorTemplateWizardTitle">
                 <FormattedMessage
                   id="observability.alerting.monitorTemplateWizard.headerTitle"
-                  defaultMessage="Monitor Template Setup"
+                  defaultMessage="Rule template setup"
                 />
               </h2>
             </EuiTitle>
             <EuiText size="xs" color="subdued">
               <FormattedMessage
                 id="observability.alerting.monitorTemplateWizard.headerSubtitle"
-                defaultMessage="Auto-generate monitors from discovered OTEL metrics — Step {step} of 4: {title}"
+                defaultMessage="Auto-generate rules from discovered OTEL metrics — Step {step} of 4: {title}"
                 values={{ step: stepNumber(), title: stepTitle() }}
               />
             </EuiText>
@@ -817,7 +817,7 @@ export const MonitorTemplateWizard: React.FC<MonitorTemplateWizardProps> = ({
                       ? i18n.translate(
                           'observability.alerting.monitorTemplateWizard.createMonitorsButton',
                           {
-                            defaultMessage: 'Create {count} Monitors',
+                            defaultMessage: 'Create {count} rules',
                             values: { count: selectedTemplates.size },
                           }
                         )

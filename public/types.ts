@@ -14,6 +14,7 @@ import { DataSourceManagementPluginSetup } from '../../../src/plugins/data_sourc
 import { EmbeddableSetup, EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { ManagementOverViewPluginSetup } from '../../../src/plugins/management_overview/public';
 import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/public';
+import { ExplorePluginSetup } from '../../../src/plugins/explore/public';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { VisualizationsSetup } from '../../../src/plugins/visualizations/public';
 import {
@@ -51,10 +52,24 @@ export interface SetupDependencies {
   dataSourceManagement: DataSourceManagementPluginSetup;
   contentManagement?: ContentManagementPluginSetup;
   investigationDashboards?: unknown;
+  /** Optional — when present we register the "Create observability monitor" entry under the Logs page Actions menu. */
+  explore?: ExplorePluginSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ObservabilitySetup {}
+export interface ObservabilitySetup {
+  /**
+   * Signals to other plugins that observability owns the "Create monitor"
+   * entry-point on Explore's Query Panel "Actions" menu — true when the
+   * observability alert manager is enabled in config (`observability.alertManager.enabled`).
+   *
+   * Consumers (currently the alerting-dashboards-plugin) read this flag in
+   * their own `setup()` and skip their parallel registration to avoid two
+   * "Create monitor" entries appearing side-by-side. Always defined so the
+   * boolean check is unambiguous — a missing field would force consumers
+   * to coalesce against `undefined`.
+   */
+  ownsMonitorCreation: boolean;
+}
 
 export interface ObservabilityStart {
   renderAccelerationDetailsFlyout: ({

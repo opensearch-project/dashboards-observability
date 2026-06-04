@@ -394,7 +394,7 @@ export const DatasourceTargetSelector: React.FC<{
       helpText={i18n.translate(
         'observability.alerting.monitorFormComponents.targetDatasourceHelpText',
         {
-          defaultMessage: 'Where this monitor will be created',
+          defaultMessage: 'Where this rule will be created',
         }
       )}
       fullWidth

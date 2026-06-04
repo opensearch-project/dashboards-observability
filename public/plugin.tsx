@@ -562,8 +562,98 @@ export class ObservabilityPlugin
 
     registerAsssitantDependencies(setupDeps.assistantDashboards);
 
-    // Return methods that should be available to other plugins
-    return {};
+    // True when our alert manager is on AND we have an Explore registry to
+    // attach to. This is also the value we hand back through the setup
+    // contract so the alerting-dashboards-plugin can stand its own
+    // "Create monitor" entry down — when both plugins register, the user
+    // sees two duplicate entries; gating on `alertManager.enabled` (rather
+    // than mere plugin presence) lets observability ship loaded-but-quiet
+    // when the alert manager is intentionally disabled.
+    const ownsMonitorCreation = !!this.config.alertManager?.enabled;
+
+    // Register the "Create monitor" entry under Explore's Query Panel
+    // "Actions" menu when our alert manager is enabled. Skipped when the
+    // flag is off so the alerting-dashboards-plugin keeps ownership.
+    // Lazy-loaded so we don't pay the import cost in setups that never
+    // open the menu.
+    if (ownsMonitorCreation && setupDeps.explore) {
+      // Lazy-load the flyout host once, at module scope of this closure — not
+      // per-render. Defining `React.lazy` inside the action's `component`
+      // would create a fresh lazy wrapper on every parent render, defeating
+      // the dynamic-import cache and re-triggering Suspense each time.
+      const LazyExploreCreateMonitor = React.lazy(async () => {
+        const mod = await import('./components/alerting/explore_create_monitor');
+        return { default: mod.ExploreCreateMonitor };
+      });
+
+      setupDeps.explore.queryPanelActionsRegistry.register({
+        id: 'observability-create-logs-monitor-from-explore',
+        order: 1,
+        actionType: 'flyout',
+        getLabel: () =>
+          i18n.translate('observability.alerting.exploreCreateMonitor.actionLabel', {
+            defaultMessage: 'Create alert rule',
+          }),
+        getIcon: () => 'bell',
+        getIsEnabled: (deps) => {
+          // Capabilities live on `CoreStart`, not `CoreSetup` — read from
+          // `coreRefs` which `start()` populates. `getIsEnabled` is invoked
+          // when the menu opens, well after the start phase, so by the time
+          // this runs `coreRefs.application` is set.
+          //
+          // The structural cast names only the field we care about
+          // (`alertingDashboards.pplV2`) — owned by the alerting plugin and
+          // not declared in any shared type, so we can't import a stronger
+          // shape without coupling this plugin to alerting's internals.
+          const capabilities = coreRefs.application?.capabilities as
+            | { alertingDashboards?: { pplV2?: boolean } }
+            | undefined;
+          // Reuse the alerting plugin's PPL capability — they own the agent
+          // config + cluster gate; we just light up alongside theirs so users
+          // see both options when PPL alerting is on.
+          if (!capabilities?.alertingDashboards?.pplV2) return false;
+          // AOSS clusters can't host monitors; their button hides itself the
+          // same way.
+          const isAOSS =
+            (deps.query as { dataset?: { dataSource?: { type?: string } } })?.dataset?.dataSource
+              ?.type === 'OpenSearch Serverless';
+          return !isAOSS;
+        },
+        component: (props) => {
+          const dataset = (props.dependencies.query as {
+            dataset?: {
+              dataSource?: { id?: string; title?: string; name?: string };
+              title?: string;
+              timeFieldName?: string;
+            };
+          }).dataset;
+          const exploreContext = {
+            dataSourceId: dataset?.dataSource?.id,
+            dataSourceName: dataset?.dataSource?.title ?? dataset?.dataSource?.name,
+            indexPattern: dataset?.title,
+            timeFieldName: dataset?.timeFieldName,
+            queryInEditor:
+              props.dependencies.queryInEditor ||
+              (props.dependencies.query as { query?: string })?.query ||
+              '',
+          };
+          return (
+            <React.Suspense fallback={null}>
+              <LazyExploreCreateMonitor
+                exploreContext={exploreContext}
+                onClose={props.closeFlyout}
+              />
+            </React.Suspense>
+          );
+        },
+      });
+    }
+
+    // Return contract for other plugins to consume. `ownsMonitorCreation` is
+    // the signal the alerting-dashboards-plugin reads to decide whether to
+    // register its own "Create monitor" entry on Explore — true when our
+    // alert manager is enabled, false otherwise.
+    return { ownsMonitorCreation };
   }
 
   public start(core: CoreStart, startDeps: AppPluginStartDependencies): ObservabilityStart {

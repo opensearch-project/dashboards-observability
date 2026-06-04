@@ -166,7 +166,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                     >
                       <FormattedMessage
                         id="observability.alerting.monitorsTable.mainPanel.createMonitor"
-                        defaultMessage="Create Monitor"
+                        defaultMessage="Create alert rule"
                       />
                     </EuiButton>
                   }
@@ -198,7 +198,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                           aria-label={i18n.translate(
                             'observability.alerting.monitorsTable.mainPanel.createLogsAriaLabel',
                             {
-                              defaultMessage: 'Create Logs monitor',
+                              defaultMessage: 'Create logs rule',
                             }
                           )}
                         />
@@ -218,7 +218,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                         aria-label={i18n.translate(
                           'observability.alerting.monitorsTable.mainPanel.createLogsAriaLabel',
                           {
-                            defaultMessage: 'Create Logs monitor',
+                            defaultMessage: 'Create logs rule',
                           }
                         )}
                       />
@@ -230,7 +230,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                           'observability.alerting.monitorsTable.mainPanel.metricsDisabledTooltip',
                           {
                             defaultMessage:
-                              'Metrics monitors require a Prometheus datasource. Select one to enable.',
+                              'Metrics rules require a Prometheus datasource. Select one to enable.',
                           }
                         )}
                       >
@@ -245,7 +245,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                           aria-label={i18n.translate(
                             'observability.alerting.monitorsTable.mainPanel.createMetricsAriaLabel',
                             {
-                              defaultMessage: 'Create Metrics monitor',
+                              defaultMessage: 'Create metrics rule',
                             }
                           )}
                         />
@@ -265,7 +265,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                         aria-label={i18n.translate(
                           'observability.alerting.monitorsTable.mainPanel.createMetricsAriaLabel',
                           {
-                            defaultMessage: 'Create Metrics monitor',
+                            defaultMessage: 'Create metrics rule',
                           }
                         )}
                       />
@@ -282,7 +282,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
               placeholder={i18n.translate(
                 'observability.alerting.monitorsTable.mainPanel.searchPlaceholder',
                 {
-                  defaultMessage: 'Search monitors by name, labels (team:infra), annotations...',
+                  defaultMessage: 'Search rules by name, labels (team:infra), annotations...',
                 }
               )}
               value={searchQuery}
@@ -298,7 +298,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
               aria-label={i18n.translate(
                 'observability.alerting.monitorsTable.mainPanel.searchAriaLabel',
                 {
-                  defaultMessage: 'Search monitors',
+                  defaultMessage: 'Search rules',
                 }
               )}
             />
@@ -350,7 +350,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                   <EuiText size="s">
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.monitorsCount"
-                      defaultMessage="{count} monitors"
+                      defaultMessage="{count} {count, plural, one {rule} other {rules}}"
                       values={{ count: <strong>{filtered.length}</strong> }}
                     />
                     {selectedIds.size > 0 && (
@@ -422,7 +422,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                   ) : (
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.noMonitorsFoundTitle"
-                      defaultMessage="No Monitors Found"
+                      defaultMessage="No rules found"
                     />
                   )}
                 </h2>
@@ -440,17 +440,17 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                   {noDatasourceSelected ? (
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.selectDatasourcePrompt"
-                      defaultMessage="Select a datasource in the filter panel to see monitors."
+                      defaultMessage="Select a datasource in the filter panel to see rules."
                     />
                   ) : rules.length === 0 ? (
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.noMonitorsConfigured"
-                      defaultMessage="No monitors configured yet."
+                      defaultMessage="No rules configured yet."
                     />
                   ) : (
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.noMonitorsMatch"
-                      defaultMessage="No monitors match your current search and filters."
+                      defaultMessage="No rules match your current search and filters."
                     />
                   )}
                 </p>
@@ -481,7 +481,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
       {showDeleteConfirm && (
         <DeleteModal
           title={i18n.translate('observability.alerting.monitorsTable.mainPanel.deleteModalTitle', {
-            defaultMessage: 'Delete {count} {count, plural, one {monitor} other {monitors}}?',
+            defaultMessage: 'Delete {count} {count, plural, one {rule} other {rules}}?',
             values: { count: selectedIds.size },
           })}
           message={i18n.translate(

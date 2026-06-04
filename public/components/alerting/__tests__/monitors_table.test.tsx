@@ -57,7 +57,7 @@ describe('MonitorsTable', () => {
   it('renders the table with a rule row', () => {
     render(<MonitorsTable {...defaultProps} />);
     expect(screen.getByText('HighCPU')).toBeInTheDocument();
-    expect(screen.getByText(/monitors/)).toBeInTheDocument();
+    expect(screen.getByText(/rules/)).toBeInTheDocument();
   });
 
   it('selects a row checkbox', () => {
@@ -75,7 +75,7 @@ describe('MonitorsTable', () => {
     const onDatasourceChange = jest.fn();
     render(<MonitorsTable {...defaultProps} onDatasourceChange={onDatasourceChange} />);
 
-    const searchInput = screen.getByPlaceholderText(/Search monitors/i) as HTMLInputElement;
+    const searchInput = screen.getByPlaceholderText(/Search rules/i) as HTMLInputElement;
     fireEvent.change(searchInput, { target: { value: 'HighCPU' } });
     expect(searchInput.value).toBe('HighCPU');
 

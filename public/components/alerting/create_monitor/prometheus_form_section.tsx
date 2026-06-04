@@ -142,7 +142,7 @@ export const PrometheusFormSection: React.FC<{
         <EuiText size="xs" color="subdued">
           {i18n.translate(
             'observability.alerting.prometheusFormSection.alertConditionDescription',
-            { defaultMessage: 'Define when this monitor should fire an alert' }
+            { defaultMessage: 'Define when this rule should fire an alert' }
           )}
         </EuiText>
         <EuiSpacer size="s" />

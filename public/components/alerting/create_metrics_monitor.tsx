@@ -376,7 +376,7 @@ const MonitorDetailsSection = React.memo<{
     buttonContent={
       <strong>
         {i18n.translate('observability.alerting.createMetricsMonitor.monitorDetailsTitle', {
-          defaultMessage: 'Monitor details',
+          defaultMessage: 'Rule details',
         })}
       </strong>
     }
@@ -385,14 +385,14 @@ const MonitorDetailsSection = React.memo<{
   >
     <EuiFormRow
       label={i18n.translate('observability.alerting.createMetricsMonitor.monitorNameLabel', {
-        defaultMessage: 'Monitor name',
+        defaultMessage: 'Rule name',
       })}
       fullWidth
     >
       <EuiFieldText
         placeholder={i18n.translate(
           'observability.alerting.createMetricsMonitor.monitorNamePlaceholder',
-          { defaultMessage: 'Enter a monitor name' }
+          { defaultMessage: 'Enter a rule name' }
         )}
         value={form.monitorName}
         onChange={(e) => onUpdate({ monitorName: e.target.value })}
@@ -400,7 +400,7 @@ const MonitorDetailsSection = React.memo<{
         compressed
         aria-label={i18n.translate(
           'observability.alerting.createMetricsMonitor.monitorNameAriaLabel',
-          { defaultMessage: 'Monitor name' }
+          { defaultMessage: 'Rule name' }
         )}
       />
     </EuiFormRow>
@@ -425,7 +425,7 @@ const MonitorDetailsSection = React.memo<{
       <EuiTextArea
         placeholder={i18n.translate(
           'observability.alerting.createMetricsMonitor.descriptionPlaceholder',
-          { defaultMessage: 'Describe this monitor' }
+          { defaultMessage: 'Describe this rule' }
         )}
         value={form.description}
         onChange={(e) => onUpdate({ description: e.target.value })}
@@ -434,7 +434,7 @@ const MonitorDetailsSection = React.memo<{
         compressed
         aria-label={i18n.translate(
           'observability.alerting.createMetricsMonitor.descriptionAriaLabel',
-          { defaultMessage: 'Monitor description' }
+          { defaultMessage: 'Rule description' }
         )}
       />
     </EuiFormRow>
@@ -692,7 +692,7 @@ const QuerySection = React.memo<{
             <EuiCallOut size="s" color="warning" iconType="iInCircle">
               <EuiText size="xs">
                 {i18n.translate('observability.alerting.createMetricsMonitor.sampleDataCallout', {
-                  defaultMessage: 'Sample data — run the monitor to see real results',
+                  defaultMessage: 'Sample data — run the rule to see real results',
                 })}
               </EuiText>
             </EuiCallOut>
@@ -813,7 +813,7 @@ const TriggerConditionSection = React.memo<{
     <EuiCallOut size="s" color="warning" iconType="iInCircle">
       <EuiText size="xs">
         {i18n.translate('observability.alerting.createMetricsMonitor.thresholdSampleDataCallout', {
-          defaultMessage: 'Sample data — run the monitor to see real results',
+          defaultMessage: 'Sample data — run the rule to see real results',
         })}
       </EuiText>
     </EuiCallOut>
@@ -1420,7 +1420,7 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({ onCa
         <EuiTitle size="m">
           <h2 id="createMetricsMonitorTitle">
             {i18n.translate('observability.alerting.createMetricsMonitor.flyoutTitle', {
-              defaultMessage: 'Create Metrics Monitor',
+              defaultMessage: 'Create metrics rule',
             })}
           </h2>
         </EuiTitle>

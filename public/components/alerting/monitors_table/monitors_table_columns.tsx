@@ -107,7 +107,7 @@ export function buildTableColumns({
           aria-label={i18n.translate(
             'observability.alerting.monitorsTable.columns.selectAllAriaLabel',
             {
-              defaultMessage: 'Select all monitors',
+              defaultMessage: 'Select all rules',
             }
           )}
         />

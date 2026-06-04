@@ -179,7 +179,7 @@ export const EditMonitor: React.FC<EditMonitorProps> = ({
             <h2 id="editMonitorErrorTitle">
               <FormattedMessage
                 id="observability.alerting.editMonitor.failedToLoadTitle"
-                defaultMessage="Failed to load monitor"
+                defaultMessage="Failed to load rule"
               />
             </h2>
           </EuiTitle>

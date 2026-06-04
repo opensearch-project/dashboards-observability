@@ -103,6 +103,13 @@ beforeEach(() => {
   } catch (_e) {
     /* no-op */
   }
+  // Reset the hash between tests — `AlarmsPage` reads `window.location.hash`
+  // on mount (via `parseAlarmsHashRoute`) and will land on whatever tab a
+  // prior test's interaction left in the URL. Without this reset, the
+  // sequence "click Rules tab in test A → mount in test B" makes test B
+  // start on the Rules tab, so `<AlertsDashboard>` never renders and
+  // `mockDashboard.mock.calls` stays empty.
+  window.history.replaceState(null, '', window.location.pathname + window.location.search);
 });
 
 describe('AlarmsPage', () => {
@@ -362,6 +369,42 @@ describe('AlarmsPage', () => {
       expect.objectContaining({ name: 'Test Monitor (Copy)' }),
       'ds-1'
     );
+  });
+
+  // ---- URL-reflects-active-tab ---------------------------------------------
+  // `handleTabClick` mirrors the active tab into `window.location.hash` so
+  // reload / bookmark / back-button round-trip the user's selection. The
+  // tests below cover the two important cases: a click writes the hash,
+  // and clicking the already-active tab is a no-op (otherwise we'd push
+  // redundant history entries).
+
+  it('writes the active tab into window.location.hash on tab click', async () => {
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+    expect(window.location.hash).toBe('#/rules');
+  });
+
+  it('updates the hash when switching from rules → routing', async () => {
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+    fireEvent.click(screen.getByTestId('alertManagerTabs-routing'));
+    expect(window.location.hash).toBe('#/routing');
+  });
+
+  it('does not push redundant history entries when clicking the active tab', async () => {
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+    const lengthAfterFirstClick = window.history.length;
+    // Click the same tab again — should be a no-op (no new history entry).
+    fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+    expect(window.history.length).toBe(lengthAfterFirstClick);
+    expect(window.location.hash).toBe('#/rules');
   });
 });
 

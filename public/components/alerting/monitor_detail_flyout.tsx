@@ -208,7 +208,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                   content={i18n.translate(
                     'observability.alerting.monitorDetailFlyout.editTooltip',
                     {
-                      defaultMessage: 'Editing is only supported for PPL monitors',
+                      defaultMessage: 'Editing is only supported for PPL alert rules',
                     }
                   )}
                 >
@@ -259,7 +259,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                     title={i18n.translate(
                       'observability.alerting.monitorDetailFlyout.detailLoadError.title',
                       {
-                        defaultMessage: 'Some monitor details could not be loaded',
+                        defaultMessage: 'Some rule details could not be loaded',
                       }
                     )}
                     data-test-subj="alertManagerMonitorDetailLoadError"
@@ -411,7 +411,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                         <em>
                           <FormattedMessage
                             id="observability.alerting.monitorDetailFlyout.bucketLevelDescription"
-                            defaultMessage="Bucket-level monitor — triggers evaluate per aggregation bucket"
+                            defaultMessage="Bucket-level rule — triggers evaluate per aggregation bucket"
                           />
                         </em>
                       </EuiText>
@@ -731,11 +731,11 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                       {monitor.enabled === false
                         ? i18n.translate(
                             'observability.alerting.monitorDetailFlyout.enableMonitor',
-                            { defaultMessage: 'Enable Monitor' }
+                            { defaultMessage: 'Enable rule' }
                           )
                         : i18n.translate(
                             'observability.alerting.monitorDetailFlyout.disableMonitor',
-                            { defaultMessage: 'Disable Monitor' }
+                            { defaultMessage: 'Disable rule' }
                           )}
                     </EuiButton>
                   ) : (
@@ -743,7 +743,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                       content={i18n.translate(
                         'observability.alerting.monitorDetailFlyout.enableDisableTooltip',
                         {
-                          defaultMessage: 'Enable/disable is only supported for PPL monitors.',
+                          defaultMessage: 'Enable/disable is only supported for PPL alert rules.',
                         }
                       )}
                     >
@@ -751,11 +751,11 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                         {monitor.enabled === false
                           ? i18n.translate(
                               'observability.alerting.monitorDetailFlyout.enableMonitor',
-                              { defaultMessage: 'Enable Monitor' }
+                              { defaultMessage: 'Enable rule' }
                             )
                           : i18n.translate(
                               'observability.alerting.monitorDetailFlyout.disableMonitor',
-                              { defaultMessage: 'Disable Monitor' }
+                              { defaultMessage: 'Disable rule' }
                             )}
                       </EuiButton>
                     </EuiToolTip>
@@ -775,7 +775,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
             values: { name: monitor.name },
           })}
           message={i18n.translate('observability.alerting.monitorDetailFlyout.deleteModalMessage', {
-            defaultMessage: 'This will remove the monitor from the current view.',
+            defaultMessage: 'This will remove the rule from the current view.',
           })}
           onCancel={() => setShowDeleteConfirm(false)}
           onConfirm={() => {
