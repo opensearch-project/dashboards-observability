@@ -94,7 +94,11 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   const [isTogglingEnabled, setIsTogglingEnabled] = useState(false);
   // Mirror the Edit-button gate (PPL only). Non-PPL types stay read-only;
   // the existing tooltip surfaces explains the limitation.
-  const canToggleEnabled = !!onToggleEnabled && (monitor.monitorType === 'ppl' || monitor.monitorType === 'metric');
+  // Prometheus rules cannot be disabled via the OS Alerting API.
+  const canToggleEnabled =
+    !!onToggleEnabled &&
+    monitor.datasourceType !== 'prometheus' &&
+    (monitor.monitorType === 'ppl' || monitor.monitorType === 'metric');
   const { detail, isLoading: detailLoading, error: detailError } = useMonitorDetail({
     dsId: monitor.datasourceId,
     ruleId: monitor.id,
@@ -713,7 +717,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  {canToggleEnabled ? (
+                  {monitor.datasourceType === 'prometheus' ? null : canToggleEnabled ? (
                     <EuiButton
                       size="s"
                       isLoading={isTogglingEnabled}

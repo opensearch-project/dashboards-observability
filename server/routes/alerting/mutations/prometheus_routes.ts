@@ -31,7 +31,17 @@ export type PrometheusClientResolver = (
 const prometheusRuleBodySchema = schema.object({
   name: schema.string({ minLength: 1, maxLength: 256 }),
   query: schema.string({ minLength: 1 }),
-  operator: schema.string({ defaultValue: '>' }),
+  operator: schema.oneOf(
+    [
+      schema.literal('>'),
+      schema.literal('>='),
+      schema.literal('<'),
+      schema.literal('<='),
+      schema.literal('=='),
+      schema.literal('!='),
+    ],
+    { defaultValue: '>' }
+  ),
   threshold: schema.number(),
   forDuration: schema.string({ defaultValue: '5m' }),
   evaluationInterval: schema.string({ defaultValue: '1m' }),

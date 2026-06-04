@@ -32,8 +32,6 @@ import {
   PplTriggerForm,
 } from './create_monitor_types';
 
-type EditFormState = MonitorFormState;
-
 /** Convert seconds to a human-readable duration string (e.g., 60 → "1m"). */
 function formatSeconds(sec: number): string {
   if (sec <= 0) return '1m';
@@ -167,14 +165,6 @@ export const EditMonitor: React.FC<EditMonitorProps> = ({
   useEffect(() => {
     if (!data) return;
     if (data.datasourceType === 'prometheus') {
-      // DEBUG: log to see what fields the rule detail returns
-      console.log('PROMETHEUS EDIT DATA:', JSON.stringify({
-        evaluationInterval: data.evaluationInterval,
-        pendingPeriod: data.pendingPeriod,
-        firingPeriod: data.firingPeriod,
-        threshold: data.threshold,
-        raw: data.raw,
-      }, null, 2));
       // Prometheus rule edit — seed from the unified rule summary + raw data.
       // The summary carries pre-parsed human-readable fields; raw has the
       // Cortex wire format which may use empty strings or numeric seconds.
@@ -191,7 +181,7 @@ export const EditMonitor: React.FC<EditMonitorProps> = ({
       // Duration fields: prefer the summary-level fields which are already
       // formatted as duration strings by the server's rule mapper.
       // Normalize "120s" → "2m" etc. so the dropdown can match.
-      const rawFor = data.pendingPeriod || String(firstRule.for || '') || '5m';
+      const rawFor = data.pendingPeriod ?? (firstRule.for != null ? String(firstRule.for) : '') || '5m';
       const forDuration = normalizeDuration(rawFor);
       const evaluationInterval = normalizeDuration(data.evaluationInterval || '1m');
       const firingPeriod = normalizeDuration(data.firingPeriod || forDuration);
@@ -219,9 +209,7 @@ export const EditMonitor: React.FC<EditMonitorProps> = ({
       return;
     }
     if (data.datasourceType !== 'opensearch') {
-      setUnsupported(
-        'Editing this monitor type is not supported yet.'
-      );
+      setUnsupported('Editing this monitor type is not supported yet.');
       return;
     }
     if (data.monitorType !== 'ppl') {

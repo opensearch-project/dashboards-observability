@@ -66,6 +66,10 @@ export const PrometheusFormSection: React.FC<{
     value: ThresholdCondition[K]
   ) => {
     onUpdate('threshold', { ...form.threshold, [key]: value });
+    // Keep pendingPeriod in sync when forDuration is changed in the threshold panel
+    if (key === 'forDuration') {
+      onUpdate('pendingPeriod', value as string);
+    }
   };
 
   const handleMetricSelect = (metricName: string) => {
@@ -300,7 +304,11 @@ export const PrometheusFormSection: React.FC<{
               <EuiSelect
                 options={DURATION_OPTIONS}
                 value={form.pendingPeriod}
-                onChange={(e) => onUpdate('pendingPeriod', e.target.value)}
+                onChange={(e) => {
+                  onUpdate('pendingPeriod', e.target.value);
+                  // Sync threshold.forDuration to match pendingPeriod
+                  onUpdate('threshold', { ...form.threshold, forDuration: e.target.value });
+                }}
                 compressed
                 aria-label={i18n.translate(
                   'observability.alerting.prometheusFormSection.pendingPeriodAriaLabel',

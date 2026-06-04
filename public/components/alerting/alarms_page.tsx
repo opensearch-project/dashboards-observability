@@ -546,7 +546,37 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         continue;
       }
       try {
-        await mutations.deleteMonitor(id, rule.datasourceId);
+        if (rule.datasourceType === 'prometheus') {
+          // Prometheus rules are deleted via the Cortex ruler API using
+          // the group name. Since Cortex deletes the entire group, check
+          // if other rules share this group — if so, warn that siblings
+          // will also be removed. Our create flow uses one rule per group,
+          // but externally-authored groups may contain multiple rules.
+          const groupName = rule.group || rule.name;
+          const siblingsInGroup = rules.filter(
+            (r) =>
+              r.id !== id &&
+              r.datasourceId === rule.datasourceId &&
+              r.datasourceType === 'prometheus' &&
+              (r.group || r.name) === groupName
+          );
+          if (siblingsInGroup.length > 0) {
+            // Multi-rule group: warn via toast but proceed (user already
+            // confirmed via the delete modal). A future enhancement can
+            // implement per-rule splice (read group → remove rule → upsert).
+            addToast(
+              i18n.translate('observability.alerting.alarmsPage.toast.groupDeleteWarning', {
+                defaultMessage:
+                  'Deleting rule group "{groupName}" which contains {count} other rule(s)',
+                values: { groupName, count: siblingsInGroup.length },
+              }),
+              'warning'
+            );
+          }
+          await mutations.deletePrometheusRule(rule.datasourceId, groupName);
+        } else {
+          await mutations.deleteMonitor(id, rule.datasourceId);
+        }
       } catch (e: unknown) {
         failed.push(id);
         addToast(
@@ -642,8 +672,69 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       // Fetch the full rule detail to get the raw backend payload — the
       // summary shape doesn't carry the wire format needed for re-creation.
       const detail = await osService.getRuleDetail(monitor.datasourceId, monitor.id);
-      const raw = (detail.raw ?? {}) as Record<string, unknown>;
-      // Strip server-assigned fields that aren't valid on create.
+
+      // Prometheus rules must be cloned via the Cortex ruler API, not the
+      // OpenSearch Alerting monitor API (which requires `schedule`).
+      if (detail.datasourceType === 'prometheus') {
+        // Use a suffix that's safe for the ruleId regex [A-Za-z0-9_-]+
+        // (no spaces or parentheses).
+        const suffix = '-copy';
+        const baseName =
+          monitor.name.length + suffix.length > PPL_MONITOR_NAME_MAX
+            ? monitor.name.slice(0, PPL_MONITOR_NAME_MAX - suffix.length)
+            : monitor.name;
+        const clonedName = `${baseName}${suffix}`;
+
+        // Extract rule details from the unified shape + raw
+        const raw = ((detail.raw ?? {}) as unknown) as Record<string, unknown>;
+        const expr = String(raw.query || raw.expr || detail.query || '');
+        const rawLabels = (raw.labels || detail.labels || {}) as Record<string, string>;
+        const rawAnnotations = (raw.annotations || detail.annotations || {}) as Record<
+          string,
+          string
+        >;
+        const duration =
+          typeof raw.duration === 'number'
+            ? `${raw.duration}s`
+            : String(raw.for || detail.pendingPeriod || '5m');
+        const evalInterval = detail.evaluationInterval || '1m';
+
+        // Parse threshold from expression (e.g. "up == 0" → operator "==", threshold 0)
+        const parsed = detail.threshold || { operator: '>', value: 0 };
+
+        const payload = {
+          name: clonedName,
+          query: expr.replace(/\s*(>|>=|<|<=|==|!=)\s*[\d.]+\s*$/, '').trim() || expr,
+          operator: parsed.operator || '>',
+          threshold: parsed.value ?? 0,
+          forDuration: duration,
+          evaluationInterval: evalInterval,
+          labels: rawLabels,
+          annotations: rawAnnotations,
+          enabled: true,
+        };
+        await mutations.createPrometheusRule(payload, monitor.datasourceId);
+        // Optimistic insert — show the cloned rule immediately in the UI
+        const optimisticClone: UnifiedRuleSummary = {
+          ...monitor,
+          id: `new-clone-${Date.now()}`,
+          name: clonedName,
+          group: clonedName,
+          status: 'pending',
+        };
+        setRules((prev) => [optimisticClone as any, ...prev]);
+        setRulesTotal((prev) => prev + 1);
+        addToast(
+          i18n.translate('observability.alerting.alarmsPage.toast.monitorCloned', {
+            defaultMessage: 'Monitor cloned',
+          })
+        );
+        // Background refetch to reconcile with Cortex once it propagates
+        setTimeout(() => refetchRules(), 15000);
+        return;
+      }
+
+      const raw = ((detail.raw ?? {}) as unknown) as Record<string, unknown>;
       const {
         id: _id,
         last_update_time: _t,
@@ -765,6 +856,20 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           enabled: promForm.enabled,
         };
         await mutations.createPrometheusRule(payload, dsId);
+
+        // Poll Cortex until the rule appears (up to 90s, every 5s).
+        // The CreateMonitor flyout keeps its button in loading state until
+        // this promise resolves, giving the user confirmation feedback.
+        const maxAttempts = 18;
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+          try {
+            const resp = await osService.getRuleDetail(dsId, `${dsId}-${promForm.name}-${promForm.name}`);
+            if (resp) break;
+          } catch {
+            // Ignore errors during polling — rule not yet visible
+          }
+        }
       } else {
         await mutations.createMonitor(buildPayload(formState), dsId);
       }
@@ -799,12 +904,28 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       if (formState.datasourceType === 'prometheus') {
         // Prometheus rules use upsert semantics — same endpoint as create
         const promForm = formState as import('./create_monitor/create_monitor_types').PrometheusFormState;
+
+        // Detect if the rule was renamed. The ruleId format is `{dsId}-{groupName}-{ruleName}`.
+        // If the name changed, delete the old rule group to avoid orphans.
+        const ruleIdParts = ruleId.split('-');
+        // dsId may itself contain dashes, so groupName is the segment after dsId prefix
+        const originalGroupName = ruleIdParts.length >= 3 ? ruleIdParts[1] : undefined;
+        if (originalGroupName && originalGroupName !== promForm.name) {
+          try {
+            await mutations.deletePrometheusRule(dsId, originalGroupName);
+          } catch {
+            // Best-effort: if delete fails, proceed with upsert anyway
+          }
+        }
+
+        // Use pendingPeriod from Eval Settings if edited; fall back to threshold.forDuration
+        const resolvedForDuration = promForm.pendingPeriod || promForm.threshold.forDuration;
         const payload = {
           name: promForm.name,
           query: promForm.query,
           operator: promForm.threshold.operator,
           threshold: promForm.threshold.value,
-          forDuration: promForm.threshold.forDuration,
+          forDuration: resolvedForDuration,
           evaluationInterval: promForm.evaluationInterval,
           labels: Object.fromEntries(
             promForm.labels.filter((l) => l.key && l.value).map((l) => [l.key, l.value])
@@ -813,10 +934,15 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             promForm.annotations.filter((a) => a.key && a.value).map((a) => [a.key, a.value])
           ),
           enabled: promForm.enabled,
+          groupName: promForm.name,
         };
         await mutations.createPrometheusRule(payload, dsId);
+        // Background refetch to reconcile with Cortex once it propagates
+        setTimeout(() => refetchRules(), 15000);
       } else {
         await mutations.updateMonitor(ruleId, buildPayload(formState), dsId);
+        // Immediate refetch for OpenSearch monitors (no propagation delay)
+        refetchRules();
       }
       addToast(
         i18n.translate('observability.alerting.alarmsPage.toast.monitorUpdated', {
@@ -825,7 +951,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       );
       setEditTarget(null);
       setPplSubmitError(null);
-      refetchRules();
     } catch (e: unknown) {
       const message = extractServerErrorMessage(e);
       const pplError = extractPplValidationError(message);

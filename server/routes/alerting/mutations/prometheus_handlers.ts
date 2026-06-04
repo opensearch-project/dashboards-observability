@@ -124,8 +124,6 @@ export async function handleDeletePrometheusRule(
   logger?: Logger
 ): Promise<{ success: boolean }> {
   await rulerClient.deleteRuleGroup(client, datasource, USER_RULES_NAMESPACE, groupName);
-  logger?.info(
-    `alerting: deletePrometheusRule success — ds=${datasource.id} group=${groupName}`
-  );
+  logger?.info(`alerting: deletePrometheusRule success — ds=${datasource.id} group=${groupName}`);
   return { success: true };
 }
