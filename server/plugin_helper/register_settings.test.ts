@@ -46,30 +46,25 @@ describe('registerObservabilityUISettings', () => {
   });
 
   describe('Alert Manager settings', () => {
-    const findSetting = (key: string, alertManagerEnabled: boolean) => {
-      registerObservabilityUISettings(mockUiSettings, alertManagerEnabled);
+    // After the move to dynamic feature flags, registration is
+    // unconditional — the alerting nav UI is gated by the dynamic
+    // capability instead of yml. The settings always register so they're
+    // available the moment the dynamic flag flips on.
+    const findSetting = (key: string) => {
+      registerObservabilityUISettings(mockUiSettings);
       const calls = (mockUiSettings.register as jest.Mock).mock.calls;
       const match = calls.find((call) => call[0][key]);
       return match?.[0][key];
     };
 
-    it('does not register datasource settings when yml flag is off', () => {
-      registerObservabilityUISettings(mockUiSettings, false);
-      const calls = (mockUiSettings.register as jest.Mock).mock.calls;
-      expect(calls.find((call) => call[0][ALERT_MANAGER_MAX_DATASOURCES_SETTING])).toBeUndefined();
-      expect(
-        calls.find((call) => call[0][ALERT_MANAGER_DEFAULT_DATASOURCES_SETTING])
-      ).toBeUndefined();
-    });
-
-    it('registers alertManagerMaxDatasources with default value 5 when yml flag is on', () => {
-      const setting = findSetting(ALERT_MANAGER_MAX_DATASOURCES_SETTING, true);
+    it('registers alertManagerMaxDatasources with default value 5', () => {
+      const setting = findSetting(ALERT_MANAGER_MAX_DATASOURCES_SETTING);
       expect(setting.value).toBe(ALERT_MANAGER_MAX_DATASOURCES_DEFAULT);
       expect(setting.value).toBe(5);
     });
 
-    it('registers alertManagerSelectedDatasources with empty array default when yml flag is on', () => {
-      const setting = findSetting(ALERT_MANAGER_DEFAULT_DATASOURCES_SETTING, true);
+    it('registers alertManagerSelectedDatasources with empty array default', () => {
+      const setting = findSetting(ALERT_MANAGER_DEFAULT_DATASOURCES_SETTING);
       expect(setting.value).toEqual([]);
     });
   });

@@ -323,13 +323,23 @@ export class ObservabilityPlugin
         },
       },
     };
-    // Hoisted above `setupRoutes` so the alerting-route gate (mirrors the
-    // existing `dataSourceEnabled` pattern) can read the flag at registration
-    // time. Keep the same fetch downstream consumers depend on — UI settings
-    // registration below reuses `observabilityConfig.alertManager?.enabled`.
+    // SLO + alerting backends register unconditionally so the dynamic
+    // capability flag (resolved at request time from DynamicConfigService,
+    // see `registerSwitcher` below) can flip user-visible UI on or off
+    // without an OSD restart.
+    //
+    // yml flag semantics:
+    //   - `alertManager.enabled` / `slo.enabled` — UI visibility default
+    //     for environments without a configured DynamicConfigService
+    //     (open-source / GitHub OSD). Read once here and used as the
+    //     fallback in both the capability provider and the switcher's
+    //     `??` chain. The dynamic store overrides them when present.
+    //   - `slo.reconciler.enabled` — whether the GC timer ticks on this
+    //     host (host-level cost, not a UI concern).
+    //   - `slo.ruleDedup.enabled` — fingerprint-keyed selector behavior.
     const observabilityConfig = await this.initializerContext.config
       .create<{
-        alertManager: { enabled: boolean };
+        alertManager?: { enabled?: boolean };
         slo?: {
           enabled?: boolean;
           ruleDedup?: { enabled: boolean };
@@ -338,19 +348,13 @@ export class ObservabilityPlugin
       }>()
       .pipe(first())
       .toPromise();
-    const alertManagerEnabled = observabilityConfig.alertManager?.enabled ?? false;
-    // Feature-flag: SLO surfaces ship dark by default. Opt in via
-    // `observability.slo.enabled: true` in `opensearch_dashboards.yml`.
-    // Mirrors the alertManager.enabled pattern. When disabled we skip SO
-    // type registration, route registration, and service construction —
-    // the plugin acts as if SLOs don't exist.
-    //
-    // Toggling this value in the yml requires an OSD restart to take
-    // effect. The value is captured once here at plugin setup so route
-    // closures and SO-type registrations can key off it; moving the check
-    // per-request would re-register OSD apps and SO types after boot,
-    // which is not supported.
-    const sloEnabled = observabilityConfig.slo?.enabled ?? false;
+    // yml-derived defaults for the two UI-visibility flags. When the
+    // dynamic-config layer is absent (open-source / GitHub OSD) these
+    // values flow straight through to the registered capability defaults
+    // so operators can still hide the links via yml. In Nexus the
+    // dynamic store overrides them per account/application.
+    const ymlAlertManagerEnabled = observabilityConfig.alertManager?.enabled ?? false;
+    const ymlSloEnabled = observabilityConfig.slo?.enabled ?? false;
     const ruleDedupEnabled = observabilityConfig.slo?.ruleDedup?.enabled ?? true;
     this.sloReconcilerOpts = {
       enabled: observabilityConfig.slo?.reconciler?.enabled ?? true,
@@ -358,26 +362,24 @@ export class ObservabilityPlugin
       graceMs: observabilityConfig.slo?.reconciler?.graceMs ?? 24 * 3600 * 1000,
     };
 
-    if (sloEnabled) {
-      core.savedObjects.registerType(sloDefinitionType);
-      core.savedObjects.registerType(sloRuleRefType);
-      if (core.workspace.isWorkspaceEnabled()) {
-        // SLO documents and slo-rule-ref refcount registry are partitioned
-        // per OSD workspace via the saved-objects workspace wrapper. The
-        // ruler recording-rule namespace (`slo-generated-<datasourceId>`)
-        // is shared across workspaces that target the same Cortex tenant —
-        // two workspaces creating SLOs over the same SLI fingerprint share
-        // one rule group on the ruler, with refcount tracked separately
-        // per workspace. The grace-GC pass owns recording-group cleanup
-        // and fires only when the cross-workspace aggregate refcount for a
-        // (datasourceId, fingerprint) tuple hits zero past the grace window.
-        this.logger.info(
-          'Observability: SLO is enabled on a workspace-enabled cluster. ' +
-            'SLO documents and dedup refcounts are scoped per workspace; ' +
-            'ruler recording rules are shared per datasource and GC-ed only ' +
-            'when no workspace references them past the grace period.'
-        );
-      }
+    core.savedObjects.registerType(sloDefinitionType);
+    core.savedObjects.registerType(sloRuleRefType);
+    if (core.workspace.isWorkspaceEnabled()) {
+      // SLO documents and slo-rule-ref refcount registry are partitioned
+      // per OSD workspace via the saved-objects workspace wrapper. The
+      // ruler recording-rule namespace (`slo-generated-<datasourceId>`)
+      // is shared across workspaces that target the same Cortex tenant —
+      // two workspaces creating SLOs over the same SLI fingerprint share
+      // one rule group on the ruler, with refcount tracked separately
+      // per workspace. The grace-GC pass owns recording-group cleanup
+      // and fires only when the cross-workspace aggregate refcount for a
+      // (datasourceId, fingerprint) tuple hits zero past the grace window.
+      this.logger.info(
+        'Observability: SLO running on a workspace-enabled cluster. ' +
+          'SLO documents and dedup refcounts are scoped per workspace; ' +
+          'ruler recording rules are shared per datasource and GC-ed only ' +
+          'when no workspace references them past the grace period.'
+      );
     }
 
     // Register server side APIs
@@ -385,118 +387,117 @@ export class ObservabilityPlugin
       router,
       client: openSearchObservabilityClient,
       dataSourceEnabled,
-      alertManagerEnabled,
       logger: this.logger,
     });
 
-    if (sloEnabled) {
-      // SLO service + routes. Starts on `InMemorySloStore` so it's available
-      // during setup; `start()` swaps it out for the saved-object-backed
-      // store once the internal repository is available. The ruler client is
-      // a transport abstraction — today it writes per-group via the
-      // DirectQuery plugin; a future Amazon-Managed-Prometheus transport will
-      // write whole namespaces atomically. Callers pass the namespace
-      // (`sloRulerNamespaceFor(workspaceId)`) explicitly so the AMP invariant
-      // "every rule group for workspace W lives in `slo-generated-<W>`"
-      // holds regardless of transport.
-      const sloLogger = {
-        info: (msg: string) => this.logger.info(msg),
-        warn: (msg: string) => this.logger.warn(msg),
-        error: (msg: string) => this.logger.error(msg),
-        debug: (msg: string) => this.logger.debug(msg),
-      };
-      const initialStore: ISloStore = new InMemorySloStore();
-      const sloService = new SloService(sloLogger, initialStore);
-      sloService.setDedupEnabled(ruleDedupEnabled);
-      sloService.setPluginVersion(this.initializerContext.env.packageInfo.version);
-      // Wire the DirectQuery status aggregator so SLO list/detail responses
-      // surface real Cortex-derived state (healthy/breaching/warning) instead
-      // of the no-op stub that always returns no_data.
-      // Per-server datasource health tracker. One instance per plugin
-      // start; failure counts and cooldown are in-memory and reset on
-      // process restart. Logs once per open/close transition so an
-      // operator sees a flapping datasource without log spam every
-      // listing call.
-      const sloCircuitBreaker = new DatasourceCircuitBreaker({
-        onTransition: (datasourceId, transition) => {
-          if (transition === 'open') {
-            sloLogger.warn(
-              `SLO status aggregator: datasource ${datasourceId} circuit OPEN — fast-failing to no_data until cooldown elapses`
-            );
-          } else {
-            sloLogger.info(
-              `SLO status aggregator: datasource ${datasourceId} circuit CLOSED — resumed live status reads`
-            );
-          }
-        },
-      });
-      sloService.setStatusAggregator(new DirectQueryStatusAggregator(sloLogger, sloCircuitBreaker));
-      this.sloService = sloService;
+    // SLO service + routes. Starts on `InMemorySloStore` so it's available
+    // during setup; `start()` swaps it out for the saved-object-backed
+    // store once the internal repository is available. The ruler client is
+    // a transport abstraction — today it writes per-group via the
+    // DirectQuery plugin; a future Amazon-Managed-Prometheus transport will
+    // write whole namespaces atomically. Callers pass the namespace
+    // (`sloRulerNamespaceFor(workspaceId)`) explicitly so the AMP invariant
+    // "every rule group for workspace W lives in `slo-generated-<W>`"
+    // holds regardless of transport.
+    const sloLogger = {
+      info: (msg: string) => this.logger.info(msg),
+      warn: (msg: string) => this.logger.warn(msg),
+      error: (msg: string) => this.logger.error(msg),
+      debug: (msg: string) => this.logger.debug(msg),
+    };
+    const initialStore: ISloStore = new InMemorySloStore();
+    const sloService = new SloService(sloLogger, initialStore);
+    sloService.setDedupEnabled(ruleDedupEnabled);
+    sloService.setPluginVersion(this.initializerContext.env.packageInfo.version);
+    // Wire the DirectQuery status aggregator so SLO list/detail responses
+    // surface real Cortex-derived state (healthy/breaching/warning) instead
+    // of the no-op stub that always returns no_data.
+    // Per-server datasource health tracker. One instance per plugin
+    // start; failure counts and cooldown are in-memory and reset on
+    // process restart. Logs once per open/close transition so an
+    // operator sees a flapping datasource without log spam every
+    // listing call.
+    const sloCircuitBreaker = new DatasourceCircuitBreaker({
+      onTransition: (datasourceId, transition) => {
+        if (transition === 'open') {
+          sloLogger.warn(
+            `SLO status aggregator: datasource ${datasourceId} circuit OPEN — fast-failing to no_data until cooldown elapses`
+          );
+        } else {
+          sloLogger.info(
+            `SLO status aggregator: datasource ${datasourceId} circuit CLOSED — resumed live status reads`
+          );
+        }
+      },
+    });
+    sloService.setStatusAggregator(new DirectQueryStatusAggregator(sloLogger, sloCircuitBreaker));
+    this.sloService = sloService;
 
-      const rulerClient = new DirectQueryRulerClient(this.logger);
-      // Stash for `start()` so the reconciler can reuse the same ruler
-      // transport the routes use. Avoids constructing a second client +
-      // ensures any future configuration on the ruler client is applied
-      // consistently across CRUD and GC paths.
-      this.sloRulerClient = rulerClient;
-      // Followups' SLO routes need an InMemoryDatasourceService + a
-      // DatasourceDiscoveryService to resolve free-text Datasource IDs at
-      // create/update/delete time. Without these, buildDeployContext returns
-      // undefined, the SO is saved, but the ruler dual-write silently no-ops
-      // (commit 4de0c0cf). Wired here to keep the SLO ruler write path live
-      // on this branch.
-      const sloDatasourceService = new InMemoryDatasourceService(sloLogger);
-      const sloDiscoveryService = new DatasourceDiscoveryService(sloDatasourceService, sloLogger);
-      // Rule-health checker probes the ruler for the SLO's expected rule
-      // groups. Without it the detail page's `GET /rule_health` returns 501
-      // and surfaces a "Could not load rule health: Not Implemented" toast
-      // every time a user opens an SLO. Backed by the same ruler client the
-      // SLO write path uses, with the default 30s in-memory cache.
-      const ruleHealthChecker = createRuleHealthChecker(rulerClient, sloLogger);
-      // Probe-SLI route is gated on a non-null prometheusBackend; without it
-      // the wizard's "Probe SLI" button always 404s. The backend is stateless
-      // (see comment in routes/index.ts beside the alerting promBackend) so
-      // the second instance is fine.
-      const sloPrometheusBackend = new DirectQueryPrometheusBackend(this.logger);
-      registerSloRoutes({
-        router,
-        sloService,
-        logger: this.logger,
-        rulerClient,
-        ruleDedupEnabled,
-        datasourceService: sloDatasourceService,
-        discoveryService: sloDiscoveryService,
-        ruleHealthChecker,
-        prometheusBackend: sloPrometheusBackend,
-      });
-    }
+    const rulerClient = new DirectQueryRulerClient(this.logger);
+    // Stash for `start()` so the reconciler can reuse the same ruler
+    // transport the routes use. Avoids constructing a second client +
+    // ensures any future configuration on the ruler client is applied
+    // consistently across CRUD and GC paths.
+    this.sloRulerClient = rulerClient;
+    // Followups' SLO routes need an InMemoryDatasourceService + a
+    // DatasourceDiscoveryService to resolve free-text Datasource IDs at
+    // create/update/delete time. Without these, buildDeployContext returns
+    // undefined, the SO is saved, but the ruler dual-write silently no-ops
+    // (commit 4de0c0cf). Wired here to keep the SLO ruler write path live
+    // on this branch.
+    const sloDatasourceService = new InMemoryDatasourceService(sloLogger);
+    const sloDiscoveryService = new DatasourceDiscoveryService(sloDatasourceService, sloLogger);
+    // Rule-health checker probes the ruler for the SLO's expected rule
+    // groups. Without it the detail page's `GET /rule_health` returns 501
+    // and surfaces a "Could not load rule health: Not Implemented" toast
+    // every time a user opens an SLO. Backed by the same ruler client the
+    // SLO write path uses, with the default 30s in-memory cache.
+    const ruleHealthChecker = createRuleHealthChecker(rulerClient, sloLogger);
+    // Probe-SLI route is gated on a non-null prometheusBackend; without it
+    // the wizard's "Probe SLI" button always 404s. The backend is stateless
+    // (see comment in routes/index.ts beside the alerting promBackend) so
+    // the second instance is fine.
+    const sloPrometheusBackend = new DirectQueryPrometheusBackend(this.logger);
+    registerSloRoutes({
+      router,
+      sloService,
+      logger: this.logger,
+      rulerClient,
+      ruleDedupEnabled,
+      datasourceService: sloDatasourceService,
+      discoveryService: sloDiscoveryService,
+      ruleHealthChecker,
+      prometheusBackend: sloPrometheusBackend,
+    });
 
     core.savedObjects.registerType(getVisualizationSavedObject(dataSourceEnabled));
     core.savedObjects.registerType(getSearchSavedObject(dataSourceEnabled));
     if (!deps.investigationDashboards) {
       core.savedObjects.registerType(notebookSavedObject);
     }
+    // Defaults seeded from yml so environments without a DynamicConfigService
+    // (open-source / GitHub OSD) still respect `observability.alertManager.enabled`
+    // and `observability.slo.enabled`. Routes/SOs/services exist on every
+    // host regardless, so the capability is purely a UI visibility gate.
+    // The switcher below overrides these values per request when the
+    // dynamic store has an entry for this account/application.
     core.capabilities.registerProvider(() => ({
       observability: {
         show: true,
-        // Default to the yml values so dev/test environments without a
-        // configured dynamic-config source still see the flags they set in
-        // `opensearch_dashboards.yml`. The switcher below overrides these
-        // when the dynamic store has a value.
-        alertManagerEnabled,
-        sloEnabled,
+        alertManagerEnabled: ymlAlertManagerEnabled,
+        sloEnabled: ymlSloEnabled,
       },
     }));
 
     // Dynamic feature-flag switcher. Reads `observability.alertManager.enabled`
     // and `observability.slo.enabled` from the DynamicConfigService at
     // request time so AppConfig-driven flag flips take effect on the next
-    // page load without an OSD restart. Server-side route/SO/service
-    // registration still keys off yml at setup (see `sloEnabled` /
-    // `alertManagerEnabled` above) — this only governs UI visibility.
-    // Failures fall back to the yml-derived values rather than the schema
-    // default so a degraded dynamic-config path can't silently dark a feature
-    // that operators explicitly enabled in yml.
+    // page load without an OSD restart.
+    //
+    // Fallback chain: dynamic-store value → yml value → schema default
+    // (`false`). On error, returns capabilities unchanged so the
+    // yml-seeded provider defaults survive — a degraded dynamic-config
+    // path can't silently flip a feature that operators set in yml.
     core.capabilities.registerSwitcher(async (_request, capabilities) => {
       try {
         const dynamicConfig = await core.dynamicConfigService.getStartService();
@@ -510,29 +511,22 @@ export class ObservabilityPlugin
           ...capabilities,
           observability: {
             ...(capabilities.observability || {}),
-            alertManagerEnabled: config.alertManager?.enabled ?? alertManagerEnabled,
-            sloEnabled: config.slo?.enabled ?? sloEnabled,
+            alertManagerEnabled: config.alertManager?.enabled ?? ymlAlertManagerEnabled,
+            sloEnabled: config.slo?.enabled ?? ymlSloEnabled,
           },
         };
       } catch (error) {
         this.logger.error(
-          'Observability: failed to resolve dynamic config flags, falling back to yml values',
+          'Observability: failed to resolve dynamic config flags, falling back to yml-seeded defaults',
           error as Error
         );
-        return {
-          ...capabilities,
-          observability: {
-            ...(capabilities.observability || {}),
-            alertManagerEnabled,
-            sloEnabled,
-          },
-        };
+        return capabilities;
       }
     });
 
     assistantDashboards?.registerMessageParser(PPLParsers);
 
-    registerObservabilityUISettings(core.uiSettings, alertManagerEnabled);
+    registerObservabilityUISettings(core.uiSettings);
 
     core.uiSettings.register({
       'observability:defaultDashboard': {
@@ -558,22 +552,20 @@ export class ObservabilityPlugin
       },
     });
 
-    if (sloEnabled) {
-      core.uiSettings.register({
-        'observability.slo.ruleDedup.enabled': {
-          name: 'SLO recording-rule dedup',
-          value: true,
-          description:
-            'When enabled, SLO recording rules are shared across SLOs with equivalent ' +
-            'SLI shapes via a workspace-scoped fingerprint registry. ' +
-            'Saves evaluation cost on the ruler when many SLOs share a backend query.',
-          schema: schema.boolean(),
-          scope: core.workspace.isWorkspaceEnabled()
-            ? UiSettingScope.WORKSPACE
-            : UiSettingScope.GLOBAL,
-        },
-      });
-    }
+    core.uiSettings.register({
+      'observability.slo.ruleDedup.enabled': {
+        name: 'SLO recording-rule dedup',
+        value: true,
+        description:
+          'When enabled, SLO recording rules are shared across SLOs with equivalent ' +
+          'SLI shapes via a workspace-scoped fingerprint registry. ' +
+          'Saves evaluation cost on the ruler when many SLOs share a backend query.',
+        schema: schema.boolean(),
+        scope: core.workspace.isWorkspaceEnabled()
+          ? UiSettingScope.WORKSPACE
+          : UiSettingScope.GLOBAL,
+      },
+    });
 
     return {};
   }
