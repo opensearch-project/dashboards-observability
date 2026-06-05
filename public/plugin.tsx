@@ -467,12 +467,27 @@ export class ObservabilityPlugin
             // Two updaters merge: `apmAppUpdater$` for the APM-vs-Trace-Analytics
             // visibility gate (driven by `explore.discoverTracesEnabled`), and
             // `apmSloAppUpdater$` for the dynamic SLO feature flag. Either one
-            // hiding the link wins.
+            // hiding the link wins — naive spread would let a later `visible`
+            // override an earlier `hidden`, so `navLinkStatus` is merged
+            // explicitly with `hidden` taking precedence.
             updater$: combineLatest([this.apmAppUpdater$, this.apmSloAppUpdater$]).pipe(
-              map(([apmUpdater, sloUpdater]) => (app: App) => ({
-                ...apmUpdater(app),
-                ...sloUpdater(app),
-              }))
+              map(([apmUpdater, sloUpdater]) => (app: App) => {
+                // `AppUpdater` may legally return `undefined`; default both
+                // to `{}` so the merge below doesn't crash on a no-op
+                // updater.
+                const apmUpdate = apmUpdater(app) ?? {};
+                const sloUpdate = sloUpdater(app) ?? {};
+                const eitherHidden =
+                  apmUpdate.navLinkStatus === AppNavLinkStatus.hidden ||
+                  sloUpdate.navLinkStatus === AppNavLinkStatus.hidden;
+                return {
+                  ...apmUpdate,
+                  ...sloUpdate,
+                  navLinkStatus: eitherHidden
+                    ? AppNavLinkStatus.hidden
+                    : sloUpdate.navLinkStatus ?? apmUpdate.navLinkStatus,
+                };
+              })
             ),
           });
         }

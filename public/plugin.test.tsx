@@ -11,8 +11,8 @@ import { dataPluginMock } from '../../../src/plugins/data/public/mocks';
 import { uiActionsPluginMock } from '../../../src/plugins/ui_actions/public/mocks';
 import { AppPluginStartDependencies, SetupDependencies } from './types';
 import { contentManagementPluginMocks } from '../../../src/plugins/content_management/public';
-import { BehaviorSubject } from 'rxjs';
-import { AppNavLinkStatus } from '../../../src/core/public';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { App, AppNavLinkStatus, AppUpdater } from '../../../src/core/public';
 
 function ensureIconSideNavMock(coreSetup: ReturnType<typeof coreMock.createSetup>) {
   if (!coreSetup.chrome.getIsIconSideNavEnabled) {
@@ -402,5 +402,183 @@ describe('#setup with Alert Manager feature gate', () => {
     const registerCalls = (coreSetup.application.register as jest.Mock).mock.calls;
     const alertingApp = registerCalls.find((call) => call[0].id === 'observability-alerting');
     expect(alertingApp).toBeUndefined();
+  });
+
+  it('should hide alerting nav link when capabilities.observability.alertManagerEnabled is false in start()', async () => {
+    const initializerContextMock = coreMock.createPluginInitializerContext();
+    initializerContextMock.config.get = jest.fn().mockReturnValue({
+      query_assist: { enabled: false },
+      summarize: { enabled: false },
+      alertManager: { enabled: true },
+    });
+    const coreSetup = coreMock.createSetup();
+    ensureIconSideNavMock(coreSetup);
+    let alertingUpdater$ = new BehaviorSubject<() => {}>(() => ({}));
+    coreSetup.application.register = jest.fn((args) => {
+      if (args.id === 'observability-alerting' && args.updater$) {
+        alertingUpdater$ = args.updater$;
+      }
+    });
+    const observabilityPlugin = new ObservabilityPlugin(initializerContextMock);
+
+    coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
+
+    await observabilityPlugin.setup(coreSetup, ({
+      embeddable: embeddablePluginMock.createSetupContract(),
+      visualizations: visualizationsPluginMock.createSetupContract(),
+      data: dataPluginMock.createSetupContract(),
+      uiActions: uiActionsPluginMock.createSetupContract(),
+      contentManagement: contentManagementPluginMocks.createSetupContract(),
+      dashboard: { registerDashboardProvider: jest.fn() },
+    } as unknown) as SetupDependencies);
+
+    const coreStart = coreMock.createStart();
+    const dataStartMock = dataPluginMock.createStartContract();
+    dataStartMock.dataSources.dataSourceFactory.registerDataSourceType = jest.fn();
+    observabilityPlugin.start(
+      {
+        ...coreStart,
+        application: {
+          ...coreStart.application,
+          capabilities: {
+            ...coreStart.application.capabilities,
+            observability: {
+              alertManagerEnabled: false,
+              sloEnabled: false,
+            },
+          },
+        },
+      },
+      ({ data: dataStartMock } as unknown) as AppPluginStartDependencies
+    );
+
+    expect(alertingUpdater$.getValue()()).toEqual({
+      navLinkStatus: AppNavLinkStatus.hidden,
+    });
+  });
+});
+
+describe('#setup with SLO feature gate', () => {
+  it('should hide SLO nav link when capabilities.observability.sloEnabled is false in start()', async () => {
+    const initializerContextMock = coreMock.createPluginInitializerContext();
+    initializerContextMock.config.get = jest.fn().mockReturnValue({
+      query_assist: { enabled: false },
+      summarize: { enabled: false },
+      slo: { enabled: true },
+    });
+    const coreSetup = coreMock.createSetup();
+    ensureIconSideNavMock(coreSetup);
+    // SLO app's updater$ is a piped Observable (combineLatest of two
+    // BehaviorSubjects), so we subscribe and capture the latest emission
+    // rather than calling `.getValue()`.
+    let latestSloUpdate: ReturnType<AppUpdater> | undefined;
+    coreSetup.application.register = jest.fn((args) => {
+      if (args.id === 'observability-apm-slo' && args.updater$) {
+        (args.updater$ as Observable<AppUpdater>).subscribe((updater) => {
+          latestSloUpdate = updater({} as App);
+        });
+      }
+    });
+    const observabilityPlugin = new ObservabilityPlugin(initializerContextMock);
+
+    coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
+    coreSetup.uiSettings.get = jest.fn().mockReturnValue(true); // APM enabled
+
+    await observabilityPlugin.setup(coreSetup, ({
+      embeddable: embeddablePluginMock.createSetupContract(),
+      visualizations: visualizationsPluginMock.createSetupContract(),
+      data: dataPluginMock.createSetupContract(),
+      uiActions: uiActionsPluginMock.createSetupContract(),
+      contentManagement: contentManagementPluginMocks.createSetupContract(),
+      dashboard: { registerDashboardProvider: jest.fn() },
+    } as unknown) as SetupDependencies);
+
+    const coreStart = coreMock.createStart();
+    const dataStartMock = dataPluginMock.createStartContract();
+    dataStartMock.dataSources.dataSourceFactory.registerDataSourceType = jest.fn();
+    observabilityPlugin.start(
+      {
+        ...coreStart,
+        application: {
+          ...coreStart.application,
+          capabilities: {
+            ...coreStart.application.capabilities,
+            // Traces enabled so APM updater leaves the link visible. SLO
+            // capability off — only the SLO updater should hide the link.
+            explore: { discoverTracesEnabled: true },
+            observability: {
+              alertManagerEnabled: false,
+              sloEnabled: false,
+            },
+          },
+        },
+      },
+      ({ data: dataStartMock } as unknown) as AppPluginStartDependencies
+    );
+
+    expect(latestSloUpdate).toMatchObject({
+      navLinkStatus: AppNavLinkStatus.hidden,
+    });
+  });
+
+  it('should hide SLO nav link when APM updater hides it even if sloEnabled capability is true', async () => {
+    // Verifies the merged-updater "either hiding wins" rule: with SLO
+    // capability on, but `discoverTracesEnabled` false (APM gate fires),
+    // the SLO link should still hide.
+    const initializerContextMock = coreMock.createPluginInitializerContext();
+    initializerContextMock.config.get = jest.fn().mockReturnValue({
+      query_assist: { enabled: false },
+      summarize: { enabled: false },
+      slo: { enabled: true },
+    });
+    const coreSetup = coreMock.createSetup();
+    ensureIconSideNavMock(coreSetup);
+    let latestSloUpdate: ReturnType<AppUpdater> | undefined;
+    coreSetup.application.register = jest.fn((args) => {
+      if (args.id === 'observability-apm-slo' && args.updater$) {
+        (args.updater$ as Observable<AppUpdater>).subscribe((updater) => {
+          latestSloUpdate = updater({} as App);
+        });
+      }
+    });
+    const observabilityPlugin = new ObservabilityPlugin(initializerContextMock);
+
+    coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
+    coreSetup.uiSettings.get = jest.fn().mockReturnValue(true);
+
+    await observabilityPlugin.setup(coreSetup, ({
+      embeddable: embeddablePluginMock.createSetupContract(),
+      visualizations: visualizationsPluginMock.createSetupContract(),
+      data: dataPluginMock.createSetupContract(),
+      uiActions: uiActionsPluginMock.createSetupContract(),
+      contentManagement: contentManagementPluginMocks.createSetupContract(),
+      dashboard: { registerDashboardProvider: jest.fn() },
+    } as unknown) as SetupDependencies);
+
+    const coreStart = coreMock.createStart();
+    const dataStartMock = dataPluginMock.createStartContract();
+    dataStartMock.dataSources.dataSourceFactory.registerDataSourceType = jest.fn();
+    observabilityPlugin.start(
+      {
+        ...coreStart,
+        application: {
+          ...coreStart.application,
+          capabilities: {
+            ...coreStart.application.capabilities,
+            // Traces disabled → APM updater hides the link.
+            explore: { discoverTracesEnabled: false },
+            observability: {
+              alertManagerEnabled: false,
+              sloEnabled: true, // SLO capability ON.
+            },
+          },
+        },
+      },
+      ({ data: dataStartMock } as unknown) as AppPluginStartDependencies
+    );
+
+    expect(latestSloUpdate).toMatchObject({
+      navLinkStatus: AppNavLinkStatus.hidden,
+    });
   });
 });
