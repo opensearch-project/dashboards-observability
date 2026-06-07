@@ -177,7 +177,7 @@ export async function getPromRuleDetail(
       const id = `${ds.id}-${group.name}-${alertingRule.name}`;
       if (id !== ruleId) continue;
 
-      const summary = promRuleToUnified(alertingRule, group.name, ds.id);
+      const summary = promRuleToUnified(alertingRule, group.name, ds.id, group.interval);
 
       // Real alert history from the rule's embedded alerts
       const alertHistory: AlertHistoryEntry[] = (alertingRule.alerts || []).map((a) => ({

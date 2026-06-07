@@ -907,9 +907,12 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
 
         // Detect if the rule was renamed. The ruleId format is `{dsId}-{groupName}-{ruleName}`.
         // If the name changed, delete the old rule group to avoid orphans.
-        const ruleIdParts = ruleId.split('-');
-        // dsId may itself contain dashes, so groupName is the segment after dsId prefix
-        const originalGroupName = ruleIdParts.length >= 3 ? ruleIdParts[1] : undefined;
+        // Since dsId may contain dashes, strip the known dsId prefix to extract groupName.
+        const ruleIdSuffix = ruleId.startsWith(dsId + '-') ? ruleId.slice(dsId.length + 1) : ruleId;
+        // After stripping dsId prefix, format is `{groupName}-{ruleName}` — for single-rule
+        // groups groupName === ruleName, so take everything before the last dash.
+        const lastDash = ruleIdSuffix.lastIndexOf('-');
+        const originalGroupName = lastDash > 0 ? ruleIdSuffix.slice(0, lastDash) : ruleIdSuffix;
         if (originalGroupName && originalGroupName !== promForm.name) {
           try {
             await mutations.deletePrometheusRule(dsId, originalGroupName);

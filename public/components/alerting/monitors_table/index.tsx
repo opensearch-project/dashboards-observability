@@ -196,6 +196,16 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     [rules, searchQuery, filters]
   );
 
+  // Prune selectedIds that are no longer in the filtered list (e.g., after
+  // search/filter changes remove items from view).
+  useEffect(() => {
+    const visibleIds = new Set(filtered.map((r) => r.id));
+    setSelectedIds((prev) => {
+      const pruned = new Set([...prev].filter((id) => visibleIds.has(id)));
+      return pruned.size === prev.size ? prev : pruned;
+    });
+  }, [filtered]);
+
   const activeFilterCount = useMemo(() => {
     let count = 0;
     count += filters.status.length;

@@ -181,7 +181,7 @@ export const EditMonitor: React.FC<EditMonitorProps> = ({
       // Duration fields: prefer the summary-level fields which are already
       // formatted as duration strings by the server's rule mapper.
       // Normalize "120s" → "2m" etc. so the dropdown can match.
-      const rawFor = data.pendingPeriod ?? (firstRule.for != null ? String(firstRule.for) : '') || '5m';
+      const rawFor = (data.pendingPeriod ?? (firstRule.for != null ? String(firstRule.for) : '')) || '5m';
       const forDuration = normalizeDuration(rawFor);
       const evaluationInterval = normalizeDuration(data.evaluationInterval || '1m');
       const firingPeriod = normalizeDuration(data.firingPeriod || forDuration);
