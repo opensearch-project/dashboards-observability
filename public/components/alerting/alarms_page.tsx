@@ -704,7 +704,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
 
         const payload = {
           name: clonedName,
-          query: expr.replace(/\s*(>|>=|<|<=|==|!=)\s*[\d.]+(?:[eE][+-]?\d+)?\s*$/, '').trim() || expr,
+          query:
+            expr.replace(/\s*(>|>=|<|<=|==|!=)\s*[\d.]+(?:[eE][+-]?\d+)?\s*$/, '').trim() || expr,
           operator: parsed.operator || '>',
           threshold: parsed.value ?? 0,
           forDuration: duration,
@@ -864,7 +865,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
           await new Promise((resolve) => setTimeout(resolve, 5000));
           try {
-            const resp = await osService.getRuleDetail(dsId, `${dsId}-${promForm.name}-${promForm.name}`);
+            const resp = await osService.getRuleDetail(
+              dsId,
+              `${dsId}-${promForm.name}-${promForm.name}`
+            );
             if (resp) break;
           } catch {
             // Ignore errors during polling — rule not yet visible

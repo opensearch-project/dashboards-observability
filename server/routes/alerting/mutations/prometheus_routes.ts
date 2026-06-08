@@ -75,9 +75,7 @@ async function resolveRulerUri(client: AlertingOSClient, datasource: Datasource)
   const ds = datasources.find((d) => d.name === dsName);
   const rulerUri = ds?.properties?.['prometheus.ruler.uri'] || ds?.properties?.['prometheus.uri'];
   if (!rulerUri) {
-    throw new Error(
-      `Could not resolve ruler URI for datasource "${dsName}" (id=${datasource.id})`
-    );
+    throw new Error(`Could not resolve ruler URI for datasource "${dsName}" (id=${datasource.id})`);
   }
   return rulerUri;
 }
@@ -194,7 +192,9 @@ export function registerPrometheusRuleRoutes(
 
         // Try direct HTTP to Cortex ruler first
         const rulerUri = await resolveRulerUri(client, datasource);
-        const url = `${rulerUri}/api/v1/rules/${encodeURIComponent(USER_RULES_NAMESPACE)}/${encodeURIComponent(req.params.groupName)}`;
+        const url = `${rulerUri}/api/v1/rules/${encodeURIComponent(
+          USER_RULES_NAMESPACE
+        )}/${encodeURIComponent(req.params.groupName)}`;
         logger?.info(`alerting: DELETE ruler directly at ${url}`);
 
         const resp = await httpRequest('DELETE', url);
