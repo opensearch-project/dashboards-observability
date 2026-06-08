@@ -106,10 +106,10 @@ describe('AlertDetailFlyout', () => {
     expect(onAcknowledge).toHaveBeenCalledWith('alert-42');
   });
 
-  it('disables the Acknowledge button for Prometheus alerts', () => {
+  it('hides the Acknowledge button for Prometheus alerts', () => {
     const onAcknowledge = jest.fn();
     const promAlert = { ...baseAlert, datasourceType: 'prometheus' as const };
-    const { getByText } = render(
+    const { queryByText } = render(
       <AlertDetailFlyout
         alert={promAlert}
         datasources={datasources}
@@ -117,11 +117,8 @@ describe('AlertDetailFlyout', () => {
         onAcknowledge={onAcknowledge}
       />
     );
-    const btn = getByText('Acknowledge').closest('button');
-    expect(btn).not.toBeNull();
-    expect(btn?.disabled).toBe(true);
-    expect(btn && btn.disabled).toBe(true);
-    fireEvent.click(getByText('Acknowledge'));
+    // Prometheus alerts use Alertmanager silences, not OS acknowledge
+    expect(queryByText('Acknowledge')).toBeNull();
     expect(onAcknowledge).not.toHaveBeenCalled();
   });
 
