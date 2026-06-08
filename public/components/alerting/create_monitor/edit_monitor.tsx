@@ -190,7 +190,7 @@ export const EditMonitor: React.FC<EditMonitorProps> = ({
         name: data.name,
         datasourceId: data.datasourceId,
         datasourceType: 'prometheus',
-        query: expr.replace(/\s*(>|>=|<|<=|==|!=)\s*[\d.]+\s*$/, '').trim() || expr,
+        query: expr.replace(/\s*(>|>=|<|<=|==|!=)\s*[\d.]+(?:[eE][+-]?\d+)?\s*$/, '').trim() || expr,
         threshold: {
           operator: (data.threshold?.operator as '>' | '>=' | '<' | '<=' | '==' | '!=') || '>',
           value: data.threshold?.value ?? 0,

@@ -106,6 +106,10 @@ function httpRequest(
       res.on('data', (chunk) => (data += chunk));
       res.on('end', () => resolve({ statusCode: res.statusCode || 500, body: data }));
     });
+    req.setTimeout(30000, () => {
+      req.destroy();
+      reject(new Error('Cortex ruler request timed out after 30s'));
+    });
     req.on('error', reject);
     if (body) req.write(body);
     req.end();

@@ -704,7 +704,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
 
         const payload = {
           name: clonedName,
-          query: expr.replace(/\s*(>|>=|<|<=|==|!=)\s*[\d.]+\s*$/, '').trim() || expr,
+          query: expr.replace(/\s*(>|>=|<|<=|==|!=)\s*[\d.]+(?:[eE][+-]?\d+)?\s*$/, '').trim() || expr,
           operator: parsed.operator || '>',
           threshold: parsed.value ?? 0,
           forDuration: duration,
@@ -722,7 +722,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           group: clonedName,
           status: 'pending',
         };
-        setRules((prev) => [optimisticClone as any, ...prev]);
+        setRules((prev) => [optimisticClone, ...prev]);
         setRulesTotal((prev) => prev + 1);
         addToast(
           i18n.translate('observability.alerting.alarmsPage.toast.monitorCloned', {
@@ -905,14 +905,11 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         // Prometheus rules use upsert semantics — same endpoint as create
         const promForm = formState as import('./create_monitor/create_monitor_types').PrometheusFormState;
 
-        // Detect if the rule was renamed. The ruleId format is `{dsId}-{groupName}-{ruleName}`.
-        // If the name changed, delete the old rule group to avoid orphans.
-        // Since dsId may contain dashes, strip the known dsId prefix to extract groupName.
-        const ruleIdSuffix = ruleId.startsWith(dsId + '-') ? ruleId.slice(dsId.length + 1) : ruleId;
-        // After stripping dsId prefix, format is `{groupName}-{ruleName}` — for single-rule
-        // groups groupName === ruleName, so take everything before the last dash.
-        const lastDash = ruleIdSuffix.lastIndexOf('-');
-        const originalGroupName = lastDash > 0 ? ruleIdSuffix.slice(0, lastDash) : ruleIdSuffix;
+        // Detect if the rule was renamed. In our design groupName === ruleName
+        // (1 rule per group). Look up the original rule in the current rules list
+        // to get its group name, which is the Cortex group to delete on rename.
+        const originalRule = rules.find((r) => r.id === ruleId);
+        const originalGroupName = originalRule?.group || originalRule?.name || promForm.name;
         if (originalGroupName && originalGroupName !== promForm.name) {
           try {
             await mutations.deletePrometheusRule(dsId, originalGroupName);
