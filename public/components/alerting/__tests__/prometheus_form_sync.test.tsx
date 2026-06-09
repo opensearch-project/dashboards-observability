@@ -39,6 +39,10 @@ const baseForm: PrometheusFormState = {
   enabled: true,
 };
 
+const mockDatasources = [
+  { id: 'ds-1', name: 'ObservabilityStack_Prometheus', type: 'prometheus' },
+];
+
 describe('PrometheusFormSection — duration sync', () => {
   it('changing forDuration in threshold syncs to pendingPeriod', () => {
     const onUpdate = jest.fn();
@@ -121,6 +125,7 @@ describe('PrometheusFormSection — Query section layout', () => {
         validationErrors={{}}
         hasSubmitted={false}
         datasourceId="ds-1"
+        datasources={mockDatasources}
       />
     );
 
@@ -137,6 +142,7 @@ describe('PrometheusFormSection — Query section layout', () => {
         validationErrors={{}}
         hasSubmitted={false}
         datasourceId="ds-1"
+        datasources={mockDatasources}
       />
     );
 
@@ -151,6 +157,7 @@ describe('PrometheusFormSection — Query section layout', () => {
         validationErrors={{}}
         hasSubmitted={false}
         datasourceId="ds-1"
+        datasources={mockDatasources}
       />
     );
 
@@ -166,6 +173,7 @@ describe('PrometheusFormSection — Query section layout', () => {
         validationErrors={{}}
         hasSubmitted={false}
         datasourceId="ds-1"
+        datasources={mockDatasources}
       />
     );
 
