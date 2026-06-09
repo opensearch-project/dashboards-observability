@@ -54,10 +54,10 @@ describe('MetricBrowser', () => {
       expect(screen.getByText('up')).toBeInTheDocument();
     });
 
-    // http_requests_total → counter
-    expect(screen.getByText('counter')).toBeInTheDocument();
+    // http_requests_total, node_cpu_seconds_total → counter
+    expect(screen.getAllByText('counter').length).toBeGreaterThanOrEqual(1);
     // http_request_duration_seconds_bucket → histogram
-    expect(screen.getByText('histogram')).toBeInTheDocument();
+    expect(screen.getAllByText('histogram').length).toBeGreaterThanOrEqual(1);
   });
 
   it('filters metrics by search input', async () => {
