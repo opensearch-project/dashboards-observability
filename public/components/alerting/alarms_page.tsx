@@ -245,6 +245,12 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // value — that way cross-tab deep-links inside the same app (alert
   // flyout's "Open monitor") still re-apply.
   const lastAppliedDsRef = useRef<string | undefined>(undefined);
+  const refetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (refetchTimerRef.current) clearTimeout(refetchTimerRef.current);
+    };
+  }, []);
   useEffect(() => {
     const dsId = deepLink.ds;
     if (!dsId) return;
