@@ -75,12 +75,9 @@ export const PrometheusFormSection: React.FC<{
   };
 
   const handleMetricSelect = (metricName: string) => {
-    if (!form.query) {
-      onUpdate('query', metricName);
-    } else {
-      onUpdate('query', form.query + (form.query.endsWith(' ') ? '' : ' ') + metricName);
-    }
+    onUpdate('query', metricName);
     setQueryTab('editor');
+
   };
 
   const previewYaml = useMemo(() => {

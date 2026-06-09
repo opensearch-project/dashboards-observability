@@ -77,6 +77,15 @@ async function resolveRulerUri(client: AlertingOSClient, datasource: Datasource)
   if (!rulerUri) {
     throw new Error(`Could not resolve ruler URI for datasource "${dsName}" (id=${datasource.id})`);
   }
+  // The ruler URI may use Docker network hostnames that OSD (host) cannot resolve.
+  // Replace with localhost since Cortex publishes its port on the host.
+  try {
+    const parsedUri = new URL(rulerUri);
+    if (parsedUri.hostname !== "localhost" && parsedUri.hostname !== "127.0.0.1") {
+      parsedUri.hostname = "localhost";
+      return parsedUri.toString().replace(/\/$/, "");
+    }
+  } catch { /* return as-is */ }
   return rulerUri;
 }
 
