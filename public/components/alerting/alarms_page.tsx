@@ -137,6 +137,33 @@ const TAB_LABELS: Record<TabId, string> = {
   }),
 };
 
+/** Build the payload for Prometheus rule create/edit/clone operations. */
+function buildPrometheusRulePayload(opts: {
+  name: string;
+  query: string;
+  operator: string;
+  threshold: number;
+  forDuration: string;
+  evaluationInterval: string;
+  labels: Record<string, string>;
+  annotations: Record<string, string>;
+  enabled: boolean;
+  groupName?: string;
+}) {
+  return {
+    name: opts.name,
+    query: opts.query,
+    operator: opts.operator,
+    threshold: opts.threshold,
+    forDuration: opts.forDuration,
+    evaluationInterval: opts.evaluationInterval,
+    labels: opts.labels,
+    annotations: opts.annotations,
+    enabled: opts.enabled,
+    ...(opts.groupName ? { groupName: opts.groupName } : {}),
+  };
+}
+
 export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   datasources,
   datasourcesLoading,
@@ -841,7 +868,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         const promForm = formState as import('./create_monitor/create_monitor_types').PrometheusFormState;
         // Use pendingPeriod from Eval Settings if edited; fall back to threshold.forDuration
         const resolvedForDuration = promForm.pendingPeriod || promForm.threshold.forDuration;
-        const payload = {
+        const payload = buildPrometheusRulePayload({
           name: promForm.name,
           query: promForm.query,
           operator: promForm.threshold.operator,
@@ -855,7 +882,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             promForm.annotations.filter((a) => a.key && a.value).map((a) => [a.key, a.value])
           ),
           enabled: promForm.enabled,
-        };
+        });
         await mutations.createPrometheusRule(payload, dsId);
 
         // Cortex has eventual consistency (~30-60s propagation). Use
@@ -912,7 +939,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
 
         // Use pendingPeriod from Eval Settings if edited; fall back to threshold.forDuration
         const resolvedForDuration = promForm.pendingPeriod || promForm.threshold.forDuration;
-        const payload = {
+        const payload = buildPrometheusRulePayload({
           name: promForm.name,
           query: promForm.query,
           operator: promForm.threshold.operator,
@@ -927,7 +954,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           ),
           enabled: promForm.enabled,
           groupName: promForm.name,
-        };
+        });
         await mutations.createPrometheusRule(payload, dsId);
         // Background refetch to reconcile with Cortex once it propagates
         refetchTimerRef.current = setTimeout(() => refetchRules(), 15000);
