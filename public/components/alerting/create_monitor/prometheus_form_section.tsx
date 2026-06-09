@@ -167,7 +167,7 @@ export const PrometheusFormSection: React.FC<{
                 defaultMessage: 'PromQL expression. Press Ctrl+Space for metric name suggestions.',
               })}
             </EuiText>
-            <PromQLEditor value={form.query} onChange={(v) => onUpdate('query', v)} height={80} />
+            <PromQLEditor value={form.query} onChange={(v) => onUpdate('query', v)} height={80} datasourceId={datasourceId} />
             <EuiSpacer size="xs" />
             <EuiText size="xs" color="subdued">
               {'Example: rate(http_requests_total{job="api"}[5m]) > 100'}
