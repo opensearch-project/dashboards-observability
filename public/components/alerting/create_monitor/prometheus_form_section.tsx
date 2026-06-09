@@ -55,6 +55,7 @@ export const PrometheusFormSection: React.FC<{
   hasSubmitted: boolean;
   context?: { service?: string; team?: string };
   datasourceId?: string;
+  datasources?: Array<{ id: string; name: string; type: string }>;
 }> = ({
   form,
   onUpdate,
@@ -62,6 +63,7 @@ export const PrometheusFormSection: React.FC<{
   hasSubmitted: _hasSubmitted,
   context,
   datasourceId,
+  datasources = [],
 }) => {
   const [queryTab, setQueryTab] = useState<'editor' | 'browser'>('editor');
 
@@ -138,13 +140,12 @@ export const PrometheusFormSection: React.FC<{
             defaultMessage: 'Datasource',
           })}
         >
-          <EuiFieldText
-            value={datasourceId || 'Not selected'}
-            readOnly
+          <EuiSelect
+            options={datasources.map((ds) => ({ value: ds.id, text: ds.name }))}
+            value={datasourceId || ''}
+            onChange={(e) => onUpdate('datasourceId' as any, e.target.value)}
             compressed
-            prepend={
-              <EuiBadge color="hollow">Prometheus</EuiBadge>
-            }
+            prepend="Prometheus"
           />
         </EuiFormRow>
         <EuiSpacer size="s" />

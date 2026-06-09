@@ -586,6 +586,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
               hasSubmitted={hasSubmitted}
               context={context}
               datasourceId={promForm.datasourceId}
+              datasources={datasources.filter((d) => d.type === "prometheus")}
             />
           ) : (
             <OpenSearchFormSection
