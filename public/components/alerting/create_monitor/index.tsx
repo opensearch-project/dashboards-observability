@@ -637,7 +637,11 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
                 isDisabled={!isValid || isSaving}
                 isLoading={isSaving}
               >
-                {isEdit
+                {isSaving && backendType === 'prometheus'
+                  ? i18n.translate('observability.alerting.createMonitor.savingPrometheus', {
+                      defaultMessage: 'Creating in Prometheus...',
+                    })
+                  : isEdit
                   ? i18n.translate('observability.alerting.createMonitor.saveChangesButton', {
                       defaultMessage: 'Save Changes',
                     })
