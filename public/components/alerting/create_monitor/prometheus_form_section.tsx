@@ -32,6 +32,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import { coreRefs } from '../../../framework/core_refs';
 import { PromQLEditor } from '../promql_editor';
 import { MetricBrowser } from '../metric_browser';
 import { AnnotationEditor, LabelEditor } from '../monitor_form_components';
@@ -121,8 +122,7 @@ export const PrometheusFormSection: React.FC<{
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiLink
-              href={`/app/explore/metrics`}
-              target="_blank"
+              onClick={() => coreRefs?.application?.navigateToApp('explore/metrics')}
               data-test-subj="alertManagerOpenInMetricsLink"
             >
               {i18n.translate('observability.alerting.prometheusFormSection.openInMetrics', {
