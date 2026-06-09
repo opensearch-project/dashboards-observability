@@ -600,13 +600,6 @@ export class ObservabilityPlugin
     // populated and well before any user can open the actions menu. The
     // alerting plugin uses the mirror condition (registers only when our
     // capability is *off*), so exactly one entry exists at any time.
-    //
-    // `ownsMonitorCreation` on the setup contract is preserved at `true`
-    // for the older alerting builds that still gate on it; newer builds
-    // ignore it and key off `capabilities.observability.alertManagerEnabled`
-    // directly.
-    const ownsMonitorCreation = true;
-
     if (setupDeps.explore) {
       const exploreSetup = setupDeps.explore;
       // Lazy-load the flyout host once, at module scope of this closure — not
@@ -691,9 +684,7 @@ export class ObservabilityPlugin
         });
     }
 
-    // Setup contract preserved for backward compat; see the comment above
-    // the `ownsMonitorCreation = true` declaration for context.
-    return { ownsMonitorCreation };
+    return {};
   }
 
   public start(core: CoreStart, startDeps: AppPluginStartDependencies): ObservabilityStart {
