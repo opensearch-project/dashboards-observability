@@ -932,17 +932,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
 
         // Detect if the rule was renamed. In our design groupName === ruleName
         // (1 rule per group). Look up the original rule in the current rules list
-        // to get its group name, which is the Cortex group to delete on rename.
-        const originalRule = rules.find((r) => r.id === ruleId);
-        const originalGroupName = originalRule?.group || originalRule?.name || promForm.name;
-        if (originalGroupName && originalGroupName !== promForm.name) {
-          try {
-            await mutations.deletePrometheusRule(dsId, originalGroupName);
-          } catch {
-            // Best-effort: if delete fails, proceed with upsert anyway
-          }
-        }
-
         // Use pendingPeriod from Eval Settings if edited; fall back to threshold.forDuration
         const resolvedForDuration = promForm.pendingPeriod || promForm.threshold.forDuration;
         const payload = buildPrometheusRulePayload({
@@ -961,7 +950,19 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           enabled: promForm.enabled,
           groupName: promForm.name,
         });
+        // Create new rule first, then delete old on success (prevents data loss
+        // if create fails — worst case is a harmless duplicate).
         await mutations.createPrometheusRule(payload, dsId);
+
+        const originalRule = rules.find((r) => r.id === ruleId);
+        const originalGroupName = originalRule?.group || originalRule?.name || promForm.name;
+        if (originalGroupName && originalGroupName !== promForm.name) {
+          try {
+            await mutations.deletePrometheusRule(dsId, originalGroupName);
+          } catch {
+            // Orphaned old group — harmless, user can delete manually
+          }
+        }
         // Background refetch to reconcile with Cortex once it propagates
         refetchTimerRef.current = setTimeout(() => refetchRules(), 15000);
       } else {
