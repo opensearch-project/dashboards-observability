@@ -15,7 +15,7 @@ import { monaco } from '@osd/monaco';
 import {
   CodeEditor,
   OpenSearchDashboardsContextProvider,
-} from '../../../../../../src/plugins/opensearch_dashboards_react/public';
+} from '../../../../../src/plugins/opensearch_dashboards_react/public';
 import { coreRefs } from '../../framework/core_refs';
 import { AlertingPromResourcesService } from './query_services/alerting_prom_resources_service';
 
