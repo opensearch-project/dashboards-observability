@@ -443,17 +443,8 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
             Logs (PPL) form embeds its datasource picker inline in the query
             toolbar, so we only render the standalone selector for the
             Prometheus form. */}
-          {backendType === 'prometheus' && (
-            <>
-              <DatasourceTargetSelector
-                datasources={datasources.filter((d) => d.type === backendType)}
-                selectedId={activeForm.datasourceId}
-                onChange={isEdit ? () => undefined : handleDatasourceChange}
-              />
-
-              <EuiSpacer size="m" />
-            </>
-          )}
+          {/* Prometheus datasource selector moved into the Query section
+              of PrometheusFormSection to match Logs layout */}
 
           {/* Creation Mode Toggle — AI only available for Prometheus, hidden in edit mode */}
           {!isEdit && backendType === 'prometheus' && (

@@ -133,18 +133,20 @@ export const PrometheusFormSection: React.FC<{
         </EuiFlexGroup>
         <EuiSpacer size="s" />
 
-        <EuiFlexGroup gutterSize="m" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow
-              label={i18n.translate('observability.alerting.prometheusFormSection.datasourceLabel', {
-                defaultMessage: 'Datasource',
-              })}
-              compressed
-            >
-              <EuiText size="s">{datasourceId ? 'ObservabilityStack_Prometheus' : 'Not selected'}</EuiText>
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiFormRow
+          label={i18n.translate('observability.alerting.prometheusFormSection.datasourceLabel', {
+            defaultMessage: 'Datasource',
+          })}
+        >
+          <EuiFieldText
+            value={datasourceId || 'Not selected'}
+            readOnly
+            compressed
+            prepend={
+              <EuiBadge color="hollow">Prometheus</EuiBadge>
+            }
+          />
+        </EuiFormRow>
         <EuiSpacer size="s" />
 
         <EuiTabs size="s">
