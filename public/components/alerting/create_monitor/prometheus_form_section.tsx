@@ -170,9 +170,7 @@ export const PrometheusFormSection: React.FC<{
             <PromQLEditor value={form.query} onChange={(v) => onUpdate('query', v)} height={80} />
             <EuiSpacer size="xs" />
             <EuiText size="xs" color="subdued">
-              {i18n.translate('observability.alerting.prometheusFormSection.promqlExample', {
-                defaultMessage: 'Example: rate(http_requests_total{{job="api"}}[5m]) > 100',
-              })}
+              {'Example: rate(http_requests_total{job="api"}[5m]) > 100'}
             </EuiText>
           </>
         ) : (
