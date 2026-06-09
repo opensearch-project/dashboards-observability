@@ -13,8 +13,8 @@ import { PrometheusFormSection } from '../create_monitor/prometheus_form_section
 import type { PrometheusFormState } from '../create_monitor/create_monitor_types';
 
 // Mock dependencies that PrometheusFormSection uses
-jest.mock('../promql_editor', () => ({
-  PromQLEditor: () => <div data-test-subj="promql-editor" />,
+jest.mock('../promql_monaco_editor', () => ({
+  PromQLMonacoEditor: () => <div data-test-subj="promql-editor" />,
 }));
 jest.mock('../metric_browser', () => ({
   MetricBrowser: () => <div data-test-subj="metric-browser" />,
