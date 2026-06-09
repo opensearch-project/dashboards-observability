@@ -109,3 +109,68 @@ describe('PrometheusFormSection — duration sync', () => {
     expect(onUpdate).not.toHaveBeenCalledWith('threshold', expect.anything());
   });
 });
+
+describe('PrometheusFormSection — Query section layout', () => {
+  const onUpdate = jest.fn();
+
+  it('renders Query header with "Build query in metrics" link', () => {
+    render(
+      <PrometheusFormSection
+        form={baseForm}
+        onUpdate={onUpdate}
+        validationErrors={{}}
+        hasSubmitted={false}
+        datasourceId="ds-1"
+      />
+    );
+
+    expect(screen.getByText('Query')).toBeInTheDocument();
+    expect(screen.getByTestId('alertManagerOpenInMetricsLink')).toBeInTheDocument();
+    expect(screen.getByText('Build query in metrics →')).toBeInTheDocument();
+  });
+
+  it('shows datasource name when datasourceId is provided', () => {
+    render(
+      <PrometheusFormSection
+        form={baseForm}
+        onUpdate={onUpdate}
+        validationErrors={{}}
+        hasSubmitted={false}
+        datasourceId="ds-1"
+      />
+    );
+
+    expect(screen.getByText('Datasource')).toBeInTheDocument();
+  });
+
+  it('renders Query Editor and Metric Browser tabs', () => {
+    render(
+      <PrometheusFormSection
+        form={baseForm}
+        onUpdate={onUpdate}
+        validationErrors={{}}
+        hasSubmitted={false}
+        datasourceId="ds-1"
+      />
+    );
+
+    expect(screen.getByText('Query Editor')).toBeInTheDocument();
+    expect(screen.getByText('Metric Browser')).toBeInTheDocument();
+  });
+
+  it('shows PromQL helper text in editor tab', () => {
+    render(
+      <PrometheusFormSection
+        form={baseForm}
+        onUpdate={onUpdate}
+        validationErrors={{}}
+        hasSubmitted={false}
+        datasourceId="ds-1"
+      />
+    );
+
+    expect(
+      screen.getByText('PromQL expression. Press Ctrl+Space for metric name suggestions.')
+    ).toBeInTheDocument();
+  });
+});
