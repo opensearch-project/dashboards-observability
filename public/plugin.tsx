@@ -618,65 +618,77 @@ export class ObservabilityPlugin
         return { default: mod.ExploreCreateMonitor };
       });
 
-      core.getStartServices().then(([coreStart]) => {
-        const capabilities = coreStart.application.capabilities as
-          | { observability?: { alertManagerEnabled?: boolean } }
-          | undefined;
-        if (!capabilities?.observability?.alertManagerEnabled) {
-          return;
-        }
-        exploreSetup.queryPanelActionsRegistry.register({
-          id: 'observability-create-logs-monitor-from-explore',
-          order: 1,
-          actionType: 'flyout',
-          getLabel: () =>
-            i18n.translate('observability.alerting.exploreCreateMonitor.actionLabel', {
-              defaultMessage: 'Create alert rule',
-            }),
-          getIcon: () => 'bell',
-          getIsEnabled: (deps) => {
-            // Reuse the alerting plugin's PPL capability — they own the
-            // agent config + cluster gate; we just light up alongside
-            // theirs so users see this option when PPL alerting is on.
-            const liveCapabilities = coreRefs.application?.capabilities as
-              | { alertingDashboards?: { pplV2?: boolean } }
-              | undefined;
-            if (!liveCapabilities?.alertingDashboards?.pplV2) return false;
-            // AOSS clusters can't host monitors; the button greys out.
-            const isAOSS =
-              (deps.query as { dataset?: { dataSource?: { type?: string } } })?.dataset?.dataSource
-                ?.type === 'OpenSearch Serverless';
-            return !isAOSS;
-          },
-          component: (props) => {
-            const dataset = (props.dependencies.query as {
-              dataset?: {
-                dataSource?: { id?: string; title?: string; name?: string };
-                title?: string;
-                timeFieldName?: string;
+      core
+        .getStartServices()
+        .then(([coreStart]) => {
+          const capabilities = coreStart.application.capabilities as
+            | { observability?: { alertManagerEnabled?: boolean } }
+            | undefined;
+          if (!capabilities?.observability?.alertManagerEnabled) {
+            return;
+          }
+          exploreSetup.queryPanelActionsRegistry.register({
+            id: 'observability-create-logs-monitor-from-explore',
+            order: 1,
+            actionType: 'flyout',
+            getLabel: () =>
+              i18n.translate('observability.alerting.exploreCreateMonitor.actionLabel', {
+                defaultMessage: 'Create alert rule',
+              }),
+            getIcon: () => 'bell',
+            getIsEnabled: (deps) => {
+              // Reuse the alerting plugin's PPL capability — they own the
+              // agent config + cluster gate; we just light up alongside
+              // theirs so users see this option when PPL alerting is on.
+              const liveCapabilities = coreRefs.application?.capabilities as
+                | { alertingDashboards?: { pplV2?: boolean } }
+                | undefined;
+              if (!liveCapabilities?.alertingDashboards?.pplV2) return false;
+              // AOSS clusters can't host monitors; the button greys out.
+              const isAOSS =
+                (deps.query as { dataset?: { dataSource?: { type?: string } } })?.dataset
+                  ?.dataSource?.type === 'OpenSearch Serverless';
+              return !isAOSS;
+            },
+            component: (props) => {
+              const dataset = (props.dependencies.query as {
+                dataset?: {
+                  dataSource?: { id?: string; title?: string; name?: string };
+                  title?: string;
+                  timeFieldName?: string;
+                };
+              }).dataset;
+              const exploreContext = {
+                dataSourceId: dataset?.dataSource?.id,
+                dataSourceName: dataset?.dataSource?.title ?? dataset?.dataSource?.name,
+                indexPattern: dataset?.title,
+                timeFieldName: dataset?.timeFieldName,
+                queryInEditor:
+                  props.dependencies.queryInEditor ||
+                  (props.dependencies.query as { query?: string })?.query ||
+                  '',
               };
-            }).dataset;
-            const exploreContext = {
-              dataSourceId: dataset?.dataSource?.id,
-              dataSourceName: dataset?.dataSource?.title ?? dataset?.dataSource?.name,
-              indexPattern: dataset?.title,
-              timeFieldName: dataset?.timeFieldName,
-              queryInEditor:
-                props.dependencies.queryInEditor ||
-                (props.dependencies.query as { query?: string })?.query ||
-                '',
-            };
-            return (
-              <React.Suspense fallback={null}>
-                <LazyExploreCreateMonitor
-                  exploreContext={exploreContext}
-                  onClose={props.closeFlyout}
-                />
-              </React.Suspense>
-            );
-          },
+              return (
+                <React.Suspense fallback={null}>
+                  <LazyExploreCreateMonitor
+                    exploreContext={exploreContext}
+                    onClose={props.closeFlyout}
+                  />
+                </React.Suspense>
+              );
+            },
+          });
+        })
+        .catch((error) => {
+          // Surface failures from the deferred-registration path. Without
+          // this catch, a `getStartServices()` rejection (rare, but
+          // possible during a failed start lifecycle or late teardown)
+          // would become an unhandled promise rejection and the
+          // registration silently no-op. Matches the existing
+          // `console.error` precedent below for the S3 datasource path.
+
+          console.error('Failed to register Explore "Create alert rule" action', error);
         });
-      });
     }
 
     // Setup contract preserved for backward compat; see the comment above
