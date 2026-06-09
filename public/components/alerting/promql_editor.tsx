@@ -595,7 +595,9 @@ export const PromQLEditor: React.FC<PromQLEditorProps> = ({
         // Non-critical — autocomplete degrades to keywords/functions only
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [datasourceId]);
 
   // Validate on change

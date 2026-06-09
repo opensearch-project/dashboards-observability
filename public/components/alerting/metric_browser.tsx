@@ -17,7 +17,6 @@ import {
   EuiBadge,
   EuiSpacer,
   EuiBasicTable,
-  EuiHealth,
   EuiButtonEmpty,
   EuiLoadingSpinner,
   EuiCallOut,
@@ -57,7 +56,7 @@ export interface MetricBrowserProps {
 
 export const MetricBrowser: React.FC<MetricBrowserProps> = ({
   onSelectMetric,
-  currentQuery,
+  currentQuery: _currentQuery,
   datasourceId,
 }) => {
   const [search, setSearch] = useState('');
@@ -106,9 +105,7 @@ export const MetricBrowser: React.FC<MetricBrowserProps> = ({
         try {
           const service = new AlertingPromResourcesService(datasourceId);
           const { labels } = await service.listLabelNames(metric.name);
-          setMetrics((prev) =>
-            prev.map((m) => (m.name === metric.name ? { ...m, labels } : m))
-          );
+          setMetrics((prev) => prev.map((m) => (m.name === metric.name ? { ...m, labels } : m)));
           setSelectedMetric((prev) =>
             prev && prev.name === metric.name ? { ...prev, labels } : prev
           );

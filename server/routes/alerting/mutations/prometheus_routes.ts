@@ -81,11 +81,13 @@ async function resolveRulerUri(client: AlertingOSClient, datasource: Datasource)
   // Replace with localhost since Cortex publishes its port on the host.
   try {
     const parsedUri = new URL(rulerUri);
-    if (parsedUri.hostname !== "localhost" && parsedUri.hostname !== "127.0.0.1") {
-      parsedUri.hostname = "localhost";
-      return parsedUri.toString().replace(/\/$/, "");
+    if (parsedUri.hostname !== 'localhost' && parsedUri.hostname !== '127.0.0.1') {
+      parsedUri.hostname = 'localhost';
+      return parsedUri.toString().replace(/\/$/, '');
     }
-  } catch { /* return as-is */ }
+  } catch {
+    /* return as-is */
+  }
   return rulerUri;
 }
 

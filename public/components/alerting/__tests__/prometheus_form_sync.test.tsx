@@ -39,9 +39,7 @@ const baseForm: PrometheusFormState = {
   enabled: true,
 };
 
-const mockDatasources = [
-  { id: 'ds-1', name: 'ObservabilityStack_Prometheus', type: 'prometheus' },
-];
+const mockDatasources = [{ id: 'ds-1', name: 'ObservabilityStack_Prometheus', type: 'prometheus' }];
 
 describe('PrometheusFormSection — duration sync', () => {
   it('changing forDuration in threshold syncs to pendingPeriod', () => {

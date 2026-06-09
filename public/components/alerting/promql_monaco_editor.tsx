@@ -25,14 +25,32 @@ const PROMQL_LANG_ID = 'promql';
 
 // PromQL keywords
 const PROMQL_KEYWORDS = [
-  'by', 'without', 'on', 'ignoring', 'group_left', 'group_right',
-  'bool', 'and', 'or', 'unless', 'offset',
+  'by',
+  'without',
+  'on',
+  'ignoring',
+  'group_left',
+  'group_right',
+  'bool',
+  'and',
+  'or',
+  'unless',
+  'offset',
 ];
 
 // PromQL aggregation operators
 const PROMQL_AGGREGATIONS = [
-  'sum', 'min', 'max', 'avg', 'count', 'count_values',
-  'stddev', 'stdvar', 'topk', 'bottomk', 'quantile',
+  'sum',
+  'min',
+  'max',
+  'avg',
+  'count',
+  'count_values',
+  'stddev',
+  'stdvar',
+  'topk',
+  'bottomk',
+  'quantile',
   'group',
 ];
 
@@ -156,7 +174,6 @@ export const PromQLMonacoEditor: React.FC<PromQLMonacoEditorProps> = ({
   datasourceId,
 }) => {
   const metricsRef = useRef<string[]>([]);
-  const labelsRef = useRef<string[]>([]);
 
   // Fetch live metrics for autocomplete
   useEffect(() => {
@@ -171,7 +188,9 @@ export const PromQLMonacoEditor: React.FC<PromQLMonacoEditorProps> = ({
         // Non-critical
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [datasourceId]);
 
   const provideCompletionItems = useCallback(
@@ -246,13 +265,10 @@ export const PromQLMonacoEditor: React.FC<PromQLMonacoEditorProps> = ({
   const disposableRef = useRef<monaco.IDisposable | null>(null);
   useEffect(() => {
     ensurePromQLRegistered();
-    disposableRef.current = monaco.languages.registerCompletionItemProvider(
-      PROMQL_LANG_ID,
-      {
-        triggerCharacters: ['(', '{', ' ', ','],
-        provideCompletionItems,
-      }
-    );
+    disposableRef.current = monaco.languages.registerCompletionItemProvider(PROMQL_LANG_ID, {
+      triggerCharacters: ['(', '{', ' ', ','],
+      provideCompletionItems,
+    });
     return () => {
       disposableRef.current?.dispose();
     };

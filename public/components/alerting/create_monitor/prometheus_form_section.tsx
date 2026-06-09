@@ -81,7 +81,6 @@ export const PrometheusFormSection: React.FC<{
   const handleMetricSelect = (metricName: string) => {
     onUpdate('query', metricName);
     setQueryTab('editor');
-
   };
 
   const previewYaml = useMemo(() => {
@@ -143,7 +142,9 @@ export const PrometheusFormSection: React.FC<{
           <EuiSelect
             options={datasources.map((ds) => ({ value: ds.id, text: ds.name }))}
             value={datasourceId || ''}
-            onChange={(e) => onUpdate('datasourceId' as any, e.target.value)}
+            onChange={(e) =>
+              onUpdate('datasourceId' as keyof PrometheusFormState, e.target.value as any)
+            }
             compressed
             prepend="Prometheus"
           />
@@ -170,14 +171,23 @@ export const PrometheusFormSection: React.FC<{
                 defaultMessage: 'PromQL expression. Press Ctrl+Space for metric name suggestions.',
               })}
             </EuiText>
-            <PromQLMonacoEditor value={form.query} onChange={(v) => onUpdate('query', v)} height={80} datasourceId={datasourceId} />
+            <PromQLMonacoEditor
+              value={form.query}
+              onChange={(v) => onUpdate('query', v)}
+              height={80}
+              datasourceId={datasourceId}
+            />
             <EuiSpacer size="xs" />
             <EuiText size="xs" color="subdued">
               {'Example: rate(http_requests_total{job="api"}[5m]) > 100'}
             </EuiText>
           </>
         ) : (
-          <MetricBrowser onSelectMetric={handleMetricSelect} currentQuery={form.query} datasourceId={datasourceId} />
+          <MetricBrowser
+            onSelectMetric={handleMetricSelect}
+            currentQuery={form.query}
+            datasourceId={datasourceId}
+          />
         )}
       </EuiPanel>
 

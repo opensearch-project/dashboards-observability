@@ -47,7 +47,7 @@ import {
 } from '../../../../common/services/alerting/validators';
 import { validatePromQL } from '../promql_editor';
 import { MonitorTemplateWizard, AlertTemplate } from '../monitor_template_wizard';
-import { DatasourceTargetSelector, MonitorBackendType } from '../monitor_form_components';
+import { MonitorBackendType } from '../monitor_form_components';
 import {
   DEFAULT_OS_FORM,
   DEFAULT_PROM_FORM,
@@ -586,7 +586,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
               hasSubmitted={hasSubmitted}
               context={context}
               datasourceId={promForm.datasourceId}
-              datasources={datasources.filter((d) => d.type === "prometheus")}
+              datasources={datasources.filter((d) => d.type === 'prometheus')}
             />
           ) : (
             <OpenSearchFormSection

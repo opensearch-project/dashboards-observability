@@ -33,16 +33,12 @@ describe('MetricBrowser', () => {
   });
 
   it('shows loading state initially', () => {
-    render(
-      <MetricBrowser onSelectMetric={mockOnSelect} datasourceId="ds-1" />
-    );
+    render(<MetricBrowser onSelectMetric={mockOnSelect} datasourceId="ds-1" />);
     expect(screen.getByText('Loading metrics...')).toBeInTheDocument();
   });
 
   it('renders metric names from the API', async () => {
-    render(
-      <MetricBrowser onSelectMetric={mockOnSelect} datasourceId="ds-1" />
-    );
+    render(<MetricBrowser onSelectMetric={mockOnSelect} datasourceId="ds-1" />);
 
     await waitFor(() => {
       expect(screen.getByText('up')).toBeInTheDocument();
@@ -52,9 +48,7 @@ describe('MetricBrowser', () => {
   });
 
   it('infers metric type from name suffix', async () => {
-    render(
-      <MetricBrowser onSelectMetric={mockOnSelect} datasourceId="ds-1" />
-    );
+    render(<MetricBrowser onSelectMetric={mockOnSelect} datasourceId="ds-1" />);
 
     await waitFor(() => {
       expect(screen.getByText('up')).toBeInTheDocument();
@@ -67,9 +61,7 @@ describe('MetricBrowser', () => {
   });
 
   it('filters metrics by search input', async () => {
-    render(
-      <MetricBrowser onSelectMetric={mockOnSelect} datasourceId="ds-1" />
-    );
+    render(<MetricBrowser onSelectMetric={mockOnSelect} datasourceId="ds-1" />);
 
     await waitFor(() => {
       expect(screen.getByText('up')).toBeInTheDocument();
@@ -85,9 +77,7 @@ describe('MetricBrowser', () => {
   });
 
   it('calls onSelectMetric when a metric is clicked', async () => {
-    render(
-      <MetricBrowser onSelectMetric={mockOnSelect} datasourceId="ds-1" />
-    );
+    render(<MetricBrowser onSelectMetric={mockOnSelect} datasourceId="ds-1" />);
 
     await waitFor(() => {
       expect(screen.getByText('up')).toBeInTheDocument();
@@ -107,9 +97,7 @@ describe('MetricBrowser', () => {
   });
 
   it('shows selected metric detail panel', async () => {
-    render(
-      <MetricBrowser onSelectMetric={mockOnSelect} datasourceId="ds-1" />
-    );
+    render(<MetricBrowser onSelectMetric={mockOnSelect} datasourceId="ds-1" />);
 
     await waitFor(() => {
       expect(screen.getByText('http_requests_total')).toBeInTheDocument();
