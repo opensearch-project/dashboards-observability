@@ -10,13 +10,10 @@
  *   - Live metric names fetched from the Prometheus datasource
  *   - Syntax highlighting for PromQL
  */
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { monaco } from '@osd/monaco';
-import {
-  CodeEditor,
-  OpenSearchDashboardsContextProvider,
-} from '../../../../../src/plugins/opensearch_dashboards_react/public';
-import { coreRefs } from '../../framework/core_refs';
+import { CodeEditor } from '../../../../../src/plugins/opensearch_dashboards_react/public';
+
 import { AlertingPromResourcesService } from './query_services/alerting_prom_resources_service';
 
 // PromQL language ID
@@ -257,10 +254,8 @@ export const PromQLMonacoEditor: React.FC<PromQLMonacoEditorProps> = ({
     };
   }, [provideCompletionItems]);
 
-  const services = useMemo(() => ({ uiSettings: coreRefs.uiSettings! }), []);
-
   return (
-    <OpenSearchDashboardsContextProvider services={services}>
+    <div>
       <CodeEditor
         languageId={PROMQL_LANG_ID}
         value={value}
@@ -268,6 +263,6 @@ export const PromQLMonacoEditor: React.FC<PromQLMonacoEditorProps> = ({
         height={typeof height === 'number' ? `${height}px` : height}
         options={EDITOR_OPTIONS}
       />
-    </OpenSearchDashboardsContextProvider>
+    </div>
   );
 };
