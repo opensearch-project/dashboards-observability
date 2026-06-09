@@ -226,12 +226,16 @@ export const MOCK_METRICS: string[] = [];
 export const MOCK_LABEL_NAMES: string[] = [];
 export const MOCK_LABEL_VALUES: Record<string, string[]> = {};
 
-// Live metric names fetched from the datasource — populated by PromQLEditor
-// and shared across instances via module-level state.
-let liveMetricNames: string[] = [];
+// Live metric names fetched from the datasource — keyed by datasourceId
+// to avoid conflicts when multiple editors target different datasources.
+const liveMetricNamesByDs = new Map<string, string[]>();
 
-export function setLiveMetricNames(names: string[]) {
-  liveMetricNames = names;
+export function setLiveMetricNames(names: string[], datasourceId?: string) {
+  liveMetricNamesByDs.set(datasourceId || '__default__', names);
+}
+
+export function getLiveMetricNames(datasourceId?: string): string[] {
+  return liveMetricNamesByDs.get(datasourceId || '__default__') || [];
 }
 
 // ============================================================================
@@ -466,7 +470,7 @@ function getSuggestions(query: string, cursorPos: number): Suggestion[] {
       }
     }
     // Metrics
-    for (const m of liveMetricNames) {
+    for (const m of [...liveMetricNamesByDs.values()].flat()) {
       if (!prefix || m.toLowerCase().includes(prefix)) {
         results.push({ text: m, type: 'metric' });
       }
@@ -590,7 +594,7 @@ export const PromQLEditor: React.FC<PromQLEditorProps> = ({
         );
         const svc = new AlertingPromResourcesService(datasourceId);
         const { metrics } = await svc.listMetricNames();
-        if (!cancelled) setLiveMetricNames(metrics);
+        if (!cancelled) setLiveMetricNames(metrics, datasourceId);
       } catch {
         // Non-critical — autocomplete degrades to keywords/functions only
       }

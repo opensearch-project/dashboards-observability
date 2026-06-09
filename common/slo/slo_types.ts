@@ -405,7 +405,7 @@ export interface GeneratedRuleGroup {
   /** Evaluation interval in seconds. */
   interval: number;
   rules: GeneratedRule[];
-  yaml: string;
+  yaml?: string;
 }
 
 // ============================================================================

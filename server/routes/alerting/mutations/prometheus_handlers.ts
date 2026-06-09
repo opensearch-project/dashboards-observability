@@ -50,37 +50,11 @@ export function buildRuleGroup(payload: PrometheusRulePayload): GeneratedRuleGro
   const intervalSeconds = parseDurationToSeconds(payload.evaluationInterval);
   const groupName = payload.groupName || payload.name;
 
-  // Build YAML representation for the preview / storage
-  const yaml = buildYaml(groupName, intervalSeconds, rule);
-
   return {
     groupName,
     interval: intervalSeconds,
     rules: [rule],
-    yaml,
   };
-}
-
-function buildYaml(groupName: string, intervalSeconds: number, rule: GeneratedRule): string {
-  let yaml = `name: ${groupName}\n`;
-  yaml += `interval: ${intervalSeconds}s\n`;
-  yaml += `rules:\n`;
-  yaml += `  - alert: ${rule.name}\n`;
-  yaml += `    expr: ${rule.expr}\n`;
-  if (rule.for) yaml += `    for: ${rule.for}\n`;
-  if (Object.keys(rule.labels).length > 0) {
-    yaml += `    labels:\n`;
-    for (const [k, v] of Object.entries(rule.labels)) {
-      yaml += `      ${k}: ${v}\n`;
-    }
-  }
-  if (rule.annotations && Object.keys(rule.annotations).length > 0) {
-    yaml += `    annotations:\n`;
-    for (const [k, v] of Object.entries(rule.annotations)) {
-      yaml += `      ${k}: "${v}"\n`;
-    }
-  }
-  return yaml;
 }
 
 function parseDurationToSeconds(dur: string): number {

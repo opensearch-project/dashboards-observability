@@ -731,7 +731,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           })
         );
         // Background refetch to reconcile with Cortex once it propagates
-        setTimeout(() => refetchRules(), 15000);
+        refetchTimerRef.current = setTimeout(() => refetchRules(), 15000);
         return;
       }
 
@@ -858,22 +858,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         };
         await mutations.createPrometheusRule(payload, dsId);
 
-        // Poll Cortex until the rule appears (up to 90s, every 5s).
-        // The CreateMonitor flyout keeps its button in loading state until
-        // this promise resolves, giving the user confirmation feedback.
-        const maxAttempts = 18;
-        for (let attempt = 0; attempt < maxAttempts; attempt++) {
-          await new Promise((resolve) => setTimeout(resolve, 5000));
-          try {
-            const resp = await osService.getRuleDetail(
-              dsId,
-              `${dsId}-${promForm.name}-${promForm.name}`
-            );
-            if (resp) break;
-          } catch {
-            // Ignore errors during polling — rule not yet visible
-          }
-        }
+        // Cortex has eventual consistency (~30-60s propagation). Use
+        // optimistic pattern: close flyout immediately, show toast, and
+        // schedule a background refetch after 15s to sync the list.
+        refetchTimerRef.current = setTimeout(() => refetchRules(), 15000);
       } else {
         await mutations.createMonitor(buildPayload(formState), dsId);
       }
@@ -942,7 +930,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         };
         await mutations.createPrometheusRule(payload, dsId);
         // Background refetch to reconcile with Cortex once it propagates
-        setTimeout(() => refetchRules(), 15000);
+        refetchTimerRef.current = setTimeout(() => refetchRules(), 15000);
       } else {
         await mutations.updateMonitor(ruleId, buildPayload(formState), dsId);
         // Immediate refetch for OpenSearch monitors (no propagation delay)
