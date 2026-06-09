@@ -52,12 +52,14 @@ export const PrometheusFormSection: React.FC<{
   validationErrors: Record<string, string>;
   hasSubmitted: boolean;
   context?: { service?: string; team?: string };
+  datasourceId?: string;
 }> = ({
   form,
   onUpdate,
   validationErrors: _validationErrors,
   hasSubmitted: _hasSubmitted,
   context,
+  datasourceId,
 }) => {
   const [queryTab, setQueryTab] = useState<'editor' | 'browser'>('editor');
 
@@ -128,7 +130,7 @@ export const PrometheusFormSection: React.FC<{
         {queryTab === 'editor' ? (
           <PromQLEditor value={form.query} onChange={(v) => onUpdate('query', v)} height={80} />
         ) : (
-          <MetricBrowser onSelectMetric={handleMetricSelect} currentQuery={form.query} />
+          <MetricBrowser onSelectMetric={handleMetricSelect} currentQuery={form.query} datasourceId={datasourceId} />
         )}
       </EuiPanel>
 

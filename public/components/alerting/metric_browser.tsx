@@ -4,10 +4,10 @@
  */
 
 /**
- * Metric Browser — browse available metrics with cardinality info,
- * query time estimates, and optimization suggestions.
+ * Metric Browser — browse available metrics from the Prometheus datasource
+ * with type inference, cardinality estimates, and label discovery.
  */
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   EuiPanel,
   EuiFieldSearch,
@@ -18,129 +18,31 @@ import {
   EuiSpacer,
   EuiBasicTable,
   EuiHealth,
-  EuiToolTip,
-  EuiIcon,
   EuiButtonEmpty,
+  EuiLoadingSpinner,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { MOCK_METRICS, MOCK_LABEL_NAMES } from './promql_editor';
+import { AlertingPromResourcesService } from './query_services/alerting_prom_resources_service';
 
 // ============================================================================
-// Mock metric metadata
+// Types
 // ============================================================================
 
-interface MetricMeta {
+interface MetricEntry {
   name: string;
-  type: 'counter' | 'gauge' | 'histogram' | 'summary';
-  help: string;
-  cardinality: number;
+  type: 'counter' | 'gauge' | 'histogram' | 'summary' | 'unknown';
   labels: string[];
-  scrapeInterval: string;
 }
 
-function generateMetricMeta(): MetricMeta[] {
-  const typeMap: Record<string, 'counter' | 'gauge' | 'histogram' | 'summary'> = {
-    _total: 'counter',
-    _bytes_total: 'counter',
-    _seconds_total: 'counter',
-    _bytes: 'gauge',
-    _ratio: 'gauge',
-    _info: 'gauge',
-    _bucket: 'histogram',
-    _sum: 'histogram',
-    _count: 'histogram',
-  };
-  return MOCK_METRICS.map((name) => {
-    let type: MetricMeta['type'] = 'gauge';
-    for (const [suffix, t] of Object.entries(typeMap)) {
-      if (name.endsWith(suffix)) {
-        type = t;
-        break;
-      }
-    }
-    const labels = MOCK_LABEL_NAMES.filter(() => Math.random() > 0.6).slice(0, 5);
-    if (!labels.includes('instance')) labels.unshift('instance');
-    if (!labels.includes('job')) labels.push('job');
-    const cardinality = Math.floor(Math.random() * 5000) + 10;
-    return {
-      name,
-      type,
-      labels,
-      help: `Help text for ${name}`,
-      cardinality,
-      scrapeInterval: '15s',
-    };
-  });
-}
-
-const METRIC_META = generateMetricMeta();
-
-function cardinalityColor(c: number): string {
-  if (c > 3000) return 'danger';
-  if (c > 1000) return 'warning';
-  return 'success';
-}
-
-function cardinalityLabel(c: number): string {
-  if (c > 3000)
-    return i18n.translate('observability.alerting.metricBrowser.cardinality.high', {
-      defaultMessage: 'High',
-    });
-  if (c > 1000)
-    return i18n.translate('observability.alerting.metricBrowser.cardinality.medium', {
-      defaultMessage: 'Medium',
-    });
-  return i18n.translate('observability.alerting.metricBrowser.cardinality.low', {
-    defaultMessage: 'Low',
-  });
-}
-
-function estimateQueryTime(cardinality: number): string {
-  if (cardinality > 3000) return '~500ms-2s';
-  if (cardinality > 1000) return '~100-500ms';
-  return '<100ms';
-}
-
-function getOptimizations(metric: MetricMeta, query?: string): string[] {
-  const tips: string[] = [];
-  if (metric.cardinality > 3000) {
-    tips.push(
-      i18n.translate('observability.alerting.metricBrowser.tip.highCardinality', {
-        defaultMessage:
-          'High cardinality ({count} series). Add label filters to reduce query scope.',
-        values: { count: metric.cardinality },
-      })
-    );
-  }
-  if (
-    metric.type === 'counter' &&
-    query &&
-    !query.includes('rate') &&
-    !query.includes('increase')
-  ) {
-    tips.push(
-      i18n.translate('observability.alerting.metricBrowser.tip.counterRate', {
-        defaultMessage: 'Counter metrics should typically be wrapped in rate() or increase().',
-      })
-    );
-  }
-  if (metric.type === 'histogram' && query && !query.includes('histogram_quantile')) {
-    tips.push(
-      i18n.translate('observability.alerting.metricBrowser.tip.histogramQuantile', {
-        defaultMessage: 'Use histogram_quantile() to compute percentiles from histogram buckets.',
-      })
-    );
-  }
-  if (metric.labels.length > 6) {
-    tips.push(
-      i18n.translate('observability.alerting.metricBrowser.tip.manyLabels', {
-        defaultMessage: 'This metric has {count} labels. Use by() or without() to aggregate.',
-        values: { count: metric.labels.length },
-      })
-    );
-  }
-  return tips;
+/** Infer metric type from name suffix conventions. */
+function inferType(name: string): MetricEntry['type'] {
+  if (name.endsWith('_total') || name.endsWith('_created')) return 'counter';
+  if (name.endsWith('_bucket')) return 'histogram';
+  if (name.endsWith('_sum') || name.endsWith('_count')) return 'histogram';
+  if (name.endsWith('_info')) return 'gauge';
+  return 'unknown';
 }
 
 // ============================================================================
@@ -150,25 +52,86 @@ function getOptimizations(metric: MetricMeta, query?: string): string[] {
 export interface MetricBrowserProps {
   onSelectMetric: (metricName: string) => void;
   currentQuery?: string;
+  datasourceId?: string;
 }
 
-export const MetricBrowser: React.FC<MetricBrowserProps> = ({ onSelectMetric, currentQuery }) => {
+export const MetricBrowser: React.FC<MetricBrowserProps> = ({
+  onSelectMetric,
+  currentQuery,
+  datasourceId,
+}) => {
   const [search, setSearch] = useState('');
-  const [selectedMetric, setSelectedMetric] = useState<MetricMeta | null>(null);
+  const [metrics, setMetrics] = useState<MetricEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedMetric, setSelectedMetric] = useState<MetricEntry | null>(null);
+
+  // Fetch metrics from the real Prometheus metadata API
+  const fetchMetrics = useCallback(async () => {
+    if (!datasourceId) {
+      setError('No datasource selected');
+      return;
+    }
+    setIsLoading(true);
+    setError(null);
+    try {
+      const service = new AlertingPromResourcesService(datasourceId);
+      const { metrics: metricNames } = await service.listMetricNames();
+
+      const entries: MetricEntry[] = metricNames.map((name) => ({
+        name,
+        type: inferType(name),
+        labels: [],
+      }));
+      setMetrics(entries);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to fetch metrics');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [datasourceId]);
+
+  useEffect(() => {
+    fetchMetrics();
+  }, [fetchMetrics]);
+
+  // Fetch labels when a metric is selected
+  const handleSelectMetric = useCallback(
+    async (metric: MetricEntry) => {
+      setSelectedMetric(metric);
+      onSelectMetric(metric.name);
+
+      // Lazy-load labels for the selected metric
+      if (datasourceId && metric.labels.length === 0) {
+        try {
+          const service = new AlertingPromResourcesService(datasourceId);
+          const { labels } = await service.listLabelNames(metric.name);
+          setMetrics((prev) =>
+            prev.map((m) => (m.name === metric.name ? { ...m, labels } : m))
+          );
+          setSelectedMetric((prev) =>
+            prev && prev.name === metric.name ? { ...prev, labels } : prev
+          );
+        } catch {
+          // Non-critical — labels just won't show
+        }
+      }
+    },
+    [datasourceId, onSelectMetric]
+  );
 
   const filtered = useMemo(() => {
-    if (!search) return METRIC_META;
+    if (!search) return metrics;
     const q = search.toLowerCase();
-    return METRIC_META.filter(
-      (m) => m.name.toLowerCase().includes(q) || m.help.toLowerCase().includes(q)
-    );
-  }, [search]);
+    return metrics.filter((m) => m.name.toLowerCase().includes(q));
+  }, [search, metrics]);
 
   const typeColors: Record<string, string> = {
     counter: 'primary',
     gauge: 'success',
     histogram: 'accent',
     summary: 'warning',
+    unknown: 'default',
   };
 
   const columns = [
@@ -178,15 +141,12 @@ export const MetricBrowser: React.FC<MetricBrowserProps> = ({ onSelectMetric, cu
         defaultMessage: 'Metric',
       }),
       sortable: true,
-      width: '280px',
-      render: (name: string, item: MetricMeta) => (
+      width: '50%',
+      render: (name: string, item: MetricEntry) => (
         <EuiButtonEmpty
           size="xs"
           flush="left"
-          onClick={() => {
-            setSelectedMetric(item);
-            onSelectMetric(name);
-          }}
+          onClick={() => handleSelectMetric(item)}
           style={{ fontFamily: 'monospace', fontSize: 12 }}
         >
           {name}
@@ -202,68 +162,53 @@ export const MetricBrowser: React.FC<MetricBrowserProps> = ({ onSelectMetric, cu
       render: (t: string) => <EuiBadge color={typeColors[t] || 'default'}>{t}</EuiBadge>,
     },
     {
-      field: 'cardinality',
-      name: i18n.translate('observability.alerting.metricBrowser.column.cardinality', {
-        defaultMessage: 'Cardinality',
-      }),
-      width: '120px',
-      sortable: true,
-      render: (c: number) => (
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiHealth color={cardinalityColor(c)}>{c.toLocaleString()}</EuiHealth>
-          </EuiFlexItem>
-          {c > 3000 && (
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate(
-                  'observability.alerting.metricBrowser.highCardinalityTooltip',
-                  { defaultMessage: 'High cardinality — may impact query performance' }
-                )}
-              >
-                <EuiIcon type="alert" color="warning" size="s" />
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      ),
-    },
-    {
-      field: 'cardinality',
-      name: i18n.translate('observability.alerting.metricBrowser.column.estQueryTime', {
-        defaultMessage: 'Est. Query Time',
-      }),
-      width: '120px',
-      render: (c: number) => (
-        <EuiText size="xs" color="subdued">
-          {estimateQueryTime(c)}
-        </EuiText>
-      ),
-    },
-    {
       field: 'labels',
       name: i18n.translate('observability.alerting.metricBrowser.column.labels', {
         defaultMessage: 'Labels',
       }),
-      width: '200px',
-      render: (labels: string[]) => (
-        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-          {labels.slice(0, 4).map((l) => (
-            <EuiFlexItem grow={false} key={l}>
-              <EuiBadge color="hollow">{l}</EuiBadge>
-            </EuiFlexItem>
-          ))}
-          {labels.length > 4 && (
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">+{labels.length - 4}</EuiBadge>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      ),
+      width: '40%',
+      render: (labels: string[]) =>
+        labels.length > 0 ? (
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            {labels.slice(0, 5).map((l) => (
+              <EuiFlexItem grow={false} key={l}>
+                <EuiBadge color="hollow">{l}</EuiBadge>
+              </EuiFlexItem>
+            ))}
+            {labels.length > 5 && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">+{labels.length - 5}</EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        ) : (
+          <EuiText size="xs" color="subdued">
+            —
+          </EuiText>
+        ),
     },
   ];
 
-  const optimizations = selectedMetric ? getOptimizations(selectedMetric, currentQuery) : [];
+  if (isLoading) {
+    return (
+      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ padding: 32 }}>
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="l" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">Loading metrics...</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (error) {
+    return (
+      <EuiCallOut title="Failed to load metrics" color="danger" iconType="alert">
+        <p>{error}</p>
+      </EuiCallOut>
+    );
+  }
 
   return (
     <div>
@@ -284,13 +229,10 @@ export const MetricBrowser: React.FC<MetricBrowserProps> = ({ onSelectMetric, cu
       {selectedMetric && (
         <>
           <EuiPanel paddingSize="s" color="subdued">
-            <EuiFlexGroup gutterSize="m" responsive={false}>
+            <EuiFlexGroup gutterSize="m" responsive={false} justifyContent="spaceBetween">
               <EuiFlexItem>
                 <EuiText size="s">
                   <strong>{selectedMetric.name}</strong>
-                </EuiText>
-                <EuiText size="xs" color="subdued">
-                  {selectedMetric.help}
                 </EuiText>
                 <EuiSpacer size="xs" />
                 <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
@@ -299,65 +241,18 @@ export const MetricBrowser: React.FC<MetricBrowserProps> = ({ onSelectMetric, cu
                       {selectedMetric.type}
                     </EuiBadge>
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiHealth color={cardinalityColor(selectedMetric.cardinality)}>
-                      <FormattedMessage
-                        id="observability.alerting.metricBrowser.seriesCount"
-                        defaultMessage="{count} series ({label})"
-                        values={{
-                          count: selectedMetric.cardinality.toLocaleString(),
-                          label: cardinalityLabel(selectedMetric.cardinality),
-                        }}
-                      />
-                    </EuiHealth>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs">
-                      <FormattedMessage
-                        id="observability.alerting.metricBrowser.scrape"
-                        defaultMessage="Scrape: {interval}"
-                        values={{ interval: selectedMetric.scrapeInterval }}
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs">
-                      <FormattedMessage
-                        id="observability.alerting.metricBrowser.estTime"
-                        defaultMessage="Est: {time}"
-                        values={{ time: estimateQueryTime(selectedMetric.cardinality) }}
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
+                  {selectedMetric.labels.length > 0 && (
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {selectedMetric.labels.length} labels
+                      </EuiText>
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
-                {optimizations.length > 0 && (
-                  <>
-                    <EuiSpacer size="xs" />
-                    {optimizations.map((tip, i) => (
-                      <div
-                        key={i}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'flex-start',
-                          gap: 4,
-                          padding: '2px 0',
-                        }}
-                      >
-                        <EuiIcon type="bulb" color="warning" size="s" style={{ marginTop: 2 }} />
-                        <EuiText size="xs" color="subdued">
-                          {tip}
-                        </EuiText>
-                      </div>
-                    ))}
-                  </>
-                )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty size="xs" iconType="cross" onClick={() => setSelectedMetric(null)}>
-                  <FormattedMessage
-                    id="observability.alerting.metricBrowser.closeButton"
-                    defaultMessage="Close"
-                  />
+                  Close
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -369,6 +264,11 @@ export const MetricBrowser: React.FC<MetricBrowserProps> = ({ onSelectMetric, cu
       <div style={{ maxHeight: 300, overflow: 'auto' }}>
         <EuiBasicTable items={filtered.slice(0, 50)} columns={columns} compressed />
       </div>
+      {filtered.length === 0 && !isLoading && (
+        <EuiText size="s" textAlign="center" color="subdued" style={{ padding: 16 }}>
+          No items found
+        </EuiText>
+      )}
       {filtered.length > 50 && (
         <EuiText size="xs" color="subdued" textAlign="center" style={{ padding: 8 }}>
           <FormattedMessage

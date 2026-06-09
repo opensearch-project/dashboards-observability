@@ -594,6 +594,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
               validationErrors={validationErrors}
               hasSubmitted={hasSubmitted}
               context={context}
+              datasourceId={promForm.datasourceId}
             />
           ) : (
             <OpenSearchFormSection
