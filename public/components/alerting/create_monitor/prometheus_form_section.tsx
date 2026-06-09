@@ -20,6 +20,7 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiFormRow,
   EuiPanel,
   EuiSelect,
@@ -103,14 +104,49 @@ export const PrometheusFormSection: React.FC<{
     <>
       {/* Query Definition */}
       <EuiPanel paddingSize="m" color="subdued">
-        <EuiTitle size="xs">
-          <h3>
-            {i18n.translate('observability.alerting.prometheusFormSection.promqlQueryTitle', {
-              defaultMessage: 'PromQL Query',
-            })}
-          </h3>
-        </EuiTitle>
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          gutterSize="none"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h3>
+                {i18n.translate('observability.alerting.prometheusFormSection.queryTitle', {
+                  defaultMessage: 'Query',
+                })}
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              href={`/app/explore/metrics`}
+              target="_blank"
+              data-test-subj="alertManagerOpenInMetricsLink"
+            >
+              {i18n.translate('observability.alerting.prometheusFormSection.openInMetrics', {
+                defaultMessage: 'Build query in metrics \u2192',
+              })}
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
+
+        <EuiFlexGroup gutterSize="m" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiFormRow
+              label={i18n.translate('observability.alerting.prometheusFormSection.datasourceLabel', {
+                defaultMessage: 'Datasource',
+              })}
+              compressed
+            >
+              <EuiText size="s">{datasourceId ? 'ObservabilityStack_Prometheus' : 'Not selected'}</EuiText>
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+
         <EuiTabs size="s">
           <EuiTab isSelected={queryTab === 'editor'} onClick={() => setQueryTab('editor')}>
             {i18n.translate('observability.alerting.prometheusFormSection.queryEditorTab', {
@@ -125,7 +161,20 @@ export const PrometheusFormSection: React.FC<{
         </EuiTabs>
         <EuiSpacer size="s" />
         {queryTab === 'editor' ? (
-          <PromQLEditor value={form.query} onChange={(v) => onUpdate('query', v)} height={80} />
+          <>
+            <EuiText size="xs" color="subdued" style={{ marginBottom: 4 }}>
+              {i18n.translate('observability.alerting.prometheusFormSection.promqlHelp', {
+                defaultMessage: 'PromQL expression. Press Ctrl+Space for metric name suggestions.',
+              })}
+            </EuiText>
+            <PromQLEditor value={form.query} onChange={(v) => onUpdate('query', v)} height={80} />
+            <EuiSpacer size="xs" />
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('observability.alerting.prometheusFormSection.promqlExample', {
+                defaultMessage: 'Example: rate(http_requests_total{{job="api"}}[5m]) > 100',
+              })}
+            </EuiText>
+          </>
         ) : (
           <MetricBrowser onSelectMetric={handleMetricSelect} currentQuery={form.query} datasourceId={datasourceId} />
         )}
