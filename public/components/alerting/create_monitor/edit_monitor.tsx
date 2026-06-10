@@ -32,6 +32,31 @@ import {
   PplTriggerForm,
 } from './create_monitor_types';
 
+/** Convert seconds to a human-readable duration string (e.g., 60 → "1m"). */
+function formatSeconds(sec: number): string {
+  if (sec <= 0) return '1m';
+  if (sec % 3600 === 0) return `${sec / 3600}h`;
+  if (sec % 60 === 0) return `${sec / 60}m`;
+  return `${sec}s`;
+}
+
+/**
+ * Normalize a duration string like "120s" to the canonical form used in
+ * dropdown options ("2m"). Handles "Ns" → minutes/hours conversion.
+ */
+function normalizeDuration(dur: string): string {
+  if (!dur) return '5m';
+  // Already in m/h/d format
+  if (/^\d+[mhd]$/.test(dur)) return dur;
+  // Convert "Ns" to minutes if evenly divisible
+  const secMatch = dur.match(/^(\d+)s$/);
+  if (secMatch) {
+    const sec = parseInt(secMatch[1], 10);
+    return formatSeconds(sec);
+  }
+  return dur;
+}
+
 export interface EditMonitorProps {
   dsId: string;
   ruleId: string;
@@ -134,15 +159,59 @@ export const EditMonitor: React.FC<EditMonitorProps> = ({
   onClearPplSubmitError,
 }) => {
   const { data, isLoading, error } = useRuleDetail(dsId, ruleId);
-  const [seededForm, setSeededForm] = useState<OpenSearchFormState | null>(null);
+  const [seededForm, setSeededForm] = useState<MonitorFormState | null>(null);
   const [unsupported, setUnsupported] = useState<string | null>(null);
 
   useEffect(() => {
     if (!data) return;
+    if (data.datasourceType === 'prometheus') {
+      // Prometheus rule edit — seed from the unified rule summary + raw data.
+      // The summary carries pre-parsed human-readable fields; raw has the
+      // Cortex wire format which may use empty strings or numeric seconds.
+      const raw = (data.raw || {}) as Record<string, unknown>;
+      const rules = (raw.rules as Array<Record<string, unknown>>) || [];
+      const firstRule = rules[0] || {};
+      const expr = String(firstRule.expr || data.query || '');
+      const rawLabels = (firstRule.labels || data.labels || {}) as Record<string, string>;
+      const rawAnnotations = (firstRule.annotations || data.annotations || {}) as Record<
+        string,
+        string
+      >;
+
+      // Duration fields: prefer the summary-level fields which are already
+      // formatted as duration strings by the server's rule mapper.
+      // Normalize "120s" → "2m" etc. so the dropdown can match.
+      const rawFor =
+        (data.pendingPeriod ?? (firstRule.for != null ? String(firstRule.for) : '')) || '5m';
+      const forDuration = normalizeDuration(rawFor);
+      const evaluationInterval = normalizeDuration(data.evaluationInterval || '1m');
+      const firingPeriod = normalizeDuration(data.firingPeriod || forDuration);
+
+      const promForm: import('./create_monitor_types').PrometheusFormState = {
+        name: data.name,
+        datasourceId: data.datasourceId,
+        datasourceType: 'prometheus',
+        query:
+          expr.replace(/\s*(>|>=|<|<=|==|!=)\s*[\d.]+(?:[eE][+-]?\d+)?\s*$/, '').trim() || expr,
+        threshold: {
+          operator: (data.threshold?.operator as '>' | '>=' | '<' | '<=' | '==' | '!=') || '>',
+          value: data.threshold?.value ?? 0,
+          unit: data.threshold?.unit || '',
+          forDuration,
+        },
+        evaluationInterval,
+        pendingPeriod: forDuration,
+        firingPeriod,
+        labels: Object.entries(rawLabels).map(([key, value]) => ({ key, value })),
+        annotations: Object.entries(rawAnnotations).map(([key, value]) => ({ key, value })),
+        severity: data.severity,
+        enabled: data.enabled,
+      };
+      setSeededForm(promForm);
+      return;
+    }
     if (data.datasourceType !== 'opensearch') {
-      setUnsupported(
-        'Editing Prometheus rule groups is not supported yet. This will land in a follow-up release.'
-      );
+      setUnsupported('Editing this monitor type is not supported yet.');
       return;
     }
     if (data.monitorType !== 'ppl') {

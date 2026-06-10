@@ -653,7 +653,8 @@ export function parseThreshold(conditionSource: string): { operator: string; val
 export function promRuleToUnified(
   r: PromAlertingRule,
   groupName: string,
-  dsId: string
+  dsId: string,
+  groupInterval?: number
 ): UnifiedRuleSummary {
   const state = r.state;
   const severity = promSeverityFromLabels(r.labels);
@@ -681,7 +682,7 @@ export function promRuleToUnified(
     lastModified: r.lastEvaluation || new Date().toISOString(),
     lastTriggered: r.alerts?.length > 0 ? r.alerts[0].activeAt : undefined,
     notificationDestinations: destNames,
-    evaluationInterval: `${r.duration}s`,
+    evaluationInterval: groupInterval ? `${groupInterval}s` : '60s',
     pendingPeriod: `${r.duration}s`,
     threshold: (() => {
       const parsed = parseThreshold(r.query);

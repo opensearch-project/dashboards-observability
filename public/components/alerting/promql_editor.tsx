@@ -226,6 +226,18 @@ export const MOCK_METRICS: string[] = [];
 export const MOCK_LABEL_NAMES: string[] = [];
 export const MOCK_LABEL_VALUES: Record<string, string[]> = {};
 
+// Live metric names fetched from the datasource — keyed by datasourceId
+// to avoid conflicts when multiple editors target different datasources.
+const liveMetricNamesByDs = new Map<string, string[]>();
+
+export function setLiveMetricNames(names: string[], datasourceId?: string) {
+  liveMetricNamesByDs.set(datasourceId || '__default__', names);
+}
+
+export function getLiveMetricNames(datasourceId?: string): string[] {
+  return liveMetricNamesByDs.get(datasourceId || '__default__') || [];
+}
+
 // ============================================================================
 // Syntax Highlighting
 // ============================================================================
@@ -458,7 +470,7 @@ function getSuggestions(query: string, cursorPos: number): Suggestion[] {
       }
     }
     // Metrics
-    for (const m of MOCK_METRICS) {
+    for (const m of [...liveMetricNamesByDs.values()].flat()) {
       if (!prefix || m.toLowerCase().includes(prefix)) {
         results.push({ text: m, type: 'metric' });
       }
@@ -548,11 +560,14 @@ export interface PromQLEditorProps {
   height?: number;
   showLineNumbers?: boolean;
   hideToolbar?: boolean;
+  /** Datasource ID for fetching live metric names for autocomplete. */
+  datasourceId?: string;
 }
 
 export const PromQLEditor: React.FC<PromQLEditorProps> = ({
   value,
   onChange,
+  datasourceId,
   placeholder = i18n.translate('observability.alerting.promqlEditor.placeholder', {
     defaultMessage: 'Enter PromQL query...',
   }),
@@ -567,6 +582,27 @@ export const PromQLEditor: React.FC<PromQLEditorProps> = ({
   const [funcHint, setFuncHint] = useState<ReturnType<typeof getFunctionHint>>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  // Fetch live metric names for autocomplete when datasourceId is available
+  useEffect(() => {
+    if (!datasourceId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { AlertingPromResourcesService } = await import(
+          './query_services/alerting_prom_resources_service'
+        );
+        const svc = new AlertingPromResourcesService(datasourceId);
+        const { metrics } = await svc.listMetricNames();
+        if (!cancelled) setLiveMetricNames(metrics, datasourceId);
+      } catch {
+        // Non-critical — autocomplete degrades to keywords/functions only
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [datasourceId]);
 
   // Validate on change
   useEffect(() => {

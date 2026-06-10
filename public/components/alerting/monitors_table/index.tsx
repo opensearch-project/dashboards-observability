@@ -149,7 +149,10 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     if (selected.length === 0) return [true, true];
     return [
       selected.every((d) => d.type === 'prometheus'),
-      selected.every((d) => d.type === 'opensearch'),
+      // Always allow Metrics creation when at least one datasource is selected —
+      // the Prometheus data-connection may exist on the cluster without a
+      // corresponding MDS saved object (discovered via SQL plugin API, not SO).
+      false,
     ];
   }, [datasources, selectedDsIds]);
 
@@ -192,6 +195,16 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     () => rules.filter((r) => matchesSearch(r, searchQuery) && matchesFilters(r, filters)),
     [rules, searchQuery, filters]
   );
+
+  // Prune selectedIds that are no longer in the filtered list (e.g., after
+  // search/filter changes remove items from view).
+  useEffect(() => {
+    const visibleIds = new Set(filtered.map((r) => r.id));
+    setSelectedIds((prev) => {
+      const pruned = new Set([...prev].filter((id) => visibleIds.has(id)));
+      return pruned.size === prev.size ? prev : pruned;
+    });
+  }, [filtered]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;

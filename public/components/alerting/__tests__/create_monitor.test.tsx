@@ -6,6 +6,11 @@
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 
+jest.mock('../promql_monaco_editor', () => ({
+  PromQLMonacoEditor: ({ value }: { value: string }) => (
+    <textarea data-test-subj="promqlMock" defaultValue={value} />
+  ),
+}));
 jest.mock('../promql_editor', () => ({
   PromQLEditor: ({ value }: { value: string }) => (
     <textarea data-test-subj="promqlMock" defaultValue={value} />

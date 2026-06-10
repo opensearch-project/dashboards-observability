@@ -60,6 +60,22 @@ export class MonitorMutationsClient {
     )) as MonitorDeleteResponse;
   }
 
+  async createPrometheusRule(
+    data: Record<string, unknown>,
+    dsId: string
+  ): Promise<PrometheusRuleResponse> {
+    return (await this.requireHttp().post(
+      `/api/alerting/prometheus/${encodeURIComponent(dsId)}/rules`,
+      { body: JSON.stringify(data) }
+    )) as PrometheusRuleResponse;
+  }
+
+  async deletePrometheusRule(dsId: string, groupName: string): Promise<{ success: boolean }> {
+    return (await this.requireHttp().delete(
+      `/api/alerting/prometheus/${encodeURIComponent(dsId)}/rules/${encodeURIComponent(groupName)}`
+    )) as { success: boolean };
+  }
+
   async acknowledgeAlert(
     alertId: string,
     datasourceId?: string,
@@ -104,3 +120,9 @@ export class MonitorMutationsClient {
 }
 
 const ACKNOWLEDGE_TIMEOUT_MS = 30_000;
+
+export interface PrometheusRuleResponse {
+  success: boolean;
+  groupName: string;
+  namespace: string;
+}

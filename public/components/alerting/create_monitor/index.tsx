@@ -47,7 +47,7 @@ import {
 } from '../../../../common/services/alerting/validators';
 import { validatePromQL } from '../promql_editor';
 import { MonitorTemplateWizard, AlertTemplate } from '../monitor_template_wizard';
-import { DatasourceTargetSelector, MonitorBackendType } from '../monitor_form_components';
+import { MonitorBackendType } from '../monitor_form_components';
 import {
   DEFAULT_OS_FORM,
   DEFAULT_PROM_FORM,
@@ -443,17 +443,8 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
             Logs (PPL) form embeds its datasource picker inline in the query
             toolbar, so we only render the standalone selector for the
             Prometheus form. */}
-          {backendType === 'prometheus' && (
-            <>
-              <DatasourceTargetSelector
-                datasources={datasources.filter((d) => d.type === backendType)}
-                selectedId={activeForm.datasourceId}
-                onChange={isEdit ? () => undefined : handleDatasourceChange}
-              />
-
-              <EuiSpacer size="m" />
-            </>
-          )}
+          {/* Prometheus datasource selector moved into the Query section
+              of PrometheusFormSection to match Logs layout */}
 
           {/* Creation Mode Toggle — AI only available for Prometheus, hidden in edit mode */}
           {!isEdit && backendType === 'prometheus' && (
@@ -594,6 +585,8 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
               validationErrors={validationErrors}
               hasSubmitted={hasSubmitted}
               context={context}
+              datasourceId={promForm.datasourceId}
+              datasources={datasources.filter((d) => d.type === 'prometheus')}
             />
           ) : (
             <OpenSearchFormSection
@@ -636,7 +629,11 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
                 isDisabled={!isValid || isSaving}
                 isLoading={isSaving}
               >
-                {isEdit
+                {isSaving && backendType === 'prometheus'
+                  ? i18n.translate('observability.alerting.createMonitor.savingPrometheus', {
+                      defaultMessage: 'Creating in Prometheus...',
+                    })
+                  : isEdit
                   ? i18n.translate('observability.alerting.createMonitor.saveChangesButton', {
                       defaultMessage: 'Save Changes',
                     })
