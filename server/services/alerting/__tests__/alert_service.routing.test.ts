@@ -141,6 +141,234 @@ describe('MultiBackendAlertService — routing & list', () => {
     expect(response.completedDatasources).toBe(2);
   });
 
+  it('links detector-triggered alerts with the matching anomaly and omits the duplicate anomaly row', async () => {
+    const start = Date.UTC(2026, 5, 4, 22, 0, 0);
+    const end = start + 5 * 60 * 1000;
+    mockDsSvc.list.mockResolvedValueOnce([osDatasource]);
+    mockOsBackend.getAlerts.mockResolvedValueOnce({
+      alerts: [
+        {
+          id: 'alert-1',
+          version: 1,
+          monitor_id: 'monitor-1',
+          monitor_name: 'detector threshold monitor',
+          monitor_version: 1,
+          trigger_id: 'trigger-1',
+          trigger_name: 'anomaly threshold',
+          state: 'ACTIVE',
+          severity: '1',
+          error_message: null,
+          start_time: start,
+          last_notification_time: end,
+          end_time: null,
+          acknowledged_time: null,
+          action_execution_results: [],
+        },
+      ],
+      totalAlerts: 1,
+      truncated: false,
+    });
+    mockOsBackend.getMonitors.mockResolvedValueOnce([
+      {
+        id: 'monitor-1',
+        type: 'monitor',
+        monitor_type: 'query_level_monitor',
+        name: 'detector threshold monitor',
+        enabled: true,
+        schedule: { period: { interval: 1, unit: 'MINUTES' } },
+        inputs: [
+          {
+            search: {
+              indices: ['.opendistro-anomaly-results*'],
+              query: {
+                query: {
+                  bool: {
+                    filter: [{ term: { detector_id: 'detector-1' } }],
+                  },
+                },
+              },
+            },
+          },
+        ],
+        triggers: [
+          {
+            id: 'trigger-1',
+            name: 'anomaly threshold',
+            severity: '1',
+            condition: {
+              script: { source: 'ctx.results[0].hits.total.value > 0', lang: 'painless' },
+            },
+            actions: [],
+          },
+        ],
+        last_update_time: start,
+      },
+    ]);
+    const transportRequest = jest.fn(async ({ path }: { path: string }) => {
+      if (path === '/_plugins/_anomaly_detection/detectors/results/_search') {
+        return {
+          body: {
+            hits: {
+              hits: [
+                {
+                  _id: 'anomaly-1',
+                  _source: {
+                    detector_id: 'detector-1',
+                    anomaly_grade: 1,
+                    anomaly_score: 7.5,
+                    confidence: 0.99,
+                    data_start_time: start + 60 * 1000,
+                    data_end_time: start + 2 * 60 * 1000,
+                    entity: [{ name: 'DestCityName', value: 'London' }],
+                    feature_data: [{ feature_name: 'test', data: 90 }],
+                  },
+                },
+              ],
+            },
+          },
+        };
+      }
+      if (path === '/_plugins/_anomaly_detection/detectors/_search') {
+        return {
+          body: {
+            hits: {
+              hits: [
+                {
+                  _id: 'detector-1',
+                  _source: { name: 'flight detector' },
+                },
+              ],
+            },
+          },
+        };
+      }
+      throw new Error(`Unexpected request: ${path}`);
+    });
+
+    const response = await svc.getUnifiedAlerts(
+      async () =>
+        ({
+          transport: { request: transportRequest },
+        } as never),
+      { dsIds: ['ds-os'] }
+    );
+
+    expect(response.results).toHaveLength(1);
+    expect(response.results[0].id).toBe('alert-1');
+    expect(response.results[0].relatedAnomaly?.labels.anomaly_result_id).toBe('anomaly-1');
+    expect(response.results.some((row) => row.findingType === 'anomaly')).toBe(false);
+  });
+
+  it('links detector-triggered alerts to explicitly referenced anomaly results outside the selected range', async () => {
+    const alertStart = Date.UTC(2026, 5, 9, 18, 0, 0);
+    const anomalyStart = Date.UTC(2026, 4, 20, 2, 4, 51);
+    mockDsSvc.list.mockResolvedValueOnce([osDatasource]);
+    mockOsBackend.getAlerts.mockResolvedValueOnce({
+      alerts: [
+        {
+          id: 'alert-1',
+          version: 1,
+          monitor_id: 'monitor-1',
+          monitor_name: 'detector threshold monitor',
+          monitor_version: 1,
+          trigger_id: 'trigger-1',
+          trigger_name: 'anomaly threshold',
+          state: 'ACTIVE',
+          severity: '1',
+          error_message: null,
+          start_time: alertStart,
+          last_notification_time: alertStart,
+          end_time: null,
+          acknowledged_time: null,
+          action_execution_results: [],
+        },
+      ],
+      totalAlerts: 1,
+      truncated: false,
+    });
+    mockOsBackend.getMonitors.mockResolvedValueOnce([
+      {
+        id: 'monitor-1',
+        type: 'monitor',
+        monitor_type: 'query_level_monitor',
+        name: 'detector threshold monitor',
+        enabled: true,
+        schedule: { period: { interval: 1, unit: 'MINUTES' } },
+        inputs: [
+          {
+            search: {
+              indices: ['.opendistro-anomaly-results*'],
+              query: {
+                query: {
+                  bool: {
+                    filter: [
+                      { term: { detector_id: { value: 'detector-1' } } },
+                      { term: { _id: { value: 'anomaly-1' } } },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        ],
+        triggers: [
+          {
+            id: 'trigger-1',
+            name: 'anomaly threshold',
+            severity: '1',
+            condition: {
+              script: { source: 'ctx.results[0].hits.total.value > 0', lang: 'painless' },
+            },
+            actions: [],
+          },
+        ],
+        last_update_time: alertStart,
+      },
+    ]);
+    const transportRequest = jest.fn(
+      async ({ path, body }: { path: string; body?: { query?: { ids?: unknown } } }) => {
+        if (path === '/_plugins/_anomaly_detection/detectors/results/_search') {
+          if (body?.query?.ids) {
+            return {
+              body: {
+                hits: {
+                  hits: [
+                    {
+                      _id: 'anomaly-1',
+                      _source: {
+                        detector_id: 'detector-1',
+                        anomaly_grade: 1,
+                        anomaly_score: 2.03,
+                        confidence: 1,
+                        data_start_time: anomalyStart,
+                        data_end_time: anomalyStart + 10 * 60 * 1000,
+                        feature_data: [{ feature_name: 'sum_http_4xx', data: 1 }],
+                      },
+                    },
+                  ],
+                },
+              },
+            };
+          }
+          return { body: { hits: { hits: [] } } };
+        }
+        throw new Error(`Unexpected request: ${path}`);
+      }
+    );
+
+    const response = await svc.getUnifiedAlerts(
+      async () =>
+        ({
+          transport: { request: transportRequest },
+        } as never),
+      { dsIds: ['ds-os'], startTime: 'now-24h', endTime: 'now' }
+    );
+
+    expect(response.results).toHaveLength(1);
+    expect(response.results[0].id).toBe('alert-1');
+    expect(response.results[0].relatedAnomaly?.labels.anomaly_result_id).toBe('anomaly-1');
+  });
+
   it('getUnifiedAlerts isolates errors per datasource', async () => {
     mockOsBackend.getAlerts.mockRejectedValueOnce(new Error('OS down'));
     mockPromBackend.getAlerts.mockResolvedValueOnce([]);
@@ -159,6 +387,54 @@ describe('MultiBackendAlertService — routing & list', () => {
     // Only prom datasource should be fetched
     expect(response.totalDatasources).toBe(1);
     expect(mockOsBackend.getMonitors).not.toHaveBeenCalled();
+  });
+
+  it('getUnifiedRules includes forecasting forecasters from OpenSearch datasources', async () => {
+    mockDsSvc.list.mockResolvedValueOnce([osDatasource]);
+    mockOsBackend.getMonitors.mockResolvedValueOnce([]);
+    const transportRequest = jest.fn(async ({ path }: { path: string }) => {
+      if (path === '/_plugins/_anomaly_detection/detectors/_search') {
+        return { body: { hits: { hits: [] } } };
+      }
+      if (path === '/_plugins/_forecast/forecasters/_search') {
+        return {
+          body: {
+            hits: {
+              hits: [
+                {
+                  _id: 'forecaster-1',
+                  _source: {
+                    name: 'CPU forecast',
+                    indices: ['metrics-*'],
+                    time_field: '@timestamp',
+                    last_update_time: Date.UTC(2026, 5, 10, 12, 0, 0),
+                    forecast_interval: { period: { interval: 5, unit: 'Minutes' } },
+                    feature_attributes: [{ feature_name: 'cpu_sum', feature_enabled: true }],
+                  },
+                },
+              ],
+            },
+          },
+        };
+      }
+      throw new Error(`Unexpected request: ${path}`);
+    });
+
+    const response = await svc.getUnifiedRules(
+      async () =>
+        ({
+          transport: { request: transportRequest },
+        } as never),
+      { dsIds: ['ds-os'] }
+    );
+
+    expect(response.results).toHaveLength(1);
+    expect(response.results[0]).toMatchObject({
+      id: 'forecaster-1',
+      name: 'CPU forecast',
+      definitionType: 'forecaster',
+      monitorType: 'forecaster',
+    });
   });
 
   // ---- resolveDatasources: disabled datasources filtered ----

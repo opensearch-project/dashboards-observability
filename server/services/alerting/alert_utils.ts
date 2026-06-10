@@ -19,12 +19,15 @@
  * a circular import between `alert_service.ts` and `alert_detail.ts`):
  *   - `osSeverityToUnified`, `osStateToUnified`
  *   - `promSeverityFromLabels`, `promStateToUnified`
- *   - `osAlertToUnified`, `promAlertToUnified`
+ *   - `osAlertToUnified`, `promAlertToUnified`, `adAnomalyToUnified`
  *   - `detectMonitorKind`
- *   - `osMonitorToUnifiedRuleSummary`, `promRuleToUnified`
+ *   - `osMonitorToUnifiedRuleSummary`, `promRuleToUnified`, `adDetectorToUnifiedRuleSummary`
  *   - `inferUnitFromExpression`, `parseThreshold`
  */
 import {
+  ADAnomalyResult,
+  ADDetector,
+  ADForecaster,
   Datasource,
   DatasourceService,
   MonitorStatus,
@@ -258,6 +261,7 @@ export function osAlertToUnified(a: OSAlert, dsId: string): UnifiedAlertSummary 
     id: a.id,
     datasourceId: dsId,
     datasourceType: 'opensearch',
+    findingType: 'alert',
     name: `${a.monitor_name} — ${a.trigger_name}`,
     state: osStateToUnified(a.state),
     severity: osSeverityToUnified(a.severity),
@@ -279,6 +283,7 @@ export function promAlertToUnified(a: PromAlert, dsId: string): UnifiedAlertSumm
     id: `${dsId}-${a.labels.alertname}-${a.labels.instance || ''}`,
     datasourceId: dsId,
     datasourceType: 'prometheus',
+    findingType: 'alert',
     name: a.labels.alertname || 'Unknown',
     state: promStateToUnified(a.state),
     severity: promSeverityFromLabels(a.labels),
@@ -287,6 +292,76 @@ export function promAlertToUnified(a: PromAlert, dsId: string): UnifiedAlertSumm
     lastUpdated: a.activeAt,
     labels: a.labels,
     annotations: a.annotations,
+  };
+}
+
+function formatPeriod(period?: { period?: { interval?: number; unit?: string } }): string {
+  const interval = period?.period?.interval;
+  const unit = period?.period?.unit;
+  if (interval === undefined || !unit) return '';
+  return `${interval} ${unit.toLowerCase()}`;
+}
+
+function anomalySeverity(grade?: number, score?: number): UnifiedAlertSeverity {
+  if ((grade ?? 0) >= 0.9 || (score ?? 0) >= 10) return 'critical';
+  if ((grade ?? 0) >= 0.5 || (score ?? 0) >= 5) return 'high';
+  if ((grade ?? 0) > 0 || (score ?? 0) > 0) return 'medium';
+  return 'info';
+}
+
+function entityLabel(entity?: ADAnomalyResult['entity']): string | undefined {
+  if (!entity || entity.length === 0) return undefined;
+  return entity
+    .map((part) => `${part.name ?? 'entity'}=${part.value ?? ''}`)
+    .filter(Boolean)
+    .join(', ');
+}
+
+export function adAnomalyToUnified(
+  anomaly: ADAnomalyResult,
+  dsId: string,
+  detectorNameById: Record<string, string> = {}
+): UnifiedAlertSummary {
+  const detectorId = anomaly.detector_id || 'unknown-detector';
+  const detectorName = detectorNameById[detectorId] || detectorId;
+  const grade = anomaly.anomaly_grade ?? 0;
+  const score = anomaly.anomaly_score ?? 0;
+  const entity = entityLabel(anomaly.entity);
+  const featureSummary = (anomaly.feature_data || [])
+    .map((feature) => `${feature.feature_name || feature.feature_id || 'feature'}=${feature.data}`)
+    .join(', ');
+  return {
+    id: `ad-${dsId}-${anomaly.id}`,
+    datasourceId: dsId,
+    datasourceType: 'opensearch',
+    findingType: 'anomaly',
+    name: entity ? `${detectorName} - ${entity}` : detectorName,
+    state: 'active',
+    severity: anomalySeverity(grade, score),
+    message: `Anomaly grade ${grade.toFixed(2)}, score ${score.toFixed(2)}${
+      featureSummary ? ` (${featureSummary})` : ''
+    }`,
+    startTime: new Date(
+      anomaly.data_start_time || anomaly.execution_start_time || Date.now()
+    ).toISOString(),
+    lastUpdated: new Date(
+      anomaly.data_end_time || anomaly.execution_end_time || Date.now()
+    ).toISOString(),
+    labels: {
+      source: 'anomaly_detection',
+      anomaly_result_id: anomaly.id,
+      detector_id: detectorId,
+      detector_name: detectorName,
+      ...(entity ? { entity } : {}),
+    },
+    annotations: {
+      anomaly_grade: String(grade),
+      anomaly_score: String(score),
+      ...(anomaly.confidence !== undefined ? { confidence: String(anomaly.confidence) } : {}),
+      ...(anomaly.threshold !== undefined ? { threshold: String(anomaly.threshold) } : {}),
+      ...(featureSummary ? { feature_data: featureSummary } : {}),
+    },
+    monitorId: detectorId,
   };
 }
 
@@ -361,6 +436,7 @@ export function promEpisodeToUnified(ep: PromAlertEpisode, dsId: string): Unifie
     id: `${dsId}-${name}-${hashLabels(ep.labels)}-${ep.startMs}`,
     datasourceId: dsId,
     datasourceType: 'prometheus',
+    findingType: 'alert',
     name,
     state,
     severity: finalSeverity,
@@ -442,6 +518,11 @@ const RULE_IDENTITY_STRIP_LABELS = new Set(['__name__', 'alertstate']);
  */
 const LOG_INDEX_PREFIXES = ['logs-', 'ss4o_logs'] as const;
 const APM_INDEX_PREFIXES = ['otel-v1-apm', 'ss4o_traces'] as const;
+const AD_RESULT_INDEX_PATTERNS = [
+  '.opendistro-anomaly-results',
+  '.opensearch-ad-plugin-result',
+  'opensearch-ad-plugin-result',
+] as const;
 
 function inferMonitorTypeFromIndices(indices: string[]): MonitorType {
   const startsWithAny = (prefixes: readonly string[]): boolean =>
@@ -449,6 +530,111 @@ function inferMonitorTypeFromIndices(indices: string[]): MonitorType {
   if (startsWithAny(LOG_INDEX_PREFIXES)) return 'log';
   if (startsWithAny(APM_INDEX_PREFIXES)) return 'apm';
   return 'metric';
+}
+
+export function isAnomalyDetectorMonitor(input: OSMonitor['inputs'][number] | undefined): boolean {
+  if (!input || !('search' in input)) return false;
+
+  const indices = input.search.indices ?? [];
+  const hasADResultIndex = indices.some((idx) => {
+    const normalized = idx.toLowerCase();
+    return AD_RESULT_INDEX_PATTERNS.some((pattern) => normalized.startsWith(pattern));
+  });
+  if (hasADResultIndex) return true;
+
+  const queryText = JSON.stringify(input.search.query ?? {}).toLowerCase();
+  return (
+    queryText.includes('detector_id') ||
+    queryText.includes('anomaly_grade') ||
+    queryText.includes('anomaly_score')
+  );
+}
+
+function collectDetectorIdValues(value: unknown, ids: Set<string>): void {
+  if (typeof value === 'string' && value.trim()) {
+    ids.add(value.trim());
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectDetectorIdValues(item, ids));
+    return;
+  }
+  if (value && typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    if ('value' in record) collectDetectorIdValues(record.value, ids);
+  }
+}
+
+function visitDetectorQuery(value: unknown, ids: Set<string>): void {
+  if (Array.isArray(value)) {
+    value.forEach((item) => visitDetectorQuery(item, ids));
+    return;
+  }
+  if (!value || typeof value !== 'object') return;
+
+  for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+    const normalizedKey = key.toLowerCase();
+    if (normalizedKey === 'detector_id' || normalizedKey.includes('detector_id.')) {
+      collectDetectorIdValues(child, ids);
+    }
+    visitDetectorQuery(child, ids);
+  }
+}
+
+function collectAnomalyResultIdValues(value: unknown, ids: Set<string>): void {
+  if (typeof value === 'string' && value.trim()) {
+    ids.add(value.trim());
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectAnomalyResultIdValues(item, ids));
+    return;
+  }
+  if (value && typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    if ('value' in record) collectAnomalyResultIdValues(record.value, ids);
+    if ('values' in record) collectAnomalyResultIdValues(record.values, ids);
+  }
+}
+
+function visitAnomalyResultQuery(value: unknown, ids: Set<string>): void {
+  if (Array.isArray(value)) {
+    value.forEach((item) => visitAnomalyResultQuery(item, ids));
+    return;
+  }
+  if (!value || typeof value !== 'object') return;
+
+  for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+    const normalizedKey = key.toLowerCase();
+    if (
+      normalizedKey === '_id' ||
+      normalizedKey === 'anomaly_result_id' ||
+      normalizedKey.includes('anomaly_result_id.')
+    ) {
+      collectAnomalyResultIdValues(child, ids);
+    }
+    visitAnomalyResultQuery(child, ids);
+  }
+}
+
+export function extractADDetectorIdsFromMonitor(m: OSMonitor): string[] {
+  const ids = new Set<string>();
+  for (const input of m.inputs) {
+    if (input && 'search' in input) {
+      visitDetectorQuery(input.search.query, ids);
+    }
+  }
+  return Array.from(ids);
+}
+
+export function extractADAnomalyResultIdsFromMonitor(m: OSMonitor): string[] {
+  const ids = new Set<string>();
+  for (const input of m.inputs) {
+    if (input && 'search' in input) {
+      visitAnomalyResultQuery(input.search.query, ids);
+    }
+  }
+  return Array.from(ids);
 }
 
 /**
@@ -577,6 +763,8 @@ export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): Unifi
     monitorType = 'log';
   } else if (kind === 'bucket') {
     monitorType = 'infrastructure';
+  } else if (isAnomalyDetectorMonitor(input)) {
+    monitorType = 'anomaly_detector_monitor';
   } else {
     // query-level: derive from index patterns. See LOG_INDEX_PREFIXES /
     // APM_INDEX_PREFIXES at module scope for the schema list.
@@ -609,6 +797,7 @@ export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): Unifi
     id: m.id,
     datasourceId: dsId,
     datasourceType: 'opensearch',
+    definitionType: 'monitor',
     name: m.name,
     enabled: isEnabled,
     severity,
@@ -627,6 +816,115 @@ export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): Unifi
     evaluationInterval: evalInterval,
     pendingPeriod: evalInterval,
     threshold,
+  };
+}
+
+export function adDetectorToUnifiedRuleSummary(
+  detector: ADDetector,
+  dsId: string
+): UnifiedRuleSummary {
+  const features = detector.feature_attributes || [];
+  const indices = detector.indices || [];
+  const evalInterval = formatPeriod(detector.detection_interval) || 'unknown interval';
+  const windowDelay = formatPeriod(detector.window_delay) || 'none';
+  const labels: Record<string, string> = {
+    source: 'anomaly_detection',
+    detector_type: detector.detector_type || 'detector',
+    datasource_id: dsId,
+  };
+  if (indices.length > 0) labels.indices = indices.join(',');
+  if (detector.time_field) labels.time_field = detector.time_field;
+
+  return {
+    id: detector.id,
+    datasourceId: dsId,
+    datasourceType: 'opensearch',
+    definitionType: 'detector',
+    name: detector.name || detector.id,
+    enabled: true,
+    severity: 'info',
+    query: indices.length > 0 ? indices.join(', ') : '(no indices)',
+    condition: `${features.length} feature${features.length === 1 ? '' : 's'} analyzed`,
+    group: detector.detector_type,
+    labels,
+    annotations: {
+      ...(detector.description ? { description: detector.description } : {}),
+      ...(features.length > 0
+        ? {
+            features: features
+              .map((feature) => feature.feature_name || feature.feature_id)
+              .join(', '),
+          }
+        : {}),
+    },
+    monitorType: 'detector',
+    status: 'active',
+    healthStatus: 'healthy',
+    createdBy: detector.user?.name || '',
+    createdAt: new Date(detector.last_update_time || Date.now()).toISOString(),
+    lastModified: new Date(detector.last_update_time || Date.now()).toISOString(),
+    lastTriggered: undefined,
+    notificationDestinations: [],
+    evaluationInterval: evalInterval,
+    pendingPeriod: windowDelay,
+  };
+}
+
+export function adForecasterToUnifiedRuleSummary(
+  forecaster: ADForecaster,
+  dsId: string
+): UnifiedRuleSummary {
+  const features = forecaster.feature_attributes || forecaster.featureAttributes || [];
+  const indices = forecaster.indices || [];
+  const evalInterval =
+    formatPeriod(forecaster.forecast_interval || forecaster.forecastInterval) || 'unknown interval';
+  const windowDelay = formatPeriod(forecaster.window_delay || forecaster.windowDelay) || 'none';
+  const lastUpdateTime = forecaster.last_update_time || forecaster.lastUpdateTime || Date.now();
+  const timeField = forecaster.time_field || forecaster.timeField;
+  const labels: Record<string, string> = {
+    source: 'forecasting',
+    forecaster_type: Array.isArray(forecaster.category_field || forecaster.categoryField)
+      ? 'high_cardinality'
+      : 'single_stream',
+    datasource_id: dsId,
+  };
+  if (indices.length > 0) labels.indices = indices.join(',');
+  if (timeField) labels.time_field = timeField;
+
+  const featureNames = features
+    .map(
+      (feature) =>
+        feature.feature_name || feature.featureName || feature.feature_id || feature.featureId
+    )
+    .filter((name): name is string => typeof name === 'string' && name.trim().length > 0);
+  const enabled = forecaster.enabled !== false;
+
+  return {
+    id: forecaster.id,
+    datasourceId: dsId,
+    datasourceType: 'opensearch',
+    definitionType: 'forecaster',
+    name: forecaster.name || forecaster.id,
+    enabled,
+    severity: 'info',
+    query: indices.length > 0 ? indices.join(', ') : '(no indices)',
+    condition: `${features.length} feature${features.length === 1 ? '' : 's'} forecasted`,
+    group: labels.forecaster_type,
+    labels,
+    annotations: {
+      ...(forecaster.description ? { description: forecaster.description } : {}),
+      ...(featureNames.length > 0 ? { features: featureNames.join(', ') } : {}),
+    },
+    monitorType: 'forecaster',
+    status: enabled ? 'active' : 'disabled',
+    healthStatus: enabled ? 'healthy' : 'no_data',
+    createdBy: forecaster.user?.name || '',
+    createdAt: new Date(lastUpdateTime).toISOString(),
+    lastModified: new Date(lastUpdateTime).toISOString(),
+    lastTriggered: undefined,
+    notificationDestinations: [],
+    evaluationInterval: evalInterval,
+    pendingPeriod: windowDelay,
   };
 }
 
@@ -665,6 +963,7 @@ export function promRuleToUnified(
     id: `${dsId}-${groupName}-${r.name}`,
     datasourceId: dsId,
     datasourceType: 'prometheus',
+    definitionType: 'prometheus_rule',
     name: r.name,
     enabled: true,
     severity,

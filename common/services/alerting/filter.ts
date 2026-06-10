@@ -113,6 +113,7 @@ export function sortRules<T>(
 
 export function filterAlerts<
   T extends {
+    findingType?: string;
     severity: string;
     state: string;
     labels: Record<string, string>;
@@ -122,6 +123,7 @@ export function filterAlerts<
 >(
   alerts: T[],
   filters: {
+    findingType?: string[];
     severity?: string[];
     state?: string[];
     labels?: Record<string, string[]>;
@@ -129,6 +131,13 @@ export function filterAlerts<
   }
 ): T[] {
   return alerts.filter((a) => {
+    const findingType = a.findingType || 'alert';
+    if (
+      filters.findingType &&
+      filters.findingType.length > 0 &&
+      !filters.findingType.includes(findingType)
+    )
+      return false;
     if (filters.severity && filters.severity.length > 0 && !filters.severity.includes(a.severity))
       return false;
     if (filters.state && filters.state.length > 0 && !filters.state.includes(a.state)) return false;

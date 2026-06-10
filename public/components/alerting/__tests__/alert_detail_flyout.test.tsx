@@ -16,6 +16,34 @@ jest.mock('echarts', () => ({
   })),
 }));
 
+jest.mock('plotly.js-dist', () => ({}));
+
+jest.mock('react-plotly.js/factory', () => {
+  const react = jest.requireActual<typeof import('react')>('react');
+  return () => (props: { layout?: { height?: number | string } }) =>
+    react.createElement(
+      'div',
+      { 'data-test-subj': 'mockPlotlyChart' },
+      `plotly ${props.layout?.height || ''}`
+    );
+});
+
+jest.mock('@elastic/charts', () => {
+  const react = jest.requireActual<typeof import('react')>('react');
+  return {
+    Axis: () => react.createElement('div', { 'data-test-subj': 'mockElasticAxis' }),
+    Chart: ({ children }: { children?: React.ReactNode }) =>
+      react.createElement('div', { 'data-test-subj': 'mockElasticChart' }, children),
+    LineSeries: () => react.createElement('div', { 'data-test-subj': 'mockElasticLineSeries' }),
+    RectAnnotation: () =>
+      react.createElement('div', { 'data-test-subj': 'mockElasticRectAnnotation' }),
+    Settings: () => react.createElement('div', { 'data-test-subj': 'mockElasticSettings' }),
+    niceTimeFormatter: () => () => '',
+    Position: { Right: 'right' },
+    ScaleType: { Linear: 'linear', Time: 'time' },
+  };
+});
+
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
   disconnect: jest.fn(),
@@ -104,6 +132,49 @@ describe('AlertDetailFlyout', () => {
     );
     fireEvent.click(getByText('Acknowledge'));
     expect(onAcknowledge).toHaveBeenCalledWith('alert-42');
+  });
+
+  it('renders associated anomaly detail content when a detector alert is linked to an anomaly', () => {
+    const relatedAnomaly: UnifiedAlertSummary = {
+      id: 'anomaly-42',
+      datasourceId: 'ds-prom',
+      datasourceType: 'opensearch',
+      findingType: 'anomaly',
+      name: 'test - DestCityName=Zurich',
+      state: 'active',
+      severity: 'critical',
+      message: 'Anomaly grade 1.00, score 7.81 (test=180)',
+      startTime: '2026-06-04T20:00:00.000Z',
+      lastUpdated: '2026-06-04T20:01:00.000Z',
+      labels: {
+        detector_id: 'detector-1',
+        detector_name: 'test',
+        entity: 'DestCityName=Zurich',
+      },
+      annotations: {
+        anomaly_grade: '1',
+        anomaly_score: '7.81',
+        confidence: '0.92',
+        feature_data: 'test=180',
+      },
+    };
+    const { getByText, getAllByTestId } = render(
+      <AlertDetailFlyout
+        alert={{ ...baseAlert, relatedAnomaly }}
+        datasources={datasources}
+        onClose={jest.fn()}
+        onAcknowledge={jest.fn()}
+      />
+    );
+
+    expect(getByText('Associated anomaly')).toBeInTheDocument();
+    expect(getByText('Detector result context')).toBeInTheDocument();
+    expect(
+      getByText('Other detector anomalies are muted; the selected anomaly is highlighted.')
+    ).toBeInTheDocument();
+    expect(getByText('Feature breakdown')).toBeInTheDocument();
+    expect(getAllByTestId('mockPlotlyChart')).toHaveLength(1);
+    expect(getAllByTestId('mockElasticChart')).toHaveLength(2);
   });
 
   it('disables the Acknowledge button for Prometheus alerts', () => {

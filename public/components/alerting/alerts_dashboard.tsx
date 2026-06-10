@@ -29,6 +29,7 @@ import {
   EuiCallOut,
   EuiHorizontalRule,
   EuiSuperDatePicker,
+  EuiSplitPanel,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -57,6 +58,7 @@ const SEVERITY_COLORS: Record<string, string> = {
 };
 const STATE_COLORS: Record<string, string> = {
   active: '#BD271E',
+  anomaly: '#B8821C',
   pending: '#F5A700',
   acknowledged: '#006BB4',
   resolved: '#017D73',
@@ -65,24 +67,41 @@ const STATE_COLORS: Record<string, string> = {
 };
 const STATE_HEALTH: Record<string, string> = {
   active: 'danger',
+  anomaly: '#B8821C',
   pending: 'warning',
   acknowledged: 'primary',
   resolved: 'success',
   error: 'danger',
   silenced: 'default',
 };
+const FINDING_TYPE_COLORS: Record<string, string> = {
+  alert: 'primary',
+  anomaly: 'warning',
+};
 
 // ============================================================================
 // Helpers
 // ============================================================================
 
-function formatDuration(startTime: string | number): string {
+function getMillis(value: string | number): number {
+  return typeof value === 'number' ? value : new Date(value).getTime();
+}
+
+function formatDurationBetween(
+  startTime: string | number,
+  endTime: string | number = Date.now()
+): string {
   const start = typeof startTime === 'number' ? startTime : new Date(startTime).getTime();
-  const ms = Date.now() - start;
+  const end = typeof endTime === 'number' ? endTime : new Date(endTime).getTime();
+  const ms = Math.max(0, end - start);
   if (ms < 60000) return '<1m';
   if (ms < 3600000) return Math.floor(ms / 60000) + 'm';
   if (ms < 86400000) return Math.floor(ms / 3600000) + 'h ' + (Math.floor(ms / 60000) % 60) + 'm';
   return Math.floor(ms / 86400000) + 'd ' + (Math.floor(ms / 3600000) % 24) + 'h';
+}
+
+function formatDuration(startTime: string | number): string {
+  return formatDurationBetween(startTime);
 }
 
 // Cap on label-key facets rendered before the user expands the section.
@@ -104,16 +123,140 @@ const SEVERITY_SORT_ORDER: Record<string, number> = {
 // ============================================================================
 
 interface AlertFilterState {
+  findingType: string[];
   severity: string[];
   state: string[];
   labels: Record<string, string[]>;
 }
 
+interface AlertTableRow extends UnifiedAlertSummary {
+  groupedOccurrences?: UnifiedAlertSummary[];
+  occurrenceCount?: number;
+}
+
 const emptyAlertFilters = (): AlertFilterState => ({
+  findingType: [],
   severity: [],
   state: [],
   labels: {},
 });
+
+function getFindingType(alert: UnifiedAlertSummary): string {
+  return alert.findingType || 'alert';
+}
+
+function getFindingDisplayState(alert: UnifiedAlertSummary): string {
+  return getFindingType(alert) === 'anomaly' ? 'anomaly' : alert.state;
+}
+
+function isGroupedAnomalyRow(row: AlertTableRow): boolean {
+  return getFindingType(row) === 'anomaly' && (row.occurrenceCount || 0) > 1;
+}
+
+function getRepresentativeAlert(row: AlertTableRow): UnifiedAlertSummary {
+  return row.groupedOccurrences?.[0] || row;
+}
+
+function getAlertTimestamp(alert: UnifiedAlertSummary): number {
+  const lastUpdated = getMillis(alert.lastUpdated || alert.startTime);
+  if (Number.isFinite(lastUpdated)) return lastUpdated;
+  const start = getMillis(alert.startTime);
+  return Number.isFinite(start) ? start : 0;
+}
+
+function formatAlertDuration(alert: UnifiedAlertSummary): string {
+  const start = getMillis(alert.startTime);
+  const end = getMillis(alert.lastUpdated);
+  if (getFindingType(alert) === 'anomaly' && Number.isFinite(start) && Number.isFinite(end)) {
+    return formatDurationBetween(start, end);
+  }
+  return alert.startTime ? formatDuration(alert.startTime) : '—';
+}
+
+function parseAnomalyNumber(value?: string): number | undefined {
+  if (!value) return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function formatAnomalyMetric(value?: number): string {
+  return value === undefined ? '—' : value.toFixed(2);
+}
+
+function formatEntityLabel(entity?: string): string {
+  if (!entity) return '';
+  const separator = entity.indexOf('=');
+  if (separator < 0) return entity;
+  const field = entity.slice(0, separator);
+  const value = entity.slice(separator + 1);
+  return field && value ? `${field}: ${value}` : entity;
+}
+
+function getAnomalyGroupKey(alert: UnifiedAlertSummary): string {
+  const detectorId = alert.labels?.detector_id || alert.monitorId || alert.name;
+  const entity = alert.labels?.entity || alert.name;
+  return [alert.datasourceId, detectorId, entity].join('::');
+}
+
+function buildGroupedAnomalyRow(group: UnifiedAlertSummary[]): AlertTableRow {
+  const sorted = [...group].sort((a, b) => getAlertTimestamp(b) - getAlertTimestamp(a));
+  const latest = sorted[0];
+  const detectorName = latest.labels?.detector_name || latest.monitorId || latest.name;
+  const entityLabel = formatEntityLabel(latest.labels?.entity);
+  const grades = sorted
+    .map((occurrence) => parseAnomalyNumber(occurrence.annotations?.anomaly_grade))
+    .filter((value): value is number => value !== undefined);
+  const maxGrade = grades.length > 0 ? Math.max(...grades) : undefined;
+  const worstSeverity = sorted.reduce((current, occurrence) => {
+    const currentOrder = SEVERITY_SORT_ORDER[current.severity] ?? 5;
+    const nextOrder = SEVERITY_SORT_ORDER[occurrence.severity] ?? 5;
+    return nextOrder < currentOrder ? occurrence : current;
+  }, latest).severity;
+  const count = sorted.length;
+
+  return {
+    ...latest,
+    id: `anomaly-group-${getAnomalyGroupKey(latest)}`,
+    name: entityLabel ? `${detectorName} - ${entityLabel}` : detectorName,
+    severity: worstSeverity,
+    startTime: latest.startTime,
+    lastUpdated: latest.lastUpdated,
+    message: i18n.translate('observability.alerting.alertsDashboard.groupedAnomalyMessage', {
+      defaultMessage:
+        '{count} anomaly {count, plural, one {occurrence} other {occurrences}} · max grade {maxGrade} · latest {latestTime}',
+      values: {
+        count,
+        maxGrade: formatAnomalyMetric(maxGrade),
+        latestTime: new Date(latest.lastUpdated || latest.startTime).toLocaleString(),
+      },
+    }),
+    groupedOccurrences: sorted,
+    occurrenceCount: count,
+  };
+}
+
+function groupAnomalyAlerts(alerts: UnifiedAlertSummary[]): AlertTableRow[] {
+  const rows: AlertTableRow[] = [];
+  const anomalyGroups = new Map<string, UnifiedAlertSummary[]>();
+
+  for (const alert of alerts) {
+    if (getFindingType(alert) !== 'anomaly') {
+      rows.push(alert);
+      continue;
+    }
+
+    const key = getAnomalyGroupKey(alert);
+    const group = anomalyGroups.get(key) || [];
+    group.push(alert);
+    anomalyGroups.set(key, group);
+  }
+
+  for (const group of anomalyGroups.values()) {
+    rows.push(group.length > 1 ? buildGroupedAnomalyRow(group) : group[0]);
+  }
+
+  return rows.sort((a, b) => getAlertTimestamp(b) - getAlertTimestamp(a));
+}
 
 function collectAlertUniqueValues(
   alerts: UnifiedAlertSummary[],
@@ -153,22 +296,134 @@ function collectAlertLabelValues(alerts: UnifiedAlertSummary[], key: string): st
 // ============================================================================
 
 interface AlertsTableProps {
-  items: UnifiedAlertSummary[];
-  columns: Array<EuiBasicTableColumn<UnifiedAlertSummary>>;
+  items: AlertTableRow[];
+  columns: Array<EuiBasicTableColumn<AlertTableRow>>;
   loading: boolean;
   message: React.ReactNode;
+  itemIdToExpandedRowMap: Record<string, React.ReactNode>;
 }
 
-const AlertsTable = React.memo(({ items, columns, loading, message }: AlertsTableProps) => (
-  <EuiInMemoryTable
-    items={items}
-    columns={columns}
-    loading={loading}
-    pagination={{ initialPageSize: 20, pageSizeOptions: [10, 20, 50, 100] }}
-    sorting={{ sort: { field: 'startTime', direction: 'desc' } }}
-    message={message}
-  />
-));
+const AlertsTable = React.memo(
+  ({ items, columns, loading, message, itemIdToExpandedRowMap }: AlertsTableProps) => (
+    <div className="altAlertsTable">
+      <EuiInMemoryTable
+        items={items}
+        itemId="id"
+        columns={columns}
+        loading={loading}
+        pagination={{ initialPageSize: 20, pageSizeOptions: [10, 20, 50, 100] }}
+        sorting={{ sort: { field: 'startTime', direction: 'desc' } }}
+        message={message}
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+      />
+    </div>
+  )
+);
+
+function renderGroupedAnomalyOccurrences(
+  row: AlertTableRow,
+  onViewDetail: (alert: UnifiedAlertSummary) => void
+): React.ReactNode {
+  const occurrences = row.groupedOccurrences || [];
+  const total = occurrences.length;
+
+  return (
+    <EuiSplitPanel.Outer
+      hasShadow={false}
+      hasBorder
+      color="plain"
+      style={{ width: '100%' }}
+      data-test-subj={`groupedAnomalyOccurrences-${row.id}`}
+    >
+      <EuiSplitPanel.Inner color="subdued" paddingSize="s">
+        <EuiText size="s">
+          <strong>
+            <FormattedMessage
+              id="observability.alerting.alertsDashboard.groupedAnomalyOccurrencesTitle"
+              defaultMessage="{count} occurrences for {alertName}"
+              values={{ count: total, alertName: row.name }}
+            />
+          </strong>
+        </EuiText>
+      </EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner paddingSize="s" className="altGroupedOccurrencesBody">
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {occurrences.map((occurrence, index) => {
+            const occurrenceNumber = total - index;
+            const timestamp = new Date(
+              occurrence.lastUpdated || occurrence.startTime
+            ).toLocaleString();
+            const severityColor = SEVERITY_COLORS[occurrence.severity] || SEVERITY_COLORS.info;
+
+            return (
+              <EuiFlexItem key={occurrence.id}>
+                <EuiPanel
+                  paddingSize="s"
+                  hasShadow={false}
+                  hasBorder
+                  color={index === 0 ? 'subdued' : 'plain'}
+                >
+                  <div className="altGroupedOccurrenceGrid">
+                    <div className="altGroupedOccurrenceCell">
+                      <EuiToolTip content={occurrence.severity}>
+                        <span
+                          style={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: '50%',
+                            background: severityColor,
+                            display: 'inline-block',
+                          }}
+                        />
+                      </EuiToolTip>
+                    </div>
+                    <div className="altGroupedOccurrenceCell altGroupedOccurrenceAlertCell">
+                      <EuiButtonEmpty
+                        size="xs"
+                        flush="left"
+                        iconType="inspect"
+                        onClick={() => onViewDetail(occurrence)}
+                      >
+                        <FormattedMessage
+                          id="observability.alerting.alertsDashboard.groupedAnomalyOccurrenceAction"
+                          defaultMessage="Occurrence {occurrenceNumber} of {total}"
+                          values={{ occurrenceNumber, total }}
+                        />
+                      </EuiButtonEmpty>
+                    </div>
+                    <div className="altGroupedOccurrenceCell" />
+                    <div className="altGroupedOccurrenceCell altGroupedOccurrenceMessageCell">
+                      {occurrence.message && (
+                        <EuiText size="xs" color="subdued" className="altGroupedOccurrenceMessage">
+                          {occurrence.message}
+                        </EuiText>
+                      )}
+                    </div>
+                    <div className="altGroupedOccurrenceCell">
+                      <EuiToolTip content={timestamp}>
+                        <span style={{ fontSize: 12 }}>
+                          <FormattedMessage
+                            id="observability.alerting.alertsDashboard.groupedAnomalyStartedAgo"
+                            defaultMessage="{duration} ago"
+                            values={{ duration: formatDuration(occurrence.startTime) }}
+                          />
+                        </span>
+                      </EuiToolTip>
+                    </div>
+                    <div className="altGroupedOccurrenceCell">
+                      <EuiText size="xs">{formatAlertDuration(occurrence)}</EuiText>
+                    </div>
+                    <div className="altGroupedOccurrenceCell" />
+                  </div>
+                </EuiPanel>
+              </EuiFlexItem>
+            );
+          })}
+        </EuiFlexGroup>
+      </EuiSplitPanel.Inner>
+    </EuiSplitPanel.Outer>
+  );
+}
 
 // ============================================================================
 // Main Dashboard Component
@@ -251,6 +506,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   const { toggleFacetCollapse, isCollapsed: isFacetCollapsed } = useFacetCollapse();
   const [labelSearch, setLabelSearch] = useState('');
   const [showAllLabels, setShowAllLabels] = useState(false);
+  const [expandedGroupIds, setExpandedGroupIds] = useState<Record<string, boolean>>({});
 
   // Build selectable datasource entries for the filter facet — alpha by name
   const datasourceEntries = useMemo(
@@ -276,7 +532,13 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   const uniqueSeverities = useMemo(() => collectAlertUniqueValues(alerts, (a) => a.severity), [
     alerts,
   ]);
-  const uniqueStates = useMemo(() => collectAlertUniqueValues(alerts, (a) => a.state), [alerts]);
+  const uniqueStates = useMemo(() => collectAlertUniqueValues(alerts, getFindingDisplayState), [
+    alerts,
+  ]);
+  const uniqueFindingTypes = useMemo(
+    () => collectAlertUniqueValues(alerts, (a) => getFindingType(a)),
+    [alerts]
+  );
   const labelKeys = useMemo(() => collectAlertLabelKeys(alerts), [alerts]);
 
   // Facet counts (against search-matched but not filter-matched alerts)
@@ -291,12 +553,16 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
       );
     });
     const counts: Record<string, Record<string, number>> = {
+      findingType: {},
       severity: {},
       state: {},
     };
     for (const a of searchMatched) {
+      const findingType = getFindingType(a);
+      const state = getFindingDisplayState(a);
+      counts.findingType[findingType] = (counts.findingType[findingType] || 0) + 1;
       counts.severity[a.severity] = (counts.severity[a.severity] || 0) + 1;
-      counts.state[a.state] = (counts.state[a.state] || 0) + 1;
+      counts.state[state] = (counts.state[state] || 0) + 1;
     }
     const labelCounts: Record<string, Record<string, number>> = {};
     for (const key of labelKeys) {
@@ -310,20 +576,35 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   }, [alerts, searchQuery, labelKeys]);
 
   const activeFilterCount = useMemo(() => {
-    let count = filters.severity.length + filters.state.length;
+    let count = filters.findingType.length + filters.severity.length + filters.state.length;
     for (const vals of Object.values(filters.labels)) count += vals.length;
     return count;
   }, [filters]);
 
   // Filtered + sorted alerts for the table
   const filteredAlerts = useMemo(() => {
-    return filterAlerts(alerts, {
+    const baseFilteredAlerts = filterAlerts(alerts, {
+      findingType: filters.findingType.length > 0 ? filters.findingType : undefined,
       severity: filters.severity.length > 0 ? filters.severity : undefined,
-      state: filters.state.length > 0 ? filters.state : undefined,
       labels: Object.keys(filters.labels).length > 0 ? filters.labels : undefined,
       search: searchQuery || undefined,
     });
+    if (filters.state.length === 0) return baseFilteredAlerts;
+    return baseFilteredAlerts.filter((alert) =>
+      filters.state.includes(getFindingDisplayState(alert))
+    );
   }, [alerts, searchQuery, filters]);
+
+  const groupedTableRows = useMemo(() => groupAnomalyAlerts(filteredAlerts), [filteredAlerts]);
+  const groupedOccurrenceRows = useMemo(() => {
+    const rows: Record<string, React.ReactNode> = {};
+    for (const row of groupedTableRows) {
+      if (expandedGroupIds[row.id] && isGroupedAnomalyRow(row)) {
+        rows[row.id] = renderGroupedAnomalyOccurrences(row, onViewDetail);
+      }
+    }
+    return rows;
+  }, [expandedGroupIds, groupedTableRows, onViewDetail]);
 
   // Clearing the datasource filter must also clear dependent facets and the
   // search box because severity/state/label options are derived from the
@@ -372,7 +653,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
 
   // Table columns — memoized so `AlertsTable`'s React.memo shallow-compare
   // doesn't invalidate on every parent re-render.
-  const columns = useMemo<Array<EuiBasicTableColumn<UnifiedAlertSummary>>>(
+  const columns = useMemo<Array<EuiBasicTableColumn<AlertTableRow>>>(
     () => [
       {
         field: 'severity',
@@ -380,7 +661,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
           defaultMessage: 'Sev',
         }),
         width: '60px',
-        sortable: (a: UnifiedAlertSummary) => SEVERITY_SORT_ORDER[a.severity] ?? 5,
+        sortable: (a: AlertTableRow) => SEVERITY_SORT_ORDER[a.severity] ?? 5,
         render: (s: string) => (
           <EuiToolTip content={s}>
             <span
@@ -402,24 +683,76 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         }),
         sortable: true,
         truncateText: true,
-        render: (name: string, alert: UnifiedAlertSummary) => {
+        className: 'altAlertColumn',
+        render: (name: string, alert: AlertTableRow) => {
+          const representative = getRepresentativeAlert(alert);
+          const isGrouped = isGroupedAnomalyRow(alert);
+          const isExpanded = Boolean(expandedGroupIds[alert.id]);
           const iconType =
             alert.datasourceType === 'prometheus' ? 'logoPrometheus' : 'logoOpenSearch';
+          const toggleExpandedGroup = () => {
+            setExpandedGroupIds((prev) => ({
+              ...prev,
+              [alert.id]: !prev[alert.id],
+            }));
+          };
           // `iconType` on EuiButtonEmpty puts the icon in the button's
           // dedicated icon slot (vertically centered with the label). Inlining
           // <EuiIcon> as a child instead lands inside the .euiButtonEmpty__text
           // flex slot which has no `align-items: center`, so it sits at the
           // top-left of the row.
           return (
-            <EuiButtonEmpty
-              size="xs"
-              flush="left"
-              iconType={iconType}
-              onClick={() => onViewDetail(alert)}
-              style={{ fontWeight: 500 }}
+            <EuiFlexGroup
+              className="altAlertCell"
+              gutterSize="xs"
+              alignItems="center"
+              responsive={false}
+              wrap={false}
             >
-              {name}
-            </EuiButtonEmpty>
+              <EuiFlexItem className="altAlertNameItem" grow={true}>
+                <EuiToolTip content={name}>
+                  <EuiButtonEmpty
+                    className="altAlertNameButton"
+                    size="xs"
+                    flush="left"
+                    iconType={iconType}
+                    onClick={() =>
+                      isGrouped ? toggleExpandedGroup() : onViewDetail(representative)
+                    }
+                    style={{ fontWeight: 500 }}
+                  >
+                    <span className="altAlertNameText">{name}</span>
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              </EuiFlexItem>
+              {isGrouped && (
+                <EuiFlexItem className="altAlertOccurrencesItem" grow={false}>
+                  <EuiButtonEmpty
+                    className="altAlertOccurrencesButton"
+                    size="xs"
+                    flush="left"
+                    color="text"
+                    iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      toggleExpandedGroup();
+                    }}
+                    aria-label={i18n.translate(
+                      'observability.alerting.alertsDashboard.groupedAnomalyOccurrenceToggleAriaLabel',
+                      {
+                        defaultMessage: 'Show or hide grouped anomaly occurrences',
+                      }
+                    )}
+                  >
+                    <FormattedMessage
+                      id="observability.alerting.alertsDashboard.groupedAnomalyOccurrenceBadge"
+                      defaultMessage="{count} occurrences"
+                      values={{ count: alert.occurrenceCount }}
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           );
         },
       },
@@ -430,9 +763,10 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         }),
         width: '140px',
         sortable: true,
-        render: (state: string) => (
-          <EuiHealth color={STATE_HEALTH[state] || 'subdued'}>{state}</EuiHealth>
-        ),
+        render: (_state: string, alert: AlertTableRow) => {
+          const state = getFindingDisplayState(alert);
+          return <EuiHealth color={STATE_HEALTH[state] || 'subdued'}>{state}</EuiHealth>;
+        },
       },
       {
         field: 'message',
@@ -475,57 +809,73 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
           defaultMessage: 'Duration',
         }),
         width: '90px',
-        render: (ts: string) => <EuiText size="xs">{ts ? formatDuration(ts) : '—'}</EuiText>,
+        render: (_ts: string, alert: AlertTableRow) => (
+          <EuiText size="xs">{formatAlertDuration(getRepresentativeAlert(alert))}</EuiText>
+        ),
       },
       {
         name: i18n.translate('observability.alerting.alertsDashboard.column.actions', {
           defaultMessage: 'Actions',
         }),
         width: '150px',
-        render: (alert: UnifiedAlertSummary) => (
-          <EuiFlexGroup gutterSize="xs" responsive={false} wrap={false} alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate(
-                  'observability.alerting.alertsDashboard.viewDetailsTooltip',
-                  {
-                    defaultMessage: 'View details',
-                  }
-                )}
-              >
-                <EuiButtonIcon
-                  iconType="inspect"
-                  aria-label={i18n.translate(
-                    'observability.alerting.alertsDashboard.viewAriaLabel',
-                    {
-                      defaultMessage: 'View',
-                    }
-                  )}
-                  size="s"
-                  onClick={() => onViewDetail(alert)}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-            {alert.state === 'active' && alert.datasourceType !== 'prometheus' && (
+        render: (alert: AlertTableRow) => {
+          const representative = getRepresentativeAlert(alert);
+          return (
+            <EuiFlexGroup gutterSize="xs" responsive={false} wrap={false} alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="check"
-                  size="xs"
-                  color="primary"
-                  onClick={() => onAcknowledge(alert.id)}
+                <EuiToolTip
+                  content={
+                    getFindingType(alert) === 'anomaly'
+                      ? i18n.translate(
+                          'observability.alerting.alertsDashboard.viewAnomalyDetailsTooltip',
+                          {
+                            defaultMessage: 'View anomaly details',
+                          }
+                        )
+                      : i18n.translate(
+                          'observability.alerting.alertsDashboard.viewDetailsTooltip',
+                          {
+                            defaultMessage: 'View details',
+                          }
+                        )
+                  }
                 >
-                  <FormattedMessage
-                    id="observability.alerting.alertsDashboard.ackButton"
-                    defaultMessage="Ack"
+                  <EuiButtonIcon
+                    iconType="inspect"
+                    aria-label={i18n.translate(
+                      'observability.alerting.alertsDashboard.viewAriaLabel',
+                      {
+                        defaultMessage: 'View',
+                      }
+                    )}
+                    size="s"
+                    onClick={() => onViewDetail(representative)}
                   />
-                </EuiButtonEmpty>
+                </EuiToolTip>
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        ),
+              {getFindingType(alert) === 'alert' &&
+                alert.state === 'active' &&
+                alert.datasourceType !== 'prometheus' && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      iconType="check"
+                      size="xs"
+                      color="primary"
+                      onClick={() => onAcknowledge(alert.id)}
+                    >
+                      <FormattedMessage
+                        id="observability.alerting.alertsDashboard.ackButton"
+                        defaultMessage="Ack"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                )}
+            </EuiFlexGroup>
+          );
+        },
       },
     ],
-    [onAcknowledge, onViewDetail]
+    [expandedGroupIds, onAcknowledge, onViewDetail]
   );
 
   // Chart-area empty state mode. Cascade:
@@ -630,6 +980,17 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   onToggleCollapse={toggleFacetCollapse}
                 />
 
+                {renderFacetGroup(
+                  'type',
+                  i18n.translate('observability.alerting.alertsDashboard.facet.type', {
+                    defaultMessage: 'Type',
+                  }),
+                  uniqueFindingTypes,
+                  filters.findingType,
+                  (v) => updateFilter('findingType', v),
+                  facetCounts.counts.findingType,
+                  FINDING_TYPE_COLORS
+                )}
                 {renderFacetGroup(
                   'severity',
                   i18n.translate('observability.alerting.alertsDashboard.facet.severity', {
@@ -844,7 +1205,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                             <h4>
                               <FormattedMessage
                                 id="observability.alerting.alertsDashboard.alertTimelineTitle"
-                                defaultMessage="Alert Timeline"
+                                defaultMessage="Alerts timeline"
                               />
                             </h4>
                           </EuiTitle>
@@ -906,7 +1267,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                             <h4>
                               <FormattedMessage
                                 id="observability.alerting.alertsDashboard.noRulesTitle"
-                                defaultMessage="No rules have been created"
+                                defaultMessage="No rules or detectors have been created"
                               />
                             </h4>
                           }
@@ -914,7 +1275,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                             <p>
                               <FormattedMessage
                                 id="observability.alerting.alertsDashboard.noRulesBody"
-                                defaultMessage="The selected datasource has no alerting rules configured. Create one to start receiving alerts."
+                                defaultMessage="The selected datasource has no monitors or anomaly detectors configured. Create one to start receiving alerts."
                               />
                             </p>
                           }
@@ -948,7 +1309,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                             <p>
                               <FormattedMessage
                                 id="observability.alerting.alertsDashboard.noAlertsBody"
-                                defaultMessage="Try expanding the time range to see more history."
+                                defaultMessage="Try expanding the time range to see more alert history."
                               />
                             </p>
                           }
@@ -995,9 +1356,20 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   <EuiText size="s">
                     <FormattedMessage
                       id="observability.alerting.alertsDashboard.alertsCount"
-                      defaultMessage="{count} alerts"
-                      values={{ count: <strong>{filteredAlerts.length}</strong> }}
+                      defaultMessage="{count} {count, plural, one {row} other {rows}}"
+                      values={{ count: groupedTableRows.length }}
                     />
+                    {groupedTableRows.length !== filteredAlerts.length && (
+                      <span>
+                        {' '}
+                        ·{' '}
+                        <FormattedMessage
+                          id="observability.alerting.alertsDashboard.groupedAlertsCount"
+                          defaultMessage="{count} alerts grouped"
+                          values={{ count: filteredAlerts.length }}
+                        />
+                      </span>
+                    )}
                     {activeFilterCount > 0 && (
                       <span>
                         {' '}
@@ -1012,9 +1384,10 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   </EuiText>
                   <EuiSpacer size="s" />
                   <AlertsTable
-                    items={filteredAlerts}
+                    items={groupedTableRows}
                     columns={columns}
                     loading={loading}
+                    itemIdToExpandedRowMap={groupedOccurrenceRows}
                     message={
                       searchQuery || activeFilterCount > 0
                         ? i18n.translate(

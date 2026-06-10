@@ -65,6 +65,15 @@ export const DEFAULT_VISIBLE: ColumnId[] = [
   'datasource',
 ];
 
+export const isDetectorDefinition = (item: UnifiedRuleSummary): boolean =>
+  item.definitionType === 'detector' || item.monitorType === 'detector';
+
+export const isForecasterDefinition = (item: UnifiedRuleSummary): boolean =>
+  item.definitionType === 'forecaster' || item.monitorType === 'forecaster';
+
+export const isReadOnlyRuleDefinition = (item: UnifiedRuleSummary): boolean =>
+  isDetectorDefinition(item) || isForecasterDefinition(item);
+
 // ============================================================================
 // Column builder — factory producing the EuiInMemoryTable column array.
 // Cell renderers close over the component state bits passed in (selectedIds,
@@ -94,6 +103,9 @@ export function buildTableColumns({
   setSelectedMonitor,
 }: BuildTableColumnsParams): Array<Record<string, unknown>> {
   const w = (id: string) => `${columnWidths[id] || DEFAULT_WIDTHS[id] || 120}px`;
+  const selectable = filtered.filter((item) => !isReadOnlyRuleDefinition(item));
+  const allSelectableSelected =
+    selectable.length > 0 && selectable.every((item) => selectedIds.has(item.id));
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- EuiInMemoryTable column type is complex
   const cols: Array<Record<string, any>> = [
@@ -102,7 +114,8 @@ export function buildTableColumns({
       name: (
         <input
           type="checkbox"
-          checked={filtered.length > 0 && selectedIds.size === filtered.length}
+          checked={allSelectableSelected}
+          disabled={selectable.length === 0}
           onChange={toggleSelectAll}
           aria-label={i18n.translate(
             'observability.alerting.monitorsTable.columns.selectAllAriaLabel',
@@ -113,20 +126,24 @@ export function buildTableColumns({
         />
       ),
       width: '32px',
-      render: (_: unknown, item: UnifiedRuleSummary) => (
-        <input
-          type="checkbox"
-          checked={selectedIds.has(item.id)}
-          onChange={() => toggleSelect(item.id)}
-          aria-label={i18n.translate(
-            'observability.alerting.monitorsTable.columns.selectRowAriaLabel',
-            {
-              defaultMessage: 'Select {name}',
-              values: { name: item.name },
-            }
-          )}
-        />
-      ),
+      render: (_: unknown, item: UnifiedRuleSummary) => {
+        const isReadOnly = isReadOnlyRuleDefinition(item);
+        return (
+          <input
+            type="checkbox"
+            checked={!isReadOnly && selectedIds.has(item.id)}
+            disabled={isReadOnly}
+            onChange={() => toggleSelect(item.id)}
+            aria-label={i18n.translate(
+              'observability.alerting.monitorsTable.columns.selectRowAriaLabel',
+              {
+                defaultMessage: 'Select {name}',
+                values: { name: item.name },
+              }
+            )}
+          />
+        );
+      },
     },
   ];
 

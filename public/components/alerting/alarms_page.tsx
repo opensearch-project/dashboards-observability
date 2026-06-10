@@ -41,6 +41,7 @@ import { CreateMonitor, MonitorFormState } from './create_monitor';
 import { EditMonitor } from './create_monitor/edit_monitor';
 import { AlertsDashboard } from './alerts_dashboard';
 import { AlertDetailFlyout } from './alert_detail_flyout';
+import { AnomalyDetailFlyout } from './anomaly_detail_flyout';
 import { NotificationRoutingPanel } from './notification_routing_panel';
 import type { MonitorBackendType } from './monitor_form_components';
 import { useAlerts } from './hooks/use_alerts';
@@ -979,10 +980,19 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           onClearPplSubmitError={() => setPplSubmitError(null)}
         />
       )}
-      {selectedAlert && (
+      {selectedAlert && selectedAlert.findingType === 'anomaly' && (
+        <AnomalyDetailFlyout
+          anomaly={selectedAlert}
+          datasources={datasources}
+          allFindings={alerts}
+          onClose={() => setSelectedAlert(null)}
+        />
+      )}
+      {selectedAlert && selectedAlert.findingType !== 'anomaly' && (
         <AlertDetailFlyout
           alert={selectedAlert}
           datasources={datasources}
+          allFindings={alerts}
           onClose={() => setSelectedAlert(null)}
           onAcknowledge={(id) => {
             handleAcknowledgeAlert(id);

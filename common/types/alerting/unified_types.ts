@@ -27,6 +27,79 @@ import type { PromAlert, PromAlertingRule } from './prometheus_types';
  */
 export type DatasourceFetchFallback = 'prometheus-alerts-current-only';
 
+export interface ADDetector {
+  id: string;
+  name?: string;
+  description?: string;
+  detector_type?: string;
+  indices?: string[];
+  time_field?: string;
+  last_update_time?: number;
+  detection_interval?: { period?: { interval?: number; unit?: string } };
+  window_delay?: { period?: { interval?: number; unit?: string } };
+  feature_attributes?: Array<{
+    feature_id?: string;
+    feature_name?: string;
+    feature_enabled?: boolean;
+    aggregation_query?: Record<string, unknown>;
+  }>;
+  user?: { name?: string };
+  [key: string]: unknown;
+}
+
+export interface ADForecaster {
+  id: string;
+  name?: string;
+  description?: string;
+  indices?: string[];
+  time_field?: string;
+  timeField?: string;
+  last_update_time?: number;
+  lastUpdateTime?: number;
+  forecast_interval?: { period?: { interval?: number; unit?: string } };
+  forecastInterval?: { period?: { interval?: number; unit?: string } };
+  window_delay?: { period?: { interval?: number; unit?: string } };
+  windowDelay?: { period?: { interval?: number; unit?: string } };
+  feature_attributes?: Array<{
+    feature_id?: string;
+    featureId?: string;
+    feature_name?: string;
+    featureName?: string;
+    feature_enabled?: boolean;
+    featureEnabled?: boolean;
+    aggregation_query?: Record<string, unknown>;
+    aggregationQuery?: Record<string, unknown>;
+  }>;
+  featureAttributes?: Array<{
+    feature_id?: string;
+    featureId?: string;
+    feature_name?: string;
+    featureName?: string;
+    feature_enabled?: boolean;
+    featureEnabled?: boolean;
+    aggregation_query?: Record<string, unknown>;
+    aggregationQuery?: Record<string, unknown>;
+  }>;
+  user?: { name?: string };
+  [key: string]: unknown;
+}
+
+export interface ADAnomalyResult {
+  id: string;
+  detector_id?: string;
+  anomaly_grade?: number;
+  anomaly_score?: number;
+  confidence?: number;
+  threshold?: number;
+  data_start_time?: number;
+  data_end_time?: number;
+  execution_start_time?: number;
+  execution_end_time?: number;
+  entity?: Array<{ name?: string; value?: string }>;
+  feature_data?: Array<{ feature_id?: string; feature_name?: string; data?: number }>;
+  [key: string]: unknown;
+}
+
 // ============================================================================
 // OSD scoped client — structural shape of the subset we use
 // ============================================================================
@@ -152,12 +225,15 @@ export type UnifiedAlertState =
   | 'silenced'
   | 'resolved'
   | 'error';
+export type UnifiedFindingType = 'alert' | 'anomaly';
 
 /** Lightweight alert representation for list views and tables. */
 export interface UnifiedAlertSummary {
   id: string;
   datasourceId: string;
   datasourceType: DatasourceType;
+  /** Row-level kind in the Alerts table. Defaults to `alert`. */
+  findingType?: UnifiedFindingType;
   name: string;
   state: UnifiedAlertState;
   severity: UnifiedAlertSeverity;
@@ -166,6 +242,13 @@ export interface UnifiedAlertSummary {
   lastUpdated: string;
   labels: Record<string, string>;
   annotations: Record<string, string>;
+  /**
+   * AD anomaly result associated with this alert. Present when an Alerting
+   * monitor is backed by anomaly detector results; the table shows the alert
+   * row and the flyout can display the triggering anomaly context without
+   * also listing the same anomaly as a standalone row.
+   */
+  relatedAnomaly?: UnifiedAlertSummary;
   /**
    * Owning monitor/rule id. OS alerts always have one; Prom alerts have no
    * monitor concept and leave it undefined. The detail flyout forwards this
@@ -176,7 +259,7 @@ export interface UnifiedAlertSummary {
 
 /** Full alert with backend-specific raw data. Use for detail views only. */
 export interface UnifiedAlert extends UnifiedAlertSummary {
-  raw: OSAlert | PromAlert;
+  raw: OSAlert | PromAlert | ADAnomalyResult;
 }
 
 export type MonitorType =
@@ -187,9 +270,13 @@ export type MonitorType =
   | 'infrastructure'
   | 'synthetics'
   | 'cluster_metrics'
-  | 'ppl';
+  | 'ppl'
+  | 'anomaly_detector_monitor'
+  | 'detector'
+  | 'forecaster';
 export type MonitorStatus = 'active' | 'pending' | 'muted' | 'disabled';
 export type MonitorHealthStatus = 'healthy' | 'failing' | 'no_data';
+export type UnifiedDefinitionType = 'monitor' | 'prometheus_rule' | 'detector' | 'forecaster';
 
 export interface SuppressionRule {
   id: string;
@@ -219,6 +306,8 @@ export interface UnifiedRuleSummary {
   id: string;
   datasourceId: string;
   datasourceType: DatasourceType;
+  /** Row-level kind in the unified monitors/detectors table. Defaults to `monitor`. */
+  definitionType?: UnifiedDefinitionType;
   name: string;
   enabled: boolean;
   severity: UnifiedAlertSeverity;
@@ -249,7 +338,7 @@ export interface UnifiedRule extends UnifiedRuleSummary {
   conditionPreviewData: Array<{ timestamp: number; value: number }>;
   notificationRouting: NotificationRouting[];
   suppressionRules: SuppressionRule[];
-  raw: OSMonitor | PromAlertingRule;
+  raw: OSMonitor | PromAlertingRule | ADDetector | ADForecaster;
 }
 
 // ============================================================================

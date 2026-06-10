@@ -223,6 +223,12 @@ export async function getAlertingClient(
     if (promDs) {
       return ctx.core.opensearch.client.asCurrentUser;
     }
+    // Back-compat for browser state written by earlier Alert Manager builds.
+    // Only fall back after real saved-object resolution misses, so a registered
+    // MDS datasource with this id still wins.
+    if (dsId === 'local_cluster') {
+      return ctx.core.opensearch.client.asCurrentUser;
+    }
     logger?.warn(`alerting: Datasource not found: ${dsId}`);
     throw createNotFoundError(`Datasource not found: ${dsId}`);
   }

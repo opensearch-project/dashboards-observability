@@ -46,6 +46,108 @@
   flex: 1;
 }
 
+.altAlertsTable {
+  min-width: 0;
+  overflow-x: auto;
+
+  .euiTable {
+    table-layout: fixed;
+    min-width: 940px;
+  }
+
+  .altAlertColumn .euiTableCellContent {
+    min-width: 0;
+    overflow: hidden;
+  }
+}
+
+.altAlertCell {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.altAlertNameItem {
+  min-width: 0;
+  overflow: hidden;
+
+  .euiToolTipAnchor {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+}
+
+.altAlertNameButton {
+  min-width: 0;
+  max-width: 100%;
+
+  .euiButtonEmpty__content,
+  .euiButtonEmpty__text {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+}
+
+.altAlertNameText {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.altAlertOccurrencesItem {
+  flex-shrink: 0;
+}
+
+.altAlertOccurrencesButton .euiButtonEmpty__text {
+  white-space: nowrap;
+}
+
+.altGroupedOccurrencesBody {
+  overflow-x: hidden;
+}
+
+.altGroupedOccurrenceGrid {
+  display: grid;
+  grid-template-columns:
+    60px
+    minmax(260px, 1fr)
+    140px
+    minmax(260px, 1fr)
+    120px
+    90px
+    150px;
+  align-items: center;
+  min-width: 1080px;
+  width: calc(100% + 50px);
+  margin-left: -25px;
+}
+
+.altGroupedOccurrenceCell {
+  min-width: 0;
+  padding: 0 8px;
+}
+
+.altGroupedOccurrenceAlertCell,
+.altGroupedOccurrenceMessageCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.altGroupedOccurrenceMessage {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .altVizRow {
   min-width: 0;
   flex: 0 0 auto !important;

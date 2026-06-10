@@ -18,6 +18,9 @@
 import type { RequestHandlerContext } from '../../../../../src/core/server';
 import {
   AlertingOSClient,
+  ADAnomalyResult,
+  ADDetector,
+  ADForecaster,
   Datasource,
   DatasourceFetchFallback,
   DatasourceFetchResult,
@@ -47,6 +50,12 @@ import {
   getRuleDetail as getRuleDetailImpl,
 } from './alert_detail';
 import {
+  adAnomalyToUnified,
+  adDetectorToUnifiedRuleSummary,
+  adForecasterToUnifiedRuleSummary,
+  extractADAnomalyResultIdsFromMonitor,
+  extractADDetectorIdsFromMonitor,
+  isAnomalyDetectorMonitor,
   osAlertToUnified,
   osMonitorToUnifiedRuleSummary,
   promAlertToUnified,
@@ -132,6 +141,25 @@ interface FetchAlertsRawResult {
   truncated?: boolean;
   fallback?: DatasourceFetchFallback;
   error?: string;
+}
+
+interface ADSearchHit<TSource> {
+  _id: string;
+  _source?: TSource;
+}
+
+interface ADSearchResponse<TSource> {
+  hits?: {
+    hits?: Array<ADSearchHit<TSource>>;
+  };
+}
+
+const ALERT_ANOMALY_LINK_TOLERANCE_MS = 60 * 60 * 1000;
+
+function timestampMs(value?: string): number {
+  if (!value) return NaN;
+  const ms = new Date(value).getTime();
+  return Number.isFinite(ms) ? ms : NaN;
 }
 
 /**
@@ -691,18 +719,43 @@ export class MultiBackendAlertService {
     ctx?: RequestHandlerContext
   ): Promise<FetchAlertsRawResult> {
     if (ds.type === 'opensearch' && this.osBackend) {
-      if (range) {
-        const { alerts, truncated } = await this.osBackend.getAlerts(client, {
-          startMs: range.startMs,
-          endMs: range.endMs,
-        });
-        return {
-          alerts: alerts.map((a) => osAlertToUnified(a, ds.id)),
-          truncated,
-        };
+      const alertResponse = range
+        ? await this.osBackend.getAlerts(client, {
+            startMs: range.startMs,
+            endMs: range.endMs,
+          })
+        : await this.osBackend.getAlerts(client);
+      const osAlerts = alertResponse.alerts.map((alert) => osAlertToUnified(alert, ds.id));
+      let anomalySummaries: UnifiedAlertSummary[] = [];
+      let detectorNameById: Record<string, string> = {};
+      try {
+        const adAnomalies = await this.fetchADAnomalies(client, range);
+        if (adAnomalies.length > 0) {
+          const detectors = await this.fetchADDetectors(client);
+          detectorNameById = Object.fromEntries(
+            detectors.map((detector) => [detector.id, detector.name || detector.id])
+          );
+          anomalySummaries = adAnomalies.map((anomaly) =>
+            adAnomalyToUnified(anomaly, ds.id, detectorNameById)
+          );
+        }
+      } catch (err) {
+        this.logger.debug(
+          `Failed to fetch anomaly results from ${ds.name}: ${extractErrorMessage(err)}`
+        );
       }
-      const { alerts } = await this.osBackend.getAlerts(client);
-      return { alerts: alerts.map((a) => osAlertToUnified(a, ds.id)) };
+
+      const { alerts, standaloneAnomalies } = await this.attachRelatedAnomaliesToAlerts(
+        client,
+        ds,
+        osAlerts,
+        anomalySummaries,
+        detectorNameById
+      );
+      return {
+        alerts: [...alerts, ...standaloneAnomalies],
+        truncated: alertResponse.truncated,
+      };
     }
 
     if (ds.type === 'prometheus' && this.promBackend) {
@@ -746,6 +799,187 @@ export class MultiBackendAlertService {
     return { alerts: [] };
   }
 
+  private async attachRelatedAnomaliesToAlerts(
+    client: AlertingOSClient,
+    ds: Datasource,
+    alerts: UnifiedAlertSummary[],
+    anomalies: UnifiedAlertSummary[],
+    detectorNameById: Record<string, string> = {}
+  ): Promise<{ alerts: UnifiedAlertSummary[]; standaloneAnomalies: UnifiedAlertSummary[] }> {
+    if (alerts.length === 0 || !this.osBackend) {
+      return { alerts, standaloneAnomalies: anomalies };
+    }
+    // Continue even when `anomalies` is empty: AD monitors can carry explicit
+    // result ids that should be fetched and shown in the alert detail flyout.
+
+    let monitors: OSMonitor[] = [];
+    try {
+      monitors = await this.osBackend.getMonitors(client);
+    } catch (err) {
+      this.logger.debug(
+        `Failed to fetch monitors for anomaly alert association from ${
+          ds.name
+        }: ${extractErrorMessage(err)}`
+      );
+      return { alerts, standaloneAnomalies: anomalies };
+    }
+
+    const detectorIdsByMonitorId = new Map<string, Set<string>>();
+    const anomalyResultIdsByMonitorId = new Map<string, Set<string>>();
+    for (const monitor of monitors) {
+      const isADMonitor = monitor.inputs.some((input) => isAnomalyDetectorMonitor(input));
+      if (!isADMonitor) continue;
+      const detectorIds = extractADDetectorIdsFromMonitor(monitor);
+      if (detectorIds.length === 0) continue;
+      detectorIdsByMonitorId.set(monitor.id, new Set(detectorIds));
+      const anomalyResultIds = extractADAnomalyResultIdsFromMonitor(monitor);
+      if (anomalyResultIds.length > 0) {
+        anomalyResultIdsByMonitorId.set(monitor.id, new Set(anomalyResultIds));
+      }
+    }
+
+    if (detectorIdsByMonitorId.size === 0) {
+      return { alerts, standaloneAnomalies: anomalies };
+    }
+
+    let candidateAnomalies = anomalies;
+    let relatedDetectorNameById = detectorNameById;
+    const anomalyByResultId = new Map<string, UnifiedAlertSummary>();
+    for (const anomaly of candidateAnomalies) {
+      const resultId = anomaly.labels?.anomaly_result_id;
+      if (resultId) anomalyByResultId.set(resultId, anomaly);
+    }
+
+    const missingExplicitIds = new Set<string>();
+    for (const alert of alerts) {
+      const explicitIds = alert.monitorId
+        ? anomalyResultIdsByMonitorId.get(alert.monitorId)
+        : undefined;
+      explicitIds?.forEach((id) => {
+        if (!anomalyByResultId.has(id)) missingExplicitIds.add(id);
+      });
+    }
+    if (missingExplicitIds.size > 0) {
+      try {
+        const detectorIdsToName = new Set<string>();
+        detectorIdsByMonitorId.forEach((detectorIds) =>
+          detectorIds.forEach((detectorId) => detectorIdsToName.add(detectorId))
+        );
+        if (
+          Array.from(detectorIdsToName).some((detectorId) => !relatedDetectorNameById[detectorId])
+        ) {
+          try {
+            const detectors = await this.fetchADDetectors(client);
+            relatedDetectorNameById = {
+              ...relatedDetectorNameById,
+              ...Object.fromEntries(
+                detectors.map((detector) => [detector.id, detector.name || detector.id])
+              ),
+            };
+          } catch (err) {
+            this.logger.debug(
+              `Failed to fetch detector names for linked anomalies from ${
+                ds.name
+              }: ${extractErrorMessage(err)}`
+            );
+          }
+        }
+        const fetchedAnomalies = await this.fetchADAnomaliesByIds(
+          client,
+          Array.from(missingExplicitIds)
+        );
+        const fetchedSummaries = fetchedAnomalies.map((anomaly) =>
+          adAnomalyToUnified(anomaly, ds.id, relatedDetectorNameById)
+        );
+        candidateAnomalies = [...candidateAnomalies, ...fetchedSummaries];
+      } catch (err) {
+        this.logger.debug(
+          `Failed to fetch explicitly linked anomaly results from ${ds.name}: ${extractErrorMessage(
+            err
+          )}`
+        );
+      }
+    }
+
+    const linkedAnomalyIds = new Set<string>();
+    const alertsWithRelatedAnomalies = alerts.map((alert) => {
+      const detectorIds = alert.monitorId ? detectorIdsByMonitorId.get(alert.monitorId) : undefined;
+      const anomalyResultIds = alert.monitorId
+        ? anomalyResultIdsByMonitorId.get(alert.monitorId)
+        : undefined;
+      if (!detectorIds) return alert;
+      const relatedAnomaly = this.findRelatedAnomaly(
+        alert,
+        detectorIds,
+        candidateAnomalies,
+        linkedAnomalyIds,
+        anomalyResultIds
+      );
+      if (!relatedAnomaly) return alert;
+      linkedAnomalyIds.add(relatedAnomaly.id);
+      return { ...alert, relatedAnomaly };
+    });
+
+    return {
+      alerts: alertsWithRelatedAnomalies,
+      standaloneAnomalies: anomalies.filter((anomaly) => !linkedAnomalyIds.has(anomaly.id)),
+    };
+  }
+
+  private findRelatedAnomaly(
+    alert: UnifiedAlertSummary,
+    detectorIds: Set<string>,
+    anomalies: UnifiedAlertSummary[],
+    linkedAnomalyIds: Set<string>,
+    anomalyResultIds?: Set<string>
+  ): UnifiedAlertSummary | undefined {
+    if (anomalyResultIds && anomalyResultIds.size > 0) {
+      const explicitMatch = anomalies
+        .filter((anomaly) => {
+          if (linkedAnomalyIds.has(anomaly.id)) return false;
+          const detectorId = anomaly.labels?.detector_id;
+          const anomalyResultId = anomaly.labels?.anomaly_result_id;
+          return (
+            !!detectorId &&
+            detectorIds.has(detectorId) &&
+            !!anomalyResultId &&
+            anomalyResultIds.has(anomalyResultId)
+          );
+        })
+        .sort((a, b) => timestampMs(b.startTime) - timestampMs(a.startTime))[0];
+      if (explicitMatch) return explicitMatch;
+    }
+
+    const alertStart = timestampMs(alert.startTime);
+    const alertEnd = timestampMs(alert.lastUpdated);
+    const start = Number.isFinite(alertStart) ? alertStart : alertEnd;
+    const end = Number.isFinite(alertEnd) ? alertEnd : start;
+    if (!Number.isFinite(start) || !Number.isFinite(end)) return undefined;
+
+    const windowStart = Math.min(start, end) - ALERT_ANOMALY_LINK_TOLERANCE_MS;
+    const windowEnd = Math.max(start, end) + ALERT_ANOMALY_LINK_TOLERANCE_MS;
+    const reference = Math.max(start, end);
+
+    return anomalies
+      .filter((anomaly) => {
+        if (linkedAnomalyIds.has(anomaly.id)) return false;
+        const detectorId = anomaly.labels?.detector_id;
+        if (!detectorId || !detectorIds.has(detectorId)) return false;
+        const anomalyStart = timestampMs(anomaly.startTime);
+        const anomalyEnd = timestampMs(anomaly.lastUpdated);
+        const candidateStart = Number.isFinite(anomalyStart) ? anomalyStart : anomalyEnd;
+        const candidateEnd = Number.isFinite(anomalyEnd) ? anomalyEnd : candidateStart;
+        if (!Number.isFinite(candidateStart) || !Number.isFinite(candidateEnd)) return false;
+        return candidateStart <= windowEnd && candidateEnd >= windowStart;
+      })
+      .sort((a, b) => {
+        const aDistance = Math.abs(timestampMs(a.startTime) - reference);
+        const bDistance = Math.abs(timestampMs(b.startTime) - reference);
+        if (aDistance !== bDistance) return aDistance - bDistance;
+        return timestampMs(b.startTime) - timestampMs(a.startTime);
+      })[0];
+  }
+
   private async fetchRulesRaw(
     client: AlertingOSClient,
     ds: Datasource
@@ -754,6 +988,20 @@ export class MultiBackendAlertService {
     if (ds.type === 'opensearch' && this.osBackend) {
       const monitors = await this.osBackend.getMonitors(client);
       for (const m of monitors) results.push(osMonitorToUnifiedRuleSummary(m, ds.id));
+      try {
+        const detectors = await this.fetchADDetectors(client);
+        for (const d of detectors) results.push(adDetectorToUnifiedRuleSummary(d, ds.id));
+      } catch (err) {
+        this.logger.debug(`Failed to fetch detectors from ${ds.name}: ${extractErrorMessage(err)}`);
+      }
+      try {
+        const forecasters = await this.fetchADForecasters(client);
+        for (const f of forecasters) results.push(adForecasterToUnifiedRuleSummary(f, ds.id));
+      } catch (err) {
+        this.logger.debug(
+          `Failed to fetch forecasters from ${ds.name}: ${extractErrorMessage(err)}`
+        );
+      }
     } else if (ds.type === 'prometheus' && this.promBackend) {
       const groups = await this.promBackend.getRuleGroups(client, ds);
       for (const g of groups) {
@@ -763,6 +1011,87 @@ export class MultiBackendAlertService {
       }
     }
     return results;
+  }
+
+  private async fetchADDetectors(client: AlertingOSClient): Promise<ADDetector[]> {
+    const response = await client.transport.request<ADSearchResponse<Omit<ADDetector, 'id'>>>({
+      method: 'POST',
+      path: '/_plugins/_anomaly_detection/detectors/_search',
+      body: {
+        size: DEFAULT_MAX_RESULTS,
+        query: { match_all: {} },
+        sort: [{ last_update_time: { order: 'desc', unmapped_type: 'long' } }],
+      },
+    });
+    return (response.body.hits?.hits || []).map((hit) => ({
+      ...(hit._source || {}),
+      id: hit._id,
+    }));
+  }
+
+  private async fetchADForecasters(client: AlertingOSClient): Promise<ADForecaster[]> {
+    const response = await client.transport.request<ADSearchResponse<Omit<ADForecaster, 'id'>>>({
+      method: 'POST',
+      path: '/_plugins/_forecast/forecasters/_search',
+      body: {
+        size: DEFAULT_MAX_RESULTS,
+        query: { match_all: {} },
+        sort: [{ last_update_time: { order: 'desc', unmapped_type: 'long' } }],
+      },
+    });
+    return (response.body.hits?.hits || []).map((hit) => ({
+      ...(hit._source || {}),
+      id: hit._id,
+    }));
+  }
+
+  private async fetchADAnomalies(
+    client: AlertingOSClient,
+    range?: ResolvedRange
+  ): Promise<ADAnomalyResult[]> {
+    const filter: Array<Record<string, unknown>> = [{ range: { anomaly_grade: { gt: 0 } } }];
+    if (range) {
+      filter.push({
+        range: {
+          data_start_time: {
+            gte: range.startMs,
+            lte: range.endMs,
+          },
+        },
+      });
+    }
+    const response = await client.transport.request<ADSearchResponse<Omit<ADAnomalyResult, 'id'>>>({
+      method: 'POST',
+      path: '/_plugins/_anomaly_detection/detectors/results/_search',
+      body: {
+        size: DEFAULT_MAX_RESULTS,
+        query: { bool: { filter } },
+        sort: [{ data_start_time: { order: 'desc', unmapped_type: 'long' } }],
+      },
+    });
+    return (response.body.hits?.hits || []).map((hit) => ({
+      ...(hit._source || {}),
+      id: hit._id,
+    }));
+  }
+
+  private async fetchADAnomaliesByIds(
+    client: AlertingOSClient,
+    ids: string[]
+  ): Promise<ADAnomalyResult[]> {
+    if (ids.length === 0) return [];
+    const response = await client.transport.request<ADSearchResponse<Omit<ADAnomalyResult, 'id'>>>({
+      method: 'POST',
+      path: '/_plugins/_anomaly_detection/detectors/results/_search',
+      body: {
+        size: Math.min(ids.length, DEFAULT_MAX_RESULTS),
+        query: { ids: { values: ids } },
+      },
+    });
+    return (response.body.hits?.hits || []).map((hit) => ({
+      ...(hit._source || {}),
+      id: hit._id,
+    }));
   }
 
   // =========================================================================

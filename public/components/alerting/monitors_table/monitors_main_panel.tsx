@@ -31,7 +31,10 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { UnifiedRuleSummary } from '../../../../common/types/alerting';
 import { DeleteModal } from '../../common/helpers/delete_modal';
+import { DetectorDetailFlyout } from '../detector_detail_flyout';
+import { ForecasterDetailFlyout } from '../forecaster_detail_flyout';
 import { MonitorDetailFlyout } from '../monitor_detail_flyout';
+import { isDetectorDefinition, isForecasterDefinition } from './monitors_table_columns';
 import { MonitorsEuiTable } from './monitors_eui_table';
 
 export interface MonitorsMainPanelProps {
@@ -166,7 +169,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                     >
                       <FormattedMessage
                         id="observability.alerting.monitorsTable.mainPanel.createMonitor"
-                        defaultMessage="Create Monitor"
+                        defaultMessage="Create Rule"
                       />
                     </EuiButton>
                   }
@@ -183,7 +186,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                           'observability.alerting.monitorsTable.mainPanel.logsDisabledTooltip',
                           {
                             defaultMessage:
-                              'Logs monitors require an OpenSearch datasource. Select one to enable.',
+                              'Logs rules require an OpenSearch datasource. Select one to enable.',
                           }
                         )}
                       >
@@ -230,7 +233,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                           'observability.alerting.monitorsTable.mainPanel.metricsDisabledTooltip',
                           {
                             defaultMessage:
-                              'Metrics monitors require a Prometheus datasource. Select one to enable.',
+                              'Metrics rules require a Prometheus datasource. Select one to enable.',
                           }
                         )}
                       >
@@ -282,7 +285,8 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
               placeholder={i18n.translate(
                 'observability.alerting.monitorsTable.mainPanel.searchPlaceholder',
                 {
-                  defaultMessage: 'Search monitors by name, labels (team:infra), annotations...',
+                  defaultMessage:
+                    'Search rules, detectors, or forecasters by name, labels (team:infra), annotations...',
                 }
               )}
               value={searchQuery}
@@ -298,7 +302,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
               aria-label={i18n.translate(
                 'observability.alerting.monitorsTable.mainPanel.searchAriaLabel',
                 {
-                  defaultMessage: 'Search monitors',
+                  defaultMessage: 'Search rules, detectors, or forecasters',
                 }
               )}
             />
@@ -350,7 +354,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                   <EuiText size="s">
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.monitorsCount"
-                      defaultMessage="{count} monitors"
+                      defaultMessage="{count} rules / detectors / forecasters"
                       values={{ count: <strong>{filtered.length}</strong> }}
                     />
                     {selectedIds.size > 0 && (
@@ -422,7 +426,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                   ) : (
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.noMonitorsFoundTitle"
-                      defaultMessage="No Monitors Found"
+                      defaultMessage="No rules, detectors, or forecasters found"
                     />
                   )}
                 </h2>
@@ -440,17 +444,17 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                   {noDatasourceSelected ? (
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.selectDatasourcePrompt"
-                      defaultMessage="Select a datasource in the filter panel to see monitors."
+                      defaultMessage="Select a datasource in the filter panel to see rules, detectors, and forecasters."
                     />
                   ) : rules.length === 0 ? (
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.noMonitorsConfigured"
-                      defaultMessage="No monitors configured yet."
+                      defaultMessage="No rules, anomaly detectors, or forecasters configured yet."
                     />
                   ) : (
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.noMonitorsMatch"
-                      defaultMessage="No monitors match your current search and filters."
+                      defaultMessage="No rules, detectors, or forecasters match your current search and filters."
                     />
                   )}
                 </p>
@@ -497,8 +501,15 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
         />
       )}
 
-      {/* Monitor detail flyout */}
-      {selectedMonitor && (
+      {/* Rule / detector detail flyout */}
+      {selectedMonitor && isDetectorDefinition(selectedMonitor) ? (
+        <DetectorDetailFlyout detector={selectedMonitor} onClose={() => setSelectedMonitor(null)} />
+      ) : selectedMonitor && isForecasterDefinition(selectedMonitor) ? (
+        <ForecasterDetailFlyout
+          forecaster={selectedMonitor}
+          onClose={() => setSelectedMonitor(null)}
+        />
+      ) : selectedMonitor ? (
         <MonitorDetailFlyout
           monitor={selectedMonitor}
           onClose={() => setSelectedMonitor(null)}
@@ -520,7 +531,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
           }
           onToggleEnabled={onToggleEnabled}
         />
-      )}
+      ) : null}
     </>
   );
 };
