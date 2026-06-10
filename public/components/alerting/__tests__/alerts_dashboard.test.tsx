@@ -52,7 +52,7 @@ function buildAnomaly(overrides: Partial<UnifiedAlertSummary> = {}): UnifiedAler
     id: 'ad-1',
     datasourceId: 'ds-1',
     datasourceType: 'opensearch',
-    findingType: 'anomaly',
+    alertKind: 'anomaly',
     name: 'test - DestCityName=London',
     state: 'active',
     severity: 'high',

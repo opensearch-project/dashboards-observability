@@ -980,19 +980,19 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           onClearPplSubmitError={() => setPplSubmitError(null)}
         />
       )}
-      {selectedAlert && selectedAlert.findingType === 'anomaly' && (
+      {selectedAlert && selectedAlert.alertKind === 'anomaly' && (
         <AnomalyDetailFlyout
           anomaly={selectedAlert}
           datasources={datasources}
-          allFindings={alerts}
+          allAlerts={alerts}
           onClose={() => setSelectedAlert(null)}
         />
       )}
-      {selectedAlert && selectedAlert.findingType !== 'anomaly' && (
+      {selectedAlert && selectedAlert.alertKind !== 'anomaly' && (
         <AlertDetailFlyout
           alert={selectedAlert}
           datasources={datasources}
-          allFindings={alerts}
+          allAlerts={alerts}
           onClose={() => setSelectedAlert(null)}
           onAcknowledge={(id) => {
             handleAcknowledgeAlert(id);

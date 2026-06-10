@@ -123,7 +123,7 @@ const SEVERITY_SORT_ORDER: Record<string, number> = {
 // ============================================================================
 
 interface AlertFilterState {
-  findingType: string[];
+  alertKind: string[];
   severity: string[];
   state: string[];
   labels: Record<string, string[]>;
@@ -135,22 +135,22 @@ interface AlertTableRow extends UnifiedAlertSummary {
 }
 
 const emptyAlertFilters = (): AlertFilterState => ({
-  findingType: [],
+  alertKind: [],
   severity: [],
   state: [],
   labels: {},
 });
 
-function getFindingType(alert: UnifiedAlertSummary): string {
-  return alert.findingType || 'alert';
+function getAlertKind(alert: UnifiedAlertSummary): string {
+  return alert.alertKind || 'alert';
 }
 
-function getFindingDisplayState(alert: UnifiedAlertSummary): string {
-  return getFindingType(alert) === 'anomaly' ? 'anomaly' : alert.state;
+function getAlertDisplayState(alert: UnifiedAlertSummary): string {
+  return getAlertKind(alert) === 'anomaly' ? 'anomaly' : alert.state;
 }
 
 function isGroupedAnomalyRow(row: AlertTableRow): boolean {
-  return getFindingType(row) === 'anomaly' && (row.occurrenceCount || 0) > 1;
+  return getAlertKind(row) === 'anomaly' && (row.occurrenceCount || 0) > 1;
 }
 
 function getRepresentativeAlert(row: AlertTableRow): UnifiedAlertSummary {
@@ -167,7 +167,7 @@ function getAlertTimestamp(alert: UnifiedAlertSummary): number {
 function formatAlertDuration(alert: UnifiedAlertSummary): string {
   const start = getMillis(alert.startTime);
   const end = getMillis(alert.lastUpdated);
-  if (getFindingType(alert) === 'anomaly' && Number.isFinite(start) && Number.isFinite(end)) {
+  if (getAlertKind(alert) === 'anomaly' && Number.isFinite(start) && Number.isFinite(end)) {
     return formatDurationBetween(start, end);
   }
   return alert.startTime ? formatDuration(alert.startTime) : '—';
@@ -240,7 +240,7 @@ function groupAnomalyAlerts(alerts: UnifiedAlertSummary[]): AlertTableRow[] {
   const anomalyGroups = new Map<string, UnifiedAlertSummary[]>();
 
   for (const alert of alerts) {
-    if (getFindingType(alert) !== 'anomaly') {
+    if (getAlertKind(alert) !== 'anomaly') {
       rows.push(alert);
       continue;
     }
@@ -532,13 +532,12 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   const uniqueSeverities = useMemo(() => collectAlertUniqueValues(alerts, (a) => a.severity), [
     alerts,
   ]);
-  const uniqueStates = useMemo(() => collectAlertUniqueValues(alerts, getFindingDisplayState), [
+  const uniqueStates = useMemo(() => collectAlertUniqueValues(alerts, getAlertDisplayState), [
     alerts,
   ]);
-  const uniqueFindingTypes = useMemo(
-    () => collectAlertUniqueValues(alerts, (a) => getFindingType(a)),
-    [alerts]
-  );
+  const uniqueAlertKinds = useMemo(() => collectAlertUniqueValues(alerts, (a) => getAlertKind(a)), [
+    alerts,
+  ]);
   const labelKeys = useMemo(() => collectAlertLabelKeys(alerts), [alerts]);
 
   // Facet counts (against search-matched but not filter-matched alerts)
@@ -553,14 +552,14 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
       );
     });
     const counts: Record<string, Record<string, number>> = {
-      findingType: {},
+      alertKind: {},
       severity: {},
       state: {},
     };
     for (const a of searchMatched) {
-      const findingType = getFindingType(a);
-      const state = getFindingDisplayState(a);
-      counts.findingType[findingType] = (counts.findingType[findingType] || 0) + 1;
+      const alertKind = getAlertKind(a);
+      const state = getAlertDisplayState(a);
+      counts.alertKind[alertKind] = (counts.alertKind[alertKind] || 0) + 1;
       counts.severity[a.severity] = (counts.severity[a.severity] || 0) + 1;
       counts.state[state] = (counts.state[state] || 0) + 1;
     }
@@ -576,7 +575,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   }, [alerts, searchQuery, labelKeys]);
 
   const activeFilterCount = useMemo(() => {
-    let count = filters.findingType.length + filters.severity.length + filters.state.length;
+    let count = filters.alertKind.length + filters.severity.length + filters.state.length;
     for (const vals of Object.values(filters.labels)) count += vals.length;
     return count;
   }, [filters]);
@@ -584,14 +583,14 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   // Filtered + sorted alerts for the table
   const filteredAlerts = useMemo(() => {
     const baseFilteredAlerts = filterAlerts(alerts, {
-      findingType: filters.findingType.length > 0 ? filters.findingType : undefined,
+      alertKind: filters.alertKind.length > 0 ? filters.alertKind : undefined,
       severity: filters.severity.length > 0 ? filters.severity : undefined,
       labels: Object.keys(filters.labels).length > 0 ? filters.labels : undefined,
       search: searchQuery || undefined,
     });
     if (filters.state.length === 0) return baseFilteredAlerts;
     return baseFilteredAlerts.filter((alert) =>
-      filters.state.includes(getFindingDisplayState(alert))
+      filters.state.includes(getAlertDisplayState(alert))
     );
   }, [alerts, searchQuery, filters]);
 
@@ -764,7 +763,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         width: '140px',
         sortable: true,
         render: (_state: string, alert: AlertTableRow) => {
-          const state = getFindingDisplayState(alert);
+          const state = getAlertDisplayState(alert);
           return <EuiHealth color={STATE_HEALTH[state] || 'subdued'}>{state}</EuiHealth>;
         },
       },
@@ -825,7 +824,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   content={
-                    getFindingType(alert) === 'anomaly'
+                    getAlertKind(alert) === 'anomaly'
                       ? i18n.translate(
                           'observability.alerting.alertsDashboard.viewAnomalyDetailsTooltip',
                           {
@@ -853,7 +852,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   />
                 </EuiToolTip>
               </EuiFlexItem>
-              {getFindingType(alert) === 'alert' &&
+              {getAlertKind(alert) === 'alert' &&
                 alert.state === 'active' &&
                 alert.datasourceType !== 'prometheus' && (
                   <EuiFlexItem grow={false}>
@@ -985,10 +984,10 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   i18n.translate('observability.alerting.alertsDashboard.facet.type', {
                     defaultMessage: 'Type',
                   }),
-                  uniqueFindingTypes,
-                  filters.findingType,
-                  (v) => updateFilter('findingType', v),
-                  facetCounts.counts.findingType,
+                  uniqueAlertKinds,
+                  filters.alertKind,
+                  (v) => updateFilter('alertKind', v),
+                  facetCounts.counts.alertKind,
                   FINDING_TYPE_COLORS
                 )}
                 {renderFacetGroup(

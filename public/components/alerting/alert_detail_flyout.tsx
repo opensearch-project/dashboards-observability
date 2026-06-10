@@ -51,7 +51,7 @@ const INTERNAL_LABEL_KEYS = new Set([
 export interface AlertDetailFlyoutProps {
   alert: UnifiedAlertSummary;
   datasources: Datasource[];
-  allFindings?: UnifiedAlertSummary[];
+  allAlerts?: UnifiedAlertSummary[];
   onClose: () => void;
   onAcknowledge: (alertId: string) => void;
 }
@@ -59,7 +59,7 @@ export interface AlertDetailFlyoutProps {
 export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
   alert,
   datasources,
-  allFindings = [],
+  allAlerts = [],
   onClose,
   onAcknowledge,
 }) => {
@@ -220,12 +220,14 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
     if (!relatedAnomaly) return [];
     const context = new Map<string, UnifiedAlertSummary>();
     context.set(relatedAnomaly.id, relatedAnomaly);
-    allFindings.forEach((finding) => {
-      context.set(finding.id, finding);
-      if (finding.relatedAnomaly) context.set(finding.relatedAnomaly.id, finding.relatedAnomaly);
+    allAlerts.forEach((candidateAlert) => {
+      context.set(candidateAlert.id, candidateAlert);
+      if (candidateAlert.relatedAnomaly) {
+        context.set(candidateAlert.relatedAnomaly.id, candidateAlert.relatedAnomaly);
+      }
     });
     return Array.from(context.values());
-  }, [allFindings, relatedAnomaly]);
+  }, [allAlerts, relatedAnomaly]);
 
   return (
     <EuiFlyout
@@ -402,7 +404,7 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
               <AnomalyDetailContent
                 anomaly={relatedAnomaly}
                 datasources={datasources}
-                allFindings={anomalyContext}
+                allAlerts={anomalyContext}
               />
             </EuiAccordion>
 

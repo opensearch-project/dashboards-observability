@@ -225,7 +225,7 @@ export type UnifiedAlertState =
   | 'silenced'
   | 'resolved'
   | 'error';
-export type UnifiedFindingType = 'alert' | 'anomaly';
+export type UnifiedAlertKind = 'alert' | 'anomaly';
 
 /** Lightweight alert representation for list views and tables. */
 export interface UnifiedAlertSummary {
@@ -233,7 +233,7 @@ export interface UnifiedAlertSummary {
   datasourceId: string;
   datasourceType: DatasourceType;
   /** Row-level kind in the Alerts table. Defaults to `alert`. */
-  findingType?: UnifiedFindingType;
+  alertKind?: UnifiedAlertKind;
   name: string;
   state: UnifiedAlertState;
   severity: UnifiedAlertSeverity;

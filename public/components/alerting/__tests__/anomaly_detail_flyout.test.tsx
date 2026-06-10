@@ -56,7 +56,7 @@ function buildAnomaly(overrides: Partial<UnifiedAlertSummary> = {}): UnifiedAler
     message: 'Anomaly grade 1.00, score 7.81',
     startTime: '2026-06-04T20:00:00.000Z',
     lastUpdated: '2026-06-04T20:01:00.000Z',
-    findingType: 'anomaly',
+    alertKind: 'anomaly',
     labels: {
       detector_id: 'detector-1',
       detector_name: 'test',
@@ -82,7 +82,7 @@ describe('AnomalyDetailFlyout', () => {
       <AnomalyDetailFlyout
         anomaly={buildAnomaly()}
         datasources={[datasource]}
-        allFindings={[
+        allAlerts={[
           buildAnomaly(),
           buildAnomaly({
             id: 'anomaly-2',
@@ -125,7 +125,7 @@ describe('AnomalyDetailFlyout', () => {
           },
         })}
         datasources={[datasource]}
-        allFindings={[]}
+        allAlerts={[]}
         onClose={jest.fn()}
       />
     );

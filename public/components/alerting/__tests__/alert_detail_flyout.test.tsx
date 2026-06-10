@@ -139,7 +139,7 @@ describe('AlertDetailFlyout', () => {
       id: 'anomaly-42',
       datasourceId: 'ds-prom',
       datasourceType: 'opensearch',
-      findingType: 'anomaly',
+      alertKind: 'anomaly',
       name: 'test - DestCityName=Zurich',
       state: 'active',
       severity: 'critical',

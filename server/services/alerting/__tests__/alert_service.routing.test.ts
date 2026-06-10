@@ -256,7 +256,7 @@ describe('MultiBackendAlertService — routing & list', () => {
     expect(response.results).toHaveLength(1);
     expect(response.results[0].id).toBe('alert-1');
     expect(response.results[0].relatedAnomaly?.labels.anomaly_result_id).toBe('anomaly-1');
-    expect(response.results.some((row) => row.findingType === 'anomaly')).toBe(false);
+    expect(response.results.some((row) => row.alertKind === 'anomaly')).toBe(false);
   });
 
   it('links detector-triggered alerts to explicitly referenced anomaly results outside the selected range', async () => {

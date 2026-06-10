@@ -109,14 +109,14 @@ const ANOMALY_HEATMAP_COLORSCALE: Array<[number, string]> = [
 export interface AnomalyDetailFlyoutProps {
   anomaly: UnifiedAlertSummary;
   datasources: Datasource[];
-  allFindings?: UnifiedAlertSummary[];
+  allAlerts?: UnifiedAlertSummary[];
   onClose: () => void;
 }
 
 export interface AnomalyDetailContentProps {
   anomaly: UnifiedAlertSummary;
   datasources: Datasource[];
-  allFindings?: UnifiedAlertSummary[];
+  allAlerts?: UnifiedAlertSummary[];
   onNavigateToDetectorResults?: () => void;
 }
 
@@ -173,7 +173,7 @@ interface AnnotationDatum {
 export const AnomalyDetailContent: React.FC<AnomalyDetailContentProps> = ({
   anomaly,
   datasources,
-  allFindings = [],
+  allAlerts = [],
   onNavigateToDetectorResults,
 }) => {
   const labels = anomaly.labels || {};
@@ -194,18 +194,18 @@ export const AnomalyDetailContent: React.FC<AnomalyDetailContentProps> = ({
 
   const relatedAnomalyPoints = useMemo(() => {
     const candidates = new Map<string, UnifiedAlertSummary>();
-    [anomaly, ...allFindings].forEach((finding) => {
-      candidates.set(finding.id, finding);
+    [anomaly, ...allAlerts].forEach((candidateAlert) => {
+      candidates.set(candidateAlert.id, candidateAlert);
     });
     return Array.from(candidates.values())
-      .filter((finding) => (finding.findingType || 'alert') === 'anomaly')
-      .filter((finding) => {
-        const findingDetectorId = finding.labels?.detector_id || finding.monitorId;
-        return detectorId ? findingDetectorId === detectorId : finding.id === anomaly.id;
+      .filter((candidateAlert) => (candidateAlert.alertKind || 'alert') === 'anomaly')
+      .filter((candidateAlert) => {
+        const candidateDetectorId = candidateAlert.labels?.detector_id || candidateAlert.monitorId;
+        return detectorId ? candidateDetectorId === detectorId : candidateAlert.id === anomaly.id;
       })
       .map(toAnomalyPoint)
       .sort((a, b) => a.time - b.time);
-  }, [allFindings, anomaly, detectorId]);
+  }, [allAlerts, anomaly, detectorId]);
 
   const isHighCardinalityDetector = useMemo(
     () => Boolean(entity) || relatedAnomalyPoints.some(hasEntityDimension),
@@ -495,7 +495,7 @@ export const AnomalyDetailContent: React.FC<AnomalyDetailContentProps> = ({
 export const AnomalyDetailFlyout: React.FC<AnomalyDetailFlyoutProps> = ({
   anomaly,
   datasources,
-  allFindings = [],
+  allAlerts = [],
   onClose,
 }) => {
   const labels = anomaly.labels || {};
@@ -574,7 +574,7 @@ export const AnomalyDetailFlyout: React.FC<AnomalyDetailFlyoutProps> = ({
         <AnomalyDetailContent
           anomaly={anomaly}
           datasources={datasources}
-          allFindings={allFindings}
+          allAlerts={allAlerts}
           onNavigateToDetectorResults={navigateToDetectorResults}
         />
       </EuiFlyoutBody>
