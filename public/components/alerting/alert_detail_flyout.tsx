@@ -27,7 +27,6 @@ import {
   EuiCodeBlock,
   EuiLink,
   EuiLoadingContent,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -196,7 +195,7 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
         defaultMessage: 'Open SLO',
       })
     : i18n.translate('observability.alerting.alertDetailFlyout.openMonitor', {
-        defaultMessage: 'Open monitor',
+        defaultMessage: 'Open rule',
       });
 
   const navigateToSource = () => {
@@ -524,7 +523,7 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" responsive={false}>
-              {/* S-C4: Hide Acknowledge for Prometheus alerts — not supported */}
+              {/* Acknowledge button — only for non-Prometheus active alerts */}
               {alert.state === 'active' && alert.datasourceType !== 'prometheus' && (
                 <EuiFlexItem grow={false}>
                   <EuiButton fill size="s" iconType="check" onClick={() => onAcknowledge(alert.id)}>
@@ -533,25 +532,6 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
                       defaultMessage="Acknowledge"
                     />
                   </EuiButton>
-                </EuiFlexItem>
-              )}
-              {alert.state === 'active' && alert.datasourceType === 'prometheus' && (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'observability.alerting.alertDetailFlyout.acknowledgeNotSupportedTooltip',
-                      {
-                        defaultMessage: 'Acknowledgement not supported for Prometheus alerts',
-                      }
-                    )}
-                  >
-                    <EuiButton fill size="s" iconType="check" isDisabled>
-                      <FormattedMessage
-                        id="observability.alerting.alertDetailFlyout.acknowledgeDisabledButton"
-                        defaultMessage="Acknowledge"
-                      />
-                    </EuiButton>
-                  </EuiToolTip>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

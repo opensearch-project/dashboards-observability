@@ -169,7 +169,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                     >
                       <FormattedMessage
                         id="observability.alerting.monitorsTable.mainPanel.createMonitor"
-                        defaultMessage="Create Rule"
+                        defaultMessage="Create alert rule"
                       />
                     </EuiButton>
                   }
@@ -201,7 +201,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                           aria-label={i18n.translate(
                             'observability.alerting.monitorsTable.mainPanel.createLogsAriaLabel',
                             {
-                              defaultMessage: 'Create Logs monitor',
+                              defaultMessage: 'Create logs rule',
                             }
                           )}
                         />
@@ -221,7 +221,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                         aria-label={i18n.translate(
                           'observability.alerting.monitorsTable.mainPanel.createLogsAriaLabel',
                           {
-                            defaultMessage: 'Create Logs monitor',
+                            defaultMessage: 'Create logs rule',
                           }
                         )}
                       />
@@ -248,7 +248,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                           aria-label={i18n.translate(
                             'observability.alerting.monitorsTable.mainPanel.createMetricsAriaLabel',
                             {
-                              defaultMessage: 'Create Metrics monitor',
+                              defaultMessage: 'Create metrics rule',
                             }
                           )}
                         />
@@ -268,7 +268,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                         aria-label={i18n.translate(
                           'observability.alerting.monitorsTable.mainPanel.createMetricsAriaLabel',
                           {
-                            defaultMessage: 'Create Metrics monitor',
+                            defaultMessage: 'Create metrics rule',
                           }
                         )}
                       />
@@ -485,7 +485,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
       {showDeleteConfirm && (
         <DeleteModal
           title={i18n.translate('observability.alerting.monitorsTable.mainPanel.deleteModalTitle', {
-            defaultMessage: 'Delete {count} {count, plural, one {monitor} other {monitors}}?',
+            defaultMessage: 'Delete {count} {count, plural, one {rule} other {rules}}?',
             values: { count: selectedIds.size },
           })}
           message={i18n.translate(

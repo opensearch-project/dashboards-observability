@@ -20,6 +20,7 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiFormRow,
   EuiPanel,
   EuiSelect,
@@ -31,7 +32,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { PromQLEditor } from '../promql_editor';
+import { coreRefs } from '../../../framework/core_refs';
+import { PromQLMonacoEditor } from '../promql_monaco_editor';
 import { MetricBrowser } from '../metric_browser';
 import { AnnotationEditor, LabelEditor } from '../monitor_form_components';
 import {
@@ -52,12 +54,16 @@ export const PrometheusFormSection: React.FC<{
   validationErrors: Record<string, string>;
   hasSubmitted: boolean;
   context?: { service?: string; team?: string };
+  datasourceId?: string;
+  datasources?: Array<{ id: string; name: string; type: string }>;
 }> = ({
   form,
   onUpdate,
   validationErrors: _validationErrors,
   hasSubmitted: _hasSubmitted,
   context,
+  datasourceId,
+  datasources = [],
 }) => {
   const [queryTab, setQueryTab] = useState<'editor' | 'browser'>('editor');
 
@@ -66,14 +72,14 @@ export const PrometheusFormSection: React.FC<{
     value: ThresholdCondition[K]
   ) => {
     onUpdate('threshold', { ...form.threshold, [key]: value });
+    // Keep pendingPeriod in sync when forDuration is changed in the threshold panel
+    if (key === 'forDuration') {
+      onUpdate('pendingPeriod', value as string);
+    }
   };
 
   const handleMetricSelect = (metricName: string) => {
-    if (!form.query) {
-      onUpdate('query', metricName);
-    } else {
-      onUpdate('query', form.query + (form.query.endsWith(' ') ? '' : ' ') + metricName);
-    }
+    onUpdate('query', metricName);
     setQueryTab('editor');
   };
 
@@ -100,14 +106,51 @@ export const PrometheusFormSection: React.FC<{
     <>
       {/* Query Definition */}
       <EuiPanel paddingSize="m" color="subdued">
-        <EuiTitle size="xs">
-          <h3>
-            {i18n.translate('observability.alerting.prometheusFormSection.promqlQueryTitle', {
-              defaultMessage: 'PromQL Query',
-            })}
-          </h3>
-        </EuiTitle>
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          gutterSize="none"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h3>
+                {i18n.translate('observability.alerting.prometheusFormSection.queryTitle', {
+                  defaultMessage: 'Query',
+                })}
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              onClick={() => coreRefs?.application?.navigateToApp('explore/metrics')}
+              data-test-subj="alertManagerOpenInMetricsLink"
+            >
+              {i18n.translate('observability.alerting.prometheusFormSection.openInMetrics', {
+                defaultMessage: 'Build query in metrics \u2192',
+              })}
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
+
+        <EuiFormRow
+          label={i18n.translate('observability.alerting.prometheusFormSection.datasourceLabel', {
+            defaultMessage: 'Datasource',
+          })}
+        >
+          <EuiSelect
+            options={datasources.map((ds) => ({ value: ds.id, text: ds.name }))}
+            value={datasourceId || ''}
+            onChange={(e) =>
+              onUpdate('datasourceId' as keyof PrometheusFormState, e.target.value as any)
+            }
+            compressed
+            prepend="Prometheus"
+          />
+        </EuiFormRow>
+        <EuiSpacer size="s" />
+
         <EuiTabs size="s">
           <EuiTab isSelected={queryTab === 'editor'} onClick={() => setQueryTab('editor')}>
             {i18n.translate('observability.alerting.prometheusFormSection.queryEditorTab', {
@@ -122,9 +165,29 @@ export const PrometheusFormSection: React.FC<{
         </EuiTabs>
         <EuiSpacer size="s" />
         {queryTab === 'editor' ? (
-          <PromQLEditor value={form.query} onChange={(v) => onUpdate('query', v)} height={80} />
+          <>
+            <EuiText size="xs" color="subdued" style={{ marginBottom: 4 }}>
+              {i18n.translate('observability.alerting.prometheusFormSection.promqlHelp', {
+                defaultMessage: 'PromQL expression. Press Ctrl+Space for metric name suggestions.',
+              })}
+            </EuiText>
+            <PromQLMonacoEditor
+              value={form.query}
+              onChange={(v) => onUpdate('query', v)}
+              height={80}
+              datasourceId={datasourceId}
+            />
+            <EuiSpacer size="xs" />
+            <EuiText size="xs" color="subdued">
+              {'Example: rate(http_requests_total{job="api"}[5m]) > 100'}
+            </EuiText>
+          </>
         ) : (
-          <MetricBrowser onSelectMetric={handleMetricSelect} currentQuery={form.query} />
+          <MetricBrowser
+            onSelectMetric={handleMetricSelect}
+            currentQuery={form.query}
+            datasourceId={datasourceId}
+          />
         )}
       </EuiPanel>
 
@@ -142,7 +205,7 @@ export const PrometheusFormSection: React.FC<{
         <EuiText size="xs" color="subdued">
           {i18n.translate(
             'observability.alerting.prometheusFormSection.alertConditionDescription',
-            { defaultMessage: 'Define when this monitor should fire an alert' }
+            { defaultMessage: 'Define when this rule should fire an alert' }
           )}
         </EuiText>
         <EuiSpacer size="s" />
@@ -300,7 +363,11 @@ export const PrometheusFormSection: React.FC<{
               <EuiSelect
                 options={DURATION_OPTIONS}
                 value={form.pendingPeriod}
-                onChange={(e) => onUpdate('pendingPeriod', e.target.value)}
+                onChange={(e) => {
+                  onUpdate('pendingPeriod', e.target.value);
+                  // Sync threshold.forDuration to match pendingPeriod
+                  onUpdate('threshold', { ...form.threshold, forDuration: e.target.value });
+                }}
                 compressed
                 aria-label={i18n.translate(
                   'observability.alerting.prometheusFormSection.pendingPeriodAriaLabel',

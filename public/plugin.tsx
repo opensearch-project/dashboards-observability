@@ -6,8 +6,10 @@
 import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
+  App,
   AppCategory,
   AppMountParameters,
   AppNavLinkStatus,
@@ -203,6 +205,11 @@ export class ObservabilityPlugin
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private apmAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private traceAnalyticsAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  // Updaters for dynamic feature-flag-controlled apps. Visibility is set in
+  // `start()` from `capabilities.observability.{alertManagerEnabled,sloEnabled}`,
+  // which the server-side switcher resolves from the DynamicConfigService.
+  private alertingAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private apmSloAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   public async setup(
     core: CoreSetup<AppPluginStartDependencies>,
@@ -447,19 +454,40 @@ export class ObservabilityPlugin
           updater$: this.apmAppUpdater$,
         });
 
-        // SLO app — gated behind observability.slo.enabled so PR 1 ships dark
-        // by default. Mirrors the alertManager.enabled pattern above; opt in
-        // via `opensearch_dashboards.yml` with `observability.slo.enabled: true`.
-        if (this.config.slo?.enabled) {
-          core.application.register({
-            id: observabilityApmSloID,
-            title: observabilityApmSloTitle,
-            category: APPLICATION_MONITORING_CATEGORY,
-            order: observabilityApmSloPluginOrder,
-            mount: appMountWithStartPage('apm-slo', '/slos'),
-            updater$: this.apmAppUpdater$,
-          });
-        }
+        // SLO app registers unconditionally. Visibility is controlled at
+        // request time by the dynamic capability flag — see the merged
+        // updater below. The merge keeps the existing APM-vs-Trace-Analytics
+        // gate (driven by `explore.discoverTracesEnabled`) and layers the
+        // SLO capability on top so either input can hide the link.
+        core.application.register({
+          id: observabilityApmSloID,
+          title: observabilityApmSloTitle,
+          category: APPLICATION_MONITORING_CATEGORY,
+          order: observabilityApmSloPluginOrder,
+          mount: appMountWithStartPage('apm-slo', '/slos'),
+          // Naive spread would let a later `visible` override an earlier
+          // `hidden`, so `navLinkStatus` is merged explicitly with `hidden`
+          // taking precedence.
+          updater$: combineLatest([this.apmAppUpdater$, this.apmSloAppUpdater$]).pipe(
+            map(([apmUpdater, sloUpdater]) => (app: App) => {
+              // `AppUpdater` may legally return `undefined`; default both
+              // to `{}` so the merge below doesn't crash on a no-op
+              // updater.
+              const apmUpdate = apmUpdater(app) ?? {};
+              const sloUpdate = sloUpdater(app) ?? {};
+              const eitherHidden =
+                apmUpdate.navLinkStatus === AppNavLinkStatus.hidden ||
+                sloUpdate.navLinkStatus === AppNavLinkStatus.hidden;
+              return {
+                ...apmUpdate,
+                ...sloUpdate,
+                navLinkStatus: eitherHidden
+                  ? AppNavLinkStatus.hidden
+                  : sloUpdate.navLinkStatus ?? apmUpdate.navLinkStatus,
+              };
+            })
+          ),
+        });
 
         // Trace Analytics apps - visible when traces capability DISABLED (fallback)
         core.application.register({
@@ -534,24 +562,22 @@ export class ObservabilityPlugin
       updater$: this.appUpdater$,
     });
 
-    if (this.config.alertManager?.enabled) {
-      core.application.register({
-        id: observabilityAlertingID,
-        title: observabilityAlertingTitle,
-        category: OBSERVABILITY_APP_CATEGORIES.observability,
-        order: observabilityAlertingPluginOrder,
-        euiIconType: 'beaker',
-        mount: appMountWithStartPage('alerting'),
-      });
-    }
+    // Alerting app registers unconditionally. Visibility flipped in
+    // `start()` from `capabilities.observability.alertManagerEnabled`.
+    core.application.register({
+      id: observabilityAlertingID,
+      title: observabilityAlertingTitle,
+      category: OBSERVABILITY_APP_CATEGORIES.observability,
+      order: observabilityAlertingPluginOrder,
+      euiIconType: 'beaker',
+      mount: appMountWithStartPage('alerting'),
+      updater$: this.alertingAppUpdater$,
+    });
 
-    registerAllPluginNavGroups(
-      core,
-      this.apmEnabled,
-      APPLICATION_MONITORING_CATEGORY,
-      !!this.config.alertManager?.enabled,
-      !!this.config.slo?.enabled
-    );
+    // Register the alerting + SLO nav-group entries unconditionally; their
+    // visibility is governed by `capabilities.observability.{alertManagerEnabled,sloEnabled}`
+    // through the per-app updaters set up above.
+    registerAllPluginNavGroups(core, this.apmEnabled, APPLICATION_MONITORING_CATEGORY, true, true);
 
     const embeddableFactory = new ObservabilityEmbeddableFactoryDefinition(async () => ({
       getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,
@@ -562,7 +588,102 @@ export class ObservabilityPlugin
 
     registerAsssitantDependencies(setupDeps.assistantDashboards);
 
-    // Return methods that should be available to other plugins
+    // Register the "Create alert rule" entry under Explore's Query Panel
+    // "Actions" menu only when our `alertManagerEnabled` capability is on.
+    //
+    // Explore's registry has only `getIsEnabled` (greys out) and no
+    // `isVisible` hook, so to actually *hide* a duplicate when the
+    // alerting-dashboards-plugin also registers its own "Create monitor"
+    // entry we must skip `register()` entirely. We can't read capabilities
+    // synchronously at setup time, so we defer registration until
+    // `getStartServices()` resolves — that fires after capabilities are
+    // populated and well before any user can open the actions menu. The
+    // alerting plugin uses the mirror condition (registers only when our
+    // capability is *off*), so exactly one entry exists at any time.
+    if (setupDeps.explore) {
+      const exploreSetup = setupDeps.explore;
+      // Lazy-load the flyout host once, at module scope of this closure — not
+      // per-render. Defining `React.lazy` inside the action's `component`
+      // would create a fresh lazy wrapper on every parent render, defeating
+      // the dynamic-import cache and re-triggering Suspense each time.
+      const LazyExploreCreateMonitor = React.lazy(async () => {
+        const mod = await import('./components/alerting/explore_create_monitor');
+        return { default: mod.ExploreCreateMonitor };
+      });
+
+      core
+        .getStartServices()
+        .then(([coreStart]) => {
+          const capabilities = coreStart.application.capabilities as
+            | { observability?: { alertManagerEnabled?: boolean } }
+            | undefined;
+          if (!capabilities?.observability?.alertManagerEnabled) {
+            return;
+          }
+          exploreSetup.queryPanelActionsRegistry.register({
+            id: 'observability-create-logs-monitor-from-explore',
+            order: 1,
+            actionType: 'flyout',
+            getLabel: () =>
+              i18n.translate('observability.alerting.exploreCreateMonitor.actionLabel', {
+                defaultMessage: 'Create alert rule',
+              }),
+            getIcon: () => 'bell',
+            getIsEnabled: (deps) => {
+              // Reuse the alerting plugin's PPL capability — they own the
+              // agent config + cluster gate; we just light up alongside
+              // theirs so users see this option when PPL alerting is on.
+              const liveCapabilities = coreRefs.application?.capabilities as
+                | { alertingDashboards?: { pplV2?: boolean } }
+                | undefined;
+              if (!liveCapabilities?.alertingDashboards?.pplV2) return false;
+              // AOSS clusters can't host monitors; the button greys out.
+              const isAOSS =
+                (deps.query as { dataset?: { dataSource?: { type?: string } } })?.dataset
+                  ?.dataSource?.type === 'OpenSearch Serverless';
+              return !isAOSS;
+            },
+            component: (props) => {
+              const dataset = (props.dependencies.query as {
+                dataset?: {
+                  dataSource?: { id?: string; title?: string; name?: string };
+                  title?: string;
+                  timeFieldName?: string;
+                };
+              }).dataset;
+              const exploreContext = {
+                dataSourceId: dataset?.dataSource?.id,
+                dataSourceName: dataset?.dataSource?.title ?? dataset?.dataSource?.name,
+                indexPattern: dataset?.title,
+                timeFieldName: dataset?.timeFieldName,
+                queryInEditor:
+                  props.dependencies.queryInEditor ||
+                  (props.dependencies.query as { query?: string })?.query ||
+                  '',
+              };
+              return (
+                <React.Suspense fallback={null}>
+                  <LazyExploreCreateMonitor
+                    exploreContext={exploreContext}
+                    onClose={props.closeFlyout}
+                  />
+                </React.Suspense>
+              );
+            },
+          });
+        })
+        .catch((error) => {
+          // Surface failures from the deferred-registration path. Without
+          // this catch, a `getStartServices()` rejection (rare, but
+          // possible during a failed start lifecycle or late teardown)
+          // would become an unhandled promise rejection and the
+          // registration silently no-op. Matches the existing
+          // `console.error` precedent below for the S3 datasource path.
+
+          console.error('Failed to register Explore "Create alert rule" action', error);
+        });
+    }
+
     return {};
   }
 
@@ -583,7 +704,31 @@ export class ObservabilityPlugin
     coreRefs.dashboard = startDeps.dashboard;
     coreRefs.queryAssistEnabled = this.config.query_assist.enabled;
     coreRefs.summarizeEnabled = this.config.summarize.enabled;
-    coreRefs.sloEnabled = !!this.config.slo?.enabled;
+    // Resolved from the dynamic-config-backed capability so AppConfig flips
+    // take effect on the next page load. Components
+    // (`apm/pages/services_home`, `apm/pages/service_details`) read this ref.
+    const observabilityCapabilities = core.application.capabilities.observability as
+      | { alertManagerEnabled?: boolean; sloEnabled?: boolean }
+      | undefined;
+    const sloEnabledFromCapability = !!observabilityCapabilities?.sloEnabled;
+    const alertManagerEnabledFromCapability = !!observabilityCapabilities?.alertManagerEnabled;
+    coreRefs.sloEnabled = sloEnabledFromCapability;
+
+    // Hide nav links whose dynamic capability says off. The apps register
+    // unconditionally, so URL access still works for users who type the
+    // path directly — the dynamic flag is a UI gate, not an access gate.
+    if (!alertManagerEnabledFromCapability) {
+      this.alertingAppUpdater$.next(() => ({
+        navLinkStatus: AppNavLinkStatus.hidden,
+      }));
+    }
+    // SLO updater is merged with `apmAppUpdater$` at register time so the
+    // APM-vs-Trace-Analytics gate still applies.
+    if (!sloEnabledFromCapability) {
+      this.apmSloAppUpdater$.next(() => ({
+        navLinkStatus: AppNavLinkStatus.hidden,
+      }));
+    }
     coreRefs.overlays = core.overlays;
     coreRefs.dataSource = startDeps.dataSource;
     coreRefs.navigation = startDeps.navigation;

@@ -113,7 +113,7 @@ describe('EditMonitor', () => {
         datasources={[osDs]}
       />
     );
-    expect(screen.getByText('Failed to load monitor')).toBeTruthy();
+    expect(screen.getByText('Failed to load rule')).toBeTruthy();
     expect(document.body.textContent).toContain('boom');
   });
 
@@ -136,9 +136,10 @@ describe('EditMonitor', () => {
     expect(mock.getAttribute('data-indices')).toBe('logs-*');
   });
 
-  it('refuses to edit Prometheus rules', () => {
+  it('renders edit form for Prometheus rules', () => {
     const promRule = pplRule();
     promRule.datasourceType = 'prometheus';
+    promRule.monitorType = 'metric';
     useRuleDetailMock.mockReturnValue({ data: promRule, isLoading: false, error: null });
     render(
       <EditMonitor
@@ -149,6 +150,8 @@ describe('EditMonitor', () => {
         datasources={[osDs]}
       />
     );
-    expect(screen.getByText('Edit not supported')).toBeTruthy();
+    // Prometheus rules are now editable — the form should render in edit mode
+    const mock = screen.getByTestId('createMonitorMock');
+    expect(mock.getAttribute('data-mode')).toBe('edit');
   });
 });

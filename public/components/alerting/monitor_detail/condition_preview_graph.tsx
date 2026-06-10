@@ -105,7 +105,7 @@ export const ConditionPreviewGraph: React.FC<ConditionPreviewGraphProps> = ({
         <em>
           <FormattedMessage
             id="observability.alerting.monitorDetailFlyout.preview.noData"
-            defaultMessage="No recent evaluation data available. The condition preview populates after the monitor executes and records metric data."
+            defaultMessage="No recent evaluation data available. The condition preview populates after the rule executes and records metric data."
           />
         </em>
       </EuiText>

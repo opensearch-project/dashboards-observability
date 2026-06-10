@@ -7,28 +7,38 @@
  * OpenSearch form section of the Create Monitor flyout. Authors PPL monitors
  * only — DSL / cluster-metrics monitors are read-only in the Rules table.
  *
- * Split out of the original `create_monitor.tsx` so the flyout shell in
- * `index.tsx` stays focused on orchestration + shared form fields.
+ * The datasource, indices, and time-field selectors are rendered inline as a
+ * compact toolbar above the Monaco PPL editor.
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiLink,
   EuiPanel,
   EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import { Datasource } from '../../../../common/types/alerting';
+import { coreRefs } from '../../../framework/core_refs';
 import { OpenSearchFormState, OS_SCHEDULE_UNIT_OPTIONS } from './create_monitor_types';
-import { IndexPicker } from './sections/index_picker';
+import { PplPreviewPanel } from './sections/ppl_preview_panel';
 import { PplQueryEditor } from './sections/ppl_query_editor';
 import { PplTriggersSection } from './sections/ppl_triggers';
-import { TimeFieldSelector } from './sections/time_field_selector';
+import { QueryToolbar } from './sections/query_toolbar';
+// Pull in the shared alert-manager stylesheet — owns `.altPplPreview` rules
+// the preview panel depends on. Imported here (not just from alarms_page.tsx)
+// because the Explore-launched flyout mounts this section without going
+// through the Rules page, so without this import the bundle wouldn't include
+// the SCSS when the user opens Create-from-Explore on a fresh page load.
+import '../alerting.scss';
 
 // Rewrite the leading `source = ...` clause to reflect the picker's index
 // list, preserving the rest of the query (everything from the first `|`
@@ -39,7 +49,10 @@ const SOURCE_LINE_RE = /^\s*source\s*=\s*[^|\n]*/i;
 
 function defaultPplQueryFor(indices: string[]): string {
   if (indices.length === 0) return '';
-  return `source = ${indices.join(', ')}\n| stats count() as error_count`;
+  // Bare `source = …` so the seeded query is valid against every index
+  // shape and works with the default `number_of_results >= 1` trigger
+  // out of the box. Users add filters / stats from there.
+  return `source = ${indices.join(', ')}`;
 }
 
 function rewriteSourceClause(query: string, indices: string[]): string {
@@ -48,14 +61,12 @@ function rewriteSourceClause(query: string, indices: string[]): string {
 
   if (SOURCE_LINE_RE.test(trimmed)) {
     if (indices.length === 0) {
-      // Drop the source clause; keep the body so the user doesn't lose work.
       const stripped = trimmed.replace(SOURCE_LINE_RE, '').replace(/^\s*\|\s*/, '');
       return stripped;
     }
     return trimmed.replace(SOURCE_LINE_RE, `source = ${indices.join(', ')}`);
   }
 
-  // No leading source clause yet — prepend one if we have indices.
   if (indices.length === 0) return query;
   return `source = ${indices.join(', ')}\n${trimmed.startsWith('|') ? '' : '| '}${trimmed}`;
 }
@@ -69,9 +80,53 @@ export const OpenSearchFormSection: React.FC<{
   onUpdate: <K extends keyof OpenSearchFormState>(key: K, value: OpenSearchFormState[K]) => void;
   validationErrors: Record<string, string>;
   hasSubmitted: boolean;
+  /** Datasources of type 'opensearch' — drives the inline picker. */
+  datasources: Datasource[];
+  /** Switching datasources from the toolbar; ignored in edit mode. */
+  onDatasourceChange: (id: string) => void;
+  /** Edit mode pins the datasource. */
+  isEdit?: boolean;
   /** Server-reported PPL parse error from a failed save; rendered under the editor. */
   pplServerError?: string;
-}> = ({ form, onUpdate, validationErrors, hasSubmitted, pplServerError }) => {
+  /**
+   * Hide the "Build query in logs →" link in the Query panel header.
+   * Set when the flyout is launched from the Logs page itself — the link
+   * would otherwise be a circular round-trip back to where the user came
+   * from (and lose their unsaved form state on the way).
+   */
+  hideBuildInLogsLink?: boolean;
+}> = ({
+  form,
+  onUpdate,
+  validationErrors: _validationErrors,
+  hasSubmitted,
+  datasources,
+  onDatasourceChange,
+  isEdit,
+  pplServerError,
+  hideBuildInLogsLink,
+}) => {
+  // Resolve the active datasource's MDS saved-object id once per render,
+  // so the preview panel can scope its PPL call to the right cluster
+  // without doing the lookup itself.
+  const activeMdsId = useMemo(() => datasources.find((d) => d.id === form.datasourceId)?.mdsId, [
+    datasources,
+    form.datasourceId,
+  ]);
+
+  // Send the user to the Explore Logs app, where they can author and
+  // validate a PPL query against live data, then come back via the
+  // Logs page Actions menu's "Create monitor" entry — which lands them
+  // back here pre-filled. Same-tab navigation: in-progress form state in
+  // this flyout will be lost; that's an acceptable tradeoff because the
+  // intended use is "open empty flyout → click here → finish in Logs."
+  // App id `explore/logs` matches `/app/explore/logs#/` — `navigateToApp`
+  // resolves the basepath/workspace prefix on its own, so this works in
+  // any environment.
+  const openLogsApp = useCallback(() => {
+    coreRefs?.application?.navigateToApp('explore/logs');
+  }, []);
+
   // Rewrite the leading `source = ...` clause whenever the picker changes,
   // preserving any later pipes the user has authored. Prevents stranding
   // the user with `source = old-index | ...` after they swap indices.
@@ -79,8 +134,6 @@ export const OpenSearchFormSection: React.FC<{
     (next: string[]) => {
       onUpdate('indices', next);
       onUpdate('query', rewriteSourceClause(form.query, next));
-      // Clear timeField if the user dropped all indices — the field choices
-      // are now empty and a stale value would surface invalid validation.
       if (next.length === 0 && form.timeField) {
         onUpdate('timeField', '');
       }
@@ -90,46 +143,62 @@ export const OpenSearchFormSection: React.FC<{
 
   return (
     <>
-      {/* Define index — picker + timestamp field. Mirrors the alerting plugin's
-          "Define monitor → Data source" step. */}
+      {/* Query — toolbar (datasource / indices / time field) + Monaco editor.
+          The header carries a "Build query in Logs" link on the right so
+          users can iterate on a query against live data and round-trip back
+          via the Logs page Actions menu. */}
       <EuiPanel paddingSize="m" color="subdued">
-        <EuiTitle size="xs">
-          <h3>
-            {i18n.translate('observability.alerting.opensearchFormSection.defineIndexTitle', {
-              defaultMessage: 'Define index',
-            })}
-          </h3>
-        </EuiTitle>
+        <EuiFlexGroup
+          alignItems="baseline"
+          justifyContent="spaceBetween"
+          gutterSize="s"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h3>
+                {i18n.translate('observability.alerting.opensearchFormSection.queryTitle', {
+                  defaultMessage: 'Query',
+                })}
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          {!hideBuildInLogsLink && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                position="left"
+                content={i18n.translate(
+                  'observability.alerting.opensearchFormSection.openInLogsTooltip',
+                  {
+                    defaultMessage:
+                      'Build and validate your query against live data in logs, then click Create alert rule to come back here pre-filled. Unsaved changes will be lost.',
+                  }
+                )}
+              >
+                <EuiLink onClick={openLogsApp} data-test-subj="alertManagerOpenInLogsLink">
+                  {i18n.translate('observability.alerting.opensearchFormSection.openInLogs', {
+                    defaultMessage: 'Build query in logs →',
+                  })}
+                </EuiLink>
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <IndexPicker
-          dsId={form.datasourceId}
-          selected={form.indices}
-          onChange={handleIndicesChange}
-          isInvalid={hasSubmitted && !!validationErrors.indices}
-          error={hasSubmitted ? validationErrors.indices : undefined}
+
+        <QueryToolbar
+          datasources={datasources}
+          selectedDsId={form.datasourceId}
+          onDatasourceChange={onDatasourceChange}
+          datasourceLocked={isEdit}
+          selectedIndices={form.indices}
+          onIndicesChange={handleIndicesChange}
+          selectedTimeField={form.timeField}
+          onTimeFieldChange={(v) => onUpdate('timeField', v)}
         />
+
         <EuiSpacer size="s" />
-        <TimeFieldSelector
-          dsId={form.datasourceId}
-          indices={form.indices}
-          value={form.timeField}
-          onChange={(v) => onUpdate('timeField', v)}
-          isInvalid={hasSubmitted && !!validationErrors.timeField}
-          error={hasSubmitted ? validationErrors.timeField : undefined}
-        />
-      </EuiPanel>
 
-      <EuiSpacer size="m" />
-
-      {/* PPL Query — Monaco-backed editor with field-aware autocomplete. */}
-      <EuiPanel paddingSize="m" color="subdued">
-        <EuiTitle size="xs">
-          <h3>
-            {i18n.translate('observability.alerting.opensearchFormSection.queryTitle', {
-              defaultMessage: 'Query',
-            })}
-          </h3>
-        </EuiTitle>
         <EuiText size="xs" color="subdued">
           {i18n.translate('observability.alerting.opensearchFormSection.queryDescriptionPpl', {
             defaultMessage:
@@ -150,15 +219,19 @@ export const OpenSearchFormSection: React.FC<{
             id="observability.alerting.opensearchFormSection.pplExample"
             defaultMessage="Example: {example}"
             values={{
-              example: (
-                <code>
-                  source = my-index | where status.code = 2 | stats count() as error_count by
-                  serviceName
-                </code>
-              ),
+              example: <code>source = my-index | where severityText = &apos;ERROR&apos;</code>,
             }}
           />
         </EuiText>
+        <EuiSpacer size="s" />
+        {/* Run-preview affordance — validates the query against the chosen
+            datasource before save. Resets implicitly each click; we don't
+            persist preview state with the form. */}
+        <PplPreviewPanel
+          query={form.query}
+          mdsId={activeMdsId}
+          hasDatasource={!!form.datasourceId}
+        />
       </EuiPanel>
 
       <EuiSpacer size="m" />

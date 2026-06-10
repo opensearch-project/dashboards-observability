@@ -94,7 +94,11 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   const [isTogglingEnabled, setIsTogglingEnabled] = useState(false);
   // Mirror the Edit-button gate (PPL only). Non-PPL types stay read-only;
   // the existing tooltip surfaces explains the limitation.
-  const canToggleEnabled = !!onToggleEnabled && monitor.monitorType === 'ppl';
+  // Prometheus rules cannot be disabled via the OS Alerting API.
+  const canToggleEnabled =
+    !!onToggleEnabled &&
+    monitor.datasourceType !== 'prometheus' &&
+    (monitor.monitorType === 'ppl' || monitor.monitorType === 'metric');
   const { detail, isLoading: detailLoading, error: detailError } = useMonitorDetail({
     dsId: monitor.datasourceId,
     ruleId: monitor.id,
@@ -191,7 +195,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
           {/* Quick actions */}
           <EuiFlexGroup gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              {onEdit && monitor.monitorType === 'ppl' ? (
+              {onEdit && (monitor.monitorType === 'ppl' || monitor.monitorType === 'metric') ? (
                 <EuiButtonEmpty
                   size="s"
                   iconType="pencil"
@@ -208,7 +212,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                   content={i18n.translate(
                     'observability.alerting.monitorDetailFlyout.editTooltip',
                     {
-                      defaultMessage: 'Editing is only supported for PPL monitors',
+                      defaultMessage: 'Editing is only supported for PPL alert rules',
                     }
                   )}
                 >
@@ -259,7 +263,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                     title={i18n.translate(
                       'observability.alerting.monitorDetailFlyout.detailLoadError.title',
                       {
-                        defaultMessage: 'Some monitor details could not be loaded',
+                        defaultMessage: 'Some rule details could not be loaded',
                       }
                     )}
                     data-test-subj="alertManagerMonitorDetailLoadError"
@@ -411,7 +415,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                         <em>
                           <FormattedMessage
                             id="observability.alerting.monitorDetailFlyout.bucketLevelDescription"
-                            defaultMessage="Bucket-level monitor — triggers evaluate per aggregation bucket"
+                            defaultMessage="Bucket-level rule — triggers evaluate per aggregation bucket"
                           />
                         </em>
                       </EuiText>
@@ -713,7 +717,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  {canToggleEnabled ? (
+                  {monitor.datasourceType === 'prometheus' ? null : canToggleEnabled ? (
                     <EuiButton
                       size="s"
                       isLoading={isTogglingEnabled}
@@ -731,11 +735,11 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                       {monitor.enabled === false
                         ? i18n.translate(
                             'observability.alerting.monitorDetailFlyout.enableMonitor',
-                            { defaultMessage: 'Enable Monitor' }
+                            { defaultMessage: 'Enable rule' }
                           )
                         : i18n.translate(
                             'observability.alerting.monitorDetailFlyout.disableMonitor',
-                            { defaultMessage: 'Disable Monitor' }
+                            { defaultMessage: 'Disable rule' }
                           )}
                     </EuiButton>
                   ) : (
@@ -743,7 +747,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                       content={i18n.translate(
                         'observability.alerting.monitorDetailFlyout.enableDisableTooltip',
                         {
-                          defaultMessage: 'Enable/disable is only supported for PPL monitors.',
+                          defaultMessage: 'Enable/disable is only supported for PPL alert rules.',
                         }
                       )}
                     >
@@ -751,11 +755,11 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                         {monitor.enabled === false
                           ? i18n.translate(
                               'observability.alerting.monitorDetailFlyout.enableMonitor',
-                              { defaultMessage: 'Enable Monitor' }
+                              { defaultMessage: 'Enable rule' }
                             )
                           : i18n.translate(
                               'observability.alerting.monitorDetailFlyout.disableMonitor',
-                              { defaultMessage: 'Disable Monitor' }
+                              { defaultMessage: 'Disable rule' }
                             )}
                       </EuiButton>
                     </EuiToolTip>
@@ -775,7 +779,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
             values: { name: monitor.name },
           })}
           message={i18n.translate('observability.alerting.monitorDetailFlyout.deleteModalMessage', {
-            defaultMessage: 'This will remove the monitor from the current view.',
+            defaultMessage: 'This will remove the rule from the current view.',
           })}
           onCancel={() => setShowDeleteConfirm(false)}
           onConfirm={() => {

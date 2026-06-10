@@ -1006,7 +1006,7 @@ export class MultiBackendAlertService {
       const groups = await this.promBackend.getRuleGroups(client, ds);
       for (const g of groups) {
         for (const r of g.rules) {
-          if (r.type === 'alerting') results.push(promRuleToUnified(r, g.name, ds.id));
+          if (r.type === 'alerting') results.push(promRuleToUnified(r, g.name, ds.id, g.interval));
         }
       }
     }

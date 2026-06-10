@@ -10,6 +10,11 @@ jest.mock('echarts', () => ({
   init: jest.fn(() => ({ setOption: jest.fn(), resize: jest.fn(), dispose: jest.fn() })),
 }));
 
+jest.mock('../promql_monaco_editor', () => ({
+  PromQLMonacoEditor: ({ value }: { value: string }) => (
+    <textarea data-test-subj="promqlMock" defaultValue={value} />
+  ),
+}));
 jest.mock('../promql_editor', () => ({
   PromQLEditor: ({ value }: { value: string }) => (
     <textarea data-test-subj="promqlMock" defaultValue={value} />
@@ -31,7 +36,7 @@ import { CreateMetricsMonitor } from '../create_metrics_monitor';
 describe('CreateMetricsMonitor', () => {
   it('renders flyout with form title', () => {
     render(<CreateMetricsMonitor onCancel={jest.fn()} onSave={jest.fn()} />);
-    expect(document.body.textContent).toContain('Monitor');
+    expect(document.body.textContent).toContain('Create metrics rule');
   });
 
   it('calls onCancel when flyout close is clicked', () => {

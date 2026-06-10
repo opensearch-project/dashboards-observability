@@ -14,6 +14,7 @@ import { DataSourceManagementPluginSetup } from '../../../src/plugins/data_sourc
 import { EmbeddableSetup, EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { ManagementOverViewPluginSetup } from '../../../src/plugins/management_overview/public';
 import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/public';
+import { ExplorePluginSetup } from '../../../src/plugins/explore/public';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { VisualizationsSetup } from '../../../src/plugins/visualizations/public';
 import {
@@ -51,6 +52,8 @@ export interface SetupDependencies {
   dataSourceManagement: DataSourceManagementPluginSetup;
   contentManagement?: ContentManagementPluginSetup;
   investigationDashboards?: unknown;
+  /** Optional — when present we register the "Create observability monitor" entry under the Logs page Actions menu. */
+  explore?: ExplorePluginSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

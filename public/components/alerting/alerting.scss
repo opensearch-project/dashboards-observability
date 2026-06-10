@@ -253,3 +253,69 @@
     }
   }
 }
+
+// PPL preview panel — column-share layout that prevents trace ids and
+// stringified structs from blowing out the EuiPanel width.
+.altPplPreview {
+  // Wrapper around the EuiBasicTable. Hard-clips horizontal overflow as a
+  // defense-in-depth in case a renderer ever sets `white-space: nowrap`
+  // outside of `.altPplPreview__cell`.
+  &__tableWrap {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  // Even column widths — without this, EUI defaults to `auto` which lets
+  // a long string column eat space from its neighbors.
+  .euiTable {
+    table-layout: fixed;
+    width: 100%;
+  }
+
+  // EUI nests <td> → .euiTableCellContent (flex) → EuiToolTip anchor
+  // (inline-block) → our EuiText. Each layer needs `min-width: 0` /
+  // `overflow: hidden` for the eventual `text-overflow: ellipsis` on the
+  // inner span to actually clip — without these, the natural-width content
+  // sails past the column boundary and overlaps the next cell.
+  .euiTableRowCell,
+  .euiTableCellContent {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  // EuiToolTip wraps its children in a `<span class="euiToolTipAnchor">`
+  // that defaults to `display: inline-block` — that's the layer that lets
+  // long text escape sideways. Promote it to a clipping block-level box.
+  &__anchor {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  // Single-line truncation with ellipsis. The tooltip layer is provided
+  // by the EuiToolTip wrapping this span via `anchorClassName`.
+  &__cell {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // `$euiColorMediumShade` is the subdued grey other plugin SCSS uses
+  // (e.g. event_analytics sidebar) — it's resolved via the auto-prepended
+  // `_globals_<theme>.scss` import the optimizer adds to every SCSS file.
+  // `$euiColorSubduedText` doesn't exist in this build's variable set.
+  &__cellNull {
+    color: $euiColorMediumShade;
+  }
+
+  // Column header type-tag — small subdued suffix on each header label
+  // (e.g. "body · string"). Class form keeps the rule in one place
+  // alongside the rest of the preview styles.
+  &__columnTypeTag {
+    color: $euiColorMediumShade;
+  }
+}

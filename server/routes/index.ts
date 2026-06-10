@@ -38,13 +38,11 @@ export function setupRoutes({
   router,
   client,
   dataSourceEnabled,
-  alertManagerEnabled,
   logger,
 }: {
   router: IRouter;
   client: ILegacyClusterClient;
   dataSourceEnabled: boolean;
-  alertManagerEnabled: boolean;
   logger: Logger;
 }) {
   PanelsRouter(router);
@@ -77,27 +75,31 @@ export function setupRoutes({
   registerGettingStartedRoutes(router);
   registerMLCommonsRCFRoute({ router, facet: new MLCommonsRCFFacet() });
 
-  // Alerting routes — gated by `observability.alertManager.enabled`
-  // (mirrors the existing `dataSourceEnabled` plumbing pattern). When the
-  // flag is off the routes are never registered, so curl returns 404 for
-  // both mutations and the AM config endpoint.
-  if (alertManagerEnabled) {
-    // Only construct the genuinely stateless deps at server start. The
-    // per-request `MultiBackendAlertService` and `PrometheusMetadataService`
-    // instances — both of which hold a `SavedObjectDatasourceService` — are
-    // built inside each route handler so the per-request scoped SavedObjects
-    // client never bleeds across concurrent requests.
-    const osBackend = new HttpOpenSearchBackend(logger);
-    const promBackend = new DirectQueryPrometheusBackend(logger);
-    // MonitorMutationService delegates to HttpOpenSearchBackend — shared
-    // stateless backend + thin write-path wrapper.
-    const mutationSvc = new MonitorMutationService(osBackend, logger);
+  // Alerting routes register unconditionally so the dynamic capability
+  // flag (`capabilities.observability.alertManagerEnabled`, resolved per
+  // request from DynamicConfigService) can hide the UI on a per-account
+  // basis without leaving the routes unreachable when re-enabled.
+  // Only construct the genuinely stateless deps at server start. The
+  // per-request `MultiBackendAlertService` and `PrometheusMetadataService`
+  // instances — both of which hold a `SavedObjectDatasourceService` — are
+  // built inside each route handler so the per-request scoped SavedObjects
+  // client never bleeds across concurrent requests.
+  const osBackend = new HttpOpenSearchBackend(logger);
+  const promBackend = new DirectQueryPrometheusBackend(logger);
+  // MonitorMutationService delegates to HttpOpenSearchBackend — shared
+  // stateless backend + thin write-path wrapper.
+  const mutationSvc = new MonitorMutationService(osBackend, logger);
+  // RulerClient for Prometheus rule CRUD via Cortex ruler API. Brought in
+  // by upstream's Prometheus metrics rule support (#2718).
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { DirectQueryRulerClient } = require('../services/slo/ruler_client');
+  const rulerClient = new DirectQueryRulerClient(logger);
 
-    registerAlertingRoutes(router, {
-      osBackend,
-      promBackend,
-      mutationSvc,
-      logger,
-    });
-  }
+  registerAlertingRoutes(router, {
+    osBackend,
+    promBackend,
+    mutationSvc,
+    logger,
+    rulerClient,
+  });
 }

@@ -21,11 +21,13 @@ import { schema } from '@osd/config-schema';
  * Allows `A-Z a-z 0-9 _ -`, length 1..128. Disallows `.`, `/`, `:`, etc.
  */
 const ID_PATTERN = /^[A-Za-z0-9_-]+$/;
-const ID_MAX_LENGTH = 128;
+const ID_MAX_LENGTH = 512;
 
 /**
  * Validate a path-interpolated ID. Rejects empty strings, strings longer
- * than 128 chars, and anything outside the `[A-Za-z0-9_-]` charset.
+ * than 512 chars, and anything outside the `[A-Za-z0-9_-]` charset.
+ * Prometheus rule IDs use format {dsId}-{groupName}-{ruleName} which can
+ * exceed 128 chars with long metric names.
  */
 export const alertingIdSchema = schema.string({
   maxLength: ID_MAX_LENGTH,
