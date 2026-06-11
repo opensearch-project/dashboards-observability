@@ -81,6 +81,7 @@ const ALERT_TYPE_COLORS: Record<string, string> = {
 const ALERTS_HIDDEN_LABEL_KEYS = new Set([
   ...Array.from(INTERNAL_LABEL_KEYS),
   'anomaly_result_id',
+  'detector_id',
   'source',
 ]);
 

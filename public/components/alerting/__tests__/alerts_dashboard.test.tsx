@@ -212,6 +212,7 @@ describe('AlertsDashboard', () => {
     expect(typeFacet.getByText('anomaly')).toBeInTheDocument();
 
     expect(screen.queryByText('anomaly_result_id')).not.toBeInTheDocument();
+    expect(screen.queryByText('detector_id')).not.toBeInTheDocument();
     expect(screen.queryByText('source')).not.toBeInTheDocument();
 
     fireEvent.click(typeFacet.getByLabelText(/anomaly/));
