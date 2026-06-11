@@ -74,10 +74,15 @@ const STATE_HEALTH: Record<string, string> = {
   error: 'danger',
   silenced: 'default',
 };
-const FINDING_TYPE_COLORS: Record<string, string> = {
-  alert: 'primary',
-  anomaly: 'warning',
+const ALERT_TYPE_COLORS: Record<string, string> = {
+  alert: '#006BB4',
+  anomaly: '#B8821C',
 };
+const ALERTS_HIDDEN_LABEL_KEYS = new Set([
+  ...Array.from(INTERNAL_LABEL_KEYS),
+  'anomaly_result_id',
+  'source',
+]);
 
 // ============================================================================
 // Helpers
@@ -353,7 +358,6 @@ function renderGroupedAnomalyOccurrences(
             const timestamp = new Date(
               occurrence.lastUpdated || occurrence.startTime
             ).toLocaleString();
-            const severityColor = SEVERITY_COLORS[occurrence.severity] || SEVERITY_COLORS.info;
 
             return (
               <EuiFlexItem key={occurrence.id}>
@@ -364,19 +368,7 @@ function renderGroupedAnomalyOccurrences(
                   color={index === 0 ? 'subdued' : 'plain'}
                 >
                   <div className="altGroupedOccurrenceGrid">
-                    <div className="altGroupedOccurrenceCell">
-                      <EuiToolTip content={occurrence.severity}>
-                        <span
-                          style={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: '50%',
-                            background: severityColor,
-                            display: 'inline-block',
-                          }}
-                        />
-                      </EuiToolTip>
-                    </div>
+                    <div className="altGroupedOccurrenceCell" />
                     <div className="altGroupedOccurrenceCell altGroupedOccurrenceAlertCell">
                       <EuiButtonEmpty
                         size="xs"
@@ -535,9 +527,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   const uniqueStates = useMemo(() => collectAlertUniqueValues(alerts, getAlertDisplayState), [
     alerts,
   ]);
-  const uniqueAlertKinds = useMemo(() => collectAlertUniqueValues(alerts, (a) => getAlertKind(a)), [
-    alerts,
-  ]);
+  const uniqueAlertKinds = useMemo(() => collectAlertUniqueValues(alerts, getAlertKind), [alerts]);
   const labelKeys = useMemo(() => collectAlertLabelKeys(alerts), [alerts]);
 
   // Facet counts (against search-matched but not filter-matched alerts)
@@ -761,7 +751,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
           defaultMessage: 'State',
         }),
         width: '140px',
-        sortable: true,
+        sortable: (alert: AlertTableRow) => getAlertDisplayState(alert),
         render: (_state: string, alert: AlertTableRow) => {
           const state = getAlertDisplayState(alert);
           return <EuiHealth color={STATE_HEALTH[state] || 'subdued'}>{state}</EuiHealth>;
@@ -988,7 +978,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   filters.alertKind,
                   (v) => updateFilter('alertKind', v),
                   facetCounts.counts.alertKind,
-                  FINDING_TYPE_COLORS
+                  ALERT_TYPE_COLORS
                 )}
                 {renderFacetGroup(
                   'severity',
@@ -1013,7 +1003,9 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   STATE_COLORS
                 )}
                 {(() => {
-                  const visibleLabelKeys = labelKeys.filter((k) => !INTERNAL_LABEL_KEYS.has(k));
+                  const visibleLabelKeys = labelKeys.filter(
+                    (k) => !ALERTS_HIDDEN_LABEL_KEYS.has(k)
+                  );
                   if (visibleLabelKeys.length === 0) return null;
                   const q = labelSearch.trim().toLowerCase();
                   const matchedLabelKeys = q

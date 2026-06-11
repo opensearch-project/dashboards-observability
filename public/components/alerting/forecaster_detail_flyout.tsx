@@ -50,6 +50,16 @@ interface FeatureRow {
 
 const EMPTY_VALUE = '—';
 
+const enabledLabel = () =>
+  i18n.translate('observability.alerting.forecasterDetailFlyout.enabledLabel', {
+    defaultMessage: 'Enabled',
+  });
+
+const disabledLabel = () =>
+  i18n.translate('observability.alerting.forecasterDetailFlyout.disabledLabel', {
+    defaultMessage: 'Disabled',
+  });
+
 const asRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
 
@@ -128,7 +138,13 @@ const buildFeatureRows = (forecaster: ADForecaster): FeatureRow[] => {
     const feature = asRecord(featureValue);
     const name =
       stringValue(getField(feature, 'feature_name', 'featureName'), '') ||
-      stringValue(getField(feature, 'feature_id', 'featureId'), `Feature ${index + 1}`);
+      stringValue(
+        getField(feature, 'feature_id', 'featureId'),
+        i18n.translate('observability.alerting.forecasterDetailFlyout.fallbackFeatureName', {
+          defaultMessage: 'Feature {index}',
+          values: { index: index + 1 },
+        })
+      );
     const enabled = getField(feature, 'feature_enabled', 'featureEnabled') !== false;
     const metadata = getFeatureMetadata(forecaster, name);
     const aggregationOf = stringValue(metadata.aggregationOf, '');
@@ -165,7 +181,7 @@ const buildFeatureRows = (forecaster: ADForecaster): FeatureRow[] => {
       definition,
       state: (
         <EuiHealth color={enabled ? 'success' : 'subdued'}>
-          {enabled ? 'Enabled' : 'Disabled'}
+          {enabled ? enabledLabel() : disabledLabel()}
         </EuiHealth>
       ),
     };
@@ -201,7 +217,14 @@ export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
   const filterDisplay = buildFilterDisplay(rawForecaster);
   const resultIndex = stringValue(rawForecaster.result_index || rawForecaster.resultIndex);
   const categoryField = getCategoryField(rawForecaster);
-  const forecasterType = asArray(categoryField).length > 0 ? 'High-cardinality' : 'Single stream';
+  const forecasterType =
+    asArray(categoryField).length > 0
+      ? i18n.translate('observability.alerting.forecasterDetailFlyout.highCardinalityType', {
+          defaultMessage: 'High-cardinality',
+        })
+      : i18n.translate('observability.alerting.forecasterDetailFlyout.singleStreamType', {
+          defaultMessage: 'Single stream',
+        });
   const shingleSize = rawForecaster.shingle_size || rawForecaster.shingleSize || EMPTY_VALUE;
   const forecasterJob = getForecasterJob(rawForecaster);
   const jobEnabled = forecasterJob.enabled;
@@ -334,21 +357,57 @@ export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
                 type="column"
                 compressed
                 listItems={[
-                  { title: 'Name', description: forecaster.name },
-                  { title: 'Forecaster type', description: forecasterType },
-                  { title: 'Data source index', description: formatList(rawForecaster.indices) },
-                  { title: 'ID', description: forecaster.id },
                   {
-                    title: 'Timestamp',
+                    title: i18n.translate(
+                      'observability.alerting.forecasterDetailFlyout.settings.name',
+                      { defaultMessage: 'Name' }
+                    ),
+                    description: forecaster.name,
+                  },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.forecasterDetailFlyout.settings.forecasterType',
+                      { defaultMessage: 'Forecaster type' }
+                    ),
+                    description: forecasterType,
+                  },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.forecasterDetailFlyout.settings.dataSourceIndex',
+                      { defaultMessage: 'Data source index' }
+                    ),
+                    description: formatList(rawForecaster.indices),
+                  },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.forecasterDetailFlyout.settings.id',
+                      { defaultMessage: 'ID' }
+                    ),
+                    description: forecaster.id,
+                  },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.forecasterDetailFlyout.settings.timestamp',
+                      { defaultMessage: 'Timestamp' }
+                    ),
                     description: stringValue(rawForecaster.time_field || rawForecaster.timeField),
                   },
                   {
-                    title: 'Last updated',
+                    title: i18n.translate(
+                      'observability.alerting.forecasterDetailFlyout.settings.lastUpdated',
+                      { defaultMessage: 'Last updated' }
+                    ),
                     description: formatTimestamp(
                       rawForecaster.last_update_time || rawForecaster.lastUpdateTime
                     ),
                   },
-                  { title: 'Custom result index', description: resultIndex },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.forecasterDetailFlyout.settings.customResultIndex',
+                      { defaultMessage: 'Custom result index' }
+                    ),
+                    description: resultIndex,
+                  },
                 ]}
               />
               <EuiSpacer size="s" />
@@ -416,18 +475,42 @@ export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
                 type="column"
                 compressed
                 listItems={[
-                  { title: 'Forecast interval', description: forecastIntervalDisplay },
-                  { title: 'Window delay', description: windowDelayDisplay },
                   {
-                    title: 'Horizon',
+                    title: i18n.translate(
+                      'observability.alerting.forecasterDetailFlyout.operational.forecastInterval',
+                      { defaultMessage: 'Forecast interval' }
+                    ),
+                    description: forecastIntervalDisplay,
+                  },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.forecasterDetailFlyout.operational.windowDelay',
+                      { defaultMessage: 'Window delay' }
+                    ),
+                    description: windowDelayDisplay,
+                  },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.forecasterDetailFlyout.operational.horizon',
+                      { defaultMessage: 'Horizon' }
+                    ),
                     description: rawForecaster.horizon
                       ? String(rawForecaster.horizon)
                       : EMPTY_VALUE,
                   },
                   {
-                    title: 'History',
+                    title: i18n.translate(
+                      'observability.alerting.forecasterDetailFlyout.operational.history',
+                      { defaultMessage: 'History' }
+                    ),
                     description: rawForecaster.history
-                      ? `${rawForecaster.history} intervals`
+                      ? i18n.translate(
+                          'observability.alerting.forecasterDetailFlyout.operational.historyIntervals',
+                          {
+                            defaultMessage: '{history} intervals',
+                            values: { history: rawForecaster.history },
+                          }
+                        )
                       : EMPTY_VALUE,
                   },
                 ]}
@@ -453,10 +536,25 @@ export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
                 type="column"
                 compressed
                 listItems={[
-                  { title: 'Category field', description: formatList(categoryField) },
-                  { title: 'Shingle size', description: String(shingleSize) },
                   {
-                    title: 'Imputation method',
+                    title: i18n.translate(
+                      'observability.alerting.forecasterDetailFlyout.additional.categoryField',
+                      { defaultMessage: 'Category field' }
+                    ),
+                    description: formatList(categoryField),
+                  },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.forecasterDetailFlyout.additional.shingleSize',
+                      { defaultMessage: 'Shingle size' }
+                    ),
+                    description: String(shingleSize),
+                  },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.forecasterDetailFlyout.additional.imputationMethod',
+                      { defaultMessage: 'Imputation method' }
+                    ),
                     description: buildImputationDisplay(rawForecaster),
                   },
                 ]}
@@ -483,21 +581,36 @@ export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
                 compressed
                 listItems={[
                   {
-                    title: 'Real-time job',
+                    title: i18n.translate(
+                      'observability.alerting.forecasterDetailFlyout.job.realTimeJob',
+                      { defaultMessage: 'Real-time job' }
+                    ),
                     description:
                       typeof jobEnabled === 'boolean'
                         ? jobEnabled
-                          ? 'Enabled'
-                          : 'Disabled'
+                          ? enabledLabel()
+                          : disabledLabel()
                         : EMPTY_VALUE,
                   },
-                  { title: 'Current state', description: currentState },
                   {
-                    title: 'Enabled time',
+                    title: i18n.translate(
+                      'observability.alerting.forecasterDetailFlyout.job.currentState',
+                      { defaultMessage: 'Current state' }
+                    ),
+                    description: currentState,
+                  },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.forecasterDetailFlyout.job.enabledTime',
+                      { defaultMessage: 'Enabled time' }
+                    ),
                     description: formatTimestamp(forecasterJob.enabled_time),
                   },
                   {
-                    title: 'Disabled time',
+                    title: i18n.translate(
+                      'observability.alerting.forecasterDetailFlyout.job.disabledTime',
+                      { defaultMessage: 'Disabled time' }
+                    ),
                     description: formatTimestamp(forecasterJob.disabled_time),
                   },
                 ]}

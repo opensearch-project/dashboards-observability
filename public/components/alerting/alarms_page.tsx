@@ -343,7 +343,9 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     });
   }, [rawAlerts]);
   const alertsWarnings = useMemo(() => {
-    const failed = (alertsData?.datasourceStatus || []).filter((s) => s.status === 'error');
+    const failed = (alertsData?.datasourceStatus || []).filter(
+      (s) => s.status === 'error' || !!s.error
+    );
     return failed.map((s) => ({
       datasourceName: s.datasourceName,
       error:
@@ -442,6 +444,14 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   const [editTarget, setEditTarget] = useState<{ dsId: string; ruleId: string } | null>(null);
   const [selectedAlert, setSelectedAlert] = useState<UnifiedAlertSummary | null>(null);
   const { setToast: addToast } = useToast();
+
+  const handleNavigateToDetectorResults = useCallback((href: string) => {
+    if (coreRefs.application?.navigateToUrl) {
+      coreRefs.application.navigateToUrl(href);
+      return;
+    }
+    window.location.assign(href);
+  }, []);
 
   const visibleRules = rules.filter((r) => !deletedRuleIds.has(r.id));
 
@@ -1195,6 +1205,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           datasources={datasources}
           allAlerts={alerts}
           onClose={() => setSelectedAlert(null)}
+          onNavigateToDetectorResults={handleNavigateToDetectorResults}
         />
       )}
       {selectedAlert && selectedAlert.alertKind !== 'anomaly' && (

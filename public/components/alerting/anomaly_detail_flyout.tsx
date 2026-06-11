@@ -111,6 +111,7 @@ export interface AnomalyDetailFlyoutProps {
   datasources: Datasource[];
   allAlerts?: UnifiedAlertSummary[];
   onClose: () => void;
+  onNavigateToDetectorResults?: (href: string) => void;
 }
 
 export interface AnomalyDetailContentProps {
@@ -497,6 +498,7 @@ export const AnomalyDetailFlyout: React.FC<AnomalyDetailFlyoutProps> = ({
   datasources,
   allAlerts = [],
   onClose,
+  onNavigateToDetectorResults,
 }) => {
   const labels = anomaly.labels || {};
   const detectorId = labels.detector_id || anomaly.monitorId;
@@ -512,6 +514,10 @@ export const AnomalyDetailFlyout: React.FC<AnomalyDetailFlyoutProps> = ({
   const navigateToDetectorResults = () => {
     if (!detectorResultsHref) return;
     onClose();
+    if (onNavigateToDetectorResults) {
+      onNavigateToDetectorResults(detectorResultsHref);
+      return;
+    }
     window.location.assign(detectorResultsHref);
   };
 

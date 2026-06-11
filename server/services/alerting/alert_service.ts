@@ -154,12 +154,42 @@ interface ADSearchResponse<TSource> {
   };
 }
 
+interface ADAnomalyFetchResult {
+  anomalies: ADAnomalyResult[];
+  truncated: boolean;
+}
+
 const ALERT_ANOMALY_LINK_TOLERANCE_MS = 60 * 60 * 1000;
 
 function timestampMs(value?: string): number {
   if (!value) return NaN;
   const ms = new Date(value).getTime();
   return Number.isFinite(ms) ? ms : NaN;
+}
+
+function buildAnomalyByResultId(
+  anomalies: UnifiedAlertSummary[]
+): Map<string, UnifiedAlertSummary> {
+  const anomalyByResultId = new Map<string, UnifiedAlertSummary>();
+  for (const anomaly of anomalies) {
+    const resultId = anomaly.labels?.anomaly_result_id;
+    if (resultId) anomalyByResultId.set(resultId, anomaly);
+  }
+  return anomalyByResultId;
+}
+
+function buildAnomaliesByDetectorId(
+  anomalies: UnifiedAlertSummary[]
+): Map<string, UnifiedAlertSummary[]> {
+  const anomaliesByDetectorId = new Map<string, UnifiedAlertSummary[]>();
+  for (const anomaly of anomalies) {
+    const detectorId = anomaly.labels?.detector_id;
+    if (!detectorId) continue;
+    const detectorAnomalies = anomaliesByDetectorId.get(detectorId) || [];
+    detectorAnomalies.push(anomaly);
+    anomaliesByDetectorId.set(detectorId, detectorAnomalies);
+  }
+  return anomaliesByDetectorId;
 }
 
 /**
@@ -719,29 +749,67 @@ export class MultiBackendAlertService {
     ctx?: RequestHandlerContext
   ): Promise<FetchAlertsRawResult> {
     if (ds.type === 'opensearch' && this.osBackend) {
-      const alertResponse = range
-        ? await this.osBackend.getAlerts(client, {
-            startMs: range.startMs,
-            endMs: range.endMs,
-          })
-        : await this.osBackend.getAlerts(client);
+      const partialErrors: string[] = [];
+      const [
+        alertSettled,
+        anomalySettled,
+        detectorSettled,
+        monitorSettled,
+      ] = await Promise.allSettled([
+        range
+          ? this.osBackend.getAlerts(client, {
+              startMs: range.startMs,
+              endMs: range.endMs,
+            })
+          : this.osBackend.getAlerts(client),
+        this.fetchADAnomalies(client, range),
+        this.fetchADDetectors(client),
+        this.osBackend.getMonitors(client),
+      ] as const);
+
+      if (alertSettled.status === 'rejected') {
+        throw alertSettled.reason;
+      }
+
+      const alertResponse = alertSettled.value;
       const osAlerts = alertResponse.alerts.map((alert) => osAlertToUnified(alert, ds.id));
       let anomalySummaries: UnifiedAlertSummary[] = [];
       let detectorNameById: Record<string, string> = {};
-      try {
-        const adAnomalies = await this.fetchADAnomalies(client, range);
-        if (adAnomalies.length > 0) {
-          const detectors = await this.fetchADDetectors(client);
-          detectorNameById = Object.fromEntries(
-            detectors.map((detector) => [detector.id, detector.name || detector.id])
-          );
-          anomalySummaries = adAnomalies.map((anomaly) =>
-            adAnomalyToUnified(anomaly, ds.id, detectorNameById)
-          );
-        }
-      } catch (err) {
+      let anomalyResultsTruncated = false;
+      let monitors: OSMonitor[] = [];
+
+      if (detectorSettled.status === 'fulfilled') {
+        detectorNameById = Object.fromEntries(
+          detectorSettled.value.map((detector) => [detector.id, detector.name || detector.id])
+        );
+      } else {
+        const message = extractErrorMessage(detectorSettled.reason);
+        partialErrors.push(`Failed to fetch detector metadata: ${message}`);
+        this.logger.debug(`Failed to fetch detector metadata from ${ds.name}: ${message}`);
+      }
+
+      if (anomalySettled.status === 'fulfilled') {
+        anomalyResultsTruncated = anomalySettled.value.truncated;
+        anomalySummaries = anomalySettled.value.anomalies.map((anomaly) =>
+          adAnomalyToUnified(anomaly, ds.id, detectorNameById)
+        );
+      } else {
+        const message = extractErrorMessage(anomalySettled.reason);
+        partialErrors.push(`Failed to fetch anomaly results: ${message}`);
         this.logger.debug(
-          `Failed to fetch anomaly results from ${ds.name}: ${extractErrorMessage(err)}`
+          `Failed to fetch anomaly results from ${ds.name}: ${extractErrorMessage(
+            anomalySettled.reason
+          )}`
+        );
+      }
+
+      if (monitorSettled.status === 'fulfilled') {
+        monitors = monitorSettled.value;
+      } else {
+        const message = extractErrorMessage(monitorSettled.reason);
+        partialErrors.push(`Failed to fetch monitor metadata for anomaly association: ${message}`);
+        this.logger.debug(
+          `Failed to fetch monitor metadata for anomaly association from ${ds.name}: ${message}`
         );
       }
 
@@ -750,11 +818,14 @@ export class MultiBackendAlertService {
         ds,
         osAlerts,
         anomalySummaries,
-        detectorNameById
+        monitors,
+        detectorNameById,
+        partialErrors
       );
       return {
         alerts: [...alerts, ...standaloneAnomalies],
-        truncated: alertResponse.truncated,
+        truncated: alertResponse.truncated || anomalyResultsTruncated,
+        error: partialErrors.length > 0 ? partialErrors.join('; ') : undefined,
       };
     }
 
@@ -804,25 +875,15 @@ export class MultiBackendAlertService {
     ds: Datasource,
     alerts: UnifiedAlertSummary[],
     anomalies: UnifiedAlertSummary[],
-    detectorNameById: Record<string, string> = {}
+    monitors: OSMonitor[],
+    detectorNameById: Record<string, string> = {},
+    partialErrors: string[] = []
   ): Promise<{ alerts: UnifiedAlertSummary[]; standaloneAnomalies: UnifiedAlertSummary[] }> {
     if (alerts.length === 0 || !this.osBackend) {
       return { alerts, standaloneAnomalies: anomalies };
     }
     // Continue even when `anomalies` is empty: AD monitors can carry explicit
     // result ids that should be fetched and shown in the alert detail flyout.
-
-    let monitors: OSMonitor[] = [];
-    try {
-      monitors = await this.osBackend.getMonitors(client);
-    } catch (err) {
-      this.logger.debug(
-        `Failed to fetch monitors for anomaly alert association from ${
-          ds.name
-        }: ${extractErrorMessage(err)}`
-      );
-      return { alerts, standaloneAnomalies: anomalies };
-    }
 
     const detectorIdsByMonitorId = new Map<string, Set<string>>();
     const anomalyResultIdsByMonitorId = new Map<string, Set<string>>();
@@ -844,11 +905,7 @@ export class MultiBackendAlertService {
 
     let candidateAnomalies = anomalies;
     let relatedDetectorNameById = detectorNameById;
-    const anomalyByResultId = new Map<string, UnifiedAlertSummary>();
-    for (const anomaly of candidateAnomalies) {
-      const resultId = anomaly.labels?.anomaly_result_id;
-      if (resultId) anomalyByResultId.set(resultId, anomaly);
-    }
+    let anomalyByResultId = buildAnomalyByResultId(candidateAnomalies);
 
     const missingExplicitIds = new Set<string>();
     for (const alert of alerts) {
@@ -877,10 +934,10 @@ export class MultiBackendAlertService {
               ),
             };
           } catch (err) {
+            const message = extractErrorMessage(err);
+            partialErrors.push(`Failed to fetch detector names for linked anomalies: ${message}`);
             this.logger.debug(
-              `Failed to fetch detector names for linked anomalies from ${
-                ds.name
-              }: ${extractErrorMessage(err)}`
+              `Failed to fetch detector names for linked anomalies from ${ds.name}: ${message}`
             );
           }
         }
@@ -893,14 +950,16 @@ export class MultiBackendAlertService {
         );
         candidateAnomalies = [...candidateAnomalies, ...fetchedSummaries];
       } catch (err) {
+        const message = extractErrorMessage(err);
+        partialErrors.push(`Failed to fetch explicitly linked anomaly results: ${message}`);
         this.logger.debug(
-          `Failed to fetch explicitly linked anomaly results from ${ds.name}: ${extractErrorMessage(
-            err
-          )}`
+          `Failed to fetch explicitly linked anomaly results from ${ds.name}: ${message}`
         );
       }
     }
 
+    anomalyByResultId = buildAnomalyByResultId(candidateAnomalies);
+    const anomaliesByDetectorId = buildAnomaliesByDetectorId(candidateAnomalies);
     const linkedAnomalyIds = new Set<string>();
     const alertsWithRelatedAnomalies = alerts.map((alert) => {
       const detectorIds = alert.monitorId ? detectorIdsByMonitorId.get(alert.monitorId) : undefined;
@@ -911,7 +970,8 @@ export class MultiBackendAlertService {
       const relatedAnomaly = this.findRelatedAnomaly(
         alert,
         detectorIds,
-        candidateAnomalies,
+        anomalyByResultId,
+        anomaliesByDetectorId,
         linkedAnomalyIds,
         anomalyResultIds
       );
@@ -929,24 +989,25 @@ export class MultiBackendAlertService {
   private findRelatedAnomaly(
     alert: UnifiedAlertSummary,
     detectorIds: Set<string>,
-    anomalies: UnifiedAlertSummary[],
+    anomalyByResultId: Map<string, UnifiedAlertSummary>,
+    anomaliesByDetectorId: Map<string, UnifiedAlertSummary[]>,
     linkedAnomalyIds: Set<string>,
     anomalyResultIds?: Set<string>
   ): UnifiedAlertSummary | undefined {
     if (anomalyResultIds && anomalyResultIds.size > 0) {
-      const explicitMatch = anomalies
-        .filter((anomaly) => {
-          if (linkedAnomalyIds.has(anomaly.id)) return false;
-          const detectorId = anomaly.labels?.detector_id;
-          const anomalyResultId = anomaly.labels?.anomaly_result_id;
-          return (
-            !!detectorId &&
-            detectorIds.has(detectorId) &&
-            !!anomalyResultId &&
-            anomalyResultIds.has(anomalyResultId)
-          );
-        })
-        .sort((a, b) => timestampMs(b.startTime) - timestampMs(a.startTime))[0];
+      let explicitMatch: UnifiedAlertSummary | undefined;
+      for (const anomalyResultId of anomalyResultIds) {
+        const anomaly = anomalyByResultId.get(anomalyResultId);
+        if (!anomaly || linkedAnomalyIds.has(anomaly.id)) continue;
+        const detectorId = anomaly.labels?.detector_id;
+        if (!detectorId || !detectorIds.has(detectorId)) continue;
+        if (
+          !explicitMatch ||
+          timestampMs(anomaly.startTime) > timestampMs(explicitMatch.startTime)
+        ) {
+          explicitMatch = anomaly;
+        }
+      }
       if (explicitMatch) return explicitMatch;
     }
 
@@ -960,24 +1021,48 @@ export class MultiBackendAlertService {
     const windowEnd = Math.max(start, end) + ALERT_ANOMALY_LINK_TOLERANCE_MS;
     const reference = Math.max(start, end);
 
-    return anomalies
-      .filter((anomaly) => {
-        if (linkedAnomalyIds.has(anomaly.id)) return false;
-        const detectorId = anomaly.labels?.detector_id;
-        if (!detectorId || !detectorIds.has(detectorId)) return false;
+    const fallbackMatches: UnifiedAlertSummary[] = [];
+    detectorIds.forEach((detectorId) => {
+      const detectorAnomalies = anomaliesByDetectorId.get(detectorId) || [];
+      detectorAnomalies.forEach((anomaly) => {
+        if (linkedAnomalyIds.has(anomaly.id)) return;
         const anomalyStart = timestampMs(anomaly.startTime);
         const anomalyEnd = timestampMs(anomaly.lastUpdated);
         const candidateStart = Number.isFinite(anomalyStart) ? anomalyStart : anomalyEnd;
         const candidateEnd = Number.isFinite(anomalyEnd) ? anomalyEnd : candidateStart;
-        if (!Number.isFinite(candidateStart) || !Number.isFinite(candidateEnd)) return false;
-        return candidateStart <= windowEnd && candidateEnd >= windowStart;
-      })
-      .sort((a, b) => {
-        const aDistance = Math.abs(timestampMs(a.startTime) - reference);
-        const bDistance = Math.abs(timestampMs(b.startTime) - reference);
-        if (aDistance !== bDistance) return aDistance - bDistance;
-        return timestampMs(b.startTime) - timestampMs(a.startTime);
-      })[0];
+        if (!Number.isFinite(candidateStart) || !Number.isFinite(candidateEnd)) return;
+        if (candidateStart <= windowEnd && candidateEnd >= windowStart) {
+          fallbackMatches.push(anomaly);
+        }
+      });
+    });
+
+    const highCardinalityEntities = new Set(
+      fallbackMatches.map((anomaly) => anomaly.labels?.entity || '').filter(Boolean)
+    );
+    if (highCardinalityEntities.size > 1) {
+      // Alert documents do not include the HC entity that triggered the monitor.
+      // In that case, linking to the nearest entity would present a possibly
+      // wrong root cause as definitive, so keep the anomalies as standalone rows.
+      return undefined;
+    }
+
+    let nearestMatch: UnifiedAlertSummary | undefined;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+    let nearestStart = Number.NEGATIVE_INFINITY;
+    fallbackMatches.forEach((anomaly) => {
+      const anomalyStart = timestampMs(anomaly.startTime);
+      const distance = Math.abs(anomalyStart - reference);
+      if (
+        distance < nearestDistance ||
+        (distance === nearestDistance && anomalyStart > nearestStart)
+      ) {
+        nearestMatch = anomaly;
+        nearestDistance = distance;
+        nearestStart = anomalyStart;
+      }
+    });
+    return nearestMatch;
   }
 
   private async fetchRulesRaw(
@@ -1048,7 +1133,7 @@ export class MultiBackendAlertService {
   private async fetchADAnomalies(
     client: AlertingOSClient,
     range?: ResolvedRange
-  ): Promise<ADAnomalyResult[]> {
+  ): Promise<ADAnomalyFetchResult> {
     const filter: Array<Record<string, unknown>> = [{ range: { anomaly_grade: { gt: 0 } } }];
     if (range) {
       filter.push({
@@ -1064,15 +1149,19 @@ export class MultiBackendAlertService {
       method: 'POST',
       path: '/_plugins/_anomaly_detection/detectors/results/_search',
       body: {
-        size: DEFAULT_MAX_RESULTS,
+        size: DEFAULT_MAX_RESULTS + 1,
         query: { bool: { filter } },
         sort: [{ data_start_time: { order: 'desc', unmapped_type: 'long' } }],
       },
     });
-    return (response.body.hits?.hits || []).map((hit) => ({
-      ...(hit._source || {}),
-      id: hit._id,
-    }));
+    const hits = response.body.hits?.hits || [];
+    return {
+      anomalies: hits.slice(0, DEFAULT_MAX_RESULTS).map((hit) => ({
+        ...(hit._source || {}),
+        id: hit._id,
+      })),
+      truncated: hits.length > DEFAULT_MAX_RESULTS,
+    };
   }
 
   private async fetchADAnomaliesByIds(

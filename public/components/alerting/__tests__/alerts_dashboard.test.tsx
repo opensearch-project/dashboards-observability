@@ -188,6 +188,39 @@ describe('AlertsDashboard', () => {
     expect(screen.getByText('1 filter')).toBeInTheDocument();
   });
 
+  it('filters by alert type and hides noisy anomaly label keys', () => {
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        alerts={[
+          sampleAlert,
+          buildAnomaly({
+            labels: {
+              detector_id: 'detector-1',
+              detector_name: 'test',
+              entity: 'DestCityName=London',
+              anomaly_result_id: 'result-1',
+              source: 'anomaly_detection',
+            },
+          }),
+        ]}
+      />
+    );
+
+    const typeFacet = within(screen.getByTestId('facetGroup-type'));
+    expect(typeFacet.getByText('alert')).toBeInTheDocument();
+    expect(typeFacet.getByText('anomaly')).toBeInTheDocument();
+
+    expect(screen.queryByText('anomaly_result_id')).not.toBeInTheDocument();
+    expect(screen.queryByText('source')).not.toBeInTheDocument();
+
+    fireEvent.click(typeFacet.getByLabelText(/anomaly/));
+
+    expect(screen.queryByText('HighCPU')).not.toBeInTheDocument();
+    expect(screen.getByText('test - DestCityName=London')).toBeInTheDocument();
+    expect(screen.getByText('1 filter')).toBeInTheDocument();
+  });
+
   it('renders timeline title without the (24h) suffix', () => {
     const { getByText, queryByText } = render(
       <AlertsDashboard {...baseProps} alerts={[sampleAlert]} />

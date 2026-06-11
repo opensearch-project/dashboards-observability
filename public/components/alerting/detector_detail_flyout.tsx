@@ -50,6 +50,16 @@ interface FeatureRow {
 
 const EMPTY_VALUE = '—';
 
+const enabledLabel = () =>
+  i18n.translate('observability.alerting.detectorDetailFlyout.enabledLabel', {
+    defaultMessage: 'Enabled',
+  });
+
+const disabledLabel = () =>
+  i18n.translate('observability.alerting.detectorDetailFlyout.disabledLabel', {
+    defaultMessage: 'Disabled',
+  });
+
 const asRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
 
@@ -121,7 +131,13 @@ const buildFeatureRows = (detector: ADDetector): FeatureRow[] => {
     const feature = asRecord(featureValue);
     const name =
       stringValue(getField(feature, 'feature_name', 'featureName'), '') ||
-      stringValue(getField(feature, 'feature_id', 'featureId'), `Feature ${index + 1}`);
+      stringValue(
+        getField(feature, 'feature_id', 'featureId'),
+        i18n.translate('observability.alerting.detectorDetailFlyout.fallbackFeatureName', {
+          defaultMessage: 'Feature {index}',
+          values: { index: index + 1 },
+        })
+      );
     const enabled = getField(feature, 'feature_enabled', 'featureEnabled') !== false;
     const metadata = getFeatureMetadata(detector, name);
     const aggregationOf = stringValue(metadata.aggregationOf, '');
@@ -157,7 +173,7 @@ const buildFeatureRows = (detector: ADDetector): FeatureRow[] => {
       definition,
       state: (
         <EuiHealth color={enabled ? 'success' : 'subdued'}>
-          {enabled ? 'Enabled' : 'Disabled'}
+          {enabled ? enabledLabel() : disabledLabel()}
         </EuiHealth>
       ),
     };
@@ -188,7 +204,12 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
   const rawDetector = (detail?.raw as ADDetector | undefined) || detectorFromSummary(detector);
   const description =
     detail?.description || rawDetector.description || detector.annotations.description || '';
-  const detectorType = stringValue(rawDetector.detector_type || detector.group, 'Detector');
+  const detectorType = stringValue(
+    rawDetector.detector_type || detector.group,
+    i18n.translate('observability.alerting.detectorDetailFlyout.detectorTypeFallback', {
+      defaultMessage: 'Detector',
+    })
+  );
   const detectorJob = getDetectorJob(rawDetector);
   const featureRows = buildFeatureRows(rawDetector);
   const filterDisplay = buildFilterDisplay(rawDetector);
@@ -199,7 +220,7 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
   const detectorIntervalDisplay = formatPeriod(rawDetector.detection_interval);
   const frequencyDisplay = formatPeriod(rawDetector.frequency);
   const realTimeJobDisplay =
-    typeof jobEnabled === 'boolean' ? (jobEnabled ? 'Enabled' : 'Disabled') : EMPTY_VALUE;
+    typeof jobEnabled === 'boolean' ? (jobEnabled ? enabledLabel() : disabledLabel()) : EMPTY_VALUE;
 
   const featureColumns: Array<EuiBasicTableColumn<FeatureRow>> = [
     {
@@ -318,16 +339,57 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
                 type="column"
                 compressed
                 listItems={[
-                  { title: 'Name', description: detector.name },
-                  { title: 'Detector type', description: detectorType },
-                  { title: 'Data source index', description: formatList(rawDetector.indices) },
-                  { title: 'ID', description: detector.id },
-                  { title: 'Timestamp', description: stringValue(rawDetector.time_field) },
                   {
-                    title: 'Last updated',
+                    title: i18n.translate(
+                      'observability.alerting.detectorDetailFlyout.settings.name',
+                      { defaultMessage: 'Name' }
+                    ),
+                    description: detector.name,
+                  },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.detectorDetailFlyout.settings.detectorType',
+                      { defaultMessage: 'Detector type' }
+                    ),
+                    description: detectorType,
+                  },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.detectorDetailFlyout.settings.dataSourceIndex',
+                      { defaultMessage: 'Data source index' }
+                    ),
+                    description: formatList(rawDetector.indices),
+                  },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.detectorDetailFlyout.settings.id',
+                      {
+                        defaultMessage: 'ID',
+                      }
+                    ),
+                    description: detector.id,
+                  },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.detectorDetailFlyout.settings.timestamp',
+                      { defaultMessage: 'Timestamp' }
+                    ),
+                    description: stringValue(rawDetector.time_field),
+                  },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.detectorDetailFlyout.settings.lastUpdated',
+                      { defaultMessage: 'Last updated' }
+                    ),
                     description: formatTimestamp(rawDetector.last_update_time),
                   },
-                  { title: 'Custom result index', description: resultIndex },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.detectorDetailFlyout.settings.customResultIndex',
+                      { defaultMessage: 'Custom result index' }
+                    ),
+                    description: resultIndex,
+                  },
                 ]}
               />
               <EuiSpacer size="s" />
@@ -395,17 +457,41 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
                 type="column"
                 compressed
                 listItems={[
-                  { title: 'Detector interval', description: detectorIntervalDisplay },
-                  { title: 'Window delay', description: formatPeriod(rawDetector.window_delay) },
                   {
-                    title: 'Frequency',
+                    title: i18n.translate(
+                      'observability.alerting.detectorDetailFlyout.operational.detectorInterval',
+                      { defaultMessage: 'Detector interval' }
+                    ),
+                    description: detectorIntervalDisplay,
+                  },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.detectorDetailFlyout.operational.windowDelay',
+                      { defaultMessage: 'Window delay' }
+                    ),
+                    description: formatPeriod(rawDetector.window_delay),
+                  },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.detectorDetailFlyout.operational.frequency',
+                      { defaultMessage: 'Frequency' }
+                    ),
                     description:
                       frequencyDisplay === EMPTY_VALUE ? detectorIntervalDisplay : frequencyDisplay,
                   },
                   {
-                    title: 'History',
+                    title: i18n.translate(
+                      'observability.alerting.detectorDetailFlyout.operational.history',
+                      { defaultMessage: 'History' }
+                    ),
                     description: rawDetector.history
-                      ? `${rawDetector.history} intervals`
+                      ? i18n.translate(
+                          'observability.alerting.detectorDetailFlyout.operational.historyIntervals',
+                          {
+                            defaultMessage: '{history} intervals',
+                            values: { history: rawDetector.history },
+                          }
+                        )
                       : EMPTY_VALUE,
                   },
                 ]}
@@ -431,9 +517,27 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
                 type="column"
                 compressed
                 listItems={[
-                  { title: 'Category field', description: categoryField },
-                  { title: 'Shingle size', description: String(shingleSize) },
-                  { title: 'Imputation method', description: buildImputationDisplay(rawDetector) },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.detectorDetailFlyout.additional.categoryField',
+                      { defaultMessage: 'Category field' }
+                    ),
+                    description: categoryField,
+                  },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.detectorDetailFlyout.additional.shingleSize',
+                      { defaultMessage: 'Shingle size' }
+                    ),
+                    description: String(shingleSize),
+                  },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.detectorDetailFlyout.additional.imputationMethod',
+                      { defaultMessage: 'Imputation method' }
+                    ),
+                    description: buildImputationDisplay(rawDetector),
+                  },
                 ]}
               />
             </EuiAccordion>
@@ -458,12 +562,24 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
                 compressed
                 listItems={[
                   {
-                    title: 'Real-time job',
+                    title: i18n.translate(
+                      'observability.alerting.detectorDetailFlyout.job.realTimeJob',
+                      { defaultMessage: 'Real-time job' }
+                    ),
                     description: realTimeJobDisplay,
                   },
-                  { title: 'Enabled time', description: formatTimestamp(detectorJob.enabled_time) },
                   {
-                    title: 'Disabled time',
+                    title: i18n.translate(
+                      'observability.alerting.detectorDetailFlyout.job.enabledTime',
+                      { defaultMessage: 'Enabled time' }
+                    ),
+                    description: formatTimestamp(detectorJob.enabled_time),
+                  },
+                  {
+                    title: i18n.translate(
+                      'observability.alerting.detectorDetailFlyout.job.disabledTime',
+                      { defaultMessage: 'Disabled time' }
+                    ),
                     description: formatTimestamp(detectorJob.disabled_time),
                   },
                 ]}
