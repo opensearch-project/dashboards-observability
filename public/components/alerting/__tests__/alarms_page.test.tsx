@@ -391,10 +391,11 @@ describe('AlarmsPage', () => {
         id: 'mon-1',
         name: 'Test Monitor',
         datasourceId: 'ds-1',
+        definitionType: 'monitor',
       });
     });
 
-    expect(mockGetRuleDetail).toHaveBeenCalledWith('ds-1', 'mon-1');
+    expect(mockGetRuleDetail).toHaveBeenCalledWith('ds-1', 'mon-1', 'monitor');
     expect(mockCreateMonitor).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'Test Monitor (Copy)' }),
       'ds-1'
