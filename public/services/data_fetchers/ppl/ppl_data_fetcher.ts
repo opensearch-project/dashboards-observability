@@ -25,6 +25,8 @@ import {
   composeFinalQueryWithoutTimestamp,
   getDescribeQueryIndexFromRawQuery,
 } from '../../../components/common/query_utils';
+import { reset as resetCountDistribution } from '../../../components/event_analytics/redux/slices/count_distribution_slice';
+import { reset as resetPatterns } from '../../../components/event_analytics/redux/slices/patterns_slice';
 import { DataFetcherBase } from '../fetcher_base';
 import { IDataFetcher } from '../fetch_interface';
 
@@ -144,7 +146,11 @@ export class PPLDataFetcher extends DataFetcherBase implements IDataFetcher {
     }
     // still need all fields when query contains stats
     const hasStats = finalQuery.match(PPL_STATS_REGEX);
-    if (hasStats) getAvailableFields(`search source=${this.queryIndex}`);
+    if (hasStats) {
+      getAvailableFields(`search source=${this.queryIndex}`);
+      dispatch(resetCountDistribution({ tabId }));
+      dispatch(resetPatterns({ tabId }));
+    }
     if (!hasStats) {
       getCountVisualizations(selectedInterval.current.value.replace(/^auto_/, ''));
       // patterns
