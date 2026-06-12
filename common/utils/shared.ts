@@ -99,3 +99,42 @@ export const dataSourceFilterFnByEngineType = (dataSource: SavedObject<DataSourc
 export const dataSourceFilterFnExcludeAnalyticEngine = (
   dataSource: SavedObject<DataSourceAttributes>
 ) => dataSourceFilterFnByEngineType(dataSource) && dataSourceFilterFn(dataSource);
+
+// Given a set of data-source saved-object ids, returns the subset whose
+// `dataSourceEngineType` is in `unsupportedOSDataSourceEngineTypes` (AnalyticEngine /
+// Mustang). Callers that list datasets (index patterns) bound to a data source — e.g. the
+// APM settings modal's traces / service-map selectors — use this to drop datasets that sit
+// on a Mustang domain, since those serve PPL/SQL but not the DSL aggregations APM issues.
+//
+// Resolves engine type with a single `bulkGet` on `data-source` saved objects. Fails open:
+// if the lookup throws, an empty set is returned so callers keep showing every dataset.
+export const getUnsupportedEngineDataSourceIds = async (
+  dataSourceIds: string[]
+): Promise<Set<string>> => {
+  const unsupported = new Set<string>();
+  const ids = Array.from(new Set(dataSourceIds.filter(Boolean)));
+  if (UNSUPPORTED_ENGINE_TYPES.length === 0 || ids.length === 0) {
+    return unsupported;
+  }
+
+  const blocked = new Set(UNSUPPORTED_ENGINE_TYPES);
+  try {
+    const response = await coreRefs.savedObjectsClient!.bulkGet<DataSourceAttributes>(
+      ids.map((id) => ({ id, type: 'data-source' }))
+    );
+    for (const dataSource of response.savedObjects) {
+      if (dataSource.error) {
+        continue;
+      }
+      const engineType = dataSource.attributes?.dataSourceEngineType;
+      if (engineType && blocked.has(engineType)) {
+        unsupported.add(dataSource.id);
+      }
+    }
+  } catch {
+    // Data-source lookup failed — return an empty set so callers fail open.
+    return new Set<string>();
+  }
+
+  return unsupported;
+};
