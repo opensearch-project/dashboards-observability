@@ -5,6 +5,8 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { useDependencyMetrics } from '../use_dependency_metrics';
+import { PromQLSearchService } from '../../../query_services/promql_search_service';
+import { useApmConfig } from '../../../config/apm_config_context';
 import { GroupedDependency } from '../../../common/types/service_details_types';
 
 // Mock the PromQLSearchService
@@ -12,6 +14,14 @@ const mockExecuteInstantQuery = jest.fn();
 jest.mock('../../../query_services/promql_search_service', () => ({
   PromQLSearchService: jest.fn().mockImplementation(() => ({
     executeInstantQuery: mockExecuteInstantQuery,
+  })),
+}));
+
+// Mock the APM config context — the hook sources the Prometheus connection meta from it.
+const mockConfigMeta = { key: 'context-meta-value' };
+jest.mock('../../../config/apm_config_context', () => ({
+  useApmConfig: jest.fn(() => ({
+    config: { prometheusDataSource: { meta: mockConfigMeta } },
   })),
 }));
 
@@ -365,6 +375,22 @@ describe('useDependencyMetrics', () => {
       // Keys should be "serviceName:remoteOperation"
       expect(result.current.metrics.has('cart:AddItem')).toBe(true);
       expect(result.current.metrics.has('payment:ProcessPayment')).toBe(true);
+    });
+  });
+
+  describe('prometheus connection meta', () => {
+    it('should construct PromQLSearchService with meta sourced from APM config context', () => {
+      renderHook(() => useDependencyMetrics(defaultParams));
+
+      expect(PromQLSearchService).toHaveBeenCalledWith('prometheus-1', mockConfigMeta);
+    });
+
+    it('should pass undefined meta when the config has no connection meta', () => {
+      (useApmConfig as jest.Mock).mockReturnValueOnce({ config: null });
+
+      renderHook(() => useDependencyMetrics(defaultParams));
+
+      expect(PromQLSearchService).toHaveBeenCalledWith('prometheus-1', undefined);
     });
   });
 });
