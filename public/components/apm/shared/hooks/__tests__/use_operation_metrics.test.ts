@@ -5,12 +5,22 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { useOperationMetrics } from '../use_operation_metrics';
+import { PromQLSearchService } from '../../../query_services/promql_search_service';
+import { useApmConfig } from '../../../config/apm_config_context';
 
 // Mock the PromQLSearchService
 const mockExecuteInstantQuery = jest.fn();
 jest.mock('../../../query_services/promql_search_service', () => ({
   PromQLSearchService: jest.fn().mockImplementation(() => ({
     executeInstantQuery: mockExecuteInstantQuery,
+  })),
+}));
+
+// Mock the APM config context — the hook sources the Prometheus connection meta from it.
+const mockConfigMeta = { key: 'context-meta-value' };
+jest.mock('../../../config/apm_config_context', () => ({
+  useApmConfig: jest.fn(() => ({
+    config: { prometheusDataSource: { meta: mockConfigMeta } },
   })),
 }));
 
@@ -301,6 +311,22 @@ describe('useOperationMetrics', () => {
       const call = mockExecuteInstantQuery.mock.calls[0][0];
       const expectedEndTime = Math.floor(defaultParams.endTime.getTime() / 1000);
       expect(call.time).toBe(expectedEndTime);
+    });
+  });
+
+  describe('prometheus connection meta', () => {
+    it('should construct PromQLSearchService with meta sourced from APM config context', () => {
+      renderHook(() => useOperationMetrics(defaultParams));
+
+      expect(PromQLSearchService).toHaveBeenCalledWith('prometheus-1', mockConfigMeta);
+    });
+
+    it('should pass undefined meta when the config has no connection meta', () => {
+      (useApmConfig as jest.Mock).mockReturnValueOnce({ config: null });
+
+      renderHook(() => useOperationMetrics(defaultParams));
+
+      expect(PromQLSearchService).toHaveBeenCalledWith('prometheus-1', undefined);
     });
   });
 });
