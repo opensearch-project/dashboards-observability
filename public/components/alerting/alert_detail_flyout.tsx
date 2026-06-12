@@ -31,6 +31,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { UnifiedAlert, UnifiedAlertSummary, Datasource } from '../../../common/types/alerting';
+import { AnomalyDetailContent } from './anomaly_detail_flyout';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { SEVERITY_COLORS, STATE_COLORS } from './shared_constants';
 
@@ -49,6 +50,7 @@ const INTERNAL_LABEL_KEYS = new Set([
 export interface AlertDetailFlyoutProps {
   alert: UnifiedAlertSummary;
   datasources: Datasource[];
+  allAlerts?: UnifiedAlertSummary[];
   onClose: () => void;
   onAcknowledge: (alertId: string) => void;
 }
@@ -56,6 +58,7 @@ export interface AlertDetailFlyoutProps {
 export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
   alert,
   datasources,
+  allAlerts = [],
   onClose,
   onAcknowledge,
 }) => {
@@ -130,8 +133,12 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
     osService,
   ]);
 
-  // Merge detail data over summary — detail has `raw` and potentially richer labels
-  const alertData = detailData ? { ...alert, ...detailData } : alert;
+  // Merge detail data over summary — detail has `raw` and potentially richer labels.
+  // The linked anomaly is assembled by the list API, so preserve it if a lazy
+  // per-alert detail response does not carry that UI-only relationship.
+  const alertData = detailData
+    ? { ...alert, ...detailData, relatedAnomaly: detailData.relatedAnomaly ?? alert.relatedAnomaly }
+    : alert;
 
   const dsName =
     datasources.find((d) => d.id === alert.datasourceId)?.name || alert.datasourceId || '\u2014';
@@ -207,9 +214,27 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
     Object.entries(allLabels).filter(([k]) => !INTERNAL_LABEL_KEYS.has(k))
   );
   const annotations = alertData.annotations || {};
+  const relatedAnomaly = alertData.relatedAnomaly;
+  const anomalyContext = useMemo(() => {
+    if (!relatedAnomaly) return [];
+    const context = new Map<string, UnifiedAlertSummary>();
+    context.set(relatedAnomaly.id, relatedAnomaly);
+    allAlerts.forEach((candidateAlert) => {
+      context.set(candidateAlert.id, candidateAlert);
+      if (candidateAlert.relatedAnomaly) {
+        context.set(candidateAlert.relatedAnomaly.id, candidateAlert.relatedAnomaly);
+      }
+    });
+    return Array.from(context.values());
+  }, [allAlerts, relatedAnomaly]);
 
   return (
-    <EuiFlyout onClose={onClose} size="m" ownFocus aria-labelledby="alertDetailTitle">
+    <EuiFlyout
+      onClose={onClose}
+      size={relatedAnomaly ? 'l' : 'm'}
+      ownFocus
+      aria-labelledby="alertDetailTitle"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem>
@@ -359,6 +384,32 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
         </EuiAccordion>
 
         <EuiSpacer size="m" />
+
+        {relatedAnomaly && (
+          <>
+            <EuiAccordion
+              id={`alertRelatedAnomaly-${alert.id}`}
+              buttonContent={
+                <strong>
+                  <FormattedMessage
+                    id="observability.alerting.alertDetailFlyout.relatedAnomalyHeader"
+                    defaultMessage="Associated anomaly"
+                  />
+                </strong>
+              }
+              initialIsOpen={true}
+              paddingSize="m"
+            >
+              <AnomalyDetailContent
+                anomaly={relatedAnomaly}
+                datasources={datasources}
+                allAlerts={anomalyContext}
+              />
+            </EuiAccordion>
+
+            <EuiSpacer size="m" />
+          </>
+        )}
 
         {/* Labels (internal keys filtered — see INTERNAL_LABEL_KEYS) */}
         <EuiAccordion

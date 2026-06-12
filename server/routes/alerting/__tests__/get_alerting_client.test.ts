@@ -150,6 +150,27 @@ describe('getAlertingClient', () => {
     expect(soClient.find).not.toHaveBeenCalled();
   });
 
+  it('accepts the legacy local_cluster id as the local-cluster sentinel', async () => {
+    const { ctx, soClient } = makeCtx({ hasMds: true, osSO: null, promSOs: [] });
+    const client = await getAlertingClient(ctx, 'local_cluster', mockLogger);
+    expect(client).toBe(localClient);
+    expect(soClient.get).toHaveBeenCalled();
+    expect(soClient.find).toHaveBeenCalled();
+  });
+
+  it('prefers a registered local_cluster data-source over the legacy fallback', async () => {
+    const { ctx } = makeCtx({
+      hasMds: true,
+      osSO: {
+        id: 'local_cluster',
+        attributes: { title: 'Local Cluster', endpoint: 'https://localhost:19200' },
+      },
+    });
+    const client = await getAlertingClient(ctx, 'local_cluster', mockLogger);
+    expect(client).toBe(mdsClient);
+    expect(ctx.dataSource.opensearch.getClient).toHaveBeenCalledWith('local_cluster');
+  });
+
   it('returns an MDS client when the dsId resolves to a data-source SO', async () => {
     const { ctx } = makeCtx({
       hasMds: true,

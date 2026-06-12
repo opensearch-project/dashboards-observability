@@ -113,6 +113,25 @@ describe('handlers', () => {
     expect(result.status).toBe(404);
   });
 
+  it('handleGetRuleDetail forwards definitionType to the service', async () => {
+    mockAlertSvc.getRuleDetail.mockResolvedValueOnce({ id: 'detector-1' } as never);
+    await handleGetRuleDetail(
+      mockAlertSvc as never,
+      mockClient,
+      'ds-1',
+      'detector-1',
+      undefined,
+      'detector'
+    );
+    expect(mockAlertSvc.getRuleDetail).toHaveBeenCalledWith(
+      mockClient,
+      'ds-1',
+      'detector-1',
+      undefined,
+      'detector'
+    );
+  });
+
   // =========================================================================
   // Range threading
   // =========================================================================

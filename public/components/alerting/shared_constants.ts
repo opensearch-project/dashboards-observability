@@ -90,6 +90,9 @@ export const TYPE_LABELS: Record<string, string> = {
   cluster_metrics: 'Cluster Metrics',
   synthetics: 'Synthetics',
   ppl: 'PPL',
+  anomaly_detector_monitor: 'Anomaly detector monitor',
+  detector: 'Detector',
+  forecaster: 'Forecaster',
 };
 
 // ============================================================================

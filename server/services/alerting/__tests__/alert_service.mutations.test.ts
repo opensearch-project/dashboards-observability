@@ -71,6 +71,7 @@ const mockClient = {} as never;
 let svc: MultiBackendAlertService;
 
 beforeEach(() => {
+  jest.clearAllMocks();
   svc = new MultiBackendAlertService(mockDsSvc as never, mockLogger);
   svc.registerOpenSearch(mockOsBackend as never);
   svc.registerPrometheus(mockPromBackend as never);
@@ -157,6 +158,88 @@ describe('MultiBackendAlertService — mutations + detail', () => {
         limit: 20,
         sortString: 'start_time',
         sortOrder: 'desc',
+      })
+    );
+  });
+
+  it('getRuleDetail uses the detector hint to skip monitor and forecaster probes', async () => {
+    const transportRequest = jest.fn(async () => ({
+      body: {
+        _id: 'detector-1',
+        anomaly_detector: {
+          name: 'flight detector',
+          indices: ['flights'],
+          time_field: 'timestamp',
+          detector_type: 'SINGLE_ENTITY',
+          last_update_time: Date.UTC(2026, 5, 4, 12, 0, 0),
+          detection_interval: { period: { interval: 1, unit: 'Minutes' } },
+          window_delay: { period: { interval: 0, unit: 'Seconds' } },
+          feature_attributes: [
+            {
+              feature_id: 'feature-1',
+              feature_name: 'delay_sum',
+              feature_enabled: true,
+              aggregation_query: { delay_sum: { sum: { field: 'FlightDelayMin' } } },
+            },
+          ],
+        },
+      },
+    }));
+    const client = { transport: { request: transportRequest } } as never;
+
+    const result = await svc.getRuleDetail(client, 'ds-os', 'detector-1', undefined, 'detector');
+
+    expect(mockOsBackend.getMonitor).not.toHaveBeenCalled();
+    expect(result?.definitionType).toBe('detector');
+    expect(result?.name).toBe('flight detector');
+    expect(transportRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'GET',
+        path: '/_plugins/_anomaly_detection/detectors/detector-1',
+      })
+    );
+  });
+
+  it('getRuleDetail uses the forecaster hint to skip monitor and detector probes', async () => {
+    const transportRequest = jest.fn(async () => ({
+      body: {
+        _id: 'forecaster-1',
+        forecaster: {
+          name: 'cpu forecaster',
+          indices: ['metrics'],
+          time_field: '@timestamp',
+          last_update_time: Date.UTC(2026, 5, 4, 12, 0, 0),
+          forecast_interval: { period: { interval: 1, unit: 'Minutes' } },
+          window_delay: { period: { interval: 0, unit: 'Seconds' } },
+          feature_attributes: [
+            {
+              feature_id: 'feature-1',
+              feature_name: 'cpu_sum',
+              feature_enabled: true,
+              aggregation_query: { cpu_sum: { sum: { field: 'cpu' } } },
+            },
+          ],
+        },
+      },
+    }));
+    const client = { transport: { request: transportRequest } } as never;
+
+    const result = await svc.getRuleDetail(
+      client,
+      'ds-os',
+      'forecaster-1',
+      undefined,
+      'forecaster'
+    );
+
+    expect(mockOsBackend.getMonitor).not.toHaveBeenCalled();
+    expect(result?.definitionType).toBe('forecaster');
+    expect(result?.name).toBe('cpu forecaster');
+    expect(transportRequest).toHaveBeenCalledTimes(1);
+    expect(transportRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'GET',
+        path: '/_plugins/_forecast/forecasters/forecaster-1',
       })
     );
   });

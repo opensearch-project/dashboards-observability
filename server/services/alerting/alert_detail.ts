@@ -21,6 +21,8 @@
  */
 import type { RequestHandlerContext } from '../../../../../src/core/server';
 import {
+  ADDetector,
+  ADForecaster,
   AlertHistoryEntry,
   AlertingOSClient,
   Datasource,
@@ -29,10 +31,13 @@ import {
   PromAlertingRule,
   PrometheusBackend,
   UnifiedAlert,
+  UnifiedDefinitionType,
   UnifiedRule,
 } from '../../../common/types/alerting';
 import {
   detectMonitorKind,
+  adDetectorToUnifiedRuleSummary,
+  adForecasterToUnifiedRuleSummary,
   osAlertToUnified,
   osMonitorToUnifiedRuleSummary,
   osStateToUnified,
@@ -40,6 +45,59 @@ import {
   promStateToUnified,
 } from './alert_utils';
 import { fetchOSPreviewTimeSeries, fetchPromPreviewData } from './alert_preview';
+import { isStatusCode } from './errors';
+
+interface ADGetDetectorResponse {
+  _id?: string;
+  _primary_term?: number;
+  _seq_no?: number;
+  anomaly_detector?: Record<string, unknown>;
+  anomaly_detector_job?: Record<string, unknown>;
+}
+
+interface ADGetForecasterResponse {
+  _id?: string;
+  _primary_term?: number;
+  _seq_no?: number;
+  forecaster?: Record<string, unknown>;
+  forecaster_job?: Record<string, unknown>;
+  realtime_task?: Record<string, unknown>;
+  run_once_task?: Record<string, unknown>;
+}
+
+const asRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
+
+function normalizeDetectorResponse(body: ADGetDetectorResponse, detectorId: string): ADDetector {
+  const detectorSource = asRecord(body.anomaly_detector);
+  const job = asRecord(body.anomaly_detector_job);
+  return {
+    ...detectorSource,
+    id: body._id || detectorId,
+    ...(body._primary_term !== undefined ? { primary_term: body._primary_term } : {}),
+    ...(body._seq_no !== undefined ? { seq_no: body._seq_no } : {}),
+    ...(Object.keys(job).length > 0 ? { anomaly_detector_job: job } : {}),
+  } as ADDetector;
+}
+
+function normalizeForecasterResponse(
+  body: ADGetForecasterResponse,
+  forecasterId: string
+): ADForecaster {
+  const forecasterSource = asRecord(body.forecaster);
+  const job = asRecord(body.forecaster_job);
+  const realtimeTask = asRecord(body.realtime_task);
+  const runOnceTask = asRecord(body.run_once_task);
+  return {
+    ...forecasterSource,
+    id: body._id || forecasterId,
+    ...(body._primary_term !== undefined ? { primary_term: body._primary_term } : {}),
+    ...(body._seq_no !== undefined ? { seq_no: body._seq_no } : {}),
+    ...(Object.keys(job).length > 0 ? { forecaster_job: job } : {}),
+    ...(Object.keys(realtimeTask).length > 0 ? { realtime_task: realtimeTask } : {}),
+    ...(Object.keys(runOnceTask).length > 0 ? { run_once_task: runOnceTask } : {}),
+  } as ADForecaster;
+}
 
 /**
  * Get full detail for a single rule/monitor. Real metadata where the
@@ -54,17 +112,86 @@ export async function getRuleDetail(
   client: AlertingOSClient,
   dsId: string,
   ruleId: string,
-  ctx?: RequestHandlerContext
+  ctx?: RequestHandlerContext,
+  definitionType?: UnifiedDefinitionType
 ): Promise<UnifiedRule | null> {
   const ds = await datasourceService.get(dsId);
   if (!ds) return null;
 
   if (ds.type === 'opensearch' && osBackend) {
-    return getOSRuleDetail(osBackend, client, ds, ruleId);
+    if (definitionType === 'detector') return getADDetectorDetail(client, ds, ruleId);
+    if (definitionType === 'forecaster') return getADForecasterDetail(client, ds, ruleId);
+    if (definitionType === 'monitor') return getOSRuleDetail(osBackend, client, ds, ruleId);
+
+    const monitor = await getOSRuleDetail(osBackend, client, ds, ruleId);
+    const detector = monitor ?? (await getADDetectorDetail(client, ds, ruleId));
+    return detector ?? getADForecasterDetail(client, ds, ruleId);
   } else if (ds.type === 'prometheus' && promBackend) {
     return getPromRuleDetail(promBackend, client, ds, ruleId, ctx);
   }
   return null;
+}
+
+export async function getADDetectorDetail(
+  client: AlertingOSClient,
+  ds: Datasource,
+  detectorId: string
+): Promise<UnifiedRule | null> {
+  let detector: ADDetector;
+  try {
+    const response = await client.transport.request<ADGetDetectorResponse>({
+      method: 'GET',
+      path: `/_plugins/_anomaly_detection/detectors/${encodeURIComponent(detectorId)}`,
+      querystring: { job: true, task: true },
+    });
+    if (!response.body?.anomaly_detector) return null;
+    detector = normalizeDetectorResponse(response.body, detectorId);
+  } catch (err) {
+    if (isStatusCode(err, 404)) return null;
+    throw err;
+  }
+
+  const summary = adDetectorToUnifiedRuleSummary(detector, ds.id);
+  return {
+    ...summary,
+    description: detector.description || '',
+    alertHistory: [],
+    conditionPreviewData: [],
+    notificationRouting: [],
+    suppressionRules: [],
+    raw: detector,
+  };
+}
+
+export async function getADForecasterDetail(
+  client: AlertingOSClient,
+  ds: Datasource,
+  forecasterId: string
+): Promise<UnifiedRule | null> {
+  let forecaster: ADForecaster;
+  try {
+    const response = await client.transport.request<ADGetForecasterResponse>({
+      method: 'GET',
+      path: `/_plugins/_forecast/forecasters/${encodeURIComponent(forecasterId)}`,
+      querystring: { job: true, task: true },
+    });
+    if (!response.body?.forecaster) return null;
+    forecaster = normalizeForecasterResponse(response.body, forecasterId);
+  } catch (err) {
+    if (isStatusCode(err, 404)) return null;
+    throw err;
+  }
+
+  const summary = adForecasterToUnifiedRuleSummary(forecaster, ds.id);
+  return {
+    ...summary,
+    description: forecaster.description || '',
+    alertHistory: [],
+    conditionPreviewData: [],
+    notificationRouting: [],
+    suppressionRules: [],
+    raw: forecaster,
+  };
 }
 
 export async function getOSRuleDetail(
