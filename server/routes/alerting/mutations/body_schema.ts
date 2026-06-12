@@ -71,9 +71,17 @@ const ACK_ID_MAX = 64;
 const ACK_BATCH_MAX = 1000;
 
 export const monitorAcknowledgeBodySchema = schema.object({
-  alerts: schema.arrayOf(schema.string({ minLength: 1, maxLength: ACK_ID_MAX }), {
-    maxSize: ACK_BATCH_MAX,
-  }),
+  alerts: schema.arrayOf(
+    schema.string({
+      validate: (value: string) => {
+        if (value.length < 1)
+          return `value has length [0] but it must have a minimum length of [1].`;
+        if (value.length > ACK_ID_MAX)
+          return `value has length [${value.length}] but it must have a maximum length of [${ACK_ID_MAX}].`;
+      },
+    }),
+    { maxSize: ACK_BATCH_MAX }
+  ),
 });
 
 // Re-exported for tests / docs.
