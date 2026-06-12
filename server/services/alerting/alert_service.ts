@@ -39,12 +39,13 @@ import {
   UnifiedAlertSummary,
   UnifiedFetchOptions,
   UnifiedAlert,
+  UnifiedDefinitionType,
   UnifiedRule,
   UnifiedRuleSummary,
 } from '../../../common/types/alerting';
 import { parseDateMathMs, computeStep } from '../../../common/services/alerting';
 import { TimeoutError } from './timeout_error';
-import { extractErrorMessage } from './errors';
+import { extractErrorMessage, isStatusCode } from './errors';
 import {
   getAlertDetail as getAlertDetailImpl,
   getRuleDetail as getRuleDetailImpl,
@@ -160,6 +161,59 @@ interface ADAnomalyFetchResult {
 }
 
 const ALERT_ANOMALY_LINK_TOLERANCE_MS = 60 * 60 * 1000;
+
+function getErrorType(value: unknown): string | undefined {
+  if (!value || typeof value !== 'object') return undefined;
+
+  const maybeError = value as {
+    body?: { error?: unknown };
+    meta?: { body?: { error?: unknown } };
+    error?: unknown;
+  };
+  const error = maybeError.body?.error ?? maybeError.meta?.body?.error ?? maybeError.error;
+
+  if (typeof error === 'string') return error;
+  if (!error || typeof error !== 'object') return undefined;
+
+  const typedError = error as {
+    type?: unknown;
+    reason?: unknown;
+    root_cause?: Array<{ type?: unknown }>;
+  };
+  if (typeof typedError.type === 'string') return typedError.type;
+
+  const rootCauseType = typedError.root_cause?.find((cause) => typeof cause.type === 'string')
+    ?.type;
+  if (rootCauseType) return rootCauseType;
+
+  return typeof typedError.reason === 'string' ? typedError.reason : undefined;
+}
+
+function hasStatusCode(value: unknown, statusCode: number): boolean {
+  if (isStatusCode(value, statusCode)) return true;
+  if (!value || typeof value !== 'object') return false;
+
+  const maybeError = value as {
+    body?: { status?: unknown };
+    meta?: { statusCode?: unknown; body?: { status?: unknown } };
+  };
+  return (
+    maybeError.body?.status === statusCode ||
+    maybeError.meta?.statusCode === statusCode ||
+    maybeError.meta?.body?.status === statusCode
+  );
+}
+
+function isOptionalPluginUnavailableError(value: unknown): boolean {
+  const errorType = getErrorType(value);
+  const message = extractErrorMessage(value).toLowerCase();
+  return (
+    hasStatusCode(value, 404) ||
+    errorType === 'index_not_found_exception' ||
+    message.includes('index_not_found_exception') ||
+    message.includes('no handler found')
+  );
+}
 
 function timestampMs(value?: string): number {
   if (!value) return NaN;
@@ -603,7 +657,8 @@ export class MultiBackendAlertService {
     client: AlertingOSClient,
     dsId: string,
     ruleId: string,
-    ctx?: RequestHandlerContext
+    ctx?: RequestHandlerContext,
+    definitionType?: UnifiedDefinitionType
   ): Promise<UnifiedRule | null> {
     return getRuleDetailImpl(
       this.datasourceService,
@@ -612,7 +667,8 @@ export class MultiBackendAlertService {
       client,
       dsId,
       ruleId,
-      ctx
+      ctx,
+      definitionType
     );
   }
 
@@ -784,7 +840,9 @@ export class MultiBackendAlertService {
         );
       } else {
         const message = extractErrorMessage(detectorSettled.reason);
-        partialErrors.push(`Failed to fetch detector metadata: ${message}`);
+        if (!isOptionalPluginUnavailableError(detectorSettled.reason)) {
+          partialErrors.push(`Failed to fetch detector metadata: ${message}`);
+        }
         this.logger.debug(`Failed to fetch detector metadata from ${ds.name}: ${message}`);
       }
 
@@ -795,12 +853,10 @@ export class MultiBackendAlertService {
         );
       } else {
         const message = extractErrorMessage(anomalySettled.reason);
-        partialErrors.push(`Failed to fetch anomaly results: ${message}`);
-        this.logger.debug(
-          `Failed to fetch anomaly results from ${ds.name}: ${extractErrorMessage(
-            anomalySettled.reason
-          )}`
-        );
+        if (!isOptionalPluginUnavailableError(anomalySettled.reason)) {
+          partialErrors.push(`Failed to fetch anomaly results: ${message}`);
+        }
+        this.logger.debug(`Failed to fetch anomaly results from ${ds.name}: ${message}`);
       }
 
       if (monitorSettled.status === 'fulfilled') {
@@ -935,7 +991,9 @@ export class MultiBackendAlertService {
             };
           } catch (err) {
             const message = extractErrorMessage(err);
-            partialErrors.push(`Failed to fetch detector names for linked anomalies: ${message}`);
+            if (!isOptionalPluginUnavailableError(err)) {
+              partialErrors.push(`Failed to fetch detector names for linked anomalies: ${message}`);
+            }
             this.logger.debug(
               `Failed to fetch detector names for linked anomalies from ${ds.name}: ${message}`
             );
@@ -951,7 +1009,9 @@ export class MultiBackendAlertService {
         candidateAnomalies = [...candidateAnomalies, ...fetchedSummaries];
       } catch (err) {
         const message = extractErrorMessage(err);
-        partialErrors.push(`Failed to fetch explicitly linked anomaly results: ${message}`);
+        if (!isOptionalPluginUnavailableError(err)) {
+          partialErrors.push(`Failed to fetch explicitly linked anomaly results: ${message}`);
+        }
         this.logger.debug(
           `Failed to fetch explicitly linked anomaly results from ${ds.name}: ${message}`
         );

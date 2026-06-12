@@ -106,5 +106,6 @@ describe('DetectorDetailFlyout', () => {
     expect(screen.getByText('sum_http_4xx')).toBeInTheDocument();
     expect(screen.getByText(/Field: http_4xx/)).toBeInTheDocument();
     expect(screen.getAllByText('10 minutes')).toHaveLength(2);
+    expect(useRuleDetailMock).toHaveBeenCalledWith('ds-1', 'det-1', 'detector');
   });
 });

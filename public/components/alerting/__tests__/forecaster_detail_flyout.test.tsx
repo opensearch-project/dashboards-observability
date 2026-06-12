@@ -105,5 +105,6 @@ describe('ForecasterDetailFlyout', () => {
     expect(screen.getByText(/Field: cpu/)).toBeInTheDocument();
     expect(screen.getByText('Horizon')).toBeInTheDocument();
     expect(screen.getByText('24')).toBeInTheDocument();
+    expect(useRuleDetailMock).toHaveBeenCalledWith('ds-1', 'forecast-1', 'forecaster');
   });
 });

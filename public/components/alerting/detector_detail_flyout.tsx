@@ -200,7 +200,11 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
   detector,
   onClose,
 }) => {
-  const { data: detail, isLoading, error } = useRuleDetail(detector.datasourceId, detector.id);
+  const { data: detail, isLoading, error } = useRuleDetail(
+    detector.datasourceId,
+    detector.id,
+    'detector'
+  );
   const rawDetector = (detail?.raw as ADDetector | undefined) || detectorFromSummary(detector);
   const description =
     detail?.description || rawDetector.description || detector.annotations.description || '';

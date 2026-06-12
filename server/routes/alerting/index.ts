@@ -723,6 +723,16 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
       path: '/api/alerting/rules/{dsId}/{ruleId}',
       validate: {
         params: schema.object({ dsId: alertingIdSchema, ruleId: alertingIdSchema }),
+        query: schema.object({
+          definitionType: schema.maybe(
+            schema.oneOf([
+              schema.literal('monitor'),
+              schema.literal('prometheus_rule'),
+              schema.literal('detector'),
+              schema.literal('forecaster'),
+            ])
+          ),
+        }),
       },
     },
     async (ctx, req, res) =>
@@ -733,7 +743,8 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
           await getAlertingClientCtx(ctx, req.params.dsId),
           req.params.dsId,
           req.params.ruleId,
-          ctx
+          ctx,
+          req.query.definitionType
         );
       })
   );

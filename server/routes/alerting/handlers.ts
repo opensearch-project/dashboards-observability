@@ -12,7 +12,11 @@
  * services (`useDatasources`, `SavedObjectDatasourceService`).
  */
 import type { RequestHandlerContext } from '../../../../../src/core/server';
-import type { AlertingOSClient, OSMonitor } from '../../../common/types/alerting';
+import type {
+  AlertingOSClient,
+  OSMonitor,
+  UnifiedDefinitionType,
+} from '../../../common/types/alerting';
 import { MultiBackendAlertService } from '../../services/alerting';
 import { toHandlerResult } from './route_utils';
 import type { HandlerResult } from './route_utils';
@@ -242,10 +246,11 @@ export async function handleGetRuleDetail(
   client: AlertingOSClient,
   dsId: string,
   ruleId: string,
-  ctx?: RequestHandlerContext
+  ctx?: RequestHandlerContext,
+  definitionType?: UnifiedDefinitionType
 ): Promise<HandlerResult> {
   try {
-    const rule = await alertSvc.getRuleDetail(client, dsId, ruleId, ctx);
+    const rule = await alertSvc.getRuleDetail(client, dsId, ruleId, ctx, definitionType);
     if (!rule) return { status: 404, body: { error: 'Rule not found' } };
     return { status: 200, body: rule };
   } catch (e: unknown) {

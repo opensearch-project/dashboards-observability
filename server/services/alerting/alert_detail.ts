@@ -31,6 +31,7 @@ import {
   PromAlertingRule,
   PrometheusBackend,
   UnifiedAlert,
+  UnifiedDefinitionType,
   UnifiedRule,
 } from '../../../common/types/alerting';
 import {
@@ -111,12 +112,17 @@ export async function getRuleDetail(
   client: AlertingOSClient,
   dsId: string,
   ruleId: string,
-  ctx?: RequestHandlerContext
+  ctx?: RequestHandlerContext,
+  definitionType?: UnifiedDefinitionType
 ): Promise<UnifiedRule | null> {
   const ds = await datasourceService.get(dsId);
   if (!ds) return null;
 
   if (ds.type === 'opensearch' && osBackend) {
+    if (definitionType === 'detector') return getADDetectorDetail(client, ds, ruleId);
+    if (definitionType === 'forecaster') return getADForecasterDetail(client, ds, ruleId);
+    if (definitionType === 'monitor') return getOSRuleDetail(osBackend, client, ds, ruleId);
+
     const monitor = await getOSRuleDetail(osBackend, client, ds, ruleId);
     const detector = monitor ?? (await getADDetectorDetail(client, ds, ruleId));
     return detector ?? getADForecasterDetail(client, ds, ruleId);

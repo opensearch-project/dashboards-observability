@@ -36,6 +36,18 @@ describe('useMonitorDetail', () => {
     expect(result.current.error).toBeNull();
   });
 
+  it('passes definitionType through to the detail service', async () => {
+    const detail = { id: 'm-1', description: 'desc' };
+    mockGetRuleDetail.mockResolvedValueOnce(detail);
+
+    const { result } = renderHook(() =>
+      useMonitorDetail({ dsId: 'ds-1', ruleId: 'm-1', definitionType: 'monitor' })
+    );
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(mockGetRuleDetail).toHaveBeenCalledWith('ds-1', 'm-1', 'monitor');
+  });
+
   it('exposes the error so consumers can render a degraded-state hint', async () => {
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
     const err = new Error('boom');

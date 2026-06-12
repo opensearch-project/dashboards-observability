@@ -15,6 +15,7 @@ import type {
   ProgressiveResponse,
   UnifiedAlert,
   UnifiedAlertSummary,
+  UnifiedDefinitionType,
   UnifiedRule,
   UnifiedRuleSummary,
 } from '../../../../common/types/alerting';
@@ -90,9 +91,14 @@ export class AlertingOpenSearchService {
   }
 
   /** Single rule detail for the flyout. */
-  async getRuleDetail(dsId: string, ruleId: string): Promise<UnifiedRule> {
+  async getRuleDetail(
+    dsId: string,
+    ruleId: string,
+    definitionType?: UnifiedDefinitionType
+  ): Promise<UnifiedRule> {
     return (await this.requireHttp().get(
-      `/api/alerting/rules/${encodeURIComponent(dsId)}/${encodeURIComponent(ruleId)}`
+      `/api/alerting/rules/${encodeURIComponent(dsId)}/${encodeURIComponent(ruleId)}`,
+      definitionType ? { query: { definitionType } } : undefined
     )) as UnifiedRule;
   }
 

@@ -770,6 +770,42 @@ describe('MultiBackendAlertService — routing & list', () => {
     expect(osStatus?.error).toContain('Failed to fetch anomaly results');
   });
 
+  it('does not surface optional AD plugin/index-missing failures as datasource warnings', async () => {
+    mockDsSvc.list.mockResolvedValueOnce([osDatasource]);
+    mockOsBackend.getAlerts.mockResolvedValueOnce({
+      alerts: [],
+      totalAlerts: 0,
+      truncated: false,
+    });
+    mockOsBackend.getMonitors.mockResolvedValueOnce([]);
+    const optionalMissingError = Object.assign(new Error('index_not_found_exception'), {
+      statusCode: 404,
+      meta: {
+        body: {
+          error: {
+            type: 'index_not_found_exception',
+          },
+        },
+      },
+    });
+    const transportRequest = jest.fn(async () => {
+      throw optionalMissingError;
+    });
+
+    const response = await svc.getUnifiedAlerts(
+      async () =>
+        ({
+          transport: { request: transportRequest },
+        } as never),
+      { dsIds: ['ds-os'] }
+    );
+
+    const osStatus = response.datasourceStatus.find((s) => s.datasourceId === 'ds-os');
+    expect(response.results).toHaveLength(0);
+    expect(osStatus?.status).toBe('success');
+    expect(osStatus?.error).toBeUndefined();
+  });
+
   it('malformed date-math surfaces as a per-datasource error (not a thrown request)', async () => {
     // Route-layer `validateDateMath` normally rejects bad input with a 400,
     // but if a handler is called directly (bypassing validation, or via a
