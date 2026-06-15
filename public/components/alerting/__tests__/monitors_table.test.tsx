@@ -11,6 +11,14 @@ jest.mock('../monitor_detail_flyout', () => ({
   MonitorDetailFlyout: () => <div data-test-subj="monitorFlyout" />,
 }));
 
+jest.mock('../detector_detail_flyout', () => ({
+  DetectorDetailFlyout: () => <div data-test-subj="detectorFlyout" />,
+}));
+
+jest.mock('../forecaster_detail_flyout', () => ({
+  ForecasterDetailFlyout: () => <div data-test-subj="forecasterFlyout" />,
+}));
+
 // monitors_table.tsx was moved to monitors_table/index.tsx;
 // `../monitors_table` still resolves via TS's implicit index.tsx resolution.
 import { MonitorsTable } from '../monitors_table';
@@ -66,6 +74,51 @@ describe('MonitorsTable', () => {
     fireEvent.click(checkbox);
     // After selecting, the Delete button should appear
     expect(screen.getByText(/Delete/)).toBeInTheDocument();
+  });
+
+  it('opens the detector flyout when a detector name is clicked', () => {
+    render(
+      <MonitorsTable
+        {...defaultProps}
+        rules={[
+          sampleRule({
+            id: 'det-1',
+            name: 'sample-http-responses-detector',
+            definitionType: 'detector',
+            monitorType: 'detector',
+            severity: 'info',
+            datasourceType: 'opensearch',
+          }),
+        ]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /sample-http-responses-detector/i }));
+
+    expect(screen.getByTestId('detectorFlyout')).toBeInTheDocument();
+  });
+
+  it('opens the forecaster flyout and keeps forecasters out of bulk monitor selection', () => {
+    render(
+      <MonitorsTable
+        {...defaultProps}
+        rules={[
+          sampleRule({
+            id: 'forecast-1',
+            name: 'sample-cpu-forecaster',
+            definitionType: 'forecaster',
+            monitorType: 'forecaster',
+            severity: 'info',
+            datasourceType: 'opensearch',
+          }),
+        ]}
+      />
+    );
+
+    expect(screen.getByLabelText('Select sample-cpu-forecaster')).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: /sample-cpu-forecaster/i }));
+
+    expect(screen.getByTestId('forecasterFlyout')).toBeInTheDocument();
   });
 
   // Regression: deselecting all datasources must wipe both the dependent

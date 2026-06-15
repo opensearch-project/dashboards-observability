@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
+import { useApmConfig } from '../../config/apm_config_context';
 import { parseTimeRange, getTimeInSeconds } from '../utils/time_utils';
 import { calculateStep, RESOLUTION_MEDIUM } from '../utils/step_utils';
 import {
@@ -41,7 +42,6 @@ export interface UsePromQLChartDataParams {
   promqlQuery: string;
   timeRange: TimeRange;
   prometheusConnectionId: string;
-  prometheusConnectionMeta?: Record<string, unknown>;
   refreshTrigger?: number;
   enabled?: boolean;
   /** Label field to extract from Prometheus labels (e.g., 'remoteService', 'operation') */
@@ -76,7 +76,6 @@ export const usePromQLChartData = (params: UsePromQLChartDataParams): UsePromQLC
     promqlQuery,
     timeRange,
     prometheusConnectionId,
-    prometheusConnectionMeta,
     refreshTrigger,
     enabled = true,
     labelField,
@@ -88,6 +87,11 @@ export const usePromQLChartData = (params: UsePromQLChartDataParams): UsePromQLC
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [refetchTrigger, setRefetchTrigger] = useState(0);
+
+  // Source the Prometheus connection meta from the APM config context, matching the
+  // working pattern in useServiceMapMetrics.
+  const { config } = useApmConfig();
+  const prometheusConnectionMeta = config?.prometheusDataSource?.meta;
 
   // Create PromQL search service
   const promqlSearchService = useMemo(() => {

@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
+import { useApmConfig } from '../../config/apm_config_context';
 import { OperationMetrics } from '../../common/types/service_details_types';
 import { calculateTimeRangeDuration } from '../utils/time_utils';
 import {
@@ -21,7 +22,6 @@ export interface UseOperationMetricsParams {
   startTime: Date;
   endTime: Date;
   prometheusConnectionId: string;
-  prometheusConnectionMeta?: Record<string, unknown>;
   refreshTrigger?: number;
 }
 
@@ -48,12 +48,17 @@ export const useOperationMetrics = (
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
+  // Source the Prometheus connection meta from the APM config context, matching the
+  // working pattern in useServiceMapMetrics.
+  const { config } = useApmConfig();
+  const prometheusConnectionMeta = config?.prometheusDataSource?.meta;
+
   const promqlService = useMemo(() => {
     if (!params.prometheusConnectionId) {
       return null;
     }
-    return new PromQLSearchService(params.prometheusConnectionId, params.prometheusConnectionMeta);
-  }, [params.prometheusConnectionId, params.prometheusConnectionMeta]);
+    return new PromQLSearchService(params.prometheusConnectionId, prometheusConnectionMeta);
+  }, [params.prometheusConnectionId, prometheusConnectionMeta]);
 
   useEffect(() => {
     if (!params.operations || params.operations.length === 0 || !promqlService) {

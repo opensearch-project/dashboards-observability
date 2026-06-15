@@ -102,6 +102,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   const { detail, isLoading: detailLoading, error: detailError } = useMonitorDetail({
     dsId: monitor.datasourceId,
     ruleId: monitor.id,
+    definitionType: monitor.definitionType || 'monitor',
   });
 
   // Use detail data when available, fall back to summary props.

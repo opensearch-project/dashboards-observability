@@ -5,7 +5,7 @@
 
 /** use_rule_detail — fetch single rule for the detail flyout. */
 import { useEffect, useMemo, useState } from 'react';
-import type { UnifiedRule } from '../../../../common/types/alerting';
+import type { UnifiedDefinitionType, UnifiedRule } from '../../../../common/types/alerting';
 import { AlertingOpenSearchService } from '../query_services/alerting_opensearch_service';
 
 export interface UseRuleDetailResult {
@@ -16,7 +16,8 @@ export interface UseRuleDetailResult {
 
 export function useRuleDetail(
   dsId: string | undefined,
-  ruleId: string | undefined
+  ruleId: string | undefined,
+  definitionType?: UnifiedDefinitionType
 ): UseRuleDetailResult {
   const service = useMemo(() => new AlertingOpenSearchService(), []);
   const [data, setData] = useState<UnifiedRule | null>(null);
@@ -33,7 +34,7 @@ export function useRuleDetail(
     setError(null);
     (async () => {
       try {
-        const res = await service.getRuleDetail(dsId, ruleId);
+        const res = await service.getRuleDetail(dsId, ruleId, definitionType);
         if (!cancelled) setData(res);
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e : new Error(String(e)));
@@ -44,7 +45,7 @@ export function useRuleDetail(
     return () => {
       cancelled = true;
     };
-  }, [service, dsId, ruleId]);
+  }, [service, dsId, ruleId, definitionType]);
 
   return { data, isLoading, error };
 }

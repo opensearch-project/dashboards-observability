@@ -41,6 +41,7 @@ import { CreateMonitor, MonitorFormState } from './create_monitor';
 import { EditMonitor } from './create_monitor/edit_monitor';
 import { AlertsDashboard } from './alerts_dashboard';
 import { AlertDetailFlyout } from './alert_detail_flyout';
+import { AnomalyDetailFlyout } from './anomaly_detail_flyout';
 import { NotificationRoutingPanel } from './notification_routing_panel';
 import type { MonitorBackendType } from './monitor_form_components';
 import { useAlerts } from './hooks/use_alerts';
@@ -342,7 +343,9 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     });
   }, [rawAlerts]);
   const alertsWarnings = useMemo(() => {
-    const failed = (alertsData?.datasourceStatus || []).filter((s) => s.status === 'error');
+    const failed = (alertsData?.datasourceStatus || []).filter(
+      (s) => s.status === 'error' || !!s.error
+    );
     return failed.map((s) => ({
       datasourceName: s.datasourceName,
       error:
@@ -441,6 +444,14 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   const [editTarget, setEditTarget] = useState<{ dsId: string; ruleId: string } | null>(null);
   const [selectedAlert, setSelectedAlert] = useState<UnifiedAlertSummary | null>(null);
   const { setToast: addToast } = useToast();
+
+  const handleNavigateToDetectorResults = useCallback((href: string) => {
+    if (coreRefs.application?.navigateToUrl) {
+      coreRefs.application.navigateToUrl(href);
+      return;
+    }
+    window.location.assign(href);
+  }, []);
 
   const visibleRules = rules.filter((r) => !deletedRuleIds.has(r.id));
 
@@ -704,7 +715,11 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     try {
       // Fetch the full rule detail to get the raw backend payload — the
       // summary shape doesn't carry the wire format needed for re-creation.
-      const detail = await osService.getRuleDetail(monitor.datasourceId, monitor.id);
+      const detail = await osService.getRuleDetail(
+        monitor.datasourceId,
+        monitor.id,
+        monitor.definitionType
+      );
 
       // Prometheus rules must be cloned via the Cortex ruler API, not the
       // OpenSearch Alerting monitor API (which requires `schedule`).
@@ -1188,10 +1203,20 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           onClearPplSubmitError={() => setPplSubmitError(null)}
         />
       )}
-      {selectedAlert && (
+      {selectedAlert && selectedAlert.alertKind === 'anomaly' && (
+        <AnomalyDetailFlyout
+          anomaly={selectedAlert}
+          datasources={datasources}
+          allAlerts={alerts}
+          onClose={() => setSelectedAlert(null)}
+          onNavigateToDetectorResults={handleNavigateToDetectorResults}
+        />
+      )}
+      {selectedAlert && selectedAlert.alertKind !== 'anomaly' && (
         <AlertDetailFlyout
           alert={selectedAlert}
           datasources={datasources}
+          allAlerts={alerts}
           onClose={() => setSelectedAlert(null)}
           onAcknowledge={(id) => {
             handleAcknowledgeAlert(id);

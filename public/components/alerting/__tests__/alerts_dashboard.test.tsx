@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent, screen } from '@testing-library/react';
+import { render, fireEvent, screen, within } from '@testing-library/react';
 
 jest.mock('echarts', () => ({
   init: jest.fn(() => ({
@@ -46,6 +46,32 @@ const sampleAlert: UnifiedAlertSummary = {
   labels: {},
   annotations: {},
 };
+
+function buildAnomaly(overrides: Partial<UnifiedAlertSummary> = {}): UnifiedAlertSummary {
+  return {
+    id: 'ad-1',
+    datasourceId: 'ds-1',
+    datasourceType: 'opensearch',
+    alertKind: 'anomaly',
+    name: 'test - DestCityName=London',
+    state: 'active',
+    severity: 'high',
+    message: 'Anomaly grade 0.88, score 1.23 (test=90)',
+    startTime: '2026-06-04T22:03:00.000Z',
+    lastUpdated: '2026-06-04T22:04:00.000Z',
+    labels: {
+      detector_id: 'detector-1',
+      detector_name: 'test',
+      entity: 'DestCityName=London',
+    },
+    annotations: {
+      anomaly_grade: '0.88',
+      confidence: '0.95',
+      feature_data: 'test=90',
+    },
+    ...overrides,
+  };
+}
 
 const sampleDs: Datasource = {
   id: 'ds-1',
@@ -94,9 +120,9 @@ describe('AlertsDashboard', () => {
     expect(getByText('No datasource selected')).toBeInTheDocument();
   });
 
-  it('renders "no rules" empty state when rulesTotal is 0', () => {
+  it('renders "no rules or detectors" empty state when rulesTotal is 0', () => {
     const { getByText } = render(<AlertsDashboard {...baseProps} rulesTotal={0} />);
-    expect(getByText('No rules have been created')).toBeInTheDocument();
+    expect(getByText('No rules or detectors have been created')).toBeInTheDocument();
   });
 
   it('renders alert table when alerts provided', () => {
@@ -104,12 +130,104 @@ describe('AlertsDashboard', () => {
     expect(getByText('HighCPU')).toBeInTheDocument();
   });
 
+  it('groups anomalies by detector and entity in the alerts table', () => {
+    const onViewDetail = jest.fn();
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        onViewDetail={onViewDetail}
+        alerts={[
+          buildAnomaly({
+            id: 'ad-older',
+            startTime: '2026-06-04T21:03:00.000Z',
+            lastUpdated: '2026-06-04T21:04:00.000Z',
+            annotations: {
+              anomaly_grade: '1',
+              confidence: '0.42',
+              feature_data: 'test=45',
+            },
+          }),
+          buildAnomaly({
+            id: 'ad-latest',
+            startTime: '2026-06-04T22:03:00.000Z',
+            lastUpdated: '2026-06-04T22:13:00.000Z',
+          }),
+        ]}
+      />
+    );
+
+    expect(screen.getByText('test - DestCityName: London')).toBeInTheDocument();
+    expect(screen.getByText('2 occurrences')).toBeInTheDocument();
+    expect(screen.getAllByText('anomaly').length).toBeGreaterThan(0);
+    expect(screen.getByText('1 row')).toBeInTheDocument();
+    expect(screen.getByText('2 alerts grouped')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('test - DestCityName: London'));
+    expect(screen.getByText('Occurrence 2 of 2')).toBeInTheDocument();
+    expect(screen.getByText('Occurrence 1 of 2')).toBeInTheDocument();
+    expect(screen.queryByText('Latest')).not.toBeInTheDocument();
+    expect(screen.getAllByText('10m').length).toBeGreaterThan(0);
+    expect(onViewDetail).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByText('Occurrence 1 of 2'));
+    expect(onViewDetail).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'ad-older' }));
+  });
+
+  it('shows anomalies as anomaly in the State facet instead of active', () => {
+    render(<AlertsDashboard {...baseProps} alerts={[sampleAlert, buildAnomaly()]} />);
+
+    const stateFacet = within(screen.getByTestId('facetGroup-state'));
+    expect(stateFacet.getByText('active')).toBeInTheDocument();
+    expect(stateFacet.getByText('anomaly')).toBeInTheDocument();
+    expect(stateFacet.getAllByText('(1)')).toHaveLength(2);
+
+    fireEvent.click(stateFacet.getByLabelText(/anomaly/));
+
+    expect(screen.queryByText('HighCPU')).not.toBeInTheDocument();
+    expect(screen.getByText('test - DestCityName=London')).toBeInTheDocument();
+    expect(screen.getByText('1 filter')).toBeInTheDocument();
+  });
+
+  it('filters by alert type and hides noisy anomaly label keys', () => {
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        alerts={[
+          sampleAlert,
+          buildAnomaly({
+            labels: {
+              detector_id: 'detector-1',
+              detector_name: 'test',
+              entity: 'DestCityName=London',
+              anomaly_result_id: 'result-1',
+              source: 'anomaly_detection',
+            },
+          }),
+        ]}
+      />
+    );
+
+    const typeFacet = within(screen.getByTestId('facetGroup-type'));
+    expect(typeFacet.getByText('alert')).toBeInTheDocument();
+    expect(typeFacet.getByText('anomaly')).toBeInTheDocument();
+
+    expect(screen.queryByText('anomaly_result_id')).not.toBeInTheDocument();
+    expect(screen.queryByText('detector_id')).not.toBeInTheDocument();
+    expect(screen.queryByText('source')).not.toBeInTheDocument();
+
+    fireEvent.click(typeFacet.getByLabelText(/anomaly/));
+
+    expect(screen.queryByText('HighCPU')).not.toBeInTheDocument();
+    expect(screen.getByText('test - DestCityName=London')).toBeInTheDocument();
+    expect(screen.getByText('1 filter')).toBeInTheDocument();
+  });
+
   it('renders timeline title without the (24h) suffix', () => {
     const { getByText, queryByText } = render(
       <AlertsDashboard {...baseProps} alerts={[sampleAlert]} />
     );
-    expect(getByText('Alert Timeline')).toBeInTheDocument();
-    expect(queryByText('Alert Timeline (24h)')).not.toBeInTheDocument();
+    expect(getByText('Alerts timeline')).toBeInTheDocument();
+    expect(queryByText('Alerts timeline (24h)')).not.toBeInTheDocument();
   });
 
   it('forwards numeric startMs/endMs to AlertTimeline (not the date-math strings)', () => {

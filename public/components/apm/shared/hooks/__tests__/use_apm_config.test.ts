@@ -247,6 +247,92 @@ describe('useDatasets', () => {
       expect(result.current.error?.message).toBe('String error message');
     });
   });
+
+  describe('AnalyticEngine (Mustang) exclusion', () => {
+    const mockBulkGet = jest.fn();
+
+    beforeEach(() => {
+      mockBulkGet.mockReset();
+      (coreRefs as any).savedObjectsClient = { bulkGet: mockBulkGet };
+    });
+
+    it('drops datasets backed by an AnalyticEngine data source from both lists', async () => {
+      mockDataService.dataViews.getIdsWithTitle.mockResolvedValue([
+        { id: 'trace-mustang', title: 'Mustang Traces' },
+        { id: 'trace-os', title: 'OpenSearch Traces' },
+      ]);
+      mockDataService.dataViews.get
+        .mockResolvedValueOnce({
+          getDisplayName: () => 'Mustang Traces',
+          signalType: 'traces',
+          dataSourceRef: { id: 'ds-mustang', type: 'data-source' },
+        })
+        .mockResolvedValueOnce({
+          getDisplayName: () => 'OpenSearch Traces',
+          signalType: 'traces',
+          dataSourceRef: { id: 'ds-os', type: 'data-source' },
+        });
+      mockBulkGet.mockResolvedValue({
+        savedObjects: [
+          { id: 'ds-mustang', attributes: { dataSourceEngineType: 'AnalyticEngine' } },
+          { id: 'ds-os', attributes: { dataSourceEngineType: 'OpenSearch' } },
+        ],
+      });
+
+      (coreRefs as any).data = mockDataService;
+
+      const { result } = renderHook(() => useDatasets());
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      expect(result.current.tracesDatasets).toHaveLength(1);
+      expect(result.current.tracesDatasets[0].label).toBe('OpenSearch Traces');
+      expect(result.current.allDatasets).toHaveLength(1);
+      expect(result.current.allDatasets[0].label).toBe('OpenSearch Traces');
+      expect(mockBulkGet).toHaveBeenCalledWith([
+        { id: 'ds-mustang', type: 'data-source' },
+        { id: 'ds-os', type: 'data-source' },
+      ]);
+    });
+
+    it('keeps all datasets when the data-source lookup fails (fail-open)', async () => {
+      mockDataService.dataViews.getIdsWithTitle.mockResolvedValue([
+        { id: 'trace-1', title: 'Traces 1' },
+      ]);
+      mockDataService.dataViews.get.mockResolvedValueOnce({
+        getDisplayName: () => 'Traces 1',
+        signalType: 'traces',
+        dataSourceRef: { id: 'ds-1', type: 'data-source' },
+      });
+      mockBulkGet.mockRejectedValue(new Error('bulkGet failed'));
+
+      (coreRefs as any).data = mockDataService;
+
+      const { result } = renderHook(() => useDatasets());
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      expect(result.current.tracesDatasets).toHaveLength(1);
+      expect(result.current.allDatasets).toHaveLength(1);
+    });
+
+    it('skips the data-source lookup when no dataset has a backing data source', async () => {
+      mockDataService.dataViews.getIdsWithTitle.mockResolvedValue([
+        { id: 'local-1', title: 'Local Traces' },
+      ]);
+      mockDataService.dataViews.get.mockResolvedValueOnce({
+        getDisplayName: () => 'Local Traces',
+        signalType: 'traces',
+        // no dataSourceRef -> local cluster
+      });
+
+      (coreRefs as any).data = mockDataService;
+
+      const { result } = renderHook(() => useDatasets());
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      expect(result.current.tracesDatasets).toHaveLength(1);
+      expect(mockBulkGet).not.toHaveBeenCalled();
+    });
+  });
 });
 
 describe('usePrometheusDataSources', () => {
