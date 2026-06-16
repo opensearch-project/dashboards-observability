@@ -36,5 +36,7 @@
     "opensearch-sql",
     "opensearch-observability"
   ],
-  "unsupportedOSDataSourceEngineTypes": ["AnalyticEngine"]
+  "unsupportedOSDataSourceEngineTypes": [
+    "AnalyticEngine"
+  ]
 }
