@@ -76,13 +76,12 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
 
     it('Create second visualization in event analytics', () => {
       cy.get('[data-test-subj="eventHomeAction__explorer"]').click();
-      // Workaround until issue #1403 is fixed
-      // Should be the following commented lines
-      // cy.get('[id^=autocomplete-textarea]').focus().type(PPL_VISUALIZATIONS[1], {
-      //   delay: 50,
-      // });
-      cy.get('[id^=autocomplete-textarea]').focus().invoke('val', PPL_VISUALIZATIONS[1]).trigger('input').trigger('change');
+      cy.get('[id^=autocomplete-textarea]')
+        .focus()
+        .clear({ force: true })
+        .type(PPL_VISUALIZATIONS[1], { delay: 50, force: true });
       cy.get('.euiButton__text').contains('Run').trigger('mouseover').click();
+      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
       cy.get('button[id="main-content-vis"]')
         .contains('Visualizations')
         .trigger('mouseover')
@@ -474,14 +473,31 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
 
       cy.get('button[data-test-subj="editPanelButton"]').click();
 
-      cy.get('.react-resizable-handle')
+      // Capture original height so we can assert that the resize actually grew
+      // the tile. react-grid-layout snaps to a row grid whose exact pixel
+      // height depends on viewport width and container margins, so matching an
+      // exact value (the previous /470/) is flaky — viewport-dependent runs
+      // land on different rounded heights (e.g. 630px in CI).
+      cy.get('div.react-grid-layout>div')
         .eq(0)
-        .trigger('mousedown', { which: 1 })
-        .trigger('mousemove', { clientX: 2000, clientY: 800 })
-        .trigger('mouseup', { force: true });
+        .invoke('height')
+        .then((originalHeight) => {
+          cy.get('.react-resizable-handle')
+            .eq(0)
+            .trigger('mousedown', { which: 1, force: true })
+            .trigger('mousemove', { clientX: 1000, clientY: 400, force: true })
+            .trigger('mousemove', { clientX: 1500, clientY: 600, force: true })
+            .trigger('mousemove', { clientX: 2000, clientY: 800, force: true })
+            .trigger('mouseup', { force: true });
 
-      cy.get('button[data-test-subj="savePanelButton"]').click();
-      cy.get('div.react-grid-layout>div').eq(0).invoke('height').should('match', new RegExp('470'));
+          cy.get('button[data-test-subj="savePanelButton"]').click();
+          cy.get('div.react-grid-layout>div')
+            .eq(0)
+            .invoke('height')
+            .should((newHeight) => {
+              expect(newHeight).to.be.greaterThan(originalHeight);
+            });
+        });
     });
 
     it('Delete a visualization', () => {

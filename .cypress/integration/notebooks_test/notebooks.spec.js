@@ -531,7 +531,11 @@ describe('link check ', () => {
     moveToNotebookHome();
     cy.get('h3[data-test-subj="notebookTableTitle"]').should('exist');
     cy.get('div[data-test-subj="notebookTableDescription"]').contains(NOTEBOOK_TEXT);
-    cy.get('a.euiLink.euiLink--primary').contains('Learn more').click();
-    cy.get(`a[href="${OPENSEARCH_URL}"]`).should('exist');
+    // Verify the link points to the expected URL without clicking — clicking
+    // navigates the test browser to docs.opensearch.org, where a 404 redirect
+    // loop crashes Cypress (ERR_TOO_MANY_REDIRECTS) after the test passes.
+    cy.get('a.euiLink.euiLink--primary')
+      .contains('Learn more')
+      .should('have.attr', 'href', OPENSEARCH_URL);
   });
 });
