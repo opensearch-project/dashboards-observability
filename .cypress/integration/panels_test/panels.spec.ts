@@ -43,14 +43,25 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
   });
 
   describe('Creating visualizations', () => {
-    beforeEach(() => {
-      moveToEventsHome();
-      // Explorer persists savedObjectId in sessionStorage via redux-persist; clear it
-      // so the second test creates a new visualization instead of trying to PUT-update
-      // the previous test's visualization (which the outer beforeEach has just deleted).
-      cy.window().then((win) => win.sessionStorage.clear());
-      cy.reload(true);
+    // Clear redux-persist session storage AND the persisted root key explicitly.
+    // Just calling sessionStorage.clear() before navigate isn't enough: the
+    // previous test's in-memory redux store re-flushes a SAVED_OBJECT_ID into
+    // the new page's sessionStorage during PERSIST rehydration, so the second
+    // save becomes a PUT-update against the deleted object id (404).
+    // Visiting the explorer fresh with a clean slate avoids the rehydrate path
+    // entirely.
+    const visitExplorerFresh = () => {
+      cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-logs#/`, {
+        onBeforeLoad: (win) => {
+          win.sessionStorage.clear();
+          win.localStorage.clear();
+        },
+      });
       cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    };
+
+    beforeEach(() => {
+      visitExplorerFresh();
     });
 
     it('Create first visualization in event analytics', () => {
@@ -184,11 +195,19 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
 
       it('Deletes the panel', () => {
         cy.reload();
-        cy.get('[data-test-subj="tableHeaderSortButton"]').first().click();// Page needs click before checking box
-        cy.get('[data-test-subj="checkboxSelectAll"]').click({ force: true })
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+        // Select the row directly. The previous select-all-with-force approach
+        // raced with EuiInMemoryTable's onSelectionChange and would sometimes
+        // leave selectedCustomPanels empty, disabling the Delete menu item and
+        // making the modal never render.
+        cy.get('.euiTableRow').should('have.length', 1);
+        cy.get('.euiCheckbox__input[title="Select this row"]').check({ force: true });
+        cy.get('.euiCheckbox__input[title="Select this row"]').should('be.checked');
         openActionsDropdown();
-        cy.get('button[data-test-subj="deleteContextMenuItem"]').click({ force: true });
-        
+        cy.get('button[data-test-subj="deleteContextMenuItem"]')
+          .should('not.be.disabled')
+          .click();
+
         cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('be.disabled');
         cy.get('input.euiFieldText[placeholder="delete"]').focus().type('delete');
         cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('not.be.disabled');
@@ -203,12 +222,29 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
         moveToPanelHome();
         cy.reload();
         cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+        // Wait until exactly one row (the SO panel just created) is present.
+        // Duplicate would otherwise pick up a leftover legacy row and hit the
+        // legacy GET endpoint with a non-UUID id, returning 400.
+        cy.get('.euiTableRow').should('have.length', 1);
       });
 
       it('Duplicates the panel', () => {
-        selectThePanel();
+        // Select the SO panel row by its href, which contains the UUID. This
+        // avoids selecting a stale legacy row that lingered past cleanup and
+        // would otherwise route the duplicate through the legacy backend.
+        cy.get('.euiTableRow')
+          .first()
+          .find('.euiCheckbox__input[title="Select this row"]')
+          .check({ force: true });
+        cy.get('.euiTableRow')
+          .first()
+          .find('a.euiLink')
+          .invoke('attr', 'href')
+          .should('match', uuidRx);
         openActionsDropdown();
-        cy.get('button[data-test-subj="duplicateContextMenuItem"]').click();
+        cy.get('button[data-test-subj="duplicateContextMenuItem"]')
+          .should('not.be.disabled')
+          .click();
         cy.get('button[data-test-subj="runModalButton"]').click();
         const duplicateName = TEST_PANEL + ' (copy)';
         cy.get('[data-test-subj="breadcrumb"]').click({ force: true }); //reload page
@@ -482,13 +518,48 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
         .eq(0)
         .invoke('height')
         .then((originalHeight) => {
+          // react-grid-layout's underlying react-draggable registers
+          // `mousemove`/`mouseup` on `document`, not on the handle. Cypress's
+          // `.trigger('mousemove')` on a specific element only fires that
+          // element's listeners, so the prior version never moved the drag
+          // and `newHeight === originalHeight`. Fire the move/up events on
+          // `document` directly.
           cy.get('.react-resizable-handle')
             .eq(0)
-            .trigger('mousedown', { which: 1, force: true })
-            .trigger('mousemove', { clientX: 1000, clientY: 400, force: true })
-            .trigger('mousemove', { clientX: 1500, clientY: 600, force: true })
-            .trigger('mousemove', { clientX: 2000, clientY: 800, force: true })
-            .trigger('mouseup', { force: true });
+            .then(($handle) => {
+              const rect = $handle[0].getBoundingClientRect();
+              const startX = rect.left + rect.width / 2;
+              const startY = rect.top + rect.height / 2;
+
+              cy.wrap($handle).trigger('mousedown', {
+                which: 1,
+                button: 0,
+                clientX: startX,
+                clientY: startY,
+                force: true,
+              });
+
+              cy.document().trigger('mousemove', {
+                clientX: startX + 200,
+                clientY: startY + 200,
+                force: true,
+              });
+              cy.document().trigger('mousemove', {
+                clientX: startX + 400,
+                clientY: startY + 400,
+                force: true,
+              });
+              cy.document().trigger('mousemove', {
+                clientX: startX + 600,
+                clientY: startY + 600,
+                force: true,
+              });
+              cy.document().trigger('mouseup', {
+                clientX: startX + 600,
+                clientY: startY + 600,
+                force: true,
+              });
+            });
 
           cy.get('button[data-test-subj="savePanelButton"]').click();
           cy.get('div.react-grid-layout>div')
@@ -717,7 +788,8 @@ const eraseLegacyPanels = () => {
       'osd-xsrf': true,
     },
   }).then((response) => {
-    response.body.panels.map((panel) => {
+    if (!response.body || !response.body.panels) return;
+    response.body.panels.forEach((panel) => {
       cy.request({
         method: 'DELETE',
         failOnStatusCode: false,
@@ -726,9 +798,6 @@ const eraseLegacyPanels = () => {
           'content-type': 'application/json;charset=UTF-8',
           'osd-xsrf': true,
         },
-      }).then((response) => {
-        const deletedId = response.allRequestResponses[0]['Request URL'].split('/').slice(-1);
-        console.log('erased panel', deletedId);
       });
     });
   });
