@@ -87,9 +87,10 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
 
     it('Create second visualization in event analytics', () => {
       cy.get('[data-test-subj="eventHomeAction__explorer"]').click();
+      cy.get('[id^=autocomplete-textarea]').should('be.visible').focus()
+        .invoke('val', '')
+        .trigger('change');
       cy.get('[id^=autocomplete-textarea]')
-        .focus()
-        .clear({ force: true })
         .type(PPL_VISUALIZATIONS[1], { delay: 50, force: true });
       cy.get('.euiButton__text').contains('Run').trigger('mouseover').click();
       cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
@@ -218,13 +219,11 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
 
     describe('with a SavedObjects Panel', () => {
       beforeEach(() => {
+        eraseSavedObjectPanels();
         createSavedObjectPanel();
         moveToPanelHome();
         cy.reload();
         cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-        // Wait until exactly one row (the SO panel just created) is present.
-        // Duplicate would otherwise pick up a leftover legacy row and hit the
-        // legacy GET endpoint with a non-UUID id, returning 400.
         cy.get('.euiTableRow').should('have.length', 1);
       });
 
@@ -518,12 +517,9 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
         .eq(0)
         .invoke('height')
         .then((originalHeight) => {
-          // react-grid-layout's underlying react-draggable registers
-          // `mousemove`/`mouseup` on `document`, not on the handle. Cypress's
-          // `.trigger('mousemove')` on a specific element only fires that
-          // element's listeners, so the prior version never moved the drag
-          // and `newHeight === originalHeight`. Fire the move/up events on
-          // `document` directly.
+          // react-draggable registers mousemove/mouseup on `document` via
+          // addEventListener. Cypress's jQuery .trigger() doesn't fire native
+          // events, so we must use dispatchEvent with real MouseEvent objects.
           cy.get('.react-resizable-handle')
             .eq(0)
             .then(($handle) => {
@@ -531,34 +527,20 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
               const startX = rect.left + rect.width / 2;
               const startY = rect.top + rect.height / 2;
 
-              cy.wrap($handle).trigger('mousedown', {
-                which: 1,
-                button: 0,
-                clientX: startX,
-                clientY: startY,
-                force: true,
-              });
+              $handle[0].dispatchEvent(
+                new MouseEvent('mousedown', { clientX: startX, clientY: startY, bubbles: true })
+              );
 
-              cy.document().trigger('mousemove', {
-                clientX: startX + 200,
-                clientY: startY + 200,
-                force: true,
-              });
-              cy.document().trigger('mousemove', {
-                clientX: startX + 400,
-                clientY: startY + 400,
-                force: true,
-              });
-              cy.document().trigger('mousemove', {
-                clientX: startX + 600,
-                clientY: startY + 600,
-                force: true,
-              });
-              cy.document().trigger('mouseup', {
-                clientX: startX + 600,
-                clientY: startY + 600,
-                force: true,
-              });
+              const doc = $handle[0].ownerDocument;
+              doc.dispatchEvent(
+                new MouseEvent('mousemove', { clientX: startX + 400, clientY: startY + 400, bubbles: true })
+              );
+              doc.dispatchEvent(
+                new MouseEvent('mousemove', { clientX: startX + 600, clientY: startY + 600, bubbles: true })
+              );
+              doc.dispatchEvent(
+                new MouseEvent('mouseup', { clientX: startX + 600, clientY: startY + 600, bubbles: true })
+              );
             });
 
           cy.get('button[data-test-subj="savePanelButton"]').click();
