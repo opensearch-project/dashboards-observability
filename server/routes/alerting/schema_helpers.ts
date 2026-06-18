@@ -54,14 +54,21 @@ export const alertingIdSchema = schema.string({
  * composite id is only used for in-memory equality matching against the
  * fetched rule list (`getPromRuleDetail`), never interpolated into an upstream
  * URL, so even the colon never reaches a transport path.
+ *
+ * Length checks live inside `validate` (not `minLength`/`maxLength`) to match
+ * the sibling `alertingIdSchema` convention: @osd/config-schema with joi v17
+ * only executes the last custom rule when both length constraints and a
+ * `validate` callback are specified.
  */
 const RULE_ID_PATTERN = /^[A-Za-z0-9_:-]+$/;
 
 export const alertingRuleIdSchema = schema.string({
-  maxLength: ID_MAX_LENGTH,
-  minLength: 1,
-  validate: (value: string) =>
-    RULE_ID_PATTERN.test(value) ? undefined : 'must match /^[A-Za-z0-9_:-]+$/',
+  validate: (value: string) => {
+    if (value.length < 1) return `value has length [0] but it must have a minimum length of [1].`;
+    if (value.length > ID_MAX_LENGTH)
+      return `value has length [${value.length}] but it must have a maximum length of [${ID_MAX_LENGTH}].`;
+    if (!RULE_ID_PATTERN.test(value)) return 'must match /^[A-Za-z0-9_:-]+$/';
+  },
 });
 
 /** Prometheus label name — `[a-zA-Z_:][a-zA-Z0-9_:]*`, bounded. */
