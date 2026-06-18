@@ -118,7 +118,7 @@ describe('handlers', () => {
 
   it('handleGetRuleDetail forwards definitionType and the source request to the service', async () => {
     mockAlertSvc.getRuleDetail.mockResolvedValueOnce({ id: 'detector-1' } as never);
-    const sourceRequest = { headers: { 'encrypted-fas-creds': 'cipher' }, auth: { isAuthenticated: true } } as never;
+    const sourceRequest = { headers: { authorization: 'Bearer tok' }, auth: { isAuthenticated: true } } as never;
     await handleGetRuleDetail(
       mockAlertSvc as never,
       mockClient,

@@ -219,6 +219,62 @@ describe('status aggregator + circuit breaker', () => {
     expect(cb.isOpen('ds-good')).toBe(false);
   });
 
+  it('mixed reads on one datasource (one throws, one succeeds) → breaker stays closed', async () => {
+    // The breaker records a failure only when EVERY enabled SLO read on the
+    // datasource throws (anyReadOk gate). Here SLO "a" read throws and SLO "b"
+    // read succeeds, so anyReadOk wins → recordSuccess → breaker stays closed.
+    // The searcher is keyed on the per-SLO `slo_id="..."` selector; the batched
+    // prefetch (`slo_id=~"..."`) is forced to throw so each SLO falls back to
+    // its own queryInstant where we can give it a per-id outcome.
+    const queryAwareSearcher = (async (_c: unknown, request: unknown) => {
+      const q = String(
+        ((request as { body?: { query?: { query?: unknown } } }).body?.query?.query ?? '')
+      );
+      if (q.includes('slo_id=~')) throw new Error('batch prefetch unreachable'); // force fallback
+      if (q.includes('slo_id="a"')) throw new Error('read a unreachable'); // a throws
+      return ({ series: [], fields: [] } as unknown) as never; // b succeeds (empty)
+    }) as PromQLSearcher;
+    setPromQLSearcher(queryAwareSearcher);
+
+    const cb = new DatasourceCircuitBreaker({ now: () => 0, failureThreshold: 1 });
+    const transport = jest.fn(async () => ({ statusCode: 200, body: { data: { alerts: [] } } }));
+    const client = ({ transport: { request: transport } } as unknown) as AlertingOSClient;
+    const agg = new DirectQueryStatusAggregator(noopLogger(), cb);
+    const docs = [makeDoc('a', 'ds-1'), makeDoc('b', 'ds-1')];
+    const ctx = ctxFor({ 'ds-1': dsFor('ds-1') }, client);
+    await agg.aggregate(docs, ctx);
+
+    expect(cb.isOpen('ds-1')).toBe(false);
+  });
+
+  it('all-disabled SLOs on a datasource leave the breaker untouched (no success or failure recorded)', async () => {
+    // Disabled SLOs short-circuit before any read, so neither anyReadOk nor
+    // anyReadThrew is set → the breaker must be neither tripped NOR reset.
+    // Prove "not reset" by pre-loading one failure (threshold 2, not yet open);
+    // if aggregate wrongly called recordSuccess it would clear that failure and
+    // the subsequent single failure wouldn't open the breaker.
+    const cb = new DatasourceCircuitBreaker({ now: () => 0, failureThreshold: 2 });
+    cb.recordFailure('ds-1');
+    expect(cb.isOpen('ds-1')).toBe(false);
+
+    const transport = jest.fn(async () => ({ statusCode: 200, body: { data: { alerts: [] } } }));
+    const client = ({ transport: { request: transport } } as unknown) as AlertingOSClient;
+    const agg = new DirectQueryStatusAggregator(noopLogger(), cb);
+    const docs = [makeDoc('a', 'ds-1'), makeDoc('b', 'ds-1')].map((d) => ({
+      ...d,
+      spec: { ...d.spec, enabled: false },
+    }));
+    const ctx = ctxFor({ 'ds-1': dsFor('ds-1') }, client);
+    await agg.aggregate(docs, ctx);
+
+    // Breaker not tripped during aggregate.
+    expect(cb.isOpen('ds-1')).toBe(false);
+    // And the prior failure was NOT reset: one more failure now reaches the
+    // threshold and opens it.
+    cb.recordFailure('ds-1');
+    expect(cb.isOpen('ds-1')).toBe(true);
+  });
+
   it('without a breaker (legacy path), behavior is unchanged', async () => {
     const transport = jest.fn(async () => ({ statusCode: 200, body: { data: { alerts: [] } } }));
     const client = ({ transport: { request: transport } } as unknown) as AlertingOSClient;

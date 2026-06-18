@@ -258,7 +258,18 @@ export interface PrometheusBackend {
     ctx: unknown,
     ds: Datasource,
     query: string,
-    time?: number
+    time?: number,
+    opts?: {
+      requestTimeoutMs?: number;
+      /**
+       * The originating inbound request, forwarded opaquely so the
+       * implementation's scoped client carries the caller's auth (OSD
+       * `client.asScoped(request)` contract). The backend does not inspect it.
+       * Typed as `unknown` here (narrowed in the implementation) so the common
+       * types stay browser-importable.
+       */
+      sourceRequest?: unknown;
+    }
   ): Promise<PromTimeSeriesPoint[]>;
 
   /**
