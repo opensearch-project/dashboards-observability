@@ -1,0 +1,4 @@
+# Treat TypeScript sources as text so diffs are always auditable, even when
+# a fixture contains a byte (e.g. a literal NUL) that trips git's binary heuristic.
+*.ts text diff
+*.tsx text diff

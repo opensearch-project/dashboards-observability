@@ -476,9 +476,7 @@ describe('registerAlertingRoutes', () => {
 
     it('rejects a slash in ruleId (path traversal stays blocked)', () => {
       const params = findParams();
-      expect(() =>
-        params.validate({ dsId: 'amp_conn', ruleId: '../../etc/passwd' })
-      ).toThrow();
+      expect(() => params.validate({ dsId: 'amp_conn', ruleId: '../../etc/passwd' })).toThrow();
     });
 
     it('rejects a colon in the strict dsId param', () => {

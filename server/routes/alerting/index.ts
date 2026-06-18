@@ -31,7 +31,11 @@ import { MonitorMutationService } from '../../services/alerting/monitor_mutation
 import { registerAlertingMutationRoutes } from './mutations';
 import { toErrorBody, toHandlerResult } from './route_utils';
 import { isAlertManagerError } from '../../services/alerting';
-import { alertingIdSchema, alertingRuleIdSchema, prometheusLabelNameSchema } from './schema_helpers';
+import {
+  alertingIdSchema,
+  alertingRuleIdSchema,
+  prometheusLabelNameSchema,
+} from './schema_helpers';
 
 /**
  * Shape of the OSD request-handler context we rely on. `dataSource` is
