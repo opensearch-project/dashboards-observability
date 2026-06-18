@@ -352,7 +352,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
         // Priority 2/3: overlay rule-health state on top of the sample
         // derivation. Health-checker errors never escape (see
         // applyRuleHealthMerge) — the listing must stay available.
-        const merged = await this.applyRuleHealthMerge(doc, ds!, ctx, base);
+        const merged = await this.applyRuleHealthMerge(doc, ds!, ctx, base, baseHasData(base));
         perSloStatus.set(doc.id, merged);
       };
       const workers = Array.from(
@@ -404,7 +404,8 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
     doc: SloDocument,
     ds: Datasource,
     ctx: SloStatusAggregationContext,
-    base: SloLiveStatus
+    base: SloLiveStatus,
+    hasSampleData: boolean
   ): Promise<SloLiveStatus> {
     if (!ctx.healthChecker) return base;
 
@@ -436,6 +437,22 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       return { ...base, state: 'rules_missing' };
     }
     if (result.state === 'ruler_unreachable') {
+      // Only surface `ruler_unreachable` as `no_data` when we have NO
+      // sample-derived data. If the SLI read returned real samples, the ruler
+      // is demonstrably reachable for reads, and a `ruler_unreachable` here is
+      // a health-check transport mismatch (the health checker and the PromQL
+      // read can travel different paths, so the health check can transiently
+      // fail while reads succeed). Downgrading a real `breached`/`warning`/`ok`
+      // to `no_data` in that case would hide the true status, so leave the
+      // sample-derived state intact.
+      if (hasSampleData) {
+        this.logger.debug(
+          `ruler unreachable for slo=${doc.id} code=${
+            result.rulerErrorCode ?? 'unknown'
+          }, but sample data is present — keeping sample-derived state ${base.state}`
+        );
+        return base;
+      }
       this.logger.debug(
         `ruler unreachable for slo=${doc.id} code=${result.rulerErrorCode ?? 'unknown'}`
       );
@@ -956,6 +973,19 @@ function emptyObjectiveStatus(objective: Objective, doc: SloDocument): Objective
     errorBudgetRemaining: 1,
     state: 'no_data',
   };
+}
+
+/**
+ * True when at least one objective carries a sample-derived state
+ * (`ok` / `warning` / `breached`) — i.e. the SLI read returned real data.
+ * `no_data` / `source_idle` / `disabled` objectives don't count. Used to
+ * decide whether a `ruler_unreachable` health-check result should downgrade
+ * the status to `no_data` (only when there's no real data to preserve).
+ */
+function baseHasData(status: SloLiveStatus): boolean {
+  return status.objectives.some(
+    (o) => o.state === 'ok' || o.state === 'warning' || o.state === 'breached'
+  );
 }
 
 /**
