@@ -166,11 +166,9 @@ describe('status aggregator + circuit breaker', () => {
     // The breaker is driven by the PromQL read path, NOT the optional alerts
     // fetch. Make the searcher (read) throw to trip it; the alerts transport is
     // irrelevant to the breaker now.
-    setPromQLSearcher(
-      (async () => {
-        throw new Error('search strategy unreachable');
-      }) as PromQLSearcher
-    );
+    setPromQLSearcher((async () => {
+      throw new Error('search strategy unreachable');
+    }) as PromQLSearcher);
     const cb = new DatasourceCircuitBreaker({ now: () => 0, failureThreshold: 2 });
     const transport = jest.fn(async () => ({ statusCode: 200, body: { data: { alerts: [] } } }));
     const client = ({ transport: { request: transport } } as unknown) as AlertingOSClient;
@@ -228,7 +226,7 @@ describe('status aggregator + circuit breaker', () => {
     // its own queryInstant where we can give it a per-id outcome.
     const queryAwareSearcher = (async (_c: unknown, request: unknown) => {
       const q = String(
-        ((request as { body?: { query?: { query?: unknown } } }).body?.query?.query ?? '')
+        (request as { body?: { query?: { query?: unknown } } }).body?.query?.query ?? ''
       );
       if (q.includes('slo_id=~')) throw new Error('batch prefetch unreachable'); // force fallback
       if (q.includes('slo_id="a"')) throw new Error('read a unreachable'); // a throws
@@ -296,11 +294,9 @@ describe('status aggregator + circuit breaker', () => {
     });
     // Breaker is driven by the read path — make the searcher throw so the
     // status read fails and trips the breaker.
-    setPromQLSearcher(
-      (async () => {
-        throw new Error('boom');
-      }) as PromQLSearcher
-    );
+    setPromQLSearcher((async () => {
+      throw new Error('boom');
+    }) as PromQLSearcher);
     const transport = jest.fn(async () => ({ statusCode: 200, body: { data: { alerts: [] } } }));
     const client = ({ transport: { request: transport } } as unknown) as AlertingOSClient;
     const agg = new DirectQueryStatusAggregator(noopLogger(), cb);

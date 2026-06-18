@@ -244,10 +244,9 @@ export interface PrometheusBackend {
       requestTimeoutMs?: number;
       /**
        * The originating inbound request, forwarded opaquely so the
-       * implementation's scoped client carries the caller's auth (OSD
-       * `client.asScoped(request)` contract). The backend does not inspect it.
-       * Typed as `unknown` here (narrowed in the implementation) so the common
-       * types stay browser-importable.
+       * implementation's datasource client can derive the caller's auth from
+       * it. The backend does not inspect it. Typed as `unknown` here (narrowed
+       * in the implementation) so the common types stay browser-importable.
        */
       sourceRequest?: unknown;
     }
@@ -263,10 +262,9 @@ export interface PrometheusBackend {
       requestTimeoutMs?: number;
       /**
        * The originating inbound request, forwarded opaquely so the
-       * implementation's scoped client carries the caller's auth (OSD
-       * `client.asScoped(request)` contract). The backend does not inspect it.
-       * Typed as `unknown` here (narrowed in the implementation) so the common
-       * types stay browser-importable.
+       * implementation's datasource client can derive the caller's auth from
+       * it. The backend does not inspect it. Typed as `unknown` here (narrowed
+       * in the implementation) so the common types stay browser-importable.
        */
       sourceRequest?: unknown;
     }
@@ -316,10 +314,10 @@ export interface PrometheusBackend {
     opts?: {
       /**
        * The originating inbound request, forwarded opaquely so the
-       * implementation's scoped client carries the caller's auth (OSD
-       * `client.asScoped(request)` contract). The backend does not inspect it.
-       * Typed as `unknown` here (narrowed to `OpenSearchDashboardsRequest` in
-       * the implementation) so the common types stay browser-importable.
+       * implementation's datasource client can derive the caller's auth from
+       * it. The backend does not inspect it. Typed as `unknown` here (narrowed
+       * to `OpenSearchDashboardsRequest` in the implementation) so the common
+       * types stay browser-importable.
        */
       sourceRequest?: unknown;
     }

@@ -28,7 +28,10 @@
  *   - RestDirectQueryResourcesManagementAction.java
  *   - PrometheusQueryHandler.java / PrometheusClient.java
  */
-import type { RequestHandlerContext, OpenSearchDashboardsRequest } from '../../../../../src/core/server';
+import type {
+  RequestHandlerContext,
+  OpenSearchDashboardsRequest,
+} from '../../../../../src/core/server';
 import {
   AlertingOSClient,
   Datasource,

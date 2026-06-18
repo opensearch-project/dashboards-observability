@@ -255,12 +255,17 @@ describe('DirectQueryPrometheusBackend', () => {
     searcher.mockResolvedValueOnce(
       buildDataFrame([{ metric: { __name__: 'up' }, value: [1000, '1'] }], /* isRange */ false)
     );
-    const sourceRequest = { headers: { authorization: 'Bearer tok' }, auth: { isAuthenticated: true } } as never;
+    const sourceRequest = {
+      headers: { authorization: 'Bearer tok' },
+      auth: { isAuthenticated: true },
+    } as never;
     await backend.queryInstant(ctx, ds, 'up', 1000, { sourceRequest });
     expect((searcher.mock.calls[0][1] as { headers?: unknown }).headers).toEqual({
       authorization: 'Bearer tok',
     });
-    expect((searcher.mock.calls[0][1] as { auth?: unknown }).auth).toEqual({ isAuthenticated: true });
+    expect((searcher.mock.calls[0][1] as { auth?: unknown }).auth).toEqual({
+      isAuthenticated: true,
+    });
 
     // No source request → no headers/auth on the synthetic request (a
     // header-less fake request is valid for `client.asScoped`).
@@ -324,13 +329,18 @@ describe('DirectQueryPrometheusBackend', () => {
 
     it('forwards opts.sourceRequest opaquely onto the search request', async () => {
       searcher.mockResolvedValueOnce(matrixDF([]));
-      const sourceRequest = { headers: { authorization: 'Bearer tok' }, auth: { isAuthenticated: true } } as never;
+      const sourceRequest = {
+        headers: { authorization: 'Bearer tok' },
+        auth: { isAuthenticated: true },
+      } as never;
       await backend.queryRangeMatrix(ctx, ds, 'ALERTS', 100, 300, 60, { sourceRequest });
       const [, request] = searcher.mock.calls[0];
       expect((request as { headers?: Record<string, unknown> }).headers).toEqual({
         authorization: 'Bearer tok',
       });
-      expect((request as { auth?: Record<string, unknown> }).auth).toEqual({ isAuthenticated: true });
+      expect((request as { auth?: Record<string, unknown> }).auth).toEqual({
+        isAuthenticated: true,
+      });
     });
   });
 

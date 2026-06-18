@@ -139,12 +139,12 @@ export interface SloStatusAggregationContext {
   ruleDedupEnabled?: boolean;
   /**
    * The originating inbound request, forwarded opaquely onto the PromQL search
-   * request so its scoped client carries the caller's auth — the standard OSD
-   * `client.asScoped(request)` contract. Server-initiated reads build a
-   * synthetic search request to hold the PromQL body; the synthetic request
-   * alone has none of the auth context (headers, `auth`, …) a scoped client
-   * needs, and the datasource client reads those off the request. The
-   * aggregator does not inspect this. Leave undefined in offline / tests.
+   * request so the datasource client can derive the caller's auth from it.
+   * Server-initiated reads build a synthetic search request to hold the PromQL
+   * body; the synthetic request alone has none of the inbound auth context
+   * (headers, `auth`, …) the datasource client reads off the request. The
+   * aggregator does not inspect this. See `PromQLSearchOptions.sourceRequest`
+   * for how the forwarding works. Leave undefined in offline / tests.
    */
   sourceRequest?: OpenSearchDashboardsRequest;
 }

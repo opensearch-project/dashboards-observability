@@ -81,18 +81,23 @@ export interface PromQLSearchOptions {
   timeoutSeconds?: number;
   /**
    * The originating inbound request, forwarded opaquely so the `promql`
-   * strategy's `client.asScoped(request)` produces a scoped client carrying
-   * the caller's auth. Server-initiated reads (SLO status aggregator,
-   * probe-sli, alert preview, historical-alert matrix) construct a *synthetic*
-   * request to hold the PromQL `body`; the synthetic request alone has none of
-   * the auth context a scoped client needs. We don't inspect this — whatever
-   * the datasource client reads off the request (auth headers, `request.auth`,
-   * etc.) travels untouched. Forwarding the whole request (rather than
-   * cherry-picking `headers`) keeps every field the client might need present,
-   * so we don't regress as that client evolves. `buildSearchRequest` spreads
-   * this and overrides only
-   * `body` / `dataSourceId`. Omit for callers (tests / non-scoped deployments)
-   * that have no request to forward — `asScoped` accepts a header-less fake.
+   * strategy's datasource client can derive the caller's auth from it.
+   * Server-initiated reads (SLO status aggregator, probe-sli, alert preview,
+   * historical-alert matrix) construct a *synthetic* request to hold the
+   * PromQL `body`; the synthetic request alone has none of the inbound auth
+   * context. We don't inspect this — whatever the datasource client reads off
+   * the request (auth `headers`, `request.auth`, etc.) travels untouched.
+   *
+   * Note: `buildSearchRequest` shallow-spreads this into a plain object, so the
+   * result is not an `instanceof OpenSearchDashboardsRequest`. The request's
+   * own-enumerable fields (`headers`, `auth`, …) are preserved, which is what
+   * the DirectQuery datasource client reads; but core's `asScoped` treats a
+   * non-branded request as header-less and won't re-run `getAuthHeaders`. That
+   * is acceptable here: the forwarded raw `headers`/`auth` are what the
+   * datasource client needs, and forwarding the whole request (rather than
+   * cherry-picking `headers`) keeps every field present so we don't regress as
+   * that client evolves. Override is limited to `body` / `dataSourceId`. Omit
+   * for callers (tests / non-scoped deployments) with no request to forward.
    */
   sourceRequest?: OpenSearchDashboardsRequest;
 }

@@ -282,11 +282,11 @@ export async function fetchPromPreviewData(
       const now = Math.floor(Date.now() / 1000);
       const oneHourAgo = now - 3600;
       const step = 60;
-      // Forward the inbound request opaquely so the backend's scoped client
-      // carries the caller's auth to the datasource (same contract the SLO
-      // status aggregator / probe-sli reads use). The datasource client reads
-      // whatever auth context it needs off the request. Without it the read
-      // throws and the preview silently falls back to embedded-alert extraction.
+      // Forward the inbound request opaquely so the backend can derive the
+      // caller's auth to the datasource (same forwarding the SLO status
+      // aggregator / probe-sli reads use). The datasource client reads whatever
+      // auth context it needs off the request. Without it the read throws and
+      // the preview silently falls back to embedded-alert extraction.
       const points = await promBackend.queryRange(ctx, ds, metricQuery, oneHourAgo, now, step, {
         sourceRequest,
       });
