@@ -31,7 +31,11 @@ import { MonitorMutationService } from '../../services/alerting/monitor_mutation
 import { registerAlertingMutationRoutes } from './mutations';
 import { toErrorBody, toHandlerResult } from './route_utils';
 import { isAlertManagerError } from '../../services/alerting';
-import { alertingIdSchema, prometheusLabelNameSchema } from './schema_helpers';
+import {
+  alertingIdSchema,
+  alertingRuleIdSchema,
+  prometheusLabelNameSchema,
+} from './schema_helpers';
 
 /**
  * Shape of the OSD request-handler context we rely on. `dataSource` is
@@ -722,7 +726,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     {
       path: '/api/alerting/rules/{dsId}/{ruleId}',
       validate: {
-        params: schema.object({ dsId: alertingIdSchema, ruleId: alertingIdSchema }),
+        params: schema.object({ dsId: alertingIdSchema, ruleId: alertingRuleIdSchema }),
         query: schema.object({
           definitionType: schema.maybe(
             schema.oneOf([
