@@ -233,6 +233,51 @@ describe('DirectQueryPrometheusBackend', () => {
     expect((request as { dataSourceId?: string }).dataSourceId).toBe('mds-saved-object-id');
   });
 
+  it('queryRange forwards the source request opaquely onto the search request', async () => {
+    searcher.mockResolvedValueOnce(matrixDF([]));
+    // A representative inbound request carrying arbitrary auth headers and an
+    // `auth` object — the backend forwards the whole thing opaquely, so both
+    // survive regardless of the deployment's auth scheme.
+    const sourceRequest = {
+      headers: { authorization: 'Bearer tok', 'x-custom-auth': 'abc' },
+      auth: { isAuthenticated: true },
+    } as never;
+    await backend.queryRange(ctx, ds, 'up', 100, 200, 15, { sourceRequest });
+    const [, request] = searcher.mock.calls[0];
+    expect((request as { headers?: Record<string, unknown> }).headers).toEqual({
+      authorization: 'Bearer tok',
+      'x-custom-auth': 'abc',
+    });
+    expect((request as { auth?: Record<string, unknown> }).auth).toEqual({ isAuthenticated: true });
+  });
+
+  it('queryInstant forwards the source request, and omits its fields when none supplied', async () => {
+    searcher.mockResolvedValueOnce(
+      buildDataFrame([{ metric: { __name__: 'up' }, value: [1000, '1'] }], /* isRange */ false)
+    );
+    const sourceRequest = {
+      headers: { authorization: 'Bearer tok' },
+      auth: { isAuthenticated: true },
+    } as never;
+    await backend.queryInstant(ctx, ds, 'up', 1000, { sourceRequest });
+    expect((searcher.mock.calls[0][1] as { headers?: unknown }).headers).toEqual({
+      authorization: 'Bearer tok',
+    });
+    expect((searcher.mock.calls[0][1] as { auth?: unknown }).auth).toEqual({
+      isAuthenticated: true,
+    });
+
+    // No source request → no headers/auth on the synthetic request (a
+    // header-less fake request is valid for `client.asScoped`).
+    searcher.mockReset();
+    searcher.mockResolvedValueOnce(
+      buildDataFrame([{ metric: { __name__: 'up' }, value: [1000, '1'] }], /* isRange */ false)
+    );
+    await backend.queryInstant(ctx, ds, 'up', 1000);
+    expect((searcher.mock.calls[0][1] as { headers?: unknown }).headers).toBeUndefined();
+    expect((searcher.mock.calls[0][1] as { auth?: unknown }).auth).toBeUndefined();
+  });
+
   // ---- resolveDqName guard ----
   it('throws when datasource has no directQueryName', async () => {
     const noDq = { ...ds, directQueryName: undefined };
@@ -281,12 +326,56 @@ describe('DirectQueryPrometheusBackend', () => {
       ]);
       expect(byKey['HighCPU|b'].values.map((v) => v.value)).toEqual([0, 1]);
     });
+
+    it('forwards opts.sourceRequest opaquely onto the search request', async () => {
+      searcher.mockResolvedValueOnce(matrixDF([]));
+      const sourceRequest = {
+        headers: { authorization: 'Bearer tok' },
+        auth: { isAuthenticated: true },
+      } as never;
+      await backend.queryRangeMatrix(ctx, ds, 'ALERTS', 100, 300, 60, { sourceRequest });
+      const [, request] = searcher.mock.calls[0];
+      expect((request as { headers?: Record<string, unknown> }).headers).toEqual({
+        authorization: 'Bearer tok',
+      });
+      expect((request as { auth?: Record<string, unknown> }).auth).toEqual({
+        isAuthenticated: true,
+      });
+    });
   });
 
   describe('getHistoricalAlerts', () => {
     beforeEach(() => {
       mockClient.transport.request.mockClear();
       searcher.mockReset();
+    });
+
+    it('threads opts.sourceRequest end-to-end through to the matrix search request', async () => {
+      // Guards the 4th read path: getHistoricalAlerts -> queryRangeMatrix ->
+      // runPromQLRange. endIsNow=false + empty matrix avoids the live-alerts
+      // fallback so the only search call is the matrix read.
+      searcher.mockResolvedValueOnce(matrixDF([]));
+      const sourceRequest = {
+        headers: { authorization: 'Bearer tok' },
+        auth: { isAuthenticated: true },
+      } as never;
+      await backend.getHistoricalAlerts(
+        ctx,
+        mockClient as never,
+        ds,
+        100,
+        400,
+        60,
+        /* endIsNow */ false,
+        { sourceRequest }
+      );
+      const [, request] = searcher.mock.calls[0];
+      expect((request as { headers?: Record<string, unknown> }).headers).toEqual({
+        authorization: 'Bearer tok',
+      });
+      expect((request as { auth?: Record<string, unknown> }).auth).toEqual({
+        isAuthenticated: true,
+      });
     });
 
     it('reconstructs a single contiguous firing block into one episode', async () => {

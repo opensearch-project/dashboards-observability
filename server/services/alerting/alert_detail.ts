@@ -19,7 +19,10 @@
  * flyout no longer surfaces it inline. Alertmanager owns Prom routing
  * and the standalone Routing tab is the canonical place for it.
  */
-import type { RequestHandlerContext } from '../../../../../src/core/server';
+import type {
+  RequestHandlerContext,
+  OpenSearchDashboardsRequest,
+} from '../../../../../src/core/server';
 import {
   ADDetector,
   ADForecaster,
@@ -113,7 +116,8 @@ export async function getRuleDetail(
   dsId: string,
   ruleId: string,
   ctx?: RequestHandlerContext,
-  definitionType?: UnifiedDefinitionType
+  definitionType?: UnifiedDefinitionType,
+  sourceRequest?: OpenSearchDashboardsRequest
 ): Promise<UnifiedRule | null> {
   const ds = await datasourceService.get(dsId);
   if (!ds) return null;
@@ -127,7 +131,7 @@ export async function getRuleDetail(
     const detector = monitor ?? (await getADDetectorDetail(client, ds, ruleId));
     return detector ?? getADForecasterDetail(client, ds, ruleId);
   } else if (ds.type === 'prometheus' && promBackend) {
-    return getPromRuleDetail(promBackend, client, ds, ruleId, ctx);
+    return getPromRuleDetail(promBackend, client, ds, ruleId, ctx, sourceRequest);
   }
   return null;
 }
@@ -292,7 +296,8 @@ export async function getPromRuleDetail(
   client: AlertingOSClient,
   ds: Datasource,
   ruleId: string,
-  ctx?: RequestHandlerContext
+  ctx?: RequestHandlerContext,
+  sourceRequest?: OpenSearchDashboardsRequest
 ): Promise<UnifiedRule | null> {
   const groups = await promBackend.getRuleGroups(client, ds);
 
@@ -331,7 +336,8 @@ export async function getPromRuleDetail(
           ctx,
           ds,
           alertingRule.query,
-          alertingRule
+          alertingRule,
+          sourceRequest
         ),
         notificationRouting: [],
         suppressionRules: [],

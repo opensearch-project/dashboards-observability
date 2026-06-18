@@ -15,7 +15,10 @@
  * Preview time-series helpers live in `alert_preview.ts`.
  * Pure utilities and unified-shape mappers live in `alert_utils.ts`.
  */
-import type { RequestHandlerContext } from '../../../../../src/core/server';
+import type {
+  RequestHandlerContext,
+  OpenSearchDashboardsRequest,
+} from '../../../../../src/core/server';
 import {
   AlertingOSClient,
   ADAnomalyResult,
@@ -410,7 +413,8 @@ export class MultiBackendAlertService {
   async getUnifiedAlerts(
     clientOrResolver: AlertingOSClient | ((dsId: string) => Promise<AlertingOSClient>),
     options?: UnifiedFetchOptions,
-    ctx?: RequestHandlerContext
+    ctx?: RequestHandlerContext,
+    sourceRequest?: OpenSearchDashboardsRequest
   ): Promise<ProgressiveResponse<UnifiedAlertSummary>> {
     const datasources = await this.resolveDatasources(options?.dsIds);
     const timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
@@ -433,7 +437,8 @@ export class MultiBackendAlertService {
           timeoutMs,
           resolvedRange,
           options?.onProgress,
-          ctx
+          ctx,
+          sourceRequest
         );
       })
     );
@@ -658,7 +663,8 @@ export class MultiBackendAlertService {
     dsId: string,
     ruleId: string,
     ctx?: RequestHandlerContext,
-    definitionType?: UnifiedDefinitionType
+    definitionType?: UnifiedDefinitionType,
+    sourceRequest?: OpenSearchDashboardsRequest
   ): Promise<UnifiedRule | null> {
     return getRuleDetailImpl(
       this.datasourceService,
@@ -668,7 +674,8 @@ export class MultiBackendAlertService {
       dsId,
       ruleId,
       ctx,
-      definitionType
+      definitionType,
+      sourceRequest
     );
   }
 
@@ -700,7 +707,8 @@ export class MultiBackendAlertService {
     timeoutMs: number,
     range: ResolvedRange | undefined,
     onProgress?: (result: DatasourceFetchResult<UnifiedAlertSummary>) => void,
-    ctx?: RequestHandlerContext
+    ctx?: RequestHandlerContext,
+    sourceRequest?: OpenSearchDashboardsRequest
   ): Promise<DatasourceFetchResult<UnifiedAlertSummary>> {
     const start = Date.now();
     const makeResult = (
@@ -722,7 +730,7 @@ export class MultiBackendAlertService {
 
     try {
       const raw = await this.withTimeout(
-        this.fetchAlertsRaw(client, ds, range, ctx),
+        this.fetchAlertsRaw(client, ds, range, ctx, sourceRequest),
         timeoutMs,
         `Datasource ${ds.name} timed out after ${timeoutMs}ms`
       );
@@ -802,7 +810,8 @@ export class MultiBackendAlertService {
     client: AlertingOSClient,
     ds: Datasource,
     range?: ResolvedRange,
-    ctx?: RequestHandlerContext
+    ctx?: RequestHandlerContext,
+    sourceRequest?: OpenSearchDashboardsRequest
   ): Promise<FetchAlertsRawResult> {
     if (ds.type === 'opensearch' && this.osBackend) {
       const partialErrors: string[] = [];
@@ -904,7 +913,8 @@ export class MultiBackendAlertService {
             startSec,
             endSec,
             step,
-            range.endIsNow
+            range.endIsNow,
+            { sourceRequest }
           );
           return {
             alerts: historical.alerts,
