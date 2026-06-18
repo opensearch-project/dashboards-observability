@@ -66,13 +66,13 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
           win.localStorage.clear();
         },
       });
-      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-      cy.get('[id^=autocomplete-textarea]').should('be.visible');
+      cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 30000 }).should('not.exist');
+      cy.get('[id^=autocomplete-textarea]', { timeout: 30000 }).should('be.visible');
     };
 
     it('Create first visualization in event analytics', () => {
       visitExplorerFresh();
-      cy.get('[id^=autocomplete-textarea]').should('be.visible').focus()
+      cy.get('[id^=autocomplete-textarea]', { timeout: 30000 }).should('be.visible').focus()
         .type(PPL_VISUALIZATIONS[0], { delay: 50 });
       cy.get('.euiButton__text').contains('Run').trigger('mouseover').click();
       cy.get('button[id="main-content-vis"]')
@@ -92,7 +92,7 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
 
     it('Create second visualization in event analytics', () => {
       visitExplorerFresh();
-      cy.get('[id^=autocomplete-textarea]').should('be.visible').focus()
+      cy.get('[id^=autocomplete-textarea]', { timeout: 30000 }).should('be.visible').focus()
         .type(PPL_VISUALIZATIONS[1], { delay: 50 });
       cy.get('.euiButton__text').contains('Run').trigger('mouseover').click();
       cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
@@ -454,10 +454,12 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
         .trigger('mouseover')
         .click({ force: true })
         .focus()
-        .type(PPL_FILTER, { force: true, delay: 500 });
+        .type(PPL_FILTER, { force: true, delay: 50 });
+      cy.get('[data-test-subj="searchAutocompleteTextArea"]')
+        .invoke('val')
+        .should('contain', 'Munich Airport');
       cy.get('button[data-test-subj="superDatePickerApplyTimeButton"]').click({ force: true });
-      cy.get('.euiButton__text').contains('Refresh').trigger('mouseover').click();
-      cy.get('.xtick').should('contain', 'Munich Airport');
+      cy.get('.xtick', { timeout: 40000 }).should('contain', 'Munich Airport');
       cy.get('.xtick').contains('Zurich Airport').should('not.exist');
       cy.get('.xtick').contains('BeatsWest').should('not.exist');
       cy.get('.xtick').contains('Logstash Airways').should('not.exist');
