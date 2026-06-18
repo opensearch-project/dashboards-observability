@@ -43,32 +43,32 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
   });
 
   describe('Creating visualizations', () => {
-    // Clear redux-persist session storage AND the persisted root key explicitly.
-    // Just calling sessionStorage.clear() before navigate isn't enough: the
-    // previous test's in-memory redux store re-flushes a SAVED_OBJECT_ID into
-    // the new page's sessionStorage during PERSIST rehydration, so the second
-    // save becomes a PUT-update against the deleted object id (404).
-    // Visiting the explorer fresh with a clean slate avoids the rehydrate path
-    // entirely.
+    // Visit the explorer page directly with a clean slate so redux-persist
+    // doesn't rehydrate a stale SAVED_OBJECT_ID from a previous test.
     const visitExplorerFresh = () => {
-      cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-logs#/`, {
+      // Navigate to home first to unload the observability-logs app and its
+      // redux store. This prevents the store from flushing stale IDs back to
+      // sessionStorage during the subsequent navigation.
+      cy.visit(`${Cypress.env('opensearchDashboards')}/app/home`, {
+        onBeforeLoad: (win) => {
+          win.sessionStorage.clear();
+          win.localStorage.clear();
+        },
+      });
+      cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-logs#/explorer`, {
         onBeforeLoad: (win) => {
           win.sessionStorage.clear();
           win.localStorage.clear();
         },
       });
       cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+      cy.get('[id^=autocomplete-textarea]').should('be.visible');
     };
 
-    beforeEach(() => {
-      visitExplorerFresh();
-    });
-
     it('Create first visualization in event analytics', () => {
-      cy.get('[data-test-subj="eventHomeAction__explorer"]').click();
-      cy.get('[id^=autocomplete-textarea]').focus().type(PPL_VISUALIZATIONS[0], {
-        delay: 50,
-      });
+      visitExplorerFresh();
+      cy.get('[id^=autocomplete-textarea]').should('be.visible').focus()
+        .type(PPL_VISUALIZATIONS[0], { delay: 50 });
       cy.get('.euiButton__text').contains('Run').trigger('mouseover').click();
       cy.get('button[id="main-content-vis"]')
         .contains('Visualizations')
@@ -86,12 +86,9 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
     });
 
     it('Create second visualization in event analytics', () => {
-      cy.get('[data-test-subj="eventHomeAction__explorer"]').click();
+      visitExplorerFresh();
       cy.get('[id^=autocomplete-textarea]').should('be.visible').focus()
-        .invoke('val', '')
-        .trigger('change');
-      cy.get('[id^=autocomplete-textarea]')
-        .type(PPL_VISUALIZATIONS[1], { delay: 50, force: true });
+        .type(PPL_VISUALIZATIONS[1], { delay: 50 });
       cy.get('.euiButton__text').contains('Run').trigger('mouseover').click();
       cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
       cy.get('button[id="main-content-vis"]')
@@ -220,7 +217,12 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
     describe('with a SavedObjects Panel', () => {
       beforeEach(() => {
         eraseSavedObjectPanels();
+        eraseLegacyPanels();
         createSavedObjectPanel();
+        // Clear session storage to prevent redux from rehydrating stale panel
+        // list (the "Duplicates" test writes 2 panels to the redux store which
+        // gets persisted to sessionStorage).
+        cy.window().then((win) => win.sessionStorage.clear());
         moveToPanelHome();
         cy.reload();
         cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
@@ -518,8 +520,8 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
         .invoke('height')
         .then((originalHeight) => {
           // react-draggable registers mousemove/mouseup on `document` via
-          // addEventListener. Cypress's jQuery .trigger() doesn't fire native
-          // events, so we must use dispatchEvent with real MouseEvent objects.
+          // addEventListener. We use dispatchEvent with real MouseEvent objects
+          // and cy.wrap() chains to give React time to process each event.
           cy.get('.react-resizable-handle')
             .eq(0)
             .then(($handle) => {
@@ -528,18 +530,54 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
               const startY = rect.top + rect.height / 2;
 
               $handle[0].dispatchEvent(
-                new MouseEvent('mousedown', { clientX: startX, clientY: startY, bubbles: true })
+                new MouseEvent('mousedown', {
+                  clientX: startX,
+                  clientY: startY,
+                  bubbles: true,
+                  cancelable: true,
+                  button: 0,
+                })
               );
+            });
 
+          // Allow React to process the mousedown and register doc listeners
+          cy.wait(100);
+
+          cy.get('.react-resizable-handle')
+            .eq(0)
+            .then(($handle) => {
+              const rect = $handle[0].getBoundingClientRect();
+              const startX = rect.left + rect.width / 2;
+              const startY = rect.top + rect.height / 2;
               const doc = $handle[0].ownerDocument;
+
               doc.dispatchEvent(
-                new MouseEvent('mousemove', { clientX: startX + 400, clientY: startY + 400, bubbles: true })
+                new MouseEvent('mousemove', {
+                  clientX: startX + 600,
+                  clientY: startY + 600,
+                  bubbles: true,
+                  cancelable: true,
+                })
               );
+            });
+
+          cy.wait(100);
+
+          cy.get('.react-resizable-handle')
+            .eq(0)
+            .then(($handle) => {
+              const doc = $handle[0].ownerDocument;
+              const rect = $handle[0].getBoundingClientRect();
+              const startX = rect.left + rect.width / 2;
+              const startY = rect.top + rect.height / 2;
+
               doc.dispatchEvent(
-                new MouseEvent('mousemove', { clientX: startX + 600, clientY: startY + 600, bubbles: true })
-              );
-              doc.dispatchEvent(
-                new MouseEvent('mouseup', { clientX: startX + 600, clientY: startY + 600, bubbles: true })
+                new MouseEvent('mouseup', {
+                  clientX: startX,
+                  clientY: startY,
+                  bubbles: true,
+                  cancelable: true,
+                })
               );
             });
 
@@ -790,14 +828,15 @@ const eraseSavedObjectPanels = () => {
     .request({
       method: 'get',
       failOnStatusCode: false,
-      url: 'api/saved_objects/_find?type=observability-panel',
+      url: 'api/saved_objects/_find?type=observability-panel&per_page=100',
       headers: {
         'content-type': 'application/json;charset=UTF-8',
         'osd-xsrf': true,
       },
     })
     .then((response) => {
-      response.body.saved_objects.map((soPanel) => {
+      const panels = response.body.saved_objects || [];
+      panels.forEach((soPanel) => {
         cy.request({
           method: 'DELETE',
           failOnStatusCode: false,
