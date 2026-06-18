@@ -272,23 +272,29 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       }
 
       // Firing-alerts: one fetch per datasource, keyed by slo_id.
+      //
+      // This fetch is NON-CRITICAL: it only supplies the firing-alert count
+      // badge. It uses the raw OSD resource-proxy transport
+      // (`ctx.client.transport`), a different path from the PromQL status read
+      // (which goes through the data plugin's search strategy). The alerts
+      // endpoint can be unreachable while `/query` is fine, so this fetch's
+      // failure must NOT drive the datasource circuit breaker — doing so trips
+      // the breaker on a healthy datasource and short-circuits the *working*
+      // PromQL status reads to `no_data` for every SLO. Failure here only zeroes
+      // the firing count; the breaker is recorded by the status read below,
+      // which reflects the path that actually determines health.
       let alertCountBySloId = new Map<string, number>();
-      let alertsFetchOk = true;
       try {
         alertCountBySloId = await this.fetchFiringAlertsBySlo(ctx.client, ds);
       } catch (err) {
-        alertsFetchOk = false;
-        this.circuitBreaker?.recordFailure(dsId);
-        // Graceful: treat as zero firing alerts for this datasource and keep
-        // computing attainment — a ruler that can't serve /alerts might still
-        // serve /query.
+        // Graceful: treat as zero firing alerts and keep computing attainment.
         this.logger.warn(
           `StatusAggregator: alerts fetch failed for datasource ${ds.id} (${
             ds.directQueryName
-          }): ${errMsg(err)}. firingCount will be 0 for affected SLOs.`
+          }): ${errMsg(err)}. firingCount will be 0 for affected SLOs (non-critical; ` +
+            `circuit breaker not affected).`
         );
       }
-      if (alertsFetchOk) this.circuitBreaker?.recordSuccess(dsId);
 
       // Pre-fetch the long-window recording samples for every non-dedup SLO
       // on this datasource in a single PromQL call per (datasource ×
@@ -308,6 +314,14 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       // listing poll.
       const PER_SLO_CONCURRENCY = 8;
       let cursor = 0;
+      // Drive the circuit breaker off the PromQL *read* path (the thing that
+      // actually determines health), not the optional alerts fetch above.
+      // `statusForSlo` throwing means the read transport is broken for this
+      // datasource; a clean return (even `no_data` from an empty vector) means
+      // it's reachable. We only trip the breaker when every enabled SLO's read
+      // throws — one bad query shouldn't fast-fail the whole datasource.
+      let anyReadOk = false;
+      let anyReadThrew = false;
       const runOne = async (doc: SloDocument): Promise<void> => {
         // Priority 1: `disabled` beats everything — don't even call the
         // ruler or the health checker for a disabled SLO.
@@ -325,7 +339,9 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
             alertCountBySloId.get(doc.id) ?? 0,
             prefetch
           );
+          anyReadOk = true;
         } catch (err) {
+          anyReadThrew = true;
           this.logger.warn(
             `StatusAggregator: statusForSlo failed for ${doc.id}: ${errMsg(
               err
@@ -349,6 +365,15 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
         }
       );
       await Promise.all(workers);
+
+      // Record breaker health from the read path: any successful read closes /
+      // resets the breaker; only an all-reads-threw group (with at least one
+      // enabled SLO attempted) records a failure toward tripping it.
+      if (anyReadOk) {
+        this.circuitBreaker?.recordSuccess(dsId);
+      } else if (anyReadThrew) {
+        this.circuitBreaker?.recordFailure(dsId);
+      }
     }
 
     // Preserve input order.

@@ -134,7 +134,7 @@ describe('status aggregator + circuit breaker', () => {
     ).toBe(true);
   });
 
-  it('a successful alerts fetch closes a previously open breaker', async () => {
+  it('a successful status read closes a previously open breaker', async () => {
     let now = 0;
     const cb = new DatasourceCircuitBreaker({
       now: () => now,
@@ -157,15 +157,22 @@ describe('status aggregator + circuit breaker', () => {
     const ctx = ctxFor({ 'ds-1': dsFor('ds-1') }, client);
     await agg.aggregate(docs, ctx);
 
-    // Successful trial → closed; subsequent calls don't fast-fail.
+    // The PromQL read returned (empty but no throw) → success → closed;
+    // subsequent calls don't fast-fail.
     expect(cb.isOpen('ds-1')).toBe(false);
   });
 
-  it('records a failure when the alerts fetch throws and re-opens after threshold', async () => {
+  it('records a failure when the status READ throws and re-opens after threshold', async () => {
+    // The breaker is driven by the PromQL read path, NOT the optional alerts
+    // fetch. Make the searcher (read) throw to trip it; the alerts transport is
+    // irrelevant to the breaker now.
+    setPromQLSearcher(
+      (async () => {
+        throw new Error('search strategy unreachable');
+      }) as PromQLSearcher
+    );
     const cb = new DatasourceCircuitBreaker({ now: () => 0, failureThreshold: 2 });
-    const transport = jest.fn(async () => {
-      throw new Error('connection refused');
-    });
+    const transport = jest.fn(async () => ({ statusCode: 200, body: { data: { alerts: [] } } }));
     const client = ({ transport: { request: transport } } as unknown) as AlertingOSClient;
     const agg = new DirectQueryStatusAggregator(noopLogger(), cb);
     const docs = [makeDoc('a', 'ds-1')];
@@ -175,6 +182,26 @@ describe('status aggregator + circuit breaker', () => {
     expect(cb.isOpen('ds-1')).toBe(false);
     await agg.aggregate(docs, ctx);
     expect(cb.isOpen('ds-1')).toBe(true);
+  });
+
+  it('a failing alerts fetch alone does NOT trip the breaker when the read succeeds', async () => {
+    // Regression: previously the alerts-fetch failure recorded a breaker
+    // failure, which tripped a healthy datasource and masked working PromQL
+    // status reads as no_data. The read here succeeds (empty searcher), so the
+    // breaker must stay closed even though the alerts transport throws.
+    const cb = new DatasourceCircuitBreaker({ now: () => 0, failureThreshold: 1 });
+    const transport = jest.fn(async () => {
+      throw new Error('connection refused'); // alerts fetch fails
+    });
+    const client = ({ transport: { request: transport } } as unknown) as AlertingOSClient;
+    const agg = new DirectQueryStatusAggregator(noopLogger(), cb);
+    const docs = [makeDoc('a', 'ds-1')];
+    const ctx = ctxFor({ 'ds-1': dsFor('ds-1') }, client);
+
+    const results = await agg.aggregate(docs, ctx);
+    expect(cb.isOpen('ds-1')).toBe(false);
+    // And the SLO is not forced to no_data by the breaker.
+    expect(results.find((r) => r.sloId === 'a')?.firingCount).toBe(0);
   });
 
   it('a bad datasource does not affect other datasources isolation', async () => {
@@ -211,9 +238,14 @@ describe('status aggregator + circuit breaker', () => {
       cooldownMs: 60_000,
       onTransition: (id, kind) => events.push([id, kind]),
     });
-    const transport = jest.fn(async () => {
-      throw new Error('boom');
-    });
+    // Breaker is driven by the read path — make the searcher throw so the
+    // status read fails and trips the breaker.
+    setPromQLSearcher(
+      (async () => {
+        throw new Error('boom');
+      }) as PromQLSearcher
+    );
+    const transport = jest.fn(async () => ({ statusCode: 200, body: { data: { alerts: [] } } }));
     const client = ({ transport: { request: transport } } as unknown) as AlertingOSClient;
     const agg = new DirectQueryStatusAggregator(noopLogger(), cb);
     const docs = [makeDoc('a', 'ds-1')];
