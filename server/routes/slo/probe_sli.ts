@@ -211,6 +211,7 @@ export function registerProbeSliRoute(
       withTimeout(
         prometheusBackend.queryInstant(ctx, ds, goodQuery, endSec, {
           requestTimeoutMs: QUERY_TIMEOUT_MS,
+          sourceRequest: req,
         }),
         QUERY_TIMEOUT_MS,
         'good-query instant'
@@ -222,6 +223,7 @@ export function registerProbeSliRoute(
       withTimeout(
         prometheusBackend.queryInstant(ctx, ds, totalQuery, endSec, {
           requestTimeoutMs: QUERY_TIMEOUT_MS,
+          sourceRequest: req,
         }),
         QUERY_TIMEOUT_MS,
         'total-query instant'
@@ -239,6 +241,7 @@ export function registerProbeSliRoute(
     const rangePoints = await withTimeout(
       prometheusBackend.queryRange(ctx, ds, ratioRangeQuery, startSec, endSec, stepSec, {
         requestTimeoutMs: QUERY_TIMEOUT_MS,
+        sourceRequest: req,
       }),
       QUERY_TIMEOUT_MS,
       'ratio range'

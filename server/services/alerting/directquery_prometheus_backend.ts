@@ -28,7 +28,7 @@
  *   - RestDirectQueryResourcesManagementAction.java
  *   - PrometheusQueryHandler.java / PrometheusClient.java
  */
-import type { RequestHandlerContext } from '../../../../../src/core/server';
+import type { RequestHandlerContext, OpenSearchDashboardsRequest } from '../../../../../src/core/server';
 import {
   AlertingOSClient,
   Datasource,
@@ -578,7 +578,7 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     start: number,
     end: number,
     step: number,
-    opts: { requestTimeoutMs?: number } = {}
+    opts: { requestTimeoutMs?: number; sourceRequest?: OpenSearchDashboardsRequest } = {}
   ): Promise<PromTimeSeriesPoint[]> {
     try {
       const dqName = this.resolveDqName(ds);
@@ -591,6 +591,7 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
         stepSec: step,
         dataSourceId: ds.mdsId,
         timeoutSeconds: timeoutSeconds(opts.requestTimeoutMs),
+        sourceRequest: opts.sourceRequest,
       });
       return this.parseRangeQueryResponse((envelope as unknown) as Record<string, unknown>);
     } catch (err) {
@@ -608,7 +609,8 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     query: string,
     startSec: number,
     endSec: number,
-    stepSec: number
+    stepSec: number,
+    opts: { sourceRequest?: OpenSearchDashboardsRequest } = {}
   ): Promise<PromSeriesMatrix[]> {
     const dqName = this.resolveDqName(ds);
     this.logger.debug(`PromQL range matrix query (strategy=PROMQL): ${query.substring(0, 80)}...`);
@@ -620,6 +622,7 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
       endSec,
       stepSec,
       dataSourceId: ds.mdsId,
+      sourceRequest: opts.sourceRequest,
     });
 
     const promResult = this.extractPrometheusResult(
@@ -681,7 +684,8 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     startEpochSec: number,
     endEpochSec: number,
     stepSec: number,
-    endIsNow: boolean
+    endIsNow: boolean,
+    opts: { sourceRequest?: OpenSearchDashboardsRequest } = {}
   ): Promise<{
     alerts: UnifiedAlertSummary[];
     fallback?: 'prometheus-alerts-current-only';
@@ -699,7 +703,8 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
       'ALERTS{alertstate="firing"}',
       startEpochSec,
       endEpochSec,
-      stepSec
+      stepSec,
+      { sourceRequest: opts.sourceRequest }
     );
     const liveSettled: Promise<
       { ok: true; alerts: PromAlert[] } | { ok: false; error: string }
@@ -845,7 +850,7 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     ds: Datasource,
     query: string,
     time?: number,
-    opts: { requestTimeoutMs?: number } = {}
+    opts: { requestTimeoutMs?: number; sourceRequest?: OpenSearchDashboardsRequest } = {}
   ): Promise<PromTimeSeriesPoint[]> {
     try {
       const dqName = this.resolveDqName(ds);
@@ -856,6 +861,7 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
         timeSec: time ?? Math.floor(Date.now() / 1000),
         dataSourceId: ds.mdsId,
         timeoutSeconds: timeoutSeconds(opts.requestTimeoutMs),
+        sourceRequest: opts.sourceRequest,
       });
       return this.parseInstantQueryResponse((envelope as unknown) as Record<string, unknown>);
     } catch (err) {

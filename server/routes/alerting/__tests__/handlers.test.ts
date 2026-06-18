@@ -87,8 +87,11 @@ describe('handlers', () => {
         maxResults: 10,
       }),
       // Third positional arg is the optional RequestHandlerContext threaded
-      // for prom-historical's strategy call; this handler test doesn't pass
-      // one, so expect undefined.
+      // for prom-historical's strategy call; the fourth is the optional source
+      // request forwarded so the prom-historical matrix read carries the
+      // caller's auth. This handler test passes neither, so expect both
+      // undefined.
+      undefined,
       undefined
     );
   });
@@ -113,22 +116,25 @@ describe('handlers', () => {
     expect(result.status).toBe(404);
   });
 
-  it('handleGetRuleDetail forwards definitionType to the service', async () => {
+  it('handleGetRuleDetail forwards definitionType and the source request to the service', async () => {
     mockAlertSvc.getRuleDetail.mockResolvedValueOnce({ id: 'detector-1' } as never);
+    const sourceRequest = { headers: { 'encrypted-fas-creds': 'cipher' }, auth: { isAuthenticated: true } } as never;
     await handleGetRuleDetail(
       mockAlertSvc as never,
       mockClient,
       'ds-1',
       'detector-1',
       undefined,
-      'detector'
+      'detector',
+      sourceRequest
     );
     expect(mockAlertSvc.getRuleDetail).toHaveBeenCalledWith(
       mockClient,
       'ds-1',
       'detector-1',
       undefined,
-      'detector'
+      'detector',
+      sourceRequest
     );
   });
 
@@ -150,6 +156,7 @@ describe('handlers', () => {
         startTime: 'now-1h',
         endTime: 'now',
       }),
+      undefined,
       undefined
     );
   });

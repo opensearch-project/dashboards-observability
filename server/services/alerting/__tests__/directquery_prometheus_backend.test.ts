@@ -233,6 +233,46 @@ describe('DirectQueryPrometheusBackend', () => {
     expect((request as { dataSourceId?: string }).dataSourceId).toBe('mds-saved-object-id');
   });
 
+  it('queryRange forwards the source request opaquely onto the search request', async () => {
+    searcher.mockResolvedValueOnce(matrixDF([]));
+    // A representative inbound request carrying both IAM-style FAS headers and
+    // the IDC-style `auth` object — the backend forwards the whole thing
+    // opaquely, so both survive regardless of auth type.
+    const sourceRequest = {
+      headers: { 'encrypted-fas-creds': 'cipher', 'fas-kms-key-arn': 'arn:aws:kms:...' },
+      auth: { isAuthenticated: true },
+    } as never;
+    await backend.queryRange(ctx, ds, 'up', 100, 200, 15, { sourceRequest });
+    const [, request] = searcher.mock.calls[0];
+    expect((request as { headers?: Record<string, unknown> }).headers).toEqual({
+      'encrypted-fas-creds': 'cipher',
+      'fas-kms-key-arn': 'arn:aws:kms:...',
+    });
+    expect((request as { auth?: Record<string, unknown> }).auth).toEqual({ isAuthenticated: true });
+  });
+
+  it('queryInstant forwards the source request, and omits its fields when none supplied', async () => {
+    searcher.mockResolvedValueOnce(
+      buildDataFrame([{ metric: { __name__: 'up' }, value: [1000, '1'] }], /* isRange */ false)
+    );
+    const sourceRequest = { headers: { 'encrypted-fas-creds': 'cipher' }, auth: { isAuthenticated: true } } as never;
+    await backend.queryInstant(ctx, ds, 'up', 1000, { sourceRequest });
+    expect((searcher.mock.calls[0][1] as { headers?: unknown }).headers).toEqual({
+      'encrypted-fas-creds': 'cipher',
+    });
+    expect((searcher.mock.calls[0][1] as { auth?: unknown }).auth).toEqual({ isAuthenticated: true });
+
+    // No source request → no headers/auth on the synthetic request (a
+    // header-less fake request is valid for `client.asScoped`).
+    searcher.mockReset();
+    searcher.mockResolvedValueOnce(
+      buildDataFrame([{ metric: { __name__: 'up' }, value: [1000, '1'] }], /* isRange */ false)
+    );
+    await backend.queryInstant(ctx, ds, 'up', 1000);
+    expect((searcher.mock.calls[0][1] as { headers?: unknown }).headers).toBeUndefined();
+    expect((searcher.mock.calls[0][1] as { auth?: unknown }).auth).toBeUndefined();
+  });
+
   // ---- resolveDqName guard ----
   it('throws when datasource has no directQueryName', async () => {
     const noDq = { ...ds, directQueryName: undefined };
@@ -280,6 +320,17 @@ describe('DirectQueryPrometheusBackend', () => {
         { timestamp: 200_000, value: 1 },
       ]);
       expect(byKey['HighCPU|b'].values.map((v) => v.value)).toEqual([0, 1]);
+    });
+
+    it('forwards opts.sourceRequest opaquely onto the search request', async () => {
+      searcher.mockResolvedValueOnce(matrixDF([]));
+      const sourceRequest = { headers: { 'encrypted-fas-creds': 'cipher' }, auth: { isAuthenticated: true } } as never;
+      await backend.queryRangeMatrix(ctx, ds, 'ALERTS', 100, 300, 60, { sourceRequest });
+      const [, request] = searcher.mock.calls[0];
+      expect((request as { headers?: Record<string, unknown> }).headers).toEqual({
+        'encrypted-fas-creds': 'cipher',
+      });
+      expect((request as { auth?: Record<string, unknown> }).auth).toEqual({ isAuthenticated: true });
     });
   });
 

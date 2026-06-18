@@ -42,7 +42,10 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { RequestHandlerContext } from '../../../../../src/core/server';
+import type {
+  RequestHandlerContext,
+  OpenSearchDashboardsRequest,
+} from '../../../../../src/core/server';
 import type {
   AlertingOSClient,
   Datasource,
@@ -134,6 +137,16 @@ export interface SloStatusAggregationContext {
    * the single-group `{slo_id="X"}` selector is used.
    */
   ruleDedupEnabled?: boolean;
+  /**
+   * The originating inbound request, forwarded opaquely onto the PromQL search
+   * request so its scoped client carries the caller's auth — the standard OSD
+   * `client.asScoped(request)` contract. Server-initiated reads build a
+   * synthetic search request to hold the PromQL body; the synthetic request
+   * alone has none of the auth context (headers, `auth`, …) a scoped client
+   * needs, and the datasource client reads those off the request. The
+   * aggregator does not inspect this. Leave undefined in offline / tests.
+   */
+  sourceRequest?: OpenSearchDashboardsRequest;
 }
 
 export interface SloStatusAggregator {
@@ -791,6 +804,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       query,
       timeSec: Math.floor(Date.now() / 1000),
       dataSourceId: ds.mdsId,
+      sourceRequest: ctx.sourceRequest,
     });
     return parseInstantResponseWithNonFinite((envelope as unknown) as Record<string, unknown>);
   }

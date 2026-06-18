@@ -11,7 +11,10 @@
  * datasource discovery + mutation moved to the client via saved-object
  * services (`useDatasources`, `SavedObjectDatasourceService`).
  */
-import type { RequestHandlerContext } from '../../../../../src/core/server';
+import type {
+  RequestHandlerContext,
+  OpenSearchDashboardsRequest,
+} from '../../../../../src/core/server';
 import type {
   AlertingOSClient,
   OSMonitor,
@@ -186,7 +189,8 @@ export async function handleGetUnifiedAlerts(
     startTime?: string;
     endTime?: string;
   },
-  ctx?: RequestHandlerContext
+  ctx?: RequestHandlerContext,
+  sourceRequest?: OpenSearchDashboardsRequest
 ): Promise<HandlerResult> {
   try {
     const dsIds = query?.dsIds ? query.dsIds.split(',').filter(Boolean) : undefined;
@@ -205,7 +209,8 @@ export async function handleGetUnifiedAlerts(
         startTime: query?.startTime,
         endTime: query?.endTime,
       },
-      ctx
+      ctx,
+      sourceRequest
     );
     return { status: 200, body: response };
   } catch (e: unknown) {
@@ -247,10 +252,18 @@ export async function handleGetRuleDetail(
   dsId: string,
   ruleId: string,
   ctx?: RequestHandlerContext,
-  definitionType?: UnifiedDefinitionType
+  definitionType?: UnifiedDefinitionType,
+  sourceRequest?: OpenSearchDashboardsRequest
 ): Promise<HandlerResult> {
   try {
-    const rule = await alertSvc.getRuleDetail(client, dsId, ruleId, ctx, definitionType);
+    const rule = await alertSvc.getRuleDetail(
+      client,
+      dsId,
+      ruleId,
+      ctx,
+      definitionType,
+      sourceRequest
+    );
     if (!rule) return { status: 404, body: { error: 'Rule not found' } };
     return { status: 200, body: rule };
   } catch (e: unknown) {

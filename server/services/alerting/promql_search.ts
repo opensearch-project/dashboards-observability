@@ -79,6 +79,22 @@ export interface PromQLSearchOptions {
   dataSourceId?: string;
   /** Maps to the strategy's `timeout` (seconds) per-query budget. */
   timeoutSeconds?: number;
+  /**
+   * The originating inbound request, forwarded opaquely so the `promql`
+   * strategy's `client.asScoped(request)` produces a scoped client carrying
+   * the caller's auth. Server-initiated reads (SLO status aggregator,
+   * probe-sli, alert preview, historical-alert matrix) construct a *synthetic*
+   * request to hold the PromQL `body`; the synthetic request alone has none of
+   * the auth context a scoped client needs. We don't inspect this — whatever
+   * the datasource client reads off the request (auth headers, `request.auth`,
+   * etc.) travels untouched. Forwarding the whole request (rather than
+   * cherry-picking `headers`) keeps every field the client might need present,
+   * so we don't regress as that client evolves. `buildSearchRequest` spreads
+   * this and overrides only
+   * `body` / `dataSourceId`. Omit for callers (tests / non-scoped deployments)
+   * that have no request to forward — `asScoped` accepts a header-less fake.
+   */
+  sourceRequest?: OpenSearchDashboardsRequest;
 }
 
 export interface PromQLInstantArgs extends PromQLSearchOptions {
@@ -130,7 +146,13 @@ let cachedSearcher: PromQLSearcher | undefined;
 /** Function shape that matches `data.search.search`. */
 export type PromQLSearcher = (
   context: RequestHandlerContext,
-  request: OpenSearchDashboardsRequest | { dataSourceId?: string; body: unknown },
+  request:
+    | OpenSearchDashboardsRequest
+    | {
+        dataSourceId?: string;
+        body: unknown;
+        [k: string]: unknown;
+      },
   options: { strategy: string }
 ) => Promise<IDataFrameResponse>;
 
@@ -186,6 +208,7 @@ export async function runPromQLInstant(
   const request = buildSearchRequest(args.dqName, args.query, args.dataSourceId, {
     options: { queryType: 'INSTANT', time: args.timeSec.toString() },
     timeoutSeconds: args.timeoutSeconds,
+    sourceRequest: args.sourceRequest,
   });
   const response = await getSearcher()(ctx, request, { strategy: PROMQL_STRATEGY });
   return rebuildEnvelope(response, args.dqName, /* isRange */ false);
@@ -199,6 +222,7 @@ export async function runPromQLRange(
     options: { step: args.stepSec },
     timeRange: { from: args.startSec.toString(), to: args.endSec.toString() },
     timeoutSeconds: args.timeoutSeconds,
+    sourceRequest: args.sourceRequest,
   });
   const response = await getSearcher()(ctx, request, { strategy: PROMQL_STRATEGY });
   return rebuildEnvelope(response, args.dqName, /* isRange */ true);
@@ -216,8 +240,13 @@ function buildSearchRequest(
     options?: Record<string, unknown>;
     timeRange?: { from: string; to: string };
     timeoutSeconds?: number;
+    sourceRequest?: OpenSearchDashboardsRequest;
   }
-): { dataSourceId?: string; body: Record<string, unknown> } {
+): {
+  dataSourceId?: string;
+  body: Record<string, unknown>;
+  [k: string]: unknown;
+} {
   const body: Record<string, unknown> = {
     query: {
       query,
@@ -235,7 +264,18 @@ function buildSearchRequest(
   if (extras.timeoutSeconds !== undefined) {
     (body.query as Record<string, unknown>).timeout = extras.timeoutSeconds;
   }
-  const request: { dataSourceId?: string; body: Record<string, unknown> } = { body };
+  // Spread the originating request first so all of its scoped-client context
+  // (`headers`, `auth`, and anything else the deployment's client wrapper
+  // reads) is present, then override `body` / `dataSourceId` with the
+  // synthetic PromQL payload. The strategy reads `body` + `dataSourceId`; the
+  // DirectQuery client wrapper reads `headers` + `auth` off the same object.
+  // When no source request is supplied (tests / non-scoped deployments) the
+  // result is just `{ body, dataSourceId? }` — `asScoped` tolerates a
+  // header-less fake request.
+  const request: { dataSourceId?: string; body: Record<string, unknown>; [k: string]: unknown } = {
+    ...((extras.sourceRequest as unknown) as Record<string, unknown>),
+    body,
+  };
   if (dataSourceId) request.dataSourceId = dataSourceId;
   return request;
 }

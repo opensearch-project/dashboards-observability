@@ -531,6 +531,15 @@ function buildStatusContext(
     // Propagate the dedup flag so the aggregator can pick fingerprint-keyed
     // selectors when true.
     ruleDedupEnabled,
+    // Forward the inbound request so the aggregator's PromQL reads carry the
+    // caller's auth onto the search strategy's scoped client (the standard OSD
+    // `client.asScoped(request)` contract). Server-initiated reads otherwise
+    // build a synthetic search request that holds only the PromQL body and has
+    // no auth context, so the scoped client can't authenticate to the
+    // datasource. Forwarded opaquely (never inspected here) so it stays
+    // agnostic to whatever the deployment's datasource client reads off the
+    // request.
+    sourceRequest: request,
   };
 }
 
