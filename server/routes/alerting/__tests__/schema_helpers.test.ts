@@ -58,6 +58,14 @@ describe('alertingRuleIdSchema', () => {
     expect(alertingRuleIdSchema.validate('abc_DEF-123')).toBe('abc_DEF-123');
   });
 
+  it('accepts degenerate colon placements (leading/trailing/standalone)', () => {
+    // The relaxed charset allows `:` anywhere; harmless because the id is only
+    // used for in-memory equality matching, never URL interpolation.
+    expect(alertingRuleIdSchema.validate(':foo')).toBe(':foo');
+    expect(alertingRuleIdSchema.validate('foo:')).toBe('foo:');
+    expect(alertingRuleIdSchema.validate(':')).toBe(':');
+  });
+
   it.each([
     ['empty string', ''],
     ['path traversal via slash', 'foo/bar'],
@@ -67,6 +75,7 @@ describe('alertingRuleIdSchema', () => {
     ['contains space', 'foo bar'],
     ['contains dot', 'foo.bar'],
     ['contains newline', 'foo\nbar'],
+    ['contains null byte', 'foo\x00bar'],
   ])('still rejects %s (%s)', (_label, bad) => {
     expect(() => alertingRuleIdSchema.validate(bad)).toThrow();
   });

@@ -428,4 +428,62 @@ describe('registerAlertingRoutes', () => {
       expect(errorCalls[0].statusCode).toBe(404);
     });
   });
+
+  // =========================================================================
+  // rule-detail route param schema: the composite Prometheus rule id
+  // `{dsId}-{groupName}-{ruleName}` contains colons (the `slo:rec:` /
+  // `slo:alerts:` convention), so the `ruleId` param must use
+  // `alertingRuleIdSchema` (colon-allowing), while `dsId` keeps the strict
+  // colon-rejecting `alertingIdSchema`. Reaching into the registered route's
+  // `validate.params` locks this wiring so a future revert to `alertingIdSchema`
+  // (which would reintroduce the 400 "Some rule details could not be loaded")
+  // is caught here even though the unit schema tests would still pass.
+  // =========================================================================
+
+  describe('rule-detail ruleId param schema', () => {
+    interface Route {
+      path: string;
+      validate?: { params?: { validate: (v: unknown) => unknown } };
+    }
+
+    const findParams = (): { validate: (v: unknown) => unknown } => {
+      mockRouter.get.mockClear();
+      registerAlertingRoutes(mockRouter as never, {
+        osBackend: mockOsBackend,
+        promBackend: mockPromBackend,
+        mutationSvc: mockMutationSvc,
+        logger: mockLogger,
+        enableMetadataRoutes: false,
+      });
+      const call = mockRouter.get.mock.calls.find(
+        ([c]: [Route]) => c.path === '/api/alerting/rules/{dsId}/{ruleId}'
+      );
+      if (!call) throw new Error('rule-detail route not registered');
+      const params = (call[0] as Route).validate?.params;
+      if (!params) throw new Error('rule-detail route has no params schema');
+      return params;
+    };
+
+    it('accepts the composite colon-bearing ruleId', () => {
+      const params = findParams();
+      expect(() =>
+        params.validate({
+          dsId: 'amp_conn',
+          ruleId: 'amp_conn-slo:rec:my-svc-slo:alerts:my-svc_BurnRate',
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects a slash in ruleId (path traversal stays blocked)', () => {
+      const params = findParams();
+      expect(() =>
+        params.validate({ dsId: 'amp_conn', ruleId: '../../etc/passwd' })
+      ).toThrow();
+    });
+
+    it('rejects a colon in the strict dsId param', () => {
+      const params = findParams();
+      expect(() => params.validate({ dsId: 'ns:bad', ruleId: 'r1' })).toThrow();
+    });
+  });
 });
