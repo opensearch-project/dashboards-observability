@@ -42,6 +42,28 @@ export const alertingIdSchema = schema.string({
   },
 });
 
+/**
+ * Pattern for the composite rule id the detail route receives:
+ * `{dsId}-{groupName}-{ruleName}`. Prometheus SLO rule groups and rules use
+ * the `slo:rec:` / `slo:alerts:` naming convention, so the id legitimately
+ * contains colons — `ID_PATTERN` would reject it (see the "contains colon"
+ * case in schema_helpers.test.ts, which still applies to `alertingIdSchema`).
+ *
+ * `:` is the only extra character allowed over `ID_PATTERN`. Slash, dot, and
+ * the rest stay disallowed so the path-traversal guard is unchanged — and the
+ * composite id is only used for in-memory equality matching against the
+ * fetched rule list (`getPromRuleDetail`), never interpolated into an upstream
+ * URL, so even the colon never reaches a transport path.
+ */
+const RULE_ID_PATTERN = /^[A-Za-z0-9_:-]+$/;
+
+export const alertingRuleIdSchema = schema.string({
+  maxLength: ID_MAX_LENGTH,
+  minLength: 1,
+  validate: (value: string) =>
+    RULE_ID_PATTERN.test(value) ? undefined : 'must match /^[A-Za-z0-9_:-]+$/',
+});
+
 /** Prometheus label name — `[a-zA-Z_:][a-zA-Z0-9_:]*`, bounded. */
 const LABEL_NAME_PATTERN = /^[a-zA-Z_:][a-zA-Z0-9_:]*$/;
 const LABEL_NAME_MAX_LENGTH = 256;
