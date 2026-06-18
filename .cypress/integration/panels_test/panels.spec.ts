@@ -20,12 +20,17 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
   suppressResizeObserverIssue(); //needs to be in file once
 
   before(() => {
-    cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`);
+    cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`, {
+      onBeforeLoad: (win) => {
+        // Prevent the "Enhanced Discover experience" modal from appearing
+        win.localStorage.setItem('home:enhancedDiscover:dismissed', 'true');
+      },
+    });
     // Wait for page to fully load - first wait for header to exist
     cy.get('header[data-test-subj="headerGlobalNav"]', { timeout: 60000 }).should('exist');
     cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 60000 }).should('not.exist');
 
-    cy.get('div[data-test-subj="sampleDataSetCardflights"]')
+    cy.get('div[data-test-subj="sampleDataSetCardflights"]', { timeout: 60000 })
       .should('be.visible')
       .contains(/(Add|View) data/)
       .trigger('mouseover')
@@ -808,8 +813,8 @@ const eraseLegacyPanels = () => {
       'osd-xsrf': true,
     },
   }).then((response) => {
-    if (!response.body || !response.body.panels) return;
-    response.body.panels.forEach((panel) => {
+    const panels = (response.body && response.body.panels) || [];
+    panels.forEach((panel) => {
       cy.request({
         method: 'DELETE',
         failOnStatusCode: false,
@@ -862,11 +867,12 @@ const eraseSavedVisualizations = () => {
       },
     })
     .then((response) => {
-      response.body.saved_objects.map((visualizations) => {
+      const visualizations = response.body.saved_objects || [];
+      visualizations.forEach((vis) => {
         cy.request({
           method: 'DELETE',
           failOnStatusCode: false,
-          url: `api/saved_objects/observability-visualization/${visualizations.id}`,
+          url: `api/saved_objects/observability-visualization/${vis.id}`,
           headers: {
             'content-type': 'application/json;charset=UTF-8',
             'osd-xsrf': true,
