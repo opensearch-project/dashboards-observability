@@ -376,22 +376,17 @@ describe('Viewing application', () => {
 
   it('Opens trace detail flyout when Trace Id is clicked', () => {
     const traceId = '03f9c770db5ee2f1caac0afc36db49ba';
-    // Click the trace link and, if the first click landed on a stale
-    // useMemo-rebuilt handler, click once more. Avoids an unbounded retry loop.
-    const openTraceFlyout = () => {
-      cy.get(`[data-test-subj="trace-link"]:has([title="${traceId}"])`, { timeout: timeoutDelay })
-        .should('be.visible')
-        .click({ force: true });
-      cy.get('body').then(($body) => {
-        if ($body.find('[data-test-subj="traceDetailFlyoutTitle"]').length === 0) {
-          cy.get(`[data-test-subj="trace-link"]:has([title="${traceId}"])`).click({ force: true });
-        }
-      });
-    };
-
     cy.get('[data-test-subj="app-analytics-traceTab"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    openTraceFlyout();
+    cy.get(`[data-test-subj="trace-link"]:has([title="${traceId}"])`, { timeout: timeoutDelay })
+      .should('be.visible')
+      .click({ force: true });
+    cy.wait(500);
+    cy.get('body').then(($body) => {
+      if ($body.find('[data-test-subj="traceDetailFlyoutTitle"]').length === 0) {
+        cy.get(`[data-test-subj="trace-link"]:has([title="${traceId}"])`).click({ force: true });
+      }
+    });
     cy.get('[data-test-subj="traceDetailFlyoutTitle"]', { timeout: timeoutDelay }).should(
       'be.visible'
     );
@@ -403,7 +398,15 @@ describe('Viewing application', () => {
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('[data-test-subj="superDatePickerShowDatesButton"]').click();
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    openTraceFlyout();
+    cy.get(`[data-test-subj="trace-link"]:has([title="${traceId}"])`, { timeout: timeoutDelay })
+      .should('be.visible')
+      .click({ force: true });
+    cy.wait(500);
+    cy.get('body').then(($body) => {
+      if ($body.find('[data-test-subj="traceDetailFlyoutTitle"]').length === 0) {
+        cy.get(`[data-test-subj="trace-link"]:has([title="${traceId}"])`).click({ force: true });
+      }
+    });
     cy.get('.panel-title-count', { timeout: timeoutDelay }).contains('(11)').should('exist');
     cy.get('[data-text="Span list"]').click();
     cy.get('[data-test-subj="dataGridRowCell"]', { timeout: timeoutDelay })
