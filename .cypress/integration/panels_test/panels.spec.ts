@@ -454,13 +454,12 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
         .trigger('mouseover')
         .click({ force: true })
         .focus()
-        .type(PPL_FILTER, { force: true, delay: 50 })
-        .type('{esc}', { force: true });
+        .type(PPL_FILTER, { force: true, delay: 50 });
       cy.get('[data-test-subj="searchAutocompleteTextArea"]')
         .invoke('val')
         .should('contain', 'Munich Airport');
-      cy.wait(1000);
       cy.get('button[data-test-subj="superDatePickerApplyTimeButton"]').click({ force: true });
+      cy.get('.euiButton__text').contains('Refresh').trigger('mouseover').click();
       cy.get('.xtick', { timeout: 40000 }).should('contain', 'Munich Airport');
       cy.get('.xtick').contains('Zurich Airport').should('not.exist');
       cy.get('.xtick').contains('BeatsWest').should('not.exist');
