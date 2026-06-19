@@ -85,7 +85,7 @@ describe('Testing trace view', () => {
     cy.get('.euiTableRow').should('have.length.lessThan', 3); //Replaces wait
     cy.get('[data-test-subj="trace-table-mode-selector"]').click();
     cy.get('.euiSelectableListItem__content').contains('Traces').click();
-    cy.get('.euiDataGridRowCell--firstColumn').eq(0).click();
+    cy.get('.euiDataGridRowCell--firstColumn a.euiLink', { timeout: 60000 }).first().click({ force: true });
   });
 
   after(() => {
@@ -185,6 +185,7 @@ describe('Testing traces table', () => {
     cy.get('.euiDataGridHeaderCell__content').contains('Percentile in trace group').should('exist');
     cy.get('.euiDataGridHeaderCell__content').contains('Errors').should('exist');
     cy.get('.euiDataGridHeaderCell__content').contains('Last updated').should('exist');
+    cy.get('.euiDataGridRowCell a.euiLink', { timeout: 60000 }).should('have.length.greaterThan', 0);
     cy.contains('client_pay_order').should('exist');
     cy.get('[data-test-subj="pagination-button-next"]').click();
     cy.contains('client_pay_order').should('not.exist');
