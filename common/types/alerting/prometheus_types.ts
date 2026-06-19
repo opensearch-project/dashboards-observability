@@ -239,7 +239,17 @@ export interface PrometheusBackend {
     query: string,
     start: number,
     end: number,
-    step: number
+    step: number,
+    opts?: {
+      requestTimeoutMs?: number;
+      /**
+       * The originating inbound request, forwarded opaquely so the
+       * implementation's datasource client can derive the caller's auth from
+       * it. The backend does not inspect it. Typed as `unknown` here (narrowed
+       * in the implementation) so the common types stay browser-importable.
+       */
+      sourceRequest?: unknown;
+    }
   ): Promise<PromTimeSeriesPoint[]>;
 
   /** Execute a PromQL instant query and return point-in-time values. */
@@ -247,7 +257,17 @@ export interface PrometheusBackend {
     ctx: unknown,
     ds: Datasource,
     query: string,
-    time?: number
+    time?: number,
+    opts?: {
+      requestTimeoutMs?: number;
+      /**
+       * The originating inbound request, forwarded opaquely so the
+       * implementation's datasource client can derive the caller's auth from
+       * it. The backend does not inspect it. Typed as `unknown` here (narrowed
+       * in the implementation) so the common types stay browser-importable.
+       */
+      sourceRequest?: unknown;
+    }
   ): Promise<PromTimeSeriesPoint[]>;
 
   /**
@@ -290,7 +310,17 @@ export interface PrometheusBackend {
     startEpochSec: number,
     endEpochSec: number,
     stepSec: number,
-    endIsNow: boolean
+    endIsNow: boolean,
+    opts?: {
+      /**
+       * The originating inbound request, forwarded opaquely so the
+       * implementation's datasource client can derive the caller's auth from
+       * it. The backend does not inspect it. Typed as `unknown` here (narrowed
+       * to `OpenSearchDashboardsRequest` in the implementation) so the common
+       * types stay browser-importable.
+       */
+      sourceRequest?: unknown;
+    }
   ): Promise<{
     alerts: UnifiedAlertSummary[];
     fallback?: 'prometheus-alerts-current-only';

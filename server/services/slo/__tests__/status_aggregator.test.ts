@@ -492,6 +492,30 @@ describe('DirectQueryStatusAggregator.aggregate — happy paths', () => {
     );
   });
 
+  it('forwards ctx.sourceRequest opaquely onto the aggregator PromQL read', async () => {
+    // The aggregator's queryInstant passes ctx.sourceRequest into
+    // runPromQLInstant so the scoped client carries the caller's auth.
+    const doc = makeDoc();
+    const { client, searcherMock } = mockClient({
+      query: () =>
+        instantResponse([{ objective: 'availability-99-9', sloId: 'slo-1', ratio: 0.0002 }]),
+    });
+    const sourceRequest = {
+      headers: { authorization: 'Bearer tok' },
+      auth: { isAuthenticated: true },
+    } as never;
+    const ctx = { ...ctxFor(promDatasource(), client), sourceRequest };
+    const agg = new DirectQueryStatusAggregator(noopLogger());
+    await agg.aggregate([doc], ctx);
+
+    expect(searcherMock).toHaveBeenCalled();
+    const [, request] = searcherMock.mock.calls[0];
+    expect((request as { headers?: Record<string, unknown> }).headers).toEqual({
+      authorization: 'Bearer tok',
+    });
+    expect((request as { auth?: Record<string, unknown> }).auth).toEqual({ isAuthenticated: true });
+  });
+
   it('warning SLO (errorRatio=0.0006, budget=40%) → warning', async () => {
     const doc = makeDoc();
     const { client } = mockClient({
@@ -810,12 +834,12 @@ describe('rule-health priority merge', () => {
     expect(status.objectives[0].state).toBe('breached');
   });
 
-  it('health=ruler_unreachable → top-level state becomes no_data', async () => {
+  it('health=ruler_unreachable WITH no sample data → top-level state becomes no_data', async () => {
     const doc = makeDoc();
-    const { client } = mockClient({
-      query: () =>
-        instantResponse([{ objective: 'availability-99-9', sloId: 'slo-1', ratio: 0.0002 }]),
-    });
+    // No query rows → the objective has no sample → no_data. The
+    // ruler_unreachable overlay then surfaces as no_data (nothing real to
+    // preserve).
+    const { client } = mockClient({ query: () => instantResponse([]) });
     const { checker } = checkerReturning({
       state: 'ruler_unreachable',
       rulerErrorCode: 'TIMEOUT',
@@ -824,10 +848,81 @@ describe('rule-health priority merge', () => {
     const agg = new DirectQueryStatusAggregator(logger);
     const [status] = await agg.aggregate([doc], ctxWith(promDatasource(), client, checker));
     expect(status.state).toBe('no_data');
-    // Debug log is emitted with the error code so operators can follow up.
     expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining('ruler unreachable for slo=slo-1 code=TIMEOUT')
     );
+  });
+
+  it('health=ruler_unreachable WITH sample data → sample-derived state is preserved', async () => {
+    // Regression: the health checker and the PromQL read can travel different
+    // transports, so the health check can report ruler_unreachable even when
+    // the PromQL read succeeded. Since we have real sample data, the ruler is
+    // reachable for reads and we must NOT downgrade the true state to no_data.
+    const doc = makeDoc();
+    const { client } = mockClient({
+      // ratio 0.002 vs target 0.999 → breached
+      query: () =>
+        instantResponse([{ objective: 'availability-99-9', sloId: 'slo-1', ratio: 0.002 }]),
+    });
+    const { checker } = checkerReturning({
+      state: 'ruler_unreachable',
+      rulerErrorCode: 'TIMEOUT',
+    });
+    const agg = new DirectQueryStatusAggregator(noopLogger());
+    const [status] = await agg.aggregate([doc], ctxWith(promDatasource(), client, checker));
+    expect(status.state).toBe('breached');
+    expect(status.objectives[0].state).toBe('breached');
+  });
+
+  it('health=ruler_unreachable WITH only source_idle (NaN) data → downgrades to no_data', async () => {
+    // `baseHasData` counts only ok/warning/breached objectives, so a
+    // source_idle (recorded NaN — source metric idle) objective is treated as
+    // "no real signal". When the ruler is also unreachable we surface no_data:
+    // there's no live signal to preserve and the ruler status is unknown. This
+    // pins that intended behavior (source_idle alone, without ruler trouble,
+    // still surfaces as source_idle — see the dedicated NaN test above).
+    const doc = makeDoc();
+    const { client } = mockClient({
+      query: () => ({
+        resultType: 'vector',
+        result: [
+          {
+            metric: {
+              __name__: 'slo:sli_error:ratio_rate_3d:checkout_availability_xxxx',
+              slo_id: 'slo-1',
+              slo_objective: 'availability-99-9',
+            },
+            value: [Math.floor(Date.now() / 1000), 'NaN'],
+          },
+        ],
+      }),
+    });
+    const { checker } = checkerReturning({
+      state: 'ruler_unreachable',
+      rulerErrorCode: 'TIMEOUT',
+    });
+    const agg = new DirectQueryStatusAggregator(noopLogger());
+    const [status] = await agg.aggregate([doc], ctxWith(promDatasource(), client, checker));
+    expect(status.state).toBe('no_data');
+  });
+
+  it('health=rules_missing overlays even WHEN sample data is present (not gated by hasSampleData)', async () => {
+    // Regression guard: the hasSampleData gate is specific to the
+    // ruler_unreachable branch. `rules_missing` is a definitive "rules were
+    // deleted" signal and must still overlay on top of a real breached sample,
+    // so a future edit can't accidentally copy the hasSampleData check up to
+    // the rules_missing branch and hide deleted rules behind stale data.
+    const doc = makeDoc();
+    const { client } = mockClient({
+      query: () =>
+        instantResponse([{ objective: 'availability-99-9', sloId: 'slo-1', ratio: 0.002 }]),
+    });
+    const { checker } = checkerReturning({ state: 'rules_missing' });
+    const agg = new DirectQueryStatusAggregator(noopLogger());
+    const [status] = await agg.aggregate([doc], ctxWith(promDatasource(), client, checker));
+    expect(status.state).toBe('rules_missing');
+    // Per-objective still reflects the breached sample.
+    expect(status.objectives[0].state).toBe('breached');
   });
 
   it('health=ok → state is the sample-derived one', async () => {
