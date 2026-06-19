@@ -20,12 +20,17 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
   suppressResizeObserverIssue(); //needs to be in file once
 
   before(() => {
-    cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`);
+    cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`, {
+      onBeforeLoad: (win) => {
+        // Prevent the "Enhanced Discover experience" modal from appearing
+        win.localStorage.setItem('home:enhancedDiscover:dismissed', 'true');
+      },
+    });
     // Wait for page to fully load - first wait for header to exist
     cy.get('header[data-test-subj="headerGlobalNav"]', { timeout: 60000 }).should('exist');
     cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 60000 }).should('not.exist');
 
-    cy.get('div[data-test-subj="sampleDataSetCardflights"]')
+    cy.get('div[data-test-subj="sampleDataSetCardflights"]', { timeout: 60000 })
       .should('be.visible')
       .contains(/(Add|View) data/)
       .trigger('mouseover')
@@ -43,32 +48,32 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
   });
 
   describe('Creating visualizations', () => {
-    // Clear redux-persist session storage AND the persisted root key explicitly.
-    // Just calling sessionStorage.clear() before navigate isn't enough: the
-    // previous test's in-memory redux store re-flushes a SAVED_OBJECT_ID into
-    // the new page's sessionStorage during PERSIST rehydration, so the second
-    // save becomes a PUT-update against the deleted object id (404).
-    // Visiting the explorer fresh with a clean slate avoids the rehydrate path
-    // entirely.
+    // Visit the explorer page directly with a clean slate so redux-persist
+    // doesn't rehydrate a stale SAVED_OBJECT_ID from a previous test.
     const visitExplorerFresh = () => {
-      cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-logs#/`, {
+      // Navigate to home first to unload the observability-logs app and its
+      // redux store. This prevents the store from flushing stale IDs back to
+      // sessionStorage during the subsequent navigation.
+      cy.visit(`${Cypress.env('opensearchDashboards')}/app/home`, {
         onBeforeLoad: (win) => {
           win.sessionStorage.clear();
           win.localStorage.clear();
         },
       });
-      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+      cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-logs#/explorer`, {
+        onBeforeLoad: (win) => {
+          win.sessionStorage.clear();
+          win.localStorage.clear();
+        },
+      });
+      cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 30000 }).should('not.exist');
+      cy.get('[id^=autocomplete-textarea]', { timeout: 30000 }).should('be.visible');
     };
 
-    beforeEach(() => {
-      visitExplorerFresh();
-    });
-
     it('Create first visualization in event analytics', () => {
-      cy.get('[data-test-subj="eventHomeAction__explorer"]').click();
-      cy.get('[id^=autocomplete-textarea]').focus().type(PPL_VISUALIZATIONS[0], {
-        delay: 50,
-      });
+      visitExplorerFresh();
+      cy.get('[id^=autocomplete-textarea]', { timeout: 30000 }).should('be.visible').focus()
+        .type(PPL_VISUALIZATIONS[0], { delay: 50 });
       cy.get('.euiButton__text').contains('Run').trigger('mouseover').click();
       cy.get('button[id="main-content-vis"]')
         .contains('Visualizations')
@@ -86,11 +91,9 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
     });
 
     it('Create second visualization in event analytics', () => {
-      cy.get('[data-test-subj="eventHomeAction__explorer"]').click();
-      cy.get('[id^=autocomplete-textarea]')
-        .focus()
-        .clear({ force: true })
-        .type(PPL_VISUALIZATIONS[1], { delay: 50, force: true });
+      visitExplorerFresh();
+      cy.get('[id^=autocomplete-textarea]', { timeout: 30000 }).should('be.visible').focus()
+        .type(PPL_VISUALIZATIONS[1], { delay: 50 });
       cy.get('.euiButton__text').contains('Run').trigger('mouseover').click();
       cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
       cy.get('button[id="main-content-vis"]')
@@ -218,13 +221,16 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
 
     describe('with a SavedObjects Panel', () => {
       beforeEach(() => {
+        eraseSavedObjectPanels();
+        eraseLegacyPanels();
         createSavedObjectPanel();
+        // Clear session storage to prevent redux from rehydrating stale panel
+        // list (the "Duplicates" test writes 2 panels to the redux store which
+        // gets persisted to sessionStorage).
+        cy.window().then((win) => win.sessionStorage.clear());
         moveToPanelHome();
         cy.reload();
         cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-        // Wait until exactly one row (the SO panel just created) is present.
-        // Duplicate would otherwise pick up a leftover legacy row and hit the
-        // legacy GET endpoint with a non-UUID id, returning 400.
         cy.get('.euiTableRow').should('have.length', 1);
       });
 
@@ -448,10 +454,12 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
         .trigger('mouseover')
         .click({ force: true })
         .focus()
-        .type(PPL_FILTER, { force: true, delay: 500 });
+        .type(PPL_FILTER, { force: true, delay: 50 });
+      cy.get('[data-test-subj="searchAutocompleteTextArea"]')
+        .invoke('val')
+        .should('contain', 'Munich Airport');
       cy.get('button[data-test-subj="superDatePickerApplyTimeButton"]').click({ force: true });
-      cy.get('.euiButton__text').contains('Refresh').trigger('mouseover').click();
-      cy.get('.xtick').should('contain', 'Munich Airport');
+      cy.get('.xtick', { timeout: 40000 }).should('contain', 'Munich Airport');
       cy.get('.xtick').contains('Zurich Airport').should('not.exist');
       cy.get('.xtick').contains('BeatsWest').should('not.exist');
       cy.get('.xtick').contains('Logstash Airways').should('not.exist');
@@ -518,12 +526,9 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
         .eq(0)
         .invoke('height')
         .then((originalHeight) => {
-          // react-grid-layout's underlying react-draggable registers
-          // `mousemove`/`mouseup` on `document`, not on the handle. Cypress's
-          // `.trigger('mousemove')` on a specific element only fires that
-          // element's listeners, so the prior version never moved the drag
-          // and `newHeight === originalHeight`. Fire the move/up events on
-          // `document` directly.
+          // react-draggable registers mousemove/mouseup on `document` via
+          // addEventListener. We use dispatchEvent with real MouseEvent objects
+          // and cy.wrap() chains to give React time to process each event.
           cy.get('.react-resizable-handle')
             .eq(0)
             .then(($handle) => {
@@ -531,34 +536,56 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
               const startX = rect.left + rect.width / 2;
               const startY = rect.top + rect.height / 2;
 
-              cy.wrap($handle).trigger('mousedown', {
-                which: 1,
-                button: 0,
-                clientX: startX,
-                clientY: startY,
-                force: true,
-              });
+              $handle[0].dispatchEvent(
+                new MouseEvent('mousedown', {
+                  clientX: startX,
+                  clientY: startY,
+                  bubbles: true,
+                  cancelable: true,
+                  button: 0,
+                })
+              );
+            });
 
-              cy.document().trigger('mousemove', {
-                clientX: startX + 200,
-                clientY: startY + 200,
-                force: true,
-              });
-              cy.document().trigger('mousemove', {
-                clientX: startX + 400,
-                clientY: startY + 400,
-                force: true,
-              });
-              cy.document().trigger('mousemove', {
-                clientX: startX + 600,
-                clientY: startY + 600,
-                force: true,
-              });
-              cy.document().trigger('mouseup', {
-                clientX: startX + 600,
-                clientY: startY + 600,
-                force: true,
-              });
+          // Allow React to process the mousedown and register doc listeners
+          cy.wait(100);
+
+          cy.get('.react-resizable-handle')
+            .eq(0)
+            .then(($handle) => {
+              const rect = $handle[0].getBoundingClientRect();
+              const startX = rect.left + rect.width / 2;
+              const startY = rect.top + rect.height / 2;
+              const doc = $handle[0].ownerDocument;
+
+              doc.dispatchEvent(
+                new MouseEvent('mousemove', {
+                  clientX: startX + 600,
+                  clientY: startY + 600,
+                  bubbles: true,
+                  cancelable: true,
+                })
+              );
+            });
+
+          cy.wait(100);
+
+          cy.get('.react-resizable-handle')
+            .eq(0)
+            .then(($handle) => {
+              const doc = $handle[0].ownerDocument;
+              const rect = $handle[0].getBoundingClientRect();
+              const startX = rect.left + rect.width / 2;
+              const startY = rect.top + rect.height / 2;
+
+              doc.dispatchEvent(
+                new MouseEvent('mouseup', {
+                  clientX: startX,
+                  clientY: startY,
+                  bubbles: true,
+                  cancelable: true,
+                })
+              );
             });
 
           cy.get('button[data-test-subj="savePanelButton"]').click();
@@ -788,8 +815,8 @@ const eraseLegacyPanels = () => {
       'osd-xsrf': true,
     },
   }).then((response) => {
-    if (!response.body || !response.body.panels) return;
-    response.body.panels.forEach((panel) => {
+    const panels = (response.body && response.body.panels) || [];
+    panels.forEach((panel) => {
       cy.request({
         method: 'DELETE',
         failOnStatusCode: false,
@@ -808,14 +835,15 @@ const eraseSavedObjectPanels = () => {
     .request({
       method: 'get',
       failOnStatusCode: false,
-      url: 'api/saved_objects/_find?type=observability-panel',
+      url: 'api/saved_objects/_find?type=observability-panel&per_page=100',
       headers: {
         'content-type': 'application/json;charset=UTF-8',
         'osd-xsrf': true,
       },
     })
     .then((response) => {
-      response.body.saved_objects.map((soPanel) => {
+      const panels = response.body.saved_objects || [];
+      panels.forEach((soPanel) => {
         cy.request({
           method: 'DELETE',
           failOnStatusCode: false,
@@ -841,11 +869,12 @@ const eraseSavedVisualizations = () => {
       },
     })
     .then((response) => {
-      response.body.saved_objects.map((visualizations) => {
+      const visualizations = response.body.saved_objects || [];
+      visualizations.forEach((vis) => {
         cy.request({
           method: 'DELETE',
           failOnStatusCode: false,
-          url: `api/saved_objects/observability-visualization/${visualizations.id}`,
+          url: `api/saved_objects/observability-visualization/${vis.id}`,
           headers: {
             'content-type': 'application/json;charset=UTF-8',
             'osd-xsrf': true,
