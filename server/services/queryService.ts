@@ -4,7 +4,7 @@
  */
 
 import 'core-js/stable';
-import _ from 'lodash';
+import isEqual from 'lodash/isEqual';
 import 'regenerator-runtime/runtime';
 import { Logger } from '../../../../src/core/server';
 
@@ -41,7 +41,7 @@ export class QueryService {
       return {
         data: {
           ok: true,
-          resp: _.isEqual(responseFormat, 'json') ? JSON.stringify(queryResponse) : queryResponse,
+          resp: isEqual(responseFormat, 'json') ? JSON.stringify(queryResponse) : queryResponse,
         },
       };
     } catch (err) {

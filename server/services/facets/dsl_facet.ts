@@ -3,14 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from 'lodash';
-
 export class DSLFacet {
   constructor(private client: any) {
     this.client = client;
   }
 
-  private fetch = async (request: any, format: string, responseFormat: string) => {
+  private fetch = async (request: any, format: string, _responseFormat: string) => {
     const res = {
       success: false,
       data: {},
