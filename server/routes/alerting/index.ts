@@ -31,7 +31,11 @@ import { MonitorMutationService } from '../../services/alerting/monitor_mutation
 import { registerAlertingMutationRoutes } from './mutations';
 import { toErrorBody, toHandlerResult } from './route_utils';
 import { isAlertManagerError } from '../../services/alerting';
-import { alertingIdSchema, prometheusLabelNameSchema } from './schema_helpers';
+import {
+  alertingIdSchema,
+  alertingRuleIdSchema,
+  prometheusLabelNameSchema,
+} from './schema_helpers';
 
 /**
  * Shape of the OSD request-handler context we rely on. `dataSource` is
@@ -409,7 +413,8 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
           startTime: req.query.startTime,
           endTime: req.query.endTime,
         },
-        ctx
+        ctx,
+        req
       );
       return res.ok({ body: result.body });
     }
@@ -722,7 +727,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     {
       path: '/api/alerting/rules/{dsId}/{ruleId}',
       validate: {
-        params: schema.object({ dsId: alertingIdSchema, ruleId: alertingIdSchema }),
+        params: schema.object({ dsId: alertingIdSchema, ruleId: alertingRuleIdSchema }),
         query: schema.object({
           definitionType: schema.maybe(
             schema.oneOf([
@@ -744,7 +749,8 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
           req.params.dsId,
           req.params.ruleId,
           ctx,
-          req.query.definitionType
+          req.query.definitionType,
+          req
         );
       })
   );

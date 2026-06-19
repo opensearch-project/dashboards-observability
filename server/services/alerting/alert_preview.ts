@@ -15,7 +15,10 @@
  *   - `extractDateHistogramPoints` — pull `{timestamp, value}` points from an agg response
  *   - `fetchPromPreviewData` — queryRange (preferred) or fallback to embedded alert data
  */
-import type { RequestHandlerContext } from '../../../../../src/core/server';
+import type {
+  RequestHandlerContext,
+  OpenSearchDashboardsRequest,
+} from '../../../../../src/core/server';
 import {
   AlertingOSClient,
   Datasource,
@@ -270,7 +273,8 @@ export async function fetchPromPreviewData(
   ctx: RequestHandlerContext | undefined,
   ds: Datasource,
   query: string,
-  rule: PromAlertingRule
+  rule: PromAlertingRule,
+  sourceRequest?: OpenSearchDashboardsRequest
 ): Promise<Array<{ timestamp: number; value: number }>> {
   if (promBackend?.queryRange && ctx) {
     try {
@@ -278,7 +282,14 @@ export async function fetchPromPreviewData(
       const now = Math.floor(Date.now() / 1000);
       const oneHourAgo = now - 3600;
       const step = 60;
-      const points = await promBackend.queryRange(ctx, ds, metricQuery, oneHourAgo, now, step);
+      // Forward the inbound request opaquely so the backend can derive the
+      // caller's auth to the datasource (same forwarding the SLO status
+      // aggregator / probe-sli reads use). The datasource client reads whatever
+      // auth context it needs off the request. Without it the read throws and
+      // the preview silently falls back to embedded-alert extraction.
+      const points = await promBackend.queryRange(ctx, ds, metricQuery, oneHourAgo, now, step, {
+        sourceRequest,
+      });
       if (points.length > 0) return points;
     } catch {
       // Strategy threw or returned no data — fall through to embedded-alert extraction
