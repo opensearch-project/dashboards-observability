@@ -439,17 +439,7 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
         cy.get('a.euiLink').contains(this.thePanel.attributes.title).click();
       });
 
-      cy.get('.euiButtonEmpty[data-test-subj="superDatePickerToggleQuickMenuButton"]').click({
-        force: true,
-      });
-      cy.get('[data-test-subj="superDatePickerQuickMenu"')
-        .first()
-        .within(() => {
-          cy.get('input[aria-label="Time value"]').type('2', { force: true });
-          cy.get('select[aria-label="Time unit"]').select('years');
-          cy.get('button').contains('Apply').click();
-        });
-
+      // Type PPL filter first
       cy.get('[data-test-subj="searchAutocompleteTextArea"]')
         .trigger('mouseover')
         .click({ force: true })
@@ -458,8 +448,20 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
       cy.get('[data-test-subj="searchAutocompleteTextArea"]')
         .invoke('val')
         .should('contain', 'Munich Airport');
-      cy.get('button[data-test-subj="superDatePickerApplyTimeButton"]').click({ force: true });
-      cy.get('.euiButton__text').contains('Refresh').trigger('mouseover').click();
+
+      // Now set the time range — this triggers onRefreshFilters with the current pplFilterValue
+      cy.intercept('POST', '**/api/ppl/search').as('pplSearch');
+      cy.get('.euiButtonEmpty[data-test-subj="superDatePickerToggleQuickMenuButton"]').click({
+        force: true,
+      });
+      cy.get('[data-test-subj="superDatePickerQuickMenu"')
+        .first()
+        .within(() => {
+          cy.get('input[aria-label="Time value"]').clear().type('2', { force: true });
+          cy.get('select[aria-label="Time unit"]').select('years');
+          cy.get('button').contains('Apply').click();
+        });
+      cy.wait('@pplSearch', { timeout: 30000 });
       cy.get('.xtick', { timeout: 40000 }).should('contain', 'Munich Airport');
       cy.get('.xtick').contains('Zurich Airport').should('not.exist');
       cy.get('.xtick').contains('BeatsWest').should('not.exist');
