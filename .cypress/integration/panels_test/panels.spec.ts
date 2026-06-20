@@ -439,40 +439,28 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
         cy.get('a.euiLink').contains(this.thePanel.attributes.title).click();
       });
 
-      // Wait for panel to fully load before interacting
-      cy.get('[data-test-subj="searchAutocompleteTextArea"]', { timeout: 30000 }).should('exist');
-
-      // Type the PPL filter
-      cy.get('[data-test-subj="searchAutocompleteTextArea"]')
-        .click({ force: true })
-        .type(PPL_FILTER, { force: true, delay: 50 });
-      cy.get('[data-test-subj="searchAutocompleteTextArea"]')
-        .invoke('val')
-        .should('contain', 'Munich Airport');
-
-      // Dismiss autocomplete and ensure React state is committed
-      cy.get('[data-test-subj="searchAutocompleteTextArea"]').blur();
-      cy.wait(500);
-
-      // Intercept only the filtered PPL search (body contains the filter text)
-      cy.intercept('POST', '**/api/ppl/search', (req) => {
-        if (req.body && JSON.stringify(req.body).includes('Munich Airport')) {
-          req.alias = 'filteredPplSearch';
-        }
-      });
-
-      // Set time range — triggers onRefreshFilters which reads pplFilterValue
+      // Set time range first
       cy.get('.euiButtonEmpty[data-test-subj="superDatePickerToggleQuickMenuButton"]').click({
         force: true,
       });
       cy.get('[data-test-subj="superDatePickerQuickMenu"')
         .first()
         .within(() => {
-          cy.get('input[aria-label="Time value"]').clear().type('2', { force: true });
+          cy.get('input[aria-label="Time value"]').type('2', { force: true });
           cy.get('select[aria-label="Time unit"]').select('years');
           cy.get('button').contains('Apply').click();
         });
-      cy.wait('@filteredPplSearch', { timeout: 30000 });
+
+      // Type the PPL filter with slow delay to ensure each keystroke commits
+      cy.get('[data-test-subj="searchAutocompleteTextArea"]')
+        .trigger('mouseover')
+        .click({ force: true })
+        .focus()
+        .type(PPL_FILTER, { force: true, delay: 200 });
+
+      // Click Update button to trigger search with filter applied
+      cy.get('button[data-test-subj="superDatePickerApplyTimeButton"]').click({ force: true });
+      cy.get('.euiButton__text').contains('Refresh').trigger('mouseover').click();
       cy.get('.xtick', { timeout: 40000 }).should('contain', 'Munich Airport');
       cy.get('.xtick').contains('Zurich Airport').should('not.exist');
       cy.get('.xtick').contains('BeatsWest').should('not.exist');
