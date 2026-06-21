@@ -235,7 +235,10 @@ describe('Testing paragraphs', () => {
     cy.get('.euiModalHeader__title').contains('Browse visualizations').should('exist');
     cy.get('input[aria-label="Searchable Visualizations"]')
       .focus()
-      .type('[Flights] Flight Count and Average Ticket Price{enter}');
+      .type('[Flights] Flight Count and Average Ticket Price');
+    cy.get('.euiSelectableListItem')
+      .contains('[Flights] Flight Count and Average Ticket Price')
+      .click();
     cy.get('button[data-test-subj="para-input-select-button"]').click();
     cy.get('button[data-test-subj="runRefreshBtn-2"]').click();
     cy.get('div.visualization').should('exist');
