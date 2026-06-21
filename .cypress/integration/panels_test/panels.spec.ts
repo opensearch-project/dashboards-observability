@@ -143,7 +143,9 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
         cy.get('.euiTableRow').should('have.length', 1);
         selectThePanel();
         openActionsDropdown();
-        cy.get('button[data-test-subj="duplicateContextMenuItem"]').click();
+        cy.get('button[data-test-subj="duplicateContextMenuItem"]')
+          .should('not.be.disabled')
+          .click();
         cy.get('button[data-test-subj="runModalButton"]').click();
         cy.get('[data-test-subj="breadcrumb"]').click({ force: true }); //Duplicate opens the panel, need to return
         cy.get('.euiTableRow').should('have.length', 2);
