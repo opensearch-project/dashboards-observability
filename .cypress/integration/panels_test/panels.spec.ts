@@ -449,11 +449,17 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
             },
           },
         });
+        // Navigate away first to ensure full reload (hash-based routing may not
+        // re-render if already on the same panel URL from beforeEach)
+        cy.visit(`${Cypress.env('opensearchDashboards')}/app/home`);
         moveToThePanel(this.thePanel.id);
       });
 
-      // Wait for the unfiltered chart to render first
-      cy.get('.xtick', { timeout: 30000 }).should('exist');
+      // Wait for panel header to confirm page loaded
+      cy.get('[data-test-subj="panelNameHeader"]', { timeout: 30000 }).should('exist');
+
+      // Wait for the unfiltered chart to render
+      cy.get('.xtick', { timeout: 60000 }).should('exist');
 
       // Type the PPL filter
       cy.get('[data-test-subj="searchAutocompleteTextArea"]')
