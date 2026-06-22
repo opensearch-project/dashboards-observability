@@ -433,41 +433,56 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
 
       cy.then(function () {
         addVisualizationsToPanel(this.thePanel, [this.vis1.id]);
-        moveToThePanel(this.thePanel.id);
-        cy.get('[data-test-subj="breadcrumb"]').click({ force: true });
-        cy.get('input[data-test-subj="operationalPanelSearchBar"]')
-          .focus()
-          .type(this.thePanel.attributes.title);
-        cy.get('a.euiLink').contains(this.thePanel.attributes.title).click();
-      });
-
-      // Set time range first
-      cy.get('.euiButtonEmpty[data-test-subj="superDatePickerToggleQuickMenuButton"]').click({
-        force: true,
-      });
-      cy.get('[data-test-subj="superDatePickerQuickMenu"')
-        .first()
-        .within(() => {
-          cy.get('input[aria-label="Time value"]').type('2', { force: true });
-          cy.get('select[aria-label="Time unit"]').select('years');
-          cy.get('button').contains('Apply').click();
+        // Update time range to 2 years via API so the panel loads with wide range
+        cy.request({
+          method: 'PUT',
+          failOnStatusCode: false,
+          url: `api/saved_objects/observability-panel/${this.thePanel.id}`,
+          headers: {
+            'content-type': 'application/json;charset=UTF-8',
+            'osd-xsrf': true,
+          },
+          body: {
+            attributes: {
+              ...this.thePanel.attributes,
+              timeRange: { from: 'now-2y', to: 'now' },
+            },
+          },
         });
+        // Navigate away first to ensure full reload (hash-based routing may not
+        // re-render if already on the same panel URL from beforeEach)
+        cy.visit(`${Cypress.env('opensearchDashboards')}/app/home`);
+        moveToThePanel(this.thePanel.id);
+      });
 
-      // Type the PPL filter with slow delay to ensure each keystroke commits
+      // Wait for panel header to confirm page loaded
+      cy.get('[data-test-subj="panelNameHeader"]', { timeout: 30000 }).should('exist');
+
+      // Wait for the unfiltered chart to render
+      cy.get('.xtick', { timeout: 60000 }).should('exist');
+
+      // Type the PPL filter
       cy.get('[data-test-subj="searchAutocompleteTextArea"]')
-        .trigger('mouseover')
         .click({ force: true })
-        .focus()
-        .type(PPL_FILTER, { force: true, delay: 200 });
+        .type(PPL_FILTER, { force: true, delay: 50 })
+        .blur();
 
-      // Click Update button to trigger search with filter applied
+      // Ensure autocomplete dropdown is closed (confirms React state is committed)
+      cy.get('.aa-Panel').should('not.exist');
+
+      // Verify the filter text is in the input before triggering refresh
+      cy.get('[data-test-subj="searchAutocompleteTextArea"]').should('have.value', PPL_FILTER);
+
+      // Trigger refresh via the date picker update button
       cy.get('button[data-test-subj="superDatePickerApplyTimeButton"]').click({ force: true });
-      cy.get('.euiButton__text').contains('Refresh').trigger('mouseover').click();
-      cy.get('.xtick', { timeout: 40000 }).should('contain', 'Munich Airport');
-      cy.get('.xtick').contains('Zurich Airport').should('not.exist');
-      cy.get('.xtick').contains('BeatsWest').should('not.exist');
-      cy.get('.xtick').contains('Logstash Airways').should('not.exist');
-      cy.get('.xtick').contains('OpenSearch Dashboards Airlines').should('not.exist');
+
+      // Wait for chart to update with filtered data — only Munich Airport should remain
+      cy.get('.xtick', { timeout: 40000 })
+        .should('contain', 'Munich Airport')
+        .and('not.contain', 'Zurich Airport')
+        .and('not.contain', 'BeatsWest')
+        .and('not.contain', 'Logstash Airways')
+        .and('not.contain', 'OpenSearch Dashboards Airlines');
     });
 
     it('Drag and drop a visualization', () => {
