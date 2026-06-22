@@ -1333,13 +1333,13 @@ isexe@^2.0.0:
   resolved "https://registry.yarnpkg.com/isexe/-/isexe-2.0.0.tgz#e8fbf374dc556ff8947a10dcb0572d633f2cfa10"
   integrity sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==
 
-isomorphic-dompurify@~2.29.0:
-  version "2.29.0"
-  resolved "https://registry.yarnpkg.com/isomorphic-dompurify/-/isomorphic-dompurify-2.29.0.tgz#08b451e0e43870bb31cbe59ee00ad5e8ab1b3782"
-  integrity sha512-Bgw5M9GMsuGeGSRpS81gk68t9/+r3AwuJJ5WnSxZK+tuazDodlRgmwz4ItMAfNYDgiNaizREYeiefkFQWkG7ow==
+isomorphic-dompurify@~2.30.0:
+  version "2.30.1"
+  resolved "https://registry.yarnpkg.com/isomorphic-dompurify/-/isomorphic-dompurify-2.30.1.tgz#4b54854ad9d1fb8e63dd6571f8ffba2606441f46"
+  integrity sha512-VJFbthRrns7BE+q3qSUJ5zxGNjuq4FqiaWXKCwnMoJbumnoQJoeOeOzP/oejKLPPtENckLWoDxGQiv5OkEFC+Q==
   dependencies:
     dompurify "^3.3.0"
-    jsdom "^27.0.0"
+    jsdom "^27.0.1"
 
 jackspeak@^3.1.2:
   version "3.4.3"
@@ -1374,7 +1374,7 @@ js-yaml@^4.1.0, js-yaml@^4.2.0:
   dependencies:
     argparse "^2.0.1"
 
-jsdom@^27.0.0:
+jsdom@^27.0.1:
   version "27.4.0"
   resolved "https://registry.yarnpkg.com/jsdom/-/jsdom-27.4.0.tgz#c36af2e43e1281a7e8bb8f255086435d177801f2"
   integrity sha512-mjzqwWRD9Y1J1KUi7W97Gja1bwOOM5Ug0EZ6UDK3xS7j7mndrkwozHtSblfomlzyB4NepioNt+B2sOSzczVgtQ==
