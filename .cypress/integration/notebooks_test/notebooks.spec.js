@@ -236,9 +236,10 @@ describe('Testing paragraphs', () => {
     cy.get('input[aria-label="Searchable Visualizations"]')
       .focus()
       .type('[Flights] Flight Count and Average Ticket Price');
-    cy.get('.euiSelectableListItem')
-      .contains('[Flights] Flight Count and Average Ticket Price')
-      .click();
+    cy.get('.euiSelectableListItem').should('have.length', 1);
+    cy.get('input[aria-label="Searchable Visualizations"]')
+      .type('{downarrow}')
+      .type('{enter}');
     cy.get('button[data-test-subj="para-input-select-button"]').click();
     cy.get('button[data-test-subj="runRefreshBtn-2"]').click();
     cy.get('div.visualization').should('exist');
