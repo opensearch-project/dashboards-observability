@@ -20,12 +20,17 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
   suppressResizeObserverIssue(); //needs to be in file once
 
   before(() => {
-    cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`);
+    cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`, {
+      onBeforeLoad: (win) => {
+        // Prevent the "Enhanced Discover experience" modal from appearing
+        win.localStorage.setItem('home:enhancedDiscover:dismissed', 'true');
+      },
+    });
     // Wait for page to fully load - first wait for header to exist
     cy.get('header[data-test-subj="headerGlobalNav"]', { timeout: 60000 }).should('exist');
     cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 60000 }).should('not.exist');
 
-    cy.get('div[data-test-subj="sampleDataSetCardflights"]')
+    cy.get('div[data-test-subj="sampleDataSetCardflights"]', { timeout: 60000 })
       .should('be.visible')
       .contains(/(Add|View) data/)
       .trigger('mouseover')
@@ -43,21 +48,32 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
   });
 
   describe('Creating visualizations', () => {
-    beforeEach(() => {
-      moveToEventsHome();
-      // Explorer persists savedObjectId in sessionStorage via redux-persist; clear it
-      // so the second test creates a new visualization instead of trying to PUT-update
-      // the previous test's visualization (which the outer beforeEach has just deleted).
-      cy.window().then((win) => win.sessionStorage.clear());
-      cy.reload(true);
-      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    });
+    // Visit the explorer page directly with a clean slate so redux-persist
+    // doesn't rehydrate a stale SAVED_OBJECT_ID from a previous test.
+    const visitExplorerFresh = () => {
+      // Navigate to home first to unload the observability-logs app and its
+      // redux store. This prevents the store from flushing stale IDs back to
+      // sessionStorage during the subsequent navigation.
+      cy.visit(`${Cypress.env('opensearchDashboards')}/app/home`, {
+        onBeforeLoad: (win) => {
+          win.sessionStorage.clear();
+          win.localStorage.clear();
+        },
+      });
+      cy.visit(`${Cypress.env('opensearchDashboards')}/app/observability-logs#/explorer`, {
+        onBeforeLoad: (win) => {
+          win.sessionStorage.clear();
+          win.localStorage.clear();
+        },
+      });
+      cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 30000 }).should('not.exist');
+      cy.get('[id^=autocomplete-textarea]', { timeout: 30000 }).should('be.visible');
+    };
 
     it('Create first visualization in event analytics', () => {
-      cy.get('[data-test-subj="eventHomeAction__explorer"]').click();
-      cy.get('[id^=autocomplete-textarea]').focus().type(PPL_VISUALIZATIONS[0], {
-        delay: 50,
-      });
+      visitExplorerFresh();
+      cy.get('[id^=autocomplete-textarea]', { timeout: 30000 }).should('be.visible').focus()
+        .type(PPL_VISUALIZATIONS[0], { delay: 50 });
       cy.get('.euiButton__text').contains('Run').trigger('mouseover').click();
       cy.get('button[id="main-content-vis"]')
         .contains('Visualizations')
@@ -75,14 +91,11 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
     });
 
     it('Create second visualization in event analytics', () => {
-      cy.get('[data-test-subj="eventHomeAction__explorer"]').click();
-      // Workaround until issue #1403 is fixed
-      // Should be the following commented lines
-      // cy.get('[id^=autocomplete-textarea]').focus().type(PPL_VISUALIZATIONS[1], {
-      //   delay: 50,
-      // });
-      cy.get('[id^=autocomplete-textarea]').focus().invoke('val', PPL_VISUALIZATIONS[1]).trigger('input').trigger('change');
+      visitExplorerFresh();
+      cy.get('[id^=autocomplete-textarea]', { timeout: 30000 }).should('be.visible').focus()
+        .type(PPL_VISUALIZATIONS[1], { delay: 50 });
       cy.get('.euiButton__text').contains('Run').trigger('mouseover').click();
+      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
       cy.get('button[id="main-content-vis"]')
         .contains('Visualizations')
         .trigger('mouseover')
@@ -130,7 +143,9 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
         cy.get('.euiTableRow').should('have.length', 1);
         selectThePanel();
         openActionsDropdown();
-        cy.get('button[data-test-subj="duplicateContextMenuItem"]').click();
+        cy.get('button[data-test-subj="duplicateContextMenuItem"]')
+          .should('not.be.disabled')
+          .click();
         cy.get('button[data-test-subj="runModalButton"]').click();
         cy.get('[data-test-subj="breadcrumb"]').click({ force: true }); //Duplicate opens the panel, need to return
         cy.get('.euiTableRow').should('have.length', 2);
@@ -185,11 +200,19 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
 
       it('Deletes the panel', () => {
         cy.reload();
-        cy.get('[data-test-subj="tableHeaderSortButton"]').first().click();// Page needs click before checking box
-        cy.get('[data-test-subj="checkboxSelectAll"]').click({ force: true })
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+        // Select the row directly. The previous select-all-with-force approach
+        // raced with EuiInMemoryTable's onSelectionChange and would sometimes
+        // leave selectedCustomPanels empty, disabling the Delete menu item and
+        // making the modal never render.
+        cy.get('.euiTableRow').should('have.length', 1);
+        cy.get('.euiCheckbox__input[title="Select this row"]').check({ force: true });
+        cy.get('.euiCheckbox__input[title="Select this row"]').should('be.checked');
         openActionsDropdown();
-        cy.get('button[data-test-subj="deleteContextMenuItem"]').click({ force: true });
-        
+        cy.get('button[data-test-subj="deleteContextMenuItem"]')
+          .should('not.be.disabled')
+          .click();
+
         cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('be.disabled');
         cy.get('input.euiFieldText[placeholder="delete"]').focus().type('delete');
         cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('not.be.disabled');
@@ -200,16 +223,36 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
 
     describe('with a SavedObjects Panel', () => {
       beforeEach(() => {
+        eraseSavedObjectPanels();
+        eraseLegacyPanels();
         createSavedObjectPanel();
+        // Clear session storage to prevent redux from rehydrating stale panel
+        // list (the "Duplicates" test writes 2 panels to the redux store which
+        // gets persisted to sessionStorage).
+        cy.window().then((win) => win.sessionStorage.clear());
         moveToPanelHome();
         cy.reload();
         cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+        cy.get('.euiTableRow').should('have.length', 1);
       });
 
       it('Duplicates the panel', () => {
-        selectThePanel();
+        // Select the SO panel row by its href, which contains the UUID. This
+        // avoids selecting a stale legacy row that lingered past cleanup and
+        // would otherwise route the duplicate through the legacy backend.
+        cy.get('.euiTableRow')
+          .first()
+          .find('.euiCheckbox__input[title="Select this row"]')
+          .check({ force: true });
+        cy.get('.euiTableRow')
+          .first()
+          .find('a.euiLink')
+          .invoke('attr', 'href')
+          .should('match', uuidRx);
         openActionsDropdown();
-        cy.get('button[data-test-subj="duplicateContextMenuItem"]').click();
+        cy.get('button[data-test-subj="duplicateContextMenuItem"]')
+          .should('not.be.disabled')
+          .click();
         cy.get('button[data-test-subj="runModalButton"]').click();
         const duplicateName = TEST_PANEL + ' (copy)';
         cy.get('[data-test-subj="breadcrumb"]').click({ force: true }); //reload page
@@ -390,37 +433,56 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
 
       cy.then(function () {
         addVisualizationsToPanel(this.thePanel, [this.vis1.id]);
-        moveToThePanel(this.thePanel.id);
-        cy.get('[data-test-subj="breadcrumb"]').click({ force: true });
-        cy.get('input[data-test-subj="operationalPanelSearchBar"]')
-          .focus()
-          .type(this.thePanel.attributes.title);
-        cy.get('a.euiLink').contains(this.thePanel.attributes.title).click();
-      });
-
-      cy.get('.euiButtonEmpty[data-test-subj="superDatePickerToggleQuickMenuButton"]').click({
-        force: true,
-      });
-      cy.get('[data-test-subj="superDatePickerQuickMenu"')
-        .first()
-        .within(() => {
-          cy.get('input[aria-label="Time value"]').type('2', { force: true });
-          cy.get('select[aria-label="Time unit"]').select('years');
-          cy.get('button').contains('Apply').click();
+        // Update time range to 2 years via API so the panel loads with wide range
+        cy.request({
+          method: 'PUT',
+          failOnStatusCode: false,
+          url: `api/saved_objects/observability-panel/${this.thePanel.id}`,
+          headers: {
+            'content-type': 'application/json;charset=UTF-8',
+            'osd-xsrf': true,
+          },
+          body: {
+            attributes: {
+              ...this.thePanel.attributes,
+              timeRange: { from: 'now-2y', to: 'now' },
+            },
+          },
         });
+        // Navigate away first to ensure full reload (hash-based routing may not
+        // re-render if already on the same panel URL from beforeEach)
+        cy.visit(`${Cypress.env('opensearchDashboards')}/app/home`);
+        moveToThePanel(this.thePanel.id);
+      });
 
+      // Wait for panel header to confirm page loaded
+      cy.get('[data-test-subj="panelNameHeader"]', { timeout: 30000 }).should('exist');
+
+      // Wait for the unfiltered chart to render
+      cy.get('.xtick', { timeout: 60000 }).should('exist');
+
+      // Type the PPL filter
       cy.get('[data-test-subj="searchAutocompleteTextArea"]')
-        .trigger('mouseover')
         .click({ force: true })
-        .focus()
-        .type(PPL_FILTER, { force: true, delay: 500 });
+        .type(PPL_FILTER, { force: true, delay: 50 })
+        .blur();
+
+      // Ensure autocomplete dropdown is closed (confirms React state is committed)
+      cy.get('.aa-Panel').should('not.exist');
+
+      // Verify the filter text is in the input before triggering refresh
+      cy.get('[data-test-subj="searchAutocompleteTextArea"]').should('have.value', PPL_FILTER);
+
+      // Trigger refresh via the date picker update button
       cy.get('button[data-test-subj="superDatePickerApplyTimeButton"]').click({ force: true });
-      cy.get('.euiButton__text').contains('Refresh').trigger('mouseover').click();
-      cy.get('.xtick').should('contain', 'Munich Airport');
-      cy.get('.xtick').contains('Zurich Airport').should('not.exist');
-      cy.get('.xtick').contains('BeatsWest').should('not.exist');
-      cy.get('.xtick').contains('Logstash Airways').should('not.exist');
-      cy.get('.xtick').contains('OpenSearch Dashboards Airlines').should('not.exist');
+
+      // Wait for chart to update with filtered data — only Munich Airport should remain
+      cy.get('.xtick', { timeout: 40000 })
+        .should('contain', 'Munich Airport')
+        .and('not.contain', 'Zurich Airport')
+        .and('not.contain', 'BeatsWest')
+        .and('not.contain', 'Logstash Airways')
+        .and('not.contain', 'OpenSearch Dashboards Airlines');
     });
 
     it('Drag and drop a visualization', () => {
@@ -474,14 +536,85 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
 
       cy.get('button[data-test-subj="editPanelButton"]').click();
 
-      cy.get('.react-resizable-handle')
+      // Capture original height so we can assert that the resize actually grew
+      // the tile. react-grid-layout snaps to a row grid whose exact pixel
+      // height depends on viewport width and container margins, so matching an
+      // exact value (the previous /470/) is flaky — viewport-dependent runs
+      // land on different rounded heights (e.g. 630px in CI).
+      cy.get('div.react-grid-layout>div')
         .eq(0)
-        .trigger('mousedown', { which: 1 })
-        .trigger('mousemove', { clientX: 2000, clientY: 800 })
-        .trigger('mouseup', { force: true });
+        .invoke('height')
+        .then((originalHeight) => {
+          // react-draggable registers mousemove/mouseup on `document` via
+          // addEventListener. We use dispatchEvent with real MouseEvent objects
+          // and cy.wrap() chains to give React time to process each event.
+          cy.get('.react-resizable-handle')
+            .eq(0)
+            .then(($handle) => {
+              const rect = $handle[0].getBoundingClientRect();
+              const startX = rect.left + rect.width / 2;
+              const startY = rect.top + rect.height / 2;
 
-      cy.get('button[data-test-subj="savePanelButton"]').click();
-      cy.get('div.react-grid-layout>div').eq(0).invoke('height').should('match', new RegExp('470'));
+              $handle[0].dispatchEvent(
+                new MouseEvent('mousedown', {
+                  clientX: startX,
+                  clientY: startY,
+                  bubbles: true,
+                  cancelable: true,
+                  button: 0,
+                })
+              );
+            });
+
+          // Allow React to process the mousedown and register doc listeners
+          cy.wait(100);
+
+          cy.get('.react-resizable-handle')
+            .eq(0)
+            .then(($handle) => {
+              const rect = $handle[0].getBoundingClientRect();
+              const startX = rect.left + rect.width / 2;
+              const startY = rect.top + rect.height / 2;
+              const doc = $handle[0].ownerDocument;
+
+              doc.dispatchEvent(
+                new MouseEvent('mousemove', {
+                  clientX: startX + 600,
+                  clientY: startY + 600,
+                  bubbles: true,
+                  cancelable: true,
+                })
+              );
+            });
+
+          cy.wait(100);
+
+          cy.get('.react-resizable-handle')
+            .eq(0)
+            .then(($handle) => {
+              const doc = $handle[0].ownerDocument;
+              const rect = $handle[0].getBoundingClientRect();
+              const startX = rect.left + rect.width / 2;
+              const startY = rect.top + rect.height / 2;
+
+              doc.dispatchEvent(
+                new MouseEvent('mouseup', {
+                  clientX: startX,
+                  clientY: startY,
+                  bubbles: true,
+                  cancelable: true,
+                })
+              );
+            });
+
+          cy.get('button[data-test-subj="savePanelButton"]').click();
+          cy.get('div.react-grid-layout>div')
+            .eq(0)
+            .invoke('height')
+            .should((newHeight) => {
+              expect(newHeight).to.be.greaterThan(originalHeight);
+            });
+        });
     });
 
     it('Delete a visualization', () => {
@@ -701,7 +834,8 @@ const eraseLegacyPanels = () => {
       'osd-xsrf': true,
     },
   }).then((response) => {
-    response.body.panels.map((panel) => {
+    const panels = (response.body && response.body.panels) || [];
+    panels.forEach((panel) => {
       cy.request({
         method: 'DELETE',
         failOnStatusCode: false,
@@ -710,9 +844,6 @@ const eraseLegacyPanels = () => {
           'content-type': 'application/json;charset=UTF-8',
           'osd-xsrf': true,
         },
-      }).then((response) => {
-        const deletedId = response.allRequestResponses[0]['Request URL'].split('/').slice(-1);
-        console.log('erased panel', deletedId);
       });
     });
   });
@@ -723,14 +854,15 @@ const eraseSavedObjectPanels = () => {
     .request({
       method: 'get',
       failOnStatusCode: false,
-      url: 'api/saved_objects/_find?type=observability-panel',
+      url: 'api/saved_objects/_find?type=observability-panel&per_page=100',
       headers: {
         'content-type': 'application/json;charset=UTF-8',
         'osd-xsrf': true,
       },
     })
     .then((response) => {
-      response.body.saved_objects.map((soPanel) => {
+      const panels = response.body.saved_objects || [];
+      panels.forEach((soPanel) => {
         cy.request({
           method: 'DELETE',
           failOnStatusCode: false,
@@ -756,11 +888,12 @@ const eraseSavedVisualizations = () => {
       },
     })
     .then((response) => {
-      response.body.saved_objects.map((visualizations) => {
+      const visualizations = response.body.saved_objects || [];
+      visualizations.forEach((vis) => {
         cy.request({
           method: 'DELETE',
           failOnStatusCode: false,
-          url: `api/saved_objects/observability-visualization/${visualizations.id}`,
+          url: `api/saved_objects/observability-visualization/${vis.id}`,
           headers: {
             'content-type': 'application/json;charset=UTF-8',
             'osd-xsrf': true,
