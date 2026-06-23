@@ -277,7 +277,6 @@ const TierCard: React.FC<TierCardProps> = ({
   const handleViewInAlertManager = () => {
     const q = `slo_id:${slo.id} slo_burn_rate_multiplier:${tier.burnRateMultiplier}`;
     const params = new URLSearchParams({ q });
-    if (slo.spec.datasourceId) params.set('ds', slo.spec.datasourceId);
     coreRefs?.application?.navigateToApp(observabilityAlertingID, {
       path: `#/rules?${params.toString()}`,
     });

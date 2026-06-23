@@ -66,7 +66,6 @@ function buildRulesPath(
     }
   }
   const params = new URLSearchParams({ q: terms.join(' ') });
-  if (datasourceId) params.set('ds', datasourceId);
   return `#/rules?${params.toString()}`;
 }
 
@@ -184,7 +183,7 @@ export const SloAlertsPanel: React.FC<SloAlertsPanelProps> = ({ doc, ruleHealth 
           <EuiFlexItem grow={false}>
             <EuiLink
               data-test-subj="slosDetailAlertsPanelViewAll"
-              onClick={() => navigateToAlertManager(doc.id, doc.spec.datasourceId)}
+              onClick={() => navigateToAlertManager(doc.id)}
             >
               {i18n.translate('observability.apm.slo.alertsPanel.viewAllLink', {
                 defaultMessage: 'View all in Alert Manager',
@@ -249,7 +248,7 @@ export const SloAlertsPanel: React.FC<SloAlertsPanelProps> = ({ doc, ruleHealth 
                   <EuiFlexItem grow={false}>
                     <EuiLink
                       data-test-subj={`slosDetailAlertsPanelGroupView-${groupName}`}
-                      onClick={() => navigateToAlertManager(doc.id, doc.spec.datasourceId)}
+                      onClick={() => navigateToAlertManager(doc.id)}
                     >
                       {i18n.translate('observability.apm.slo.alertsPanel.viewGroupLink', {
                         defaultMessage: 'View',
