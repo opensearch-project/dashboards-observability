@@ -134,3 +134,16 @@ describe('wizard_state reducer', () => {
     expect(oneoff.end).toMatch(/T/);
   });
 });
+
+describe('setTemplate — clearing template', () => {
+  it('clears templateId when set to empty string', () => {
+    let s = { ...initialState };
+    // First set a template
+    s = reducer(s, { kind: 'setTemplate', templateId: 'http-availability' });
+    expect(s.templateId).toBe('http-availability');
+
+    // Then clear it (simulates "Change template" navigation)
+    s = reducer(s, { kind: 'setTemplate', templateId: '' });
+    expect(s.templateId).toBe('');
+  });
+});
