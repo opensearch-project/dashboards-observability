@@ -8,7 +8,7 @@ on:
 
 env:
   PLUGIN_NAME: dashboards-observability
-  OPENSEARCH_DASHBOARDS_VERSION: "2.x"
+  OPENSEARCH_DASHBOARDS_VERSION: "2.19"
 
 jobs:
   tests:
