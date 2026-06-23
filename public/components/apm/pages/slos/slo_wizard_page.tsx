@@ -157,10 +157,13 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
   const [rulerError, setRulerError] = useState<SloRulerErrorEnvelope | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Initialize from URL template on mount.
+  // Sync template state with URL param.
   useEffect(() => {
     if (urlTemplateId && state.templateId !== urlTemplateId) {
       dispatch({ kind: 'setTemplate', templateId: urlTemplateId });
+    } else if (!urlTemplateId && state.templateId) {
+      // User navigated back to /slos/create (no templateId in URL) — clear selection
+      dispatch({ kind: 'setTemplate', templateId: '' });
     }
   }, [urlTemplateId]); // eslint-disable-line react-hooks/exhaustive-deps
 
