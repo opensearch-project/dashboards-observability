@@ -90,7 +90,6 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      parentBreadcrumb,
       {
         text: i18n.translate('observability.apm.slo.suggest.breadcrumb.slos', {
           defaultMessage: 'SLO/SLI',

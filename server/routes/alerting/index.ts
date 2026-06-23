@@ -782,12 +782,28 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
           },
         });
       }
-      const result = await handleGetAlertmanagerConfig(
-        promBackend,
-        await getAlertingClientCtx(ctx as AlertingHandlerContext),
-        promDs,
-        logger
-      );
+      let result;
+      try {
+        result = await handleGetAlertmanagerConfig(
+          promBackend,
+          await getAlertingClientCtx(ctx as AlertingHandlerContext),
+          promDs,
+          logger
+        );
+      } catch (configErr: unknown) {
+        logger?.warn(
+          'Alertmanager config fetch failed: ' +
+            (configErr instanceof Error ? configErr.message : String(configErr))
+        );
+        return res.ok({
+          body: {
+            available: false,
+            error:
+              'Alertmanager configuration is not available. ' +
+              (configErr instanceof Error ? configErr.message : 'Internal error'),
+          },
+        });
+      }
       // This route intentionally returns a domain envelope
       // `{ available, code, ... }` on BOTH success and error paths — the UI
       // treats `code` as the discriminator and `available` as the boolean.

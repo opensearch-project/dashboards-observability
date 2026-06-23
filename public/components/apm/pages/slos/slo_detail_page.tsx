@@ -563,7 +563,6 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      parentBreadcrumb,
       {
         text: i18n.translate('observability.apm.slo.detail.breadcrumb.slos', {
           defaultMessage: 'SLO/SLI',

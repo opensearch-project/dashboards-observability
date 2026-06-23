@@ -166,7 +166,6 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      parentBreadcrumb,
       {
         text: i18n.translate('observability.apm.slo.wizard.breadcrumb.slos', {
           defaultMessage: 'SLO/SLI',
