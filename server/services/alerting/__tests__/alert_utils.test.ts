@@ -15,6 +15,8 @@
  *   - `truncatedStart` flag ⇒ `annotations.truncatedStart = 'true'`.
  */
 import {
+  adForecasterToUnifiedRuleSummary,
+  extractADAnomalyResultIdsFromMonitor,
   osAlertToUnified,
   osMonitorToUnifiedRuleSummary,
   promEpisodeToUnified,
@@ -265,8 +267,94 @@ describe('osMonitorToUnifiedRuleSummary — monitorType derivation', () => {
     expect(r.monitorType).toBe('metric');
   });
 
+  it.each([['.opendistro-anomaly-results*'], ['opensearch-ad-plugin-result-test-history-*']])(
+    'classifies %s as an anomaly detector monitor',
+    (idx) => {
+      expect(osMonitorToUnifiedRuleSummary(buildMonitor([idx]), 'ds').monitorType).toBe(
+        'anomaly_detector_monitor'
+      );
+    }
+  );
+
+  it('classifies detector-id query monitors as anomaly detector monitors', () => {
+    const monitor = buildMonitor(['custom-results-index']);
+    const input = monitor.inputs[0] as Extract<OSMonitor['inputs'][number], { search: unknown }>;
+    input.search.query = {
+      size: 1,
+      query: {
+        bool: {
+          filter: [{ term: { detector_id: { value: 'detector-1' } } }],
+        },
+      },
+      aggregations: {
+        max_anomaly_grade: { max: { field: 'anomaly_grade' } },
+      },
+    };
+    expect(osMonitorToUnifiedRuleSummary(monitor, 'ds').monitorType).toBe(
+      'anomaly_detector_monitor'
+    );
+  });
+
+  it('extracts explicit anomaly result ids from detector-backed monitor queries', () => {
+    const monitor = buildMonitor(['.opendistro-anomaly-results*']);
+    const input = monitor.inputs[0] as Extract<OSMonitor['inputs'][number], { search: unknown }>;
+    input.search.query = {
+      query: {
+        bool: {
+          filter: [
+            { term: { detector_id: { value: 'detector-1' } } },
+            { term: { _id: { value: 'anomaly-1' } } },
+            { terms: { anomaly_result_id: ['anomaly-2'] } },
+          ],
+        },
+      },
+    };
+
+    expect(extractADAnomalyResultIdsFromMonitor(monitor)).toEqual(['anomaly-1', 'anomaly-2']);
+  });
+
   it('treats the first matching prefix as authoritative — log wins over apm when both are present', () => {
     const r = osMonitorToUnifiedRuleSummary(buildMonitor(['logs-app', 'otel-v1-apm-span']), 'ds');
     expect(r.monitorType).toBe('log');
+  });
+});
+
+describe('adForecasterToUnifiedRuleSummary', () => {
+  it('maps a forecasting forecaster into a read-only unified rule summary', () => {
+    const rule = adForecasterToUnifiedRuleSummary(
+      {
+        id: 'forecaster-1',
+        name: 'CPU forecast',
+        description: 'Forecast host CPU',
+        indices: ['metrics-*'],
+        time_field: '@timestamp',
+        category_field: ['host'],
+        last_update_time: Date.UTC(2026, 5, 10, 12, 0, 0),
+        forecast_interval: { period: { interval: 5, unit: 'Minutes' } },
+        window_delay: { period: { interval: 1, unit: 'Minutes' } },
+        feature_attributes: [
+          {
+            feature_name: 'cpu_sum',
+            feature_enabled: true,
+            aggregation_query: { cpu_sum: { sum: { field: 'cpu' } } },
+          },
+        ],
+        user: { name: 'admin' },
+      },
+      'ds-os'
+    );
+
+    expect(rule.definitionType).toBe('forecaster');
+    expect(rule.monitorType).toBe('forecaster');
+    expect(rule.name).toBe('CPU forecast');
+    expect(rule.query).toBe('metrics-*');
+    expect(rule.condition).toBe('1 feature forecasted');
+    expect(rule.labels.source).toBe('forecasting');
+    expect(rule.labels.forecaster_type).toBe('high_cardinality');
+    expect(rule.labels.time_field).toBe('@timestamp');
+    expect(rule.annotations.features).toBe('cpu_sum');
+    expect(rule.evaluationInterval).toBe('5 minutes');
+    expect(rule.pendingPeriod).toBe('1 minutes');
+    expect(rule.createdBy).toBe('admin');
   });
 });

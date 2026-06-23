@@ -56,20 +56,8 @@ export interface SetupDependencies {
   explore?: ExplorePluginSetup;
 }
 
-export interface ObservabilitySetup {
-  /**
-   * Signals to other plugins that observability owns the "Create monitor"
-   * entry-point on Explore's Query Panel "Actions" menu — true when the
-   * observability alert manager is enabled in config (`observability.alertManager.enabled`).
-   *
-   * Consumers (currently the alerting-dashboards-plugin) read this flag in
-   * their own `setup()` and skip their parallel registration to avoid two
-   * "Create monitor" entries appearing side-by-side. Always defined so the
-   * boolean check is unambiguous — a missing field would force consumers
-   * to coalesce against `undefined`.
-   */
-  ownsMonitorCreation: boolean;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ObservabilitySetup {}
 
 export interface ObservabilityStart {
   renderAccelerationDetailsFlyout: ({

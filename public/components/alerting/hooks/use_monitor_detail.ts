@@ -19,12 +19,13 @@
  *     Partial detail still renders against the summary props.
  */
 import { useEffect, useMemo, useState } from 'react';
-import type { UnifiedRule } from '../../../../common/types/alerting';
+import type { UnifiedDefinitionType, UnifiedRule } from '../../../../common/types/alerting';
 import { AlertingOpenSearchService } from '../query_services/alerting_opensearch_service';
 
 export interface UseMonitorDetailParams {
   dsId: string;
   ruleId: string;
+  definitionType?: UnifiedDefinitionType;
 }
 
 export interface UseMonitorDetailResult {
@@ -33,7 +34,11 @@ export interface UseMonitorDetailResult {
   error: Error | null;
 }
 
-export function useMonitorDetail({ dsId, ruleId }: UseMonitorDetailParams): UseMonitorDetailResult {
+export function useMonitorDetail({
+  dsId,
+  ruleId,
+  definitionType,
+}: UseMonitorDetailParams): UseMonitorDetailResult {
   const osService = useMemo(() => new AlertingOpenSearchService(), []);
   const [detail, setDetail] = useState<UnifiedRule | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,7 +53,7 @@ export function useMonitorDetail({ dsId, ruleId }: UseMonitorDetailParams): UseM
     setIsLoading(true);
     setError(null);
     osService
-      .getRuleDetail(dsId, ruleId)
+      .getRuleDetail(dsId, ruleId, definitionType)
       .then((data: UnifiedRule) => {
         if (!cancelled && data) setDetail(data);
       })
@@ -64,7 +69,7 @@ export function useMonitorDetail({ dsId, ruleId }: UseMonitorDetailParams): UseM
     return () => {
       cancelled = true;
     };
-  }, [dsId, ruleId, osService]);
+  }, [dsId, ruleId, definitionType, osService]);
 
   return { detail, isLoading, error };
 }

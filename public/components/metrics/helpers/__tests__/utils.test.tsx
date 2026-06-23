@@ -10,15 +10,15 @@ import {
   sampleMetricsVisualizations,
   sampleVisualizationsList,
 } from '../../../../../test/metrics_constants';
-import _ from 'lodash';
+import shuffle from 'lodash/shuffle';
 
 describe('Utils helper functions', () => {
   it('validates sortMetricLayout function', () => {
-    expect(sortMetricLayout(_.shuffle(sampleMetricsVisualizations))).toStrictEqual(
+    expect(sortMetricLayout(shuffle(sampleMetricsVisualizations))).toStrictEqual(
       sampleMetricsVisualizations
     );
 
-    expect(sortMetricLayout(_.shuffle(sampleMetricsVisualizations))).toStrictEqual(
+    expect(sortMetricLayout(shuffle(sampleMetricsVisualizations))).toStrictEqual(
       sampleMetricsVisualizations
     );
   });

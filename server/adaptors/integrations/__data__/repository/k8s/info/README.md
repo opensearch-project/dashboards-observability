@@ -20,7 +20,7 @@ With the Kubernetes integration, you can gain valuable insights into the health 
 
 ### Collecting K8s
 
-The next OpenTelemetry [page](https://opentelemetry.io/docs/kubernetes/collector/components/) describes the K8s attributes and other components
+The next OpenTelemetry [page](https://opentelemetry.io/docs/platforms/kubernetes/collector/components/) describes the K8s attributes and other components
 
 #### Kubernetes Attributes Processor
 
@@ -83,8 +83,8 @@ The following attributes are added by default:
 
 ### Important Components for Kubernetes
 
-- [Kubeletstats Receiver](https://opentelemetry.io/docs/kubernetes/collector/components/#kubeletstats-receiver): pulls pod metrics from the API server on a kubelet.
-- [Filelog Receiver](https://opentelemetry.io/docs/kubernetes/collector/components/#filelog-receiver): collects Kubernetes logs and application logs written to stdout/stderr.
-- [Kubernetes Cluster Receiver](https://opentelemetry.io/docs/kubernetes/collector/components/#kubernetes-cluster-receiver): collects cluster-level metrics and entity events.
-- [Kubernetes Objects Receiver](https://opentelemetry.io/docs/kubernetes/collector/components/#kubernetes-objects-receiver): collects objects, such as events, from the Kubernetes API server.
-- [Host Metrics Receiver](https://opentelemetry.io/docs/kubernetes/collector/components/#host-metrics-receiver): scrapes host metrics from Kubernetes nodes.
+- [Kubeletstats Receiver](https://opentelemetry.io/docs/platforms/kubernetes/collector/components/#kubeletstats-receiver): pulls pod metrics from the API server on a kubelet.
+- [Filelog Receiver](https://opentelemetry.io/docs/platforms/kubernetes/collector/components/#filelog-receiver): collects Kubernetes logs and application logs written to stdout/stderr.
+- [Kubernetes Cluster Receiver](https://opentelemetry.io/docs/platforms/kubernetes/collector/components/#kubernetes-cluster-receiver): collects cluster-level metrics and entity events.
+- [Kubernetes Objects Receiver](https://opentelemetry.io/docs/platforms/kubernetes/collector/components/#kubernetes-objects-receiver): collects objects, such as events, from the Kubernetes API server.
+- [Host Metrics Receiver](https://opentelemetry.io/docs/platforms/kubernetes/collector/components/#host-metrics-receiver): scrapes host metrics from Kubernetes nodes.

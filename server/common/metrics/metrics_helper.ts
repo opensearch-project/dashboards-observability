@@ -3,7 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import get from 'lodash/get';
+import merge from 'lodash/merge';
+import set from 'lodash/set';
 import {
   CAPACITY,
   COMPONENTS,
@@ -22,16 +25,16 @@ export function addClickToMetric(element: string, counter: CounterNameType = 'co
   trim();
 
   const timeKey = getKey(Date.now());
-  const rollingCounter = time2CountWin.get(timeKey) || _.cloneDeep(DEFAULT_ROLLING_COUNTER);
+  const rollingCounter = time2CountWin.get(timeKey) || cloneDeep(DEFAULT_ROLLING_COUNTER);
   const key = `click.${element}.${counter}`;
 
-  _.set(rollingCounter, key, (_.get(rollingCounter, key, 0) as number) + 1);
+  set(rollingCounter, key, (get(rollingCounter, key, 0) as number) + 1);
   if (counter === 'count') {
     const basicCounterKey = `click.${element}.total`;
-    _.set(
+    set(
       GLOBAL_BASIC_COUNTER,
       basicCounterKey,
-      (_.get(GLOBAL_BASIC_COUNTER, basicCounterKey, 0) as number) + 1
+      (get(GLOBAL_BASIC_COUNTER, basicCounterKey, 0) as number) + 1
     );
   }
 
@@ -64,7 +67,7 @@ export function addRequestToMetric(
   trim();
 
   const timeKey = getKey(Date.now());
-  const rollingCounter = time2CountWin.get(timeKey) || _.cloneDeep(DEFAULT_ROLLING_COUNTER);
+  const rollingCounter = time2CountWin.get(timeKey) || cloneDeep(DEFAULT_ROLLING_COUNTER);
 
   rollingCounter[component][request][counter]!++;
   if (counter === 'count') {
@@ -115,7 +118,7 @@ const buildMetrics = (rollingCounters?: CounterType) => {
   if (!rollingCounters) {
     rollingCounters = DEFAULT_ROLLING_COUNTER;
   }
-  const basicMetrics = _.merge(rollingCounters, GLOBAL_BASIC_COUNTER);
+  const basicMetrics = merge(rollingCounters, GLOBAL_BASIC_COUNTER);
   const overallActionMetrics = {
     request_total: 0,
     request_count: 0,

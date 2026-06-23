@@ -4,7 +4,7 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import _ from 'lodash';
+import sum from 'lodash/sum';
 import React from 'react';
 import { selectCountDistribution } from '../../redux/slices/count_distribution_slice';
 import { CountDistribution } from '../visualizations/count_distribution';
@@ -24,7 +24,7 @@ export const Timechart: React.FC<TimechartProps> = (props) => {
   return (
     <>
       <HitsCounter
-        hits={_.sum(props.countDistribution.data?.['count()'])}
+        hits={sum(props.countDistribution.data?.['count()'])}
         showResetButton={false}
         onResetQuery={() => {}}
       />

@@ -32,6 +32,7 @@ module.exports = {
     '^opensearch-dashboards/server$': '<rootDir>/../../src/core/server',
     '^opensearch-dashboards/server/(.*)$': '<rootDir>/../../src/core/server/$1',
     '^opensearch-dashboards$': '<rootDir>/../../opensearch_dashboards',
+    '@hapi/hoek/(?!lib/)(.*)': '<rootDir>/../../node_modules/@hapi/hoek/lib/$1',
   },
   testEnvironment: 'jsdom',
 };

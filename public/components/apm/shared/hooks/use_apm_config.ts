@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { coreRefs } from '../../../../framework/core_refs';
+import { getUnsupportedEngineDataSourceIds } from '../../../../../common/utils/shared';
 
 interface DatasetOptionData {
   id: string;
@@ -53,6 +54,12 @@ export const useDatasets = () => {
         const allDataViews = await dataService.dataViews.getIdsWithTitle(true);
         const tracesOptions: Array<EuiComboBoxOptionOption<DatasetOptionData>> = [];
         const allOptions: Array<EuiComboBoxOptionOption<DatasetOptionData>> = [];
+        // Backing data-source id per option, used to drop AnalyticEngine-backed datasets
+        // after the loop (single bulkGet rather than one lookup per dataset).
+        const dataSourceIdByOption = new Map<
+          EuiComboBoxOptionOption<DatasetOptionData>,
+          string | undefined
+        >();
 
         for (const { id, title } of allDataViews) {
           if (abortController.signal.aborted) break;
@@ -69,6 +76,7 @@ export const useDatasets = () => {
                 title,
               },
             };
+            dataSourceIdByOption.set(option, dataView.dataSourceRef?.id);
 
             // Add to all datasets
             allOptions.push(option);
@@ -82,10 +90,21 @@ export const useDatasets = () => {
           }
         }
 
+        // Drop datasets backed by an AnalyticEngine (Mustang) data source: Mustang serves
+        // PPL/SQL but not the DSL aggregations the APM traces / service-map views run, so
+        // selecting one here would 5xx. Fails open if the data-source lookup fails.
+        const unsupportedDataSourceIds = await getUnsupportedEngineDataSourceIds(
+          Array.from(dataSourceIdByOption.values()).filter((dsId): dsId is string => Boolean(dsId))
+        );
+        const isSupported = (option: EuiComboBoxOptionOption<DatasetOptionData>) => {
+          const dsId = dataSourceIdByOption.get(option);
+          return !(dsId && unsupportedDataSourceIds.has(dsId));
+        };
+
         if (!abortController.signal.aborted) {
           setState({
-            tracesDatasets: tracesOptions,
-            allDatasets: allOptions,
+            tracesDatasets: tracesOptions.filter(isSupported),
+            allDatasets: allOptions.filter(isSupported),
             loading: false,
           });
         }

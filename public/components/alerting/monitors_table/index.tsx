@@ -21,7 +21,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { EuiResizableContainer } from '@elastic/eui';
 import { Datasource, UnifiedRuleSummary } from '../../../../common/types/alerting';
 import { useFacetCollapse } from '../facet_filter_panel';
-import { buildTableColumns, DEFAULT_VISIBLE } from './monitors_table_columns';
+import {
+  buildTableColumns,
+  DEFAULT_VISIBLE,
+  isReadOnlyRuleDefinition,
+} from './monitors_table_columns';
 import {
   buildSuggestions,
   collectLabelKeys,
@@ -195,6 +199,26 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     () => rules.filter((r) => matchesSearch(r, searchQuery) && matchesFilters(r, filters)),
     [rules, searchQuery, filters]
   );
+  const selectableIds = useMemo(
+    () => new Set(rules.filter((r) => !isReadOnlyRuleDefinition(r)).map((r) => r.id)),
+    [rules]
+  );
+  useEffect(() => {
+    setSelectedIds((prev) => {
+      const next = new Set(Array.from(prev).filter((id) => selectableIds.has(id)));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [selectableIds]);
+
+  // Prune selectedIds that are no longer in the filtered list (e.g., after
+  // search/filter changes remove items from view).
+  useEffect(() => {
+    const visibleIds = new Set(filtered.map((r) => r.id));
+    setSelectedIds((prev) => {
+      const pruned = new Set([...prev].filter((id) => visibleIds.has(id)));
+      return pruned.size === prev.size ? prev : pruned;
+    });
+  }, [filtered]);
 
   // Prune selectedIds that are no longer in the filtered list (e.g., after
   // search/filter changes remove items from view).
@@ -220,14 +244,20 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
 
   // Selection
   const toggleSelect = (id: string) => {
+    if (!selectableIds.has(id)) return;
     const next = new Set(selectedIds);
     if (next.has(id)) next.delete(id);
     else next.add(id);
     setSelectedIds(next);
   };
   const toggleSelectAll = () => {
-    if (selectedIds.size === filtered.length) setSelectedIds(new Set());
-    else setSelectedIds(new Set(filtered.map((r) => r.id)));
+    const selectableFiltered = filtered.filter((r) => !isReadOnlyRuleDefinition(r));
+    const allSelected =
+      selectableFiltered.length > 0 && selectableFiltered.every((r) => selectedIds.has(r.id));
+    const next = new Set(selectedIds);
+    if (allSelected) selectableFiltered.forEach((r) => next.delete(r.id));
+    else selectableFiltered.forEach((r) => next.add(r.id));
+    setSelectedIds(next);
   };
 
   // Saved searches
@@ -244,7 +274,9 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
 
   // Bulk delete
   const handleBulkDelete = () => {
-    onDelete(Array.from(selectedIds));
+    const deletableIds = Array.from(selectedIds).filter((id) => selectableIds.has(id));
+    if (deletableIds.length === 0) return;
+    onDelete(deletableIds);
     setSelectedIds(new Set());
     setShowDeleteConfirm(false);
   };

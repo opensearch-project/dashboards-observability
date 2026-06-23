@@ -28,12 +28,47 @@ const ID_MAX_LENGTH = 512;
  * than 512 chars, and anything outside the `[A-Za-z0-9_-]` charset.
  * Prometheus rule IDs use format {dsId}-{groupName}-{ruleName} which can
  * exceed 128 chars with long metric names.
+ *
+ * NOTE: Length checks are done inside `validate` because @osd/config-schema
+ * with joi v17 only executes the last custom rule when both minLength/maxLength
+ * and validate are specified.
  */
 export const alertingIdSchema = schema.string({
-  maxLength: ID_MAX_LENGTH,
-  minLength: 1,
-  validate: (value: string) =>
-    ID_PATTERN.test(value) ? undefined : 'must match /^[A-Za-z0-9_-]+$/',
+  validate: (value: string) => {
+    if (value.length < 1) return `value has length [0] but it must have a minimum length of [1].`;
+    if (value.length > ID_MAX_LENGTH)
+      return `value has length [${value.length}] but it must have a maximum length of [${ID_MAX_LENGTH}].`;
+    if (!ID_PATTERN.test(value)) return 'must match /^[A-Za-z0-9_-]+$/';
+  },
+});
+
+/**
+ * Pattern for the composite rule id the detail route receives:
+ * `{dsId}-{groupName}-{ruleName}`. Prometheus SLO rule groups and rules use
+ * the `slo:rec:` / `slo:alerts:` naming convention, so the id legitimately
+ * contains colons — `ID_PATTERN` would reject it (see the "contains colon"
+ * case in schema_helpers.test.ts, which still applies to `alertingIdSchema`).
+ *
+ * `:` is the only extra character allowed over `ID_PATTERN`. Slash, dot, and
+ * the rest stay disallowed so the path-traversal guard is unchanged — and the
+ * composite id is only used for in-memory equality matching against the
+ * fetched rule list (`getPromRuleDetail`), never interpolated into an upstream
+ * URL, so even the colon never reaches a transport path.
+ *
+ * Length checks live inside `validate` (not `minLength`/`maxLength`) to match
+ * the sibling `alertingIdSchema` convention: @osd/config-schema with joi v17
+ * only executes the last custom rule when both length constraints and a
+ * `validate` callback are specified.
+ */
+const RULE_ID_PATTERN = /^[A-Za-z0-9_:-]+$/;
+
+export const alertingRuleIdSchema = schema.string({
+  validate: (value: string) => {
+    if (value.length < 1) return `value has length [0] but it must have a minimum length of [1].`;
+    if (value.length > ID_MAX_LENGTH)
+      return `value has length [${value.length}] but it must have a maximum length of [${ID_MAX_LENGTH}].`;
+    if (!RULE_ID_PATTERN.test(value)) return 'must match /^[A-Za-z0-9_:-]+$/';
+  },
 });
 
 /** Prometheus label name — `[a-zA-Z_:][a-zA-Z0-9_:]*`, bounded. */
@@ -41,8 +76,10 @@ const LABEL_NAME_PATTERN = /^[a-zA-Z_:][a-zA-Z0-9_:]*$/;
 const LABEL_NAME_MAX_LENGTH = 256;
 
 export const prometheusLabelNameSchema = schema.string({
-  maxLength: LABEL_NAME_MAX_LENGTH,
-  minLength: 1,
-  validate: (value: string) =>
-    LABEL_NAME_PATTERN.test(value) ? undefined : 'must match /^[a-zA-Z_:][a-zA-Z0-9_:]*$/',
+  validate: (value: string) => {
+    if (value.length < 1) return `value has length [0] but it must have a minimum length of [1].`;
+    if (value.length > LABEL_NAME_MAX_LENGTH)
+      return `value has length [${value.length}] but it must have a maximum length of [${LABEL_NAME_MAX_LENGTH}].`;
+    if (!LABEL_NAME_PATTERN.test(value)) return 'must match /^[a-zA-Z_:][a-zA-Z0-9_:]*$/';
+  },
 });

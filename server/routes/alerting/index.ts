@@ -31,7 +31,11 @@ import { MonitorMutationService } from '../../services/alerting/monitor_mutation
 import { registerAlertingMutationRoutes } from './mutations';
 import { toErrorBody, toHandlerResult } from './route_utils';
 import { isAlertManagerError } from '../../services/alerting';
-import { alertingIdSchema, prometheusLabelNameSchema } from './schema_helpers';
+import {
+  alertingIdSchema,
+  alertingRuleIdSchema,
+  prometheusLabelNameSchema,
+} from './schema_helpers';
 
 /**
  * Shape of the OSD request-handler context we rely on. `dataSource` is
@@ -228,6 +232,12 @@ export async function getAlertingClient(
     if (promDs) {
       return ctx.core.opensearch.client.asCurrentUser;
     }
+    // Back-compat for browser state written by earlier Alert Manager builds.
+    // Only fall back after real saved-object resolution misses, so a registered
+    // MDS datasource with this id still wins.
+    if (dsId === 'local_cluster') {
+      return ctx.core.opensearch.client.asCurrentUser;
+    }
     logger?.warn(`alerting: Datasource not found: ${dsId}`);
     throw createNotFoundError(`Datasource not found: ${dsId}`);
   }
@@ -403,7 +413,8 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
           startTime: req.query.startTime,
           endTime: req.query.endTime,
         },
-        ctx
+        ctx,
+        req
       );
       return res.ok({ body: result.body });
     }
@@ -716,7 +727,17 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     {
       path: '/api/alerting/rules/{dsId}/{ruleId}',
       validate: {
-        params: schema.object({ dsId: alertingIdSchema, ruleId: alertingIdSchema }),
+        params: schema.object({ dsId: alertingIdSchema, ruleId: alertingRuleIdSchema }),
+        query: schema.object({
+          definitionType: schema.maybe(
+            schema.oneOf([
+              schema.literal('monitor'),
+              schema.literal('prometheus_rule'),
+              schema.literal('detector'),
+              schema.literal('forecaster'),
+            ])
+          ),
+        }),
       },
     },
     async (ctx, req, res) =>
@@ -727,7 +748,9 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
           await getAlertingClientCtx(ctx, req.params.dsId),
           req.params.dsId,
           req.params.ruleId,
-          ctx
+          ctx,
+          req.query.definitionType,
+          req
         );
       })
   );

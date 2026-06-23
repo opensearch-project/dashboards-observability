@@ -29,10 +29,7 @@ import {
   ALERT_MANAGER_MAX_DATASOURCES_SETTING,
 } from '../../common/constants/alerting_settings';
 
-export const registerObservabilityUISettings = (
-  uiSettings: UiSettingsServiceSetup,
-  alertManagerEnabled: boolean = false
-) => {
+export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSetup) => {
   uiSettings.register({
     [TRACE_CUSTOM_SPAN_INDEX_SETTING]: {
       name: i18n.translate('observability.traceAnalyticsCustomSpanIndices.name', {
@@ -167,13 +164,9 @@ export const registerObservabilityUISettings = (
     },
   });
 
-  // Alert Manager datasource settings — only registered when the feature is
-  // enabled in opensearch_dashboards.yml (observability.alertManager.enabled).
-  // The on/off toggle itself is a yml flag, not a uiSetting.
-  if (!alertManagerEnabled) {
-    return;
-  }
-
+  // Alert Manager datasource settings register unconditionally so they
+  // exist whenever the dynamic flag flips the UI on. UI visibility is
+  // gated by `capabilities.observability.alertManagerEnabled`.
   uiSettings.register({
     [ALERT_MANAGER_DEFAULT_DATASOURCES_SETTING]: {
       name: i18n.translate('observability.alertManagerSelectedDatasources.name', {

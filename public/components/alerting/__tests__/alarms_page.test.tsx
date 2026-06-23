@@ -227,6 +227,36 @@ describe('AlarmsPage', () => {
     expect(last.truncated).toBe(true);
   });
 
+  it('surfaces partial-success datasource errors as warnings', async () => {
+    mockUseAlerts.mockReturnValue({
+      ...emptyHookResult,
+      data: {
+        results: [],
+        datasourceStatus: [
+          {
+            datasourceId: 'ds-1',
+            datasourceName: 'Local',
+            datasourceType: 'opensearch',
+            status: 'success',
+            data: [],
+            durationMs: 10,
+            error: 'Failed to fetch anomaly results: AD unavailable',
+          },
+        ],
+        totalDatasources: 1,
+        completedDatasources: 1,
+        fetchedAt: '2026-01-01T00:00:00Z',
+      },
+    });
+
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+
+    expect(screen.getByText('Some datasources could not be reached')).toBeInTheDocument();
+    expect(screen.getByText(/Failed to fetch anomaly results/)).toBeInTheDocument();
+  });
+
   it('forwards `fallbackHints` built from datasourceStatus entries with a fallback marker', async () => {
     mockUseAlerts.mockReturnValue({
       ...emptyHookResult,
@@ -361,10 +391,11 @@ describe('AlarmsPage', () => {
         id: 'mon-1',
         name: 'Test Monitor',
         datasourceId: 'ds-1',
+        definitionType: 'monitor',
       });
     });
 
-    expect(mockGetRuleDetail).toHaveBeenCalledWith('ds-1', 'mon-1');
+    expect(mockGetRuleDetail).toHaveBeenCalledWith('ds-1', 'mon-1', 'monitor');
     expect(mockCreateMonitor).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'Test Monitor (Copy)' }),
       'ds-1'
