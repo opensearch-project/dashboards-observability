@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { HashRouter, Route } from 'react-router-dom';
-import { i18n } from '@osd/i18n';
 import { coreRefs } from '../../framework/core_refs';
 import {
   ALERT_MANAGER_DEFAULT_DATASOURCES_SETTING,

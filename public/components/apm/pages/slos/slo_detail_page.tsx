@@ -571,7 +571,7 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
       },
       { text: doc?.spec.name ?? id },
     ]);
-  }, [chrome, parentBreadcrumb, doc, id]);
+  }, [chrome, doc, id]);
 
   const onDelete = useCallback(async () => {
     setConfirmDelete(false);
