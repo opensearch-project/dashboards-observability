@@ -150,7 +150,7 @@ describe('SloAlertsPanel', () => {
     render(<SloAlertsPanel doc={makeDoc()} ruleHealth={makeRuleHealth()} />);
     fireEvent.click(screen.getByTestId('slosDetailAlertsPanelViewAll'));
     expect(mockNavigateToApp).toHaveBeenCalledWith('observability-alerting', {
-      path: `#/rules?q=${encodeURIComponent('slo_id:slo-1')}`,
+      path: `#/rules?q=${encodeURIComponent('slo_id:slo-1')}&ds=ds-1`,
     });
   });
 });

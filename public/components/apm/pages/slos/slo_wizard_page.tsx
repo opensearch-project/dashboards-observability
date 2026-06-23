@@ -147,7 +147,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
   apiClient,
   chrome,
   notifications,
-  parentBreadcrumb,
+  parentBreadcrumb: _parentBreadcrumb,
 }) => {
   const history = useHistory();
   const { templateId: urlTemplateId } = useParams<{ templateId?: string }>();
@@ -178,7 +178,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
         }),
       },
     ]);
-  }, [chrome, parentBreadcrumb]);
+  }, [chrome]);
 
   const template = useMemo(() => SLO_TEMPLATES.find((t) => t.id === state.templateId) ?? null, [
     state.templateId,

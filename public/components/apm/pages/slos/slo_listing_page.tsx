@@ -620,7 +620,7 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
   http,
   chrome,
   notifications,
-  parentBreadcrumb,
+  parentBreadcrumb: _parentBreadcrumb,
 }) => {
   const history = useHistory();
   const location = useLocation();
@@ -658,7 +658,7 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
         }),
       },
     ]);
-  }, [chrome, parentBreadcrumb]);
+  }, [chrome]);
 
   // Filter+cursor ↔ URL sync. Single effect, guarded by a ref that stores the
   // last serialized string we reconciled. Writing to URL via history.replace

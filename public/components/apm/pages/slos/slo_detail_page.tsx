@@ -440,7 +440,7 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
   apiClient,
   chrome,
   notifications,
-  parentBreadcrumb,
+  parentBreadcrumb: _parentBreadcrumb,
 }) => {
   const { id } = useParams<{ id: string }>();
   const history = useHistory();
