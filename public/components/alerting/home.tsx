@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { HashRouter, Route } from 'react-router-dom';
-import { i18n } from '@osd/i18n';
 import { coreRefs } from '../../framework/core_refs';
 import {
   ALERT_MANAGER_DEFAULT_DATASOURCES_SETTING,
@@ -18,26 +17,6 @@ import { useDatasources } from './hooks/use_datasources';
 
 export const AlertingHome = () => {
   const { datasources, isLoading: datasourcesLoading } = useDatasources();
-
-  // Show a "Beta" badge in the top chrome bar while the Alerts app is
-  // mounted; clear it on unmount so it doesn't leak into other apps.
-  useEffect(() => {
-    const chrome = coreRefs.chrome;
-    if (!chrome?.setBadge) return undefined;
-    chrome.setBadge({
-      text: i18n.translate('observability.alerting.home.betaBadge', {
-        defaultMessage: 'Beta',
-      }),
-      tooltip: i18n.translate('observability.alerting.home.betaBadgeTooltip', {
-        defaultMessage:
-          'Alerts is in beta. Features may change and some functionality is still evolving.',
-      }),
-      iconType: 'beaker',
-    });
-    return () => {
-      chrome.setBadge?.(undefined);
-    };
-  }, []);
 
   const { defaultDatasources, maxDatasources } = useMemo(() => {
     const uiSettings = coreRefs.core?.uiSettings;

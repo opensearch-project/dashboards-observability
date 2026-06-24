@@ -147,7 +147,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
   apiClient,
   chrome,
   notifications,
-  parentBreadcrumb,
+  parentBreadcrumb: _parentBreadcrumb,
 }) => {
   const history = useHistory();
   const { templateId: urlTemplateId } = useParams<{ templateId?: string }>();
@@ -157,16 +157,18 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
   const [rulerError, setRulerError] = useState<SloRulerErrorEnvelope | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Initialize from URL template on mount.
+  // Sync template state with URL param.
   useEffect(() => {
     if (urlTemplateId && state.templateId !== urlTemplateId) {
       dispatch({ kind: 'setTemplate', templateId: urlTemplateId });
+    } else if (!urlTemplateId && state.templateId) {
+      // User navigated back to /slos/create (no templateId in URL) — clear selection
+      dispatch({ kind: 'setTemplate', templateId: null });
     }
-  }, [urlTemplateId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [urlTemplateId, state.templateId]);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      parentBreadcrumb,
       {
         text: i18n.translate('observability.apm.slo.wizard.breadcrumb.slos', {
           defaultMessage: 'SLO/SLI',
@@ -179,7 +181,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
         }),
       },
     ]);
-  }, [chrome, parentBreadcrumb]);
+  }, [chrome]);
 
   const template = useMemo(() => SLO_TEMPLATES.find((t) => t.id === state.templateId) ?? null, [
     state.templateId,

@@ -71,7 +71,6 @@ import {
 // ============================================================================
 // Main Page Component
 // ============================================================================
-
 interface AlarmsPageProps {
   /** Datasources sourced from saved-object types (data-source + data-connection). */
   datasources: Datasource[];

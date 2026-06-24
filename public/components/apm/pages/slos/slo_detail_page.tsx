@@ -440,7 +440,7 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
   apiClient,
   chrome,
   notifications,
-  parentBreadcrumb,
+  parentBreadcrumb: _parentBreadcrumb,
 }) => {
   const { id } = useParams<{ id: string }>();
   const history = useHistory();
@@ -563,7 +563,6 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      parentBreadcrumb,
       {
         text: i18n.translate('observability.apm.slo.detail.breadcrumb.slos', {
           defaultMessage: 'SLO/SLI',
@@ -572,7 +571,7 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
       },
       { text: doc?.spec.name ?? id },
     ]);
-  }, [chrome, parentBreadcrumb, doc, id]);
+  }, [chrome, doc, id]);
 
   const onDelete = useCallback(async () => {
     setConfirmDelete(false);

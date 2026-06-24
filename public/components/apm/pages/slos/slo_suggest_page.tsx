@@ -73,7 +73,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   chrome,
   http,
   notifications,
-  parentBreadcrumb,
+  parentBreadcrumb: _parentBreadcrumb,
 }) => {
   const history = useHistory();
   const location = useLocation();
@@ -90,7 +90,6 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      parentBreadcrumb,
       {
         text: i18n.translate('observability.apm.slo.suggest.breadcrumb.slos', {
           defaultMessage: 'SLO/SLI',
@@ -103,7 +102,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
         }),
       },
     ]);
-  }, [chrome, parentBreadcrumb]);
+  }, [chrome]);
 
   // Use the Prometheus datasource the APM config points at — same one the SLO
   // wizard writes SLOs against. Users who want a different datasource edit the
