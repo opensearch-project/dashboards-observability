@@ -68,8 +68,9 @@ import {
   resolveDatasourceTokens,
 } from './alarms_page_helpers';
 
-// =====================================================================// Main Page Component
-// =====================================================================
+// ============================================================================
+// Main Page Component
+// ============================================================================
 interface AlarmsPageProps {
   /** Datasources sourced from saved-object types (data-source + data-connection). */
   datasources: Datasource[];
