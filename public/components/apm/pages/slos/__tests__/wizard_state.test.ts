@@ -134,4 +134,3 @@ describe('wizard_state reducer', () => {
     expect(oneoff.end).toMatch(/T/);
   });
 });
-
