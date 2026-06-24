@@ -90,7 +90,7 @@ export const useDatasets = () => {
           }
         }
 
-        // Drop datasets backed by an AnalyticEngine (Mustang) data source: Mustang serves
+        // Drop datasets backed by an AnalyticEngine data source: AnalyticEngine serves
         // PPL/SQL but not the DSL aggregations the APM traces / service-map views run, so
         // selecting one here would 5xx. Fails open if the data-source lookup fails.
         const unsupportedDataSourceIds = await getUnsupportedEngineDataSourceIds(
