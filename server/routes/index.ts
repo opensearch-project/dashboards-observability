@@ -38,11 +38,13 @@ export function setupRoutes({
   router,
   client,
   dataSourceEnabled,
+  alertManagerEnabled,
   logger,
 }: {
   router: IRouter;
   client: ILegacyClusterClient;
   dataSourceEnabled: boolean;
+  alertManagerEnabled: boolean;
   logger: Logger;
 }) {
   PanelsRouter(router);
