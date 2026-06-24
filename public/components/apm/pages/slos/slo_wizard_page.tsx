@@ -163,7 +163,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
       dispatch({ kind: 'setTemplate', templateId: urlTemplateId });
     } else if (!urlTemplateId && state.templateId) {
       // User navigated back to /slos/create (no templateId in URL) — clear selection
-      dispatch({ kind: 'setTemplate', templateId: '' });
+      dispatch({ kind: 'setTemplate', templateId: null });
     }
   }, [urlTemplateId]); // eslint-disable-line react-hooks/exhaustive-deps
 

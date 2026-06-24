@@ -144,6 +144,6 @@ describe('setTemplate — clearing template', () => {
 
     // Then clear it (simulates "Change template" navigation)
     s = reducer(s, { kind: 'setTemplate', templateId: '' });
-    expect(s.templateId).toBe('');
+    expect(s.templateId).toBeNull();
   });
 });

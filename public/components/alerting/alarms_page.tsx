@@ -713,7 +713,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     try {
       // Fetch the full rule detail to get the raw backend payload — the
       // summary shape doesn't carry the wire format needed for re-creation.
-      const detail = await osService.getRuleDetail(monitor.datasourceId, monitor.id);
       const detail = await osService.getRuleDetail(
         monitor.datasourceId,
         monitor.id,
