@@ -54,11 +54,7 @@ export interface SloAlertsPanelProps {
  * pairs to compose AND-joined predicates; the search input is whitespace-
  * separated.
  */
-function buildRulesPath(
-  sloId: string,
-  datasourceId?: string,
-  extraLabels?: Record<string, string>
-): string {
+function buildRulesPath(sloId: string, extraLabels?: Record<string, string>): string {
   const terms = [`slo_id:${sloId}`];
   if (extraLabels) {
     for (const [k, v] of Object.entries(extraLabels)) {
@@ -69,12 +65,8 @@ function buildRulesPath(
   return `#/rules?${params.toString()}`;
 }
 
-function navigateToAlertManager(
-  sloId: string,
-  datasourceId?: string,
-  extraLabels?: Record<string, string>
-): void {
-  const path = buildRulesPath(sloId, datasourceId, extraLabels);
+function navigateToAlertManager(sloId: string, extraLabels?: Record<string, string>): void {
+  const path = buildRulesPath(sloId, extraLabels);
   coreRefs?.application?.navigateToApp(observabilityAlertingID, { path });
   // Alerting home uses HashRouter; pushState doesn't trigger hashchange.
   window.dispatchEvent(new HashChangeEvent('hashchange'));
