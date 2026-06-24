@@ -446,8 +446,8 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
           {/* Prometheus datasource selector moved into the Query section
               of PrometheusFormSection to match Logs layout */}
 
-          {/* Creation Mode Toggle — AI only available for Prometheus, hidden in edit mode */}
-          {!isEdit && backendType === 'prometheus' && (
+          {/* Creation Mode Toggle — hidden until template support is ready */}
+          {false && !isEdit && backendType === 'prometheus' && (
             <>
               <EuiPanel paddingSize="s" hasBorder>
                 <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>

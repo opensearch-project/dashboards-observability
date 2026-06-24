@@ -387,6 +387,7 @@ export class ObservabilityPlugin
       router,
       client: openSearchObservabilityClient,
       dataSourceEnabled,
+      alertManagerEnabled: true,
       logger: this.logger,
     });
 
