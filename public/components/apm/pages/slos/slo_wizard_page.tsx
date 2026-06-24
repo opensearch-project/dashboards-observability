@@ -165,7 +165,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
       // User navigated back to /slos/create (no templateId in URL) — clear selection
       dispatch({ kind: 'setTemplate', templateId: null });
     }
-  }, [urlTemplateId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [urlTemplateId, state.templateId]);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
