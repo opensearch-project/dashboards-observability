@@ -42,6 +42,7 @@ import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/pl
 import { extractRulerErrorEnvelope } from './slo_api_client';
 import type { SloApiClient, SloRulerErrorEnvelope } from './slo_api_client';
 import { GeneratedRulesPreview } from './generated_rules_preview';
+import { DatasourceSelect } from './datasource_select';
 import { ObjectivesSection } from './objectives_section';
 import { CustomPromqlEditor } from './custom_promql_editor';
 import { ProbeSliPanel } from './probe_sli_panel';
@@ -559,18 +560,15 @@ const IdentityPanel: React.FC<PanelProps & { template: string }> = ({
     <EuiSpacer size="s" />
     <EuiFormRow
       label={i18n.translate('observability.apm.slo.wizard.identity.datasourceLabel', {
-        defaultMessage: 'Datasource ID',
+        defaultMessage: 'Datasource',
       })}
       isInvalid={!!errors['spec.datasourceId']}
       error={errors['spec.datasourceId']}
     >
-      <EuiFieldText
+      <DatasourceSelect
         value={state.datasourceId}
-        onChange={(e) =>
-          dispatch({ kind: 'setField', field: 'datasourceId', value: e.target.value })
-        }
-        data-test-subj="slosWizardDatasourceId"
-        placeholder="ds-2"
+        isInvalid={!!errors['spec.datasourceId']}
+        onChange={(value) => dispatch({ kind: 'setField', field: 'datasourceId', value })}
       />
     </EuiFormRow>
     <EuiFormRow

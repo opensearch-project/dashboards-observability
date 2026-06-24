@@ -10,6 +10,7 @@
  */
 
 import type { BurnRateConfig, SloSpec, Objective } from './slo_types';
+import { isSupportedSliBackend } from './slo_types';
 import { MWMBR_MAX_TIERS, parseDurationToMs, RECORDING_WINDOWS } from './slo_promql_generator';
 
 const METRIC_NAME_RE = /^[a-zA-Z_:][a-zA-Z0-9_:]*$/;
@@ -287,8 +288,8 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
           }
         }
       }
-    } else if (definition.backend === 'opensearch') {
-      errors['spec.sli.definition.backend'] = 'OpenSearch SLI backend is not supported in P0';
+    } else if (definition.backend === 'opensearch' && !isSupportedSliBackend('opensearch')) {
+      errors['spec.sli.definition.backend'] = 'OpenSearch SLI backend is not supported yet';
     }
 
     // Dimensions — required for non-custom single SLIs.

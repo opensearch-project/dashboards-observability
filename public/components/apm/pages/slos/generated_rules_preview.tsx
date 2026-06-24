@@ -74,11 +74,22 @@ export const GeneratedRulesPreview: React.FC<GeneratedRulesPreviewProps> = ({
   input,
   errors,
 }) => {
+  // Gate the request on client-side validity. The wizard passes the same
+  // `validateSloSpec` errors it would surface on submit; if any are present
+  // the server's `/preview` is guaranteed to 400, so firing it only produces
+  // the "Preview unavailable / Bad Request" flash before the user has filled
+  // anything in. Hold the request until the form is client-valid and let the
+  // empty-state prompt list the missing fields instead.
+  const hasClientErrors = errors ? Object.keys(errors).length > 0 : false;
+
   // Debounce on the serialized input so equivalent objects don't retrigger
   // fetches (stable JSON → stable effect dep). Unlike useDebouncedValue, we
   // never seed the debounced value from the initial prop — the first preview
   // request should wait out the debounce window just like subsequent ones.
-  const serialized = useMemo(() => (input ? JSON.stringify(input) : null), [input]);
+  const serialized = useMemo(() => (input && !hasClientErrors ? JSON.stringify(input) : null), [
+    input,
+    hasClientErrors,
+  ]);
   const [debouncedSerialized, setDebouncedSerialized] = useState<string | null>(null);
   const [state, setState] = useState<PreviewState>(INITIAL);
 

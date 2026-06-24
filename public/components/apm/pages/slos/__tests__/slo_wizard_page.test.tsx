@@ -22,6 +22,20 @@ jest.mock('../../../../../plugin_helpers/plugin_headerControl', () => ({
   ),
 }));
 
+// The datasource picker reads the live list via useDatasources(), which would
+// reach coreRefs.savedObjectsClient (unwired here). Provide one eligible
+// Prometheus datasource so the select renders with a selectable option.
+jest.mock('../../../../alerting/hooks/use_datasources', () => ({
+  useDatasources: () => ({
+    datasources: [
+      { id: 'ds-2', name: 'Prod Prometheus', type: 'prometheus', url: 'ds-2', enabled: true },
+    ],
+    isLoading: false,
+    error: null,
+    refresh: () => {},
+  }),
+}));
+
 function renderWizard(apiClient: Partial<SloApiClient>, templateId = 'http-availability') {
   const chrome = ({ setBreadcrumbs: jest.fn() } as unknown) as Parameters<
     typeof SloWizardPage

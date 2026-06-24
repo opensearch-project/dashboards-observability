@@ -89,6 +89,27 @@ export interface OpenSearchSli extends BaseSli {
 
 export type SliDefinition = PrometheusSli | OpenSearchSli;
 
+/** The SLI backend discriminant — mirrors `SliDefinition['backend']`. */
+export type SliBackend = SliDefinition['backend'];
+
+/**
+ * Backends an SLO can actually be created against *today*. This is the single
+ * source of truth the UI and validators consult instead of hardcoding
+ * `'prometheus'` in each place — when OpenSearch-backed SLOs land (the
+ * `OpenSearchSli` arm above is shape-reserved for it), add `'opensearch'` here
+ * and the datasource picker, validation gate, and any backend filter pick it
+ * up without further edits to those call sites.
+ *
+ * Note: enabling a backend here is necessary but not sufficient — the rule
+ * generator (`slo_promql_generator.ts`) and deploy path must also implement it.
+ */
+export const SUPPORTED_SLI_BACKENDS: readonly SliBackend[] = ['prometheus'];
+
+/** True when SLOs can currently be created against `backend`. */
+export function isSupportedSliBackend(backend: SliBackend): boolean {
+  return SUPPORTED_SLI_BACKENDS.includes(backend);
+}
+
 /**
  * Grouping dimensions live inside the SingleSli node. Composite SLOs (P2)
  * aggregate members that each carry their own dimensions; the composite has none.
