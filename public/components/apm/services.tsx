@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
 import { ChromeBreadcrumb, NotificationsStart } from '../../../../../src/core/public';
+import { useOpenOnUrlMarker } from '../../../../../src/plugins/opensearch_dashboards_utils/public';
 import { ApmSettingsModal } from './config/apm_settings_modal';
 import { ApmEmptyState } from './common/apm_empty_state';
 import { HeaderControlledComponentsWrapper } from '../../plugin_helpers/plugin_headerControl';
@@ -60,6 +61,13 @@ export const Services = (props: ApmServicesProps) => {
       });
     }
   }, [error, notifications]);
+
+  // The side-nav "APM settings" popover action navigates here with an
+  // `_apmSettings=true` hash marker (a popover action only has navigateToApp, so
+  // it can't open the modal itself). useOpenOnUrlMarker opens the modal on the
+  // marker and strips it (cooldown / replaceState handled in the hook).
+  const openSettingsModal = useCallback(() => setIsSettingsModalVisible(true), []);
+  useOpenOnUrlMarker('_apmSettings', openSettingsModal);
 
   const handleModalClose = (saved?: boolean) => {
     setIsSettingsModalVisible(false);

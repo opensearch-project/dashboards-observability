@@ -25,6 +25,12 @@ import {
 } from '../../common/constants/apm';
 import { AppPluginStartDependencies } from '../types';
 import { notebooksNavPopover } from './notebooks_nav_popover';
+import {
+  topologyMapNavPopover,
+  servicesNavPopover,
+  sloNavPopover,
+  alertingNavPopover,
+} from './apm_nav_popover';
 
 function registerIconSideNavGroups(
   core: CoreSetup<AppPluginStartDependencies>,
@@ -51,6 +57,7 @@ function registerIconSideNavGroups(
         showInAllNavGroup: true,
         order: 50,
         euiIconType: 'beaker',
+        navPopover: alertingNavPopover,
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
@@ -84,6 +91,7 @@ function registerIconSideNavGroups(
         showInAllNavGroup: true,
         order: 200,
         euiIconType: 'navServiceMap',
+        navPopover: servicesNavPopover,
       },
       {
         id: observabilityApmApplicationMapID,
@@ -93,6 +101,7 @@ function registerIconSideNavGroups(
         order: 400,
         euiIconType: 'navAiFlow',
         startCluster: true,
+        navPopover: topologyMapNavPopover,
       },
       ...(sloEnabled
         ? [
@@ -102,6 +111,7 @@ function registerIconSideNavGroups(
               showInAllNavGroup: true,
               order: 500,
               euiIconType: 'visGauge',
+              navPopover: sloNavPopover,
             },
           ]
         : []),

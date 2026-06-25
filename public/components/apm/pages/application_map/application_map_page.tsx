@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { ChromeStart, NotificationsStart } from '../../../../../../../src/core/public';
+import { useOpenOnUrlMarker } from '../../../../../../../src/plugins/opensearch_dashboards_utils/public';
 import { useApmConfig } from '../../config/apm_config_context';
 import { ApmSettingsModal } from '../../config/apm_settings_modal';
 import { ApmEmptyState } from '../../common/apm_empty_state';
@@ -160,6 +161,13 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
   useEffect(() => {
     chrome?.setBreadcrumbs([{ text: i18nTexts.breadcrumb, href: '#/application-map' }]);
   }, [chrome]);
+
+  // The side-nav "APM settings" popover action navigates here with an
+  // `_apmSettings=true` hash marker (a popover action only has navigateToApp, so
+  // it can't open the modal itself). useOpenOnUrlMarker opens the modal on the
+  // marker and strips it (cooldown / replaceState handled in the hook).
+  const openSettingsModal = useCallback(() => setIsSettingsModalVisible(true), []);
+  useOpenOnUrlMarker('_apmSettings', openSettingsModal);
 
   // Parse URL parameters on mount to support deep-linking from Services Home
   useEffect(() => {

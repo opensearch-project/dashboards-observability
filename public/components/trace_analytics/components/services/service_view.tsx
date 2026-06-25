@@ -84,7 +84,7 @@ export function ServiceView(props: ServiceViewProps) {
       const params = new URLSearchParams(location?.search || '');
       const id = params.get('serviceId');
       setServiceId(id);
-    } catch (error) {
+    } catch (_error) {
       setServiceId(null);
     }
   }, [location]);
@@ -106,7 +106,7 @@ export function ServiceView(props: ServiceViewProps) {
         setserviceIdEmpty(false);
         setFields(data);
       }
-    } catch (e) {
+    } catch (_e) {
       setserviceIdEmpty(true);
       setFields({});
       setServiceMap({});
@@ -240,7 +240,7 @@ export function ServiceView(props: ServiceViewProps) {
                 >
                   <EuiToolTip content="View service page">
                     <EuiLink data-test-subj={'service-view-flyout-action-btn'}>
-                      <EuiSmallButtonIcon iconType="graphApp" display="base" />
+                      <EuiSmallButtonIcon iconType="navAiFlow" display="base" />
                     </EuiLink>
                   </EuiToolTip>
                 </EuiFlexItem>
