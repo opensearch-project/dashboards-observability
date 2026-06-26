@@ -56,7 +56,7 @@ describe('ApmEmptyState', () => {
     render(<ApmEmptyState onGetStartedClick={mockOnGetStartedClick} />);
 
     expect(screen.getByRole('tab', { name: 'Services' })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Application Map' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Topology Map' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Correlate traces and logs' })).toBeInTheDocument();
   });
 
@@ -78,7 +78,7 @@ describe('ApmEmptyState', () => {
   it('should switch tab and description when clicking another tab', () => {
     render(<ApmEmptyState onGetStartedClick={mockOnGetStartedClick} />);
 
-    const applicationMapTab = screen.getByRole('tab', { name: 'Application Map' });
+    const applicationMapTab = screen.getByRole('tab', { name: 'Topology Map' });
     fireEvent.click(applicationMapTab);
 
     expect(applicationMapTab).toHaveAttribute('aria-selected', 'true');
@@ -91,9 +91,9 @@ describe('ApmEmptyState', () => {
     // Default is Services
     expect(screen.getByAltText('Services preview')).toBeInTheDocument();
 
-    // Click Application Map tab
-    fireEvent.click(screen.getByRole('tab', { name: 'Application Map' }));
-    expect(screen.getByAltText('Application Map preview')).toBeInTheDocument();
+    // Click Topology Map tab
+    fireEvent.click(screen.getByRole('tab', { name: 'Topology Map' }));
+    expect(screen.getByAltText('Topology Map preview')).toBeInTheDocument();
   });
 
   it('should render preview image', () => {

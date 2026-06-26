@@ -107,7 +107,7 @@ export interface ApplicationMapPageProps {
 }
 
 /**
- * ApplicationMapPage - Main page for APM Application Map
+ * ApplicationMapPage - Main page for APM Topology Map
  *
  * Displays a service topology visualization using CelestialMap.
  * Supports hierarchical navigation (Application -> Services view).
