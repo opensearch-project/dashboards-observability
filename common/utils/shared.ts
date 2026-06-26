@@ -101,10 +101,10 @@ export const dataSourceFilterFnExcludeAnalyticEngine = (
 ) => dataSourceFilterFnByEngineType(dataSource) && dataSourceFilterFn(dataSource);
 
 // Given a set of data-source saved-object ids, returns the subset whose
-// `dataSourceEngineType` is in `unsupportedOSDataSourceEngineTypes` (AnalyticEngine /
-// Mustang). Callers that list datasets (index patterns) bound to a data source — e.g. the
+// `dataSourceEngineType` is in `unsupportedOSDataSourceEngineTypes` (AnalyticEngine).
+// Callers that list datasets (index patterns) bound to a data source — e.g. the
 // APM settings modal's traces / service-map selectors — use this to drop datasets that sit
-// on a Mustang domain, since those serve PPL/SQL but not the DSL aggregations APM issues.
+// on an AnalyticEngine domain, since those serve PPL/SQL but not the DSL aggregations APM issues.
 //
 // Resolves engine type with a single `bulkGet` on `data-source` saved objects. Fails open:
 // if the lookup throws, an empty set is returned so callers keep showing every dataset.
