@@ -84,7 +84,8 @@ export function ServiceView(props: ServiceViewProps) {
       const params = new URLSearchParams(location?.search || '');
       const id = params.get('serviceId');
       setServiceId(id);
-    } catch (_error) {
+    } catch (error) {
+      console.error('[ServiceView] Failed to parse serviceId from URL:', error);
       setServiceId(null);
     }
   }, [location]);
@@ -106,7 +107,8 @@ export function ServiceView(props: ServiceViewProps) {
         setserviceIdEmpty(false);
         setFields(data);
       }
-    } catch (_e) {
+    } catch (e) {
+      console.error('[ServiceView] Failed to process service data response:', e);
       setserviceIdEmpty(true);
       setFields({});
       setServiceMap({});
