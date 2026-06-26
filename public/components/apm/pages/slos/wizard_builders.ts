@@ -55,7 +55,9 @@ function buildSli(state: FormState, template: SloTemplate): SingleSli {
     backend: 'prometheus',
     type: template.sli.type,
     calcMethod: template.sli.calcMethod,
-    metric: template.sli.metric,
+    // Metric is now user-editable (SLI editor Advanced view) for structured
+    // SLIs; fall back to the template default if the field is somehow empty.
+    metric: state.metric || template.sli.metric,
     goodEventsFilter:
       template.sli.type === 'availability' && state.goodEventsFilter
         ? state.goodEventsFilter

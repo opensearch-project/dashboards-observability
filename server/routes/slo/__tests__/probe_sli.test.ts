@@ -93,8 +93,16 @@ describe('probe-sli route', () => {
   });
 
   it('returns counts, ratio, and sparkline on full success', async () => {
-    backend.queryInstant.mockResolvedValueOnce([{ timestamp: 1_700_000_000_000, value: 95 }]);
-    backend.queryInstant.mockResolvedValueOnce([{ timestamp: 1_700_000_000_000, value: 100 }]);
+    // Good + total are now range queries (reduced to the latest finite point),
+    // then the ratio range for the sparkline — three queryRange calls in order.
+    backend.queryRange.mockResolvedValueOnce([
+      { timestamp: 1_699_999_940_000, value: 90 },
+      { timestamp: 1_700_000_000_000, value: 95 },
+    ]);
+    backend.queryRange.mockResolvedValueOnce([
+      { timestamp: 1_699_999_940_000, value: 98 },
+      { timestamp: 1_700_000_000_000, value: 100 },
+    ]);
     backend.queryRange.mockResolvedValueOnce([
       { timestamp: 1_700_000_000_000, value: 0.95 },
       { timestamp: 1_700_000_060_000, value: 0.96 },
@@ -126,8 +134,9 @@ describe('probe-sli route', () => {
   });
 
   it('surfaces per-query errors without losing the other side', async () => {
-    backend.queryInstant.mockRejectedValueOnce(new Error('parse error at char 42'));
-    backend.queryInstant.mockResolvedValueOnce([{ timestamp: 1, value: 50 }]);
+    // good range rejects, total range resolves, ratio range empty.
+    backend.queryRange.mockRejectedValueOnce(new Error('parse error at char 42'));
+    backend.queryRange.mockResolvedValueOnce([{ timestamp: 1, value: 50 }]);
     backend.queryRange.mockResolvedValueOnce([]);
 
     const ctx = makeCtx();
@@ -153,8 +162,8 @@ describe('probe-sli route', () => {
   });
 
   it('flags emptyVector when Prometheus returns zero series', async () => {
-    backend.queryInstant.mockResolvedValueOnce([]);
-    backend.queryInstant.mockResolvedValueOnce([]);
+    backend.queryRange.mockResolvedValueOnce([]);
+    backend.queryRange.mockResolvedValueOnce([]);
     backend.queryRange.mockResolvedValueOnce([]);
 
     const ctx = makeCtx();
@@ -177,8 +186,8 @@ describe('probe-sli route', () => {
   });
 
   it('flags emptyVector when total count is zero (no-data denominator)', async () => {
-    backend.queryInstant.mockResolvedValueOnce([{ timestamp: 1, value: 10 }]);
-    backend.queryInstant.mockResolvedValueOnce([{ timestamp: 1, value: 0 }]);
+    backend.queryRange.mockResolvedValueOnce([{ timestamp: 1, value: 10 }]);
+    backend.queryRange.mockResolvedValueOnce([{ timestamp: 1, value: 0 }]);
     backend.queryRange.mockResolvedValueOnce([]);
 
     const ctx = makeCtx();
@@ -226,15 +235,18 @@ describe('probe-sli route', () => {
         }),
       })
     );
-    expect(backend.queryInstant).not.toHaveBeenCalled();
+    expect(backend.queryRange).not.toHaveBeenCalled();
   });
 
-  it('sums multi-series vectors and clamps ratio to [0, 1]', async () => {
-    backend.queryInstant.mockResolvedValueOnce([
-      { timestamp: 1, value: 60 },
-      { timestamp: 1, value: 60 },
+  it('takes the latest finite point and clamps ratio to [0, 1]', async () => {
+    // Range series: the reducer uses the most recent finite value. A stray
+    // NaN at the tail is skipped in favor of the prior real sample.
+    backend.queryRange.mockResolvedValueOnce([
+      { timestamp: 1, value: 100 },
+      { timestamp: 2, value: 120 },
+      { timestamp: 3, value: NaN },
     ]);
-    backend.queryInstant.mockResolvedValueOnce([{ timestamp: 1, value: 100 }]);
+    backend.queryRange.mockResolvedValueOnce([{ timestamp: 1, value: 100 }]);
     backend.queryRange.mockResolvedValueOnce([{ timestamp: 1, value: 1.5 }]);
 
     const ctx = makeCtx();
@@ -252,6 +264,7 @@ describe('probe-sli route', () => {
     );
 
     const body = res.ok.mock.calls[0][0].body;
+    // Latest finite good = 120 (NaN tail skipped); total = 100.
     expect(body.goodCount).toBe(120);
     expect(body.totalCount).toBe(100);
     // 120/100 = 1.2 → clamped to 1
@@ -310,13 +323,13 @@ describe('probe-sli route', () => {
   });
 
   it('caps sparkline at 20 points', async () => {
-    backend.queryInstant.mockResolvedValueOnce([{ timestamp: 1, value: 1 }]);
-    backend.queryInstant.mockResolvedValueOnce([{ timestamp: 1, value: 1 }]);
+    backend.queryRange.mockResolvedValueOnce([{ timestamp: 1, value: 1 }]); // good
+    backend.queryRange.mockResolvedValueOnce([{ timestamp: 1, value: 1 }]); // total
     const longSeries = Array.from({ length: 30 }, (_, i) => ({
       timestamp: 1_700_000_000_000 + i * 60_000,
       value: 0.9,
     }));
-    backend.queryRange.mockResolvedValueOnce(longSeries);
+    backend.queryRange.mockResolvedValueOnce(longSeries); // ratio sparkline
 
     const ctx = makeCtx();
     const res = makeRes();

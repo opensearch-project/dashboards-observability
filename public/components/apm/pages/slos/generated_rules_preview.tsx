@@ -125,8 +125,13 @@ export const GeneratedRulesPreview: React.FC<GeneratedRulesPreviewProps> = ({
     };
   }, [apiClient, debouncedSerialized]);
 
+  // Yellow background signals the preview is "blocked" — required fields are
+  // still missing/invalid, so no rule group can be generated yet. Clears to the
+  // normal panel once the form is valid and the preview renders.
+  const blocked = hasClientErrors;
+
   return (
-    <EuiPanel data-test-subj="slosWizardPreview">
+    <EuiPanel data-test-subj="slosWizardPreview" color={blocked ? 'warning' : 'plain'}>
       <EuiText size="m">
         <h4>
           {i18n.translate('observability.apm.slo.wizard.rulesPreview.heading', {
@@ -297,21 +302,21 @@ function renderEmptyPrompt(
             defaultMessage: 'Missing or invalid fields:',
           })}
         </EuiText>
-        <ul data-test-subj="slosWizardPreviewMissingList">
+        <div data-test-subj="slosWizardPreviewMissingList">
           {missingEntries.map(([key, msg]) => {
             const section = findSectionForKey(key);
             return (
-              <li key={key}>
+              <EuiText size="s" key={key}>
                 <EuiLink
                   onClick={() => scrollToErrorKey(key)}
                   data-test-subj={`slosWizardPreviewMissing-${key}`}
                 >
                   <strong>{section?.label ?? key}:</strong> {msg}
                 </EuiLink>
-              </li>
+              </EuiText>
             );
           })}
-        </ul>
+        </div>
       </>
     ) : (
       <EuiText size="s" color="subdued">

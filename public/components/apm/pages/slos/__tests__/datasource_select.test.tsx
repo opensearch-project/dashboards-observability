@@ -8,9 +8,9 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import type { Datasource } from '../../../../../common/types/alerting';
 import { DatasourceSelect, SUPPORTED_DATASOURCE_TYPES } from '../datasource_select';
 
-// The component falls back to useDatasources() only when no `datasources` prop
-// is supplied; every test here passes the prop, so the hook is inert. Mock it
-// anyway so it never touches coreRefs.savedObjectsClient.
+// The datasource picker falls back to useDatasources() only when no
+// `datasources` prop is supplied; every test here passes the prop, so the hook
+// is inert. Mock it anyway so it never touches coreRefs.savedObjectsClient.
 jest.mock('../../../../alerting/hooks/use_datasources', () => ({
   useDatasources: () => ({ datasources: [], isLoading: false, error: null, refresh: () => {} }),
 }));
@@ -22,8 +22,20 @@ function ds(overrides: Partial<Datasource> = {}): Datasource {
     type: 'prometheus',
     url: 'ds-prom-1',
     enabled: true,
+    // The SLO routes resolve spec.datasourceId by the SQL-plugin connection id,
+    // so the picker emits this (not the saved-object id).
+    directQueryName: 'prom_conn',
     ...overrides,
   };
+}
+
+/** Open the combobox option list and return the rendered option labels. */
+function openAndReadOptions(): string[] {
+  // EuiComboBox renders a toggle button that expands the option list. The list
+  // portals into document.body, so query options at screen level (role
+  // "option" buttons) rather than scoping to the input container.
+  fireEvent.click(screen.getByTestId('comboBoxToggleListButton'));
+  return screen.getAllByRole('option').map((o) => o.textContent ?? '');
 }
 
 describe('DatasourceSelect', () => {
@@ -34,11 +46,10 @@ describe('DatasourceSelect', () => {
   });
 
   it('lists eligible (prometheus, enabled) datasources and excludes the rest', () => {
-    const onChange = jest.fn();
     render(
       <DatasourceSelect
         value=""
-        onChange={onChange}
+        onChange={jest.fn()}
         isLoading={false}
         datasources={[
           ds({ id: 'ds-prom-1', name: 'Prod Prometheus' }),
@@ -47,15 +58,64 @@ describe('DatasourceSelect', () => {
         ]}
       />
     );
-    const select = screen.getByTestId('slosWizardDatasourceId') as HTMLSelectElement;
-    const optionText = Array.from(select.options).map((o) => o.text);
+    const optionText = openAndReadOptions();
     expect(optionText).toContain('Prod Prometheus');
     // OpenSearch + disabled prometheus are filtered out.
     expect(optionText).not.toContain('Local Cluster');
     expect(optionText).not.toContain('Disabled Prom');
   });
 
-  it('emits the selected datasource id on change', () => {
+  it('excludes a Prometheus datasource with no directQueryName (cannot be deployed to)', () => {
+    render(
+      <DatasourceSelect
+        value=""
+        onChange={jest.fn()}
+        isLoading={false}
+        datasources={[
+          ds({ id: 'ds-prom-1', name: 'Deployable', directQueryName: 'conn-1' }),
+          ds({ id: 'ds-prom-2', name: 'No Connection', directQueryName: undefined }),
+        ]}
+      />
+    );
+    const optionText = openAndReadOptions();
+    expect(optionText).toContain('Deployable');
+    expect(optionText).not.toContain('No Connection');
+  });
+
+  it('emits the connection id (directQueryName), not the saved-object id', () => {
+    const onChange = jest.fn();
+    render(
+      <DatasourceSelect
+        value=""
+        onChange={onChange}
+        isLoading={false}
+        datasources={[
+          ds({ id: 'so-uuid-1', name: 'Prod Prometheus', directQueryName: 'prom_conn' }),
+        ]}
+      />
+    );
+    fireEvent.click(screen.getByTestId('comboBoxToggleListButton'));
+    fireEvent.click(screen.getByRole('option', { name: 'Prod Prometheus' }));
+    // Must be the connection id the SLO routes resolve — NOT 'so-uuid-1'.
+    expect(onChange).toHaveBeenCalledWith('prom_conn');
+  });
+
+  it('shows the datasource name for the currently-selected connection id', () => {
+    render(
+      <DatasourceSelect
+        value="prom_conn"
+        onChange={jest.fn()}
+        isLoading={false}
+        datasources={[
+          ds({ id: 'so-uuid-1', name: 'Prod Prometheus', directQueryName: 'prom_conn' }),
+        ]}
+      />
+    );
+    // The active selection renders as a chip showing the human-readable name.
+    expect(screen.getByText('Prod Prometheus')).toBeInTheDocument();
+  });
+
+  it('does not accept free text — typing an unknown id selects nothing', () => {
     const onChange = jest.fn();
     render(
       <DatasourceSelect
@@ -65,10 +125,11 @@ describe('DatasourceSelect', () => {
         datasources={[ds({ id: 'ds-prom-1', name: 'Prod Prometheus' })]}
       />
     );
-    fireEvent.change(screen.getByTestId('slosWizardDatasourceId'), {
-      target: { value: 'ds-prom-1' },
-    });
-    expect(onChange).toHaveBeenCalledWith('ds-prom-1');
+    const input = screen.getByTestId('comboBoxSearchInput');
+    fireEvent.change(input, { target: { value: 'made-up-datasource' } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+    // No onCreateOption wired → arbitrary text cannot become a selection.
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it('shows an actionable empty state when no compatible datasource exists', () => {
@@ -82,13 +143,14 @@ describe('DatasourceSelect', () => {
     );
     expect(screen.getByTestId('slosWizardDatasourceEmpty')).toBeInTheDocument();
     expect(screen.getByTestId('slosWizardDatasourceEmptyLink')).toBeInTheDocument();
-    // The actual select is not rendered in the empty state.
+    // The combobox is not rendered in the empty state.
     expect(screen.queryByTestId('slosWizardDatasourceId')).toBeNull();
   });
 
-  it('shows a loading indicator while datasources resolve', () => {
+  it('renders the combobox (not the empty state) while datasources are still loading', () => {
     render(<DatasourceSelect value="" onChange={jest.fn()} isLoading datasources={[]} />);
-    expect(screen.getByTestId('slosWizardDatasourceLoading')).toBeInTheDocument();
-    expect(screen.queryByTestId('slosWizardDatasourceId')).toBeNull();
+    // An empty-but-loading list must not flash the "no datasources" callout.
+    expect(screen.queryByTestId('slosWizardDatasourceEmpty')).toBeNull();
+    expect(screen.getByTestId('slosWizardDatasourceId')).toBeInTheDocument();
   });
 });

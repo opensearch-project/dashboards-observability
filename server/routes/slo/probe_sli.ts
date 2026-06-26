@@ -133,15 +133,26 @@ async function resolveDatasource(
 }
 
 /**
- * Sum the point-in-time values across every series Prometheus returned. An
- * instant query over a bare `sum(rate(...))` returns one series, but we sum
- * defensively in case the user's PromQL happens to emit multiple.
+ * Reduce a range-query series to a single representative value: the most
+ * recent finite point. Probing over the lookback window (rather than an
+ * instant at `now`) is what makes a slow counter's `rate(metric[5m])` return a
+ * number instead of an empty vector — at the exact current second there may be
+ * <2 samples in the trailing window, but earlier steps in the window have them.
+ *
+ * Returns `vectorEmpty: true` when the series carried no finite point at all
+ * (genuinely no data over the window → the SLI would record `no_data`).
  */
-function reduceInstant(points: Array<{ value: number }>): { count: number; vectorEmpty: boolean } {
-  if (points.length === 0) return { count: 0, vectorEmpty: true };
-  let total = 0;
-  for (const p of points) total += p.value;
-  return { count: total, vectorEmpty: false };
+function reduceRange(
+  points: Array<{ timestamp: number; value: number }> | null
+): { count: number; vectorEmpty: boolean } {
+  if (!points || points.length === 0) return { count: 0, vectorEmpty: true };
+  // Walk from the most recent point backwards to the first finite value.
+  for (let i = points.length - 1; i >= 0; i--) {
+    if (Number.isFinite(points[i].value)) {
+      return { count: points[i].value, vectorEmpty: false };
+    }
+  }
+  return { count: 0, vectorEmpty: true };
 }
 
 export function registerProbeSliRoute(
@@ -200,36 +211,36 @@ export function registerProbeSliRoute(
 
     const errors: { good?: string; total?: string } = {};
 
-    // Instant counts (good + total) — fan out in parallel. Each side is
-    // timeout-guarded and any throw becomes a per-query error string. The
-    // `time` argument is required by the SQL plugin's PrometheusQueryHandler
-    // (it rejects instant requests without one), so pass endSec explicitly.
-    // `requestTimeoutMs` is forwarded to the search strategy as a per-query
-    // timeout hint; the local `withTimeout` race remains the safety net for
-    // the upstream socket.
-    const [goodInstant, totalInstant] = await Promise.all([
+    // Good + total counts, evaluated over the lookback *range* rather than an
+    // instant at `now`. A bare `rate(metric[5m])` at the current second is
+    // frequently empty for a slow counter (no two samples in the trailing
+    // window yet); evaluating across the range and taking the latest finite
+    // point returns a real value while still reflecting recent data. Fan out in
+    // parallel; each side is timeout-guarded and any throw becomes a per-query
+    // error string the UI renders inline on that query field.
+    const [goodRange, totalRange] = await Promise.all([
       withTimeout(
-        prometheusBackend.queryInstant(ctx, ds, goodQuery, endSec, {
+        prometheusBackend.queryRange(ctx, ds, goodQuery, startSec, endSec, stepSec, {
           requestTimeoutMs: QUERY_TIMEOUT_MS,
           sourceRequest: req,
         }),
         QUERY_TIMEOUT_MS,
-        'good-query instant'
+        'good-query range'
       ).catch((e) => {
         errors.good = e instanceof Error ? e.message : String(e);
-        logger.debug(`probe-sli good instant failed: ${errors.good}`);
+        logger.debug(`probe-sli good range failed: ${errors.good}`);
         return null;
       }),
       withTimeout(
-        prometheusBackend.queryInstant(ctx, ds, totalQuery, endSec, {
+        prometheusBackend.queryRange(ctx, ds, totalQuery, startSec, endSec, stepSec, {
           requestTimeoutMs: QUERY_TIMEOUT_MS,
           sourceRequest: req,
         }),
         QUERY_TIMEOUT_MS,
-        'total-query instant'
+        'total-query range'
       ).catch((e) => {
         errors.total = e instanceof Error ? e.message : String(e);
-        logger.debug(`probe-sli total instant failed: ${errors.total}`);
+        logger.debug(`probe-sli total range failed: ${errors.total}`);
         return null;
       }),
     ]);
@@ -254,11 +265,11 @@ export function registerProbeSliRoute(
     });
 
     const response: ProbeSliResponse = {};
-    if (goodInstant !== null) {
-      const { count, vectorEmpty } = reduceInstant(goodInstant);
+    if (goodRange !== null) {
+      const { count, vectorEmpty } = reduceRange(goodRange);
       response.goodCount = count;
-      if (totalInstant !== null) {
-        const t = reduceInstant(totalInstant);
+      if (totalRange !== null) {
+        const t = reduceRange(totalRange);
         response.totalCount = t.count;
         // `emptyVector` captures both "no series from either side" and
         // "zero denominator" — both imply the SLI will record `no_data`
@@ -270,8 +281,8 @@ export function registerProbeSliRoute(
           response.sliRatio = Math.max(0, Math.min(1, ratio));
         }
       }
-    } else if (totalInstant !== null) {
-      response.totalCount = reduceInstant(totalInstant).count;
+    } else if (totalRange !== null) {
+      response.totalCount = reduceRange(totalRange).count;
     }
 
     if (rangePoints && rangePoints.length > 0) {

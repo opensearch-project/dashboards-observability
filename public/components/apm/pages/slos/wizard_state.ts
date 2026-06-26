@@ -58,6 +58,12 @@ export interface FormState {
   windowDuration: '7d' | '14d' | '28d' | '30d';
   objectives: ObjectiveRow[];
   dimensions: Dimension[];
+  /**
+   * The Prometheus metric for structured (availability / latency) SLIs. Seeded
+   * from the template default on apply, then user-editable in the SLI editor's
+   * Advanced view. Unused for `custom` SLIs (those carry full PromQL instead).
+   */
+  metric: string;
   goodEventsFilter: string;
   latencyThresholdUnit: 'seconds' | 'milliseconds';
   customPromql: CustomPromqlState;
@@ -148,6 +154,7 @@ type ScalarField =
   | 'ownerPrimaryUser'
   | 'tier'
   | 'windowDuration'
+  | 'metric'
   | 'goodEventsFilter'
   | 'latencyThresholdUnit'
   | 'shadow';
@@ -224,6 +231,7 @@ export function initialState(): FormState {
     windowDuration: '28d',
     objectives: [defaultObjective(null)],
     dimensions: [{ name: 'service', value: '' }],
+    metric: '',
     goodEventsFilter: '',
     latencyThresholdUnit: 'seconds',
     customPromql: { mode: 'events', goodQuery: '', totalQuery: '', errorRatioQuery: '' },
@@ -239,6 +247,55 @@ export function initialState(): FormState {
 }
 
 /**
+ * Re-derive the template SLI query when the service changes.
+ *
+ * The template default (`customPromqlDefaults`) holds the un-substituted
+ * template — e.g. `sum(request{service="${service}",…})`. We compute what the
+ * query *was* for the previous service and compare it to the current query:
+ *
+ *  - If they match, the query is still the untouched template default, so we
+ *    re-substitute it for the new service (frontend → checkout rewrites it).
+ *  - If they differ, the user edited the query (Advanced / manual PromQL), so
+ *    we leave it exactly as-is — switching service never clobbers their work.
+ *
+ * `prevService` may be empty (service not yet set), in which case the prior
+ * default still carries the literal `${service}` placeholder; that's what the
+ * current query equals on first selection, so the match still holds.
+ */
+function rederiveQueryForService(
+  template: SloTemplate,
+  current: CustomPromqlState,
+  prevService: string,
+  nextService: string
+): CustomPromqlState {
+  const defaults = template.customPromqlDefaults;
+  if (!defaults) return current;
+
+  const prevDefault = substituteCustomPromqlDefaults(defaults, { service: prevService });
+  const nextDefault = substituteCustomPromqlDefaults(defaults, { service: nextService });
+
+  const isUntouched = (() => {
+    if (current.mode !== defaults.mode) return false;
+    if (defaults.mode === 'events' && prevDefault.mode === 'events') {
+      return (
+        current.goodQuery === prevDefault.goodQuery && current.totalQuery === prevDefault.totalQuery
+      );
+    }
+    if (defaults.mode === 'raw' && prevDefault.mode === 'raw') {
+      return current.errorRatioQuery === prevDefault.errorRatioQuery;
+    }
+    return false;
+  })();
+
+  if (!isUntouched) return current;
+
+  if (nextDefault.mode === 'events') {
+    return { ...current, goodQuery: nextDefault.goodQuery, totalQuery: nextDefault.totalQuery };
+  }
+  return { ...current, errorRatioQuery: nextDefault.errorRatioQuery };
+}
+
+/**
  * Applying a template preserves user edits to fields the template doesn't own
  * (service/name/owner), and resets SLI-specific defaults (metric,
  * goodEventsFilter, latency threshold). Objectives are reset to a single row
@@ -249,41 +306,45 @@ export function initialState(): FormState {
  * the custom PromQL editor with `${service}` / `${remoteService}` already
  * substituted from form state.
  */
-export function applyTemplate(state: FormState, template: SloTemplate | null): FormState {
-  if (!template) return { ...state, templateId: null };
+export function applyTemplate(_state: FormState, template: SloTemplate | null): FormState {
+  // Switching (or first-picking) a template resets the whole form to a fresh
+  // state seeded from that template — no fields carry over from a previously
+  // selected template. This avoids stale queries/metrics/objectives bleeding
+  // across SLI types. (Per product decision: a template switch is a clean
+  // slate; the user re-enters identity/datasource for the new template.)
+  const fresh = initialState();
+  if (!template) return { ...fresh, templateId: null };
+
+  // Service is blank in a fresh state, so customPromqlDefaults keep their
+  // `${service}` placeholder until the user picks a service (then the reducer's
+  // service re-derivation substitutes it).
   const nextCustomPromql = template.customPromqlDefaults
-    ? (() => {
-        const subbed = substituteCustomPromqlDefaults(template.customPromqlDefaults, {
-          service: state.service,
-        });
-        if (subbed.mode === 'events') {
-          return {
-            mode: 'events' as const,
-            goodQuery: subbed.goodQuery,
-            totalQuery: subbed.totalQuery,
-            errorRatioQuery: state.customPromql.errorRatioQuery,
-          };
-        }
-        return {
-          mode: 'raw' as const,
-          goodQuery: state.customPromql.goodQuery,
-          totalQuery: state.customPromql.totalQuery,
-          errorRatioQuery: subbed.errorRatioQuery,
-        };
-      })()
-    : state.customPromql;
+    ? substituteCustomPromqlDefaultsToState(template.customPromqlDefaults, fresh.customPromql, '')
+    : fresh.customPromql;
+
   return {
-    ...state,
+    ...fresh,
     templateId: template.id,
+    metric: template.sli.metric ?? '',
     goodEventsFilter: template.sli.goodEventsFilter ?? '',
     latencyThresholdUnit: template.sli.latencyThresholdUnit ?? 'seconds',
-    dimensions: [
-      { name: template.dimensionHints.serviceLabel, value: state.service || '' },
-      ...(state.dimensions.length > 1 ? state.dimensions.slice(1) : []),
-    ],
+    dimensions: [{ name: template.dimensionHints.serviceLabel, value: '' }],
     objectives: [defaultObjective(template)],
     customPromql: nextCustomPromql,
   };
+}
+
+/** Merge substituted template defaults into a CustomPromqlState. */
+function substituteCustomPromqlDefaultsToState(
+  defaults: NonNullable<SloTemplate['customPromqlDefaults']>,
+  base: CustomPromqlState,
+  service: string
+): CustomPromqlState {
+  const subbed = substituteCustomPromqlDefaults(defaults, { service });
+  if (subbed.mode === 'events') {
+    return { ...base, mode: 'events', goodQuery: subbed.goodQuery, totalQuery: subbed.totalQuery };
+  }
+  return { ...base, mode: 'raw', errorRatioQuery: subbed.errorRatioQuery };
 }
 
 function makeEmptyExclusionWindow(): ExclusionWindow {
@@ -327,8 +388,44 @@ export function reducer(state: FormState, action: Action): FormState {
       const t = SLO_TEMPLATES.find((x) => x.id === action.templateId) ?? null;
       return applyTemplate(state, t);
     }
-    case 'setField':
-      return { ...state, [action.field]: action.value } as FormState;
+    case 'setField': {
+      const next = { ...state, [action.field]: action.value } as FormState;
+      // When the Service field changes, re-derive the template's SLI query for
+      // the new service — so switching frontend→checkout rewrites the query
+      // instead of leaving the old service baked in. We only do this while the
+      // query is still the *untouched* template default: if the user edited it
+      // (Advanced / manual PromQL), their query is preserved. This keeps the
+      // simple "pick a service → query fills, switch → query updates" flow
+      // working without ever clobbering hand-tuned queries.
+      if (action.field === 'service' && typeof action.value === 'string') {
+        const template = SLO_TEMPLATES.find((t) => t.id === state.templateId) ?? null;
+        if (template?.customPromqlDefaults) {
+          next.customPromql = rederiveQueryForService(
+            template,
+            state.customPromql,
+            state.service,
+            action.value
+          );
+        }
+        // Keep the first dimension's value in sync with the service for the
+        // common single-service case, so the user never has to retype it as a
+        // dimension row. Only the auto-derived value is updated (when it still
+        // equals the previous service); a hand-edited dimension is preserved.
+        // This satisfies the "≥1 dimension" rule for availability/latency SLIs
+        // from just the Service field.
+        if (template && next.dimensions.length > 0) {
+          const first = next.dimensions[0];
+          const wasAutoDerived = first.value === state.service || first.value === '';
+          if (wasAutoDerived) {
+            next.dimensions = [
+              { name: first.name || template.dimensionHints.serviceLabel, value: action.value },
+              ...next.dimensions.slice(1),
+            ];
+          }
+        }
+      }
+      return next;
+    }
     case 'setObjectiveField': {
       const next = state.objectives.slice();
       next[action.index] = { ...next[action.index], [action.field]: action.value };
