@@ -95,7 +95,8 @@ function registerIconSideNavGroups(
       },
       {
         id: observabilityApmApplicationMapID,
-        title: 'Topology Map',
+        // Title comes from observabilityApmApplicationMapTitle ('Topology Map'),
+        // so no per-link override is needed here.
         category: undefined,
         showInAllNavGroup: true,
         order: 400,

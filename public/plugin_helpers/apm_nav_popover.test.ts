@@ -29,7 +29,9 @@ const makeServices = (navigateToApp = jest.fn()): NavPopoverServices => ({
 /** Fire the action with the given id and return the navigateToApp mock. */
 function clickAction(popover: typeof topologyMapNavPopover, id: string) {
   const navigateToApp = jest.fn();
-  popover.actions!.find((a) => a.id === id)!.onClick(makeServices(navigateToApp));
+  const action = (popover.actions ?? []).find((a) => a.id === id);
+  if (!action) throw new Error(`No popover action with id "${id}"`);
+  action.onClick(makeServices(navigateToApp));
   return navigateToApp;
 }
 
