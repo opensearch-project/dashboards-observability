@@ -31,6 +31,23 @@ const WORKSPACE_PREFIX = Cypress.env('workspaceId') ? `/w/${Cypress.env('workspa
 
 const uniqueSuffix = () => Math.random().toString(36).slice(2, 8);
 
+// The datasource field is a type-ahead EuiComboBox (single-select, no free
+// text). Type to filter, then click the matching option. The option label is
+// the datasource's connection name, which is the same value passed as
+// `sloDatasourceId`. Options match by `role="option"` — prefix-agnostic across
+// the OUI/EUI class rename.
+function selectDatasource(dsName) {
+  cy.get('[data-test-subj="slosWizardDatasourceId"]').click();
+  cy.get('[data-test-subj="slosWizardDatasourceId"]').find('input').first().type(dsName);
+  cy.get('[role="option"]', { timeout: 10000 }).contains(dsName).click();
+}
+
+// Service and Primary team are suggesting comboboxes that also accept free
+// text. Type into the inner input and press Enter to commit a new value.
+function typeComboBox(testSubj, value) {
+  cy.get(`[data-test-subj="${testSubj}"]`).find('input').first().type(`${value}{enter}`);
+}
+
 describe('SLO — CRUD smoke', () => {
   it('creates an SLO via the custom-PromQL template, then deletes it', () => {
     const name = `Smoke SLO ${uniqueSuffix()}`;
@@ -58,24 +75,23 @@ describe('SLO — CRUD smoke', () => {
     cy.get('[data-test-subj="slosTemplate-custom"]', { timeout: 20000 }).click();
 
     // Identity panel
-    cy.get('[data-test-subj="slosWizardDatasourceId"]').clear().type(DATASOURCE_ID);
+    selectDatasource(DATASOURCE_ID);
     cy.get('[data-test-subj="slosWizardName"]').type(name);
 
     // Service + owner team are both required.
-    cy.get('[data-test-subj="slosWizardService"]').type('ci-svc');
-    cy.get('[data-test-subj="slosWizardOwnerTeam"]').type('platform');
+    typeComboBox('slosWizardService', 'ci-svc');
+    typeComboBox('slosWizardOwnerTeam', 'platform');
 
-    // Custom PromQL — events mode (good + total). Placeholder queries are
-    // syntactically valid PromQL; Cortex's ruler accepts them even if the
-    // metric series don't exist yet (it'll just record `NaN`).
+    // SLI query — use the Advanced (raw error-ratio) mode, a stable textarea.
+    // The default Ratio mode renders metric-picker comboboxes; Advanced is the
+    // raw-PromQL escape hatch and is simpler to drive deterministically here.
+    // The placeholder query is syntactically valid PromQL; Cortex's ruler
+    // accepts it even if the series don't exist yet (records `NaN`).
     // parseSpecialCharSequences:false because Cypress otherwise treats `{`
     // as a special-char modifier prefix (matches cmd, alt, etc).
-    cy.get('[data-test-subj="slosWizardCustomPromqlGood"]').type(
-      'sum(rate(http_requests_total{status_code!~"5.."}[5m]))',
-      { parseSpecialCharSequences: false }
-    );
-    cy.get('[data-test-subj="slosWizardCustomPromqlTotal"]').type(
-      'sum(rate(http_requests_total[5m]))',
+    cy.get('[data-test-subj="slosWizardCustomPromqlMode"]').contains('Advanced').click();
+    cy.get('[data-test-subj="slosWizardCustomPromqlRaw"]').type(
+      'sum(rate(http_requests_total{status_code=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))',
       { parseSpecialCharSequences: false }
     );
 

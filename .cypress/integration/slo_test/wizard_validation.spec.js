@@ -50,19 +50,45 @@ function visitWizard(templateId = 'custom') {
   cy.get('[data-test-subj="sloWizardPage"]', { timeout: 20000 }).should('be.visible');
 }
 
+// The datasource field is a type-ahead EuiComboBox (single-select, no free
+// text). Type to filter, then click the option (matched by `role="option"`,
+// prefix-agnostic across the OUI/EUI class rename). The option label is the
+// datasource connection name — the same value passed as `sloDatasourceId`.
+function selectDatasource(dsName) {
+  cy.get('[data-test-subj="slosWizardDatasourceId"]').click();
+  cy.get('[data-test-subj="slosWizardDatasourceId"]').find('input').first().type(dsName);
+  cy.get('[role="option"]', { timeout: 10000 }).contains(dsName).click();
+}
+
+// Clear a combobox selection. The clear (×) button carries no stable
+// test-subj across the OUI/EUI rename, so remove the selected chip by focusing
+// the input and pressing backspace — single-select drops the one selection.
+function clearComboBox(testSubj) {
+  cy.get(`[data-test-subj="${testSubj}"]`).find('input').first().focus().type('{backspace}');
+}
+
+// Service and Primary team are suggesting comboboxes that also accept free
+// text. Type into the inner input and press Enter to commit a new value.
+function typeComboBox(testSubj, value) {
+  cy.get(`[data-test-subj="${testSubj}"]`).find('input').first().type(`${value}{enter}`);
+}
+
+// Author the SLI via Advanced (raw error-ratio) mode — a stable textarea.
+// The default Ratio mode uses metric-picker comboboxes; Advanced is the raw
+// PromQL escape hatch and the simplest deterministic path for these tests.
+function fillSliRaw(query = 'sum(rate(http_requests_total{status_code=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))') {
+  cy.get('[data-test-subj="slosWizardCustomPromqlMode"]').contains('Advanced').click();
+  cy.get('[data-test-subj="slosWizardCustomPromqlRaw"]').clear().type(query, {
+    parseSpecialCharSequences: false,
+  });
+}
+
 function fillCustomHappyPath({ name, datasourceId = DATASOURCE_ID, service = 'ci-svc', team = 'platform' }) {
-  cy.get('[data-test-subj="slosWizardDatasourceId"]').clear().type(datasourceId);
+  selectDatasource(datasourceId);
   cy.get('[data-test-subj="slosWizardName"]').clear().type(name);
-  cy.get('[data-test-subj="slosWizardService"]').clear().type(service);
-  cy.get('[data-test-subj="slosWizardOwnerTeam"]').clear().type(team);
-  cy.get('[data-test-subj="slosWizardCustomPromqlGood"]').clear().type(
-    'sum(rate(http_requests_total{status_code!~"5.."}[5m]))',
-    { parseSpecialCharSequences: false }
-  );
-  cy.get('[data-test-subj="slosWizardCustomPromqlTotal"]').clear().type(
-    'sum(rate(http_requests_total[5m]))',
-    { parseSpecialCharSequences: false }
-  );
+  typeComboBox('slosWizardService', service);
+  typeComboBox('slosWizardOwnerTeam', team);
+  fillSliRaw();
 }
 
 describe('SLO wizard — validation paths', () => {
@@ -101,7 +127,7 @@ describe('SLO wizard — validation paths', () => {
     dirtyNames.push(name);
     visitWizard('custom');
     fillCustomHappyPath({ name });
-    cy.get('[data-test-subj="slosWizardDatasourceId"]').clear();
+    clearComboBox('slosWizardDatasourceId');
     cy.get('[data-test-subj="slosWizardSubmit"]').click();
     cy.get('[data-test-subj="slosWizardValidationSummary"]', { timeout: 10000 }).should('be.visible');
     cy.get('[data-test-subj="slosWizardValidationSummaryItem-spec.datasourceId"]').should(
@@ -128,7 +154,7 @@ describe('SLO wizard — validation paths', () => {
     dirtyNames.push(name);
     visitWizard('custom');
     fillCustomHappyPath({ name });
-    cy.get('[data-test-subj="slosWizardService"]').clear();
+    clearComboBox('slosWizardService');
     cy.get('[data-test-subj="slosWizardSubmit"]').click();
     cy.get('[data-test-subj="slosWizardValidationSummary"]', { timeout: 10000 }).should('be.visible');
     cy.get('[data-test-subj="slosWizardValidationSummaryItem-spec.service"]').should('be.visible');
@@ -140,7 +166,7 @@ describe('SLO wizard — validation paths', () => {
     dirtyNames.push(name);
     visitWizard('custom');
     fillCustomHappyPath({ name });
-    cy.get('[data-test-subj="slosWizardOwnerTeam"]').clear();
+    clearComboBox('slosWizardOwnerTeam');
     cy.get('[data-test-subj="slosWizardSubmit"]').click();
     cy.get('[data-test-subj="slosWizardValidationSummary"]', { timeout: 10000 }).should('be.visible');
     cy.get('[data-test-subj="slosWizardValidationSummaryItem-spec.owner.teams"]').should(
@@ -149,21 +175,22 @@ describe('SLO wizard — validation paths', () => {
     cy.location('hash').should('match', /#\/slos\/create/);
   });
 
-  it('malformed PromQL: validation summary surfaces customExpr.goodQuery error', () => {
+  it('malformed PromQL: validation summary surfaces customExpr.errorRatioQuery error', () => {
     const name = `Wizard validate ${uniqueSuffix()}`;
     dirtyNames.push(name);
     visitWizard('custom');
-    // Fill the happy path first, then overwrite the good query with an
-    // unbalanced expression. validateCustomPromQL counts paren depth and
-    // rejects on imbalance — see common/slo/slo_validators.ts.
+    // Fill the happy path first (which authors the SLI in Advanced/raw mode),
+    // then overwrite the raw error-ratio query with an unbalanced expression.
+    // validateCustomPromQL counts paren depth and rejects on imbalance — see
+    // common/slo/slo_validators.ts.
     fillCustomHappyPath({ name });
-    cy.get('[data-test-subj="slosWizardCustomPromqlGood"]')
+    cy.get('[data-test-subj="slosWizardCustomPromqlRaw"]')
       .clear()
       .type('sum(rate(', { parseSpecialCharSequences: false });
     cy.get('[data-test-subj="slosWizardSubmit"]').click();
     cy.get('[data-test-subj="slosWizardValidationSummary"]', { timeout: 10000 }).should('be.visible');
     cy.get(
-      '[data-test-subj="slosWizardValidationSummaryItem-spec.sli.definition.customExpr.goodQuery"]'
+      '[data-test-subj="slosWizardValidationSummaryItem-spec.sli.definition.customExpr.errorRatioQuery"]'
     ).should('be.visible');
     cy.location('hash').should('match', /#\/slos\/create/);
   });

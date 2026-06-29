@@ -13,6 +13,7 @@
 
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import {
+  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -42,8 +43,12 @@ import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/pl
 import { extractRulerErrorEnvelope } from './slo_api_client';
 import type { SloApiClient, SloRulerErrorEnvelope } from './slo_api_client';
 import { GeneratedRulesPreview } from './generated_rules_preview';
+import { DatasourceSelect } from './datasource_select';
+import { SuggestingComboBox } from './suggesting_combo_box';
+import { useOwnerSuggestions } from './use_owner_suggestions';
 import { ObjectivesSection } from './objectives_section';
 import { CustomPromqlEditor } from './custom_promql_editor';
+import { StructuredSliEditor } from './structured_sli_editor';
 import { ProbeSliPanel } from './probe_sli_panel';
 import { AdvancedSection } from './advanced_section';
 import { ExclusionWindowsEditor } from './exclusion_windows_editor';
@@ -187,6 +192,30 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
     state.templateId,
   ]);
 
+  // Reset scroll to the top whenever a template is (re)selected, so picking a
+  // card lower on the picker grid lands the user at the start of the creation
+  // flow rather than mid-page. Keyed on the template id so it fires on first
+  // pick and on every switch. Scrolls the nearest scrollable ancestor of the
+  // wizard root (OSD scrolls a content container, not always `window`).
+  const pageRef = React.useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!state.templateId) return;
+    const root = pageRef.current;
+    if (!root) return;
+    // Walk up to the first scrollable ancestor and reset it; also reset window
+    // as a fallback for layouts where the document itself scrolls.
+    let el: HTMLElement | null = root.parentElement;
+    while (el) {
+      const overflowY = window.getComputedStyle(el).overflowY;
+      if ((overflowY === 'auto' || overflowY === 'scroll') && el.scrollHeight > el.clientHeight) {
+        el.scrollTop = 0;
+        break;
+      }
+      el = el.parentElement;
+    }
+    window.scrollTo({ top: 0 });
+  }, [state.templateId]);
+
   // Build the current input + live warnings. Preview uses the input; warnings
   // surface advisories (e.g. rolling-window >3d approximation) without
   // gating submit. Errors remain submit-gated so typing doesn't produce a
@@ -311,6 +340,9 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
     );
   }
 
+  // Header keeps only the contextual "Change template" affordance. The
+  // primary Create / Cancel actions live in a sticky bottom bar so they're
+  // always reachable on this long form — no scrolling back to the top.
   const wizardActions = [
     <EuiButtonEmpty
       key="template-back"
@@ -323,31 +355,15 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
         defaultMessage: 'Change template',
       })}
     </EuiButtonEmpty>,
-    <EuiButtonEmpty key="cancel" href="#/slos" size="s" data-test-subj="slosWizardCancel">
-      {i18n.translate('observability.apm.slo.wizard.cancelButton', {
-        defaultMessage: 'Cancel',
-      })}
-    </EuiButtonEmpty>,
-    <EuiButton
-      key="submit"
-      fill
-      size="s"
-      isLoading={submitting}
-      onClick={onSubmit}
-      data-test-subj="slosWizardSubmit"
-    >
-      {i18n.translate('observability.apm.slo.wizard.submitButton', {
-        defaultMessage: 'Create SLO',
-      })}
-    </EuiButton>,
   ];
 
   const visibleSectionIds: WizardSectionId[] = [
     'identity',
     'window',
     'owner',
+    // The SLI query editor (custom or structured) now lives under the 'sli'
+    // anchor for every template, so there's no separate 'promql' nav entry.
     'sli',
-    ...(template.sli.type === 'custom' ? (['promql'] as WizardSectionId[]) : []),
     'objectives',
     'advanced',
     'exclusions',
@@ -356,176 +372,272 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
   ];
 
   return (
-    <EuiPage data-test-subj="sloWizardPage">
-      <EuiPageBody component="main">
-        <HeaderControlledComponentsWrapper components={wizardActions} />
-        <EuiPageContent color="transparent" hasBorder={false} paddingSize="none">
-          <EuiPageContentBody>
-            <EuiFlexGroup gutterSize="l" alignItems="flexStart">
-              <EuiFlexItem grow={false}>
-                <WizardNav errors={errors} visibleSectionIds={visibleSectionIds} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiForm component="form">
-                  {state.submitAttempted && <WizardValidationSummary errors={errors} />}
+    <div ref={pageRef}>
+      <EuiPage data-test-subj="sloWizardPage">
+        <EuiPageBody component="main">
+          <HeaderControlledComponentsWrapper components={wizardActions} />
+          <EuiPageContent color="transparent" hasBorder={false} paddingSize="none">
+            <EuiPageContentBody>
+              <EuiFlexGroup gutterSize="l" alignItems="flexStart">
+                <EuiFlexItem grow={false}>
+                  <WizardNav errors={errors} visibleSectionIds={visibleSectionIds} />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiForm component="form">
+                    {state.submitAttempted && <WizardValidationSummary errors={errors} />}
 
-                  <div id={sectionAnchorId('identity')} style={SECTION_ANCHOR_STYLE}>
-                    <IdentityPanel
-                      state={state}
-                      errors={errors}
-                      dispatch={dispatch}
-                      template={template.name}
-                    />
-                  </div>
-
-                  <EuiSpacer size="m" />
-
-                  <div id={sectionAnchorId('window')} style={SECTION_ANCHOR_STYLE}>
-                    <WindowPanel state={state} warnings={warnings} dispatch={dispatch} />
-                  </div>
-
-                  <EuiSpacer size="m" />
-
-                  <div id={sectionAnchorId('owner')} style={SECTION_ANCHOR_STYLE}>
-                    <OwnerPanel state={state} errors={errors} dispatch={dispatch} />
-                  </div>
-
-                  <EuiSpacer size="m" />
-
-                  {template.note && (
-                    <>
-                      <EuiCallOut
-                        size="s"
-                        color="primary"
-                        iconType="iInCircle"
-                        title={template.note}
-                        data-test-subj="slosWizardTemplateNote"
+                    <div id={sectionAnchorId('identity')} style={SECTION_ANCHOR_STYLE}>
+                      <IdentityPanel
+                        state={state}
+                        errors={errors}
+                        dispatch={dispatch}
+                        template={template.name}
                       />
-                      <EuiSpacer size="m" />
-                    </>
-                  )}
+                    </div>
 
-                  <div id={sectionAnchorId('sli')} style={SECTION_ANCHOR_STYLE}>
-                    <SliPanel
-                      state={state}
-                      errors={errors}
-                      dispatch={dispatch}
-                      template={template}
-                    />
-                  </div>
+                    <EuiSpacer size="m" />
 
-                  <EuiSpacer size="m" />
+                    <div id={sectionAnchorId('window')} style={SECTION_ANCHOR_STYLE}>
+                      <WindowPanel state={state} warnings={warnings} dispatch={dispatch} />
+                    </div>
 
-                  {template.sli.type === 'custom' && (
-                    <>
-                      <div id={sectionAnchorId('promql')} style={SECTION_ANCHOR_STYLE}>
+                    <EuiSpacer size="m" />
+
+                    <div id={sectionAnchorId('owner')} style={SECTION_ANCHOR_STYLE}>
+                      <OwnerPanel
+                        state={state}
+                        errors={errors}
+                        dispatch={dispatch}
+                        apiClient={apiClient}
+                      />
+                    </div>
+
+                    <EuiSpacer size="m" />
+
+                    {template.note && (
+                      <>
+                        <EuiCallOut
+                          size="s"
+                          color="primary"
+                          iconType="iInCircle"
+                          title={template.note}
+                          data-test-subj="slosWizardTemplateNote"
+                        />
+                        <EuiSpacer size="m" />
+                      </>
+                    )}
+
+                    {/* SLI query editor — type-appropriate. Custom templates get
+                      the Ratio/Advanced PromQL builder; availability/latency
+                      templates get the structured metric+filter editor. Both
+                      share the same simple-summary + Advanced-accordion UX, and
+                      both embed the "Test query" control directly under the
+                      query summary (probeSlot) so verifying the SLI lives with
+                      the query rather than in a separate panel. */}
+                    <div id={sectionAnchorId('sli')} style={SECTION_ANCHOR_STYLE}>
+                      {template.sli.type === 'custom' ? (
                         <CustomPromqlEditor
                           value={state.customPromql}
                           errors={errors}
                           dispatch={dispatch}
+                          datasourceId={state.datasourceId}
+                          template={template}
+                          service={state.service}
+                          probeSlot={
+                            <ProbeSliPanel
+                              embedded
+                              apiClient={apiClient}
+                              goodQuery={probeQueries.good}
+                              totalQuery={probeQueries.total}
+                              datasourceId={state.datasourceId}
+                            />
+                          }
                         />
-                      </div>
-                      <EuiSpacer size="m" />
-                    </>
-                  )}
+                      ) : (
+                        <StructuredSliEditor
+                          state={state}
+                          errors={errors}
+                          dispatch={dispatch}
+                          template={template}
+                          datasourceId={state.datasourceId}
+                          probeSlot={
+                            <ProbeSliPanel
+                              embedded
+                              apiClient={apiClient}
+                              goodQuery={probeQueries.good}
+                              totalQuery={probeQueries.total}
+                              datasourceId={state.datasourceId}
+                            />
+                          }
+                        />
+                      )}
+                    </div>
 
-                  <ProbeSliPanel
-                    apiClient={apiClient}
-                    goodQuery={probeQueries.good}
-                    totalQuery={probeQueries.total}
-                    datasourceId={state.datasourceId}
-                  />
+                    <EuiSpacer size="m" />
 
-                  <EuiSpacer size="m" />
+                    {/* Dimensions (grouping labels). The first dimension is kept
+                      in sync with the Service field automatically, so the
+                      common single-service case needs no input here. Tucked
+                      into a collapsed accordion as an advanced affordance for
+                      adding extra slices (route, region, …). */}
+                    <div style={SECTION_ANCHOR_STYLE}>
+                      <EuiPanel>
+                        <EuiAccordion
+                          id="slosWizardDimensionsAdvanced"
+                          buttonContent={
+                            <EuiText size="s">
+                              <strong>
+                                {i18n.translate(
+                                  'observability.apm.slo.wizard.sli.dimensionsAccordion',
+                                  {
+                                    defaultMessage: 'Dimensions (advanced)',
+                                  }
+                                )}
+                              </strong>{' '}
+                              <EuiText size="xs" color="subdued" component="span">
+                                {i18n.translate(
+                                  'observability.apm.slo.wizard.sli.dimensionsAccordionHint',
+                                  { defaultMessage: '— scoped to the selected service by default' }
+                                )}
+                              </EuiText>
+                            </EuiText>
+                          }
+                          data-test-subj="slosWizardDimensionsAccordion"
+                        >
+                          <EuiSpacer size="s" />
+                          <SliPanel
+                            state={state}
+                            errors={errors}
+                            dispatch={dispatch}
+                            template={template}
+                          />
+                        </EuiAccordion>
+                      </EuiPanel>
+                    </div>
 
-                  <div id={sectionAnchorId('objectives')} style={SECTION_ANCHOR_STYLE}>
-                    <ObjectivesSection
-                      objectives={state.objectives}
-                      latencyThresholdUnit={state.latencyThresholdUnit}
-                      windowDuration={state.windowDuration}
-                      template={template}
-                      errors={errors}
-                      dispatch={dispatch}
-                    />
-                  </div>
+                    <EuiSpacer size="m" />
 
-                  <EuiSpacer size="m" />
+                    <div id={sectionAnchorId('objectives')} style={SECTION_ANCHOR_STYLE}>
+                      <ObjectivesSection
+                        objectives={state.objectives}
+                        latencyThresholdUnit={state.latencyThresholdUnit}
+                        windowDuration={state.windowDuration}
+                        template={template}
+                        errors={errors}
+                        dispatch={dispatch}
+                      />
+                    </div>
 
-                  <div id={sectionAnchorId('advanced')} style={SECTION_ANCHOR_STYLE}>
-                    <AdvancedSection
-                      burnRates={state.burnRates}
-                      budgetWarnings={state.budgetWarnings}
-                      alarms={state.alarms}
-                      errors={errors}
-                      dispatch={dispatch}
-                    />
-                  </div>
+                    <EuiSpacer size="m" />
 
-                  <EuiSpacer size="m" />
+                    <div id={sectionAnchorId('advanced')} style={SECTION_ANCHOR_STYLE}>
+                      <AdvancedSection
+                        burnRates={state.burnRates}
+                        budgetWarnings={state.budgetWarnings}
+                        alarms={state.alarms}
+                        errors={errors}
+                        dispatch={dispatch}
+                      />
+                    </div>
 
-                  <div id={sectionAnchorId('exclusions')} style={SECTION_ANCHOR_STYLE}>
-                    <ExclusionWindowsEditor
-                      exclusionWindows={state.exclusionWindows}
-                      dispatch={dispatch}
-                    />
-                  </div>
+                    <EuiSpacer size="m" />
 
-                  <EuiSpacer size="m" />
+                    <div id={sectionAnchorId('exclusions')} style={SECTION_ANCHOR_STYLE}>
+                      <ExclusionWindowsEditor
+                        exclusionWindows={state.exclusionWindows}
+                        dispatch={dispatch}
+                      />
+                    </div>
 
-                  <div id={sectionAnchorId('labels')} style={SECTION_ANCHOR_STYLE}>
-                    <LabelsAnnotationsPanel state={state} errors={errors} dispatch={dispatch} />
-                  </div>
+                    <EuiSpacer size="m" />
 
-                  <EuiSpacer size="m" />
+                    <div id={sectionAnchorId('labels')} style={SECTION_ANCHOR_STYLE}>
+                      <LabelsAnnotationsPanel state={state} errors={errors} dispatch={dispatch} />
+                    </div>
 
-                  <div id={sectionAnchorId('rulesPreview')} style={SECTION_ANCHOR_STYLE}>
-                    <GeneratedRulesPreview
-                      apiClient={apiClient}
-                      input={liveInput}
-                      errors={liveErrors}
-                    />
-                  </div>
+                    <EuiSpacer size="m" />
 
-                  {rulerError && (
-                    <>
-                      <EuiSpacer size="m" />
-                      <EuiCallOut
-                        title={rulerErrorTitle(rulerError)}
-                        color="danger"
-                        iconType="alert"
-                        data-test-subj="slosWizardRulerError"
-                      >
-                        <EuiText size="s">
-                          <p data-test-subj="slosWizardRulerErrorBody">{rulerError.rawBody}</p>
-                          <p>
-                            <small>
-                              {i18n.translate(
-                                'observability.apm.slo.wizard.rulerError.codePrefix',
-                                {
-                                  defaultMessage: 'Code: ',
-                                }
-                              )}
-                              <code>{rulerError.code}</code>
-                              {i18n.translate(
-                                'observability.apm.slo.wizard.rulerError.httpSuffix',
-                                {
-                                  defaultMessage: ' · upstream HTTP {status}',
-                                  values: { status: rulerError.httpStatus },
-                                }
-                              )}
-                            </small>
-                          </p>
-                        </EuiText>
-                      </EuiCallOut>
-                    </>
-                  )}
-                </EuiForm>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+                    <div id={sectionAnchorId('rulesPreview')} style={SECTION_ANCHOR_STYLE}>
+                      <GeneratedRulesPreview
+                        apiClient={apiClient}
+                        input={liveInput}
+                        errors={liveErrors}
+                      />
+                    </div>
+
+                    {rulerError && (
+                      <>
+                        <EuiSpacer size="m" />
+                        <EuiCallOut
+                          title={rulerErrorTitle(rulerError)}
+                          color="danger"
+                          iconType="alert"
+                          data-test-subj="slosWizardRulerError"
+                        >
+                          <EuiText size="s">
+                            <p data-test-subj="slosWizardRulerErrorBody">{rulerError.rawBody}</p>
+                            <p>
+                              <small>
+                                {i18n.translate(
+                                  'observability.apm.slo.wizard.rulerError.codePrefix',
+                                  {
+                                    defaultMessage: 'Code: ',
+                                  }
+                                )}
+                                <code>{rulerError.code}</code>
+                                {i18n.translate(
+                                  'observability.apm.slo.wizard.rulerError.httpSuffix',
+                                  {
+                                    defaultMessage: ' · upstream HTTP {status}',
+                                    values: { status: rulerError.httpStatus },
+                                  }
+                                )}
+                              </small>
+                            </p>
+                          </EuiText>
+                        </EuiCallOut>
+                      </>
+                    )}
+
+                    {/* In-flow action footer — sits right below the rule preview
+                      so Create is reachable when you scroll to the bottom, with
+                      nothing overlapping the content. */}
+                    <EuiSpacer size="s" />
+                    <EuiFlexGroup
+                      justifyContent="flexEnd"
+                      gutterSize="s"
+                      responsive={false}
+                      data-test-subj="slosWizardActionFooter"
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty href="#/slos" size="s" data-test-subj="slosWizardCancel">
+                          {i18n.translate('observability.apm.slo.wizard.cancelButton', {
+                            defaultMessage: 'Cancel',
+                          })}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          fill
+                          size="s"
+                          isLoading={submitting}
+                          onClick={onSubmit}
+                          data-test-subj="slosWizardSubmit"
+                        >
+                          {i18n.translate('observability.apm.slo.wizard.submitButton', {
+                            defaultMessage: 'Create SLO',
+                          })}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiForm>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPageContentBody>
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
+    </div>
   );
 };
 
@@ -561,18 +673,15 @@ const IdentityPanel: React.FC<PanelProps & { template: string }> = ({
     <EuiSpacer size="s" />
     <EuiFormRow
       label={i18n.translate('observability.apm.slo.wizard.identity.datasourceLabel', {
-        defaultMessage: 'Datasource ID',
+        defaultMessage: 'Datasource',
       })}
       isInvalid={!!errors['spec.datasourceId']}
       error={errors['spec.datasourceId']}
     >
-      <EuiFieldText
+      <DatasourceSelect
         value={state.datasourceId}
-        onChange={(e) =>
-          dispatch({ kind: 'setField', field: 'datasourceId', value: e.target.value })
-        }
-        data-test-subj="slosWizardDatasourceId"
-        placeholder="ds-2"
+        isInvalid={!!errors['spec.datasourceId']}
+        onChange={(value) => dispatch({ kind: 'setField', field: 'datasourceId', value })}
       />
     </EuiFormRow>
     <EuiFormRow
@@ -590,7 +699,7 @@ const IdentityPanel: React.FC<PanelProps & { template: string }> = ({
     </EuiFormRow>
     <EuiFormRow
       label={i18n.translate('observability.apm.slo.wizard.identity.descriptionLabel', {
-        defaultMessage: 'Description',
+        defaultMessage: 'Description (optional)',
       })}
     >
       <EuiTextArea
@@ -605,100 +714,99 @@ const IdentityPanel: React.FC<PanelProps & { template: string }> = ({
   </EuiPanel>
 );
 
-const OwnerPanel: React.FC<PanelProps> = ({ state, errors, dispatch }) => (
-  <EuiPanel>
-    <EuiText size="m">
-      <h4>
-        {i18n.translate('observability.apm.slo.wizard.owner.heading', {
-          defaultMessage: 'Service & owner',
-        })}
-      </h4>
-    </EuiText>
-    <EuiSpacer size="s" />
-    <EuiFormRow
-      label={i18n.translate('observability.apm.slo.wizard.owner.serviceLabel', {
-        defaultMessage: 'Service',
-      })}
-      isInvalid={!!errors['spec.service']}
-      error={errors['spec.service']}
-    >
-      <EuiFieldText
-        value={state.service}
-        onChange={(e) => dispatch({ kind: 'setField', field: 'service', value: e.target.value })}
-        data-test-subj="slosWizardService"
-      />
-    </EuiFormRow>
-    <EuiFormRow
-      label={i18n.translate('observability.apm.slo.wizard.owner.primaryTeamLabel', {
-        defaultMessage: 'Primary team',
-      })}
-      isInvalid={!!errors['spec.owner.teams']}
-      error={errors['spec.owner.teams']}
-    >
-      <EuiFieldText
-        value={state.ownerTeam}
-        onChange={(e) => dispatch({ kind: 'setField', field: 'ownerTeam', value: e.target.value })}
-        data-test-subj="slosWizardOwnerTeam"
-      />
-    </EuiFormRow>
-    <EuiFormRow
-      label={i18n.translate('observability.apm.slo.wizard.owner.primaryUserLabel', {
-        defaultMessage: 'Primary user (optional)',
-      })}
-    >
-      <EuiFieldText
-        value={state.ownerPrimaryUser}
-        onChange={(e) =>
-          dispatch({ kind: 'setField', field: 'ownerPrimaryUser', value: e.target.value })
-        }
-        data-test-subj="slosWizardOwnerPrimaryUser"
-      />
-    </EuiFormRow>
-    <EuiFormRow
-      label={i18n.translate('observability.apm.slo.wizard.owner.tierLabel', {
-        defaultMessage: 'Tier (optional)',
-      })}
-    >
-      <EuiFieldText
-        value={state.tier}
-        onChange={(e) => dispatch({ kind: 'setField', field: 'tier', value: e.target.value })}
-        data-test-subj="slosWizardTier"
-      />
-    </EuiFormRow>
-  </EuiPanel>
-);
-
-const SliPanel: React.FC<
-  PanelProps & { template: import('../../../../../common/slo/slo_templates').SloTemplate }
-> = ({ state, errors, dispatch, template }) => (
-  <EuiPanel>
-    <EuiText size="m">
-      <h4>
-        {i18n.translate('observability.apm.slo.wizard.sli.heading', {
-          defaultMessage: 'SLI',
-        })}
-      </h4>
-    </EuiText>
-    <EuiSpacer size="s" />
-    {template.sli.type === 'availability' && (
+const OwnerPanel: React.FC<
+  PanelProps & { apiClient: Pick<SloApiClient, 'labelValues' | 'list'> }
+> = ({ state, errors, dispatch, apiClient }) => {
+  const { services, teams } = useOwnerSuggestions(apiClient, state.datasourceId);
+  return (
+    <EuiPanel>
+      <EuiText size="m">
+        <h4>
+          {i18n.translate('observability.apm.slo.wizard.owner.heading', {
+            defaultMessage: 'Service & owner',
+          })}
+        </h4>
+      </EuiText>
+      <EuiSpacer size="s" />
       <EuiFormRow
-        label={i18n.translate('observability.apm.slo.wizard.sli.goodEventsFilterLabel', {
-          defaultMessage: 'Good events filter',
+        label={i18n.translate('observability.apm.slo.wizard.owner.serviceLabel', {
+          defaultMessage: 'Service',
         })}
-        helpText={i18n.translate('observability.apm.slo.wizard.sli.goodEventsFilterHelp', {
-          defaultMessage: 'Default: {value}',
-          values: { value: template.sli.goodEventsFilter ?? '' },
+        helpText={i18n.translate('observability.apm.slo.wizard.owner.serviceHelp', {
+          defaultMessage:
+            'Names discovered on the selected datasource are suggested; you can also type a new one.',
+        })}
+        isInvalid={!!errors['spec.service']}
+        error={errors['spec.service']}
+      >
+        <SuggestingComboBox
+          value={state.service}
+          onChange={(value) => dispatch({ kind: 'setField', field: 'service', value })}
+          suggestions={services}
+          isInvalid={!!errors['spec.service']}
+          data-test-subj="slosWizardService"
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={i18n.translate('observability.apm.slo.wizard.owner.primaryTeamLabel', {
+          defaultMessage: 'Primary team',
+        })}
+        isInvalid={!!errors['spec.owner.teams']}
+        error={errors['spec.owner.teams']}
+      >
+        <SuggestingComboBox
+          value={state.ownerTeam}
+          onChange={(value) => dispatch({ kind: 'setField', field: 'ownerTeam', value })}
+          suggestions={teams}
+          isInvalid={!!errors['spec.owner.teams']}
+          placeholder={i18n.translate('observability.apm.slo.wizard.owner.primaryTeamPlaceholder', {
+            defaultMessage: 'Select a team or type a new one',
+          })}
+          data-test-subj="slosWizardOwnerTeam"
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={i18n.translate('observability.apm.slo.wizard.owner.primaryUserLabel', {
+          defaultMessage: 'Primary user (optional)',
         })}
       >
         <EuiFieldText
-          value={state.goodEventsFilter}
+          value={state.ownerPrimaryUser}
           onChange={(e) =>
-            dispatch({ kind: 'setField', field: 'goodEventsFilter', value: e.target.value })
+            dispatch({ kind: 'setField', field: 'ownerPrimaryUser', value: e.target.value })
           }
-          data-test-subj="slosWizardGoodEventsFilter"
+          data-test-subj="slosWizardOwnerPrimaryUser"
         />
       </EuiFormRow>
-    )}
+      <EuiFormRow
+        label={i18n.translate('observability.apm.slo.wizard.owner.tierLabel', {
+          defaultMessage: 'Tier (optional)',
+        })}
+      >
+        <EuiFieldText
+          value={state.tier}
+          onChange={(e) => dispatch({ kind: 'setField', field: 'tier', value: e.target.value })}
+          data-test-subj="slosWizardTier"
+        />
+      </EuiFormRow>
+    </EuiPanel>
+  );
+};
+
+// Dimensions (grouping labels) panel. The metric and good-events filter moved
+// into the type-specific SLI editors (CustomPromqlEditor / StructuredSliEditor);
+// this panel now owns only the dimension rows, which apply to every SLI type.
+const SliPanel: React.FC<
+  PanelProps & { template: import('../../../../../common/slo/slo_templates').SloTemplate }
+> = ({ state, errors, dispatch, template }) => (
+  <>
+    <EuiText size="xs" color="subdued">
+      {i18n.translate('observability.apm.slo.wizard.sli.dimensionsDescription', {
+        defaultMessage:
+          'Extra label matchers that scope the metric. The service is already applied; add rows to narrow further (e.g. http_route, region).',
+      })}
+    </EuiText>
+    <EuiSpacer size="s" />
     <EuiFormRow
       label={
         template.sli.type === 'custom'
@@ -786,7 +894,7 @@ const SliPanel: React.FC<
         </EuiButtonEmpty>
       </div>
     </EuiFormRow>
-  </EuiPanel>
+  </>
 );
 
 const WindowPanel: React.FC<{

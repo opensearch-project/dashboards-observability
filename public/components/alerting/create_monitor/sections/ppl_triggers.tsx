@@ -47,25 +47,38 @@ const NUM_RESULTS_MAX = 10000;
 const SUBJECT_MAX = 1000;
 const MESSAGE_MAX = 5000;
 
+// OpenSearch alerting stores severity as '1'–'5' (1 = highest). We keep those
+// stored values for backend compatibility but label them with the standard
+// named tiers so the dropdown reads Critical → Info instead of bare numbers.
 const SEVERITY_OPTIONS: Array<{ value: PplTriggerSeverity; text: string }> = [
   {
     value: '1',
     text: i18n.translate('observability.alerting.pplTriggers.severityOption1', {
-      defaultMessage: '1 (highest)',
+      defaultMessage: 'Critical',
     }),
   },
-  { value: '2', text: '2' },
+  {
+    value: '2',
+    text: i18n.translate('observability.alerting.pplTriggers.severityOption2', {
+      defaultMessage: 'High',
+    }),
+  },
   {
     value: '3',
     text: i18n.translate('observability.alerting.pplTriggers.severityOption3', {
-      defaultMessage: '3 (default)',
+      defaultMessage: 'Medium',
     }),
   },
-  { value: '4', text: '4' },
+  {
+    value: '4',
+    text: i18n.translate('observability.alerting.pplTriggers.severityOption4', {
+      defaultMessage: 'Low',
+    }),
+  },
   {
     value: '5',
     text: i18n.translate('observability.alerting.pplTriggers.severityOption5', {
-      defaultMessage: '5 (lowest)',
+      defaultMessage: 'Info',
     }),
   },
 ];

@@ -141,11 +141,11 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
 
   // Logs / Metrics popover entries are grayed out when the parent's selection
   // can't satisfy them: Logs needs at least one OpenSearch datasource, Metrics
-  // needs at least one Prometheus. The empty-selection case used to fall
-  // through to "both enabled", but the spec is "no datasource selected → no
-  // create options viable" — Logs without an OS DS is undefined, Metrics
-  // without a Prometheus DS is undefined. Gate both so the user can't enter
-  // a flyout that will silently re-default the datasource on them.
+  // needs at least one Prometheus. The empty-selection case is "no datasource
+  // selected → no create options viable", so gate both. When a selection
+  // exists, each option is disabled iff EVERY selected datasource is the wrong
+  // type for it — i.e. only-Prometheus disables Logs, only-OpenSearch disables
+  // Metrics (symmetric).
   const [logsCreateDisabled, metricsCreateDisabled] = useMemo(() => {
     const selected = selectedDsIds
       .map((id) => datasources.find((d) => d.id === id))
@@ -153,10 +153,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     if (selected.length === 0) return [true, true];
     return [
       selected.every((d) => d.type === 'prometheus'),
-      // Always allow Metrics creation when at least one datasource is selected —
-      // the Prometheus data-connection may exist on the cluster without a
-      // corresponding MDS saved object (discovered via SQL plugin API, not SO).
-      false,
+      selected.every((d) => d.type === 'opensearch'),
     ];
   }, [datasources, selectedDsIds]);
 

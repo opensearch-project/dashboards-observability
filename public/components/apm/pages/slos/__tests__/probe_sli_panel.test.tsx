@@ -45,6 +45,38 @@ describe('ProbeSliPanel', () => {
     expect(screen.getByTestId('slosWizardProbeButton')).toBeDisabled();
   });
 
+  it('explains why the button is disabled — no datasource', async () => {
+    render(
+      <ProbeSliPanel
+        apiClient={makeClient(jest.fn())}
+        goodQuery="good"
+        totalQuery="total"
+        datasourceId=""
+      />
+    );
+    // EuiToolTip renders its content on hover over the (disabled-button)
+    // wrapper. The reason text appears in the tooltip.
+    fireEvent.mouseOver(screen.getByTestId('slosWizardProbeButton'));
+    await waitFor(() => expect(screen.getByText('Select a datasource first.')).toBeInTheDocument());
+  });
+
+  it('explains why the button is disabled — incomplete query', async () => {
+    render(
+      <ProbeSliPanel
+        apiClient={makeClient(jest.fn())}
+        goodQuery=""
+        totalQuery=""
+        datasourceId="prom-1"
+      />
+    );
+    fireEvent.mouseOver(screen.getByTestId('slosWizardProbeButton'));
+    await waitFor(() =>
+      expect(
+        screen.getByText('Finish the SLI query — pick a metric so it returns data.')
+      ).toBeInTheDocument()
+    );
+  });
+
   it('renders the result panel + ratio stat on success', async () => {
     const probe: ProbeSliResponse = {
       goodCount: 990,

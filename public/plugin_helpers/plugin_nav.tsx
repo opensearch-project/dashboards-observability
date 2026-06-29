@@ -48,7 +48,7 @@ function registerIconSideNavGroups(
         category: undefined,
         showInAllNavGroup: true,
         order: 50,
-        euiIconType: 'beaker',
+        euiIconType: 'bell',
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [

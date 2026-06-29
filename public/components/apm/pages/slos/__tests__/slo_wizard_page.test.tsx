@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route } from 'react-router-dom';
 import { SloWizardPage } from '../slo_wizard_page';
 import type { SloApiClient } from '../slo_api_client';
@@ -22,6 +22,57 @@ jest.mock('../../../../../plugin_helpers/plugin_headerControl', () => ({
   ),
 }));
 
+// The datasource picker reads the live list via useDatasources(), which would
+// reach coreRefs.savedObjectsClient (unwired here). Provide one eligible
+// Prometheus datasource so the select renders with a selectable option.
+jest.mock('../../../../alerting/hooks/use_datasources', () => ({
+  useDatasources: () => ({
+    datasources: [
+      {
+        id: 'ds-2',
+        name: 'Prod Prometheus',
+        type: 'prometheus',
+        url: 'ds-2',
+        enabled: true,
+        directQueryName: 'prom_conn',
+      },
+    ],
+    isLoading: false,
+    error: null,
+    refresh: () => {},
+  }),
+}));
+
+// The SLI metric picker uses usePrometheusMetadata, which reaches coreRefs.http.
+// Stub it to an inert shape — the wizard test exercises free-text metric entry,
+// not autocomplete.
+jest.mock('../../../../alerting/hooks/use_prometheus_metadata', () => ({
+  usePrometheusMetadata: () => ({
+    metricOptions: [],
+    metricsLoading: false,
+    searchMetrics: jest.fn(),
+    labelNames: [],
+    labelNamesLoading: false,
+    labelValues: {},
+    labelValuesLoading: {},
+    fetchLabelValues: jest.fn(),
+    metricMetadata: [],
+    error: false,
+    applyTemplate: jest.fn(),
+  }),
+}));
+
+// The Service/owner panel's useOwnerSuggestions hook calls list + labelValues.
+// Stub them empty by default so the comboboxes render (free text still works)
+// without each test having to wire suggestion sources.
+function withSuggestionStubs(apiClient: Partial<SloApiClient>): Partial<SloApiClient> {
+  return {
+    list: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    labelValues: jest.fn().mockResolvedValue({ values: [] }),
+    ...apiClient,
+  };
+}
+
 function renderWizard(apiClient: Partial<SloApiClient>, templateId = 'http-availability') {
   const chrome = ({ setBreadcrumbs: jest.fn() } as unknown) as Parameters<
     typeof SloWizardPage
@@ -38,7 +89,7 @@ function renderWizard(apiClient: Partial<SloApiClient>, templateId = 'http-avail
     <MemoryRouter initialEntries={[`/slos/create/${templateId}`]}>
       <Route path="/slos/create/:templateId">
         <SloWizardPage
-          apiClient={apiClient as SloApiClient}
+          apiClient={withSuggestionStubs(apiClient) as SloApiClient}
           chrome={chrome}
           notifications={notifications}
           parentBreadcrumb={{ text: 'APM', href: '#/' }}
@@ -52,19 +103,32 @@ function renderWizard(apiClient: Partial<SloApiClient>, templateId = 'http-avail
  * Minimum fields required to pass client-side validation so `apiClient.create`
  * is actually reached. Validator exits early on any missing field.
  */
+/** Pick the mocked `ds-2` datasource from the combobox. */
+function selectDatasource() {
+  const combo = screen.getByTestId('slosWizardDatasourceId');
+  // Toggle lives inside the input container; options portal to document.body.
+  fireEvent.click(within(combo).getByTestId('comboBoxToggleListButton'));
+  fireEvent.click(screen.getByRole('option', { name: 'Prod Prometheus' }));
+}
+
+/**
+ * Enter free text into a suggesting combobox (Service / Primary team). Type
+ * into the inner search input and press Enter to fire `onCreateOption`.
+ */
+function typeComboBox(testSubj: string, value: string) {
+  const combo = screen.getByTestId(testSubj);
+  const input = within(combo).getByTestId('comboBoxSearchInput');
+  fireEvent.change(input, { target: { value } });
+  fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+}
+
 function fillMinimumRequiredFields() {
-  fireEvent.change(screen.getByTestId('slosWizardDatasourceId'), {
-    target: { value: 'ds-2' },
-  });
+  selectDatasource();
   fireEvent.change(screen.getByTestId('slosWizardName'), {
     target: { value: 'my-api-availability' },
   });
-  fireEvent.change(screen.getByTestId('slosWizardService'), {
-    target: { value: 'my-api' },
-  });
-  fireEvent.change(screen.getByTestId('slosWizardOwnerTeam'), {
-    target: { value: 'sre' },
-  });
+  typeComboBox('slosWizardService', 'my-api');
+  typeComboBox('slosWizardOwnerTeam', 'sre');
   fireEvent.change(screen.getByTestId('slosWizardDimValue-0'), {
     target: { value: 'my-api' },
   });
@@ -177,7 +241,7 @@ describe('SloWizardPage — Wave 2 additions', () => {
       <MemoryRouter initialEntries={[`/slos/create/http-availability`]}>
         <Route path="/slos/create/:templateId">
           <SloWizardPage
-            apiClient={apiClient as SloApiClient}
+            apiClient={withSuggestionStubs(apiClient) as SloApiClient}
             chrome={chrome}
             notifications={notifications}
             parentBreadcrumb={{ text: 'APM', href: '#/' }}
@@ -271,12 +335,16 @@ describe('SloWizardPage — Wave 2 additions', () => {
     // Dimension is optional for custom but required when names/values are given —
     // the min-fields helper seeds it, which is fine.
 
-    fireEvent.change(screen.getByTestId('slosWizardCustomPromqlGood'), {
-      target: { value: 'sum(rate(good[5m]))' },
-    });
-    fireEvent.change(screen.getByTestId('slosWizardCustomPromqlTotal'), {
-      target: { value: 'sum(rate(total[5m]))' },
-    });
+    // Ratio mode: each metric is a picker. Selecting metric `good`/`total`
+    // serializes to `sum(rate(<metric>[5m]))` implicitly.
+    const pickMetric = (pickerTestSubj: string, metric: string) => {
+      const picker = screen.getByTestId(pickerTestSubj);
+      const input = within(picker).getByTestId('comboBoxSearchInput');
+      fireEvent.change(input, { target: { value: metric } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+    };
+    pickMetric('slosWizardCustomPromqlGoodPicker', 'good');
+    pickMetric('slosWizardCustomPromqlTotalPicker', 'total');
 
     await act(async () => {
       fireEvent.click(screen.getByTestId('slosWizardSubmit'));
