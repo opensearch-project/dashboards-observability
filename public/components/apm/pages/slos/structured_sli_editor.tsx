@@ -37,6 +37,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import type { SloTemplate } from '../../../../../common/slo/slo_templates';
+import {
+  ensureBucketMetric,
+  formatLatencyBoundLe,
+} from '../../../../../common/slo/slo_promql_generator';
 import { usePrometheusMetadata } from '../../../alerting/hooks/use_prometheus_metadata';
 import type { Action, FormState } from './wizard_state';
 
@@ -80,9 +84,10 @@ function summaryText(template: SloTemplate, service: string): string {
 }
 
 /**
- * Read-only PromQL-ish summary of the derived query. Mirrors the generator's
- * `1 - (good / total)` shape closely enough for the user to recognise what
- * deploys, without depending on the server.
+ * Read-only summary of the derived query. Uses the deploy path's own helpers
+ * (`ensureBucketMetric`, `formatLatencyBoundLe`) so the preview matches what's
+ * recorded — notably the latency `_bucket` suffix and unit-scaled `le` bound.
+ * The `5m` window is illustrative (deploy emits one rule per MWMBR window).
  */
 function summaryQuery(state: FormState, template: SloTemplate): string {
   const metric = state.metric || template.sli.metric || '';
@@ -94,9 +99,12 @@ function summaryQuery(state: FormState, template: SloTemplate): string {
     .map((d) => `${d.name}="${d.value}"`)
     .join(', ');
   if (template.sli.type === SLI_TYPE.latency) {
-    const le = state.objectives[0]?.latencyThreshold || '…';
+    const bucketMetric = ensureBucketMetric(metric);
+    const raw = Number(state.objectives[0]?.latencyThreshold);
+    const le =
+      Number.isFinite(raw) && raw > 0 ? formatLatencyBoundLe(raw, state.latencyThresholdUnit) : '…';
     const sel = dims ? `${dims}, ` : '';
-    return `sum(rate(${metric}{${sel}le="${le}"}[5m])) / sum(rate(${metric}{${sel}le="+Inf"}[5m]))`;
+    return `sum(rate(${bucketMetric}{${sel}le="${le}"}[5m])) / sum(rate(${bucketMetric}{${sel}le="+Inf"}[5m]))`;
   }
   const good = state.goodEventsFilter
     ? `${dims ? `${dims}, ` : ''}${state.goodEventsFilter}`

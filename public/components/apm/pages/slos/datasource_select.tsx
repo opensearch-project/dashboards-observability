@@ -18,8 +18,8 @@
  * datasource must resolve to a real saved object, and accepting arbitrary
  * strings is exactly the class of error this picker exists to prevent.
  *
- * Backend-extensibility: the filter is driven by `SUPPORTED_SLI_BACKENDS`
- * (common/slo/slo_types) mapped through `SLI_BACKEND_TO_DATASOURCE_TYPE`. When
+ * Backend-extensibility: the filter is driven by `SUPPORTED_DATASOURCE_TYPES`
+ * (common/slo/slo_types, itself derived from `SUPPORTED_SLI_BACKENDS`). When
  * OpenSearch-backed SLOs land, adding `'opensearch'` to `SUPPORTED_SLI_BACKENDS`
  * widens this dropdown automatically — no change needed here.
  */
@@ -27,29 +27,17 @@
 import React, { useMemo } from 'react';
 import { EuiCallOut, EuiComboBox, EuiComboBoxOptionOption, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import type { Datasource, DatasourceType } from '../../../../../common/types/alerting';
-import type { SliBackend } from '../../../../../common/slo/slo_types';
-import { SUPPORTED_SLI_BACKENDS } from '../../../../../common/slo/slo_types';
+import type { Datasource } from '../../../../../common/types/alerting';
+import { SUPPORTED_DATASOURCE_TYPES } from '../../../../../common/slo/slo_types';
 import { useDatasources } from '../../../alerting/hooks/use_datasources';
 import { coreRefs } from '../../../../framework/core_refs';
 
-/**
- * Map an SLI backend to the `Datasource.type` that can serve it. Kept explicit
- * (rather than assuming the names match) so the two type spaces can evolve
- * independently — e.g. a future backend served by an existing datasource type.
- */
-const SLI_BACKEND_TO_DATASOURCE_TYPE: Record<SliBackend, DatasourceType> = {
-  prometheus: 'prometheus',
-  opensearch: 'opensearch',
-};
-
-/** Datasource types that can back a currently-supported SLO. */
-export const SUPPORTED_DATASOURCE_TYPES: readonly DatasourceType[] = SUPPORTED_SLI_BACKENDS.map(
-  (b) => SLI_BACKEND_TO_DATASOURCE_TYPE[b]
-);
+// Re-exported for callers (and tests) that consumed it from this module before
+// the mapping moved to `common/slo/slo_types` as the shared source of truth.
+export { SUPPORTED_DATASOURCE_TYPES };
 
 export interface DatasourceSelectProps {
-  /** Currently-selected datasource saved-object id (empty string when unset). */
+  /** Selected datasource `directQueryName` (the connection id persisted as `spec.datasourceId`), not the OSD saved-object id. Empty when unset. */
   value: string;
   onChange: (datasourceId: string) => void;
   isInvalid?: boolean;

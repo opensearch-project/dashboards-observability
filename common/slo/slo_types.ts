@@ -110,6 +110,17 @@ export function isSupportedSliBackend(backend: SliBackend): boolean {
   return SUPPORTED_SLI_BACKENDS.includes(backend);
 }
 
+/** Maps an SLI backend to the `Datasource.type` that can serve it (kept explicit so the two type spaces can diverge). */
+export const SLI_BACKEND_TO_DATASOURCE_TYPE: Record<SliBackend, 'prometheus' | 'opensearch'> = {
+  prometheus: 'prometheus',
+  opensearch: 'opensearch',
+};
+
+/** Datasource types that can back a currently-supported SLO. */
+export const SUPPORTED_DATASOURCE_TYPES: ReadonlyArray<
+  'prometheus' | 'opensearch'
+> = SUPPORTED_SLI_BACKENDS.map((b) => SLI_BACKEND_TO_DATASOURCE_TYPE[b]);
+
 /**
  * Grouping dimensions live inside the SingleSli node. Composite SLOs (P2)
  * aggregate members that each carry their own dimensions; the composite has none.

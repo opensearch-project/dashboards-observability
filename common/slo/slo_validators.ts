@@ -245,7 +245,11 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
         if (!prom.metric) errors['spec.sli.definition.metric'] = 'Metric name is required';
         else if (!METRIC_NAME_RE.test(prom.metric))
           errors['spec.sli.definition.metric'] = 'Invalid Prometheus metric name';
-        if (prom.goodEventsFilter) {
+        // Required for availability SLIs: without it the good selector equals the total selector, so the error ratio collapses to 0 (always 100% available, never alerts).
+        if (!prom.goodEventsFilter || !prom.goodEventsFilter.trim()) {
+          errors['spec.sli.definition.goodEventsFilter'] =
+            'Good events filter is required for availability SLIs (e.g. status_code!~"5..")';
+        } else {
           const filterErr = validateGoodEventsFilter(prom.goodEventsFilter);
           if (filterErr) errors['spec.sli.definition.goodEventsFilter'] = filterErr;
         }

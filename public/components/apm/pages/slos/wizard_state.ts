@@ -296,15 +296,21 @@ function rederiveQueryForService(
 }
 
 /**
- * Applying a template preserves user edits to fields the template doesn't own
- * (service/name/owner), and resets SLI-specific defaults (metric,
- * goodEventsFilter, latency threshold). Objectives are reset to a single row
- * sized for the template so the wizard isn't stuck with stale latency-only
- * rows when flipping to availability.
+ * Applying (or switching) a template resets the WHOLE form to a fresh state
+ * seeded from that template — no fields carry over from a previously selected
+ * template, including service/name/owner and the datasource. This is an
+ * intentional product decision: a template switch is a clean slate (it avoids
+ * stale queries/metrics/objectives bleeding across SLI types), and the user
+ * re-enters identity + datasource for the new template. The first arg
+ * (`_state`) is therefore unused.
+ *
+ * Objectives are reset to a single row sized for the template so the wizard
+ * isn't stuck with stale latency-only rows when flipping to availability.
  *
  * Templates that carry `customPromqlDefaults` (APM span-derived) also pre-fill
- * the custom PromQL editor with `${service}` / `${remoteService}` already
- * substituted from form state.
+ * the custom PromQL editor; the `${service}` / `${remoteService}` placeholders
+ * stay un-substituted until the user picks a service (the reducer's service
+ * re-derivation substitutes them then).
  */
 export function applyTemplate(_state: FormState, template: SloTemplate | null): FormState {
   // Switching (or first-picking) a template resets the whole form to a fresh

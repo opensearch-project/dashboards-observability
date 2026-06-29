@@ -12,7 +12,7 @@
  *   /slos/:id                   — detail view
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiCallOut, EuiCode, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
@@ -99,27 +99,6 @@ export const SlosPage: React.FC<SlosPageProps> = ({
   parentBreadcrumb,
 }) => {
   const apiClient = useMemo(() => new SloApiClient(http), [http]);
-
-  // Show a "Beta" badge in the top chrome bar while the SLO/SLI app is
-  // mounted; clear it on unmount so it doesn't leak into other apps.
-  // Mirrors the pattern in components/alerting/home.tsx — same beaker icon,
-  // same chrome.setBadge call, same cleanup contract.
-  useEffect(() => {
-    if (!chrome?.setBadge) return undefined;
-    chrome.setBadge({
-      text: i18n.translate('observability.apm.slo.betaBadge', {
-        defaultMessage: 'Beta',
-      }),
-      tooltip: i18n.translate('observability.apm.slo.betaBadgeTooltip', {
-        defaultMessage:
-          'SLO/SLI is in beta. Features may change and some functionality is still evolving.',
-      }),
-      iconType: 'beaker',
-    });
-    return () => {
-      chrome.setBadge?.(undefined);
-    };
-  }, [chrome]);
 
   return (
     <SloRouterErrorBoundary>

@@ -109,4 +109,22 @@ describe('StructuredSliEditor', () => {
     renderEditor(HTTP_LATENCY, s);
     expect(screen.getByTestId('slosWizardStructuredSliSummaryQuery')).toHaveTextContent(/le=/);
   });
+
+  it('latency summary matches the generator: _bucket metric + unit-scaled le (M2)', () => {
+    // A millisecond threshold must render as the unit-scaled, generator-formatted
+    // le bound on the histogram `_bucket` metric — not the raw "500" on the bare
+    // metric. This is the divergence M2 flagged between preview and deploy.
+    const base = stateFor('http-latency');
+    const s: FormState = {
+      ...base,
+      metric: 'http_server_request_duration_seconds', // no _bucket suffix
+      latencyThresholdUnit: 'milliseconds',
+      objectives: base.objectives.map((o, i) => (i === 0 ? { ...o, latencyThreshold: '500' } : o)),
+    };
+    renderEditor(HTTP_LATENCY, s);
+    const q = screen.getByTestId('slosWizardStructuredSliSummaryQuery').textContent ?? '';
+    expect(q).toContain('http_server_request_duration_seconds_bucket');
+    expect(q).toContain('le="0.5"');
+    expect(q).not.toContain('le="500"');
+  });
 });
