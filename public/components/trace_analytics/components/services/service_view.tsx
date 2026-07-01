@@ -85,6 +85,7 @@ export function ServiceView(props: ServiceViewProps) {
       const id = params.get('serviceId');
       setServiceId(id);
     } catch (error) {
+      console.error('[ServiceView] Failed to parse serviceId from URL:', error);
       setServiceId(null);
     }
   }, [location]);
@@ -107,6 +108,7 @@ export function ServiceView(props: ServiceViewProps) {
         setFields(data);
       }
     } catch (e) {
+      console.error('[ServiceView] Failed to process service data response:', e);
       setserviceIdEmpty(true);
       setFields({});
       setServiceMap({});
@@ -240,7 +242,7 @@ export function ServiceView(props: ServiceViewProps) {
                 >
                   <EuiToolTip content="View service page">
                     <EuiLink data-test-subj={'service-view-flyout-action-btn'}>
-                      <EuiSmallButtonIcon iconType="graphApp" display="base" />
+                      <EuiSmallButtonIcon iconType="navAiFlow" display="base" />
                     </EuiLink>
                   </EuiToolTip>
                 </EuiFlexItem>

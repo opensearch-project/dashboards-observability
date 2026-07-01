@@ -6,16 +6,16 @@
 import { i18n } from '@osd/i18n';
 
 /**
- * i18n texts for Application Map page
+ * i18n texts for Topology Map page
  */
 export const applicationMapI18nTexts = {
   breadcrumb: i18n.translate('observability.apm.applicationMap.breadcrumb', {
-    defaultMessage: 'Application Map',
+    defaultMessage: 'Topology Map',
   }),
 
   // Page header
   pageTitle: i18n.translate('observability.apm.applicationMap.pageTitle', {
-    defaultMessage: 'Application Map',
+    defaultMessage: 'Topology Map',
   }),
   searchPlaceholder: i18n.translate('observability.apm.applicationMap.search.placeholder', {
     defaultMessage: 'Filter by service name',

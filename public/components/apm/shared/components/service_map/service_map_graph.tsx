@@ -577,7 +577,7 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
   if (celestialNodes.length === 0) {
     return (
       <EuiEmptyPrompt
-        iconType="graphApp"
+        iconType="navAiFlow"
         title={<h2>{i18nTexts.empty.title}</h2>}
         body={<p>{i18nTexts.empty.body}</p>}
       />
