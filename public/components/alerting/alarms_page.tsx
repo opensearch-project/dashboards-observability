@@ -1158,13 +1158,14 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   const activeWarnings = activeTab === 'alerts' ? alertsWarnings : rulesWarnings;
 
   // Link back to the legacy alerting dashboard (the standalone `alerts` app's
-  // `#/dashboard` route). Rendered as a plain anchor: `basePath.prepend` builds
-  // a workspace-aware href, and since this crosses into a different app the
-  // browser navigation (which also preserves open-in-new-tab / right-click) is
-  // preferable to an `onClick` SPA hop.
-  const oldExperienceHref = coreRefs.http?.basePath.prepend(
-    `/app/${OLD_ALERTING_APP_ID}#/dashboard`
-  );
+  // `#/dashboard` route). Built from `basePath.get()` (which carries any
+  // workspace prefix) + the app path — same URL-building recipe as the
+  // Advanced Settings link above. Rendered as a plain anchor since this crosses
+  // into a different app, so browser navigation (open-in-new-tab / right-click)
+  // is preferable to an `onClick` SPA hop.
+  const oldExperienceHref = `${
+    coreRefs.http?.basePath.get() ?? ''
+  }/app/${OLD_ALERTING_APP_ID}#/dashboard`;
 
   return (
     <div data-test-subj="alertManagerPage" className="altPageRoot">
