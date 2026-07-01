@@ -56,7 +56,7 @@ function registerIconSideNavGroups(
         category: undefined,
         showInAllNavGroup: true,
         order: 50,
-        euiIconType: 'beaker',
+        euiIconType: 'bell',
         navPopover: alertingNavPopover,
       },
     ]);

@@ -569,7 +569,7 @@ export class ObservabilityPlugin
       title: observabilityAlertingTitle,
       category: OBSERVABILITY_APP_CATEGORIES.observability,
       order: observabilityAlertingPluginOrder,
-      euiIconType: 'beaker',
+      euiIconType: 'bell',
       mount: appMountWithStartPage('alerting'),
       updater$: this.alertingAppUpdater$,
     });

@@ -127,15 +127,16 @@ describe('wizard_builders', () => {
 
   it('builds an APM span-derived availability SLI from the template custom defaults', () => {
     const apmAvailability = SLO_TEMPLATES.find((t) => t.id === 'apm-service-availability')!;
+    // Template first (a switch resets the form), then fill identity — matches
+    // the real wizard order and the post-reset behavior.
     let s = reducer(initialState(), {
-      kind: 'setField',
-      field: 'datasourceId',
-      value: 'ds-2',
+      kind: 'setTemplate',
+      templateId: 'apm-service-availability',
     });
+    s = reducer(s, { kind: 'setField', field: 'datasourceId', value: 'ds-2' });
     s = reducer(s, { kind: 'setField', field: 'name', value: 'checkout-avail' });
     s = reducer(s, { kind: 'setField', field: 'service', value: 'checkout' });
     s = reducer(s, { kind: 'setField', field: 'ownerTeam', value: 'sre' });
-    s = reducer(s, { kind: 'setTemplate', templateId: 'apm-service-availability' });
     const input = buildCreateInput(s, apmAvailability);
     const def = singlePromSli(input.spec.sli);
     expect(def.type).toBe('custom');

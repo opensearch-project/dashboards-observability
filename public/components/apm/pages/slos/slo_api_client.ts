@@ -222,4 +222,20 @@ export class SloApiClient {
   getRuleHealth(id: string): Promise<RuleHealthResponse> {
     return this.http.get(`${SLO_BASE}/${encodeURIComponent(id)}/rule_health`);
   }
+
+  /**
+   * Distinct Prometheus label values for `label` on the given datasource,
+   * optionally narrowed by a series `selector` (e.g. `{__name__="http_..."}`).
+   * Backs the Service field's type-ahead suggestions. Reuses the Alert
+   * Manager metadata route the suggest-engine discovery probes already call —
+   * values are cached server-side (90s TTL).
+   */
+  labelValues(dsId: string, label: string, selector?: string): Promise<{ values: string[] }> {
+    return this.http.get(
+      `/api/alerting/prometheus/${encodeURIComponent(
+        dsId
+      )}/metadata/label-values/${encodeURIComponent(label)}`,
+      selector ? { query: { selector } } : undefined
+    );
+  }
 }
