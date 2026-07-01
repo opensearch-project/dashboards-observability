@@ -119,7 +119,7 @@ export const alertingNavPopover: NavPopoverConfig = {
       label: i18n.translate('observability.navPopover.viewAlerts', {
         defaultMessage: 'View alerts',
       }),
-      iconType: 'bell',
+      iconType: 'navAlerting',
       onClick: ({ navigateToApp }) => navigateToApp(observabilityAlertingID, { path: '#/alerts' }),
     },
     {
