@@ -60,6 +60,7 @@ import { transformPplFormToPayload } from '../../../common/services/alerting/for
 import { PPL_MONITOR_NAME_MAX } from '../../../common/services/alerting/validators';
 import { showMonitorCreatedToast } from './toast_helpers';
 import './alerting.scss';
+import { alertingTelemetry } from './alerting_telemetry';
 import type { OpenSearchFormState } from './create_monitor/create_monitor_types';
 import {
   extractPplValidationError,
@@ -256,6 +257,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // flyout's "Open monitor") still re-apply.
   const lastAppliedDsRef = useRef<string | undefined>(undefined);
   const refetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wizardOpenTimeRef = useRef<number>(0);
   useEffect(() => {
     return () => {
       if (refetchTimerRef.current) clearTimeout(refetchTimerRef.current);
@@ -564,6 +566,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           defaultMessage: 'Alert acknowledged',
         })
       );
+      alertingTelemetry.alertAcknowledged({
+        alertCount: 1,
+        dsType: (alert?.datasourceType as any) || 'opensearch',
+      });
       // Layer an optimistic override so the row flips to "acknowledged"
       // immediately. The override is dropped once the refetch's response
       // either confirms the ack or removes the row.
@@ -932,6 +938,15 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         await mutations.createMonitor(buildPayload(formState), dsId);
       }
       showMonitorCreatedToast({ monitorName: formState.name, dsId });
+      alertingTelemetry.ruleCreated({
+        ruleType: formState.datasourceType === 'prometheus' ? 'promql' : 'ppl',
+        dsType: formState.datasourceType as any,
+        dsId,
+      });
+      alertingTelemetry.wizardCompleted({
+        ruleType: formState.datasourceType === 'prometheus' ? 'promql' : 'ppl',
+        durationMs: wizardOpenTimeRef.current ? Date.now() - wizardOpenTimeRef.current : 0,
+      });
       setShowCreateMonitor(false);
       setCreateBackendType(null);
       setPplSubmitError(null);
@@ -1131,9 +1146,11 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             if (type === 'logs') {
               setCreateBackendType('opensearch');
               setShowCreateMonitor(true);
+              wizardOpenTimeRef.current = Date.now(); alertingTelemetry.wizardStarted({ entryPoint: 'button' });
             } else if (type === 'metrics') {
               setCreateBackendType('prometheus');
               setShowCreateMonitor(true);
+              wizardOpenTimeRef.current = Date.now(); alertingTelemetry.wizardStarted({ entryPoint: 'button' });
             }
           }}
           selectedDsIds={selectedDsIds}
