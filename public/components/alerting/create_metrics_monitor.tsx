@@ -89,6 +89,16 @@ export interface MetricsMonitorFormState {
 export interface CreateMetricsMonitorProps {
   onCancel: () => void;
   onSave: (form: MetricsMonitorFormState) => void;
+  /** Datasource ID from the current Explore page context */
+  datasourceId?: string;
+  /** Datasource display name from the current Explore page context */
+  datasourceName?: string;
+  /** HTTP client for persisting rules */
+  http?: {
+    post: (path: string, options: { body: string }) => Promise<unknown>;
+  };
+  /** Toast notification callback */
+  addToast?: (title: string, color?: 'success' | 'danger') => void;
 }
 
 // ============================================================================
@@ -269,21 +279,6 @@ const EVAL_INTERVAL_OPTIONS = [
   },
 ];
 
-const MOCK_DATASOURCES = [
-  {
-    id: 'prom-1',
-    name: i18n.translate('observability.alerting.createMetricsMonitor.datasourceProd', {
-      defaultMessage: 'Prometheus (production)',
-    }),
-  },
-  {
-    id: 'prom-2',
-    name: i18n.translate('observability.alerting.createMetricsMonitor.datasourceStaging', {
-      defaultMessage: 'Prometheus (staging)',
-    }),
-  },
-];
-
 const MOCK_SAMPLE_QUERIES = [
   {
     label: i18n.translate('observability.alerting.createMetricsMonitor.sampleHighCpu', {
@@ -447,13 +442,30 @@ const QuerySection = React.memo<{
   onUpdate: (patch: Partial<MetricsMonitorFormState>) => void;
   showPreview: boolean;
   onRunPreview: () => void;
-}>(({ form, onUpdate, showPreview, onRunPreview }) => {
+  contextDatasourceName?: string;
+}>(({ form, onUpdate, showPreview, onRunPreview, contextDatasourceName }) => {
   const [showMetricBrowser, setShowMetricBrowser] = useState(false);
   const [showQueryLibrary, setShowQueryLibrary] = useState(false);
   const [showDatasourcePicker, setShowDatasourcePicker] = useState(false);
 
+  // Use the real datasource from the Explore page context. When no
+  // datasource is provided (e.g. standalone usage), show a placeholder.
+  const datasourceOptions = useMemo(() => {
+    if (form.datasourceId) {
+      return [{ id: form.datasourceId, name: contextDatasourceName || form.datasourceId }];
+    }
+    return [];
+  }, [form.datasourceId, contextDatasourceName]);
+
   const selectedDs =
-    MOCK_DATASOURCES.find((d) => d.id === form.datasourceId) || MOCK_DATASOURCES[0];
+    datasourceOptions.length > 0
+      ? datasourceOptions[0]
+      : {
+          id: '',
+          name: i18n.translate('observability.alerting.createMetricsMonitor.noDatasourceAttached', {
+            defaultMessage: 'No Prometheus datasource attached',
+          }),
+        };
 
   const handleMetricSelect = (metricName: string) => {
     const newQuery = form.query
@@ -533,7 +545,7 @@ const QuerySection = React.memo<{
               closePopover={() => setShowDatasourcePicker(false)}
               panelPaddingSize="s"
             >
-              {MOCK_DATASOURCES.map((ds) => (
+              {datasourceOptions.map((ds) => (
                 <EuiButtonEmpty
                   key={ds.id}
                   size="xs"
@@ -620,7 +632,11 @@ const QuerySection = React.memo<{
               style={{ width: 600 }}
             >
               <div style={{ width: 560, maxHeight: 400, overflow: 'auto' }}>
-                <MetricBrowser onSelectMetric={handleMetricSelect} currentQuery={form.query} />
+                <MetricBrowser
+                  onSelectMetric={handleMetricSelect}
+                  currentQuery={form.query}
+                  datasourceId={form.datasourceId}
+                />
               </div>
             </EuiPopover>
           </EuiFlexItem>
@@ -1341,12 +1357,19 @@ const RulePreviewSection = React.memo<{
 // Main Component
 // ============================================================================
 
-export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({ onCancel, onSave }) => {
+export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
+  onCancel,
+  onSave,
+  datasourceId: contextDatasourceId,
+  datasourceName: contextDatasourceName,
+  http,
+  addToast,
+}) => {
   const [form, setForm] = useState<MetricsMonitorFormState>({
     monitorName: '',
     description: '',
     query: DEFAULT_PROMQL,
-    datasourceId: MOCK_DATASOURCES[0].id,
+    datasourceId: contextDatasourceId || '',
     operator: '>',
     thresholdValue: 0.05,
     forDuration: '5m',
@@ -1412,7 +1435,60 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({ onCa
     setShowPreview(true);
   }, []);
 
-  const isValid = form.monitorName.trim() !== '' && form.query.trim() !== '';
+  const isValid =
+    form.monitorName.trim() !== '' && form.query.trim() !== '' && form.datasourceId !== '';
+
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = useCallback(async () => {
+    if (!isValid || isSaving) return;
+
+    // If no http client available, fall back to the original onSave callback
+    if (!http || !form.datasourceId) {
+      onSave(form);
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const payload = {
+        name: form.monitorName,
+        query: form.query,
+        operator: form.operator,
+        threshold: form.thresholdValue,
+        forDuration: form.forDuration,
+        evaluationInterval: form.evalInterval,
+        labels: Object.fromEntries(
+          form.labels.filter((l) => l.key.trim()).map((l) => [l.key, l.value])
+        ),
+        annotations: Object.fromEntries(
+          form.annotations.filter((a) => a.key.trim()).map((a) => [a.key, a.value])
+        ),
+        enabled: true,
+        groupName: form.monitorName,
+      };
+      await http.post(`/api/alerting/prometheus/${encodeURIComponent(form.datasourceId)}/rules`, {
+        body: JSON.stringify(payload),
+      });
+      addToast?.(
+        i18n.translate('observability.alerting.createMetricsMonitor.toast.created', {
+          defaultMessage: 'Alert rule created successfully.',
+        }),
+        'success'
+      );
+      onSave(form);
+    } catch (err) {
+      console.error('CreateMetricsMonitor: rule creation failed', err);
+      addToast?.(
+        i18n.translate('observability.alerting.createMetricsMonitor.toast.failed', {
+          defaultMessage: 'Failed to create alert rule.',
+        }),
+        'danger'
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }, [isValid, isSaving, http, form, onSave, addToast]);
 
   return (
     <EuiFlyout onClose={handleClose} size="l" ownFocus aria-labelledby="createMetricsMonitorTitle">
@@ -1443,6 +1519,7 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({ onCa
           onUpdate={updateForm}
           showPreview={showPreview}
           onRunPreview={handleRunPreview}
+          contextDatasourceName={contextDatasourceName}
         />
         <EuiHorizontalRule margin="l" />
 
@@ -1484,7 +1561,7 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({ onCa
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={() => onSave(form)} isDisabled={!isValid}>
+            <EuiButton fill onClick={handleSave} isLoading={isSaving} isDisabled={!isValid}>
               {i18n.translate('observability.alerting.createMetricsMonitor.createButton', {
                 defaultMessage: 'Create',
               })}

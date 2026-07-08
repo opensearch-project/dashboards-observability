@@ -637,6 +637,10 @@ export class ObservabilityPlugin
                 | { alertingDashboards?: { pplV2?: boolean } }
                 | undefined;
               if (!liveCapabilities?.alertingDashboards?.pplV2) return false;
+              // This is a Logs (PPL) rule action — disable on Metrics
+              // (PromQL) pages so users don't get the wrong flyout.
+              const queryLanguage = (deps.query as { language?: string })?.language?.toUpperCase();
+              if (queryLanguage === 'PROMQL') return false;
               // AOSS clusters can't host monitors; the button greys out.
               const isAOSS =
                 (deps.query as { dataset?: { dataSource?: { type?: string } } })?.dataset
@@ -681,6 +685,81 @@ export class ObservabilityPlugin
           // `console.error` precedent below for the S3 datasource path.
 
           console.error('Failed to register Explore "Create alert rule" action', error);
+        });
+
+      // Register a separate "Create alert rule" action for the Metrics
+      // (PromQL) Explore page. This opens the Metrics rule flyout instead
+      // of the Logs (PPL) flyout when the user is on the Metrics page.
+      const LazyCreateMetricsMonitor = React.lazy(async () => {
+        const mod = await import('./components/alerting/create_metrics_monitor');
+        return { default: mod.CreateMetricsMonitor };
+      });
+
+      core
+        .getStartServices()
+        .then(([coreStart]) => {
+          const capabilities = coreStart.application.capabilities as
+            | { observability?: { alertManagerEnabled?: boolean } }
+            | undefined;
+          if (!capabilities?.observability?.alertManagerEnabled) {
+            return;
+          }
+          exploreSetup.queryPanelActionsRegistry.register({
+            id: 'observability-create-metrics-monitor-from-explore',
+            order: 2,
+            actionType: 'flyout',
+            getLabel: () =>
+              i18n.translate('observability.alerting.exploreCreateMetricsMonitor.actionLabel', {
+                defaultMessage: 'Create alert rule',
+              }),
+            getIcon: () => 'bell',
+            getIsEnabled: (deps) => {
+              // Only enable on Metrics (PromQL) pages.
+              const queryLanguage = (deps.query as { language?: string })?.language?.toUpperCase();
+              if (queryLanguage !== 'PROMQL') return false;
+              // AOSS clusters can't host monitors.
+              const isAOSS =
+                (deps.query as { dataset?: { dataSource?: { type?: string } } })?.dataset
+                  ?.dataSource?.type === 'OpenSearch Serverless';
+              return !isAOSS;
+            },
+            component: (props) => {
+              const dataset = (props.dependencies.query as {
+                dataset?: {
+                  id?: string;
+                  title?: string;
+                  dataSource?: { id?: string; title?: string; name?: string };
+                };
+              }).dataset;
+              // On the Metrics page the Prometheus connection is the dataset
+              // itself (dataset.id), not a nested dataSource. Fall back to
+              // dataset.dataSource.id for compatibility with other layouts.
+              const dsId = dataset?.dataSource?.id || dataset?.id;
+              const dsName =
+                dataset?.dataSource?.title ?? dataset?.dataSource?.name ?? dataset?.title;
+              return (
+                <React.Suspense fallback={null}>
+                  <LazyCreateMetricsMonitor
+                    onCancel={props.closeFlyout}
+                    onSave={() => {
+                      props.closeFlyout();
+                    }}
+                    datasourceId={dsId}
+                    datasourceName={dsName}
+                    http={props.services.http}
+                    addToast={(title, color) =>
+                      props.services.notifications.toasts[
+                        color === 'danger' ? 'addDanger' : 'addSuccess'
+                      ](title)
+                    }
+                  />
+                </React.Suspense>
+              );
+            },
+          });
+        })
+        .catch((error) => {
+          console.error('Failed to register Explore "Create metrics alert rule" action', error);
         });
     }
 
