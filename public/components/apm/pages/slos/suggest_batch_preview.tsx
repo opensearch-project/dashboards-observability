@@ -13,12 +13,15 @@
 
 import React, { useState } from 'react';
 import {
+  EuiAccordion,
   EuiBadge,
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import type { SloApiClient } from './slo_api_client';
@@ -177,14 +180,45 @@ export const SuggestBatchPreview: React.FC<SuggestBatchPreviewProps> = ({
           })}
         </EuiText>
       ) : (
-        previews.map((p) => (
-          <SuggestPreviewRow
-            key={p.key}
-            preview={p}
-            live={liveByKey[p.key] ?? { status: 'loading' }}
-            windowChoice={windowChoice}
-          />
-        ))
+        (() => {
+          const grouped: Array<{ service: string; items: typeof previews }> = [];
+          for (const p of previews) {
+            const svc = p.suggestion.input.spec.service ?? '';
+            const last = grouped[grouped.length - 1];
+            if (last && last.service === svc) {
+              last.items.push(p);
+            } else {
+              grouped.push({ service: svc, items: [p] });
+            }
+          }
+          const MAX_INITIALLY_OPEN = 5;
+          return grouped.map((group, idx) => (
+            <div key={group.service} data-test-subj={`slosSuggestPreviewGroup-${group.service}`}>
+              <EuiAccordion
+                id={`slosSuggestPreviewAccordion-${group.service}`}
+                buttonContent={
+                  <EuiTitle size="xxs">
+                    <h5>
+                      {group.service} ({group.items.length})
+                    </h5>
+                  </EuiTitle>
+                }
+                initialIsOpen={idx < MAX_INITIALLY_OPEN}
+                paddingSize="s"
+              >
+                {group.items.map((p) => (
+                  <SuggestPreviewRow
+                    key={p.key}
+                    preview={p}
+                    live={liveByKey[p.key] ?? { status: 'loading' }}
+                    windowChoice={windowChoice}
+                  />
+                ))}
+              </EuiAccordion>
+              {idx < grouped.length - 1 && <EuiHorizontalRule margin="s" />}
+            </div>
+          ));
+        })()
       )}
     </div>
   );
