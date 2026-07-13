@@ -62,6 +62,8 @@ import { SuggestBatchPreview } from './suggest_batch_preview';
 import { useDiscoveryProbes } from './suggest_use_discovery_probes';
 import { useBatchCreate } from './suggest_use_batch_create';
 import { useServiceSloHealth } from './slo_health_summary';
+import { buildServiceFilterOptions } from './service_filter_options';
+import './slo_suggest_page.scss';
 
 export interface SloSuggestPageProps {
   apiClient: SloApiClient;
@@ -118,30 +120,8 @@ const ResizableFlyout: React.FC<{
       pushMinBreakpoint="xs"
       data-test-subj="slosSuggestPreviewFlyout"
     >
-      <div
-        ref={handleRef}
-        onMouseDown={onMouseDown}
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          bottom: 0,
-          width: 6,
-          cursor: 'col-resize',
-          zIndex: 1000,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <div
-          style={{
-            width: 4,
-            height: 40,
-            borderRadius: 2,
-            backgroundColor: '#c0c5cc',
-          }}
-        />
+      <div ref={handleRef} onMouseDown={onMouseDown} className="sloSuggestFlyout__resizeHandle">
+        <div className="sloSuggestFlyout__resizeGrip" />
       </div>
       {children}
     </EuiFlyout>
@@ -153,20 +133,7 @@ const SuggestServiceFilter: React.FC<{
   coveredSet: Set<string>;
   scopedServices: string[] | undefined;
   history: ReturnType<typeof useHistory>;
-  selectAll: () => void;
-  clearAll: () => void;
-  allSelected: boolean;
-  noneSelected: boolean;
-}> = ({
-  allServices,
-  coveredSet,
-  scopedServices,
-  history,
-  selectAll,
-  clearAll,
-  allSelected,
-  noneSelected,
-}) => {
+}> = ({ allServices, coveredSet, scopedServices, history }) => {
   const [isOpen, setIsOpen] = useState(false);
   const scopeSet = useMemo(() => new Set(scopedServices ?? []), [scopedServices]);
 
@@ -178,28 +145,19 @@ const SuggestServiceFilter: React.FC<{
     return Array.from(set);
   }, [allServices]);
 
-  const noScope = scopedServices === undefined;
   const options = useMemo(
     () =>
-      allServiceNames.map((svc) => {
-        const fullyCovered = coveredSet.has(svc);
-        const isChecked = fullyCovered
-          ? undefined
-          : noScope || scopeSet.has(svc)
-          ? ('on' as const)
-          : undefined;
-        return {
-          label: svc,
-          checked: isChecked,
-          disabled: fullyCovered,
-          append: fullyCovered ? (
-            <EuiText size="xs" color="success">
-              covered
-            </EuiText>
-          ) : undefined,
-        };
-      }),
-    [allServiceNames, scopeSet, coveredSet, noScope]
+      buildServiceFilterOptions(allServiceNames, scopeSet, coveredSet).map((opt) => ({
+        label: opt.label,
+        checked: opt.checked,
+        disabled: opt.disabled,
+        append: opt.covered ? (
+          <EuiText size="xs" color="success">
+            covered
+          </EuiText>
+        ) : undefined,
+      })),
+    [allServiceNames, scopeSet, coveredSet]
   );
 
   const onChange = useCallback(
@@ -207,38 +165,36 @@ const SuggestServiceFilter: React.FC<{
       const sel = newOptions
         .filter((o) => o.checked === 'on' && !coveredSet.has(o.label))
         .map((o) => o.label);
-      if (
-        sel.length === 0 ||
-        sel.length === allServiceNames.filter((s) => !coveredSet.has(s)).length
-      ) {
+      // Empty selection collapses to the unscoped URL, which now renders the
+      // "pick services" empty state rather than drafting everything.
+      if (sel.length === 0) {
         history.replace('/slos/suggest');
       } else {
         const qs = new URLSearchParams({ source: 'apm', services: sel.join(',') });
         history.replace(`/slos/suggest?${qs.toString()}`);
       }
     },
-    [history, allServiceNames, coveredSet]
+    [history, coveredSet]
   );
 
-  const selectedCount = scopedServices?.length ?? 0;
+  const clearScope = useCallback(() => {
+    setIsOpen(false);
+    history.replace('/slos/suggest');
+  }, [history]);
+
+  const scopedCount = scopedServices?.length ?? 0;
+  const buttonLabel =
+    scopedCount === 0
+      ? i18n.translate('observability.apm.slo.suggest.serviceFilter.empty', {
+          defaultMessage: 'Select services',
+        })
+      : i18n.translate('observability.apm.slo.suggest.serviceFilter', {
+          defaultMessage: 'Suggest SLOs for {count, plural, one {# service} other {# services}}',
+          values: { count: scopedCount },
+        });
 
   return (
-    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty size="s" onClick={selectAll} isDisabled={allSelected}>
-          {i18n.translate('observability.apm.slo.suggest.selectAll', {
-            defaultMessage: 'Select all',
-          })}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty size="s" onClick={clearAll} isDisabled={noneSelected}>
-          {i18n.translate('observability.apm.slo.suggest.clearSelection', {
-            defaultMessage: 'Clear',
-          })}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem grow={true} />
+    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
         <EuiPopover
           isOpen={isOpen}
@@ -253,30 +209,39 @@ const SuggestServiceFilter: React.FC<{
               onClick={() => setIsOpen((prev) => !prev)}
               data-test-subj="slosSuggestServiceFilter"
             >
-              {i18n.translate('observability.apm.slo.suggest.serviceFilter', {
-                defaultMessage:
-                  'Suggest SLOs for {count, plural, one {# service} other {# services}}',
-                values: { count: selectedCount },
-              })}
+              {buttonLabel}
             </EuiButton>
           }
         >
-          <EuiSelectable
-            searchable
-            searchProps={{ compressed: true, placeholder: 'Filter services' }}
-            options={options}
-            onChange={onChange}
-            listProps={{ bordered: false }}
-            style={{ width: 300 }}
-            height={240}
-          >
-            {(list, search) => (
-              <>
-                <div style={{ padding: '8px 8px 0' }}>{search}</div>
-                {list}
-              </>
-            )}
-          </EuiSelectable>
+          <div className="sloSuggestFilter__panel">
+            <EuiSelectable
+              searchable
+              searchProps={{ compressed: true, placeholder: 'Filter services' }}
+              options={options}
+              onChange={onChange}
+              listProps={{ bordered: false }}
+              height={240}
+            >
+              {(list, search) => (
+                <>
+                  <div className="sloSuggestFilter__search">{search}</div>
+                  {list}
+                </>
+              )}
+            </EuiSelectable>
+            <EuiPanel color="transparent" paddingSize="s">
+              <EuiButtonEmpty
+                size="s"
+                onClick={clearScope}
+                isDisabled={scopedCount === 0}
+                data-test-subj="slosSuggestServiceFilterClear"
+              >
+                {i18n.translate('observability.apm.slo.suggest.clearSelection', {
+                  defaultMessage: 'Clear',
+                })}
+              </EuiButtonEmpty>
+            </EuiPanel>
+          </div>
         </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -301,8 +266,6 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   const [flyoutWidth, setFlyoutWidth] = useState(Math.round(window.innerWidth * 0.3));
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [expandedMap, setExpandedMap] = useState<Record<string, boolean>>({});
-  /** Bumping this triggers the discovery effect. */
-  const [discoveryEpoch] = useState(0);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -340,13 +303,14 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   });
 
   // Apply URL scope before the `services.length === 0` guard in `suggestions`.
-  // A stale deep link (scope names nothing discovery sees) falls back to the
-  // full list so the page stays usable; the UI still surfaces the miss.
+  // Unscoped (no `?services=`) drafts nothing: the user picks services from the
+  // filter popover, which writes the scope to the URL. A stale deep link that
+  // names services discovery doesn't see resolves to an empty list, which the
+  // "pick services" empty state handles the same as the initial landing.
   const scopedServices = useMemo(() => {
-    if (!scope.services) return allDiscoveredServices;
+    if (!scope.services) return [];
     const allow = new Set(scope.services);
-    const filtered = allDiscoveredServices.filter((s) => allow.has(s.serviceName));
-    return filtered.length > 0 ? filtered : allDiscoveredServices;
+    return allDiscoveredServices.filter((s) => allow.has(s.serviceName));
   }, [allDiscoveredServices, scope.services]);
 
   const services = scopedServices;
@@ -357,7 +321,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
     existingRuleGroups,
     rulerFetchFailed,
     loading: discoveryLoading,
-  } = useDiscoveryProbes({ http, datasourceId, epoch: discoveryEpoch });
+  } = useDiscoveryProbes({ http, datasourceId });
 
   const suggestions = useMemo<Suggestion[]>(() => {
     if (!datasourceId || !services || services.length === 0) return [];
@@ -394,9 +358,10 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   }, [healthBySvc]);
 
   // Default every suggestion to "selected" when the list changes — EXCEPT
-  // those already covered by an existing Prometheus rule. Users can re-check
-  // covered drafts explicitly if they want a duplicate, but the common case
-  // is "leave them unchecked so we don't dual-write".
+  // those already covered by an existing Prometheus rule. The user has already
+  // chosen which services to scope upstream, so landing with their drafts
+  // pre-checked matches intent; covered drafts stay unchecked so we don't
+  // dual-write. Users can uncheck any draft they don't want.
   useEffect(() => {
     setSelected(new Set(suggestions.filter((s) => !s.existingRuleMatch).map((s) => s.key)));
   }, [suggestions]);
@@ -481,10 +446,10 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   // deps include it (uniqueServices, serviceRows, …). The result was a render
   // loop where typing in a draft override re-derived the entire row tree on
   // every keystroke for ~38 drafts.
-  const decoratedSuggestions = useMemo(() => suggestions.map(applyOverrides), [
-    suggestions,
-    applyOverrides,
-  ]);
+  const decoratedSuggestions = useMemo(
+    () => suggestions.map(applyOverrides),
+    [suggestions, applyOverrides]
+  );
   const selectedCount = decoratedSuggestions.filter((s) => selected.has(s.key)).length;
   const totalRules = decoratedSuggestions
     .filter((s) => selected.has(s.key))
@@ -623,6 +588,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
             {servicesError && (
               <>
                 <EuiCallOut
+                  announceOnMount
                   color="danger"
                   iconType="alert"
                   title={i18n.translate('observability.apm.slo.suggest.servicesErrorTitle', {
@@ -637,7 +603,11 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
             )}
 
             {loading && (
-              <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
+              <EuiFlexGroup
+                justifyContent="center"
+                alignItems="center"
+                className="sloSuggestLoading"
+              >
                 <EuiFlexItem grow={false}>
                   <EuiLoadingSpinner size="xl" />
                 </EuiFlexItem>
@@ -646,6 +616,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
 
             {!loading && !datasourceId && (
               <EuiCallOut
+                announceOnMount
                 size="s"
                 iconType="iInCircle"
                 title={i18n.translate('observability.apm.slo.suggest.noDatasource.title', {
@@ -662,8 +633,9 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
               </EuiCallOut>
             )}
 
-            {!loading && datasourceId && uniqueServices.length === 0 && !servicesError && (
+            {!loading && datasourceId && allDiscoveredServices.length === 0 && !servicesError && (
               <EuiCallOut
+                announceOnMount
                 size="s"
                 iconType="iInCircle"
                 title={i18n.translate('observability.apm.slo.suggest.noServices.title', {
@@ -682,6 +654,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
             {!loading && datasourceId && rulerFetchFailed && (
               <>
                 <EuiCallOut
+                  announceOnMount
                   size="s"
                   iconType="alert"
                   color="warning"
@@ -701,136 +674,152 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
               </>
             )}
 
-            {!loading && decoratedSuggestions.length > 0 && (
+            {!loading && datasourceId && allDiscoveredServices.length > 0 && !servicesError && (
               <>
-                <EuiFlexGroup
-                  alignItems="center"
-                  responsive={false}
-                  gutterSize="m"
-                  data-test-subj="slosSuggestHeaderStrip"
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiPanel paddingSize="m" hasBorder>
-                      <EuiStat
-                        title={`${selectedCount}`}
-                        description={i18n.translate('observability.apm.slo.suggest.stat.ofSlos', {
-                          defaultMessage: 'of {total} SLOs',
-                          values: { total: decoratedSuggestions.length },
-                        })}
-                        titleSize="m"
-                        reverse
-                        data-test-subj="slosSuggestStatSlos"
-                      />
-                    </EuiPanel>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiPanel paddingSize="m" hasBorder>
-                      <EuiStat
-                        title={`${uniqueServices.length}`}
-                        description={i18n.translate('observability.apm.slo.suggest.stat.services', {
-                          defaultMessage: '{count, plural, one {service} other {services}}',
-                          values: { count: uniqueServices.length },
-                        })}
-                        titleSize="m"
-                        reverse
-                        data-test-subj="slosSuggestStatServices"
-                      />
-                    </EuiPanel>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiPanel paddingSize="m" hasBorder>
-                      <EuiStat
-                        title={`${totalRules}`}
-                        description={i18n.translate(
-                          'observability.apm.slo.suggest.stat.rulesToProvision',
-                          { defaultMessage: 'rules to provision' }
-                        )}
-                        titleSize="m"
-                        titleColor="subdued"
-                        reverse
-                        data-test-subj="slosSuggestStatRules"
-                      />
-                    </EuiPanel>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={true} />
-                </EuiFlexGroup>
-                {coveredCount > 0 && <EuiSpacer size="xs" />}
-                {coveredCount > 0 && (
-                  <EuiText size="xs" color="subdued" data-test-subj="slosSuggestHeaderSubline">
-                    {i18n.translate('observability.apm.slo.suggest.headerSubline.covered', {
-                      defaultMessage:
-                        '{count, plural, one {# draft} other {# drafts}} already covered by existing rules',
-                      values: { count: coveredCount },
-                    })}
-                  </EuiText>
-                )}
-                <EuiSpacer size="m" />
-
-                {progress && (
+                {decoratedSuggestions.length > 0 && (
                   <>
-                    <EuiPanel paddingSize="s" hasBorder data-test-subj="slosSuggestProgressStrip">
-                      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                        <EuiFlexItem grow={false}>
-                          <EuiText size="xs">
-                            {i18n.translate('observability.apm.slo.suggest.progressPrefix', {
-                              defaultMessage: 'Creating SLO {done}/{total} · ',
-                              values: { done: progress.done, total: progress.total },
-                            })}
-                            <strong>{progress.failed}</strong>
-                            {i18n.translate('observability.apm.slo.suggest.progressSuffix', {
-                              defaultMessage: ' failed so far',
-                            })}
-                          </EuiText>
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiProgress
-                            color={progress.failed > 0 ? 'warning' : 'primary'}
-                            value={progress.done}
-                            max={progress.total}
-                            size="xs"
+                    <EuiFlexGroup
+                      alignItems="center"
+                      responsive={false}
+                      gutterSize="m"
+                      data-test-subj="slosSuggestHeaderStrip"
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EuiPanel paddingSize="m" hasBorder>
+                          <EuiStat
+                            title={`${selectedCount}`}
+                            description={i18n.translate(
+                              'observability.apm.slo.suggest.stat.ofSlos',
+                              {
+                                defaultMessage: 'of {total} SLOs',
+                                values: { total: decoratedSuggestions.length },
+                              }
+                            )}
+                            titleSize="m"
+                            reverse
+                            data-test-subj="slosSuggestStatSlos"
                           />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiPanel>
-                    <EuiSpacer size="s" />
+                        </EuiPanel>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiPanel paddingSize="m" hasBorder>
+                          <EuiStat
+                            title={`${uniqueServices.length}`}
+                            description={i18n.translate(
+                              'observability.apm.slo.suggest.stat.services',
+                              {
+                                defaultMessage: '{count, plural, one {service} other {services}}',
+                                values: { count: uniqueServices.length },
+                              }
+                            )}
+                            titleSize="m"
+                            reverse
+                            data-test-subj="slosSuggestStatServices"
+                          />
+                        </EuiPanel>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiPanel paddingSize="m" hasBorder>
+                          <EuiStat
+                            title={`${totalRules}`}
+                            description={i18n.translate(
+                              'observability.apm.slo.suggest.stat.rulesToProvision',
+                              { defaultMessage: 'rules to provision' }
+                            )}
+                            titleSize="m"
+                            titleColor="subdued"
+                            reverse
+                            data-test-subj="slosSuggestStatRules"
+                          />
+                        </EuiPanel>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={true} />
+                    </EuiFlexGroup>
+                    {coveredCount > 0 && <EuiSpacer size="xs" />}
+                    {coveredCount > 0 && (
+                      <EuiText size="xs" color="subdued" data-test-subj="slosSuggestHeaderSubline">
+                        {i18n.translate('observability.apm.slo.suggest.headerSubline.covered', {
+                          defaultMessage:
+                            '{count, plural, one {# draft} other {# drafts}} already covered by existing rules',
+                          values: { count: coveredCount },
+                        })}
+                      </EuiText>
+                    )}
+                    <EuiSpacer size="m" />
+
+                    {progress && (
+                      <>
+                        <EuiPanel
+                          paddingSize="s"
+                          hasBorder
+                          data-test-subj="slosSuggestProgressStrip"
+                        >
+                          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                            <EuiFlexItem grow={false}>
+                              <EuiText size="xs">
+                                {i18n.translate('observability.apm.slo.suggest.progressPrefix', {
+                                  defaultMessage: 'Creating SLO {done}/{total} · ',
+                                  values: { done: progress.done, total: progress.total },
+                                })}
+                                <strong>{progress.failed}</strong>
+                                {i18n.translate('observability.apm.slo.suggest.progressSuffix', {
+                                  defaultMessage: ' failed so far',
+                                })}
+                              </EuiText>
+                            </EuiFlexItem>
+                            <EuiFlexItem>
+                              <EuiProgress
+                                color={progress.failed > 0 ? 'warning' : 'primary'}
+                                value={progress.done}
+                                max={progress.total}
+                                size="xs"
+                              />
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </EuiPanel>
+                        <EuiSpacer size="s" />
+                      </>
+                    )}
                   </>
                 )}
 
+                {/* The service picker is always available once services are
+                    discovered — it's how the user scopes drafts, including from
+                    the empty initial state. */}
                 <SuggestServiceFilter
                   allServices={allDiscoveredServices}
                   coveredSet={allServicesCoverage}
                   scopedServices={scope.services}
                   history={history}
-                  selectAll={() => {
-                    const selectable = !scope.services
-                      ? decoratedSuggestions.filter(
-                          (s) => !allServicesCoverage.has(s.input.spec.service)
-                        )
-                      : decoratedSuggestions;
-                    setSelected(new Set(selectable.map((s) => s.key)));
-                  }}
-                  clearAll={() => setSelected(new Set())}
-                  allSelected={
-                    selectedCount ===
-                      decoratedSuggestions.filter((s) =>
-                        scope.services ? true : !allServicesCoverage.has(s.input.spec.service)
-                      ).length && selectedCount > 0
-                  }
-                  noneSelected={selectedCount === 0}
                 />
                 <EuiSpacer size="s" />
-                <ServiceTreeTable
-                  serviceRows={serviceRows}
-                  expandedMap={expandedMap}
-                  onToggleExpand={toggleExpand}
-                  onToggleServiceSelection={toggleServiceSelection}
-                  selected={selected}
-                  overrides={overrides}
-                  onToggleDraft={toggle}
-                  onOverrideChange={setOverride}
-                  rowStatusMap={rowStatusMap}
-                  coveredServices={!scope.services ? allServicesCoverage : undefined}
-                />
+
+                {decoratedSuggestions.length > 0 ? (
+                  <ServiceTreeTable
+                    serviceRows={serviceRows}
+                    expandedMap={expandedMap}
+                    onToggleExpand={toggleExpand}
+                    onToggleServiceSelection={toggleServiceSelection}
+                    selected={selected}
+                    overrides={overrides}
+                    onToggleDraft={toggle}
+                    onOverrideChange={setOverride}
+                    rowStatusMap={rowStatusMap}
+                  />
+                ) : (
+                  <EuiPanel
+                    color="subdued"
+                    hasShadow={false}
+                    paddingSize="l"
+                    data-test-subj="slosSuggestPickServices"
+                  >
+                    <EuiText size="s" color="subdued" textAlign="center">
+                      {i18n.translate('observability.apm.slo.suggest.pickServices.prompt', {
+                        defaultMessage: 'Pick one or more services to suggest SLOs for.',
+                      })}
+                    </EuiText>
+                  </EuiPanel>
+                )}
               </>
             )}
           </EuiPageContentBody>
@@ -858,7 +847,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
               </h3>
             </EuiTitle>
           </EuiFlyoutHeader>
-          <EuiFlyoutBody style={{ overflowWrap: 'break-word', wordBreak: 'break-word' }}>
+          <EuiFlyoutBody className="sloSuggestFlyout__body">
             <SuggestBatchPreview
               apiClient={apiClient}
               selectedSuggestions={decoratedSuggestions.filter((s) => selected.has(s.key))}

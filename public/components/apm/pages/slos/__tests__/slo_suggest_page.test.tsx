@@ -32,6 +32,7 @@ jest.mock('../../../shared/hooks/use_services', () => ({
 }));
 
 import { SloSuggestPage } from '../slo_suggest_page';
+import { buildServiceFilterOptions } from '../service_filter_options';
 import type { SloApiClient } from '../slo_api_client';
 import type {
   ChromeStart,
@@ -42,21 +43,21 @@ import type {
 function makeHttp(): HttpStart {
   // The discovery effect fires probes + ruler fetch; resolve them all to
   // empty so the page renders without loading-spinner getting stuck.
-  return ({
+  return {
     get: jest.fn().mockImplementation((url: string) => {
       if (url.includes('/metadata/label-values/')) return Promise.resolve({ values: [] });
       if (url.includes('/rules')) return Promise.resolve({ data: { groups: [] } });
       return Promise.resolve({});
     }),
-  } as unknown) as HttpStart;
+  } as unknown as HttpStart;
 }
 
 function makeChrome(): ChromeStart {
-  return ({ setBreadcrumbs: jest.fn() } as unknown) as ChromeStart;
+  return { setBreadcrumbs: jest.fn() } as unknown as ChromeStart;
 }
 
 function makeNotifications(): NotificationsStart {
-  return ({
+  return {
     toasts: {
       addSuccess: jest.fn(),
       addDanger: jest.fn(),
@@ -64,19 +65,25 @@ function makeNotifications(): NotificationsStart {
       addInfo: jest.fn(),
       addError: jest.fn(),
     },
-  } as unknown) as NotificationsStart;
+  } as unknown as NotificationsStart;
 }
 
 function makeApiClient(): SloApiClient {
-  return ({
+  return {
     create: jest.fn().mockResolvedValue(undefined),
     preview: jest.fn().mockResolvedValue({ groupName: 'g', interval: 30, rules: [], yaml: '' }),
-  } as unknown) as SloApiClient;
+  } as unknown as SloApiClient;
 }
 
 function renderPage(
   opts: {
     rulerFails?: boolean;
+    /**
+     * URL the page mounts at. Drafts are only generated for services named in
+     * the `?services=` scope, so interactive tests that need a populated draft
+     * view pass an explicit scope. Defaults to unscoped (the empty landing).
+     */
+    initialEntry?: string;
   } = {}
 ) {
   mockUseApmConfig.mockReturnValue({
@@ -93,20 +100,20 @@ function renderPage(
     refetch: jest.fn(),
   });
   const http = opts.rulerFails
-    ? (({
+    ? ({
         get: jest.fn().mockImplementation((url: string) => {
           if (url.includes('/rules')) return Promise.reject(new Error('ruler down'));
           if (url.includes('/metadata/label-values/')) return Promise.resolve({ values: [] });
           return Promise.resolve({});
         }),
-      } as unknown) as HttpStart)
+      } as unknown as HttpStart)
     : makeHttp();
   // Suppress per-probe / ruler failure console.warn / .error so they don't
   // pollute the test report.
   jest.spyOn(console, 'warn').mockImplementation(() => {});
   const apiClient = makeApiClient();
   const result = render(
-    <MemoryRouter initialEntries={['/slos/suggest']}>
+    <MemoryRouter initialEntries={[opts.initialEntry ?? '/slos/suggest']}>
       <SloSuggestPage
         apiClient={apiClient}
         http={http}
@@ -119,6 +126,10 @@ function renderPage(
   return { ...result, apiClient };
 }
 
+// Scope both mocked services so drafts are generated (unscoped renders the
+// "pick services" empty state instead).
+const SCOPED_ENTRY = '/slos/suggest?source=apm&services=cart,checkout';
+
 describe('SloSuggestPage', () => {
   afterEach(() => {
     mockUseApmConfig.mockReset();
@@ -129,7 +140,7 @@ describe('SloSuggestPage', () => {
   it('mounts with mocked services and renders the page chrome', async () => {
     renderPage();
     expect(await screen.findByTestId('slosSuggestPage')).toBeInTheDocument();
-    expect(screen.getByTestId('slosSuggestDiscover')).toBeInTheDocument();
+    expect(screen.getByTestId('slosSuggestPreviewToggle')).toBeInTheDocument();
     expect(screen.getByTestId('slosSuggestCreate')).toBeInTheDocument();
   });
 
@@ -138,34 +149,81 @@ describe('SloSuggestPage', () => {
     expect(await screen.findByTestId('slosSuggestRulerFetchFailed')).toBeInTheDocument();
   });
 
-  it('disables the create button when no rows are selected', async () => {
+  it('shows the "pick services" empty state (and no drafts) when unscoped', async () => {
     renderPage();
-    // Click "Clear" to reset the default selection (Suggest defaults to all
-    // selected) so the create button drops to disabled.
+    await screen.findByTestId('slosSuggestPage');
+    // The service picker is available so the user can scope, but no drafts
+    // (and no stats strip) are rendered until they pick.
+    expect(await screen.findByTestId('slosSuggestPickServices')).toBeInTheDocument();
+    expect(screen.getByTestId('slosSuggestServiceFilter')).toBeInTheDocument();
+    expect(screen.getByText('Select services')).toBeInTheDocument();
+    expect(screen.queryByTestId('slosSuggestHeaderStrip')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('slosSuggestTable')).not.toBeInTheDocument();
+  });
+
+  it('generates drafts and shows the stats strip when a scope is present', async () => {
+    renderPage({ initialEntry: SCOPED_ENTRY });
+    await screen.findByTestId('slosSuggestPage');
+    expect(await screen.findByTestId('slosSuggestHeaderStrip')).toBeInTheDocument();
+    expect(screen.getByTestId('slosSuggestTable')).toBeInTheDocument();
+    expect(screen.queryByTestId('slosSuggestPickServices')).not.toBeInTheDocument();
+    // Button reflects the scoped count, not "Select services" or "0 services".
+    expect(screen.getByText('Suggest SLOs for 2 services')).toBeInTheDocument();
+  });
+
+  it('defaults scoped drafts to selected so the create button is enabled', async () => {
+    renderPage({ initialEntry: SCOPED_ENTRY });
     await screen.findByTestId('slosSuggestPage');
     await waitFor(() => expect(screen.getByTestId('slosSuggestHeaderStrip')).toBeInTheDocument());
-    fireEvent.click(screen.getByText('Clear'));
+    // A scoped page lands with every uncovered draft selected — no top-level
+    // Select all / Clear links exist anymore.
+    expect(screen.queryByText('Select all')).not.toBeInTheDocument();
+    expect(screen.getByTestId('slosSuggestCreate')).not.toBeDisabled();
+  });
+
+  it('disables the create button when every service is deselected', async () => {
+    renderPage({ initialEntry: SCOPED_ENTRY });
+    await screen.findByTestId('slosSuggestPage');
+    await waitFor(() => expect(screen.getByTestId('slosSuggestHeaderStrip')).toBeInTheDocument());
+    // Uncheck each service's master checkbox to clear the default selection.
+    fireEvent.click(screen.getByTestId('slosSuggestServiceSelect-cart'));
+    fireEvent.click(screen.getByTestId('slosSuggestServiceSelect-checkout'));
     await waitFor(() => expect(screen.getByTestId('slosSuggestCreate')).toBeDisabled());
   });
 
   it('opens and closes the confirm modal', async () => {
-    renderPage();
+    renderPage({ initialEntry: SCOPED_ENTRY });
     await screen.findByTestId('slosSuggestPage');
     await waitFor(() => expect(screen.getByTestId('slosSuggestHeaderStrip')).toBeInTheDocument());
+    // Drafts default to selected, so create is immediately actionable.
+    await waitFor(() => expect(screen.getByTestId('slosSuggestCreate')).not.toBeDisabled());
     fireEvent.click(screen.getByTestId('slosSuggestCreate'));
     expect(await screen.findByTestId('slosSuggestConfirmModal')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('Cancel'));
+    fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
     await waitFor(() =>
       expect(screen.queryByTestId('slosSuggestConfirmModal')).not.toBeInTheDocument()
     );
   });
 
   it('renders the preview flyout when "Preview" is clicked', async () => {
-    renderPage();
+    renderPage({ initialEntry: SCOPED_ENTRY });
     await screen.findByTestId('slosSuggestPage');
     await waitFor(() => expect(screen.getByTestId('slosSuggestPreviewToggle')).toBeInTheDocument());
+    // Preview is enabled because scoped drafts default to selected.
+    await waitFor(() => expect(screen.getByTestId('slosSuggestPreviewToggle')).not.toBeDisabled());
     fireEvent.click(screen.getByTestId('slosSuggestPreviewToggle'));
     expect(await screen.findByTestId('slosSuggestPreviewFlyout')).toBeInTheDocument();
+  });
+
+  it('clears the service scope from the filter dropdown, returning to the empty state', async () => {
+    renderPage({ initialEntry: SCOPED_ENTRY });
+    await screen.findByTestId('slosSuggestPage');
+    await waitFor(() => expect(screen.getByTestId('slosSuggestHeaderStrip')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('slosSuggestServiceFilter'));
+    fireEvent.click(await screen.findByTestId('slosSuggestServiceFilterClear'));
+    // Scope cleared → drafts gone → the "pick services" empty state returns.
+    expect(await screen.findByTestId('slosSuggestPickServices')).toBeInTheDocument();
+    expect(screen.queryByTestId('slosSuggestHeaderStrip')).not.toBeInTheDocument();
   });
 
   it('renders the no-datasource warning when prometheusDataSource is missing', async () => {
@@ -192,5 +250,50 @@ describe('SloSuggestPage', () => {
       </MemoryRouter>
     );
     expect(await screen.findByText(/No Prometheus datasource configured/)).toBeInTheDocument();
+  });
+});
+
+describe('buildServiceFilterOptions', () => {
+  it('checks in-scope services and leaves the rest unchecked', () => {
+    const opts = buildServiceFilterOptions(
+      ['cart', 'checkout', 'payments'],
+      new Set(['cart']),
+      new Set()
+    );
+    const byLabel = Object.fromEntries(opts.map((o) => [o.label, o]));
+    expect(byLabel.cart.checked).toBe('on');
+    expect(byLabel.checkout.checked).toBeUndefined();
+    expect(byLabel.payments.checked).toBeUndefined();
+  });
+
+  it('disables covered services and never checks them, even if in scope', () => {
+    const opts = buildServiceFilterOptions(
+      ['cart', 'payments'],
+      new Set(['cart', 'payments']),
+      new Set(['payments'])
+    );
+    const byLabel = Object.fromEntries(opts.map((o) => [o.label, o]));
+    expect(byLabel.payments.disabled).toBe(true);
+    expect(byLabel.payments.covered).toBe(true);
+    expect(byLabel.payments.checked).toBeUndefined();
+    expect(byLabel.cart.disabled).toBe(false);
+    expect(byLabel.cart.checked).toBe('on');
+  });
+
+  it('floats checked services to the top, preserving order within each group', () => {
+    const opts = buildServiceFilterOptions(
+      ['ad', 'cart', 'checkout', 'currency', 'email'],
+      new Set(['checkout', 'email']),
+      new Set()
+    );
+    expect(opts.map((o) => o.label)).toEqual([
+      // checked, in original order…
+      'checkout',
+      'email',
+      // …then unchecked, in original order.
+      'ad',
+      'cart',
+      'currency',
+    ]);
   });
 });

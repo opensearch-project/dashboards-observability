@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 
 // Stub coreRefs so the navigate helpers don't explode on mount. `jest.mock`
 // is hoisted above imports, so the captured variable has to be `mock`-
@@ -17,6 +17,64 @@ jest.mock('../../../../../framework/core_refs', () => ({
     http: { basePath: { prepend: (p: string) => p } },
   },
 }));
+
+// EuiSelectable virtualizes its option list (react-window + AutoSizer), which
+// measures 0×0 in jsdom and renders no rows — so its options can't be queried
+// or clicked in tests. Stub it with a plain checkbox list that preserves the
+// same option/onChange contract our picker relies on, leaving every other EUI
+// component real.
+interface StubOption {
+  label: string;
+  checked?: 'on';
+  disabled?: boolean;
+  append?: React.ReactNode;
+}
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const ReactLib = jest.requireActual('react');
+  return {
+    ...actual,
+    EuiSelectable: ({
+      options,
+      onChange,
+    }: {
+      options: StubOption[];
+      onChange: (next: StubOption[]) => void;
+    }) =>
+      ReactLib.createElement(
+        'ul',
+        { role: 'listbox' },
+        options.map((opt) =>
+          ReactLib.createElement(
+            'li',
+            {
+              key: opt.label,
+              role: 'option',
+              'aria-selected': opt.checked === 'on',
+              'aria-disabled': opt.disabled ? 'true' : undefined,
+            },
+            ReactLib.createElement(
+              'button',
+              {
+                type: 'button',
+                disabled: opt.disabled,
+                onClick: () =>
+                  onChange(
+                    options.map((o) =>
+                      o.label === opt.label
+                        ? { ...o, checked: o.checked === 'on' ? undefined : ('on' as const) }
+                        : o
+                    )
+                  ),
+              },
+              opt.label
+            ),
+            opt.append
+          )
+        )
+      ),
+  };
+});
 
 import { SloHealthCell, SloHealthPanel } from '../slo_health_panel';
 import { navigateToSloListing, navigateToSloSuggest } from '../../../shared/utils/navigation_utils';
@@ -152,7 +210,7 @@ describe('SloHealthPanel', () => {
     expect(screen.queryByTestId('sloHealthPanelChip-breached')).toBeNull();
   });
 
-  it('primary CTA scopes to services with missingCanonicalPair=true only', () => {
+  it('opens a picker (nothing pre-checked) and scopes to the services the user picks', async () => {
     const bySvc = new Map<string, SloHealthBucket>();
     bySvc.set('foo', makeBucket({ missingCanonicalPair: true }));
     bySvc.set('bar', makeBucket({ missingCanonicalPair: false }));
@@ -169,11 +227,126 @@ describe('SloHealthPanel', () => {
       />
     );
     const cta = screen.getByTestId('sloHealthPanelCta');
-    expect(cta).toHaveTextContent('Suggest SLOs for 2 services');
+    // Default label — nothing picked yet.
+    expect(cta).toHaveTextContent('Suggest SLOs');
+    expect(cta).not.toHaveTextContent('service');
+
+    // Open the popover and pick a subset. `bar` is covered (disabled).
     fireEvent.click(cta);
+    const foo = await screen.findByText('foo');
+    fireEvent.click(foo);
+    fireEvent.click(screen.getByText('baz'));
+
+    // The confirm button reflects the picked count and navigates scoped to it.
+    const confirm = screen.getByTestId('sloHealthPanelCtaConfirm');
+    await waitFor(() => expect(confirm).toHaveTextContent('Suggest SLOs for 2 services'));
+    fireEvent.click(confirm);
     expect(mockNavigateToApp).toHaveBeenLastCalledWith('observability-apm-slo', {
       path: '#/slos/suggest?source=apm&services=foo%2Cbaz',
     });
+  });
+
+  it('floats checked services to the top of the list', async () => {
+    const bySvc = new Map<string, SloHealthBucket>();
+    for (const s of ['ad', 'cart', 'checkout', 'currency']) {
+      bySvc.set(s, makeBucket({ missingCanonicalPair: true }));
+    }
+
+    render(
+      <SloHealthPanel
+        aggregate={makeBucket({ total: 4, ok: 4 })}
+        bySvc={bySvc}
+        allServices={['ad', 'cart', 'checkout', 'currency']}
+        isLoading={false}
+        error={undefined}
+        onRetry={jest.fn()}
+      />
+    );
+    fireEvent.click(screen.getByTestId('sloHealthPanelCta'));
+    // Check two services that aren't first alphabetically.
+    fireEvent.click(await screen.findByText('checkout'));
+    fireEvent.click(screen.getByText('currency'));
+
+    // After selection they sort above the unchecked ones (each group keeps
+    // original order): checkout, currency, then ad, cart.
+    await waitFor(() => {
+      const labels = screen.getAllByRole('option').map((li) => li.textContent);
+      expect(labels).toEqual(['checkout', 'currency', 'ad', 'cart']);
+    });
+  });
+
+  it('clears all picks via the Clear button', async () => {
+    const bySvc = new Map<string, SloHealthBucket>();
+    bySvc.set('foo', makeBucket({ missingCanonicalPair: true }));
+    bySvc.set('baz', makeBucket({ missingCanonicalPair: true }));
+
+    render(
+      <SloHealthPanel
+        aggregate={makeBucket({ total: 2, ok: 2 })}
+        bySvc={bySvc}
+        allServices={['foo', 'baz']}
+        isLoading={false}
+        error={undefined}
+        onRetry={jest.fn()}
+      />
+    );
+    fireEvent.click(screen.getByTestId('sloHealthPanelCta'));
+    fireEvent.click(await screen.findByText('foo'));
+    fireEvent.click(screen.getByText('baz'));
+
+    const clear = screen.getByTestId('sloHealthPanelCtaClear');
+    const confirm = screen.getByTestId('sloHealthPanelCtaConfirm');
+    await waitFor(() => expect(confirm).toHaveTextContent('Suggest SLOs for 2 services'));
+    expect(clear).not.toBeDisabled();
+
+    // Clearing resets the count and disables both the confirm and clear actions.
+    fireEvent.click(clear);
+    await waitFor(() => expect(confirm).toHaveTextContent('Suggest SLOs'));
+    expect(confirm).not.toHaveTextContent('service');
+    expect(confirm).toBeDisabled();
+    expect(clear).toBeDisabled();
+  });
+
+  it('shows a filled (primary) trigger when closed and a neutral one when open', async () => {
+    render(
+      <SloHealthPanel
+        aggregate={makeBucket({ total: 1, ok: 1 })}
+        bySvc={new Map([['foo', makeBucket({ missingCanonicalPair: true })]])}
+        allServices={['foo']}
+        isLoading={false}
+        error={undefined}
+        onRetry={jest.fn()}
+      />
+    );
+    const cta = screen.getByTestId('sloHealthPanelCta');
+    // Closed → primary/filled to draw attention to opening the picker.
+    expect(cta.className).toContain('euiButton--fill');
+    fireEvent.click(cta);
+    // Open → neutral so the footer confirm is the only primary action in view.
+    await waitFor(() => expect(cta.className).not.toContain('euiButton--fill'));
+    expect(screen.getByTestId('sloHealthPanelCtaConfirm').className).toContain('euiButton--fill');
+  });
+
+  it('disables covered services in the picker so they cannot be scoped', async () => {
+    const bySvc = new Map<string, SloHealthBucket>();
+    bySvc.set('foo', makeBucket({ missingCanonicalPair: true }));
+    bySvc.set('bar', makeBucket({ missingCanonicalPair: false }));
+
+    render(
+      <SloHealthPanel
+        aggregate={makeBucket({ total: 2, ok: 2 })}
+        bySvc={bySvc}
+        allServices={['foo', 'bar']}
+        isLoading={false}
+        error={undefined}
+        onRetry={jest.fn()}
+      />
+    );
+    fireEvent.click(screen.getByTestId('sloHealthPanelCta'));
+    // The covered service renders a disabled option carrying the "covered" tag.
+    const barOption = (await screen.findByText('bar')).closest('li');
+    expect(barOption).toHaveAttribute('aria-disabled', 'true');
+    expect(within(barOption as HTMLElement).getByText('covered')).toBeInTheDocument();
   });
 
   it('secondary CTA carries the full service list currently shown', () => {
@@ -209,6 +382,7 @@ describe('SloHealthPanel', () => {
         onRetry={jest.fn()}
       />
     );
+    // Every service is covered → nothing to suggest → the trigger is disabled.
     expect(screen.getByTestId('sloHealthPanelCta')).toBeDisabled();
   });
 

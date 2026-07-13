@@ -10,7 +10,7 @@
  * `SuggestionInlineRow` cards for every draft that service owns.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonIcon,
@@ -29,6 +29,7 @@ import type { Suggestion } from './suggest_engine';
 import { suggestionIconType } from './suggest_icon';
 import { OverridePatch, OverrideValues, SuggestionInlineRow } from './suggest_inline_row';
 import type { RowStatusMap } from './suggest_use_batch_create';
+import './suggest_service_tree_table.scss';
 
 const SLI_MIX_VISIBLE_CAP = 4;
 
@@ -39,15 +40,25 @@ const SliMixBadgePopover: React.FC<{
   drafts: Suggestion[];
 }> = ({ kind, iconType, drafts }) => {
   const [isOpen, setIsOpen] = useState(false);
-  let closeTimer: ReturnType<typeof setTimeout> | undefined;
+  // Keep the hover-close timer in a ref so it survives re-renders — a plain
+  // local would reset to undefined every render, leaving `openPopover` unable
+  // to cancel a pending close and risking a setState after unmount.
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const openPopover = () => {
-    if (closeTimer) clearTimeout(closeTimer);
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     setIsOpen(true);
   };
   const closePopover = () => {
-    closeTimer = setTimeout(() => setIsOpen(false), 150);
+    closeTimerRef.current = setTimeout(() => setIsOpen(false), 150);
   };
+
+  // Clear any pending close timer on unmount.
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    };
+  }, []);
 
   return (
     <div onMouseEnter={openPopover} onMouseLeave={closePopover}>
@@ -62,7 +73,11 @@ const SliMixBadgePopover: React.FC<{
         anchorPosition="downCenter"
         panelPaddingSize="s"
       >
-        <div style={{ maxWidth: 320 }} onMouseEnter={openPopover} onMouseLeave={closePopover}>
+        <div
+          className="sloSuggestSliMix__popover"
+          onMouseEnter={openPopover}
+          onMouseLeave={closePopover}
+        >
           <EuiText size="xs">
             <strong>{kind}</strong>
             {' — '}
@@ -70,14 +85,19 @@ const SliMixBadgePopover: React.FC<{
           </EuiText>
           <EuiHorizontalRule margin="xs" />
           {drafts.map((d) => (
-            <div key={d.key} style={{ marginBottom: 6 }}>
+            <div key={d.key} className="sloSuggestSliMix__draft">
               <EuiText size="xs">
                 <strong>{d.input.spec.name || d.key}</strong>
               </EuiText>
               <EuiText size="xs" color="subdued">
                 {d.reason}
               </EuiText>
-              <EuiFlexGroup gutterSize="s" responsive={false} wrap style={{ marginTop: 2 }}>
+              <EuiFlexGroup
+                gutterSize="s"
+                responsive={false}
+                wrap
+                className="sloSuggestSliMix__draftBadges"
+              >
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="hollow">
                     {`Target: ${((d.input.spec.objectives?.[0]?.target ?? 0) * 100).toFixed(1)}%`}
@@ -92,7 +112,7 @@ const SliMixBadgePopover: React.FC<{
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
-              <EuiText size="xs" color="subdued" style={{ marginTop: 2 }}>
+              <EuiText size="xs" color="subdued" className="sloSuggestSliMix__draftMetric">
                 Metric: <code>{d.sourceMetric}</code>
               </EuiText>
             </div>
@@ -163,7 +183,7 @@ export const ServiceTreeTable: React.FC<ServiceTreeTableProps> = ({
         const overflow = row.kinds.length - visible.length;
 
         return (
-          <div key={row.serviceName} style={{ marginBottom: 12 }}>
+          <div key={row.serviceName} className="sloSuggestTree__service">
             <EuiPanel
               hasBorder
               paddingSize="m"
@@ -270,7 +290,7 @@ export const ServiceTreeTable: React.FC<ServiceTreeTableProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                       <EuiFlexItem grow={false}>
-                        <EuiIcon type="check" color="success" size="s" />
+                        <EuiIcon type="check" color="success" size="s" aria-hidden={true} />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiText size="xs" color="success">

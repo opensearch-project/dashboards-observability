@@ -54,14 +54,11 @@ export interface DiscoveryProbesResult {
 export interface UseDiscoveryProbesArgs {
   http: HttpStart;
   datasourceId: string;
-  /** Bumping this triggers a re-probe; covers the "Rediscover" button. */
-  epoch: number;
 }
 
 export function useDiscoveryProbes({
   http,
   datasourceId,
-  epoch,
 }: UseDiscoveryProbesArgs): DiscoveryProbesResult {
   const [metricNames, setMetricNames] = useState<string[]>([]);
   const [labelValuesByMetric, setLabelValuesByMetric] = useState<LabelValuesByMetric>({});
@@ -151,7 +148,7 @@ export function useDiscoveryProbes({
     return () => {
       cancelled = true;
     };
-  }, [datasourceId, http, epoch]);
+  }, [datasourceId, http]);
 
   return {
     metricNames,

@@ -1,0 +1,33 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Width shared by the suggest-picker popover panel and its empty message.
+$sloHealthPickerWidth: 300px;
+
+.sloHealthPicker {
+  &__panel {
+    width: $sloHealthPickerWidth;
+  }
+
+  &__empty {
+    width: $sloHealthPickerWidth;
+    padding: 12px;
+  }
+
+  // Padding around the EuiSelectable search box inside the popover.
+  &__search {
+    padding: 8px 8px 0;
+  }
+}
+
+// Reserve height so the header doesn't reflow when the skeleton appears.
+.sloHealthPanel__loadingPlaceholder {
+  height: 20px;
+}
+
+// Fixed width for the per-row loading skeleton so the column doesn't jump.
+.sloHealthCell__loading {
+  width: 80px;
+}

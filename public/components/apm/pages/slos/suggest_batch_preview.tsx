@@ -181,15 +181,23 @@ export const SuggestBatchPreview: React.FC<SuggestBatchPreviewProps> = ({
         </EuiText>
       ) : (
         (() => {
+          // Group previews by service. A service can produce non-contiguous
+          // drafts — the engine emits detector-first (all APM drafts, then all
+          // HTTP drafts, …), so a service with both APM and OTel drafts appears
+          // more than once in `previews`. Key by service (not adjacency) so each
+          // service yields exactly one accordion; adjacency grouping would emit
+          // duplicate groups with duplicate React keys.
           const grouped: Array<{ service: string; items: typeof previews }> = [];
+          const groupByService = new Map<string, { service: string; items: typeof previews }>();
           for (const p of previews) {
             const svc = p.suggestion.input.spec.service ?? '';
-            const last = grouped[grouped.length - 1];
-            if (last && last.service === svc) {
-              last.items.push(p);
-            } else {
-              grouped.push({ service: svc, items: [p] });
+            let group = groupByService.get(svc);
+            if (!group) {
+              group = { service: svc, items: [] };
+              groupByService.set(svc, group);
+              grouped.push(group);
             }
+            group.items.push(p);
           }
           const MAX_INITIALLY_OPEN = 5;
           return grouped.map((group, idx) => (

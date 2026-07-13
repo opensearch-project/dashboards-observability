@@ -4,12 +4,12 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { ServiceRowShape, ServiceTreeTable } from '../suggest_service_tree_table';
 import type { Suggestion } from '../suggest_engine';
 
 function fakeSuggestion(key: string, kind = 'HTTP availability'): Suggestion {
-  return ({
+  return {
     key,
     kindId: 'http-availability',
     kind,
@@ -51,7 +51,7 @@ function fakeSuggestion(key: string, kind = 'HTTP availability'): Suggestion {
         annotations: {},
       },
     },
-  } as unknown) as Suggestion;
+  } as unknown as Suggestion;
 }
 
 function row(overrides: Partial<ServiceRowShape> = {}): ServiceRowShape {
@@ -151,10 +151,10 @@ describe('ServiceTreeTable', () => {
         onOverrideChange={jest.fn()}
       />
     );
-    expect(screen.getByText('3')).toBeInTheDocument();
+    expect(screen.getByText('3 covered')).toBeInTheDocument();
   });
 
-  it('renders the selection badge with the correct counts', () => {
+  it('renders the selection count with the correct values', () => {
     render(
       <ServiceTreeTable
         serviceRows={[row({ selectedCount: 1 })]}
@@ -167,8 +167,7 @@ describe('ServiceTreeTable', () => {
         onOverrideChange={jest.fn()}
       />
     );
-    const badge = screen.getByTestId('slosSuggestSelectionBadge-cart');
-    expect(badge).toHaveTextContent('1 / 2 selected');
+    expect(screen.getByText('1/2 SLOs selected')).toBeInTheDocument();
   });
 
   it('caps SLI mix badges and renders an overflow badge', () => {
@@ -198,5 +197,42 @@ describe('ServiceTreeTable', () => {
       />
     );
     expect(screen.getByText('+2 more')).toBeInTheDocument();
+  });
+
+  it('clears the SLI-mix popover close timer on unmount without a setState warning', () => {
+    jest.useFakeTimers();
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const { unmount } = render(
+        <ServiceTreeTable
+          serviceRows={[row()]}
+          expandedMap={{}}
+          onToggleExpand={jest.fn()}
+          onToggleServiceSelection={jest.fn()}
+          selected={new Set()}
+          overrides={{}}
+          onToggleDraft={jest.fn()}
+          onOverrideChange={jest.fn()}
+        />
+      );
+      // Open a badge popover (hover), then leave to arm the 150ms close timer.
+      const badge = screen.getAllByText('HTTP availability')[0];
+      fireEvent.mouseEnter(badge);
+      fireEvent.mouseLeave(badge);
+      // Unmount with the timer still pending, then let it fire.
+      unmount();
+      act(() => {
+        jest.runAllTimers();
+      });
+      expect(errSpy).not.toHaveBeenCalledWith(
+        expect.stringContaining('not wrapped in act'),
+        expect.anything(),
+        expect.anything()
+      );
+      expect(errSpy).not.toHaveBeenCalledWith(expect.stringContaining('unmounted component'));
+    } finally {
+      errSpy.mockRestore();
+      jest.useRealTimers();
+    }
   });
 });
