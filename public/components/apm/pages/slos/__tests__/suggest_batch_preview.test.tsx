@@ -166,4 +166,42 @@ describe('SuggestBatchPreview', () => {
     expect(within(cartGroup).getByTestId('slosSuggestPreviewRow-cart-avail')).toBeInTheDocument();
     expect(within(cartGroup).getByTestId('slosSuggestPreviewRow-cart-http')).toBeInTheDocument();
   });
+
+  /** Data-frame scalar as the PromQL search service returns it. */
+  function valueFrame(n: number) {
+    return { fields: [{ name: 'Value', values: [n] }] };
+  }
+
+  it('shows the breaching badge when the live SLI is below target', async () => {
+    const preview = jest.fn().mockResolvedValue(fakeGroup);
+    const apiClient = { preview } as unknown as Pick<SloApiClient, 'preview'>;
+    // Availability draft (target 0.99): ratio query → 0.5 (below target),
+    // samples query → 100 (>0 so the comparison runs), p99 unused.
+    mockExecuteInstantQuery.mockImplementation(({ query }: { query: string }) => {
+      if (query.includes('http_response_status_code')) return Promise.resolve(valueFrame(0.5));
+      if (query.includes('increase(')) return Promise.resolve(valueFrame(100));
+      return Promise.resolve(valueFrame(NaN));
+    });
+
+    render(
+      <SuggestBatchPreview
+        apiClient={apiClient}
+        selectedSuggestions={[fakeSuggestion('a')]}
+        prometheusConnectionId="prom-1"
+      />
+    );
+
+    await waitFor(() => expect(screen.getByText('1 breaching')).toBeInTheDocument());
+  });
+
+  it('shows the failed badge when a preview request rejects', async () => {
+    const preview = jest.fn().mockRejectedValue(new Error('preview boom'));
+    const apiClient = { preview } as unknown as Pick<SloApiClient, 'preview'>;
+
+    render(
+      <SuggestBatchPreview apiClient={apiClient} selectedSuggestions={[fakeSuggestion('a')]} />
+    );
+
+    await waitFor(() => expect(screen.getByText('1 failed')).toBeInTheDocument());
+  });
 });

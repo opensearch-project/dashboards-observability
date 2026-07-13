@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 // HeaderControlledComponentsWrapper hits the chrome service; stub it.
@@ -30,6 +30,42 @@ jest.mock('../../../config/apm_config_context', () => ({
 jest.mock('../../../shared/hooks/use_services', () => ({
   useServices: (...args: unknown[]) => mockUseServices(...args),
 }));
+
+// Let individual tests control the drafts the engine returns (e.g. to inject a
+// draft already covered by an existing recording rule) without exercising the
+// full detector pipeline. Defaults to the real implementation.
+const actualEngine = jest.requireActual('../suggest_engine');
+const mockGenerateSuggestions = jest.fn();
+jest.mock('../suggest_engine', () => ({
+  ...jest.requireActual('../suggest_engine'),
+  generateSuggestionsForServices: (...args: unknown[]) => mockGenerateSuggestions(...args),
+}));
+
+/** Minimal covered/uncovered draft fixture shaped like a real Suggestion. */
+function fakeDraft(key: string, service: string, existingRuleMatch = false) {
+  return {
+    key,
+    kindId: 'apm-availability',
+    kind: 'APM availability',
+    reason: '',
+    sourceMetric: 'request',
+    detected: { service },
+    estimatedRuleCount: 13,
+    existingRuleMatch: existingRuleMatch ? { ruleName: 'r', groupName: 'g' } : undefined,
+    input: {
+      spec: {
+        service,
+        name: key,
+        objectives: [{ name: 'o', target: 0.99 }],
+        sli: {
+          type: 'single',
+          definition: { backend: 'prometheus', type: 'availability', calcMethod: 'events' },
+          dimensions: [],
+        },
+      },
+    },
+  };
+}
 
 import { SloSuggestPage } from '../slo_suggest_page';
 import { buildServiceFilterOptions } from '../service_filter_options';
@@ -131,9 +167,16 @@ function renderPage(
 const SCOPED_ENTRY = '/slos/suggest?source=apm&services=cart,checkout';
 
 describe('SloSuggestPage', () => {
+  beforeEach(() => {
+    // Default: delegate to the real detector pipeline. Tests that need a
+    // specific draft set override this per-test.
+    mockGenerateSuggestions.mockImplementation(actualEngine.generateSuggestionsForServices);
+  });
+
   afterEach(() => {
     mockUseApmConfig.mockReset();
     mockUseServices.mockReset();
+    mockGenerateSuggestions.mockReset();
     jest.restoreAllMocks();
   });
 
@@ -215,6 +258,39 @@ describe('SloSuggestPage', () => {
     expect(await screen.findByTestId('slosSuggestPreviewFlyout')).toBeInTheDocument();
   });
 
+  it('resizes the preview flyout by dragging the handle and cleans up on mouse up', async () => {
+    renderPage({ initialEntry: SCOPED_ENTRY });
+    await screen.findByTestId('slosSuggestPage');
+    await waitFor(() => expect(screen.getByTestId('slosSuggestPreviewToggle')).not.toBeDisabled());
+    fireEvent.click(screen.getByTestId('slosSuggestPreviewToggle'));
+    const flyout = await screen.findByTestId('slosSuggestPreviewFlyout');
+    const handle = screen.getByTestId('slosSuggestPreviewFlyoutResizeHandle');
+
+    const widthBefore = flyout.getBoundingClientRect().width || parseFloat(flyout.style.width) || 0;
+
+    // Press on the handle → cursor + user-select locked globally while dragging.
+    fireEvent.mouseDown(handle, { clientX: 800 });
+    expect(document.body.style.cursor).toBe('col-resize');
+    expect(document.body.style.userSelect).toBe('none');
+
+    // Drag left (smaller clientX) → the flyout, docked right, grows wider.
+    act(() => {
+      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 600 }));
+    });
+    await waitFor(() => {
+      const widthAfter =
+        flyout.getBoundingClientRect().width || parseFloat(flyout.style.width) || 0;
+      expect(widthAfter).toBeGreaterThan(widthBefore);
+    });
+
+    // Releasing clears the global cursor/user-select locks.
+    act(() => {
+      document.dispatchEvent(new MouseEvent('mouseup'));
+    });
+    expect(document.body.style.cursor).toBe('');
+    expect(document.body.style.userSelect).toBe('');
+  });
+
   it('clears the service scope from the filter dropdown, returning to the empty state', async () => {
     renderPage({ initialEntry: SCOPED_ENTRY });
     await screen.findByTestId('slosSuggestPage');
@@ -250,6 +326,24 @@ describe('SloSuggestPage', () => {
       </MemoryRouter>
     );
     expect(await screen.findByText(/No Prometheus datasource configured/)).toBeInTheDocument();
+  });
+
+  it('leaves already-covered drafts unchecked and surfaces the covered subline', async () => {
+    // cart yields two drafts: one already covered by an existing rule, one not.
+    mockGenerateSuggestions.mockReturnValue([
+      fakeDraft('cart-avail', 'cart', true),
+      fakeDraft('cart-lat', 'cart', false),
+    ]);
+    renderPage({ initialEntry: SCOPED_ENTRY });
+    await screen.findByTestId('slosSuggestPage');
+    await waitFor(() => expect(screen.getByTestId('slosSuggestHeaderStrip')).toBeInTheDocument());
+
+    // Only the uncovered draft is selected by default → "Create 1 SLO".
+    expect(screen.getByTestId('slosSuggestCreate')).toHaveTextContent('Create 1 SLO');
+    // The covered draft is called out in the subline.
+    expect(screen.getByTestId('slosSuggestHeaderSubline')).toHaveTextContent(
+      '1 draft already covered by existing rules'
+    );
   });
 });
 

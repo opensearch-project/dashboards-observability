@@ -3,31 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Width shared by the suggest-picker popover panel and its empty message.
-$sloHealthPickerWidth: 300px;
-
-.sloHealthPicker {
+.slo-health-picker {
   &__panel {
-    width: $sloHealthPickerWidth;
+    width: 300px;
   }
 
   &__empty {
-    width: $sloHealthPickerWidth;
-    padding: 12px;
-  }
-
-  // Padding around the EuiSelectable search box inside the popover.
-  &__search {
-    padding: 8px 8px 0;
+    width: 300px;
+    padding: $euiSizeM;
   }
 }
 
 // Reserve height so the header doesn't reflow when the skeleton appears.
-.sloHealthPanel__loadingPlaceholder {
+.slo-health-panel__loading-placeholder {
   height: 20px;
 }
 
 // Fixed width for the per-row loading skeleton so the column doesn't jump.
-.sloHealthCell__loading {
+.slo-health-cell__loading {
   width: 80px;
 }

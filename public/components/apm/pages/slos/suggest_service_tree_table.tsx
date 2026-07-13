@@ -32,6 +32,45 @@ import type { RowStatusMap } from './suggest_use_batch_create';
 import './suggest_service_tree_table.scss';
 
 const SLI_MIX_VISIBLE_CAP = 4;
+/** Grace period before the hover popover closes, so moving into it doesn't dismiss it. */
+const HOVER_CLOSE_DELAY_MS = 150;
+
+const t = {
+  draftCount: (count: number) =>
+    i18n.translate('observability.apm.slo.suggest.serviceTreeTable.draftCount', {
+      defaultMessage: '{count, plural, one {# draft} other {# drafts}}',
+      values: { count },
+    }),
+  target: (pct: string) =>
+    i18n.translate('observability.apm.slo.suggest.serviceTreeTable.target', {
+      defaultMessage: 'Target: {pct}%',
+      values: { pct },
+    }),
+  approxRules: (count: number) =>
+    i18n.translate('observability.apm.slo.suggest.serviceTreeTable.approxRules', {
+      defaultMessage: '~{count, plural, one {# rule} other {# rules}}',
+      values: { count },
+    }),
+  rules: (count: number) =>
+    i18n.translate('observability.apm.slo.suggest.serviceTreeTable.rules', {
+      defaultMessage: '{count, plural, one {# rule} other {# rules}}',
+      values: { count },
+    }),
+  covered: i18n.translate('observability.apm.slo.suggest.serviceTreeTable.coveredBadge', {
+    defaultMessage: 'Covered',
+  }),
+  metricLabel: i18n.translate('observability.apm.slo.suggest.serviceTreeTable.metricLabel', {
+    defaultMessage: 'Metric:',
+  }),
+  sliMix: i18n.translate('observability.apm.slo.suggest.serviceTreeTable.sliMix', {
+    defaultMessage: 'SLI mix',
+  }),
+  overflowMore: (count: number) =>
+    i18n.translate('observability.apm.slo.suggest.serviceTreeTable.overflowMore', {
+      defaultMessage: '+{count} more',
+      values: { count },
+    }),
+};
 
 /** Badge with a popover showing draft details for a given SLI kind (opens on hover). */
 const SliMixBadgePopover: React.FC<{
@@ -50,7 +89,7 @@ const SliMixBadgePopover: React.FC<{
     setIsOpen(true);
   };
   const closePopover = () => {
-    closeTimerRef.current = setTimeout(() => setIsOpen(false), 150);
+    closeTimerRef.current = setTimeout(() => setIsOpen(false), HOVER_CLOSE_DELAY_MS);
   };
 
   // Clear any pending close timer on unmount.
@@ -74,18 +113,18 @@ const SliMixBadgePopover: React.FC<{
         panelPaddingSize="s"
       >
         <div
-          className="sloSuggestSliMix__popover"
+          className="slo-suggest-sli-mix__popover"
           onMouseEnter={openPopover}
           onMouseLeave={closePopover}
         >
           <EuiText size="xs">
             <strong>{kind}</strong>
             {' — '}
-            {drafts.length === 1 ? '1 draft' : `${drafts.length} drafts`}
+            {t.draftCount(drafts.length)}
           </EuiText>
           <EuiHorizontalRule margin="xs" />
           {drafts.map((d) => (
-            <div key={d.key} className="sloSuggestSliMix__draft">
+            <div key={d.key} className="slo-suggest-sli-mix__draft">
               <EuiText size="xs">
                 <strong>{d.input.spec.name || d.key}</strong>
               </EuiText>
@@ -96,24 +135,24 @@ const SliMixBadgePopover: React.FC<{
                 gutterSize="s"
                 responsive={false}
                 wrap
-                className="sloSuggestSliMix__draftBadges"
+                className="slo-suggest-sli-mix__draft-badges"
               >
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="hollow">
-                    {`Target: ${((d.input.spec.objectives?.[0]?.target ?? 0) * 100).toFixed(1)}%`}
+                    {t.target(((d.input.spec.objectives?.[0]?.target ?? 0) * 100).toFixed(1))}
                   </EuiBadge>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">{`~${d.estimatedRuleCount} rules`}</EuiBadge>
+                  <EuiBadge color="hollow">{t.approxRules(d.estimatedRuleCount)}</EuiBadge>
                 </EuiFlexItem>
                 {d.existingRuleMatch && (
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color="warning">Covered</EuiBadge>
+                    <EuiBadge color="warning">{t.covered}</EuiBadge>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
-              <EuiText size="xs" color="subdued" className="sloSuggestSliMix__draftMetric">
-                Metric: <code>{d.sourceMetric}</code>
+              <EuiText size="xs" color="subdued" className="slo-suggest-sli-mix__draft-metric">
+                {t.metricLabel} <code>{d.sourceMetric}</code>
               </EuiText>
             </div>
           ))}
@@ -183,7 +222,7 @@ export const ServiceTreeTable: React.FC<ServiceTreeTableProps> = ({
         const overflow = row.kinds.length - visible.length;
 
         return (
-          <div key={row.serviceName} className="sloSuggestTree__service">
+          <div key={row.serviceName} className="slo-suggest-tree__service">
             <EuiPanel
               hasBorder
               paddingSize="m"
@@ -246,7 +285,7 @@ export const ServiceTreeTable: React.FC<ServiceTreeTableProps> = ({
                   <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs" color="subdued">
-                        SLI mix
+                        {t.sliMix}
                       </EuiText>
                     </EuiFlexItem>
                     {visible.map((kind) => (
@@ -261,7 +300,7 @@ export const ServiceTreeTable: React.FC<ServiceTreeTableProps> = ({
                     {overflow > 0 && (
                       <EuiFlexItem grow={false}>
                         <SliMixBadgePopover
-                          kind={`+${overflow} more`}
+                          kind={t.overflowMore(overflow)}
                           iconType="boxesHorizontal"
                           drafts={row.kinds
                             .slice(SLI_MIX_VISIBLE_CAP)
@@ -283,7 +322,7 @@ export const ServiceTreeTable: React.FC<ServiceTreeTableProps> = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="subdued">
-                    {`${row.totalRules} rules`}
+                    {t.rules(row.totalRules)}
                   </EuiText>
                 </EuiFlexItem>
                 {row.coveredCount > 0 && (

@@ -26,7 +26,6 @@ import {
   EuiLoadingContent,
   EuiPanel,
   EuiPopover,
-  EuiSelectable,
   EuiSpacer,
   EuiText,
   EuiToolTip,
@@ -35,7 +34,7 @@ import { i18n } from '@osd/i18n';
 import { navigateToSloListing, navigateToSloSuggest } from '../../shared/utils/navigation_utils';
 import type { SloHealthAccessError, SloHealthBucket } from '../slos/slo_health_summary';
 import { ChipRow } from '../slos/slo_health_chip_row';
-import { buildServiceFilterOptions } from '../slos/service_filter_options';
+import { ServiceFilterSelectable } from '../slos/service_filter_selectable';
 import { SloBudgetSparkline } from './slo_budget_sparkline';
 import './slo_health_panel.scss';
 
@@ -82,13 +81,6 @@ const t = {
     }),
   suggestPick: i18n.translate('observability.apm.services.sloHealth.suggestPick', {
     defaultMessage: 'Suggest SLOs',
-  }),
-  suggestPickPlaceholder: i18n.translate(
-    'observability.apm.services.sloHealth.suggestPickPlaceholder',
-    { defaultMessage: 'Filter services' }
-  ),
-  suggestPickCovered: i18n.translate('observability.apm.services.sloHealth.suggestPickCovered', {
-    defaultMessage: 'covered',
   }),
   suggestPickEmpty: i18n.translate('observability.apm.services.sloHealth.suggestPickEmpty', {
     defaultMessage: 'No services to suggest SLOs for.',
@@ -177,33 +169,20 @@ const SloSuggestPicker: React.FC<{
   const [isOpen, setIsOpen] = useState(false);
   const [picked, setPicked] = useState<Set<string>>(new Set());
 
-  const options = useMemo(
-    () =>
-      // Shared builder: covered services disabled, checked services floated to
-      // the top so the current selection stays visible as the list scrolls.
-      buildServiceFilterOptions(allServices, picked, coveredSet).map((opt) => ({
-        label: opt.label,
-        checked: opt.checked,
-        disabled: opt.disabled,
-        append: opt.covered ? (
-          <EuiText size="xs" color="success">
-            {t.suggestPickCovered}
-          </EuiText>
-        ) : undefined,
-      })),
-    [allServices, coveredSet, picked]
-  );
+  // Prune picks that no longer make sense as the data refreshes: a service that
+  // dropped out of discovery, or one that became covered while the popover was
+  // open, must not linger in `picked` — otherwise the CTA count inflates and
+  // `onConfirm` would navigate with a stale/covered service. Runs on every
+  // props change; only rebuilds the set when something actually falls out.
+  useEffect(() => {
+    setPicked((prev) => {
+      const allServiceSet = new Set(allServices);
+      const next = new Set([...prev].filter((s) => allServiceSet.has(s) && !coveredSet.has(s)));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [allServices, coveredSet]);
 
-  const onChange = useCallback(
-    (newOptions: Array<{ label: string; checked?: 'on'; disabled?: boolean }>) => {
-      const next = new Set<string>();
-      for (const o of newOptions) {
-        if (o.checked === 'on' && !coveredSet.has(o.label)) next.add(o.label);
-      }
-      setPicked(next);
-    },
-    [coveredSet]
-  );
+  const onSelectionChange = useCallback((sel: string[]) => setPicked(new Set(sel)), []);
 
   const onConfirm = useCallback(() => {
     if (picked.size === 0) return;
@@ -242,26 +221,17 @@ const SloSuggestPicker: React.FC<{
       }
     >
       {allServices.length === 0 ? (
-        <EuiText size="s" color="subdued" className="sloHealthPicker__empty">
+        <EuiText size="s" color="subdued" className="slo-health-picker__empty">
           {t.suggestPickEmpty}
         </EuiText>
       ) : (
-        <div className="sloHealthPicker__panel">
-          <EuiSelectable
-            searchable
-            searchProps={{ compressed: true, placeholder: t.suggestPickPlaceholder }}
-            options={options}
-            onChange={onChange}
-            listProps={{ bordered: false }}
-            height={240}
-          >
-            {(list, search) => (
-              <>
-                <div className="sloHealthPicker__search">{search}</div>
-                {list}
-              </>
-            )}
-          </EuiSelectable>
+        <div className="slo-health-picker__panel">
+          <ServiceFilterSelectable
+            serviceNames={allServices}
+            selectedSet={picked}
+            coveredSet={coveredSet}
+            onSelectionChange={onSelectionChange}
+          />
           <EuiPanel color="transparent" paddingSize="s">
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
               <EuiFlexItem grow={false}>
@@ -375,7 +345,7 @@ export const SloHealthPanel: React.FC<SloHealthPanelProps> = ({
                     // Reserve vertical height so the panel doesn't reflow when
                     // the skeleton appears at t=150ms.
                     <div
-                      className="sloHealthPanel__loadingPlaceholder"
+                      className="slo-health-panel__loading-placeholder"
                       data-test-subj="sloHealthPanelLoadingPlaceholder"
                     />
                   )
@@ -562,7 +532,7 @@ const SloHealthCellUI: React.FC<SloHealthCellProps> = ({
   if (isLoading && !bucket) {
     return (
       <div
-        className="sloHealthCell__loading"
+        className="slo-health-cell__loading"
         data-test-subj={`sloHealthCellLoading-${serviceName}`}
       >
         <EuiLoadingContent lines={1} />

@@ -235,4 +235,45 @@ describe('ServiceTreeTable', () => {
       jest.useRealTimers();
     }
   });
+
+  it('opens the SLI-mix popover on hover and holds it open through the grace delay', () => {
+    jest.useFakeTimers();
+    try {
+      render(
+        <ServiceTreeTable
+          serviceRows={[row({ drafts: [fakeSuggestion('a', 'HTTP availability')] })]}
+          expandedMap={{}}
+          onToggleExpand={jest.fn()}
+          onToggleServiceSelection={jest.fn()}
+          selected={new Set()}
+          overrides={{}}
+          onToggleDraft={jest.fn()}
+          onOverrideChange={jest.fn()}
+        />
+      );
+      const badge = screen.getByText('HTTP availability');
+
+      // Not open until hovered.
+      expect(screen.queryByText('Metric:')).not.toBeInTheDocument();
+
+      // Hover opens the popover — its draft detail (the "Metric:" line) appears.
+      act(() => {
+        fireEvent.mouseEnter(badge);
+      });
+      expect(screen.getByText('Metric:')).toBeInTheDocument();
+
+      // Leaving arms the close timer; the grace delay keeps it open just before
+      // the delay elapses so moving the pointer into the panel doesn't dismiss
+      // it. (The close firing + timer cleanup is covered by the unmount test.)
+      act(() => {
+        fireEvent.mouseLeave(badge);
+        jest.advanceTimersByTime(HOVER_CLOSE_DELAY_MS - 1);
+      });
+      expect(screen.getByText('Metric:')).toBeInTheDocument();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });
+
+const HOVER_CLOSE_DELAY_MS = 150;

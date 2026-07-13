@@ -1,0 +1,9 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Padding around the EuiSelectable search box inside the picker popovers.
+.service-filter__search {
+  padding: $euiSizeS $euiSizeS 0;
+}

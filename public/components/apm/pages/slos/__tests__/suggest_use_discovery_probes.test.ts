@@ -110,16 +110,19 @@ describe('useDiscoveryProbes', () => {
 
   it('does not setState after unmount', async () => {
     const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    const http = makeHttp({
-      labelValues: { http_server_request_duration_seconds_count: { service_name: ['x'] } },
-    });
-    const { unmount } = renderHook(() => useDiscoveryProbes({ http, datasourceId: 'prom-1' }));
-    unmount();
-    // Drain microtasks so the in-flight effect's `.then` resolves and would
-    // attempt a setState if cancellation weren't honored.
-    await new Promise((r) => setImmediate(r));
-    // Any state-update-after-unmount would trigger React's act warning here.
-    expect(errSpy).not.toHaveBeenCalledWith(expect.stringContaining('not wrapped in act'));
-    errSpy.mockRestore();
+    try {
+      const http = makeHttp({
+        labelValues: { http_server_request_duration_seconds_count: { service_name: ['x'] } },
+      });
+      const { unmount } = renderHook(() => useDiscoveryProbes({ http, datasourceId: 'prom-1' }));
+      unmount();
+      // Drain microtasks so the in-flight effect's `.then` resolves and would
+      // attempt a setState if cancellation weren't honored.
+      await new Promise((r) => setImmediate(r));
+      // Any state-update-after-unmount would trigger React's act warning here.
+      expect(errSpy).not.toHaveBeenCalledWith(expect.stringContaining('not wrapped in act'));
+    } finally {
+      errSpy.mockRestore();
+    }
   });
 });

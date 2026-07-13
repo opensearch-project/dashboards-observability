@@ -307,6 +307,51 @@ describe('SloHealthPanel', () => {
     expect(clear).toBeDisabled();
   });
 
+  it('prunes a pick that becomes covered before confirm (no stale/inflated selection)', async () => {
+    const uncovered = ['foo', 'baz'].reduce((m, s) => {
+      m.set(s, makeBucket({ missingCanonicalPair: true }));
+      return m;
+    }, new Map<string, SloHealthBucket>());
+
+    const { rerender } = render(
+      <SloHealthPanel
+        aggregate={makeBucket({ total: 2, ok: 2 })}
+        bySvc={uncovered}
+        allServices={['foo', 'baz']}
+        isLoading={false}
+        error={undefined}
+        onRetry={jest.fn()}
+      />
+    );
+    fireEvent.click(screen.getByTestId('sloHealthPanelCta'));
+    fireEvent.click(await screen.findByText('foo'));
+    fireEvent.click(screen.getByText('baz'));
+    const confirm = screen.getByTestId('sloHealthPanelCtaConfirm');
+    await waitFor(() => expect(confirm).toHaveTextContent('Suggest SLOs for 2 services'));
+
+    // A health refresh marks `foo` as now covered (owns its canonical pair).
+    const refreshed = new Map<string, SloHealthBucket>(uncovered);
+    refreshed.set('foo', makeBucket({ missingCanonicalPair: false }));
+    rerender(
+      <SloHealthPanel
+        aggregate={makeBucket({ total: 2, ok: 2 })}
+        bySvc={refreshed}
+        allServices={['foo', 'baz']}
+        isLoading={false}
+        error={undefined}
+        onRetry={jest.fn()}
+      />
+    );
+
+    // `foo` is pruned from the selection — count drops to 1 and confirm
+    // navigates with only the still-valid pick, never the covered service.
+    await waitFor(() => expect(confirm).toHaveTextContent('Suggest SLOs for 1 service'));
+    fireEvent.click(confirm);
+    expect(mockNavigateToApp).toHaveBeenLastCalledWith('observability-apm-slo', {
+      path: '#/slos/suggest?source=apm&services=baz',
+    });
+  });
+
   it('shows a filled (primary) trigger when closed and a neutral one when open', async () => {
     render(
       <SloHealthPanel
@@ -388,23 +433,26 @@ describe('SloHealthPanel', () => {
 
   it('does not show the skeleton before the 150ms grace timer elapses', () => {
     jest.useFakeTimers();
-    render(
-      <SloHealthPanel
-        aggregate={makeBucket()}
-        bySvc={new Map()}
-        allServices={[]}
-        isLoading
-        error={undefined}
-        onRetry={jest.fn()}
-      />
-    );
-    expect(screen.queryByTestId('sloHealthPanelSkeleton')).toBeNull();
-    expect(screen.getByTestId('sloHealthPanelLoadingPlaceholder')).toBeInTheDocument();
-    act(() => {
-      jest.advanceTimersByTime(160);
-    });
-    expect(screen.getByTestId('sloHealthPanelSkeleton')).toBeInTheDocument();
-    jest.useRealTimers();
+    try {
+      render(
+        <SloHealthPanel
+          aggregate={makeBucket()}
+          bySvc={new Map()}
+          allServices={[]}
+          isLoading
+          error={undefined}
+          onRetry={jest.fn()}
+        />
+      );
+      expect(screen.queryByTestId('sloHealthPanelSkeleton')).toBeNull();
+      expect(screen.getByTestId('sloHealthPanelLoadingPlaceholder')).toBeInTheDocument();
+      act(() => {
+        jest.advanceTimersByTime(160);
+      });
+      expect(screen.getByTestId('sloHealthPanelSkeleton')).toBeInTheDocument();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('renders an inline error with retry link on generic failure', () => {

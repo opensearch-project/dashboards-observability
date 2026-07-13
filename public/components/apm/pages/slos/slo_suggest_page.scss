@@ -3,25 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Width shared by the service-filter popover panel and its search row.
-$sloSuggestFilterPanelWidth: 300px;
-
-.sloSuggestFilter {
-  &__panel {
-    width: $sloSuggestFilterPanelWidth;
-  }
-
-  // Padding around the EuiSelectable search box inside the popover.
-  &__search {
-    padding: 8px 8px 0;
-  }
+// Width of the service-filter popover panel.
+.slo-service-filter__panel {
+  width: 300px;
 }
 
 // Draggable grip on the left edge of the preview flyout. The flyout width
 // itself stays inline (it is driven by the drag state), but the handle's
 // presentation lives here so the themed color + hover state are declarative.
-.sloSuggestFlyout {
-  &__resizeHandle {
+.slo-suggest-flyout {
+  &__resize-handle {
     position: absolute;
     top: 0;
     left: 0;
@@ -34,7 +25,7 @@ $sloSuggestFilterPanelWidth: 300px;
     z-index: 1000;
   }
 
-  &__resizeGrip {
+  &__resize-grip {
     width: 4px;
     height: 40px;
     border-radius: 2px;
@@ -42,18 +33,18 @@ $sloSuggestFilterPanelWidth: 300px;
     transition: background-color $euiAnimSpeedFast ease-in;
   }
 
-  &__resizeHandle:hover &__resizeGrip {
+  &__resize-handle:hover &__resize-grip {
     background-color: $euiColorDarkShade;
+  }
+
+  // Break long PromQL / rule strings in the preview flyout body.
+  &__body {
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 }
 
 // Reserve height so the centered loading spinner doesn't collapse the page.
-.sloSuggestLoading {
+.slo-suggest-loading {
   min-height: 200px;
-}
-
-// Break long PromQL / rule strings in the preview flyout body.
-.sloSuggestFlyout__body {
-  overflow-wrap: break-word;
-  word-break: break-word;
 }

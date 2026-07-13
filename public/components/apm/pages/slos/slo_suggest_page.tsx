@@ -20,7 +20,7 @@
  *     siblings under this directory. The page itself is pure composition.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -40,7 +40,6 @@ import {
   EuiPanel,
   EuiPopover,
   EuiProgress,
-  EuiSelectable,
   EuiSpacer,
   EuiStat,
   EuiTitle,
@@ -62,7 +61,7 @@ import { SuggestBatchPreview } from './suggest_batch_preview';
 import { useDiscoveryProbes } from './suggest_use_discovery_probes';
 import { useBatchCreate } from './suggest_use_batch_create';
 import { useServiceSloHealth } from './slo_health_summary';
-import { buildServiceFilterOptions } from './service_filter_options';
+import { ServiceFilterSelectable } from './service_filter_selectable';
 import './slo_suggest_page.scss';
 
 export interface SloSuggestPageProps {
@@ -75,6 +74,7 @@ export interface SloSuggestPageProps {
 
 const FLYOUT_MIN_WIDTH = 300;
 const FLYOUT_MAX_WIDTH_PCT = 0.45;
+const FLYOUT_INITIAL_WIDTH_PCT = 0.3;
 
 const ResizableFlyout: React.FC<{
   width: number;
@@ -120,8 +120,13 @@ const ResizableFlyout: React.FC<{
       pushMinBreakpoint="xs"
       data-test-subj="slosSuggestPreviewFlyout"
     >
-      <div ref={handleRef} onMouseDown={onMouseDown} className="sloSuggestFlyout__resizeHandle">
-        <div className="sloSuggestFlyout__resizeGrip" />
+      <div
+        ref={handleRef}
+        onMouseDown={onMouseDown}
+        className="slo-suggest-flyout__resize-handle"
+        data-test-subj="slosSuggestPreviewFlyoutResizeHandle"
+      >
+        <div className="slo-suggest-flyout__resize-grip" />
       </div>
       {children}
     </EuiFlyout>
@@ -145,27 +150,11 @@ const SuggestServiceFilter: React.FC<{
     return Array.from(set);
   }, [allServices]);
 
-  const options = useMemo(
-    () =>
-      buildServiceFilterOptions(allServiceNames, scopeSet, coveredSet).map((opt) => ({
-        label: opt.label,
-        checked: opt.checked,
-        disabled: opt.disabled,
-        append: opt.covered ? (
-          <EuiText size="xs" color="success">
-            covered
-          </EuiText>
-        ) : undefined,
-      })),
-    [allServiceNames, scopeSet, coveredSet]
-  );
-
-  const onChange = useCallback(
-    (newOptions: Array<{ label: string; checked?: 'on' }>) => {
-      const sel = newOptions
-        .filter((o) => o.checked === 'on' && !coveredSet.has(o.label))
-        .map((o) => o.label);
-      // Empty selection collapses to the unscoped URL, which now renders the
+  // The suggest page commits selection live to the URL scope — no staged
+  // "confirm" step — so every toggle rewrites the query string.
+  const onSelectionChange = useCallback(
+    (sel: string[]) => {
+      // Empty selection collapses to the unscoped URL, which renders the
       // "pick services" empty state rather than drafting everything.
       if (sel.length === 0) {
         history.replace('/slos/suggest');
@@ -174,7 +163,7 @@ const SuggestServiceFilter: React.FC<{
         history.replace(`/slos/suggest?${qs.toString()}`);
       }
     },
-    [history, coveredSet]
+    [history]
   );
 
   const clearScope = useCallback(() => {
@@ -213,22 +202,13 @@ const SuggestServiceFilter: React.FC<{
             </EuiButton>
           }
         >
-          <div className="sloSuggestFilter__panel">
-            <EuiSelectable
-              searchable
-              searchProps={{ compressed: true, placeholder: 'Filter services' }}
-              options={options}
-              onChange={onChange}
-              listProps={{ bordered: false }}
-              height={240}
-            >
-              {(list, search) => (
-                <>
-                  <div className="sloSuggestFilter__search">{search}</div>
-                  {list}
-                </>
-              )}
-            </EuiSelectable>
+          <div className="slo-service-filter__panel">
+            <ServiceFilterSelectable
+              serviceNames={allServiceNames}
+              selectedSet={scopeSet}
+              coveredSet={coveredSet}
+              onSelectionChange={onSelectionChange}
+            />
             <EuiPanel color="transparent" paddingSize="s">
               <EuiButtonEmpty
                 size="s"
@@ -263,7 +243,9 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   /** Per-suggestion overrides users type into the card. */
   const [overrides, setOverrides] = useState<Record<string, OverrideValues>>({});
   const [showPreview, setShowPreview] = useState(false);
-  const [flyoutWidth, setFlyoutWidth] = useState(Math.round(window.innerWidth * 0.3));
+  const [flyoutWidth, setFlyoutWidth] = useState(() =>
+    Math.round(window.innerWidth * FLYOUT_INITIAL_WIDTH_PCT)
+  );
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [expandedMap, setExpandedMap] = useState<Record<string, boolean>>({});
 
@@ -307,6 +289,10 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   // filter popover, which writes the scope to the URL. A stale deep link that
   // names services discovery doesn't see resolves to an empty list, which the
   // "pick services" empty state handles the same as the initial landing.
+  //
+  // A deep link to an already-covered service still renders its drafts (so the
+  // user sees them), but they default unchecked via the selection effect below,
+  // consistent with how the picker disables covered services.
   const scopedServices = useMemo(() => {
     if (!scope.services) return [];
     const allow = new Set(scope.services);
@@ -357,16 +343,48 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
     return set;
   }, [healthBySvc]);
 
-  // Default every suggestion to "selected" when the list changes — EXCEPT
-  // those already covered by an existing Prometheus rule. The user has already
-  // chosen which services to scope upstream, so landing with their drafts
-  // pre-checked matches intent; covered drafts stay unchecked so we don't
-  // dual-write. Users can uncheck any draft they don't want.
+  // Tracks whether the user has manually changed the selection. Once they have,
+  // we stop auto-re-seeding so a late-resolving ruler/health fetch can't clobber
+  // their toggles (the discovery probes and SLO-health rollup arrive async and
+  // recompute `suggestions`).
+  const hasInteractedRef = useRef(false);
+  // Signature of the current draft set — re-seeding keys off this rather than
+  // `suggestions` identity so metadata-only recomputes (ruler resolving, which
+  // sets `existingRuleMatch`) don't count as "a new list".
+  const suggestionKeySig = useMemo(
+    () =>
+      suggestions
+        .map((s) => s.key)
+        .sort()
+        .join('\n'),
+    [suggestions]
+  );
+  const lastSeededSigRef = useRef<string | null>(null);
+
+  // Default drafts to "selected" — EXCEPT those already covered, so we never
+  // dual-write. "Covered" unions both signals we have: a matching Prometheus
+  // recording rule (`existingRuleMatch`, per-draft) OR the service already
+  // owning its canonical availability+latency SLO pair (`allServicesCoverage`,
+  // from the health rollup). Re-seed when the draft set changes (scope changed)
+  // or while the user hasn't touched the selection yet — the latter lets a
+  // late-arriving coverage signal still deselect covered drafts. Once the user
+  // interacts, their selection is preserved.
   useEffect(() => {
-    setSelected(new Set(suggestions.filter((s) => !s.existingRuleMatch).map((s) => s.key)));
-  }, [suggestions]);
+    const sigChanged = lastSeededSigRef.current !== suggestionKeySig;
+    if (!sigChanged && hasInteractedRef.current) return;
+    if (sigChanged) hasInteractedRef.current = false;
+    lastSeededSigRef.current = suggestionKeySig;
+    setSelected(
+      new Set(
+        suggestions
+          .filter((s) => !s.existingRuleMatch && !allServicesCoverage.has(s.input.spec.service))
+          .map((s) => s.key)
+      )
+    );
+  }, [suggestions, suggestionKeySig, allServicesCoverage]);
 
   const toggle = useCallback((key: string) => {
+    hasInteractedRef.current = true;
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key);
@@ -383,7 +401,8 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
     (s: Suggestion): Suggestion => {
       const o = overrides[s.key] ?? {};
       // Stamp canonicalKind from the suggestion so readers can classify
-      // without re-running the heuristic. M5A: tag wins, heuristic fallback.
+      // without re-running the heuristic (the explicit tag wins over the
+      // heuristic fallback downstream).
       const spec = { ...s.input.spec, canonicalKind: s.kindId };
       if (o.ownerTeam && o.ownerTeam.trim()) {
         spec.owner = { ...spec.owner, teams: [o.ownerTeam.trim()] };
@@ -506,6 +525,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   }, []);
 
   const toggleServiceSelection = useCallback((row: ServiceRowShape) => {
+    hasInteractedRef.current = true;
     const allSelected = row.selectedCount === row.drafts.length;
     setSelected((prev) => {
       const next = new Set(prev);
@@ -606,7 +626,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
               <EuiFlexGroup
                 justifyContent="center"
                 alignItems="center"
-                className="sloSuggestLoading"
+                className="slo-suggest-loading"
               >
                 <EuiFlexItem grow={false}>
                   <EuiLoadingSpinner size="xl" />
@@ -847,7 +867,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
               </h3>
             </EuiTitle>
           </EuiFlyoutHeader>
-          <EuiFlyoutBody className="sloSuggestFlyout__body">
+          <EuiFlyoutBody className="slo-suggest-flyout__body">
             <SuggestBatchPreview
               apiClient={apiClient}
               selectedSuggestions={decoratedSuggestions.filter((s) => selected.has(s.key))}
