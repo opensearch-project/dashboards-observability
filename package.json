@@ -78,10 +78,5 @@
     "serialize-javascript": "^7.0.3",
     "@babel/runtime": "^7.26.10",
     "uuid": "^3.4.0"
-  },
-  "eslintIgnore": [
-    "common/query_manager/antlr/output/*",
-    "node_modules/*",
-    "target/*"
-  ]
+  }
 }
