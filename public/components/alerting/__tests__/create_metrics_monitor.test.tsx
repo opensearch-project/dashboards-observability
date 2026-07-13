@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 
 jest.mock('echarts', () => ({
   init: jest.fn(() => ({ setOption: jest.fn(), resize: jest.fn(), dispose: jest.fn() })),
@@ -46,5 +46,67 @@ describe('CreateMetricsMonitor', () => {
     expect(closeBtn).not.toBeNull();
     closeBtn!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     expect(onCancel).toHaveBeenCalled();
+  });
+
+  it('disables Create button when datasourceId is empty', () => {
+    render(<CreateMetricsMonitor onCancel={jest.fn()} onSave={jest.fn()} datasourceId="" />);
+    const createBtn = document.querySelector(
+      'button[class*="euiButton--fill"]'
+    ) as HTMLButtonElement;
+    expect(createBtn).not.toBeNull();
+    expect(createBtn!.disabled).toBe(true);
+  });
+
+  it('POSTs the correct payload shape on save', async () => {
+    const mockPost = jest.fn().mockResolvedValue({});
+    const onSave = jest.fn();
+    const addToast = jest.fn();
+
+    render(
+      <CreateMetricsMonitor
+        onCancel={jest.fn()}
+        onSave={onSave}
+        datasourceId="test-ds-123"
+        datasourceName="Test Prometheus"
+        http={{ post: mockPost }}
+        addToast={addToast}
+      />
+    );
+
+    // Fill in required fields: monitorName
+    const nameInput = document.querySelector('input[aria-label="Rule name"]') as HTMLInputElement;
+    fireEvent.change(nameInput, { target: { value: 'my-test-rule' } });
+
+    // Click Create button
+    const createBtn = document.querySelector(
+      'button[class*="euiButton--fill"]'
+    ) as HTMLButtonElement;
+    fireEvent.click(createBtn);
+
+    await waitFor(() => {
+      expect(mockPost).toHaveBeenCalledWith(
+        '/api/alerting/prometheus/test-ds-123/rules',
+        expect.objectContaining({ body: expect.any(String) })
+      );
+    });
+
+    // Verify payload structure
+    const body = JSON.parse(mockPost.mock.calls[0][1].body);
+    expect(body).toMatchObject({
+      name: 'my-test-rule',
+      query: expect.any(String),
+      operator: '>',
+      threshold: expect.any(Number),
+      forDuration: expect.any(String),
+      evaluationInterval: expect.any(String),
+      enabled: true,
+      groupName: 'my-test-rule',
+    });
+    expect(body).toHaveProperty('labels');
+    expect(body).toHaveProperty('annotations');
+
+    // Should call onSave and show success toast
+    expect(onSave).toHaveBeenCalled();
+    expect(addToast).toHaveBeenCalledWith(expect.any(String), 'success');
   });
 });

@@ -11,9 +11,9 @@ export const observabilityApmServicesID = 'observability-apm-services';
 export const observabilityApmServicesTitle = 'Services';
 export const observabilityApmServicesPluginOrder = 5100;
 
-// APM application IDs - Application Map
+// APM application IDs - Topology Map (formerly "Application Map")
 export const observabilityApmApplicationMapID = 'observability-apm-application-map';
-export const observabilityApmApplicationMapTitle = 'Application Map';
+export const observabilityApmApplicationMapTitle = 'Topology Map';
 export const observabilityApmApplicationMapPluginOrder = 5101;
 
 // APM application IDs - Application Monitoring Config

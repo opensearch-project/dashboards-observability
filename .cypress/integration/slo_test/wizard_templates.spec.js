@@ -119,28 +119,35 @@ describe('SLO wizard — template picker + non-custom shapes', () => {
     });
   });
 
-  it('apm-service-availability picker → wizard pre-fills custom PromQL editor', () => {
+  it('apm-service-availability picker → wizard pre-fills the SLI query', () => {
     visitPicker();
     cy.get('[data-test-subj="slosTemplate-apm-service-availability"]', { timeout: 20000 }).click();
     cy.get('[data-test-subj="sloWizardPage"]', { timeout: 20000 }).should('be.visible');
-    cy.get('[data-test-subj="slosWizardCustomPromqlGood"]', { timeout: 10000 })
-      .invoke('val')
-      .should((value) => {
-        expect(value, `custom good query auto-fill: ${value}`).to.match(/.+/);
-      });
-    cy.get('[data-test-subj="slosWizardCustomPromqlTotal"]')
-      .invoke('val')
-      .should((value) => {
-        expect(value, `custom total query auto-fill: ${value}`).to.match(/.+/);
+    // The SLI section leads with a read-only summary of the generated query.
+    // The apm-service-availability default is built from span-derived
+    // `request` (good = request - fault), so the summary reflects it.
+    cy.get('[data-test-subj="slosWizardSliSummaryQuery"]', { timeout: 10000 })
+      .invoke('text')
+      .should((text) => {
+        expect(text, `SLI summary query: ${text}`).to.match(/request/);
       });
   });
 
-  it('http-availability picker → wizard renders metric and goodEventsFilter fields', () => {
+  it('http-availability picker → SLI summary reflects the template metric + good filter', () => {
     visitPicker();
     cy.get('[data-test-subj="slosTemplate-http-availability"]', { timeout: 20000 }).click();
     cy.get('[data-test-subj="sloWizardPage"]', { timeout: 20000 }).should('be.visible');
-    // For availability templates the wizard surfaces the goodEventsFilter
-    // form row, pre-filled with the template default.
+    // The structured SLI editor leads with a read-only summary of the derived
+    // query. The metric + good-events filter live in the Advanced accordion;
+    // the summary surfaces both without expanding it.
+    cy.get('[data-test-subj="slosWizardStructuredSliSummaryQuery"]', { timeout: 10000 })
+      .invoke('text')
+      .should((text) => {
+        expect(text, `SLI summary: ${text}`).to.match(/http_server_request_duration_seconds_count/);
+        expect(text, `SLI summary: ${text}`).to.match(/http_response_status_code/);
+      });
+    // The editable good-events filter is reachable by expanding Advanced.
+    cy.get('[data-test-subj="slosWizardStructuredSliAdvanced"]').click();
     cy.get('[data-test-subj="slosWizardGoodEventsFilter"]')
       .invoke('val')
       .should((value) => {
