@@ -55,7 +55,8 @@ function buildSli(state: FormState, template: SloTemplate): SingleSli {
     backend: 'prometheus',
     type: template.sli.type,
     calcMethod: template.sli.calcMethod,
-    metric: template.sli.metric,
+    // Emitted verbatim (no `|| template.sli.metric` fallback): applyTemplate already seeds the default, so clearing the field yields '' and the "metric required" validation can fire.
+    metric: state.metric,
     goodEventsFilter:
       template.sli.type === 'availability' && state.goodEventsFilter
         ? state.goodEventsFilter

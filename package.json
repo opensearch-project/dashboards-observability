@@ -28,9 +28,9 @@
     "@nteract/presentational-components": "^3.4.3",
     "@reduxjs/toolkit": "^1.6.1",
     "ajv": "^8.18.0",
-    "echarts": "^6.0.0",
     "antlr4": "4.8.0",
     "antlr4ts": "^0.5.0-alpha.4",
+    "echarts": "^6.0.0",
     "isomorphic-dompurify": "~2.29.0",
     "js-yaml": "^4.2.0",
     "json5": "^2.2.3",
@@ -78,10 +78,5 @@
     "serialize-javascript": "^7.0.3",
     "@babel/runtime": "^7.26.10",
     "uuid": "^11.1.1"
-  },
-  "eslintIgnore": [
-    "common/query_manager/antlr/output/*",
-    "node_modules/*",
-    "target/*"
-  ]
+  }
 }

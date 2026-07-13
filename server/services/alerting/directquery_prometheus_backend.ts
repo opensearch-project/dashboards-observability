@@ -613,7 +613,7 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     startSec: number,
     endSec: number,
     stepSec: number,
-    opts: { sourceRequest?: OpenSearchDashboardsRequest } = {}
+    opts: { requestTimeoutMs?: number; sourceRequest?: OpenSearchDashboardsRequest } = {}
   ): Promise<PromSeriesMatrix[]> {
     const dqName = this.resolveDqName(ds);
     this.logger.debug(`PromQL range matrix query (strategy=PROMQL): ${query.substring(0, 80)}...`);
@@ -625,6 +625,7 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
       endSec,
       stepSec,
       dataSourceId: ds.mdsId,
+      timeoutSeconds: timeoutSeconds(opts.requestTimeoutMs),
       sourceRequest: opts.sourceRequest,
     });
 

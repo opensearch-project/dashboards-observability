@@ -53,6 +53,7 @@ function validSpec(overrides: Partial<SloSpec> = {}): SloSpec {
         type: 'availability',
         calcMethod: 'events',
         metric: 'http_requests_total',
+        goodEventsFilter: 'status_code!~"5.."',
       },
       dimensions: [{ name: 'service', value: 'api-gateway' }],
     },

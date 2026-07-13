@@ -240,7 +240,7 @@ export const PROMQL_CONSTANTS = {
 } as const;
 
 /**
- * Application Map constants
+ * Topology Map constants
  */
 export const APPLICATION_MAP_CONSTANTS = {
   /** Default time range for the map */

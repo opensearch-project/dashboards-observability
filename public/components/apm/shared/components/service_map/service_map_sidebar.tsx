@@ -32,7 +32,7 @@ export interface ServiceMapSidebarProps {
 }
 
 /**
- * ServiceMapSidebar - Filter sidebar for the Application Map
+ * ServiceMapSidebar - Filter sidebar for the Topology Map
  *
  * Contains:
  * - Group By dropdown (populated from availableGroupByAttributes)

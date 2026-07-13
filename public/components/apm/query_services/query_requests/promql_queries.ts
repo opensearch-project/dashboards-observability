@@ -717,7 +717,7 @@ export const getQueryAllDependenciesAvailabilityAvg = (
 
 /**
  * Application-level total requests (aggregated across all services)
- * For Application Map root node
+ * For Topology Map root node
  * @page App Map Node Flyout — Application root requests chart
  */
 export const getQueryApplicationRequests = (): string => `
@@ -726,7 +726,7 @@ sum(request{namespace="span_derived"})
 
 /**
  * Application-level total faults (5xx) (aggregated across all services)
- * For Application Map root node
+ * For Topology Map root node
  * @page App Map Node Flyout — Application root faults chart
  */
 export const getQueryApplicationFaults = (): string => `
@@ -735,7 +735,7 @@ sum(fault{namespace="span_derived"})
 
 /**
  * Application-level total errors (4xx) (aggregated across all services)
- * For Application Map root node
+ * For Topology Map root node
  * @page App Map Node Flyout — Application root errors chart
  */
 export const getQueryApplicationErrors = (): string => `
@@ -745,7 +745,7 @@ sum(error{namespace="span_derived"})
 /**
  * Application-level combined latency percentiles (aggregated across all services)
  * Returns P99, P90, P50 in milliseconds
- * For Application Map root node latency chart
+ * For Topology Map root node latency chart
  * @page App Map Node Flyout — Application root latency chart
  */
 export const getQueryApplicationLatency = (): string => `
@@ -956,7 +956,7 @@ label_replace(
  * Uses sum_over_time to aggregate over the selected time range
  * @param serviceFilter - Service filter regex (e.g., service=~"svc1|svc2")
  * @param timeRange - Time range string (e.g., "3600s")
- * @page Application Map — Node throughput metric (via useServiceMapMetrics hook)
+ * @page Topology Map — Node throughput metric (via useServiceMapMetrics hook)
  */
 export const getQueryServiceMapThroughput = (serviceFilter: string, timeRange: string): string =>
   `
@@ -970,7 +970,7 @@ sum by (service) (
  * Uses sum_over_time to aggregate over the selected time range
  * @param serviceFilter - Service filter regex (e.g., service=~"svc1|svc2")
  * @param timeRange - Time range string (e.g., "3600s")
- * @page Application Map — Node fault metric (via useServiceMapMetrics hook)
+ * @page Topology Map — Node fault metric (via useServiceMapMetrics hook)
  */
 export const getQueryServiceMapFaults = (serviceFilter: string, timeRange: string): string =>
   `
@@ -984,7 +984,7 @@ sum by (service) (
  * Uses sum_over_time to aggregate over the selected time range
  * @param serviceFilter - Service filter regex (e.g., service=~"svc1|svc2")
  * @param timeRange - Time range string (e.g., "3600s")
- * @page Application Map — Node error metric (via useServiceMapMetrics hook)
+ * @page Topology Map — Node error metric (via useServiceMapMetrics hook)
  */
 export const getQueryServiceMapErrors = (serviceFilter: string, timeRange: string): string =>
   `
@@ -994,7 +994,7 @@ sum by (service) (
 `.trim();
 
 // ============================================================================
-// GROUP METRICS (for Application Map Group By feature)
+// GROUP METRICS (for Topology Map Group By feature)
 // ============================================================================
 
 /**
@@ -1002,7 +1002,7 @@ sum by (service) (
  * Aggregates requests across all services with the specified label filter
  * @param labelFilter - Label filter (e.g., telemetry_sdk_language="cpp",namespace="span_derived")
  * @param timeRange - Time range string (e.g., "3600s")
- * @page Application Map — Group node throughput (via useGroupMetrics hook)
+ * @page Topology Map — Group node throughput (via useGroupMetrics hook)
  */
 export const getQueryGroupThroughput = (labelFilter: string, timeRange: string): string =>
   `
@@ -1014,7 +1014,7 @@ sum(sum_over_time(request{${labelFilter}}[${timeRange}]))
  * Aggregates faults across all services with the specified label filter
  * @param labelFilter - Label filter (e.g., telemetry_sdk_language="cpp",namespace="span_derived")
  * @param timeRange - Time range string (e.g., "3600s")
- * @page Application Map — Group node faults (via useGroupMetrics hook)
+ * @page Topology Map — Group node faults (via useGroupMetrics hook)
  */
 export const getQueryGroupFaults = (labelFilter: string, timeRange: string): string =>
   `
@@ -1026,7 +1026,7 @@ sum(sum_over_time(fault{${labelFilter}}[${timeRange}]))
  * Aggregates errors across all services with the specified label filter
  * @param labelFilter - Label filter (e.g., telemetry_sdk_language="cpp",namespace="span_derived")
  * @param timeRange - Time range string (e.g., "3600s")
- * @page Application Map — Group node errors (via useGroupMetrics hook)
+ * @page Topology Map — Group node errors (via useGroupMetrics hook)
  */
 export const getQueryGroupErrors = (labelFilter: string, timeRange: string): string =>
   `
@@ -1040,7 +1040,7 @@ sum(sum_over_time(error{${labelFilter}}[${timeRange}]))
  * @param percentile - Percentile value (0.50, 0.90, 0.99)
  * @param timeRange - Time range string (e.g., "3600s")
  * @returns Latency in milliseconds
- * @page Application Map — Group node latency (via useGroupMetrics hook)
+ * @page Topology Map — Group node latency (via useGroupMetrics hook)
  */
 export const getQueryGroupLatencyPercentile = (
   labelFilter: string,

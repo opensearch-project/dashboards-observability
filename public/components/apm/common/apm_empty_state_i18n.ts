@@ -30,7 +30,7 @@ export const apmEmptyStateI18nTexts = {
     },
     applicationMap: {
       name: i18n.translate('observability.apm.emptyState.tabs.applicationMap.name', {
-        defaultMessage: 'Application Map',
+        defaultMessage: 'Topology Map',
       }),
       description: i18n.translate('observability.apm.emptyState.tabs.applicationMap.description', {
         defaultMessage:

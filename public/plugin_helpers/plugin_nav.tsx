@@ -24,6 +24,13 @@ import {
   observabilityApmSloID,
 } from '../../common/constants/apm';
 import { AppPluginStartDependencies } from '../types';
+import { notebooksNavPopover } from './notebooks_nav_popover';
+import {
+  topologyMapNavPopover,
+  servicesNavPopover,
+  sloNavPopover,
+  alertingNavPopover,
+} from './apm_nav_popover';
 
 function registerIconSideNavGroups(
   core: CoreSetup<AppPluginStartDependencies>,
@@ -38,6 +45,7 @@ function registerIconSideNavGroups(
       category: DEFAULT_APP_CATEGORIES.observabilityTools,
       order: 400,
       euiIconType: 'notebookApp',
+      navPopover: notebooksNavPopover,
     },
   ]);
 
@@ -48,7 +56,8 @@ function registerIconSideNavGroups(
         category: undefined,
         showInAllNavGroup: true,
         order: 50,
-        euiIconType: 'beaker',
+        euiIconType: 'navAlerting',
+        navPopover: alertingNavPopover,
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
@@ -82,15 +91,18 @@ function registerIconSideNavGroups(
         showInAllNavGroup: true,
         order: 200,
         euiIconType: 'navServiceMap',
+        navPopover: servicesNavPopover,
       },
       {
         id: observabilityApmApplicationMapID,
-        title: 'Topology Map',
+        // Title comes from observabilityApmApplicationMapTitle ('Topology Map'),
+        // so no per-link override is needed here.
         category: undefined,
         showInAllNavGroup: true,
         order: 400,
-        euiIconType: 'graphApp',
+        euiIconType: 'navAiFlow',
         startCluster: true,
+        navPopover: topologyMapNavPopover,
       },
       ...(sloEnabled
         ? [
@@ -100,6 +112,7 @@ function registerIconSideNavGroups(
               showInAllNavGroup: true,
               order: 500,
               euiIconType: 'visGauge',
+              navPopover: sloNavPopover,
             },
           ]
         : []),

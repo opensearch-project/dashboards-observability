@@ -156,7 +156,7 @@ export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSet
       category: ['Observability'],
       description: i18n.translate('observability.apmEnabled.description', {
         defaultMessage:
-          'Enable the APM (Application Performance Monitoring) feature. When enabled and the Discover Traces feature is active, APM Services and Application Map pages are available in the navigation. Otherwise, Trace Analytics pages are shown as fallback.',
+          'Enable the APM (Application Performance Monitoring) feature. When enabled and the Discover Traces feature is active, APM Services and Topology Map pages are available in the navigation. Otherwise, Trace Analytics pages are shown as fallback.',
       }),
       schema: schema.boolean(),
       requiresPageReload: true,

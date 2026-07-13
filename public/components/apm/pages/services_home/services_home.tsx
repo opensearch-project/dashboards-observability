@@ -897,7 +897,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             <EuiFlexItem grow={false}>
               <EuiToolTip content={i18nTexts.actions.viewServiceMap}>
                 <EuiButtonIcon
-                  iconType="graphApp"
+                  iconType="navAiFlow"
                   aria-label={i18nTexts.actions.viewServiceMap}
                   onClick={() =>
                     navigateToServiceMap(item.serviceName, item.environment, { timeRange })

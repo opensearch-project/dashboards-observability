@@ -27,6 +27,7 @@ import {
   EuiSpacer,
   EuiStat,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
@@ -74,6 +75,12 @@ export interface ProbeSliPanelProps {
   goodQuery: string | null;
   totalQuery: string | null;
   datasourceId: string;
+  /**
+   * When true, render only the control row + result (no surrounding panel,
+   * heading, or description) so the caller can embed it inside the SLI query
+   * card. The standalone (panel) form is the default.
+   */
+  embedded?: boolean;
 }
 
 interface ProbeState {
@@ -112,6 +119,7 @@ export const ProbeSliPanel: React.FC<ProbeSliPanelProps> = ({
   goodQuery,
   totalQuery,
   datasourceId,
+  embedded = false,
 }) => {
   const [lookback, setLookback] = useState<ProbeSliLookback>('1h');
   const [state, setState] = useState<ProbeState>({ status: 'idle' });
@@ -122,6 +130,23 @@ export const ProbeSliPanel: React.FC<ProbeSliPanelProps> = ({
     !totalQuery?.trim() ||
     !datasourceId?.trim() ||
     state.status === 'loading';
+
+  // Why is the button disabled? Surface it as hover text so a greyed-out
+  // "Test query" tells the user what to fix instead of being a dead end. Order
+  // matters: datasource first (most upstream), then an incomplete query.
+  // `undefined` while loading or enabled → no tooltip.
+  const disabledReason: string | undefined =
+    state.status === 'loading'
+      ? undefined
+      : !datasourceId?.trim()
+      ? i18n.translate('observability.apm.slo.wizard.probeSli.disabled.noDatasource', {
+          defaultMessage: 'Select a datasource first.',
+        })
+      : !goodQuery?.trim() || !totalQuery?.trim()
+      ? i18n.translate('observability.apm.slo.wizard.probeSli.disabled.incompleteQuery', {
+          defaultMessage: 'Finish the SLI query — pick a metric so it returns data.',
+        })
+      : undefined;
 
   const onProbe = useCallback(async () => {
     if (disabled) return;
@@ -145,37 +170,32 @@ export const ProbeSliPanel: React.FC<ProbeSliPanelProps> = ({
     }
   }, [apiClient, datasourceId, goodQuery, totalQuery, lookback, disabled]);
 
-  return (
-    <EuiPanel paddingSize="m" hasShadow={false} hasBorder data-test-subj="slosWizardProbePanel">
-      <EuiText size="s">
-        <h4>
-          {i18n.translate('observability.apm.slo.wizard.probeSli.heading', {
-            defaultMessage: 'Probe SLI',
-          })}
-        </h4>
-        <p>
-          {i18n.translate('observability.apm.slo.wizard.probeSli.description', {
-            defaultMessage:
-              'Run this SLI against the target Prometheus backend to verify your queries match data before you create the SLO.',
-          })}
-        </p>
-      </EuiText>
-      <EuiSpacer size="s" />
+  // The control row + result — shared by the embedded and standalone forms.
+  const body = (
+    <>
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            iconType="inspect"
-            fill
-            isLoading={state.status === 'loading'}
-            disabled={disabled}
-            onClick={onProbe}
-            data-test-subj="slosWizardProbeButton"
+          <EuiToolTip
+            content={disabledReason}
+            // `position` is harmless when there's no content; the tooltip only
+            // shows when `content` is set (button disabled for a known reason).
+            position="top"
+            data-test-subj="slosWizardProbeButtonTooltip"
           >
-            {i18n.translate('observability.apm.slo.wizard.probeSli.button', {
-              defaultMessage: 'Probe SLI',
-            })}
-          </EuiButton>
+            <EuiButton
+              size="s"
+              iconType="inspect"
+              fill
+              isLoading={state.status === 'loading'}
+              disabled={disabled}
+              onClick={onProbe}
+              data-test-subj="slosWizardProbeButton"
+            >
+              {i18n.translate('observability.apm.slo.wizard.probeSli.button', {
+                defaultMessage: 'Test query',
+              })}
+            </EuiButton>
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSelect
@@ -191,6 +211,32 @@ export const ProbeSliPanel: React.FC<ProbeSliPanelProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <ProbeResult state={state} />
+    </>
+  );
+
+  // Embedded form: no panel/heading — the SLI query card already provides the
+  // container and context (the query sits directly above this).
+  if (embedded) {
+    return <div data-test-subj="slosWizardProbePanel">{body}</div>;
+  }
+
+  return (
+    <EuiPanel paddingSize="m" hasShadow={false} hasBorder data-test-subj="slosWizardProbePanel">
+      <EuiText size="s">
+        <h4>
+          {i18n.translate('observability.apm.slo.wizard.probeSli.heading', {
+            defaultMessage: 'Test query',
+          })}
+        </h4>
+        <p>
+          {i18n.translate('observability.apm.slo.wizard.probeSli.description', {
+            defaultMessage:
+              'Run this SLI against the target Prometheus backend to verify your queries match data before you create the SLO.',
+          })}
+        </p>
+      </EuiText>
+      <EuiSpacer size="s" />
+      {body}
     </EuiPanel>
   );
 };

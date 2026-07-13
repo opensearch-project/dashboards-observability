@@ -22,6 +22,7 @@ function minimalSpec(overrides: Partial<SloSpec> = {}): Partial<SloSpec> {
         type: 'availability',
         calcMethod: 'events',
         metric: 'http_requests_total',
+        goodEventsFilter: 'status_code!~"5.."',
       },
       dimensions: [{ name: 'service', value: 'api-gateway' }],
     },
@@ -67,6 +68,47 @@ describe('validateSloSpec', () => {
   it('warns when window > 3d (approximation)', () => {
     const result = validateSloSpec(minimalSpec());
     expect(result.warnings['spec.window.duration']).toContain('approximation');
+  });
+
+  it('requires a good-events filter for availability SLIs (cleared-filter footgun)', () => {
+    // An availability SLI with no good-events filter would record
+    // `1 - (good/total)` where good === total, i.e. a constant-100% SLO that
+    // never burns budget and never alerts. The validator must reject it.
+    const result = validateSloSpec(
+      minimalSpec({
+        sli: {
+          type: 'single',
+          definition: {
+            backend: 'prometheus',
+            type: 'availability',
+            calcMethod: 'events',
+            metric: 'http_requests_total',
+            goodEventsFilter: '',
+          },
+          dimensions: [{ name: 'service', value: 'api-gateway' }],
+        },
+      })
+    );
+    expect(result.errors['spec.sli.definition.goodEventsFilter']).toContain('required');
+  });
+
+  it('rejects a whitespace-only good-events filter for availability SLIs', () => {
+    const result = validateSloSpec(
+      minimalSpec({
+        sli: {
+          type: 'single',
+          definition: {
+            backend: 'prometheus',
+            type: 'availability',
+            calcMethod: 'events',
+            metric: 'http_requests_total',
+            goodEventsFilter: '   ',
+          },
+          dimensions: [{ name: 'service', value: 'api-gateway' }],
+        },
+      })
+    );
+    expect(result.errors['spec.sli.definition.goodEventsFilter']).toContain('required');
   });
 
   it('rejects composite SLI (P2 deferral)', () => {
