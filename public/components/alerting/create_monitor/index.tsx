@@ -135,6 +135,9 @@ export interface CreateMonitorProps {
 
 type CreationMode = 'manual' | 'ai';
 
+/** Feature flag: enable template-based monitor creation. Flip to true when ready. */
+const TEMPLATE_MODE_ENABLED = false;
+
 export const CreateMonitor: React.FC<CreateMonitorProps> = ({
   onSave,
   onBatchSave,
@@ -446,8 +449,8 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
           {/* Prometheus datasource selector moved into the Query section
               of PrometheusFormSection to match Logs layout */}
 
-          {/* Creation Mode Toggle — AI only available for Prometheus, hidden in edit mode */}
-          {!isEdit && backendType === 'prometheus' && (
+          {/* Creation Mode Toggle — hidden until template support is ready */}
+          {TEMPLATE_MODE_ENABLED && !isEdit && backendType === 'prometheus' && (
             <>
               <EuiPanel paddingSize="s" hasBorder>
                 <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>

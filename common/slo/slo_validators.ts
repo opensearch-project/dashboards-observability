@@ -10,6 +10,7 @@
  */
 
 import type { BurnRateConfig, SloSpec, Objective } from './slo_types';
+import { isSupportedSliBackend } from './slo_types';
 import { MWMBR_MAX_TIERS, parseDurationToMs, RECORDING_WINDOWS } from './slo_promql_generator';
 
 const METRIC_NAME_RE = /^[a-zA-Z_:][a-zA-Z0-9_:]*$/;
@@ -244,7 +245,11 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
         if (!prom.metric) errors['spec.sli.definition.metric'] = 'Metric name is required';
         else if (!METRIC_NAME_RE.test(prom.metric))
           errors['spec.sli.definition.metric'] = 'Invalid Prometheus metric name';
-        if (prom.goodEventsFilter) {
+        // Required for availability SLIs: without it the good selector equals the total selector, so the error ratio collapses to 0 (always 100% available, never alerts).
+        if (!prom.goodEventsFilter || !prom.goodEventsFilter.trim()) {
+          errors['spec.sli.definition.goodEventsFilter'] =
+            'Good events filter is required for availability SLIs (e.g. status_code!~"5..")';
+        } else {
           const filterErr = validateGoodEventsFilter(prom.goodEventsFilter);
           if (filterErr) errors['spec.sli.definition.goodEventsFilter'] = filterErr;
         }
@@ -287,8 +292,8 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
           }
         }
       }
-    } else if (definition.backend === 'opensearch') {
-      errors['spec.sli.definition.backend'] = 'OpenSearch SLI backend is not supported in P0';
+    } else if (definition.backend === 'opensearch' && !isSupportedSliBackend('opensearch')) {
+      errors['spec.sli.definition.backend'] = 'OpenSearch SLI backend is not supported yet';
     }
 
     // Dimensions — required for non-custom single SLIs.

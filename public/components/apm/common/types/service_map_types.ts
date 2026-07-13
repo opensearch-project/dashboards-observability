@@ -128,7 +128,7 @@ export interface SelectedEdgeState {
 }
 
 /**
- * Filter state for the Application Map page
+ * Filter state for the Topology Map page
  */
 export interface ApplicationMapFilters {
   /** Fault rate (5xx) threshold buckets (OR logic - show nodes matching ANY selected threshold) */

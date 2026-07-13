@@ -87,7 +87,7 @@ export const setTimeFilter = (setEndTime = false, refresh = true) => {
       .focus()
       .type('{selectall}' + endTime, { force: true });
   }
-  if (refresh) cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click();
+  if (refresh) cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').click({ force: true });
   cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 };
 

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from 'lodash';
+import forEach from 'lodash/forEach';
 import { IPPLEventsDataSource, IPPLVisualizationDataSource } from '../common/types';
 
 type PPLResponse = IPPLEventsDataSource & IPPLVisualizationDataSource;
@@ -60,7 +60,7 @@ export class PPLDataSource {
 
     const data: any[] = [];
 
-    _.forEach(pplRes.datarows, (row) => {
+    forEach(pplRes.datarows, (row) => {
       const record: any = {};
 
       for (let i = 0; i < pplRes.schema.length; i++) {

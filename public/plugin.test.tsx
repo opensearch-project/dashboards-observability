@@ -178,7 +178,7 @@ describe('#setup with APM enabled', () => {
     expect(servicesApp).toBeDefined();
     expect(servicesApp[0].category.id).toBe('applicationMonitoring');
 
-    // Verify Application Map app is registered
+    // Verify Topology Map app is registered
     const appMapApp = registerCalls.find(
       (call) => call[0].id === 'observability-apm-application-map'
     );

@@ -248,7 +248,7 @@ describe('useDatasets', () => {
     });
   });
 
-  describe('AnalyticEngine (Mustang) exclusion', () => {
+  describe('AnalyticEngine exclusion', () => {
     const mockBulkGet = jest.fn();
 
     beforeEach(() => {
@@ -258,14 +258,14 @@ describe('useDatasets', () => {
 
     it('drops datasets backed by an AnalyticEngine data source from both lists', async () => {
       mockDataService.dataViews.getIdsWithTitle.mockResolvedValue([
-        { id: 'trace-mustang', title: 'Mustang Traces' },
+        { id: 'trace-analytic-engine', title: 'AnalyticEngine Traces' },
         { id: 'trace-os', title: 'OpenSearch Traces' },
       ]);
       mockDataService.dataViews.get
         .mockResolvedValueOnce({
-          getDisplayName: () => 'Mustang Traces',
+          getDisplayName: () => 'AnalyticEngine Traces',
           signalType: 'traces',
-          dataSourceRef: { id: 'ds-mustang', type: 'data-source' },
+          dataSourceRef: { id: 'ds-analytic-engine', type: 'data-source' },
         })
         .mockResolvedValueOnce({
           getDisplayName: () => 'OpenSearch Traces',
@@ -274,7 +274,7 @@ describe('useDatasets', () => {
         });
       mockBulkGet.mockResolvedValue({
         savedObjects: [
-          { id: 'ds-mustang', attributes: { dataSourceEngineType: 'AnalyticEngine' } },
+          { id: 'ds-analytic-engine', attributes: { dataSourceEngineType: 'AnalyticEngine' } },
           { id: 'ds-os', attributes: { dataSourceEngineType: 'OpenSearch' } },
         ],
       });
@@ -289,7 +289,7 @@ describe('useDatasets', () => {
       expect(result.current.allDatasets).toHaveLength(1);
       expect(result.current.allDatasets[0].label).toBe('OpenSearch Traces');
       expect(mockBulkGet).toHaveBeenCalledWith([
-        { id: 'ds-mustang', type: 'data-source' },
+        { id: 'ds-analytic-engine', type: 'data-source' },
         { id: 'ds-os', type: 'data-source' },
       ]);
     });

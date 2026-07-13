@@ -77,8 +77,8 @@ export function setupRoutes({
 
   // Alerting routes register unconditionally so the dynamic capability
   // flag (`capabilities.observability.alertManagerEnabled`, resolved per
-  // request from DynamicConfigService) can hide the UI on a per-account
-  // basis without leaving the routes unreachable when re-enabled.
+  // request) can hide the UI on a per-account basis without leaving
+  // the routes unreachable when re-enabled.
   // Only construct the genuinely stateless deps at server start. The
   // per-request `MultiBackendAlertService` and `PrometheusMetadataService`
   // instances — both of which hold a `SavedObjectDatasourceService` — are
@@ -89,8 +89,7 @@ export function setupRoutes({
   // MonitorMutationService delegates to HttpOpenSearchBackend — shared
   // stateless backend + thin write-path wrapper.
   const mutationSvc = new MonitorMutationService(osBackend, logger);
-  // RulerClient for Prometheus rule CRUD via Cortex ruler API. Brought in
-  // by upstream's Prometheus metrics rule support (#2718).
+  // RulerClient for Prometheus rule CRUD via Cortex ruler API.
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { DirectQueryRulerClient } = require('../services/slo/ruler_client');
   const rulerClient = new DirectQueryRulerClient(logger);

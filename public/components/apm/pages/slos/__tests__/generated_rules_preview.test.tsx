@@ -105,6 +105,48 @@ describe('GeneratedRulesPreview', () => {
     );
   });
 
+  it('does not fire the preview while client-side validation errors are present', () => {
+    // A complete-shaped input but with live validator errors still pending
+    // (the wizard always builds a non-null input once a template is picked).
+    // The request must be withheld so the server never gets a spec it will
+    // 400 on — the empty prompt lists the missing fields instead.
+    const preview = jest.fn();
+    render(
+      <GeneratedRulesPreview
+        apiClient={{ preview }}
+        input={makeInput()}
+        errors={{ 'spec.name': 'SLO name is required' }}
+      />
+    );
+    act(() => {
+      jest.advanceTimersByTime(PREVIEW_DEBOUNCE_MS);
+    });
+    expect(preview).not.toHaveBeenCalled();
+    expect(screen.getByTestId('slosWizardPreviewEmpty')).toBeInTheDocument();
+    expect(screen.getByTestId('slosWizardPreviewMissing-spec.name')).toBeInTheDocument();
+  });
+
+  it('fires the preview once client-side validation errors clear', async () => {
+    const preview = jest.fn().mockResolvedValue(makeGroup());
+    const { rerender } = render(
+      <GeneratedRulesPreview
+        apiClient={{ preview }}
+        input={makeInput()}
+        errors={{ 'spec.name': 'SLO name is required' }}
+      />
+    );
+    act(() => {
+      jest.advanceTimersByTime(PREVIEW_DEBOUNCE_MS);
+    });
+    expect(preview).not.toHaveBeenCalled();
+    // Errors clear (user filled the field) — preview should now fire.
+    rerender(<GeneratedRulesPreview apiClient={{ preview }} input={makeInput()} errors={{}} />);
+    act(() => {
+      jest.advanceTimersByTime(PREVIEW_DEBOUNCE_MS);
+    });
+    await waitFor(() => expect(preview).toHaveBeenCalledTimes(1));
+  });
+
   it('routes Bad Request server errors to the empty prompt (not the warning callout)', async () => {
     // OSD's HTTP client wraps a 400 from `res.customError({ body: ... })` as
     // an IHttpFetchError whose `.body` mirrors the route's body. Our SLO

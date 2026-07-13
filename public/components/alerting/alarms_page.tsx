@@ -25,7 +25,7 @@
  *   - `AlertManagerEndTime`   — date-math string for picker end.
  */
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { EuiLink, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { toMountPoint } from '../../../../../src/plugins/opensearch_dashboards_react/public';
@@ -68,10 +68,19 @@ import {
   resolveDatasourceTokens,
 } from './alarms_page_helpers';
 
+/**
+ * App id of the legacy (pre-unified) alerting experience, served by the
+ * standalone `alerts` plugin. The "old experience" link in the new-experience
+ * callout deep-links to its `#/dashboard` route.
+ */
+const OLD_ALERTING_APP_ID = 'alerts';
+
+/** localStorage key persisting dismissal of the new-experience intro callout. */
+const NEW_EXPERIENCE_CALLOUT_DISMISSED_KEY = 'observability.alerting.newExperienceCalloutDismissed';
+
 // ============================================================================
 // Main Page Component
 // ============================================================================
-
 interface AlarmsPageProps {
   /** Datasources sourced from saved-object types (data-source + data-connection). */
   datasources: Datasource[];
@@ -443,6 +452,15 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   const [createBackendType, setCreateBackendType] = useState<MonitorBackendType | null>(null);
   const [editTarget, setEditTarget] = useState<{ dsId: string; ruleId: string } | null>(null);
   const [selectedAlert, setSelectedAlert] = useState<UnifiedAlertSummary | null>(null);
+  // Whether the "new alerting experience" intro callout has been dismissed.
+  // Persisted in localStorage so it stays hidden across reloads once closed.
+  const [newExperienceCalloutDismissed, setNewExperienceCalloutDismissed] = useState<boolean>(
+    () => window.localStorage.getItem(NEW_EXPERIENCE_CALLOUT_DISMISSED_KEY) === 'true'
+  );
+  const dismissNewExperienceCallout = useCallback(() => {
+    window.localStorage.setItem(NEW_EXPERIENCE_CALLOUT_DISMISSED_KEY, 'true');
+    setNewExperienceCalloutDismissed(true);
+  }, []);
   const { setToast: addToast } = useToast();
 
   const handleNavigateToDetectorResults = useCallback((href: string) => {
@@ -1139,6 +1157,16 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // datasource is still timing out on both flows).
   const activeWarnings = activeTab === 'alerts' ? alertsWarnings : rulesWarnings;
 
+  // Link back to the legacy alerting dashboard (the standalone `alerts` app's
+  // `#/dashboard` route). Built from `basePath.get()` (which carries any
+  // workspace prefix) + the app path — same URL-building recipe as the
+  // Advanced Settings link above. Rendered as a plain anchor since this crosses
+  // into a different app, so browser navigation (open-in-new-tab / right-click)
+  // is preferable to an `onClick` SPA hop.
+  const oldExperienceHref = `${
+    coreRefs.http?.basePath.get() ?? ''
+  }/app/${OLD_ALERTING_APP_ID}#/dashboard`;
+
   return (
     <div data-test-subj="alertManagerPage" className="altPageRoot">
       <AlarmsPageCallouts
@@ -1149,6 +1177,32 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         generalError={error}
         warnings={activeWarnings}
       />
+      {!newExperienceCalloutDismissed && (
+        <EuiCallOut
+          size="s"
+          iconType="cheer"
+          color="primary"
+          data-test-subj="alertManagerNewExperienceCallout"
+          onDismiss={dismissNewExperienceCallout}
+          dismissible
+          title={
+            <FormattedMessage
+              id="observability.alerting.alarmsPage.newExperienceCallout"
+              defaultMessage="Welcome to the new alerting experience view your OpenSearch and Prometheus alerts together in one place. Prefer the previous view? {oldExperienceLink}"
+              values={{
+                oldExperienceLink: (
+                  <EuiLink data-test-subj="alertManagerOldExperienceLink" href={oldExperienceHref}>
+                    <FormattedMessage
+                      id="observability.alerting.alarmsPage.newExperienceCallout.oldExperienceLink"
+                      defaultMessage="Switch to the classic experience"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
+        />
+      )}
       <EuiTabs data-test-subj="alertManagerTabs">
         {tabs.map((t) => (
           <EuiTab
