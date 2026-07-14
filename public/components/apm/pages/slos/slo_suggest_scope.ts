@@ -36,8 +36,13 @@ function isKnownSource(value: string): value is SuggestSource {
   return (KNOWN_SOURCES as string[]).includes(value);
 }
 
-/** Allowed characters for a relative/absolute time value (e.g. `now-15m`, ISO). */
-const TIME_VALUE_REGEX = /^[a-zA-Z0-9_\-:+.TZ ]+$/;
+/**
+ * Allowed characters for a relative/absolute time value. Covers relative
+ * datemath (`now-15m`), slash-rounded datemath from EuiSuperDatePicker quick
+ * ranges (`now/d`, `now/w`, `now-1d/d`), and absolute ISO timestamps
+ * (`2024-01-01T00:00:00Z`).
+ */
+const TIME_VALUE_REGEX = /^[a-zA-Z0-9_\-:+./TZ ]+$/;
 
 /** Validate a single `from`/`to` value; returns `undefined` when unusable. */
 function parseTimeValue(value: string | null): string | undefined {

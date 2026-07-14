@@ -93,6 +93,19 @@ describe('parseSuggestScopeFromSearch', () => {
       });
     });
 
+    it('parses slash-rounded datemath from EuiSuperDatePicker quick ranges', () => {
+      // `now/d`, `now/w`, `now-1d/d` etc. contain a slash — the char class must
+      // allow it or the carried-over range is silently dropped.
+      expect(parseSuggestScopeFromSearch('?from=now%2Fd&to=now%2Fd').timeRange).toEqual({
+        from: 'now/d',
+        to: 'now/d',
+      });
+      expect(parseSuggestScopeFromSearch('?from=now-1d%2Fd&to=now').timeRange).toEqual({
+        from: 'now-1d/d',
+        to: 'now',
+      });
+    });
+
     it('returns undefined when only one bound is present', () => {
       expect(parseSuggestScopeFromSearch('?from=now-1h').timeRange).toBeUndefined();
       expect(parseSuggestScopeFromSearch('?to=now').timeRange).toBeUndefined();
